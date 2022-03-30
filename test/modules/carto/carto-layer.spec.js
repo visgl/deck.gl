@@ -186,40 +186,43 @@ mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
     ...[API_VERSIONS.V1, API_VERSIONS.V2]
       .map(apiVersion => {
         return [{connection: 'connection'}, {geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(
-          prop => {
-            return {
-              title: `should throw when ${
-                Object.keys(prop)[0]
-              } prop is used for apiVersion ${apiVersion}`,
-              props: {
-                ...layer.props,
-                type: MAP_TYPES.QUERY,
-                credentials: {apiVersion},
-                ...prop
-              },
-              regex: /prop is not supported for apiVersion/i
-            };
-          }
+          prop => ({
+            title: `should throw when ${
+              Object.keys(prop)[0]
+            } prop is used for apiVersion ${apiVersion}`,
+            props: {
+              ...layer.props,
+              type: MAP_TYPES.QUERY,
+              credentials: {apiVersion},
+              ...prop
+            },
+            regex: /prop is not supported for apiVersion/i
+          })
         );
       })
       .flat(),
-    ...[MAP_TYPES.TILESET]
-      .map(type => {
-        return [{geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(prop => {
-          return {
-            title: `should throw when geoColumn prop is used with type ${type}`,
-            props: {
-              ...layer.props,
-              connection: 'conn_name',
-              type,
-              credentials: {apiVersion: API_VERSIONS.V3},
-              ...prop
-            },
-            regex: /prop is only supported for type/i
-          };
-        });
-      })
-      .flat()
+    ...[MAP_TYPES.TILESET].map(type => ({
+      title: `should throw when geoColumn prop is used with type ${type}`,
+      props: {
+        ...layer.props,
+        connection: 'conn_name',
+        type,
+        credentials: {apiVersion: API_VERSIONS.V3},
+        geoColumn: 'geoColumn'
+      },
+      regex: /geoColumn prop is only supported for type/i
+    })),
+    ...[MAP_TYPES.TILESET, MAP_TYPES.QUERY].map(type => ({
+      title: `should throw when columns prop is used with type ${type}`,
+      props: {
+        ...layer.props,
+        connection: 'conn_name',
+        type,
+        credentials: {apiVersion: API_VERSIONS.V3},
+        columns: ['a', 'b']
+      },
+      regex: /columns prop is only supported for type/i
+    }))
   ];
 
   TEST_CASES.forEach(c => {
