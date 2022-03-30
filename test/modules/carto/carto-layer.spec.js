@@ -203,7 +203,7 @@ mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
         );
       })
       .flat(),
-    ...[MAP_TYPES.QUERY, MAP_TYPES.TILESET]
+    ...[MAP_TYPES.TILESET]
       .map(type => {
         return [{geoColumn: 'geoColumn'}, {columns: ['a', 'b']}].map(prop => {
           return {
