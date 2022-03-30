@@ -137,11 +137,11 @@ function getParameters({
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (COLUMNS_SUPPORT.includes(type) && columns) {
-    parameters.push(encodeParameter('columns', columns.join(',')));
-  }
   if (GEO_COLUMN_SUPPORT.includes(type) && geoColumn) {
     parameters.push(encodeParameter('geo_column', geoColumn));
+  }
+  if (COLUMNS_SUPPORT.includes(type) && columns) {
+    parameters.push(encodeParameter('columns', columns.join(',')));
   }
 
   return parameters.join('&');
