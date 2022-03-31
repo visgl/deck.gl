@@ -1,4 +1,5 @@
 /* eslint-disable callback-return */
+import GL from '@luma.gl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {
   ScatterplotLayer,
@@ -128,6 +129,44 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-tissot.png'
+  },
+  {
+    name: 'scatterplot-smoothedge',
+    viewState: {
+      latitude: 47,
+      longitude: -120,
+      zoom: 6
+    },
+    useDevicePixels: 2,
+    layers: [
+      new ScatterplotLayer({
+        id: 'background',
+        data: [0],
+        getFillColor: d => [0, 0, 0],
+        getPosition: d => [-120, 47],
+        getRadius: d => 1000,
+        radiusUnits: 'pixels'
+      }),
+      ...[true, false].map(
+        antialiasing =>
+          new ScatterplotLayer({
+            id: `circles-${antialiasing}`,
+            data: Array(399)
+              .fill()
+              .map((x, i) => i),
+            getFillColor: antialiasing ? [255, 250, 50] : [0, 0, 0],
+            getPosition: d => [-124 + 0.4 * Math.floor(d / 19), 48.25 - 0.14 * (d % 19)],
+            getRadius: d => 4 + 8 * (d % 2),
+            antialiasing,
+            parameters: {
+              blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
+              blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
+            },
+            radiusUnits: 'pixels'
+          })
+      )
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-smoothedge.png'
   },
   {
     name: 'line-lnglat',
