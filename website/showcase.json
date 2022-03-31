@@ -7,7 +7,7 @@
       "by Vizgen": "https://vizgen.com/"
     },
     "description": "Vizgen's Interactive Single-Cell Spatial Visualizer enables users to explore single-cell gene expression data from our MERFISH Mouse Brain Receptor Map. Cells can be visualized using a UMAP embedding or the spatial coordinates within the brain - providing a detailed spatial map of the tissue."
-  },  
+  },
   {
     "name": "ISB Covid19",
     "url": "https://atlas.fredhutch.org/isb/covid/",
@@ -165,5 +165,12 @@
       "Blog post": "https://medium.com/vis-gl/rendering-a-minecraft-world-with-deck-gl-927b52c5c6db"
     },
     "description": "Rendering A Minecraft World With deck.gl."
+  },
+  {
+    "name": "I3S Explorer",
+    "url": "https://production.d3nof3l3x2sso4.amplifyapp.com/",
+    "image": "/images/examples/arcgis.jpg",
+    "links": {},
+    "description": "Visualization and Debug Tool for I3S 3D geographic data"
   }
 ]
