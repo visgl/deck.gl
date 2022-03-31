@@ -65,7 +65,7 @@ const id = params.has('id') ? params.get('id') : examples[0];
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
 iframe.style.height = 'calc(50% + 20px)';
-iframe.src = `http://localhost:3001/map/${id}`;
+iframe.src = `https://gcp-us-east1.app.carto.com/map/${id}`;
 document.body.appendChild(iframe);
 
 for (const e of examples) {
