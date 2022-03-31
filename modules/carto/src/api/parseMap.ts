@@ -127,11 +127,17 @@ function mapProps(source, target, mapping) {
 function createStyleProps(config, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
+
+  // Kepler format sometimes omits strokeColor. TODO: remove once we can rely on
+  // `strokeColor` always being sert when `stroke: true`.
+  if (result.stroked && !result.getLineColor) {
+    result.getLineColor = result.getFillColor;
+  }
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
 }
 
-/* eslint-disable complexity */
+/* eslint-disable complexity, max-statements */
 function createChannelProps(visualChannels, type, config, data) {
   const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
     visualChannels;
@@ -143,7 +149,13 @@ function createChannelProps(visualChannels, type, config, data) {
   const {textLabel, visConfig} = config;
   const result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
-  if (colorField) {
+
+  if (type === 'grid' || type === 'hexagon') {
+    result.colorScaleType = colorScale;
+    if (colorField) {
+      result.getColorWeight = d => d[colorField.name];
+    }
+  } else if (colorField) {
     result.getFillColor = getColorAccessor(
       colorField,
       colorScale,
@@ -151,9 +163,8 @@ function createChannelProps(visualChannels, type, config, data) {
       1, // Rely on layer opacity
       data
     );
-  } else if (type === 'grid' || type === 'hexagon') {
-    result.colorScaleType = colorScale;
   }
+
   if (strokeColorField) {
     const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
     result.getLineColor = getColorAccessor(
