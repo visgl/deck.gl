@@ -106,8 +106,7 @@ export function getLayer(
       propMap: {visConfig: {outline: 'stroked'}}
     },
     geojson: {
-      Layer: GeoJsonLayer,
-      defaultProps: {}
+      Layer: GeoJsonLayer
     },
     grid: {
       Layer: CPUGridLayer,
