@@ -1,4 +1,5 @@
 import {createTexture, destroyTexture} from '../utils/texture';
+import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
 
@@ -57,6 +58,8 @@ type ImagePropType = BasePropType & {
 };
 type ObjectPropType = BasePropType & {
   type: 'object';
+  optional?: boolean;
+  compare?: boolean;
 };
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
@@ -125,6 +128,11 @@ const TYPE_DEFINITIONS = {
     },
     equal(value1, value2, propType: ArrayPropType) {
       return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
+    }
+  },
+  object: {
+    equal(value1, value2, propType: ObjectPropType) {
+      return propType.compare ? deepEqual(value1, value2) : value1 === value2;
     }
   },
   function: {
