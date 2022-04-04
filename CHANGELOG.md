@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.4] - Apr 4 2022
+
+- Fix BitmapLayer imageCoordinateSystem: LNGLAT (#6801)
+- Deep comparison of parameters prop in Layer (#6754)
+- Expand Scatterplot geometry for edge smoothing (#6785)
+- Fix polygon tesselation for extreme latitudes (#6780)
+
 #### deck.gl [8.7.3] - Mar 25 2022
 
 - CARTO: Correctly map aggregation weights & methods (#6771)
