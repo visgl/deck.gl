@@ -1182,7 +1182,7 @@ export default abstract class Layer<
       return false;
     }
 
-    let redraw: string | boolean = false;
+    let redraw: string | false = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
     this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
