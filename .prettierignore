@@ -1,5 +1,5 @@
 workers/
-**/dist*/**/*.js
+**/dist*/**/*
 dist.js
 *.min.js
 **/mapbox-gl-dev.js
