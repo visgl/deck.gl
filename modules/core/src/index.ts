@@ -105,3 +105,13 @@ export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';
 export type {OrthographicViewState} from './views/orthographic-view';
 export type {GlobeViewState} from './views/globe-view';
+export type {LayerContext} from './lib/layer-manager';
+export type {
+  LayerProps,
+  CompositeLayerProps,
+  Accessor,
+  LayerData,
+  Unit,
+  Position,
+  Color
+} from './types/layer-props';

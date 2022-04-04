@@ -20,6 +20,14 @@ export type AccessorContext<T> = {
 
 export type Accessor<In, Out> = Out | ((object: In, objectInfo: AccessorContext<In>) => Out);
 
+export type Position = [number, number] | [number, number, number] | Float32Array | Float64Array;
+export type Color =
+  | [number, number, number]
+  | [number, number, number, number]
+  | Uint8Array
+  | Uint8ClampedArray;
+export type Unit = 'meters' | 'common' | 'pixels';
+
 // TODO
 type BinaryAttribute = any;
 
@@ -56,7 +64,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch?: (
+  fetch: (
     url: string,
     context: {
       propName: string;
@@ -73,27 +81,27 @@ export type LayerProps<DataType = any> = {
   /**
    * The purpose of the layer
    */
-  operation?: 'draw' | 'mask';
+  operation: 'draw' | 'mask';
   /**
    * If the layer should be rendered. Default true.
    */
-  visible?: boolean;
+  visible: boolean;
   /**
    * If the layer can be picked on pointer events. Default false.
    */
-  pickable?: boolean;
+  pickable: boolean;
   /**
    * Opacity of the layer, between 0 and 1. Default 1.
    */
-  opacity?: number;
+  opacity: number;
   /**
    * The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view.
    */
-  coordinateSystem?: CoordinateSystem;
+  coordinateSystem: CoordinateSystem;
   /**
    * The coordinate origin of the data.
    */
-  coordinateOrigin?: [number, number, number];
+  coordinateOrigin: [number, number, number];
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
@@ -101,15 +109,15 @@ export type LayerProps<DataType = any> = {
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
-  wrapLongitude?: boolean;
+  wrapLongitude: boolean;
   /**
    * The format of positions, default 'XYZ'.
    */
-  positionFormat?: 'XYZ' | 'XY';
+  positionFormat: 'XYZ' | 'XY';
   /**
    * The format of colors, default 'RGBA'.
    */
-  colorFormat?: 'RGBA' | 'RGB';
+  colorFormat: 'RGBA' | 'RGB';
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
@@ -121,7 +129,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add additional functionalities to this layer.
    */
-  extensions?: any[];
+  extensions: any[];
   /**
    * Add support for additional data formats.
    */
@@ -138,15 +146,15 @@ export type LayerProps<DataType = any> = {
   /**
    * Enable GPU-based object highlighting. Default false.
    */
-  autoHighlight?: boolean;
+  autoHighlight: boolean;
   /**
    * The index of the data object to highlight. If unspecified, the currently hoverred object is highlighted.
    */
-  highlightedObjectIndex?: number | null;
+  highlightedObjectIndex: number | null;
   /**
    * The color of the highlight.
    */
-  highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
+  highlightColor: number[] | ((pickingInfo: PickingInfo) => number[]);
 
   /**
    * Called when remote data is fetched and parsed.
