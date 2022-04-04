@@ -1,4 +1,4 @@
-import {deviation, extent, flatRollup, median, mode, variance} from 'd3-array';
+import {deviation, extent, flatRollup, groupSort, median, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
   scaleLinear,
@@ -39,9 +39,10 @@ export const AGGREGATION = {
 };
 
 const AGGREGATION_FUNC = {
-  'count unique': (value, accessor) => flatRollup(value, v => v.length, accessor).length,
+  'count unique': (values, accessor) => groupSort(values, v => v.length, accessor).length,
   median,
-  mode,
+  // Unfortunately mode() is only available in d3-array@3+ which is ESM only
+  mode: (values, accessor) => groupSort(values, v => v.length, accessor).pop(),
   stddev: deviation,
   variance
 };
