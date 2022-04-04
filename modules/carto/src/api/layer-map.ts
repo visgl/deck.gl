@@ -1,4 +1,4 @@
-import {extent} from 'd3-array';
+import {deviation, extent, flatRollup, median, mode, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
   scaleLinear,
@@ -36,6 +36,14 @@ export const AGGREGATION = {
   maximum: 'MAX',
   minimum: 'MIN',
   sum: 'SUM'
+};
+
+const AGGREGATION_FUNC = {
+  'count unique': (value, accessor) => flatRollup(value, v => v.length, accessor).length,
+  median,
+  mode,
+  stddev: deviation,
+  variance
 };
 
 const hexToRGBA = c => {
@@ -212,6 +220,12 @@ function normalizeAccessor(accessor, data) {
     };
   }
   return accessor;
+}
+
+export function getColorValueAccessor({name}, colorAggregation, data: any) {
+  const aggregator = AGGREGATION_FUNC[colorAggregation];
+  const accessor = values => aggregator(values, p => p[name]);
+  return normalizeAccessor(accessor, data);
 }
 
 export function getColorAccessor(
