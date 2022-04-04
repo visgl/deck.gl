@@ -38,17 +38,17 @@
     "@luma.gl/constants": "^8.5.10",
     "@math.gl/web-mercator": "3.6.0-alpha.3",
     "cartocolor": "^4.0.2",
-    "d3-array": "^2.8.0",
-    "d3-color": "^2.0.0",
-    "d3-format": "^2.0.0",
-    "d3-scale": "^3.2.3",
+    "d3-array": "^3.0.2",
+    "d3-color": "^3.1.0",
+    "d3-format": "^3.1.0",
+    "d3-scale": "^4.0.2",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1"
   },
   "devDependencies": {
     "@types/d3-array": "^3.0.2",
-    "@types/d3-color": "^1.4.2",
-    "@types/d3-scale": "^3.0.0"
+    "@types/d3-color": "^3.0.2",
+    "@types/d3-scale": "^4.0.2"
   },
   "peerDependencies": {
     "@deck.gl/aggregation-layers": "^8.0.0",
