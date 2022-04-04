@@ -116,7 +116,7 @@ export default class AttributeManager {
   //
   // @param {String} [clearRedrawFlags=false] - whether to clear the flag
   // @return {false|String} - reason a redraw is needed.
-  getNeedsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | boolean {
+  getNeedsRedraw(opts: {clearRedrawFlags?: boolean} = {clearRedrawFlags: false}): string | false {
     const redraw = this.needsRedraw;
     this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;

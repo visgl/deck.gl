@@ -206,7 +206,7 @@ export default class LayersPass extends Pass {
         moduleParameters.viewport = viewport;
 
         try {
-          layer.drawLayer({
+          layer._drawLayer({
             moduleParameters,
             uniforms: {layerIndex: layerRenderIndex},
             parameters: layerParameters

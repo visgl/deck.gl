@@ -41,7 +41,7 @@ test('ComponentState#imports', t => {
 
 test('ComponentState#synchronous async props', t => {
   const component = new Component();
-  component._initState();
+  component.internalState = new ComponentState(component);
   const state = component.internalState;
   t.ok(state, 'ComponentState construction ok');
 

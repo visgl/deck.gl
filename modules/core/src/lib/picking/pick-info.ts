@@ -96,7 +96,7 @@ export function processPickInfo(opts: {
   pickInfo: PickedPixel;
   lastPickedInfo: {
     index: number;
-    layerId: string;
+    layerId: string | null;
     info: PickingInfo | null;
   };
   mode: string;
@@ -116,7 +116,7 @@ export function processPickInfo(opts: {
     // only invoke onHover events if picked object has changed
     const lastPickedPixelIndex = lastPickedInfo.index;
     const lastPickedLayerId = lastPickedInfo.layerId;
-    const pickedLayerId = pickedLayer && pickedLayer.props.id;
+    const pickedLayerId = pickedLayer ? pickedLayer.props.id : null;
 
     // proceed only if picked object changed
     if (pickedLayerId !== lastPickedLayerId || pickedObjectIndex !== lastPickedPixelIndex) {
