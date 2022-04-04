@@ -23,7 +23,7 @@ void main(void) {
   vTexCoord = texCoords;
 
   if (coordinateConversion < -0.5) {
-    vTexPos = geometry.position.xy;
+    vTexPos = geometry.position.xy + project_uCommonOrigin.xy;
   } else if (coordinateConversion > 0.5) {
     vTexPos = geometry.worldPosition.xy;
   }
