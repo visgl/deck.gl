@@ -16,6 +16,7 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "types": "dist/types/index.d.ts",
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
   "files": [
