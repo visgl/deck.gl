@@ -24,16 +24,18 @@ export default class FlyToInterpolator extends TransitionInterpolator {
     maxDuration?: number;
   };
 
-  constructor(opts: {
-    /** The zooming "curve" that will occur along the flight path. Default 1.414 */
-    curve?: number;
-    /** The average speed of the animation defined in relation to `options.curve`, it linearly affects the duration, higher speed returns smaller durations and vice versa. Default 1.2 */
-    speed?: number;
-    /** The average speed of the animation measured in screenfuls per second. Similar to `opts.speed` it linearly affects the duration,  when specified `opts.speed` is ignored. */
-    screenSpeed?: number;
-    /** Maximum duration in milliseconds, if calculated duration exceeds this value, `0` is returned. */
-    maxDuration?: number;
-  } = {}) {
+  constructor(
+    opts: {
+      /** The zooming "curve" that will occur along the flight path. Default 1.414 */
+      curve?: number;
+      /** The average speed of the animation defined in relation to `options.curve`, it linearly affects the duration, higher speed returns smaller durations and vice versa. Default 1.2 */
+      speed?: number;
+      /** The average speed of the animation measured in screenfuls per second. Similar to `opts.speed` it linearly affects the duration,  when specified `opts.speed` is ignored. */
+      screenSpeed?: number;
+      /** Maximum duration in milliseconds, if calculated duration exceeds this value, `0` is returned. */
+      maxDuration?: number;
+    } = {}
+  ) {
     super({
       compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
       extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
