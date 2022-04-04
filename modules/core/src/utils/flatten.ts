@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-type Nested<T> = (T | Nested<T>)[];
+type NestedArray<T> = (T | NestedArray<T>)[];
 
 /**
  * Flattens a nested array into a single level array,
@@ -31,7 +31,7 @@ type Nested<T> = (T | Nested<T>)[];
  * @return Returns the new flattened array (new array or `result` if provided)
  */
 export function flatten<T>(
-  array: T | Nested<T>,
+  array: T | NestedArray<T>,
   filter: (element: T) => boolean = () => true
 ): T[] {
   // Wrap single object in array
@@ -43,7 +43,7 @@ export function flatten<T>(
 }
 
 /** Deep flattens an array. Helper to `flatten`, see its parameters */
-function flattenArray<T>(array: Nested<T>, filter: (element: T) => boolean, result: T[]): T[] {
+function flattenArray<T>(array: NestedArray<T>, filter: (element: T) => boolean, result: T[]): T[] {
   let index = -1;
   while (++index < array.length) {
     const value = array[index];

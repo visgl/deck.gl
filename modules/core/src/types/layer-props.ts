@@ -1,4 +1,4 @@
-import {COORDINATE_SYSTEM} from '../lib/constants';
+import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 
 import type {NumericArray} from './types';
@@ -89,7 +89,7 @@ export type LayerProps<DataType = any> = {
   /**
    * The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view.
    */
-  coordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  coordinateSystem?: CoordinateSystem;
   /**
    * The coordinate origin of the data.
    */

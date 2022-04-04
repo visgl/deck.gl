@@ -10,6 +10,7 @@ import * as vec4 from 'gl-matrix/vec4';
 import * as vec3 from 'gl-matrix/vec3';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
+import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';
 
@@ -34,17 +35,17 @@ function lngLatZToWorldPosition(
 
 function normalizeParameters(opts: {
   viewport: Viewport;
-  coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  coordinateSystem: CoordinateSystem;
   coordinateOrigin: [number, number, number];
   modelMatrix?: NumericArray;
-  fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  fromCoordinateSystem?: CoordinateSystem;
   fromCoordinateOrigin?: [number, number, number];
 }): {
   viewport: Viewport;
-  coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  coordinateSystem: CoordinateSystem;
   coordinateOrigin: [number, number, number];
   modelMatrix?: NumericArray;
-  fromCoordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+  fromCoordinateSystem: CoordinateSystem;
   fromCoordinateOrigin: [number, number, number];
 } {
   const {viewport, modelMatrix, coordinateOrigin} = opts;
@@ -85,7 +86,7 @@ export function getWorldPosition(
   }: {
     viewport: Viewport;
     modelMatrix?: NumericArray;
-    coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    coordinateSystem: CoordinateSystem;
     coordinateOrigin: [number, number, number];
     offsetMode?: boolean;
   }
@@ -133,13 +134,13 @@ export function projectPosition(
     /** The current viewport */
     viewport: Viewport;
     /** The reference coordinate system used to align world position */
-    coordinateSystem: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    coordinateSystem: CoordinateSystem;
     /** The reference coordinate origin used to align world position */
     coordinateOrigin: [number, number, number];
     /** The model matrix of the supplied position */
     modelMatrix?: NumericArray;
     /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
-    fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+    fromCoordinateSystem?: CoordinateSystem;
     /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
     fromCoordinateOrigin?: [number, number, number];
   }

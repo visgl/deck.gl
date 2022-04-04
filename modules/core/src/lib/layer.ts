@@ -41,6 +41,7 @@ import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
 
+import type {CoordinateSystem} from './constants';
 import type {StatefulComponentProps} from '../lifecycle/component';
 import type Attribute from './attribute/attribute';
 import type {LayerProps} from '../types/layer-props';
@@ -196,7 +197,7 @@ export default abstract class Layer<
       /** The viewport to use */
       viewport?: Viewport;
       /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
-      fromCoordinateSystem?: typeof COORDINATE_SYSTEM[keyof typeof COORDINATE_SYSTEM];
+      fromCoordinateSystem?: CoordinateSystem;
       /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
       fromCoordinateOrigin?: [number, number, number];
     }
