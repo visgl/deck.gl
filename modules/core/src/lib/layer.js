@@ -148,6 +148,10 @@ export default class Layer extends Component {
     return `${className}({id: '${this.props.id}'})`;
   }
 
+  get isComposite() {
+    return false;
+  }
+
   raiseError(error, message) {
     if (message) {
       error.message = `${message}: ${error.message}`;
@@ -406,7 +410,7 @@ export default class Layer extends Component {
 
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
-  getPickingInfo({info, mode}) {
+  getPickingInfo({info, mode, sourceLayer}) {
     const {index} = info;
 
     if (index >= 0) {
