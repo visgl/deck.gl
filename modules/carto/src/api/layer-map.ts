@@ -1,4 +1,4 @@
-import {deviation, extent, flatRollup, groupSort, median, variance} from 'd3-array';
+import {deviation, extent, groupSort, median, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
   scaleLinear,
