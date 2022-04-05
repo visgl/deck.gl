@@ -17,8 +17,11 @@ const GL_STATE = {
   blendEquation: GL.FUNC_ADD
 };
 
+function noop() {}
+
 export default class GoogleMapsOverlay {
   constructor(props) {
+    if (props.interleaved === undefined) props.interleaved = true;
     this.props = {};
     this._map = null;
     this.setProps(props);
@@ -81,6 +84,7 @@ export default class GoogleMapsOverlay {
 
   /* Private API */
   _createOverlay(map) {
+    const {interleaved} = this.props;
     const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     const renderingType = map.getRenderingType();
     if (renderingType === UNINITIALIZED) {
@@ -92,10 +96,16 @@ export default class GoogleMapsOverlay {
 
     // Lifecycle methods are different depending on map type
     if (isVectorMap) {
-      overlay.onAdd = () => {};
+      if (interleaved) {
+        overlay.onAdd = noop;
+        overlay.onContextRestored = this._onContextRestored.bind(this);
+        overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
+      } else {
+        overlay.onAdd = this._onAdd.bind(this);
+        overlay.onContextRestored = noop;
+        overlay.onDraw = this._onDrawVectorOverlay.bind(this);
+      }
       overlay.onContextLost = this._onContextLost.bind(this);
-      overlay.onContextRestored = this._onContextRestored.bind(this);
-      overlay.onDraw = this._onDrawVector.bind(this);
     } else {
       overlay.onAdd = this._onAdd.bind(this);
       overlay.draw = this._onDrawRaster.bind(this);
@@ -165,7 +175,7 @@ export default class GoogleMapsOverlay {
   }
 
   // Vector code path
-  _onDrawVector({gl, transformer}) {
+  _onDrawVectorInterleaved({gl, transformer}) {
     if (!this._deck || !this._map) {
       return;
     }
@@ -173,7 +183,11 @@ export default class GoogleMapsOverlay {
     const deck = this._deck;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer),
+
+      // Using external gl context - do not set css size
+      width: false,
+      height: false
     });
 
     if (deck.layerManager) {
@@ -201,5 +215,17 @@ export default class GoogleMapsOverlay {
         });
       });
     }
+  }
+
+  _onDrawVectorOverlay({gl, transformer}) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
+    const deck = this._deck;
+    deck.setProps({
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
+    });
+    deck.redraw();
   }
 }
