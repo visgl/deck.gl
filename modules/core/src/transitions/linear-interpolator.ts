@@ -6,6 +6,12 @@ import type Viewport from '../viewports/viewport';
 const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
 
+type PropsWithAnchor = {
+  around?: number[];
+  aroundPosition?: number[];
+  [key: string]: any;
+};
+
 /**
  * Performs linear interpolation of two view states.
  */
@@ -58,8 +64,8 @@ export default class LinearInterpolator extends TransitionInterpolator {
     startProps: Record<string, any>,
     endProps: Record<string, any>
   ): {
-    start: Record<string, any>;
-    end: Record<string, any>;
+    start: PropsWithAnchor;
+    end: PropsWithAnchor;
   } {
     const result = super.initializeProps(startProps, endProps);
 
@@ -81,8 +87,8 @@ export default class LinearInterpolator extends TransitionInterpolator {
   }
 
   interpolateProps(
-    startProps: Record<string, any>,
-    endProps: Record<string, any>,
+    startProps: PropsWithAnchor,
+    endProps: PropsWithAnchor,
     t: number
   ): Record<string, any> {
     const propsInTransition = {};
@@ -98,7 +104,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
         viewport.panByPosition(
           endProps.aroundPosition,
           // anchor point in current screen coordinates
-          lerp(startProps.around, endProps.around, t)
+          lerp(startProps.around as number[], endProps.around as number[], t) as number[]
         )
       );
     }

@@ -82,7 +82,7 @@ export default class ComponentState<PropsT extends ComponentProps> {
     return asyncProp && asyncProp.resolvedValue;
   }
 
-  isAsyncPropLoading(propName: keyof PropsT): boolean {
+  isAsyncPropLoading(propName?: keyof PropsT): boolean {
     if (propName) {
       const asyncProp = this.asyncProps[propName];
       return Boolean(

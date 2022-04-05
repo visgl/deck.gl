@@ -21,27 +21,40 @@ import Layer from './layer';
 import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
+import type AttributeManager from './attribute/attribute-manager';
+import type {PickingInfo} from './picking/pick-info';
+import type {ChangeFlags} from './layer-state';
+import type {FilterContext} from '../passes/layers-pass';
+import type {LayersList, LayerContext} from './layer-manager';
+import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
+
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default class CompositeLayer extends Layer {
-  get isComposite() {
+export default abstract class CompositeLayer<
+  PropsT extends CompositeLayerProps = CompositeLayerProps
+> extends Layer<PropsT> {
+  /** `true` if this layer renders other layers */
+  get isComposite(): boolean {
     return true;
   }
 
-  get isLoaded() {
+  /** Returns true if all async resources are loaded */
+  get isLoaded(): boolean {
     return super.isLoaded && this.getSubLayers().every(layer => layer.isLoaded);
   }
 
-  getSubLayers() {
+  /** Return last rendered sub layers */
+  getSubLayers(): Layer[] {
     return (this.internalState && this.internalState.subLayers) || [];
   }
 
   // initializeState is usually not needed for composite layers
   // Provide empty definition to disable check for missing definition
-  initializeState() {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  initializeState(context: LayerContext): void {}
 
-  // Updates selected state members and marks the composite layer to need rerender
-  setState(updateObject) {
+  /** Updates selected state members and marks the composite layer to need rerender */
+  setState(updateObject: any): void {
     super.setState(updateObject);
     // Trigger a layer update
     // Although conceptually layer.draw and compositeLayer.renderLayers are equivalent,
@@ -51,11 +64,10 @@ export default class CompositeLayer extends Layer {
     this.setNeedsUpdate();
   }
 
-  // called to augment the info object that is bubbled up from a sublayer
-  // override Layer.getPickingInfo() because decoding / setting uniform do
-  // not apply to a composite layer.
-  // @return null to cancel event
-  getPickingInfo({info}) {
+  /** called to augment the info object that is bubbled up from a sublayer
+      override Layer.getPickingInfo() because decoding / setting uniform do
+      not apply to a composite layer. */
+  getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
     const {object} = info;
     const isDataWrapped =
       object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
@@ -72,39 +84,34 @@ export default class CompositeLayer extends Layer {
   }
 
   // Implement to generate subLayers
-  renderLayers() {
-    return null;
-  }
+  abstract renderLayers(): Layer | null | LayersList;
 
   /**
-   * Filters sub layers at draw time
-   * @param {Layer} context.layer - sub layer instance
-   * @param {Viewport} context.viewport - the viewport being rendered in
-   * @param {Boolean} context.isPicking - whether it is a picking pass
-   * @param {String} context.pass - the current pass
-   * @return {Boolean} true if the sub layer should be drawn
+   * Filters sub layers at draw time. Return true if the sub layer should be drawn.
    */
-  filterSubLayer(context) {
+  filterSubLayer(context: FilterContext): boolean {
     return true;
   }
 
-  // Returns true if sub layer needs to be rendered
-  shouldRenderSubLayer(id, data) {
+  /** Returns true if sub layer needs to be rendered */
+  protected shouldRenderSubLayer(subLayerId: string, data: any): boolean {
     return data && data.length;
   }
 
-  // Returns sub layer class for a specific sublayer
-  getSubLayerClass(id, DefaultLayerClass) {
+  /** Returns sub layer class for a specific sublayer */
+  protected getSubLayerClass(subLayerId: string, DefaultLayerClass: typeof Layer): typeof Layer {
     const {_subLayerProps: overridingProps} = this.props;
 
     return (
-      (overridingProps && overridingProps[id] && overridingProps[id].type) || DefaultLayerClass
+      (overridingProps && overridingProps[subLayerId] && overridingProps[subLayerId].type) ||
+      DefaultLayerClass
     );
   }
 
-  // When casting user data into another format to pass to sublayers,
-  // add reference to the original object and object index
-  getSubLayerRow(row, sourceObject, sourceObjectIndex) {
+  /** When casting user data into another format to pass to sublayers,
+      add reference to the original object and object index */
+  protected getSubLayerRow<T>(row: T, sourceObject: any, sourceObjectIndex: number): T {
+    // @ts-ignore (TS2339) adding undefined property
     row.__source = {
       parent: this,
       object: sourceObject,
@@ -113,29 +120,39 @@ export default class CompositeLayer extends Layer {
     return row;
   }
 
-  // Some composite layers cast user data into another format before passing to sublayers
-  // We need to unwrap them before calling the accessor so that they see the original data
-  // objects
-  getSubLayerAccessor(accessor) {
+  /** Some composite layers cast user data into another format before passing to sublayers
+    We need to unwrap them before calling the accessor so that they see the original data
+    objects */
+  protected getSubLayerAccessor<In, Out>(accessor: Accessor<In, Out>): Accessor<In, Out> {
     if (typeof accessor === 'function') {
-      const objectInfo = {
+      const objectInfo: AccessorContext<In> = {
+        index: -1,
+        // @ts-ignore accessing resolved data
         data: this.props.data,
         target: []
       };
-      return (x, i) => {
+      return (x: any, i: AccessorContext<In>) => {
         if (x && x.__source) {
           objectInfo.index = x.__source.index;
-          return accessor(x.__source.object, objectInfo);
+          // @ts-ignore (TS2349) Out is never a function
+          return accessor(x.__source.object as In, objectInfo);
         }
-        return accessor(x, i);
+        // @ts-ignore (TS2349) Out is never a function
+        return accessor(x as In, i);
       };
     }
     return accessor;
   }
 
-  // Returns sub layer props for a specific sublayer
   // eslint-disable-next-line complexity
-  getSubLayerProps(sublayerProps = {}) {
+  /** Returns sub layer props for a specific sublayer */
+  protected getSubLayerProps(
+    sublayerProps: {
+      id?: string;
+      updateTriggers?: Record<string, any>;
+      [propName: string]: any;
+    } = {}
+  ): any {
     const {
       opacity,
       pickable,
@@ -156,6 +173,8 @@ export default class CompositeLayer extends Layer {
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
+      id: '',
+      updateTriggers: {},
       opacity,
       pickable,
       visible,
@@ -174,12 +193,14 @@ export default class CompositeLayer extends Layer {
       operation
     };
 
-    const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
+    const overridingSublayerProps =
+      overridingProps && sublayerProps.id && overridingProps[sublayerProps.id];
     const overridingSublayerTriggers =
       overridingSublayerProps && overridingSublayerProps.updateTriggers;
     const sublayerId = sublayerProps.id || 'sublayer';
 
     if (overridingSublayerProps) {
+      // @ts-ignore (TS2339) hidden property
       const propTypes = this.constructor._propTypes;
       const subLayerPropTypes = sublayerProps.type ? sublayerProps.type._propTypes : {};
       for (const key in overridingSublayerProps) {
@@ -199,12 +220,13 @@ export default class CompositeLayer extends Layer {
     );
     newProps.id = `${this.props.id}-${sublayerId}`;
     newProps.updateTriggers = {
-      all: this.props.updateTriggers.all,
+      all: this.props.updateTriggers?.all,
       ...sublayerProps.updateTriggers,
       ...overridingSublayerTriggers
     };
 
     // Pass through extension props
+    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of extensions) {
       const passThroughProps = extension.getSubLayerProps.call(this, extension);
       if (passThroughProps) {
@@ -217,26 +239,38 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
-  _updateAutoHighlight(info) {
+  /** Update sub layers to highlight the hovered object */
+  protected _updateAutoHighlight(info: PickingInfo): void {
     for (const layer of this.getSubLayers()) {
       layer.updateAutoHighlight(info);
     }
   }
 
-  _getAttributeManager() {
+  /** Override base Layer method */
+  protected _getAttributeManager(): AttributeManager | null {
     return null;
   }
 
-  // Called by layer manager to render subLayers
-  _renderLayers() {
-    let {subLayers} = this.internalState;
+  /** (Internal) Called after an update to rerender sub layers */
+  protected _postUpdate(
+    updateParams: {
+      props: PropsT;
+      oldProps: PropsT;
+      context: LayerContext;
+      changeFlags: ChangeFlags;
+    },
+    forceUpdate: boolean
+  ) {
+    // @ts-ignore (TS2531) this method is only called internally when internalState is defined
+    let subLayers = this.internalState.subLayers as Layer[];
     const shouldUpdate = !subLayers || this.needsUpdate();
     if (shouldUpdate) {
-      subLayers = this.renderLayers();
+      const subLayersList = this.renderLayers();
       // Flatten the returned array, removing any null, undefined or false
       // this allows layers to render sublayers conditionally
       // (see CompositeLayer.renderLayers docs)
-      subLayers = flatten(subLayers, Boolean);
+      subLayers = flatten(subLayersList, Boolean) as Layer[];
+      // @ts-ignore (TS2531) this method is only called internally when internalState is defined
       this.internalState.subLayers = subLayers;
     }
     debug(TRACE_RENDER_LAYERS, this, shouldUpdate, subLayers);
