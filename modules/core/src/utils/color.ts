@@ -2,8 +2,6 @@
 
 import {NumericArray} from '../types/types';
 
-type NumericArray = number[];
-
 /** Parse array or string color */
 function parseColor(
   color: NumericArray,

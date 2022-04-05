@@ -3,7 +3,13 @@ import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
-import {FORMATS, MAP_TYPES, TILE_FORMATS} from '../api/maps-api-common';
+import {
+  COLUMNS_SUPPORT,
+  FORMATS,
+  GEO_COLUMN_SUPPORT,
+  MAP_TYPES,
+  TILE_FORMATS
+} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -76,9 +82,14 @@ export default class CartoLayer extends CompositeLayer {
         Object.values(MAP_TYPES).includes(type),
         `Invalid type ${type}. Use MAP_TYPES enum.`
       );
-      if (type !== MAP_TYPES.TABLE) {
-        log.assert(!geoColumn, `geoColumn prop is only supported for type ${MAP_TYPES.TABLE}`);
-        log.assert(!columns, `columns prop is only supported for type ${MAP_TYPES.TABLE}`);
+      if (!COLUMNS_SUPPORT.includes(type)) {
+        log.assert(!columns, `columns prop is only supported for types: ${COLUMNS_SUPPORT.join()}`);
+      }
+      if (!GEO_COLUMN_SUPPORT.includes(type)) {
+        log.assert(
+          !geoColumn,
+          `geoColumn prop is only supported for types: ${GEO_COLUMN_SUPPORT.join()}`
+        );
       }
       if (columns) {
         log.assert(Array.isArray(columns), 'columns prop must be an Array');

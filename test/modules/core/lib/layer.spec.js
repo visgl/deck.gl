@@ -211,27 +211,27 @@ test('Layer#diffProps', t => {
   let layer = new SubLayer(LAYER_PROPS);
   t.doesNotThrow(() => testInitializeLayer({layer, onError: t.notOk}), 'Layer initialized OK');
 
-  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
+  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]})).props,
     layer.props
   );
   t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
+  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
   t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}})).props,
     layer.props
   );
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}})).props,
     layer.props
   );
@@ -240,7 +240,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}})).props,
     layer.props
   );
@@ -248,7 +248,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 1}})).props,
     layer.props
   );
@@ -256,7 +256,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: null}})).props,
     layer.props
   );
@@ -264,7 +264,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: undefined}})).props,
     layer.props
   );

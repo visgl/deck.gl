@@ -1,4 +1,4 @@
-import {extent} from 'd3-array';
+import {deviation, extent, groupSort, median, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
   scaleLinear,
@@ -36,6 +36,15 @@ export const AGGREGATION = {
   maximum: 'MAX',
   minimum: 'MIN',
   sum: 'SUM'
+};
+
+const AGGREGATION_FUNC = {
+  'count unique': (values, accessor) => groupSort(values, v => v.length, accessor).length,
+  median,
+  // Unfortunately mode() is only available in d3-array@3+ which is ESM only
+  mode: (values, accessor) => groupSort(values, v => v.length, accessor).pop(),
+  stddev: deviation,
+  variance
 };
 
 const hexToRGBA = c => {
@@ -206,6 +215,12 @@ function normalizeAccessor(accessor, data) {
     };
   }
   return accessor;
+}
+
+export function getColorValueAccessor({name}, colorAggregation, data: any) {
+  const aggregator = AGGREGATION_FUNC[colorAggregation];
+  const accessor = values => aggregator(values, p => p[name]);
+  return normalizeAccessor(accessor, data);
 }
 
 export function getColorAccessor(
