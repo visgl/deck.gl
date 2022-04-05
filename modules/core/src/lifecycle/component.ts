@@ -7,7 +7,9 @@ import {
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
 import {createProps} from './create-props';
-import ComponentState from './component-state';
+
+import type {LayerContext} from '../lib/layer-manager';
+import type LayerState from '../lib/layer-state';
 
 let counter = 0;
 
@@ -31,9 +33,9 @@ export default class Component<PropsT extends ComponentProps> {
   count: number;
   lifecycle: Lifecycle;
   parent: Component<any> | null;
-  context: Record<string, any> | null;
+  context: LayerContext | null;
   state: Record<string, any> | null;
-  internalState: ComponentState<PropsT> | null;
+  internalState: LayerState<PropsT> | null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
@@ -82,11 +84,5 @@ export default class Component<PropsT extends ComponentProps> {
     // Some custom layer implementation may not support multiple arguments in the constructor
     // @ts-ignore
     return new this.constructor({...props, ...asyncProps, ...newProps});
-  }
-
-  // PROTECTED METHODS, override in subclass
-
-  _initState() {
-    this.internalState = new ComponentState(this);
   }
 }

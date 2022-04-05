@@ -14,7 +14,16 @@ export function validateProps(props) {
 }
 
 // Returns an object with "change flags", either false or strings indicating reason for change
-export function diffProps(props, oldProps) {
+export function diffProps(
+  props,
+  oldProps
+): {
+  dataChanged: string | false | {startRow: number; endRow?: number}[];
+  propsChanged: string | false;
+  updateTriggersChanged: Record<string, true> | false;
+  extensionsChanged: boolean;
+  transitionsChanged: Record<string, true> | false;
+} {
   // First check if any props have changed (ignore props that will be examined separately)
   const propsChangedReason = compareProps({
     newProps: props,
@@ -28,7 +37,7 @@ export function diffProps(props, oldProps) {
 
   // Check update triggers to determine if any attributes need regeneration
   // Note - if data has changed, all attributes will need regeneration, so skip this step
-  let updateTriggersChangedReason: boolean | string | Record<string, true> = false;
+  let updateTriggersChangedReason: false | string | Record<string, true> = false;
   if (!dataChangedReason) {
     updateTriggersChangedReason = diffUpdateTriggers(props, oldProps);
   }
@@ -42,12 +51,13 @@ export function diffProps(props, oldProps) {
   };
 }
 
-function diffTransitions(props, oldProps): null | Record<string, true> {
+function diffTransitions(props, oldProps): false | Record<string, true> {
   if (!props.transitions) {
-    return null;
+    return false;
   }
-  const result = {};
+  const result: Record<string, true> = {};
   const propTypes = getPropTypes(props);
+  let changed = false;
 
   for (const key in props.transitions) {
     const propType = propTypes[key];
@@ -55,9 +65,10 @@ function diffTransitions(props, oldProps): null | Record<string, true> {
     const isTransitionable = type === 'number' || type === 'color' || type === 'array';
     if (isTransitionable && comparePropValues(props[key], oldProps[key], propType)) {
       result[key] = true;
+      changed = true;
     }
   }
-  return result;
+  return changed ? result : false;
 }
 
 /**
@@ -81,10 +92,10 @@ export function compareProps({
   ignoreProps = {},
   propTypes = {},
   triggerName = 'props'
-}): string | null {
+}): string | false {
   // shallow equality => deep equality
   if (oldProps === newProps) {
-    return null;
+    return false;
   }
 
   // TODO - do we need these checks? Should never happen...
@@ -125,7 +136,7 @@ export function compareProps({
     }
   }
 
-  return null;
+  return false;
 }
 /* eslint-enable max-statements, max-depth, complexity */
 
@@ -154,12 +165,12 @@ function comparePropValues(newProp, oldProp, propType) {
 
 // The comparison of the data prop requires special handling
 // the dataComparator should be used if supplied
-function diffDataProps(props, oldProps): string | null | {startRow: number; endRow?: number}[] {
+function diffDataProps(props, oldProps): string | false | {startRow: number; endRow?: number}[] {
   if (oldProps === null) {
     return 'oldProps is null, initial diff';
   }
 
-  let dataChanged: any = null;
+  let dataChanged: string | false | {startRow: number; endRow?: number}[] = false;
   // Support optional app defined comparison of data
   const {dataComparator, _dataDiff} = props;
   if (dataComparator) {
@@ -179,9 +190,9 @@ function diffDataProps(props, oldProps): string | null | {startRow: number; endR
 
 // Checks if any update triggers have changed
 // also calls callback to invalidate attributes accordingly.
-function diffUpdateTriggers(props, oldProps): string | Record<string, true> {
+function diffUpdateTriggers(props, oldProps): Record<string, true> | false {
   if (oldProps === null) {
-    return 'oldProps is null, initial diff';
+    return {all: true};
   }
 
   // If the 'all' updateTrigger fires, ignore testing others
@@ -192,20 +203,20 @@ function diffUpdateTriggers(props, oldProps): string | Record<string, true> {
     }
   }
 
-  const triggerChanged = {};
-  let reason: any = false;
+  const reason: Record<string, true> = {};
+  let changed = false;
   // If the 'all' updateTrigger didn't fire, need to check all others
   for (const triggerName in props.updateTriggers) {
     if (triggerName !== 'all') {
       const diffReason = diffUpdateTrigger(props, oldProps, triggerName);
       if (diffReason) {
-        triggerChanged[triggerName] = true;
-        reason = triggerChanged;
+        reason[triggerName] = true;
+        changed = true;
       }
     }
   }
 
-  return reason;
+  return changed ? reason : false;
 }
 
 // Returns true if any extensions have changed

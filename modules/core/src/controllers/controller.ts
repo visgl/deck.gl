@@ -83,7 +83,7 @@ export type ControllerOptions = {
   inertia?: boolean | number;
 };
 
-type ControllerProps = {
+export type ControllerProps = {
   /** Identifier of the controller */
   id: string;
   /** Viewport x position */

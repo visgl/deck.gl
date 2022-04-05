@@ -43,7 +43,7 @@ export default class EffectManager {
   }
 
   // Private
-  setEffects(effects = []) {
+  setEffects(effects: Effect[] = []) {
     this.cleanup();
     this.effects = effects;
 

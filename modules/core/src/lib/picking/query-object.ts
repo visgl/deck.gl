@@ -19,10 +19,21 @@
 // THE SOFTWARE.
 
 import log from '../../utils/log';
+import type Layer from '../layer';
+import type Viewport from '../../viewports/viewport';
+import type {PickingColorDecoder} from '../../passes/pick-layers-pass';
+
+export type PickedPixel = {
+  pickedColor: Uint8Array | null;
+  pickedLayer?: Layer;
+  pickedViewports?: Viewport[];
+  pickedX?: number;
+  pickedY?: number;
+  pickedObjectIndex: number;
+};
 
 const NO_PICKED_OBJECT = {
   pickedColor: null,
-  pickedLayer: null,
   pickedObjectIndex: -1
 };
 
@@ -38,57 +49,62 @@ export function getClosestObject({
   deviceY,
   deviceRadius,
   deviceRect
-}) {
-  if (pickedColors) {
-    // Traverse all pixels in picking results and find the one closest to the supplied
-    // [deviceX, deviceY]
-    const {x, y, width, height} = deviceRect;
-    let minSquareDistanceToCenter = deviceRadius * deviceRadius;
-    let closestPixelIndex = -1;
-    let i = 0;
+}: {
+  pickedColors: Uint8Array;
+  decodePickingColor: PickingColorDecoder;
+  deviceX: number;
+  deviceY: number;
+  deviceRadius: number;
+  deviceRect: {x: number; y: number; width: number; height: number};
+}): PickedPixel {
+  // Traverse all pixels in picking results and find the one closest to the supplied
+  // [deviceX, deviceY]
+  const {x, y, width, height} = deviceRect;
+  let minSquareDistanceToCenter = deviceRadius * deviceRadius;
+  let closestPixelIndex = -1;
+  let i = 0;
 
-    for (let row = 0; row < height; row++) {
-      const dy = row + y - deviceY;
-      const dy2 = dy * dy;
+  for (let row = 0; row < height; row++) {
+    const dy = row + y - deviceY;
+    const dy2 = dy * dy;
 
-      if (dy2 > minSquareDistanceToCenter) {
-        // skip this row
-        i += 4 * width;
-      } else {
-        for (let col = 0; col < width; col++) {
-          // Decode picked layer from color
-          const pickedLayerIndex = pickedColors[i + 3] - 1;
+    if (dy2 > minSquareDistanceToCenter) {
+      // skip this row
+      i += 4 * width;
+    } else {
+      for (let col = 0; col < width; col++) {
+        // Decode picked layer from color
+        const pickedLayerIndex = pickedColors[i + 3] - 1;
 
-          if (pickedLayerIndex >= 0) {
-            const dx = col + x - deviceX;
-            const d2 = dx * dx + dy2;
+        if (pickedLayerIndex >= 0) {
+          const dx = col + x - deviceX;
+          const d2 = dx * dx + dy2;
 
-            if (d2 <= minSquareDistanceToCenter) {
-              minSquareDistanceToCenter = d2;
-              closestPixelIndex = i;
-            }
+          if (d2 <= minSquareDistanceToCenter) {
+            minSquareDistanceToCenter = d2;
+            closestPixelIndex = i;
           }
-          i += 4;
         }
+        i += 4;
       }
     }
+  }
 
-    if (closestPixelIndex >= 0) {
-      // Decode picked object index from color
-      const pickedColor = pickedColors.slice(closestPixelIndex, closestPixelIndex + 4);
-      const pickedObject = decodePickingColor(pickedColor);
-      if (pickedObject) {
-        const dy = Math.floor(closestPixelIndex / 4 / width);
-        const dx = closestPixelIndex / 4 - dy * width;
-        return {
-          ...pickedObject,
-          pickedColor,
-          pickedX: x + dx,
-          pickedY: y + dy
-        };
-      }
-      log.error('Picked non-existent layer. Is picking buffer corrupt?')();
+  if (closestPixelIndex >= 0) {
+    // Decode picked object index from color
+    const pickedColor = pickedColors.slice(closestPixelIndex, closestPixelIndex + 4);
+    const pickedObject = decodePickingColor(pickedColor);
+    if (pickedObject) {
+      const dy = Math.floor(closestPixelIndex / 4 / width);
+      const dx = closestPixelIndex / 4 - dy * width;
+      return {
+        ...pickedObject,
+        pickedColor,
+        pickedX: x + dx,
+        pickedY: y + dy
+      };
     }
+    log.error('Picked non-existent layer. Is picking buffer corrupt?')();
   }
   return NO_PICKED_OBJECT;
 }
@@ -97,7 +113,13 @@ export function getClosestObject({
  * Examines a picking buffer for unique colors
  * Returns array of unique objects in shape `{x, y, pickedColor, pickedLayer, pickedObjectIndex}`
  */
-export function getUniqueObjects({pickedColors, decodePickingColor}) {
+export function getUniqueObjects({
+  pickedColors,
+  decodePickingColor
+}: {
+  pickedColors: Uint8Array;
+  decodePickingColor: PickingColorDecoder;
+}): PickedPixel[] {
   const uniqueColors = new Map();
 
   // Traverse all pixels in picking results and get unique colors
@@ -116,7 +138,7 @@ export function getUniqueObjects({pickedColors, decodePickingColor}) {
           if (pickedObject) {
             uniqueColors.set(colorKey, {
               ...pickedObject,
-              pickedColor
+              color: pickedColor
             });
           } else {
             log.error('Picked non-existent layer. Is picking buffer corrupt?')();
