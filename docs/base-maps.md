@@ -1,10 +1,12 @@
-# Suppported Base Maps
+# Base Maps
 
-While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer the invaluable context for understanding the overlay layers.
+While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer invaluable context for understanding the overlay layers.
+
+## Base Maps Renderers
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
 
-There are two types of integration between deck.gl and a base map solution:
+There are two types of integration between deck.gl and a base map renderer:
 
 - **Overlaid**: the Deck canvas is rendered over the base map as a separate DOM element. Deck's camera and the camera of the base map are synchronized so they pan/zoom together. This is the more robust option since the two libraries manage their renderings independently from each other. It is usually sufficient if the base map is 2D.
 
@@ -17,11 +19,11 @@ There are two types of integration between deck.gl and a base map solution:
 
 | Library | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- | ----- |
-| [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
-| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
-| [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/deckgl-overlay-view) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) | 
 | [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) | ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis) |
+| [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/deckgl-overlay-view) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) | 
 | [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  |
 | [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  |
+| [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
 
 It is also important to understand the difference between the JS library that renders the map and the map data provider. For example, you can use Mapbox GL JS with the Mapbox service, but also with any other service that hosts Mapbox Vector Tiles. When using a base map, be sure to follow the terms and conditions, as well as the attribution requirements of both the JS library and the data provider.
