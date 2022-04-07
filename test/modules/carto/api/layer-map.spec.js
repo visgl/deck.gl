@@ -138,7 +138,7 @@ const TEXT_PIXEL_OFFSET_TESTS = [
     alignment: 'bottom',
     radius: 20,
     size: 10,
-    expected: [24, 34]
+    expected: [40, 50]
   },
   {
     anchor: 'end',
@@ -146,7 +146,7 @@ const TEXT_PIXEL_OFFSET_TESTS = [
     radius: r => 2 * r,
     data: 10,
     size: 10,
-    expected: [-24, -34]
+    expected: [-40, -50]
   }
 ];
 

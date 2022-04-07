@@ -8,6 +8,7 @@ const config = deepMerge(defaultConfig, {
     project: ['./tsconfig.json'],
     ecmaVersion: 2020
   },
+  extends: ['prettier'],
 
   env: {
     es2020: true

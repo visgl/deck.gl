@@ -7,7 +7,6 @@ const LINEARLY_INTERPOLATED_PROPS = ['bearing', 'pitch'];
 const DEFAULT_OPTS = {
   speed: 1.2,
   curve: 1.414
-  // screenSpeed and maxDuration are used only if specified
 };
 
 /**
@@ -18,24 +17,35 @@ const DEFAULT_OPTS = {
  * "Jarke J. van Wijk and Wim A.A. Nuij"
  */
 export default class FlyToInterpolator extends TransitionInterpolator {
-  /**
-   * @param props {Object}
-    - `props.curve` (Number, optional, default: 1.414) - The zooming "curve" that will occur along the flight path.
-    - `props.speed` (Number, optional, default: 1.2) - The average speed of the animation defined in relation to `options.curve`, it linearly affects the duration, higher speed returns smaller durations and vice versa.
-    - `props.screenSpeed` (Number, optional) - The average speed of the animation measured in screenfuls per second. Similar to `opts.speed` it linearly affects the duration,  when specified `opts.speed` is ignored.
-    - `props.maxDuration` (Number, optional) - Maximum duration in milliseconds, if calculated duration exceeds this value, `0` is returned.
-   */
-  constructor(props = {}) {
+  opts: {
+    curve: number;
+    speed: number;
+    screenSpeed?: number;
+    maxDuration?: number;
+  };
+
+  constructor(
+    opts: {
+      /** The zooming "curve" that will occur along the flight path. Default 1.414 */
+      curve?: number;
+      /** The average speed of the animation defined in relation to `options.curve`, it linearly affects the duration, higher speed returns smaller durations and vice versa. Default 1.2 */
+      speed?: number;
+      /** The average speed of the animation measured in screenfuls per second. Similar to `opts.speed` it linearly affects the duration,  when specified `opts.speed` is ignored. */
+      screenSpeed?: number;
+      /** Maximum duration in milliseconds, if calculated duration exceeds this value, `0` is returned. */
+      maxDuration?: number;
+    } = {}
+  ) {
     super({
       compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
       extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
       required: ['width', 'height', 'latitude', 'longitude', 'zoom']
     });
-    this.props = {...DEFAULT_OPTS, ...props};
+    this.opts = {...DEFAULT_OPTS, ...opts};
   }
 
   interpolateProps(startProps, endProps, t) {
-    const viewport = flyToViewport(startProps, endProps, t, this.props);
+    const viewport = flyToViewport(startProps, endProps, t, this.opts);
 
     // Linearly interpolate 'bearing' and 'pitch'.
     // If pitch/bearing are not supplied, they are interpreted as zeros in viewport calculation
@@ -54,7 +64,7 @@ export default class FlyToInterpolator extends TransitionInterpolator {
     let {transitionDuration} = endProps;
     if (transitionDuration === 'auto') {
       // auto calculate duration based on start and end props
-      transitionDuration = getFlyToDuration(startProps, endProps, this.props);
+      transitionDuration = getFlyToDuration(startProps, endProps, this.opts);
     }
     return transitionDuration;
   }

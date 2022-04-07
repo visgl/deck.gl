@@ -28,7 +28,7 @@ const ERR_NOT_CONTAINER = 'count(): argument not a container';
  * - Auto-deduction for Classic Arrays via the built-in length attribute
  * - Also handles objects, although note that this an O(N) operation
  */
-export function count(container) {
+export function count(container: any): number {
   if (!isObject(container)) {
     throw new Error(ERR_NOT_OBJECT);
   }

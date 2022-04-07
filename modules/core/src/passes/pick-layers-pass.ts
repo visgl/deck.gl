@@ -25,6 +25,14 @@ type EncodedPickingColors = {
   viewports: Viewport[];
 };
 
+export type PickingColorDecoder = (pickedColor: number[] | Uint8Array) =>
+  | {
+      pickedLayer: Layer;
+      pickedViewports: Viewport[];
+      pickedObjectIndex: number;
+    }
+  | undefined;
+
 export default class PickLayersPass extends LayersPass {
   private pickZ?: boolean;
   private _colors: {
@@ -56,15 +64,7 @@ export default class PickLayersPass extends LayersPass {
     pass = 'picking',
     pickZ
   }: PickLayersPassRenderOptions): {
-    decodePickingColor:
-      | null
-      | ((pickedColor: number[]) =>
-          | {
-              pickedLayer: Layer;
-              pickedViewports: Viewport[];
-              pickedObjectIndex: number;
-            }
-          | undefined);
+    decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
     const gl = this.gl;
@@ -122,7 +122,7 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected shouldDrawLayer(layer: Layer): boolean {
-    return layer.props.pickable && layer.props.operation === OPERATION.DRAW;
+    return (layer.props.pickable as boolean) && layer.props.operation === OPERATION.DRAW;
   }
 
   protected getModuleParameters() {
@@ -189,7 +189,7 @@ function decodeColor(
     byLayer: Map<Layer, EncodedPickingColors>;
     byAlpha: EncodedPickingColors[];
   },
-  pickedColor: number[]
+  pickedColor: number[] | Uint8Array
 ):
   | {
       pickedLayer: Layer;
