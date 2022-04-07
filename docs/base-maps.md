@@ -6,7 +6,6 @@ While deck.gl works independently without any map component, when visualizing ge
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
 
-
 There are two types of integration between deck.gl and a base map renderer:
 
 - **Overlaid**: the Deck canvas is rendered over the base map as a separate DOM element. Deck's camera and the camera of the base map are synchronized so they pan/zoom together. This is the more robust option since the two libraries manage their renderings independently from each other. It is usually sufficient if the base map is 2D.
