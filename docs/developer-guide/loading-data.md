@@ -206,7 +206,7 @@ function svgToDataURL(svg) {
 
 new IconLayer({
   getIcon: d => {
-    icon: svgToDataURL(createSVGIcon(d.value)),
+    url: svgToDataURL(createSVGIcon(d.value)),
     width: 24,
     height: 24
   }

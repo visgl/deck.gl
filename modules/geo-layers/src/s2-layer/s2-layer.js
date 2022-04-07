@@ -18,89 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
-import {PolygonLayer} from '@deck.gl/layers';
-
+import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 const defaultProps = {
-  ...PolygonLayer.defaultProps,
   getS2Token: {type: 'accessor', value: d => d.token}
 };
 
-export default class S2Layer extends CompositeLayer {
-  renderLayers() {
-    // Layer prop
+export default class S2Layer extends GeoCellLayer {
+  indexToBounds() {
     const {data, getS2Token} = this.props;
 
-    // Rendering props underlying layer
-    const {
-      elevationScale,
-      extruded,
-      wireframe,
-      filled,
-      stroked,
-      lineWidthUnits,
-      lineWidthScale,
-      lineWidthMinPixels,
-      lineWidthMaxPixels,
-      lineJointRounded,
-      lineMiterLimit,
-      lineDashJustified,
-      getElevation,
-      getFillColor,
-      getLineColor,
-      getLineWidth,
-      getLineDashArray
-    } = this.props;
-
-    // Accessor props for underlying layers
-    const {updateTriggers, material} = this.props;
-
-    // Filled Polygon Layer
-    const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
-    return new CellLayer(
-      {
-        filled,
-        wireframe,
-
-        extruded,
-        elevationScale,
-
-        stroked,
-        lineWidthUnits,
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels,
-        lineJointRounded,
-        lineMiterLimit,
-        lineDashJustified,
-
-        material,
-
-        getElevation,
-        getFillColor,
-        getLineColor,
-        getLineWidth,
-        getLineDashArray
-      },
-      this.getSubLayerProps({
-        id: 'cell',
-        updateTriggers: {
-          getElevation: updateTriggers.getElevation,
-          getFillColor: updateTriggers.getFillColor,
-          getLineColor: updateTriggers.getLineColor,
-          getLineWidth: updateTriggers.getLineWidth,
-          getLineDashArray: updateTriggers.getLineDashArray
-        }
-      }),
-      {
-        data,
-        _normalize: false,
-        positionFormat: 'XY',
-        getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
-      }
-    );
+    return {
+      data,
+      _normalize: false,
+      positionFormat: 'XY',
+      getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
+    };
   }
 }
 

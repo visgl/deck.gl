@@ -3,41 +3,43 @@
 This class is an experimental implementation of the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to 3D views of maps created with the ArcGIS
 API for JavaScript.
 
-`DeckRenderer` is only available when `loadArcGISModules()` is resolved.
 
 ## Usage
 
 ```js
-import {loadArcGISModules} from '@deck.gl/arcgis';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {DeckRenderer} from '@deck.gl/arcgis';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import ArcGISMap from '@arcgis/core/Map';
+import SceneView from '@arcgis/core/views/SceneView';
+import * as externalRenderers from '@arcgis/core/views/3d/externalRenderers';
 
-loadArcGISModules([
-  'esri/views/SceneView',
-  'esri/views/3d/externalRenderers'
-]).then(({DeckRenderer, modules}) => {
-  const [SceneView, externalRenderers] = modules;
-
-  const sceneView = new SceneView({
-    container: 'viewDiv',
-    map: new ArcGISMap({
-      basemap: 'dark-gray-vector'
-    }),
-    camera: {
-      position: {x: -74, y: 40.65, z: 5000},
-      heading: 180,
-      tilt: 30
-    },
-    viewingMode: 'local'
-  });
-
-  const renderer = new DeckRenderer(sceneView, {
-    layers: [
-      // deck.gl layers
-    ]
-  });
-
-  externalRenderers.add(sceneView, renderer);
+const sceneView = new SceneView({
+  container: 'viewDiv',
+  map: new ArcGISMap({
+    basemap: 'dark-gray-vector'
+  }),
+  camera: {
+    position: {x: -74, y: 40.65, z: 5000},
+    heading: 180,
+    tilt: 30
+  },
+  viewingMode: 'local'
 });
+
+const renderer = new DeckRenderer(sceneView, {
+  layers: [
+    new ScatterplotLayer({
+      data: [
+        {position: [0.119, 52.205]}
+      ],
+      getPosition: d => d.position,
+      getColor: [255, 0, 0],
+      radiusMinPixels: 20
+    })
+  ]
+});
+
+externalRenderers.add(sceneView, renderer);
 ```
 
 

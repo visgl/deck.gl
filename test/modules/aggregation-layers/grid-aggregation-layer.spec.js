@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import GridAggregationLayer from '@deck.gl/aggregation-layers/grid-aggregation-layer';
 import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {
@@ -29,7 +29,7 @@ import GL from '@luma.gl/constants';
 import {Layer} from 'deck.gl';
 import {testLayer, gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 import {Buffer} from '@luma.gl/core';
 
 const BASE_LAYER_ID = 'composite-layer-id';

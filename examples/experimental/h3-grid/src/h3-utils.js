@@ -23,7 +23,15 @@ export function getHexagonsInBoundingBox({west, north, east, south}, resolution)
   }
 
   return polyfill(
-    [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+    [
+      [
+        [west, north],
+        [west, south],
+        [east, south],
+        [east, north],
+        [west, north]
+      ]
+    ],
     resolution,
     true
   );

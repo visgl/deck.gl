@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import Tile2DHeader from '@deck.gl/geo-layers/tile-layer/tile-2d-header';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 

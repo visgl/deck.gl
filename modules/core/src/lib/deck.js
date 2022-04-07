@@ -31,7 +31,7 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
-import {getBrowser} from 'probe.gl/env';
+import {getBrowser} from '@probe.gl/env';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
@@ -41,7 +41,7 @@ import {
   Timeline,
   lumaStats
 } from '@luma.gl/core';
-import {Stats} from 'probe.gl';
+import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
@@ -215,7 +215,7 @@ export default class Deck {
 
     // UNSAFE/experimental prop: only set at initialization to avoid performance hit
     if (props._typedArrayManagerProps) {
-      typedArrayManager.setProps(props._typedArrayManagerProps);
+      typedArrayManager.setOptions(props._typedArrayManagerProps);
     }
 
     this.animationLoop.start();
@@ -404,6 +404,7 @@ export default class Deck {
       views: this.viewManager.getViews(),
       viewports: this.getViewports(opts),
       onViewportActive: this.layerManager.activateViewport,
+      effects: this.effectManager.getEffects(),
       ...opts
     });
 
@@ -823,11 +824,12 @@ export default class Deck {
 
   _onPointerDown(event) {
     const pos = event.offsetCenter;
-    this._lastPointerDownInfo = this.pickObject({
+    const pickedInfo = this._pick('pickObject', 'pickObject Time', {
       x: pos.x,
       y: pos.y,
       radius: this.props.pickingRadius
     });
+    this._lastPointerDownInfo = pickedInfo.result[0] || pickedInfo.emptyInfo;
   }
 
   _getFrameStats() {

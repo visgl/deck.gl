@@ -41,6 +41,10 @@ export function getOffsetOrigin(
   coordinateSystem,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN
 ) {
+  if (coordinateOrigin.length < 3) {
+    coordinateOrigin = [coordinateOrigin[0], coordinateOrigin[1], 0];
+  }
+
   let shaderCoordinateOrigin = coordinateOrigin;
   let geospatialOrigin;
   let offsetMode = true;
@@ -88,6 +92,7 @@ export function getOffsetOrigin(
 
     case PROJECTION_MODE.IDENTITY:
       shaderCoordinateOrigin = viewport.position.map(Math.fround);
+      shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       break;
 
     case PROJECTION_MODE.GLOBE:
@@ -99,8 +104,6 @@ export function getOffsetOrigin(
       // Unknown projection mode
       offsetMode = false;
   }
-
-  shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
 
   return {geospatialOrigin, shaderCoordinateOrigin, offsetMode};
 }
@@ -221,7 +224,7 @@ function calculateViewportUniforms({
   // When using Viewport class's default projection matrix, this yields 1 for orthographic
   // and `viewport.focalDistance` for perspective views
   const focalDistance =
-    viewport.projectionMatrix.transform([0, 0, -viewport.focalDistance, 1])[3] || 1;
+    vec4.transformMat4([], [0, 0, -viewport.focalDistance, 1], viewport.projectionMatrix)[3] || 1;
 
   const uniforms = {
     // Projection mode values

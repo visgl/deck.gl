@@ -8,7 +8,8 @@ import {
   TerrainLayer,
   MVTLayer,
   H3HexagonLayer,
-  H3ClusterLayer
+  H3ClusterLayer,
+  QuadkeyLayer
 } from '@deck.gl/geo-layers';
 
 import {makeLayerDemo} from './demo-base';
@@ -25,6 +26,22 @@ export const GreatCircleLayerDemo = makeLayerDemo({
     getTargetColor: [0, 128, 200],
     widthMinPixels: 5,
     pickable: true
+  }`
+});
+
+export const QuadkeyLayerDemo = makeLayerDemo({
+  Layer: QuadkeyLayer,
+  getTooltip: '({object}) => object && `${object.quadkey} value: ${object.value}`',
+  props: `{
+    data: '${DATA_URI}/sf.quadkeys.json',
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 1000,
+    getQuadkey: d => d.quadkey,
+    getFillColor: d => [d.value * 128, (1 - d.value) * 255, (1 - d.value) * 255, 180],
+    getElevation: d => d.value
   }`
 });
 
@@ -174,4 +191,4 @@ export const MVTLayerDemo = makeLayerDemo({
     },
     lineWidthMinPixels: 1
   }`
-})
+});

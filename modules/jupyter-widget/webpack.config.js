@@ -1,7 +1,8 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
+const {getOcularConfig} = require('ocular-dev-tools');
 
-const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+const ALIASES = getOcularConfig({
   aliasMode: 'src',
   root: resolve(__dirname, '../..')
 }).aliases;
@@ -13,7 +14,7 @@ const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
 const rules = [
   {
     // Compile ES2015 using babel
-    test: /\.js$/,
+    test: /(\.js|\.ts|\.tsx)$/,
     loader: 'babel-loader',
     include: /src/,
     options: {
@@ -24,7 +25,8 @@ const rules = [
           {
             targets: ['>0.2%', 'not ie 11', 'not dead', 'not chrome 49']
           }
-        ]
+        ],
+        '@babel/preset-typescript'
       ],
       // all of the helpers will reference the module @babel/runtime to avoid duplication
       // across the compiled output.
@@ -47,7 +49,8 @@ const config = [
      */
     entry: './src/index.js',
     resolve: {
-      alias: ALIASES
+      alias: ALIASES,
+      extensions: ['.ts', '.tsx', '.js', '.json']
     },
     output: {
       filename: 'index.js',

@@ -1,8 +1,9 @@
 import {CompositeLayer, log} from '@deck.gl/core';
+import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {getData, getDataV2, API_VERSIONS} from '../api';
-import {MAP_TYPES} from '../api/maps-api-common';
+import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {FORMATS, MAP_TYPES, TILE_FORMATS} from '../api/maps-api-common';
 import {getDefaultCredentials} from '../config';
 
 const defaultProps = {
@@ -12,6 +13,7 @@ const defaultProps = {
   type: null,
   onDataLoad: {type: 'function', value: data => {}, compare: false},
   onDataError: {type: 'function', value: null, compare: false, optional: true},
+  uniqueIdProperty: 'cartodb_id',
 
   // override carto credentials for the layer, set to null to read from default
   credentials: null,
@@ -21,6 +23,15 @@ const defaultProps = {
   /**********************/
   // (String, required): connection name at CARTO platform
   connection: null,
+
+  // (String, optional): format of data
+  format: null,
+
+  // (String, optional): force format of data for tiles
+  formatTiles: null,
+
+  // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
+  clientId: null,
 
   // (String, optional): name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
   geoColumn: null,
@@ -81,8 +92,10 @@ export default class CartoLayer extends CompositeLayer {
       changeFlags.dataChanged ||
       props.connection !== oldProps.connection ||
       props.geoColumn !== oldProps.geoColumn ||
-      JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
+      props.format !== oldProps.format ||
+      props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
+      JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
       JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
 
     if (shouldUpdateData) {
@@ -93,29 +106,19 @@ export default class CartoLayer extends CompositeLayer {
 
   async _updateData() {
     try {
-      const {type, data: source, connection, credentials, geoColumn, columns} = this.props;
+      const {type, data: source, clientId, credentials, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let data;
-
-      if (apiVersion === API_VERSIONS.V3) {
-        data = await getData({
-          type,
-          source,
-          connection,
-          credentials,
-          geoColumn,
-          columns
-        });
-      } else if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        data = await getDataV2({type, source, credentials});
+      let result;
+      if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+        result = {data: await getDataV2({type, source, credentials})};
       } else {
-        log.assert(`Unknow apiVersion ${apiVersion}. Use API_VERSIONS enum.`);
+        result = await fetchLayerData({type, source, clientId, credentials, ...rest});
       }
 
-      this.setState({data, apiVersion});
-      this.props.onDataLoad(data);
+      this.setState({...result, apiVersion});
+      this.props.onDataLoad(result.data);
     } catch (err) {
       if (this.props.onDataError) {
         this.props.onDataError(err);
@@ -125,28 +128,39 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
+  _getSubLayerAndProps() {
+    const {data, format, apiVersion} = this.state;
+
+    const {uniqueIdProperty} = defaultProps;
+    const props = {uniqueIdProperty, ...this.props};
+    delete props.data;
+
+    if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
+      return [MVTLayer, props];
+    }
+
+    if (format === FORMATS.TILEJSON) {
+      /* global URL */
+      const tileUrl = new URL(data.tiles[0]);
+
+      props.formatTiles =
+        props.formatTiles || tileUrl.searchParams.get('formatTiles') || TILE_FORMATS.MVT;
+
+      return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
+    }
+
+    // It's a geojson layer
+    return [GeoJsonLayer, props];
+  }
+
   renderLayers() {
-    const {data, apiVersion} = this.state;
-    const {type} = this.props;
+    const {data} = this.state;
 
     if (!data) return null;
 
     const {updateTriggers} = this.props;
 
-    let layer;
-
-    if (
-      apiVersion === API_VERSIONS.V1 ||
-      apiVersion === API_VERSIONS.V2 ||
-      type === MAP_TYPES.TILESET
-    ) {
-      layer = MVTLayer;
-    } else {
-      layer = GeoJsonLayer;
-    }
-
-    const props = {...this.props};
-    delete props.data;
+    const [layer, props] = this._getSubLayerAndProps();
 
     // eslint-disable-next-line new-cap
     return new layer(

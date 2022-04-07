@@ -15,11 +15,12 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
+const {getOcularConfig} = require('ocular-dev-tools');
 
 const ROOT_DIR = resolve(__dirname, '..');
 const LIB_DIR = resolve(__dirname, '..');
 
-const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+const ALIASES = getOcularConfig({
   root: resolve(__dirname, '..')
 }).aliases;
 
@@ -89,6 +90,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
 
     resolve: {
       // mainFields: ['esnext', 'module', 'main'],
+      extensions: ['.ts', '.tsx', '.js', '.json'],
 
       alias: Object.assign({}, ALIASES, LUMA_ALIASES, MATH_ALIASES, {
         // Use luma.gl installed in parallel with deck.gl
@@ -110,10 +112,13 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
           // Compile source using babel. This is not necessary for src to run in the browser
           // However class inheritance cannot happen between transpiled/non-transpiled code
           // Which affects some examples
-          test: /\.js$/,
+          test: /(\.js|\.ts|\.tsx)$/,
           loader: 'babel-loader',
           options: {
-            presets: [['@babel/env', {targets: '> 1%, not ie 11'}]]
+            presets: [
+              '@babel/typescript',
+              ['@babel/env', {targets: '> 1%, not ie 11'}]
+            ]
           },
           include: [resolve(ROOT_DIR, 'modules'), resolve(ROOT_DIR, '../luma.gl/modules')]
         }
@@ -124,16 +129,23 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
 
 function addLocalDevSettings(config, exampleDir, linkToLuma, linkToMath) {
   const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir, linkToLuma, linkToMath);
-  config = Object.assign({}, LOCAL_DEV_CONFIG, config);
-  config.resolve = Object.assign({}, LOCAL_DEV_CONFIG.resolve, config.resolve || {});
-  config.resolve.alias = config.resolve.alias || {};
-  Object.assign(config.resolve.alias, LOCAL_DEV_CONFIG.resolve.alias);
-
-  config.module = config.module || {};
-  Object.assign(config.module, {
-    rules: (config.module.rules || []).concat(LOCAL_DEV_CONFIG.module.rules)
-  });
-  return config;
+  return {
+    ...LOCAL_DEV_CONFIG,
+    ...config,
+    resolve: {
+      ...LOCAL_DEV_CONFIG.resolve,
+      ...config.resolve,
+      alias: {
+        ...LOCAL_DEV_CONFIG.resolve.alias,
+        ...config.resolve?.alias
+      }
+    },
+    module: {
+      ...LOCAL_DEV_CONFIG.module,
+      ...config.module,
+      rules: (config.module?.rules || []).concat(LOCAL_DEV_CONFIG.module.rules)
+    }
+  };
 }
 
 module.exports = (config, exampleDir) => env => {

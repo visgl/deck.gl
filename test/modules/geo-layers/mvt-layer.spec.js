@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -67,21 +67,41 @@ const TRANSFORM_COORDS_DATA = [
   {
     result: {
       type: 'MultiPoint',
-      coordinates: [[-135, 79.17133464081945], [-90, 66.51326044311185]]
+      coordinates: [
+        [-135, 79.17133464081945],
+        [-90, 66.51326044311185]
+      ]
     },
     geom: {
       type: 'MultiPoint',
-      coordinates: [[0.25, 0.25], [0.5, 0.5]] // local coords
+      coordinates: [
+        [0.25, 0.25],
+        [0.5, 0.5]
+      ] // local coords
     }
   },
   {
     result: {
       type: 'Polygon',
-      coordinates: [[[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]]]
+      coordinates: [
+        [
+          [-180, 0],
+          [0, 0],
+          [0, 66.51326044311185],
+          [-180, 0]
+        ]
+      ]
     },
     geom: {
       type: 'Polygon',
-      coordinates: [[[0, 1], [1, 1], [1, 0.5], [0, 1]]] // local coords
+      coordinates: [
+        [
+          [0, 1],
+          [1, 1],
+          [1, 0.5],
+          [0, 1]
+        ]
+      ] // local coords
     }
   },
   {
@@ -89,34 +109,83 @@ const TRANSFORM_COORDS_DATA = [
       type: 'MultiPolygon',
       coordinates: [
         [
-          [[-180, 0], [0, 0], [0, 66.51326044311185], [-180, 0]],
-          [[-180, 0], [0, -66.51326044311185], [0, -40.97989806962013], [-180, 0]]
+          [
+            [-180, 0],
+            [0, 0],
+            [0, 66.51326044311185],
+            [-180, 0]
+          ],
+          [
+            [-180, 0],
+            [0, -66.51326044311185],
+            [0, -40.97989806962013],
+            [-180, 0]
+          ]
         ]
       ]
     },
     geom: {
       type: 'MultiPolygon',
-      coordinates: [[[[0, 1], [1, 1], [1, 0.5], [0, 1]], [[0, 1], [1, 1.5], [1, 1.25], [0, 1]]]] // local coords
+      coordinates: [
+        [
+          [
+            [0, 1],
+            [1, 1],
+            [1, 0.5],
+            [0, 1]
+          ],
+          [
+            [0, 1],
+            [1, 1.5],
+            [1, 1.25],
+            [0, 1]
+          ]
+        ]
+      ] // local coords
     }
   },
   {
     result: {
       type: 'LineString',
-      coordinates: [[-180, 85.0511287798066], [-180, 0]]
+      coordinates: [
+        [-180, 85.0511287798066],
+        [-180, 0]
+      ]
     },
     geom: {
       type: 'LineString',
-      coordinates: [[0, 0], [0, 1]] // local coords
+      coordinates: [
+        [0, 0],
+        [0, 1]
+      ] // local coords
     }
   },
   {
     result: {
       type: 'MultiLineString',
-      coordinates: [[[-180, 85.0511287798066], [-180, 0]], [[-90, 66.51326044311185], [-180, 0]]]
+      coordinates: [
+        [
+          [-180, 85.0511287798066],
+          [-180, 0]
+        ],
+        [
+          [-90, 66.51326044311185],
+          [-180, 0]
+        ]
+      ]
     },
     geom: {
       type: 'MultiLineString',
-      coordinates: [[[0, 0], [0, 1]], [[0.5, 0.5], [0, 1]]] // local coords
+      coordinates: [
+        [
+          [0, 0],
+          [0, 1]
+        ],
+        [
+          [0.5, 0.5],
+          [0, 1]
+        ]
+      ] // local coords
     }
   }
 ];
@@ -173,7 +242,7 @@ test('MVTLayer#transformCoordsToWGS84', t => {
 test('MVTLayer#autoHighlight', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return this.props.binary ? geoJSONBinaryData : geoJSONData;
+      return this.state.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
@@ -231,7 +300,7 @@ for (const binary of [true, false]) {
   test(`MVTLayer#picking binary:${binary}`, async t => {
     class TestMVTLayer extends MVTLayer {
       getTileData() {
-        return this.props.binary ? geoJSONBinaryData : geoJSONData;
+        return this.state.binary ? geoJSONBinaryData : geoJSONData;
       }
     }
 
@@ -315,11 +384,9 @@ test('MVTLayer#TileJSON', async t => {
   };
 
   // polyfill/hijack fetch
-  /* global global, window */
-  const _global = typeof global !== 'undefined' ? global : window;
-  const fetch = _global.fetch;
+  const fetch = globalThis.fetch;
 
-  _global.fetch = url => {
+  globalThis.fetch = url => {
     return Promise.resolve(JSON.stringify(tileJSON));
   };
 
@@ -352,13 +419,13 @@ test('MVTLayer#TileJSON', async t => {
   t.end();
 
   // restore fetcch
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
 });
 
 test('MVTLayer#dataInWGS84', async t => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
-      return this.props.binary ? geoJSONBinaryData : geoJSONData;
+      return this.state.binary ? geoJSONBinaryData : geoJSONData;
     }
   }
 
@@ -428,7 +495,7 @@ test('MVTLayer#triangulation', async t => {
     }
     const geoJsonLayer = layer.internalState.subLayers[0];
     const data = geoJsonLayer.props.data;
-    if (layer.props.binary) {
+    if (layer.state.binary) {
       // Triangulated binary data should be passed
       t.ok(data.polygons.triangles, 'should triangulate');
     } else {
@@ -532,7 +599,13 @@ test('findIndexBinary', t => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[0, 0], [1, 1], [2, 2]]]
+        coordinates: [
+          [
+            [0, 0],
+            [1, 1],
+            [2, 2]
+          ]
+        ]
       },
       properties: {
         numericalId: 100,
@@ -545,7 +618,10 @@ test('findIndexBinary', t => {
       type: 'Feature',
       geometry: {
         type: 'LineString',
-        coordinates: [[0, 0], [1, 1]]
+        coordinates: [
+          [0, 0],
+          [1, 1]
+        ]
       },
       properties: {
         numericalId: 200,
@@ -599,6 +675,56 @@ test('findIndexBinary', t => {
   t.is(findIndexBinary(testData, 'stringId', 'A'), 1, 'Find by string id');
   t.is(findIndexBinary(testData, 'stringId', 'B'), 0, 'Find by string id');
   t.is(findIndexBinary(testData, 'stringId', 'B', 'road'), 2, 'Find by string id with layer name');
+
+  t.end();
+});
+
+test('MVTLayer#GeoJsonLayer.defaultProps', t => {
+  let didDraw = false;
+  class TestMVTLayer extends MVTLayer {
+    initializeState() {}
+
+    renderLayers() {
+      didDraw = true;
+    }
+  }
+
+  const onBeforeUpdate = () => (didDraw = false);
+  const testCases = [
+    {
+      title: 'GeoJsonLayer#shallow update',
+      props: {
+        id: 'testLayer',
+        data: [],
+        getTileData: () => {}, // TileLayer prop
+        getFillColor: () => [128, 0, 0, 255] // GeoJsonLayer prop
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.ok(didDraw, 'should draw layer');
+      }
+    },
+    {
+      updateProps: {
+        getTileData: () => {}
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.notOk(didDraw, 'should not update after shallow TileLayer accessor update');
+      }
+    },
+    {
+      updateProps: {
+        getFillColor: () => [128, 0, 0, 255]
+      },
+      onBeforeUpdate,
+      onAfterUpdate: ({layer, subLayers}) => {
+        t.notOk(didDraw, 'should not update after shallow GeoJsonLayer accessor update');
+      }
+    }
+  ];
+
+  testLayer({Layer: TestMVTLayer, testCases, onError: t.notOk});
 
   t.end();
 });

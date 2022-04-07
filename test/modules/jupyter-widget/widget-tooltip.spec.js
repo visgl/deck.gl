@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 /* global document */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import makeTooltip, {
   getTooltipDefault,
   substituteIn,

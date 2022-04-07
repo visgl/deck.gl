@@ -27,7 +27,8 @@ import FontAtlasManager, {
   DEFAULT_FONT_SIZE,
   DEFAULT_BUFFER,
   DEFAULT_RADIUS,
-  DEFAULT_CUTOFF
+  DEFAULT_CUTOFF,
+  setFontAtlasCacheLimit
 } from './font-atlas-manager';
 import {transformParagraph, getTextFromBuffer} from './utils';
 
@@ -369,9 +370,10 @@ export default class TextLayer extends CompositeLayer {
             }
           }),
           {
-            data: data.attributes
-              ? {length: data.length, attributes: data.attributes.background || {}}
-              : data,
+            data:
+              data.attributes && data.attributes.background
+                ? {length: data.length, attributes: data.attributes.background}
+                : data,
             _dataDiff,
             // Maintain the same background behavior as <=8.3. Remove in v9?
             autoHighlight: false,
@@ -436,6 +438,10 @@ export default class TextLayer extends CompositeLayer {
         }
       )
     ];
+  }
+
+  static set fontAtlasCacheLimit(limit) {
+    setFontAtlasCacheLimit(limit);
   }
 }
 

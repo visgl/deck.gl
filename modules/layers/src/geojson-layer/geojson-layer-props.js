@@ -39,6 +39,10 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
 }
 
 export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
+  // The binary data format is documented here
+  // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
+  // It is the default output from the `MVTLoader` and can also be obtained
+  // from GeoJSON by using the `geojsonToBinary` utility function.
   const layerProps = createEmptyLayerProps();
   const {points, lines, polygons} = geojsonBinary;
 
@@ -47,6 +51,7 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
   layerProps.points.data = {
     length: points.positions.value.length / points.positions.size,
     attributes: {
+      ...points.attributes,
       getPosition: points.positions,
       instancePickingColors: {
         size: 3,
@@ -62,6 +67,7 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
     length: lines.pathIndices.value.length - 1,
     startIndices: lines.pathIndices.value,
     attributes: {
+      ...lines.attributes,
       getPath: lines.positions,
       instancePickingColors: {
         size: 3,
@@ -78,6 +84,7 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
     length: polygons.polygonIndices.value.length - 1,
     startIndices: polygons.polygonIndices.value,
     attributes: {
+      ...polygons.attributes,
       getPolygon: polygons.positions,
       pickingColors: {
         size: 3,
@@ -97,6 +104,7 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
     length: polygons.primitivePolygonIndices.value.length - 1,
     startIndices: polygons.primitivePolygonIndices.value,
     attributes: {
+      ...polygons.attributes,
       getPath: polygons.positions,
       instancePickingColors: {
         size: 3,

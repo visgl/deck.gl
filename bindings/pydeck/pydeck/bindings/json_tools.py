@@ -31,8 +31,8 @@ def to_camel_case(snake_case):
     """
     output_str = ""
     should_upper_case = False
-    for c in snake_case:
-        if c == "_":
+    for i, c in enumerate(snake_case):
+        if c == "_" and i != 0:
             should_upper_case = True
             continue
         output_str = output_str + c.upper() if should_upper_case else output_str + c
@@ -59,7 +59,10 @@ def lower_camel_case_keys(attrs):
     for snake_key in list(attrs.keys()):
         if "_" not in snake_key:
             continue
-        camel_key = camel_and_lower(snake_key)
+        if snake_key == "_data":
+            camel_key = "data"
+        else:
+            camel_key = camel_and_lower(snake_key)
         attrs[camel_key] = attrs.pop(snake_key)
 
 

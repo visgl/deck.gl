@@ -25,7 +25,13 @@ const MAX_RESOLUTION = 100;
 /* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
 /* eslint-disable max-statements */
 function getGeoBounds({face, ij, level}) {
-  const offsets = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
+  const offsets = [
+    [0, 0],
+    [0, 1],
+    [1, 1],
+    [1, 0],
+    [0, 0]
+  ];
 
   // The S2 cell edge is curved: http://s2geometry.io/
   // This is more prominent at lower levels

@@ -202,64 +202,24 @@ export default class AxesLayer extends Layer {
     // offset of each corner
     const gridPositions = [
       // left edge
-      -1,
-      -1,
-      0,
-      -1,
-      1,
-      0,
+      -1, -1, 0, -1, 1, 0,
       // top edge
-      -1,
-      1,
-      0,
-      1,
-      1,
-      0,
+      -1, 1, 0, 1, 1, 0,
       // right edge
-      1,
-      1,
-      0,
-      1,
-      -1,
-      0,
+      1, 1, 0, 1, -1, 0,
       // bottom edge
-      1,
-      -1,
-      0,
-      -1,
-      -1,
-      0
+      1, -1, 0, -1, -1, 0
     ];
     // normal of each edge
     const gridNormals = [
       // left edge
-      -1,
-      0,
-      0,
-      -1,
-      0,
-      0,
+      -1, 0, 0, -1, 0, 0,
       // top edge
-      0,
-      1,
-      0,
-      0,
-      1,
-      0,
+      0, 1, 0, 0, 1, 0,
       // right edge
-      1,
-      0,
-      0,
-      1,
-      0,
-      0,
+      1, 0, 0, 1, 0, 0,
       // bottom edge
-      0,
-      -1,
-      0,
-      0,
-      -1,
-      0
+      0, -1, 0, 0, -1, 0
     ];
 
     const grids = new Model(gl, {

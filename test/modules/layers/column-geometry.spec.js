@@ -1,9 +1,14 @@
-import test from 'tape-catch';
-import {equals} from 'math.gl';
+import test from 'tape-promise/tape';
+import {equals} from '@math.gl/core';
 
 import ColumnGeometry from '@deck.gl/layers/column-layer/column-geometry';
 
-const TEST_VERTICES = [[-1, -1, 0], [-1, 1, 0], [1, 1, 0], [1, -1, 0]];
+const TEST_VERTICES = [
+  [-1, -1, 0],
+  [-1, 1, 0],
+  [1, 1, 0],
+  [1, -1, 0]
+];
 
 test('ColumnGeometry#constructor', t => {
   let geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 6});

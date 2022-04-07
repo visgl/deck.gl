@@ -16,7 +16,7 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
 
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
@@ -56,7 +56,14 @@ const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
 
 const POST_PROCESS = new PostProcessEffect(ink, {strength: 0.5});
 
-const LAND_COVER = [[[-122.3, 37.7], [-122.3, 37.9], [-122.6, 37.9], [-122.6, 37.7]]];
+const LAND_COVER = [
+  [
+    [-122.3, 37.7],
+    [-122.3, 37.9],
+    [-122.6, 37.9],
+    [-122.6, 37.7]
+  ]
+];
 
 // ---- View ---- //
 export default class App extends PureComponent {

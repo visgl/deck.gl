@@ -116,7 +116,7 @@ When a layer extension is used, it injects itself into a layer. This means that 
 
 ##### `getShaders`
 
-Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://luma.gl/docs/api-reference/shadertools/assemble-shaders). See [writing shaders](/docs/developer-guide/custom-layers/writing-shaders.md) for deck.gl-specific modules and hooks.
+Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/visgl/luma.gl/blob/8.5-release/modules/shadertools/docs/api-reference/assemble-shaders.md). See [writing shaders](/docs/developer-guide/custom-layers/writing-shaders.md) for deck.gl-specific modules and hooks.
 
 When this method is executed, `this` points to the layer.
 

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {TextLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -145,6 +145,28 @@ test('TextLayer - binary unicode characters', t => {
     }
   ];
 
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('TextLayer - fontAtlasCacheLimit', t => {
+  TextLayer.fontAtlasCacheLimit = 5;
+
+  const testCases = generateLayerTests({
+    Layer: TextLayer,
+    sampleProps: {
+      data: FIXTURES.points,
+      background: true,
+      getText: d => d.ADDRESS,
+      getPosition: d => d.COORDINATES
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayer}) => {
+      t.ok(subLayer, 'Renders sublayer');
+    }
+  });
   testLayer({Layer: TextLayer, testCases, onError: t.notOk});
 
   t.end();

@@ -6,7 +6,7 @@ import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import DeckGL from '@deck.gl/react';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 import {scaleLinear} from 'd3-scale';
 import {sortData} from './sort-data';
@@ -33,7 +33,11 @@ const yScale = scaleLinear()
 const yTicks = [-60, -30, 0, 30];
 export const colorScale = scaleLinear()
   .domain([-60, -10, 30]) // temperature
-  .range([[80, 160, 225], [0, 80, 80], [255, 80, 80]]);
+  .range([
+    [80, 160, 225],
+    [0, 80, 80],
+    [255, 80, 80]
+  ]);
 
 function getOffset(chartIndex) {
   const y = Math.floor(chartIndex / ROW_SIZE);
@@ -58,18 +62,15 @@ function getTooltip({object}) {
 export default function App({data, groupBy = 'Country'}) {
   const dataSlices = useMemo(() => sortData(data, groupBy), [data, groupBy]);
 
-  const initialViewState = useMemo(
-    () => {
-      const centerX = (Math.min(dataSlices.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
-      const centerY = (Math.ceil(dataSlices.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
-      return {
-        target: [centerX, centerY, 0],
-        zoom: -2,
-        minZoom: -2
-      };
-    },
-    [dataSlices.length]
-  );
+  const initialViewState = useMemo(() => {
+    const centerX = (Math.min(dataSlices.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
+    const centerY = (Math.ceil(dataSlices.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
+    return {
+      target: [centerX, centerY, 0],
+      zoom: -2,
+      minZoom: -2
+    };
+  }, [dataSlices.length]);
 
   const yLabels = useMemo(
     () =>

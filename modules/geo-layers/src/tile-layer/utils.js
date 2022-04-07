@@ -33,13 +33,13 @@ export const urlType = {
 function transformBox(bbox, modelMatrix) {
   const transformedCoords = [
     // top-left
-    modelMatrix.transformPoint([bbox[0], bbox[1]]),
+    modelMatrix.transformAsPoint([bbox[0], bbox[1]]),
     // top-right
-    modelMatrix.transformPoint([bbox[2], bbox[1]]),
+    modelMatrix.transformAsPoint([bbox[2], bbox[1]]),
     // bottom-left
-    modelMatrix.transformPoint([bbox[0], bbox[3]]),
+    modelMatrix.transformAsPoint([bbox[0], bbox[3]]),
     // bottom-right
-    modelMatrix.transformPoint([bbox[2], bbox[3]])
+    modelMatrix.transformAsPoint([bbox[2], bbox[3]])
   ];
   const transformedBox = [
     // Minimum x coord
@@ -65,10 +65,10 @@ export function getURLFromTemplate(template, properties) {
 
   const {x, y, z} = properties;
   return template
-    .replace('{x}', x)
-    .replace('{y}', y)
-    .replace('{z}', z)
-    .replace('{-y}', Math.pow(2, z) - y - 1);
+    .replace(/\{x\}/g, x)
+    .replace(/\{y\}/g, y)
+    .replace(/\{z\}/g, z)
+    .replace(/\{-y\}/g, Math.pow(2, z) - y - 1);
 }
 
 /**

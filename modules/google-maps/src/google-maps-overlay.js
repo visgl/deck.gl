@@ -86,8 +86,8 @@ export default class GoogleMapsOverlay {
     if (renderingType === UNINITIALIZED) {
       return;
     }
-    const isVectorMap = renderingType === VECTOR && google.maps.WebglOverlayView;
-    const OverlayView = isVectorMap ? google.maps.WebglOverlayView : google.maps.OverlayView;
+    const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
+    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
     const overlay = new OverlayView();
 
     // Lifecycle methods are different depending on map type
@@ -110,7 +110,7 @@ export default class GoogleMapsOverlay {
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
-  _onContextRestored(gl) {
+  _onContextRestored({gl}) {
     const _customRender = () => {
       this._overlay.requestRedraw();
     };
@@ -148,34 +148,32 @@ export default class GoogleMapsOverlay {
 
   _onDrawRaster() {
     const deck = this._deck;
-    const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewPropsFromOverlay(
-      this._map,
-      this._overlay
-    );
-
-    const canSyncWithGoogleMaps = pitch === 0;
+    const {width, height, left, top, ...rest} = getViewPropsFromOverlay(this._map, this._overlay);
 
     const parentStyle = deck.canvas.parentElement.style;
     parentStyle.left = `${left}px`;
     parentStyle.top = `${top}px`;
 
+    const altitude = 10000;
     deck.setProps({
       width,
       height,
-      viewState: {latitude, longitude, zoom, repeat: true},
-      // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
-      layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
+      viewState: {altitude, repeat: true, ...rest}
     });
     // Deck is initialized
     deck.redraw();
   }
 
   // Vector code path
-  _onDrawVector(gl, coordinateTransformer) {
+  _onDrawVector({gl, transformer}) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
     const deck = this._deck;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, coordinateTransformer)
+      ...getViewPropsFromCoordinateTransformer(this._map, transformer)
     });
 
     if (deck.layerManager) {

@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
-
-const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+const {getOcularConfig} = require('ocular-dev-tools');
+const ALIASES = getOcularConfig({
   aliasMode: 'src',
   root: resolve(__dirname, '..')
 }).aliases;
@@ -51,20 +51,24 @@ const config = {
   },
 
   resolve: {
-    alias: ALIASES
+    alias: ALIASES,
+    extensions: ['.ts', '.tsx', '.js', '.json']
   },
 
   module: {
     rules: [
       {
         // Compile ES2015 using babel
-        test: /\.js$/,
+        test: /(\.js|\.ts|\.tsx)$/,
         loader: 'babel-loader',
         include: [/src/, /bundle/, /esm/],
         options: {
-          presets: [['@babel/preset-env', {
-            targets: ["supports webgl", "not dead"]
-          }]],
+          presets: [
+            '@babel/preset-typescript',
+            ['@babel/preset-env', {
+              targets: ["supports webgl", "not dead"]
+            }]
+          ],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
           // across the compiled output.
           plugins: [
@@ -104,8 +108,24 @@ module.exports = (env = {}) => {
     config.mode = 'development';
     // Remove .min from the name
     config.output.filename = 'dist/dist.dev.js';
-    // Disable transpilation
-    config.module.rules = [];
+    // Use light transpilation
+    config.module.rules = [
+      {
+        test: /(\.js|\.ts|\.tsx)$/,
+        loader: 'babel-loader',
+        include: [/src/, /bundle/],
+        options: {
+          presets: [
+            '@babel/preset-typescript'
+          ],
+          // TODO - Webpack 4 does not support class properties. Upgrade Webpack and remove
+          plugins: [
+            '@babel/proposal-class-properties'
+          ]
+        }
+      }
+    ];
+
   }
 
   // NOTE uncomment to display config

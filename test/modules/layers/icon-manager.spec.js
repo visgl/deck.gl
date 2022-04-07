@@ -81,7 +81,7 @@ test('IconManager#buildMapping', t => {
    *   |                     |                       |
    *   |                     |                       |
    *   +---------------------+-----------------------+
-  */
+   */
 
   const results = buildMapping({
     icons: DATA.map(d => d.icon),

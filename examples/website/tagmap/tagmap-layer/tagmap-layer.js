@@ -102,10 +102,22 @@ export default class TagmapLayer extends CompositeLayer {
       ];
 
       bbox = {
-        minX: Math.min.apply(null, corners.map(p => p[0])),
-        minY: Math.min.apply(null, corners.map(p => p[1])),
-        maxX: Math.max.apply(null, corners.map(p => p[0])),
-        maxY: Math.max.apply(null, corners.map(p => p[1]))
+        minX: Math.min.apply(
+          null,
+          corners.map(p => p[0])
+        ),
+        minY: Math.min.apply(
+          null,
+          corners.map(p => p[1])
+        ),
+        maxX: Math.max.apply(
+          null,
+          corners.map(p => p[0])
+        ),
+        maxY: Math.max.apply(
+          null,
+          corners.map(p => p[1])
+        )
       };
     }
 

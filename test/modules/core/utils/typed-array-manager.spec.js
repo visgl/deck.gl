@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {TypedArrayManager} from '@deck.gl/core/utils/typed-array-manager';
 
 test('TypedArrayManager#allocate', t => {
@@ -80,11 +80,19 @@ test('TypedArrayManager#release', t => {
   const pool = typedArrayManager._pool;
 
   t.is(pool.length, 2, 'Has correct pool size');
-  t.deepEqual(pool.map(buffer => buffer.byteLength), [24, 36], 'Has correct buffers in pool');
+  t.deepEqual(
+    pool.map(buffer => buffer.byteLength),
+    [24, 36],
+    'Has correct buffers in pool'
+  );
 
   typedArrayManager.allocate(null, 8, {size: 4, type: Uint8ClampedArray});
   t.is(pool.length, 1, 'Reused released arraybuffer');
-  t.deepEqual(pool.map(buffer => buffer.byteLength), [24], 'Has correct buffers in pool');
+  t.deepEqual(
+    pool.map(buffer => buffer.byteLength),
+    [24],
+    'Has correct buffers in pool'
+  );
 
   t.end();
 });

@@ -29,7 +29,7 @@ import {
 } from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {equals, Matrix4} from 'math.gl';
+import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/core';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
@@ -62,7 +62,14 @@ const LAYER_CONSTRUCT_TEST_CASES = [
   },
   {
     title: 'With data map',
-    props: {id: 'testLayer', data: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']])}
+    props: {
+      id: 'testLayer',
+      data: new Map([
+        ['a', 'a'],
+        ['b', 'b'],
+        ['c', 'c']
+      ])
+    }
   }
 ];
 
@@ -303,11 +310,10 @@ test('Layer#project', t => {
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
   t.ok(
-    equals(layer.project([100, 100, 100]), [
-      215.9196278025254,
-      134.08037212692722,
-      0.9981698636873962
-    ]),
+    equals(
+      layer.project([100, 100, 100]),
+      [215.9196278025254, 134.08037212692722, 0.9981698636873962]
+    ),
     'returns correct value'
   );
 
@@ -323,11 +329,10 @@ test('Layer#project', t => {
   });
 
   t.ok(
-    equals(layer.project([100, 100, 100]), [
-      77.35308047269142,
-      60.21622351419864,
-      0.8327158213685135
-    ]),
+    equals(
+      layer.project([100, 100, 100]),
+      [77.35308047269142, 60.21622351419864, 0.8327158213685135]
+    ),
     'returns correct value'
   );
 

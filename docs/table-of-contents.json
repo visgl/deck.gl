@@ -17,11 +17,7 @@
       "entries": [
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
-        {"entry": "docs/get-started/using-with-react"},
-        {"entry": "docs/get-started/using-with-google-maps"},
-        {"entry": "docs/get-started/using-with-mapbox"},
-        {"entry": "docs/get-started/using-with-arcgis"},
-        {"entry": "docs/get-started/using-with-other-maps"},
+        {"entry": "docs/get-started/using-with-react"},        
         {"entry": "docs/get-started/learning-resources"}
       ]
     },
@@ -58,6 +54,15 @@
             {"entry": "docs/developer-guide/custom-layers/prop-types"},
             {"entry": "docs/developer-guide/custom-layers/attribute-management"},
             {"entry": "docs/developer-guide/custom-layers/writing-shaders"}
+          ]
+        },
+        {
+          "title": "Using with Supported Base Maps",
+          "entries": [
+            {"entry": "docs/developer-guide/base-maps/using-with-arcgis"},
+            {"entry": "docs/developer-guide/base-maps/using-with-google-maps"},
+            {"entry": "docs/developer-guide/base-maps/using-with-mapbox"},
+            {"entry": "docs/developer-guide/base-maps/using-with-other-maps"}
           ]
         }
       ]
@@ -98,6 +103,7 @@
             {"entry": "docs/api-reference/layers/path-layer"},
             {"entry": "docs/api-reference/layers/point-cloud-layer"},
             {"entry": "docs/api-reference/layers/polygon-layer"},
+            {"entry": "docs/api-reference/geo-layers/quadkey-layer"},
             {"entry": "docs/api-reference/geo-layers/s2-layer"},
             {"entry": "docs/api-reference/layers/scatterplot-layer"},
             {"entry": "docs/api-reference/mesh-layers/scenegraph-layer"},
@@ -198,9 +204,8 @@
           "title": "@deck.gl/carto",
           "entries": [
             {"entry": "docs/api-reference/carto/overview"},
+            {"entry": "docs/api-reference/carto/fetch-map"},
             {"entry": "docs/api-reference/carto/carto-layer"},
-            {"entry": "docs/api-reference/carto/carto-sql-layer"},
-            {"entry": "docs/api-reference/carto/carto-bqtiler-layer"},
             {"entry": "docs/api-reference/carto/basemap"},
             {"entry": "docs/api-reference/carto/styles"}
           ]
@@ -217,9 +222,11 @@
           "entries": [
             {"entry": "docs/api-reference/extensions/overview"},
             {"entry": "docs/api-reference/extensions/brushing-extension"},
+            {"entry": "docs/api-reference/extensions/clip-extension"},
             {"entry": "docs/api-reference/extensions/data-filter-extension"},
             {"entry": "docs/api-reference/extensions/fill-style-extension"},
             {"entry": "docs/api-reference/extensions/fp64-extension"},
+            {"entry": "docs/api-reference/extensions/mask-extension"},
             {"entry": "docs/api-reference/extensions/path-style-extension"}
           ]
         },

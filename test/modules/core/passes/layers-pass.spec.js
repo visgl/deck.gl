@@ -1,9 +1,10 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {gl} from '@deck.gl/test-utils';
+import {Framebuffer, getParameters} from '@luma.gl/core';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -18,14 +19,13 @@ class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
     const {subLayers} = this.props;
 
-    return subLayers.map(
-      props =>
-        props.children
-          ? new TestCompositeLayer(
-              this.getSubLayerProps({id: props.id, subLayers: props.children}),
-              props
-            )
-          : new TestLayer(this.getSubLayerProps({id: props.id}), props)
+    return subLayers.map(props =>
+      props.children
+        ? new TestCompositeLayer(
+            this.getSubLayerProps({id: props.id, subLayers: props.children}),
+            props
+          )
+        : new TestLayer(this.getSubLayerProps({id: props.id}), props)
     );
   }
 }
@@ -207,7 +207,10 @@ test('LayersPass#shouldDrawLayer', t => {
       subLayers: [
         {
           id: 'test-sub-1',
-          children: [{id: 'test-sub-1A', viewportId: 'A'}, {id: 'test-sub-1B', viewportId: 'B'}]
+          children: [
+            {id: 'test-sub-1A', viewportId: 'A'},
+            {id: 'test-sub-1B', viewportId: 'B'}
+          ]
         },
         {
           id: 'test-sub-2'
@@ -255,6 +258,90 @@ test('LayersPass#shouldDrawLayer', t => {
   })[0];
   t.ok(renderStats.totalCount === 7 && renderStats.compositeCount === 2, 'Total # of layers');
   t.is(renderStats.visibleCount, 1, '# of rendered layers'); // test-primitive-visible
+
+  t.end();
+});
+
+test('LayersPass#GLViewport', t => {
+  const layers = [
+    new TestLayer({
+      id: 'test'
+    })
+  ];
+
+  const layerManager = new LayerManager(gl, {});
+  const layersPass = new DrawLayersPass(gl);
+  const framebuffer = new Framebuffer(gl, {width: 100, height: 100});
+  layerManager.setLayers(layers);
+
+  const testCases = [
+    {
+      name: 'default framebuffer',
+      viewport: {},
+      expectedGLViewport: [0, 0, 1, 1]
+    },
+    {
+      name: 'default framebuffer offset',
+      viewport: {
+        x: 0.5,
+        y: 0.3
+      },
+      expectedGLViewport: [0.5, -0.30000000000000004, 1, 1]
+    },
+    {
+      name: 'external framebuffer',
+      target: framebuffer,
+      viewport: {},
+      expectedGLViewport: [0, 99, 1, 1]
+    },
+    {
+      name: 'external framebuffer pixel ratio 2',
+      target: framebuffer,
+      viewport: {},
+      moduleParameters: {
+        devicePixelRatio: 2
+      },
+      expectedGLViewport: [0, 98, 2, 2]
+    },
+    {
+      name: 'external framebuffer fill viewport',
+      target: framebuffer,
+      viewport: {x: 0, y: 0, width: 100, height: 100},
+      expectedGLViewport: [0, 0, 100, 100]
+    },
+    {
+      name: 'external framebuffer offset',
+      target: framebuffer,
+      viewport: {x: 5, y: 10, width: 30, height: 30},
+      expectedGLViewport: [5, 60, 30, 30]
+    },
+    {
+      name: 'external framebuffer offset pixel ratio 2',
+      target: framebuffer,
+      viewport: {x: 5, y: 10, width: 30, height: 30},
+      moduleParameters: {
+        devicePixelRatio: 2
+      },
+      expectedGLViewport: [10, 20, 60, 60]
+    }
+  ];
+
+  for (const {name, target, viewport, moduleParameters, expectedGLViewport} of testCases) {
+    layersPass.render({
+      target,
+      viewports: [new Viewport({id: 'A', ...viewport})],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      moduleParameters,
+      onError: t.notOk
+    });
+
+    t.deepEqual(
+      getParameters(gl, gl.VIEWPORT),
+      expectedGLViewport,
+      `${name} sets viewport correctly`
+    );
+  }
 
   t.end();
 });

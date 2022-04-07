@@ -1,5 +1,5 @@
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 export const sampleViewport = new WebMercatorViewport({
   width: 1024,
@@ -11,7 +11,4 @@ export const sampleViewport = new WebMercatorViewport({
   bearing: 0
 });
 
-export const sampleModelMatrix = new Matrix4()
-  .rotateX(0.1)
-  .rotateY(-0.2)
-  .translate([1, 1, 0]);
+export const sampleModelMatrix = new Matrix4().rotateX(0.1).rotateY(-0.2).translate([1, 1, 0]);

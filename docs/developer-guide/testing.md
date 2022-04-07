@@ -14,7 +14,7 @@ Lifecycle test functions are designed to allow for integration with different un
 Using [testLayer](/docs/api-reference/test-utils/test-layer.md) util to instantiate a layer and test a series of prop updates:
 
 ```js
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
@@ -54,7 +54,7 @@ test('GeoJsonLayer#tests', t => {
 The [generateLayerTests](/docs/api-reference/test-utils/generate-layer-tests.md) utility automatically generates a series of test cases for `testLayers` based on the layer class' default props. It is useful for checking the conformance of a layer class:
 
 ```js
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 

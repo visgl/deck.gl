@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {Controller} from '@deck.gl/core';
 import ViewState from '@deck.gl/core/controllers/view-state';
 
@@ -22,7 +22,8 @@ class MockEventManager {
 
 class TestController extends Controller {
   constructor(props) {
-    super(ViewState, props);
+    super(props);
+    this.ControllerState = ViewState;
     this.events = ['press', 'wheel'];
   }
 }
@@ -31,7 +32,9 @@ test('Custom Controller', t => {
   const eventManager = new MockEventManager();
 
   const controller = new TestController({
-    eventManager,
+    eventManager
+  });
+  controller.setProps({
     scrollZoom: false
   });
 

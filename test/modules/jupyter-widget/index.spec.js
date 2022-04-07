@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {JupyterTransportModel} from '@deck.gl/jupyter-widget';
 import {createTestModel} from './mock-widget-base';

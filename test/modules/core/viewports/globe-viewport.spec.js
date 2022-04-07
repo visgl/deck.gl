@@ -1,6 +1,6 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
-import {equals, config} from 'math.gl';
+import {equals, config} from '@math.gl/core';
 
 const TEST_VIEWPORTS = [
   {
@@ -40,12 +40,8 @@ test('GlobeViewport#distanceScale', t => {
   for (const testCase of TEST_VIEWPORTS) {
     const viewport = new GlobeViewport(testCase);
 
-    const {
-      unitsPerMeter,
-      metersPerUnit,
-      unitsPerDegree,
-      degreesPerUnit
-    } = viewport.getDistanceScales();
+    const {unitsPerMeter, metersPerUnit, unitsPerDegree, degreesPerUnit} =
+      viewport.getDistanceScales();
     t.ok(
       equals(
         [

@@ -7,7 +7,7 @@ This utility generates a series of test cases to be used with [testLayer](/docs/
 Example of layer unit tests using `tape`. The test utility itself is test framework agnostic.
 
 ```js
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 

@@ -93,10 +93,7 @@ export default class DeckPicker {
       layer
     };
 
-    if (layer) {
-      return {...lastPickedInfo, ...info};
-    }
-    return Object.assign(info, {color: null, object: null, index: -1});
+    return {...lastPickedInfo, ...info};
   }
 
   // Private
@@ -145,7 +142,8 @@ export default class DeckPicker {
     depth = 1,
     mode = 'query',
     unproject3D,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -180,7 +178,7 @@ export default class DeckPicker {
 
     let infos;
     const result = [];
-    const affectedLayers = {};
+    const affectedLayers = new Set();
 
     for (let i = 0; i < depth; i++) {
       const pickedResult =
@@ -191,6 +189,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          effects,
           pass: `picking:${mode}`,
           redrawReason: mode
         });
@@ -211,24 +210,22 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          effects,
           pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
         });
         // picked value is in common space (pixels) from the camera target (viewport.position)
         // convert it to meters from the ground
-        z =
-          pickedResultPass2.pickedColors[0] * viewports[0].distanceScales.metersPerUnit[2] +
-          viewports[0].position[2];
+        z = pickedResultPass2.pickedColors[0];
       }
 
       // Only exclude if we need to run picking again.
       // We need to run picking again if an object is detected AND
       // we have not exhausted the requested depth.
-      if (pickInfo.pickedColor && i + 1 < depth) {
-        const layerId = pickInfo.pickedColor[3] - 1;
-        affectedLayers[layerId] = true;
-        layers[layerId].disablePickingIndex(pickInfo.pickedObjectIndex);
+      if (pickInfo.pickedLayer && i + 1 < depth) {
+        affectedLayers.add(pickInfo.pickedLayer);
+        pickInfo.pickedLayer.disablePickingIndex(pickInfo.pickedObjectIndex);
       }
 
       // This logic needs to run even if no object is picked.
@@ -257,8 +254,8 @@ export default class DeckPicker {
     }
 
     // reset only affected buffers
-    for (const layerId in affectedLayers) {
-      layers[layerId].restorePickingColors();
+    for (const layer of affectedLayers) {
+      layer.restorePickingColors();
     }
 
     return {result, emptyInfo: infos && infos.get(null)};
@@ -275,7 +272,8 @@ export default class DeckPicker {
     height = 1,
     mode = 'query',
     maxObjects = null,
-    onViewportActive
+    onViewportActive,
+    effects
   }) {
     layers = this._getPickable(layers);
 
@@ -312,6 +310,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      effects,
       pass: `picking:${mode}`,
       redrawReason: mode
     });
@@ -356,6 +355,7 @@ export default class DeckPicker {
     viewports,
     onViewportActive,
     deviceRect,
+    effects,
     pass,
     redrawReason,
     pickZ
@@ -370,6 +370,7 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      effects,
       pass,
       redrawReason,
       pickZ

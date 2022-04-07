@@ -70,10 +70,10 @@ The keys in `data.attributes` correspond to the [accessor](/docs/developer-guide
 
 Each value in `data.attributes` may be one of the following formats:
 
-- luma.gl [Buffer](https://luma.gl/docs/api-reference/webgl/buffer) instance
+- luma.gl [Buffer](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/buffer.md) instance
 - A typed array, which will be used to create a `Buffer`
 - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
-  + `buffer` ([Buffer](https://luma.gl/docs/api-reference/webgl/buffer))
+  + `buffer` ([Buffer](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/buffer.md))
   + `value` (TypedArray)
   + `type` (GLenum) - A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#Parameters).
   + `size` (Number) - the number of elements per vertex attribute.
@@ -212,11 +212,13 @@ RGBA color to blend with the highlighted object (either the hovered over object 
 - If an array is supplied, it is used for the object that is currently highlighted.
 - If a function is supplied, it is called with a [pickingInfo](/docs/developer-guide/interactivity.md#the-picking-info-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
 
-##### `highlightedObjectIndex` (Integer, optional)
+##### `highlightedObjectIndex` (Number|null, optional)
 
-* Default: `-1`
+* Default: `null`
 
-When provided a valid value corresponding object (one instance in instanced rendering or group of primitives with same picking color) will be highlighted with `highlightColor`.
+The index of the object in `data` to highlight. If specified, overrides the effect of `autoHighlight`.
+
+When set to an integer that corresponds to an object, the object will be highlighted with `highlightColor`. When set to an integer that does not correspond to an object (e.g. `-1`), nothing is highlighted.
 
 ##### `autoHighlight` (Boolean, optional)
 
@@ -470,7 +472,7 @@ The function receives two arguments:
 
 The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
 
-To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](https://luma.gl/docs/api-reference/gltools/parameter-setting) API for documentation on supported parameters and values.
+To get access to static parameter values, applications can `import GL from 'luma.gl'`. Please refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
 
 
 ##### `getPolygonOffset` (Function, optional)
@@ -752,6 +754,13 @@ Projects a map coordinate to world coordinate using the current viewport setting
 Parameters:
 
 * `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
+* `params` (Object, optional) - Projection parameters override. It accepts the following fields:
+  - `viewport` (Viewport) - defaults to `this.context.viewport`.
+  - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.
+  - `coordinateOrigin` ([Number, Number, Number]) - defaults to `this.props.coordinateOrigin`.
+  - `coordinateSystem` (Number) - defaults to `this.props.coordinateSystem`.
+  - `fromCoordinateOrigin` ([Number, Number, Number]) - defaults to passed `coordinateOrigin`.
+  - `fromCoordinateSystem` (Number) - defaults to passed `coordinateSystem`.
 
 Returns:
 

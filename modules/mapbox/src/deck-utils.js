@@ -1,4 +1,4 @@
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport, MapView} from '@deck.gl/core';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
@@ -22,20 +22,22 @@ export function getDeckInstance({map, gl, deck}) {
     parameters: {
       depthMask: true,
       depthTest: true,
+      blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: gl.LEQUAL,
       blendEquation: gl.FUNC_ADD
     },
     userData: {
       isExternal: false,
       mapboxLayers: new Set()
-    }
+    },
+    views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };
 
-  if (deck) {
-    deck.setProps(deckProps);
-    deck.props.userData.isExternal = true;
-  } else {
-    // Using external gl context - do not set css size
+  if (!deck || deck.props.gl === gl) {
+    // deck is using the WebGLContext created by mapbox
+    // block deck from setting the canvas size
     Object.assign(deckProps, {
       gl,
       width: false,
@@ -43,17 +45,22 @@ export function getDeckInstance({map, gl, deck}) {
       touchAction: 'unset',
       viewState: getViewState(map)
     });
-    deck = new Deck(deckProps);
-
-    // If deck is externally provided (React use case), we use deck's viewState to
-    // drive the map.
+    // If using the WebGLContext created by deck (React use case), we use deck's viewState to drive the map.
     // Otherwise (pure JS use case), we use the map's viewState to drive deck.
     map.on('move', () => onMapMove(deck, map));
+  }
+
+  if (deck) {
+    deck.setProps(deckProps);
+    deck.props.userData.isExternal = true;
+  } else {
+    deck = new Deck(deckProps);
     map.on('remove', () => {
       deck.finalize();
       map.__deck = null;
     });
   }
+
   deck.props.userData.mapboxVersion = getMapboxVersion(map);
   map.__deck = deck;
   map.on('render', () => {
@@ -88,6 +95,7 @@ export function drawLayer(deck, map, layer) {
   if (!deck.layerManager) {
     return;
   }
+
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
@@ -95,14 +103,15 @@ export function drawLayer(deck, map, layer) {
   });
 }
 
-function getViewState(map) {
+export function getViewState(map) {
   const {lng, lat} = map.getCenter();
   return {
     longitude: lng,
     latitude: lat,
     zoom: map.getZoom(),
     bearing: map.getBearing(),
-    pitch: map.getPitch()
+    pitch: map.getPitch(),
+    repeat: map.getRenderWorldCopies()
   };
 }
 
@@ -111,10 +120,7 @@ function getMapboxVersion(map) {
   let major = 0;
   let minor = 0;
   if (map.version) {
-    [major, minor] = map.version
-      .split('.')
-      .slice(0, 2)
-      .map(Number);
+    [major, minor] = map.version.split('.').slice(0, 2).map(Number);
   }
   return {major, minor};
 }
@@ -125,11 +131,11 @@ function getViewport(deck, map, useMapboxProjection = true) {
   return new WebMercatorViewport(
     Object.assign(
       {
+        id: 'mapbox',
         x: 0,
         y: 0,
         width: deck.width,
-        height: deck.height,
-        repeat: true
+        height: deck.height
       },
       getViewState(map),
       useMapboxProjection
@@ -157,10 +163,21 @@ function afterRender(deck, map) {
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     const hasNonMapboxLayers = deck.props.layers.some(layer => !mapboxLayerIds.includes(layer.id));
-    if (hasNonMapboxLayers) {
+    let viewports = deck.getViewports();
+    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
+    const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
+
+    if (hasNonMapboxLayers || hasNonMapboxViews) {
+      if (mapboxViewportIdx >= 0) {
+        viewports = viewports.slice();
+        viewports[mapboxViewportIdx] = getViewport(deck, map, false);
+      }
+
       deck._drawLayers('mapbox-repaint', {
-        viewports: [getViewport(deck, map, false)],
-        layerFilter: ({layer}) => !mapboxLayerIds.includes(layer.id),
+        viewports,
+        layerFilter: params =>
+          (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+          (params.viewport.id !== 'mapbox' || !mapboxLayerIds.includes(params.layer.id)),
         clearCanvas: false
       });
     }
@@ -186,9 +203,10 @@ function updateLayers(deck) {
   }
 
   const layers = [];
+  let layerIndex = 0;
   deck.props.userData.mapboxLayers.forEach(deckLayer => {
     const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props);
+    const layer = new LayerType(deckLayer.props, {_offset: layerIndex++});
     layers.push(layer);
   });
   deck.setProps({layers});

@@ -1,5 +1,5 @@
 /* global document */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import Tooltip from '@deck.gl/core/lib/tooltip';
 

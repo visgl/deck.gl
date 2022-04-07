@@ -86,7 +86,7 @@ Text size multiplier.
 
 * Default: `pixels`
 
-The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-system.md#supported-units).
+The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
 
 ##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -463,6 +463,22 @@ The TextLayer has full support for Unicode characters. To reference a Unicode ch
 
 At the moment this layer doesn't render multi-color emojis.
 
+### Font Atlas Cache Limit
+
+To conserve memory, DeckGL caches the most 3 used `fontAtlas` by default. Creating a `fontAtlas` is a CPU intesive operation specially if `fontSettings.sdf` is set to `true`. 
+If you are using much more than 3 fonts, you might experience perforamnce hits because DeckGL constantly tries to evict the least most used `fontAtlas` from cache and recreate them when needed.
+
+To mitigate the potential performance degradation, you can override the `fontAtlas` default cache limit by setting `TextLayer.fontAtlasCacheLimit` value:
+
+```js
+import {TextLayer} from '@deck.gl/layers';
+
+TextLayer.fontAtlasCacheLimit = 10;
+
+// ... rest of the application
+```
+
+It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtals`.
 
 ## Source
 

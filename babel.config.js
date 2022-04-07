@@ -1,15 +1,21 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const getBabelConfig = require('ocular-dev-tools/config/babel.config');
+const {getBabelConfig, deepMerge} = require('ocular-dev-tools');
 
 module.exports = api => {
-  const config = getBabelConfig(api);
+  let config = getBabelConfig(api, {react: true});
 
-  config.plugins.push('version-inline', 'inline-webgl-constants', [
-    'remove-glsl-comments',
-    {
-      patterns: ['**/*.glsl.js']
-    }
-  ]);
+  config = deepMerge(config, {
+    plugins: [
+      'version-inline',
+      'inline-webgl-constants',
+      [
+        'remove-glsl-comments',
+        {
+          patterns: ['**/*.glsl.js']
+        }
+      ]
+    ]
+  });
 
   return config;
 };

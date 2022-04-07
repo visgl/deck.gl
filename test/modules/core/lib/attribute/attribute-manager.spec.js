@@ -21,7 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import GL from '@luma.gl/constants';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 
 function update(attribute, {data}) {
@@ -34,14 +34,6 @@ function update(attribute, {data}) {
     i += size;
   }
 }
-
-function enable() {
-  return this.enabled; // eslint-disable-line
-}
-
-const fixture = {
-  positions: new Float32Array([0, 1, 0, -1, -1, 0, 1, -1, 0])
-};
 
 test('AttributeManager imports', t => {
   t.equals(typeof AttributeManager, 'function', 'AttributeManager import successful');
@@ -83,11 +75,6 @@ test('AttributeManager.add', t => {
     attributeManager.getAttributes()['positions'].settings.divisor,
     0,
     'AttributeManager.add creates attribute with default divisor of 0'
-  );
-  t.equals(
-    attributeManager.getAttributes()['positions'].settings.isIndexed,
-    false,
-    'AttributeManager.add creates attribute with default isIndexed of false'
   );
   t.end();
 });

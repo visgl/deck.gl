@@ -6,7 +6,7 @@ import DeckGL, {OrthographicView, COORDINATE_SYSTEM} from 'deck.gl';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
-import {clamp} from 'math.gl';
+import {clamp} from '@math.gl/core';
 
 const INITIAL_VIEW_STATE = {
   target: [13000, 13000, 0],

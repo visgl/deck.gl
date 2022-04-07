@@ -1,10 +1,11 @@
 import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
-const TILE_STATE_UNKNOWN = 0;
-const TILE_STATE_VISIBLE = 1;
+// bit masks
+const TILE_STATE_VISITED = 1;
+const TILE_STATE_VISIBLE = 2;
 /*
    show cached parent tile if children are loading
    +-----------+       +-----+            +-----+-----+
@@ -23,16 +24,18 @@ const TILE_STATE_VISIBLE = 1;
    +-------+----  -->  |
    |       |           |
  */
-const TILE_STATE_PLACEHOLDER = 3;
-const TILE_STATE_HIDDEN = 4;
-// tiles that should be displayed in the current viewport
-const TILE_STATE_SELECTED = 5;
 
 export const STRATEGY_NEVER = 'never';
 export const STRATEGY_REPLACE = 'no-overlap';
 export const STRATEGY_DEFAULT = 'best-available';
 
 const DEFAULT_CACHE_SCALE = 5;
+
+const STRATEGIES = {
+  [STRATEGY_DEFAULT]: updateTileStateDefault,
+  [STRATEGY_REPLACE]: updateTileStateReplace,
+  [STRATEGY_NEVER]: () => {}
+};
 
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
@@ -71,6 +74,9 @@ export default class Tileset2D {
     this._selectedTiles = null;
     this._frameNumber = 0;
 
+    this._modelMatrix = new Matrix4();
+    this._modelMatrixInverse = new Matrix4();
+
     this.setOptions(opts);
   }
 
@@ -85,6 +91,10 @@ export default class Tileset2D {
 
   get isLoaded() {
     return this._selectedTiles.every(tile => tile.isLoaded);
+  }
+
+  get needsReload() {
+    return this._selectedTiles.some(tile => tile.needsReload);
   }
 
   setOptions(opts) {
@@ -131,8 +141,8 @@ export default class Tileset2D {
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (!viewport.equals(this._viewport) || isModelMatrixNew) {
       if (isModelMatrixNew) {
-        this._modelMatrixInverse = modelMatrix && modelMatrixAsMatrix4.clone().invert();
-        this._modelMatrix = modelMatrix && modelMatrixAsMatrix4;
+        this._modelMatrixInverse = modelMatrixAsMatrix4.clone().invert();
+        this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
       const tileIndices = this.getTileIndices({
@@ -149,10 +159,16 @@ export default class Tileset2D {
         // Some new tiles are added
         this._rebuildTree();
       }
+      // Check for needed reloads explicitly even if the view/matrix has not changed.
+    } else if (this.needsReload) {
+      this._selectedTiles = this._selectedTiles.map(tile =>
+        this._getTile({x: tile.x, y: tile.y, z: tile.z})
+      );
     }
 
     // Update tile states
     const changed = this.updateTileStates();
+    this._pruneRequests();
 
     if (this._dirty) {
       // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
@@ -201,45 +217,62 @@ export default class Tileset2D {
 
   // Returns true if any tile's visibility changed
   updateTileStates() {
-    this._updateTileStates(this.selectedTiles);
+    const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
 
+    const visibilities = new Array(this._cache.size);
+    let i = 0;
+    // Reset state
+    for (const tile of this._cache.values()) {
+      // save previous state
+      visibilities[i++] = tile.isVisible;
+      tile.isSelected = false;
+      tile.isVisible = false;
+    }
+    for (const tile of this._selectedTiles) {
+      tile.isSelected = true;
+      tile.isVisible = true;
+    }
+
+    // Strategy-specific state logic
+    (typeof refinementStrategy === 'function'
+      ? refinementStrategy
+      : STRATEGIES[refinementStrategy])(Array.from(this._cache.values()));
+
+    i = 0;
+    // Check if any visibility has changed
+    for (const tile of this._cache.values()) {
+      if (visibilities[i++] !== tile.isVisible) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /* Private methods */
+
+  _pruneRequests() {
     const {maxRequests} = this.opts;
 
     const abortCandidates = [];
     let ongoingRequestCount = 0;
-    let changed = false;
     for (const tile of this._cache.values()) {
-      const isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
-      if (tile.isVisible !== isVisible) {
-        changed = true;
-        tile.isVisible = isVisible;
-      }
-
-      // isSelected used in request scheduler
-      tile.isSelected = tile.state === TILE_STATE_SELECTED;
-
       // Keep track of all the ongoing requests
       if (tile.isLoading) {
         ongoingRequestCount++;
-        if (!tile.isSelected) {
+        if (!tile.isSelected && !tile.isVisible) {
           abortCandidates.push(tile);
         }
       }
     }
 
-    if (maxRequests > 0) {
-      while (ongoingRequestCount > maxRequests && abortCandidates.length > 0) {
-        // There are too many ongoing requests, so abort some that are unselected
-        const tile = abortCandidates.shift();
-        tile.abort();
-        ongoingRequestCount--;
-      }
+    while (maxRequests > 0 && ongoingRequestCount > maxRequests && abortCandidates.length > 0) {
+      // There are too many ongoing requests, so abort some that are unselected
+      const tile = abortCandidates.shift();
+      tile.abort();
+      ongoingRequestCount--;
     }
-
-    return changed;
   }
-
-  /* Private methods */
 
   // This needs to be called every time some tiles have been added/removed from cache
   _rebuildTree() {
@@ -257,40 +290,6 @@ export default class Tileset2D {
       tile.parent = parent;
       if (parent) {
         parent.children.push(tile);
-      }
-    }
-  }
-
-  // A selected tile is always visible.
-  // Never show two overlapping tiles.
-  // If a selected tile is loading, try showing a cached ancester with the closest z
-  // If a selected tile is loading, and no ancester is shown - try showing cached
-  // descendants with the closest z
-  _updateTileStates(selectedTiles) {
-    const {_cache} = this;
-    const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
-
-    // Reset states
-    for (const tile of _cache.values()) {
-      tile.state = TILE_STATE_UNKNOWN;
-    }
-
-    // For all the selected && pending tiles:
-    // - pick the closest ancestor as placeholder
-    // - if no ancestor is visible, pick the closest children as placeholder
-    for (const tile of selectedTiles) {
-      tile.state = TILE_STATE_SELECTED;
-    }
-
-    if (refinementStrategy === STRATEGY_NEVER) {
-      return;
-    }
-    for (const tile of selectedTiles) {
-      getPlaceholderInAncestors(tile, refinementStrategy);
-    }
-    for (const tile of selectedTiles) {
-      if (needsPlaceholder(tile)) {
-        getPlaceholderInChildren(tile);
       }
     }
   }
@@ -375,44 +374,70 @@ export default class Tileset2D {
   }
 }
 
-// A selected tile needs placeholder from its children if
-// - it is not loaded
-// - none of its ancestors is visible and loaded
-function needsPlaceholder(tile) {
-  let t = tile;
-  while (t) {
-    if (t.state & (TILE_STATE_VISIBLE === 0)) {
-      return true;
-    }
-    if (t.isLoaded) {
-      return false;
-    }
-    t = t.parent;
+/* -- Refinement strategies --*/
+/* eslint-disable max-depth */
+
+// For all the selected && pending tiles:
+// - pick the closest ancestor as placeholder
+// - if no ancestor is visible, pick the closest children as placeholder
+function updateTileStateDefault(allTiles) {
+  for (const tile of allTiles) {
+    tile.state = 0;
   }
-  return true;
+  for (const tile of allTiles) {
+    if (tile.isSelected && !getPlaceholderInAncestors(tile)) {
+      getPlaceholderInChildren(tile);
+    }
+  }
+  for (const tile of allTiles) {
+    tile.isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
+  }
 }
 
-function getPlaceholderInAncestors(tile, refinementStrategy) {
-  let parent;
-  let state = TILE_STATE_PLACEHOLDER;
-  while ((parent = tile.parent)) {
-    if (tile.isLoaded) {
-      // If a tile is loaded, mark all its ancestors as hidden
-      state = TILE_STATE_HIDDEN;
-      if (refinementStrategy === STRATEGY_DEFAULT) {
-        return;
-      }
-    }
-    parent.state = Math.max(parent.state, state);
-    tile = parent;
+// Until a selected tile and all its selected siblings are loaded, use the closest ancestor as placeholder
+function updateTileStateReplace(allTiles) {
+  for (const tile of allTiles) {
+    tile.state = 0;
   }
+  for (const tile of allTiles) {
+    if (tile.isSelected) {
+      getPlaceholderInAncestors(tile);
+    }
+  }
+  // Always process parents first
+  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.z - t2.z);
+  for (const tile of sortedTiles) {
+    tile.isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
+
+    if (tile.isVisible || tile.state & TILE_STATE_VISITED) {
+      // If the tile is rendered, or if the tile has been explicitly hidden, hide all of its children
+      for (const child of tile.children) {
+        child.state = TILE_STATE_VISITED;
+      }
+    } else if (tile.isSelected) {
+      getPlaceholderInChildren(tile);
+    }
+  }
+}
+
+// Walk up the tree until we find one ancestor that is loaded. Returns true if successful.
+function getPlaceholderInAncestors(tile) {
+  while (tile) {
+    if (tile.isLoaded || tile.content) {
+      tile.state |= TILE_STATE_VISIBLE;
+      return true;
+    }
+    tile = tile.parent;
+  }
+  return false;
 }
 
 // Recursively set children as placeholder
 function getPlaceholderInChildren(tile) {
   for (const child of tile.children) {
-    child.state = Math.max(child.state, TILE_STATE_PLACEHOLDER);
-    if (!child.isLoaded) {
+    if (child.isLoaded || child.content) {
+      child.state |= TILE_STATE_VISIBLE;
+    } else {
       getPlaceholderInChildren(child);
     }
   }

@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 test('ViewManager#constructor', t => {
   const viewManager = new ViewManager({
@@ -149,7 +149,7 @@ test('ViewManager#controllers', t => {
   t.ok(viewManager.controllers.minimap, 'minimap controller is constructed');
 
   const viewport = viewManager.controllers.minimap.makeViewport(
-    viewManager.controllers.minimap.controllerStateProps
+    viewManager.controllers.minimap.props
   );
   t.ok(viewport.viewProjectionMatrix.every(Number.isFinite), 'makeViewport returns valid viewport');
 

@@ -1,16 +1,14 @@
 /* eslint-disable max-statements */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {makeSpy} from '@probe.gl/test-utils';
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
 
-/* global global, window */
-const _global = typeof global === 'undefined' ? window : global;
-_global.google = {maps: mapsApi};
+globalThis.google = {maps: mapsApi};
 
 test('GoogleMapsOverlay#constructor', t => {
   const map = new mapsApi.Map({
@@ -162,14 +160,6 @@ function drawPickTest(renderingType) {
     } else {
       t.ok(equals(width, false), 'width is not set');
       t.ok(equals(height, false), 'height is not set');
-    }
-
-    if (renderingType === mapsApi.RenderingType.RASTER) {
-      t.notOk(deck.props.layerFilter, 'layerFilter is empty');
-
-      map.setTilt(45);
-      map.draw();
-      t.ok(deck.props.layerFilter, 'layerFilter should be set to block drawing');
     }
 
     const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');

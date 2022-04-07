@@ -23,7 +23,7 @@ const BINARY_DATA = [
 ];
 
 // eslint-disable-next-line
-const TISSOTS_INDICATRIX = (function() {
+const TISSOTS_INDICATRIX = (function () {
   const result = [];
   for (let lng = -180; lng <= 180; lng += 30) {
     for (let lat = -60; lat <= 60; lat += 30) {

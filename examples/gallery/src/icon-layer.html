@@ -4,6 +4,7 @@
 
     <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <style type="text/css">
       body {
@@ -33,14 +34,12 @@
 
     const deckgl =  new DeckGL({
       views: new OrthographicView(),
-      initialViewState: { target: [0, 0, 0], zoom: 2 },
+      initialViewState: { target: [0, 0, 0], zoom: 3 },
       controller: true,
       getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
     });
 
     function renderLayers(data) {
-      const ORIGIN = [0, 0];
-
       const iconLayer = new IconLayer({
         id: 'users',
         data,
@@ -49,68 +48,42 @@
           width: 128,
           height: 128
         }),
-        getSize : d => d.size,
-        getPosition: d => d.position,
-        sizeUnits: 'meters',
+        getSize : d => d.r * 1.4,
+        getPosition: d => [d.x, d.y],
+        sizeUnits: 'common',
         pickable: true
       });
 
-      const lineLayer = new LineLayer({
-        id: 'links',
-        data,
-        pickable: true,
-        getSourcePosition: d => ORIGIN,
-        getTargetPosition: d => d.position,
-        getColor: [228, 228, 228],
-        getWidth: 3
-      });
-
-      const scatterPlotLayer = new ScatterplotLayer({
-        id: 'deck.gl-circle',
-        data: [{position: [0, 0]}],
-        getPosition: d => d.position,
-        getFillColor: [23, 38, 42],
-        getRadius: 12,
-        radiusMaxPixels: 60
-      });
-
-      const textLayer = new TextLayer({
-        id: 'deck.gl-label',
-        data: [{position: [0, 0]}],
-        getSize: 15,
-        getPosition: d => d.position,
-        getText: d => 'Deck.gl',
-        getColor: [255, 255, 255]
-      });
-
-      deckgl.setProps({ layers: [lineLayer, iconLayer, scatterPlotLayer, textLayer] });
+      deckgl.setProps({ layers: [iconLayer] });
     }
 
-    new Octokit().repos.getContributors({ owner: 'uber', repo: 'deck.gl' })
-    .then(result => {
-      let {data} = result;
-      // process data
-      const listOfContributions = data.map(contributor => contributor.contributions);
-      const maxContributions = Math.max(...listOfContributions);
+    async function getContributors() {
+      const octokit = new Octokit();
+      const perPage = 100;
+      let page = 1;
+      let result = [];
+      while (true) {
+        const {data} = await octokit.repos.getContributors({ owner: 'visgl', repo: 'deck.gl', per_page: perPage, page: page++});
+        result = result.concat(data);
+        if (data.length < perPage) return result;
+      }
+    }
 
-      // shuffle
-      data.sort(() => 0.5 - Math.random());
-      data = data.map((d, i) => {
-        const angle = i / data.length * 2 * Math.PI;
-        const distance = 30 * Math.sqrt(d.contributions / maxContributions) + 16;
-        const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance;
-        const size = Math.log2(d.contributions) + 1;
+    getContributors()
+    .then(data => {
+      const circles = data.map((d, i) => {
         return {
           login: d.login,
           avatar_url: d.avatar_url,
           contributions: d.contributions,
-          position: [x, y],
-          size
+          // For d3.pack
+          r: Math.log(d.contributions + 1)
         };
       });
 
-      renderLayers(data);
+      d3.packSiblings(circles);
+
+      renderLayers(circles);
     })
 
   </script>

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
@@ -40,10 +40,7 @@ test('FillStyleExtension#PolygonLayer', t => {
           'fillPatternScales attribute is populated'
         );
         t.deepEqual(
-          fillLayer
-            .getAttributeManager()
-            .getAttributes()
-            .fillPatternFrames.value.slice(0, 4),
+          fillLayer.getAttributeManager().getAttributes().fillPatternFrames.value.slice(0, 4),
           [0, 0, 1, 1],
           'fillPatternFrames attribute is populated'
         );

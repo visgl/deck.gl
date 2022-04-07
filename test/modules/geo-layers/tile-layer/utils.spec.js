@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {
   getTileIndices,
   tileToBoundingBox,
@@ -6,7 +6,7 @@ import {
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tile-layer/utils';
 import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 const TEST_CASES = [
   {
@@ -243,10 +243,7 @@ const TEST_CASES = [
     }),
     tileSize: 512,
     modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
-    modelMatrixInverse: new Matrix4()
-      .translate([1024, 1024, 0])
-      .scale(2)
-      .invert(),
+    modelMatrixInverse: new Matrix4().translate([1024, 1024, 0]).scale(2).invert(),
     output: ['-1,-1,0']
   },
   {
@@ -262,10 +259,7 @@ const TEST_CASES = [
     tileSize: 512,
     extent: [0, 0, 2048, 2048],
     modelMatrix: new Matrix4().translate([1024, 1024, 0]).scale(2),
-    modelMatrixInverse: new Matrix4()
-      .translate([1024, 1024, 0])
-      .scale(2)
-      .invert(),
+    modelMatrixInverse: new Matrix4().translate([1024, 1024, 0]).scale(2).invert(),
     output: []
   },
   {
@@ -508,6 +502,7 @@ test('urlType', t => {
 
 test('getURLFromTemplate', t => {
   const TEST_TEMPLATE = 'https://server.com/{z}/{x}/{y}.png';
+  const TEST_TEMPLATE2 = 'https://server.com/{z}/{x}/{y}/{x}-{y}-{z}.png';
   const TEST_TEMPLATE_ARRAY = [
     'https://server.com/ep1/{x}/{y}.png',
     'https://server.com/ep2/{x}/{y}.png'
@@ -516,6 +511,11 @@ test('getURLFromTemplate', t => {
     getURLFromTemplate(TEST_TEMPLATE, {x: 1, y: 2, z: 0}),
     'https://server.com/0/1/2.png',
     'single string template'
+  );
+  t.is(
+    getURLFromTemplate(TEST_TEMPLATE2, {x: 1, y: 2, z: 0}),
+    'https://server.com/0/1/2/1-2-0.png',
+    'single string template with multiple occurance'
   );
   t.is(
     getURLFromTemplate(TEST_TEMPLATE_ARRAY, {x: 1, y: 2, z: 0}),

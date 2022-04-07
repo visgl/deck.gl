@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
@@ -26,7 +26,7 @@ import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {gl} from '@deck.gl/test-utils';
 
-import {equals} from 'math.gl';
+import {equals} from '@math.gl/core';
 
 const testLayer = new ScatterplotLayer({
   id: 'test-layer',

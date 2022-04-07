@@ -17,15 +17,141 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.7
+
+### deck.gl v8.7 Prereleases
+
+#### deck.gl [8.7.0-beta.7] - Feb 24 2022
+
+- CARTO: Fix formatTiles propagation at CartoLayer (#6687)
+- Add QuadkeyLayer (#6678)
+- [mapbox] Fix event handling when using external deck (#6671)
+- Fix math.gl deprecation warning (#6670)
+- Doc: Correct links to all extensions (#6680)
+- CartoTileLayer: Default formatTiles to binary (#6668)
+- Ignore dataComparator change in props diff (#6669)
+- fix(mapbox) leave additional views intact (#6329)
+- fix(tets): include Typescript sources in test coverage (#6663)
+
+#### deck.gl [8.7.0-beta.6] - Feb 21 2022
+- CARTO: Rename CartoDynamicTileLayer -> CartoTileLayer (#6658)
+- GeoJsonLayer[binary]: do not pass instancePickingColors attribute to TextLayer (#6650)
+- Support tilt & bearing for Google raster maps (#6653)
+
+#### deck.gl [8.7.0-beta.5] - Feb 10 2022
+
+- CARTO: fetchMap supports tiles in different formats (#6637)
+- CARTO: Simplify format tiles logic (#6635)
+- Carto: Allow private maps in fetchMap (#6629)
+- Change highlightedObjectIndex default to null (#6631)
+#### deck.gl [8.7.0-beta.4] - Feb 7 2022
+
+- Include extensions sent in properties in the CartoDynamicTileLayer
+- Support TILE_FORMATS.BINARY in CartoDynamicTileLayer (#6580)
+#### deck.gl [8.7.0-beta.3] - Feb 2 2022
+
+- CARTO module: Support tiles in different formats (#6609)
+- Fix OrthographicController drift when using independent scales(#6606)
+#### deck.gl [8.7.0-beta.2] - Feb 1 2022
+
+- Respect mask coordinate system & origin (#6591)
+- CARTO fetchMap: Fix h3 hexagon layers are not shown (#6596)
+- Create unique MaskEffect per EffectManager (#6595)
+- Fix OrthographicView projection when using independent scales (#6604)
+- Fix `update` Behavior in `Tileset2D` (#6602)
+- Fix depth picking accuracy (#6600)
+- MapboxLayer only repeats if the base map renders multiple copies (#6594)
+- Allow setting FontAtlasManager LRU Cache limit (#6576)
+- Support multiple masks (#6589)
+
+#### deck.gl [8.7.0-beta.1] - Jan 26 2022
+
+- Add MaskExtension (#6554)
+- Add getBounds method to Attribute (#6583)
+- Update to new Google Maps API (#6579)
+- CARTO fetchMap:  Fix no layer shown if one of the map layers fails (#6573)
+- Add uniqueIdProperty to mvt layer props (#6572)
+- Fix fetchMap in Carto module (#6569)
+- Migrate core/passes to TypeScript (#6488)
+- Fix TileLayer url template resolution (#6566)
+- Fix z-index of MapboxLayers (#6565)
+- Fix highlighting in GeoJsonLayer when it’s used as a sub layer (#6563)
+- Correctly calculate GLViewport with Framebuffer (#6553)
+
+#### deck.gl [8.7.0-alpha.11] - Dec 30 2021
+
+- CARTO - add clientId parameter for internal tracing (#6534)
+
+#### deck.gl [8.7.0-alpha.10] - Dec 28 2021
+
+- CARTO - add clientId parameter for internal tracing (#6534)
+
+#### deck.gl [8.7.0-alpha.9] - Dec 17 2021
+
+- CartoLayer support for dynamic tiled maps (geojson) (#6509)
+- Bump loaders to 3.1.3 (#6511)
+
+#### deck.gl [8.7.0-alpha.8] - Dec 13 2021
+
+- Supply attributes directly in binary GeoJson layer (#6492)
+
+#### deck.gl [8.7.0-alpha.7] - Dec 9 2021
+
+- Fix pre-built dev bundles (#6499)
+- Fix pre-built bundles (#6498)
+
+#### deck.gl [8.7.0-alpha.4] - Dec 9 2021
+
+- TileLayer: reduce flashing when using no-overlap strategy (#6477)
+- feat(geo): controller position (#6478)
+- chore: Bump to loaders.gl@3.1.0 (#6484)
+- chore(core): Move utils to .ts (#6452)
+- CARTO: Fix domain length for CartoColors in colorBins  (#6475)
+- Migrate core/lifecycle to TypeScript (#6454)
+- feat(geo-layers): Tile3DLayer pass coordinateSystem as prop (#6466)
+- Fix project_normal in GlobeView (#6445)
+- Add flatShading prop to ColumnLayer (#6392)
+- TerrainLayer handle non-WebMercator viewports (#6461)
+- colorContinuous - Use domain length to get palette (#6447)
+- fix(geo-layers): _MeshLayer & repeating textures (#6468)
+- TileLayer support custom refinementStrategy (#6382)
+- chore: Move to @math.gl/core (#6405)
+- chore: Lint fixes (#6443)
+- chore: Move controllers to .ts (#6440)
+- chore: loaders.gl@3.1.0-beta.5 (#6388)
+- feat: Typescript monorepo (#6381)
+- chore: Replace `global` with `globalThis` (#6407)
+- feat: Upgrade tooling to support TypeScript (#6390)
+
+#### deck.gl [8.7.0-alpha.3] - Nov 25 2021
+
+- Fix: Rename publicToken to token (#6425)
+- Fix: CartoLayer support `format` prop (#6416)
+- Default to `cartodb_id` for uniqueIdProperty in CartoLayer (#6404)
+- Deprecate CartoBQTilerLayer and CartoSQLLayer (#6402)
+
+#### deck.gl [8.7.0-alpha.2] - Nov 16 2021
+- Bump prettier to v2 (#6386)
+- CARTO default to v3 API (#6376)
+- Fix multi-depth picking with layerFilter (#6380)
+
+#### deck.gl [8.7.0-alpha.1] - Nov 8 2021
+- Add missing prop mappings for GeoJsonLayer (#6336)
+- Add `fetchMap` function to carto module (#6341)
+- CARTO: fix layer credentials overwrite (#6349)
+- Skip rendering out-of-DOM Google Maps (#6340)
+- pydeck: Bump version to 0.7.1 (#6322)
+- Multi-view picking consistency (#6306)
+
 ## deck.gl v8.6
 
 ### deck.gl v8.6 Prereleases
 
-### deck.gl [8.6.0-beta.1] - Oct 9 2021
+#### deck.gl [8.6.0-beta.1] - Oct 9 2021
 
 - Default to binary mode in MVTLayer (#6282)
 
-### deck.gl [8.6.0-alpha.4] - Oct 6 2021
+#### deck.gl [8.6.0-alpha.4] - Oct 6 2021
 
 - Google Maps Overlay: Safely invoke onRender by resetting arrayBuffer (#6224)
 - Bump luma to 8.5.10 (#6267)

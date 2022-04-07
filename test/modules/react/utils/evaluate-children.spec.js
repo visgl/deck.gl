@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import evaluateChildren from '@deck.gl/react/utils/evaluate-children';
 import React, {createElement} from 'react';
 import {StaticMap} from 'react-map-gl';

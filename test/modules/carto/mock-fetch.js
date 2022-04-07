@@ -1,12 +1,17 @@
-/* global global, window */
-const _global = typeof global !== 'undefined' ? global : window;
+/* global Headers */
+import test from 'tape-catch';
+import {API_VERSIONS, setDefaultCredentials} from '@deck.gl/carto';
+
+// See test/modules/carto/responseToJson for details for creating test data
+import binaryTileData from './data/binaryTile.json';
+const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
   tiles: ['https://xyz.com/{z}/{x}/{y}']
 };
 
-const GEOJSON = {
+export const GEOJSON_RESPONSE = {
   type: 'FeatureCollection',
   features: [
     {
@@ -28,9 +33,9 @@ export const MAPS_API_V1_RESPONSE = {
   }
 };
 
-export function mockFetchMapsV1() {
-  const fetch = _global.fetch;
-  _global.fetch = url =>
+function mockFetchMapsV1() {
+  const fetch = globalThis.fetch;
+  globalThis.fetch = url =>
     Promise.resolve({
       json: () => MAPS_API_V1_RESPONSE,
       ok: true
@@ -38,9 +43,10 @@ export function mockFetchMapsV1() {
   return fetch;
 }
 
-export function mockFetchMapsV2() {
-  const fetch = _global.fetch;
-  _global.fetch = url => {
+function mockFetchMapsV2() {
+  const fetch = globalThis.fetch;
+
+  globalThis.fetch = url => {
     return Promise.resolve({
       json: () => TILEJSON_RESPONSE,
       ok: true
@@ -50,39 +56,70 @@ export function mockFetchMapsV2() {
 }
 
 export function mockFetchMapsV3() {
-  const fetch = _global.fetch;
-  _global.fetch = url => {
+  const fetch = globalThis.fetch;
+  globalThis.fetch = (url, {headers}) => {
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
           return TILEJSON_RESPONSE;
         }
         if (url.indexOf('format=geojson') !== -1) {
-          return GEOJSON;
+          return GEOJSON_RESPONSE;
         }
 
         if (url.indexOf('tileset') !== -1) {
           return {
             tilejson: {
-              url: ['https://xyz.com?format=tilejson']
+              url: ['https://xyz.com?format=tilejson&cache=12345678']
             }
           };
         }
         if (url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
             geojson: {
-              url: ['https://xyz.com?format=geojson']
+              url: ['https://xyz.com?format=geojson&cache=12345678']
             }
           };
         }
         return null;
       },
-      ok: true
+      arrayBuffer: () => BINARY_TILE,
+      text: () => null, // Required to get loaders.gl to use arrayBuffer()
+      ok: true,
+      headers: new Headers(headers)
     });
   };
   return fetch;
 }
 
 export function restoreFetch(fetch) {
-  _global.fetch = fetch;
+  globalThis.fetch = fetch;
+}
+
+export function mockedV1Test(name, testFunc) {
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV1();
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
+}
+
+export function mockedV2Test(name, testFunc) {
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV2();
+    setDefaultCredentials({apiVersion: API_VERSIONS.V2});
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
+}
+
+export function mockedV3Test(name, testFunc) {
+  test(name, async t => {
+    const fetchMock = mockFetchMapsV3();
+    await testFunc(t);
+    restoreFetch(fetchMock);
+    t.end();
+  });
 }

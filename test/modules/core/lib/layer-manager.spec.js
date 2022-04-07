@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
 

@@ -29,8 +29,7 @@ export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) 
     pickedViewport = getViewportFromCoordinates(pickInfo?.pickedViewports || viewports, {x, y});
   }
   const coordinate =
-    pickedViewport &&
-    pickedViewport.unproject([x - pickedViewport.x, y - pickedViewport.y], {targetZ: z});
+    pickedViewport && pickedViewport.unproject([x - pickedViewport.x, y - pickedViewport.y, z]);
 
   return {
     color: null,
@@ -42,7 +41,7 @@ export function getEmptyPickingInfo({pickInfo, viewports, pixelRatio, x, y, z}) 
     y,
     pixel: [x, y],
     coordinate,
-    devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
+    devicePixel: pickInfo && 'pickedX' in pickInfo ? [pickInfo.pickedX, pickInfo.pickedY] : null,
     pixelRatio
   };
 }

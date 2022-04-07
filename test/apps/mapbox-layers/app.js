@@ -8,7 +8,7 @@ mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/light-v9',
+  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   center: [-74.012, 40.705],
   zoom: 15.5,
   bearing: -20,

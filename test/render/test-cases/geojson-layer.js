@@ -38,6 +38,8 @@ const lightingEffect = new LightingEffect({
   })
 });
 
+const lines = geojson.features.filter(f => f.geometry.type === 'LineString');
+
 // Tests that contain text render differently depending on the OS,
 // currently only do comparisons on Mac
 const macOnlyTests = [
@@ -46,7 +48,9 @@ const macOnlyTests = [
     viewState: {
       longitude: -100,
       latitude: 40,
-      zoom: 4
+      zoom: 4,
+      pitch: 0,
+      bearing: 0
     },
     layers: [
       new GeoJsonLayer({
@@ -76,7 +80,9 @@ const macOnlyTests = [
     viewState: {
       longitude: -100,
       latitude: 40,
-      zoom: 4
+      zoom: 4,
+      pitch: 0,
+      bearing: 0
     },
     layers: [
       new GeoJsonLayer({
@@ -87,6 +93,51 @@ const macOnlyTests = [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-text.png'
+  },
+  {
+    name: 'geojson-text-billboard',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text',
+        data: capitals,
+        parameters: {
+          depthTest: false
+        },
+        pointType: 'text',
+        getText: d => d.properties.name,
+        textBillboard: false // default value is true
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-text-billboard.png'
+  },
+  {
+    name: 'geojson-text-font-settings',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-text',
+        data: capitals,
+        pointType: 'text',
+        getText: d => d.properties.name,
+        textFontSettings: {
+          fontSize: 8 // text is not sharp anymore
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-text-font-settings.png'
   }
 ];
 const optionalTests = OS === 'Mac' ? macOnlyTests : [];
@@ -252,7 +303,13 @@ export default [
           geometry: {
             type: 'Polygon',
             coordinates: [
-              [[0, 66.56333], [90, 66.56333], [180, 66.56333], [-90, 66.56333], [0, 66.56333]]
+              [
+                [0, 66.56333],
+                [90, 66.56333],
+                [180, 66.56333],
+                [-90, 66.56333],
+                [0, 66.56333]
+              ]
             ]
           }
         },
@@ -311,6 +368,105 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/geojson-icon.png'
+  },
+  {
+    name: 'geojson-circle-billboard',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-circle',
+        data: capitals,
+        pointType: 'circle',
+        stroked: true,
+        filled: true,
+        getFillColor: [255, 255, 0],
+        getLineColor: [0, 0, 255],
+        getPointRadius: d => 10 + 3 * d.properties.name.length,
+        opacity: 0.3,
+        lineWidthMinPixels: 2,
+        pointRadiusUnits: 'pixels',
+        pointBillboard: true // default value is false
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-circle-billboard.png'
+  },
+  {
+    name: 'geojson-icon-billboard',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
+        iconBillboard: false // default value is true
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-icon-billbaord.png'
+  },
+  {
+    name: 'geojson-icon-alpha-cutoff',
+    viewState: {
+      longitude: -100,
+      latitude: 40,
+      zoom: 4,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-icon',
+        data: capitals,
+        pointType: 'icon',
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        iconSizeScale: 5,
+        iconSizeUnits: 'pixels',
+        getIconSize: 10,
+        getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
+        iconAlphaCutoff: 1.0 // icon edge is not sharp anymore
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-icon-alpha-cutoff.png'
+  },
+  {
+    name: 'geojson-line-billboard',
+    viewState: {
+      latitude: 37.772537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13.5,
+      pitch: 40,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-line-billboard',
+        data: lines,
+        opacity: 0.6,
+        lineBillboard: true,
+        getLineColor: [128, 255, 0],
+        getLineWidth: 10,
+        lineWidthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/geojson-line-billboard.png'
   },
   ...optionalTests
 ];

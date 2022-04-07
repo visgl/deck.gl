@@ -20,7 +20,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {
   MapView,
   ScatterplotLayer,
@@ -45,7 +45,8 @@ const DECK_PROPS = {
   height: 550,
   views: [new MapView()],
   viewState: VIEW_STATE,
-  useDevicePixels: false
+  useDevicePixels: false,
+  layerFilter: null
 };
 
 const NEW_GRID_LAYER_PICK_METHODS = {
@@ -537,6 +538,48 @@ const TEST_CASES = [
     }
   },
   {
+    id: 'multiLayers with filter',
+    props: {
+      layers: [
+        new ScatterplotLayer({
+          data: DATA.points,
+          getPosition: d => d.COORDINATES,
+          getRadius: d => d.SPACES,
+          pickable: true,
+          radiusScale: 30,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 30
+        }),
+        new PolygonLayer({
+          data: DATA.polygons,
+          getPolygon: f => f,
+          pickable: true
+        }),
+        new PathLayer({
+          data: DATA.zigzag,
+          getPath: f => f.path,
+          getWidth: 10,
+          widthMinPixels: 1,
+          pickable: true
+        })
+      ],
+      layerFilter: ({layer}) => layer.id === 'PathLayer'
+    },
+    pickingMethods: {
+      pickMultipleObjects: [
+        {
+          parameters: {
+            x: 260,
+            y: 300
+          },
+          results: {
+            count: 1
+          }
+        }
+      ]
+    }
+  },
+  {
     id: 'newgridlayer - cpu',
     props: {
       layers: [
@@ -618,9 +661,9 @@ test(`pickingTest`, t => {
       deck.finalize();
       t.end();
     } else {
-      deck.setProps(TEST_CASES[index].props);
+      deck.setProps({...DECK_PROPS, ...TEST_CASES[index].props});
     }
   }
 
-  deck.setProps(Object.assign({}, DECK_PROPS, TEST_CASES[0].props, {onAfterRender: runTests}));
+  deck.setProps({...DECK_PROPS, ...TEST_CASES[0].props, onAfterRender: runTests});
 });

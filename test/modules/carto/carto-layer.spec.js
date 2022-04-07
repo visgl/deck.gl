@@ -1,10 +1,10 @@
-import test from 'tape-catch';
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {CartoLayer, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
+import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES, TILE_FORMATS} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {mockFetchMapsV2, mockFetchMapsV1, mockFetchMapsV3, restoreFetch} from './mock-fetch';
+import CartoTileLayer from '@deck.gl/carto/layers/carto-tile-layer';
+import {mockedV1Test, mockedV2Test, mockedV3Test} from './mock-fetch';
 
 const CREDENTIALS_V3 = {
   apiVersion: API_VERSIONS.V3,
@@ -12,9 +12,7 @@ const CREDENTIALS_V3 = {
   accessToken: 'XXX'
 };
 
-test('CartoLayer#v2', async t => {
-  const fetchMock = mockFetchMapsV2();
-
+mockedV2Test('CartoLayer#v2', async t => {
   const onAfterUpdate = ({layer, subLayers, subLayer}) => {
     const {data} = layer.state;
     if (!data) {
@@ -23,6 +21,11 @@ test('CartoLayer#v2', async t => {
       t.is(subLayers.length, 1, 'should render a subLayer');
       t.ok(Array.isArray(data.tiles), 'tiles should be an array');
       t.ok(subLayer instanceof MVTLayer, 'subLayer should be an MVTLayer ');
+      t.is(
+        subLayer.props.uniqueIdProperty,
+        'cartodb_id',
+        'should default to correct uniqueIdProperty'
+      );
     }
   };
 
@@ -49,27 +52,36 @@ test('CartoLayer#v2', async t => {
     ]
   });
 
-  restoreFetch(fetchMock);
   spy.restore();
-  t.end();
 });
 
-test('CartoLayer#v3', async t => {
-  const fetchMock = mockFetchMapsV3();
+mockedV3Test('CartoLayer#v3', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
 
   const onAfterUpdate = ({layer, subLayer, subLayers}) => {
-    const {data} = layer.state;
+    const {data, format} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
     } else {
       t.is(subLayers.length, 1, 'should have only 1 sublayer');
+
       switch (layer.props.type) {
         case MAP_TYPES.TILESET:
           t.ok(subLayer instanceof MVTLayer, 'should be an MVTLayer');
+          t.is(
+            subLayer.props.uniqueIdProperty,
+            'cartodb_id',
+            'should default to correct uniqueIdProperty'
+          );
           break;
         case MAP_TYPES.TABLE:
+          if (format === FORMATS.TILEJSON) {
+            t.ok(subLayer instanceof CartoTileLayer, 'should be a CartoTileLayer');
+          } else {
+            t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
+          }
+          break;
         case MAP_TYPES.QUERY:
           t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
           break;
@@ -108,19 +120,25 @@ test('CartoLayer#v3', async t => {
           credentials: CREDENTIALS_V3
         },
         onAfterUpdate
+      },
+      {
+        props: {
+          data: 'dynamic_tileset',
+          connection: 'conn_name',
+          type: MAP_TYPES.TABLE,
+          format: FORMATS.TILEJSON,
+          formatTiles: TILE_FORMATS.BINARY,
+          credentials: CREDENTIALS_V3
+        },
+        onAfterUpdate
       }
     ]
   });
 
-  restoreFetch(fetchMock);
   spy.restore();
-
-  t.end();
 });
 
-test('CartoLayer#should throw with invalid params for v1 and v2', t => {
-  const fetchMock = mockFetchMapsV1();
-
+mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   const layer = new CartoLayer();
 
   const TEST_CASES = [
@@ -207,14 +225,9 @@ test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   TEST_CASES.forEach(c => {
     t.throws(() => layer._checkProps(c.props), c.regex, c.title);
   });
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoLayer#should throw with invalid params for v3', t => {
-  const fetchMock = mockFetchMapsV1();
+mockedV1Test('CartoLayer#should throw with invalid params for v3', t => {
   const layer = new CartoLayer();
 
   const TEST_CASES = [
@@ -263,15 +276,9 @@ test('CartoLayer#should throw with invalid params for v3', t => {
   TEST_CASES.forEach(c => {
     t.throws(() => layer._checkProps(c.props), c.regex, c.title);
   });
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoLayer#_updateData executed when props changes', async t => {
-  const fetchMock = mockFetchMapsV3();
-
+mockedV3Test('CartoLayer#_updateData executed when props changes', async t => {
   const testCases = [
     {
       spies: ['_updateData'],
@@ -372,15 +379,37 @@ test('CartoLayer#_updateData executed when props changes', async t => {
   ];
 
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
-
-  restoreFetch(fetchMock);
-
-  t.end();
 });
 
-test('CartoSQLLayer#onDataLoad', async t => {
-  const fetchMock = mockFetchMapsV3();
+mockedV3Test('CartoLayer#_updateData invalid apiVersion', async t => {
+  const testCases = [
+    {
+      props: {
+        type: MAP_TYPES.TABLE,
+        data: 'table',
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3
+      }
+    },
+    {
+      updateProps: {credentials: {apiVersion: 'wrong'}}
+    }
+  ];
 
+  let didThrow = false;
+  const regex = /Invalid apiVersion wrong. Use API_VERSIONS enum./;
+  await testLayerAsync({
+    Layer: CartoLayer,
+    testCases,
+    onError: e => {
+      t.ok(e.message.match(regex), 'Correct error message');
+      didThrow = true;
+    }
+  });
+  t.ok(didThrow, 'exception was thrown on invalid apiVersion prop update');
+});
+
+mockedV3Test('CartoLayer#onDataLoad', async t => {
   const spy = makeSpy(MVTLayer.prototype, 'getTileData');
   spy.returns([]);
 
@@ -418,7 +447,156 @@ test('CartoSQLLayer#onDataLoad', async t => {
   await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
 
   spy.restore();
-  t.end();
+});
 
-  restoreFetch(fetchMock);
+mockedV3Test('CartoLayer#onDataError', async t => {
+  const spy = makeSpy(MVTLayer.prototype, 'getTileData');
+  spy.returns([]);
+
+  const onDataLoad = () => {
+    throw new Error('onDataLoad ERROR');
+  };
+
+  let counter = 0;
+  const onDataError = () => {
+    counter++;
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: 'tileset',
+        type: MAP_TYPES.TILESET,
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3,
+        onDataError
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 0, 'should not call to onDataError');
+        }
+      }
+    },
+    {
+      updateProps: {
+        data: 'table',
+        type: MAP_TYPES.TABLE,
+        onDataLoad // <-- will throw error
+      },
+      onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 1, 'should call to onDataError');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
+
+  spy.restore();
+});
+
+mockedV3Test('CartoLayer#dynamic', async t => {
+  let counter = 0;
+  const onDataLoad = () => {
+    counter++;
+  };
+
+  const testCases = [
+    {
+      props: {
+        data: 'tileset',
+        type: MAP_TYPES.TABLE,
+        format: FORMATS.TILEJSON,
+        formatTiles: TILE_FORMATS.BINARY,
+        connection: 'connection_name',
+        credentials: CREDENTIALS_V3,
+
+        onDataLoad
+      },
+      onAfterUpdate: ({layer, subLayers}) => {
+        if (layer.isLoaded) {
+          t.is(counter, 1, 'should call once to onDataLoad');
+          t.is(subLayers.length, 1, 'Rendered sublayer');
+          const dynLayer = subLayers[0];
+          t.is(dynLayer.internalState.subLayers.length, 4, 'Rendered right number of sublayers');
+          const geojsonLayer = dynLayer.internalState.subLayers[0];
+          const {data} = geojsonLayer.props;
+
+          // Test data taken from `cartobq.testtables.polygons_10k` table, tile: 15/9633/12341
+          t.is(data.points.positions.value.length, 0, 'No points');
+          t.is(data.lines.positions.value.length, 0, 'No lines');
+
+          // positions
+          t.deepEqual(
+            [...data.polygons.positions.value],
+            [
+              -74.15892028808594, 40.5383186340332, -74.15888977050781, 40.538330078125,
+              -74.15872955322266, 40.538169860839844, -74.15850830078125, 40.53828048706055,
+              -74.15876770019531, 40.538551330566406, -74.15901184082031, 40.538421630859375,
+              -74.15892028808594, 40.5383186340332
+            ],
+            'Polygon position data'
+          );
+          t.equal(data.polygons.positions.size, 2, 'Polygon position size');
+
+          // polygonIndices
+          t.deepEqual(
+            [...data.polygons.polygonIndices.value],
+            [0, 7],
+            'Polygon polygonIndices data'
+          );
+          t.equal(data.polygons.polygonIndices.size, 1, 'Polygon polygonIndices size');
+
+          // primitivePolygonIndices
+          t.deepEqual(
+            [...data.polygons.primitivePolygonIndices.value],
+            [0, 7],
+            'Polygons primitivePolygonIndices data'
+          );
+          t.equal(
+            data.polygons.primitivePolygonIndices.size,
+            1,
+            'Polygon primitivePolygonIndices size'
+          );
+
+          // featureIds
+          t.deepEqual(
+            [...data.polygons.featureIds.value],
+            [0, 0, 0, 0, 0, 0, 0],
+            'Polygons featureIds data'
+          );
+          t.equal(data.polygons.featureIds.size, 1, 'Polygon featureIds size');
+
+          // globalFeatureIds
+          t.deepEqual(
+            [...data.polygons.globalFeatureIds.value],
+            [0, 0, 0, 0, 0, 0, 0],
+            'Polygons globalFeatureIds data'
+          );
+          t.equal(data.polygons.globalFeatureIds.size, 1, 'Polygon globalFeatureIds size');
+
+          // triangles
+          t.deepEqual(
+            [...data.polygons.triangles.value],
+            [5, 0, 1, 1, 2, 3, 3, 4, 5, 5, 1, 3],
+            'Polygons triangles data'
+          );
+          t.equal(data.polygons.triangles.size, 1, 'Polygon triangles size');
+
+          // properties
+          t.deepEqual(
+            data.polygons.properties,
+            [{address: '4 PARK ROAD', bbl: '5052680264'}],
+            'Polygons properties data'
+          );
+
+          // numericProps
+          t.deepEqual(data.polygons.numericProps, {}, 'Polygons numericProps data');
+        }
+      }
+    }
+  ];
+
+  await testLayerAsync({Layer: CartoLayer, testCases, onError: t.notOk});
 });

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {COORDINATE_SYSTEM} from './constants';
+import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -61,7 +61,7 @@ let pickingColorCache = new Uint8ClampedArray(0);
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: null,
+  dataComparator: {type: 'function', value: null, compare: false, optional: true},
   _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
@@ -107,6 +107,7 @@ const defaultProps = {
   visible: true,
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
+  operation: OPERATION.DRAW,
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},
@@ -136,7 +137,7 @@ const defaultProps = {
   },
 
   // Selection/Highlighting
-  highlightedObjectIndex: -1,
+  highlightedObjectIndex: null,
   autoHighlight: false,
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
@@ -254,12 +255,13 @@ export default class Layer extends Component {
     return viewport.unproject(xy);
   }
 
-  projectPosition(xyz) {
+  projectPosition(xyz, params) {
     return projectPosition(xyz, {
       viewport: this.context.viewport,
       modelMatrix: this.props.modelMatrix,
       coordinateOrigin: this.props.coordinateOrigin,
-      coordinateSystem: this.props.coordinateSystem
+      coordinateSystem: this.props.coordinateSystem,
+      ...params
     });
   }
 
@@ -330,6 +332,15 @@ export default class Layer extends Component {
     return shaders;
   }
 
+  // Default implementation
+  // Sublayers chould override this method to provide an accurate calculation of the bounds
+  getBounds() {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) return null;
+    const {positions, instancePositions} = attributeManager.attributes;
+    return (positions || instancePositions)?.getBounds();
+  }
+
   // Let's layer control if updateState should be called
   shouldUpdateState({oldProps, props, context, changeFlags}) {
     return changeFlags.propsOrDataChanged;
@@ -352,8 +363,9 @@ export default class Layer extends Component {
       }
     }
 
-    const neededPickingBuffer = oldProps.highlightedObjectIndex >= 0 || oldProps.pickable;
-    const needPickingBuffer = props.highlightedObjectIndex >= 0 || props.pickable;
+    const neededPickingBuffer =
+      Number.isInteger(oldProps.highlightedObjectIndex) || oldProps.pickable;
+    const needPickingBuffer = Number.isInteger(props.highlightedObjectIndex) || props.pickable;
     if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
       const {pickingColors, instancePickingColors} = attributeManager.attributes;
       const pickingColorsAttribute = pickingColors || instancePickingColors;
@@ -894,7 +906,7 @@ export default class Layer extends Component {
   }
 
   updateAutoHighlight(info) {
-    if (this.props.autoHighlight) {
+    if (this.props.autoHighlight && !Number.isInteger(this.props.highlightedObjectIndex)) {
       this._updateAutoHighlight(info);
     }
   }

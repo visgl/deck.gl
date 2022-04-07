@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
-import {equals, config, Vector3} from 'math.gl';
+import test from 'tape-promise/tape';
+import {equals, config, Vector3} from '@math.gl/core';
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
@@ -153,20 +153,18 @@ test('WebMercatorViewport.getScales', t => {
     );
 
     t.ok(
-      equals(distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]), [
-        1,
-        1,
-        1
-      ]),
+      equals(
+        distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]),
+        [1, 1, 1]
+      ),
       'metersPerUnit/unitsPerMeter match'
     );
 
     t.ok(
-      equals(distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]), [
-        1,
-        1,
-        1
-      ]),
+      equals(
+        distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]),
+        [1, 1, 1]
+      ),
       'degreesPerUnit/unitsPerDegree match'
     );
 

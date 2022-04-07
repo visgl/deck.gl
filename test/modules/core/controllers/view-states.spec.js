@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {MapController, OrbitController, FirstPersonController} from '@deck.gl/core';
 
 test('MapViewState', t => {

@@ -1,6 +1,6 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4, Vector2} from '@math.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -64,10 +64,7 @@ function getContainer(overlay, style) {
   if (overlay.getPanes) {
     overlay.getPanes().overlayLayer.appendChild(container);
   } else {
-    overlay
-      .getMap()
-      .getDiv()
-      .appendChild(container);
+    overlay.getMap().getDiv().appendChild(container);
   }
   return container;
 }
@@ -121,25 +118,49 @@ export function getViewPropsFromOverlay(map, overlay) {
   const mapCount = Math.ceil(width / mapWidth);
   leftOffset -= Math.floor(mapCount / 2) * mapWidth;
 
-  // Compute fractional zoom.
-  const scale = height ? (bottomLeft.y - topRight.y) / height : 1;
-  // When resizing aggressively, occasionally ne and sw are the same points
-  // See https://github.com/visgl/deck.gl/issues/4218
-  const zoom = Math.log2(scale || 1) + map.getZoom() - 1;
+  const topLngLat = pixelToLngLat(projection, width / 2, 0);
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
   // Compute fractional center.
-  let centerPx = new google.maps.Point(width / 2, height / 2);
-  const centerContainer = projection.fromContainerPixelToLatLng(centerPx);
-  let latitude = centerContainer.lat();
-  const longitude = centerContainer.lng();
+  let latitude = centerLngLat[1];
+  const longitude = centerLngLat[0];
 
   // Adjust vertical offset - limit latitude
   if (Math.abs(latitude) > MAX_LATITUDE) {
     latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
     const center = new google.maps.LatLng(latitude, longitude);
-    centerPx = projection.fromLatLngToContainerPixel(center);
+    const centerPx = projection.fromLatLngToContainerPixel(center);
     topOffset += centerPx.y - height / 2;
   }
+
+  // Compute fractional bearing
+  const delta = new Vector2(topLngLat).sub(bottomLngLat);
+  let bearing = (180 * delta.verticalAngle()) / Math.PI;
+  if (bearing < 0) bearing += 360;
+
+  // Maps sometimes returns undefined instead of 0
+  const heading = map.getHeading() || 0;
+
+  let zoom = map.getZoom() - 1;
+  let scale;
+
+  if (bearing === 0) {
+    // At full world view (always unrotated) simply compare height, as diagonal
+    // is incorrect due to multiple world copies
+    scale = height ? (bottomLeft.y - topRight.y) / height : 1;
+  } else if (bearing === heading) {
+    // Fractional zoom calculation only correct when bearing is not animating
+    const viewDiagonal = new Vector2([topRight.x, topRight.y])
+      .sub([bottomLeft.x, bottomLeft.y])
+      .len();
+    const mapDiagonal = new Vector2([width, -height]).len();
+    scale = mapDiagonal ? viewDiagonal / mapDiagonal : 1;
+  }
+
+  // When resizing aggressively, occasionally ne and sw are the same points
+  // See https://github.com/visgl/deck.gl/issues/4218
+  zoom += Math.log2(scale || 1);
 
   return {
     width,
@@ -147,6 +168,7 @@ export function getViewPropsFromOverlay(map, overlay) {
     left: leftOffset,
     top: topOffset,
     zoom,
+    bearing,
     pitch: map.getTilt(),
     latitude,
     longitude
@@ -158,21 +180,15 @@ export function getViewPropsFromOverlay(map, overlay) {
 /**
  * Get the current view state
  * @param map (google.maps.Map) - The parent Map instance
- * @param coordinateTransformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
+ * @param transformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
  */
-export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer) {
+export function getViewPropsFromCoordinateTransformer(map, transformer) {
   const {width, height} = getMapSize(map);
-  const {
-    lat: latitude,
-    lng: longitude,
-    heading: bearing,
-    tilt: pitch,
-    zoom
-  } = coordinateTransformer.getCameraParams();
+  const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
   // Match Google projection matrix
   const fovy = 25;
-  const aspect = width / height;
+  const aspect = height ? width / height : 1;
 
   // Match depth range (crucial for correct z-sorting)
   const near = 0.75;
@@ -194,8 +210,8 @@ export function getViewPropsFromCoordinateTransformer(map, coordinateTransformer
     viewState: {
       altitude: focalDistance,
       bearing,
-      latitude,
-      longitude,
+      latitude: center.lat(),
+      longitude: center.lng(),
       pitch,
       projectionMatrix,
       repeat: true,
@@ -212,6 +228,12 @@ function getMapSize(map) {
     width: container.offsetWidth,
     height: container.offsetHeight
   };
+}
+
+function pixelToLngLat(projection, x, y) {
+  const point = new google.maps.Point(x, y);
+  const latLng = projection.fromContainerPixelToLatLng(point);
+  return [latLng.lng(), latLng.lat()];
 }
 
 function getEventPixel(event, deck) {
