@@ -19,12 +19,15 @@ const GL_STATE = {
 
 function noop() {}
 
+const defaultProps = {
+  interleaved: true
+};
+
 export default class GoogleMapsOverlay {
   constructor(props) {
-    if (props.interleaved === undefined) props.interleaved = true;
     this.props = {};
     this._map = null;
-    this.setProps(props);
+    this.setProps({...defaultProps, ...props});
   }
 
   /* Public API */
