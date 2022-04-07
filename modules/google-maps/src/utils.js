@@ -29,7 +29,7 @@ export function createDeckInstance(map, overlay, deck, props) {
 
   deck = new Deck({
     ...props,
-    style: null,
+    style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     initialViewState: {
       longitude: 0,
@@ -204,9 +204,8 @@ export function getViewPropsFromCoordinateTransformer(map, transformer) {
   const focalDistance = 0.5 * projectionMatrix[5];
 
   return {
-    // Using external gl context - do not set css size
-    width: false,
-    height: false,
+    width,
+    height,
     viewState: {
       altitude: focalDistance,
       bearing,
