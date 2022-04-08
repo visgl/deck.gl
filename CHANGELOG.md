@@ -18,6 +18,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## deck.gl v8.7
+https://github.com/visgl/deck.gl/pull/6800 CARTO: fetchMap custom aggregations
+https://github.com/visgl/deck.gl/pull/6789 Remove all scales from CARTO fetchMap (#6789)
+- CARTO: Accept the geoColumn property in the CartoLayer for query map types (#6788))
+
+#### deck.gl [8.7.5] - Apr 8 2022
+
+- GoogleMapsOverlay support non-interleaved mode for vector maps (#6804)
+- CARTO: fetchMap custom aggregations (#6800, #6789, #6789)
+- CARTO: Force GeoJSON for geojson/point fetchMap layers (#6767). Not properly released in 8.7.3.
+- CARTO: Accept the geoColumn property in the CartoLayer for query map types (#6788). Not properly released in 8.7.3.
 
 #### deck.gl [8.7.4] - Apr 4 2022
 
