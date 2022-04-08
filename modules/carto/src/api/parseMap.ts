@@ -1,7 +1,9 @@
 import GL from '@luma.gl/constants';
 import {
+  AGGREGATION,
   getLayer,
   getColorAccessor,
+  getColorValueAccessor,
   getSizeAccessor,
   getTextAccessor,
   getTextPixelOffsetAccessor
@@ -153,7 +155,12 @@ function createChannelProps(visualChannels, type, config, data) {
   if (type === 'grid' || type === 'hexagon') {
     result.colorScaleType = colorScale;
     if (colorField) {
-      result.getColorWeight = d => d[colorField.name];
+      const {colorAggregation} = config.visConfig;
+      if (!AGGREGATION[colorAggregation]) {
+        result.getColorValue = getColorValueAccessor(colorField, colorAggregation, data);
+      } else {
+        result.getColorWeight = d => [colorField.name];
+      }
     }
   } else if (colorField) {
     result.getFillColor = getColorAccessor(

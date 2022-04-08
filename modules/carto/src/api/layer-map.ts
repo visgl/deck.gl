@@ -1,4 +1,4 @@
-import {extent} from 'd3-array';
+import {deviation, extent, groupSort, median, variance} from 'd3-array';
 import {rgb} from 'd3-color';
 import {
   scaleLinear,
@@ -38,6 +38,15 @@ export const AGGREGATION = {
   sum: 'SUM'
 };
 
+const AGGREGATION_FUNC = {
+  'count unique': (values, accessor) => groupSort(values, v => v.length, accessor).length,
+  median,
+  // Unfortunately mode() is only available in d3-array@3+ which is ESM only
+  mode: (values, accessor) => groupSort(values, v => v.length, accessor).pop(),
+  stddev: deviation,
+  variance
+};
+
 const hexToRGBA = c => {
   const {r, g, b, opacity} = rgb(c);
   return [r, g, b, 255 * opacity];
@@ -75,12 +84,9 @@ const aggregationVisConfig = {
   percentile: ['lowerPercentile', 'upperPercentile']
 };
 
-const RADIUS_DOWNSCALE = 0.2;
-
 const defaultProps = {
   lineMiterLimit: 2,
   lineWidthUnits: 'pixels',
-  pointRadiusScale: RADIUS_DOWNSCALE,
   pointRadiusUnits: 'pixels',
   rounded: true,
   wrapLongitude: false
@@ -109,8 +115,7 @@ export function getLayer(
       propMap: {visConfig: {outline: 'stroked'}}
     },
     geojson: {
-      Layer: GeoJsonLayer,
-      defaultProps: {lineWidthScale: 2}
+      Layer: GeoJsonLayer
     },
     grid: {
       Layer: CPUGridLayer,
@@ -154,8 +159,6 @@ function getTileLayer(dataset) {
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
-      pointRadiusScale: 0.3,
-      lineWidthScale: 2,
       uniqueIdProperty: 'geoid',
       formatTiles
     }
@@ -214,6 +217,12 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
+export function getColorValueAccessor({name}, colorAggregation, data: any) {
+  const aggregator = AGGREGATION_FUNC[colorAggregation];
+  const accessor = values => aggregator(values, p => p[name]);
+  return normalizeAccessor(accessor, data);
+}
+
 export function getColorAccessor(
   {name},
   scaleType: SCALE_TYPE,
@@ -266,10 +275,7 @@ export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
   const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
   const sizeOffset = alignment === 'center' ? 0 : size;
 
-  const calculateOffset = r => {
-    r = RADIUS_DOWNSCALE * r;
-    return [signX * (r + padding), signY * (r + padding + sizeOffset)];
-  };
+  const calculateOffset = r => [signX * (r + padding), signY * (r + padding + sizeOffset)];
 
   return typeof radius === 'function'
     ? d => {
