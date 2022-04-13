@@ -170,7 +170,7 @@ test('getHexagon', t => {
 });
 
 test('domainFromValues', t => {
-  t.deepEquals(_domainFromValues(['a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
+  t.deepEquals(_domainFromValues(['a', 'a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
   t.deepEquals(_domainFromValues([1, 4, 2, 3, 1], 'quantile'), [1, 1, 2, 3, 4]);
   t.deepEquals(_domainFromValues([1, 0, -3], 'log'), [-3, 1]);
   t.deepEquals(_domainFromValues([1, 0, 3], 'log'), [0.00001, 3]);
