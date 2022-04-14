@@ -59,7 +59,7 @@ export default class TileLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (!tileset) {
-      tileset = new Tileset2D(this._getTilesetOptions(props));
+      tileset = new (this._getTileset2DClass())(this._getTilesetOptions(props));
       this.setState({tileset});
     } else if (propsChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
@@ -77,6 +77,10 @@ export default class TileLayer extends CompositeLayer {
     }
 
     this._updateTileset();
+  }
+
+  _getTileset2DClass () {
+    return Tileset2D;
   }
 
   _getTilesetOptions(props) {

@@ -31,3 +31,4 @@ export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tile-layer/utils';
+export {Tileset2D} from './tile-layer/tileset-2d';
