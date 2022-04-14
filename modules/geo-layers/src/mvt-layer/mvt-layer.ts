@@ -211,7 +211,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
       _offset: number;
       tile: Tile2DHeader<ParsedMvtTile>;
     }
-  ): LayersList {
+  ): Layer | null | LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
 
