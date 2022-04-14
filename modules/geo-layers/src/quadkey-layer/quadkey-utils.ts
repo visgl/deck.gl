@@ -2,7 +2,7 @@ import {worldToLngLat} from '@math.gl/web-mercator';
 
 const TILE_SIZE = 512;
 
-export function quadkeyToWorldBounds(quadkey) {
+export function quadkeyToWorldBounds(quadkey: string): [number[], number[]] {
   let x = 0;
   let y = 0;
   let mask = 1 << quadkey.length;
@@ -20,7 +20,7 @@ export function quadkeyToWorldBounds(quadkey) {
   ];
 }
 
-export function getQuadkeyPolygon(quadkey) {
+export function getQuadkeyPolygon(quadkey: string): number[] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);

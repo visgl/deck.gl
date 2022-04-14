@@ -36,3 +36,4 @@ export {default as _Tileset2D} from './tile-layer/tileset-2d';
 // Types
 
 export type {TileLayerProps} from './tile-layer/tile-layer';
+export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
