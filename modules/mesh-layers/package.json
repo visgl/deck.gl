@@ -32,7 +32,7 @@
     "@deck.gl/core": "^8.0.0"
   },
   "dependencies": {
-    "@loaders.gl/gltf": "^3.1.5",
+    "@loaders.gl/gltf": "^3.2.0-alpha.2",
     "@luma.gl/constants": "^8.5.10",
     "@luma.gl/core": "^8.5.10",
     "@luma.gl/experimental": "^8.5.10",

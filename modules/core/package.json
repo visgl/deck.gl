@@ -34,8 +34,8 @@
     "DEPRECATED: math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"
   ],
   "dependencies": {
-    "@loaders.gl/core": "^3.1.5",
-    "@loaders.gl/images": "^3.1.5",
+    "@loaders.gl/core": "^3.2.0-alpha.2",
+    "@loaders.gl/images": "^3.2.0-alpha.2",
     "@luma.gl/constants": "^8.5.10",
     "@luma.gl/core": "^8.5.10",
     "@math.gl/core": "3.6.0-alpha.5",

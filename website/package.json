@@ -18,8 +18,8 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d public"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^3.1.5",
-    "@loaders.gl/ply": "^3.1.5",
+    "@loaders.gl/obj": "^3.2.0-alpha.2",
+    "@loaders.gl/ply": "^3.2.0-alpha.2",
     "d3-color": "^1.4.1",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",

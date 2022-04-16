@@ -28,13 +28,13 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/images": "^3.1.5",
+    "@loaders.gl/images": "^3.2.0-alpha.2",
     "@mapbox/tiny-sdf": "^1.1.0",
     "@math.gl/polygon": "3.6.0-alpha.5",
     "earcut": "^2.0.6"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "^3.1.5"
+    "@loaders.gl/core": "^3.0.0"
   }
 }
