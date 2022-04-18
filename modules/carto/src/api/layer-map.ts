@@ -183,7 +183,7 @@ function domainFromAttribute(attribute, scaleType: SCALE_TYPE) {
 
 function domainFromValues(values, scaleType: SCALE_TYPE) {
   if (scaleType === 'ordinal') {
-    return uniqueSortedByFrequency(values);
+    return groupSort(values, g => -g.length, d => d);
   } else if (scaleType === 'quantile') {
     return values.sort((a, b) => a - b);
   } else if (scaleType === 'log') {
@@ -191,20 +191,6 @@ function domainFromValues(values, scaleType: SCALE_TYPE) {
     return [d0 === 0 ? 1e-5 : d0, d1];
   }
   return extent(values);
-}
-
-function uniqueSortedByFrequency(values) {
-  const frequency = values.reduce((res, value) => {
-    if (value !== null && value !== undefined) {
-      if (!res[value]) {
-        res[value] = 0;
-      }
-      res[value] += 1;
-    }
-    return res;
-  }, {});
-
-  return Object.keys(frequency).sort((a, b) => frequency[b] - frequency[a]);
 }
 
 function calculateDomain(data, name, scaleType) {
