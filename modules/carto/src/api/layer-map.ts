@@ -183,7 +183,11 @@ function domainFromAttribute(attribute, scaleType: SCALE_TYPE) {
 
 function domainFromValues(values, scaleType: SCALE_TYPE) {
   if (scaleType === 'ordinal') {
-    return groupSort(values, g => -g.length, d => d);
+    return groupSort(
+      values,
+      g => -g.length,
+      d => d
+    );
   } else if (scaleType === 'quantile') {
     return values.sort((a, b) => a - b);
   } else if (scaleType === 'log') {
