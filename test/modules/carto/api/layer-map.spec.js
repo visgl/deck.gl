@@ -48,6 +48,50 @@ const COLOR_TESTS = [
     data: [{}], // Default range will be [0, 1]
     d: {v: 0.5},
     expected: [117, 18, 67, 186]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'custom',
+    colorRange: {
+      colors,
+      colorMap: [
+        [0, '#E3611C'],
+        [1, '#F1920E'],
+        [5, '#FFC300']
+      ]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [241, 146, 14, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'ordinal',
+    colorRange: {
+      colors,
+      colorMap: [
+        [0, '#E3611C'],
+        [1, '#F1920E'],
+        [5, '#FFC300']
+      ]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [227, 97, 28, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'ordinal',
+    colorRange: {
+      colors,
+      colorMap: [[99, '#E3611C']]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [134, 141, 145, 255]
   }
 ];
 
