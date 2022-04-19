@@ -200,7 +200,7 @@ function checkFetchLayerDataParameters({
 
 export interface FetchLayerDataResult {
   data: any;
-  format: Format;
+  format?: Format;
   schema?: SchemaField[];
 }
 export async function fetchLayerData({

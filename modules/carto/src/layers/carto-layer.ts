@@ -1,16 +1,28 @@
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, Layer, log} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
 import {
   COLUMNS_SUPPORT,
+  Format,
   FORMATS,
   GEO_COLUMN_SUPPORT,
+  MapType,
   MAP_TYPES,
+  TileFormat,
   TILE_FORMATS
 } from '../api/maps-api-common';
-import {getDefaultCredentials} from '../config';
+import {
+  ClassicCredentials,
+  CloudNativeCredentials,
+  Credentials,
+  getDefaultCredentials
+} from '../config';
+import {CompositeLayerProps, LayerProps} from 'modules/core/src/types/layer-props';
+import {ChangeFlags} from 'modules/core/src/lib/layer-state';
+import {FetchLayerDataResult} from '../api/maps-v3-client';
+import {assert} from '../utils';
 
 const defaultProps = {
   // (String, required): data resource to load. table name, sql query or tileset name.
@@ -46,19 +58,105 @@ const defaultProps = {
   columns: {type: 'array', value: null}
 };
 
-export default class CartoLayer extends CompositeLayer {
-  initializeState() {
+export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
+  /**
+   * Either a SQL query or a name of dataset/tileset.
+   */
+  data: string;
+
+  /**
+   * Data type.
+   *
+   * Possible values are:
+   *  * `MAP_TYPES.QUERY`, if data is a SQL query.
+   *  * `MAP_TYPES.TILESET`, if data is a tileset name.
+   *  * `MAP_TYPES.TABLE`, if data is a dataset name. Only supported with API v3.
+   */
+  type: MapType;
+
+  /**
+   * Name of the connection registered in the CARTO workspace.
+   *
+   * Required when apiVersion is `API_VERSIONS.V3`.
+   */
+  connection?: string;
+
+  /**
+   * Use to override the default data format.
+   *
+   * Only supported when apiVersion is `API_VERSIONS.V3`.
+   *
+   * Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`.
+   */
+  format?: Format;
+
+  /**
+   * Use to override the default tile data format.
+   *
+   * Only supported when apiVersion is `API_VERSIONS.V3` and format is `FORMATS.TILEJSON`.
+   *
+   * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
+   */
+  formatTiles?: TileFormat;
+
+  /**
+   * Name of the geo_column in the CARTO platform.
+   *
+   * Use this override the default column (`'geom'`), from which the geometry information should be fetched.
+   *
+   * Only supported when apiVersion is `API_VERSIONS.V3` and type is `MAP_TYPES.TABLE`.
+   */
+  geoColumn?: string;
+
+  /**
+   * Names of columns to fetch.
+   *
+   * By default, all columns are fetched
+   *
+   * Only supported when apiVersion is `API_VERSIONS.V3` and type is `MAP_TYPES.TABLE`.
+   */
+  columns?: string[];
+
+  /**
+   * A string pointing to a unique attribute at the result of the query.
+   *
+   * A unique attribute is needed for highlighting with vector tiles when a feature is split across two or more tiles.
+   */
+  uniqueIdProperty?: string;
+
+  /**
+   * Optional. Overrides the configuration to connect with CARTO.
+   *
+   * @see Credentials
+   */
+  credentials?: Credentials;
+
+  /**
+   * Called when the request to the CARTO Maps API failed.
+   *
+   * By default the Error is thrown.
+   */
+  onDataError?: (err: unknown) => void;
+
+  clientId?: string;
+}
+
+export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerProps<DataT>> {
+  static layerName = 'CartoLayer';
+  static defaultProps = defaultProps as any;
+
+  initializeState(): void {
     this.state = {
       data: null,
       apiVersion: null
     };
   }
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     return this.getSubLayers().length > 0 && super.isLoaded;
   }
 
-  _checkProps(props) {
+  _checkProps(props: CartoLayerProps): void {
     const {type, credentials, connection, geoColumn, columns} = props;
     const localCreds = {...getDefaultCredentials(), ...credentials};
     const {apiVersion} = localCreds;
@@ -97,7 +195,16 @@ export default class CartoLayer extends CompositeLayer {
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({
+    props,
+    oldProps,
+    changeFlags
+  }: {
+    props: CartoLayerProps;
+    oldProps: CartoLayerProps;
+    context: any;
+    changeFlags: ChangeFlags;
+  }): void {
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
@@ -111,40 +218,57 @@ export default class CartoLayer extends CompositeLayer {
 
     if (shouldUpdateData) {
       this.setState({data: null, apiVersion: null});
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateData();
     }
   }
 
-  async _updateData() {
+  async _updateData(): Promise<void> {
     try {
-      const {type, data: source, clientId, credentials, ...rest} = this.props;
+      const {type, data: source, clientId, credentials, connection, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let result;
+      let result: FetchLayerDataResult;
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
-        result = {data: await getDataV2({type, source, credentials})};
+        result = {
+          data: await getDataV2({type, source, credentials: credentials as ClassicCredentials})
+        };
       } else {
-        result = await fetchLayerData({type, source, clientId, credentials, ...rest});
+        result = await fetchLayerData({
+          type,
+          source,
+          clientId,
+          credentials: credentials as CloudNativeCredentials,
+          connection: connection as string,
+          ...rest
+        });
       }
 
       this.setState({...result, apiVersion});
-      this.props.onDataLoad(result.data);
+
+      this.props.onDataLoad?.(result.data, {
+        propName: 'data',
+        layer: this
+      });
     } catch (err) {
       if (this.props.onDataError) {
-        this.props.onDataError(err);
+        this.props.onDataError(err as Error);
       } else {
         throw err;
       }
     }
   }
 
-  _getSubLayerAndProps() {
+  _getSubLayerAndProps(): [any, LayerProps] {
+    assert(this.state);
+
     const {data, format, apiVersion} = this.state;
 
     const {uniqueIdProperty} = defaultProps;
-    const props = {uniqueIdProperty, ...this.props};
-    delete props.data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {data: _notUsed, ...propsNoData} = this.props;
+    const props = {uniqueIdProperty, ...propsNoData};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
       return [MVTLayer, props];
@@ -155,7 +279,9 @@ export default class CartoLayer extends CompositeLayer {
       const tileUrl = new URL(data.tiles[0]);
 
       props.formatTiles =
-        props.formatTiles || tileUrl.searchParams.get('formatTiles') || TILE_FORMATS.MVT;
+        props.formatTiles ||
+        (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
+        TILE_FORMATS.MVT;
 
       return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
     }
@@ -164,7 +290,9 @@ export default class CartoLayer extends CompositeLayer {
     return [GeoJsonLayer, props];
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null {
+    assert(this.state);
+
     const {data} = this.state;
 
     if (!data) return null;
@@ -184,6 +312,3 @@ export default class CartoLayer extends CompositeLayer {
     );
   }
 }
-
-CartoLayer.layerName = 'CartoLayer';
-CartoLayer.defaultProps = defaultProps;
