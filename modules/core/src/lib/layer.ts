@@ -49,6 +49,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {LayerContext} from './layer-manager';
+import {PropTypeDef} from '../lifecycle/prop-types';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -69,7 +70,7 @@ const areViewportsEqual = memoize(
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
-const defaultProps = {
+const defaultProps: Record<string, PropTypeDef> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: {type: 'function', value: null, compare: false, optional: true},

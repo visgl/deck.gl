@@ -1,8 +1,9 @@
 import {AccessorFunction} from '@deck.gl/core';
+import {PropTypeDef} from 'modules/core/src/lifecycle/prop-types';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
-const defaultProps = {
+const defaultProps: Record<string, PropTypeDef> = {
   getQuadkey: {type: 'accessor', value: d => d.quadkey}
 };
 
