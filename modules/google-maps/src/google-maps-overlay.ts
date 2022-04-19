@@ -7,6 +7,7 @@ import {
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer
 } from './utils';
+import {Deck, Layer} from '@deck.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE = {
@@ -17,27 +18,34 @@ const GL_STATE = {
   blendEquation: GL.FUNC_ADD
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const defaultProps = {
   interleaved: true
 };
 
+// TODO: this should be alias to Deck Props.
+export type GoogleMapsOverlayProps = Record<string, any>;
 export default class GoogleMapsOverlay {
-  constructor(props) {
-    this.props = {};
-    this._map = null;
+  private props: GoogleMapsOverlayProps = {};
+  private _map: google.maps.Map | null = null;
+  private _deck: Deck | null = null;
+  private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
+
+  constructor(props: GoogleMapsOverlayProps) {
     this.setProps({...defaultProps, ...props});
   }
 
   /* Public API */
 
-  setMap(map) {
+  /** Add/remove the overlay from a map. */
+  setMap(map: google.maps.Map | null): void {
     if (map === this._map) {
       return;
     }
     if (this._map) {
-      this._overlay.setMap(null);
+      this._overlay?.setMap(null);
       this._map = null;
     }
     if (map) {
@@ -54,7 +62,10 @@ export default class GoogleMapsOverlay {
     }
   }
 
-  setProps(props) {
+  /**
+   * Update (partial) props.
+   */
+  setProps(props: Partial<GoogleMapsOverlayProps>): void {
     Object.assign(this.props, props);
     if (this._deck) {
       if (props.style) {
@@ -65,18 +76,22 @@ export default class GoogleMapsOverlay {
     }
   }
 
+  /** Equivalent of `deck.pickObject`. */
   pickObject(params) {
     return this._deck && this._deck.pickObject(params);
   }
 
+  /** Equivalent of `deck.pickObjects`.  */
   pickMultipleObjects(params) {
     return this._deck && this._deck.pickMultipleObjects(params);
   }
 
+  /** Equivalent of `deck.pickMultipleObjects`. */
   pickObjects(params) {
     return this._deck && this._deck.pickObjects(params);
   }
 
+  /** Remove the overlay and release all underlying resources. */
   finalize() {
     this.setMap(null);
     if (this._deck) {
@@ -86,33 +101,35 @@ export default class GoogleMapsOverlay {
   }
 
   /* Private API */
-  _createOverlay(map) {
+  _createOverlay(map: google.maps.Map) {
     const {interleaved} = this.props;
     const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     const renderingType = map.getRenderingType();
     if (renderingType === UNINITIALIZED) {
       return;
     }
-    const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
-    const OverlayView = isVectorMap ? google.maps.WebGLOverlayView : google.maps.OverlayView;
-    const overlay = new OverlayView();
 
-    // Lifecycle methods are different depending on map type
-    if (isVectorMap) {
-      if (interleaved) {
-        overlay.onAdd = noop;
-        overlay.onContextRestored = this._onContextRestored.bind(this);
-        overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
-      } else {
-        overlay.onAdd = this._onAdd.bind(this);
-        overlay.onContextRestored = noop;
-        overlay.onDraw = this._onDrawVectorOverlay.bind(this);
+    const overlay = (() => {
+      const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
+      if (isVectorMap) {
+        const overlay = new google.maps.WebGLOverlayView();
+        if (interleaved) {
+          overlay.onAdd = noop;
+          overlay.onContextRestored = this._onContextRestored.bind(this);
+          overlay.onDraw = this._onDrawVectorInterleaved.bind(this);
+        } else {
+          overlay.onAdd = this._onAdd.bind(this);
+          overlay.onContextRestored = noop;
+          overlay.onDraw = this._onDrawVectorOverlay.bind(this);
+        }
+        overlay.onContextLost = this._onContextLost.bind(this);
+        return overlay;
       }
-      overlay.onContextLost = this._onContextLost.bind(this);
-    } else {
+      const overlay = new google.maps.OverlayView();
       overlay.onAdd = this._onAdd.bind(this);
       overlay.draw = this._onDrawRaster.bind(this);
-    }
+      return overlay;
+    })();
     overlay.onRemove = this._onRemove.bind(this);
 
     this._overlay = overlay;
@@ -120,12 +137,20 @@ export default class GoogleMapsOverlay {
   }
 
   _onAdd() {
+    if (!this._map || !this._overlay) {
+      return;
+    }
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
   _onContextRestored({gl}) {
+    if (!this._map || !this._overlay) {
+      return;
+    }
     const _customRender = () => {
-      this._overlay.requestRedraw();
+      if (this._overlay) {
+        (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
+      }
     };
     const deck = createDeckInstance(this._map, this._overlay, this._deck, {
       gl,
@@ -155,13 +180,22 @@ export default class GoogleMapsOverlay {
   }
 
   _onRemove() {
+    if (!this._deck) {
+      return;
+    }
     // Clear deck canvas
     this._deck.setProps({layerFilter: HIDE_ALL_LAYERS});
   }
 
   _onDrawRaster() {
+    if (!this._deck || !this._map) {
+      return;
+    }
     const deck = this._deck;
-    const {width, height, left, top, ...rest} = getViewPropsFromOverlay(this._map, this._overlay);
+    const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
+      this._map,
+      this._overlay as google.maps.OverlayView
+    );
 
     const parentStyle = deck.canvas.parentElement.style;
     parentStyle.left = `${left}px`;
