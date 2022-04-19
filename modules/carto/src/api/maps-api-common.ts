@@ -20,8 +20,8 @@ export const MAP_TYPES = {
   TILESET: 'tileset'
 } as const;
 export type MapType = ValuesOf<typeof MAP_TYPES>;
-export const COLUMNS_SUPPORT = [MAP_TYPES.TABLE];
-export const GEO_COLUMN_SUPPORT = [MAP_TYPES.QUERY, MAP_TYPES.TABLE];
+export const COLUMNS_SUPPORT: MapType[] = [MAP_TYPES.TABLE];
+export const GEO_COLUMN_SUPPORT: MapType[] = [MAP_TYPES.QUERY, MAP_TYPES.TABLE];
 
 // AVAILABLE FORMATS
 export const FORMATS = {
