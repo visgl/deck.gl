@@ -68,6 +68,7 @@ export {
   DeckRenderer,
   // Logging
   log,
+  assert,
   // Transition bindings
   TRANSITION_EVENTS,
   TransitionInterpolator,
