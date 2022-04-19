@@ -1,5 +1,5 @@
 /* global google, document */
-import {Deck} from '@deck.gl/core';
+import {assert, Deck} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -108,7 +108,10 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   const projection = overlay.getProjection();
 
   const bounds = map.getBounds();
-  assert(bounds);
+  if (!bounds) {
+    return {width, height, left: 0, top: 0};
+  }
+
   const ne = bounds.getNorthEast();
   const sw = bounds.getSouthWest();
   const topRight = projection.fromLatLngToDivPixel(ne);
@@ -155,7 +158,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // Maps sometimes returns undefined instead of 0
   const heading = map.getHeading() || 0;
 
-  let zoom = (map.getZoom() || 0) - 1;
+  let zoom = map.getZoom()! - 1;
 
   let scale;
 
@@ -308,11 +311,5 @@ function handleMouseEvent(deck: Deck, type: string, event) {
 
     default:
       return;
-  }
-}
-
-export default function assert(condition: unknown, message?: string): asserts condition {
-  if (!condition) {
-    throw new Error(message || 'deck.gl: assertion failed.');
   }
 }
