@@ -18,9 +18,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
 ## deck.gl v8.7
-https://github.com/visgl/deck.gl/pull/6800 CARTO: fetchMap custom aggregations
-https://github.com/visgl/deck.gl/pull/6789 Remove all scales from CARTO fetchMap (#6789)
-- CARTO: Accept the geoColumn property in the CartoLayer for query map types (#6788))
+
+#### deck.gl [8.7.6] - Apr 20 2022
+
+-  CARTO: fetchMap support for custom breaks (#6819)
 
 #### deck.gl [8.7.5] - Apr 8 2022
 
