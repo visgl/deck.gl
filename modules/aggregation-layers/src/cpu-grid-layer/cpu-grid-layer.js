@@ -25,6 +25,8 @@ import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer';
 
+import GL from '@luma.gl/constants';
+
 function nop() {}
 
 const defaultProps = {
@@ -79,7 +81,7 @@ export default class CPUGridLayer extends AggregationLayer {
     };
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, accessor: 'getPosition'}
+      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'}
     });
     // color and elevation attributes can't be added as attributes
     // they are calcualted using 'getValue' accessor that takes an array of pints.
