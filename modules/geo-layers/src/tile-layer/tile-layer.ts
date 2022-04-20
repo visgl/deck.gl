@@ -303,7 +303,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return this.props.renderSubLayers(props);
   }
 
-  getSubLayerPropsByTile(tile: Tile2DHeader): LayerProps | null {
+  getSubLayerPropsByTile(tile: Tile2DHeader): Partial<LayerProps> | null {
     return null;
   }
 
@@ -318,7 +318,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     }
   }
 
-  renderLayers(): Layer[] {
+  renderLayers(): Layer[] | null {
     assert(this.state);
     return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);

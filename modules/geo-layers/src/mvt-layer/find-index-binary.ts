@@ -8,7 +8,12 @@ const GEOM_TYPES = ['points', 'lines', 'polygons'];
  * @param {Number|String} featureId - feature id to find
  * @param {String} layerName - the layer to search in
  */
-export default function findIndexBinary(data, uniqueIdProperty, featureId, layerName) {
+export default function findIndexBinary(
+  data,
+  uniqueIdProperty: string,
+  featureId: string | number,
+  layerName: string
+) {
   for (const gt of GEOM_TYPES) {
     const index = data[gt] && findIndexByType(data[gt], uniqueIdProperty, featureId, layerName);
     if (index >= 0) {
@@ -19,7 +24,12 @@ export default function findIndexBinary(data, uniqueIdProperty, featureId, layer
   return -1;
 }
 
-function findIndexByType(geomData, uniqueIdProperty, featureId, layerName) {
+function findIndexByType(
+  geomData,
+  uniqueIdProperty: string,
+  featureId: string | number,
+  layerName: string
+) {
   const featureIds = geomData.featureIds.value;
 
   if (!featureIds.length) {
@@ -66,7 +76,10 @@ function findIndexByType(geomData, uniqueIdProperty, featureId, layerName) {
 
 // Returns [firstFeatureIndex, lastFeatureIndex]
 // MVTLoader parses tiles layer-by-layer, so each layer is a continuous range
-function getLayerRange(geomData, layerName) {
+function getLayerRange(
+  geomData,
+  layerName: string
+): [firstFeatureIndex: number, lastFeatureIndex: number] | undefined {
   if (!geomData.__layers) {
     // Cache a map from properties.layerName to index ranges
     const layerNames = {};
@@ -87,10 +100,10 @@ function getLayerRange(geomData, layerName) {
 }
 
 // Returns global feature id
-function getGlobalFeatureId(geomData, featureIndex) {
+function getGlobalFeatureId(geomData, featureIndex: number) {
   if (!geomData.__ids) {
     // Cache a map from featureId to globalFeatureId
-    const result = [];
+    const result: string[] = [];
     const featureIds = geomData.featureIds.value;
     const globalFeatureIds = geomData.globalFeatureIds.value;
     for (let i = 0; i < featureIds.length; i++) {
@@ -102,7 +115,7 @@ function getGlobalFeatureId(geomData, featureIndex) {
 }
 
 // Like array.findIndex, but only search within a range
-function findIndex(array, predicate, startIndex, endIndex) {
+function findIndex(array, predicate, startIndex: number, endIndex: number) {
   for (let i = startIndex; i < endIndex; i++) {
     if (predicate(array[i], i)) {
       return i;
