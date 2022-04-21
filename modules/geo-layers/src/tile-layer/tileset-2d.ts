@@ -266,6 +266,10 @@ export default class Tileset2D {
     return `${index.x}-${index.y}-${index.z}`;
   }
 
+  getTileZoom(index: TileIndex) {
+    return index.z;
+  }
+
   // Add custom metadata to tiles
   getTileMetadata({index}) {
     assert(this._viewport);
@@ -395,9 +399,8 @@ export default class Tileset2D {
       this._dirty = true;
     }
     if (this._dirty) {
-      this._tiles = Array.from(this._cache.values())
-        // sort by zoom level so that smaller tiles are displayed on top
-        .sort((t1, t2) => t1.z - t2.z);
+      // sort by zoom level so that smaller tiles are displayed on top
+      this._tiles = Array.from(this._cache.values()).sort((t1, t2) => t1.zoom - t2.zoom);
 
       this._dirty = false;
     }
@@ -414,6 +417,7 @@ export default class Tileset2D {
     if (!tile && create) {
       tile = new Tile2DHeader(index);
       Object.assign(tile, this.getTileMetadata(tile));
+      Object.assign(tile, {zoom: this.getTileZoom(tile.index)});
       needsReload = true;
       this._cache.set(cacheKey, tile);
       this._dirty = true;
@@ -438,7 +442,7 @@ export default class Tileset2D {
 
     // Make copy as getParentIndex mutates object
     let index = JSON.parse(JSON.stringify(tile.index));
-    while (index.z > _minZoom) {
+    while (this.getTileZoom(index) > _minZoom) {
       index = this.getParentIndex(index);
       const parent = this._getTile(index);
       if (parent) {
@@ -480,7 +484,7 @@ function updateTileStateReplace(allTiles: Tile2DHeader[]) {
     }
   }
   // Always process parents first
-  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.z - t2.z);
+  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.zoom - t2.zoom);
   for (const tile of sortedTiles) {
     tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
 

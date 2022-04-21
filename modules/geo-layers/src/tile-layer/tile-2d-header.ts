@@ -16,9 +16,11 @@ export default class Tile2DHeader {
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
   content: any;
-  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
   state?: number;
   layers?: Layer[] | null;
+
+  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
+  zoom!: number; // assigned _always_ with result of `getTileZoom`
 
   private _abortController: AbortController | null;
   private _loader: Promise<void> | undefined;

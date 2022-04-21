@@ -27,12 +27,16 @@ class QuadkeyTileset2D extends Tileset2D {
     return super.getTileIndices(opts).map(tileToQuadkey);
   }
 
+  getTileCacheKey(index) {
+    return index;
+  }
+
   getTileMetadata(index) {
     return {};
   }
 
-  getTileCacheKey(index) {
-    return index;
+  getTileZoom(index) {
+    return index.length;
   }
 
   getParentIndex(index) {
