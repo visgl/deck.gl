@@ -157,8 +157,8 @@ const defaultProps = {
 export default abstract class Layer<
   PropsT extends LayerProps = LayerProps
 > extends Component<PropsT> {
-  static defaultProps = defaultProps;
-  static layerName = 'Layer';
+  static defaultProps: any = defaultProps;
+  static layerName: string = 'Layer';
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -174,9 +174,7 @@ export default abstract class Layer<
     const worldPosition = getWorldPosition(xyz, {
       viewport,
       modelMatrix: this.props.modelMatrix,
-      // @ts-ignore coordinateOrigin cannot be undefined after merging with default prop
       coordinateOrigin: this.props.coordinateOrigin,
-      // @ts-ignore coordinateSystem cannot be undefined after merging with default prop
       coordinateSystem: this.props.coordinateSystem
     });
     const [x, y, z] = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
@@ -207,9 +205,7 @@ export default abstract class Layer<
     return projectPosition(xyz, {
       viewport,
       modelMatrix: this.props.modelMatrix,
-      // @ts-ignore coordinateOrigin cannot be undefined after merging with default prop
       coordinateOrigin: this.props.coordinateOrigin,
-      // @ts-ignore coordinateSystem cannot be undefined after merging with default prop
       coordinateSystem: this.props.coordinateSystem,
       ...params
     });
@@ -251,12 +247,12 @@ export default abstract class Layer<
 
   /** Returns true if using shader-based WGS84 longitude wrapping */
   get wrapLongitude(): boolean {
-    return this.props.wrapLongitude || false;
+    return this.props.wrapLongitude;
   }
 
   /** Returns true if the layer is visible in the picking pass */
   isPickable(): boolean {
-    return (this.props.pickable && this.props.visible) || false;
+    return this.props.pickable && this.props.visible;
   }
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
@@ -391,7 +387,6 @@ export default abstract class Layer<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
-    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
@@ -774,7 +769,7 @@ export default abstract class Layer<
     /* eslint-disable accessor-pairs */
     Object.defineProperty(this.state, 'attributeManager', {
       get: () => {
-        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()');
+        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()')();
         return attributeManager;
       }
     });
@@ -793,7 +788,6 @@ export default abstract class Layer<
     this.initializeState(this.context as LayerContext);
 
     // Initialize extensions
-    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of this.props.extensions) {
       extension.initializeState.call(this, this.context, extension);
     }
@@ -875,7 +869,6 @@ export default abstract class Layer<
         }
       }
       // Execute extension updates
-      // @ts-ignore (TS2532) extensions is always defined after merging with default props
       for (const extension of this.props.extensions) {
         extension.updateState.call(this, updateParams, extension);
       }
@@ -902,7 +895,6 @@ export default abstract class Layer<
     // Call subclass lifecycle method
     this.finalizeState(this.context as LayerContext);
     // Finalize extensions
-    // @ts-ignore (TS2532) extensions is always defined after merging with default props
     for (const extension of this.props.extensions) {
       extension.finalizeState.call(this, extension);
     }
@@ -927,7 +919,7 @@ export default abstract class Layer<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity as number;
+    const opacity = this.props.opacity;
     // apply gamma to opacity to make it visually "linear"
     uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
@@ -949,7 +941,6 @@ export default abstract class Layer<
         const opts = {moduleParameters, uniforms, parameters, context};
 
         // extensions
-        // @ts-ignore (TS2532) extensions is always defined after merging with default props
         for (const extension of this.props.extensions) {
           extension.draw.call(this, opts, extension);
         }
