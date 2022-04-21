@@ -769,7 +769,7 @@ export default abstract class Layer<
     /* eslint-disable accessor-pairs */
     Object.defineProperty(this.state, 'attributeManager', {
       get: () => {
-        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()');
+        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()')();
         return attributeManager;
       }
     });

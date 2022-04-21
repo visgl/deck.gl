@@ -5,6 +5,8 @@ import type {NumericArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
+import type {Buffer} from '@luma.gl/webgl';
+
 export type LayerData<T> =
   | Iterable<T>
   | {
@@ -13,23 +15,62 @@ export type LayerData<T> =
     };
 
 export type AccessorContext<T> = {
+  /** The index of the current iteration */
   index: number;
+  /** The value of the `data` prop */
   data: LayerData<T>;
+  /** A pre-allocated array. The accessor function can optionally fill data into this array and return it,
+   * instead of creating a new array for every object. In some browsers this improves performance significantly
+   * by reducing garbage collection. */
   target: number[];
 };
 
-export type Accessor<In, Out> = Out | ((object: In, objectInfo: AccessorContext<In>) => Out);
+/** Either a uniform value for all objects, or a function that returns a value for each object. */
+export type Accessor<In, Out> =
+  | Out
+  | ((
+      /** The current element in the data stream.
+       * If `data` is an array or an iterable, the element of the current iteration is used.
+       * If `data` is a non-iterable object, this argument is always `null`. */
+      object: In,
+      /** Contextual information of the current element. */
+      objectInfo: AccessorContext<In>
+    ) => Out);
 
+/** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
+ * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
+ */
 export type Position = [number, number] | [number, number, number] | Float32Array | Float64Array;
+
+/** A color in the format of `[r, g, b, a?]` */
 export type Color =
   | [number, number, number]
   | [number, number, number, number]
   | Uint8Array
   | Uint8ClampedArray;
+
+/** The unit of dimensions.
+ * See https://deck.gl/docs/developer-guide/coordinate-systems#dimensions
+ */
 export type Unit = 'meters' | 'common' | 'pixels';
 
-// TODO
-type BinaryAttribute = any;
+/** Supply binary buffers directly to the layer */
+type BinaryAttribute =
+  | Buffer
+  | {
+      buffer?: Buffer;
+      value?: NumericArray;
+      /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
+      type?: number;
+      /** The number of elements per vertex attribute. */
+      size?: number;
+      /** Offset of the first vertex attribute into the buffer, in bytes. */
+      offset?: number;
+      /** The offset between the beginning of consecutive vertex attributes, in bytes. */
+      stride?: number;
+      /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
+      normalized?: boolean;
+    };
 
 /**
  * Base Layer prop types
