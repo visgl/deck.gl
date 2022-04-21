@@ -12,13 +12,15 @@ import Tile2DHeader from './tile-2d-header';
 
 import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
 import {TileLoadProps, ZRange} from './types';
-import {urlType, getURLFromTemplate} from './utils';
+import {urlType, getURLFromTemplate as _getURLFromTemplate} from './utils';
 
 const defaultProps = {
+  TilesetClass: Tileset2D,
   data: [],
   dataComparator: urlType.equals,
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', optional: true, value: null, compare: false},
+  getURLFromTemplate: {type: 'function', value: _getURLFromTemplate, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null, compare: false},
   onTileLoad: {type: 'function', value: tile => {}, compare: false},
@@ -167,7 +169,7 @@ export default class TileLayer<
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (!tileset) {
-      tileset = new Tileset2D(this._getTilesetOptions(props));
+      tileset = new this.props.TilesetClass(this._getTilesetOptions(props));
       this.setState({tileset});
     } else if (propsChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
@@ -272,7 +274,7 @@ export default class TileLayer<
   // Methods for subclass to override
 
   getTileData(tile: TileLoadProps) {
-    const {data, getTileData, fetch} = this.props;
+    const {data, getTileData, getURLFromTemplate, fetch} = this.props;
     const {signal} = tile;
 
     tile.url =
