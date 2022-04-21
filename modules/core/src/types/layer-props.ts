@@ -87,29 +87,32 @@ export type LayerProps<DataType = any> = {
   /**
    * Callback to determine if two data values are equal.
    */
-  dataComparator?: (newData: LayerData<DataType>, oldData?: LayerData<DataType>) => boolean;
+  dataComparator?:
+    | ((newData: LayerData<DataType>, oldData?: LayerData<DataType>) => boolean)
+    | null;
   /**
    * Callback to determine the difference between two data values, in order to perform a partial update.
    */
-  _dataDiff?: (
-    newData: LayerData<DataType>,
-    oldData?: LayerData<DataType>
-  ) => {startRow: number; endRow?: number}[];
+  _dataDiff?:
+    | ((
+        newData: LayerData<DataType>,
+        oldData?: LayerData<DataType>
+      ) => {startRow: number; endRow?: number}[])
+    | null;
   /**
    * Callback to manipulate remote data when it's fetched and parsed.
    */
-  dataTransform?: (
-    data: LayerData<DataType>,
-    previousData?: LayerData<DataType>
-  ) => LayerData<DataType>;
+  dataTransform?:
+    | ((data: LayerData<DataType>, previousData?: LayerData<DataType>) => LayerData<DataType>)
+    | null;
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch: (
+  fetch?: <PropsT>(
     url: string,
     context: {
       propName: string;
-      layer: Layer;
+      layer: Layer<PropsT>;
       loaders?: any[];
       loadOptions?: any;
       signal?: AbortSignal;
@@ -122,43 +125,43 @@ export type LayerProps<DataType = any> = {
   /**
    * The purpose of the layer
    */
-  operation: 'draw' | 'mask';
+  operation?: 'draw' | 'mask';
   /**
    * If the layer should be rendered. Default true.
    */
-  visible: boolean;
+  visible?: boolean;
   /**
    * If the layer can be picked on pointer events. Default false.
    */
-  pickable: boolean;
+  pickable?: boolean;
   /**
    * Opacity of the layer, between 0 and 1. Default 1.
    */
-  opacity: number;
+  opacity?: number;
   /**
    * The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view.
    */
-  coordinateSystem: CoordinateSystem;
+  coordinateSystem?: CoordinateSystem;
   /**
    * The coordinate origin of the data.
    */
-  coordinateOrigin: [number, number, number];
+  coordinateOrigin?: [number, number, number];
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
-  modelMatrix?: NumericArray;
+  modelMatrix?: NumericArray | null;
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
-  wrapLongitude: boolean;
+  wrapLongitude?: boolean;
   /**
    * The format of positions, default 'XYZ'.
    */
-  positionFormat: 'XYZ' | 'XY';
+  positionFormat?: 'XYZ' | 'XY';
   /**
    * The format of colors, default 'RGBA'.
    */
-  colorFormat: 'RGBA' | 'RGB';
+  colorFormat?: 'RGBA' | 'RGB';
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
@@ -170,7 +173,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add additional functionalities to this layer.
    */
-  extensions: any[];
+  extensions?: any[];
   /**
    * Add support for additional data formats.
    */
@@ -182,65 +185,68 @@ export type LayerProps<DataType = any> = {
   /**
    * Callback to calculate the polygonOffset WebGL parameter.
    */
-  getPolygonOffset?: (params: {layerIndex: number}) => [number, number] | null;
+  getPolygonOffset?: ((params: {layerIndex: number}) => [number, number]) | null;
 
   /**
    * Enable GPU-based object highlighting. Default false.
    */
-  autoHighlight: boolean;
+  autoHighlight?: boolean;
   /**
    * The index of the data object to highlight. If unspecified, the currently hoverred object is highlighted.
    */
-  highlightedObjectIndex: number | null;
+  highlightedObjectIndex?: number | null;
   /**
    * The color of the highlight.
    */
-  highlightColor: number[] | ((pickingInfo: PickingInfo) => number[]);
+  highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
 
   /**
    * Called when remote data is fetched and parsed.
    */
-  onDataLoad?: (data: LayerData<DataType>, context: {propName: string; layer: Layer}) => void;
+  onDataLoad?:
+    | (<PropsT>(
+        data: LayerData<DataType>,
+        context: {propName: string; layer: Layer<PropsT>}
+      ) => void)
+    | null;
   /**
    * Called when the layer encounters an error.
    */
-  onError?: (error: Error) => boolean | void;
+  onError?: ((error: Error) => boolean | void) | null;
   /**
    * Called when the mouse enters/leaves an object of this layer.
    */
-  onHover?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+  onHover?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
   /**
    * Called when the mouse clicks over an object of this layer.
    */
-  onClick?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+  onClick?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
   /**
    * Called when the mouse starts dragging an object of this layer.
    */
-  onDragStart?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+  onDragStart?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
   /**
    * Called when the mouse drags an object of this layer.
    */
-  onDrag?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+  onDrag?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
   /**
    * Called when the mouse releases an object of this layer.
    */
-  onDragEnd?: (pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void;
+  onDragEnd?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
 
   /** (Advanced) supply attribute size externally */
-  numInstances?: number;
+  numInstances?: number | undefined;
 
   /** (Advanced) supply variable-width attribute size externally */
-  startIndices?: NumericArray;
-};
+  startIndices?: NumericArray | undefined;
 
-/**
- * Base CompositeLayer prop types
- */
-export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
-  _subLayerProps: {
-    [subLayerId: string]: {
-      type?: typeof Layer;
-      [propName: string]: any;
-    };
-  };
+  /** (Experimental) override sub layer props. Only works on a composite layer. */
+  _subLayerProps?:
+    | {
+        [subLayerId: string]: {
+          type?: typeof Layer;
+          [propName: string]: any;
+        };
+      }
+    | undefined;
 };

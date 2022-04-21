@@ -30,26 +30,26 @@ import type {LayerProps, LayerContext, Accessor, Unit, Position, Color} from '@d
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 export type ScatterplotLayerProps<DataT> = LayerProps<DataT> & {
-  radiusUnits: Unit;
-  radiusScale: number;
-  radiusMinPixels: number;
-  radiusMaxPixels: number;
+  radiusUnits?: Unit;
+  radiusScale?: number;
+  radiusMinPixels?: number;
+  radiusMaxPixels?: number;
 
-  lineWidthUnits: Unit;
-  lineWidthScale: number;
-  lineWidthMinPixels: number;
-  lineWidthMaxPixels: number;
+  lineWidthUnits?: Unit;
+  lineWidthScale?: number;
+  lineWidthMinPixels?: number;
+  lineWidthMaxPixels?: number;
 
-  stroked: boolean;
-  filled: boolean;
-  billboard: boolean;
-  antialiasing: boolean;
+  stroked?: boolean;
+  filled?: boolean;
+  billboard?: boolean;
+  antialiasing?: boolean;
 
-  getPosition: Accessor<DataT, Position>;
-  getRadius: Accessor<DataT, number>;
-  getFillColor: Accessor<DataT, Color>;
-  getLineColor: Accessor<DataT, Color>;
-  getLineWidth: Accessor<DataT, number>;
+  getPosition?: Accessor<DataT, Position>;
+  getRadius?: Accessor<DataT, number>;
+  getFillColor?: Accessor<DataT, Color>;
+  getLineColor?: Accessor<DataT, Color>;
+  getLineWidth?: Accessor<DataT, number>;
 };
 
 const defaultProps = {

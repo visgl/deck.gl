@@ -37,14 +37,14 @@ function normalizeParameters(opts: {
   viewport: Viewport;
   coordinateSystem: CoordinateSystem;
   coordinateOrigin: [number, number, number];
-  modelMatrix?: NumericArray;
+  modelMatrix?: NumericArray | null;
   fromCoordinateSystem?: CoordinateSystem;
   fromCoordinateOrigin?: [number, number, number];
 }): {
   viewport: Viewport;
   coordinateSystem: CoordinateSystem;
   coordinateOrigin: [number, number, number];
-  modelMatrix?: NumericArray;
+  modelMatrix?: NumericArray | null;
   fromCoordinateSystem: CoordinateSystem;
   fromCoordinateOrigin: [number, number, number];
 } {
@@ -85,7 +85,7 @@ export function getWorldPosition(
     offsetMode
   }: {
     viewport: Viewport;
-    modelMatrix?: NumericArray;
+    modelMatrix?: NumericArray | null;
     coordinateSystem: CoordinateSystem;
     coordinateOrigin: [number, number, number];
     offsetMode?: boolean;
@@ -138,7 +138,7 @@ export function projectPosition(
     /** The reference coordinate origin used to align world position */
     coordinateOrigin: [number, number, number];
     /** The model matrix of the supplied position */
-    modelMatrix?: NumericArray;
+    modelMatrix?: NumericArray | null;
     /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
     fromCoordinateSystem?: CoordinateSystem;
     /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */

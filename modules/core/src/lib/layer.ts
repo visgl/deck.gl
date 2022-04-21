@@ -44,7 +44,6 @@ import {load} from '@loaders.gl/core';
 import type {CoordinateSystem} from './constants';
 import type {StatefulComponentProps} from '../lifecycle/component';
 import type Attribute from './attribute/attribute';
-import type {LayerProps} from '../types/layer-props';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
@@ -154,9 +153,14 @@ const defaultProps = {
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
 
-export default abstract class Layer<
-  PropsT extends LayerProps = LayerProps
-> extends Component<PropsT> {
+export type UpdateParameters<PropsT> = {
+  props: StatefulComponentProps<PropsT>;
+  oldProps: StatefulComponentProps<PropsT>;
+  context: LayerContext;
+  changeFlags: ChangeFlags;
+};
+
+export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   static defaultProps: any = defaultProps;
   static layerName: string = 'Layer';
 
@@ -339,7 +343,7 @@ export default abstract class Layer<
     - Auto-deduction for ES6 containers that define a size member
     - Auto-deduction for Classic Arrays via the built-in length attribute
     - Auto-deduction via arrays */
-  getNumInstances(props: PropsT = this.props): number {
+  getNumInstances(props: StatefulComponentProps<PropsT> = this.props): number {
     // First Check if app has provided an explicit value
     if (props.numInstances !== undefined) {
       return props.numInstances;
@@ -358,7 +362,7 @@ export default abstract class Layer<
       The default (null) is one value each object.
       Some data formats (e.g. paths, polygons) have various length. Their buffer layout
       is in the form of [L0, L1, L2, ...] */
-  getStartIndices(props: PropsT = this.props): NumericArray | null {
+  getStartIndices(props: StatefulComponentProps<PropsT> = this.props): NumericArray | null {
     // First Check if startIndices is provided as an explicit value
     if (props.startIndices !== undefined) {
       return props.startIndices;
@@ -405,12 +409,7 @@ export default abstract class Layer<
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState(params: {
-    oldProps: PropsT;
-    props: PropsT;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): void {
+  updateState(params: UpdateParameters<PropsT>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {
@@ -575,15 +574,16 @@ export default abstract class Layer<
   }
 
   /** Recalculate any attributes if needed */
-  protected _updateAttributes(props: PropsT): void {
+  protected _updateAttributes(): void {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
+    const props = this.props;
 
     // Figure out data length
-    const numInstances = this.getNumInstances(props);
-    const startIndices = this.getStartIndices(props);
+    const numInstances = this.getNumInstances();
+    const startIndices = this.getStartIndices();
 
     attributeManager.update({
       data: props.data,
@@ -826,7 +826,7 @@ export default abstract class Layer<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffProps(this.props, this.internalState.getOldProps() as PropsT);
+    this._diffProps(this.props, this.internalState.getOldProps() as StatefulComponentProps<PropsT>);
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1029,7 +1029,10 @@ export default abstract class Layer<
   /** Compares the layers props with old props from a matched older layer
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
-  private _diffProps(newProps: PropsT, oldProps: PropsT) {
+  private _diffProps(
+    newProps: StatefulComponentProps<PropsT>,
+    oldProps: StatefulComponentProps<PropsT>
+  ) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -1102,20 +1105,12 @@ export default abstract class Layer<
   // Private methods
 
   /** Called after updateState to perform common tasks */
-  protected _postUpdate(
-    updateParams: {
-      props: PropsT;
-      oldProps: PropsT;
-      context: LayerContext;
-      changeFlags: ChangeFlags;
-    },
-    forceUpdate: boolean
-  ) {
+  protected _postUpdate(updateParams: UpdateParameters<PropsT>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
     this.setNeedsRedraw();
     // Check if attributes need recalculation
-    this._updateAttributes(props);
+    this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
     const {model} = this.state as any;
@@ -1149,12 +1144,7 @@ export default abstract class Layer<
     }
   }
 
-  private _getUpdateParams(): {
-    props: PropsT;
-    oldProps: PropsT;
-    context: LayerContext;
-    changeFlags: ChangeFlags;
-  } {
+  private _getUpdateParams(): UpdateParameters<PropsT> {
     return {
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
