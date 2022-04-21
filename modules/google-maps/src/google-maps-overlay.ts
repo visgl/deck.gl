@@ -7,7 +7,7 @@ import {
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer
 } from './utils';
-import {assert, Deck} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE = {
@@ -135,14 +135,14 @@ export default class GoogleMapsOverlay {
   }
 
   _onAdd() {
-    assert(this._map && this._overlay);
-
+    // @ts-ignore (TS2345) map is defined at this stage
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
   _onContextRestored({gl}) {
-    assert(this._map && this._overlay);
-
+    if (!this._map || !this._overlay) {
+      return;
+    }
     const _customRender = () => {
       if (this._overlay) {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
@@ -180,8 +180,10 @@ export default class GoogleMapsOverlay {
   }
 
   _onDrawRaster() {
+    if (!this._deck || !this._map) {
+      return;
+    }
     const deck = this._deck;
-    assert(this._map && this._overlay && deck);
 
     const {width, height, left, top, ...rest} = getViewPropsFromOverlay(
       this._map,
@@ -204,8 +206,11 @@ export default class GoogleMapsOverlay {
 
   // Vector code path
   _onDrawVectorInterleaved({gl, transformer}) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
     const deck = this._deck;
-    assert(this._map && this._overlay && deck);
 
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, transformer),
@@ -242,9 +247,12 @@ export default class GoogleMapsOverlay {
     }
   }
 
-  _onDrawVectorOverlay({gl, transformer}) {
+  _onDrawVectorOverlay({transformer}) {
+    if (!this._deck || !this._map) {
+      return;
+    }
+
     const deck = this._deck;
-    assert(this._map && this._overlay && deck);
 
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, transformer)

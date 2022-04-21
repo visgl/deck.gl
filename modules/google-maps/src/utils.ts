@@ -1,5 +1,5 @@
 /* global google, document */
-import {assert, Deck} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
@@ -116,7 +116,6 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   const sw = bounds.getSouthWest();
   const topRight = projection.fromLatLngToDivPixel(ne);
   const bottomLeft = projection.fromLatLngToDivPixel(sw);
-  assert(topRight && bottomLeft);
 
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
@@ -124,7 +123,11 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   const nwContainerPx = new google.maps.Point(0, 0);
   const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
   const nwDivPx = projection.fromLatLngToDivPixel(nw);
-  assert(nwDivPx);
+
+  if (!topRight || !bottomLeft || !nwDivPx) {
+    return {width, height, left: 0, top: 0};
+  }
+
   let leftOffset = nwDivPx.x;
   let topOffset = nwDivPx.y;
 
@@ -146,7 +149,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
     latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
     const center = new google.maps.LatLng(latitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
-    assert(centerPx);
+    // @ts-ignore (TS2531) Object is possibly 'null'
     topOffset += centerPx.y - height / 2;
   }
 
@@ -158,7 +161,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // Maps sometimes returns undefined instead of 0
   const heading = map.getHeading() || 0;
 
-  let zoom = map.getZoom()! - 1;
+  let zoom = (map.getZoom() as number) - 1;
 
   let scale;
 
@@ -243,9 +246,10 @@ function getMapSize(map: google.maps.Map): {width: number; height: number} {
   // The map fills the container div unless it's in fullscreen mode
   // at which point the first child of the container is promoted
   const container = map.getDiv().firstChild as HTMLElement | null;
-  assert(container);
   return {
+    // @ts-ignore (TS2531) Object is possibly 'null'
     width: container.offsetWidth,
+    // @ts-ignore (TS2531) Object is possibly 'null'
     height: container.offsetHeight
   };
 }
@@ -257,7 +261,7 @@ function pixelToLngLat(
 ): [longitude: number, latitude: number] {
   const point = new google.maps.Point(x, y);
   const latLng = projection.fromContainerPixelToLatLng(point);
-  assert(latLng, 'pixel outside of map');
+  // @ts-ignore (TS2531) Object is possibly 'null'
   return [latLng.lng(), latLng.lat()];
 }
 
