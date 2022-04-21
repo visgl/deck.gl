@@ -8,7 +8,8 @@ export type TileBoundingBox =
 
 export type TileIndex = {x: number; y: number; z: number};
 
-export type TileLoadProps = TileIndex & {
+export type TileLoadProps = {
+  index: TileIndex;
   bbox: TileBoundingBox;
   url?: string | null;
   signal?: AbortSignal;

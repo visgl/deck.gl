@@ -57,19 +57,16 @@ function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   return transformedBox;
 }
 
-export function getURLFromTemplate(
-  template: string | string[],
-  properties: TileIndex
-): string | null {
+export function getURLFromTemplate(template: string | string[], index: TileIndex): string | null {
   if (!template || !template.length) {
     return null;
   }
   if (Array.isArray(template)) {
-    const index = Math.abs(properties.x + properties.y) % template.length;
+    const index = Math.abs(index.x + index.y) % template.length;
     template = template[index];
   }
 
-  const {x, y, z} = properties;
+  const {x, y, z} = index;
   return template
     .replace(/\{x\}/g, String(x))
     .replace(/\{y\}/g, String(y))

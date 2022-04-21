@@ -276,7 +276,7 @@ export default class TileLayer<
     const {signal} = tile;
 
     tile.url =
-      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, tile) : null;
+      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, tile.index) : null;
 
     if (getTileData) {
       return getTileData(tile);
@@ -323,7 +323,7 @@ export default class TileLayer<
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
+          id: `${this.id}-${tile.cacheKey}`,
           data: tile.content,
           _offset: 0,
           tile

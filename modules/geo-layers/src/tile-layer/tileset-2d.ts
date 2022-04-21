@@ -207,7 +207,7 @@ export default class Tileset2D {
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles!.map(
-        tile => this._getTile({x: tile.x, y: tile.y, z: tile.z}) as Tile2DHeader
+        tile => this._getTile({index: tile.index}) as Tile2DHeader
       );
     }
 
@@ -229,7 +229,7 @@ export default class Tileset2D {
 
   /* Public interface for subclassing */
 
-  // Returns array of {x, y, z}
+  // Returns array of {index}
   getTileIndices({
     viewport,
     maxZoom,
@@ -262,10 +262,10 @@ export default class Tileset2D {
   }
 
   // Add custom metadata to tiles
-  getTileMetadata({x, y, z}: TileIndex) {
+  getTileMetadata({index}) {
     assert(this._viewport);
     const {tileSize} = this.opts;
-    return {bbox: tileToBoundingBox(this._viewport, x, y, z, tileSize)};
+    return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
   // Returns {x, y, z} of the parent tile
@@ -351,7 +351,7 @@ export default class Tileset2D {
 
     // Rebuild tree
     for (const tile of _cache.values()) {
-      const parent = this._getNearestAncestor(tile.x, tile.y, tile.z);
+      const parent = this._getNearestAncestor(tile);
       tile.parent = parent;
       if (parent?.children) {
         parent.children.push(tile);
@@ -399,15 +399,16 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z}: TileIndex, create: true): Tile2DHeader;
-  _getTile({x, y, z}: TileIndex, create?: false): Tile2DHeader | undefined;
-  _getTile({x, y, z}: TileIndex, create?: boolean): Tile2DHeader | undefined {
-    const tileId = `${x},${y},${z}`;
+  _getTile(index: TileIndex, create: true): Tile2DHeader;
+  _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
+  _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
+    // TODO use cacheKey?
+    const tileId = `${index.x},${index.y},${index.z}`;
     let tile = this._cache.get(tileId);
     let needsReload = false;
 
     if (!tile && create) {
-      tile = new Tile2DHeader({x, y, z});
+      tile = new Tile2DHeader(index);
       Object.assign(tile, this.getTileMetadata(tile));
       needsReload = true;
       this._cache.set(tileId, tile);
@@ -428,10 +429,11 @@ export default class Tileset2D {
     return tile;
   }
 
-  _getNearestAncestor(x: number, y: number, z: number): Tile2DHeader | null {
+  _getNearestAncestor(tile: Tile2DHeader): Tile2DHeader | null {
     const {_minZoom = 0} = this;
-    let index = {x, y, z};
 
+    // Make copy as getParentIndex mutates object
+    let index = JSON.parse(JSON.stringify(tile.index));
     while (index.z > _minZoom) {
       index = this.getParentIndex(index);
       const parent = this._getTile(index);
