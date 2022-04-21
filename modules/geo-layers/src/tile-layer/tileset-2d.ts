@@ -165,10 +165,10 @@ export default class Tileset2D {
   }
 
   reloadAll(): void {
-    for (const tileId of this._cache.keys()) {
-      const tile = this._cache.get(tileId) as Tile2DHeader;
+    for (const cacheKey of this._cache.keys()) {
+      const tile = this._cache.get(cacheKey) as Tile2DHeader;
       if (!this._selectedTiles || !this._selectedTiles.includes(tile)) {
-        this._cache.delete(tileId);
+        this._cache.delete(cacheKey);
       } else {
         tile.setNeedsReload();
       }
@@ -259,6 +259,11 @@ export default class Tileset2D {
       modelMatrixInverse,
       zoomOffset
     });
+  }
+
+  // Returns unique string key for a tile index
+  getTileCacheKey(index: TileIndex) {
+    return `${index.x}-${index.y}-${index.z}`;
   }
 
   // Add custom metadata to tiles
@@ -375,11 +380,11 @@ export default class Tileset2D {
     const overflown = _cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
-      for (const [tileId, tile] of _cache) {
+      for (const [cacheKey, tile] of _cache) {
         if (!tile.isVisible) {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
-          _cache.delete(tileId);
+          _cache.delete(cacheKey);
           this.opts.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -402,16 +407,15 @@ export default class Tileset2D {
   _getTile(index: TileIndex, create: true): Tile2DHeader;
   _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
   _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
-    // TODO use cacheKey?
-    const tileId = `${index.x},${index.y},${index.z}`;
-    let tile = this._cache.get(tileId);
+    const cacheKey = this.getTileCacheKey(index);
+    let tile = this._cache.get(cacheKey);
     let needsReload = false;
 
     if (!tile && create) {
       tile = new Tile2DHeader(index);
       Object.assign(tile, this.getTileMetadata(tile));
       needsReload = true;
-      this._cache.set(tileId, tile);
+      this._cache.set(cacheKey, tile);
       this._dirty = true;
     } else if (tile && tile.needsReload) {
       needsReload = true;

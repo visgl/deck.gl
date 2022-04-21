@@ -321,9 +321,10 @@ export default class TileLayer<
       if (!tile.isLoaded && !tile.content) {
         // nothing to show
       } else if (!tile.layers) {
+        const cacheKey = this.state.tileset.getTileCacheKey(tile.index);
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.cacheKey}`,
+          id: `${this.id}-${cacheKey}`,
           data: tile.content,
           _offset: 0,
           tile

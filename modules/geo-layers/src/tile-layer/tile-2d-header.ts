@@ -48,10 +48,6 @@ export default class Tile2DHeader {
     return this.isLoading && this._loader ? this._loader.then(() => this.data) : this.content;
   }
 
-  get cacheKey() {
-    return `${this.index.x}-${this.index.y}-${this.index.z}`;
-  }
-
   get isLoaded() {
     return this._isLoaded && !this._needsReload;
   }
