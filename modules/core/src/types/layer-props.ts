@@ -5,6 +5,8 @@ import type {NumericArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
+import type {Buffer} from '@luma.gl/webgl';
+
 export type LayerData<T> =
   | Iterable<T>
   | {
@@ -13,15 +15,62 @@ export type LayerData<T> =
     };
 
 export type AccessorContext<T> = {
+  /** The index of the current iteration */
   index: number;
+  /** The value of the `data` prop */
   data: LayerData<T>;
+  /** A pre-allocated array. The accessor function can optionally fill data into this array and return it,
+   * instead of creating a new array for every object. In some browsers this improves performance significantly
+   * by reducing garbage collection. */
   target: number[];
 };
 
-export type Accessor<In, Out> = Out | ((object: In, objectInfo: AccessorContext<In>) => Out);
+/** Either a uniform value for all objects, or a function that returns a value for each object. */
+export type Accessor<In, Out> =
+  | Out
+  | ((
+      /** The current element in the data stream.
+       * If `data` is an array or an iterable, the element of the current iteration is used.
+       * If `data` is a non-iterable object, this argument is always `null`. */
+      object: In,
+      /** Contextual information of the current element. */
+      objectInfo: AccessorContext<In>
+    ) => Out);
 
-// TODO
-type BinaryAttribute = any;
+/** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
+ * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
+ */
+export type Position = [number, number] | [number, number, number] | Float32Array | Float64Array;
+
+/** A color in the format of `[r, g, b, a?]` */
+export type Color =
+  | [number, number, number]
+  | [number, number, number, number]
+  | Uint8Array
+  | Uint8ClampedArray;
+
+/** The unit of dimensions.
+ * See https://deck.gl/docs/developer-guide/coordinate-systems#dimensions
+ */
+export type Unit = 'meters' | 'common' | 'pixels';
+
+/** Supply binary buffers directly to the layer */
+type BinaryAttribute =
+  | Buffer
+  | {
+      buffer?: Buffer;
+      value?: NumericArray;
+      /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
+      type?: number;
+      /** The number of elements per vertex attribute. */
+      size?: number;
+      /** Offset of the first vertex attribute into the buffer, in bytes. */
+      offset?: number;
+      /** The offset between the beginning of consecutive vertex attributes, in bytes. */
+      stride?: number;
+      /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
+      normalized?: boolean;
+    };
 
 /**
  * Base Layer prop types
@@ -56,7 +105,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch?: (
+  fetch: (
     url: string,
     context: {
       propName: string;
@@ -73,27 +122,27 @@ export type LayerProps<DataType = any> = {
   /**
    * The purpose of the layer
    */
-  operation?: 'draw' | 'mask';
+  operation: 'draw' | 'mask';
   /**
    * If the layer should be rendered. Default true.
    */
-  visible?: boolean;
+  visible: boolean;
   /**
    * If the layer can be picked on pointer events. Default false.
    */
-  pickable?: boolean;
+  pickable: boolean;
   /**
    * Opacity of the layer, between 0 and 1. Default 1.
    */
-  opacity?: number;
+  opacity: number;
   /**
    * The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view.
    */
-  coordinateSystem?: CoordinateSystem;
+  coordinateSystem: CoordinateSystem;
   /**
    * The coordinate origin of the data.
    */
-  coordinateOrigin?: [number, number, number];
+  coordinateOrigin: [number, number, number];
   /**
    * A 4x4 matrix to transform local coordianates to the world space.
    */
@@ -101,15 +150,15 @@ export type LayerProps<DataType = any> = {
   /**
    * (Geospatial only) normalize geometries that cross the 180th meridian. Default false.
    */
-  wrapLongitude?: boolean;
+  wrapLongitude: boolean;
   /**
    * The format of positions, default 'XYZ'.
    */
-  positionFormat?: 'XYZ' | 'XY';
+  positionFormat: 'XYZ' | 'XY';
   /**
    * The format of colors, default 'RGBA'.
    */
-  colorFormat?: 'RGBA' | 'RGB';
+  colorFormat: 'RGBA' | 'RGB';
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
@@ -121,7 +170,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add additional functionalities to this layer.
    */
-  extensions?: any[];
+  extensions: any[];
   /**
    * Add support for additional data formats.
    */
@@ -138,15 +187,15 @@ export type LayerProps<DataType = any> = {
   /**
    * Enable GPU-based object highlighting. Default false.
    */
-  autoHighlight?: boolean;
+  autoHighlight: boolean;
   /**
    * The index of the data object to highlight. If unspecified, the currently hoverred object is highlighted.
    */
-  highlightedObjectIndex?: number | null;
+  highlightedObjectIndex: number | null;
   /**
    * The color of the highlight.
    */
-  highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
+  highlightColor: number[] | ((pickingInfo: PickingInfo) => number[]);
 
   /**
    * Called when remote data is fetched and parsed.
