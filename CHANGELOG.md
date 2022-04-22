@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.8] - Apr 22 2022
+
+- Fix position precision in CPU aggregation layers (#6815)
+- Fix uniform transition for shader module props (#6843)
+
 #### deck.gl [8.7.7] - Apr 20 2022
 
 -  CARTO: fetchMap support for custom breaks (#6819)
