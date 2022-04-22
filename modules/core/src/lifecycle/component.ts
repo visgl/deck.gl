@@ -14,7 +14,7 @@ import type {LayerProps} from '../types/layer-props';
 
 let counter = 0;
 
-export type StatefulComponentProps<PropsT> = Required<PropsT> &
+export type StatefulComponentProps<PropsT> = PropsT &
   Required<LayerProps> & {
     [COMPONENT_SYMBOL]: Component<PropsT>;
     [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
@@ -56,7 +56,7 @@ export default class Component<PropsT = any> {
 
   get root(): Component {
     // eslint-disable-next-line
-    let component = this as Component;
+    let component: Component = this;
     while (component.parent) {
       component = component.parent;
     }

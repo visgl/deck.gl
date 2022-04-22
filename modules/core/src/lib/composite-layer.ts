@@ -21,14 +21,19 @@ import Layer, {UpdateParameters} from './layer';
 import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
+import type AttributeManager from './attribute/attribute-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
-import type {Accessor, AccessorContext} from '../types/layer-props';
+import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<PropsT = any> extends Layer<PropsT> {
+export default abstract class CompositeLayer<PropsT = any> extends Layer<
+  PropsT & Required<CompositeLayerProps>
+> {
+  static layerName: string = 'CompositeLayer';
+
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return true;
@@ -243,7 +248,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<PropsT>
   }
 
   /** Override base Layer method */
-  protected _getAttributeManager(): null {
+  protected _getAttributeManager(): AttributeManager | null {
     return null;
   }
 
@@ -266,9 +271,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<PropsT>
     // populate reference to parent layer (this layer)
     // NOTE: needs to be done even when reusing layers as the parent may have changed
     for (const layer of subLayers) {
-      layer.parent = this as Layer;
+      layer.parent = this;
     }
   }
 }
-
-CompositeLayer.layerName = 'CompositeLayer';

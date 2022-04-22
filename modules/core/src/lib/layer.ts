@@ -398,18 +398,13 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
-  shouldUpdateState(params: {
-    oldProps: PropsT;
-    props: PropsT;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): boolean {
+  shouldUpdateState<T>(params: UpdateParameters<T>): boolean {
     return params.changeFlags.propsOrDataChanged;
   }
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState(params: UpdateParameters<PropsT>): void {
+  updateState<T>(params: UpdateParameters<T>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {

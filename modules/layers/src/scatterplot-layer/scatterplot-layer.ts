@@ -25,11 +25,23 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
-import type {LayerProps, LayerContext, Accessor, Unit, Position, Color} from '@deck.gl/core';
+import type {
+  LayerProps,
+  UpdateParameters,
+  LayerContext,
+  Accessor,
+  Unit,
+  Position,
+  Color
+} from '@deck.gl/core';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
-export type ScatterplotLayerProps<DataT> = LayerProps<DataT> & {
+/** All props supported by the ScatterplotLayer */
+export type ScatterplotLayerProps<DataT> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
+
+/** Props added by the ScatterplotLayer */
+type _ScatterplotLayerProps<DataT> = {
   radiusUnits?: Unit;
   radiusScale?: number;
   radiusMinPixels?: number;
@@ -80,10 +92,9 @@ const defaultProps = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-export default class ScatterplotLayer<
-  DataT = any,
-  PropsT extends ScatterplotLayerProps<DataT> = ScatterplotLayerProps<DataT>
-> extends Layer<PropsT> {
+export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
+> {
   static defaultProps: any = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
@@ -134,7 +145,7 @@ export default class ScatterplotLayer<
     });
   }
 
-  updateState(params) {
+  updateState<T extends _ScatterplotLayerProps<DataT>>(params: UpdateParameters<T>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {

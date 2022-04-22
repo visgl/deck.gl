@@ -239,7 +239,9 @@ export type LayerProps<DataType = any> = {
 
   /** (Advanced) supply variable-width attribute size externally */
   startIndices?: NumericArray | undefined;
+};
 
+export type CompositeLayerProps = {
   /** (Experimental) override sub layer props. Only works on a composite layer. */
   _subLayerProps?:
     | {
