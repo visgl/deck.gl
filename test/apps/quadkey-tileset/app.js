@@ -6,13 +6,46 @@ import {StaticMap} from 'react-map-gl';
 import {BASEMAP} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
 import {BitmapLayer} from '@deck.gl/layers';
-import {QuadkeyLayer, TileLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer, QuadkeyLayer, TileLayer} from '@deck.gl/geo-layers';
+import H3Tileset2D from './h3-tileset-2d';
 import QuadkeyTileset2D from './quadkey-tileset-2d';
 
 const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 4};
 
 function Root() {
-  const tileLayer = new TileLayer({
+  const h3TileLayer = new TileLayer({
+    id: 'h3-tile-layer',
+
+    // Overrides to work with h3
+    TilesetClass: H3Tileset2D,
+    data: 'data/{i}.json',
+    getURLFromTemplate(template, index) {
+      return template.replace(/\{i\}/g, index);
+    },
+
+    minZoom: 4,
+    maxZoom: 5,
+    extent: [-112.5, 21.943045533438177, -90, 40.97989806962013],
+
+    renderSubLayers: props => {
+      const {data} = props;
+      const {index} = props.tile;
+      if (!data || !data.length) return null;
+
+      return new H3HexagonLayer(props, {
+        centerHexagon: index,
+        highPrecision: true,
+
+        getHexagon: d => d.spatial_index,
+        getFillColor: d => [(d.temp - 14) * 28, 90 - d.temp * 3, (25 - d.temp) * 16],
+        getElevation: d => d.temp - 14,
+        extruded: true,
+        elevationScale: 50000
+      });
+    }
+  });
+
+  const quadkeyTileLayer = new TileLayer({
     id: 'quadkey-tile-layer',
 
     // Overrides to work with quadkeys
@@ -40,7 +73,11 @@ function Root() {
 
   return (
     <>
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[tileLayer]}>
+      <DeckGL
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+        layers={[h3TileLayer, quadkeyTileLayer]}
+      >
         <StaticMap mapStyle={BASEMAP.VOYAGER} />
       </DeckGL>
     </>
