@@ -21,10 +21,13 @@
 import {
   Accessor,
   AccessorFunction,
+  ChangeFlags,
   Color,
   CompositeLayer,
   CompositeLayerProps,
   createIterable,
+  Layer,
+  LayersList,
   log,
   Unit
 } from '@deck.gl/core';
@@ -32,8 +35,6 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
-import {assert} from '@deck.gl/core';
-import {PropTypeDef} from 'modules/core/src/lifecycle/prop-types';
 
 // TODO: not sure where this type belongs to
 export type MaterialProps = {
@@ -44,9 +45,14 @@ export type MaterialProps = {
 };
 
 /**
+ * Aggregated properties for `PolygonLayer`.
+ */
+export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
+
+/**
  * Properties for `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
+type _PolygonLayerProps<DataT = any> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
@@ -140,21 +146,21 @@ export type PolygonLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: Accessor<DataT, Color> | null;
 
   /**
    * Line color value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: Accessor<DataT, Color> | null;
 
   /**
    * Line width value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: Accessor<DataT, number> | null;
 
   /**
    * Elevation valur or accessor.
@@ -195,13 +201,13 @@ export type PolygonLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
    *
    * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
    */
-  material?: true | MaterialProps;
+  material?: true | MaterialProps | null;
 };
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
 
-const defaultProps: Record<string, PropTypeDef> = {
+const defaultProps = {
   stroked: true,
   filled: true,
   extruded: false,
@@ -238,7 +244,7 @@ export default class PolygonLayer<
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
 
-  initializeState() {
+  initializeState(): void {
     this.state = {
       paths: []
     };
@@ -248,15 +254,21 @@ export default class PolygonLayer<
     }
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    assert(this.state);
-
+  updateState({
+    changeFlags
+  }: {
+    props: PropsT;
+    oldProps: PropsT;
+    context: any;
+    changeFlags: ChangeFlags;
+  }) {
     const geometryChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     if (geometryChanged && Array.isArray(changeFlags.dataChanged)) {
+      // @ts-expect-error state is always initialized on instantiated layer
       const paths = this.state.paths.slice();
       const pathsDiff = changeFlags.dataChanged.map(dataRange =>
         replaceInRange({
@@ -275,7 +287,7 @@ export default class PolygonLayer<
     }
   }
 
-  _getPaths(dataRange: {startRow?: number; endRow?: number} = {}) {
+  private _getPaths(dataRange: {startRow?: number; endRow?: number} = {}): {path: number[]}[] {
     const {data, getPolygon, positionFormat, _normalize} = this.props;
     const paths: {path: number[]}[] = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
@@ -307,7 +319,7 @@ export default class PolygonLayer<
   }
 
   /* eslint-disable complexity */
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     // Layer composition props
     const {
       data,
@@ -346,8 +358,7 @@ export default class PolygonLayer<
       material
     } = this.props;
 
-    assert(updateTriggers && this.state);
-
+    // @ts-expect-error state is always initialized on instantiated layer
     const {paths, pathsDiff} = this.state;
 
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
@@ -376,7 +387,7 @@ export default class PolygonLayer<
         },
         this.getSubLayerProps({
           id: 'fill',
-          updateTriggers: {
+          updateTriggers: updateTriggers && {
             getPolygon: updateTriggers.getPolygon,
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
@@ -424,7 +435,7 @@ export default class PolygonLayer<
         },
         this.getSubLayerProps({
           id: 'stroke',
-          updateTriggers: {
+          updateTriggers: updateTriggers && {
             getWidth: updateTriggers.getLineWidth,
             getColor: updateTriggers.getLineColor,
             getDashArray: updateTriggers.getLineDashArray

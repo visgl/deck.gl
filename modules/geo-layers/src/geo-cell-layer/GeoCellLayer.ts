@@ -1,4 +1,4 @@
-import {CompositeLayer, Layer, assert} from '@deck.gl/core';
+import {CompositeLayer, Layer, LayersList} from '@deck.gl/core';
 import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 const defaultProps = {
@@ -12,14 +12,14 @@ export default class GeoCellLayer<
   PropsT extends GeoCellLayerProps<DataT> = GeoCellLayerProps<DataT>
 > extends CompositeLayer<PropsT> {
   static layerName = 'GeoCellLayer';
-  static defaultProps = defaultProps as any; // TODO: why defaultProps is broken
+  static defaultProps = defaultProps;
 
   /** Implement to generate props to create geometry. */
   indexToBounds(): Partial<GeoCellLayerProps> | null {
     return null;
   }
 
-  renderLayers(): Layer {
+  renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
     const {
       elevationScale,
@@ -42,7 +42,6 @@ export default class GeoCellLayer<
 
     // Accessor props for underlying layers
     const {updateTriggers, material, transitions} = this.props;
-    assert(updateTriggers);
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
@@ -73,7 +72,7 @@ export default class GeoCellLayer<
       },
       this.getSubLayerProps({
         id: 'cell',
-        updateTriggers: {
+        updateTriggers: updateTriggers && {
           getElevation: updateTriggers.getElevation,
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,

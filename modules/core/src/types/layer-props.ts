@@ -27,17 +27,19 @@ export type AccessorContext<T> = {
 
 /** Function that returns a value for each object. */
 export type AccessorFunction<In, Out> = (
-  /** The current element in the data stream.
-       * If `data` is an array or an iterable, the element of the current iteration is used.
-       * If `data` is a non-iterable object, this argument is always `null`. */
-  object: In, 
+  /**
+   * The current element in the data stream.
+   *
+   * If `data` is an array or an iterable, the element of the current iteration is used.
+   * If `data` is a non-iterable object, this argument is always `null`.
+   * */
+  object: In,
   /** Contextual information of the current element. */
-  objectInfo: AccessorContext<In>) => Out;
+  objectInfo: AccessorContext<In>
+) => Out;
 
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
-export type Accessor<In, Out> =
-  | Out
-  | AccessorFunction<In, Out>
+export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
