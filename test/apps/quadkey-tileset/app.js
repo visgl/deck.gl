@@ -24,8 +24,7 @@ function Root() {
     },
 
     minZoom: 4,
-    maxZoom: 5,
-    extent: [-112.5, 21.943045533438177, -90, 40.97989806962013],
+    maxZoom: 6,
 
     renderSubLayers: props => {
       const {data} = props;

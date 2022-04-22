@@ -45,9 +45,20 @@ export function tileToBoundingBox(index) {
 }
 
 export default class H3Tileset2D extends Tileset2D {
-  getTileIndices({viewport}) {
+  getTileIndices({viewport, minZoom, maxZoom}) {
     const [east, south, west, north] = viewport.getBounds();
-    const resolution = Math.max(0, Math.floor((2 * viewport.zoom) / 3) - 2);
+
+    // TODO ignores extent
+    let z = viewport.zoom;
+    if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
+      z = minZoom;
+    }
+    if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
+      z = maxZoom;
+    }
+
+    // Heuristic to get h3 resolution
+    const resolution = Math.max(0, Math.floor((2 * z) / 3) - 2);
     return getHexagonsInBoundingBox({west, north, east, south}, resolution);
   }
 
