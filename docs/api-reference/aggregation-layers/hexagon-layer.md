@@ -179,7 +179,7 @@ larger than the elevationUpperPercentile will be hidden.
 
 ##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `100`
+* Default: `0`
 
 Filter bins and re-calculate elevation by `elevationLowerPercentile`. Hexagons with elevation value
 smaller than the elevationLowerPercentile will be hidden.
