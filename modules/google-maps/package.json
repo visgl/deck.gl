@@ -28,7 +28,13 @@
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
+  "devDependencies": {
+    "@types/google.maps": "^3.48.6"
+  },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0"
+    "@deck.gl/core": "^8.0.0",
+    "@luma.gl/core": "^8.5.10",
+    "@luma.gl/constants": "^8.5.10",
+    "@math.gl/core": "^3.5.1"
   }
 }
