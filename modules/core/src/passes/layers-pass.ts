@@ -281,15 +281,18 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
-    const moduleParameters = Object.assign(Object.create(layer.props), {
-      autoWrapLongitude: layer.wrapLongitude,
-      // @ts-ignore
-      viewport: layer.context.viewport,
-      // @ts-ignore
-      mousePosition: layer.context.mousePosition,
-      pickingActive: 0,
-      devicePixelRatio: cssToDeviceRatio(this.gl)
-    });
+    const moduleParameters = Object.assign(
+      Object.create(layer.internalState?.propsInTransition || layer.props),
+      {
+        autoWrapLongitude: layer.wrapLongitude,
+        // @ts-ignore
+        viewport: layer.context.viewport,
+        // @ts-ignore
+        mousePosition: layer.context.mousePosition,
+        pickingActive: 0,
+        devicePixelRatio: cssToDeviceRatio(this.gl)
+      }
+    );
 
     if (effects) {
       for (const effect of effects) {
