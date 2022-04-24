@@ -11,7 +11,12 @@ const MAX_LATITUDE = 85.05113;
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  * @param [deck] (Deck) - a previously created instances
  */
-export function createDeckInstance(map, overlay, deck, props) {
+export function createDeckInstance(
+  map: google.maps.Map,
+  overlay: google.maps.OverlayView | google.maps.WebGLOverlayView,
+  deck: Deck | null | undefined,
+  props
+): Deck {
   if (deck) {
     if (deck.props.userData._googleMap === map) {
       return deck;
@@ -27,7 +32,7 @@ export function createDeckInstance(map, overlay, deck, props) {
     mouseout: null
   };
 
-  deck = new Deck({
+  const newDeck = new Deck({
     ...props,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
@@ -46,25 +51,28 @@ export function createDeckInstance(map, overlay, deck, props) {
   // Register event listeners
   for (const eventType in eventListeners) {
     eventListeners[eventType] = map.addListener(eventType, evt =>
-      handleMouseEvent(deck, eventType, evt)
+      handleMouseEvent(newDeck, eventType, evt)
     );
   }
 
-  return deck;
+  return newDeck;
 }
 
 // Create a container that will host the deck canvas and tooltip
-function getContainer(overlay, style) {
+function getContainer(
+  overlay: google.maps.OverlayView | google.maps.WebGLOverlayView,
+  style?: Partial<CSSStyleDeclaration>
+): HTMLElement {
   const container = document.createElement('div');
   container.style.position = 'absolute';
   Object.assign(container.style, style);
 
   // The DOM structure has a different structure depending on whether
   // the Google map is rendered as vector or raster
-  if (overlay.getPanes) {
-    overlay.getPanes().overlayLayer.appendChild(container);
+  if ('getPanes' in overlay) {
+    overlay.getPanes()?.overlayLayer.appendChild(container);
   } else {
-    overlay.getMap().getDiv().appendChild(container);
+    overlay.getMap()?.getDiv().appendChild(container);
   }
   return container;
 }
@@ -73,7 +81,7 @@ function getContainer(overlay, style) {
  * Safely remove a deck instance
  * @param deck (Deck) - a previously created instances
  */
-export function destroyDeckInstance(deck) {
+export function destroyDeckInstance(deck: Deck) {
   const {_eventListeners: eventListeners} = deck.props.userData;
 
   // Unregister event listeners
@@ -90,7 +98,8 @@ export function destroyDeckInstance(deck) {
  * @param map (google.maps.Map) - The parent Map instance
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  */
-export function getViewPropsFromOverlay(map, overlay) {
+// eslint-disable-next-line complexity
+export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.maps.OverlayView) {
   const {width, height} = getMapSize(map);
 
   // Canvas position relative to draggable map's container depends on
@@ -99,6 +108,10 @@ export function getViewPropsFromOverlay(map, overlay) {
   const projection = overlay.getProjection();
 
   const bounds = map.getBounds();
+  if (!bounds) {
+    return {width, height, left: 0, top: 0};
+  }
+
   const ne = bounds.getNorthEast();
   const sw = bounds.getSouthWest();
   const topRight = projection.fromLatLngToDivPixel(ne);
@@ -110,6 +123,11 @@ export function getViewPropsFromOverlay(map, overlay) {
   const nwContainerPx = new google.maps.Point(0, 0);
   const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
   const nwDivPx = projection.fromLatLngToDivPixel(nw);
+
+  if (!topRight || !bottomLeft || !nwDivPx) {
+    return {width, height, left: 0, top: 0};
+  }
+
   let leftOffset = nwDivPx.x;
   let topOffset = nwDivPx.y;
 
@@ -131,6 +149,7 @@ export function getViewPropsFromOverlay(map, overlay) {
     latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
     const center = new google.maps.LatLng(latitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
+    // @ts-ignore (TS2531) Object is possibly 'null'
     topOffset += centerPx.y - height / 2;
   }
 
@@ -142,7 +161,8 @@ export function getViewPropsFromOverlay(map, overlay) {
   // Maps sometimes returns undefined instead of 0
   const heading = map.getHeading() || 0;
 
-  let zoom = map.getZoom() - 1;
+  let zoom = (map.getZoom() as number) - 1;
+
   let scale;
 
   if (bearing === 0) {
@@ -182,7 +202,10 @@ export function getViewPropsFromOverlay(map, overlay) {
  * @param map (google.maps.Map) - The parent Map instance
  * @param transformer (google.maps.CoordinateTransformer) - A CoordinateTransformer instance
  */
-export function getViewPropsFromCoordinateTransformer(map, transformer) {
+export function getViewPropsFromCoordinateTransformer(
+  map: google.maps.Map,
+  transformer: google.maps.CoordinateTransformer
+) {
   const {width, height} = getMapSize(map);
   const {center, heading: bearing, tilt: pitch, zoom} = transformer.getCameraParams();
 
@@ -219,23 +242,30 @@ export function getViewPropsFromCoordinateTransformer(map, transformer) {
   };
 }
 
-function getMapSize(map) {
+function getMapSize(map: google.maps.Map): {width: number; height: number} {
   // The map fills the container div unless it's in fullscreen mode
   // at which point the first child of the container is promoted
-  const container = map.getDiv().firstChild;
+  const container = map.getDiv().firstChild as HTMLElement | null;
   return {
+    // @ts-ignore (TS2531) Object is possibly 'null'
     width: container.offsetWidth,
+    // @ts-ignore (TS2531) Object is possibly 'null'
     height: container.offsetHeight
   };
 }
 
-function pixelToLngLat(projection, x, y) {
+function pixelToLngLat(
+  projection: google.maps.MapCanvasProjection,
+  x: number,
+  y: number
+): [longitude: number, latitude: number] {
   const point = new google.maps.Point(x, y);
   const latLng = projection.fromContainerPixelToLatLng(point);
+  // @ts-ignore (TS2531) Object is possibly 'null'
   return [latLng.lng(), latLng.lat()];
 }
 
-function getEventPixel(event, deck) {
+function getEventPixel(event, deck: Deck): {x: number; y: number} {
   if (event.pixel) {
     return event.pixel;
   }
@@ -249,8 +279,8 @@ function getEventPixel(event, deck) {
 }
 
 // Triggers picking on a mouse event
-function handleMouseEvent(deck, type, event) {
-  const mockEvent = {
+function handleMouseEvent(deck: Deck, type: string, event) {
+  const mockEvent: Record<string, any> = {
     type,
     offsetCenter: getEventPixel(event, deck),
     srcEvent: event
