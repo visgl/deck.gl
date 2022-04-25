@@ -109,21 +109,21 @@ export default class MVTLayer extends TileLayer {
   }
 
   getTileData(tile) {
-    const url = getURLFromTemplate(this.state.data, tile);
+    const url = getURLFromTemplate(this.state.data, tile.index);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
     let loadOptions = this.getLoadOptions();
     const {binary} = this.state;
     const {fetch} = this.props;
-    const {signal, x, y, z} = tile;
+    const {signal, index} = tile;
     loadOptions = {
       ...loadOptions,
       mimeType: 'application/x-protobuf',
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x, y, z}
+        tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers
