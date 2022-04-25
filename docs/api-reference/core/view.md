@@ -43,9 +43,9 @@ A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `offset` ([Number, Number], optional)
+##### `padding` (Object, optional)
 
-Pixel offset of the viewport center, in `[x, y]` where x is the number of pixels right, and y is the number of pixels down. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
+Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
 ##### `controller` (Function|Boolean|Object, optional)
 

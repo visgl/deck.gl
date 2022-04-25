@@ -297,9 +297,10 @@ export default class ViewManager {
       onViewStateChange: this._onViewStateChange.bind(this, props.id),
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
-        view._getViewport(viewState, {
-          width: viewState.width,
-          height: viewState.height
+        view.makeViewport({
+          viewState,
+          width: this.width,
+          height: this.height
         })
     });
 
@@ -349,8 +350,7 @@ export default class ViewManager {
     for (let i = views.length; i--; ) {
       const view = views[i];
       const viewState = this.getViewState(view);
-      const dimensions = view.getDimensions(this);
-      const viewport = view._getViewport(viewState, dimensions);
+      const viewport = view.makeViewport({viewState, width: this.width, height: this.height});
 
       let oldController = oldControllers[view.id];
       const hasController = Boolean(view.controller);

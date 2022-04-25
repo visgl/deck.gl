@@ -231,8 +231,8 @@ test('OrthographicView', t => {
   t.end();
 });
 
-test('OrthographicView#offset', t => {
-  const view = new OrthographicView({id: '2d-view', offset: [50, -20]});
+test('OrthographicView#padding', t => {
+  const view = new OrthographicView({id: '2d-view', padding: {bottom: '50%', left: '100%'}});
   const viewport = view.makeViewport({
     width: 100,
     height: 100,
@@ -242,10 +242,7 @@ test('OrthographicView#offset', t => {
     }
   });
   const center = viewport.project([0, 1]);
-  t.ok(
-    equals(center, [viewport.width / 2 + 50, viewport.height / 2 - 20]),
-    'viewport center is offset'
-  );
+  t.ok(equals(center, [viewport.width, viewport.height / 4]), 'viewport center is offset');
 
   t.end();
 });

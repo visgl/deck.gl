@@ -5,8 +5,8 @@ import assert from '../utils/assert';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
-
-import {ConstructorOf} from '../types/types';
+import type {Padding} from '../viewports/viewport';
+import type {ConstructorOf} from '../types/types';
 
 export type CommonViewState = TransitionProps;
 
@@ -21,6 +21,13 @@ type CommonViewProps<ViewState> = {
   width?: number | string;
   /** A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`. */
   height?: number | string;
+  /** Padding around the view, expressed in either relative (e.g. `'50%'`) or absolute pixels. Default `null`. */
+  padding?: {
+    left?: number | string;
+    right?: number | string;
+    top?: number | string;
+    bottom?: number | string;
+  } | null;
   /** State of the view */
   viewState?:
     | string
@@ -53,11 +60,25 @@ export default abstract class View<
   private _y: Position;
   private _width: Position;
   private _height: Position;
+  private _padding: {
+    left: Position;
+    right: Position;
+    top: Position;
+    bottom: Position;
+  } | null;
 
   protected props: ViewProps & CommonViewProps<ViewState>;
 
   constructor(props: ViewProps & CommonViewProps<ViewState>) {
-    const {id, x = 0, y = 0, width = '100%', height = '100%', viewportInstance} = props || {};
+    const {
+      id,
+      x = 0,
+      y = 0,
+      width = '100%',
+      height = '100%',
+      padding = null,
+      viewportInstance
+    } = props || {};
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
     this.viewportInstance = viewportInstance;
@@ -72,6 +93,12 @@ export default abstract class View<
     this._y = parsePosition(y);
     this._width = parsePosition(width);
     this._height = parsePosition(height);
+    this._padding = padding && {
+      left: parsePosition(padding.left || 0),
+      right: parsePosition(padding.right || 0),
+      top: parsePosition(padding.top || 0),
+      bottom: parsePosition(padding.bottom || 0)
+    };
 
     // Bind methods for easy access
     this.equals = this.equals.bind(this);
@@ -103,7 +130,7 @@ export default abstract class View<
 
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
-    return this._getViewport(viewState, viewportDimensions);
+    return new this.ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 
   getViewStateId(): string {
@@ -143,12 +170,19 @@ export default abstract class View<
     y: number;
     width: number;
     height: number;
+    padding: Padding | null;
   } {
     return {
       x: getPosition(this._x, width),
       y: getPosition(this._y, height),
       width: getPosition(this._width, width),
-      height: getPosition(this._height, height)
+      height: getPosition(this._height, height),
+      padding: this._padding && {
+        left: getPosition(this._padding.left, width),
+        top: getPosition(this._padding.top, height),
+        right: getPosition(this._padding.right, width),
+        bottom: getPosition(this._padding.bottom, height)
+      }
     };
   }
 
@@ -166,18 +200,5 @@ export default abstract class View<
       return {type: opts};
     }
     return {type: this.ControllerType, ...opts};
-  }
-
-  /** Make viewport from resolved view state and dimensions */
-  _getViewport(
-    viewState: ViewState,
-    viewportDimensions: {
-      x?: number;
-      y?: number;
-      width: number;
-      height: number;
-    }
-  ): Viewport {
-    return new this.ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 }
