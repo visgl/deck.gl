@@ -62,8 +62,8 @@ export function getURLFromTemplate(template: string | string[], index: TileIndex
     return null;
   }
   if (Array.isArray(template)) {
-    const index = Math.abs(index.x + index.y) % template.length;
-    template = template[index];
+    const i = Math.abs(index.x + index.y) % template.length;
+    template = template[i];
   }
 
   const {x, y, z} = index;
