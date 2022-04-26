@@ -49,10 +49,11 @@ test('Tileset2D#update', t => {
   tileset.update(testViewport);
 
   t.is(tileset._cache.size, 1, 'should update with expected tiles');
+  const {x, y, z} = tileset.tiles[0].index;
 
-  t.equal(tileset.tiles[0].x, 1171);
-  t.equal(tileset.tiles[0].y, 1566);
-  t.equal(tileset.tiles[0].z, 12);
+  t.equal(x, 1171);
+  t.equal(y, 1566);
+  t.equal(z, 12);
   t.ok(tileset.tiles[0].bbox, 'tile has metadata');
 
   t.end();
@@ -126,7 +127,7 @@ test('Tileset2D#maxCacheSize', t => {
   // load a viewport to fill the cache
   tileset.update(testViewport);
   t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('1171,1566,12'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -139,7 +140,7 @@ test('Tileset2D#maxCacheSize', t => {
   );
 
   t.equal(tileset._cache.size, 1, 'cache is resized');
-  t.ok(tileset._cache.get('910,459,12'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
 
   t.end();
 });
@@ -154,7 +155,7 @@ test('Tileset2D#maxCacheByteSize', async t => {
   // load a viewport to fill the cache
   tileset.update(testViewport);
   t.equal(tileset._cache.size, 1, 'expected cache size');
-  t.ok(tileset._cache.get('1171,1566,12'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -171,7 +172,7 @@ test('Tileset2D#maxCacheByteSize', async t => {
   await sleep(100);
 
   t.equal(tileset._cache.size, 1, 'cache is resized after tile data is loaded');
-  t.ok(tileset._cache.get('910,459,12'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
 
   t.end();
 });
@@ -191,7 +192,7 @@ test('Tileset2D#over-zoomed', t => {
 
   tileset.update(zoomedInViewport);
   tileset.tiles.forEach(tile => {
-    t.equal(tile.z, 13);
+    t.equal(tile.zoom, 13);
   });
 
   t.end();
@@ -222,7 +223,7 @@ test('Tileset2D#under-zoomed-with-extent', t => {
   const zoomedOutViewport = new WebMercatorViewport(Object.assign({}, testViewState, {zoom: 1}));
 
   tileset.update(zoomedOutViewport);
-  const tileZoomLevels = tileset.tiles.map(tile => tile.z);
+  const tileZoomLevels = tileset.tiles.map(tile => tile.zoom);
   t.assert(tileZoomLevels[0] === 11);
   t.end();
 });
@@ -311,46 +312,46 @@ test('Tileset2D#traversal', async t => {
 
   /*
     Test tiles:
-                                        +- 0,0,2 (pending) -+- 0,0,3 (pending) -+- 0,0,4 (pending)
-                                        +- 0,1,2 (pending) -+- 0,2,3 (loaded)  -+- 0,4,4 (pending)
-                    +- 0,0,1 (loaded)  -+- 1,0,2 (missing) -+- 2,0,3 (pending)
-                    |                   +- 1,1,2 (missing) -+- 2,2,3 (loaded)
-   0,0,0 (pending) -+
-                    |                   +- 2,0,2 (loaded)  -+- 4,0,3 (pending)
-                    +- 1,0,1 (pending) -+- 2,1,2 (loaded)  -+- 4,2,3 (loaded)
-                                        +- 3,0,2 (pending) -+- 6,0,3 (pending)
-                                        +- 3,1,2 (pending) -+- 6,2,3 (loaded)
+                                        +- 0-0-2 (pending) -+- 0-0-3 (pending) -+- 0-0-4 (pending)
+                                        +- 0-1-2 (pending) -+- 0-2-3 (loaded)  -+- 0-4-4 (pending)
+                    +- 0-0-1 (loaded)  -+- 1-0-2 (missing) -+- 2-0-3 (pending)
+                    |                   +- 1-1-2 (missing) -+- 2-2-3 (loaded)
+   0-0-0 (pending) -+
+                    |                   +- 2-0-2 (loaded)  -+- 4-0-3 (pending)
+                    +- 1-0-1 (pending) -+- 2-1-2 (loaded)  -+- 4-2-3 (loaded)
+                                        +- 3-0-2 (pending) -+- 6-0-3 (pending)
+                                        +- 3-1-2 (pending) -+- 6-2-3 (loaded)
    */
   const TEST_CASES = [
     {
-      selectedTiles: ['0,0,0']
+      selectedTiles: ['0-0-0']
     },
     {
-      selectedTiles: ['0,0,1']
+      selectedTiles: ['0-0-1']
     },
     {
-      selectedTiles: ['0,0,1', '1,0,1']
+      selectedTiles: ['0-0-1', '1-0-1']
     },
     {
-      selectedTiles: ['0,0,2', '0,1,2']
+      selectedTiles: ['0-0-2', '0-1-2']
     },
     {
-      selectedTiles: ['2,0,2', '2,1,2', '3,0,2', '3,1,2']
+      selectedTiles: ['2-0-2', '2-1-2', '3-0-2', '3-1-2']
     },
     {
-      selectedTiles: ['0,0,3', '2,0,3']
+      selectedTiles: ['0-0-3', '2-0-3']
     },
     {
-      selectedTiles: ['0,0,3', '0,2,3', '2,0,3', '2,2,3']
+      selectedTiles: ['0-0-3', '0-2-3', '2-0-3', '2-2-3']
     },
     {
-      selectedTiles: ['4,0,3', '6,0,3']
+      selectedTiles: ['4-0-3', '6-0-3']
     },
     {
-      selectedTiles: ['4,0,3', '4,2,3', '6,0,3', '6,2,3']
+      selectedTiles: ['4-0-3', '4-2-3', '6-0-3', '6-2-3']
     },
     {
-      selectedTiles: ['0,0,4', '0,4,4']
+      selectedTiles: ['0-0-4', '0-4-4']
     }
   ];
 
@@ -386,8 +387,8 @@ test('Tileset2D#traversal', async t => {
   tileset._rebuildTree();
 
   // Sanity check
-  t.ok(tileset._getTile({x: 0, y: 0, z: 1}).isLoaded, '0,0,1 is loaded');
-  t.notOk(tileset._getTile({x: 0, y: 0, z: 0}).isLoaded, '0,0,0 is not loaded');
+  t.ok(tileset._getTile({x: 0, y: 0, z: 1}).isLoaded, '0-0-1 is loaded');
+  t.notOk(tileset._getTile({x: 0, y: 0, z: 0}).isLoaded, '0-0-0 is not loaded');
 
   for (const testCase of TEST_CASES) {
     const selectedTiles = testCase.selectedTiles.map(id => tileMap.get(id));
