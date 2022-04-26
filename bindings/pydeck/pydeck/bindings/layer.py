@@ -15,7 +15,7 @@ QUOTE_CHARS = {"'", '"', "`"}
 
 
 class Layer(JSONMixin):
-    def __init__(self, type, data=None, id=None, use_binary_transport=None, **kwargs):
+    def __init__(self, class_type, data=None, id=None, use_binary_transport=None, **kwargs):
         """Configures a deck.gl layer for rendering on a map. Parameters passed
         here will be specific to the particular deck.gl layer that you are choosing to use.
 
@@ -27,7 +27,7 @@ class Layer(JSONMixin):
         Parameters
         ==========
 
-        type : str
+        class_type : str
             Type of layer to render, e.g., `HexagonLayer`
         id : str, default None
             Unique name for layer
@@ -74,7 +74,7 @@ class Layer(JSONMixin):
           >>>     extruded=True,
           >>>     coverage=1)
         """
-        self.type = type
+        self.type = class_type
         self.id = id or str(uuid.uuid4())
 
         # Add any other kwargs to the JSON output

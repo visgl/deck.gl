@@ -45,7 +45,7 @@ def create_heatmap_test_object():
     # Tries to detect if strings are being interpreted by the
     # expression parser in @deck.gl/json
     failed_hexagon_layer = Layer(
-        type="HexagonLayer",
+        "HexagonLayer",
         id="failed-heatmap",
         data=data,
         elevation_range=[0, 15],
@@ -57,7 +57,7 @@ def create_heatmap_test_object():
     )
     # This will render
     successful_heatmap_layer = Layer(
-        type="HeatmapLayer", id="successful-heatmap", data=data, get_position=["lon", "lat"], color_range=color_range,
+        "HeatmapLayer", id="successful-heatmap", data=data, get_position=["lon", "lat"], color_range=color_range,
     )
 
     return Deck(
