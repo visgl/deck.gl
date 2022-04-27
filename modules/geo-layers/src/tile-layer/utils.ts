@@ -73,12 +73,17 @@ export function getURLFromTemplate(template: string | string[], tile: Tile2DHead
     template = template[i];
   }
 
-  const {x, y, z} = index;
-  return template
-    .replace(/\{x\}/g, String(x))
-    .replace(/\{y\}/g, String(y))
-    .replace(/\{z\}/g, String(z))
-    .replace(/\{-y\}/g, String(Math.pow(2, z) - y - 1));
+  let url = template;
+  for (let key of keys) {
+    const regex = new RegExp(`{${key}}`, 'g');
+    url = url.replace(regex, String(index[key]));
+  }
+
+  // Back-compatible support for {-y}
+  if (Number.isInteger(index.y) && Number.isInteger(index.z)) {
+    url = url.replace(/\{-y\}/g, String(Math.pow(2, index.z) - index.y - 1));
+  }
+  return url;
 }
 
 /**

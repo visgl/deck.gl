@@ -59,24 +59,24 @@ export default class H3Tileset2D extends Tileset2D {
 
     // Heuristic to get h3 resolution
     const resolution = Math.max(0, Math.floor((2 * z) / 3) - 2);
-    return getHexagonsInBoundingBox({west, north, east, south}, resolution);
+    return getHexagonsInBoundingBox({west, north, east, south}, resolution).map(h3 => ({h3}));
   }
 
-  getTileCacheKey(index) {
-    return index;
+  getTileCacheKey({h3}) {
+    return h3;
   }
 
-  getTileMetadata(index) {
-    return {bbox: tileToBoundingBox(index)};
+  getTileMetadata({h3}) {
+    return {bbox: tileToBoundingBox(h3)};
   }
 
-  getTileZoom(index) {
-    return h3GetResolution(index);
+  getTileZoom({h3}) {
+    return h3GetResolution(h3);
   }
 
   getParentIndex(index) {
-    const resolution = h3GetResolution(index);
-    index = h3ToParent(index, resolution - 1);
+    const resolution = h3GetResolution(index.h3);
+    index.h3 = h3ToParent(index.h3, resolution - 1);
     return index;
   }
 }
