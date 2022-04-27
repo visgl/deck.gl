@@ -227,7 +227,7 @@ export default class Tileset2D {
 
   /* Public interface for subclassing */
 
-  // Returns array of {index}
+  /** Returns array of tile indices in the current viewport */
   getTileIndices({
     viewport,
     maxZoom,
@@ -259,29 +259,30 @@ export default class Tileset2D {
     });
   }
 
-  // Returns unique string key for a tile index
+  /** Returns unique string key for a tile index */
   getTileCacheKey(index: TileIndex) {
     return `${index.x}-${index.y}-${index.z}`;
   }
 
+  /** Returns a zoom level for a tile index */
   getTileZoom(index: TileIndex) {
     return index.z;
   }
 
-  // Add custom metadata to tiles
-  getTileMetadata({index}) {
+  /** Returns additional metadata to add to tile, bbox by default */
+  getTileMetadata(index: TileIndex) {
     assert(this._viewport);
     const {tileSize} = this.opts;
     return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
-  // Returns {x, y, z} of the parent tile
-  getParentIndex(tileIndex) {
+  /** Returns index of the parent tile */
+  getParentIndex(index: TileIndex) {
     // Perf: mutate the input object to avoid GC
-    tileIndex.x = Math.floor(tileIndex.x / 2);
-    tileIndex.y = Math.floor(tileIndex.y / 2);
-    tileIndex.z -= 1;
-    return tileIndex;
+    index.x = Math.floor(index.x / 2);
+    index.y = Math.floor(index.y / 2);
+    index.z -= 1;
+    return index;
   }
 
   // Returns true if any tile's visibility changed
@@ -414,7 +415,7 @@ export default class Tileset2D {
 
     if (!tile && create) {
       tile = new Tile2DHeader(index);
-      Object.assign(tile, this.getTileMetadata(tile));
+      Object.assign(tile, this.getTileMetadata(tile.index));
       Object.assign(tile, {zoom: this.getTileZoom(tile.index)});
       needsReload = true;
       this._cache.set(cacheKey, tile);
