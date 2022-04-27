@@ -12,13 +12,17 @@ import QuadkeyTileset2D from './quadkey-tileset-2d';
 
 const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 4};
 
+// TODO: reference master
+const DATA_URI =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/90664726007d455bfe04ccfd5eb723e3b7c237c2/test-data/';
+
 function Root() {
   const h3TileLayer = new TileLayer({
     id: 'h3-tile-layer',
 
     // Overrides to work with h3
     TilesetClass: H3Tileset2D,
-    data: 'data/{h3}.json',
+    data: `${DATA_URI}/h3/{h3}.json`,
 
     minZoom: 4,
     maxZoom: 6,
@@ -46,7 +50,7 @@ function Root() {
 
     // Overrides to work with quadkeys
     TilesetClass: QuadkeyTileset2D,
-    data: 'data/{i}.json',
+    data: `${DATA_URI}/quadkey/{i}.json`,
 
     // Limit to available test data
     minZoom: 4,
