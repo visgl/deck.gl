@@ -144,12 +144,12 @@ function getParameters({
   if (GEO_COLUMN_SUPPORT.includes(type)) {
     if (geoColumn) {
       parameters.push(encodeParameter('geo_column', geoColumn));
-    }
-    if (aggregationExp) {
-      parameters.push(encodeParameter('aggregationExp', aggregationExp));
-    }
-    if (aggregationResLevel) {
-      parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
+      if (aggregationExp) {
+        parameters.push(encodeParameter('aggregationExp', aggregationExp));
+      }
+      if (aggregationExp && aggregationResLevel) {
+        parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
+      }
     }
   }
   if (COLUMNS_SUPPORT.includes(type) && columns) {
