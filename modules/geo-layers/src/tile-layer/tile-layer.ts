@@ -275,10 +275,10 @@ export default class TileLayer<
 
   getTileData(tile: TileLoadProps) {
     const {data, getTileData, getURLFromTemplate, fetch} = this.props;
-    const {index, signal} = tile;
+    const {signal} = tile;
 
     tile.url =
-      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, index) : null;
+      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, tile) : null;
 
     if (getTileData) {
       return getTileData(tile);

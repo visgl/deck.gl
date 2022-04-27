@@ -19,7 +19,7 @@ function Root() {
     // Overrides to work with h3
     TilesetClass: H3Tileset2D,
     data: 'data/{i}.json',
-    getURLFromTemplate: (template, index) => template.replace(/\{i\}/g, index),
+    getURLFromTemplate: (template, tile) => template.replace(/\{i\}/g, tile.index),
 
     minZoom: 4,
     maxZoom: 6,
@@ -48,7 +48,7 @@ function Root() {
     // Overrides to work with quadkeys
     TilesetClass: QuadkeyTileset2D,
     data: 'data/{i}.json',
-    getURLFromTemplate: (template, index) => template.replace(/\{i\}/g, index),
+    getURLFromTemplate: (template, tile) => template.replace(/\{i\}/g, tile.index),
 
     // Limit to available test data
     minZoom: 4,

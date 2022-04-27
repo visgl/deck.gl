@@ -109,7 +109,7 @@ export default class MVTLayer extends TileLayer {
   }
 
   getTileData(tile) {
-    const url = getURLFromTemplate(this.state.data, tile.index);
+    const url = getURLFromTemplate(this.state.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }

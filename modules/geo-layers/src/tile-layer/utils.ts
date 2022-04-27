@@ -57,12 +57,19 @@ function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   return transformedBox;
 }
 
-export function getURLFromTemplate(template: string | string[], index: TileIndex): string | null {
+function stringHash(s) {
+  return s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
+}
+
+export function getURLFromTemplate(template: string | string[], tile: Tile2DHeader): string | null {
   if (!template || !template.length) {
     return null;
   }
+  const {cacheKey, index} = tile;
+  const keys = Object.keys(index);
+
   if (Array.isArray(template)) {
-    const i = Math.abs(index.x + index.y) % template.length;
+    const i = stringHash(cacheKey) % template.length;
     template = template[i];
   }
 

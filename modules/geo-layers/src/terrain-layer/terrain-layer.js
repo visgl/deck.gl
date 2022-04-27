@@ -124,8 +124,8 @@ export default class TerrainLayer extends CompositeLayer {
   getTiledTerrainData(tile) {
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const {viewport} = this.context;
-    const dataUrl = getURLFromTemplate(elevationData, tile.index);
-    const textureUrl = getURLFromTemplate(texture, tile.index);
+    const dataUrl = getURLFromTemplate(elevationData, tile);
+    const textureUrl = getURLFromTemplate(texture, tile);
 
     const {bbox, signal} = tile;
     const bottomLeft = viewport.isGeospatial

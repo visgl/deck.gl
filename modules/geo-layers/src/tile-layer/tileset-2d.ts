@@ -416,7 +416,7 @@ export default class Tileset2D {
     if (!tile && create) {
       tile = new Tile2DHeader(index);
       Object.assign(tile, this.getTileMetadata(tile.index));
-      Object.assign(tile, {zoom: this.getTileZoom(tile.index)});
+      Object.assign(tile, {cacheKey, zoom: this.getTileZoom(tile.index)});
       needsReload = true;
       this._cache.set(cacheKey, tile);
       this._dirty = true;
