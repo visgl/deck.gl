@@ -66,7 +66,6 @@ export function getURLFromTemplate(template: string | string[], tile: Tile2DHead
     return null;
   }
   const {cacheKey, index} = tile;
-  const keys = Object.keys(index);
 
   if (Array.isArray(template)) {
     const i = stringHash(cacheKey) % template.length;
@@ -74,7 +73,7 @@ export function getURLFromTemplate(template: string | string[], tile: Tile2DHead
   }
 
   let url = template;
-  for (let key of keys) {
+  for (const key of Object.keys(index)) {
     const regex = new RegExp(`{${key}}`, 'g');
     url = url.replace(regex, String(index[key]));
   }
