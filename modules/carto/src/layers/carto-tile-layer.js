@@ -75,7 +75,7 @@ const defaultProps = {
 
 export default class CartoTileLayer extends MVTLayer {
   getTileData(tile) {
-    const url = _getURLFromTemplate(this.state.data, tile.index);
+    const url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
