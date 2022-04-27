@@ -128,6 +128,7 @@ export {
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,
+  _Tileset2D,
   TripsLayer,
   Tile3DLayer,
   TerrainLayer,

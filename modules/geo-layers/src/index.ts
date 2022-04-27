@@ -30,6 +30,7 @@ export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
 export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
 
+export {getURLFromTemplate as _getURLFromTemplate} from './tile-layer/utils';
 export {default as _Tileset2D} from './tile-layer/tileset-2d';
 
 // Types
