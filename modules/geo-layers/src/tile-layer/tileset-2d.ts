@@ -66,8 +66,8 @@ export type Tileset2DProps = Pick<
 };
 
 /**
- * Manages loading and purging of tiles data. This class caches recently visited tiles
- * and only create new tiles if they are present.
+ * Manages loading and purging of tile data. This class caches recently visited tiles
+ * and only creates new tiles if they are present.
  */
 export default class Tileset2D {
   private opts: Tileset2DProps;

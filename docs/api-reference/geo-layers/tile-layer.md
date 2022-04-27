@@ -134,6 +134,11 @@ if (signal.aborted) {
 // Expensive computation on returned data
 ```
 
+##### `TilesetClass` (class, optional)
+
+- Default: `Tileset2D`
+
+Tileset class that `TileLayer` uses for tile indexing. Extend [Tileset2D](#tileset2d) to implement a custom indexing scheme.
 
 ##### `tileSize` (Number, optional)
 
@@ -304,6 +309,43 @@ Properties:
 - `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
 - `isVisible` (Boolean) - if the tile should be rendered
 - `isLoaded` (Boolean) - if the content of the tile has been loaded
+
+## Tileset2D
+
+Class that manages loading and purging of tile data. This class caches recently visited tiles and only creates new tiles if they are present.
+
+To implement a custom indexing scheme, extend `Tileset2D` and implement the following interface:
+
+- `getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse})` - returns an array of indices in the given viewport. The indices should have the shape of Objects, like: `{q: '0123'}` to allow referencing in the URL template supplied to the `data` prop.
+- `getTileCacheKey(index)` - returns unique string key for a tile index.
+- `getParentIndex(index)` - returns index of the parent tile.
+- `getTileZoom(index)` - returns a zoom level for a tile index.
+- `getTileMetadata(index) - returns additional metadata to add to tile (optional).
+
+For example, to index using quadkeys:
+
+```js
+class QuadkeyTileset2D extends Tileset2D {
+  getTileIndices(opts) {
+    // Quadkeys and OSM tiles share the layout, leverage existing algorithm
+    // Data format: [{q: '0120'}, {q: '0121'}, {q: '0120'}, {q: '0120'},...]
+    return super.getTileIndices(opts).map(tileToQuadkey);
+  }
+
+  getTileCacheKey({q}) {
+    return q;
+  }
+
+  getTileZoom({q}) {
+    return q.length;
+  }
+
+  getParentIndex(index) {
+    index.q = index.q.slice(0, -1);
+    return index;
+  }
+}
+```
 
 ## Source
 
