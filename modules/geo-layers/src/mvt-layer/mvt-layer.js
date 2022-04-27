@@ -135,14 +135,14 @@ export default class MVTLayer extends TileLayer {
   }
 
   renderSubLayers(props) {
-    const {tile} = props;
-    const worldScale = Math.pow(2, tile.z);
+    const {x, y, z} = props.tile.index;
+    const worldScale = Math.pow(2, z);
 
     const xScale = WORLD_SIZE / worldScale;
     const yScale = -xScale;
 
-    const xOffset = (WORLD_SIZE * tile.x) / worldScale;
-    const yOffset = WORLD_SIZE * (1 - tile.y / worldScale);
+    const xOffset = (WORLD_SIZE * x) / worldScale;
+    const yOffset = WORLD_SIZE * (1 - y / worldScale);
 
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
