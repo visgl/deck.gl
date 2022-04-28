@@ -9,7 +9,7 @@ function tileToQuadkey(tile) {
     if ((tile.y & mask) !== 0) b += 2;
     index += b.toString();
   }
-  return {i: index};
+  return {q: index};
 }
 
 export default class QuadkeyTileset2D extends Tileset2D {
@@ -17,20 +17,20 @@ export default class QuadkeyTileset2D extends Tileset2D {
     return super.getTileIndices(opts).map(tileToQuadkey);
   }
 
-  getTileId({i}) {
-    return i;
+  getTileId({q}) {
+    return q;
   }
 
   getTileMetadata() {
     return {};
   }
 
-  getTileZoom({i}) {
-    return i.length;
+  getTileZoom({q}) {
+    return q.length;
   }
 
   getParentIndex(index) {
-    index.i = index.i.slice(0, -1);
-    return index;
+    const q = index.q.slice(0, -1);
+    return {q};
   }
 }

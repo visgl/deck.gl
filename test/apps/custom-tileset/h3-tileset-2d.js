@@ -76,7 +76,7 @@ export default class H3Tileset2D extends Tileset2D {
 
   getParentIndex(index) {
     const resolution = h3GetResolution(index.h3);
-    index.h3 = h3ToParent(index.h3, resolution - 1);
-    return index;
+    const h3 = h3ToParent(index.h3, resolution - 1);
+    return {h3};
   }
 }

@@ -278,11 +278,10 @@ export default class Tileset2D {
 
   /** Returns index of the parent tile */
   getParentIndex(index: TileIndex) {
-    // Perf: mutate the input object to avoid GC
-    index.x = Math.floor(index.x / 2);
-    index.y = Math.floor(index.y / 2);
-    index.z -= 1;
-    return index;
+    const x = Math.floor(index.x / 2);
+    const y = Math.floor(index.y / 2);
+    const z = index.z - 1;
+    return {x, y, z};
   }
 
   // Returns true if any tile's visibility changed
@@ -439,8 +438,7 @@ export default class Tileset2D {
   _getNearestAncestor(tile: Tile2DHeader): Tile2DHeader | null {
     const {_minZoom = 0} = this;
 
-    // Make copy as getParentIndex mutates object
-    let index = JSON.parse(JSON.stringify(tile.index));
+    let index = tile.index;
     while (this.getTileZoom(index) > _minZoom) {
       index = this.getParentIndex(index);
       const parent = this._getTile(index);
