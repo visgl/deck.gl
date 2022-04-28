@@ -518,12 +518,12 @@ test('getURLFromTemplate', t => {
     'single string template with multiple occurance'
   );
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 1, y: 2, z: 0}, cacheKey: '1-2-0'}),
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 1, y: 2, z: 0}, id: '1-2-0'}),
     'https://server.com/ep2/1/2.png',
     'array of templates'
   );
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 2, y: 2, z: 0}, cacheKey: '2-2-0'}),
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 2, y: 2, z: 0}, id: '2-2-0'}),
     'https://server.com/ep1/2/2.png',
     'array of templates'
   );

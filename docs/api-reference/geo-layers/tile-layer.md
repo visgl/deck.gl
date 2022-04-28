@@ -1,4 +1,4 @@
-import {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
+id {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 <TileLayerDemo />
 
@@ -113,7 +113,7 @@ If the value is an array: multiple URL templates. Each endpoint must return the 
 If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
 
 - `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
-- `cacheKey` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
+- `id` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
@@ -232,7 +232,7 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 * `id`: An unique id for this sublayer
 * `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
-* `tile`: An object containing `index` and `bbox` and `cacheKey` of the tile.
+* `tile`: An object containing `index` and `bbox` and `id` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
 
@@ -300,7 +300,7 @@ Class to hold the reading of a single tile
 Properties:
 
 - `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
-- `cacheKey` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
+- `id` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
 - `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
@@ -317,7 +317,7 @@ Class that manages loading and purging of tile data. This class caches recently 
 To implement a custom indexing scheme, extend `Tileset2D` and implement the following interface:
 
 - `getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse})` - returns an array of indices in the given viewport. The indices should have the shape of Objects, like: `{q: '0123'}` to allow referencing in the URL template supplied to the `data` prop.
-- `getTileCacheKey(index)` - returns unique string key for a tile index.
+- `getTileId(index)` - returns unique string key for a tile index.
 - `getParentIndex(index)` - returns index of the parent tile.
 - `getTileZoom(index)` - returns a zoom level for a tile index.
 - `getTileMetadata(index) - returns additional metadata to add to tile (optional).
@@ -332,7 +332,7 @@ class QuadkeyTileset2D extends Tileset2D {
     return super.getTileIndices(opts).map(tileToQuadkey);
   }
 
-  getTileCacheKey({q}) {
+  getTileId({q}) {
     return q;
   }
 

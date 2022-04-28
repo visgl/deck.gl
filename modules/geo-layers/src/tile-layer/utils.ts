@@ -65,10 +65,10 @@ export function getURLFromTemplate(template: string | string[], tile: Tile2DHead
   if (!template || !template.length) {
     return null;
   }
-  const {cacheKey, index} = tile;
+  const {index, id} = tile;
 
   if (Array.isArray(template)) {
-    const i = stringHash(cacheKey) % template.length;
+    const i = stringHash(id) % template.length;
     template = template[i];
   }
 

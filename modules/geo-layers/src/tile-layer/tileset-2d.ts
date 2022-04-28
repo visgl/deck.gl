@@ -165,10 +165,10 @@ export default class Tileset2D {
   }
 
   reloadAll(): void {
-    for (const cacheKey of this._cache.keys()) {
-      const tile = this._cache.get(cacheKey) as Tile2DHeader;
+    for (const id of this._cache.keys()) {
+      const tile = this._cache.get(id) as Tile2DHeader;
       if (!this._selectedTiles || !this._selectedTiles.includes(tile)) {
-        this._cache.delete(cacheKey);
+        this._cache.delete(id);
       } else {
         tile.setNeedsReload();
       }
@@ -260,7 +260,7 @@ export default class Tileset2D {
   }
 
   /** Returns unique string key for a tile index */
-  getTileCacheKey(index: TileIndex) {
+  getTileId(index: TileIndex) {
     return `${index.x}-${index.y}-${index.z}`;
   }
 
@@ -383,11 +383,11 @@ export default class Tileset2D {
     const overflown = _cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
-      for (const [cacheKey, tile] of _cache) {
+      for (const [id, tile] of _cache) {
         if (!tile.isVisible) {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
-          _cache.delete(cacheKey);
+          _cache.delete(id);
           this.opts.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -409,16 +409,16 @@ export default class Tileset2D {
   _getTile(index: TileIndex, create: true): Tile2DHeader;
   _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
   _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
-    const cacheKey = this.getTileCacheKey(index);
-    let tile = this._cache.get(cacheKey);
+    const id = this.getTileId(index);
+    let tile = this._cache.get(id);
     let needsReload = false;
 
     if (!tile && create) {
       tile = new Tile2DHeader(index);
       Object.assign(tile, this.getTileMetadata(tile.index));
-      Object.assign(tile, {cacheKey, zoom: this.getTileZoom(tile.index)});
+      Object.assign(tile, {id, zoom: this.getTileZoom(tile.index)});
       needsReload = true;
-      this._cache.set(cacheKey, tile);
+      this._cache.set(id, tile);
       this._dirty = true;
     } else if (tile && tile.needsReload) {
       needsReload = true;

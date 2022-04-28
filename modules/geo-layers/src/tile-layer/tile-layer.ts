@@ -324,7 +324,7 @@ export default class TileLayer<
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.cacheKey}`,
+          id: `${this.id}-${tile.id}`,
           data: tile.content,
           _offset: 0,
           tile

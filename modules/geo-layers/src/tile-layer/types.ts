@@ -10,8 +10,8 @@ export type TileIndex = {x: number; y: number; z: number};
 
 export type TileLoadProps = {
   index: TileIndex;
+  id: string;
   bbox: TileBoundingBox;
-  cacheKey: string;
   url?: string | null;
   signal?: AbortSignal;
 };

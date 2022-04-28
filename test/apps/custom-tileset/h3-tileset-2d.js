@@ -62,7 +62,7 @@ export default class H3Tileset2D extends Tileset2D {
     return getHexagonsInBoundingBox({west, north, east, south}, resolution).map(h3 => ({h3}));
   }
 
-  getTileCacheKey({h3}) {
+  getTileId({h3}) {
     return h3;
   }
 

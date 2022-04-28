@@ -17,7 +17,7 @@ export default class QuadkeyTileset2D extends Tileset2D {
     return super.getTileIndices(opts).map(tileToQuadkey);
   }
 
-  getTileCacheKey({i}) {
+  getTileId({i}) {
     return i;
   }
 
