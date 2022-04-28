@@ -133,14 +133,6 @@ function getParameters({
   aggregationExp,
   aggregationResLevel
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
-  checkFetchLayerData({
-    type,
-    geoColumn,
-    columns,
-    aggregationExp,
-    aggregationResLevel
-  });
-
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
   if (schema) {
     parameters.push(encodeParameter('schema', true));
@@ -163,30 +155,6 @@ function getParameters({
   }
 
   return parameters.join('&');
-}
-
-function checkFetchLayerData({
-  type,
-  geoColumn,
-  columns,
-  aggregationExp,
-  aggregationResLevel
-}: Omit<FetchLayerDataParams, 'connection' | 'credentials' | 'source'>) {
-  if (geoColumn && !GEO_COLUMN_SUPPORT.includes(type)) {
-    throw new Error(`The geoColumn parameter is not supported by type ${type}`);
-  }
-  if (columns && !COLUMNS_SUPPORT.includes(type)) {
-    throw new Error(`The columns parameter is not supported by type ${type}`);
-  }
-  if (aggregationExp && !geoColumn) {
-    throw new Error('The geoColumn parameter is missing');
-  }
-  if (aggregationResLevel && !geoColumn) {
-    throw new Error('The geoColumn parameter is missing');
-  }
-  if (aggregationResLevel && !aggregationExp) {
-    throw new Error('The aggregationExp parameter is missing');
-  }
 }
 
 export async function mapInstantiation({
@@ -240,7 +208,11 @@ function checkFetchLayerDataParameters({
   type,
   source,
   connection,
-  credentials
+  credentials,
+  geoColumn,
+  columns,
+  aggregationExp,
+  aggregationResLevel
 }: FetchLayerDataParams) {
   assert(connection, 'Must define connection');
   assert(type, 'Must define a type');
@@ -249,6 +221,29 @@ function checkFetchLayerDataParameters({
   assert(credentials.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   assert(credentials.apiBaseUrl, 'Must define apiBaseUrl');
   assert(credentials.accessToken, 'Must define an accessToken');
+
+  if (columns) {
+    assert(
+      COLUMNS_SUPPORT.includes(type),
+      `The columns parameter is not supported by type ${type}`
+    );
+  }
+  if (geoColumn) {
+    assert(
+      GEO_COLUMN_SUPPORT.includes(type),
+      `The geoColumn parameter is not supported by type ${type}`
+    );
+  } else {
+    assert(!aggregationExp, 'Have aggregationExp, but geoColumn parameter is missing');
+    assert(!aggregationResLevel, 'Have aggregationResLevel, but geoColumn parameter is missing');
+  }
+
+  if (!aggregationExp) {
+    assert(
+      !aggregationResLevel,
+      'Have aggregationResLevel, but aggregationExp parameter is missing'
+    );
+  }
 }
 
 export interface FetchLayerDataResult {
@@ -317,7 +312,16 @@ async function _fetchDataUrl({
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
-  checkFetchLayerDataParameters({type, source, connection, credentials: localCreds});
+  checkFetchLayerDataParameters({
+    type,
+    source,
+    connection,
+    credentials: localCreds,
+    geoColumn,
+    columns,
+    aggregationExp,
+    aggregationResLevel
+  });
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
