@@ -121,41 +121,49 @@ for (const useSetDefaultCredentials of [true, false]) {
   });
 }
 
-test('getData#parameters', async t => {
-  const params = {
-    type: MAP_TYPES.TABLE,
-    connection: 'connection_name',
-    source: 'table'
-  };
+const TABLE_PARAMS = {
+  type: MAP_TYPES.TABLE,
+  connection: 'connection_name',
+  source: 'table',
+  credentials: {accessToken: 'XXX', apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://maps-v3'}
+};
 
-  try {
-    await getData({
-      ...params,
-      credentials: {
-        apiVersion: API_VERSIONS.V2
-      }
-    });
-    t.fail('it should throw an error');
-  } catch (e) {
-    t.is(e.message, 'Method only available for v3', 'should throw when no v3');
+[
+  {
+    title: 'v2',
+    params: {
+      ...TABLE_PARAMS,
+      credentials: {apiVersion: API_VERSIONS.V2}
+    },
+    regex: /Method only available for v3/
+  },
+  {
+    title: 'no access token',
+    params: {
+      ...TABLE_PARAMS,
+      credentials: {apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://maps-v3'}
+    },
+    regex: /Must define an accessToken/
   }
+].forEach(({title, params, regex}) => {
+  test(`getData#parameters ${title}`, async t => {
+    try {
+      await getData({
+        ...params
+      });
+      t.fail('it should throw an error');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        'Error message should match'
+      );
+    }
 
-  try {
-    await getData({
-      type: MAP_TYPES.TABLE,
-      connection: 'connection_name',
-      source: 'table',
-      credentials: {
-        apiVersion: API_VERSIONS.V3,
-        apiBaseUrl: 'http://maps-v3'
-      }
-    });
-    t.fail('it should throw an error');
-  } catch (e) {
-    t.is(e.message, 'Must define an accessToken', 'should throw when no accessToken');
-  }
-
-  t.end();
+    t.end();
+  });
 });
 
 [
