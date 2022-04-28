@@ -416,11 +416,6 @@ test(`getDataV2#versionError`, async t => {
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&columns=a%2Cb%2Cc'
   },
   {
-    props: {schema: true},
-    mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&schema=true&name=table'
-  },
-  {
     props: {geoColumn: 'geog', aggregationExp: 'sum(col) as value'},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'

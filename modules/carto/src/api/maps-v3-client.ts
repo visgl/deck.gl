@@ -112,7 +112,6 @@ type FetchLayerDataParams = {
   credentials: CloudNativeCredentials;
   geoColumn?: string;
   columns?: string[];
-  schema?: boolean;
   clientId?: string;
   format?: Format;
   formatTiles?: TileFormat;
@@ -128,15 +127,11 @@ function getParameters({
   source,
   geoColumn,
   columns,
-  schema,
   clientId,
   aggregationExp,
   aggregationResLevel
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
-  if (schema) {
-    parameters.push(encodeParameter('schema', true));
-  }
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
@@ -164,7 +159,6 @@ export async function mapInstantiation({
   credentials,
   geoColumn,
   columns,
-  schema,
   clientId,
   aggregationExp,
   aggregationResLevel
@@ -175,7 +169,6 @@ export async function mapInstantiation({
     source,
     geoColumn,
     columns,
-    schema,
     clientId,
     aggregationExp,
     aggregationResLevel
@@ -249,7 +242,7 @@ function checkFetchLayerDataParameters({
 export interface FetchLayerDataResult {
   data: any;
   format?: Format;
-  schema?: SchemaField[];
+  schema: SchemaField[];
 }
 export async function fetchLayerData({
   type,
@@ -260,7 +253,6 @@ export async function fetchLayerData({
   columns,
   format,
   formatTiles,
-  schema,
   clientId,
   aggregationExp,
   aggregationResLevel
@@ -276,18 +268,13 @@ export async function fetchLayerData({
     columns,
     format,
     formatTiles,
-    schema,
     clientId,
     aggregationExp,
     aggregationResLevel
   });
 
   const data = await requestData({url, format: mapFormat, accessToken});
-  const result: FetchLayerDataResult = {data, format: mapFormat};
-  if (schema) {
-    result.schema = metadata.schema;
-  }
-
+  const result: FetchLayerDataResult = {data, format: mapFormat, schema: metadata.schema};
   return result;
 }
 
@@ -300,7 +287,6 @@ async function _fetchDataUrl({
   columns,
   format,
   formatTiles,
-  schema,
   clientId,
   aggregationExp,
   aggregationResLevel
@@ -334,7 +320,6 @@ async function _fetchDataUrl({
     credentials: localCreds,
     geoColumn,
     columns,
-    schema,
     clientId,
     aggregationExp,
     aggregationResLevel
@@ -390,7 +375,6 @@ export async function getData({
     geoColumn,
     columns,
     format,
-    schema: false,
     clientId
   });
   return layerData.data;
