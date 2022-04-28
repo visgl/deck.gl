@@ -391,6 +391,16 @@ test(`getDataV2#versionError`, async t => {
     props: {schema: true},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&schema=true&name=table'
+  },
+  {
+    props: {geoColumn: 'geog', aggregationExp: 'sum(col) as value'},
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'
+  },
+  {
+    props: {geoColumn: 'geog', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
