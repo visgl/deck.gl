@@ -131,10 +131,7 @@ const TABLE_PARAMS = {
 [
   {
     title: 'v2',
-    params: {
-      ...TABLE_PARAMS,
-      credentials: {apiVersion: API_VERSIONS.V2}
-    },
+    params: {...TABLE_PARAMS, credentials: {apiVersion: API_VERSIONS.V2}},
     regex: /Method only available for v3/
   },
   {
@@ -144,13 +141,36 @@ const TABLE_PARAMS = {
       credentials: {apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://maps-v3'}
     },
     regex: /Must define an accessToken/
+  },
+  {
+    title: 'tileset + geoColumn',
+    params: {...TABLE_PARAMS, type: MAP_TYPES.TILESET, geoColumn: 'geo'},
+    regex: /geoColumn parameter is not supported by type tileset/
+  },
+  {
+    title: 'query + columns',
+    params: {...TABLE_PARAMS, type: MAP_TYPES.QUERY, columns: ['geo']},
+    regex: /columns parameter is not supported by type query/
+  },
+  {
+    title: 'no geoColumn + aggregationExp',
+    params: {...TABLE_PARAMS, aggregationExp: 'sum(x) as y'},
+    regex: /aggregationExp, but geoColumn parameter is missing/
+  },
+  {
+    title: 'no geoColumn + aggregationResLevel',
+    params: {...TABLE_PARAMS, aggregationResLevel: 8},
+    regex: /aggregationResLevel, but geoColumn parameter is missing/
+  },
+  {
+    title: 'no aggregationExp + aggregationResLevel',
+    params: {...TABLE_PARAMS, geoColumn: 'geo', aggregationResLevel: 8},
+    regex: /aggregationResLevel, but aggregationExp parameter is missing/
   }
 ].forEach(({title, params, regex}) => {
-  test(`getData#parameters ${title}`, async t => {
+  test(`fetchLayerData#parameters ${title}`, async t => {
     try {
-      await getData({
-        ...params
-      });
+      await fetchLayerData(params);
       t.fail('it should throw an error');
     } catch (e) {
       t.throws(
