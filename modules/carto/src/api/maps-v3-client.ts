@@ -133,6 +133,14 @@ function getParameters({
   aggregationExp,
   aggregationResLevel
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
+  checkFetchLayerData({
+    type,
+    geoColumn,
+    columns,
+    aggregationExp,
+    aggregationResLevel
+  });
+
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
   if (schema) {
     parameters.push(encodeParameter('schema', true));
@@ -141,22 +149,44 @@ function getParameters({
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (GEO_COLUMN_SUPPORT.includes(type)) {
-    if (geoColumn) {
-      parameters.push(encodeParameter('geo_column', geoColumn));
-      if (aggregationExp) {
-        parameters.push(encodeParameter('aggregationExp', aggregationExp));
-      }
-      if (aggregationExp && aggregationResLevel) {
-        parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
-      }
-    }
+  if (geoColumn) {
+    parameters.push(encodeParameter('geo_column', geoColumn));
   }
-  if (COLUMNS_SUPPORT.includes(type) && columns) {
+  if (columns) {
     parameters.push(encodeParameter('columns', columns.join(',')));
+  }
+  if (aggregationExp) {
+    parameters.push(encodeParameter('aggregationExp', aggregationExp));
+  }
+  if (aggregationResLevel) {
+    parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
   }
 
   return parameters.join('&');
+}
+
+function checkFetchLayerData({
+  type,
+  geoColumn,
+  columns,
+  aggregationExp,
+  aggregationResLevel
+}: Omit<FetchLayerDataParams, 'connection' | 'credentials' | 'source'>) {
+  if (geoColumn && !GEO_COLUMN_SUPPORT.includes(type)) {
+    throw new Error(`The geoColumn parameter is not supported by type ${type}`);
+  }
+  if (columns && !COLUMNS_SUPPORT.includes(type)) {
+    throw new Error(`The columns parameter is not supported by type ${type}`);
+  }
+  if (aggregationExp && !geoColumn) {
+    throw new Error('The geoColumn parameter is missing');
+  }
+  if (aggregationResLevel && !geoColumn) {
+    throw new Error('The geoColumn parameter is missing');
+  }
+  if (aggregationResLevel && !aggregationExp) {
+    throw new Error('The aggregationExp parameter is missing');
+  }
 }
 
 export async function mapInstantiation({
