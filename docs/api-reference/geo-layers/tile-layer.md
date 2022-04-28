@@ -113,7 +113,7 @@ If the value is an array: multiple URL templates. Each endpoint must return the 
 If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
 
 - `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
-- `id` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
+- `id` (String) - unique string representation of index.
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
