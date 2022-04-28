@@ -50,7 +50,7 @@ function Root() {
 
     // Overrides to work with quadkeys
     TilesetClass: QuadkeyTileset2D,
-    data: `${DATA_URI}/quadkey/{i}.json`,
+    data: `${DATA_URI}/quadkey/{q}.json`,
 
     // Limit to available test data
     minZoom: 4,
