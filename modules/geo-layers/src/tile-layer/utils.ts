@@ -1,5 +1,6 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
+import Tile2DHeader from './tile-2d-header';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 
