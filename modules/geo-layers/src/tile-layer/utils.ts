@@ -58,7 +58,7 @@ function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   return transformedBox;
 }
 
-function stringHash(s) {
+function stringHash(s: string): number {
   return s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
 }
 
