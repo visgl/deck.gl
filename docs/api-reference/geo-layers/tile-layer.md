@@ -322,7 +322,7 @@ To implement a custom indexing scheme, extend `Tileset2D` and implement the foll
 - `getTileZoom(index)` - returns a zoom level for a tile index.
 - `getTileMetadata(index) - returns additional metadata to add to tile (optional).
 
-For example, to index using quadkeys:
+For example, to index using [quadkeys](https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system#tile-coordinates-and-quadkeys):
 
 ```js
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
