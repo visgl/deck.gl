@@ -1,4 +1,4 @@
-id {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
+import {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 <TileLayerDemo />
 
