@@ -167,12 +167,11 @@ export default class Tile3DLayer extends CompositeLayer {
     if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
-    tileset3d.selectTiles(Object.values(viewports)).then(frameNumber => {
-      const tilesetChanged = this.state.frameNumber !== frameNumber;
-      if (tilesetChanged) {
-        this.setState({frameNumber});
-      }
-    });
+    const frameNumber = tileset3d.update(Object.values(viewports));
+    const tilesetChanged = this.state.frameNumber !== frameNumber;
+    if (tilesetChanged) {
+      this.setState({frameNumber});
+    }
   }
 
   _getSubLayer(tileHeader, oldLayer) {
