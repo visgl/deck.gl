@@ -232,7 +232,7 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 * `id`: An unique id for this sublayer
 * `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
-* `tile`: An object containing `index` and `bbox` and `id` of the tile.
+* `tile`: An object containing `index`, `bbox`, and `id` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
 
