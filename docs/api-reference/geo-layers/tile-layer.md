@@ -329,23 +329,29 @@ import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 class QuadkeyTileset2D extends Tileset2D {
   getTileIndices(opts) {
     // Quadkeys and OSM tiles share the layout, leverage existing algorithm
-    // Data format: [{q: '0120'}, {q: '0121'}, {q: '0120'}, {q: '0120'},...]
+    // Data format: [{quadkey: '0120'}, {quadkey: '0121'}, {quadkey: '0120'},...]
     return super.getTileIndices(opts).map(tileToQuadkey);
   }
 
-  getTileId({q}) {
-    return q;
+  getTileId({quadkey}) {
+    return quadkey;
   }
 
-  getTileZoom({q}) {
-    return q.length;
+  getTileZoom({quadkey}) {
+    return quadkey.length;
   }
 
-  getParentIndex(index) {
-    index.q = index.q.slice(0, -1);
-    return index;
+  getParentIndex({quadkey}) {
+    const quadkey = quadkey.slice(0, -1);
+    return {quadkey};
   }
 }
+
+const quadkeyTileLayer = new TileLayer({
+  TilesetClass: QuadkeyTileset2D,
+  data: 'quadkey/{quadkey}.json',
+  ...
+});
 ```
 
 ## Source
