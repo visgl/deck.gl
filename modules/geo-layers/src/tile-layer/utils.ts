@@ -1,7 +1,10 @@
+import {Viewport} from '@deck.gl/core';
+import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
+import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 
 const TILE_SIZE = 512;
-const DEFAULT_EXTENT = [-Infinity, -Infinity, Infinity, Infinity];
+const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
 
 export const urlType = {
   type: 'url',
@@ -30,7 +33,7 @@ export const urlType = {
   }
 };
 
-function transformBox(bbox, modelMatrix) {
+function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   const transformedCoords = [
     // top-left
     modelMatrix.transformAsPoint([bbox[0], bbox[1]]),
@@ -41,7 +44,7 @@ function transformBox(bbox, modelMatrix) {
     // bottom-right
     modelMatrix.transformAsPoint([bbox[2], bbox[3]])
   ];
-  const transformedBox = [
+  const transformedBox: Bounds = [
     // Minimum x coord
     Math.min(...transformedCoords.map(i => i[0])),
     // Minimum y coord
@@ -54,7 +57,10 @@ function transformBox(bbox, modelMatrix) {
   return transformedBox;
 }
 
-export function getURLFromTemplate(template, properties) {
+export function getURLFromTemplate(
+  template: string | string[],
+  properties: TileIndex
+): string | null {
   if (!template || !template.length) {
     return null;
   }
@@ -65,16 +71,16 @@ export function getURLFromTemplate(template, properties) {
 
   const {x, y, z} = properties;
   return template
-    .replace(/\{x\}/g, x)
-    .replace(/\{y\}/g, y)
-    .replace(/\{z\}/g, z)
-    .replace(/\{-y\}/g, Math.pow(2, z) - y - 1);
+    .replace(/\{x\}/g, String(x))
+    .replace(/\{y\}/g, String(y))
+    .replace(/\{z\}/g, String(z))
+    .replace(/\{-y\}/g, String(Math.pow(2, z) - y - 1));
 }
 
 /**
  * gets the bounding box of a viewport
  */
-function getBoundingBox(viewport, zRange, extent) {
+function getBoundingBox(viewport: Viewport, zRange: number[] | null, extent: Bounds): Bounds {
   let bounds;
   if (zRange && zRange.length === 2) {
     const [minZ, maxZ] = zRange;
@@ -107,22 +113,26 @@ function getBoundingBox(viewport, zRange, extent) {
   ];
 }
 
-function getIndexingCoords(bbox, scale, modelMatrixInverse) {
+function getIndexingCoords(bbox: Bounds, scale: number, modelMatrixInverse?: Matrix4): Bounds {
   if (modelMatrixInverse) {
     const transformedTileIndex = transformBox(bbox, modelMatrixInverse).map(
       i => (i * scale) / TILE_SIZE
     );
-    return transformedTileIndex;
+    return transformedTileIndex as Bounds;
   }
-  return bbox.map(i => (i * scale) / TILE_SIZE);
+  return bbox.map(i => (i * scale) / TILE_SIZE) as Bounds;
 }
 
-function getScale(z, tileSize) {
+function getScale(z: number, tileSize: number): number {
   return (Math.pow(2, z) * TILE_SIZE) / tileSize;
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-export function osmTile2lngLat(x, y, z) {
+export function osmTile2lngLat(
+  x: number,
+  y: number,
+  z: number
+): [latitude: number, longitude: number] {
   const scale = getScale(z, TILE_SIZE);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
@@ -130,11 +140,17 @@ export function osmTile2lngLat(x, y, z) {
   return [lng, lat];
 }
 
-function tile2XY(x, y, z, tileSize) {
+function tile2XY(x: number, y: number, z: number, tileSize: number): [x: number, y: number] {
   const scale = getScale(z, tileSize);
   return [(x / scale) * TILE_SIZE, (y / scale) * TILE_SIZE];
 }
-export function tileToBoundingBox(viewport, x, y, z, tileSize = TILE_SIZE) {
+export function tileToBoundingBox(
+  viewport: Viewport,
+  x: number,
+  y: number,
+  z: number,
+  tileSize: number = TILE_SIZE
+): TileBoundingBox {
   if (viewport.isGeospatial) {
     const [west, north] = osmTile2lngLat(x, y, z);
     const [east, south] = osmTile2lngLat(x + 1, y + 1, z);
@@ -145,11 +161,17 @@ export function tileToBoundingBox(viewport, x, y, z, tileSize = TILE_SIZE) {
   return {left, top, right, bottom};
 }
 
-function getIdentityTileIndices(viewport, z, tileSize, extent, modelMatrixInverse) {
+function getIdentityTileIndices(
+  viewport: Viewport,
+  z: number,
+  tileSize: number,
+  extent: Bounds,
+  modelMatrixInverse?: Matrix4
+) {
   const bbox = getBoundingBox(viewport, null, extent);
   const scale = getScale(z, tileSize);
   const [minX, minY, maxX, maxY] = getIndexingCoords(bbox, scale, modelMatrixInverse);
-  const indices = [];
+  const indices: TileIndex[] = [];
 
   /*
       |  TILE  |  TILE  |  TILE  |
@@ -179,17 +201,27 @@ export function getTileIndices({
   modelMatrix,
   modelMatrixInverse,
   zoomOffset = 0
+}: {
+  viewport: Viewport;
+  maxZoom?: number;
+  minZoom?: number;
+  zRange: ZRange | undefined;
+  extent?: Bounds;
+  tileSize?: number;
+  modelMatrix?: Matrix4;
+  modelMatrixInverse?: Matrix4;
+  zoomOffset?: number;
 }) {
   let z = viewport.isGeospatial
     ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
     : Math.ceil(viewport.zoom) + zoomOffset;
-  if (Number.isFinite(minZoom) && z < minZoom) {
+  if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
     }
     z = minZoom;
   }
-  if (Number.isFinite(maxZoom) && z > maxZoom) {
+  if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
   }
   let transformedExtent = extent;
@@ -210,6 +242,6 @@ export function getTileIndices({
 /**
  * Returns true if s is a valid URL template
  */
-export function isURLTemplate(s) {
+export function isURLTemplate(s: string): boolean {
   return /(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/.test(s);
 }

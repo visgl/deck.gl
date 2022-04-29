@@ -1,7 +1,18 @@
-import {CompositeLayer, _flatten as flatten} from '@deck.gl/core';
+import {
+  assert,
+  ChangeFlags,
+  CompositeLayer,
+  CompositeLayerProps,
+  Layer,
+  LayerProps,
+  _flatten as flatten
+} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {LayersList} from 'modules/core/src/lib/layer-manager';
+import Tile2DHeader from './tile-2d-header';
 
-import Tileset2D, {STRATEGY_DEFAULT} from './tileset-2d';
+import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
+import {TileLoadProps, ZRange} from './types';
 import {urlType, getURLFromTemplate} from './utils';
 
 const defaultProps = {
@@ -27,7 +38,96 @@ const defaultProps = {
   zoomOffset: 0
 };
 
-export default class TileLayer extends CompositeLayer {
+export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
+  /**
+   * Renders one or an array of Layer instances.
+   */
+  renderSubLayers: (
+    props: TileLayerProps & {
+      id: string;
+      data: any;
+      _offset: number;
+      tile: Tile2DHeader;
+    }
+  ) => LayersList;
+  /**
+   * If supplied, `getTileData` is called to retrieve the data of each tile.
+   */
+  getTileData: (props: TileLoadProps) => Promise<any> | any;
+
+  /** Called when all tiles in the current viewport are loaded. */
+  onViewportLoad?: (tiles: Tile2DHeader[]) => void;
+
+  /** Called when a tile successfully loads. */
+  onTileLoad: (tile: Tile2DHeader) => void;
+
+  /** Called when a tile is cleared from cache. */
+  onTileUnload: (tile: Tile2DHeader) => void;
+
+  /** Called when a tile failed to load. */
+  onTileError: (err: any) => void;
+
+  /** The bounding box of the layer's data. */
+  extent: number[] | undefined | null;
+
+  /** The pixel dimension of the tiles, usually a power of 2. */
+  tileSize: number;
+
+  /** The max zoom level of the layer's data.  */
+  maxZoom: number;
+
+  /** The min zoom level of the layer's data.  */
+  minZoom: number;
+
+  /** The maximum number of tiles that can be cached. */
+  maxCacheSize: number | undefined | null;
+
+  /**
+   * The maximum memory used for caching tiles.
+   *
+   * @default null
+   */
+  maxCacheByteSize: number | undefined;
+
+  /**
+   * How the tile layer refines the visibility of tiles.
+   *
+   * @default 'best-available'
+   */
+  refinementStrategy: RefinementStrategy;
+
+  /** Range of minimum and maximum heights in the tile. */
+  zRange: ZRange | null;
+
+  /**
+   * The maximum number of concurrent getTileData calls.
+   *
+   * @default 6
+   */
+  maxRequests: number;
+
+  /**
+   * This offset changes the zoom level at which the tiles are fetched.
+   *
+   * Needs to be an integer.
+   *
+   * @default 0
+   */
+  zoomOffset: number;
+};
+
+/**
+ * The TileLayer is a composite layer that makes it possible to visualize very large datasets.
+ *
+ * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
+ */
+export default class TileLayer<
+  DataT = any,
+  PropsT extends TileLayerProps<DataT> = TileLayerProps<DataT>
+> extends CompositeLayer<PropsT> {
+  static defaultProps = defaultProps as any;
+  static layerName = 'TileLayer';
+
   initializeState() {
     this.state = {
       tileset: null,
@@ -36,21 +136,30 @@ export default class TileLayer extends CompositeLayer {
   }
 
   finalizeState() {
-    this.state.tileset?.finalize();
+    this.state?.tileset?.finalize();
   }
 
-  get isLoaded() {
-    const {tileset} = this.state;
-    return tileset.selectedTiles.every(
+  get isLoaded(): boolean {
+    return this.state?.tileset?.selectedTiles.every(
       tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}): boolean {
     return changeFlags.somethingChanged;
   }
 
-  updateState({props, changeFlags}) {
+  updateState({
+    props,
+    changeFlags
+  }: {
+    props: TileLayerProps;
+    oldProps: TileLayerProps;
+    context: any;
+    changeFlags: ChangeFlags;
+  }) {
+    assert(this.state);
+
     let {tileset} = this.state;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
@@ -79,7 +188,7 @@ export default class TileLayer extends CompositeLayer {
     this._updateTileset();
   }
 
-  _getTilesetOptions(props) {
+  _getTilesetOptions(props: TileLayerProps): Tileset2DProps {
     const {
       tileSize,
       maxCacheSize,
@@ -110,7 +219,8 @@ export default class TileLayer extends CompositeLayer {
     };
   }
 
-  _updateTileset() {
+  _updateTileset(): void {
+    assert(this.state && this.context);
     const {tileset} = this.state;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
@@ -131,7 +241,9 @@ export default class TileLayer extends CompositeLayer {
     this.state.isLoaded = isLoaded;
   }
 
-  _onViewportLoad() {
+  _onViewportLoad(): void {
+    assert(this.state);
+
     const {tileset} = this.state;
     const {onViewportLoad} = this.props;
 
@@ -140,46 +252,54 @@ export default class TileLayer extends CompositeLayer {
     }
   }
 
-  _onTileLoad(tile) {
+  _onTileLoad(tile: Tile2DHeader): void {
     this.props.onTileLoad(tile);
     tile.layers = null;
 
     this.setNeedsUpdate();
   }
 
-  _onTileError(error, tile) {
+  _onTileError(error: any, tile: Tile2DHeader) {
     this.props.onTileError(error);
     tile.layers = null;
 
     this.setNeedsUpdate();
   }
 
-  _onTileUnload(tile) {
+  _onTileUnload(tile: Tile2DHeader) {
     this.props.onTileUnload(tile);
   }
 
   // Methods for subclass to override
 
-  getTileData(tile) {
+  getTileData(tile: TileLoadProps) {
     const {data, getTileData, fetch} = this.props;
     const {signal} = tile;
 
-    tile.url = getURLFromTemplate(data, tile);
+    tile.url =
+      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, tile) : null;
 
     if (getTileData) {
       return getTileData(tile);
     }
-    if (tile.url) {
+    if (fetch && tile.url) {
       return fetch(tile.url, {propName: 'data', layer: this, signal});
     }
     return null;
   }
 
-  renderSubLayers(props) {
+  renderSubLayers(
+    props: TileLayerProps & {
+      id: string;
+      data: any;
+      _offset: number;
+      tile: Tile2DHeader;
+    }
+  ): LayersList {
     return this.props.renderSubLayers(props);
   }
 
-  getSubLayerPropsByTile(tile) {
+  getSubLayerPropsByTile(tile: Tile2DHeader): LayerProps | null {
     return null;
   }
 
@@ -194,8 +314,9 @@ export default class TileLayer extends CompositeLayer {
     }
   }
 
-  renderLayers() {
-    return this.state.tileset.tiles.map(tile => {
+  renderLayers(): Layer[] {
+    assert(this.state);
+    return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded && !tile.content) {
@@ -218,7 +339,7 @@ export default class TileLayer extends CompositeLayer {
         subLayerProps &&
         tile.layers[0] &&
         Object.keys(subLayerProps).some(
-          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
+          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
         )
       ) {
         tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));
@@ -231,6 +352,3 @@ export default class TileLayer extends CompositeLayer {
     return layer.props.tile.isVisible;
   }
 }
-
-TileLayer.layerName = 'TileLayer';
-TileLayer.defaultProps = defaultProps;
