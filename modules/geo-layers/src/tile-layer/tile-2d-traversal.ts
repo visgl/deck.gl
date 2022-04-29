@@ -7,7 +7,7 @@ import {
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/culling';
 import {lngLatToWorld} from '@math.gl/web-mercator';
-import {Bounds, ZRange} from './types';
+import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
 
 const TILE_SIZE = 512;
@@ -183,7 +183,7 @@ export function getOSMTileIndices(
   maxZ: number,
   zRange: ZRange | undefined,
   bounds?: Bounds
-) {
+): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =
     viewport instanceof _GlobeViewport && viewport.resolution
       ? // eslint-disable-next-line @typescript-eslint/unbound-method

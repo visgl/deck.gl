@@ -115,3 +115,4 @@ export type {OrbitViewState} from './views/orbit-view';
 export type {OrthographicViewState} from './views/orthographic-view';
 export type {GlobeViewState} from './views/globe-view';
 export type {ChangeFlags} from './lib/layer-state';
+export type {LayersList} from './lib/layer-manager';
