@@ -325,6 +325,7 @@ To implement a custom indexing scheme, extend `Tileset2D` and implement the foll
 For example, to index using quadkeys:
 
 ```js
+import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 class QuadkeyTileset2D extends Tileset2D {
   getTileIndices(opts) {
     // Quadkeys and OSM tiles share the layout, leverage existing algorithm
