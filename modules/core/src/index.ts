@@ -100,7 +100,15 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
-export type {LayerProps, CompositeLayerProps} from './types/layer-props';
+export type {
+  LayerProps,
+  CompositeLayerProps,
+  Accessor,
+  LayerData,
+  Unit,
+  Position,
+  Color
+} from './types/layer-props';
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';

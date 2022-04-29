@@ -29,12 +29,12 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^3.1.5",
-    "@loaders.gl/gis": "^3.1.5",
-    "@loaders.gl/loader-utils": "^3.1.5",
-    "@loaders.gl/mvt": "^3.1.5",
-    "@loaders.gl/terrain": "^3.1.5",
-    "@loaders.gl/tiles": "^3.1.5",
+    "@loaders.gl/3d-tiles": "^3.2.0-alpha.2",
+    "@loaders.gl/gis": "^3.2.0-alpha.2",
+    "@loaders.gl/loader-utils": "^3.2.0-alpha.2",
+    "@loaders.gl/mvt": "^3.2.0-alpha.2",
+    "@loaders.gl/terrain": "^3.2.0-alpha.2",
+    "@loaders.gl/tiles": "^3.2.0-alpha.2",
     "@luma.gl/experimental": "^8.5.10",
     "@math.gl/core": "3.6.0-alpha.5",
     "@math.gl/culling": "3.6.0-alpha.5",

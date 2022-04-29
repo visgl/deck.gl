@@ -122,7 +122,7 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected shouldDrawLayer(layer: Layer): boolean {
-    return (layer.props.pickable as boolean) && layer.props.operation === OPERATION.DRAW;
+    return layer.props.pickable && layer.props.operation === OPERATION.DRAW;
   }
 
   protected getModuleParameters() {

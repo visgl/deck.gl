@@ -121,41 +121,69 @@ for (const useSetDefaultCredentials of [true, false]) {
   });
 }
 
-test('getData#parameters', async t => {
-  const params = {
-    type: MAP_TYPES.TABLE,
-    connection: 'connection_name',
-    source: 'table'
-  };
+const TABLE_PARAMS = {
+  type: MAP_TYPES.TABLE,
+  connection: 'connection_name',
+  source: 'table',
+  credentials: {accessToken: 'XXX', apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://maps-v3'}
+};
 
-  try {
-    await getData({
-      ...params,
-      credentials: {
-        apiVersion: API_VERSIONS.V2
-      }
-    });
-    t.fail('it should throw an error');
-  } catch (e) {
-    t.is(e.message, 'Method only available for v3', 'should throw when no v3');
+[
+  {
+    title: 'v2',
+    params: {...TABLE_PARAMS, credentials: {apiVersion: API_VERSIONS.V2}},
+    regex: /Method only available for v3/
+  },
+  {
+    title: 'no access token',
+    params: {
+      ...TABLE_PARAMS,
+      credentials: {apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://maps-v3'}
+    },
+    regex: /Must define an accessToken/
+  },
+  {
+    title: 'tileset + geoColumn',
+    params: {...TABLE_PARAMS, type: MAP_TYPES.TILESET, geoColumn: 'geo'},
+    regex: /geoColumn parameter is not supported by type tileset/
+  },
+  {
+    title: 'query + columns',
+    params: {...TABLE_PARAMS, type: MAP_TYPES.QUERY, columns: ['geo']},
+    regex: /columns parameter is not supported by type query/
+  },
+  {
+    title: 'no geoColumn + aggregationExp',
+    params: {...TABLE_PARAMS, aggregationExp: 'sum(x) as y'},
+    regex: /aggregationExp, but geoColumn parameter is missing/
+  },
+  {
+    title: 'no geoColumn + aggregationResLevel',
+    params: {...TABLE_PARAMS, aggregationResLevel: 8},
+    regex: /aggregationResLevel, but geoColumn parameter is missing/
+  },
+  {
+    title: 'no aggregationExp + aggregationResLevel',
+    params: {...TABLE_PARAMS, geoColumn: 'geo', aggregationResLevel: 8},
+    regex: /aggregationResLevel, but aggregationExp parameter is missing/
   }
+].forEach(({title, params, regex}) => {
+  test(`fetchLayerData#parameters ${title}`, async t => {
+    try {
+      await fetchLayerData(params);
+      t.fail('it should throw an error');
+    } catch (e) {
+      t.throws(
+        () => {
+          throw e;
+        },
+        regex,
+        'Error message should match'
+      );
+    }
 
-  try {
-    await getData({
-      type: MAP_TYPES.TABLE,
-      connection: 'connection_name',
-      source: 'table',
-      credentials: {
-        apiVersion: API_VERSIONS.V3,
-        apiBaseUrl: 'http://maps-v3'
-      }
-    });
-    t.fail('it should throw an error');
-  } catch (e) {
-    t.is(e.message, 'Must define an accessToken', 'should throw when no accessToken');
-  }
-
-  t.end();
+    t.end();
+  });
 });
 
 [
@@ -388,9 +416,14 @@ test(`getDataV2#versionError`, async t => {
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&columns=a%2Cb%2Cc'
   },
   {
-    props: {schema: true},
+    props: {geoColumn: 'geog', aggregationExp: 'sum(col) as value'},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&schema=true&name=table'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'
+  },
+  {
+    props: {geoColumn: 'geog', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
