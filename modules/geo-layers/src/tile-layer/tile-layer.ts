@@ -8,6 +8,7 @@ import {
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
+import {LayersList} from 'modules/core/src/lib/layer-manager';
 import Tile2DHeader from './tile-2d-header';
 
 import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
@@ -49,7 +50,7 @@ export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
       _offset: number;
       tile: Tile2DHeader;
     }
-  ) => Layer | Layer[];
+  ) => LayersList;
   /**
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
@@ -139,13 +140,13 @@ export default class TileLayer<
     this.state?.tileset?.finalize();
   }
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     return this.state?.tileset?.selectedTiles.every(
       tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}): boolean {
     return changeFlags.somethingChanged;
   }
 
@@ -252,7 +253,7 @@ export default class TileLayer<
     }
   }
 
-  _onTileLoad(tile) {
+  _onTileLoad(tile: Tile2DHeader): void {
     this.props.onTileLoad(tile);
     tile.layers = null;
 
@@ -295,7 +296,7 @@ export default class TileLayer<
       _offset: number;
       tile: Tile2DHeader;
     }
-  ) {
+  ): LayersList {
     return this.props.renderSubLayers(props);
   }
 

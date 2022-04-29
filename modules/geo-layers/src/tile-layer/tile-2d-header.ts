@@ -78,7 +78,11 @@ export default class Tile2DHeader {
     onLoad,
     onError
   }: TileLoadDataProps): Promise<void> {
+<<<<<<< HEAD:modules/geo-layers/src/tile-layer/tile-2d-header.ts
     const {index, id, bbox} = this;
+=======
+    const {x, y, z, bbox} = this;
+>>>>>>> master:modules/geo-layers/src/tile-layer/tile-2d-header.js
     const loaderId = this._loaderId;
 
     this._abortController = new AbortController();

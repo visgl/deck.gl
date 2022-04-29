@@ -35,6 +35,7 @@ export default class Component<PropsT extends ComponentProps> {
   parent: Component<any> | null;
   context: LayerContext | null;
   state: Record<string, any> | null;
+  // @ts-expect-error (TS2344) PropsT does not extend LayerProps
   internalState: LayerState<PropsT> | null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
