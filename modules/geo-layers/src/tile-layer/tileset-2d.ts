@@ -66,8 +66,8 @@ export type Tileset2DProps = Pick<
 };
 
 /**
- * Manages loading and purging of tiles data. This class caches recently visited tiles
- * and only create new tiles if they are present.
+ * Manages loading and purging of tile data. This class caches recently visited tiles
+ * and only creates new tiles if they are present.
  */
 export default class Tileset2D {
   private opts: Tileset2DProps;
@@ -165,10 +165,10 @@ export default class Tileset2D {
   }
 
   reloadAll(): void {
-    for (const tileId of this._cache.keys()) {
-      const tile = this._cache.get(tileId) as Tile2DHeader;
+    for (const id of this._cache.keys()) {
+      const tile = this._cache.get(id) as Tile2DHeader;
       if (!this._selectedTiles || !this._selectedTiles.includes(tile)) {
-        this._cache.delete(tileId);
+        this._cache.delete(id);
       } else {
         tile.setNeedsReload();
       }
@@ -206,9 +206,7 @@ export default class Tileset2D {
       }
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
-      this._selectedTiles = this._selectedTiles!.map(
-        tile => this._getTile({x: tile.x, y: tile.y, z: tile.z}) as Tile2DHeader
-      );
+      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index));
     }
 
     // Update tile states
@@ -229,7 +227,7 @@ export default class Tileset2D {
 
   /* Public interface for subclassing */
 
-  // Returns array of {x, y, z}
+  /** Returns array of tile indices in the current viewport */
   getTileIndices({
     viewport,
     maxZoom,
@@ -261,20 +259,29 @@ export default class Tileset2D {
     });
   }
 
-  // Add custom metadata to tiles
-  getTileMetadata({x, y, z}: TileIndex) {
-    assert(this._viewport);
-    const {tileSize} = this.opts;
-    return {bbox: tileToBoundingBox(this._viewport, x, y, z, tileSize)};
+  /** Returns unique string key for a tile index */
+  getTileId(index: TileIndex) {
+    return `${index.x}-${index.y}-${index.z}`;
   }
 
-  // Returns {x, y, z} of the parent tile
-  getParentIndex(tileIndex) {
-    // Perf: mutate the input object to avoid GC
-    tileIndex.x = Math.floor(tileIndex.x / 2);
-    tileIndex.y = Math.floor(tileIndex.y / 2);
-    tileIndex.z -= 1;
-    return tileIndex;
+  /** Returns a zoom level for a tile index */
+  getTileZoom(index: TileIndex) {
+    return index.z;
+  }
+
+  /** Returns additional metadata to add to tile, bbox by default */
+  getTileMetadata(index: TileIndex) {
+    assert(this._viewport);
+    const {tileSize} = this.opts;
+    return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
+  }
+
+  /** Returns index of the parent tile */
+  getParentIndex(index: TileIndex) {
+    const x = Math.floor(index.x / 2);
+    const y = Math.floor(index.y / 2);
+    const z = index.z - 1;
+    return {x, y, z};
   }
 
   // Returns true if any tile's visibility changed
@@ -351,7 +358,7 @@ export default class Tileset2D {
 
     // Rebuild tree
     for (const tile of _cache.values()) {
-      const parent = this._getNearestAncestor(tile.x, tile.y, tile.z);
+      const parent = this._getNearestAncestor(tile);
       tile.parent = parent;
       if (parent?.children) {
         parent.children.push(tile);
@@ -375,11 +382,11 @@ export default class Tileset2D {
     const overflown = _cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
-      for (const [tileId, tile] of _cache) {
+      for (const [id, tile] of _cache) {
         if (!tile.isVisible) {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
-          _cache.delete(tileId);
+          _cache.delete(id);
           this.opts.onTileUnload(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -390,27 +397,27 @@ export default class Tileset2D {
       this._dirty = true;
     }
     if (this._dirty) {
-      this._tiles = Array.from(this._cache.values())
-        // sort by zoom level so that smaller tiles are displayed on top
-        .sort((t1, t2) => t1.z - t2.z);
+      // sort by zoom level so that smaller tiles are displayed on top
+      this._tiles = Array.from(this._cache.values()).sort((t1, t2) => t1.zoom - t2.zoom);
 
       this._dirty = false;
     }
   }
   /* eslint-enable complexity */
 
-  _getTile({x, y, z}: TileIndex, create: true): Tile2DHeader;
-  _getTile({x, y, z}: TileIndex, create?: false): Tile2DHeader | undefined;
-  _getTile({x, y, z}: TileIndex, create?: boolean): Tile2DHeader | undefined {
-    const tileId = `${x},${y},${z}`;
-    let tile = this._cache.get(tileId);
+  _getTile(index: TileIndex, create: true): Tile2DHeader;
+  _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
+  _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
+    const id = this.getTileId(index);
+    let tile = this._cache.get(id);
     let needsReload = false;
 
     if (!tile && create) {
-      tile = new Tile2DHeader({x, y, z});
-      Object.assign(tile, this.getTileMetadata(tile));
+      tile = new Tile2DHeader(index);
+      Object.assign(tile, this.getTileMetadata(tile.index));
+      Object.assign(tile, {id, zoom: this.getTileZoom(tile.index)});
       needsReload = true;
-      this._cache.set(tileId, tile);
+      this._cache.set(id, tile);
       this._dirty = true;
     } else if (tile && tile.needsReload) {
       needsReload = true;
@@ -428,11 +435,11 @@ export default class Tileset2D {
     return tile;
   }
 
-  _getNearestAncestor(x: number, y: number, z: number): Tile2DHeader | null {
+  _getNearestAncestor(tile: Tile2DHeader): Tile2DHeader | null {
     const {_minZoom = 0} = this;
-    let index = {x, y, z};
 
-    while (index.z > _minZoom) {
+    let index = tile.index;
+    while (this.getTileZoom(index) > _minZoom) {
       index = this.getParentIndex(index);
       const parent = this._getTile(index);
       if (parent) {
@@ -474,7 +481,7 @@ function updateTileStateReplace(allTiles: Tile2DHeader[]) {
     }
   }
   // Always process parents first
-  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.z - t2.z);
+  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.zoom - t2.zoom);
   for (const tile of sortedTiles) {
     tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
 

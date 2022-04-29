@@ -1,5 +1,6 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
+import Tile2DHeader from './tile-2d-header';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 
@@ -57,24 +58,32 @@ function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   return transformedBox;
 }
 
-export function getURLFromTemplate(
-  template: string | string[],
-  properties: TileIndex
-): string | null {
+function stringHash(s: string): number {
+  return s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
+}
+
+export function getURLFromTemplate(template: string | string[], tile: Tile2DHeader): string | null {
   if (!template || !template.length) {
     return null;
   }
+  const {index, id} = tile;
+
   if (Array.isArray(template)) {
-    const index = Math.abs(properties.x + properties.y) % template.length;
-    template = template[index];
+    const i = stringHash(id) % template.length;
+    template = template[i];
   }
 
-  const {x, y, z} = properties;
-  return template
-    .replace(/\{x\}/g, String(x))
-    .replace(/\{y\}/g, String(y))
-    .replace(/\{z\}/g, String(z))
-    .replace(/\{-y\}/g, String(Math.pow(2, z) - y - 1));
+  let url = template;
+  for (const key of Object.keys(index)) {
+    const regex = new RegExp(`{${key}}`, 'g');
+    url = url.replace(regex, String(index[key]));
+  }
+
+  // Back-compatible support for {-y}
+  if (Number.isInteger(index.y) && Number.isInteger(index.z)) {
+    url = url.replace(/\{-y\}/g, String(Math.pow(2, index.z) - index.y - 1));
+  }
+  return url;
 }
 
 /**

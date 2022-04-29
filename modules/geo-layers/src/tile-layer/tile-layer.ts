@@ -16,6 +16,7 @@ import {TileLoadProps, ZRange} from './types';
 import {urlType, getURLFromTemplate} from './utils';
 
 const defaultProps = {
+  TilesetClass: Tileset2D,
   data: [],
   dataComparator: urlType.equals,
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
@@ -168,7 +169,7 @@ export default class TileLayer<
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (!tileset) {
-      tileset = new Tileset2D(this._getTilesetOptions(props));
+      tileset = new this.props.TilesetClass(this._getTilesetOptions(props));
       this.setState({tileset});
     } else if (propsChanged) {
       tileset.setOptions(this._getTilesetOptions(props));
@@ -324,7 +325,7 @@ export default class TileLayer<
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
+          id: `${this.id}-${tile.id}`,
           data: tile.content,
           _offset: 0,
           tile

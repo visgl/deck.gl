@@ -10,17 +10,18 @@ export type TileLoadDataProps = {
   onError: (error: any, tile: Tile2DHeader) => void;
 };
 export default class Tile2DHeader {
-  x: number;
-  y: number;
-  z: number;
+  index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
   content: any;
-  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
   state?: number;
   layers?: Layer[] | null;
+
+  id!: string; // assigned _always_ with result of `getTileId`
+  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
+  zoom!: number; // assigned _always_ with result of `getTileZoom`
 
   private _abortController: AbortController | null;
   private _loader: Promise<void> | undefined;
@@ -29,10 +30,8 @@ export default class Tile2DHeader {
   private _isCancelled: boolean;
   private _needsReload: boolean;
 
-  constructor({x, y, z}: TileIndex) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  constructor(index: TileIndex) {
+    this.index = index;
     this.isVisible = false;
     this.isSelected = false;
     this.parent = null;
@@ -79,7 +78,7 @@ export default class Tile2DHeader {
     onLoad,
     onError
   }: TileLoadDataProps): Promise<void> {
-    const {x, y, z, bbox} = this;
+    const {index, id, bbox} = this;
     const loaderId = this._loaderId;
 
     this._abortController = new AbortController();
@@ -103,7 +102,7 @@ export default class Tile2DHeader {
     let tileData = null;
     let error;
     try {
-      tileData = await getData({x, y, z, bbox, signal});
+      tileData = await getData({index, id, bbox, signal});
     } catch (err) {
       error = err || true;
     } finally {
