@@ -58,7 +58,7 @@ and used to resolve this JSON object:
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "getColor": [0, 128, 255],
       "getRadius": 1
@@ -81,7 +81,7 @@ will replace the layers descriptor with
 }
 ```
 
-Whenever the `JSONConverter` component finds a "type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
+Whenever the `JSONConverter` component finds a "@@type" field, it looks into a "class catalog". This can be a layer, a view, or other objects.
 
 ### Functions Catalogs
 
@@ -131,7 +131,7 @@ it will replace the layers descriptor with
 }
 ```
 
-Whenever the `JSONConverter` component finds a "function" field, it looks into a "function catalog".
+Whenever the `JSONConverter` component finds a "@@function" field, it looks into a "function catalog".
 
 ### Enumeration Catalogs
 
@@ -156,7 +156,7 @@ and used to resolve this JSON object:
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "coordinateSystem": "COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
