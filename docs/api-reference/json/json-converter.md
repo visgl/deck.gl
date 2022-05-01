@@ -158,17 +158,17 @@ and used to resolve this JSON object:
     {
       "@@type": "ScatterplotLayer",
       "data": ...,
-      "coordinateSystem": "COORDINATE_SYSTEM.METER_OFFSETS",
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
         "blend": true,
-        "blendFunc": ["GL.ONE", "GL.ZERO", "GL.SRC_ALPHA", "GL.DST_ALPHA"]
+        "blendFunc": ["@@#GL.ONE", "@@#GL.ZERO", "@@#GL.SRC_ALPHA", "@@#GL.DST_ALPHA"]
       }
     }
   ]
 }
 ```
 
-`<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
+`@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
 
 ```js
 {
@@ -204,7 +204,7 @@ and used to resolve in this JSON object:
 
 ```json
 {
-  "controller": "MapController",
+  "controller": "@@#MapController",
   "layers": [
     {
       "type": "ScatterplotLayer",
@@ -227,4 +227,6 @@ will replace the constants' value with the value provided in configuration decla
     })
   ]
 }
-``
+```
+
+Whenever the `JSONConverter` component finds a string prefixed with "@@#", it looks into a "constants catalog".
