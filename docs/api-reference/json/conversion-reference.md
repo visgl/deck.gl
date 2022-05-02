@@ -136,7 +136,7 @@ and used to resolve in this JSON object:
   "controller": "@@#MapController",
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       ...
     }
@@ -188,7 +188,7 @@ and used to resolve this JSON object–
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
@@ -259,3 +259,4 @@ datum => [datum.lng, datum.lat, altitudeMeters / 1000]
 datum => [datum.color / 255, 200, 20]
 datum => datum.value > 10 ? [255, 0, 0] : [0, 255, 200]
 ```
+
