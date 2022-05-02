@@ -22,6 +22,7 @@ export default class Tile2DHeader {
   id!: string; // assigned _always_ with result of `getTileId`
   bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
   zoom!: number; // assigned _always_ with result of `getTileZoom`
+  userData?: Record<string, any>; // _may be_ assigned with result of `getTileMetadata`
 
   private _abortController: AbortController | null;
   private _loader: Promise<void> | undefined;
@@ -78,7 +79,7 @@ export default class Tile2DHeader {
     onLoad,
     onError
   }: TileLoadDataProps): Promise<void> {
-    const {index, id, bbox} = this;
+    const {index, id, bbox, userData, zoom} = this;
     const loaderId = this._loaderId;
 
     this._abortController = new AbortController();
@@ -102,7 +103,7 @@ export default class Tile2DHeader {
     let tileData = null;
     let error;
     try {
-      tileData = await getData({index, id, bbox, signal});
+      tileData = await getData({index, id, bbox, userData, zoom, signal});
     } catch (err) {
       error = err || true;
     } finally {
