@@ -235,20 +235,18 @@ export type LayerProps<DataType = any> = {
   onDragEnd?: ((pickingInfo: PickingInfo, event: MjolnirEvent) => boolean | void) | null;
 
   /** (Advanced) supply attribute size externally */
-  numInstances?: number | undefined;
+  numInstances?: number | null;
 
   /** (Advanced) supply variable-width attribute size externally */
-  startIndices?: NumericArray | undefined;
+  startIndices?: NumericArray | null;
 };
 
-export type CompositeLayerProps = {
+export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
   /** (Experimental) override sub layer props. Only works on a composite layer. */
-  _subLayerProps?:
-    | {
-        [subLayerId: string]: {
-          type?: typeof Layer;
-          [propName: string]: any;
-        };
-      }
-    | undefined;
+  _subLayerProps?: {
+    [subLayerId: string]: {
+      type?: typeof Layer;
+      [propName: string]: any;
+    };
+  } | null;
 };

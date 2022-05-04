@@ -345,8 +345,8 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
     - Auto-deduction via arrays */
   getNumInstances(props: StatefulComponentProps<PropsT> = this.props): number {
     // First Check if app has provided an explicit value
-    if (props.numInstances !== undefined) {
-      return props.numInstances;
+    if (Number.isFinite(props.numInstances)) {
+      return props.numInstances as number;
     }
 
     // Second check if the layer has set its own value
@@ -364,7 +364,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
       is in the form of [L0, L1, L2, ...] */
   getStartIndices(props: StatefulComponentProps<PropsT> = this.props): NumericArray | null {
     // First Check if startIndices is provided as an explicit value
-    if (props.startIndices !== undefined) {
+    if (props.startIndices) {
       return props.startIndices;
     }
 
@@ -398,13 +398,13 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
-  shouldUpdateState<T>(params: UpdateParameters<T>): boolean {
+  shouldUpdateState(params: UpdateParameters<PropsT>): boolean {
     return params.changeFlags.propsOrDataChanged;
   }
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState<T>(params: UpdateParameters<T>): void {
+  updateState(params: UpdateParameters<PropsT>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {
