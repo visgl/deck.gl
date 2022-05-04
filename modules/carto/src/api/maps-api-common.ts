@@ -59,7 +59,7 @@ export interface SchemaField {
 export interface MapInstantiation extends MapInstantiationFormats {
   nrows: number;
   size?: number;
-  schema?: SchemaField[];
+  schema: SchemaField[];
 }
 
 type MapInstantiationFormats = Record<
