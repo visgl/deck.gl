@@ -1,7 +1,6 @@
 import pydeck as pdk
 
-# FIXME: add CDN url
-CARTO_LAYER_BUNDLE_URL = "http://127.0.0.1:8888/dist.min.js"
+CARTO_LAYER_BUNDLE_URL = "https://libs.cartocdn.com/pydeck/@deck.gl/carto@8.7.8/dist.min.js"
 
 
 def register_carto_layer():
