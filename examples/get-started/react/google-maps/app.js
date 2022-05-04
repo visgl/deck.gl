@@ -50,6 +50,25 @@ const renderMap = status => {
   return null;
 };
 
+// if using the create-react-app template try this
+// function MyMapComponent({center, zoom}) {
+//   const ref = useRef();
+//   const [map, setMap] = useState(null);
+  
+//   useEffect(() => {
+//     const map = new window.google.maps.Map(ref.current, {
+//       center: center,
+//       zoom: zoom,
+//       mapId: GOOGLE_MAP_ID
+//     });
+//     setMap(map);
+    
+//   }, [center, zoom]);
+
+//   useEffect(() => {
+//     overlay.setMap(map);
+//   }, [map]);
+
 function MyMapComponent({center, zoom}) {
   const ref = useRef();
 
