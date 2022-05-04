@@ -15,7 +15,7 @@ setup(
     author="Jesús Arroyo",
     author_email="jarroyo@carto.com",
     url="https://github.com/visgl/deck.gl/tree/master/bindings/pydeck-carto",
-    license="Apache License 2.0",
+    license="BSD 3-Clause",
     packages=find_packages(include=["pydeck_carto"]),
     python_requires=">=3.7",
     install_requires=[
@@ -27,7 +27,7 @@ setup(
         "Framework :: Jupyter",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: Apache Software License",
+        "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",

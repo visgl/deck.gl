@@ -1,6 +1,3 @@
-# import pytest
-# import requests
-
 from pydeck_carto import load_carto_credentials
 
 
