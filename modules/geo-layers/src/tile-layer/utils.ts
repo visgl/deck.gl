@@ -1,6 +1,5 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
-import Tile2DHeader from './tile-2d-header';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 
@@ -62,7 +61,13 @@ function stringHash(s: string): number {
   return s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
 }
 
-export function getURLFromTemplate(template: string | string[], tile: Tile2DHeader): string | null {
+export function getURLFromTemplate(
+  template: string | string[],
+  tile: {
+    index: TileIndex;
+    id: string;
+  }
+): string | null {
   if (!template || !template.length) {
     return null;
   }
