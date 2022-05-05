@@ -1,3 +1,12 @@
+import type {
+  BinaryFeatures,
+  BinaryLineFeatures,
+  BinaryPointFeatures,
+  BinaryPolygonFeatures
+} from '@loaders.gl/schema';
+
+type FeatureTypes = BinaryPointFeatures | BinaryLineFeatures | BinaryPolygonFeatures;
+
 const GEOM_TYPES = ['points', 'lines', 'polygons'];
 /**
  * Return the index of feature (numericProps or featureIds) for given feature id
@@ -9,7 +18,7 @@ const GEOM_TYPES = ['points', 'lines', 'polygons'];
  * @param {String} layerName - the layer to search in
  */
 export default function findIndexBinary(
-  data,
+  data: BinaryFeatures,
   uniqueIdProperty: string,
   featureId: string | number,
   layerName: string
@@ -25,7 +34,7 @@ export default function findIndexBinary(
 }
 
 function findIndexByType(
-  geomData,
+  geomData: FeatureTypes,
   uniqueIdProperty: string,
   featureId: string | number,
   layerName: string
@@ -63,10 +72,10 @@ function findIndexByType(
       startFeatureIndex,
       endFeatureIndex
     );
-  } else {
+  } else if (geomData.fields) {
     featureIndex = findIndex(
       geomData.fields,
-      elem => elem.id === featureId,
+      (elem: any) => elem.id === featureId,
       startFeatureIndex,
       endFeatureIndex
     );
@@ -74,18 +83,22 @@ function findIndexByType(
   return featureIndex >= 0 ? getGlobalFeatureId(geomData, featureIndex) : -1;
 }
 
+type LayerRange = [firstFeatureIndex: number, lastFeatureIndex: number];
+
 // Returns [firstFeatureIndex, lastFeatureIndex]
 // MVTLoader parses tiles layer-by-layer, so each layer is a continuous range
 function getLayerRange(
-  geomData,
+  geomData: FeatureTypes & {
+    __layers?: Record<string, LayerRange>;
+  },
   layerName: string
-): [firstFeatureIndex: number, lastFeatureIndex: number] | undefined {
+): LayerRange | undefined {
   if (!geomData.__layers) {
     // Cache a map from properties.layerName to index ranges
-    const layerNames = {};
+    const layerNames: Record<string, LayerRange> = {};
     const {properties} = geomData;
     for (let i = 0; i < properties.length; i++) {
-      const {layerName: key} = properties[i];
+      const {layerName: key} = properties[i] as Record<string, any>;
       if (!key) {
         // ignore
       } else if (layerNames[key]) {
@@ -115,7 +128,12 @@ function getGlobalFeatureId(geomData, featureIndex: number) {
 }
 
 // Like array.findIndex, but only search within a range
-function findIndex(array, predicate, startIndex: number, endIndex: number) {
+function findIndex<T>(
+  array: T[],
+  predicate: (v: T, index: number) => boolean,
+  startIndex: number,
+  endIndex: number
+) {
   for (let i = startIndex; i < endIndex; i++) {
     if (predicate(array[i], i)) {
       return i;

@@ -22,14 +22,14 @@ import type Layer from '../layer';
 import type Viewport from '../../viewports/viewport';
 import type {PickedPixel} from './query-object';
 
-export interface PickingInfo {
+export interface PickingInfo<DataT = any> {
   color: Uint8Array | null;
   layer: Layer | null;
   sourceLayer?: Layer | null;
   viewport?: Viewport;
   index: number;
   picked: boolean;
-  object?: any;
+  object?: DataT;
   x: number;
   y: number;
   pixel?: [number, number];
