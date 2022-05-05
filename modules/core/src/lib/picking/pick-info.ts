@@ -38,6 +38,12 @@ export interface PickingInfo<DataT = any> {
   pixelRatio: number;
 }
 
+export interface PickingInfoProps<DataT = any> {
+  info: PickingInfo<DataT>, 
+  mode: string,
+  sourceLayer: Layer | null
+}
+
 /** Generates some basic information of the picking action: x, y, coordinates etc.
  * Regardless if anything is picked
  */

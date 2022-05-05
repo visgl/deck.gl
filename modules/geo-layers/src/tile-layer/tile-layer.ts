@@ -4,6 +4,8 @@ import {
   Layer,
   LayerProps,
   UpdateParameters,
+  PickingInfo,
+  PickingInfoProps,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -309,12 +311,12 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}) {
-    info.tile = sourceLayer.props.tile;
+  getPickingInfo({info, sourceLayer}: PickingInfoProps): PickingInfo<DataT> {
+    (info as any).tile = (sourceLayer as any).props.tile;
     return info;
   }
 
-  _updateAutoHighlight(info) {
+  _updateAutoHighlight(info: PickingInfo): void {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
     }

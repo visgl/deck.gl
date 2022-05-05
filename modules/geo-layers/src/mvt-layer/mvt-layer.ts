@@ -1,32 +1,32 @@
 import {
-  ChangeFlags,
   Layer,
   LayersList,
   log,
   PickingInfo,
   UpdateParameters,
+  PickingInfoProps,
   Viewport,
-  _GlobeViewport
+  _GlobeViewport,
+  COORDINATE_SYSTEM
 } from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
-import type {BinaryFeatures} from '@loaders.gl/schema';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
-import {Feature} from 'geojson';
+
+import type {Loader} from '@loaders.gl/loader-utils';
+import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {Feature} from 'geojson';
 
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
-import Tileset2D from '../tile-layer/tileset-2d';
+import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
 import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
+import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
+import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
 
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {Loader} from '@loaders.gl/loader-utils';
-import {Tileset2DProps} from '../tile-layer/tileset-2d';
-import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
-import Tile2DHeader from '../tile-layer/tile-2d-header';
 
 const WORLD_SIZE = 512;
 
@@ -41,6 +41,7 @@ const defaultProps = {
 export type TileJson = {
   tilejson: string;
   tiles: string[];
+  // eslint-disable-next-line camelcase
   vector_layers: any[];
   attribution?: string;
   scheme?: string;
@@ -64,8 +65,6 @@ export type MVTLayerProps<DataT = Feature> = TileLayerProps<DataT> & {
 
   loaders: Loader[];
 };
-
-export type TileDataT = Feature[] | BinaryFeatures;
 
 export default class MVTLayer<
   DataT extends Feature = Feature,
@@ -164,10 +163,10 @@ export default class MVTLayer<
   }
 
   getTileData(loadProps: TileLoadProps): Promise<any> {
-    const {index, signal} = loadProps;
-
     // @ts-expect-error state is initialized for instantiated layer
     const {data, binary} = this.state;
+    const {index, signal} = loadProps;
+
     const url = getURLFromTemplate(data, loadProps);
     if (!url) {
       return Promise.reject('Invalid URL');
@@ -261,7 +260,7 @@ export default class MVTLayer<
     }
   }
 
-  getPickingInfo(params): PickingInfo<DataT> {
+  getPickingInfo(params: PickingInfoProps): PickingInfo<DataT> {
     const info = super.getPickingInfo(params);
 
     // @ts-expect-error context if defined for instantiated layer
@@ -269,8 +268,8 @@ export default class MVTLayer<
 
     // @ts-expect-error state if defined for instantiated layer
     if (this.state.binary && info.index !== -1) {
-      const {data} = params.sourceLayer.props;
-      info.object = binaryToGeojson(data, {globalFeatureId: info.index}) as DataT;
+      const {data} = params.sourceLayer!.props;
+      info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
     }
     if (info.object && !isWGS84) {
       // @ts-expect-error context if defined for instantiated layer
@@ -280,7 +279,7 @@ export default class MVTLayer<
     return info;
   }
 
-  getSubLayerPropsByTile(tile: Tile2DHeader) {
+  getSubLayerPropsByTile(tile: Tile2DHeader): Record<string, any> {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       // @ts-expect-error state if defined for instantiated layer
@@ -341,33 +340,32 @@ export default class MVTLayer<
   getRenderedFeatures(maxFeatures: number | null = null): DataT[] {
     const features = this._pickObjects(maxFeatures);
     const featureCache = new Set();
-    const renderedFeatures: any[] = [];
+    const renderedFeatures: DataT[] = [];
 
     for (const f of features) {
-      if (!f.object) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
+      // @ts-expect-error TODO: is it safe to assume f.object is always defined?
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
       if (featureId === undefined) {
         // we have no id for the feature, we just add to the list
-        renderedFeatures.push(f.object);
+        renderedFeatures.push(f.object as DataT);
       } else if (!featureCache.has(featureId)) {
         // Add removing duplicates
         featureCache.add(featureId);
-        renderedFeatures.push(f.object);
+        renderedFeatures.push(f.object as DataT);
       }
     }
 
     return renderedFeatures;
   }
 
-  private _setWGS84PropertyForTiles() {
+  private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state?.tileset;
 
     // @ts-expect-error state if defined for instantiated layer
+    const tileset: Tileset2D = this.state.tileset;
+
+    // @ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & any) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
@@ -400,7 +398,7 @@ export default class MVTLayer<
 }
 
 function getFeatureUniqueId(feature: Feature, uniqueIdProperty: string | undefined) {
-  if (uniqueIdProperty && feature.properties) {
+  if (feature.properties && uniqueIdProperty) {
     return feature.properties[uniqueIdProperty];
   }
 
