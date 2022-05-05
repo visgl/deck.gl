@@ -2,7 +2,7 @@ import Tile2DHeader from './tile-2d-header';
 import {getTileIndices, tileToBoundingBox} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {Matrix4} from '@math.gl/core';
-import {assert, Viewport} from '@deck.gl/core';
+import {Viewport} from '@deck.gl/core';
 import {Bounds, TileIndex, ZRange} from './types';
 import {TileLayerProps} from './tile-layer';
 
@@ -206,7 +206,7 @@ export default class Tileset2D {
       }
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
-      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index));
+      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
     }
 
     // Update tile states
@@ -271,8 +271,8 @@ export default class Tileset2D {
 
   /** Returns additional metadata to add to tile, bbox by default */
   getTileMetadata(index: TileIndex) {
-    assert(this._viewport);
     const {tileSize} = this.opts;
+    // @ts-expect-error
     return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
@@ -285,8 +285,7 @@ export default class Tileset2D {
   }
 
   // Returns true if any tile's visibility changed
-  updateTileStates() {
-    assert(this._selectedTiles);
+  private updateTileStates() {
     const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
 
     const visibilities = new Array(this._cache.size);
@@ -298,6 +297,7 @@ export default class Tileset2D {
       tile.isSelected = false;
       tile.isVisible = false;
     }
+    // @ts-expect-error called only when _selectedTiles is already defined
     for (const tile of this._selectedTiles) {
       tile.isSelected = true;
       tile.isVisible = true;
@@ -370,12 +370,12 @@ export default class Tileset2D {
    * Clear tiles that are not visible when the cache is full
    */
   /* eslint-disable complexity */
-  _resizeCache() {
-    assert(this.selectedTiles);
+  private _resizeCache() {
     const {_cache, opts} = this;
 
     const maxCacheSize =
       opts.maxCacheSize ||
+      // @ts-expect-error called only when selectedTiles is initialized
       (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
     const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
 
@@ -405,9 +405,9 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile(index: TileIndex, create: true): Tile2DHeader;
-  _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
-  _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
+  private _getTile(index: TileIndex, create: true): Tile2DHeader;
+  private _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
+  private _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
     const id = this.getTileId(index);
     let tile = this._cache.get(id);
     let needsReload = false;

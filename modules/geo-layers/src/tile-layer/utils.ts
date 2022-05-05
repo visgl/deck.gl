@@ -1,7 +1,7 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
-import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
+import {Bounds, TileBoundingBox, TileIndex, TileLoadProps, ZRange} from './types';
 
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];

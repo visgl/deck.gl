@@ -108,7 +108,6 @@ export type {GlobeViewState} from './views/globe-view';
 export type {ChangeFlags} from './lib/layer-state';
 export type {LayersList} from './lib/layer-manager';
 export type {LayerContext} from './lib/layer-manager';
-export type {PickingInfo} from './lib/picking/pick-info';
 export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
 export type {
