@@ -1,7 +1,7 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
-import {Bounds, TileBoundingBox, TileIndex, TileLoadProps, ZRange} from './types';
+import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, TileLoadProps, ZRange} from './types';
 
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
@@ -254,4 +254,13 @@ export function getTileIndices({
  */
 export function isURLTemplate(s: string): boolean {
   return /(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/.test(s);
+}
+
+export function isGeoBoundingBox(v: any): v is GeoBoundingBox {
+  return (
+    Number.isFinite(v.west) &&
+    Number.isFinite(v.north) &&
+    Number.isFinite(v.east) &&
+    Number.isFinite(v.south)
+  );
 }

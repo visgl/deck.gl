@@ -20,7 +20,7 @@ import type {Feature} from 'geojson';
 
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
-import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
+import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
 import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
 import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
@@ -66,6 +66,7 @@ export type MVTLayerProps<DataT = Feature> = TileLayerProps<DataT> & {
   loaders: Loader[];
 };
 
+type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 export default class MVTLayer<
   DataT extends Feature = Feature,
   PropsT extends MVTLayerProps<DataT> = MVTLayerProps<DataT>
@@ -366,7 +367,7 @@ export default class MVTLayer<
     const tileset: Tileset2D = this.state.tileset;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
-    tileset.selectedTiles.forEach((tile: Tile2DHeader & any) => {
+    tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {
@@ -382,11 +383,12 @@ export default class MVTLayer<
               return [];
             }
 
-            if (tile._contentWGS84 === undefined) {
+            const {bbox} = tile;
+            if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
               const content = this.state!.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
-                transformTileCoordsToWGS84(feature, tile.bbox, this.context!.viewport)
+                transformTileCoordsToWGS84(feature, bbox, this.context!.viewport)
               );
             }
             return tile._contentWGS84;
