@@ -55,9 +55,9 @@ type _TileLayerProps<DataT> = {
   renderSubLayers?: (
     props: TileLayerProps<DataT> & {
       id: string;
-      data: any;
+      data: DataT;
       _offset: number;
-      tile: Tile2DHeader;
+      tile: Tile2DHeader<DataT>;
     }
   ) => LayersList;
   /**
@@ -66,13 +66,13 @@ type _TileLayerProps<DataT> = {
   getTileData?: (props: TileLoadProps) => Promise<DataT> | DataT;
 
   /** Called when all tiles in the current viewport are loaded. */
-  onViewportLoad?: (tiles: Tile2DHeader[]) => void;
+  onViewportLoad?: (tiles: Tile2DHeader<DataT>[]) => void;
 
   /** Called when a tile successfully loads. */
-  onTileLoad?: (tile: Tile2DHeader) => void;
+  onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
 
   /** Called when a tile is cleared from cache. */
-  onTileUnload?: (tile: Tile2DHeader) => void;
+  onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
 
   /** Called when a tile failed to load. */
   onTileError?: (err: any) => void;
@@ -128,6 +128,10 @@ type _TileLayerProps<DataT> = {
    * @default 0
    */
   zoomOffset?: number;
+};
+
+export type TiledPickingInfo<DataT = any> = PickingInfo & {
+  tile?: Tile2DHeader<DataT>;
 };
 
 /**
@@ -252,21 +256,21 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     }
   }
 
-  _onTileLoad(tile: Tile2DHeader): void {
+  _onTileLoad(tile: Tile2DHeader<DataT>): void {
     this.props.onTileLoad(tile);
     tile.layers = null;
 
     this.setNeedsUpdate();
   }
 
-  _onTileError(error: any, tile: Tile2DHeader) {
+  _onTileError(error: any, tile: Tile2DHeader<DataT>) {
     this.props.onTileError(error);
     tile.layers = null;
 
     this.setNeedsUpdate();
   }
 
-  _onTileUnload(tile: Tile2DHeader) {
+  _onTileUnload(tile: Tile2DHeader<DataT>) {
     this.props.onTileUnload(tile);
   }
 
@@ -289,11 +293,11 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   }
 
   renderSubLayers(
-    props: _TileLayerProps<DataT> & {
+    props: TileLayer['props'] & {
       id: string;
-      data: any;
+      data: DataT;
       _offset: number;
-      tile: Tile2DHeader;
+      tile: Tile2DHeader<DataT>;
     }
   ): LayersList {
     return this.props.renderSubLayers(props);
@@ -303,7 +307,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): PickingInfo {
+  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
     (info as any).tile = (sourceLayer as any).props.tile;
     return info;
   }
