@@ -17,6 +17,34 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.8
+
+### deck.gl v8.8 Prereleases
+
+#### deck.gl [8.8.0-alpha.1] - Feb 24 2022
+
+- Fix crash in getURLFromTemplate (#6898)
+- Additional user metadata in `Tile2DHeader` to be used by `getTileData` (#6867)
+- Bump @loaders.gl from 3.2.0-alpha.2 to 3.2.0-alpha.4 (#6881)
+- Add view parameter to offset center (#6672)
+- Expose Generic Tileset2D class for use with TileLayer (#6848)
+- [ts] TileLayer (#6841)
+- CARTO: Do not send schema to CARTO API (#6868)
+- CARTO: fetchLayerData add support for aggregation parameters (#6864)
+- feat(geo-layers): Tile3DLayers-async tileset traversal (#6856)
+- Remove non-existent param from function doc in polygon.js (#6840)
+- Bump @loaders.gl from 3.1.5 to 3.2.0-alpha.2 (#6829)
+- [ts] GoogleMapsOverlay converted to Typescript. (#6835)
+- [ts] ScatterplotLayer (#6803)
+- CartoLayer converted to typescript (#6821)
+- Update TypeScript build setup (#6802)
+- Migrate Layer class to TypeScript (#6779)
+- Migrate core/picking to TypeScript (#6776)
+- [mapbox] add MapboxOverlay (#6738)
+- TypeScript: views & viewports (#6725)
+- TypeScript: attributes (#6710)
+- TypeScript: controllers & transitions (#6708)
+
 ## deck.gl v8.7
 
 ### deck.gl v8.7 Prereleases

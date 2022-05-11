@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "8.7.0-beta.7",
+  "version": "8.8.0-alpha.1",
   "keywords": [
     "webgl",
     "visualization",
@@ -27,16 +27,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "8.7.0-beta.7",
-    "@deck.gl/carto": "8.7.0-beta.7",
-    "@deck.gl/core": "8.7.0-beta.7",
-    "@deck.gl/extensions": "8.7.0-beta.7",
-    "@deck.gl/geo-layers": "8.7.0-beta.7",
-    "@deck.gl/google-maps": "8.7.0-beta.7",
-    "@deck.gl/json": "8.7.0-beta.7",
-    "@deck.gl/layers": "8.7.0-beta.7",
-    "@deck.gl/mapbox": "8.7.0-beta.7",
-    "@deck.gl/mesh-layers": "8.7.0-beta.7",
-    "@deck.gl/react": "8.7.0-beta.7"
+    "@deck.gl/aggregation-layers": "8.8.0-alpha.1",
+    "@deck.gl/carto": "8.8.0-alpha.1",
+    "@deck.gl/core": "8.8.0-alpha.1",
+    "@deck.gl/extensions": "8.8.0-alpha.1",
+    "@deck.gl/geo-layers": "8.8.0-alpha.1",
+    "@deck.gl/google-maps": "8.8.0-alpha.1",
+    "@deck.gl/json": "8.8.0-alpha.1",
+    "@deck.gl/layers": "8.8.0-alpha.1",
+    "@deck.gl/mapbox": "8.8.0-alpha.1",
+    "@deck.gl/mesh-layers": "8.8.0-alpha.1",
+    "@deck.gl/react": "8.8.0-alpha.1"
   }
 }
