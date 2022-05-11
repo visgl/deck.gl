@@ -161,7 +161,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return changeFlags.somethingChanged;
   }
 
-  updateState({changeFlags}: UpdateParameters<ExtraPropsT & Required<_TileLayerProps<DataT>>>) {
+  updateState({changeFlags}: UpdateParameters<TileLayer>) {
     assert(this.state);
 
     let {tileset} = this.state;

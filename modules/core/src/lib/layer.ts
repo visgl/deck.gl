@@ -153,9 +153,9 @@ const defaultProps = {
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
 
-export type UpdateParameters<PropsT> = {
-  props: StatefulComponentProps<PropsT>;
-  oldProps: StatefulComponentProps<PropsT>;
+export type UpdateParameters<LayerT extends Layer> = {
+  props: LayerT['props'];
+  oldProps: LayerT['props'];
   context: LayerContext;
   changeFlags: ChangeFlags;
 };
@@ -398,13 +398,13 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
-  shouldUpdateState(params: UpdateParameters<PropsT>): boolean {
+  shouldUpdateState(params: UpdateParameters<Layer>): boolean {
     return params.changeFlags.propsOrDataChanged;
   }
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState(params: UpdateParameters<PropsT>): void {
+  updateState(params: UpdateParameters<Layer>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {
@@ -1100,7 +1100,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   // Private methods
 
   /** Called after updateState to perform common tasks */
-  protected _postUpdate(updateParams: UpdateParameters<PropsT>, forceUpdate: boolean) {
+  protected _postUpdate(updateParams: UpdateParameters<Layer>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
     this.setNeedsRedraw();
@@ -1139,7 +1139,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
     }
   }
 
-  private _getUpdateParams(): UpdateParameters<PropsT> {
+  private _getUpdateParams(): UpdateParameters<Layer> {
     return {
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
