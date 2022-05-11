@@ -59,7 +59,7 @@ function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
 }
 
 function stringHash(s: string): number {
-  return s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
+  return Math.abs(s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0));
 }
 
 export function getURLFromTemplate(template: string | string[], tile: Tile2DHeader): string | null {
@@ -137,11 +137,7 @@ function getScale(z: number, tileSize: number): number {
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-export function osmTile2lngLat(
-  x: number,
-  y: number,
-  z: number
-): [latitude: number, longitude: number] {
+export function osmTile2lngLat(x: number, y: number, z: number): [number, number] {
   const scale = getScale(z, TILE_SIZE);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
@@ -149,7 +145,7 @@ export function osmTile2lngLat(
   return [lng, lat];
 }
 
-function tile2XY(x: number, y: number, z: number, tileSize: number): [x: number, y: number] {
+function tile2XY(x: number, y: number, z: number, tileSize: number): [number, number] {
   const scale = getScale(z, tileSize);
   return [(x / scale) * TILE_SIZE, (y / scale) * TILE_SIZE];
 }
