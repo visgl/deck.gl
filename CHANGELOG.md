@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.9] - May 11 2022
+
+- CARTO: fetchMap support for custom breaks (#6819)
+- CARTO: fetchLayerData add support for aggregation parameters (#6864)
+
 #### deck.gl [8.7.8] - Apr 22 2022
 
 - Fix position precision in CPU aggregation layers (#6815)
@@ -47,6 +52,7 @@ This release is not available in NPM due to an issue during publication
 - Fix polygon tesselation for extreme latitudes (#6780)
 
 #### deck.gl [8.7.3] - Mar 25 2022
+
 
 - CARTO: Correctly map aggregation weights & methods (#6771)
 - CARTO: Force GeoJSON for geojson/point fetchMap layers (#6767)
