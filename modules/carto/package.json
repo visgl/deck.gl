@@ -2,7 +2,7 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "8.8.0-alpha.1",
+  "version": "8.8.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -57,5 +57,6 @@
     "@deck.gl/geo-layers": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
     "@loaders.gl/core": "^3.0.0"
-  }
+  },
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

@@ -21,7 +21,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
-#### deck.gl [8.8.0-alpha.1] - Feb 24 2022
+#### deck.gl [8.8.0-alpha.2] - Feb 24 2022
 
 - Fix crash in getURLFromTemplate (#6898)
 - Additional user metadata in `Tile2DHeader` to be used by `getTileData` (#6867)
