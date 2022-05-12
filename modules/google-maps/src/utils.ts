@@ -120,24 +120,18 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
   // We need to update left/top of the deck canvas to match the base map.
-  const nwContainerPx = new google.maps.Point(0, 0);
-  const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
-  const nwDivPx = projection.fromLatLngToDivPixel(nw);
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const centerH = new google.maps.LatLng(0, centerLngLat[0]);
+  const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
+  const centerDivPx = projection.fromLatLngToDivPixel(centerH);
 
-  if (!topRight || !bottomLeft || !nwDivPx) {
+  if (!topRight || !bottomLeft || !centerDivPx || !centerContainerPx) {
     return {width, height, left: 0, top: 0};
   }
-
-  let leftOffset = nwDivPx.x;
-  let topOffset = nwDivPx.y;
-
-  // Adjust horizontal offset - position the viewport at the map in the center
-  const mapWidth = projection.getWorldWidth();
-  const mapCount = Math.ceil(width / mapWidth);
-  leftOffset -= Math.floor(mapCount / 2) * mapWidth;
+  const leftOffset = Math.round(centerDivPx.x - centerContainerPx.x);
+  let topOffset = Math.round(centerDivPx.y - centerContainerPx.y);
 
   const topLngLat = pixelToLngLat(projection, width / 2, 0);
-  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
   const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
   // Compute fractional center.
@@ -150,7 +144,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
     const center = new google.maps.LatLng(latitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
     // @ts-ignore (TS2531) Object is possibly 'null'
-    topOffset += centerPx.y - height / 2;
+    topOffset += Math.round(centerPx.y - height / 2);
   }
 
   // Compute fractional bearing
