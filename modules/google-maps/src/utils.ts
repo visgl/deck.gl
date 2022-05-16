@@ -129,7 +129,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
     return {width, height, left: 0, top: 0};
   }
   const leftOffset = Math.round(centerDivPx.x - centerContainerPx.x);
-  let topOffset = Math.round(centerDivPx.y - centerContainerPx.y);
+  let topOffset = centerDivPx.y - centerContainerPx.y;
 
   const topLngLat = pixelToLngLat(projection, width / 2, 0);
   const bottomLngLat = pixelToLngLat(projection, width / 2, height);
@@ -144,8 +144,9 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
     const center = new google.maps.LatLng(latitude, longitude);
     const centerPx = projection.fromLatLngToContainerPixel(center);
     // @ts-ignore (TS2531) Object is possibly 'null'
-    topOffset += Math.round(centerPx.y - height / 2);
+    topOffset += centerPx.y - height / 2;
   }
+  topOffset = Math.round(topOffset);
 
   // Compute fractional bearing
   const delta = new Vector2(topLngLat).sub(bottomLngLat);
