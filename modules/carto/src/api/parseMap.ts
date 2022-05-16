@@ -6,7 +6,9 @@ import {
   getColorValueAccessor,
   getSizeAccessor,
   getTextAccessor,
-  getTextPixelOffsetAccessor
+  getTextPixelOffsetAccessor,
+  OPACITY_MAP,
+  opacityToAlpha
 } from './layer-map';
 import {_flatten as flatten, log} from '@deck.gl/core';
 import {assert} from '../utils';
@@ -131,10 +133,21 @@ function createStyleProps(config, mapping) {
   mapProps(config, result, mapping);
 
   // Kepler format sometimes omits strokeColor. TODO: remove once we can rely on
-  // `strokeColor` always being sert when `stroke: true`.
+  // `strokeColor` always being set when `stroke: true`.
   if (result.stroked && !result.getLineColor) {
     result.getLineColor = result.getFillColor;
   }
+
+  for (const colorAccessor in OPACITY_MAP) {
+    if (Array.isArray(result[colorAccessor])) {
+      const color = [...result[colorAccessor]];
+      const opacityKey = OPACITY_MAP[colorAccessor];
+      const opacity = config.visConfig[opacityKey];
+      color[3] = opacityToAlpha(opacity);
+      result[colorAccessor] = color;
+    }
+  }
+
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
 }
@@ -167,13 +180,15 @@ function createChannelProps(visualChannels, type, config, data) {
       colorField,
       colorScale,
       visConfig.colorRange,
-      1, // Rely on layer opacity
+      visConfig.opacity,
       data
     );
   }
 
   if (strokeColorField) {
-    const opacity = visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : 1;
+    const fallbackOpacity = type === 'point' ? visConfig.opacity : 1;
+    const opacity =
+      visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : fallbackOpacity;
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
