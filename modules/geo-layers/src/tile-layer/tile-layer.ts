@@ -1,10 +1,10 @@
 import {
   assert,
-  ChangeFlags,
   CompositeLayer,
   CompositeLayerProps,
   Layer,
   LayerProps,
+  UpdateParameters,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -39,12 +39,20 @@ const defaultProps = {
   zoomOffset: 0
 };
 
-export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
+/** All props supported by the TileLayer */
+export type TileLayerProps<DataT> = _TileLayerProps<DataT> & CompositeLayerProps<DataT>;
+
+/** Props added by the TileLayer */
+type _TileLayerProps<DataT> = {
+  /**
+   * Optionally implement a custom indexing scheme.
+   */
+  TilesetClass: typeof Tileset2D;
   /**
    * Renders one or an array of Layer instances.
    */
-  renderSubLayers: (
-    props: TileLayerProps & {
+  renderSubLayers?: (
+    props: TileLayerProps<DataT> & {
       id: string;
       data: any;
       _offset: number;
@@ -54,58 +62,62 @@ export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
   /**
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
-  getTileData: (props: TileLoadProps) => Promise<any> | any;
+  getTileData?: (props: TileLoadProps) => Promise<DataT> | DataT;
 
   /** Called when all tiles in the current viewport are loaded. */
   onViewportLoad?: (tiles: Tile2DHeader[]) => void;
 
   /** Called when a tile successfully loads. */
-  onTileLoad: (tile: Tile2DHeader) => void;
+  onTileLoad?: (tile: Tile2DHeader) => void;
 
   /** Called when a tile is cleared from cache. */
-  onTileUnload: (tile: Tile2DHeader) => void;
+  onTileUnload?: (tile: Tile2DHeader) => void;
 
   /** Called when a tile failed to load. */
-  onTileError: (err: any) => void;
+  onTileError?: (err: any) => void;
 
   /** The bounding box of the layer's data. */
-  extent: number[] | undefined | null;
+  extent?: number[] | null;
 
   /** The pixel dimension of the tiles, usually a power of 2. */
-  tileSize: number;
+  tileSize?: number;
 
-  /** The max zoom level of the layer's data.  */
-  maxZoom: number;
+  /** The max zoom level of the layer's data.
+   * @default null
+   */
+  maxZoom?: number | null;
 
-  /** The min zoom level of the layer's data.  */
-  minZoom: number;
+  /** The min zoom level of the layer's data.
+   * @default 0
+   */
+  minZoom?: number | null;
 
   /** The maximum number of tiles that can be cached. */
-  maxCacheSize: number | undefined | null;
+  maxCacheSize?: number | null;
 
   /**
    * The maximum memory used for caching tiles.
    *
    * @default null
    */
-  maxCacheByteSize: number | undefined;
+  maxCacheByteSize?: number | null;
 
   /**
    * How the tile layer refines the visibility of tiles.
    *
    * @default 'best-available'
    */
-  refinementStrategy: RefinementStrategy;
+  refinementStrategy?: RefinementStrategy;
 
   /** Range of minimum and maximum heights in the tile. */
-  zRange: ZRange | null;
+  zRange?: ZRange | null;
 
   /**
    * The maximum number of concurrent getTileData calls.
    *
    * @default 6
    */
-  maxRequests: number;
+  maxRequests?: number;
 
   /**
    * This offset changes the zoom level at which the tiles are fetched.
@@ -114,7 +126,7 @@ export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
    *
    * @default 0
    */
-  zoomOffset: number;
+  zoomOffset?: number;
 };
 
 /**
@@ -122,10 +134,9 @@ export type TileLayerProps<DataT = any> = CompositeLayerProps<DataT> & {
  *
  * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
  */
-export default class TileLayer<
-  DataT = any,
-  PropsT extends TileLayerProps<DataT> = TileLayerProps<DataT>
-> extends CompositeLayer<PropsT> {
+export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_TileLayerProps<DataT>>
+> {
   static defaultProps = defaultProps as any;
   static layerName = 'TileLayer';
 
@@ -150,15 +161,7 @@ export default class TileLayer<
     return changeFlags.somethingChanged;
   }
 
-  updateState({
-    props,
-    changeFlags
-  }: {
-    props: TileLayerProps;
-    oldProps: TileLayerProps;
-    context: any;
-    changeFlags: ChangeFlags;
-  }) {
+  updateState({changeFlags}: UpdateParameters<TileLayer>) {
     assert(this.state);
 
     let {tileset} = this.state;
@@ -169,10 +172,10 @@ export default class TileLayer<
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
     if (!tileset) {
-      tileset = new this.props.TilesetClass(this._getTilesetOptions(props));
+      tileset = new this.props.TilesetClass(this._getTilesetOptions());
       this.setState({tileset});
     } else if (propsChanged) {
-      tileset.setOptions(this._getTilesetOptions(props));
+      tileset.setOptions(this._getTilesetOptions());
 
       if (dataChanged) {
         // reload all tiles
@@ -189,7 +192,7 @@ export default class TileLayer<
     this._updateTileset();
   }
 
-  _getTilesetOptions(props: TileLayerProps): Tileset2DProps {
+  _getTilesetOptions(): Tileset2DProps {
     const {
       tileSize,
       maxCacheSize,
@@ -200,7 +203,7 @@ export default class TileLayer<
       minZoom,
       maxRequests,
       zoomOffset
-    } = props;
+    } = this.props;
 
     return {
       maxCacheSize,
@@ -290,7 +293,7 @@ export default class TileLayer<
   }
 
   renderSubLayers(
-    props: TileLayerProps & {
+    props: _TileLayerProps<DataT> & {
       id: string;
       data: any;
       _offset: number;
@@ -330,7 +333,7 @@ export default class TileLayer<
           _offset: 0,
           tile
         });
-        tile.layers = flatten(layers, Boolean).map(layer =>
+        tile.layers = (flatten(layers, Boolean) as Layer[]).map(layer =>
           layer.clone({
             tile,
             ...subLayerProps

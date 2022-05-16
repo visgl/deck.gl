@@ -21,7 +21,7 @@
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {ASYNC_ORIGINAL_SYMBOL, ASYNC_RESOLVED_SYMBOL, ASYNC_DEFAULTS_SYMBOL} from './constants';
 import type Component from './component';
-import {ComponentProps, StatefulComponentProps} from './component';
+import {StatefulComponentProps} from './component';
 import {PropType} from './prop-types';
 
 const EMPTY_PROPS = Object.freeze({});
@@ -34,7 +34,7 @@ type AsyncPropState = {
   resolvedLoadCount: number;
 };
 
-export default class ComponentState<PropsT extends ComponentProps> {
+export default class ComponentState<PropsT> {
   component: Component<PropsT>;
   onAsyncPropUpdated: (propName: keyof PropsT, value: any) => void;
 
@@ -55,7 +55,11 @@ export default class ComponentState<PropsT extends ComponentProps> {
       const asyncProp = this.asyncProps[propName];
       if (asyncProp && asyncProp.type && asyncProp.type.release) {
         // Release any resources created by transforms
-        asyncProp.type.release(asyncProp.resolvedValue, asyncProp.type, this.component);
+        asyncProp.type.release(
+          asyncProp.resolvedValue,
+          asyncProp.type,
+          this.component as Component
+        );
       }
     }
   }
@@ -259,14 +263,13 @@ export default class ComponentState<PropsT extends ComponentProps> {
 
     asyncProp.pendingLoadCount++;
     const loadCount = asyncProp.pendingLoadCount;
-    let data = [];
+    let data: any[] = [];
     let count = 0;
 
     for await (const chunk of iterable) {
-      // @ts-expect-error
       const {dataTransform} = this.component.props;
       if (dataTransform) {
-        data = dataTransform(chunk, data);
+        data = dataTransform(chunk, data) as any[];
       } else {
         data = data.concat(chunk);
       }
