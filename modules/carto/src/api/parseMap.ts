@@ -159,7 +159,7 @@ function createChannelProps(visualChannels, type, config, data) {
       if (!AGGREGATION[colorAggregation]) {
         result.getColorValue = getColorValueAccessor(colorField, colorAggregation, data);
       } else {
-        result.getColorWeight = d => [colorField.name];
+        result.getColorWeight = d => d[colorField.name];
       }
     }
   } else if (colorField) {

@@ -262,8 +262,9 @@ export function getColorAccessor(
   const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 
   const accessor = properties => {
-    const {r, g, b} = rgb(scale(properties[name]));
-    return [r, g, b, alpha];
+    const propertyValue = properties[name];
+    const {r, g, b} = rgb(scale(propertyValue));
+    return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
 }
