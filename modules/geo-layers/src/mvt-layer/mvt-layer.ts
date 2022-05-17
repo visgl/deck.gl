@@ -50,27 +50,27 @@ export type TileJson = {
   version?: string;
 };
 
-export type MVTLayerProps<DataT = Feature> = TileLayerProps<DataT> & {
+export type MVTLayerProps = {
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
 
   /** Needed for highlighting a feature split across two or more tiles. */
-  uniqueIdProperty: string;
+  uniqueIdProperty?: string;
 
   /** A feature with ID corresponding to the supplied value will be highlighted. */
-  highlightedFeatureId: string | undefined;
+  highlightedFeatureId?: string | null;
 
   /** Use tile data in binary format. */
-  binary: boolean;
+  binary?: boolean;
 
-  loaders: Loader[];
+  loaders?: Loader[];
 };
 
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
-export default class MVTLayer<
-  DataT extends Feature = Feature,
-  PropsT extends MVTLayerProps<DataT> = MVTLayerProps<DataT>
-> extends TileLayer<DataT, PropsT> {
+export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
+  DataT,
+  Required<MVTLayerProps> & ExtraProps
+> {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
@@ -193,7 +193,7 @@ export default class MVTLayer<
   }
 
   renderSubLayers(
-    props: PropsT & {
+    props: TileLayer['props'] & {
       id: string;
       data: any;
       _offset: number;
@@ -377,7 +377,8 @@ export default class MVTLayer<
               return null;
             }
 
-            if (this.state!.binary && Array.isArray(tile.content) && !tile.content.length) {
+            // @ts-expect-error state if defined for instantiated layer
+            if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
               // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
               return [];
@@ -386,7 +387,9 @@ export default class MVTLayer<
             const {bbox} = tile;
             if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
-              const content = this.state!.binary ? binaryToGeojson(tile.content) : tile.content;
+
+              // @ts-expect-error state if defined for instantiated layer
+              const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, bbox, this.context!.viewport)
               );
