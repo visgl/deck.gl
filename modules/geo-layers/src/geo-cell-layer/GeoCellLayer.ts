@@ -8,7 +8,7 @@ const defaultProps = {
 export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT>;
 
 export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  Required<GeoCellLayerProps<DataT> & ExtraProps>
+  Required<GeoCellLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'GeoCellLayer';
   static defaultProps = defaultProps;

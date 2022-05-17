@@ -51,6 +51,8 @@ export type PolygonLayerProps<DataT = any> = {
    * Whether to draw an outline around the polygon (solid fill).
    *
    * Note that both the outer polygon as well the outlines of any holes will be drawn.
+   *
+   * @default true
    */
   stroked?: boolean;
 
@@ -58,16 +60,20 @@ export type PolygonLayerProps<DataT = any> = {
    * Whether to draw a filled polygon (solid fill).
    *
    * Note that only the area between the outer polygon and any holes will be filled.
+   *
+   * @default true
    */
   filled?: boolean;
 
   /**
-   * Whether to extrude the polygons
+   * Whether to extrude the polygons.
    *
    * Based on the elevations provided by the `getElevation` accessor.
    *
    * If set to `false`, all polygons will be flat, this generates less geometry and is faster
    * than simply returning 0 from getElevation.
+   *
+   * @default false
    */
   extruded?: boolean;
 
@@ -76,6 +82,8 @@ export type PolygonLayerProps<DataT = any> = {
    *
    * The final elevation is calculated by `elevationScale * getElevation(d)`.
    * `elevationScale` is a handy property to scale all elevation without updating the data.
+   *
+   * @default 1
    */
   elevationScale?: boolean;
 
@@ -83,13 +91,16 @@ export type PolygonLayerProps<DataT = any> = {
    * Whether to generate a line wireframe of the hexagon.
    *
    * The outline will have "horizontal" lines closing the top and bottom polygons and a vertical
-   * line (a "strut") for each vertex on the polygon
+   * line (a "strut") for each vertex on the polygon.
+   *
+   * @default false
    */
   wireframe?: boolean;
 
   /**
    * The units of the line width, one of `meters`, `common`, and `pixels`.
    *
+   * @default 'meters'
    * @see Unit.
    */
   lineWidthUnits?: Unit;
@@ -97,6 +108,8 @@ export type PolygonLayerProps<DataT = any> = {
   /**
    * The line width multiplier that multiplied to all outlines of `Polygon` and `MultiPolygon`
    * features if the stroked attribute is true.
+   *
+   * @default 1
    */
   lineWidthScale?: number;
 
@@ -140,21 +153,21 @@ export type PolygonLayerProps<DataT = any> = {
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color> | null;
+  getFillColor?: Accessor<DataT, Color>;
 
   /**
    * Line color value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color> | null;
+  getLineColor?: Accessor<DataT, Color>;
 
   /**
    * Line width value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineWidth?: Accessor<DataT, number> | null;
+  getLineWidth?: Accessor<DataT, number>;
 
   /**
    * Elevation valur or accessor.
@@ -163,7 +176,7 @@ export type PolygonLayerProps<DataT = any> = {
    *
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number> | null;
+  getElevation?: Accessor<DataT, number>;
 
   /**
    * This property has been moved to `PathStyleExtension`.
@@ -193,6 +206,7 @@ export type PolygonLayerProps<DataT = any> = {
   /**
    * Material props for lighting effect.
    *
+   * @default true
    * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
    */
   material?: true | MaterialProps | null;
@@ -232,7 +246,7 @@ const defaultProps = {
 };
 
 export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  Required<PolygonLayerProps<DataT> & ExtraProps>
+  Required<PolygonLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
