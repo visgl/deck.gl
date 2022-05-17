@@ -18,7 +18,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
-import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
+import TileLayer from '../tile-layer/tile-layer';
 import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
 import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
 import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
@@ -60,9 +60,18 @@ export type MVTLayerProps = {
   /** A feature with ID corresponding to the supplied value will be highlighted. */
   highlightedFeatureId?: string | null;
 
-  /** Use tile data in binary format. */
+  /**
+   * Use tile data in binary format.
+   *
+   * @default true
+   */
   binary?: boolean;
 
+  /**
+   * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
+   *
+   * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
+   */
   loaders?: Loader[];
 };
 
