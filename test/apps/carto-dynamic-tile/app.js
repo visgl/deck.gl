@@ -19,8 +19,27 @@ const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 
 const config = {
   bigquery: {
-    quadint: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
-    quadkey: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadkey'
+    che15: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
+    che18: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2',
+    esp15: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2',
+    esp18: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2',
+    ukr15: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2',
+    ukr18: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2',
+    usa15: 'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2',
+    che15_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadkey',
+    che18_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2_quadkey',
+    esp15_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2_quadkey',
+    esp18_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2_quadkey',
+    ukr15_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2_quadkey',
+    ukr18_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2_quadkey',
+    usa15_quadkey:
+      'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2_quadkey'
   }
 };
 
@@ -32,7 +51,7 @@ const showCarto = true;
 
 function Root() {
   const [connection, setConnection] = useState('bigquery');
-  const [dataset, setDataset] = useState('quadkey');
+  const [dataset, setDataset] = useState('che15');
   const [formatTiles, setFormatTiles] = useState(TILE_FORMATS.JSON);
   const table = config[connection][dataset];
   return (
