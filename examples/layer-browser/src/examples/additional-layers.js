@@ -38,8 +38,8 @@ const GeohashLayerExample = {
     data: dataSamples.geohashes,
     opacity: 0.6,
     getGeohash: f => f.geohash,
-    getFillColor: f => [f.value * 128, (1 - f.value) * 255, (1 - f.value) * 255, 180],
-    getElevation: f => Math.random() * 1000,
+    getFillColor: f => [f.value * 255, (1 - f.value) * 128, 0],
+    getElevation: f => 100 * f.value,
     pickable: true
   }
 }
