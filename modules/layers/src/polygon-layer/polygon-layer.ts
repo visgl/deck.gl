@@ -21,15 +21,14 @@
 import {
   Accessor,
   AccessorFunction,
-  ChangeFlags,
   Color,
   CompositeLayer,
-  CompositeLayerProps,
   createIterable,
   Layer,
   LayersList,
   log,
-  Unit
+  Unit,
+  UpdateParameters
 } from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
@@ -45,27 +44,22 @@ export type MaterialProps = {
 };
 
 /**
- * Aggregated properties for `PolygonLayer`.
- */
-export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
-
-/**
  * Properties for `PolygonLayer`.
  */
-type _PolygonLayerProps<DataT = any> = {
+export type PolygonLayerProps<DataT = any> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
    * Note that both the outer polygon as well the outlines of any holes will be drawn.
    */
-  stroked: boolean;
+  stroked?: boolean;
 
   /**
    * Whether to draw a filled polygon (solid fill).
    *
    * Note that only the area between the outer polygon and any holes will be filled.
    */
-  filled: boolean;
+  filled?: boolean;
 
   /**
    * Whether to extrude the polygons
@@ -75,7 +69,7 @@ type _PolygonLayerProps<DataT = any> = {
    * If set to `false`, all polygons will be flat, this generates less geometry and is faster
    * than simply returning 0 from getElevation.
    */
-  extruded: boolean;
+  extruded?: boolean;
 
   /**
    * Elevation multiplier.
@@ -83,7 +77,7 @@ type _PolygonLayerProps<DataT = any> = {
    * The final elevation is calculated by `elevationScale * getElevation(d)`.
    * `elevationScale` is a handy property to scale all elevation without updating the data.
    */
-  elevationScale: boolean;
+  elevationScale?: boolean;
 
   /**
    * Whether to generate a line wireframe of the hexagon.
@@ -91,41 +85,41 @@ type _PolygonLayerProps<DataT = any> = {
    * The outline will have "horizontal" lines closing the top and bottom polygons and a vertical
    * line (a "strut") for each vertex on the polygon
    */
-  wireframe: boolean;
+  wireframe?: boolean;
 
   /**
    * The units of the line width, one of `meters`, `common`, and `pixels`.
    *
    * @see Unit.
    */
-  lineWidthUnits: Unit;
+  lineWidthUnits?: Unit;
 
   /**
    * The line width multiplier that multiplied to all outlines of `Polygon` and `MultiPolygon`
    * features if the stroked attribute is true.
    */
-  lineWidthScale: number;
+  lineWidthScale?: number;
 
   /**
    * The minimum line width in pixels.
    *
    * @default 0
    */
-  lineWidthMinPixels: number;
+  lineWidthMinPixels?: number;
 
   /**
    * The maximum line width in pixels
    *
    * @default Number.MAX_SAFE_INTEGER
    */
-  lineWidthMaxPixels: number;
+  lineWidthMaxPixels?: number;
 
   /**
    * Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
    *
    * @default false
    */
-  lineJointRounded: boolean;
+  lineJointRounded?: boolean;
 
   /**
    * The maximum extent of a joint in ratio to the stroke width.
@@ -134,12 +128,12 @@ type _PolygonLayerProps<DataT = any> = {
    *
    * @default 4
    */
-  lineMiterLimit: number;
+  lineMiterLimit?: number;
 
-  lineDashJustified: boolean;
+  lineDashJustified?: boolean;
 
   /** Called on each object in the data stream to retrieve its corresponding polygon. */
-  getPolygon: AccessorFunction<DataT, any>;
+  getPolygon?: AccessorFunction<DataT, any>;
 
   /**
    * Fill collor value or accessor.
@@ -169,14 +163,14 @@ type _PolygonLayerProps<DataT = any> = {
    *
    * @default 1000
    */
-  getElevation: Accessor<DataT, number>;
+  getElevation?: Accessor<DataT, number> | null;
 
   /**
    * This property has been moved to `PathStyleExtension`.
    *
    * @deprecated
    */
-  getLineDashArray: Accessor<DataT, number> | undefined;
+  getLineDashArray?: Accessor<DataT, number> | null;
 
   /**
    * If `false`, will skip normalizing the coordinates returned by `getPolygon`.
@@ -185,7 +179,7 @@ type _PolygonLayerProps<DataT = any> = {
    *
    * @default true
    */
-  _normalize: boolean;
+  _normalize?: boolean;
 
   /**
    * Specifies the winding order of rings in the polygon data.
@@ -194,7 +188,7 @@ type _PolygonLayerProps<DataT = any> = {
    *
    * @default 'CW'
    */
-  _windingOrder: 'CW' | 'CCW';
+  _windingOrder?: 'CW' | 'CCW';
 
   /**
    * Material props for lighting effect.
@@ -237,10 +231,9 @@ const defaultProps = {
   material: true
 };
 
-export default class PolygonLayer<
-  DataT = any,
-  PropsT extends PolygonLayerProps<DataT> = PolygonLayerProps<DataT>
-> extends CompositeLayer<PropsT> {
+export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  Required<PolygonLayerProps<DataT> & ExtraProps>
+> {
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
 
@@ -254,14 +247,7 @@ export default class PolygonLayer<
     }
   }
 
-  updateState({
-    changeFlags
-  }: {
-    props: PropsT;
-    oldProps: PropsT;
-    context: any;
-    changeFlags: ChangeFlags;
-  }) {
+  updateState({changeFlags}: UpdateParameters<PolygonLayer>) {
     const geometryChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&

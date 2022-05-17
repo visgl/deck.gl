@@ -7,15 +7,14 @@ const defaultProps = {
 
 export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT>;
 
-export default class GeoCellLayer<
-  DataT = any,
-  PropsT extends GeoCellLayerProps<DataT> = GeoCellLayerProps<DataT>
-> extends CompositeLayer<PropsT> {
+export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  Required<GeoCellLayerProps<DataT> & ExtraProps>
+> {
   static layerName = 'GeoCellLayer';
   static defaultProps = defaultProps;
 
   /** Implement to generate props to create geometry. */
-  indexToBounds(): Partial<GeoCellLayerProps> | null {
+  indexToBounds(): Partial<GeoCellLayer['props']> | null {
     return null;
   }
 
