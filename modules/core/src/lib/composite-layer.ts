@@ -17,22 +17,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import Layer from './layer';
+import Layer, {UpdateParameters} from './layer';
 import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
 import type {PickingInfo} from './picking/pick-info';
-import type {ChangeFlags} from './layer-state';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<
-  PropsT extends CompositeLayerProps = CompositeLayerProps
-> extends Layer<PropsT> {
+export default abstract class CompositeLayer<PropsT = any> extends Layer<
+  PropsT & Required<CompositeLayerProps>
+> {
+  static layerName: string = 'CompositeLayer';
+
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return true;
@@ -252,15 +253,7 @@ export default abstract class CompositeLayer<
   }
 
   /** (Internal) Called after an update to rerender sub layers */
-  protected _postUpdate(
-    updateParams: {
-      props: PropsT;
-      oldProps: PropsT;
-      context: LayerContext;
-      changeFlags: ChangeFlags;
-    },
-    forceUpdate: boolean
-  ) {
+  protected _postUpdate(updateParams: UpdateParameters<CompositeLayer>, forceUpdate: boolean) {
     // @ts-ignore (TS2531) this method is only called internally when internalState is defined
     let subLayers = this.internalState.subLayers as Layer[];
     const shouldUpdate = !subLayers || this.needsUpdate();
@@ -282,5 +275,3 @@ export default abstract class CompositeLayer<
     }
   }
 }
-
-CompositeLayer.layerName = 'CompositeLayer';

@@ -240,7 +240,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
           source,
           clientId,
           credentials: credentials as CloudNativeCredentials,
-          connection: connection as string,
+          connection,
           ...rest
         });
       }
