@@ -28,7 +28,8 @@ import {
   S2Layer,
   TileLayer,
   TripsLayer,
-  TerrainLayer
+  TerrainLayer,
+  GeohashLayer
 } from '@deck.gl/geo-layers';
 
 test('Top-level imports', t => {
@@ -40,6 +41,7 @@ test('Top-level imports', t => {
   t.ok(TileLayer, 'TileLayer symbol imported');
   t.ok(TripsLayer, 'TripsLayer symbol imported');
   t.ok(TerrainLayer, 'TerrainLayer symbol imported');
+  t.ok(GeohashLayer, 'GeohashLayer symbol imported');
   t.end();
 });
 
@@ -52,3 +54,4 @@ import './h3-layers.spec';
 import './tile-3d-layer';
 import './terrain-layer.spec';
 import './mvt-layer.spec';
+import './geohash-layer.spec';
