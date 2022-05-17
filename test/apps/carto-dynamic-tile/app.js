@@ -6,7 +6,7 @@ import DeckGL from '@deck.gl/react';
 import {CartoLayer, FORMATS, TILE_FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-const INITIAL_VIEW_STATE = {longitude: -73.95643, latitude: 40.8039, zoom: 12};
+const INITIAL_VIEW_STATE = {longitude: 8, latitude: 47, zoom: 6};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
@@ -33,7 +33,7 @@ const showCarto = true;
 function Root() {
   const [connection, setConnection] = useState('bigquery');
   const [dataset, setDataset] = useState('quadkey');
-  const [formatTiles, setFormatTiles] = useState(TILE_FORMATS.BINARY);
+  const [formatTiles, setFormatTiles] = useState(TILE_FORMATS.JSON);
   const table = config[connection][dataset];
   return (
     <>
@@ -99,18 +99,21 @@ function createCarto(connection, formatTiles, table) {
     aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation',
     aggregationResLevel: 6,
     geoColumn,
+    getQuadkey: d => d.id,
 
     // Styling
-    getFillColor: [233, 71, 251],
-    getElevation: 1000,
-    // extruded: true,
-    stroked: true,
-    filled: true,
-    pointType: 'circle',
-    pointRadiusUnits: 'pixels',
-    lineWidthMinPixels: 0.5,
-    getPointRadius: 1.5,
-    getLineColor: [0, 0, 200]
+    getFillColor: d => [
+      Math.pow((d.properties.value || d.properties.VALUE) / 200, 0.1) * 255,
+      255 - (d.properties.value || d.properties.VALUE),
+      79
+    ],
+    getElevation: d =>
+      'elevation' in d.properties
+        ? d.properties.elevation
+        : d.properties.value || d.properties.VALUE,
+    extruded: true,
+    opacity: 0.3,
+    elevationScale: 100
   });
 }
 
