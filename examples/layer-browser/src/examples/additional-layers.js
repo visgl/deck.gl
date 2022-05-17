@@ -4,7 +4,8 @@ import {
   S2Layer,
   H3ClusterLayer,
   H3HexagonLayer,
-  TripsLayer
+  TripsLayer,
+  GeohashLayer
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
@@ -31,6 +32,18 @@ const GreatCircleLayerExample = {
   }
 };
 
+const GeohashLayerExample = {
+  layer: GeohashLayer,
+  props: {
+    data: dataSamples.geohashes,
+    opacity: 0.6,
+    getGeohash: f => f.geohash,
+    getFillColor: f => [f.value * 128, (1 - f.value) * 255, (1 - f.value) * 255, 180],
+    getElevation: f => Math.random() * 1000,
+    pickable: true
+  }
+}
+
 const QuadkeyLayerExample = {
   layer: QuadkeyLayer,
   props: {
@@ -51,7 +64,7 @@ const S2LayerExample = {
     opacity: 0.6,
     getS2Token: f => f.token,
     getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128, 128],
-    getElevation: f => Math.random() * 1000,
+    getElevation: f => 100 * f.value,
     pickable: true
   }
 };
@@ -117,6 +130,7 @@ export default {
     H3ClusterLayer: H3ClusterLayerExample,
     H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample,
-    TripsLayer: TripsLayerExample
+    TripsLayer: TripsLayerExample,
+    GeohashLayer: GeohashLayerExample
   }
 };

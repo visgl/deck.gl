@@ -40,7 +40,8 @@
     "@math.gl/culling": "3.6.0-alpha.5",
     "@math.gl/web-mercator": "3.6.0-alpha.5",
     "h3-js": "^3.6.0",
-    "long": "^3.2.0"
+    "long": "^3.2.0",
+    "ngeohash": "^0.6.3"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
