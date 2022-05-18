@@ -35,6 +35,7 @@ export type Format = ValuesOf<typeof FORMATS>;
 // AVAILABLE FORMATS FOR TILES
 export const TILE_FORMATS = {
   MVT: 'mvt',
+  JSON: 'json',
   GEOJSON: 'geojson',
   BINARY: 'binary'
 } as const;

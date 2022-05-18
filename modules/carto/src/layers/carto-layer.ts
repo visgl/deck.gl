@@ -1,5 +1,7 @@
 import {CompositeLayer, Layer, log} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
+import H3TileLayer from './h3-tile-layer';
+import QuadkeyTileLayer from './quadkey-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -240,7 +242,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
           source,
           clientId,
           credentials: credentials as CloudNativeCredentials,
-          connection: connection as string,
+          connection,
           ...rest
         });
       }
@@ -283,6 +285,12 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
         (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
         TILE_FORMATS.MVT;
 
+      if (data.scheme === 'h3') {
+        return [H3TileLayer, props];
+      }
+      if (data.scheme === 'quadkey') {
+        return [QuadkeyTileLayer, props];
+      }
       return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
     }
 

@@ -3,7 +3,6 @@ import {StatefulComponentProps} from '../lifecycle/component';
 
 import type Layer from './layer';
 import type AttributeManager from './attribute/attribute-manager';
-import type {LayerProps} from '../types/layer-props';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
 
@@ -21,7 +20,7 @@ export type ChangeFlags = {
   somethingChanged: boolean;
 };
 
-export default class LayerState<PropsT extends LayerProps> extends ComponentState<PropsT> {
+export default class LayerState<PropsT> extends ComponentState<PropsT> {
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;
