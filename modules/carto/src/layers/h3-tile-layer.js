@@ -1,14 +1,19 @@
 import {CompositeLayer} from '@deck.gl/core';
-import {QuadkeyLayer, TileLayer} from '@deck.gl/geo-layers';
-import QuadkeyTileset2D from './quadkey-tileset-2d';
+import {H3HexagonLayer, TileLayer} from '@deck.gl/geo-layers';
+import H3Tileset2D from './h3-tileset-2d';
 
 const renderSubLayers = props => {
   const {data} = props;
+  const {index} = props.tile;
   if (!data || !data.length) return null;
-  return new QuadkeyLayer(props);
+
+  return new H3HexagonLayer(props, {
+    centerHexagon: index,
+    highPrecision: true
+  });
 };
 
-export default class QuadkeyTileLayer extends CompositeLayer {
+export default class H3TileLayer extends CompositeLayer {
   initializeState() {
     this.setState({data: null, tileJSON: null});
   }
@@ -23,20 +28,17 @@ export default class QuadkeyTileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, tileJSON} = this.state;
-    const {maxresolution} = tileJSON;
-    const maxZoom = maxresolution - this.props.aggregationResLevel;
+    const {data} = this.state;
     return [
       new TileLayer(this.props, {
-        id: 'quadkey-tile-layer',
+        id: 'h3-tile-layer',
         data,
-        getQuadkey: d => d.id,
-        TilesetClass: QuadkeyTileset2D,
-        renderSubLayers,
-        maxZoom
+        getHexagon: d => d.id,
+        TilesetClass: H3Tileset2D,
+        renderSubLayers
       })
     ];
   }
 }
 
-QuadkeyTileLayer.layerName = 'QuadkeyTileLayer';
+H3TileLayer.layerName = 'H3TileLayer';
