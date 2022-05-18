@@ -82,18 +82,19 @@ export default class MVTLayer extends TileLayer {
     this.setState({data, tileJSON});
   }
 
-  _getTilesetOptions(props) {
-    const opts = super._getTilesetOptions(props);
+  _getTilesetOptions() {
+    const opts = super._getTilesetOptions();
     const {tileJSON} = this.state;
+    const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
-      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > props.minZoom) {
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
         opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(props.maxZoom) || tileJSON.maxzoom < props.maxZoom)
+        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
       ) {
         opts.maxZoom = tileJSON.maxzoom;
       }
@@ -116,14 +117,14 @@ export default class MVTLayer extends TileLayer {
     let loadOptions = this.getLoadOptions();
     const {binary} = this.state;
     const {fetch} = this.props;
-    const {signal, x, y, z} = tile;
+    const {signal, index} = tile;
     loadOptions = {
       ...loadOptions,
       mimeType: 'application/x-protobuf',
       mvt: {
         ...loadOptions?.mvt,
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
-        tileIndex: {x, y, z}
+        tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers
@@ -135,14 +136,14 @@ export default class MVTLayer extends TileLayer {
   }
 
   renderSubLayers(props) {
-    const {tile} = props;
-    const worldScale = Math.pow(2, tile.z);
+    const {x, y, z} = props.tile.index;
+    const worldScale = Math.pow(2, z);
 
     const xScale = WORLD_SIZE / worldScale;
     const yScale = -xScale;
 
-    const xOffset = (WORLD_SIZE * tile.x) / worldScale;
-    const yOffset = WORLD_SIZE * (1 - tile.y / worldScale);
+    const xOffset = (WORLD_SIZE * x) / worldScale;
+    const yOffset = WORLD_SIZE * (1 - y / worldScale);
 
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 

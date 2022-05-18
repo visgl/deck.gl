@@ -21,12 +21,13 @@
   ],
   "resolutions": {
     "acorn": "7.4.1",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "@math.gl/core": "3.6.0-alpha.5"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
-    "build": "ocular-clean && ocular-build && lerna run build",
+    "build": "ocular-clean && ocular-build && npm run tsbuild && lerna run build",
     "version": "ocular-build core",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
@@ -36,6 +37,8 @@
     "test-fast": "ocular-test fast",
     "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
+    "tsclean": "find . -name tsconfig.tsbuildinfo -exec rm {} \\;",
+    "tsbuild": "tsc -b tsconfig.build.json",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",
     "metrics": "ocular-metrics",
@@ -50,8 +53,8 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^3.1.5",
-    "@loaders.gl/polyfills": "^3.1.5",
+    "@loaders.gl/csv": "^3.2.0-alpha.4",
+    "@loaders.gl/polyfills": "^3.2.0-alpha.4",
     "@luma.gl/test-utils": "^8.5.10",
     "@probe.gl/bench": "^3.5.0",
     "@probe.gl/test-utils": "^3.5.0",

@@ -14,12 +14,19 @@ export enum TRANSITION_EVENTS {
 }
 
 export type TransitionProps = {
+  /** Transition duration in milliseconds, default value 0, implies no transition. When using `FlyToInterpolator`, it can also be set to `'auto'`. */
   transitionDuration?: number | 'auto';
+  /** An interpolator object that defines the transition behavior between two viewports. */
   transitionInterpolator?: TransitionInterpolator;
+  /** Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. */
   transitionEasing?: (t: number) => number;
+  /** Controls how to process a new view state change that occurs during an existing transition. */
   transitionInterruption?: TRANSITION_EVENTS;
+  /** Callback fired when requested transition starts. */
   onTransitionStart?: (transition: Transition) => void;
+  /** Callback fired when requested transition is interrupted. */
   onTransitionInterrupt?: (transition: Transition) => void;
+  /** Callback fired when requested transition ends. */
   onTransitionEnd?: (transition: Transition) => void;
 };
 

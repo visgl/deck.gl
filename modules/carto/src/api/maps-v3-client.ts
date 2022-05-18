@@ -4,9 +4,11 @@
 import {getDefaultCredentials, buildMapsUrlFromBase, CloudNativeCredentials} from '../config';
 import {
   API_VERSIONS,
+  COLUMNS_SUPPORT,
   encodeParameter,
   Format,
   FORMATS,
+  GEO_COLUMN_SUPPORT,
   MapInstantiation,
   MapType,
   MAP_TYPES,
@@ -110,10 +112,11 @@ type FetchLayerDataParams = {
   credentials: CloudNativeCredentials;
   geoColumn?: string;
   columns?: string[];
-  schema?: boolean;
   clientId?: string;
   format?: Format;
   formatTiles?: TileFormat;
+  aggregationExp?: string;
+  aggregationResLevel?: number;
 };
 
 /**
@@ -124,24 +127,26 @@ function getParameters({
   source,
   geoColumn,
   columns,
-  schema,
-  clientId
+  clientId,
+  aggregationExp,
+  aggregationResLevel
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
-  if (schema) {
-    parameters.push(encodeParameter('schema', true));
-  }
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (type === MAP_TYPES.TABLE) {
-    if (geoColumn) {
-      parameters.push(encodeParameter('geo_column', geoColumn));
-    }
-    if (columns) {
-      parameters.push(encodeParameter('columns', columns.join(',')));
-    }
+  if (geoColumn) {
+    parameters.push(encodeParameter('geo_column', geoColumn));
+  }
+  if (columns) {
+    parameters.push(encodeParameter('columns', columns.join(',')));
+  }
+  if (aggregationExp) {
+    parameters.push(encodeParameter('aggregationExp', aggregationExp));
+  }
+  if (aggregationResLevel) {
+    parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
   }
 
   return parameters.join('&');
@@ -154,11 +159,20 @@ export async function mapInstantiation({
   credentials,
   geoColumn,
   columns,
-  schema,
-  clientId
+  clientId,
+  aggregationExp,
+  aggregationResLevel
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({type, source, geoColumn, columns, schema, clientId})}`;
+  const url = `${baseUrl}?${getParameters({
+    type,
+    source,
+    geoColumn,
+    columns,
+    clientId,
+    aggregationExp,
+    aggregationResLevel
+  })}`;
   const {accessToken} = credentials;
 
   if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
@@ -187,7 +201,11 @@ function checkFetchLayerDataParameters({
   type,
   source,
   connection,
-  credentials
+  credentials,
+  geoColumn,
+  columns,
+  aggregationExp,
+  aggregationResLevel
 }: FetchLayerDataParams) {
   assert(connection, 'Must define connection');
   assert(type, 'Must define a type');
@@ -196,12 +214,35 @@ function checkFetchLayerDataParameters({
   assert(credentials.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
   assert(credentials.apiBaseUrl, 'Must define apiBaseUrl');
   assert(credentials.accessToken, 'Must define an accessToken');
+
+  if (columns) {
+    assert(
+      COLUMNS_SUPPORT.includes(type),
+      `The columns parameter is not supported by type ${type}`
+    );
+  }
+  if (geoColumn) {
+    assert(
+      GEO_COLUMN_SUPPORT.includes(type),
+      `The geoColumn parameter is not supported by type ${type}`
+    );
+  } else {
+    assert(!aggregationExp, 'Have aggregationExp, but geoColumn parameter is missing');
+    assert(!aggregationResLevel, 'Have aggregationResLevel, but geoColumn parameter is missing');
+  }
+
+  if (!aggregationExp) {
+    assert(
+      !aggregationResLevel,
+      'Have aggregationResLevel, but aggregationExp parameter is missing'
+    );
+  }
 }
 
 export interface FetchLayerDataResult {
   data: any;
-  format: Format;
-  schema?: SchemaField[];
+  format?: Format;
+  schema: SchemaField[];
 }
 export async function fetchLayerData({
   type,
@@ -212,8 +253,9 @@ export async function fetchLayerData({
   columns,
   format,
   formatTiles,
-  schema,
-  clientId
+  clientId,
+  aggregationExp,
+  aggregationResLevel
 }: FetchLayerDataParams): Promise<FetchLayerDataResult> {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
@@ -226,16 +268,13 @@ export async function fetchLayerData({
     columns,
     format,
     formatTiles,
-    schema,
-    clientId
+    clientId,
+    aggregationExp,
+    aggregationResLevel
   });
 
   const data = await requestData({url, format: mapFormat, accessToken});
-  const result: FetchLayerDataResult = {data, format: mapFormat};
-  if (schema) {
-    result.schema = metadata.schema;
-  }
-
+  const result: FetchLayerDataResult = {data, format: mapFormat, schema: metadata.schema};
   return result;
 }
 
@@ -248,8 +287,9 @@ async function _fetchDataUrl({
   columns,
   format,
   formatTiles,
-  schema,
-  clientId
+  clientId,
+  aggregationExp,
+  aggregationResLevel
 }: FetchLayerDataParams) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
@@ -258,7 +298,16 @@ async function _fetchDataUrl({
     ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
     ...credentials
   };
-  checkFetchLayerDataParameters({type, source, connection, credentials: localCreds});
+  checkFetchLayerDataParameters({
+    type,
+    source,
+    connection,
+    credentials: localCreds,
+    geoColumn,
+    columns,
+    aggregationExp,
+    aggregationResLevel
+  });
 
   if (!localCreds.mapsUrl) {
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
@@ -271,8 +320,9 @@ async function _fetchDataUrl({
     credentials: localCreds,
     geoColumn,
     columns,
-    schema,
-    clientId
+    clientId,
+    aggregationExp,
+    aggregationResLevel
   });
   let url: string | null = null;
   let mapFormat: Format | undefined;
@@ -325,7 +375,6 @@ export async function getData({
     geoColumn,
     columns,
     format,
-    schema: false,
     clientId
   });
   return layerData.data;
@@ -428,6 +477,16 @@ export async function fetchMap({
       clearInterval(intervalId);
     };
   }
+
+  const geojsonLayers = map.keplerMapConfig.config.visState.layers.filter(
+    ({type}) => type === 'geojson' || type === 'point'
+  );
+  const geojsonDatasetIds = geojsonLayers.map(({config}) => config.dataId);
+  map.datasets.forEach(dataset => {
+    if (geojsonDatasetIds.includes(dataset.id)) {
+      dataset.format = 'geojson';
+    }
+  });
 
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);

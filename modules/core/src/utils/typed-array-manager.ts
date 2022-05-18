@@ -20,8 +20,8 @@ export class TypedArrayManager {
     Object.assign(this.opts, options);
   }
 
-  allocate(
-    typedArray: TypedArray | null | undefined,
+  allocate<T extends TypedArray>(
+    typedArray: T | null | undefined,
     count: number,
     {
       size = 1,
@@ -38,7 +38,7 @@ export class TypedArrayManager {
       initialize?: boolean;
       maxCount?: number;
     }
-  ): TypedArray {
+  ): T {
     const Type =
       type || (typedArray && (typedArray.constructor as TypedArrayConstructor)) || Float32Array;
 
@@ -48,7 +48,7 @@ export class TypedArrayManager {
         return typedArray;
       }
       if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
-        return new Type(typedArray.buffer, 0, newSize);
+        return new Type(typedArray.buffer, 0, newSize) as T;
       }
     }
 
@@ -67,7 +67,7 @@ export class TypedArrayManager {
     }
 
     this._release(typedArray);
-    return newArray;
+    return newArray as T;
   }
 
   release(typedArray: TypedArray | null | undefined) {

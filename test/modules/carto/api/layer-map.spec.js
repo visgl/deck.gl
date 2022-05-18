@@ -48,6 +48,50 @@ const COLOR_TESTS = [
     data: [{}], // Default range will be [0, 1]
     d: {v: 0.5},
     expected: [117, 18, 67, 186]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'custom',
+    colorRange: {
+      colors,
+      colorMap: [
+        [0, '#E3611C'],
+        [1, '#F1920E'],
+        [5, '#FFC300']
+      ]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [241, 146, 14, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'ordinal',
+    colorRange: {
+      colors,
+      colorMap: [
+        [0, '#E3611C'],
+        [1, '#F1920E'],
+        [5, '#FFC300']
+      ]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [227, 97, 28, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'ordinal',
+    colorRange: {
+      colors,
+      colorMap: [[99, '#E3611C']]
+    },
+    opacity: 1,
+    data: [{v: 0}, {v: 1}, {v: 5}],
+    d: {v: 0},
+    expected: [134, 141, 145, 255]
   }
 ];
 
@@ -138,7 +182,7 @@ const TEXT_PIXEL_OFFSET_TESTS = [
     alignment: 'bottom',
     radius: 20,
     size: 10,
-    expected: [24, 34]
+    expected: [40, 50]
   },
   {
     anchor: 'end',
@@ -146,7 +190,7 @@ const TEXT_PIXEL_OFFSET_TESTS = [
     radius: r => 2 * r,
     data: 10,
     size: 10,
-    expected: [-24, -34]
+    expected: [-40, -50]
   }
 ];
 
@@ -170,7 +214,7 @@ test('getHexagon', t => {
 });
 
 test('domainFromValues', t => {
-  t.deepEquals(_domainFromValues(['a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
+  t.deepEquals(_domainFromValues(['a', 'a', 'b', 'c', 'b'], 'ordinal'), ['a', 'b', 'c']);
   t.deepEquals(_domainFromValues([1, 4, 2, 3, 1], 'quantile'), [1, 1, 2, 3, 4]);
   t.deepEquals(_domainFromValues([1, 0, -3], 'log'), [-3, 1]);
   t.deepEquals(_domainFromValues([1, 0, 3], 'log'), [0.00001, 3]);

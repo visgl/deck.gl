@@ -211,27 +211,27 @@ test('Layer#diffProps', t => {
   let layer = new SubLayer(LAYER_PROPS);
   t.doesNotThrow(() => testInitializeLayer({layer, onError: t.notOk}), 'Layer initialized OK');
 
-  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
+  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]})).props,
     layer.props
   );
   t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
+  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
   t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}})).props,
     layer.props
   );
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}})).props,
     layer.props
   );
@@ -240,7 +240,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}})).props,
     layer.props
   );
@@ -248,7 +248,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 1}})).props,
     layer.props
   );
@@ -256,7 +256,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: null}})).props,
     layer.props
   );
@@ -264,7 +264,7 @@ test('Layer#diffProps', t => {
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
   testInitializeLayer({layer, onError: t.notOk});
-  layer.diffProps(
+  layer._diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: undefined}})).props,
     layer.props
   );
@@ -371,40 +371,68 @@ test('Layer#uniformTransitions', t => {
   class TestLayer extends Layer {
     initializeState() {}
 
+    setModuleParameters(params) {
+      super.setModuleParameters(params);
+      this.state.moduleParameters = params;
+    }
+
     draw() {
       drawCalls.push({
-        opacity: this.props.opacity
+        opacity: this.props.opacity,
+        modelMatrix: this.state.moduleParameters.modelMatrix
       });
     }
   }
+
+  const identityMat4 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const scale2Mat4 = [2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1];
+  const scale3Mat4 = [3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1];
 
   const testCases = [
     {
       props: {
         id: 'testLayer',
         data: [],
-        opacity: 0
+        opacity: 0,
+        modelMatrix: identityMat4
       },
       onBeforeUpdate: () => timeline.setTime(0),
-      onAfterUpdate: () => t.deepEquals(drawCalls.pop(), {opacity: 0}, 'layer drawn with opacity')
+      onAfterUpdate: () =>
+        t.deepEquals(
+          drawCalls.pop(),
+          {opacity: 0, modelMatrix: identityMat4},
+          'layer drawn with opacity'
+        )
     },
     {
       updateProps: {
-        opacity: 1
+        opacity: 1,
+        modelMatrix: scale3Mat4
       },
       onBeforeUpdate: () => timeline.setTime(100),
-      onAfterUpdate: () => t.deepEquals(drawCalls.pop(), {opacity: 1}, 'layer drawn with opacity')
+      onAfterUpdate: () =>
+        t.deepEquals(
+          drawCalls.pop(),
+          {opacity: 1, modelMatrix: scale3Mat4},
+          'layer drawn with opacity'
+        )
     },
     {
       updateProps: {
         opacity: 0,
+        modelMatrix: identityMat4,
         transitions: {
-          opacity: 200
+          opacity: 200,
+          modelMatrix: 200
         }
       },
       onBeforeUpdate: () => timeline.setTime(200),
       onAfterUpdate: () =>
-        t.deepEquals(drawCalls.pop(), {opacity: 1}, 'layer drawn with opacity in transition')
+        t.deepEquals(
+          drawCalls.pop(),
+          {opacity: 1, modelMatrix: scale3Mat4},
+          'layer drawn with opacity in transition'
+        )
     },
     {
       updateProps: {
@@ -412,7 +440,11 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(300),
       onAfterUpdate: () =>
-        t.deepEquals(drawCalls.pop(), {opacity: 0.5}, 'layer drawn with opacity in transition')
+        t.deepEquals(
+          drawCalls.pop(),
+          {opacity: 0.5, modelMatrix: scale2Mat4},
+          'layer drawn with opacity in transition'
+        )
     },
     {
       updateProps: {
@@ -420,7 +452,11 @@ test('Layer#uniformTransitions', t => {
       },
       onBeforeUpdate: () => timeline.setTime(400),
       onAfterUpdate: () =>
-        t.deepEquals(drawCalls.pop(), {opacity: 0}, 'layer drawn with opacity in transition')
+        t.deepEquals(
+          drawCalls.pop(),
+          {opacity: 0, modelMatrix: identityMat4},
+          'layer drawn with opacity in transition'
+        )
     }
   ];
 

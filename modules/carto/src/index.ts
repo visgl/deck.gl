@@ -16,3 +16,5 @@ export {
   getData,
   mapInstantiation as _mapInstantiation
 } from './api';
+
+export type {CartoLayerProps} from './layers/carto-layer';

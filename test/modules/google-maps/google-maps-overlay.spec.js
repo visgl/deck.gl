@@ -27,6 +27,7 @@ test('GoogleMapsOverlay#constructor', t => {
   map.emit({type: 'renderingtype_changed'});
   const deck = overlay._deck;
   t.ok(deck, 'Deck instance is created');
+  t.ok(overlay.props.interleaved, 'interleaved defaults to true');
 
   overlay.setMap(map);
   t.is(overlay._deck, deck, 'Deck instance is the same');
@@ -37,6 +38,16 @@ test('GoogleMapsOverlay#constructor', t => {
   overlay.finalize();
   t.notOk(overlay._deck, 'Deck instance is finalized');
 
+  t.end();
+});
+
+test('GoogleMapsOverlay#interleaved prop', t => {
+  const overlay = new GoogleMapsOverlay({
+    interleaved: false,
+    layers: []
+  });
+
+  t.ok(!overlay.props.interleaved, 'interleaved set to false');
   t.end();
 });
 
@@ -64,31 +75,34 @@ test('GoogleMapsOverlay#raster lifecycle', t => {
   t.end();
 });
 
-test('GoogleMapsOverlay#vector lifecycle', t => {
-  const map = new mapsApi.Map({
-    width: 1,
-    height: 1,
-    longitude: 0,
-    latitude: 0,
-    zoom: 1,
-    renderingType: mapsApi.RenderingType.VECTOR
+for (const interleaved of [true, false]) {
+  test(`GoogleMapsOverlay#vector lifecycle (interleaved:${interleaved}`, t => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType: mapsApi.RenderingType.VECTOR
+    });
+
+    const overlay = new GoogleMapsOverlay({
+      interleaved,
+      layers: []
+    });
+
+    overlay.setMap(map);
+    map.emit({type: 'renderingtype_changed'});
+    t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
+    t.ok(overlay._overlay.onContextLost, 'onContextLost lifecycle function is registered');
+    t.ok(overlay._overlay.onContextRestored, 'onContextRestored lifecycle function is registered');
+    t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
+    t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+    overlay.finalize();
+
+    t.end();
   });
-
-  const overlay = new GoogleMapsOverlay({
-    layers: []
-  });
-
-  overlay.setMap(map);
-  map.emit({type: 'renderingtype_changed'});
-  t.ok(overlay._overlay.onAdd, 'onAdd lifecycle function is registered');
-  t.ok(overlay._overlay.onContextLost, 'onContextLost lifecycle function is registered');
-  t.ok(overlay._overlay.onContextRestored, 'onContextRestored lifecycle function is registered');
-  t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
-  t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
-  overlay.finalize();
-
-  t.end();
-});
+}
 
 test('GoogleMapsOverlay#style', t => {
   const map = new mapsApi.Map({

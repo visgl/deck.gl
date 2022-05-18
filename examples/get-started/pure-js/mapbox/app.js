@@ -1,4 +1,4 @@
-import {Deck} from '@deck.gl/core';
+import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import mapboxgl from 'mapbox-gl';
 
@@ -6,41 +6,16 @@ import mapboxgl from 'mapbox-gl';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const INITIAL_VIEW_STATE = {
-  latitude: 51.47,
-  longitude: 0.45,
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  center: [0.45, 51.47],
   zoom: 4,
   bearing: 0,
   pitch: 30
-};
-
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: MAP_STYLE,
-  // Note: deck.gl will be in charge of interaction and event handling
-  interactive: false,
-  center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
-  zoom: INITIAL_VIEW_STATE.zoom,
-  bearing: INITIAL_VIEW_STATE.bearing,
-  pitch: INITIAL_VIEW_STATE.pitch
 });
 
-export const deck = new Deck({
-  canvas: 'deck-canvas',
-  width: '100%',
-  height: '100%',
-  initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
-  onViewStateChange: ({viewState}) => {
-    map.jumpTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: viewState.zoom,
-      bearing: viewState.bearing,
-      pitch: viewState.pitch
-    });
-  },
+const deckOverlay = new DeckOverlay({
   layers: [
     new GeoJsonLayer({
       id: 'airports',
@@ -71,3 +46,6 @@ export const deck = new Deck({
     })
   ]
 });
+
+map.addControl(deckOverlay);
+map.addControl(new mapboxgl.NavigationControl());
