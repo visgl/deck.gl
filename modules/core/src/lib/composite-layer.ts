@@ -26,6 +26,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
+import {ConstructorOf} from '../types/types';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
@@ -100,11 +101,16 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<
   }
 
   /** Returns sub layer class for a specific sublayer */
-  protected getSubLayerClass(subLayerId: string, DefaultLayerClass: typeof Layer): typeof Layer {
+  protected getSubLayerClass<T extends Layer>(
+    subLayerId: string,
+    DefaultLayerClass: ConstructorOf<T>
+  ): ConstructorOf<T> {
     const {_subLayerProps: overridingProps} = this.props;
 
     return (
-      (overridingProps && overridingProps[subLayerId] && overridingProps[subLayerId].type) ||
+      (overridingProps &&
+        overridingProps[subLayerId] &&
+        (overridingProps[subLayerId].type as ConstructorOf<T>)) ||
       DefaultLayerClass
     );
   }

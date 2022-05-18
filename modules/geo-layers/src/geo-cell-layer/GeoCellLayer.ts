@@ -1,17 +1,24 @@
-import {CompositeLayer} from '@deck.gl/core';
-import {PolygonLayer} from '@deck.gl/layers';
+import {CompositeLayer, Layer, LayersList} from '@deck.gl/core';
+import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 const defaultProps = {
   ...PolygonLayer.defaultProps
 };
 
-export default class GeoCellLayer extends CompositeLayer {
-  // Implement to generate props to create geometry
-  indexToBounds() {
+export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT>;
+
+export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  Required<GeoCellLayerProps<DataT>> & ExtraProps
+> {
+  static layerName = 'GeoCellLayer';
+  static defaultProps = defaultProps;
+
+  /** Implement to generate props to create geometry. */
+  indexToBounds(): Partial<GeoCellLayer['props']> | null {
     return null;
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
     const {
       elevationScale,
@@ -64,7 +71,7 @@ export default class GeoCellLayer extends CompositeLayer {
       },
       this.getSubLayerProps({
         id: 'cell',
-        updateTriggers: {
+        updateTriggers: updateTriggers && {
           getElevation: updateTriggers.getElevation,
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,
@@ -75,6 +82,3 @@ export default class GeoCellLayer extends CompositeLayer {
     );
   }
 }
-
-GeoCellLayer.layerName = 'GeoCellLayer';
-GeoCellLayer.defaultProps = defaultProps;
