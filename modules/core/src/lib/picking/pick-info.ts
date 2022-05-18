@@ -38,7 +38,7 @@ export interface PickingInfo<DataT = any> {
   pixelRatio: number;
 }
 
-export interface PickingInfoProps<DataT = any> {
+export interface GetPickingInfoParams<DataT = any> {
   info: PickingInfo<DataT>;
   mode: string;
   sourceLayer: Layer | null;

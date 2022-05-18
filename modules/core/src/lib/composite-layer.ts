@@ -22,7 +22,7 @@ import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
-import type {PickingInfo, PickingInfoProps} from './picking/pick-info';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
@@ -69,7 +69,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<
   /** called to augment the info object that is bubbled up from a sublayer
       override Layer.getPickingInfo() because decoding / setting uniform do
       not apply to a composite layer. */
-  getPickingInfo({info}: PickingInfoProps): PickingInfo {
+  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     const {object} = info;
     const isDataWrapped =
       object && object.__source && object.__source.parent && object.__source.parent.id === this.id;

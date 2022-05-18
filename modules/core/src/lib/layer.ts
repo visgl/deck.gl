@@ -45,7 +45,7 @@ import {load} from '@loaders.gl/core';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
-import type {PickingInfo, PickingInfoProps} from './picking/pick-info';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {LayerProps} from '../types/layer-props';
@@ -478,7 +478,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
-  getPickingInfo({info, mode, sourceLayer}: PickingInfoProps) {
+  getPickingInfo({info, mode, sourceLayer}: GetPickingInfoParams) {
     const {index} = info;
 
     if (index >= 0) {

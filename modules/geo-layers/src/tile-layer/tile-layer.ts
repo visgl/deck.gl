@@ -5,7 +5,7 @@ import {
   LayerProps,
   UpdateParameters,
   PickingInfo,
-  PickingInfoProps,
+  GetPickingInfoParams,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -311,7 +311,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}: PickingInfoProps): PickingInfo<DataT> {
+  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): PickingInfo<DataT> {
     (info as any).tile = (sourceLayer as any).props.tile;
     return info;
   }

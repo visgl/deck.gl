@@ -4,7 +4,7 @@ import {
   log,
   PickingInfo,
   UpdateParameters,
-  PickingInfoProps,
+  GetPickingInfoParams,
   Viewport,
   _GlobeViewport,
   COORDINATE_SYSTEM
@@ -18,7 +18,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
-import TileLayer from '../tile-layer/tile-layer';
+import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
 import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
 import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
@@ -50,7 +50,11 @@ export type TileJson = {
   version?: string;
 };
 
-export type MVTLayerProps = {
+/** All props supported by the MVTLayer */
+export type MVTLayerProps<DataT> = _MVTLayerProps & TileLayerProps<DataT>;
+
+/** Props added by the MVTLayer  */
+export type _MVTLayerProps = {
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
 
@@ -78,7 +82,7 @@ export type MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
   DataT,
-  Required<MVTLayerProps> & ExtraProps
+  Required<_MVTLayerProps> & ExtraProps
 > {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
@@ -270,7 +274,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     }
   }
 
-  getPickingInfo(params: PickingInfoProps): PickingInfo<DataT> {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo<DataT> {
     const info = super.getPickingInfo(params);
 
     // @ts-expect-error context if defined for instantiated layer
