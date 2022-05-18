@@ -103,7 +103,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
 
-    this.destroyMaterialParserTextures();
+    this.state.materialParser?.delete();
 
     return new GLTFMaterialParser(this.context.gl, {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
