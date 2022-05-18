@@ -33,6 +33,7 @@ export default class H3TileLayer extends CompositeLayer {
       new TileLayer(this.props, {
         id: 'h3-tile-layer',
         data,
+        getHexagon: d => d.id,
         TilesetClass: H3Tileset2D,
         renderSubLayers
       })

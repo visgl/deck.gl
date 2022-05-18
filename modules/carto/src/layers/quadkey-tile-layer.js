@@ -30,6 +30,7 @@ export default class QuadkeyTileLayer extends CompositeLayer {
       new TileLayer(this.props, {
         id: 'quadkey-tile-layer',
         data,
+        getQuadkey: d => d.id,
         TilesetClass: QuadkeyTileset2D,
         renderSubLayers,
         maxZoom
