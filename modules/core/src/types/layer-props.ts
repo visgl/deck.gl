@@ -1,7 +1,7 @@
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 
-import type {NumericArray} from './types';
+import type {ConstructorOf, NumericArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
@@ -25,17 +25,21 @@ export type AccessorContext<T> = {
   target: number[];
 };
 
+/** Function that returns a value for each object. */
+export type AccessorFunction<In, Out> = (
+  /**
+   * The current element in the data stream.
+   *
+   * If `data` is an array or an iterable, the element of the current iteration is used.
+   * If `data` is a non-iterable object, this argument is always `null`.
+   * */
+  object: In,
+  /** Contextual information of the current element. */
+  objectInfo: AccessorContext<In>
+) => Out;
+
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
-export type Accessor<In, Out> =
-  | Out
-  | ((
-      /** The current element in the data stream.
-       * If `data` is an array or an iterable, the element of the current iteration is used.
-       * If `data` is a non-iterable object, this argument is always `null`. */
-      object: In,
-      /** Contextual information of the current element. */
-      objectInfo: AccessorContext<In>
-    ) => Out);
+export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
@@ -245,7 +249,7 @@ export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
   /** (Experimental) override sub layer props. Only works on a composite layer. */
   _subLayerProps?: {
     [subLayerId: string]: {
-      type?: typeof Layer;
+      type?: ConstructorOf<Layer>;
       [propName: string]: any;
     };
   } | null;
