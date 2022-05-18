@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-alpha.3] - May 18 2022
+
+- CARTO: fetchMap stroke opacity correctly applied (#6911)
+- CARTO: Support H3TileLayer in CartoLayer (#6915)
+- CARTO: Support QuadkeyTileLayer in CartoLayer (#6913)
+- [ts] QuadkeyLayer and GeoCellLayer translated to typescript. (#6822)
+- Base Layer type signature (#6847)
+- [google-maps] More robust offset calculation (#6903)
+- CARTO: fix getColorWeight and apply transparent color to null values when using a ramp (#6905)
+
 #### deck.gl [8.8.0-alpha.2] - Feb 24 2022
 
 - Fix crash in getURLFromTemplate (#6898)
