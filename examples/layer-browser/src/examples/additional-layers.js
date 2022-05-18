@@ -51,7 +51,7 @@ const QuadkeyLayerExample = {
     opacity: 0.6,
     getQuadkey: f => f.quadkey,
     getFillColor: f => [f.value * 128, (1 - f.value) * 255, (1 - f.value) * 255, 180],
-    getElevation: f => 100 * f.value,
+    getElevation: f => Math.random() * 1000,
     pickable: true
   }
 };

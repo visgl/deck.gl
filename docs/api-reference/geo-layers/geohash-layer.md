@@ -40,7 +40,7 @@ function App({data, viewState}) {
     filled: true,
     extruded: true,
     elevationScale: 1000,
-    getQuadkey: d => d.geohash,
+    getGeohash: d => d.geohash,
     getFillColor: d => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
     getElevation: d => d.value
   });

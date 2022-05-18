@@ -17,7 +17,7 @@ export default [
         opacity: 0.8,
         filled: true,
         stroked: false,
-        getQuadkey: f => f.quadkey,
+        getGeohash: f => f.geohash,
         getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
         pickable: true
       })
@@ -42,7 +42,7 @@ export default [
         extruded: true,
         elevationScale: 100,
         getElevation: f => 100 * f.value,
-        getQuadkey: f => f.quadkey,
+        getGeohash: f => f.geohash,
         getFillColor: f => [f.value * 255, (1 - f.value) * 128, (1 - f.value) * 255],
         pickable: true
       })
