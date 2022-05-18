@@ -45,7 +45,7 @@ export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & Composi
 /**
  * Properties added by `PolygonLayer`.
  */
-export type _PolygonLayerProps<DataT = any> = {
+type _PolygonLayerProps<DataT = any> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
