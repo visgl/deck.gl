@@ -29,8 +29,7 @@ export default class H3TileLayer extends CompositeLayer {
 
   renderLayers() {
     const {data, tileJSON} = this.state;
-    const {maxresolution} = tileJSON;
-    const maxZoom = maxresolution - this.props.aggregationResLevel;
+    const maxZoom = parseInt(tileJSON.maxresolution);
     return [
       new TileLayer(this.props, {
         id: 'h3-tile-layer',
