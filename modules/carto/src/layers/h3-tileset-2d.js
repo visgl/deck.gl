@@ -1,7 +1,15 @@
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {polyfill, getRes0Indexes, h3GetResolution, h3ToGeoBoundary, h3ToParent} from 'h3-js';
+import {
+  polyfill,
+  getRes0Indexes,
+  geoToH3,
+  h3GetResolution,
+  h3ToGeoBoundary,
+  h3ToParent,
+  kRing
+} from 'h3-js';
 
-export function getHexagonsInBoundingBox({west, north, east, south}, resolution) {
+function getHexagonsInBoundingBox({west, north, east, south}, resolution) {
   if (resolution === 0) {
     return getRes0Indexes();
   }
@@ -15,7 +23,7 @@ export function getHexagonsInBoundingBox({west, north, east, south}, resolution)
 
   // `polyfill()` fills based on hexagon center, which means tiles vanish
   // prematurely. Get more accurate coverage by oversampling
-  const oversample = 1;
+  const oversample = 2;
   const h3Indices = polyfill(
     [
       [
@@ -33,7 +41,7 @@ export function getHexagonsInBoundingBox({west, north, east, south}, resolution)
   return oversample ? [...new Set(h3Indices.map(i => h3ToParent(i, resolution)))] : h3Indices;
 }
 
-export function tileToBoundingBox(index) {
+function tileToBoundingBox(index) {
   const coordinates = h3ToGeoBoundary(index);
   const latitudes = coordinates.map(c => c[0]);
   const longitudes = coordinates.map(c => c[1]);
@@ -44,22 +52,40 @@ export function tileToBoundingBox(index) {
   return {west, south, east, north};
 }
 
+// Resolution conversion function. Takes a WebMercatorViewport and returns
+// a H3 resolution such that the screen space size of the hexagons is
+// similar
+// Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
+const BIAS = 2;
+function getHexagonResolution(viewport) {
+  const hexagonScaleFactor = (2 / 3) * viewport.zoom;
+  const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
+
+  // Clip and bias
+  return Math.max(0, Math.floor(hexagonScaleFactor + latitudeScaleFactor - BIAS));
+}
+
 export default class H3Tileset2D extends Tileset2D {
   getTileIndices({viewport, minZoom, maxZoom}) {
     const [east, south, west, north] = viewport.getBounds();
 
-    // TODO ignores extent
-    let z = viewport.zoom;
+    let z = getHexagonResolution(viewport);
+    let indices = [];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
       z = minZoom;
     }
     if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
       z = maxZoom;
+
+      // Once we are at max zoom, getHexagonsInBoundingBox doesn't work, simply
+      // get a ring centered on the hexagon in the viewport center
+      const center = geoToH3(viewport.latitude, viewport.longitude, maxZoom);
+      indices = kRing(center, 1);
+    } else {
+      indices = getHexagonsInBoundingBox({west, north, east, south}, z);
     }
 
-    // Heuristic to get h3 resolution
-    const resolution = Math.max(0, Math.floor((2 * z) / 3) - 2);
-    return getHexagonsInBoundingBox({west, north, east, south}, resolution).map(i => ({i}));
+    return indices.map(i => ({i}));
   }
 
   getTileId({i}) {

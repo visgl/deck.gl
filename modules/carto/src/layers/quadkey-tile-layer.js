@@ -28,8 +28,7 @@ export default class QuadkeyTileLayer extends CompositeLayer {
 
   renderLayers() {
     const {data, tileJSON} = this.state;
-    const {maxresolution} = tileJSON;
-    const maxZoom = maxresolution - this.props.aggregationResLevel;
+    const maxZoom = parseInt(tileJSON.maxresolution);
     return [
       new TileLayer(this.props, {
         id: 'quadkey-tile-layer',
