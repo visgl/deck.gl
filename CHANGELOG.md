@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.10] - May 19 2022
+
+- [google-maps] More robust offset calculation (#6903)
+- [mapbox] restrict longitude returned by map.getCenter() (#6929)
+
 #### deck.gl [8.7.9] - May 11 2022
 
 - CARTO: fetchMap support for custom breaks (#6819)
