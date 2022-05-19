@@ -57,7 +57,13 @@ const defaultProps = {
   geoColumn: null,
 
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
-  columns: {type: 'array', value: null}
+  columns: {type: 'array', value: null},
+
+  // (String, optional): aggregration SQL expression. Only used for spatial index datasets
+  aggregationExp: null,
+
+  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
+  aggregationResLevel: null
 };
 
 export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
