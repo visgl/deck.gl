@@ -1,6 +1,7 @@
 import {CompositeLayer} from '@deck.gl/core';
-import {H3HexagonLayer, TileLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D from './h3-tileset-2d';
+import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
   const {data} = props;
@@ -35,7 +36,7 @@ export default class H3TileLayer extends CompositeLayer {
     const {data, tileJSON} = this.state;
     const maxZoom = parseInt(tileJSON.maxresolution);
     return [
-      new TileLayer(this.props, {
+      new SpatialIndexTileLayer(this.props, {
         id: 'h3-tile-layer',
         data,
         getHexagon: d => d.id,
