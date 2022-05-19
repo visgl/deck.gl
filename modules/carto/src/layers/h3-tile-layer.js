@@ -13,6 +13,10 @@ const renderSubLayers = props => {
   });
 };
 
+const defaultProps = {
+  aggregationResLevel: 4
+};
+
 export default class H3TileLayer extends CompositeLayer {
   initializeState() {
     this.setState({data: null, tileJSON: null});
@@ -44,3 +48,4 @@ export default class H3TileLayer extends CompositeLayer {
 }
 
 H3TileLayer.layerName = 'H3TileLayer';
+H3TileLayer.defaultProps = defaultProps;
