@@ -8,6 +8,10 @@ const renderSubLayers = props => {
   return new QuadkeyLayer(props);
 };
 
+const defaultProps = {
+  aggregationResLevel: 6
+};
+
 export default class QuadkeyTileLayer extends CompositeLayer {
   initializeState() {
     this.setState({data: null, tileJSON: null});
@@ -40,3 +44,4 @@ export default class QuadkeyTileLayer extends CompositeLayer {
 }
 
 QuadkeyTileLayer.layerName = 'QuadkeyTileLayer';
+QuadkeyTileLayer.defaultProps = defaultProps;
