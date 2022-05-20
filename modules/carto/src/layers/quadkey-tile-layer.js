@@ -1,6 +1,7 @@
 import {CompositeLayer} from '@deck.gl/core';
-import {QuadkeyLayer, TileLayer} from '@deck.gl/geo-layers';
+import {QuadkeyLayer} from '@deck.gl/geo-layers';
 import QuadkeyTileset2D from './quadkey-tileset-2d';
+import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
   const {data} = props;
@@ -30,7 +31,7 @@ export default class QuadkeyTileLayer extends CompositeLayer {
     const {data, tileJSON} = this.state;
     const maxZoom = parseInt(tileJSON.maxresolution);
     return [
-      new TileLayer(this.props, {
+      new SpatialIndexTileLayer(this.props, {
         id: 'quadkey-tile-layer',
         data,
         getQuadkey: d => d.id,
