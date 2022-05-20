@@ -18,13 +18,24 @@ export type _GeoJsonLayerProps<DataT = any> = {
    */
   pointType?: string;
 
+  /** Type of line caps.
+   * If `true`, draw round caps. Otherwise draw square caps.
+   * @default false
+   */
+  lineCapRounded?: boolean;
+
+  /**
+   * If `true`, extrude the line in screen space (width always faces the camera).
+   * If `false`, the width always faces up.
+   *
+   * @default false
+   */
+  lineBillboard?: boolean;
+
   /** @deprecated */
   getRadius?: Accessor<DataT, number>;
 } & FillProps<DataT> &
   StrokeProps<DataT> &
-  // TODO: lineCapRounded
-  // TODO: lineBillboard
-
   Polygon3DProps<DataT> &
   _GeoJsonLayerPointCircleProps<DataT> &
   _GeojsonLayerIconPointProps<DataT> &
@@ -41,6 +52,7 @@ type _GeoJsonLayerPointCircleProps<DataT = any> = {
   pointBillboard?: boolean;
 };
 
+/** Properties forwarded to `IconLayer` if `pointType` is `'icon'` */
 type _GeojsonLayerIconPointProps<DataT = any> = {
   iconAtlas?: any;
   iconMapping?: any;
@@ -57,6 +69,7 @@ type _GeojsonLayerIconPointProps<DataT = any> = {
   iconAlphaCutoff?: number;
 };
 
+/** Properties forwarded to `TextLayer` if `pointType` is `'text'` */
 type _GeojsonLayerTextPointProps<DataT = any> = {
   getText?: Accessor<DataT, any>;
   getTextColor?: Accessor<DataT, Color>;

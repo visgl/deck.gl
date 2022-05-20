@@ -19,15 +19,13 @@
 // THE SOFTWARE.
 
 import {
-  Accessor,
   AccessorFunction,
-  Color,
   CompositeLayer,
+  CompositeLayerProps,
   createIterable,
   Layer,
   LayersList,
   log,
-  Unit,
   UpdateParameters
 } from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
@@ -36,22 +34,17 @@ import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
 import {FillProps, Polygon3DProps, StrokeProps} from '../types';
 
-// TODO: not sure where this type belongs to
-export type MaterialProps = {
-  ambient: number;
-  diffuse: number;
-  shininess: number;
-  specularColor: [r: number, g: number, b: number];
-};
+/**
+ * All properties supported by `PolygonLayer`.
+ */
+export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
 
 /**
- * Properties for `PolygonLayer`.
+ * Properties added by `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = FillProps<DataT> &
+export type _PolygonLayerProps<DataT = any> = FillProps<DataT> &
   StrokeProps<DataT> &
   Polygon3DProps<DataT> & {
-    lineDashJustified?: boolean;
-
     /** Called on each object in the data stream to retrieve its corresponding polygon. */
     getPolygon?: AccessorFunction<DataT, any>;
 
@@ -72,6 +65,9 @@ export type PolygonLayerProps<DataT = any> = FillProps<DataT> &
      * @default 'CW'
      */
     _windingOrder?: 'CW' | 'CCW';
+
+    /** @deprecated */
+    lineDashJustified?: boolean;
   };
 
 const defaultLineColor = [0, 0, 0, 255];
@@ -108,7 +104,7 @@ const defaultProps = {
 };
 
 export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  Required<PolygonLayerProps<DataT>> & ExtraProps
+  Required<_PolygonLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
