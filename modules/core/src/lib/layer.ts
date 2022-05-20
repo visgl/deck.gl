@@ -23,6 +23,7 @@ import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
+import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug';
@@ -48,7 +49,10 @@ import type {Model} from '@luma.gl/engine';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
+import type {LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
+
+export type ResolvedLayerProps<PropsT> = StatefulComponentProps<PropsT & Required<LayerProps>>;
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -160,9 +164,14 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
-export default abstract class Layer<PropsT = any> extends Component<PropsT> {
-  static defaultProps: any = defaultProps;
+export default abstract class Layer<PropsT = any> extends Component<PropsT & Required<LayerProps>> {
   static layerName: string = 'Layer';
+  static defaultProps: any = defaultProps;
+
+  lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+  context: LayerContext | null = null; // Will reference layer manager's context, contains state shared by layers
+  state: Record<string, any> | null = null; // Will be set to the shared layer state object during layer matching
+  internalState: LayerState<PropsT> | null = null;
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -343,10 +352,10 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
     - Auto-deduction for ES6 containers that define a size member
     - Auto-deduction for Classic Arrays via the built-in length attribute
     - Auto-deduction via arrays */
-  getNumInstances(props: StatefulComponentProps<PropsT> = this.props): number {
+  getNumInstances(): number {
     // First Check if app has provided an explicit value
-    if (Number.isFinite(props.numInstances)) {
-      return props.numInstances as number;
+    if (Number.isFinite(this.props.numInstances)) {
+      return this.props.numInstances as number;
     }
 
     // Second check if the layer has set its own value
@@ -355,17 +364,17 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
     }
 
     // Use container library to get a count for any ES6 container or object
-    return count(props.data);
+    return count(this.props.data);
   }
 
   /** Buffer layout describes how many attribute values are packed for each data object
       The default (null) is one value each object.
       Some data formats (e.g. paths, polygons) have various length. Their buffer layout
       is in the form of [L0, L1, L2, ...] */
-  getStartIndices(props: StatefulComponentProps<PropsT> = this.props): NumericArray | null {
+  getStartIndices(): NumericArray | null {
     // First Check if startIndices is provided as an explicit value
-    if (props.startIndices) {
-      return props.startIndices;
+    if (this.props.startIndices) {
+      return this.props.startIndices;
     }
 
     // Second check if the layer has set its own value
@@ -604,7 +613,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   }
 
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
-  private _updateUniformTransition(): StatefulComponentProps<PropsT> {
+  private _updateUniformTransition(): ResolvedLayerProps<PropsT> {
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
@@ -821,7 +830,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffProps(this.props, this.internalState.getOldProps() as StatefulComponentProps<PropsT>);
+    this._diffProps(this.props, this.internalState.getOldProps() as ResolvedLayerProps<PropsT>);
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1024,10 +1033,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT> {
   /** Compares the layers props with old props from a matched older layer
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
-  private _diffProps(
-    newProps: StatefulComponentProps<PropsT>,
-    oldProps: StatefulComponentProps<PropsT>
-  ) {
+  private _diffProps(newProps: ResolvedLayerProps<PropsT>, oldProps: ResolvedLayerProps<PropsT>) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
