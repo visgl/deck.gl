@@ -13,12 +13,13 @@ export default class SpatialIndexTileLayer extends TileLayer {
     if (hoveredFeature) {
       newHoveredFeatureId = hoveredFeature.id;
     }
-    let {highlightColor} = this.props;
-    if (typeof highlightColor === 'function') {
-      highlightColor = highlightColor(info);
-    }
 
     if (hoveredFeatureId !== newHoveredFeatureId) {
+      let {highlightColor} = this.props;
+      if (typeof highlightColor === 'function') {
+        highlightColor = highlightColor(info);
+      }
+
       this.setState({
         highlightColor,
         hoveredFeatureId: newHoveredFeatureId
