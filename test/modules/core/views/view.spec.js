@@ -230,3 +230,19 @@ test('OrthographicView', t => {
 
   t.end();
 });
+
+test('OrthographicView#padding', t => {
+  const view = new OrthographicView({id: '2d-view', padding: {bottom: '50%', left: '100%'}});
+  const viewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      target: [0, 1, 0],
+      zoom: 4
+    }
+  });
+  const center = viewport.project([0, 1]);
+  t.ok(equals(center, [viewport.width, viewport.height / 4]), 'viewport center is offset');
+
+  t.end();
+});

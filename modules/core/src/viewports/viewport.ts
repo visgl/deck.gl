@@ -40,6 +40,13 @@ export type DistanceScales = {
   metersPerUnit: number[];
 };
 
+export type Padding = {
+  left?: number;
+  right?: number;
+  top?: number;
+  bottom?: number;
+};
+
 export type ViewportOptions = {
   /** Name of the viewport */
   id?: string;
@@ -59,6 +66,8 @@ export type ViewportOptions = {
   position?: number[];
   /** Zoom level */
   zoom?: number;
+  /** Padding around the viewport, in pixels. */
+  padding?: Padding | null;
   distanceScales?: DistanceScales;
   /** Model matrix of viewport center */
   modelMatrix?: number[] | null;
@@ -92,11 +101,38 @@ const DEFAULT_DISTANCE_SCALES: DistanceScales = {
 };
 
 // / Helpers
-
-function createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
-  return orthographic
+function createProjectionMatrix({
+  width,
+  height,
+  orthographic,
+  fovyRadians,
+  focalDistance,
+  padding,
+  near,
+  far
+}: {
+  width: number;
+  height: number;
+  orthographic: boolean;
+  fovyRadians: number;
+  focalDistance: number;
+  padding: Padding | null;
+  near: number;
+  far: number;
+}) {
+  const aspect = width / height;
+  const matrix = orthographic
     ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
     : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
+  if (padding) {
+    const {left = 0, right = 0, top = 0, bottom = 0} = padding;
+    const offsetX = clamp((left + width - right) / 2, 0, width) - width / 2;
+    const offsetY = clamp((top + height - bottom) / 2, 0, height) - height / 2;
+    // pixels to clip space
+    matrix[8] -= (offsetX * 2) / width;
+    matrix[9] += (offsetY * 2) / height;
+  }
+  return matrix;
 }
 
 /**
@@ -438,6 +474,7 @@ export default class Viewport {
       fovy = 75,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
+      padding = null, // Center offset in pixels
       focalDistance = 1
     } = opts;
 
@@ -452,10 +489,12 @@ export default class Viewport {
     this.projectionMatrix =
       projectionMatrix ||
       createProjectionMatrix({
+        width: this.width,
+        height: this.height,
         orthographic,
         fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-        aspect: this.width / this.height,
         focalDistance,
+        padding,
         near,
         far
       });

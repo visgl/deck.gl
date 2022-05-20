@@ -25,7 +25,44 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
+import type {
+  LayerProps,
+  UpdateParameters,
+  LayerContext,
+  Accessor,
+  Unit,
+  Position,
+  Color
+} from '@deck.gl/core';
+
 const DEFAULT_COLOR = [0, 0, 0, 255];
+
+/** All props supported by the ScatterplotLayer */
+export type ScatterplotLayerProps<DataT> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
+
+/** Props added by the ScatterplotLayer */
+type _ScatterplotLayerProps<DataT> = {
+  radiusUnits?: Unit;
+  radiusScale?: number;
+  radiusMinPixels?: number;
+  radiusMaxPixels?: number;
+
+  lineWidthUnits?: Unit;
+  lineWidthScale?: number;
+  lineWidthMinPixels?: number;
+  lineWidthMaxPixels?: number;
+
+  stroked?: boolean;
+  filled?: boolean;
+  billboard?: boolean;
+  antialiasing?: boolean;
+
+  getPosition?: Accessor<DataT, Position>;
+  getRadius?: Accessor<DataT, number>;
+  getFillColor?: Accessor<DataT, Color>;
+  getLineColor?: Accessor<DataT, Color>;
+  getLineWidth?: Accessor<DataT, number>;
+};
 
 const defaultProps = {
   radiusUnits: 'meters',
@@ -55,12 +92,18 @@ const defaultProps = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-export default class ScatterplotLayer extends Layer {
+export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
+> {
+  static defaultProps: any = defaultProps;
+  static layerName: string = 'ScatterplotLayer';
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
+    // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
     this.getAttributeManager().addInstanced({
       instancePositions: {
         size: 3,
@@ -76,6 +119,7 @@ export default class ScatterplotLayer extends Layer {
         defaultValue: 1
       },
       instanceFillColors: {
+        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
         size: this.props.colorFormat.length,
         transition: true,
         normalized: true,
@@ -84,6 +128,7 @@ export default class ScatterplotLayer extends Layer {
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
+        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
         size: this.props.colorFormat.length,
         transition: true,
         normalized: true,
@@ -100,12 +145,16 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
-    if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
+  updateState(params: UpdateParameters<ScatterplotLayer>) {
+    super.updateState(params);
+
+    if (params.changeFlags.extensionsChanged) {
+      const {gl} = this.context as LayerContext;
+      // @ts-ignore (TS2531) state is always defined
       this.state.model?.delete();
+      // @ts-ignore (TS2531) state is always defined
       this.state.model = this._getModel(gl);
+      // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
       this.getAttributeManager().invalidateAll();
     }
   }
@@ -126,6 +175,7 @@ export default class ScatterplotLayer extends Layer {
       lineWidthMaxPixels
     } = this.props;
 
+    // @ts-ignore (TS2531) state is always defined
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
@@ -163,6 +213,3 @@ export default class ScatterplotLayer extends Layer {
     });
   }
 }
-
-ScatterplotLayer.layerName = 'ScatterplotLayer';
-ScatterplotLayer.defaultProps = defaultProps;

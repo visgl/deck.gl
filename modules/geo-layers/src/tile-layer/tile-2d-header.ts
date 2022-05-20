@@ -1,11 +1,38 @@
 /* eslint-env browser */
-import {log} from '@deck.gl/core';
+import {Layer, log} from '@deck.gl/core';
+import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 
+export type TileLoadDataProps = {
+  requestScheduler: RequestScheduler;
+  getData: (props: TileLoadProps) => Promise<any>;
+  onLoad: (tile: Tile2DHeader) => void;
+  onError: (error: any, tile: Tile2DHeader) => void;
+};
 export default class Tile2DHeader {
-  constructor({x, y, z}) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  index: TileIndex;
+  isVisible: boolean;
+  isSelected: boolean;
+  parent: Tile2DHeader | null;
+  children: Tile2DHeader[] | null;
+  content: any;
+  state?: number;
+  layers?: Layer[] | null;
+
+  id!: string; // assigned _always_ with result of `getTileId`
+  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
+  zoom!: number; // assigned _always_ with result of `getTileZoom`
+  userData?: Record<string, any>; // _may be_ assigned with result of `getTileMetadata`
+
+  private _abortController: AbortController | null;
+  private _loader: Promise<void> | undefined;
+  private _loaderId: number;
+  private _isLoaded: boolean;
+  private _isCancelled: boolean;
+  private _needsReload: boolean;
+
+  constructor(index: TileIndex) {
+    this.index = index;
     this.isVisible = false;
     this.isSelected = false;
     this.parent = null;
@@ -13,6 +40,8 @@ export default class Tile2DHeader {
 
     this.content = null;
 
+    this._loader = undefined;
+    this._abortController = null;
     this._loaderId = 0;
     this._isLoaded = false;
     this._isCancelled = false;
@@ -20,7 +49,7 @@ export default class Tile2DHeader {
   }
 
   get data() {
-    return this.isLoading ? this._loader.then(() => this.data) : this.content;
+    return this.isLoading && this._loader ? this._loader.then(() => this.data) : this.content;
   }
 
   get isLoaded() {
@@ -44,13 +73,19 @@ export default class Tile2DHeader {
   }
 
   /* eslint-disable max-statements */
-  async _loadData({getData, requestScheduler, onLoad, onError}) {
-    const {x, y, z, bbox} = this;
+  private async _loadData({
+    getData,
+    requestScheduler,
+    onLoad,
+    onError
+  }: TileLoadDataProps): Promise<void> {
+    const {index, id, bbox, userData, zoom} = this;
     const loaderId = this._loaderId;
 
-    this._abortController = new AbortController(); // eslint-disable-line no-undef
+    this._abortController = new AbortController();
     const {signal} = this._abortController;
 
+    // @ts-expect-error (2345) Argument of type '(tile: any) => 1 | -1' is not assignable ...
     const requestToken = await requestScheduler.scheduleRequest(this, tile => {
       return tile.isSelected ? 1 : -1;
     });
@@ -68,7 +103,7 @@ export default class Tile2DHeader {
     let tileData = null;
     let error;
     try {
-      tileData = await getData({x, y, z, bbox, signal});
+      tileData = await getData({index, id, bbox, userData, zoom, signal});
     } catch (err) {
       error = err || true;
     } finally {
@@ -99,9 +134,8 @@ export default class Tile2DHeader {
       onLoad(this);
     }
   }
-  /* eslint-enable max-statements */
 
-  loadData(opts) {
+  loadData(opts: TileLoadDataProps): Promise<void> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
@@ -110,7 +144,7 @@ export default class Tile2DHeader {
     return this._loader;
   }
 
-  setNeedsReload() {
+  setNeedsReload(): void {
     if (this.isLoading) {
       this.abort();
       this._loader = undefined;
@@ -118,12 +152,12 @@ export default class Tile2DHeader {
     this._needsReload = true;
   }
 
-  abort() {
+  abort(): void {
     if (this.isLoaded) {
       return;
     }
 
     this._isCancelled = true;
-    this._abortController.abort();
+    this._abortController?.abort();
   }
 }

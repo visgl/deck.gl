@@ -508,26 +508,31 @@ test('getURLFromTemplate', t => {
     'https://server.com/ep2/{x}/{y}.png'
   ];
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE, {x: 1, y: 2, z: 0}),
+    getURLFromTemplate(TEST_TEMPLATE, {index: {x: 1, y: 2, z: 0}}),
     'https://server.com/0/1/2.png',
     'single string template'
   );
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE2, {x: 1, y: 2, z: 0}),
+    getURLFromTemplate(TEST_TEMPLATE2, {index: {x: 1, y: 2, z: 0}}),
     'https://server.com/0/1/2/1-2-0.png',
     'single string template with multiple occurance'
   );
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {x: 1, y: 2, z: 0}),
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 1, y: 2, z: 0}, id: '1-2-0'}),
     'https://server.com/ep2/1/2.png',
     'array of templates'
   );
   t.is(
-    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {x: 2, y: 2, z: 0}),
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 2, y: 2, z: 0}, id: '2-2-0'}),
     'https://server.com/ep1/2/2.png',
     'array of templates'
   );
-  t.is(getURLFromTemplate(null, {x: 1, y: 2, z: 0}), null, 'invalid template');
-  t.is(getURLFromTemplate([], {x: 1, y: 2, z: 0}), null, 'empty array');
+  t.is(
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 17, y: 11, z: 5}, id: '17-11-5'}),
+    'https://server.com/ep2/17/11.png',
+    'array of templates'
+  );
+  t.is(getURLFromTemplate(null, {index: {x: 1, y: 2, z: 0}}), null, 'invalid template');
+  t.is(getURLFromTemplate([], {index: {x: 1, y: 2, z: 0}}), null, 'empty array');
   t.end();
 });

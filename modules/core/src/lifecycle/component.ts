@@ -10,21 +10,19 @@ import {createProps} from './create-props';
 
 import type {LayerContext} from '../lib/layer-manager';
 import type LayerState from '../lib/layer-state';
+import type {LayerProps} from '../types/layer-props';
 
 let counter = 0;
 
-export type ComponentProps = {
-  id: string;
-};
+export type StatefulComponentProps<PropsT> = PropsT &
+  Required<LayerProps> & {
+    [COMPONENT_SYMBOL]: Component<PropsT>;
+    [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
+    [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
+    [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
+  };
 
-export type StatefulComponentProps<PropsT extends ComponentProps> = PropsT & {
-  [COMPONENT_SYMBOL]: Component<PropsT>;
-  [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
-  [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
-  [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
-};
-
-export default class Component<PropsT extends ComponentProps> {
+export default class Component<PropsT = any> {
   static componentName: string = 'Component';
   static defaultProps: Readonly<{}> = {};
 
@@ -32,7 +30,7 @@ export default class Component<PropsT extends ComponentProps> {
   props: StatefulComponentProps<PropsT>;
   count: number;
   lifecycle: Lifecycle;
-  parent: Component<any> | null;
+  parent: Component | null;
   context: LayerContext | null;
   state: Record<string, any> | null;
   internalState: LayerState<PropsT> | null;
@@ -56,9 +54,9 @@ export default class Component<PropsT extends ComponentProps> {
     Object.seal(this);
   }
 
-  get root() {
+  get root(): Component {
     // eslint-disable-next-line
-    let component: Component<any> = this;
+    let component: Component = this;
     while (component.parent) {
       component = component.parent;
     }
@@ -66,7 +64,7 @@ export default class Component<PropsT extends ComponentProps> {
   }
 
   // clone this layer with modified props
-  clone(newProps) {
+  clone(newProps: Partial<PropsT>) {
     const {props} = this;
 
     // Async props cannot be copied with Object.assign, copy them separately

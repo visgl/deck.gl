@@ -112,9 +112,8 @@ If the value is an array: multiple URL templates. Each endpoint must return the 
 
 If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
 
-- `x` (Number) - x index of the tile
-- `y` (Number) - y index of the tile
-- `z` (Number) - z index of the tile
+- `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
+- `id` (String) - unique string representation of index.
 - `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
@@ -135,6 +134,11 @@ if (signal.aborted) {
 // Expensive computation on returned data
 ```
 
+##### `TilesetClass` (class, optional)
+
+- Default: `Tileset2D`
+
+Tileset class that `TileLayer` uses for tile indexing. Extend [Tileset2D](#tileset2d) to implement a custom indexing scheme.
 
 ##### `tileSize` (Number, optional)
 
@@ -228,7 +232,7 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 * `id`: An unique id for this sublayer
 * `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
-* `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile.
+* `tile`: An object containing `index`, `bbox`, and `id` of the tile.
 
 - Default: `props => new GeoJsonLayer(props)`
 
@@ -295,9 +299,8 @@ Class to hold the reading of a single tile
 
 Properties:
 
-- `x` (Number) - x index of the tile
-- `y` (Number) - y index of the tile
-- `z` (Number) - z index of the tile
+- `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
+- `id` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
 - `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
 - `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
 - `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
@@ -307,8 +310,50 @@ Properties:
 - `isVisible` (Boolean) - if the tile should be rendered
 - `isLoaded` (Boolean) - if the content of the tile has been loaded
 
+## Tileset2D
+
+Class that manages loading and purging of tile data. This class caches recently visited tiles and only creates new tiles if they are present.
+
+To implement a custom indexing scheme, extend `Tileset2D` and implement the following interface:
+
+- `getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse})` - returns an array of indices in the given viewport. The indices should have the shape of Objects, like: `{q: '0123'}` to allow referencing in the URL template supplied to the `data` prop.
+- `getTileId(index)` - returns unique string key for a tile index.
+- `getParentIndex(index)` - returns index of the parent tile.
+- `getTileZoom(index)` - returns a zoom level for a tile index.
+- `getTileMetadata(index) - returns additional metadata to add to tile (optional).
+
+For example, to index using [quadkeys](https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system#tile-coordinates-and-quadkeys):
+
+```js
+import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
+class QuadkeyTileset2D extends Tileset2D {
+  getTileIndices(opts) {
+    // Quadkeys and OSM tiles share the layout, leverage existing algorithm
+    // Data format: [{quadkey: '0120'}, {quadkey: '0121'}, {quadkey: '0120'},...]
+    return super.getTileIndices(opts).map(tileToQuadkey);
+  }
+
+  getTileId({quadkey}) {
+    return quadkey;
+  }
+
+  getTileZoom({quadkey}) {
+    return quadkey.length;
+  }
+
+  getParentIndex({quadkey}) {
+    const quadkey = quadkey.slice(0, -1);
+    return {quadkey};
+  }
+}
+
+const quadkeyTileLayer = new TileLayer({
+  TilesetClass: QuadkeyTileset2D,
+  data: 'quadkey/{quadkey}.json',
+  ...
+});
+```
+
 ## Source
 
 [modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
-
-

@@ -5,8 +5,8 @@
 | `@@type` | Interpret a string as a JavaScript class or React component, resolving in the JSONConfiguration. | `"@@type": "ScatterplotLayer"`
 | `@@function` | Interpret a string as a JavaScript function, resolving in the JSONConfiguration. | `"@@function": "calculateRadius"`
 | `@@=` | Interpret the rest of the string as a function, parsing unquoted character strings as identifiers | `"@@=[lng, lat]"`
-| `@@#` | Interpret the rest of the string as a constant, resolving in the JSON configuration | `"@@#GL.ONE"`
-
+| `@@#` | Interpret the rest of the string as a constant, resolving in the JSON configuration | `"@@#MapController"`
+| `@@#<enum-name>.<enum-value>` | Interpret the rest of the string as a enumeration, resolving in the JSON configuration | `"@@#GL.ONE"`
 
 The @deck.g/json framework inspects the "raw" parsed JSON data structure before supplying it to deck.gl as props. This conversion process replaces certain objects in the structure with instances of objects.
 
@@ -112,6 +112,55 @@ Whenever the `JSONConverter` component finds the `@@function` field, it looks in
 like that in the configuration object above.
 
 
+### Constants and using the `@@#` prefix
+
+A map of constants that should be made available to the JSON string resolver. This is also helpful to evaluate a prop that does not need to be instantiated. The `@@#` prefix on an constant triggers this lookup.
+
+For example, when this configuration is passed to `JSONConverter`:
+
+```js
+import {MapController} from '@deck.gl/core';
+
+const configuration = {
+  ...
+  constants: {
+    MapController
+  }
+};
+```
+
+and used to resolve in this JSON object:
+
+```json
+{
+  "controller": "@@#MapController",
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": ...,
+      ...
+    }
+  ]
+}
+```
+
+will replace the constants' value with the value provided in configuration declaration:
+
+```js
+{
+  controller: MapController, // MapController class from '@deck.gl/core' 
+  layers: [
+    new ScatterplotLayer({
+      data: ...,
+      ...
+    })
+  ]
+}
+```
+
+Whenever the `JSONConverter` component finds a string prefixed with `@@#`, it looks into a "constants catalog" first and then the "enumerations catalog".
+
+
 ### Enumerations and using the `@@#` prefix
 
 Often deck.gl visualizations require access to particular enumerations. For this reason, a configuration
@@ -139,7 +188,7 @@ and used to resolve this JSON object–
 {
   "layers": [
     {
-      "type": "ScatterplotLayer",
+      "@@type": "ScatterplotLayer",
       "data": ...,
       "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
       "parameters": {
@@ -167,6 +216,7 @@ the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumeration
   ]
 }
 ```
+
 
 ## Functions and using the `@@=` prefix
 
@@ -209,3 +259,4 @@ datum => [datum.lng, datum.lat, altitudeMeters / 1000]
 datum => [datum.color / 255, 200, 20]
 datum => datum.value > 10 ? [255, 0, 0] : [0, 255, 200]
 ```
+

@@ -87,6 +87,7 @@ export {default as FlyToInterpolator} from './transitions/fly-to-interpolator';
 
 // Layer utilities
 export {default as log} from './utils/log';
+export {default as assert} from './utils/assert';
 export {createIterable} from './utils/iterable-utils';
 export {fp64LowPart} from './utils/math-utils';
 export {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
@@ -99,9 +100,22 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
-
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';
 export type {OrthographicViewState} from './views/orthographic-view';
 export type {GlobeViewState} from './views/globe-view';
+export type {ChangeFlags} from './lib/layer-state';
+export type {LayersList} from './lib/layer-manager';
+export type {LayerContext} from './lib/layer-manager';
+export type {UpdateParameters} from './lib/layer';
+export type {
+  LayerProps,
+  CompositeLayerProps,
+  Accessor,
+  AccessorFunction,
+  LayerData,
+  Unit,
+  Position,
+  Color
+} from './types/layer-props';
