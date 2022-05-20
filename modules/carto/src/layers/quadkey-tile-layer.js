@@ -32,7 +32,7 @@ export default class QuadkeyTileLayer extends CompositeLayer {
     const maxZoom = parseInt(tileJSON.maxresolution);
     return [
       new SpatialIndexTileLayer(this.props, {
-        id: `quadkey-tile-layer_${this.props.id}`,
+        id: `quadkey-tile-layer-${this.props.id}`,
         data,
         getQuadkey: d => d.id,
         TilesetClass: QuadkeyTileset2D,
