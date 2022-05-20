@@ -1,7 +1,6 @@
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
-import type {ResolvedLayerProps} from './layer';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
@@ -43,7 +42,7 @@ export default class LayerState<PropsT> extends ComponentState<PropsT & Required
 
   uniformTransitions!: UniformTransitionManager;
   /** Populated during uniform transition to replace user-supplied values */
-  propsInTransition?: ResolvedLayerProps<PropsT>;
+  propsInTransition?: Layer<PropsT>['props'];
 
   constructor({
     attributeManager,

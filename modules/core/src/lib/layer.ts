@@ -43,7 +43,6 @@ import {worldToPixels} from '@math.gl/web-mercator';
 import {load} from '@loaders.gl/core';
 
 import type {CoordinateSystem} from './constants';
-import type {StatefulComponentProps} from '../lifecycle/component';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo} from './picking/pick-info';
@@ -51,8 +50,6 @@ import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
-
-export type ResolvedLayerProps<PropsT> = StatefulComponentProps<PropsT & Required<LayerProps>>;
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -165,13 +162,13 @@ export type UpdateParameters<LayerT extends Layer> = {
 };
 
 export default abstract class Layer<PropsT = any> extends Component<PropsT & Required<LayerProps>> {
-  static layerName: string = 'Layer';
   static defaultProps: any = defaultProps;
+  static layerName: string = 'Layer';
 
-  lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
   context: LayerContext | null = null; // Will reference layer manager's context, contains state shared by layers
-  state: Record<string, any> | null = null; // Will be set to the shared layer state object during layer matching
   internalState: LayerState<PropsT> | null = null;
+  lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+  state: Record<string, any> | null = null; // Will be set to the shared layer state object during layer matching
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -407,13 +404,13 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
-  shouldUpdateState(params: UpdateParameters<Layer>): boolean {
+  shouldUpdateState(params: UpdateParameters<Layer<PropsT>>): boolean {
     return params.changeFlags.propsOrDataChanged;
   }
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState(params: UpdateParameters<Layer>): void {
+  updateState(params: UpdateParameters<Layer<PropsT>>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {
@@ -613,7 +610,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   }
 
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
-  private _updateUniformTransition(): ResolvedLayerProps<PropsT> {
+  private _updateUniformTransition(): Layer<PropsT>['props'] {
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
@@ -830,7 +827,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffProps(this.props, this.internalState.getOldProps() as ResolvedLayerProps<PropsT>);
+    this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1033,7 +1030,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   /** Compares the layers props with old props from a matched older layer
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
-  private _diffProps(newProps: ResolvedLayerProps<PropsT>, oldProps: ResolvedLayerProps<PropsT>) {
+  private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -1106,7 +1103,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   // Private methods
 
   /** Called after updateState to perform common tasks */
-  protected _postUpdate(updateParams: UpdateParameters<Layer>, forceUpdate: boolean) {
+  protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
     this.setNeedsRedraw();
@@ -1145,7 +1142,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     }
   }
 
-  private _getUpdateParams(): UpdateParameters<Layer> {
+  private _getUpdateParams(): UpdateParameters<Layer<PropsT>> {
     return {
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
