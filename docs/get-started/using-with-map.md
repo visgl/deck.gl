@@ -53,7 +53,7 @@ If you are using mapbox-gl without React, check out [Mapbox GL JS API](https://d
 
 If you are using react-map-gl, there are several ways to provide a token to your app:
 
-* Set the `MapboxAccessToken` environment variable. You may need to add additional set up to the bundler ([example](https://webpack.js.org/plugins/environment-plugin/)) so that `process.env.MapboxAccessToekn` is accessible at runtime.
+* Set the `MapboxAccessToken` environment variable. You may need to add additional set up to the bundler ([example](https://webpack.js.org/plugins/environment-plugin/)) so that `process.env.MapboxAccessToken` is accessible at runtime.
 * Provide it in the URL, e.g `?access_token=TOKEN`
 * Pass it as a prop to the ReactMapGL instance `<ReactMapGL mapboxApiAccessToken={TOKEN} />`
 
