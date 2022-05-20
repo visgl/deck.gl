@@ -26,7 +26,7 @@ import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
 
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 
 const WORLD_SIZE = 512;
 
@@ -51,7 +51,9 @@ export type TileJson = {
 };
 
 /** All props supported by the MVTLayer */
-export type MVTLayerProps<DataT> = _MVTLayerProps & TileLayerProps<DataT>;
+export type MVTLayerProps<DataT extends Feature = Feature> = _MVTLayerProps &
+  GeoJsonLayerProps<DataT> &
+  TileLayerProps<DataT>;
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
@@ -80,6 +82,7 @@ export type _MVTLayerProps = {
 };
 
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
+
 export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
   DataT,
   Required<_MVTLayerProps> & ExtraProps
@@ -103,7 +106,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     return this.state && this.state.data && this.state.tileset && super.isLoaded;
   }
 
-  updateState({props, oldProps, context, changeFlags}: UpdateParameters<MVTLayer>) {
+  updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
     if (changeFlags.dataChanged) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();

@@ -162,7 +162,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     return changeFlags.somethingChanged;
   }
 
-  updateState({changeFlags}: UpdateParameters<TileLayer>) {
+  updateState({changeFlags}: UpdateParameters<this>) {
     // @ts-expect-error updateState is only called when previous state is initalized
     let {tileset} = this.state;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
