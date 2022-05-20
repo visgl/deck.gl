@@ -7,7 +7,7 @@ export type MaterialProps = {
   specularColor: [r: number, g: number, b: number];
 };
 
-/** Fill properties */
+/** Common properties for layers that use fill. */
 export type FillProps<DataT = any> = {
   /**
    * Whether to draw a filled polygon (solid fill).
@@ -26,7 +26,7 @@ export type FillProps<DataT = any> = {
   getFillColor?: Accessor<DataT, Color>;
 };
 
-/** Stroke properties */
+/** Common properties for layers that use stroke. */
 export type StrokeProps<DataT = any> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
@@ -95,9 +95,17 @@ export type StrokeProps<DataT = any> = {
    * @default 4
    */
   lineMiterLimit?: number;
+
+  /**
+   * This property has been moved to `PathStyleExtension`.
+   *
+   * @deprecated
+   */
+  getLineDashArray?: Accessor<DataT, number> | null;
 };
+
 /**
- * 3D properties shared by PolygonLayer and GeoJsonLayer
+ * Common properties for layers that draw 3D extruded features.
  */
 export type Polygon3DProps<DataT = any> = {
   /**

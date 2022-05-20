@@ -18,7 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Layer,
+  log,
+  PickingInfo,
+  UpdateParameters,
+  _ConstructorOf
+} from '@deck.gl/core';
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
 import {
@@ -31,6 +38,8 @@ import {
 
 import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
+import {GeoJsonLayerProps} from './types';
+import type {BinaryFeatures} from '@loaders.gl/schema';
 
 const FEATURE_TYPES = ['points', 'linestrings', 'polygons'];
 
@@ -58,8 +67,17 @@ const defaultProps = {
   getRadius: {deprecatedFor: 'getPointRadius'}
 };
 
-export default class GeoJsonLayer extends CompositeLayer {
-  initializeState() {
+type GeoJsonPickingInfo = PickingInfo & {
+  featureType?: string | null;
+  info?: any;
+};
+export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  Required<GeoJsonLayerProps<DataT>> & ExtraProps
+> {
+  static layerName = 'GeoJsonLayer';
+  static defaultProps = defaultProps;
+
+  initializeState(): void {
     this.state = {
       layerProps: {},
       features: {}
@@ -70,12 +88,13 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  updateState({props, changeFlags}) {
+  updateState({props, changeFlags}: UpdateParameters<GeoJsonLayer>) {
     if (!changeFlags.dataChanged) {
       return;
     }
     const {data} = this.props;
-    const binary = data && 'points' in data && 'polygons' in data && 'lines' in data;
+    const binary =
+      data && 'points' in (data as {}) && 'polygons' in (data as {}) && 'lines' in (data as {});
 
     this.setState({binary});
 
@@ -86,19 +105,20 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  _updateStateBinary({props, changeFlags}) {
+  private _updateStateBinary({props, changeFlags}) {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
     this.setState({layerProps});
   }
 
-  _updateStateJSON({props, changeFlags}) {
+  private _updateStateJSON({props, changeFlags}) {
     const features = getGeojsonFeatures(props.data);
     const wrapFeature = this.getSubLayerRow.bind(this);
     let newFeatures = {};
     const featuresDiff = {};
 
     if (Array.isArray(changeFlags.dataChanged)) {
-      const oldFeatures = this.state.features;
+      const oldFeatures = this.state!.features;
       for (const key in oldFeatures) {
         newFeatures[key] = oldFeatures[key].slice();
         featuresDiff[key] = [];
@@ -130,12 +150,12 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
-  getPickingInfo(params) {
-    const info = super.getPickingInfo(params);
+  getPickingInfo(params): GeoJsonPickingInfo {
+    const info = super.getPickingInfo(params) as GeoJsonPickingInfo;
     const {index, sourceLayer} = info;
-    info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
-    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
-      info.index = this.props.data.points.globalFeatureIds.value[index];
+    info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
+    if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state!.binary) {
+      info.index = (this.props.data as BinaryFeatures).points!.globalFeatureIds.value[index];
     }
     return info;
   }
@@ -152,9 +172,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  _renderPolygonLayer() {
+  private _renderPolygonLayer() {
     const {extruded, wireframe} = this.props;
-    const {layerProps} = this.state;
+    const {layerProps} = this.state!;
     const id = 'polygons-fill';
 
     const PolygonFillLayer =
@@ -183,9 +203,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     return null;
   }
 
-  _renderLineLayers() {
+  private _renderLineLayers() {
     const {extruded, stroked} = this.props;
-    const {layerProps} = this.state;
+    const {layerProps} = this.state!;
     const polygonStrokeLayerId = 'polygons-stroke';
     const lineStringsLayerId = 'linestrings';
 
@@ -226,9 +246,9 @@ export default class GeoJsonLayer extends CompositeLayer {
     return null;
   }
 
-  _renderPointLayers() {
+  private _renderPointLayers() {
     const {pointType} = this.props;
-    const {layerProps, binary} = this.state;
+    const {layerProps, binary} = this.state!;
     let {highlightedObjectIndex} = this.props;
 
     if (!binary && Number.isFinite(highlightedObjectIndex)) {
@@ -239,11 +259,11 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Avoid duplicate sub layer ids
     const types = new Set(pointType.split('+'));
-    const pointLayers = [];
+    const pointLayers: Layer[] = [];
     for (const type of types) {
       const id = `points-${type}`;
       const PointLayerMapping = POINT_LAYER[type];
-      const PointsLayer =
+      const PointsLayer: _ConstructorOf<Layer> =
         PointLayerMapping &&
         this.shouldRenderSubLayer(id, layerProps.points.data) &&
         this.getSubLayerClass(id, PointLayerMapping.type);
@@ -251,7 +271,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         const forwardedProps = forwardProps(this, PointLayerMapping.props);
         let pointsLayerProps = layerProps.points;
 
-        if (type === 'text' && this.state.binary) {
+        if (type === 'text' && binary) {
           // Picking colors are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line no-unused-vars
@@ -296,7 +316,7 @@ export default class GeoJsonLayer extends CompositeLayer {
   }
 
   getSubLayerAccessor(accessor) {
-    const {binary} = this.state;
+    const {binary} = this.state!;
     if (!binary || typeof accessor !== 'function') {
       return super.getSubLayerAccessor(accessor);
     }
@@ -308,6 +328,3 @@ export default class GeoJsonLayer extends CompositeLayer {
     };
   }
 }
-
-GeoJsonLayer.layerName = 'GeoJsonLayer';
-GeoJsonLayer.defaultProps = defaultProps;

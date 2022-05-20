@@ -56,13 +56,6 @@ export type PolygonLayerProps<DataT = any> = FillProps<DataT> &
     getPolygon?: AccessorFunction<DataT, any>;
 
     /**
-     * This property has been moved to `PathStyleExtension`.
-     *
-     * @deprecated
-     */
-    getLineDashArray?: Accessor<DataT, number> | null;
-
-    /**
      * If `false`, will skip normalizing the coordinates returned by `getPolygon`.
      *
      * **Note**: This prop is experimental
