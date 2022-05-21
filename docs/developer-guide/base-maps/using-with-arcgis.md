@@ -1,5 +1,9 @@
 # Using with ArcGIS
 
+| Pure JS | React | Overlaid | Interleaved |
+| ----- | ----- | ----- | ----- |
+| ✓ | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/arcgis) |
+
 Starting with v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](/docs/api-reference/arcgis/overview.md) module.
 
 ![deck.gl as a ArcGIS map layer](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/arcgis.jpg)

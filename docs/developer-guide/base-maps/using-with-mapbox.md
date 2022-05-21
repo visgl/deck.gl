@@ -1,5 +1,9 @@
 # Using with Mapbox
 
+| Pure JS | React | Overlaid | Interleaved |
+| ----- | ----- | ----- | ----- |
+|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+
 [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) is a powerful open-source map renderer from [Mapbox](https://mapbox.com). deck.gl's `MapView` is designed to sync perfectly with the camera of Mapbox, at every zoom level and rotation angle.
 
 When using deck.gl and Mapbox, there are two options you can choose from:
@@ -32,3 +36,26 @@ If you are using react-map-gl, there are several ways to provide a token to your
 As of v2.0, Mapbox GL JS [went proprietary](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#200) and requires a Mapbox account to use even if you don't load tiles from the Mapbox data service. Community forks of the v1 code base such as [MapLibre GL JS](https://maplibre.org) can generally be used as a drop-in replacement of mapbox-gl. If you are using react-map-gl, follow [these instructions](http://visgl.github.io/react-map-gl/docs/get-started/get-started#using-with-a-mapbox-gl-fork).
 
 If the forked libraries and Mapbox API diverge in the future, compatibility issues may arise. deck.gl intends to support open source efforts wherever reasonable. Please report any issue on GitHub.
+
+## Using with other basemap services
+
+It is possible to use the map component without the Mapbox service, you need a URL that conforms to the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-js/style-spec) and pass it to `ReactMapGL` using the `mapStyle` prop.
+
+You can use existing free vector tile services:
+
+- [CARTO free basemaps](https://carto.com/basemaps) for non commercial applications. Checkout [this guide](/docs/api-reference/carto/basemap.md) to start using it.
+
+### Hosting your own basemap service
+
+If you host your own map tiles, you will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), this custom style must match the schema of your tile source.
+
+Open source tile schemas include:
+
+- [TileZen schema](https://tilezen.readthedocs.io/en/latest/layers/)
+- [OpenMapTiles schema ](https://openmaptiles.org/schema/)
+
+Some useful resources for creating your own map service:
+
+- [Mapbox Vector Tile Spec](https://www.mapbox.com/developers/vector-tiles/)
+- [Open source tools](https://github.com/mapbox/awesome-vector-tiles)
+- [Maputnik Style editor](https://maputnik.github.io)
