@@ -1,6 +1,4 @@
 import {
-  LIFECYCLE,
-  Lifecycle,
   COMPONENT_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
@@ -8,19 +6,15 @@ import {
 } from './constants';
 import {createProps} from './create-props';
 
-import type {LayerContext} from '../lib/layer-manager';
-import type LayerState from '../lib/layer-state';
-import type {LayerProps} from '../types/layer-props';
-
 let counter = 0;
 
-export type StatefulComponentProps<PropsT> = PropsT &
-  Required<LayerProps> & {
-    [COMPONENT_SYMBOL]: Component<PropsT>;
-    [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
-    [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
-    [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
-  };
+export type StatefulComponentProps<PropsT> = PropsT & {
+  id: string;
+  [COMPONENT_SYMBOL]: Component<PropsT>;
+  [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
+  [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
+  [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
+};
 
 export default class Component<PropsT = any> {
   static componentName: string = 'Component';
@@ -29,11 +23,7 @@ export default class Component<PropsT = any> {
   id: string;
   props: StatefulComponentProps<PropsT>;
   count: number;
-  lifecycle: Lifecycle;
   parent: Component | null;
-  context: LayerContext | null;
-  state: Record<string, any> | null;
-  internalState: LayerState<PropsT> | null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
@@ -41,17 +31,9 @@ export default class Component<PropsT = any> {
     this.props = createProps<PropsT>(this, propObjects);
     /* eslint-enable prefer-spread */
 
-    // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.count = counter++; // Keep track of how many layer instances you are generating
-    this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
     this.parent = null; // reference to the composite layer parent that rendered this layer
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.internalState = null;
-
-    // Seal the layer
-    Object.seal(this);
   }
 
   get root(): Component {
