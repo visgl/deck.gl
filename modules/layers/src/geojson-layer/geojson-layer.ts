@@ -19,13 +19,21 @@
 // THE SOFTWARE.
 
 import {
+  Accessor,
+  Color,
   CompositeLayer,
+  CompositeLayerProps,
   Layer,
   log,
   PickingInfo,
+  Unit,
   UpdateParameters,
   _ConstructorOf
 } from '@deck.gl/core';
+
+import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {Feature} from 'geojson';
+
 import {replaceInRange} from '../utils';
 import {binaryToFeatureForAccesor} from './geojson-binary';
 import {
@@ -36,10 +44,247 @@ import {
   forwardProps
 } from './sub-layer-map';
 
-import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
+import {getGeojsonFeatures, SeparatedGeometries, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
-import {GeoJsonLayerProps} from './types';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import {MaterialProps} from '../types';
+
+/** All properties supported by GeoJsonLayer */
+export type GeoJsonLayerProps<DataT extends Feature = Feature> = _GeoJsonLayerProps<DataT> &
+  CompositeLayerProps<DataT>;
+
+/** Properties added by GeoJsonLayer */
+export type _GeoJsonLayerProps<DataT extends Feature = Feature> = {
+  /**
+   * How to render Point and MultiPoint features in the data.
+   *
+   * Supported types are:
+   *  * `'circle'`
+   *  * `'icon'`
+   *  * `'text'`
+   *
+   * @default 'circle'
+   */
+  pointType?: string;
+} & _GeoJsonLayerFillProps<DataT> &
+  _GeoJsonLayerStrokeProps<DataT> &
+  _GeoJsonLayer3DProps<DataT> &
+  _GeoJsonLayerPointCircleProps<DataT> &
+  _GeojsonLayerIconPointProps<DataT> &
+  _GeojsonLayerTextPointProps<DataT>;
+
+/** GeoJsonLayer fill options. */
+type _GeoJsonLayerFillProps<DataT> = {
+  /**
+   * Whether to draw a filled polygon (solid fill).
+   *
+   * Note that only the area between the outer polygon and any holes will be filled.
+   *
+   * @default true
+   */
+  filled?: boolean;
+
+  /**
+   * Fill collor value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getFillColor?: Accessor<DataT, Color>;
+};
+
+/** GeoJsonLayer stroke options. */
+type _GeoJsonLayerStrokeProps<DataT> = {
+  /**
+   * Whether to draw an outline around the polygon (solid fill).
+   *
+   * Note that both the outer polygon as well the outlines of any holes will be drawn.
+   *
+   * @default true
+   */
+  stroked?: boolean;
+
+  /**
+   * Line color value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getLineColor?: Accessor<DataT, Color>;
+
+  /**
+   * Line width value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getLineWidth?: Accessor<DataT, number>;
+
+  /**
+   * The units of the line width, one of `meters`, `common`, and `pixels`.
+   *
+   * @default 'meters'
+   * @see Unit.
+   */
+  lineWidthUnits?: Unit;
+
+  /**
+   * A multiplier that is applied to all line widths
+   *
+   * @default 1
+   */
+  lineWidthScale?: number;
+
+  /**
+   * The minimum line width in pixels.
+   *
+   * @default 0
+   */
+  lineWidthMinPixels?: number;
+
+  /**
+   * The maximum line width in pixels
+   *
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  lineWidthMaxPixels?: number;
+
+  /**
+   * Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+   *
+   * @default false
+   */
+  lineJointRounded?: boolean;
+
+  /**
+   * The maximum extent of a joint in ratio to the stroke width.
+   *
+   * Only works if `lineJointRounded` is false.
+   *
+   * @default 4
+   */
+  lineMiterLimit?: number;
+
+  /**
+   * Type of line caps.
+   *
+   * If `true`, draw round caps. Otherwise draw square caps.
+   *
+   * @default false
+   */
+  lineCapRounded?: boolean;
+
+  /**
+   * If `true`, extrude the line in screen space (width always faces the camera).
+   * If `false`, the width always faces up.
+   *
+   * @default false
+   */
+  lineBillboard?: boolean;
+};
+
+/** GeoJsonLayer 3D options. */
+type _GeoJsonLayer3DProps<DataT> = {
+  /**
+   * Extrude Polygon and MultiPolygon features along the z-axis if set to true
+   *
+   * Based on the elevations provided by the `getElevation` accessor.
+   *
+   * @default false
+   */
+  extruded?: boolean;
+
+  /**
+   * Whether to generate a line wireframe of the hexagon.
+   *
+   * @default false
+   */
+  wireframe?: boolean;
+
+  /**
+   * Elevation valur or accessor.
+   *
+   * Only used if `extruded: true`.
+   *
+   * @default 1000
+   */
+  getElevation?: Accessor<DataT, number>;
+
+  /**
+   * Elevation multiplier.
+   *
+   * The final elevation is calculated by `elevationScale * getElevation(d)`.
+   * `elevationScale` is a handy property to scale all elevation without updating the data.
+   *
+   * @default 1
+   */
+  elevationScale?: boolean;
+
+  /**
+   * Material props for lighting effect.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
+   */
+  material?: true | MaterialProps | null;
+};
+
+/** GeoJsonLayer Properties forwarded to `ScatterPlotLayer` if `pointType` is `'circle'` */
+export type _GeoJsonLayerPointCircleProps<DataT> = {
+  getPointRadius?: Accessor<DataT, number>;
+  pointRadiusUnits?: Unit;
+  pointRadiusScale?: number;
+  pointRadiusMinPixels?: number;
+  pointRadiusMaxPixels?: number;
+  pointAntialiasing?: boolean;
+  pointBillboard?: boolean;
+
+  /** @deprecated use getPointRadius */
+  getRadius?: Accessor<DataT, number>;
+};
+
+/** GeoJsonLayer properties forwarded to `IconLayer` if `pointType` is `'icon'` */
+type _GeojsonLayerIconPointProps<DataT> = {
+  iconAtlas?: any;
+  iconMapping?: any;
+  getIcon?: Accessor<DataT, any>;
+  getIconSize?: Accessor<DataT, number>;
+  getIconColor?: Accessor<DataT, Color>;
+  getIconAngle?: Accessor<DataT, number>;
+  getIconPixelOffset?: Accessor<DataT, number[]>;
+  iconSizeUnits?: Unit;
+  iconSizeScale?: number;
+  iconSizeMinPixels?: number;
+  iconSizeMaxPixels?: number;
+  iconBillboard?: boolean;
+  iconAlphaCutoff?: number;
+};
+
+/** GeoJsonLayer properties forwarded to `TextLayer` if `pointType` is `'text'` */
+type _GeojsonLayerTextPointProps<DataT> = {
+  getText?: Accessor<DataT, any>;
+  getTextColor?: Accessor<DataT, Color>;
+  getTextAngle?: Accessor<DataT, number>;
+  getTextSize?: Accessor<DataT, number>;
+  getTextAnchor?: Accessor<DataT, string>;
+  getTextAlignmentBaseline?: Accessor<DataT, string>;
+  getTextPixelOffset?: Accessor<DataT, number[]>;
+  getTextBackgroundColor?: Accessor<DataT, Color>;
+  getTextBorderColor?: Accessor<DataT, Color>;
+  getTextBorderWidth?: Accessor<DataT, number>;
+  textSizeUnits?: Unit;
+  textSizeScale?: number;
+  textSizeMinPixels?: number;
+  textSizeMaxPixels?: number;
+  textCharacterSet?: any;
+  textFontFamily?: string;
+  textFontWeight?: number;
+  textLineHeight?: number;
+  textMaxWidth?: number;
+  textWordBreak?: string; // TODO
+  textBackground?: boolean;
+  textBackgroundPadding?: number[];
+  textOutlineColor?: Color;
+  textOutlineWidth?: number;
+  textBillboard?: boolean;
+  textFontSettings?: any;
+};
 
 const FEATURE_TYPES = ['points', 'linestrings', 'polygons'];
 
@@ -71,9 +316,11 @@ type GeoJsonPickingInfo = PickingInfo & {
   featureType?: string | null;
   info?: any;
 };
-export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  Required<GeoJsonLayerProps<DataT>> & ExtraProps
-> {
+
+export default class GeoJsonLayer<
+  DataT extends Feature = Feature,
+  ExtraProps = {}
+> extends CompositeLayer<Required<GeoJsonLayerProps<DataT>> & ExtraProps> {
   static layerName = 'GeoJsonLayer';
   static defaultProps = defaultProps;
 
@@ -83,12 +330,12 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
       features: {}
     };
 
-    if (this.props.getLineDashArray) {
+    if ((this.props as any).getLineDashArray) {
       log.removed('getLineDashArray', 'PathStyleExtension')();
     }
   }
 
-  updateState({props, changeFlags}: UpdateParameters<GeoJsonLayer>) {
+  updateState({props, changeFlags}: UpdateParameters<this>): void {
     if (!changeFlags.dataChanged) {
       return;
     }
@@ -105,16 +352,16 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     }
   }
 
-  private _updateStateBinary({props, changeFlags}) {
+  private _updateStateBinary({props, changeFlags}): void {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
     this.setState({layerProps});
   }
 
-  private _updateStateJSON({props, changeFlags}) {
-    const features = getGeojsonFeatures(props.data);
+  private _updateStateJSON({props, changeFlags}): void {
+    const features: Feature[] = getGeojsonFeatures(props.data) as any;
     const wrapFeature = this.getSubLayerRow.bind(this);
-    let newFeatures = {};
+    let newFeatures: SeparatedGeometries = {} as SeparatedGeometries;
     const featuresDiff = {};
 
     if (Array.isArray(changeFlags.dataChanged)) {
@@ -160,7 +407,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     return info;
   }
 
-  _updateAutoHighlight(info) {
+  _updateAutoHighlight(info: GeoJsonPickingInfo): void {
     // All sub layers except the points layer use source feature index to encode the picking color
     // The points layer uses indices from the points data array.
     const pointLayerIdPrefix = `${this.id}-points-`;
@@ -172,7 +419,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     }
   }
 
-  private _renderPolygonLayer() {
+  private _renderPolygonLayer(): Layer | null {
     const {extruded, wireframe} = this.props;
     const {layerProps} = this.state!;
     const id = 'polygons-fill';
@@ -203,7 +450,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     return null;
   }
 
-  private _renderLineLayers() {
+  private _renderLineLayers(): (Layer | false)[] | null {
     const {extruded, stroked} = this.props;
     const {layerProps} = this.state!;
     const polygonStrokeLayerId = 'polygons-stroke';
@@ -246,7 +493,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     return null;
   }
 
-  private _renderPointLayers() {
+  private _renderPointLayers(): Layer[] | null {
     const {pointType} = this.props;
     const {layerProps, binary} = this.state!;
     let {highlightedObjectIndex} = this.props;
@@ -315,7 +562,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     ];
   }
 
-  getSubLayerAccessor(accessor) {
+  protected getSubLayerAccessor<In, Out>(accessor: Accessor<In, Out>): Accessor<In, Out> {
     const {binary} = this.state!;
     if (!binary || typeof accessor !== 'function') {
       return super.getSubLayerAccessor(accessor);
@@ -324,6 +571,7 @@ export default class GeoJsonLayer<DataT = any, ExtraProps = {}> extends Composit
     return (object, info) => {
       const {data, index} = info;
       const feature = binaryToFeatureForAccesor(data, index);
+      // @ts-ignore (TS2349) accessor is always function
       return accessor(feature, info);
     };
   }

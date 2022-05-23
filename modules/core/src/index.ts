@@ -121,3 +121,4 @@ export type {
 } from './types/layer-props';
 export type {PickingInfo} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
+export type {BinaryAttribute} from './lib/attribute/attribute';

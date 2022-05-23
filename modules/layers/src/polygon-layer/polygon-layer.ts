@@ -260,7 +260,7 @@ export default class PolygonLayer<DataT = any, ExtraProps = {}> extends Composit
     }
   }
 
-  updateState({changeFlags}: UpdateParameters<PolygonLayer>) {
+  updateState({changeFlags}: UpdateParameters<this>) {
     const geometryChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&

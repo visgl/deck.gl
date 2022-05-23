@@ -38,7 +38,7 @@ import type {
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 /** All props supported by the ScatterplotLayer */
-export type ScatterplotLayerProps<DataT> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
+export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
 
 /** Props added by the ScatterplotLayer */
 type _ScatterplotLayerProps<DataT> = {
