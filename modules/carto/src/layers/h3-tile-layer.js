@@ -37,7 +37,7 @@ export default class H3TileLayer extends CompositeLayer {
     const maxZoom = parseInt(tileJSON.maxresolution);
     return [
       new SpatialIndexTileLayer(this.props, {
-        id: 'h3-tile-layer',
+        id: `h3-tile-layer-${this.props.id}`,
         data,
         getHexagon: d => d.id,
         TilesetClass: H3Tileset2D,
