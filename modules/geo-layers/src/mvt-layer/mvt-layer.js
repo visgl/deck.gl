@@ -82,18 +82,19 @@ export default class MVTLayer extends TileLayer {
     this.setState({data, tileJSON});
   }
 
-  _getTilesetOptions(props) {
-    const opts = super._getTilesetOptions(props);
+  _getTilesetOptions() {
+    const opts = super._getTilesetOptions();
     const {tileJSON} = this.state;
+    const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
-      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > props.minZoom) {
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
         opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(props.maxZoom) || tileJSON.maxzoom < props.maxZoom)
+        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
       ) {
         opts.maxZoom = tileJSON.maxzoom;
       }

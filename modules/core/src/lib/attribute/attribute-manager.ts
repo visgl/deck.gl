@@ -237,7 +237,7 @@ export default class AttributeManager {
         });
       }
 
-      this.needsRedraw ||= attribute.needsRedraw();
+      this.needsRedraw = this.needsRedraw || attribute.needsRedraw();
     }
 
     if (updated) {

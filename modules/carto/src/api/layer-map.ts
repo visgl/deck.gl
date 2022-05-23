@@ -42,6 +42,12 @@ export const AGGREGATION = {
   sum: 'SUM'
 };
 
+export const OPACITY_MAP = {
+  getFillColor: 'opacity',
+  getLineColor: 'strokeOpacity',
+  getTextColor: 'opacity'
+};
+
 const AGGREGATION_FUNC = {
   'count unique': (values, accessor) => groupSort(values, v => v.length, accessor).length,
   median,
@@ -71,7 +77,6 @@ const sharedPropMap = {
     enable3d: 'extruded',
     elevationScale: 'elevationScale',
     filled: 'filled',
-    opacity: 'opacity',
     strokeColor: 'getLineColor',
     stroked: 'stroked',
     thickness: 'getLineWidth',
@@ -225,6 +230,10 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
+export function opacityToAlpha(opacity) {
+  return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
+}
+
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
   const aggregator = AGGREGATION_FUNC[colorAggregation];
   const accessor = values => aggregator(values, p => p[name]);
@@ -259,11 +268,12 @@ export function getColorAccessor(
   scale.domain(domain);
   scale.range(scaleColor);
   scale.unknown(UNKNOWN_COLOR);
-  const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
+  const alpha = opacityToAlpha(opacity);
 
   const accessor = properties => {
-    const {r, g, b} = rgb(scale(properties[name]));
-    return [r, g, b, alpha];
+    const propertyValue = properties[name];
+    const {r, g, b} = rgb(scale(propertyValue));
+    return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
 }

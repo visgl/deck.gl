@@ -1,5 +1,7 @@
 import {CompositeLayer, Layer, log} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
+import H3TileLayer from './h3-tile-layer';
+import QuadkeyTileLayer from './quadkey-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -55,7 +57,13 @@ const defaultProps = {
   geoColumn: null,
 
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
-  columns: {type: 'array', value: null}
+  columns: {type: 'array', value: null},
+
+  // (String, optional): aggregration SQL expression. Only used for spatial index datasets
+  aggregationExp: null,
+
+  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
+  aggregationResLevel: null
 };
 
 export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
@@ -240,7 +248,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
           source,
           clientId,
           credentials: credentials as CloudNativeCredentials,
-          connection: connection as string,
+          connection,
           ...rest
         });
       }
@@ -283,6 +291,12 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
         (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
         TILE_FORMATS.MVT;
 
+      if (data.scheme === 'h3') {
+        return [H3TileLayer, props];
+      }
+      if (data.scheme === 'quadkey') {
+        return [QuadkeyTileLayer, props];
+      }
       return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
     }
 

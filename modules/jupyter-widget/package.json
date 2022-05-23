@@ -2,7 +2,7 @@
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
-  "version": "8.7.0-beta.7",
+  "version": "8.8.0-alpha.4",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -29,21 +29,22 @@
     "prepublishOnly": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "8.7.0-beta.7",
-    "@deck.gl/carto": "8.7.0-beta.7",
-    "@deck.gl/geo-layers": "8.7.0-beta.7",
-    "@deck.gl/google-maps": "8.7.0-beta.7",
-    "@deck.gl/json": "8.7.0-beta.7",
-    "@deck.gl/layers": "8.7.0-beta.7",
-    "@deck.gl/mesh-layers": "8.7.0-beta.7",
+    "@deck.gl/aggregation-layers": "8.8.0-alpha.4",
+    "@deck.gl/carto": "8.8.0-alpha.4",
+    "@deck.gl/geo-layers": "8.8.0-alpha.4",
+    "@deck.gl/google-maps": "8.8.0-alpha.4",
+    "@deck.gl/json": "8.8.0-alpha.4",
+    "@deck.gl/layers": "8.8.0-alpha.4",
+    "@deck.gl/mesh-layers": "8.8.0-alpha.4",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3",
     "@loaders.gl/3d-tiles": "^3.2.0-alpha.4",
     "@loaders.gl/core": "^3.2.0-alpha.4",
     "@loaders.gl/csv": "^3.2.0-alpha.4",
-    "@luma.gl/constants": "^8.5.10",
+    "@luma.gl/constants": "^8.5.12",
     "mapbox-gl": "^1.2.1"
   },
   "jupyterlab": {
     "extension": "src/plugin"
-  }
+  },
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

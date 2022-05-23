@@ -1,6 +1,4 @@
 import {
-  LIFECYCLE,
-  Lifecycle,
   COMPONENT_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
@@ -8,35 +6,24 @@ import {
 } from './constants';
 import {createProps} from './create-props';
 
-import type {LayerContext} from '../lib/layer-manager';
-import type LayerState from '../lib/layer-state';
-
 let counter = 0;
 
-export type ComponentProps = {
+export type StatefulComponentProps<PropsT> = PropsT & {
   id: string;
-};
-
-export type StatefulComponentProps<PropsT extends ComponentProps> = PropsT & {
   [COMPONENT_SYMBOL]: Component<PropsT>;
   [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
   [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
   [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
 };
 
-export default class Component<PropsT extends ComponentProps> {
+export default class Component<PropsT = any> {
   static componentName: string = 'Component';
   static defaultProps: Readonly<{}> = {};
 
   id: string;
   props: StatefulComponentProps<PropsT>;
   count: number;
-  lifecycle: Lifecycle;
-  parent: Component<any> | null;
-  context: LayerContext | null;
-  state: Record<string, any> | null;
-  // @ts-expect-error (TS2344) PropsT does not extend LayerProps
-  internalState: LayerState<PropsT> | null;
+  parent: Component | null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
@@ -44,22 +31,14 @@ export default class Component<PropsT extends ComponentProps> {
     this.props = createProps<PropsT>(this, propObjects);
     /* eslint-enable prefer-spread */
 
-    // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.count = counter++; // Keep track of how many layer instances you are generating
-    this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
     this.parent = null; // reference to the composite layer parent that rendered this layer
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.internalState = null;
-
-    // Seal the layer
-    Object.seal(this);
   }
 
-  get root() {
+  get root(): Component {
     // eslint-disable-next-line
-    let component: Component<any> = this;
+    let component: Component = this;
     while (component.parent) {
       component = component.parent;
     }
@@ -67,7 +46,7 @@ export default class Component<PropsT extends ComponentProps> {
   }
 
   // clone this layer with modified props
-  clone(newProps) {
+  clone(newProps: Partial<PropsT>) {
     const {props} = this;
 
     // Async props cannot be copied with Object.assign, copy them separately

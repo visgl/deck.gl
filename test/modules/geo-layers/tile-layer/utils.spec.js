@@ -527,6 +527,11 @@ test('getURLFromTemplate', t => {
     'https://server.com/ep1/2/2.png',
     'array of templates'
   );
+  t.is(
+    getURLFromTemplate(TEST_TEMPLATE_ARRAY, {index: {x: 17, y: 11, z: 5}, id: '17-11-5'}),
+    'https://server.com/ep2/17/11.png',
+    'array of templates'
+  );
   t.is(getURLFromTemplate(null, {index: {x: 1, y: 2, z: 0}}), null, 'invalid template');
   t.is(getURLFromTemplate([], {index: {x: 1, y: 2, z: 0}}), null, 'empty array');
   t.end();
