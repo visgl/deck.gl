@@ -329,10 +329,6 @@ export default class GeoJsonLayer<
       layerProps: {},
       features: {}
     };
-
-    if ((this.props as any).getLineDashArray) {
-      log.removed('getLineDashArray', 'PathStyleExtension')();
-    }
   }
 
   updateState({props, changeFlags}: UpdateParameters<this>): void {
