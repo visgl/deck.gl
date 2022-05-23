@@ -1,6 +1,24 @@
+import {BinaryAttribute, LayerData, LayerProps} from '@deck.gl/core';
+import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
+import {BinaryFeatures} from '@loaders.gl/schema';
+import {SeparatedGeometries} from './geojson';
 
-function createEmptyLayerProps() {
+// TODO: PathLayer is not yet typed
+type PathLayerProps = LayerProps & Record<string, any>;
+
+type SubLayersProps = {
+  points: Partial<ScatterplotLayerProps>;
+  lines: Partial<PathLayerProps>;
+  polygons: Partial<PolygonLayerProps>;
+  polygonsOutline: Partial<PathLayerProps>;
+};
+
+type ExtendedBinaryFeatures = {
+  [P in keyof BinaryFeatures]: BinaryFeatures[P] & {attributes?: Record<string, BinaryAttribute>};
+};
+
+function createEmptyLayerProps(): SubLayersProps {
   return {
     points: {},
     lines: {},
@@ -13,7 +31,10 @@ function getCoordinates(f) {
   return f.geometry.coordinates;
 }
 
-export function createLayerPropsFromFeatures(features, featuresDiff) {
+export function createLayerPropsFromFeatures(
+  features: SeparatedGeometries,
+  featuresDiff
+): SubLayersProps {
   const layerProps = createEmptyLayerProps();
   const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
@@ -38,7 +59,10 @@ export function createLayerPropsFromFeatures(features, featuresDiff) {
   return layerProps;
 }
 
-export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
+export function createLayerPropsFromBinary(
+  geojsonBinary: Required<ExtendedBinaryFeatures>,
+  encodePickingColor
+): SubLayersProps {
   // The binary data format is documented here
   // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
   // It is the default output from the `MVTLoader` and can also be obtained
@@ -55,13 +79,13 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
       getPosition: points.positions,
       instancePickingColors: {
         size: 3,
-        value: customPickingColors.points
+        value: customPickingColors.points!
       }
     },
     properties: points.properties,
     numericProps: points.numericProps,
     featureIds: points.featureIds
-  };
+  } as LayerData<any>;
 
   layerProps.lines.data = {
     length: lines.pathIndices.value.length - 1,
@@ -71,13 +95,13 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
       getPath: lines.positions,
       instancePickingColors: {
         size: 3,
-        value: customPickingColors.lines
+        value: customPickingColors.lines!
       }
     },
     properties: lines.properties,
     numericProps: lines.numericProps,
     featureIds: lines.featureIds
-  };
+  } as LayerData<any>;
   layerProps.lines._pathType = 'open';
 
   layerProps.polygons.data = {
@@ -88,16 +112,16 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
       getPolygon: polygons.positions,
       pickingColors: {
         size: 3,
-        value: customPickingColors.polygons
+        value: customPickingColors.polygons!
       }
     },
     properties: polygons.properties,
     numericProps: polygons.numericProps,
     featureIds: polygons.featureIds
-  };
+  } as LayerData<any>;
   layerProps.polygons._normalize = false;
   if (polygons.triangles) {
-    layerProps.polygons.data.attributes.indices = polygons.triangles.value;
+    (layerProps.polygons.data as any).attributes.indices = polygons.triangles.value;
   }
 
   layerProps.polygonsOutline.data = {
@@ -108,13 +132,13 @@ export function createLayerPropsFromBinary(geojsonBinary, encodePickingColor) {
       getPath: polygons.positions,
       instancePickingColors: {
         size: 3,
-        value: customPickingColors.polygons
+        value: customPickingColors.polygons!
       }
     },
     properties: polygons.properties,
     numericProps: polygons.numericProps,
     featureIds: polygons.featureIds
-  };
+  } as LayerData<any>;
   layerProps.polygonsOutline._pathType = 'open';
 
   return layerProps;

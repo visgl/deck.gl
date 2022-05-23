@@ -23,6 +23,7 @@ import {
   AccessorFunction,
   Color,
   CompositeLayer,
+  CompositeLayerProps,
   createIterable,
   Layer,
   LayersList,
@@ -34,19 +35,17 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
-
-// TODO: not sure where this type belongs to
-export type MaterialProps = {
-  ambient: number;
-  diffuse: number;
-  shininess: number;
-  specularColor: [r: number, g: number, b: number];
-};
+import {MaterialProps} from '../types';
 
 /**
- * Properties for `PolygonLayer`.
+ * All properties supported by `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = {
+export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
+
+/**
+ * Properties added by `PolygonLayer`.
+ */
+export type _PolygonLayerProps<DataT = any> = {
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *
@@ -246,7 +245,7 @@ const defaultProps = {
 };
 
 export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  Required<PolygonLayerProps<DataT>> & ExtraProps
+  Required<_PolygonLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
@@ -261,7 +260,7 @@ export default class PolygonLayer<DataT = any, ExtraProps = {}> extends Composit
     }
   }
 
-  updateState({changeFlags}: UpdateParameters<PolygonLayer>) {
+  updateState({changeFlags}: UpdateParameters<this>) {
     const geometryChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&

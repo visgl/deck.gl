@@ -2353,6 +2353,14 @@
     "@types/geojson" "^7946.0.7"
     apache-arrow "^4.0.0"
 
+"@loaders.gl/schema@^3.2.0-alpha.4":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.2.3.tgz#469bd80a72a50590c9cbb9b87534f506b600884c"
+  integrity sha512-mylwvB6Fjrt6MRQyIFdC0B6z4yZ/sXMmGb03qh5MSdoIIdFVMMHjlt5DykhRT0eNZREBorKfMrcu/LCBbO7jKg==
+  dependencies:
+    "@types/geojson" "^7946.0.7"
+    apache-arrow "^4.0.0"
+
 "@loaders.gl/terrain@^3.2.0-alpha.4":
   version "3.2.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@loaders.gl/terrain/-/terrain-3.2.0-alpha.4.tgz#24761cb9b32701b8bc82cb16dbddca8b522fa37b"
