@@ -106,7 +106,9 @@ export function drawLayer(deck, map, layer) {
 export function getViewState(map) {
   const {lng, lat} = map.getCenter();
   return {
-    longitude: lng,
+    // Longitude returned by getCenter can be outside of [-180, 180] when zooming near the anti meridian
+    // https://github.com/visgl/deck.gl/issues/6894
+    longitude: ((lng + 540) % 360) - 180,
     latitude: lat,
     zoom: map.getZoom(),
     bearing: map.getBearing(),

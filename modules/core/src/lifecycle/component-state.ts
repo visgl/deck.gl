@@ -267,6 +267,7 @@ export default class ComponentState<PropsT> {
     let count = 0;
 
     for await (const chunk of iterable) {
+      // @ts-expect-error (2339) dataTransform is not decared in base component props
       const {dataTransform} = this.component.props;
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];

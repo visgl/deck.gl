@@ -1,10 +1,10 @@
 import ComponentState from '../lifecycle/component-state';
-import {StatefulComponentProps} from '../lifecycle/component';
 
 import type Layer from './layer';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
+import type {LayerProps} from '../types/layer-props';
 
 export type ChangeFlags = {
   // Primary changeFlags, can be strings stating reason for change
@@ -20,7 +20,7 @@ export type ChangeFlags = {
   somethingChanged: boolean;
 };
 
-export default class LayerState<PropsT> extends ComponentState<PropsT> {
+export default class LayerState<PropsT> extends ComponentState<PropsT & Required<LayerProps>> {
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;
@@ -42,7 +42,7 @@ export default class LayerState<PropsT> extends ComponentState<PropsT> {
 
   uniformTransitions!: UniformTransitionManager;
   /** Populated during uniform transition to replace user-supplied values */
-  propsInTransition?: StatefulComponentProps<PropsT>;
+  propsInTransition?: Layer<PropsT>['props'];
 
   constructor({
     attributeManager,
