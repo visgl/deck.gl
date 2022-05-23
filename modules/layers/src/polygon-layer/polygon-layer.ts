@@ -19,20 +19,23 @@
 // THE SOFTWARE.
 
 import {
+  Accessor,
   AccessorFunction,
+  Color,
   CompositeLayer,
   CompositeLayerProps,
   createIterable,
   Layer,
   LayersList,
   log,
+  Unit,
   UpdateParameters
 } from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
-import {FillProps, Polygon3DProps, StrokeProps} from '../types';
+import {MaterialProps} from '../types';
 
 /**
  * All properties supported by `PolygonLayer`.
@@ -42,33 +45,171 @@ export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & Composi
 /**
  * Properties added by `PolygonLayer`.
  */
-export type _PolygonLayerProps<DataT = any> = FillProps<DataT> &
-  StrokeProps<DataT> &
-  Polygon3DProps<DataT> & {
-    /** Called on each object in the data stream to retrieve its corresponding polygon. */
-    getPolygon?: AccessorFunction<DataT, any>;
+export type _PolygonLayerProps<DataT = any> = {
+  /**
+   * Whether to draw an outline around the polygon (solid fill).
+   *
+   * Note that both the outer polygon as well the outlines of any holes will be drawn.
+   *
+   * @default true
+   */
+  stroked?: boolean;
 
-    /**
-     * If `false`, will skip normalizing the coordinates returned by `getPolygon`.
-     *
-     * **Note**: This prop is experimental
-     *
-     * @default true
-     */
-    _normalize?: boolean;
+  /**
+   * Whether to draw a filled polygon (solid fill).
+   *
+   * Note that only the area between the outer polygon and any holes will be filled.
+   *
+   * @default true
+   */
+  filled?: boolean;
 
-    /**
-     * Specifies the winding order of rings in the polygon data.
-     *
-     * **Note**: This prop is experimental
-     *
-     * @default 'CW'
-     */
-    _windingOrder?: 'CW' | 'CCW';
+  /**
+   * Whether to extrude the polygons.
+   *
+   * Based on the elevations provided by the `getElevation` accessor.
+   *
+   * If set to `false`, all polygons will be flat, this generates less geometry and is faster
+   * than simply returning 0 from getElevation.
+   *
+   * @default false
+   */
+  extruded?: boolean;
 
-    /** @deprecated */
-    lineDashJustified?: boolean;
-  };
+  /**
+   * Elevation multiplier.
+   *
+   * The final elevation is calculated by `elevationScale * getElevation(d)`.
+   * `elevationScale` is a handy property to scale all elevation without updating the data.
+   *
+   * @default 1
+   */
+  elevationScale?: boolean;
+
+  /**
+   * Whether to generate a line wireframe of the hexagon.
+   *
+   * The outline will have "horizontal" lines closing the top and bottom polygons and a vertical
+   * line (a "strut") for each vertex on the polygon.
+   *
+   * @default false
+   */
+  wireframe?: boolean;
+
+  /**
+   * The units of the line width, one of `meters`, `common`, and `pixels`.
+   *
+   * @default 'meters'
+   * @see Unit.
+   */
+  lineWidthUnits?: Unit;
+
+  /**
+   * The line width multiplier that multiplied to all outlines of `Polygon` and `MultiPolygon`
+   * features if the stroked attribute is true.
+   *
+   * @default 1
+   */
+  lineWidthScale?: number;
+
+  /**
+   * The minimum line width in pixels.
+   *
+   * @default 0
+   */
+  lineWidthMinPixels?: number;
+
+  /**
+   * The maximum line width in pixels
+   *
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  lineWidthMaxPixels?: number;
+
+  /**
+   * Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+   *
+   * @default false
+   */
+  lineJointRounded?: boolean;
+
+  /**
+   * The maximum extent of a joint in ratio to the stroke width.
+   *
+   * Only works if `lineJointRounded` is false.
+   *
+   * @default 4
+   */
+  lineMiterLimit?: number;
+
+  lineDashJustified?: boolean;
+
+  /** Called on each object in the data stream to retrieve its corresponding polygon. */
+  getPolygon?: AccessorFunction<DataT, any>;
+
+  /**
+   * Fill collor value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getFillColor?: Accessor<DataT, Color>;
+
+  /**
+   * Line color value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getLineColor?: Accessor<DataT, Color>;
+
+  /**
+   * Line width value or accessor.
+   *
+   * @default [0, 0, 0, 255]
+   */
+  getLineWidth?: Accessor<DataT, number>;
+
+  /**
+   * Elevation valur or accessor.
+   *
+   * Only used if `extruded: true`.
+   *
+   * @default 1000
+   */
+  getElevation?: Accessor<DataT, number>;
+
+  /**
+   * This property has been moved to `PathStyleExtension`.
+   *
+   * @deprecated
+   */
+  getLineDashArray?: Accessor<DataT, number> | null;
+
+  /**
+   * If `false`, will skip normalizing the coordinates returned by `getPolygon`.
+   *
+   * **Note**: This prop is experimental
+   *
+   * @default true
+   */
+  _normalize?: boolean;
+
+  /**
+   * Specifies the winding order of rings in the polygon data.
+   *
+   * **Note**: This prop is experimental
+   *
+   * @default 'CW'
+   */
+  _windingOrder?: 'CW' | 'CCW';
+
+  /**
+   * Material props for lighting effect.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
+   */
+  material?: true | MaterialProps | null;
+};
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
