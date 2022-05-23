@@ -38,7 +38,7 @@
     "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
     "tsclean": "find . -name tsconfig.tsbuildinfo -exec rm {} \\;",
-    "tsbuild": "tsc -b tsconfig.build.json",
+    "tsbuild": "tsc -b tsconfig.build.json && node scripts/typed-entry.js",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",
     "metrics": "ocular-metrics",

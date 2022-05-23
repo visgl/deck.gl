@@ -1,5 +1,6 @@
 build/
 dist/
+modules/*/typed
 **/*.min.js
 node_modules/
 coverage/

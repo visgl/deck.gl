@@ -20,7 +20,8 @@
   "module": "dist/esm/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "typed"
   ],
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
