@@ -18,6 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {log} from '@deck.gl/core';
+import type {
+  Feature,
+  GeoJSON,
+  GeoJsonGeometryTypes,
+  LineString,
+  MultiLineString,
+  MultiPoint,
+  MultiPolygon,
+  Point,
+  Polygon
+} from 'geojson';
+
+type SupportedGeometry = Point | MultiPoint | LineString | MultiLineString | Polygon | MultiPolygon;
+
+export type SeparatedGeometries = {
+  pointFeatures: {geometry: Point}[];
+  lineFeatures: {geometry: LineString}[];
+  polygonFeatures: {geometry: Polygon}[];
+  polygonOutlineFeatures: {geometry: LineString}[];
+};
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -31,7 +51,7 @@ import {log} from '@deck.gl/core';
  *  Geometry) or array of features
  * @return {Array|"iteratable"} - iterable list of features
  */
-export function getGeojsonFeatures(geojson) {
+export function getGeojsonFeatures(geojson: GeoJSON): Feature[] {
   // If array, assume this is a list of features
   if (Array.isArray(geojson)) {
     return geojson;
@@ -50,13 +70,17 @@ export function getGeojsonFeatures(geojson) {
     default:
       // Assume it's a geometry, we'll check type in separateGeojsonFeatures
       // Wrap the geometry object in a 'Feature' object and wrap in an array
-      return [{geometry: geojson}];
+      return [{geometry: geojson}] as Feature[];
   }
 }
 
 // Linearize
-export function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
-  const separated = {
+export function separateGeojsonFeatures(
+  features: Feature[],
+  wrapFeature: <T>(row: T, sourceObject: any, sourceObjectIndex: number) => T,
+  dataRange: {startRow?: number; endRow?: number} = {}
+): SeparatedGeometries {
+  const separated: SeparatedGeometries = {
     pointFeatures: [],
     lineFeatures: [],
     polygonFeatures: [],
@@ -76,7 +100,13 @@ export function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
       const {geometries} = geometry;
       for (let i = 0; i < geometries.length; i++) {
         const subGeometry = geometries[i];
-        separateGeometry(subGeometry, separated, wrapFeature, feature, featureIndex);
+        separateGeometry(
+          subGeometry as SupportedGeometry,
+          separated,
+          wrapFeature,
+          feature,
+          featureIndex
+        );
       }
     } else {
       separateGeometry(geometry, separated, wrapFeature, feature, featureIndex);
@@ -86,7 +116,13 @@ export function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
   return separated;
 }
 
-function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourceFeatureIndex) {
+function separateGeometry(
+  geometry: SupportedGeometry,
+  separated: SeparatedGeometries,
+  wrapFeature: <T>(row: T, sourceObject: any, sourceObjectIndex: number) => T,
+  sourceFeature: Feature,
+  sourceFeatureIndex: number
+) {
   const {type, coordinates} = geometry;
   const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = separated;
 
@@ -206,7 +242,7 @@ function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourc
    - geometry.type is supported
    - geometry.coordinate has correct nesting level
  */
-const COORDINATE_NEST_LEVEL = {
+const COORDINATE_NEST_LEVEL: Record<SupportedGeometry['type'], number> = {
   Point: 1,
   MultiPoint: 2,
   LineString: 2,
@@ -215,8 +251,8 @@ const COORDINATE_NEST_LEVEL = {
   MultiPolygon: 4
 };
 
-export function validateGeometry(type, coordinates) {
-  let nestLevel = COORDINATE_NEST_LEVEL[type];
+export function validateGeometry(type: GeoJsonGeometryTypes, coordinates: any): boolean {
+  let nestLevel = COORDINATE_NEST_LEVEL[type] as number;
 
   log.assert(nestLevel, `Unknown GeoJSON type ${type}`);
 
