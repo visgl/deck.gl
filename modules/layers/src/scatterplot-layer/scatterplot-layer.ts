@@ -25,15 +25,7 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
-import type {
-  LayerProps,
-  UpdateParameters,
-  LayerContext,
-  Accessor,
-  Unit,
-  Position,
-  Color
-} from '@deck.gl/core';
+import type {LayerProps, UpdateParameters, Accessor, Unit, Position, Color} from '@deck.gl/core';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -142,13 +134,13 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
     });
   }
 
-  updateState(params: UpdateParameters<ScatterplotLayer>) {
+  updateState(params: UpdateParameters<ScatterplotLayer<DataT, ExtraPropsT>>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context as LayerContext;
-      this.state!.model?.delete();
-      this.state!.model = this._getModel(gl);
+      const {gl} = this.context;
+      this.state.model?.delete();
+      this.state.model = this._getModel(gl);
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -169,7 +161,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
       lineWidthMaxPixels
     } = this.props;
 
-    this.state!.model.setUniforms(uniforms)
+    this.state.model
+      .setUniforms(uniforms)
       .setUniforms({
         stroked: stroked ? 1 : 0,
         filled,

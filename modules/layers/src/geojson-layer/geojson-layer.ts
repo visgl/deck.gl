@@ -361,7 +361,7 @@ export default class GeoJsonLayer<
     const featuresDiff = {};
 
     if (Array.isArray(changeFlags.dataChanged)) {
-      const oldFeatures = this.state!.features;
+      const oldFeatures = this.state.features;
       for (const key in oldFeatures) {
         newFeatures[key] = oldFeatures[key].slice();
         featuresDiff[key] = [];
@@ -397,7 +397,7 @@ export default class GeoJsonLayer<
     const info = super.getPickingInfo(params) as GeoJsonPickingInfo;
     const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
-    if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state!.binary) {
+    if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
       info.index = (this.props.data as BinaryFeatures).points!.globalFeatureIds.value[index];
     }
     return info;
@@ -417,7 +417,7 @@ export default class GeoJsonLayer<
 
   private _renderPolygonLayer(): Layer | null {
     const {extruded, wireframe} = this.props;
-    const {layerProps} = this.state!;
+    const {layerProps} = this.state;
     const id = 'polygons-fill';
 
     const PolygonFillLayer =
@@ -448,7 +448,7 @@ export default class GeoJsonLayer<
 
   private _renderLineLayers(): (Layer | false)[] | null {
     const {extruded, stroked} = this.props;
-    const {layerProps} = this.state!;
+    const {layerProps} = this.state;
     const polygonStrokeLayerId = 'polygons-stroke';
     const lineStringsLayerId = 'linestrings';
 
@@ -491,7 +491,7 @@ export default class GeoJsonLayer<
 
   private _renderPointLayers(): Layer[] | null {
     const {pointType} = this.props;
-    const {layerProps, binary} = this.state!;
+    const {layerProps, binary} = this.state;
     let {highlightedObjectIndex} = this.props;
 
     if (!binary && Number.isFinite(highlightedObjectIndex)) {
@@ -559,7 +559,7 @@ export default class GeoJsonLayer<
   }
 
   protected getSubLayerAccessor<In, Out>(accessor: Accessor<In, Out>): Accessor<In, Out> {
-    const {binary} = this.state!;
+    const {binary} = this.state;
     if (!binary || typeof accessor !== 'function') {
       return super.getSubLayerAccessor(accessor);
     }
