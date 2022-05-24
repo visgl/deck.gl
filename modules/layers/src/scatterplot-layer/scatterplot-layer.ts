@@ -25,15 +25,7 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
-import type {
-  LayerProps,
-  UpdateParameters,
-  LayerContext,
-  Accessor,
-  Unit,
-  Position,
-  Color
-} from '@deck.gl/core';
+import type {LayerProps, UpdateParameters, Accessor, Unit, Position, Color} from '@deck.gl/core';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
@@ -103,8 +95,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
   }
 
   initializeState() {
-    // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
-    this.getAttributeManager().addInstanced({
+    this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -119,8 +110,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
         defaultValue: 1
       },
       instanceFillColors: {
-        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
-        size: this.props.colorFormat.length,
+        size: this.props.colorFormat.length as 3 | 4,
         transition: true,
         normalized: true,
         type: GL.UNSIGNED_BYTE,
@@ -128,8 +118,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
-        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
-        size: this.props.colorFormat.length,
+        size: this.props.colorFormat.length as 3 | 4,
         transition: true,
         normalized: true,
         type: GL.UNSIGNED_BYTE,
@@ -145,17 +134,14 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
     });
   }
 
-  updateState(params: UpdateParameters<ScatterplotLayer>) {
+  updateState(params: UpdateParameters<ScatterplotLayer<DataT, ExtraPropsT>>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context as LayerContext;
-      // @ts-ignore (TS2531) state is always defined
+      const {gl} = this.context;
       this.state.model?.delete();
-      // @ts-ignore (TS2531) state is always defined
       this.state.model = this._getModel(gl);
-      // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
@@ -175,7 +161,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
       lineWidthMaxPixels
     } = this.props;
 
-    // @ts-ignore (TS2531) state is always defined
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
