@@ -9358,10 +9358,10 @@ mjolnir.js@^2.2.0:
     "@babel/runtime" "^7.0.0"
     hammerjs "^2.0.8"
 
-mjolnir.js@^2.7.0-alpha.2:
-  version "2.7.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.7.0-alpha.2.tgz#5b72876aecded2f43c4eb32e484be68fb3c62f65"
-  integrity sha512-chizp8wrNk3f8et+DJuQeIhs4hskpbsufh0ynuJ0tGvjcPlsPbO4LZ6MfQl6102Rw/VP3Zc6xdPZ+8cRwiMrGQ==
+mjolnir.js@^2.7.0-alpha.3:
+  version "2.7.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.7.0-alpha.3.tgz#da7c427f5b03cccf296345cf1cfb13a9435f12c4"
+  integrity sha512-t+ovI3GIuJ9Yj3BrsxrFzDbjmw94ZX63LjoTPpAG0dE/Vw1/rzG7eQ92Vlj8b/4aL5WFs32e3YP8OTqT7gv5aQ==
   dependencies:
     "@types/hammerjs" "^2.0.41"
     hammerjs "^2.0.8"
@@ -10795,7 +10795,7 @@ promzard@^0.3.0:
   dependencies:
     read "1"
 
-prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
