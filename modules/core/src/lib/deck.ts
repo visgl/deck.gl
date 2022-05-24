@@ -323,6 +323,7 @@ export default class Deck {
 
   constructor(props: DeckProps) {
     this.props = {...defaultProps, ...props};
+    props = this.props;
 
     this._needsRedraw = 'Initial render';
     this._pickRequest = {
@@ -351,10 +352,10 @@ export default class Deck {
     if (!props.gl) {
       // Note: LayerManager creation deferred until gl context available
       if (typeof document !== 'undefined') {
-        this.canvas = this._createCanvas(this.props);
+        this.canvas = this._createCanvas(props);
       }
     }
-    this.animationLoop = this._createAnimationLoop(this.props);
+    this.animationLoop = this._createAnimationLoop(props);
 
     this.stats = new Stats({id: 'deck.gl'});
     this.metrics = {
@@ -668,7 +669,7 @@ export default class Deck {
   }
 
   /** Resolve props.canvas to element */
-  private _createCanvas(props: Required<DeckProps>): HTMLCanvasElement {
+  private _createCanvas(props: DeckProps): HTMLCanvasElement {
     let canvas = props.canvas;
 
     // TODO EventManager should accept element id
@@ -728,7 +729,7 @@ export default class Deck {
     }
   }
 
-  private _createAnimationLoop(props: Required<DeckProps>): AnimationLoop {
+  private _createAnimationLoop(props: DeckProps): AnimationLoop {
     const {
       width,
       height,
