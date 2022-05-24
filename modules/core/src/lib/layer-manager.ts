@@ -46,7 +46,7 @@ export type LayerContext = {
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
-  mousePosition: [number, number] | null;
+  mousePosition: {x: number; y: number} | null;
   userData: any;
   onError?: <PropsT>(error: Error, source: Layer<PropsT>) => void;
 };

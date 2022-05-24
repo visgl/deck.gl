@@ -27,7 +27,6 @@ import {
   useImperativeHandle,
   forwardRef
 } from 'react';
-import PropTypes from 'prop-types';
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
@@ -234,7 +233,6 @@ const DeckGL = forwardRef((props, ref) => {
   return thisRef.control;
 });
 
-DeckGL.propTypes = Deck.getPropTypes(PropTypes);
 DeckGL.defaultProps = Deck.defaultProps;
 
 export default DeckGL;
