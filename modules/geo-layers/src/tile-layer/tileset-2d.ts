@@ -48,7 +48,7 @@ const STRATEGIES = {
 };
 
 export type Tileset2DProps = Pick<
-  TileLayerProps,
+  Required<TileLayerProps>,
   | 'getTileData'
   | 'tileSize'
   | 'maxCacheSize'
@@ -145,10 +145,10 @@ export default class Tileset2D {
   setOptions(opts: Tileset2DProps): void {
     Object.assign(this.opts, opts);
     if (Number.isFinite(opts.maxZoom)) {
-      this._maxZoom = Math.floor(opts.maxZoom);
+      this._maxZoom = Math.floor(opts.maxZoom as number);
     }
     if (Number.isFinite(opts.minZoom)) {
-      this._minZoom = Math.ceil(opts.minZoom);
+      this._minZoom = Math.ceil(opts.minZoom as number);
     }
   }
 

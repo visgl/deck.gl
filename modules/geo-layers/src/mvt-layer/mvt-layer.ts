@@ -6,9 +6,9 @@ import {
   UpdateParameters,
   GetPickingInfoParams,
   Viewport,
-  _GlobeViewport,
   COORDINATE_SYSTEM
 } from '@deck.gl/core';
+import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
@@ -25,8 +25,6 @@ import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
 import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
-
-import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 
 const WORLD_SIZE = 512;
 
@@ -50,10 +48,12 @@ export type TileJson = {
   version?: string;
 };
 
+type ParsedMvtTile = Feature[] | BinaryFeatures;
+
 /** All props supported by the MVTLayer */
 export type MVTLayerProps<DataT extends Feature = Feature> = _MVTLayerProps &
   GeoJsonLayerProps<DataT> &
-  TileLayerProps<DataT>;
+  TileLayerProps<ParsedMvtTile>;
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
@@ -84,7 +84,7 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
-  DataT,
+  ParsedMvtTile,
   Required<_MVTLayerProps> & ExtraProps
 > {
   static layerName = 'MVTLayer';
@@ -93,8 +93,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
-    // @ts-expect-error context is always initialized at this point
-    const binary = this.context.viewport instanceof _GlobeViewport ? false : this.props.binary;
+    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
       binary,
       data: null,
@@ -153,20 +152,19 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
 
   _getTilesetOptions(): Tileset2DProps {
     const opts = super._getTilesetOptions();
-    // @ts-expect-error state is initialized for instantiated layer
     const tileJSON: TileJson | null | undefined = this.state.tileJSON;
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
       if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
-        opts.minZoom = tileJSON.minzoom;
+        opts.minZoom = tileJSON.minzoom as number;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
         (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
       ) {
-        opts.maxZoom = tileJSON.maxzoom;
+        opts.maxZoom = tileJSON.maxzoom as number;
       }
     }
     return opts;
@@ -179,8 +177,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     return super.renderLayers();
   }
 
-  getTileData(loadProps: TileLoadProps): Promise<any> {
-    // @ts-expect-error state is initialized for instantiated layer
+  getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
     const {data, binary} = this.state;
     const {index, signal} = loadProps;
 
@@ -195,8 +192,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
       mimeType: 'application/x-protobuf',
       mvt: {
         ...loadOptions?.mvt,
-        // @ts-expect-error context if initalized for instantiated layer
-        coordinates: this.context.viewport instanceof _GlobeViewport ? 'wgs84' : 'local',
+        coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
@@ -229,8 +225,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
 
     props.autoHighlight = false;
 
-    // @ts-expect-error context if defined for instantiated layer
-    if (!(this.context.viewport instanceof _GlobeViewport)) {
+    if (!this.context.viewport.resolution) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
@@ -239,7 +234,6 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
 
     const subLayers = super.renderSubLayers(props);
 
-    // @ts-expect-error state if defined for instantiated layer
     if (this.state.binary && !(subLayers instanceof GeoJsonLayer)) {
       log.warn('renderSubLayers() must return GeoJsonLayer when using binary:true')();
     }
@@ -247,10 +241,9 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     return subLayers;
   }
 
-  _updateAutoHighlight(info: PickingInfo<DataT>): void {
+  protected _updateAutoHighlight(info: PickingInfo): void {
     const {uniqueIdProperty} = this.props;
 
-    // @ts-expect-error state if defined for instantiated layer
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const hoveredFeature = info.object;
     let newHoveredFeatureId;
@@ -277,19 +270,16 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     }
   }
 
-  getPickingInfo(params: GetPickingInfoParams): PickingInfo<DataT> {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
 
-    // @ts-expect-error context if defined for instantiated layer
-    const isWGS84 = this.context.viewport instanceof _GlobeViewport;
+    const isWGS84 = Boolean(this.context.viewport.resolution);
 
-    // @ts-expect-error state if defined for instantiated layer
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
       info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
     }
     if (info.object && !isWGS84) {
-      // @ts-expect-error context if defined for instantiated layer
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
     }
 
@@ -299,13 +289,11 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
   getSubLayerPropsByTile(tile: Tile2DHeader): Record<string, any> {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
-      // @ts-expect-error state if defined for instantiated layer
       highlightColor: this.state.highlightColor
     };
   }
 
   private getHighlightedObjectIndex(tile: Tile2DHeader): number {
-    // @ts-expect-error state if defined for instantiated layer
     const {hoveredFeatureId, hoveredFeatureLayerName, binary} = this.state;
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const data = tile.content;
@@ -342,15 +330,14 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     return -1;
   }
 
-  private _pickObjects(maxObjects: number | null): PickingInfo<DataT>[] {
-    // @ts-expect-error context if defined for instantiated layer
+  private _pickObjects(maxObjects: number | null): PickingInfo[] {
     const {deck, viewport} = this.context;
     const width = viewport.width;
     const height = viewport.height;
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
+    return deck!.pickObjects({x, y, width, height, layerIds, maxObjects});
   }
 
   /** Get the rendered features in the current viewport. */
@@ -360,7 +347,6 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     const renderedFeatures: DataT[] = [];
 
     for (const f of features) {
-      // @ts-expect-error TODO: is it safe to assume f.object is always defined?
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
       if (featureId === undefined) {
@@ -378,8 +364,6 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-
-    // @ts-expect-error state if defined for instantiated layer
     const tileset: Tileset2D = this.state.tileset;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
@@ -393,7 +377,6 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
               return null;
             }
 
-            // @ts-expect-error state if defined for instantiated layer
             if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
               // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
@@ -404,10 +387,9 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
             if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
 
-              // @ts-expect-error state if defined for instantiated layer
               const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
-                transformTileCoordsToWGS84(feature, bbox, this.context!.viewport)
+                transformTileCoordsToWGS84(feature, bbox, this.context.viewport)
               );
             }
             return tile._contentWGS84;

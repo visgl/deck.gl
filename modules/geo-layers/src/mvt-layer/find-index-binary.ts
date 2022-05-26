@@ -22,7 +22,7 @@ export default function findIndexBinary(
   uniqueIdProperty: string,
   featureId: string | number,
   layerName: string
-) {
+): number {
   for (const gt of GEOM_TYPES) {
     const index = data[gt] && findIndexByType(data[gt], uniqueIdProperty, featureId, layerName);
     if (index >= 0) {
@@ -38,7 +38,7 @@ function findIndexByType(
   uniqueIdProperty: string,
   featureId: string | number,
   layerName: string
-) {
+): number {
   const featureIds = geomData.featureIds.value;
 
   if (!featureIds.length) {

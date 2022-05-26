@@ -22,14 +22,14 @@ import type Layer from '../layer';
 import type Viewport from '../../viewports/viewport';
 import type {PickedPixel} from './query-object';
 
-export interface PickingInfo<DataT = any> {
+export interface PickingInfo {
   color: Uint8Array | null;
   layer: Layer | null;
   sourceLayer?: Layer | null;
   viewport?: Viewport;
   index: number;
   picked: boolean;
-  object?: DataT;
+  object?: any;
   x: number;
   y: number;
   pixel?: [number, number];
@@ -38,8 +38,8 @@ export interface PickingInfo<DataT = any> {
   pixelRatio: number;
 }
 
-export interface GetPickingInfoParams<DataT = any> {
-  info: PickingInfo<DataT>;
+export interface GetPickingInfoParams {
+  info: PickingInfo;
   mode: string;
   sourceLayer: Layer | null;
 }
