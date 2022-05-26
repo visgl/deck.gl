@@ -647,9 +647,9 @@ Parameters:
 
 * `x` (Number) - x position in pixels
 * `y` (Number) - y position in pixels
-* `radius`=`0` (Number, optional) - radius of tolerance in pixels.
-* `layerIds`=`null` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
-* `depth`=`10` - Specifies the max
+* `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
+* `layerIds` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `depth` - Specifies the max number of objects to return. Default `10`.
 * `unproject3D` (Boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
 
 Returns:
@@ -676,6 +676,7 @@ Parameters:
 * `width` (Number, optional) - width of the bouding box in pixels. Default `1`.
 * `height` (Number, optional) - height of the bouding box in pixels. Default `1`.
 * `layerIds` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `maxObjects` (Number, optional) - if specified, limits the number of objects that can be returned.
 
 Returns:
 

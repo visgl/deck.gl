@@ -12,7 +12,7 @@
     {"path": "modules/core"},
     {"path": "modules/extensions"},
     // {"path": "modules/geo-layers"},
-    // {"path": "modules/google-maps"},
+    {"path": "modules/google-maps"},
     // {"path": "modules/json"},
     // {"path": "modules/jupyter-widget"},
     {"path": "modules/layers"},

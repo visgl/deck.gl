@@ -67,7 +67,7 @@ export default abstract class View<
     bottom: Position;
   } | null;
 
-  protected props: ViewProps & CommonViewProps<ViewState>;
+  readonly props: ViewProps & CommonViewProps<ViewState>;
 
   constructor(props: ViewProps & CommonViewProps<ViewState>) {
     const {

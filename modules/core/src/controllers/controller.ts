@@ -198,6 +198,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   finalize() {
     for (const eventName in this._events) {
       if (this._events[eventName]) {
+        // @ts-ignore (2345) event type string cannot be assifned to enum
         // eslint-disable-next-line @typescript-eslint/unbound-method
         this.eventManager?.off(eventName, this.handleEvent);
       }

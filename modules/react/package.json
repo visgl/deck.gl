@@ -26,7 +26,6 @@
   "sideEffects": false,
   "scripts": {},
   "dependencies": {
-    "prop-types": "^15.6.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
