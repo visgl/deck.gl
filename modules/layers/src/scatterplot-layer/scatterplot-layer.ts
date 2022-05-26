@@ -134,7 +134,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
     });
   }
 
-  updateState(params: UpdateParameters<ScatterplotLayer<DataT, ExtraPropsT>>) {
+  updateState(params: UpdateParameters<this>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {

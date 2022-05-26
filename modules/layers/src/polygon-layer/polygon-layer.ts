@@ -267,7 +267,6 @@ export default class PolygonLayer<DataT = any, ExtraProps = {}> extends Composit
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     if (geometryChanged && Array.isArray(changeFlags.dataChanged)) {
-      // @ts-expect-error state is always initialized on instantiated layer
       const paths = this.state.paths.slice();
       const pathsDiff = changeFlags.dataChanged.map(dataRange =>
         replaceInRange({
@@ -357,7 +356,6 @@ export default class PolygonLayer<DataT = any, ExtraProps = {}> extends Composit
       material
     } = this.props;
 
-    // @ts-expect-error state is always initialized on instantiated layer
     const {paths, pathsDiff} = this.state;
 
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);

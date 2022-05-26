@@ -20,7 +20,8 @@
   "module": "dist/esm/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "typed"
   ],
   "sideEffects": false,
   "scripts": {},

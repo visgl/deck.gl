@@ -21,6 +21,7 @@
   "files": [
     "dist",
     "src",
+    "typed",
     "debug.min.js",
     "dist.min.js"
   ],

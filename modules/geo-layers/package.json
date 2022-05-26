@@ -21,6 +21,7 @@
   "files": [
     "dist",
     "src",
+    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
