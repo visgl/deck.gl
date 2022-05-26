@@ -84,8 +84,9 @@ function resolveDoublePrecisionShaderAttributes(
 }
 
 export type DataColumnOptions<Options> = Options &
-  BufferAccessor & {
+  Omit<BufferAccessor, 'size'> & {
     id?: string;
+    size?: number;
     vertexOffset?: number;
     fp64?: boolean;
     logicalType?: number;
@@ -95,7 +96,7 @@ export type DataColumnOptions<Options> = Options &
 
 type DataColumnSettings<Options> = DataColumnOptions<Options> & {
   type: number;
-  size: 1 | 2 | 3 | 4;
+  size: number;
   logicalType?: number;
   bytesPerElement: number;
   defaultValue: number[];
@@ -114,7 +115,7 @@ type DataColumnInternalState<Options, State> = State & {
 export default class DataColumn<Options, State> implements IShaderAttribute {
   gl: WebGLRenderingContext;
   id: string;
-  size: 1 | 2 | 3 | 4;
+  size: number;
   settings: DataColumnSettings<Options>;
   value: NumericArray | null;
   doublePrecision: boolean;
@@ -260,7 +261,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (this.state.constant) {
       return this.value;
     }
-    return [this.getBuffer() as LumaBuffer, this.getAccessor()];
+    return [this.getBuffer() as LumaBuffer, this.getAccessor() as BufferAccessor];
   }
 
   getAccessor(): DataColumnSettings<Options> {
