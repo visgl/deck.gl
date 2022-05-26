@@ -27,7 +27,6 @@ const defaultProps = {
   interleaved: true
 };
 
-// TODO: this should be alias to Deck Props.
 export type GoogleMapsOverlayProps = DeckProps & {
   interleaved?: boolean;
 };

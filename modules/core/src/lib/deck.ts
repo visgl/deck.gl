@@ -101,7 +101,7 @@ export type DeckProps = {
    */
   height?: string | number | null;
   /** Additional CSS styles for the canvas. */
-  style?: any;
+  style?: Partial<CSSStyleDeclaration> | null;
 
   /** Controls the resolution of drawing buffer used for rendering.
    * @default `true` (use browser devicePixelRatio)
