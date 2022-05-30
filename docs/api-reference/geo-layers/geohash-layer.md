@@ -22,12 +22,12 @@ function App({data, viewState}) {
    * [
    *   {
    *     // Geohash in SF Bay Area
-   *     geohash: "023012010333",
-   *     value: 0.5979242952642347
+   *     geohash: "9q8yv",
+   *     value: 0.7668453218020029
    *   },
    *   {
-   *     geohash: "023012010332",
-   *     value: 0.5446256069712141
+   *     geohash: "9q8yyp",
+   *     value: 0.8789404786833306
    *   },
    *   ...
    * ]
