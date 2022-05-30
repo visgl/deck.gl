@@ -1,14 +1,35 @@
 import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GeohashLayer} from '@deck.gl/geo-layers';
-import {getGeohashPolygon} from '@deck.gl/geo-layers/geohash-layer/geohash-utils';
+import {getGeohashPolygon, getGeohashBounds} from '@deck.gl/geo-layers/geohash-layer/geohash-utils';
 
 const TEST_DATA = [
   {
-    geohash: '9q8yybj'
+    geohash: '9',
+    expectedBounds: [
+      0,
+      -135,
+      45,
+      -90
+    ]
   },
   {
-    geohash: '9q8yy'
+    geohash: '9q8yybj',
+    expectedBounds: [
+      37.7490234375,
+      -122.39181518554688,
+      37.750396728515625,
+      -122.39044189453125
+    ]
+  },
+  {
+    geohash: '9q8yy',
+    expectedBounds: [
+      37.7490234375,
+      -122.431640625,
+      37.79296875,
+      -122.3876953125
+    ]
   }
 ];
 
@@ -35,6 +56,15 @@ test('GeohashLayer', t => {
   });
 
   testLayer({Layer: GeohashLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('GeohashLayer#getGeohashBounds', t => {
+  for (const {geohash, expectedBounds} of TEST_DATA) {
+    const bounds = getGeohashBounds(geohash);
+    t.deepEquals(bounds, expectedBounds, 'Geohash bounds calculated');
+  }
 
   t.end();
 });
