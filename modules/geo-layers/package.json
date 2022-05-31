@@ -35,11 +35,13 @@
     "@loaders.gl/loader-utils": "^3.2.0-alpha.4",
     "@loaders.gl/mvt": "^3.2.0-alpha.4",
     "@loaders.gl/terrain": "^3.2.0-alpha.4",
+    "@loaders.gl/schema": "^3.2.0-alpha.4",
     "@loaders.gl/tiles": "^3.2.0-alpha.4",
     "@luma.gl/experimental": "^8.5.12",
     "@math.gl/core": "3.6.0-alpha.5",
     "@math.gl/culling": "3.6.0-alpha.5",
     "@math.gl/web-mercator": "3.6.0-alpha.5",
+    "@types/geojson": "^7946.0.8",
     "h3-js": "^3.6.0",
     "long": "^3.2.0"
   },

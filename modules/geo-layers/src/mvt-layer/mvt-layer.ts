@@ -1,16 +1,30 @@
-import {log} from '@deck.gl/core';
+import {
+  Layer,
+  LayersList,
+  log,
+  PickingInfo,
+  UpdateParameters,
+  GetPickingInfoParams,
+  Viewport,
+  COORDINATE_SYSTEM
+} from '@deck.gl/core';
+import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 
-import TileLayer from '../tile-layer/tile-layer';
-import {getURLFromTemplate, isURLTemplate} from '../tile-layer/utils';
+import type {Loader} from '@loaders.gl/loader-utils';
+import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {Feature} from 'geojson';
+
+import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
+import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
+import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
+import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
+import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
-
-import {GeoJsonLayer} from '@deck.gl/layers';
 
 const WORLD_SIZE = 512;
 
@@ -22,8 +36,61 @@ const defaultProps = {
   binary: true
 };
 
-export default class MVTLayer extends TileLayer {
-  initializeState() {
+export type TileJson = {
+  tilejson: string;
+  tiles: string[];
+  // eslint-disable-next-line camelcase
+  vector_layers: any[];
+  attribution?: string;
+  scheme?: string;
+  maxzoom?: number;
+  minzoom?: number;
+  version?: string;
+};
+
+type ParsedMvtTile = Feature[] | BinaryFeatures;
+
+/** All props supported by the MVTLayer */
+export type MVTLayerProps<DataT extends Feature = Feature> = _MVTLayerProps &
+  GeoJsonLayerProps<DataT> &
+  TileLayerProps<ParsedMvtTile>;
+
+/** Props added by the MVTLayer  */
+export type _MVTLayerProps = {
+  /** Called if `data` is a TileJSON URL when it is successfully fetched. */
+  onDataLoad?: ((tilejson: TileJson | null) => void) | null;
+
+  /** Needed for highlighting a feature split across two or more tiles. */
+  uniqueIdProperty?: string;
+
+  /** A feature with ID corresponding to the supplied value will be highlighted. */
+  highlightedFeatureId?: string | null;
+
+  /**
+   * Use tile data in binary format.
+   *
+   * @default true
+   */
+  binary?: boolean;
+
+  /**
+   * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
+   *
+   * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
+   */
+  loaders?: Loader[];
+};
+
+type ContentWGS84Cache = {_contentWGS84?: Feature[]};
+
+export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
+  ParsedMvtTile,
+  Required<_MVTLayerProps> & ExtraProps
+> {
+  static layerName = 'MVTLayer';
+  static defaultProps = defaultProps;
+
+  initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
     const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
@@ -34,16 +101,17 @@ export default class MVTLayer extends TileLayer {
     });
   }
 
-  get isLoaded() {
-    return this.state.data && this.state.tileset && super.isLoaded;
+  get isLoaded(): boolean {
+    return this.state && this.state.data && this.state.tileset && super.isLoaded;
   }
 
-  updateState({props, oldProps, context, changeFlags}) {
+  updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
     if (changeFlags.dataChanged) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();
     }
 
-    if (this.state.data) {
+    if (this.state?.data) {
       super.updateState({props, oldProps, context, changeFlags});
       this._setWGS84PropertyForTiles();
     }
@@ -54,22 +122,22 @@ export default class MVTLayer extends TileLayer {
   }
 
   /* eslint-disable complexity */
-  async _updateTileData() {
-    let {data} = this.props;
-    let tileJSON = null;
+  private async _updateTileData(): Promise<void> {
+    let data: any = this.props.data;
+    let tileJSON: any = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
       const {onDataLoad, fetch} = this.props;
       this.setState({data: null, tileJSON: null});
       try {
         tileJSON = await fetch(data, {propName: 'data', layer: this, loaders: []});
-      } catch (error) {
+      } catch (error: any) {
         this.raiseError(error, 'loading TileJSON');
         data = null;
       }
 
       if (onDataLoad) {
-        onDataLoad(tileJSON);
+        onDataLoad(tileJSON, {propName: 'data', layer: this});
       }
     } else if (data.tilejson) {
       tileJSON = data;
@@ -82,21 +150,21 @@ export default class MVTLayer extends TileLayer {
     this.setState({data, tileJSON});
   }
 
-  _getTilesetOptions() {
+  _getTilesetOptions(): Tileset2DProps {
     const opts = super._getTilesetOptions();
-    const {tileJSON} = this.state;
+    const tileJSON: TileJson | null | undefined = this.state.tileJSON;
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
-      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
-        opts.minZoom = tileJSON.minzoom;
+      if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
+        opts.minZoom = tileJSON.minzoom as number;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
+        (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
       ) {
-        opts.maxZoom = tileJSON.maxzoom;
+        opts.maxZoom = tileJSON.maxzoom as number;
       }
     }
     return opts;
@@ -104,20 +172,21 @@ export default class MVTLayer extends TileLayer {
 
   /* eslint-disable complexity */
 
-  renderLayers() {
-    if (!this.state.data) return null;
+  renderLayers(): Layer | null | LayersList {
+    if (!this.state?.data) return null;
     return super.renderLayers();
   }
 
-  getTileData(tile) {
-    const url = getURLFromTemplate(this.state.data, tile);
+  getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
+    const {data, binary} = this.state;
+    const {index, signal} = loadProps;
+
+    const url = getURLFromTemplate(data, loadProps);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
     let loadOptions = this.getLoadOptions();
-    const {binary} = this.state;
     const {fetch} = this.props;
-    const {signal, index} = tile;
     loadOptions = {
       ...loadOptions,
       mimeType: 'application/x-protobuf',
@@ -135,7 +204,14 @@ export default class MVTLayer extends TileLayer {
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
   }
 
-  renderSubLayers(props) {
+  renderSubLayers(
+    props: TileLayer['props'] & {
+      id: string;
+      data: any;
+      _offset: number;
+      tile: Tile2DHeader;
+    }
+  ): LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
 
@@ -165,7 +241,7 @@ export default class MVTLayer extends TileLayer {
     return subLayers;
   }
 
-  _updateAutoHighlight(info) {
+  protected _updateAutoHighlight(info: PickingInfo): void {
     const {uniqueIdProperty} = this.props;
 
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
@@ -194,14 +270,14 @@ export default class MVTLayer extends TileLayer {
     }
   }
 
-  getPickingInfo(params) {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
 
-    const isWGS84 = this.context.viewport.resolution;
+    const isWGS84 = Boolean(this.context.viewport.resolution);
 
     if (this.state.binary && info.index !== -1) {
-      const {data} = params.sourceLayer.props;
-      info.object = binaryToGeojson(data, {globalFeatureId: info.index});
+      const {data} = params.sourceLayer!.props;
+      info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
     }
     if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
@@ -210,14 +286,14 @@ export default class MVTLayer extends TileLayer {
     return info;
   }
 
-  getSubLayerPropsByTile(tile) {
+  getSubLayerPropsByTile(tile: Tile2DHeader): Record<string, any> {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       highlightColor: this.state.highlightColor
     };
   }
 
-  getHighlightedObjectIndex(tile) {
+  private getHighlightedObjectIndex(tile: Tile2DHeader): number {
     const {hoveredFeatureId, hoveredFeatureLayerName, binary} = this.state;
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const data = tile.content;
@@ -254,42 +330,44 @@ export default class MVTLayer extends TileLayer {
     return -1;
   }
 
-  _pickObjects(maxObjects) {
+  private _pickObjects(maxObjects: number | null): PickingInfo[] {
     const {deck, viewport} = this.context;
     const width = viewport.width;
     const height = viewport.height;
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
+    return deck!.pickObjects({x, y, width, height, layerIds, maxObjects});
   }
 
-  getRenderedFeatures(maxFeatures = null) {
+  /** Get the rendered features in the current viewport. */
+  getRenderedFeatures(maxFeatures: number | null = null): DataT[] {
     const features = this._pickObjects(maxFeatures);
     const featureCache = new Set();
-    const renderedFeatures = [];
+    const renderedFeatures: DataT[] = [];
 
     for (const f of features) {
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
       if (featureId === undefined) {
         // we have no id for the feature, we just add to the list
-        renderedFeatures.push(f.object);
+        renderedFeatures.push(f.object as DataT);
       } else if (!featureCache.has(featureId)) {
         // Add removing duplicates
         featureCache.add(featureId);
-        renderedFeatures.push(f.object);
+        renderedFeatures.push(f.object as DataT);
       }
     }
 
     return renderedFeatures;
   }
 
-  _setWGS84PropertyForTiles() {
+  private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const {tileset} = this.state;
+    const tileset: Tileset2D = this.state.tileset;
 
-    tileset.selectedTiles.forEach(tile => {
+    // @ts-expect-error selectedTiles are always initialized when tile is being processed
+    tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {
@@ -305,11 +383,13 @@ export default class MVTLayer extends TileLayer {
               return [];
             }
 
-            if (tile._contentWGS84 === undefined) {
+            const {bbox} = tile;
+            if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
+
               const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
-                transformTileCoordsToWGS84(feature, tile.bbox, this.context.viewport)
+                transformTileCoordsToWGS84(feature, bbox, this.context.viewport)
               );
             }
             return tile._contentWGS84;
@@ -320,8 +400,8 @@ export default class MVTLayer extends TileLayer {
   }
 }
 
-function getFeatureUniqueId(feature, uniqueIdProperty) {
-  if (uniqueIdProperty) {
+function getFeatureUniqueId(feature: Feature, uniqueIdProperty: string | undefined) {
+  if (feature.properties && uniqueIdProperty) {
     return feature.properties[uniqueIdProperty];
   }
 
@@ -332,15 +412,19 @@ function getFeatureUniqueId(feature, uniqueIdProperty) {
   return undefined;
 }
 
-function getFeatureLayerName(feature) {
+function getFeatureLayerName(feature: Feature): string | null {
   return feature.properties?.layerName || null;
 }
 
-function isFeatureIdDefined(value) {
+function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(object, bbox, viewport) {
+function transformTileCoordsToWGS84(
+  object: Feature,
+  bbox: GeoBoundingBox,
+  viewport: Viewport
+): Feature {
   const feature = {
     ...object,
     geometry: {
@@ -356,8 +440,5 @@ function transformTileCoordsToWGS84(object, bbox, viewport) {
     }
   });
 
-  return feature;
+  return feature as Feature;
 }
-
-MVTLayer.layerName = 'MVTLayer';
-MVTLayer.defaultProps = defaultProps;

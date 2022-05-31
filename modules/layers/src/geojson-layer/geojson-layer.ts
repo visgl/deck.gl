@@ -24,7 +24,6 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   Layer,
-  log,
   PickingInfo,
   Unit,
   UpdateParameters,
