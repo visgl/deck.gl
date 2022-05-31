@@ -57,7 +57,7 @@ type _ScenegraphLayerProps<DataT> = {
    */
   scenegraph: any;
   /**
-   * Create a luma.gl ScenegraphNode from the resolved scenegraph prop
+   * Create a luma.gl GroupNode from the resolved scenegraph prop
    */
   getScene?: (
     scenegraph: any,
