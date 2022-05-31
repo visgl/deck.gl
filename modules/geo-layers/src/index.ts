@@ -37,8 +37,5 @@ export {default as _Tile2DHeader} from './tile-layer/tile-2d-header';
 // Types
 export type {TileLayerProps} from './tile-layer/tile-layer';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
-export type {
-  TileLoadProps as _TileLoadProps,
-  GeoBoundingBox as _GeoBoundingBox
-} from './tile-layer/types';
+export type {TileLoadProps as _TileLoadProps} from './tile-layer/types';
 export type {MVTLayerProps} from './mvt-layer/mvt-layer';

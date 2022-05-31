@@ -4,8 +4,8 @@ import {Layer, LayersList, log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
+  MVTLayerProps,
   TileLayer,
-  _GeoBoundingBox,
   _getURLFromTemplate,
   _Tile2DHeader,
   _TileLoadProps as TileLoadProps
@@ -85,14 +85,25 @@ const defaultProps = {
   loaders: [CartoTileLoader]
 };
 
-export type CartoTileLayerProps = {
-  formatTiles: TileFormat;
+/** All properties supported by CartoTileLayer. */
+export type CartoTileLayerProps<DataT extends Feature = Feature> = _CartoTileLayerProps &
+  MVTLayerProps<DataT>;
+
+/** Properties added by CartoTileLayer. */
+type _CartoTileLayerProps = {
+  /** Use to override the default tile data format.
+   *
+   * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
+   *
+   * Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`.
+   * */
+  formatTiles?: TileFormat;
 };
 
-export default class CartoTileLayer<DataT extends Feature = Feature> extends MVTLayer<
-  DataT,
-  Required<CartoTileLayerProps>
-> {
+export default class CartoTileLayer<
+  DataT extends Feature = Feature,
+  ExtraProps = {}
+> extends MVTLayer<DataT, Required<_CartoTileLayerProps> & ExtraProps> {
   static layerName = 'CartoTileLayer';
   static defaultProps = defaultProps;
 
@@ -129,7 +140,7 @@ export default class CartoTileLayer<DataT extends Feature = Feature> extends MVT
       _offset: number;
       tile: _Tile2DHeader;
     }
-  ): Layer | null | LayersList {
+  ): GeoJsonLayer | null {
     if (props.data === null) {
       return null;
     }
