@@ -13,7 +13,7 @@ import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/
 export type BufferAccessor = {
   // WebGL attribute pointer parameters
   type?: number;
-  size?: 1 | 2 | 3 | 4;
+  size?: number;
   divisor?: number;
   offset?: number;
   stride?: number;
@@ -84,9 +84,8 @@ function resolveDoublePrecisionShaderAttributes(
 }
 
 export type DataColumnOptions<Options> = Options &
-  Omit<BufferAccessor, 'size'> & {
+  BufferAccessor & {
     id?: string;
-    size?: number;
     vertexOffset?: number;
     fp64?: boolean;
     logicalType?: number;
