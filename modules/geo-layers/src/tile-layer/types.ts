@@ -16,4 +16,6 @@ export type TileLoadProps = {
   bbox: TileBoundingBox;
   url?: string | null;
   signal?: AbortSignal;
+  userData?: Record<string, any>;
+  zoom?: number;
 };

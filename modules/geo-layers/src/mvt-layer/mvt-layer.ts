@@ -18,7 +18,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
-import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
+import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
 import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
 import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
@@ -207,9 +207,9 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
   renderSubLayers(
     props: TileLayer['props'] & {
       id: string;
-      data: any;
+      data: ParsedMvtTile;
       _offset: number;
-      tile: Tile2DHeader;
+      tile: Tile2DHeader<ParsedMvtTile>;
     }
   ): LayersList {
     const {x, y, z} = props.tile.index;
@@ -270,7 +270,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     }
   }
 
-  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
+  getPickingInfo(params: GetPickingInfoParams): TiledPickingInfo {
     const info = super.getPickingInfo(params);
 
     const isWGS84 = Boolean(this.context.viewport.resolution);
@@ -280,20 +280,24 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
       info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
     }
     if (info.object && !isWGS84) {
-      info.object = transformTileCoordsToWGS84(info.object, info.tile.bbox, this.context.viewport);
+      info.object = transformTileCoordsToWGS84(
+        info.object,
+        info.tile!.bbox as GeoBoundingBox,
+        this.context.viewport
+      );
     }
 
     return info;
   }
 
-  getSubLayerPropsByTile(tile: Tile2DHeader): Record<string, any> {
+  getSubLayerPropsByTile(tile: Tile2DHeader<ParsedMvtTile>): Record<string, any> {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       highlightColor: this.state.highlightColor
     };
   }
 
-  private getHighlightedObjectIndex(tile: Tile2DHeader): number {
+  private getHighlightedObjectIndex(tile: Tile2DHeader<ParsedMvtTile>): number {
     const {hoveredFeatureId, hoveredFeatureLayerName, binary} = this.state;
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const data = tile.content;
