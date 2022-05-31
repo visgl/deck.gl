@@ -235,7 +235,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT = {}> extends Laye
     this._deleteScenegraph();
   }
 
-  private _updateScenegraph() {
+  private _updateScenegraph(): void {
     const props = this.props;
     const {gl} = this.context;
     let scenegraphData: any = null;
