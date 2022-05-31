@@ -55,11 +55,11 @@ type _IconLayerProps<DataT> = {
    */
   sizeUnits?: Unit;
   /**
-   * The minimum size in pixels.
+   * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
   sizeMinPixels?: number;
   /**
-   * The maximum size in pixels.
+   * The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
    */
   sizeMaxPixels?: number;
   /** If `true`, the icon always faces camera. Otherwise the icon faces up (z)

@@ -311,7 +311,7 @@ export default class IconManager {
   }
 
   getIconMapping(icon: string | UnpackedIcon): PrepackedIcon {
-    const id = typeof icon === 'string' ? icon : getIconId(icon);
+    const id = this._autoPacking ? getIconId(icon as UnpackedIcon) : (icon as string);
     return this._mapping[id] || {};
   }
 
