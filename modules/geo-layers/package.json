@@ -37,7 +37,7 @@
     "@loaders.gl/terrain": "^3.2.0-alpha.4",
     "@loaders.gl/schema": "^3.2.0-alpha.4",
     "@loaders.gl/tiles": "^3.2.0-alpha.4",
-    "@luma.gl/experimental": "^8.5.12",
+    "@luma.gl/experimental": "^8.5.13",
     "@math.gl/core": "3.6.0-alpha.5",
     "@math.gl/culling": "3.6.0-alpha.5",
     "@math.gl/web-mercator": "3.6.0-alpha.5",

@@ -5,7 +5,7 @@ import type {ConstructorOf, NumericArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -57,6 +57,15 @@ export type Color =
  * See https://deck.gl/docs/developer-guide/coordinate-systems#dimensions
  */
 export type Unit = 'meters' | 'common' | 'pixels';
+
+export type Texture =
+  | Texture2D
+  | Texture2DProps
+  | HTMLImageElement
+  | ImageData
+  | HTMLCanvasElement
+  | HTMLVideoElement
+  | ImageBitmap;
 
 /** Supply binary buffers directly to the layer */
 type BinaryAttribute =
