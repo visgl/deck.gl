@@ -53,7 +53,7 @@ export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & L
 type _ScenegraphLayerProps<DataT> = {
   // TODO - define in luma.gl
   /**
-   * A url to glTF model or scenegraph loaded via a [scenegraph loader](https://loaders.gl/docs/specifications/category-scenegraph)
+   * A url for a glTF model or scenegraph loaded via a [scenegraph loader](https://loaders.gl/docs/specifications/category-scenegraph)
    */
   scenegraph: any;
   /**
