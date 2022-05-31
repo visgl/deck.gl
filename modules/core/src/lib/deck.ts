@@ -61,6 +61,7 @@ import type {LayersList} from './layer-manager';
 
 /* global document */
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
@@ -221,8 +222,6 @@ export type DeckProps = {
   debug?: boolean;
   /** (Debug) Render the picking buffer to screen. */
   drawPickingColors?: boolean;
-  /** (Debug) Disable drawing buffer resize */
-  autoResizeDrawingBuffer?: boolean;
 };
 
 const defaultProps = {
@@ -251,7 +250,6 @@ const defaultProps = {
   _pickable: true,
   _typedArrayManagerProps: {},
   _customRender: null,
-  _autoResizeDrawingBuffer: true,
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -272,8 +270,7 @@ const defaultProps = {
   getTooltip: null,
 
   debug: false,
-  drawPickingColors: false,
-  autoResizeDrawingBuffer: true
+  drawPickingColors: false
 };
 
 /* eslint-disable max-statements */
@@ -739,15 +736,13 @@ export default class Deck {
       onError,
       onBeforeRender,
       onAfterRender,
-      useDevicePixels,
-      autoResizeDrawingBuffer
+      useDevicePixels
     } = props;
 
     return new AnimationLoop({
       width,
       height,
       useDevicePixels,
-      // autoResizeDrawingBuffer,
       autoResizeViewport: false,
       gl,
       onCreateContext: opts =>
@@ -952,6 +947,7 @@ export default class Deck {
     redrawReason: string,
     renderOptions?: {
       target?: Framebuffer;
+      layerFilter?: (context: FilterContext) => boolean;
       layers?: Layer[];
       viewports?: Viewport[];
       views?: {[viewId: string]: View};

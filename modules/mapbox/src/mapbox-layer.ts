@@ -1,8 +1,21 @@
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
+import type {Map, CustomLayerInterface} from 'mapbox-gl';
+import type {Deck, Layer} from '@deck.gl/core';
 
-export default class MapboxLayer {
+export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
+  id: string;
+};
+
+export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInterface {
+  id: string;
+  type: 'custom';
+  renderingMode: '2d' | '3d';
+  map: Map | null;
+  deck: Deck | null;
+  props: MapboxLayerProps<LayerT>;
+
   /* eslint-disable no-this-before-super */
-  constructor(props) {
+  constructor(props: MapboxLayerProps<LayerT>) {
     if (!props.id) {
       throw new Error('Layer must have an unique id');
     }
@@ -17,17 +30,19 @@ export default class MapboxLayer {
 
   /* Mapbox custom layer methods */
 
-  onAdd(map, gl) {
+  onAdd(map: Map, gl: WebGLRenderingContext): void {
     this.map = map;
     this.deck = getDeckInstance({map, gl, deck: this.props.deck});
     addLayer(this.deck, this);
   }
 
-  onRemove() {
-    removeLayer(this.deck, this);
+  onRemove(): void {
+    if (this.deck) {
+      removeLayer(this.deck, this);
+    }
   }
 
-  setProps(props) {
+  setProps(props: MapboxLayerProps<LayerT>) {
     // id cannot be changed
     Object.assign(this.props, props, {id: this.id});
     // safe guard in case setProps is called before onAdd
@@ -36,7 +51,7 @@ export default class MapboxLayer {
     }
   }
 
-  render(gl, matrix) {
-    drawLayer(this.deck, this.map, this);
+  render() {
+    drawLayer(this.deck!, this.map!, this);
   }
 }
