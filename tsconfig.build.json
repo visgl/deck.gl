@@ -17,7 +17,7 @@
     // {"path": "modules/jupyter-widget"},
     {"path": "modules/layers"},
     // {"path": "modules/main"},
-    // {"path": "modules/mapbox"},
+    {"path": "modules/mapbox"},
     // {"path": "modules/mesh-layers"},
     {"path": "modules/react"},
     // {"path": "modules/test-utils"}
