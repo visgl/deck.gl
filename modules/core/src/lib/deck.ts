@@ -61,6 +61,7 @@ import type {LayersList} from './layer-manager';
 
 /* global document */
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');

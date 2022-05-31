@@ -1,4 +1,4 @@
-import {Deck, WebMercatorViewport, MapView} from '@deck.gl/core';
+import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
 import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
@@ -15,14 +15,12 @@ export function getDeckInstance({
   gl,
   deck
 }: {
-  map: Map;
+  map: Map & {__deck?: Deck | null};
   gl: WebGLRenderingContext;
   deck?: Deck;
 }): Deck {
   // Only create one deck instance per context
-  // @ts-expect-error (2339) undefined property
   if (map.__deck) {
-    // @ts-expect-error (2339) undefined property
     return map.__deck;
   }
 
@@ -71,14 +69,12 @@ export function getDeckInstance({
     deck = new Deck(deckProps);
     map.on('remove', () => {
       deck!.finalize();
-      // @ts-expect-error (2339) undefined property
       map.__deck = null;
     });
   }
 
   (deck.userData as UserData).mapboxLayers = new Set();
   (deck.userData as UserData).mapboxVersion = getMapboxVersion(map);
-  // @ts-expect-error (2339) undefined property
   map.__deck = deck;
   map.on('render', () => {
     // @ts-expect-error (2445) protected property
@@ -186,11 +182,9 @@ function afterRender(deck: Deck, map: Map): void {
   if (isExternal) {
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    const hasNonMapboxLayers = deck.props.layers.some(
-      layer =>
-        layer &&
-        // @ts-ignore (2339) id does not exist on Layer[]
-        !mapboxLayerIds.includes(layer.id)
+    const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
+    const hasNonMapboxLayers = deckLayers.some(
+      layer => layer && !mapboxLayerIds.includes(layer.id)
     );
     let viewports = deck.getViewports();
     const mapboxViewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
