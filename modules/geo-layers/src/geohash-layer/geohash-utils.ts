@@ -10,7 +10,7 @@ const MIN_LON = -180;
 const MAX_LON = 180;
 
 // Adapted from ngeohash decode_bbox
-function getGeohashBounds(geohash: string): number[] {
+export function getGeohashBounds(geohash: string): number[] {
   let isLon = true;
   let maxLat = MAX_LAT;
   let minLat = MIN_LAT;
