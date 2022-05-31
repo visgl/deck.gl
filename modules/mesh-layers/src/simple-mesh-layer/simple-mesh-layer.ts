@@ -44,7 +44,7 @@ import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} f
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 
-function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean) {
+function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
   const useColorAttribute = hasColorAttribute && useMeshColors;
   if (!useColorAttribute) {
