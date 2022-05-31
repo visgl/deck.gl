@@ -81,7 +81,7 @@ export function getSourceBufferAttribute(
         divisor: 0,
         size: attribute.size,
         normalized: attribute.settings.normalized
-      }
+      } as BufferAccessor
     ];
   }
   // constant

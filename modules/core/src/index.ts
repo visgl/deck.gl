@@ -118,7 +118,8 @@ export type {
   LayerData,
   Unit,
   Position,
-  Color
+  Color,
+  Texture
 } from './types/layer-props';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
