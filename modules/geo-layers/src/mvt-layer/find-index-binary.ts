@@ -133,7 +133,7 @@ function findIndex<T>(
   predicate: (v: T, index: number) => boolean,
   startIndex: number,
   endIndex: number
-) {
+): number {
   for (let i = startIndex; i < endIndex; i++) {
     if (predicate(array[i], i)) {
       return i;
