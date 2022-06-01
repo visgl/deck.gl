@@ -21,6 +21,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-alpha.5] - Jun 1 2022
+
+- [ts] CartoTileLayer and utilities (#6891)
+- [ts] mesh layers (#6956)
+- [ts] Tile2DHeader generic (#6889)
+- [ts] mapbox module (#6957)
+- [ts] MVTLayer (#6842)
+- [ts] Deck class (#6947)
+- Add optional types entry point (#6946)
+- [ts] Handle nullable layer members in layer code (#6932)
+- Create separate basemap docs by provider (#6294)
+- [ts] GeoJsonLayer (#6940)
+- CARTO: fix spatial index H3tileLayer id (#6945,#6937)
+- chore(luma.gl): bump version to 8.5.12 (#6914)
+- Remove layer-specific logic from Component class (#6933)
+- Fix typo in mapbox access token (#6939)
+
 #### deck.gl [8.8.0-alpha.4] - May 20 2022
 
 - CARTO: Fix autohighlighting in spatial index tile layers (#6928)
