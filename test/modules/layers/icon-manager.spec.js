@@ -233,12 +233,11 @@ test('IconManager#events', t => {
 
   iconManager.setProps({
     autoPacking: true,
-    loadOptions: {},
-    data: [{id: 0}],
-    getIcon: d => ({
-      url: 'icon.png',
-      width: 64,
-      height: 64
-    })
+    loadOptions: {}
   });
+  iconManager.packIcons([{id: 0}], d => ({
+    url: 'icon.png',
+    width: 64,
+    height: 64
+  }));
 });
