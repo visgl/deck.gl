@@ -265,8 +265,6 @@ export default class IconManager {
   private onUpdate: () => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
-  private _getIcon: AccessorFunction<any, UnpackedIcon> | null = null;
-
   private _texture: Texture2D | null = null;
   private _externalTexture: Texture2D | null = null;
   private _mapping: IconMapping = {};
@@ -319,16 +317,12 @@ export default class IconManager {
     loadOptions,
     autoPacking,
     iconAtlas,
-    iconMapping,
-    data,
-    getIcon
+    iconMapping
   }: {
     loadOptions?: any;
     autoPacking?: boolean;
     iconAtlas?: Texture2D | null;
-    iconMapping?: IconMapping;
-    data?: any;
-    getIcon?: AccessorFunction<any, UnpackedIcon>;
+    iconMapping?: IconMapping | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
@@ -338,22 +332,14 @@ export default class IconManager {
       this._autoPacking = autoPacking;
     }
 
-    if (getIcon) {
-      this._getIcon = getIcon;
-    }
-
     if (iconMapping) {
       this._mapping = iconMapping;
     }
 
     if (iconAtlas) {
-      this._updateIconAtlas(iconAtlas);
-    }
-
-    if (this._autoPacking && (data || getIcon) && typeof document !== 'undefined') {
-      this._canvas = this._canvas || document.createElement('canvas');
-
-      this._updateAutoPacking(data);
+      this._texture?.delete();
+      this._texture = null;
+      this._externalTexture = iconAtlas;
     }
   }
 
@@ -361,15 +347,12 @@ export default class IconManager {
     return this._pendingCount === 0;
   }
 
-  private _updateIconAtlas(iconAtlas: Texture2D | null): void {
-    this._texture?.delete();
-    this._texture = null;
-    this._externalTexture = iconAtlas;
-    this.onUpdate();
-  }
+  packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): void {
+    if (!this._autoPacking || typeof document === 'undefined') {
+      return;
+    }
 
-  private _updateAutoPacking(data: any): void {
-    const icons = Object.values(getDiffIcons(data, this._getIcon, this._mapping) || {});
+    const icons = Object.values(getDiffIcons(data, getIcon, this._mapping) || {});
 
     if (icons.length > 0) {
       // generate icon mapping
@@ -405,6 +388,7 @@ export default class IconManager {
       this.onUpdate();
 
       // load images
+      this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
     }
   }

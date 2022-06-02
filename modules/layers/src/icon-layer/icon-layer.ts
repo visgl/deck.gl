@@ -155,6 +155,11 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   static defaultProps = defaultProps;
   static layerName = 'IconLayer';
 
+  state!: {
+    model?: Model;
+    iconManager: IconManager;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
@@ -233,39 +238,27 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {iconAtlas, iconMapping, data, getIcon} = props;
     const {iconManager} = this.state;
 
-    iconManager.setProps({loadOptions: props.loadOptions});
-
-    let iconMappingChanged = false;
     // internalState is always defined during updateState
     const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
+    iconManager.setProps({
+      loadOptions: props.loadOptions,
+      autoPacking: !prePacked,
+      iconAtlas,
+      iconMapping: iconMapping as IconMapping
+    });
 
     // prepacked iconAtlas from user
     if (prePacked) {
-      if (oldProps.iconAtlas !== props.iconAtlas) {
-        iconManager.setProps({iconAtlas, autoPacking: false});
-      }
-
       if (oldProps.iconMapping !== props.iconMapping) {
-        iconManager.setProps({iconMapping});
-        iconMappingChanged = true;
+        attributeManager!.invalidate('getIcon');
       }
-    } else {
-      // otherwise, use autoPacking
-      iconManager.setProps({autoPacking: true});
-    }
-
-    if (
+    } else if (
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
-      iconManager.setProps({data, getIcon});
-    }
-
-    if (iconMappingChanged) {
-      attributeManager!.invalidate('instanceOffsets');
-      attributeManager!.invalidate('instanceIconFrames');
-      attributeManager!.invalidate('instanceColorModes');
+      // Auto packing - getIcon is expected to return an object
+      iconManager.packIcons(data, getIcon as AccessorFunction<any, UnpackedIcon>);
     }
 
     if (changeFlags.extensionsChanged) {
@@ -281,13 +274,13 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     return super.isLoaded && this.state.iconManager.isLoaded;
   }
 
-  finalizeState(context: LayerContext) {
+  finalizeState(context: LayerContext): void {
     super.finalizeState(context);
     // Release resources held by the icon manager
     this.state.iconManager.finalize();
   }
 
-  draw({uniforms}) {
+  draw({uniforms}): void {
     const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
     const {iconManager} = this.state;
 
@@ -309,7 +302,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
   }
 
-  protected _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
@@ -332,31 +325,36 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     });
   }
 
-  private _onUpdate() {
+  private _onUpdate(): void {
     this.setNeedsRedraw();
   }
 
-  private _onError(evt) {
+  private _onError(evt: LoadIconErrorContext): void {
     const onIconError = this.getCurrentLayer()?.props.onIconError;
     if (onIconError) {
       onIconError(evt);
     } else {
-      log.error(evt.error)();
+      log.error(evt.error.message)();
     }
   }
 
-  protected getInstanceOffset(icon) {
-    const rect = this.state.iconManager.getIconMapping(icon);
-    return [rect.width / 2 - rect.anchorX || 0, rect.height / 2 - rect.anchorY || 0];
+  protected getInstanceOffset(icon: string): [number, number] {
+    const {
+      width,
+      height,
+      anchorX = width / 2,
+      anchorY = height / 2
+    } = this.state.iconManager.getIconMapping(icon);
+    return [width / 2 - anchorX, height / 2 - anchorY];
   }
 
-  protected getInstanceColorMode(icon) {
+  protected getInstanceColorMode(icon: string): number {
     const mapping = this.state.iconManager.getIconMapping(icon);
     return mapping.mask ? 1 : 0;
   }
 
-  protected getInstanceIconFrame(icon) {
-    const rect = this.state.iconManager.getIconMapping(icon);
-    return [rect.x || 0, rect.y || 0, rect.width || 0, rect.height || 0];
+  protected getInstanceIconFrame(icon: string): [number, number, number, number] {
+    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
+    return [x, y, width, height];
   }
 }
