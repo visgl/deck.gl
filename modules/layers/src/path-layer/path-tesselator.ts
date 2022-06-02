@@ -20,13 +20,30 @@
 import {Tesselator} from '@deck.gl/core';
 import {normalizePath} from './path';
 
+import type {TypedArray} from '@math.gl/core';
+import type {
+  PathGeometry,
+  FlatPathGeometry,
+  NestedPathGeometry,
+  NormalizedPathGeometry
+} from './path';
+
 const START_CAP = 1;
 const END_CAP = 2;
 const INVALID = 4;
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
-export default class PathTesselator extends Tesselator {
+export default class PathTesselator extends Tesselator<
+  PathGeometry,
+  NormalizedPathGeometry,
+  {
+    fp64?: boolean;
+    resolution?: number;
+    wrapLongitude?: boolean;
+    loop?: boolean;
+  }
+> {
   constructor(opts) {
     super({
       ...opts,
@@ -44,67 +61,82 @@ export default class PathTesselator extends Tesselator {
     });
   }
 
-  getGeometryFromBuffer(buffer) {
+  /** Get packed attribute by name */
+  get(attributeName: string): TypedArray | null {
+    return this.attributes[attributeName];
+  }
+
+  /* Implement base Tesselator interface */
+  protected getGeometryFromBuffer(buffer) {
     if (this.normalize) {
       return super.getGeometryFromBuffer(buffer);
     }
     // we don't need to read the positions if no normalization
-    return () => null;
+    return null;
   }
 
-  normalizeGeometry(path) {
+  /* Implement base Tesselator interface */
+  protected normalizeGeometry(path: PathGeometry): number[][] | PathGeometry {
     if (this.normalize) {
       return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
     return path;
   }
 
-  /* Getters */
-  get(attributeName) {
-    return this.attributes[attributeName];
-  }
-
   /* Implement base Tesselator interface */
-  getGeometrySize(path) {
+  protected getGeometrySize(path: PathGeometry): number {
     if (Array.isArray(path[0])) {
       let size = 0;
-      for (const subPath of path) {
+      for (const subPath of path as NestedPathGeometry) {
         size += this.getGeometrySize(subPath);
       }
       return size;
     }
-    const numPoints = this.getPathLength(path);
+    const numPoints = this.getPathLength(path as FlatPathGeometry);
     if (numPoints < 2) {
       // invalid path
       return 0;
     }
-    if (this.isClosed(path)) {
+    if (this.isClosed(path as FlatPathGeometry)) {
       // minimum 3 vertices
       return numPoints < 3 ? 0 : numPoints + 2;
     }
     return numPoints;
   }
 
-  updateGeometryAttributes(path, context) {
-    if (context.geometrySize === 0) {
+  /* Implement base Tesselator interface */
+  protected updateGeometryAttributes(
+    path: NormalizedPathGeometry | null,
+    context: {
+      vertexStart: number;
+      geometrySize: number;
+    }
+  ): void {
+    if (context.geometrySize === 0 ) {
       return;
     }
     if (path && Array.isArray(path[0])) {
-      for (const subPath of path) {
+      for (const subPath of path as FlatPathGeometry[]) {
         const geometrySize = this.getGeometrySize(subPath);
         context.geometrySize = geometrySize;
         this.updateGeometryAttributes(subPath, context);
         context.vertexStart += geometrySize;
       }
     } else {
-      this._updateSegmentTypes(path, context);
-      this._updatePositions(path, context);
+      this._updateSegmentTypes(path as FlatPathGeometry, context);
+      this._updatePositions(path as FlatPathGeometry, context);
     }
   }
 
-  _updateSegmentTypes(path, context) {
-    const {segmentTypes} = this.attributes;
-    const isPathClosed = this.isClosed(path);
+  private _updateSegmentTypes(
+    path: FlatPathGeometry | null,
+    context: {
+      vertexStart: number;
+      geometrySize: number;
+    }
+  ) {
+    const segmentTypes = this.attributes.segmentTypes as TypedArray;
+    const isPathClosed = path ? this.isClosed(path) : false;
     const {vertexStart, geometrySize} = context;
 
     // positions   --  A0 A1 B0 B1 B2 B3 B0 B1 B2 --
@@ -120,9 +152,15 @@ export default class PathTesselator extends Tesselator {
     segmentTypes[vertexStart + geometrySize - 1] = INVALID;
   }
 
-  _updatePositions(path, context) {
+  private _updatePositions(
+    path: FlatPathGeometry | null,
+    context: {
+      vertexStart: number;
+      geometrySize: number;
+    }
+  ) {
     const {positions} = this.attributes;
-    if (!positions) {
+    if (!positions || !path) {
       return;
     }
     const {vertexStart, geometrySize} = context;
@@ -138,14 +176,14 @@ export default class PathTesselator extends Tesselator {
     }
   }
 
-  /* Utilities */
-  // Returns the number of points in the path
-  getPathLength(path) {
+  // Utilities
+  /** Returns the number of points in the path */
+  private getPathLength(path: FlatPathGeometry): number {
     return path.length / this.positionSize;
   }
 
-  // Returns a point on the path at the specified index
-  getPointOnPath(path, index, target = []) {
+  /** Returns a point on the path at the specified index */
+  private getPointOnPath(path: FlatPathGeometry, index: number, target: number[] = []): number[] {
     const {positionSize} = this;
     if (index * positionSize >= path.length) {
       // loop
@@ -159,9 +197,9 @@ export default class PathTesselator extends Tesselator {
   }
 
   // Returns true if the first and last points are identical
-  isClosed(path) {
+  private isClosed(path: FlatPathGeometry): boolean {
     if (!this.normalize) {
-      return this.opts.loop;
+      return this.opts.loop as boolean;
     }
     const {positionSize} = this;
     const lastPointIndex = path.length - positionSize;
