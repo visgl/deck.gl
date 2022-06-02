@@ -22,7 +22,7 @@
   "resolutions": {
     "acorn": "7.4.1",
     "prettier": "^2.4.1",
-    "@math.gl/core": "3.6.0-alpha.5"
+    "@math.gl/core": "3.6.0-alpha.6"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
