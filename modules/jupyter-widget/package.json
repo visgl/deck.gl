@@ -36,7 +36,7 @@
     "@deck.gl/json": "8.8.0-alpha.6",
     "@deck.gl/layers": "8.8.0-alpha.6",
     "@deck.gl/mesh-layers": "8.8.0-alpha.6",
-    "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3",
+    "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",
     "@loaders.gl/3d-tiles": "^3.2.0",
     "@loaders.gl/core": "^3.2.0",
     "@loaders.gl/csv": "^3.2.0",
@@ -44,7 +44,13 @@
     "mapbox-gl": "^1.2.1"
   },
   "jupyterlab": {
-    "extension": "src/plugin"
+    "extension": "src/plugin",
+    "sharedPackages": {
+      "@jupyter-widgets/base": {
+        "bundled": false,
+        "singleton": true
+      }
+    }
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
