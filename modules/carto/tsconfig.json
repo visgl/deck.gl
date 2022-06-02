@@ -9,6 +9,7 @@
   },
   "references": [
     {"path": "../core"},
+    {"path": "../aggregation-layers"},
     {"path": "../geo-layers"},
     {"path": "../layers"}
   ]

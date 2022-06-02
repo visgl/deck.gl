@@ -66,7 +66,11 @@ const defaultProps = {
   aggregationResLevel: null
 };
 
-export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
+/** All properties supported by CartoLayer. */
+export type CartoLayerProps<DataT = any> = _CartoLayerProps & CompositeLayerProps<DataT>;
+
+/** Properties added by CartoLayer. */
+type _CartoLayerProps = {
   /**
    * Either a SQL query or a name of dataset/tileset.
    */
@@ -147,9 +151,11 @@ export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT>
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
-}
+};
 
-export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerProps<DataT>> {
+export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
+  Required<_CartoLayerProps> & ExtraProps
+> {
   static layerName = 'CartoLayer';
   static defaultProps = defaultProps as any;
 
@@ -276,7 +282,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {data: _notUsed, ...propsNoData} = this.props;
-    const props = {uniqueIdProperty, ...propsNoData};
+    const props = {...propsNoData, uniqueIdProperty};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
       return [MVTLayer, props];
