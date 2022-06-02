@@ -2,6 +2,7 @@
 name = "pydeck"
 version = "0.3.0"
 
+[build-system]
 requires = [
     "setuptools",
     "wheel",
