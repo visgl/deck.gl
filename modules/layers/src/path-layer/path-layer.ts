@@ -18,27 +18,102 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
-
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
+import type {
+  LayerProps,
+  Color,
+  Accessor,
+  AccessorFunction,
+  Unit,
+  UpdateParameters,
+  GetPickingInfoParams,
+  PickingInfo
+} from '@deck.gl/core';
+import type {PathGeometry} from './path';
+
+type _PathLayerProps<DataT> = {
+  /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
+   * @default 'meters'
+   */
+  widthUnits?: Unit;
+  /**
+   * Path width multiplier.
+   * @default 1
+   */
+  widthScale?: number;
+  /**
+   * The minimum path width in pixels. This prop can be used to prevent the path from getting too thin when zoomed out.
+   * @default 0
+   */
+  widthMinPixels?: number;
+  /**
+   * The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  widthMaxPixels?: number;
+  /**
+   * Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
+   * @default false
+   */
+  jointRounded?: boolean;
+  /**
+   * Type of caps. If `true`, draw round caps. Otherwise draw square caps.
+   * @default false
+   */
+  capRounded?: boolean;
+  /**
+   * The maximum extent of a joint in ratio to the stroke width. Only works if `jointRounded` is `false`.
+   * @default 4
+   */
+  miterLimit?: number;
+  /**
+   * If `true`, extrude the path in screen space (width always faces the camera).
+   * If `false`, the width always faces up (z).
+   * @default false
+   */
+  billboard?: boolean;
+  /**
+   * (Experimental) If `'loop'` or `'open'`, will skip normalizing the coordinates returned by `getPath` and instead assume all paths are to be loops or open paths.
+   * When normalization is disabled, paths must be specified in the format of flat array. Open paths must contain at least 2 vertices and closed paths must contain at least 3 vertices.
+   * @default null
+   */
+  _pathType?: null | 'loop' | 'open';
+  /**
+   * Path geometry accessor.
+   */
+  getPath?: AccessorFunction<DataT, PathGeometry>;
+  /**
+   * Path color accessor.
+   * @default [0, 0, 0, 255]
+   */
+  getColor?: Accessor<DataT, Color | Color[]>;
+  /**
+   * Path width accessor.
+   * @default 1
+   */
+  getWidth?: Accessor<DataT, number | number[]>;
+};
+
+export type PathLayerProps<DataT> = _PathLayerProps<DataT> & LayerProps<DataT>;
+
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   widthUnits: 'meters',
-  widthScale: {type: 'number', min: 0, value: 1}, // stroke width in meters
-  widthMinPixels: {type: 'number', min: 0, value: 0}, //  min stroke width in pixels
-  widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
+  widthScale: {type: 'number', min: 0, value: 1},
+  widthMinPixels: {type: 'number', min: 0, value: 0},
+  widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
   jointRounded: false,
   capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
   billboard: false,
-  // `loop` or `open`
   _pathType: null,
 
   getPath: {type: 'accessor', value: object => object.path},
@@ -55,12 +130,22 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-export default class PathLayer extends Layer {
+export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_PathLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'PathLayer';
+
+  state!: {
+    model?: Model;
+    pathTesselator: PathTesselator;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
   }
 
-  get wrapLongitude() {
+  get wrapLongitude(): boolean {
     return false;
   }
 
@@ -68,7 +153,7 @@ export default class PathLayer extends Layer {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       positions: {
         size: 3,
         // Start filling buffer from 1 vertex in
@@ -77,6 +162,7 @@ export default class PathLayer extends Layer {
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
@@ -97,6 +183,7 @@ export default class PathLayer extends Layer {
       instanceTypes: {
         size: 1,
         type: GL.UNSIGNED_BYTE,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateSegmentTypes,
         noAlloc
       },
@@ -128,14 +215,11 @@ export default class PathLayer extends Layer {
         fp64: this.use64bitPositions()
       })
     });
-
-    if (this.props.getDashArray && !this.props.extensions.length) {
-      log.removed('getDashArray', 'PathStyleExtension')();
-    }
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
+    const {props, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
 
@@ -146,7 +230,7 @@ export default class PathLayer extends Layer {
 
     if (geometryChanged) {
       const {pathTesselator} = this.state;
-      const buffers = props.data.attributes || {};
+      const buffers = (props.data as any).attributes || {};
 
       pathTesselator.updateGeometry({
         data: props.data,
@@ -168,7 +252,7 @@ export default class PathLayer extends Layer {
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
-        attributeManager.invalidateAll();
+        attributeManager!.invalidateAll();
       }
     }
 
@@ -176,11 +260,11 @@ export default class PathLayer extends Layer {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
 
-  getPickingInfo(params) {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
     const {data} = this.props;
@@ -188,18 +272,19 @@ export default class PathLayer extends Layer {
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = data.find(d => d.__source.index === index);
+      info.object = (data as any[]).find(d => d.__source.index === index);
     }
     return info;
   }
 
-  disablePickingIndex(objectIndex) {
+  /** Override base Layer method */
+  disablePickingIndex(objectIndex: number) {
     const {data} = this.props;
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < data.length; i++) {
+      for (let i = 0; i < (data as any[]).length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }
@@ -236,7 +321,7 @@ export default class PathLayer extends Layer {
       .draw();
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -295,20 +380,17 @@ export default class PathLayer extends Layer {
     });
   }
 
-  calculatePositions(attribute) {
+  protected calculatePositions(attribute) {
     const {pathTesselator} = this.state;
 
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('positions');
   }
 
-  calculateSegmentTypes(attribute) {
+  protected calculateSegmentTypes(attribute) {
     const {pathTesselator} = this.state;
 
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('segmentTypes');
   }
 }
-
-PathLayer.layerName = 'PathLayer';
-PathLayer.defaultProps = defaultProps;

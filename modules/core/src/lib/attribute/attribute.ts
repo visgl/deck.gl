@@ -37,7 +37,7 @@ export type Updater = (
 ) => void;
 
 export type AttributeOptions = DataColumnOptions<{
-  transition?: boolean;
+  transition?: boolean | Partial<TransitionSettings>;
   noAlloc?: boolean;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];

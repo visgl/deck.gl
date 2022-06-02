@@ -45,7 +45,7 @@ const DEFAULT_TRANSITION_SETTINGS = {
 
 export function normalizeTransitionSettings(
   userSettings: number | InterpolationTransitionSettings | SpringTransitionSettings,
-  layerSettings?: boolean | TransitionSettings
+  layerSettings?: boolean | Partial<TransitionSettings>
 ): TransitionSettings | null {
   if (!userSettings) {
     return null;
