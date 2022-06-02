@@ -59,9 +59,7 @@ export type PolygonGeometry =
   | FlatSimplePolygonGeometry
   | FlatComplexPolygonGeometry;
 
-export type NormalizedPolygonGeometry =
-  | FlatSimplePolygonGeometry
-  | FlatComplexPolygonGeometry;
+export type NormalizedPolygonGeometry = FlatSimplePolygonGeometry | FlatComplexPolygonGeometry;
 
 /**
  * Ensure a polygon is valid format

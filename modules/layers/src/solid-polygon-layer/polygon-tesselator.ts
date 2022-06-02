@@ -99,18 +99,26 @@ export default class PolygonTesselator extends Tesselator<
     if (this.normalize) {
       const normalizedPolygon = Polygon.normalize(polygon, this.positionSize);
       if (this.opts.resolution) {
-        return cutPolygonByGrid(getPositions(normalizedPolygon), getHoleIndices(normalizedPolygon), {
-          size: this.positionSize,
-          gridResolution: this.opts.resolution,
-          edgeTypes: true
-        }) as CutPolygon[];
+        return cutPolygonByGrid(
+          getPositions(normalizedPolygon),
+          getHoleIndices(normalizedPolygon),
+          {
+            size: this.positionSize,
+            gridResolution: this.opts.resolution,
+            edgeTypes: true
+          }
+        ) as CutPolygon[];
       }
       if (this.opts.wrapLongitude) {
-        return cutPolygonByMercatorBounds(getPositions(normalizedPolygon), getHoleIndices(normalizedPolygon), {
-          size: this.positionSize,
-          maxLatitude: 86,
-          edgeTypes: true
-        }) as CutPolygon[];
+        return cutPolygonByMercatorBounds(
+          getPositions(normalizedPolygon),
+          getHoleIndices(normalizedPolygon),
+          {
+            size: this.positionSize,
+            maxLatitude: 86,
+            edgeTypes: true
+          }
+        ) as CutPolygon[];
       }
       return normalizedPolygon;
     }
@@ -127,9 +135,7 @@ export default class PolygonTesselator extends Tesselator<
       }
       return size;
     }
-    return (
-      getPositions(polygon as NormalizedPolygonGeometry).length / this.positionSize
-    );
+    return getPositions(polygon as NormalizedPolygonGeometry).length / this.positionSize;
   }
 
   /** Override base Tesselator method */
@@ -155,18 +161,9 @@ export default class PolygonTesselator extends Tesselator<
         context.indexStart = this.indexStarts[context.geometryIndex + 1];
       }
     } else {
-      this._updateIndices(
-        polygon as NormalizedPolygonGeometry,
-        context
-      );
-      this._updatePositions(
-        polygon as NormalizedPolygonGeometry,
-        context
-      );
-      this._updateVertexValid(
-        polygon as NormalizedPolygonGeometry,
-        context
-      );
+      this._updateIndices(polygon as NormalizedPolygonGeometry, context);
+      this._updatePositions(polygon as NormalizedPolygonGeometry, context);
+      this._updateVertexValid(polygon as NormalizedPolygonGeometry, context);
     }
   }
 

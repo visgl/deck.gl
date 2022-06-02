@@ -112,7 +112,7 @@ export default class PathTesselator extends Tesselator<
       geometrySize: number;
     }
   ): void {
-    if (context.geometrySize === 0 ) {
+    if (context.geometrySize === 0) {
       return;
     }
     if (path && Array.isArray(path[0])) {
