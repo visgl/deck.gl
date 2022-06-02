@@ -51,8 +51,8 @@ export type GeometryUpdateContext = {
 export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOptionsT> {
   opts: TesselatorOptions<GeometryT, ExtraOptionsT>;
   typedArrayManager: TypedArrayManager;
-  indexStarts!: number[];
-  vertexStarts!: number[];
+  indexStarts: number[] = [0];
+  vertexStarts: number[] = [0];
   vertexCount: number = 0;
   instanceCount: number = 0;
   attributes: Record<string, TypedArray | null>;
@@ -74,8 +74,6 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
     this.opts = opts;
 
     this.updateGeometry(opts);
-
-    Object.seal(this);
   }
 
   /* Public methods */
