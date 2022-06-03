@@ -243,7 +243,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let result: FetchLayerDataResult;
+      let result: Partial<FetchLayerDataResult>;
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {
           data: await getDataV2({type, source, credentials: credentials as ClassicCredentials})
@@ -282,7 +282,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {data: _notUsed, ...propsNoData} = this.props;
-    const props = {...propsNoData, uniqueIdProperty};
+    // @ts-expect-error 'uniqueIdProperty' is specified more than once, so this usage will be overwritten.
+    const props = {uniqueIdProperty, ...propsNoData};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
       return [MVTLayer, props];

@@ -14,8 +14,7 @@ const renderSubLayers = props => {
   const {index} = props.tile;
   if (!data || !data.length) return null;
 
-  return new H3HexagonLayer({
-    ...props,
+  return new H3HexagonLayer(props, {
     getHexagon: d => d.id,
     centerHexagon: index,
     highPrecision: true

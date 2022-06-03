@@ -12,7 +12,7 @@ import SpatialIndexTileLayer from './spatial-index-tile-layer';
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
-  return new QuadkeyLayer({...props, getQuadkey: d => d.id});
+  return new QuadkeyLayer(props, {getQuadkey: d => d.id});
 };
 
 const defaultProps = {
