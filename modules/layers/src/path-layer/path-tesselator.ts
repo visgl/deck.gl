@@ -21,12 +21,7 @@ import {Tesselator} from '@deck.gl/core';
 import {normalizePath} from './path';
 
 import type {TypedArray} from '@math.gl/core';
-import type {
-  PathGeometry,
-  FlatPathGeometry,
-  NestedPathGeometry,
-  NormalizedPathGeometry
-} from './path';
+import type {PathGeometry, FlatPathGeometry, NormalizedPathGeometry} from './path';
 
 const START_CAP = 1;
 const END_CAP = 2;
@@ -84,20 +79,20 @@ export default class PathTesselator extends Tesselator<
   }
 
   /* Implement base Tesselator interface */
-  protected getGeometrySize(path: PathGeometry): number {
-    if (Array.isArray(path[0])) {
+  protected getGeometrySize(path: NormalizedPathGeometry): number {
+    if (isCut(path)) {
       let size = 0;
-      for (const subPath of path as NestedPathGeometry) {
+      for (const subPath of path) {
         size += this.getGeometrySize(subPath);
       }
       return size;
     }
-    const numPoints = this.getPathLength(path as FlatPathGeometry);
+    const numPoints = this.getPathLength(path);
     if (numPoints < 2) {
       // invalid path
       return 0;
     }
-    if (this.isClosed(path as FlatPathGeometry)) {
+    if (this.isClosed(path)) {
       // minimum 3 vertices
       return numPoints < 3 ? 0 : numPoints + 2;
     }
@@ -115,16 +110,16 @@ export default class PathTesselator extends Tesselator<
     if (context.geometrySize === 0) {
       return;
     }
-    if (path && Array.isArray(path[0])) {
-      for (const subPath of path as FlatPathGeometry[]) {
+    if (path && isCut(path)) {
+      for (const subPath of path) {
         const geometrySize = this.getGeometrySize(subPath);
         context.geometrySize = geometrySize;
         this.updateGeometryAttributes(subPath, context);
         context.vertexStart += geometrySize;
       }
     } else {
-      this._updateSegmentTypes(path as FlatPathGeometry, context);
-      this._updatePositions(path as FlatPathGeometry, context);
+      this._updateSegmentTypes(path, context);
+      this._updatePositions(path, context);
     }
   }
 
@@ -199,7 +194,7 @@ export default class PathTesselator extends Tesselator<
   // Returns true if the first and last points are identical
   private isClosed(path: FlatPathGeometry): boolean {
     if (!this.normalize) {
-      return this.opts.loop as boolean;
+      return Boolean(this.opts.loop);
     }
     const {positionSize} = this;
     const lastPointIndex = path.length - positionSize;
@@ -209,4 +204,8 @@ export default class PathTesselator extends Tesselator<
       (positionSize === 2 || path[2] === path[lastPointIndex + 2])
     );
   }
+}
+
+function isCut(path: NormalizedPathGeometry): path is FlatPathGeometry[] {
+  return Array.isArray(path[0]);
 }

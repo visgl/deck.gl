@@ -24,7 +24,7 @@ import assert from './assert';
 import {Buffer} from '@luma.gl/webgl';
 
 import type {BinaryAttribute} from '../lib/attribute/attribute';
-import type {NumericArray, TypedArray} from '../types/types';
+import type {TypedArray} from '../types/types';
 import type {AccessorFunction} from '../types/layer-props';
 import type {TypedArrayManager} from './typed-array-manager';
 
@@ -226,22 +226,25 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       // count instances
       instanceCount = vertexStarts[vertexStarts.length - 1];
     } else {
-      // External buffer is provided, either via luma Buffer or TypedArray
-      const buffer = (geometryBuffer as BinaryAttribute).buffer || geometryBuffer;
-      if (buffer instanceof Buffer) {
-        const byteStride = (geometryBuffer as BinaryAttribute).stride || this.positionSize * 4;
-        // assume user provided data is already normalized
-        vertexStarts = data.startIndices;
-        instanceCount = vertexStarts[data.length] || buffer.byteLength / byteStride;
-      } else {
-        const bufferValue =
-          (geometryBuffer as BinaryAttribute).value || (geometryBuffer as TypedArray);
+      // assume user provided data is already normalized
+      vertexStarts = data.startIndices;
+      instanceCount = vertexStarts[data.length] || 0;
+
+      if (ArrayBuffer.isView(geometryBuffer)) {
+        instanceCount = instanceCount || geometryBuffer.length / this.positionSize;
+      } else if (geometryBuffer instanceof Buffer) {
+        // @ts-expect-error (2339) accessor is not typed
+        const byteStride = geometryBuffer.accessor.stride || this.positionSize * 4;
+        instanceCount = instanceCount || geometryBuffer.byteLength / byteStride;
+      } else if (geometryBuffer.buffer) {
+        const byteStride = geometryBuffer.stride || this.positionSize * 4;
+        instanceCount = instanceCount || geometryBuffer.buffer.byteLength / byteStride;
+      } else if (geometryBuffer.value) {
+        const bufferValue = geometryBuffer.value;
         const elementStride =
           // @ts-ignore (2339) if stride is not specified, will fall through to positionSize
           geometryBuffer.stride / bufferValue.BYTES_PER_ELEMENT || this.positionSize;
-        // assume user provided data is already normalized
-        vertexStarts = data.startIndices;
-        instanceCount = vertexStarts[data.length] || bufferValue.length / elementStride;
+        instanceCount = instanceCount || bufferValue.length / elementStride;
       }
     }
 

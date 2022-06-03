@@ -71,11 +71,33 @@ function validate(polygon: PolygonGeometry): void {
   }
 }
 
+/** Get the positions from a normalized polygon */
+export function getPositions(polygon: NormalizedPolygonGeometry): NumericArray {
+  return 'positions' in polygon ? polygon.positions : polygon;
+}
+
+/** Get the hole indices from a normalized polygon */
+export function getHoleIndices(polygon: NormalizedPolygonGeometry): NumericArray | null {
+  return 'holeIndices' in polygon ? polygon.holeIndices : null;
+}
+
+/**
+ * Check if a polygon is nested or flat
+ * Returns true if the polygon is a flat polygon (i.e. not an array of polygons)
+ */
+function isNested(
+  polygon: PolygonGeometry
+): polygon is NestedSimplePolygonGeometry | NestedComplexPolygonGeometry {
+  return Array.isArray(polygon[0]);
+}
+
 /**
  * Check if a polygon is simple or complex
  * Returns true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
-function isSimple(polygon: NestedSimplePolygonGeometry | NestedComplexPolygonGeometry): boolean {
+function isSimple(
+  polygon: NestedSimplePolygonGeometry | NestedComplexPolygonGeometry
+): polygon is NestedSimplePolygonGeometry {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
 }
 
@@ -207,10 +229,9 @@ export function normalize(
   const positions: number[] = [];
   const holeIndices: number[] = [];
 
-  if ((polygon as FlatComplexPolygonGeometry).positions) {
+  if ('positions' in polygon) {
     // complex flat
-    const {positions: srcPositions, holeIndices: srcHoleIndices} =
-      polygon as FlatComplexPolygonGeometry;
+    const {positions: srcPositions, holeIndices: srcHoleIndices} = polygon;
 
     if (srcHoleIndices) {
       let targetIndex = 0;
@@ -236,26 +257,16 @@ export function normalize(
     }
     polygon = srcPositions;
   }
-  if (Number.isFinite(polygon[0])) {
+  if (!isNested(polygon)) {
     // simple flat
-    copyFlatRing(
-      positions,
-      0,
-      polygon as FlatSimplePolygonGeometry,
-      positionSize,
-      0,
-      positions.length,
-      OUTER_POLYGON_WINDING
-    );
+    copyFlatRing(positions, 0, polygon, positionSize, 0, positions.length, OUTER_POLYGON_WINDING);
     return positions;
   }
-  if (!isSimple(polygon as NestedSimplePolygonGeometry | NestedComplexPolygonGeometry)) {
+  if (!isSimple(polygon)) {
     // complex polygon
     let targetIndex = 0;
 
-    for (const [polygonIndex, simplePolygon] of (
-      polygon as NestedComplexPolygonGeometry
-    ).entries()) {
+    for (const [polygonIndex, simplePolygon] of polygon.entries()) {
       targetIndex = copyNestedRing(
         positions,
         targetIndex,
@@ -271,13 +282,7 @@ export function normalize(
     return {positions, holeIndices};
   }
   // simple polygon
-  copyNestedRing(
-    positions,
-    0,
-    polygon as NestedSimplePolygonGeometry,
-    positionSize,
-    OUTER_POLYGON_WINDING
-  );
+  copyNestedRing(positions, 0, polygon, positionSize, OUTER_POLYGON_WINDING);
   return positions;
 }
 /* eslint-enable max-statements */
@@ -286,18 +291,16 @@ export function normalize(
  * Get vertex indices for drawing polygon mesh (triangulation)
  */
 export function getSurfaceIndices(
-  normalizedPolygon: NormalizedPolygonGeometry,
+  polygon: NormalizedPolygonGeometry,
   positionSize: number,
   preproject?: (xy: number[]) => number[]
 ): number[] {
-  let holeIndices: NumericArray | null = null;
-
-  if ((normalizedPolygon as FlatComplexPolygonGeometry).holeIndices) {
-    holeIndices = (normalizedPolygon as FlatComplexPolygonGeometry).holeIndices.map(
-      positionIndex => positionIndex / positionSize
-    );
+  let holeIndices = getHoleIndices(polygon);
+  if (holeIndices) {
+    holeIndices = holeIndices.map(positionIndex => positionIndex / positionSize);
   }
-  let positions = (normalizedPolygon as FlatComplexPolygonGeometry).positions || normalizedPolygon;
+
+  let positions = getPositions(polygon);
 
   if (preproject) {
     // When tesselating lnglat coordinates, project them to the common space for accuracy

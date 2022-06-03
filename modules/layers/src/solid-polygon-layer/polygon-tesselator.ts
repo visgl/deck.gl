@@ -30,10 +30,9 @@ import {cutPolygonByGrid, cutPolygonByMercatorBounds} from '@math.gl/polygon';
 import type {
   PolygonGeometry,
   NormalizedPolygonGeometry,
-  FlatSimplePolygonGeometry,
   FlatComplexPolygonGeometry
 } from './polygon';
-import type {TypedArray, NumericArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core';
 
 type GeometryUpdateContext = {
   vertexStart: number;
@@ -100,8 +99,8 @@ export default class PolygonTesselator extends Tesselator<
       const normalizedPolygon = Polygon.normalize(polygon, this.positionSize);
       if (this.opts.resolution) {
         return cutPolygonByGrid(
-          getPositions(normalizedPolygon),
-          getHoleIndices(normalizedPolygon),
+          Polygon.getPositions(normalizedPolygon),
+          Polygon.getHoleIndices(normalizedPolygon),
           {
             size: this.positionSize,
             gridResolution: this.opts.resolution,
@@ -111,8 +110,8 @@ export default class PolygonTesselator extends Tesselator<
       }
       if (this.opts.wrapLongitude) {
         return cutPolygonByMercatorBounds(
-          getPositions(normalizedPolygon),
-          getHoleIndices(normalizedPolygon),
+          Polygon.getPositions(normalizedPolygon),
+          Polygon.getHoleIndices(normalizedPolygon),
           {
             size: this.positionSize,
             maxLatitude: 86,
@@ -128,14 +127,14 @@ export default class PolygonTesselator extends Tesselator<
 
   /** Implement base Tesselator interface */
   protected getGeometrySize(polygon: NormalizedPolygonGeometry | CutPolygon[]): number {
-    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
+    if (isCut(polygon)) {
       let size = 0;
-      for (const subPolygon of polygon as CutPolygon[]) {
+      for (const subPolygon of polygon) {
         size += this.getGeometrySize(subPolygon);
       }
       return size;
     }
-    return getPositions(polygon as NormalizedPolygonGeometry).length / this.positionSize;
+    return Polygon.getPositions(polygon).length / this.positionSize;
   }
 
   /** Override base Tesselator method */
@@ -152,8 +151,8 @@ export default class PolygonTesselator extends Tesselator<
     polygon: NormalizedPolygonGeometry | CutPolygon[] | null,
     context: GeometryUpdateContext
   ) {
-    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
-      for (const subPolygon of polygon as CutPolygon[]) {
+    if (polygon && isCut(polygon)) {
+      for (const subPolygon of polygon) {
         const geometrySize = this.getGeometrySize(subPolygon);
         context.geometrySize = geometrySize;
         this.updateGeometryAttributes(subPolygon, context);
@@ -161,9 +160,9 @@ export default class PolygonTesselator extends Tesselator<
         context.indexStart = this.indexStarts[context.geometryIndex + 1];
       }
     } else {
-      this._updateIndices(polygon as NormalizedPolygonGeometry, context);
-      this._updatePositions(polygon as NormalizedPolygonGeometry, context);
-      this._updateVertexValid(polygon as NormalizedPolygonGeometry, context);
+      this._updateIndices(polygon, context);
+      this._updatePositions(polygon, context);
+      this._updateVertexValid(polygon, context);
     }
   }
 
@@ -209,7 +208,7 @@ export default class PolygonTesselator extends Tesselator<
     if (!positions || !polygon) {
       return;
     }
-    const polygonPositions = getPositions(polygon);
+    const polygonPositions = Polygon.getPositions(polygon);
 
     for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
       const x = polygonPositions[j * positionSize];
@@ -228,7 +227,7 @@ export default class PolygonTesselator extends Tesselator<
   ) {
     const {positionSize} = this;
     const vertexValid = this.attributes.vertexValid as TypedArray;
-    const holeIndices = polygon && getHoleIndices(polygon);
+    const holeIndices = polygon && Polygon.getHoleIndices(polygon);
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
      * the last vertex of each ring overlaps with the first vertex of the next ring.
@@ -252,12 +251,6 @@ export default class PolygonTesselator extends Tesselator<
   }
 }
 
-// Helpers
-
-function getPositions(polygon: NormalizedPolygonGeometry): NumericArray {
-  return 'positions' in polygon ? polygon.positions : polygon;
-}
-
-function getHoleIndices(polygon: NormalizedPolygonGeometry): NumericArray | null {
-  return 'holeIndices' in polygon ? polygon.holeIndices : null;
+function isCut(polygon: NormalizedPolygonGeometry | CutPolygon[]): polygon is CutPolygon[] {
+  return Array.isArray(polygon) && polygon.length > 0 && !Number.isFinite(polygon[0]);
 }
