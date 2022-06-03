@@ -18,10 +18,11 @@ export default class PostProcessEffect implements Effect {
     this.module = module;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
   postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(gl, this.module, this.id);
+    const passes = this.passes || createPasses(gl, this.module, this.id, this.props);
     this.passes = passes;
 
     const {target} = params;
@@ -50,13 +51,19 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
+function createPasses(
+  gl: WebGLRenderingContext,
+  module: ShaderModule,
+  id: string,
+  moduleSettings: any
+): ScreenPass[] {
   if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
       module,
-      fs
+      fs,
+      moduleSettings
     });
     return [pass];
   }
@@ -68,7 +75,8 @@ function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: strin
     return new ScreenPass(gl, {
       id: idn,
       module,
-      fs
+      fs,
+      moduleSettings
     });
   });
 }

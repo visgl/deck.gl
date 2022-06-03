@@ -35,7 +35,7 @@ export type ShaderModule<SettingsT = any> = {
   fs?: string;
   vs?: string;
   uniforms?: Record<string, any>;
-  getUniforms?: (context: Partial<SettingsT>) => Record<string, any>;
+  getUniforms?: (opts: SettingsT | {}, uniforms: Record<string, any>) => Record<string, any>;
   defines?: Record<string, any>;
   dependencies?: ShaderModule[];
   inject?: Record<string, string>;
