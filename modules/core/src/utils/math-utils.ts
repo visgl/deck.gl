@@ -1,6 +1,6 @@
 // Extensions to math.gl library. Intended to be folded back.
 import typedArrayManager from './typed-array-manager';
-import {Vector3} from '@math.gl/core';
+import {Vector3, NumericArray} from '@math.gl/core';
 
 import type {Matrix4} from '@math.gl/core';
 
@@ -15,7 +15,9 @@ export function mod(value: number, divisor: number): number {
 }
 
 // Extract camera vectors (move to math library?)
-export function getCameraPosition(viewMatrixInverse: Matrix4): [number, number, number] {
+export function getCameraPosition(
+  viewMatrixInverse: Matrix4 | NumericArray
+): [number, number, number] {
   // Read the translation from the inverse view matrix
   return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
@@ -26,7 +28,7 @@ export type FrustumPlane = {
 };
 
 // https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
-export function getFrustumPlanes(viewProjectionMatrix: Matrix4): {
+export function getFrustumPlanes(viewProjectionMatrix: Matrix4 | NumericArray): {
   left: FrustumPlane;
   right: FrustumPlane;
   top: FrustumPlane;
