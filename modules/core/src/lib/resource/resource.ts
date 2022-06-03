@@ -1,42 +1,57 @@
 import {load} from '@loaders.gl/core';
 
-export default class Resource {
-  constructor(id, data, context) {
+import type {ResourceManagerContext} from './resource-manager';
+
+export type ResourceSubscriber<T = any> = {
+  onChange: (data: T | Promise<T>) => void;
+};
+
+export default class Resource<T = any> {
+  id: string;
+  context: ResourceManagerContext;
+  isLoaded!: boolean;
+  persistent?: boolean;
+
+  private _loadCount: number = 0;
+  private _subscribers = new Set<ResourceSubscriber<T>>();
+  private _data!: T | Promise<T> | string;
+  private _loader?: Promise<void>;
+  private _error?: Error;
+  private _content?: T;
+
+  constructor(id: string, data: T | Promise<T> | string, context: ResourceManagerContext) {
     this.id = id;
     this.context = context;
-
-    this._loadCount = 0;
-    this._subscribers = new Set();
 
     this.setData(data);
   }
 
   // consumer: {onChange: Function}
-  subscribe(consumer) {
+  subscribe(consumer: ResourceSubscriber<T>): void {
     this._subscribers.add(consumer);
   }
 
-  unsubscribe(consumer) {
+  unsubscribe(consumer: ResourceSubscriber<T>): void {
     this._subscribers.delete(consumer);
   }
 
-  inUse() {
+  inUse(): boolean {
     return this._subscribers.size > 0;
   }
 
-  delete() {
+  delete(): void {
     // Remove any resources created
   }
 
-  getData() {
+  getData(): T | Promise<T> {
     return this.isLoaded
       ? this._error
         ? Promise.reject(this._error)
-        : this._content
-      : this._loader.then(() => this.getData());
+        : this._content!
+      : this._loader!.then(() => this.getData());
   }
 
-  setData(data, forceUpdate) {
+  setData(data: any, forceUpdate?: boolean) {
     if (data === this._data && !forceUpdate) {
       return;
     }
@@ -54,7 +69,7 @@ export default class Resource {
           // check if source has changed
           if (this._loadCount === loadCount) {
             this.isLoaded = true;
-            this._error = null;
+            this._error = undefined;
             this._content = result;
           }
         })
@@ -66,7 +81,7 @@ export default class Resource {
         });
     } else {
       this.isLoaded = true;
-      this._error = null;
+      this._error = undefined;
       this._content = data;
     }
 

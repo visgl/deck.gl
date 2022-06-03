@@ -1,7 +1,28 @@
 /* global setTimeout */
 import Resource from './resource';
+import type {ResourceSubscriber} from './resource';
+
+export type ResourceManagerContext = {
+  gl: WebGLRenderingContext;
+  resourceManager: ResourceManager;
+};
 
 export default class ResourceManager {
+  protocol: string;
+
+  private _context: ResourceManagerContext;
+  private _resources: Record<string, Resource>;
+  private _consumers: Record<
+    string,
+    Record<
+      string,
+      ResourceSubscriber & {
+        resourceId: string;
+      }
+    >
+  >;
+  private _pruneRequest: number | null;
+
   constructor({gl, protocol}) {
     this.protocol = protocol || 'resource://';
 
@@ -15,14 +36,24 @@ export default class ResourceManager {
     this._pruneRequest = null;
   }
 
-  contains(resourceId) {
+  contains(resourceId: string): boolean {
     if (resourceId.startsWith(this.protocol)) {
       return true;
     }
     return resourceId in this._resources;
   }
 
-  add({resourceId, data, forceUpdate = false, persistent = true}) {
+  add({
+    resourceId,
+    data,
+    forceUpdate = false,
+    persistent = true
+  }: {
+    resourceId: string;
+    data: any;
+    forceUpdate?: boolean;
+    persistent?: boolean;
+  }) {
     let res = this._resources[resourceId];
 
     if (res) {
@@ -36,7 +67,7 @@ export default class ResourceManager {
     res.persistent = persistent;
   }
 
-  remove(resourceId) {
+  remove(resourceId: string): void {
     const res = this._resources[resourceId];
 
     if (res) {
@@ -45,13 +76,14 @@ export default class ResourceManager {
     }
   }
 
-  unsubscribe({consumerId}) {
+  unsubscribe({consumerId}: {consumerId: string}): void {
     const consumer = this._consumers[consumerId];
     if (consumer) {
       for (const requestId in consumer) {
         const request = consumer[requestId];
-        if (request.resource) {
-          request.resource.unsubscribe(request);
+        const resource = this._resources[request.resourceId];
+        if (resource) {
+          resource.unsubscribe(request);
         }
       }
       delete this._consumers[consumerId];
@@ -59,7 +91,17 @@ export default class ResourceManager {
     }
   }
 
-  subscribe({resourceId, onChange, consumerId, requestId = 'default'}) {
+  subscribe<T>({
+    resourceId,
+    onChange,
+    consumerId,
+    requestId = 'default'
+  }: {
+    resourceId: string;
+    onChange: (data: T | Promise<T>) => void;
+    consumerId: string;
+    requestId: string;
+  }): T | Promise<T> | undefined {
     const {_resources: resources, protocol} = this;
     if (resourceId.startsWith(protocol)) {
       resourceId = resourceId.replace(protocol, '');
@@ -68,7 +110,7 @@ export default class ResourceManager {
         this.add({resourceId, data: null, persistent: false});
       }
     }
-    const res = resources[resourceId];
+    const res: Resource<T> = resources[resourceId];
     this._track(consumerId, requestId, res, onChange);
     if (res) {
       return res.getData();
@@ -77,39 +119,45 @@ export default class ResourceManager {
     return undefined;
   }
 
-  prune() {
+  prune(): void {
     if (!this._pruneRequest) {
       // prune() may be called multiple times in the same animation frame.
       // Batch multiple requests together
+      // @ts-ignore setTimeout returns NodeJS.Timeout in node
       this._pruneRequest = setTimeout(() => this._prune(), 0);
     }
   }
 
-  finalize() {
+  finalize(): void {
     for (const key in this._resources) {
       this._resources[key].delete();
     }
   }
 
-  _track(consumerId, requestId, resource, onChange) {
+  private _track(
+    consumerId: string,
+    requestId: string,
+    resource: Resource,
+    onChange: (data: any) => void
+  ) {
     const consumers = this._consumers;
     const consumer = (consumers[consumerId] = consumers[consumerId] || {});
     const request = consumer[requestId] || {};
 
-    if (request.resource) {
-      request.resource.unsubscribe(request);
-      request.resource = null;
+    const oldResource = request.resourceId && this._resources[request.resourceId];
+    if (oldResource) {
+      oldResource.unsubscribe(request);
       this.prune();
     }
     if (resource) {
       consumer[requestId] = request;
       request.onChange = onChange;
-      request.resource = resource;
+      request.resourceId = resource.id;
       resource.subscribe(request);
     }
   }
 
-  _prune() {
+  private _prune(): void {
     this._pruneRequest = null;
 
     for (const key of Object.keys(this._resources)) {
