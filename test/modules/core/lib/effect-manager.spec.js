@@ -20,7 +20,6 @@
 
 import test from 'tape-promise/tape';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
-import Effect from '@deck.gl/core/lib/effect';
 import LayerManager from '@deck.gl/core/lib/layer-manager';
 
 import {gl} from '@deck.gl/test-utils';
@@ -28,6 +27,16 @@ import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 
 const layerManager = new LayerManager(gl);
+
+class TestEffect {
+  constructor() {
+    this.id = 'effect';
+    this.props = null;
+  }
+
+  preRender() {}
+  cleanup() {}
+}
 
 function getResourceCounts() {
   /* global luma */
@@ -61,8 +70,8 @@ test('EffectManager#constructor', t => {
 
 test('EffectManager#set and get Effects', t => {
   const effectManager = new EffectManager({gl, layerManager});
-  const effect1 = new Effect();
-  const effect2 = new Effect();
+  const effect1 = new TestEffect();
+  const effect2 = new TestEffect();
   effectManager.setEffects([effect1, effect2]);
   let effects = effectManager.getEffects();
   t.equal(effects.length, 4, 'Effect set and get successfully');

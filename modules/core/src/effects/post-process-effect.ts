@@ -1,19 +1,28 @@
-import Effect from '../lib/effect';
 import ScreenPass from '../passes/screen-pass';
 import {normalizeShaderModule} from '@luma.gl/core';
 
-export default class PostProcessEffect extends Effect {
-  constructor(module, props = {}) {
-    super(props);
+import type {Effect, PostRenderOptions} from '../lib/effect';
+import type {Framebuffer} from '@luma.gl/webgl';
+import type {ShaderModule} from '../types/types';
+
+export default class PostProcessEffect implements Effect {
+  id: string;
+  props: any;
+  module: ShaderModule;
+  passes?: ScreenPass[];
+
+  constructor(module: ShaderModule, props: any = {}) {
     this.id = `${module.name}-pass`;
+    this.props = props;
     normalizeShaderModule(module);
     this.module = module;
   }
 
-  postRender(gl, params) {
-    if (!this.passes) {
-      this.passes = createPasses(gl, this.module, this.id, this.props);
-    }
+  preRender(): void {}
+
+  postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
+    const passes = this.passes || createPasses(gl, this.module, this.id);
+    this.passes = passes;
 
     const {target} = params;
     let inputBuffer = params.inputBuffer;
@@ -31,38 +40,35 @@ export default class PostProcessEffect extends Effect {
     return inputBuffer;
   }
 
-  cleanup() {
+  cleanup(): void {
     if (this.passes) {
       for (const pass of this.passes) {
         pass.delete();
       }
-      this.passes = null;
+      this.passes = undefined;
     }
   }
 }
 
-function createPasses(gl, module, id, moduleSettings) {
-  if (module.filter || module.sampler) {
+function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
+  if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
       module,
-      fs,
-      moduleSettings
+      fs
     });
     return [pass];
   }
 
-  const passes = module.passes || [];
-  return passes.map((pass, index) => {
+  return module.passes.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
 
     return new ScreenPass(gl, {
       id: idn,
       module,
-      fs,
-      moduleSettings
+      fs
     });
   });
 }
