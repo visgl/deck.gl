@@ -4,10 +4,9 @@ function isJSON(text: string): boolean {
   return (firstChar === '{' && lastChar === '}') || (firstChar === '[' && lastChar === ']');
 }
 
-// TODO - replace with the version in loaders.gl
+// A light weight version instead of @loaders.gl/json (stream processing etc.)
 export default {
   name: 'JSON',
-  // TODO - can we stream process geojson?
   extensions: ['json', 'geojson'],
   mimeTypes: ['application/json', 'application/geo+json'],
   testText: isJSON,
