@@ -64,26 +64,7 @@ function createDeckInstance(thisRef, props) {
     ...props,
     style: null,
     width: '100%',
-    height: '100%',
-    // The Deck's animation loop is independent from React's render cycle, causing potential
-    // synchronization issues. We provide this custom render function to make sure that React
-    // and Deck update on the same schedule.
-    _customRender: redrawReason => {
-      // Save the dirty flag for later
-      thisRef.redrawReason = redrawReason;
-
-      // Viewport/view state is passed to child components as props.
-      // If they have changed, we need to trigger a React rerender to update children props.
-      const viewports = deck.viewManager.getViewports();
-      if (thisRef.lastRenderedViewports !== viewports) {
-        // Viewports have changed, update children props first.
-        // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-        // so that the canvas does not get rendered before the child components update.
-        thisRef.forceUpdate(v => v + 1);
-      } else {
-        redrawDeck(thisRef);
-      }
-    }
+    height: '100%'
   });
   return deck;
 }
@@ -142,6 +123,25 @@ const DeckGL = forwardRef((props, ref) => {
       style: null,
       width: '100%',
       height: '100%',
+      // The Deck's animation loop is independent from React's render cycle, causing potential
+      // synchronization issues. We provide this custom render function to make sure that React
+      // and Deck update on the same schedule.
+      _customRender: redrawReason => {
+        // Save the dirty flag for later
+        thisRef.redrawReason = redrawReason;
+
+        // Viewport/view state is passed to child components as props.
+        // If they have changed, we need to trigger a React rerender to update children props.
+        const viewports = thisRef.deck.viewManager.getViewports();
+        if (thisRef.lastRenderedViewports !== viewports) {
+          // Viewports have changed, update children props first.
+          // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
+          // so that the canvas does not get rendered before the child components update.
+          thisRef.forceUpdate(v => v + 1);
+        } else {
+          redrawDeck(thisRef);
+        }
+      },
       layers: jsxProps.layers,
       views: jsxProps.views,
       onViewStateChange: handleViewStateChange,
