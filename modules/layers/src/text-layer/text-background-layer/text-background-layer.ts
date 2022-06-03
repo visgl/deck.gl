@@ -5,6 +5,29 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
+import type {LayerProps, Accessor, Unit, Position, Color, UpdateParameters} from '@deck.gl/core';
+
+type _TextBackgroundLayerProps<DataT> = {
+  billboard?: boolean;
+  sizeScale?: number;
+  sizeUnits?: Unit;
+  sizeMinPixels?: number;
+  sizeMaxPixels?: number;
+
+  padding?: [number, number] | [number, number, number, number];
+
+  getPosition?: Accessor<DataT, Position>;
+  getSize?: Accessor<DataT, number>;
+  getAngle?: Accessor<DataT, number>;
+  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getBoundingRect?: Accessor<DataT, [number, number, number, number]>;
+  getFillColor?: Accessor<DataT, Color>;
+  getLineColor?: Accessor<DataT, Color>;
+  getLineWidth?: Accessor<DataT, number>;
+};
+
+export type TextBackgroundLayerProps<DataT> = _TextBackgroundLayerProps<DataT> & LayerProps<DataT>;
+
 const defaultProps = {
   billboard: true,
   sizeScale: 1,
@@ -24,13 +47,22 @@ const defaultProps = {
   getLineWidth: {type: 'accessor', value: 1}
 };
 
-export default class TextBackgroundLayer extends Layer {
+export default class TextBackgroundLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_TextBackgroundLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'TextBackgroundLayer';
+
+  state!: {
+    model: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
-    this.getAttributeManager().addInstanced({
+    this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -83,13 +115,14 @@ export default class TextBackgroundLayer extends Layer {
     });
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
+    const {changeFlags} = params;
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
@@ -116,7 +149,7 @@ export default class TextBackgroundLayer extends Layer {
       .draw();
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 
@@ -134,6 +167,3 @@ export default class TextBackgroundLayer extends Layer {
     });
   }
 }
-
-TextBackgroundLayer.layerName = 'TextBackgroundLayer';
-TextBackgroundLayer.defaultProps = defaultProps;

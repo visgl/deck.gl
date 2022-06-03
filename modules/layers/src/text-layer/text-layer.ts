@@ -21,45 +21,173 @@
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
-  DEFAULT_CHAR_SET,
-  DEFAULT_FONT_FAMILY,
-  DEFAULT_FONT_WEIGHT,
-  DEFAULT_FONT_SIZE,
-  DEFAULT_BUFFER,
-  DEFAULT_RADIUS,
-  DEFAULT_CUTOFF,
+  DEFAULT_FONT_SETTINGS,
   setFontAtlasCacheLimit
 } from './font-atlas-manager';
 import {transformParagraph, getTextFromBuffer} from './utils';
 
 import TextBackgroundLayer from './text-background-layer/text-background-layer';
 
-const DEFAULT_FONT_SETTINGS = {
-  fontSize: DEFAULT_FONT_SIZE,
-  buffer: DEFAULT_BUFFER,
-  sdf: false,
-  radius: DEFAULT_RADIUS,
-  cutoff: DEFAULT_CUTOFF,
-  smoothing: 0.1
-};
+import type {FontSettings} from './font-atlas-manager';
+import type {
+  LayerProps,
+  Accessor,
+  AccessorFunction,
+  Unit,
+  Position,
+  Color,
+  UpdateParameters,
+  GetPickingInfoParams,
+  PickingInfo
+} from '@deck.gl/core';
 
 const TEXT_ANCHOR = {
   start: 1,
   middle: 0,
   end: -1
-};
+} as const;
 
 const ALIGNMENT_BASELINE = {
   top: 1,
   center: 0,
   bottom: -1
-};
+} as const;
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
-const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
+type _TextLayerProps<DataT> = {
+  /** If `true`, the text always faces camera. Otherwise the text faces up (z).
+   * @default true
+   */
+  billboard?: boolean;
+  /**
+   * Text size multiplier.
+   * @default 1
+   */
+  sizeScale?: number;
+  /**
+   * The units of the size, one of `'meters'`, `'common'`, and `'pixels'`.
+   * @default 'pixels'
+   */
+  sizeUnits?: Unit;
+  /**
+   * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
+   * @default 0
+   */
+  sizeMinPixels?: number;
+  /**
+   * The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  sizeMaxPixels?: number;
+
+  /** Whether to render background for the text blocks.
+   * @default false
+   */
+  background?: boolean;
+  /** Background color accessor.
+   * @default [255, 255, 255, 255]
+   */
+  getBackgroundColor?: Accessor<DataT, Color>;
+  /** Border color accessor.
+   * @default [0, 0, 0, 255]
+   */
+  getBorderColor?: Accessor<DataT, Color>;
+  /** Border width accessor.
+   * @default 0
+   */
+  getBorderWidth?: Accessor<DataT, number>;
+  /**
+   * The padding of the background..
+   * If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
+   * If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
+   * @default [0, 0, 0, 0]
+   */
+  backgroundPadding?: [number, number] | [number, number, number, number];
+  /**
+   * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
+   * @default (ASCII characters 32-128)
+   */
+  characterSet?: FontSettings['characterSet'] | 'auto';
+  /** CSS font family
+   * @default 'Monaco, monospace'
+   */
+  fontFamily?: FontSettings['fontFamily'];
+  /** CSS font weight
+   * @default 'normal'
+   */
+  fontWeight?: FontSettings['fontWeight'];
+  /** A unitless number that will be multiplied with the current font size to set the line height.
+   * @default 'normal'
+   */
+  lineHeight?: number;
+  /**
+   * Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
+   * @default 0
+   */
+  outlineWidth?: number;
+  /**
+   * Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+   * @default [0, 0, 0, 255]
+   */
+  outlineColor?: Color;
+  /**
+   * Advance options for fine tuning the appearance and performance of the generated shared `fontAtlas`.
+   */
+  fontSettings?: FontSettings;
+  /**
+   * Available options are `break-all` and `break-word`. A valid `maxWidth` has to be provided to use `wordBreak`.
+   * @default 'break-word'
+   */
+  wordBreak?: 'break-word' | 'break-all';
+  /**
+   * `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
+   * @default -1
+   */
+  maxWidth?: number;
+  /**
+   * Label text accessor
+   */
+  getText?: AccessorFunction<DataT, string>;
+  /**
+   * Anchor position accessor
+   */
+  getPosition?: Accessor<DataT, Position>;
+  /**
+   * Label color accessor
+   * @default [0, 0, 0, 255]
+   */
+  getColor?: Accessor<DataT, Color>;
+  /**
+   * Label size accessor
+   * @default 32
+   */
+  getSize?: Accessor<DataT, number>;
+  /**
+   * Label rotation accessor, in degrees
+   * @default 0
+   */
+  getAngle?: Accessor<DataT, number>;
+  /**
+   * Horizontal alignment accessor
+   * @default 'middle'
+   */
+  getTextAnchor?: Accessor<DataT, 'start' | 'middle' | 'end'>;
+  /**
+   * Vertical alignment accessor
+   * @default 'center'
+   */
+  getAlignmentBaseline?: Accessor<DataT, 'top' | 'center' | 'bottom'>;
+  /**
+   * Label offset from the anchor position, [x, y] in pixels
+   * @default [0, 0]
+   */
+  getPixelOffset?: Accessor<DataT, [number, number]>;
+};
+
+export type TextLayerProps<DataT> = _TextLayerProps<DataT> & LayerProps<DataT>;
 
 const defaultProps = {
   billboard: true,
@@ -74,9 +202,9 @@ const defaultProps = {
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
-  characterSet: {type: 'object', value: DEFAULT_CHAR_SET},
-  fontFamily: DEFAULT_FONT_FAMILY,
-  fontWeight: DEFAULT_FONT_WEIGHT,
+  characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
+  fontFamily: DEFAULT_FONT_SETTINGS.fontFamily,
+  fontWeight: DEFAULT_FONT_SETTINGS.fontWeight,
   lineHeight: DEFAULT_LINE_HEIGHT,
   outlineWidth: {type: 'number', value: 0, min: 0},
   outlineColor: {type: 'color', value: DEFAULT_COLOR},
@@ -99,7 +227,21 @@ const defaultProps = {
   backgroundColor: {deprecatedFor: ['background', 'getBackgroundColor']}
 };
 
-export default class TextLayer extends CompositeLayer {
+export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_TextLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'TextLayer';
+
+  state!: {
+    styleVersion: number;
+    fontAtlasManager: FontAtlasManager;
+    characterSet?: Set<string>;
+    startIndices?: number[];
+    numInstances?: number;
+    getText?: AccessorFunction<DataT, string>;
+  };
+
   initializeState() {
     this.state = {
       styleVersion: 0,
@@ -108,23 +250,18 @@ export default class TextLayer extends CompositeLayer {
   }
 
   // eslint-disable-next-line complexity
-  updateState({props, oldProps, changeFlags}) {
+  updateState(params: UpdateParameters<this>) {
+    const {props, oldProps, changeFlags} = params;
     const textChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
-    const oldCharacterSet = this.state.characterSet;
 
     if (textChanged) {
       this._updateText();
     }
 
-    const fontChanged =
-      oldCharacterSet !== this.state.characterSet || this._fontChanged(oldProps, props);
-
-    if (fontChanged) {
-      this._updateFontAtlas(oldProps, props);
-    }
+    const fontChanged = this._updateFontAtlas();
 
     const styleChanged =
       fontChanged ||
@@ -139,56 +276,56 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
-  getPickingInfo({info}) {
+  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data
     info.object = info.index >= 0 ? this.props.data[info.index] : null;
     return info;
   }
 
-  _updateFontAtlas(oldProps, props) {
-    const {fontSettings, fontFamily, fontWeight} = props;
-
-    // generate test characterSet
+  /** Returns true if font has changed */
+  private _updateFontAtlas(): boolean {
+    const {fontSettings, fontFamily, fontWeight} = this.props;
     const {fontAtlasManager, characterSet} = this.state;
-    fontAtlasManager.setProps({
-      ...DEFAULT_FONT_SETTINGS,
+
+    const fontProps = {
       ...fontSettings,
       characterSet,
       fontFamily,
       fontWeight
-    });
-  }
+    };
 
-  _fontChanged(oldProps, props) {
-    if (oldProps.fontFamily !== props.fontFamily || oldProps.fontWeight !== props.fontWeight) {
+    if (!fontAtlasManager.mapping) {
+      // This is the first update
+      fontAtlasManager.setProps(fontProps);
       return true;
     }
 
-    if (oldProps.fontSettings === props.fontSettings) {
-      return false;
+    for (const key in fontProps) {
+      if (fontProps[key] !== fontAtlasManager.props[key]) {
+        fontAtlasManager.setProps(fontProps);
+        return true;
+      }
     }
 
-    const oldFontSettings = oldProps.fontSettings || {};
-    const fontSettings = props.fontSettings || {};
-
-    return FONT_SETTINGS_PROPS.some(prop => oldFontSettings[prop] !== fontSettings[prop]);
+    return false;
   }
 
   // Text strings are variable width objects
   // Count characters and start offsets
-  _updateText() {
+  private _updateText() {
     const {data, characterSet} = this.props;
-    const textBuffer = data.attributes && data.attributes.getText;
+    const textBuffer = (data as any).attributes?.getText;
     let {getText} = this.props;
-    let {startIndices} = data;
-    let numInstances;
+    let startIndices: number[] = (data as any).startIndices;
+    let numInstances: number;
 
     const autoCharacterSet = characterSet === 'auto' && new Set();
 
     if (textBuffer && startIndices) {
       const {texts, characterCount} = getTextFromBuffer({
         ...(ArrayBuffer.isView(textBuffer) ? {value: textBuffer} : textBuffer),
+        // @ts-ignore if data.attribute is defined then length is expected
         length: data.length,
         startIndices,
         characterSet: autoCharacterSet
@@ -206,6 +343,7 @@ export default class TextLayer extends CompositeLayer {
         // When dealing with double-length unicode characters, `str.length` or `str[i]` do not work
         const text = Array.from(getText(object, objectInfo) || '');
         if (autoCharacterSet) {
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           text.forEach(autoCharacterSet.add, autoCharacterSet);
         }
         numInstances += text.length;
@@ -222,9 +360,12 @@ export default class TextLayer extends CompositeLayer {
   }
 
   // Returns the x, y offsets of each character in a text string
-  getBoundingRect(object, objectInfo) {
-    const iconMapping = this.state.fontAtlasManager.mapping;
-    const {getText} = this.state;
+  private getBoundingRect: AccessorFunction<DataT, [number, number, number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    const iconMapping = this.state.fontAtlasManager.mapping!;
+    const getText = this.state.getText!;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
@@ -243,12 +384,12 @@ export default class TextLayer extends CompositeLayer {
       ];
 
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
-  }
+  };
 
   // Returns the x, y, w, h of each text object
-  getIconOffsets(object, objectInfo) {
-    const iconMapping = this.state.fontAtlasManager.mapping;
-    const {getText} = this.state;
+  private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
+    const iconMapping = this.state.fontAtlasManager.mapping!;
+    const getText = this.state.getText!;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
@@ -281,7 +422,7 @@ export default class TextLayer extends CompositeLayer {
       offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
-  }
+  };
 
   renderLayers() {
     const {
@@ -371,13 +512,15 @@ export default class TextLayer extends CompositeLayer {
           }),
           {
             data:
+              // @ts-ignore (2339) attribute is not defined on all data types
               data.attributes && data.attributes.background
-                ? {length: data.length, attributes: data.attributes.background}
+                ? // @ts-ignore (2339) attribute is not defined on all data types
+                  {length: data.length, attributes: data.attributes.background}
                 : data,
             _dataDiff,
             // Maintain the same background behavior as <=8.3. Remove in v9?
             autoHighlight: false,
-            getBoundingRect: this.getBoundingRect.bind(this)
+            getBoundingRect: this.getBoundingRect
           }
         ),
       new CharactersLayerClass(
@@ -433,17 +576,14 @@ export default class TextLayer extends CompositeLayer {
           _dataDiff,
           startIndices,
           numInstances,
-          getIconOffsets: this.getIconOffsets.bind(this),
+          getIconOffsets: this.getIconOffsets,
           getIcon: getText
         }
       )
     ];
   }
 
-  static set fontAtlasCacheLimit(limit) {
+  static set fontAtlasCacheLimit(limit: number) {
     setFontAtlasCacheLimit(limit);
   }
 }
-
-TextLayer.layerName = 'TextLayer';
-TextLayer.defaultProps = defaultProps;

@@ -5,20 +5,17 @@
  * Delete oldest when reach given limit
  */
 
-export default class LRUCache {
-  constructor(limit = 5) {
+export default class LRUCache<ValueT> {
+  private limit: number;
+  private _cache: Record<string, ValueT> = {};
+  /** access/update order, first item is oldest, last item is newest */
+  private _order: string[] = [];
+
+  constructor(limit: number = 5) {
     this.limit = limit;
-
-    this.clear();
   }
 
-  clear() {
-    this._cache = {};
-    // access/update order, first item is oldest, last item is newest
-    this._order = [];
-  }
-
-  get(key) {
+  get(key: string): ValueT {
     const value = this._cache[key];
     if (value) {
       // update order
@@ -28,7 +25,7 @@ export default class LRUCache {
     return value;
   }
 
-  set(key, value) {
+  set(key: string, value: ValueT): void {
     if (!this._cache[key]) {
       // if reach limit, delete the oldest
       if (Object.keys(this._cache).length === this.limit) {
@@ -46,26 +43,22 @@ export default class LRUCache {
     }
   }
 
-  delete(key) {
+  delete(key: string): void {
     const value = this._cache[key];
     if (value) {
-      this._deleteCache(key);
+      delete this._cache[key];
       this._deleteOrder(key);
     }
   }
 
-  _deleteCache(key) {
-    delete this._cache[key];
-  }
-
-  _deleteOrder(key) {
-    const index = this._order.findIndex(o => o === key);
+  private _deleteOrder(key: string): void {
+    const index = this._order.indexOf(key);
     if (index >= 0) {
       this._order.splice(index, 1);
     }
   }
 
-  _appendOrder(key) {
+  private _appendOrder(key: string): void {
     this._order.push(key);
   }
 }

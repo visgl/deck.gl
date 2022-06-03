@@ -43,3 +43,6 @@ export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer'
 export type {IconLayerProps} from './icon-layer/icon-layer';
 export type {PolygonLayerProps} from './polygon-layer/polygon-layer';
 export type {GeoJsonLayerProps} from './geojson-layer/geojson-layer';
+export type {TextLayerProps} from './text-layer/text-layer';
+export type {MultiIconLayerProps} from './text-layer/multi-icon-layer/multi-icon-layer';
+export type {TextBackgroundLayerProps} from './text-layer/text-background-layer/text-background-layer';

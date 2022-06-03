@@ -1,30 +1,26 @@
 /* eslint-disable max-statements, max-params, complexity, max-depth */
 // TODO merge with icon-layer/icon-manager
 import {log} from '@deck.gl/core';
+import type {NumericArray} from '@math.gl/core';
 
 const MISSING_CHAR_WIDTH = 32;
 const SINGLE_LINE = [];
 
-export function nextPowOfTwo(number) {
+export type Character = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type CharacterMapping = Record<string, Character>;
+
+export function nextPowOfTwo(number: number): number {
   return Math.pow(2, Math.ceil(Math.log2(number)));
 }
 
 /**
  * Generate character mapping table or update from an existing mapping table
- * @param characterSet {Array|Set} new characters
- * @param getFontWidth {Function} function to get width of each character
- * @param fontHeight {Number} height of font
- * @param buffer {Number} buffer surround each character
- * @param maxCanvasWidth {Number} max width of font atlas
- * @param mapping {Object} old mapping table
- * @param xOffset {Number} x position of last character in old mapping table
- * @param yOffset {Number} y position of last character in old mapping table
- * @returns {{
- *   mapping: Object,
- *   xOffset: Number, x position of last character
- *   yOffset: Number, y position of last character in old mapping table
- *   canvasHeight: Number, height of the font atlas canvas, power of 2
- *  }}
  */
 export function buildMapping({
   characterSet,
@@ -35,18 +31,43 @@ export function buildMapping({
   mapping = {},
   xOffset = 0,
   yOffset = 0
-}) {
+}: {
+  /** list of characters */
+  characterSet: Set<string>;
+  /** function to get width of each character */
+  getFontWidth: (char: string) => number;
+  /** height of font */
+  fontHeight: number;
+  /** bleeding buffer surround each character */
+  buffer: number;
+  /** max width of font atlas */
+  maxCanvasWidth: number;
+  /** cached mapping table */
+  mapping?: CharacterMapping;
+  /** x position of last character in the existing mapping table */
+  xOffset?: number;
+  /** y position of last character in the existing mapping table */
+  yOffset?: number;
+}): {
+  /** new mapping table */
+  mapping: CharacterMapping;
+  /** x position of last character in the new mapping table */
+  xOffset: number;
+  /** y position of last character in the new mapping table */
+  yOffset: number;
+  /** height of the font atlas canvas, power of 2 */
+  canvasHeight: number;
+} {
   let row = 0;
   // continue from x position of last character in the old mapping
   let x = xOffset;
 
-  let i = 0;
   for (const char of characterSet) {
     if (!mapping[char]) {
       // measure texts
       // TODO - use Advanced text metrics when they are adopted:
       // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-      const width = getFontWidth(char, i++);
+      const width = getFontWidth(char);
 
       if (x + width + buffer * 2 > maxCanvasWidth) {
         x = 0;
@@ -72,23 +93,29 @@ export function buildMapping({
   };
 }
 
-function getTextWidth(text, startIndex, endIndex, mapping) {
+function getTextWidth(
+  text: string[],
+  startIndex: number,
+  endIndex: number,
+  mapping: CharacterMapping
+): number {
   let width = 0;
   for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
-    let frameWidth = null;
-    const frame = mapping && mapping[character];
-    if (frame) {
-      frameWidth = frame.width;
-    }
-
-    width += frameWidth;
+    width += mapping[character]?.width || 0;
   }
 
   return width;
 }
 
-function breakAll(text, startIndex, endIndex, maxWidth, iconMapping, target) {
+function breakAll(
+  text: string[],
+  startIndex: number,
+  endIndex: number,
+  maxWidth: number,
+  iconMapping: CharacterMapping,
+  target: number[]
+): number {
   let rowStartCharIndex = startIndex;
   let rowOffsetLeft = 0;
 
@@ -108,7 +135,14 @@ function breakAll(text, startIndex, endIndex, maxWidth, iconMapping, target) {
   return rowOffsetLeft;
 }
 
-function breakWord(text, startIndex, endIndex, maxWidth, iconMapping, target) {
+function breakWord(
+  text: string[],
+  startIndex: number,
+  endIndex: number,
+  maxWidth: number,
+  iconMapping: CharacterMapping,
+  target: number[]
+): number {
   let rowStartCharIndex = startIndex;
   let groupStartCharIndex = startIndex;
   let groupEndCharIndex = startIndex;
@@ -157,8 +191,18 @@ function breakWord(text, startIndex, endIndex, maxWidth, iconMapping, target) {
   return rowOffsetLeft;
 }
 
-// Returns a list of indices where line breaks should be inserted
-export function autoWrapping(text, wordBreak, maxWidth, iconMapping, startIndex = 0, endIndex) {
+/**
+ * Wrap the given text so that each line does not exceed the given max width.
+ * Returns a list of indices where line breaks should be inserted.
+ */
+export function autoWrapping(
+  text: string[],
+  wordBreak: 'break-all' | 'break-word',
+  maxWidth: number,
+  iconMapping: CharacterMapping,
+  startIndex: number = 0,
+  endIndex: number
+): number[] {
   if (endIndex === undefined) {
     endIndex = text.length;
   }
@@ -171,7 +215,14 @@ export function autoWrapping(text, wordBreak, maxWidth, iconMapping, startIndex 
   return result;
 }
 
-function transformRow(line, startIndex, endIndex, iconMapping, leftOffsets, rowSize) {
+function transformRow(
+  line: string[],
+  startIndex: number,
+  endIndex: number,
+  iconMapping: CharacterMapping,
+  leftOffsets: number[],
+  rowSize: [number, number]
+) {
   let x = 0;
   let rowHeight = 0;
 
@@ -198,53 +249,59 @@ function transformRow(line, startIndex, endIndex, iconMapping, leftOffsets, rowS
 
 /**
  * Transform a text paragraph to an array of characters, each character contains
- * @param paragraph: {String}
- * @param iconMapping {Object} character mapping table for retrieving a character from font atlas
- * @param lineHeight {Number} css line-height
- * @param wordBreak {String} css word-break option
- * @param maxWidth {number} css max-width
- * @param transformedData {Array} output transformed data array, each datum contains
- *   - text: character
- *   - index: character index in the paragraph
- *   - x: x offset in the row,
- *   - y: y offset in the paragraph
- *   - size: [width, height] size of the paragraph
- *   - rowSize: [rowWidth, rowHeight] size of the row
- *   - len: length of the paragraph
  */
-export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping) {
+export function transformParagraph(
+  paragraph: string,
+  /** CSS line-height */
+  lineHeight: number,
+  /** CSS word-break option */
+  wordBreak: 'break-word' | 'break-all',
+  /** CSS max-width */
+  maxWidth: number,
+  /** character mapping table for retrieving a character from font atlas */
+  iconMapping: CharacterMapping
+): {
+  /** x position of each character */
+  x: number[];
+  /** y position of each character */
+  y: number[];
+  /** the current row width of each character */
+  rowWidth: number[];
+  /** the width and height of the paragraph */
+  size: [number, number];
+} {
   // Break into an array of characters
   // When dealing with double-length unicode characters, `str.length` or `str[i]` do not work
-  paragraph = Array.from(paragraph);
-  const numCharacters = paragraph.length;
-  const x = new Array(numCharacters);
-  const y = new Array(numCharacters);
-  const rowWidth = new Array(numCharacters);
+  const characters = Array.from(paragraph);
+  const numCharacters = characters.length;
+  const x = new Array(numCharacters) as number[];
+  const y = new Array(numCharacters) as number[];
+  const rowWidth = new Array(numCharacters) as number[];
   const autoWrappingEnabled =
     (wordBreak === 'break-word' || wordBreak === 'break-all') && isFinite(maxWidth) && maxWidth > 0;
 
   // maxWidth and height of the paragraph
-  const size = [0, 0];
-  const rowSize = [];
+  const size: [number, number] = [0, 0];
+  const rowSize: [number, number] = [0, 0];
   let rowOffsetTop = 0;
   let lineStartIndex = 0;
   let lineEndIndex = 0;
 
   for (let i = 0; i <= numCharacters; i++) {
-    const char = paragraph[i];
+    const char = characters[i];
     if (char === '\n' || i === numCharacters) {
       lineEndIndex = i;
     }
 
     if (lineEndIndex > lineStartIndex) {
       const rows = autoWrappingEnabled
-        ? autoWrapping(paragraph, wordBreak, maxWidth, iconMapping, lineStartIndex, lineEndIndex)
+        ? autoWrapping(characters, wordBreak, maxWidth, iconMapping, lineStartIndex, lineEndIndex)
         : SINGLE_LINE;
 
       for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
         const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
         const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
-        transformRow(paragraph, rowStart, rowEnd, iconMapping, x, rowSize);
+        transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
           y[j] = rowOffsetTop + rowSize[1] / 2;
           rowWidth[j] = rowSize[0];
@@ -270,19 +327,41 @@ export function transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, i
   return {x, y, rowWidth, size};
 }
 
-export function getTextFromBuffer({value, length, stride, offset, startIndices, characterSet}) {
+export function getTextFromBuffer({
+  value,
+  length,
+  stride,
+  offset,
+  startIndices,
+  characterSet
+}: {
+  value: Uint8Array | Uint8ClampedArray | Uint16Array | Uint32Array;
+  length: number;
+  stride?: number;
+  offset?: number;
+  startIndices: NumericArray;
+  characterSet?: Set<string>;
+}): {
+  texts: string[];
+  characterCount: number;
+} {
   const bytesPerElement = value.BYTES_PER_ELEMENT;
   const elementStride = stride ? stride / bytesPerElement : 1;
   const elementOffset = offset ? offset / bytesPerElement : 0;
   const characterCount =
     startIndices[length] || Math.ceil((value.length - elementOffset) / elementStride);
-  const autoCharacterSet = characterSet && new Set();
+  const autoCharacterSet = characterSet && new Set<number>();
 
   const texts = new Array(length);
 
   let codes = value;
   if (elementStride > 1 || elementOffset > 0) {
-    codes = new value.constructor(characterCount);
+    const ArrayType = value.constructor as
+      | Uint8ArrayConstructor
+      | Uint8ClampedArrayConstructor
+      | Uint16ArrayConstructor
+      | Uint32ArrayConstructor;
+    codes = new ArrayType(characterCount);
     for (let i = 0; i < characterCount; i++) {
       codes[i] = value[i * elementStride + elementOffset];
     }
@@ -292,8 +371,10 @@ export function getTextFromBuffer({value, length, stride, offset, startIndices, 
     const startIndex = startIndices[index];
     const endIndex = startIndices[index + 1] || characterCount;
     const codesAtIndex = codes.subarray(startIndex, endIndex);
+    // @ts-ignore TS wants the argument to be number[] but typed array works too
     texts[index] = String.fromCodePoint.apply(null, codesAtIndex);
     if (autoCharacterSet) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       codesAtIndex.forEach(autoCharacterSet.add, autoCharacterSet);
     }
   }
