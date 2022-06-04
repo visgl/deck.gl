@@ -1,10 +1,12 @@
 import type {Log} from '@probe.gl/log';
 
 const logState: {
-  attributeUpdateStart?: number;
-  attributeManagerUpdateStart?: number;
+  attributeUpdateStart: number;
+  attributeManagerUpdateStart: number;
   attributeUpdateMessages: string[];
 } = {
+  attributeUpdateStart: -1,
+  attributeManagerUpdateStart: -1,
   attributeUpdateMessages: []
 };
 
@@ -88,7 +90,7 @@ export const getLoggers = (log: Log): Record<string, Function> => ({
     logState.attributeManagerUpdateStart = Date.now();
   },
   'attributeManager.updateEnd': (attributeManager, numInstances) => {
-    const timeMs = Math.round(Date.now() - logState.attributeManagerUpdateStart!);
+    const timeMs = Math.round(Date.now() - logState.attributeManagerUpdateStart);
     log.groupCollapsed(
       LOG_LEVEL_MINOR_UPDATE,
       `Updated attributes for ${numInstances} instances in ${attributeManager.id} in ${timeMs}ms`
@@ -109,7 +111,7 @@ export const getLoggers = (log: Log): Record<string, Function> => ({
     logState.attributeUpdateMessages.push(message);
   },
   'attribute.updateEnd': (attribute, numInstances) => {
-    const timeMs = Math.round(Date.now() - logState.attributeUpdateStart!);
+    const timeMs = Math.round(Date.now() - logState.attributeUpdateStart);
     const message = `${attribute.id} updated ${numInstances} in ${timeMs}ms`;
     logState.attributeUpdateMessages.push(message);
   },

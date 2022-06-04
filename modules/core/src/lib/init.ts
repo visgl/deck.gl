@@ -53,8 +53,11 @@ if (!existingVersion) {
     _registerLoggers: register
   };
 
-  // @ts-expect-error non-standard Loader formats
-  registerLoaders([jsonLoader, [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]]);
+  registerLoaders([
+    jsonLoader,
+    // @ts-expect-error non-standard Loader format
+    [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
+  ]);
 }
 
 export default globalThis.deck;
