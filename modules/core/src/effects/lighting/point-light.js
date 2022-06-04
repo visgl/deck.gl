@@ -1,5 +1,5 @@
 import {projectPosition} from '../../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../../lib';
+import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 const DEFAULT_LIGHT_COLOR = [255, 255, 255];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
