@@ -37,7 +37,7 @@ type TesselatorOptions<GeometryT, ExtraOptionsT> = ExtraOptionsT & {
   buffers?: Record<string, ExternalBuffer>;
   geometryBuffer?: ExternalBuffer;
   positionFormat?: 'XY' | 'XYZ';
-  dataChanged?: {startRow: number; endRow: number}[];
+  dataChanged?: {startRow: number; endRow?: number}[] | string | false;
   normalize?: boolean;
 };
 
@@ -111,7 +111,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
     if (Array.isArray(dataChanged)) {
       // is partial update
-      for (const dataRange of dataChanged) {
+      for (const dataRange of dataChanged as {startRow: number; endRow?: number}[]) {
         this._rebuildGeometry(dataRange);
       }
     } else {
@@ -195,7 +195,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
   }
 
   /* eslint-disable complexity,max-statements */
-  private _rebuildGeometry(dataRange?: {startRow: number; endRow: number}): void {
+  private _rebuildGeometry(dataRange?: {startRow: number; endRow?: number}): void {
     if (!this.data) {
       return;
     }
