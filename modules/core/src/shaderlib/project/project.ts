@@ -23,10 +23,13 @@ import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
+import type {ProjectModuleSettings} from './viewport-uniforms';
+import type {ShaderModule} from '../../types/types';
+
 const INITIAL_MODULE_OPTIONS = {};
 
-function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
-  if (opts.viewport) {
+function getUniforms(opts: ProjectModuleSettings | {} = INITIAL_MODULE_OPTIONS) {
+  if ('viewport' in opts) {
     return getUniformsFromViewport(opts);
   }
   return {};
@@ -37,4 +40,4 @@ export default {
   dependencies: [fp32, geometry],
   vs: projectShader,
   getUniforms
-};
+} as ShaderModule<ProjectModuleSettings>;

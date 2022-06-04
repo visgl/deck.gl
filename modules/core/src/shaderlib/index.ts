@@ -48,3 +48,27 @@ export function createProgramManager(gl) {
 }
 
 export {picking, project, project32, gouraudLighting, phongLighting, shadow};
+
+// Useful for custom shader modules
+export type {ProjectUniforms} from './project/viewport-uniforms';
+
+// TODO - these should be imported from luma.gl
+/* eslint-disable camelcase */
+export type PickingUniforms = {
+  picking_uActive: boolean;
+  picking_uAttribute: boolean;
+  picking_uSelectedColor: [number, number, number];
+  picking_uSelectedColorValid: boolean;
+  picking_uHighlightColor: [number, number, number, number];
+};
+
+export type LightingModuleSettings = {
+  material:
+    | boolean
+    | {
+        ambient?: number;
+        diffuse?: number;
+        shininess?: number;
+        specularColor?: [number, number, number];
+      };
+};
