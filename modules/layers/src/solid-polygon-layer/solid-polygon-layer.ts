@@ -39,6 +39,7 @@ import type {
   PickingInfo
 } from '@deck.gl/core';
 import type {PolygonGeometry} from './polygon';
+import type {MaterialProps} from '../types';
 
 type _SolidPolygonLayerProps<DataT> = {
   /** Whether to fill the polygons
@@ -79,7 +80,7 @@ type _SolidPolygonLayerProps<DataT> = {
   getLineColor?: Accessor<DataT, Color>;
 
   /** Optional settings for 'lighting' shader module */
-  material?: boolean | any; // TODO
+  material?: boolean | MaterialProps;
 };
 
 export type SolidPolygonLayerProps<DataT> = _SolidPolygonLayerProps<DataT> & LayerProps<DataT>;
