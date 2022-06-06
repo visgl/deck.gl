@@ -37,7 +37,7 @@ export type Updater = (
 ) => void;
 
 export type AttributeOptions = DataColumnOptions<{
-  transition?: boolean;
+  transition?: boolean | Partial<TransitionSettings>;
   noAlloc?: boolean;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
@@ -303,7 +303,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       }
       const binaryValue = buffer as BinaryAttribute;
       assert(ArrayBuffer.isView(binaryValue.value), `invalid ${settings.accessor}`);
-      const needsNormalize = binaryValue.size && binaryValue.size !== this.size;
+      const needsNormalize = Boolean(binaryValue.size) && binaryValue.size !== this.size;
 
       state.binaryAccessor = getAccessorFromBuffer(binaryValue.value, {
         size: binaryValue.size || this.size,

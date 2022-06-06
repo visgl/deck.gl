@@ -46,9 +46,9 @@ export type LayerContext = {
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
-  mousePosition: [number, number] | null;
+  mousePosition: {x: number; y: number} | null;
   userData: any;
-  onError?: (error: Error, source: Layer) => void;
+  onError?: <PropsT>(error: Error, source: Layer<PropsT>) => void;
 };
 
 export type LayersList = (Layer | undefined | false | null | LayersList)[];

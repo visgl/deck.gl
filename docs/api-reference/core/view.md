@@ -43,6 +43,10 @@ A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
+##### `padding` (Object, optional)
+
+Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
+
 ##### `controller` (Function|Boolean|Object, optional)
 
 Options for viewport interactivity.

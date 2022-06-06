@@ -25,31 +25,102 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
-import type {LayerProps, LayerContext, Accessor, Unit, Position, Color} from '@deck.gl/core';
+import type {LayerProps, UpdateParameters, Accessor, Unit, Position, Color} from '@deck.gl/core';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
-export type ScatterplotLayerProps<DataT> = LayerProps<DataT> & {
-  radiusUnits: Unit;
-  radiusScale: number;
-  radiusMinPixels: number;
-  radiusMaxPixels: number;
+/** All props supported by the ScatterplotLayer */
+export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
 
-  lineWidthUnits: Unit;
-  lineWidthScale: number;
-  lineWidthMinPixels: number;
-  lineWidthMaxPixels: number;
+/** Props added by the ScatterplotLayer */
+type _ScatterplotLayerProps<DataT> = {
+  /**
+   * The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`.
+   * @default 'meters'
+   */
+  radiusUnits?: Unit;
+  /**
+   * Radius multiplier.
+   * @default 1
+   */
+  radiusScale?: number;
+  /**
+   * The minimum radius in pixels. This prop can be used to prevent the circle from getting too small when zoomed out.
+   * @default 0
+   */
+  radiusMinPixels?: number;
+  /**
+   * The maximum radius in pixels. This prop can be used to prevent the circle from getting too big when zoomed in.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  radiusMaxPixels?: number;
 
-  stroked: boolean;
-  filled: boolean;
-  billboard: boolean;
-  antialiasing: boolean;
+  /**
+   * The units of the stroke width, one of `'meters'`, `'common'`, and `'pixels'`.
+   * @default 'meters'
+   */
+  lineWidthUnits?: Unit;
+  /**
+   * Stroke width multiplier.
+   * @default 1
+   */
+  lineWidthScale?: number;
+  /**
+   * The minimum stroke width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
+   * @default 0
+   */
+  lineWidthMinPixels?: number;
+  /**
+   * The maximum stroke width in pixels. This prop can be used to prevent the circle from getting too thick when zoomed in.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  lineWidthMaxPixels?: number;
 
-  getPosition: Accessor<DataT, Position>;
-  getRadius: Accessor<DataT, number>;
-  getFillColor: Accessor<DataT, Color>;
-  getLineColor: Accessor<DataT, Color>;
-  getLineWidth: Accessor<DataT, number>;
+  /**
+   * Draw the outline of points.
+   * @default false
+   */
+  stroked?: boolean;
+  /**
+   * Draw the filled area of points.
+   * @default true
+   */
+  filled?: boolean;
+  /**
+   * If `true`, rendered circles always face the camera. If `false` circles face up (i.e. are parallel with the ground plane).
+   * @default false
+   */
+  billboard?: boolean;
+  /**
+   * If `true`, circles are rendered with smoothed edges. If `false`, circles are rendered with rough edges. Antialiasing can cause artifacts on edges of overlapping circles.
+   * @default true
+   */
+  antialiasing?: boolean;
+
+  /**
+   * Center position accessor.
+   */
+  getPosition?: Accessor<DataT, Position>;
+  /**
+   * Radius accessor.
+   * @default 1
+   */
+  getRadius?: Accessor<DataT, number>;
+  /**
+   * Fill color accessor.
+   * @default [0, 0, 0, 255]
+   */
+  getFillColor?: Accessor<DataT, Color>;
+  /**
+   * Stroke color accessor.
+   * @default [0, 0, 0, 255]
+   */
+  getLineColor?: Accessor<DataT, Color>;
+  /**
+   * Stroke width accessor.
+   * @default 1
+   */
+  getLineWidth?: Accessor<DataT, number>;
 };
 
 const defaultProps = {
@@ -80,10 +151,9 @@ const defaultProps = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-export default class ScatterplotLayer<
-  DataT = any,
-  PropsT extends ScatterplotLayerProps<DataT> = ScatterplotLayerProps<DataT>
-> extends Layer<PropsT> {
+export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
+> {
   static defaultProps: any = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
@@ -92,8 +162,7 @@ export default class ScatterplotLayer<
   }
 
   initializeState() {
-    // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
-    this.getAttributeManager().addInstanced({
+    this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -108,7 +177,6 @@ export default class ScatterplotLayer<
         defaultValue: 1
       },
       instanceFillColors: {
-        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
         size: this.props.colorFormat.length,
         transition: true,
         normalized: true,
@@ -117,7 +185,6 @@ export default class ScatterplotLayer<
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
-        // @ts-ignore (TS2322) colorFormat.length can only be 3 or 4
         size: this.props.colorFormat.length,
         transition: true,
         normalized: true,
@@ -134,17 +201,14 @@ export default class ScatterplotLayer<
     });
   }
 
-  updateState(params) {
+  updateState(params: UpdateParameters<this>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context as LayerContext;
-      // @ts-ignore (TS2531) state is always defined
+      const {gl} = this.context;
       this.state.model?.delete();
-      // @ts-ignore (TS2531) state is always defined
       this.state.model = this._getModel(gl);
-      // @ts-ignore (TS2531) attributeManager is always defined for primitive layer
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
@@ -164,7 +228,6 @@ export default class ScatterplotLayer<
       lineWidthMaxPixels
     } = this.props;
 
-    // @ts-ignore (TS2531) state is always defined
     this.state.model
       .setUniforms(uniforms)
       .setUniforms({
@@ -184,7 +247,7 @@ export default class ScatterplotLayer<
       .draw();
   }
 
-  _getModel(gl) {
+  protected _getModel(gl) {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
 

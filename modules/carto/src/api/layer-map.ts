@@ -13,6 +13,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
+import {Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
@@ -40,6 +41,12 @@ export const AGGREGATION = {
   maximum: 'MAX',
   minimum: 'MIN',
   sum: 'SUM'
+};
+
+export const OPACITY_MAP = {
+  getFillColor: 'opacity',
+  getLineColor: 'strokeOpacity',
+  getTextColor: 'opacity'
 };
 
 const AGGREGATION_FUNC = {
@@ -71,7 +78,6 @@ const sharedPropMap = {
     enable3d: 'extruded',
     elevationScale: 'elevationScale',
     filled: 'filled',
-    opacity: 'opacity',
     strokeColor: 'getLineColor',
     stroked: 'stroked',
     thickness: 'getLineWidth',
@@ -96,7 +102,7 @@ const defaultProps = {
   wrapLongitude: false
 };
 
-function mergePropMaps(a = {}, b = {}) {
+function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {}) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
@@ -104,7 +110,7 @@ export function getLayer(
   type: string,
   config,
   dataset
-): {Layer: any; propMap: any; defaultProps: any} {
+): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
   if (type === 'mvt' || type === 'tileset') {
     return getTileLayer(dataset);
   }
@@ -113,7 +119,11 @@ export function getLayer(
   const getPosition = d => d[geoColumn].coordinates;
 
   const hexagonId = config.columns?.hex_id;
-  const layer = {
+
+  const layerTypeDefs: Record<
+    string,
+    {Layer: ConstructorOf<Layer>; propMap?: any; defaultProps?: any}
+  > = {
     point: {
       Layer: GeoJsonLayer,
       propMap: {visConfig: {outline: 'stroked'}}
@@ -141,12 +151,16 @@ export function getLayer(
       propMap: {visConfig: {coverage: 'coverage'}},
       defaultProps: {getHexagon: d => d[hexagonId], stroked: false}
     }
-  }[type];
+  };
+
+  const layer = layerTypeDefs[type];
 
   assert(layer, `Unsupported layer type: ${type}`);
-  layer.propMap = mergePropMaps(sharedPropMap, layer.propMap);
-  layer.defaultProps = {...defaultProps, ...layer.defaultProps};
-  return layer;
+  return {
+    ...layer,
+    propMap: mergePropMaps(sharedPropMap, layer.propMap),
+    defaultProps: {...defaultProps, ...layer.defaultProps}
+  };
 }
 
 function getTileLayer(dataset) {
@@ -225,6 +239,10 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
+export function opacityToAlpha(opacity) {
+  return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
+}
+
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
   const aggregator = AGGREGATION_FUNC[colorAggregation];
   const accessor = values => aggregator(values, p => p[name]);
@@ -259,11 +277,12 @@ export function getColorAccessor(
   scale.domain(domain);
   scale.range(scaleColor);
   scale.unknown(UNKNOWN_COLOR);
-  const alpha = opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
+  const alpha = opacityToAlpha(opacity);
 
   const accessor = properties => {
-    const {r, g, b} = rgb(scale(properties[name]));
-    return [r, g, b, alpha];
+    const propertyValue = properties[name];
+    const {r, g, b} = rgb(scale(propertyValue));
+    return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
 }

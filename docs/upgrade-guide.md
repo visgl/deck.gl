@@ -1,5 +1,13 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.7 to v8.8
+
+### Layers
+
+#### Breaking changes
+
+- `Tile` class in `TileLayer` no longer has `x`, `y`, and `z` as top level properties, but instead an `index` property with shape `{x, y, z}`.
+
 ## Upgrading from deck.gl v8.6 to v8.7
 
 #### Deprecations

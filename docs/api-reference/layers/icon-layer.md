@@ -143,7 +143,7 @@ Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
 
 ##### `iconAtlas` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional)
 
-The atlas image. 
+A pre-packed image that contains all icons.
 
 - If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
 - One of the following, or a Promise that resolves to one of the following:
@@ -192,19 +192,19 @@ The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit 
 
 * Default: `0`
 
-The minimum size in pixels.
+The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
 
 ##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum size in pixels.
+The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
 
 ##### `billboard` (Boolean, optional)
 
 - Default: `true`
 
-If on, the icon always faces camera. Otherwise the icon faces up (z)
+If `true`, the icon always faces camera. Otherwise the icon faces up (z).
 
 ##### `alphaCutoff` (Number, optional)
 

@@ -23,6 +23,7 @@ import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
+import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug';
@@ -42,13 +43,12 @@ import {worldToPixels} from '@math.gl/web-mercator';
 import {load} from '@loaders.gl/core';
 
 import type {CoordinateSystem} from './constants';
-import type {StatefulComponentProps} from '../lifecycle/component';
 import type Attribute from './attribute/attribute';
-import type {LayerProps} from '../types/layer-props';
 import type {Model} from '@luma.gl/engine';
-import type {PickingInfo} from './picking/pick-info';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
+import type {LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
@@ -154,11 +154,25 @@ const defaultProps = {
   highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
 };
 
-export default abstract class Layer<
-  PropsT extends LayerProps = LayerProps
-> extends Component<PropsT> {
+export type UpdateParameters<LayerT extends Layer> = {
+  props: LayerT['props'];
+  oldProps: LayerT['props'];
+  context: LayerContext;
+  changeFlags: ChangeFlags;
+};
+
+export default abstract class Layer<PropsT = any> extends Component<PropsT & Required<LayerProps>> {
   static defaultProps: any = defaultProps;
   static layerName: string = 'Layer';
+
+  internalState: LayerState<PropsT> | null = null;
+  lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
+
+  // context and state can technically be null before a layer is initialized/matched.
+  // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
+  // Checking for null state constantly in layer implementation is unnecessarily verbose.
+  context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
+  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -169,7 +183,8 @@ export default abstract class Layer<
 
   /** Projects a point with current view state from the current layer's coordinate system to screen */
   project(xyz: number[]): number[] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
 
     const worldPosition = getWorldPosition(xyz, {
       viewport,
@@ -184,7 +199,8 @@ export default abstract class Layer<
   /** Unprojects a screen pixel to the current view's default coordinate system
       Note: this does not reverse `project`. */
   unproject(xy: number[]): number[] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
     return viewport.unproject(xy);
   }
 
@@ -200,7 +216,8 @@ export default abstract class Layer<
       fromCoordinateOrigin?: [number, number, number];
     }
   ): [number, number, number] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
 
     return projectPosition(xyz, {
       viewport,
@@ -234,7 +251,7 @@ export default abstract class Layer<
 
   /** Mark this layer as needs a deep update */
   setNeedsUpdate() {
-    if (this.context && this.internalState) {
+    if (this.internalState) {
       this.context.layerManager.setNeedsUpdate(String(this));
       this.internalState.needsUpdate = true;
     }
@@ -257,7 +274,7 @@ export default abstract class Layer<
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
   getModels(): Model[] {
-    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
+    return (this.state && (this.state.models || (this.state.model && [this.state.model]))) || [];
   }
 
   /** Update shader module parameters */
@@ -339,10 +356,10 @@ export default abstract class Layer<
     - Auto-deduction for ES6 containers that define a size member
     - Auto-deduction for Classic Arrays via the built-in length attribute
     - Auto-deduction via arrays */
-  getNumInstances(props: PropsT = this.props): number {
+  getNumInstances(): number {
     // First Check if app has provided an explicit value
-    if (props.numInstances !== undefined) {
-      return props.numInstances;
+    if (Number.isFinite(this.props.numInstances)) {
+      return this.props.numInstances as number;
     }
 
     // Second check if the layer has set its own value
@@ -351,17 +368,17 @@ export default abstract class Layer<
     }
 
     // Use container library to get a count for any ES6 container or object
-    return count(props.data);
+    return count(this.props.data);
   }
 
   /** Buffer layout describes how many attribute values are packed for each data object
       The default (null) is one value each object.
       Some data formats (e.g. paths, polygons) have various length. Their buffer layout
       is in the form of [L0, L1, L2, ...] */
-  getStartIndices(props: PropsT = this.props): NumericArray | null {
+  getStartIndices(): NumericArray | null {
     // First Check if startIndices is provided as an explicit value
-    if (props.startIndices !== undefined) {
-      return props.startIndices;
+    if (this.props.startIndices) {
+      return this.props.startIndices;
     }
 
     // Second check if the layer has set its own value
@@ -394,23 +411,13 @@ export default abstract class Layer<
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
-  shouldUpdateState(params: {
-    oldProps: PropsT;
-    props: PropsT;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): boolean {
+  shouldUpdateState(params: UpdateParameters<Layer<PropsT>>): boolean {
     return params.changeFlags.propsOrDataChanged;
   }
 
   /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
-  updateState(params: {
-    oldProps: PropsT;
-    props: PropsT;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): void {
+  updateState(params: UpdateParameters<Layer<PropsT>>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;
     if (dataChanged && attributeManager) {
@@ -471,7 +478,7 @@ export default abstract class Layer<
 
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
-  getPickingInfo({info, mode, sourceLayer}) {
+  getPickingInfo({info, mode, sourceLayer}: GetPickingInfoParams) {
     const {index} = info;
 
     if (index >= 0) {
@@ -488,7 +495,7 @@ export default abstract class Layer<
 
   // / INTERNAL METHODS - called by LayerManager, DeckRenderer and DeckPicker
 
-  /** Propagate an error event through the system */
+  /** (Internal) Propagate an error event through the system */
   raiseError(error: Error, message: string): void {
     if (message) {
       error.message = `${message}: ${error.message}`;
@@ -498,7 +505,7 @@ export default abstract class Layer<
     }
   }
 
-  /** Checks if this layer needs redraw */
+  /** (Internal) Checks if this layer needs redraw */
   getNeedsRedraw(
     opts: {
       /** Reset redraw flags to false after the check */
@@ -508,7 +515,7 @@ export default abstract class Layer<
     return this._getNeedsRedraw(opts);
   }
 
-  /** Checks if this layer needs a deep update */
+  /** (Internal) Checks if this layer needs a deep update */
   needsUpdate(): boolean {
     if (!this.internalState) {
       return false;
@@ -575,15 +582,16 @@ export default abstract class Layer<
   }
 
   /** Recalculate any attributes if needed */
-  protected _updateAttributes(props: PropsT): void {
+  protected _updateAttributes(): void {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
     }
+    const props = this.props;
 
     // Figure out data length
-    const numInstances = this.getNumInstances(props);
-    const startIndices = this.getStartIndices(props);
+    const numInstances = this.getNumInstances();
+    const startIndices = this.getStartIndices();
 
     attributeManager.update({
       data: props.data,
@@ -609,7 +617,7 @@ export default abstract class Layer<
   }
 
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
-  private _updateUniformTransition(): StatefulComponentProps<PropsT> {
+  private _updateUniformTransition(): Layer<PropsT>['props'] {
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
@@ -734,7 +742,7 @@ export default abstract class Layer<
   /* eslint-disable max-statements */
   /* (Internal) Called by layer manager when a new layer is found */
   _initialize() {
-    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(!this.internalState); // finalized layer cannot be reused
     assert(Number.isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     debug(TRACE_INITIALIZE, this);
@@ -776,16 +784,14 @@ export default abstract class Layer<
     /* eslint-enable accessor-pairs */
 
     this.internalState.layer = this;
-    this.internalState.uniformTransitions = new UniformTransitionManager(
-      (this.context as LayerContext).timeline
-    );
+    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
     // Call subclass lifecycle methods
-    this.initializeState(this.context as LayerContext);
+    this.initializeState(this.context);
 
     // Initialize extensions
     for (const extension of this.props.extensions) {
@@ -826,7 +832,7 @@ export default abstract class Layer<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffProps(this.props, this.internalState.getOldProps() as PropsT);
+    this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -841,7 +847,7 @@ export default abstract class Layer<
     }
 
     const currentProps = this.props;
-    const context = this.context as LayerContext;
+    const context = this.context;
     const internalState = this.internalState as LayerState<PropsT>;
 
     const currentViewport = context.viewport;
@@ -893,7 +899,7 @@ export default abstract class Layer<
     debug(TRACE_FINALIZE, this);
 
     // Call subclass lifecycle method
-    this.finalizeState(this.context as LayerContext);
+    this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
       extension.finalizeState.call(this, extension);
@@ -913,7 +919,7 @@ export default abstract class Layer<
     this._updateAttributeTransition();
 
     const currentProps = this.props;
-    const context = this.context as LayerContext;
+    const context = this.context;
     // Overwrite this.props during redraw to use in-transition prop values
     // `internalState.propsInTransition` could be missing if `updateState` failed
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
@@ -1029,7 +1035,7 @@ export default abstract class Layer<
   /** Compares the layers props with old props from a matched older layer
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
-  private _diffProps(newProps: PropsT, oldProps: PropsT) {
+  private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -1089,36 +1095,26 @@ export default abstract class Layer<
 
   /** Create new attribute manager */
   protected _getAttributeManager(): AttributeManager | null {
-    return (
-      this.context &&
-      new AttributeManager(this.context.gl, {
-        id: this.props.id,
-        stats: this.context.stats,
-        timeline: this.context.timeline
-      })
-    );
+    const context = this.context;
+    return new AttributeManager(context.gl, {
+      id: this.props.id,
+      stats: context.stats,
+      timeline: context.timeline
+    });
   }
 
   // Private methods
 
   /** Called after updateState to perform common tasks */
-  protected _postUpdate(
-    updateParams: {
-      props: PropsT;
-      oldProps: PropsT;
-      context: LayerContext;
-      changeFlags: ChangeFlags;
-    },
-    forceUpdate: boolean
-  ) {
+  protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
 
     this.setNeedsRedraw();
     // Check if attributes need recalculation
-    this._updateAttributes(props);
+    this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
-    const {model} = this.state as any;
+    const {model} = this.state;
     model?.setInstanceCount(this.getNumInstances());
 
     // Set picking module parameters to match props
@@ -1149,17 +1145,12 @@ export default abstract class Layer<
     }
   }
 
-  private _getUpdateParams(): {
-    props: PropsT;
-    oldProps: PropsT;
-    context: LayerContext;
-    changeFlags: ChangeFlags;
-  } {
+  private _getUpdateParams(): UpdateParameters<Layer<PropsT>> {
     return {
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       oldProps: this.internalState.getOldProps() as PropsT,
-      context: this.context as LayerContext,
+      context: this.context,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       changeFlags: this.internalState.changeFlags
     };

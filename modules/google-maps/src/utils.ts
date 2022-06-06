@@ -1,6 +1,7 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
+import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -18,7 +19,7 @@ export function createDeckInstance(
   props
 ): Deck {
   if (deck) {
-    if (deck.props.userData._googleMap === map) {
+    if (deck.userData._googleMap === map) {
       return deck;
     }
     // deck instance was created for a different map
@@ -82,7 +83,7 @@ function getContainer(
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck: Deck) {
-  const {_eventListeners: eventListeners} = deck.props.userData;
+  const {_eventListeners: eventListeners} = deck.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
@@ -120,24 +121,18 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
   // We need to update left/top of the deck canvas to match the base map.
-  const nwContainerPx = new google.maps.Point(0, 0);
-  const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
-  const nwDivPx = projection.fromLatLngToDivPixel(nw);
+  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
+  const centerH = new google.maps.LatLng(0, centerLngLat[0]);
+  const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
+  const centerDivPx = projection.fromLatLngToDivPixel(centerH);
 
-  if (!topRight || !bottomLeft || !nwDivPx) {
+  if (!topRight || !bottomLeft || !centerDivPx || !centerContainerPx) {
     return {width, height, left: 0, top: 0};
   }
-
-  let leftOffset = nwDivPx.x;
-  let topOffset = nwDivPx.y;
-
-  // Adjust horizontal offset - position the viewport at the map in the center
-  const mapWidth = projection.getWorldWidth();
-  const mapCount = Math.ceil(width / mapWidth);
-  leftOffset -= Math.floor(mapCount / 2) * mapWidth;
+  const leftOffset = Math.round(centerDivPx.x - centerContainerPx.x);
+  let topOffset = centerDivPx.y - centerContainerPx.y;
 
   const topLngLat = pixelToLngLat(projection, width / 2, 0);
-  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
   const bottomLngLat = pixelToLngLat(projection, width / 2, height);
 
   // Compute fractional center.
@@ -152,6 +147,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
     // @ts-ignore (TS2531) Object is possibly 'null'
     topOffset += centerPx.y - height / 2;
   }
+  topOffset = Math.round(topOffset);
 
   // Compute fractional bearing
   const delta = new Vector2(topLngLat).sub(bottomLngLat);
@@ -288,29 +284,26 @@ function handleMouseEvent(deck: Deck, type: string, event) {
 
   switch (type) {
     case 'click':
-      // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        ...mockEvent.offsetCenter,
-        radius: deck.props.pickingRadius
-      });
       mockEvent.tapCount = 1;
-      deck._onEvent(mockEvent);
+      // Hack: because we do not listen to pointer down, perform picking now
+      deck._onPointerDown(mockEvent as MjolnirPointerEvent);
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
       break;
 
     case 'dblclick':
       mockEvent.type = 'click';
       mockEvent.tapCount = 2;
-      deck._onEvent(mockEvent);
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
       break;
 
     case 'mousemove':
       mockEvent.type = 'pointermove';
-      deck._onPointerMove(mockEvent);
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
       break;
 
     case 'mouseout':
       mockEvent.type = 'pointerleave';
-      deck._onPointerMove(mockEvent);
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
       break;
 
     default:

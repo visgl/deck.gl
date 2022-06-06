@@ -35,6 +35,7 @@ export type Format = ValuesOf<typeof FORMATS>;
 // AVAILABLE FORMATS FOR TILES
 export const TILE_FORMATS = {
   MVT: 'mvt',
+  JSON: 'json',
   GEOJSON: 'geojson',
   BINARY: 'binary'
 } as const;
@@ -59,7 +60,7 @@ export interface SchemaField {
 export interface MapInstantiation extends MapInstantiationFormats {
   nrows: number;
   size?: number;
-  schema?: SchemaField[];
+  schema: SchemaField[];
 }
 
 type MapInstantiationFormats = Record<

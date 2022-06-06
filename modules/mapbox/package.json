@@ -2,7 +2,7 @@
   "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
-  "version": "8.7.0-beta.7",
+  "version": "8.8.0-alpha.5",
   "publishConfig": {
     "access": "public"
   },
@@ -21,6 +21,7 @@
   "files": [
     "dist",
     "src",
+    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
@@ -33,5 +34,6 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0"
-  }
+  },
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

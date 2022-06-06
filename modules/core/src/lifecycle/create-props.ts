@@ -7,11 +7,11 @@ import {
   ASYNC_RESOLVED_SYMBOL,
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
-import {ComponentProps, StatefulComponentProps} from './component';
+import {StatefulComponentProps} from './component';
 import type Component from './component';
 
 // Create a property object
-export function createProps<T extends ComponentProps>(
+export function createProps<T>(
   component: Component<T>,
   propObjects: Partial<T>[]
 ): StatefulComponentProps<T> {

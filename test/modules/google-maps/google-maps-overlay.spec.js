@@ -172,8 +172,8 @@ function drawPickTest(renderingType) {
       t.ok(equals(width, map.opts.width), 'width is set');
       t.ok(equals(height, map.opts.height), 'height is set');
     } else {
-      t.ok(equals(width, false), 'width is not set');
-      t.ok(equals(height, false), 'height is not set');
+      t.ok(equals(width, null), 'width is not set');
+      t.ok(equals(height, null), 'height is not set');
     }
 
     const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');

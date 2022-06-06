@@ -5,10 +5,11 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist/typed"
+    "outDir": "typed"
   },
   "references": [
     {"path": "../core"},
+    {"path": "../aggregation-layers"},
     {"path": "../geo-layers"},
     {"path": "../layers"}
   ]

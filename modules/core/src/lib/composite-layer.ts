@@ -17,22 +17,24 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import Layer from './layer';
+import Layer, {UpdateParameters} from './layer';
 import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
-import type {PickingInfo} from './picking/pick-info';
-import type {ChangeFlags} from './layer-state';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
+import {ConstructorOf} from '../types/types';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<
-  PropsT extends CompositeLayerProps = CompositeLayerProps
-> extends Layer<PropsT> {
+export default abstract class CompositeLayer<PropsT = any> extends Layer<
+  PropsT & Required<CompositeLayerProps>
+> {
+  static layerName: string = 'CompositeLayer';
+
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return true;
@@ -67,7 +69,7 @@ export default abstract class CompositeLayer<
   /** called to augment the info object that is bubbled up from a sublayer
       override Layer.getPickingInfo() because decoding / setting uniform do
       not apply to a composite layer. */
-  getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
+  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     const {object} = info;
     const isDataWrapped =
       object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
@@ -99,11 +101,16 @@ export default abstract class CompositeLayer<
   }
 
   /** Returns sub layer class for a specific sublayer */
-  protected getSubLayerClass(subLayerId: string, DefaultLayerClass: typeof Layer): typeof Layer {
+  protected getSubLayerClass<T extends Layer>(
+    subLayerId: string,
+    DefaultLayerClass: ConstructorOf<T>
+  ): ConstructorOf<T> {
     const {_subLayerProps: overridingProps} = this.props;
 
     return (
-      (overridingProps && overridingProps[subLayerId] && overridingProps[subLayerId].type) ||
+      (overridingProps &&
+        overridingProps[subLayerId] &&
+        (overridingProps[subLayerId].type as ConstructorOf<T>)) ||
       DefaultLayerClass
     );
   }
@@ -252,15 +259,7 @@ export default abstract class CompositeLayer<
   }
 
   /** (Internal) Called after an update to rerender sub layers */
-  protected _postUpdate(
-    updateParams: {
-      props: PropsT;
-      oldProps: PropsT;
-      context: LayerContext;
-      changeFlags: ChangeFlags;
-    },
-    forceUpdate: boolean
-  ) {
+  protected _postUpdate(updateParams: UpdateParameters<CompositeLayer>, forceUpdate: boolean) {
     // @ts-ignore (TS2531) this method is only called internally when internalState is defined
     let subLayers = this.internalState.subLayers as Layer[];
     const shouldUpdate = !subLayers || this.needsUpdate();
@@ -282,5 +281,3 @@ export default abstract class CompositeLayer<
     }
   }
 }
-
-CompositeLayer.layerName = 'CompositeLayer';

@@ -22,7 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, phongLighting, picking, COORDINATE_SYSTEM, log} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  phongLighting,
+  picking,
+  COORDINATE_SYSTEM,
+  log,
+  LayerContext
+} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
 import {hasFeature, FEATURES} from '@luma.gl/webgl';
@@ -32,7 +40,11 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
-function validateGeometryAttributes(attributes, useMeshColors) {
+import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} from '@deck.gl/core';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {Geometry as GeometryType} from '@luma.gl/engine';
+
+function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
   const useColorAttribute = hasColorAttribute && useMeshColors;
   if (!useColorAttribute) {
@@ -48,15 +60,15 @@ function validateGeometryAttributes(attributes, useMeshColors) {
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
-function getGeometry(data, useMeshColors) {
-  if (data.attributes) {
-    validateGeometryAttributes(data.attributes, useMeshColors);
+function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
+  if ((data as any).attributes) {
+    validateGeometryAttributes((data as any).attributes, useMeshColors);
     if (data instanceof Geometry) {
       return data;
     } else {
       return new Geometry(data);
     }
-  } else if (data.positions || data.POSITION) {
+  } else if ((data as MeshAttributes).positions || (data as MeshAttributes).POSITION) {
     validateGeometryAttributes(data, useMeshColors);
     return new Geometry({
       attributes: data
@@ -66,6 +78,86 @@ function getGeometry(data, useMeshColors) {
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+
+type Mesh =
+  | GeometryType
+  | {
+      attributes: MeshAttributes;
+      indices?: MeshAttribute;
+    }
+  | MeshAttributes;
+
+type _SimpleMeshLayerProps<DataT> = {
+  mesh: string | Mesh | Promise<Mesh>;
+  texture?: string | Texture | Promise<Texture>;
+  textureParameters?: {[p: number]: number} | null;
+
+  /** Anchor position accessor. */
+  getPosition?: Accessor<DataT, Position>;
+  /** Color value or accessor.
+   * If `mesh` does not contain vertex colors, use this color to render each object.
+   * If `mesh` contains vertex colors, then the two colors are mixed together.
+   * Use `[255, 255, 255]` to use the original mesh colors.
+   * If `texture` is assigned, then both colors will be ignored.
+   * @default [0, 0, 0, 255]
+   */
+  getColor?: Accessor<DataT, Color>;
+  /**
+   * Orientation in [pitch, yaw, roll] in degrees.
+   * @see https://en.wikipedia.org/wiki/Euler_angles
+   * @default [0, 0, 0]
+   */
+  getOrientation?: Accessor<DataT, [number, number, number]>;
+  /**
+   * Scaling factor of the model along each axis.
+   * @default [1, 1, 1]
+   */
+  getScale?: Accessor<DataT, [number, number, number]>;
+  /**
+   * Translation from the anchor point, [x, y, z] in meters.
+   * @default [0, 0, 0]
+   */
+  getTranslation?: Accessor<DataT, [number, number, number]>;
+  /**
+   * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
+   */
+  getTransformMatrix?: Accessor<DataT, number[]>;
+  /**
+   * Multiplier to scale each geometry by.
+   * @default 1
+   */
+  sizeScale?: number;
+  /**
+   * @deprecated Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute).
+   * If set to `false` vertex colors will be ignored.
+   * This prop will be removed and set to always true in the next major release.
+   * @default false
+   */
+  _useMeshColors?: boolean;
+
+  /**
+   * (Experimental) If rendering only one instance of the mesh, set this to false to treat mesh positions
+   * as deltas of the world coordinates of the anchor.
+   * E.g. in LNGLAT coordinates, mesh positions are interpreted as meter offsets by default.
+   * setting _instanced to false interpreted mesh positions as lnglat deltas.
+   * @default true
+   */
+  _instanced?: true; // TODO - formalize API
+  /**
+   * Whether to render the mesh in wireframe mode.
+   * @default false
+   */
+  wireframe?: false;
+  /**
+   * Material props for lighting effect.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
+   */
+  material?: true | any | null; // TODO - export Material def from lighting shader module
+};
+
+export type SimpleMeshLayerProps<DataT> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
 
 const defaultProps = {
   mesh: {value: null, type: 'object', async: true},
@@ -97,11 +189,22 @@ const defaultProps = {
   getTransformMatrix: {type: 'accessor', value: []}
 };
 
-export default class SimpleMeshLayer extends Layer {
+export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_SimpleMeshLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'SimpleMeshLayer';
+
+  state!: {
+    model?: Model;
+    emptyTexture: Texture2D;
+    hasNormals?: boolean;
+  };
+
   getShaders() {
     const transpileToGLSL100 = !isWebGL2(this.context.gl);
 
-    const defines = {};
+    const defines: any = {};
 
     if (hasFeature(this.context.gl, FEATURES.GLSL_DERIVATIVES)) {
       defines.DERIVATIVES_AVAILABLE = 1;
@@ -118,8 +221,8 @@ export default class SimpleMeshLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
-
-    attributeManager.addInstanced({
+    // attributeManager is always defined in a primitive layer
+    attributeManager!.addInstanced({
       instancePositions: {
         transition: true,
         type: GL.DOUBLE,
@@ -149,22 +252,22 @@ export default class SimpleMeshLayer extends Layer {
     });
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
 
+    const {props, oldProps, changeFlags} = params;
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
-      if (this.state.model) {
-        this.state.model.delete();
-      }
+      this.state.model?.delete();
       if (props.mesh) {
-        this.state.model = this.getModel(props.mesh);
+        this.state.model = this.getModel(props.mesh as Mesh);
 
-        const attributes = props.mesh.attributes || props.mesh;
+        const attributes = (props.mesh as any).attributes || props.mesh;
         this.setState({
           hasNormals: Boolean(attributes.NORMAL || attributes.normals)
         });
       }
-      this.getAttributeManager().invalidateAll();
+      // attributeManager is always defined in a primitive layer
+      this.getAttributeManager()!.invalidateAll();
     }
 
     if (props.texture !== oldProps.texture) {
@@ -176,8 +279,8 @@ export default class SimpleMeshLayer extends Layer {
     }
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext) {
+    super.finalizeState(context);
 
     this.state.emptyTexture.delete();
   }
@@ -200,7 +303,7 @@ export default class SimpleMeshLayer extends Layer {
       .draw();
   }
 
-  getModel(mesh) {
+  private getModel(mesh: Mesh): Model {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,
@@ -218,7 +321,7 @@ export default class SimpleMeshLayer extends Layer {
     return model;
   }
 
-  setTexture(texture) {
+  private setTexture(texture: Texture2D): void {
     const {emptyTexture, model} = this.state;
 
     // props.mesh may not be ready at this time.
@@ -231,6 +334,3 @@ export default class SimpleMeshLayer extends Layer {
     }
   }
 }
-
-SimpleMeshLayer.layerName = 'SimpleMeshLayer';
-SimpleMeshLayer.defaultProps = defaultProps;

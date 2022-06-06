@@ -1,5 +1,7 @@
 import {CompositeLayer, Layer, log} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
+import H3TileLayer from './h3-tile-layer';
+import QuadkeyTileLayer from './quadkey-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
@@ -55,10 +57,20 @@ const defaultProps = {
   geoColumn: null,
 
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
-  columns: {type: 'array', value: null}
+  columns: {type: 'array', value: null},
+
+  // (String, optional): aggregration SQL expression. Only used for spatial index datasets
+  aggregationExp: null,
+
+  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
+  aggregationResLevel: null
 };
 
-export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
+/** All properties supported by CartoLayer. */
+export type CartoLayerProps<DataT = any> = _CartoLayerProps & CompositeLayerProps<DataT>;
+
+/** Properties added by CartoLayer. */
+type _CartoLayerProps = {
   /**
    * Either a SQL query or a name of dataset/tileset.
    */
@@ -139,9 +151,11 @@ export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT>
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
-}
+};
 
-export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerProps<DataT>> {
+export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
+  Required<_CartoLayerProps> & ExtraProps
+> {
   static layerName = 'CartoLayer';
   static defaultProps = defaultProps as any;
 
@@ -229,7 +243,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let result: FetchLayerDataResult;
+      let result: Partial<FetchLayerDataResult>;
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {
           data: await getDataV2({type, source, credentials: credentials as ClassicCredentials})
@@ -240,7 +254,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
           source,
           clientId,
           credentials: credentials as CloudNativeCredentials,
-          connection: connection as string,
+          connection,
           ...rest
         });
       }
@@ -268,6 +282,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {data: _notUsed, ...propsNoData} = this.props;
+    // @ts-expect-error 'uniqueIdProperty' is specified more than once, so this usage will be overwritten.
     const props = {uniqueIdProperty, ...propsNoData};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
@@ -283,6 +298,12 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
         (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
         TILE_FORMATS.MVT;
 
+      if (data.scheme === 'h3') {
+        return [H3TileLayer, props];
+      }
+      if (data.scheme === 'quadkey') {
+        return [QuadkeyTileLayer, props];
+      }
       return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
     }
 
