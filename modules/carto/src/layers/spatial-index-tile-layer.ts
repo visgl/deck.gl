@@ -6,6 +6,8 @@ function isFeatureIdDefined(value: unknown): boolean {
 }
 
 export default class SpatialIndexTileLayer<ExtraProps = {}> extends TileLayer<any, ExtraProps> {
+  static layerName = 'SpatialIndexTileLayer';
+
   protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
