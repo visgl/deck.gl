@@ -13,6 +13,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
+import {Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
@@ -101,7 +102,7 @@ const defaultProps = {
   wrapLongitude: false
 };
 
-function mergePropMaps(a = {}, b = {}) {
+function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {}) {
   return {...a, ...b, visConfig: {...a.visConfig, ...b.visConfig}};
 }
 
@@ -109,7 +110,7 @@ export function getLayer(
   type: string,
   config,
   dataset
-): {Layer: any; propMap: any; defaultProps: any} {
+): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
   if (type === 'mvt' || type === 'tileset') {
     return getTileLayer(dataset);
   }
@@ -118,7 +119,11 @@ export function getLayer(
   const getPosition = d => d[geoColumn].coordinates;
 
   const hexagonId = config.columns?.hex_id;
-  const layer = {
+
+  const layerTypeDefs: Record<
+    string,
+    {Layer: ConstructorOf<Layer>; propMap?: any; defaultProps?: any}
+  > = {
     point: {
       Layer: GeoJsonLayer,
       propMap: {visConfig: {outline: 'stroked'}}
@@ -146,12 +151,16 @@ export function getLayer(
       propMap: {visConfig: {coverage: 'coverage'}},
       defaultProps: {getHexagon: d => d[hexagonId], stroked: false}
     }
-  }[type];
+  };
+
+  const layer = layerTypeDefs[type];
 
   assert(layer, `Unsupported layer type: ${type}`);
-  layer.propMap = mergePropMaps(sharedPropMap, layer.propMap);
-  layer.defaultProps = {...defaultProps, ...layer.defaultProps};
-  return layer;
+  return {
+    ...layer,
+    propMap: mergePropMaps(sharedPropMap, layer.propMap),
+    defaultProps: {...defaultProps, ...layer.defaultProps}
+  };
 }
 
 function getTileLayer(dataset) {
