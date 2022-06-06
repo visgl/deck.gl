@@ -29,29 +29,78 @@ import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
+import type {
+  LayerProps,
+  Color,
+  Accessor,
+  AccessorFunction,
+  UpdateParameters,
+  GetPickingInfoParams,
+  PickingInfo
+} from '@deck.gl/core';
+import type {PolygonGeometry} from './polygon';
+import type {MaterialProps} from '../types';
+
+type _SolidPolygonLayerProps<DataT> = {
+  /** Whether to fill the polygons
+   * @default true
+   */
+  filled?: boolean;
+  /** Whether to extrude the polygons
+   * @default false
+   */
+  extruded?: boolean;
+  /** Whether to generate a line wireframe of the polygon.
+   * @default false
+   */
+  wireframe?: boolean;
+  /**
+   * (Experimental) If `false`, will skip normalizing the coordinates returned by `getPolygon`.
+   * @default true
+   */
+  _normalize?: boolean;
+  /**
+   * (Experimental) This prop is only effective with `_normalize: false`.
+   * It specifies the winding order of rings in the polygon data, one of 'CW' (clockwise) and 'CCW' (counter-clockwise)
+   */
+  _windingOrder?: 'CW' | 'CCW';
+
+  /** Elevation multiplier.
+   * @default 1
+   */
+  elevationScale?: number;
+
+  /** Polygon geometry accessor. */
+  getPolygon?: AccessorFunction<DataT, PolygonGeometry>;
+  /** Extrusion height accessor. */
+  getElevation?: Accessor<DataT, number>;
+  /** Fill color accessor. */
+  getFillColor?: Accessor<DataT, Color>;
+  /** Wireframe color accessor. */
+  getLineColor?: Accessor<DataT, Color>;
+
+  /** Optional settings for 'lighting' shader module */
+  material?: boolean | MaterialProps;
+};
+
+export type SolidPolygonLayerProps<DataT> = _SolidPolygonLayerProps<DataT> & LayerProps<DataT>;
+
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   filled: true,
-  // Whether to extrude
   extruded: false,
-  // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
   _normalize: true,
   _windingOrder: 'CW',
 
-  // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
 
-  // Accessor for polygon geometry
   getPolygon: {type: 'accessor', value: f => f.polygon},
-  // Accessor for extrusion height
   getElevation: {type: 'accessor', value: 1000},
-  // Accessor for colors
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  // Optional settings for 'lighting' shader module
   material: true
 };
 
@@ -61,7 +110,20 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-export default class SolidPolygonLayer extends Layer {
+export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_SolidPolygonLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'SolidPolygonLayer';
+
+  state!: {
+    topModel?: Model;
+    sideModel?: Model;
+    models?: Model[];
+    numInstances: number;
+    polygonTesselator: PolygonTesselator;
+  };
+
   getShaders(type) {
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
@@ -73,7 +135,7 @@ export default class SolidPolygonLayer extends Layer {
     });
   }
 
-  get wrapLongitude() {
+  get wrapLongitude(): boolean {
     return false;
   }
 
@@ -89,26 +151,34 @@ export default class SolidPolygonLayer extends Layer {
       polygonTesselator: new PolygonTesselator({
         // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
         // Provide a preproject function if the coordinates are in lnglat
-        preproject: coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat,
+        preproject:
+          coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat.bind(viewport),
         fp64: this.use64bitPositions(),
         IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
     });
 
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
 
     attributeManager.remove(['instancePickingColors']);
 
     /* eslint-disable max-len */
     attributeManager.add({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      indices: {
+        size: 1,
+        isIndexed: true,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        update: this.calculateIndices,
+        noAlloc
+      },
       positions: {
         size: 3,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
@@ -130,6 +200,7 @@ export default class SolidPolygonLayer extends Layer {
         size: 1,
         divisor: 1,
         type: GL.UNSIGNED_BYTE,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
         noAlloc
       },
@@ -147,7 +218,6 @@ export default class SolidPolygonLayer extends Layer {
         }
       },
       fillColors: {
-        alias: 'colors',
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         normalized: true,
@@ -164,7 +234,6 @@ export default class SolidPolygonLayer extends Layer {
         }
       },
       lineColors: {
-        alias: 'colors',
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         normalized: true,
@@ -198,7 +267,7 @@ export default class SolidPolygonLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  getPickingInfo(params) {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
     const {data} = this.props;
@@ -206,18 +275,18 @@ export default class SolidPolygonLayer extends Layer {
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = data.find(d => d.__source.index === index);
+      info.object = (data as any[]).find(d => d.__source.index === index);
     }
     return info;
   }
 
-  disablePickingIndex(objectIndex) {
+  disablePickingIndex(objectIndex: number) {
     const {data} = this.props;
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < data.length; i++) {
+      for (let i = 0; i < (data as any[]).length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }
@@ -257,7 +326,7 @@ export default class SolidPolygonLayer extends Layer {
     }
   }
 
-  updateState(updateParams) {
+  updateState(updateParams: UpdateParameters<this>) {
     super.updateState(updateParams);
 
     this.updateGeometry(updateParams);
@@ -274,11 +343,11 @@ export default class SolidPolygonLayer extends Layer {
       this.state.models?.forEach(model => model.delete());
 
       this.setState(this._getModels(this.context.gl));
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
 
-  updateGeometry({props, oldProps, changeFlags}) {
+  protected updateGeometry({props, oldProps, changeFlags}: UpdateParameters<this>) {
     const geometryConfigChanged =
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
@@ -288,7 +357,7 @@ export default class SolidPolygonLayer extends Layer {
     // tessellator needs to be invoked
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
-      const buffers = props.data.attributes || {};
+      const buffers = (props.data as any).attributes || {};
       polygonTesselator.updateGeometry({
         data: props.data,
         normalize: props._normalize,
@@ -311,12 +380,12 @@ export default class SolidPolygonLayer extends Layer {
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
-        this.getAttributeManager().invalidateAll();
+        this.getAttributeManager()!.invalidateAll();
       }
     }
   }
 
-  _getModels(gl) {
+  protected _getModels(gl: WebGLRenderingContext): Model {
     const {id, filled, extruded} = this.props;
 
     let topModel;
@@ -370,22 +439,19 @@ export default class SolidPolygonLayer extends Layer {
     };
   }
 
-  calculateIndices(attribute) {
+  protected calculateIndices(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.indexStarts;
     attribute.value = polygonTesselator.get('indices');
   }
 
-  calculatePositions(attribute) {
+  protected calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.vertexStarts;
     attribute.value = polygonTesselator.get('positions');
   }
 
-  calculateVertexValid(attribute) {
+  protected calculateVertexValid(attribute) {
     attribute.value = this.state.polygonTesselator.get('vertexValid');
   }
 }
-
-SolidPolygonLayer.layerName = 'SolidPolygonLayer';
-SolidPolygonLayer.defaultProps = defaultProps;

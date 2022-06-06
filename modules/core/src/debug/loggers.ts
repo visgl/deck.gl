@@ -1,4 +1,12 @@
-const logState = {
+import type {Log} from '@probe.gl/log';
+
+const logState: {
+  attributeUpdateStart: number;
+  attributeManagerUpdateStart: number;
+  attributeUpdateMessages: string[];
+} = {
+  attributeUpdateStart: -1,
+  attributeManagerUpdateStart: -1,
   attributeUpdateMessages: []
 };
 
@@ -8,7 +16,7 @@ const LOG_LEVEL_UPDATE_DETAIL = 3;
 const LOG_LEVEL_INFO = 4;
 const LOG_LEVEL_DRAW = 2;
 
-export const getLoggers = log => ({
+export const getLoggers = (log: Log): Record<string, Function> => ({
   /* Layer events */
 
   'layer.changeFlag': (layer, key, flags) => {
