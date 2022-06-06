@@ -25,6 +25,86 @@ import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import IconManager from './icon-manager';
 
+import type {
+  LayerProps,
+  Accessor,
+  AccessorFunction,
+  Position,
+  Color,
+  Texture,
+  Unit,
+  UpdateParameters,
+  LayerContext
+} from '@deck.gl/core';
+import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
+
+type _IconLayerProps<DataT> = {
+  /** A prepacked image that contains all icons. */
+  iconAtlas?: string | Texture;
+  /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
+  iconMapping?: string | IconMapping;
+
+  /** Icon size multiplier.
+   * @default 1
+   */
+  sizeScale?: number;
+  /**
+   * The units of the icon size, one of `meters`, `common`, and `pixels`.
+   *
+   * @default 'pixels'
+   */
+  sizeUnits?: Unit;
+  /**
+   * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
+   */
+  sizeMinPixels?: number;
+  /**
+   * The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
+   */
+  sizeMaxPixels?: number;
+  /** If `true`, the icon always faces camera. Otherwise the icon faces up (z)
+   * @default true
+   */
+  billboard?: boolean;
+  /**
+   * Discard pixels whose opacity is below this threshold.
+   * A discarded pixel would create a "hole" in the icon that is not considered part of the object.
+   * @default 0.05
+   */
+  alphaCutoff?: number;
+
+  /** Anchor position accessor. */
+  getPosition?: Accessor<DataT, Position>;
+  /** Icon definition accessor.
+   * Should return the icon id if using pre-packed icons (`iconAtlas` + `iconMapping`).
+   * Return an object that defines the icon if using auto-packing.
+   */
+  getIcon?: AccessorFunction<DataT, string> | AccessorFunction<DataT, UnpackedIcon>;
+  /** Icon color accessor.
+   * @default [0, 0, 0, 255]
+   */
+  getColor?: Accessor<DataT, Color>;
+  /** Icon size accessor.
+   * @default 1
+   */
+  getSize?: Accessor<DataT, number>;
+  /** Icon rotation accessor, in degrees.
+   * @default 0
+   */
+  getAngle?: Accessor<DataT, number>;
+  /**
+   * Icon offsest accessor, in pixels.
+   * @default [0, 0]
+   */
+  getPixelOffset?: Accessor<DataT, [number, number]>;
+  /**
+   * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
+   */
+  onIconError?: (context: LoadIconErrorContext) => void;
+};
+
+export type IconLayerProps<DataT> = _IconLayerProps<DataT> & LayerProps<DataT>;
+
 const DEFAULT_COLOR = [0, 0, 0, 255];
 /*
  * @param {object} props
@@ -69,7 +149,17 @@ const defaultProps = {
   onIconError: {type: 'function', value: null, compare: false, optional: true}
 };
 
-export default class IconLayer extends Layer {
+export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_IconLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'IconLayer';
+
+  state!: {
+    model?: Model;
+    iconManager: IconManager;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
@@ -84,7 +174,7 @@ export default class IconLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -98,12 +188,23 @@ export default class IconLayer extends Layer {
         accessor: 'getSize',
         defaultValue: 1
       },
-      instanceOffsets: {size: 2, accessor: 'getIcon', transform: this.getInstanceOffset},
-      instanceIconFrames: {size: 4, accessor: 'getIcon', transform: this.getInstanceIconFrame},
+      instanceOffsets: {
+        size: 2,
+        accessor: 'getIcon',
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceOffset
+      },
+      instanceIconFrames: {
+        size: 4,
+        accessor: 'getIcon',
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        transform: this.getInstanceIconFrame
+      },
       instanceColorModes: {
         size: 1,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getIcon',
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         transform: this.getInstanceColorMode
       },
       instanceColors: {
@@ -129,67 +230,57 @@ export default class IconLayer extends Layer {
   }
 
   /* eslint-disable max-statements, complexity */
-  updateState({oldProps, props, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
+    const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
     const {iconAtlas, iconMapping, data, getIcon} = props;
     const {iconManager} = this.state;
 
-    iconManager.setProps({loadOptions: props.loadOptions});
-
-    let iconMappingChanged = false;
-    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
+    // internalState is always defined during updateState
+    const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
+    iconManager.setProps({
+      loadOptions: props.loadOptions,
+      autoPacking: !prePacked,
+      iconAtlas,
+      iconMapping: iconMapping as IconMapping
+    });
 
     // prepacked iconAtlas from user
     if (prePacked) {
-      if (oldProps.iconAtlas !== props.iconAtlas) {
-        iconManager.setProps({iconAtlas, autoPacking: false});
-      }
-
       if (oldProps.iconMapping !== props.iconMapping) {
-        iconManager.setProps({iconMapping});
-        iconMappingChanged = true;
+        attributeManager!.invalidate('getIcon');
       }
-    } else {
-      // otherwise, use autoPacking
-      iconManager.setProps({autoPacking: true});
-    }
-
-    if (
+    } else if (
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
-      iconManager.setProps({data, getIcon});
-    }
-
-    if (iconMappingChanged) {
-      attributeManager.invalidate('instanceOffsets');
-      attributeManager.invalidate('instanceIconFrames');
-      attributeManager.invalidate('instanceColorModes');
+      // Auto packing - getIcon is expected to return an object
+      iconManager.packIcons(data, getIcon as AccessorFunction<any, UnpackedIcon>);
     }
 
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     return super.isLoaded && this.state.iconManager.isLoaded;
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext): void {
+    super.finalizeState(context);
     // Release resources held by the icon manager
     this.state.iconManager.finalize();
   }
 
-  draw({uniforms}) {
+  draw({uniforms}): void {
     const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
     const {iconManager} = this.state;
 
@@ -211,7 +302,7 @@ export default class IconLayer extends Layer {
     }
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
@@ -234,34 +325,36 @@ export default class IconLayer extends Layer {
     });
   }
 
-  _onUpdate() {
+  private _onUpdate(): void {
     this.setNeedsRedraw();
   }
 
-  _onError(evt) {
-    const {onIconError} = this.getCurrentLayer().props;
+  private _onError(evt: LoadIconErrorContext): void {
+    const onIconError = this.getCurrentLayer()?.props.onIconError;
     if (onIconError) {
       onIconError(evt);
     } else {
-      log.error(evt.error)();
+      log.error(evt.error.message)();
     }
   }
 
-  getInstanceOffset(icon) {
-    const rect = this.state.iconManager.getIconMapping(icon);
-    return [rect.width / 2 - rect.anchorX || 0, rect.height / 2 - rect.anchorY || 0];
+  protected getInstanceOffset(icon: string): [number, number] {
+    const {
+      width,
+      height,
+      anchorX = width / 2,
+      anchorY = height / 2
+    } = this.state.iconManager.getIconMapping(icon);
+    return [width / 2 - anchorX, height / 2 - anchorY];
   }
 
-  getInstanceColorMode(icon) {
+  protected getInstanceColorMode(icon: string): number {
     const mapping = this.state.iconManager.getIconMapping(icon);
     return mapping.mask ? 1 : 0;
   }
 
-  getInstanceIconFrame(icon) {
-    const rect = this.state.iconManager.getIconMapping(icon);
-    return [rect.x || 0, rect.y || 0, rect.width || 0, rect.height || 0];
+  protected getInstanceIconFrame(icon: string): [number, number, number, number] {
+    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
+    return [x, y, width, height];
   }
 }
-
-IconLayer.layerName = 'IconLayer';
-IconLayer.defaultProps = defaultProps;
