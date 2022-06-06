@@ -71,7 +71,7 @@ export default class LightingEffect implements Effect {
     if (!this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
-    this.shadowMatrices = this._createLightMatrix();
+    this.shadowMatrices = this._calculateMatrices();
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl);
@@ -159,7 +159,7 @@ export default class LightingEffect implements Effect {
     }
   }
 
-  private _createLightMatrix(): Matrix4[] {
+  private _calculateMatrices(): Matrix4[] {
     const lightMatrices: Matrix4[] = [];
     for (const light of this.directionalLights) {
       const viewMatrix = new Matrix4().lookAt({
