@@ -25,3 +25,23 @@ export type NumericArray = number[] | TypedArray;
 export interface ConstructorOf<T> {
   new (...args): T;
 }
+
+// Standin for luma.gl types that are not exported or not properly typed
+// TODO - import from luma.gl after upgrading to v9
+
+/** luma.gl shader module */
+export type ShaderModule<SettingsT = any> = {
+  name: string;
+  fs?: string;
+  vs?: string;
+  uniforms?: Record<string, any>;
+  getUniforms?: (opts: SettingsT | {}, uniforms: Record<string, any>) => Record<string, any>;
+  defines?: Record<string, any>;
+  dependencies?: ShaderModule[];
+  inject?: Record<string, string>;
+  passes?: {
+    sampler?: string | boolean;
+    filter?: boolean;
+    uniforms?: Record<string, any>;
+  }[];
+};

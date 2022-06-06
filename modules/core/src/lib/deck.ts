@@ -22,7 +22,6 @@ import LayerManager from './layer-manager';
 import ViewManager from './view-manager';
 import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
-import Effect from './effect';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
@@ -47,6 +46,7 @@ import {EventManager} from 'mjolnir.js';
 import assert from '../utils/assert';
 import {EVENTS} from './constants';
 
+import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
 import type View from '../views/view';
