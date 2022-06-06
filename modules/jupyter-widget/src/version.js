@@ -5,6 +5,6 @@
  * version number.
  */
 
-export const MODULE_VERSION =
-  typeof __VERSION__ === 'undefined' ? 'untranspiled source' : __VERSION__;
-export const MODULE_NAME = '@deck.gl/jupyter-widget';
+const {name, version} = require('../package.json');
+export const MODULE_VERSION = version;
+export const MODULE_NAME = name;
