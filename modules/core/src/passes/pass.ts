@@ -1,9 +1,9 @@
 export default class Pass {
-  id;
-  gl;
-  props;
+  id: string;
+  gl: WebGLRenderingContext;
+  props: any;
 
-  constructor(gl: WebGLRenderingContext, props: {id} = {id: 'pass'}) {
+  constructor(gl: WebGLRenderingContext, props: {id: string} = {id: 'pass'}) {
     const {id} = props;
     this.id = id; // id of this pass
     this.gl = gl;

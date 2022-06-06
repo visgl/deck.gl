@@ -8,10 +8,13 @@ import type {Framebuffer} from '@luma.gl/core';
 import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/core';
 import Pass from './pass';
 
+import type {ShaderModule} from '../types/types';
+
 type ScreenPassProps = {
-  module;
-  fs;
-  id;
+  module: ShaderModule;
+  fs: string | null;
+  id: string;
+  moduleSettings: any;
 };
 
 type ScreenPassRenderOptions = {

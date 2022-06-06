@@ -12,7 +12,12 @@ export default class ShadowPass extends LayersPass {
   depthBuffer: Renderbuffer;
   fbo: Framebuffer;
 
-  constructor(gl, props) {
+  constructor(
+    gl: WebGLRenderingContext,
+    props?: {
+      id;
+    }
+  ) {
     super(gl, props);
 
     // The shadowMap texture

@@ -2,22 +2,52 @@ import {Texture2D} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
-import Effect from '../../lib/effect';
 import {OPERATION} from '../../lib/constants';
 import {getMaskBounds, getMaskViewport} from './utils';
 import log from '../../utils/log';
 
-// Class to manage mask effect
-export default class MaskEffect extends Effect {
-  constructor(props) {
-    super(props);
-    this.dummyMaskMap = null;
-    this.useInPicking = true;
-    this.channels = [];
-    this.masks = null;
-  }
+import type {Effect, PreRenderOptions} from '../../lib/effect';
+import type Layer from '../../lib/layer';
+import type Viewport from '../../viewports/viewport';
+import type {MaskBounds} from './utils';
+import type {CoordinateSystem} from '../../lib/constants';
 
-  preRender(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
+type Mask = {
+  /** The channel index */
+  index: number;
+  bounds: MaskBounds;
+  coordinateOrigin: [number, number, number];
+  coordinateSystem: CoordinateSystem;
+};
+
+type Channel = {
+  id: string;
+  index: number;
+  layers: Layer[];
+  bounds: MaskBounds;
+  maskBounds: MaskBounds;
+  layerBounds: MaskBounds[];
+  coordinateOrigin: [number, number, number];
+  coordinateSystem: CoordinateSystem;
+};
+
+// Class to manage mask effect
+export default class MaskEffect implements Effect {
+  id = 'mask-effect';
+  props = null;
+  useInPicking = true;
+
+  private dummyMaskMap?: Texture2D;
+  private channels: (Channel | null)[] = [];
+  private masks: Record<string, Mask> | null = null;
+  private maskPass?: MaskPass;
+  private maskMap?: Texture2D;
+  private lastViewport?: Viewport;
+
+  preRender(
+    gl: WebGLRenderingContext,
+    {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
+  ): void {
     if (!this.dummyMaskMap) {
       this.dummyMaskMap = new Texture2D(gl, {
         width: 1,
@@ -81,8 +111,27 @@ export default class MaskEffect extends Effect {
     // ctx.putImageData(imageData, 0, 0);
   }
 
-  _renderChannel(channelInfo, {layerFilter, onViewportActive, views, viewport, viewportChanged}) {
+  private _renderChannel(
+    channelInfo: Channel,
+    {
+      layerFilter,
+      onViewportActive,
+      views,
+      viewport,
+      viewportChanged
+    }: {
+      layerFilter: PreRenderOptions['layerFilter'];
+      onViewportActive: PreRenderOptions['onViewportActive'];
+      views: PreRenderOptions['views'];
+      viewport: Viewport;
+      viewportChanged: boolean;
+    }
+  ) {
     const oldChannelInfo = this.channels[channelInfo.index];
+    if (!oldChannelInfo) {
+      return;
+    }
+
     const maskChanged =
       // If a channel is new
       channelInfo === oldChannelInfo ||
@@ -114,7 +163,9 @@ export default class MaskEffect extends Effect {
 
         channelInfo.maskBounds = maskViewport ? maskViewport.getBounds() : [0, 0, 1, 1];
 
+        // @ts-ignore (2532) This method is only called from preRender where maskPass is defined
         maskPass.render({
+          pass: 'mask',
           channel: channelInfo.index,
           layers: channelInfo.layers,
           layerFilter,
@@ -128,6 +179,7 @@ export default class MaskEffect extends Effect {
       }
     }
 
+    // @ts-ignore (2532) This method is only called from preRender where masks is defined
     this.masks[channelInfo.id] = {
       index: channelInfo.index,
       bounds: channelInfo.maskBounds,
@@ -141,8 +193,9 @@ export default class MaskEffect extends Effect {
    * If a maskId already exists, diff and update the existing channel
    * Otherwise replace a removed mask
    * Otherwise create a new channel
+   * Returns a map from mask layer id to channel info
    */
-  _sortMaskChannels(maskLayers) {
+  private _sortMaskChannels(maskLayers: Layer[]): Record<string, Channel> {
     const channelMap = {};
     let channelCount = 0;
     for (const layer of maskLayers) {
@@ -186,26 +239,29 @@ export default class MaskEffect extends Effect {
     return channelMap;
   }
 
-  getModuleParameters() {
+  getModuleParameters(): {
+    maskMap: Texture2D;
+    maskChannels: Record<string, Mask> | null;
+  } {
     return {
       maskMap: this.masks ? this.maskMap : this.dummyMaskMap,
       maskChannels: this.masks
     };
   }
 
-  cleanup() {
+  cleanup(): void {
     if (this.dummyMaskMap) {
       this.dummyMaskMap.delete();
-      this.dummyMaskMap = null;
+      this.dummyMaskMap = undefined;
     }
 
     if (this.maskPass) {
       this.maskPass.delete();
-      this.maskPass = null;
-      this.maskMap = null;
+      this.maskPass = undefined;
+      this.maskMap = undefined;
     }
 
-    this.lastViewport = null;
+    this.lastViewport = undefined;
     this.masks = null;
     this.channels.length = 0;
   }

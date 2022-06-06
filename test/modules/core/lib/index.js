@@ -29,7 +29,6 @@ import './layer-manager.spec';
 import './tooltip.spec';
 import './transition-manager.spec';
 import './uniform-transition-manager.spec';
-import './effect.spec';
 import './effect-manager.spec';
 import './picking.spec';
 import './view-manager.spec';

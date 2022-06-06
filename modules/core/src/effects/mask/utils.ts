@@ -1,14 +1,26 @@
 import OrthographicView from '../../views/orthographic-view';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {fitBounds} from '@math.gl/web-mercator';
+
+import type Layer from '../../lib/layer';
+import type Viewport from '../../viewports/viewport';
+
+export type MaskBounds = [number, number, number, number];
+
 /*
  * Compute the bounds of the mask in world space, such that it covers an
  * area currently visible (extended by a buffer) or the area of the masking
  * data, whichever is smaller
  */
-export function getMaskBounds({layers, viewport}) {
+export function getMaskBounds({
+  layers,
+  viewport
+}: {
+  layers: Layer[];
+  viewport: Viewport;
+}): MaskBounds {
   // Join the bounds of layer data
-  let bounds = null;
+  let bounds: MaskBounds | null = null;
   for (const layer of layers) {
     const subLayerBounds = layer.getBounds();
     if (subLayerBounds) {
@@ -61,7 +73,17 @@ export function getMaskBounds({layers, viewport}) {
 /*
  * Compute viewport to render the mask into, covering the given bounds
  */
-export function getMaskViewport({bounds, viewport, width, height}) {
+export function getMaskViewport({
+  bounds,
+  viewport,
+  width,
+  height
+}: {
+  bounds: MaskBounds;
+  viewport: Viewport;
+  width: number;
+  height: number;
+}): Viewport | null {
   if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
     return null;
   }
@@ -108,7 +130,7 @@ export function getMaskViewport({bounds, viewport, width, height}) {
   });
 }
 
-function _doubleBounds(bounds) {
+function _doubleBounds(bounds: MaskBounds): MaskBounds {
   const size = {
     x: bounds[2] - bounds[0],
     y: bounds[3] - bounds[1]
