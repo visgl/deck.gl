@@ -148,6 +148,10 @@ const DeckGL = forwardRef((props, ref) => {
       onInteractionStateChange: handleInteractionStateChange
     };
 
+    // The defaultValue for _customRender is null, which would overwrite the definition
+    // of _customRender. Remove to avoid frequently redeclaring the method here.
+    delete forwardProps._customRender;
+
     if (thisRef.deck) {
       thisRef.deck.setProps(forwardProps);
     }
