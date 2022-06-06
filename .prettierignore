@@ -1,4 +1,5 @@
 workers/
+typed/
 **/dist*/**/*.js
 dist.js
 *.min.js
