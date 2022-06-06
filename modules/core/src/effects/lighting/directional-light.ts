@@ -21,7 +21,7 @@ export type DirectionalLightOptions = {
    * @default [0.0, 0.0, -1.0]
    */
   direction?: number[];
-  /** (Experimental) render shadows casted by this light
+  /** (Experimental) render shadows cast by this light
    * @default false
    */
   _shadow?: boolean;
