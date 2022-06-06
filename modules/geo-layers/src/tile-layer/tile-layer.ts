@@ -59,7 +59,7 @@ type _TileLayerProps<DataT> = {
       _offset: number;
       tile: Tile2DHeader<DataT>;
     }
-  ) => LayersList;
+  ) => Layer | null | LayersList;
   /**
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
