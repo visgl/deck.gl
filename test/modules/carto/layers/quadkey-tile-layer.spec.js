@@ -18,7 +18,7 @@ test('QuadkeyTileLayer', async t => {
   t.end();
 });
 
-test.only('QuadkeyTileLayer', async t => {
+test('QuadkeyTileLayer tilejson', async t => {
   const testCases = [
     {
       Layer: QuadkeyTileLayer,
