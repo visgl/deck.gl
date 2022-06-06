@@ -27,9 +27,37 @@ import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
 import {cutPolygonByGrid, cutPolygonByMercatorBounds} from '@math.gl/polygon';
 
+import type {
+  PolygonGeometry,
+  NormalizedPolygonGeometry,
+  FlatComplexPolygonGeometry
+} from './polygon';
+import type {TypedArray} from '@math.gl/core';
+
+type GeometryUpdateContext = {
+  vertexStart: number;
+  indexStart: number;
+  geometrySize: number;
+  geometryIndex: number;
+};
+
+type CutPolygon = FlatComplexPolygonGeometry & {
+  edgeTypes: number[];
+};
+
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
-export default class PolygonTesselator extends Tesselator {
+export default class PolygonTesselator extends Tesselator<
+  PolygonGeometry,
+  NormalizedPolygonGeometry | CutPolygon[],
+  {
+    fp64?: boolean;
+    IndexType?: Uint32ArrayConstructor | Uint16ArrayConstructor;
+    resolution?: number;
+    wrapLongitude?: boolean;
+    preproject?: (xy: number[]) => number[];
+  }
+> {
   constructor(opts) {
     const {fp64, IndexType = Uint32Array} = opts;
     super({
@@ -42,8 +70,8 @@ export default class PolygonTesselator extends Tesselator {
     });
   }
 
-  /* Getters */
-  get(attributeName) {
+  /** Get attribute by name */
+  get(attributeName: string): TypedArray | null {
     const {attributes} = this;
     if (attributeName === 'indices') {
       return attributes.indices && attributes.indices.subarray(0, this.vertexCount);
@@ -52,58 +80,78 @@ export default class PolygonTesselator extends Tesselator {
     return attributes[attributeName];
   }
 
-  /* Implement base Tesselator interface */
+  /** Override base Tesselator method */
   updateGeometry(opts) {
     super.updateGeometry(opts);
 
     const externalIndices = this.buffers.indices;
     if (externalIndices) {
+      // @ts-ignore (2339) value is not defined on TypedArray (fall through)
       this.vertexCount = (externalIndices.value || externalIndices).length;
+    } else if (this.data && !this.getGeometry) {
+      throw new Error('missing indices buffer');
     }
   }
 
-  normalizeGeometry(polygon) {
+  /** Implement base Tesselator interface */
+  protected normalizeGeometry(polygon: PolygonGeometry): NormalizedPolygonGeometry | CutPolygon[] {
     if (this.normalize) {
-      polygon = Polygon.normalize(polygon, this.positionSize);
+      const normalizedPolygon = Polygon.normalize(polygon, this.positionSize);
       if (this.opts.resolution) {
-        return cutPolygonByGrid(polygon.positions || polygon, polygon.holeIndices, {
-          size: this.positionSize,
-          gridResolution: this.opts.resolution,
-          edgeTypes: true
-        });
+        return cutPolygonByGrid(
+          Polygon.getPositions(normalizedPolygon),
+          Polygon.getHoleIndices(normalizedPolygon),
+          {
+            size: this.positionSize,
+            gridResolution: this.opts.resolution,
+            edgeTypes: true
+          }
+        ) as CutPolygon[];
       }
       if (this.opts.wrapLongitude) {
-        return cutPolygonByMercatorBounds(polygon.positions || polygon, polygon.holeIndices, {
-          size: this.positionSize,
-          maxLatitude: 86,
-          edgeTypes: true
-        });
+        return cutPolygonByMercatorBounds(
+          Polygon.getPositions(normalizedPolygon),
+          Polygon.getHoleIndices(normalizedPolygon),
+          {
+            size: this.positionSize,
+            maxLatitude: 86,
+            edgeTypes: true
+          }
+        ) as CutPolygon[];
       }
+      return normalizedPolygon;
     }
-    return polygon;
+    // normalize is explicitly set to false, assume that user passed in already normalized polygons
+    return polygon as NormalizedPolygonGeometry;
   }
 
-  getGeometrySize(polygon) {
-    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
+  /** Implement base Tesselator interface */
+  protected getGeometrySize(polygon: NormalizedPolygonGeometry | CutPolygon[]): number {
+    if (isCut(polygon)) {
       let size = 0;
       for (const subPolygon of polygon) {
         size += this.getGeometrySize(subPolygon);
       }
       return size;
     }
-    return (polygon.positions || polygon).length / this.positionSize;
+    return Polygon.getPositions(polygon).length / this.positionSize;
   }
 
-  getGeometryFromBuffer(buffer) {
+  /** Override base Tesselator method */
+  protected getGeometryFromBuffer(buffer) {
     if (this.normalize || !this.buffers.indices) {
       return super.getGeometryFromBuffer(buffer);
     }
     // we don't need to read the positions if no normalization/tesselation
-    return () => null;
+    return null;
   }
 
-  updateGeometryAttributes(polygon, context) {
-    if (Array.isArray(polygon) && !Number.isFinite(polygon[0])) {
+  /** Implement base Tesselator interface */
+  protected updateGeometryAttributes(
+    polygon: NormalizedPolygonGeometry | CutPolygon[] | null,
+    context: GeometryUpdateContext
+  ) {
+    if (polygon && isCut(polygon)) {
       for (const subPolygon of polygon) {
         const geometrySize = this.getGeometrySize(subPolygon);
         context.geometrySize = geometrySize;
@@ -119,11 +167,14 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   // Flatten the indices array
-  _updateIndices(polygon, {geometryIndex, vertexStart: offset, indexStart}) {
+  private _updateIndices(
+    polygon: NormalizedPolygonGeometry | null,
+    {geometryIndex, vertexStart: offset, indexStart}: GeometryUpdateContext
+  ) {
     const {attributes, indexStarts, typedArrayManager} = this;
 
     let target = attributes.indices;
-    if (!target) {
+    if (!target || !polygon) {
       return;
     }
     let i = indexStart;
@@ -146,15 +197,18 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   // Flatten out all the vertices of all the sub subPolygons
-  _updatePositions(polygon, {vertexStart, geometrySize}) {
+  private _updatePositions(
+    polygon: NormalizedPolygonGeometry | null,
+    {vertexStart, geometrySize}: GeometryUpdateContext
+  ) {
     const {
       attributes: {positions},
       positionSize
     } = this;
-    if (!positions) {
+    if (!positions || !polygon) {
       return;
     }
-    const polygonPositions = polygon.positions || polygon;
+    const polygonPositions = Polygon.getPositions(polygon);
 
     for (let i = vertexStart, j = 0; j < geometrySize; i++, j++) {
       const x = polygonPositions[j * positionSize];
@@ -167,12 +221,13 @@ export default class PolygonTesselator extends Tesselator {
     }
   }
 
-  _updateVertexValid(polygon, {vertexStart, geometrySize}) {
-    const {
-      attributes: {vertexValid},
-      positionSize
-    } = this;
-    const holeIndices = polygon && polygon.holeIndices;
+  private _updateVertexValid(
+    polygon: NormalizedPolygonGeometry | null,
+    {vertexStart, geometrySize}: GeometryUpdateContext
+  ) {
+    const {positionSize} = this;
+    const vertexValid = this.attributes.vertexValid as TypedArray;
+    const holeIndices = polygon && Polygon.getHoleIndices(polygon);
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
      * the last vertex of each ring overlaps with the first vertex of the next ring.
@@ -182,8 +237,8 @@ export default class PolygonTesselator extends Tesselator {
       nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
       vertexValid    1  1  1  1  0  1  1  0  1 ...
      */
-    if (polygon && polygon.edgeTypes) {
-      vertexValid.set(polygon.edgeTypes, vertexStart);
+    if (polygon && (polygon as CutPolygon).edgeTypes) {
+      vertexValid.set((polygon as CutPolygon).edgeTypes, vertexStart);
     } else {
       vertexValid.fill(1, vertexStart, vertexStart + geometrySize);
     }
@@ -194,4 +249,8 @@ export default class PolygonTesselator extends Tesselator {
     }
     vertexValid[vertexStart + geometrySize - 1] = 0;
   }
+}
+
+function isCut(polygon: NormalizedPolygonGeometry | CutPolygon[]): polygon is CutPolygon[] {
+  return Array.isArray(polygon) && polygon.length > 0 && !Number.isFinite(polygon[0]);
 }
