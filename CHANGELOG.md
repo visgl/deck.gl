@@ -21,6 +21,26 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-alpha.6] - Jun 6 2022
+
+- Bump devcert from 1.1.3 to 1.2.1 in /website (#6983)
+- chore: upgrade @loaders.gl version (#6968)
+- [ts] TextLayer (#6976)
+- [ts] Tooltip (#6980)
+- [ts] ResourceManager (#6978)
+- Fix HeatmapLayer on iOS (#6988)
+- [ts] Effects (#6982)
+- Export CartoLayerLibrary in carto module for pydeck integration (#6866)
+- Fix regression in DeckGL React component not syncing base map (#6977)
+- [ts] Carto spatial index layers (#6971)
+- [ts] Core utilities (#6979)
+- [ts] PathLayer and SolidPolygonLayer (#6974)
+- [ts] Tesselators (#6973)
+- [ts] IconLayer (#6962)
+- Bump eventsource from 1.0.7 to 1.1.1 (#6964)
+- [ts] ScatterplotLayerProps documentation (#6963)
+- [ts] Fix prop types of Polygon, GeoCell and Quadkey layers. (#6965)
+
 #### deck.gl [8.8.0-alpha.5] - Jun 1 2022
 
 - [ts] CartoTileLayer and utilities (#6891)
