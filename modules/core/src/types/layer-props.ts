@@ -6,6 +6,7 @@ import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
 import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
+import type {Loader} from '@loaders.gl/loader-utils';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -108,7 +109,7 @@ export type LayerProps<DataType = any> = {
     context: {
       propName: string;
       layer: Layer<PropsT>;
-      loaders?: any[];
+      loaders?: Loader[];
       loadOptions?: any;
       signal?: AbortSignal;
     }
@@ -172,7 +173,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add support for additional data formats.
    */
-  loaders?: any[];
+  loaders?: Loader[];
   /**
    * Options to customize the behavior of loaders
    */
