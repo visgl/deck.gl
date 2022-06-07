@@ -16,14 +16,13 @@ export type StatefulComponentProps<PropsT> = PropsT & {
   [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
 };
 
-export default class Component<PropsT = any> {
+export default class Component<PropsT = {}> {
   static componentName: string = 'Component';
   static defaultProps: Readonly<{}> = {};
 
   id: string;
   props: StatefulComponentProps<PropsT>;
   count: number;
-  parent: Component | null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
@@ -33,16 +32,6 @@ export default class Component<PropsT = any> {
 
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.count = counter++; // Keep track of how many layer instances you are generating
-    this.parent = null; // reference to the composite layer parent that rendered this layer
-  }
-
-  get root(): Component {
-    // eslint-disable-next-line
-    let component: Component = this;
-    while (component.parent) {
-      component = component.parent;
-    }
-    return component;
   }
 
   // clone this layer with modified props

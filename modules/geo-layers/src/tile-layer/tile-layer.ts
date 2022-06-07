@@ -332,7 +332,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
           _offset: 0,
           tile
         });
-        tile.layers = (flatten(layers, Boolean) as Layer[]).map(layer =>
+        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
           layer.clone({
             tile,
             ...subLayerProps

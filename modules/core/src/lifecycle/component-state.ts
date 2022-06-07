@@ -21,7 +21,6 @@
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {ASYNC_ORIGINAL_SYMBOL, ASYNC_RESOLVED_SYMBOL, ASYNC_DEFAULTS_SYMBOL} from './constants';
 import type Component from './component';
-import {StatefulComponentProps} from './component';
 import {PropType} from './prop-types';
 
 const EMPTY_PROPS = Object.freeze({});
@@ -34,15 +33,15 @@ type AsyncPropState = {
   resolvedLoadCount: number;
 };
 
-export default class ComponentState<PropsT> {
-  component: Component<PropsT>;
-  onAsyncPropUpdated: (propName: keyof PropsT, value: any) => void;
+export default class ComponentState<ComponentT extends Component> {
+  component: ComponentT;
+  onAsyncPropUpdated: (propName: string, value: any) => void;
 
-  private asyncProps: Partial<Record<keyof PropsT, AsyncPropState>>;
-  private oldProps: StatefulComponentProps<PropsT> | null;
-  private oldAsyncProps: StatefulComponentProps<PropsT> | null;
+  private asyncProps: Partial<Record<string, AsyncPropState>>;
+  private oldProps: ComponentT['props'] | null;
+  private oldAsyncProps: ComponentT['props'] | null;
 
-  constructor(component: Component<PropsT>) {
+  constructor(component: ComponentT) {
     this.component = component;
     this.asyncProps = {}; // Prop values that the layer sees
     this.onAsyncPropUpdated = () => {};
@@ -66,7 +65,7 @@ export default class ComponentState<PropsT> {
 
   /* Layer-facing props API */
 
-  getOldProps(): StatefulComponentProps<PropsT> | typeof EMPTY_PROPS {
+  getOldProps(): ComponentT['props'] | typeof EMPTY_PROPS {
     return this.oldAsyncProps || this.oldProps || EMPTY_PROPS;
   }
 
@@ -76,17 +75,17 @@ export default class ComponentState<PropsT> {
   }
 
   // Checks if a prop is overridden
-  hasAsyncProp(propName: keyof PropsT): boolean {
+  hasAsyncProp(propName: string): boolean {
     return propName in this.asyncProps;
   }
 
   // Returns value of an overriden prop
-  getAsyncProp(propName: keyof PropsT): any {
+  getAsyncProp(propName: string): any {
     const asyncProp = this.asyncProps[propName];
     return asyncProp && asyncProp.resolvedValue;
   }
 
-  isAsyncPropLoading(propName?: keyof PropsT): boolean {
+  isAsyncPropLoading(propName?: string): boolean {
     if (propName) {
       const asyncProp = this.asyncProps[propName];
       return Boolean(
@@ -104,15 +103,15 @@ export default class ComponentState<PropsT> {
   }
 
   // Without changing the original prop value, swap out the data resolution under the hood
-  reloadAsyncProp(propName: keyof PropsT, value: any) {
+  reloadAsyncProp(propName: string, value: any) {
     this._watchPromise(propName, Promise.resolve(value));
   }
 
   // Updates all async/overridden props (when new props come in)
   // Checks if urls have changed, starts loading, or removes override
-  setAsyncProps(props: StatefulComponentProps<PropsT>) {
+  setAsyncProps(props: ComponentT['props']) {
     // NOTE: prop param and default values are only support for testing
-    const resolvedValues = props[ASYNC_RESOLVED_SYMBOL] || {};
+    const resolvedValues = props[ASYNC_RESOLVED_SYMBOL];
     const originalValues = props[ASYNC_ORIGINAL_SYMBOL] || props;
     const defaultValues = props[ASYNC_DEFAULTS_SYMBOL] || {};
 
@@ -135,16 +134,16 @@ export default class ComponentState<PropsT> {
 
   /* Placeholder methods for subclassing */
 
-  protected _fetch(propName: keyof PropsT, url: string): any {
+  protected _fetch(propName: string, url: string): any {
     return url;
   }
 
-  protected _onResolve(propName: keyof PropsT, value: any) {} // eslint-disable-line @typescript-eslint/no-empty-function
+  protected _onResolve(propName: string, value: any) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  protected _onError(propName: keyof PropsT, error: Error) {} // eslint-disable-line @typescript-eslint/no-empty-function
+  protected _onError(propName: string, error: Error) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting
-  private _updateAsyncProp(propName: keyof PropsT, value: any) {
+  private _updateAsyncProp(propName: string, value: any) {
     if (!this._didAsyncInputValueChange(propName, value)) {
       return;
     }
@@ -187,7 +186,7 @@ export default class ComponentState<PropsT> {
   }
 
   // Checks if an input value actually changed (to avoid reloading/rewatching promises/urls)
-  private _didAsyncInputValueChange(propName: keyof PropsT, value: any): boolean {
+  private _didAsyncInputValueChange(propName: string, value: any): boolean {
     // @ts-ignore
     const asyncProp: AsyncPropState = this.asyncProps[propName];
     if (value === asyncProp.resolvedValue || value === asyncProp.lastValue) {
@@ -198,7 +197,7 @@ export default class ComponentState<PropsT> {
   }
 
   // Set normal, non-async value
-  private _setPropValue(propName: keyof PropsT, value: any) {
+  private _setPropValue(propName: string, value: any) {
     // Save the current value before overwriting so that diffProps can access both
     this._freezeAsyncOldProps();
 
@@ -212,7 +211,7 @@ export default class ComponentState<PropsT> {
   }
 
   // Set a just resolved async value, calling onAsyncPropUpdates if value changes asynchronously
-  private _setAsyncPropValue(propName: keyof PropsT, value: any, loadCount: number) {
+  private _setAsyncPropValue(propName: string, value: any, loadCount: number) {
     // Only update if loadCount is larger or equal to resolvedLoadCount
     // otherwise a more recent load has already completed
     const asyncProp = this.asyncProps[propName];
@@ -229,7 +228,7 @@ export default class ComponentState<PropsT> {
   }
 
   // Tracks a promise, sets the prop when loaded, handles load count
-  private _watchPromise(propName: keyof PropsT, promise: Promise<any>) {
+  private _watchPromise(propName: string, promise: Promise<any>) {
     const asyncProp = this.asyncProps[propName];
     if (asyncProp) {
       asyncProp.pendingLoadCount++;
@@ -247,7 +246,7 @@ export default class ComponentState<PropsT> {
   }
 
   private async _resolveAsyncIterable(
-    propName: keyof PropsT,
+    propName: string,
     iterable: AsyncIterable<any>
   ): Promise<void> {
     if (propName !== 'data') {
@@ -267,7 +266,7 @@ export default class ComponentState<PropsT> {
     let count = 0;
 
     for await (const chunk of iterable) {
-      // @ts-expect-error (2339) dataTransform is not decared in base component props
+      // @ts-expect-error dataTransform is not defined on the base Component. TODO: move this to LayerState
       const {dataTransform} = this.component.props;
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];
@@ -303,7 +302,7 @@ export default class ComponentState<PropsT> {
   }
 
   // Creating an asyncProp record if needed
-  private _createAsyncPropData(propName, defaultValue) {
+  private _createAsyncPropData(propName: string, defaultValue: any) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
       // @ts-expect-error
