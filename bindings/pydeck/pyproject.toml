@@ -4,31 +4,20 @@ version = "0.7.1"
 requires-python = ">=3.7"
 
 [build-system]
-requires = [
-  "setuptools",
-  "wheel",
-]
+requires = ["jupyter_packaging~=0.10,<2", "jupyterlab~=3.1"]
+build-backend = "jupyter_packaging.build_api"
 
-[tool.black]
-line-length = 120
-target-version = ['py34']
-include = '\.pyi?$'
-exclude = '''
+[tool.jupyter-packaging.options]
+skip-if-exists = ["pydeck/labextension/static/style.js"]
+ensured-targets = ["pydeck/labextension/static/style.js", "pydeck/labextension/package.json"]
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
+[tool.jupyter-packaging.builder]
+factory = "jupyter_packaging.npm_builder"
+
+[tool.jupyter-packaging.build-args]
+build_cmd = "build:labextension"
+path = "../../modules/jupyter-widget"
+npm = ["jlpm"]
+
+[tool.check-manifest]
+ignore = ["pydeck/labextension/**", "yarn.lock", ".*", "package-lock.json"]

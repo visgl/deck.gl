@@ -1,8 +1,14 @@
 include LICENSE.txt
-include README.md
+include *.md
+include pyproject.toml
 
 include pytest.ini
 include .coveragerc
+
+include package.json
+include install.json
+include ts*.json
+include yarn.lock
 
 include pydeck/io/templates/*.j2
 
@@ -13,9 +19,15 @@ graft examples
 graft tests
 prune tests/build
 
-# Javascript files
 graft pydeck/nbextension
+graft pydeck/labextension
 prune setup
+
+# Javascript files
+graft src
+graft style
+prune **/node_modules
+prune lib
 
 # Patterns to exclude from any directory
 global-exclude *~

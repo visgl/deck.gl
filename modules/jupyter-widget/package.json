@@ -1,6 +1,11 @@
 {
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
+  "homepage": "https://github.com/visgl/deck.gl/tree/master/bindings/pydeck",
+  "author": {
+    "name": "Urban Computing Foundation",
+    "email": "info@uc.foundation"
+  },
   "license": "MIT",
   "version": "8.8.0-alpha.6",
   "keywords": [
@@ -69,7 +74,7 @@
         "singleton": true
       }
     },
-    "outputDir": "pydeck/labextension",
+    "outputDir": "../../bindings/pydeck/pydeck/labextension",
     "webpackConfig": "./webpack.config.js"
   },
   "devDependencies": {

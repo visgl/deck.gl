@@ -11,6 +11,7 @@ factory = "jupyter_packaging.npm_builder"
 
 [tool.jupyter-packaging.build-args]
 build_cmd = "build:prod"
+source_dir = "../../modules/jupyter-widget"
 npm = ["jlpm"]
 
 [tool.check-manifest]

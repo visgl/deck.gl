@@ -47,7 +47,6 @@ const config = {
    * Used in JupyterLab (whose entry point is at plugin.js) and Jupyter Notebook alike.
    *
    */
-  mode: 'development',
   resolve: {
     alias: ALIASES,
     extensions: ['.ts', '.tsx', '.js', '.json']
