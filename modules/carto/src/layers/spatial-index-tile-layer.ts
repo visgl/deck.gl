@@ -1,11 +1,12 @@
-import {TileLayer} from '@deck.gl/geo-layers';
+import {PickingInfo} from '@deck.gl/core';
+import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 
-function isFeatureIdDefined(value) {
+function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-export default class SpatialIndexTileLayer extends TileLayer {
-  _updateAutoHighlight(info) {
+export default class SpatialIndexTileLayer<ExtraProps = {}> extends TileLayer<any, ExtraProps> {
+  protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
     let newHoveredFeatureId;
@@ -27,14 +28,14 @@ export default class SpatialIndexTileLayer extends TileLayer {
     }
   }
 
-  getSubLayerPropsByTile(tile) {
+  getSubLayerPropsByTile(tile: Tile2DHeader) {
     return {
       highlightedObjectIndex: this.getHighlightedObjectIndex(tile),
       highlightColor: this.state.highlightColor
     };
   }
 
-  getHighlightedObjectIndex(tile) {
+  getHighlightedObjectIndex(tile: Tile2DHeader) {
     const {hoveredFeatureId} = this.state;
     const data = tile.content;
 

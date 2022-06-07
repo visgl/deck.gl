@@ -1,5 +1,5 @@
 // Partial deep equal (only recursive on arrays)
-export function deepEqual(a, b) {
+export function deepEqual(a: any, b: any): boolean {
   if (a === b) {
     return true;
   }

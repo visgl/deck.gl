@@ -270,7 +270,7 @@ export default class Tileset2D {
   }
 
   /** Returns additional metadata to add to tile, bbox by default */
-  getTileMetadata(index: TileIndex) {
+  getTileMetadata(index: TileIndex): Record<string, any> {
     const {tileSize} = this.opts;
     // @ts-expect-error
     return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};

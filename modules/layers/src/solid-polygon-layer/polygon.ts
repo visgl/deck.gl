@@ -22,47 +22,90 @@
 import earcut from 'earcut';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
+import type {Position} from '@deck.gl/core';
+import type {NumericArray} from '@math.gl/core';
+
 const OUTER_POLYGON_WINDING = WINDING.CLOCKWISE;
 const HOLE_POLYGON_WINDING = WINDING.COUNTER_CLOCKWISE;
 
-const windingOptions = {
+type WindingOptions = {
+  start?: number;
+  end?: number;
+  size?: number;
+  isClosed?: boolean;
+};
+
+/** A scratch object for sending winding options */
+const windingOptions: WindingOptions = {
   isClosed: true
 };
 
 // 4 data formats are supported:
-// Simple Polygon: an array of points
-// Complex Polygon: an array of array of points (array of rings)
-//   with the first ring representing the outer hull and other rings representing holes
-// Simple Flat: an array of numbers (flattened "simple polygon")
-// Complex Flat: {position: array<number>, holeIndices: array<number>}
-//   (flattened "complex polygon")
+
+/** Simple Polygon: an array of points */
+export type NestedSimplePolygonGeometry = Position[];
+/** Complex Polygon: an array of array of points (array of rings)
+ * with the first ring representing the outer hull and other rings representing holes
+ */
+export type NestedComplexPolygonGeometry = Position[][];
+/** An array of numbers (flattened "simple polygon") */
+export type FlatSimplePolygonGeometry = NumericArray;
+/** Flattened "complex polygon" */
+export type FlatComplexPolygonGeometry = {positions: NumericArray; holeIndices: NumericArray};
+
+export type PolygonGeometry =
+  | NestedSimplePolygonGeometry
+  | NestedComplexPolygonGeometry
+  | FlatSimplePolygonGeometry
+  | FlatComplexPolygonGeometry;
+
+export type NormalizedPolygonGeometry = FlatSimplePolygonGeometry | FlatComplexPolygonGeometry;
 
 /**
  * Ensure a polygon is valid format
- * @param {Array|Object} polygon
  */
-function validate(polygon) {
-  polygon = (polygon && polygon.positions) || polygon;
+function validate(polygon: PolygonGeometry): void {
+  polygon = (polygon && (polygon as FlatComplexPolygonGeometry).positions) || polygon;
   if (!Array.isArray(polygon) && !ArrayBuffer.isView(polygon)) {
     throw new Error('invalid polygon');
   }
 }
 
+/** Get the positions from a normalized polygon */
+export function getPositions(polygon: NormalizedPolygonGeometry): NumericArray {
+  return 'positions' in polygon ? polygon.positions : polygon;
+}
+
+/** Get the hole indices from a normalized polygon */
+export function getHoleIndices(polygon: NormalizedPolygonGeometry): NumericArray | null {
+  return 'holeIndices' in polygon ? polygon.holeIndices : null;
+}
+
+/**
+ * Check if a polygon is nested or flat
+ * Returns true if the polygon is a flat polygon (i.e. not an array of polygons)
+ */
+function isNested(
+  polygon: PolygonGeometry
+): polygon is NestedSimplePolygonGeometry | NestedComplexPolygonGeometry {
+  return Array.isArray(polygon[0]);
+}
+
 /**
  * Check if a polygon is simple or complex
- * @param {Array} polygon - either a complex or simple polygon
- * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
+ * Returns true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
-function isSimple(polygon) {
+function isSimple(
+  polygon: NestedSimplePolygonGeometry | NestedComplexPolygonGeometry
+): polygon is NestedSimplePolygonGeometry {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
 }
 
 /**
  * Check if a simple polygon is a closed ring
- * @param {Array} simplePolygon - array of points
- * @return {Boolean} - true if the simple polygon is a closed ring
+ * Returns true if the simple polygon is a closed ring
  */
-function isNestedRingClosed(simplePolygon) {
+function isNestedRingClosed(simplePolygon: NestedSimplePolygonGeometry): boolean {
   // check if first and last vertex are the same
   const p0 = simplePolygon[0];
   const p1 = simplePolygon[simplePolygon.length - 1];
@@ -72,13 +115,17 @@ function isNestedRingClosed(simplePolygon) {
 
 /**
  * Check if a simple flat array is a closed ring
- * @param {Array} positions - array of numbers
- * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
- * @param {Number} startIndex - start index of the path in the positions array
- * @param {Number} endIndex - end index of the path in the positions array
- * @return {Boolean} - true if the simple flat array is a closed ring
+ * Returns true if the simple flat array is a closed ring
  */
-function isFlatRingClosed(positions, size, startIndex, endIndex) {
+function isFlatRingClosed(
+  positions: FlatSimplePolygonGeometry,
+  /** size of a position, 2 (xy) or 3 (xyz) */
+  size: number,
+  /** start index of the path in the positions array */
+  startIndex: number,
+  /** end index of the path in the positions array */
+  endIndex: number
+): boolean {
   for (let i = 0; i < size; i++) {
     if (positions[startIndex + i] !== positions[endIndex - size + i]) {
       return false;
@@ -89,14 +136,20 @@ function isFlatRingClosed(positions, size, startIndex, endIndex) {
 
 /**
  * Copy a simple polygon coordinates into a flat array, closes the ring if needed.
- * @param {Float64Array} target - destination
- * @param {Number} targetStartIndex - index in the destination to start copying into
- * @param {Array} simplePolygon - array of points
- * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
- * @param {Number} [windingDirection] - modify polygon to be of the specified winding direction
- * @returns {Number} - the index of the write head in the destination
+ * Returns the index of the write head in the destination
  */
-function copyNestedRing(target, targetStartIndex, simplePolygon, size, windingDirection) {
+function copyNestedRing(
+  /** destination */
+  target: NumericArray,
+  /** index in the destination to start copying into */
+  targetStartIndex: number,
+  /** the source polygon */
+  simplePolygon: NestedSimplePolygonGeometry,
+  /** size of a position, 2 (xy) or 3 (xyz) */
+  size: number,
+  /** modify polygon to be of the specified winding direction */
+  windingDirection: WINDING
+): number {
   let targetIndex = targetStartIndex;
   const len = simplePolygon.length;
   for (let i = 0; i < len; i++) {
@@ -121,24 +174,23 @@ function copyNestedRing(target, targetStartIndex, simplePolygon, size, windingDi
 
 /**
  * Copy a simple flat array into another flat array, closes the ring if needed.
- * @param {Float64Array} target - destination
- * @param {Number} targetStartIndex - index in the destination to start copying into
- * @param {Array} positions - array of numbers
- * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
- * @param {Number} [srcStartIndex] - start index of the path in the positions array
- * @param {Number} [srcEndIndex] - end index of the path in the positions array
- * @param {Number} [windingDirection] - modify polygon to be of the specified winding direction
- * @returns {Number} - the index of the write head in the destination
+ * Returns the index of the write head in the destination
  */
 function copyFlatRing(
-  target,
-  targetStartIndex,
-  positions,
-  size,
-  srcStartIndex = 0,
-  srcEndIndex,
-  windingDirection
-) {
+  /** destination */
+  target: NumericArray,
+  /** index in the destination to start copying into */
+  targetStartIndex: number,
+  /** the source polygon */
+  positions: FlatSimplePolygonGeometry,
+  /** size of a position, 2 (xy) or 3 (xyz) */
+  size: number,
+  /** start index of the path in the positions array */
+  srcStartIndex: number = 0,
+  /** end index of the path in the positions array */
+  srcEndIndex: number,
+  windingDirection: WINDING
+): number {
   srcEndIndex = srcEndIndex || positions.length;
   const srcLength = srcEndIndex - srcStartIndex;
   if (srcLength <= 0) {
@@ -166,18 +218,18 @@ function copyFlatRing(
 
 /**
  * Normalize any polygon representation into the "complex flat" format
- * @param {Array|Object} polygon
- * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
- * @return {Object} - {positions: <Float64Array>, holeIndices: <Array|null>}
  */
 /* eslint-disable max-statements */
-export function normalize(polygon, positionSize) {
+export function normalize(
+  polygon: PolygonGeometry,
+  positionSize: number
+): NormalizedPolygonGeometry {
   validate(polygon);
 
-  const positions = [];
-  const holeIndices = [];
+  const positions: number[] = [];
+  const holeIndices: number[] = [];
 
-  if (polygon.positions) {
+  if ('positions' in polygon) {
     // complex flat
     const {positions: srcPositions, holeIndices: srcHoleIndices} = polygon;
 
@@ -205,7 +257,7 @@ export function normalize(polygon, positionSize) {
     }
     polygon = srcPositions;
   }
-  if (Number.isFinite(polygon[0])) {
+  if (!isNested(polygon)) {
     // simple flat
     copyFlatRing(positions, 0, polygon, positionSize, 0, positions.length, OUTER_POLYGON_WINDING);
     return positions;
@@ -236,25 +288,26 @@ export function normalize(polygon, positionSize) {
 /* eslint-enable max-statements */
 
 /*
- * Get vertex indices for drawing polygon mesh
- * @param {Object} normalizedPolygon - {positions, holeIndices}
- * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
- * @returns {Array} array of indices
+ * Get vertex indices for drawing polygon mesh (triangulation)
  */
-export function getSurfaceIndices(normalizedPolygon, positionSize, preproject) {
-  let holeIndices = null;
-
-  if (normalizedPolygon.holeIndices) {
-    holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
+export function getSurfaceIndices(
+  polygon: NormalizedPolygonGeometry,
+  positionSize: number,
+  preproject?: (xy: number[]) => number[]
+): number[] {
+  let holeIndices = getHoleIndices(polygon);
+  if (holeIndices) {
+    holeIndices = holeIndices.map(positionIndex => positionIndex / positionSize);
   }
-  let positions = normalizedPolygon.positions || normalizedPolygon;
+
+  let positions = getPositions(polygon);
 
   if (preproject) {
     // When tesselating lnglat coordinates, project them to the common space for accuracy
     const n = positions.length;
     // Clone the array
     positions = positions.slice();
-    const p = [];
+    const p: number[] = [];
     for (let i = 0; i < n; i += positionSize) {
       p[0] = positions[i];
       p[1] = positions[i + 1];
