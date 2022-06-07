@@ -11,12 +11,17 @@ import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
 export type BufferAccessor = {
-  // WebGL attribute pointer parameters
+  /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
   type?: number;
+  /** The number of elements per vertex attribute. */
   size?: number;
+  /** 1 if instanced. */
   divisor?: number;
+  /** Offset of the first vertex attribute into the buffer, in bytes. */
   offset?: number;
+  /** The offset between the beginning of consecutive vertex attributes, in bytes. */
   stride?: number;
+  /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
   normalized?: boolean;
   integer?: boolean;
 };

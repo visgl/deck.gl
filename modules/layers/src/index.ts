@@ -40,5 +40,8 @@ export {default as _TextBackgroundLayer} from './text-layer/text-background-laye
 
 // Types
 export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer';
+export type {IconLayerProps} from './icon-layer/icon-layer';
 export type {PolygonLayerProps} from './polygon-layer/polygon-layer';
 export type {GeoJsonLayerProps} from './geojson-layer/geojson-layer';
+export type {PathLayerProps} from './path-layer/path-layer';
+export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';

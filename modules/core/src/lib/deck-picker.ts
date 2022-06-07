@@ -39,7 +39,7 @@ import {
 import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
-import type Effect from './effect';
+import type {Effect} from './effect';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 

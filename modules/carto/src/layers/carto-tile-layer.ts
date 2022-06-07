@@ -1,6 +1,6 @@
 /* global TextDecoder */
 import Protobuf from 'pbf';
-import {Layer, LayersList, log} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
@@ -96,7 +96,7 @@ type _CartoTileLayerProps = {
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
    *
    * Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`.
-   * */
+   */
   formatTiles?: TileFormat;
 };
 

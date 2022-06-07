@@ -28,9 +28,10 @@ import jsonLoader from '../utils/json-loader';
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
 const version =
-  // @ts-expect-error
+  // @ts-expect-error __VERSION__ is replaced during transpilation
   typeof __VERSION__ !== 'undefined'
-    ? __VERSION__
+    ? // @ts-expect-error
+      __VERSION__
     : globalThis.DECK_VERSION || 'untranspiled source';
 
 // Note: a `deck` object not created by deck.gl may exist in the global scope
@@ -52,7 +53,11 @@ if (!existingVersion) {
     _registerLoggers: register
   };
 
-  registerLoaders([jsonLoader, [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]]);
+  registerLoaders([
+    jsonLoader,
+    // @ts-expect-error non-standard Loader format
+    [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
+  ]);
 }
 
 export default globalThis.deck;

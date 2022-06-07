@@ -1,4 +1,4 @@
-import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
+import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
 import {
   polyfill,
   getRes0Indexes,
@@ -9,7 +9,12 @@ import {
   kRing
 } from 'h3-js';
 
-function getHexagonsInBoundingBox({west, north, east, south}, resolution) {
+export type H3TileIndex = {i: string};
+
+function getHexagonsInBoundingBox(
+  {west, north, east, south}: GeoBoundingBox,
+  resolution: number
+): string[] {
   if (resolution === 0) {
     return getRes0Indexes();
   }
@@ -41,7 +46,7 @@ function getHexagonsInBoundingBox({west, north, east, south}, resolution) {
   return oversample ? [...new Set(h3Indices.map(i => h3ToParent(i, resolution)))] : h3Indices;
 }
 
-function tileToBoundingBox(index) {
+function tileToBoundingBox(index: string): GeoBoundingBox {
   const coordinates = h3ToGeoBoundary(index);
   const latitudes = coordinates.map(c => c[0]);
   const longitudes = coordinates.map(c => c[1]);
@@ -57,7 +62,7 @@ function tileToBoundingBox(index) {
 // similar
 // Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
 const BIAS = 2;
-function getHexagonResolution(viewport) {
+function getHexagonResolution(viewport): number {
   const hexagonScaleFactor = (2 / 3) * viewport.zoom;
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
 
@@ -66,11 +71,12 @@ function getHexagonResolution(viewport) {
 }
 
 export default class H3Tileset2D extends Tileset2D {
-  getTileIndices({viewport, minZoom, maxZoom}) {
+  // @ts-expect-error Tileset2D should be generic over TileIndex
+  getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     const [east, south, west, north] = viewport.getBounds();
 
     let z = getHexagonResolution(viewport);
-    let indices = [];
+    let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
       z = minZoom;
     }
@@ -88,19 +94,23 @@ export default class H3Tileset2D extends Tileset2D {
     return indices.map(i => ({i}));
   }
 
-  getTileId({i}) {
+  // @ts-expect-error Tileset2D should be generic over TileIndex
+  getTileId({i}: H3TileIndex): string {
     return i;
   }
 
-  getTileMetadata({i}) {
+  // @ts-expect-error Tileset2D should be generic over TileIndex
+  getTileMetadata({i}: H3TileIndex) {
     return {bbox: tileToBoundingBox(i)};
   }
 
-  getTileZoom({i}) {
+  // @ts-expect-error Tileset2D should be generic over TileIndex
+  getTileZoom({i}: H3TileIndex): number {
     return h3GetResolution(i);
   }
 
-  getParentIndex(index) {
+  // @ts-expect-error Tileset2D should be generic over TileIndex
+  getParentIndex(index: H3TileIndex): H3TileIndex {
     const resolution = h3GetResolution(index.i);
     const i = h3ToParent(index.i, resolution - 1);
     return {i};

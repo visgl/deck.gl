@@ -76,7 +76,6 @@ export {default as OrbitController} from './controllers/orbit-controller';
 export {default as OrthographicController} from './controllers/orthographic-controller';
 
 // Extensions interface
-export {default as Effect} from './lib/effect';
 export {default as LayerExtension} from './lib/layer-extension';
 
 // Transitions
@@ -124,3 +123,4 @@ export type {
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
+export type {Effect} from './lib/effect';

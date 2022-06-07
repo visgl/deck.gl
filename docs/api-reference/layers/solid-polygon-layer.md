@@ -86,7 +86,7 @@ generates less geometry and is faster than simply returning `0` from `getElevati
 
 * Default: `false`
 
-Whether to generate a line wireframe of the hexagon. The outline will have
+Whether to generate a line wireframe of the polygon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 

@@ -32,12 +32,14 @@
     "@loaders.gl/images": "^3.2.0-alpha.4",
     "@loaders.gl/schema": "^3.2.0-alpha.4",
     "@mapbox/tiny-sdf": "^1.1.0",
-    "@math.gl/polygon": "3.6.0-alpha.5",
+    "@math.gl/polygon": "3.6.0-alpha.8",
     "earcut": "^2.0.6"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "^3.0.0"
+    "@loaders.gl/core": "^3.0.0",
+    "@luma.gl/constants": "^8.0.0",
+    "@luma.gl/core": "^8.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
