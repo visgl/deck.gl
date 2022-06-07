@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import QuadkeyTileset2D from '@deck.gl/carto/layers/quadkey-tileset-2d';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-test.only('QuadkeyTileset2D', async t => {
+test('QuadkeyTileset2D', async t => {
   const tileset = new QuadkeyTileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,

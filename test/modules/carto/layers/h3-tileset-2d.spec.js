@@ -45,3 +45,33 @@ test('H3Tileset2D', async t => {
   );
   t.end();
 });
+
+test('H3Tileset2D res0', async t => {
+  const tileset = new H3Tileset2D({});
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1,
+    width: 1023,
+    height: 1024
+  });
+
+  const indices = tileset.getTileIndices({viewport});
+  t.equal(indices.length, 122, 'res0 indices in viewport');
+  t.end();
+});
+
+test('H3Tileset2D large span', async t => {
+  const tileset = new H3Tileset2D({});
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1,
+    width: 1000,
+    height: 400
+  });
+
+  const indices = tileset.getTileIndices({viewport});
+  t.equal(indices.length, 114, 'large viewport span');
+  t.end();
+});
