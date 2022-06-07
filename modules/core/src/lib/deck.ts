@@ -58,6 +58,7 @@ import type {ViewStateChangeParameters, InteractionState} from '../controllers/c
 import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
+import type {TooltipContent} from './tooltip';
 
 /* global document */
 
@@ -216,7 +217,7 @@ export type DeckProps = {
   /** A custom callback to retrieve the cursor type. */
   getCursor?: (state: CursorState) => string;
   /** Callback that takes a hovered-over point and renders a tooltip. */
-  getTooltip?: ((info: PickingInfo) => any) | null;
+  getTooltip?: ((info: PickingInfo) => TooltipContent) | null;
 
   /** (Debug) Flag to enable WebGL debug mode. Requires importing `@luma.gl/debug`. */
   debug?: boolean;
@@ -849,9 +850,9 @@ export default class Deck {
       }
 
       // Update tooltip
-      if (this.props.getTooltip) {
+      if (this.props.getTooltip && this.tooltip) {
         const displayInfo = this.props.getTooltip(pickedInfo);
-        this.tooltip?.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
+        this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
       }
 
       // Clear pending pickRequest
