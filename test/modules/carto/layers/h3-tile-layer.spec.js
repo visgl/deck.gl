@@ -57,16 +57,22 @@ test('H3TileLayer autoHighlight', async t => {
       autoHighlight: true,
       pickable: true
     }),
-    viewport: new WebMercatorViewport({latitude: 0, longitude: 0, zoom: 1}),
+    viewport: new WebMercatorViewport({
+      latitude: 0,
+      longitude: 0,
+      zoom: 1,
+      width: 100,
+      height: 100
+    }),
     testCases: [
       {
         pickedColor: new Uint8Array([4, 0, 0, 0]),
-        pickedLayerId: 'h3-tile-layer-h3-tile-8001fffffffffff-hexagon-cell-hifi-fill',
+        pickedLayerId: 'h3-tile-layer-h3-tile-8075fffffffffff-hexagon-cell-hifi-fill',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over h3');
           t.ok(info.object, 'info.object is populated');
-          t.equal(info.object.id, '8100fffffffffff', 'h3 is correct');
+          t.equal(info.object.id, '81753ffffffffff', 'h3 is correct');
           t.equal(info.object.value, 3, 'object value is correct');
         }
       },

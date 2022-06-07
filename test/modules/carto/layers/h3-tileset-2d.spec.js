@@ -75,3 +75,37 @@ test('H3Tileset2D large span', async t => {
   t.equal(indices.length, 114, 'large viewport span');
   t.end();
 });
+
+test('H3Tileset2D min zoom', async t => {
+  const tileset = new H3Tileset2D({});
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 1,
+    width: 300,
+    height: 200
+  });
+
+  let indices = tileset.getTileIndices({viewport});
+  t.equal(indices.length, 28, 'without min zoom');
+  indices = tileset.getTileIndices({viewport, minZoom: 1});
+  t.equal(indices.length, 157, 'min zoom added');
+  t.end();
+});
+
+test('H3Tileset2D max zoom', async t => {
+  const tileset = new H3Tileset2D({});
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 8,
+    width: 1000,
+    height: 800
+  });
+
+  let indices = tileset.getTileIndices({viewport});
+  t.equal(indices.length, 16, 'without max zoom');
+  indices = tileset.getTileIndices({viewport, maxZoom: 1});
+  t.equal(indices.length, 7, 'max zoom added');
+  t.end();
+});
