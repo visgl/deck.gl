@@ -3,6 +3,7 @@ import './api/parseMap.spec';
 import './api/maps-api-client.spec';
 import './carto-layer.spec';
 import './config.spec';
+import './layers/h3-tile-layer.spec';
 import './layers/quadkey-tile-layer.spec';
 import './style/carto-color-bins.spec';
 import './style/carto-color-categories.spec';
