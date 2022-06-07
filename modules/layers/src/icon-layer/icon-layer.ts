@@ -152,7 +152,7 @@ const defaultProps = {
 export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps;
+  static defaultProps: any = defaultProps;
   static layerName = 'IconLayer';
 
   state!: {
@@ -338,7 +338,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
   }
 
-  protected getInstanceOffset(icon: string): [number, number] {
+  protected getInstanceOffset(icon: string): number[] {
     const {
       width,
       height,
@@ -353,7 +353,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     return mapping.mask ? 1 : 0;
   }
 
-  protected getInstanceIconFrame(icon: string): [number, number, number, number] {
+  protected getInstanceIconFrame(icon: string): number[] {
     const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
     return [x, y, width, height];
   }
