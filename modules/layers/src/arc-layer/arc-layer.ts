@@ -240,7 +240,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       .draw();
   }
 
-  private _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     let positions: number[] = [];
     const NUM_SEGMENTS = 50;
     /*
