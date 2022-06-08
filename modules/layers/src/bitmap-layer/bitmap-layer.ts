@@ -23,12 +23,15 @@ import {
   Layer,
   project32,
   picking,
+  CoordinateSystem,
   COORDINATE_SYSTEM,
   LayerProps,
   PickingInfo,
   GetPickingInfoParams,
   UpdateParameters,
-  Color
+  Color,
+  Texture,
+  Position
 } from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
@@ -58,9 +61,10 @@ export type BitmapLayerProps = _BitmapLayerProps & LayerProps;
 type _BitmapLayerProps = {
   /**
    * The image to display.
+   *
    * @default null
    */
-  image?: any | null;
+  image?: string | Texture | null;
 
   /**
    * Supported formats:
@@ -69,7 +73,7 @@ type _BitmapLayerProps = {
    *   Each position could optionally contain a third component `z`.
    * @default [1, 0, 0, 1]
    */
-  bounds?: number[] | number[][];
+  bounds?: [number, number, number, number] | [Position, Position, Position, Position];
 
   /**
    * > Note: this prop is experimental.
@@ -77,7 +81,7 @@ type _BitmapLayerProps = {
    * Specifies how image coordinates should be geographically interpreted.
    * @default COORDINATE_SYSTEM.DEFAULT
    */
-  _imageCoordinateSystem?: any;
+  _imageCoordinateSystem?: CoordinateSystem;
 
   /**
    * The desaturation of the bitmap. Between `[0, 1]`.
@@ -180,7 +184,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
       return info;
     }
 
-    const {width, height} = image;
+    const {width, height} = image as Texture;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;
@@ -188,7 +192,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
 
-    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
+    const pixel = [Math.floor(uv[0] * (width as number)), Math.floor(uv[1] * (height as number))];
 
     info.bitmap = {
       size: {width, height}, // Size of bitmap
@@ -333,6 +337,8 @@ function unpackUVsFromRGB(color) {
   return [(u + uFrac) / 256, (v + vFrac) / 256];
 }
 
-function isRectangularBounds(bounds: number[] | number[][]): bounds is number[] {
+function isRectangularBounds(
+  bounds: [number, number, number, number] | [Position, Position, Position, Position]
+): bounds is [number, number, number, number] {
   return Number.isFinite(bounds[0]);
 }
