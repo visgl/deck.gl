@@ -18,7 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  picking,
+  UNIT,
+  UpdateParameters,
+  LayerProps,
+  Unit,
+  AccessorFunction,
+  Position,
+  Accessor,
+  Color
+} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -45,7 +57,95 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
 };
 
-export default class ArcLayer extends Layer {
+/** All properties supported by ArcLayer */
+export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps<DataT>;
+
+/** Properties added by /** All properties supported by GeoJsonLayer. */
+type _ArcLayerProps<DataT> = {
+  /**
+   * If `true`, create the arc along the shortest path on the earth surface.
+   * @default false
+   */
+  greatCircle?: boolean;
+
+  /**
+   * The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
+   * @default 'pixels'
+   */
+  widthUnits?: Unit;
+
+  /**
+   * The scaling multiplier for the width of each line.
+   * @default 1
+   */
+  widthScale?: number;
+
+  /**
+   * The minimum line width in pixels.
+   * @default 0
+   */
+  widthMinPixels?: number;
+
+  /**
+   * The maximum line width in pixels.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  widthMaxPixels?: number;
+
+  /**
+   * Method called to retrieve the source position of each object.
+   * @default object => object.sourcePosition
+   */
+  getSourcePosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * Method called to retrieve the target position of each object.
+   * @default object => object.targetPosition
+   */
+  getTargetPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * The rgba color is in the format of `[r, g, b, [a]]`.
+   * @default [0, 0, 0, 255]
+   */
+  getSourceColor?: Accessor<DataT, Color>;
+
+  /**
+   * The rgba color is in the format of `[r, g, b, [a]]`.
+   * @default [0, 0, 0, 255]
+   */
+  getTargetColor?: Accessor<DataT, Color>;
+
+  /**
+   * The line width of each object, in units specified by `widthUnits`.
+   * @default 1
+   */
+  getWidth?: Accessor<DataT, Color>;
+
+  /**
+   * Multiplier of layer height. `0` will make the layer flat.
+   * @default 1
+   */
+  getHeight?: Accessor<DataT, number>;
+
+  /**
+   * Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
+   * @default 0
+   */
+  getTilt?: Accessor<DataT, number>;
+};
+
+/** The Arc Layer renders raised arcs joining pairs of source and target points. */
+export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ArcLayerProps<DataT>>
+> {
+  static layerName = 'ArcLayer';
+  static defaultProps = defaultProps;
+
+  state!: Layer['state'] & {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
   }
@@ -56,7 +156,7 @@ export default class ArcLayer extends Layer {
   }
 
   initializeState() {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -112,14 +212,14 @@ export default class ArcLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(opts: UpdateParameters<this>): void {
+    super.updateState(opts);
     // Re-generate model if geometry changed
-    if (changeFlags.extensionsChanged) {
+    if (opts.changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
@@ -140,8 +240,8 @@ export default class ArcLayer extends Layer {
       .draw();
   }
 
-  _getModel(gl) {
-    let positions = [];
+  private _getModel(gl: WebGLRenderingContext): Model {
+    let positions: number[] = [];
     const NUM_SEGMENTS = 50;
     /*
      *  (0, -1)-------------_(1, -1)
@@ -171,6 +271,3 @@ export default class ArcLayer extends Layer {
     return model;
   }
 }
-
-ArcLayer.layerName = 'ArcLayer';
-ArcLayer.defaultProps = defaultProps;
