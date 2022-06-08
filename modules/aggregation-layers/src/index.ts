@@ -41,3 +41,4 @@ export type {HexagonLayerProps} from './hexagon-layer/hexagon-layer';
 export type {CPUGridLayerProps} from './cpu-grid-layer/cpu-grid-layer';
 export type {GridLayerProps} from './grid-layer/grid-layer';
 export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';
+export type {ScreenGridLayerProps} from './screen-grid-layer/screen-grid-layer';
