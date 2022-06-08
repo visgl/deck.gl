@@ -25,7 +25,6 @@ import {
   UNIT,
   LayerProps,
   Unit,
-  AccessorFunction,
   Position,
   Accessor,
   Color,
@@ -81,16 +80,16 @@ type _LineLayerProps<DataT> = {
   widthMaxPixels?: number;
 
   /**
-   * Method called to retrieve the source position of each object.
+   * Source position of each object.
    * @default object => object.sourcePosition
    */
-  getSourcePosition?: AccessorFunction<DataT, Position>;
+  getSourcePosition?: Accessor<DataT, Position>;
 
   /**
-   * Method called to retrieve the target position of each object.
+   * Target position of each object.
    * @default object => object.targetPosition
    */
-  getTargetPosition?: AccessorFunction<DataT, Position>;
+  getTargetPosition?: Accessor<DataT, Position>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
