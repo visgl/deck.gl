@@ -57,10 +57,10 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
 };
 
-/** All properties supported by ArcLayer */
+/** All properties supported by ArcLayer. */
 export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps<DataT>;
 
-/** Properties added by /** All properties supported by GeoJsonLayer. */
+/** Properties added by ArcLayer. */
 type _ArcLayerProps<DataT> = {
   /**
    * If `true`, create the arc along the shortest path on the earth surface.
