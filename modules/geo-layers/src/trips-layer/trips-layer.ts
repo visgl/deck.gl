@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {NumericArray} from '@math.gl/core';
 import {AccessorFunction} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
@@ -51,7 +52,7 @@ type _TripsLayerProps<DataT = any> = {
   /**
    * Timestamp accessor.
    */
-  getTimestamps?: AccessorFunction<DataT, number>;
+  getTimestamps?: AccessorFunction<DataT, NumericArray>;
 };
 
 export default class TripsLayer<DataT = any, ExtraProps = {}> extends PathLayer<
