@@ -2,8 +2,16 @@ import {log} from '@deck.gl/core';
 import {Geometry, uid} from '@luma.gl/core';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
+type ColumnGeometryProps = {
+  id?: string;
+  radius: number;
+  height?: number;
+  nradial?: number;
+  vertices?: number[];
+};
+
 export default class ColumnGeometry extends Geometry {
-  constructor(props = {}) {
+  constructor(props: ColumnGeometryProps) {
     const {id = uid('column-geometry')} = props;
     const {indices, attributes} = tesselateColumn(props);
     super({
@@ -16,7 +24,7 @@ export default class ColumnGeometry extends Geometry {
 }
 
 /* eslint-disable max-statements, complexity */
-function tesselateColumn(props) {
+function tesselateColumn(props: ColumnGeometryProps) {
   const {radius, height = 1, nradial = 10} = props;
   let {vertices} = props;
 
