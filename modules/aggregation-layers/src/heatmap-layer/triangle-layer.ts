@@ -19,19 +19,31 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
-import {Layer, project32} from '@deck.gl/core';
+import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
-export default class TriangleLayer extends Layer {
+type _TriangleLayerProps = {
+  colorDomain: number[];
+  aggregationMode: string;
+  threshold: number;
+  intensity: number;
+  vertexCount: number;
+  colorTexture: Texture2D;
+  maxTexture: Texture2D;
+  texture: Texture2D;
+};
+
+export default class TriangleLayer extends Layer<_TriangleLayerProps> {
+  static layerName = 'TriangleLayer';
+
   getShaders() {
     return {vs, fs, modules: [project32]};
   }
 
-  initializeState() {
-    const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
+  initializeState({gl}: LayerContext): void {
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       positions: {size: 3, noAlloc: true},
       texCoords: {size: 2, noAlloc: true}
@@ -41,7 +53,7 @@ export default class TriangleLayer extends Layer {
     });
   }
 
-  _getModel(gl) {
+  _getModel(gl: WebGLRenderingContext): Model {
     const {vertexCount} = this.props;
 
     return new Model(gl, {
@@ -54,7 +66,7 @@ export default class TriangleLayer extends Layer {
     });
   }
 
-  draw({uniforms}) {
+  draw({uniforms}): void {
     const {model} = this.state;
 
     const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
@@ -74,5 +86,3 @@ export default class TriangleLayer extends Layer {
       .draw();
   }
 }
-
-TriangleLayer.layerName = 'TriangleLayer';

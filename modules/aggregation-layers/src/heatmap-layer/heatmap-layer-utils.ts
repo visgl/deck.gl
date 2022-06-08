@@ -1,7 +1,7 @@
 import GL from '@luma.gl/constants';
 import {isWebGL2} from '@luma.gl/core';
 
-export function getBounds(points) {
+export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
   const x = points.map(p => p[0]);
   const y = points.map(p => p[1]);
@@ -15,7 +15,7 @@ export function getBounds(points) {
 }
 
 // true if currentBounds contains targetBounds, false otherwise
-export function boundsContain(currentBounds, targetBounds) {
+export function boundsContain(currentBounds: number[], targetBounds: number[]): boolean {
   if (
     targetBounds[0] >= currentBounds[0] &&
     targetBounds[2] <= currentBounds[2] &&
@@ -30,7 +30,7 @@ export function boundsContain(currentBounds, targetBounds) {
 const scratchArray = new Float32Array(12);
 
 // For given rectangle bounds generates two triangles vertices that coverit completely
-export function packVertices(points, dimensions = 2) {
+export function packVertices(points: number[][], dimensions: number = 2): Float32Array {
   let index = 0;
   for (const point of points) {
     for (let i = 0; i < dimensions; i++) {
@@ -41,7 +41,7 @@ export function packVertices(points, dimensions = 2) {
 }
 
 // Expands boundingBox:[xMin, yMin, xMax, yMax] to match aspect ratio of given width and height
-export function scaleToAspectRatio(boundingBox, width, height) {
+export function scaleToAspectRatio(boundingBox: number[], width: number, height: number): number[] {
   const [xMin, yMin, xMax, yMax] = boundingBox;
 
   const currentWidth = xMax - xMin;
@@ -73,7 +73,7 @@ export function scaleToAspectRatio(boundingBox, width, height) {
 }
 
 // Get texture coordiante of point inside a bounding box
-export function getTextureCoordinates(point, bounds) {
+export function getTextureCoordinates(point: number[], bounds: number[]) {
   const [xMin, yMin, xMax, yMax] = bounds;
   return [(point[0] - xMin) / (xMax - xMin), (point[1] - yMin) / (yMax - yMin)];
 }
