@@ -98,13 +98,13 @@ type _ColumnLayerProps<DataT> = {
    * Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one.
    * @default null
    */
-  vertices: number[] | null;
+  vertices: Position[] | null;
 
   /**
    * Disk offset from the position, relative to the radius.
    * @default [0,0]
    */
-  offset?: number[];
+  offset?: [number, number];
 
   /**
    * Radius multiplier, between 0 - 1

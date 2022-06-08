@@ -1,4 +1,4 @@
-import {log} from '@deck.gl/core';
+import {log, BinaryAttribute} from '@deck.gl/core';
 import {Geometry, uid} from '@luma.gl/core';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
@@ -24,7 +24,10 @@ export default class ColumnGeometry extends Geometry {
 }
 
 /* eslint-disable max-statements, complexity */
-function tesselateColumn(props: ColumnGeometryProps) {
+function tesselateColumn(props: ColumnGeometryProps): {
+  indices: Uint16Array;
+  attributes: Record<string, BinaryAttribute>;
+} {
   const {radius, height = 1, nradial = 10} = props;
   let {vertices} = props;
 
