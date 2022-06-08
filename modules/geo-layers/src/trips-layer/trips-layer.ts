@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PathLayer} from '@deck.gl/layers';
+import {AccessorFunction} from '@deck.gl/core';
+import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
 const defaultProps = {
   fadeTrail: true,
@@ -27,7 +28,39 @@ const defaultProps = {
   getTimestamps: {type: 'accessor', value: null}
 };
 
-export default class TripsLayer extends PathLayer {
+/** All properties supported by TripsLayer. */
+export type TripsLayerProps<DataT = any> = _TripsLayerProps<DataT> & PathLayerProps<DataT>;
+
+/** Properties added by TripsLayer. */
+type _TripsLayerProps<DataT = any> = {
+  /**
+   * Whether or not the path fades out.
+   * @default true
+   */
+  fadeTrail?: boolean;
+  /**
+   * Trail length.
+   * @default 120
+   */
+  trailLength?: number;
+  /**
+   * The current time of the frame.
+   * @default 0
+   */
+  currentTime?: number;
+  /**
+   * Timestamp accessor.
+   */
+  getTimestamps?: AccessorFunction<DataT, number>;
+};
+
+export default class TripsLayer<DataT = any, ExtraProps = {}> extends PathLayer<
+  DataT,
+  Required<_TripsLayerProps> & ExtraProps
+> {
+  static layerName = 'TripsLayer';
+  static defaultProps: any = defaultProps;
+
   getShaders() {
     const shaders = super.getShaders();
     shaders.inject = {
@@ -63,11 +96,11 @@ if(fadeTrail) {
     return shaders;
   }
 
-  initializeState(params) {
-    super.initializeState(params);
+  initializeState() {
+    super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       timestamps: {
         size: 1,
         accessor: 'getTimestamps',
@@ -96,6 +129,3 @@ if(fadeTrail) {
     super.draw(params);
   }
 }
-
-TripsLayer.layerName = 'TripsLayer';
-TripsLayer.defaultProps = defaultProps;
