@@ -99,6 +99,7 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
+export type {CoordinateSystem} from './lib/constants';
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';

@@ -40,6 +40,7 @@ export {default as _TextBackgroundLayer} from './text-layer/text-background-laye
 
 // Types
 export type {ArcLayerProps} from './arc-layer/arc-layer';
+export type {BitmapLayerProps} from './bitmap-layer/bitmap-layer';
 export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer';
 export type {IconLayerProps} from './icon-layer/icon-layer';
 export type {PolygonLayerProps} from './polygon-layer/polygon-layer';

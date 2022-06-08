@@ -32,7 +32,9 @@
     "@loaders.gl/images": "^3.2.0-alpha.4",
     "@loaders.gl/schema": "^3.2.0-alpha.4",
     "@mapbox/tiny-sdf": "^1.1.0",
+    "@math.gl/core": "3.6.0-alpha.8",
     "@math.gl/polygon": "3.6.0-alpha.8",
+    "@math.gl/web-mercator": "3.6.0-alpha.8",
     "earcut": "^2.0.6"
   },
   "peerDependencies": {
