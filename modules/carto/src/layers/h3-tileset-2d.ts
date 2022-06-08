@@ -1,13 +1,5 @@
 import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
-import {
-  polyfill,
-  getRes0Indexes,
-  geoToH3,
-  h3GetResolution,
-  h3ToGeoBoundary,
-  h3ToParent,
-  kRing
-} from 'h3-js';
+import {polyfill, geoToH3, h3GetResolution, h3ToGeoBoundary, h3ToParent, kRing} from 'h3-js';
 
 export type H3TileIndex = {i: string};
 
@@ -15,15 +7,16 @@ function getHexagonsInBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
   resolution: number
 ): string[] {
-  if (resolution === 0) {
-    return getRes0Indexes();
-  }
-  if (east - west > 180) {
+  if (Math.abs(east - west) > 180) {
     // This is a known issue in h3-js: polyfill does not work correctly
     // when longitude span is larger than 180 degrees.
-    return getHexagonsInBoundingBox({west, north, east: 0, south}, resolution).concat(
-      getHexagonsInBoundingBox({west: 0, north, east, south}, resolution)
-    );
+    return [
+      ...new Set(
+        getHexagonsInBoundingBox({west, north, east: 0, south}, resolution).concat(
+          getHexagonsInBoundingBox({west: 0, north, east, south}, resolution)
+        )
+      )
+    ];
   }
 
   // `polyfill()` fills based on hexagon center, which means tiles vanish
