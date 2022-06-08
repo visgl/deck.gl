@@ -55,7 +55,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS,
       getCellSize: props => props.cellSizePixels
     });

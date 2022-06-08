@@ -18,22 +18,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, AttributeManager, _compareProps as compareProps} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  AttributeManager,
+  _compareProps as compareProps,
+  UpdateParameters,
+  CompositeLayerProps
+} from '@deck.gl/core';
 import {cssToDeviceRatio} from '@luma.gl/core';
 import {filterProps} from './utils/prop-utils';
 
-export default class AggregationLayer extends CompositeLayer {
-  initializeState(dimensions) {
-    super.initializeState();
+export type AggregationLayerProps<DataT = any> = CompositeLayerProps<DataT>;
+
+export default abstract class AggregationLayer<
+  ExtraPropsT = {}
+> extends CompositeLayer<ExtraPropsT> {
+  static layerName = 'AggregationLayer';
+
+  state!: CompositeLayer['state'] & {
+    ignoreProps?: Record<string, any>;
+    dimensions?: any;
+  };
+
+  initializeAggregationLayer(dimensions: any) {
+    super.initializeState(this.context);
 
     this.setState({
       // Layer props , when changed doesn't require updating aggregation
-      ignoreProps: filterProps(this.constructor._propTypes, dimensions.data.props),
+      ignoreProps: filterProps((this.constructor as any)._propTypes, dimensions.data.props),
       dimensions
     });
   }
 
-  updateState(opts) {
+  updateState(opts: UpdateParameters<this>) {
     super.updateState(opts);
     const {changeFlags} = opts;
     if (changeFlags.extensionsChanged) {
@@ -45,7 +62,7 @@ export default class AggregationLayer extends CompositeLayer {
     }
 
     // Explictly call to update attributes as 'CompositeLayer' doesn't call this
-    this._updateAttributes(opts.props);
+    this._updateAttributes();
   }
 
   updateAttributes(changedAttributes) {
@@ -55,7 +72,7 @@ export default class AggregationLayer extends CompositeLayer {
   }
 
   getAttributes() {
-    return this.getAttributeManager().getShaderAttributes();
+    return this.getAttributeManager()!.getShaderAttributes();
   }
 
   getModuleSettings() {
@@ -84,7 +101,10 @@ export default class AggregationLayer extends CompositeLayer {
    * @param {Boolean} params.compareAll - when `true` it will include non layer props for comparision
    * @returns {Boolean} - returns true if dimensions' prop or accessor is changed
    **/
-  isAggregationDirty(updateOpts, params = {}) {
+  isAggregationDirty(
+    updateOpts,
+    params: {compareAll?: boolean; dimension?: any} = {}
+  ): string | boolean {
     const {props, oldProps, changeFlags} = updateOpts;
     const {compareAll = false, dimension} = params;
     const {ignoreProps} = this.state;
@@ -113,7 +133,7 @@ export default class AggregationLayer extends CompositeLayer {
         oldProps,
         newProps: props,
         ignoreProps,
-        propTypes: this.constructor._propTypes
+        propTypes: (this.constructor as any)._propTypes
       });
     }
     // Compare props of the dimension
@@ -131,7 +151,7 @@ export default class AggregationLayer extends CompositeLayer {
    * @returns {Boolean} - `true` if attribute `name` is changed, `false` otherwise,
    *                       If `name` is not passed or `undefiend`, `true` if any attribute is changed, `false` otherwise
    **/
-  isAttributeChanged(name) {
+  isAttributeChanged(name?: string) {
     const {changedAttributes} = this.state;
     if (!name) {
       // if name not specified return true if any attribute is changed
@@ -156,13 +176,10 @@ export default class AggregationLayer extends CompositeLayer {
 // Returns true if given object is empty, false otherwise.
 function isObjectEmpty(obj) {
   let isEmpty = true;
-  /* eslint-disable no-unused-vars  */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const key in obj) {
     isEmpty = false;
     break;
   }
-  /* eslint-enable no-unused-vars  */
   return isEmpty;
 }
-
-AggregationLayer.layerName = 'AggregationLayer';

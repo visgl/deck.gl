@@ -60,7 +60,7 @@ const DIMENSIONS = {
 
 export default class ContourLayer extends GridAggregationLayer {
   initializeState() {
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS
     });
     this.setState({
