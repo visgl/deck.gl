@@ -37,3 +37,6 @@ export {default as _BinSorter} from './utils/bin-sorter';
 // types
 export type {ContourLayerProps} from './contour-layer/contour-layer';
 export type {HexagonLayerProps} from './hexagon-layer/hexagon-layer';
+export type {CPUGridLayerProps} from './cpu-grid-layer/cpu-grid-layer';
+export type {GridLayerProps} from './grid-layer/grid-layer';
+export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';

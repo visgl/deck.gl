@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, fp64LowPart, project32, gouraudLighting, picking} from '@deck.gl/core';
+import {Layer, fp64LowPart, project32, gouraudLighting, picking, LayerContext} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CubeGeometry} from '@luma.gl/core';
+import {Model, CubeGeometry, Buffer} from '@luma.gl/core';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
-
+import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';
 import fs from './gpu-grid-cell-layer-fragment.glsl';
 
@@ -53,7 +53,19 @@ const defaultProps = {
   material: true // Use lighting module defaults
 };
 
-export default class GPUGridCellLayer extends Layer {
+type _GPUGridCellLayerProps = _GPUGridLayerProps<any> & {
+  offset: number[];
+  gridSize: number[];
+  gridOrigin: number[];
+  gridOffset: number[];
+  colorMaxMinBuffer: Buffer;
+  elevationMaxMinBuffer: Buffer;
+};
+
+export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
+  static layerName = 'GPUGridCellLayer';
+  static defaultProps = defaultProps;
+
   getShaders() {
     return super.getShaders({
       vs,
@@ -62,9 +74,8 @@ export default class GPUGridCellLayer extends Layer {
     });
   }
 
-  initializeState() {
-    const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
+  initializeState({gl}: LayerContext) {
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       colors: {
         size: 4,
@@ -80,7 +91,7 @@ export default class GPUGridCellLayer extends Layer {
     this.setState({model});
   }
 
-  _getModel(gl) {
+  _getModel(gl: WebGLRenderingContext): Model {
     return new Model(gl, {
       ...this.getShaders(),
       id: this.props.id,
@@ -142,7 +153,7 @@ export default class GPUGridCellLayer extends Layer {
 
   getDomainUniforms() {
     const {colorDomain, elevationDomain} = this.props;
-    const domainUniforms = {};
+    const domainUniforms: Record<string, any> = {};
     if (colorDomain !== null) {
       domainUniforms.colorDomainValid = true;
       domainUniforms.colorDomain = colorDomain;
@@ -158,8 +169,8 @@ export default class GPUGridCellLayer extends Layer {
     return domainUniforms;
   }
 
-  _setupUniformBuffer(model) {
-    const gl = this.context.gl;
+  private _setupUniformBuffer(model: Model): void {
+    const gl = this.context.gl as WebGL2RenderingContext;
     const programHandle = model.program.handle;
 
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
@@ -168,6 +179,3 @@ export default class GPUGridCellLayer extends Layer {
     gl.uniformBlockBinding(programHandle, elevationIndex, ELEVATION_DATA_UBO_INDEX);
   }
 }
-
-GPUGridCellLayer.layerName = 'GPUGridCellLayer';
-GPUGridCellLayer.defaultProps = defaultProps;

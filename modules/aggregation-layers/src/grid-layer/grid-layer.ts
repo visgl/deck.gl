@@ -1,7 +1,7 @@
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, UpdateParameters} from '@deck.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import GPUGridLayer from '../gpu-grid-layer/gpu-grid-layer';
-import CPUGridLayer from '../cpu-grid-layer/cpu-grid-layer';
+import GPUGridLayer, {_GPUGridLayerProps} from '../gpu-grid-layer/gpu-grid-layer';
+import CPUGridLayer, {_CPUGridLayerProps} from '../cpu-grid-layer/cpu-grid-layer';
 
 const defaultProps = {
   ...GPUGridLayer.defaultProps,
@@ -9,20 +9,48 @@ const defaultProps = {
   gpuAggregation: false
 };
 
-export default class GridLayer extends CompositeLayer {
+/** All properties supported by GridLayer. */
+export type GridLayerProps<DataT = any> = _GridLayerProps<DataT> & CompositeLayerProps<DataT>;
+
+/** Properties added by GridLayer. */
+type _GridLayerProps<DataT = any> = _CPUGridLayerProps<DataT> &
+  _GPUGridLayerProps<DataT> & {
+    /**
+     * Whether the aggregation should be performed in high-precision 64-bit mode.
+     * @default false
+     */
+    fp64?: boolean;
+
+    /**
+     * When set to true, aggregation is performed on GPU, provided other conditions are met.
+     * @default false
+     */
+    gpuAggregation?: boolean;
+  };
+
+export default class GridLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_GridLayerProps<DataT>>
+> {
+  static layerName = 'GridLayer';
+  static defaultProps = defaultProps;
+
+  state!: CompositeLayer['state'] & {
+    useGPUAggregation: boolean;
+  };
+
   initializeState() {
     this.state = {
       useGPUAggregation: true
     };
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    const newState = {};
-    newState.useGPUAggregation = this.canUseGPUAggregation(props);
-    this.setState(newState);
+  updateState({props}: UpdateParameters<this>) {
+    this.setState({
+      useGPUAggregation: this.canUseGPUAggregation(props)
+    });
   }
 
-  renderLayers() {
+  renderLayers(): Layer {
     const {data, updateTriggers} = this.props;
     const id = this.state.useGPUAggregation ? 'GPU' : 'CPU';
     const LayerType = this.state.useGPUAggregation
@@ -42,7 +70,7 @@ export default class GridLayer extends CompositeLayer {
 
   // Private methods
 
-  canUseGPUAggregation(props) {
+  canUseGPUAggregation(props: GridLayer['props']) {
     const {
       gpuAggregation,
       lowerPercentile,
@@ -73,6 +101,3 @@ export default class GridLayer extends CompositeLayer {
     return true;
   }
 }
-
-GridLayer.layerName = 'GridLayer';
-GridLayer.defaultProps = defaultProps;
