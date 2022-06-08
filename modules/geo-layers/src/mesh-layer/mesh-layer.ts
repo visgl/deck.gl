@@ -1,10 +1,18 @@
+import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {UpdateParameters} from '@deck.gl/core';
+import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
+
+export type Mesh = {
+  attributes: MeshAttributes;
+  indices?: MeshAttribute;
+};
 
 function validateGeometryAttributes(attributes) {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
@@ -14,12 +22,33 @@ function validateGeometryAttributes(attributes) {
 }
 
 const defaultProps = {
-  // PBR material object. _lighting must be pbr for this to work
   pbrMaterial: {type: 'object', value: null},
   featureIds: {type: 'array', value: null, optional: true}
 };
 
-export default class _MeshLayer extends SimpleMeshLayer {
+/** All properties supported by _MeshLayer. */
+export type _MeshLayerProps<DataT = any> = __MeshLayerProps<DataT> & SimpleMeshLayerProps<DataT>;
+
+/** Properties added by _MeshLayer. */
+type __MeshLayerProps<DataT = any> = {
+  /**
+   * PBR material object. _lighting must be pbr for this to work
+   */
+  pbrMaterial?: any; // TODO add type when converting Tile3DLayer
+
+  /**
+   * List of feature ids.
+   */
+  featureIds: NumericArray;
+};
+
+export default class _MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshLayer<
+  DataT,
+  Required<__MeshLayerProps> & ExtraProps
+> {
+  static layerName = '_MeshLayer';
+  static defaultProps: any = defaultProps;
+
   getShaders() {
     const shaders = super.getShaders();
     const modules = shaders.modules;
@@ -31,8 +60,10 @@ export default class _MeshLayer extends SimpleMeshLayer {
     const {featureIds} = this.props;
     super.initializeState();
 
+    const attributeManager = this.getAttributeManager();
     if (featureIds) {
-      this.state.attributeManager.add({
+      // attributeManager is always defined in a primitive layer
+      attributeManager!.add({
         featureIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
@@ -43,8 +74,10 @@ export default class _MeshLayer extends SimpleMeshLayer {
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
+
+    const {props, oldProps} = params;
     if (props.pbrMaterial !== oldProps.pbrMaterial) {
       this.updatePbrMaterialUniforms(props.pbrMaterial);
     }
@@ -64,7 +97,7 @@ export default class _MeshLayer extends SimpleMeshLayer {
     super.draw(opts);
   }
 
-  getModel(mesh) {
+  protected getModel(mesh: Mesh): Model {
     const {id, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
     const shaders = this.getShaders();
@@ -125,6 +158,3 @@ export default class _MeshLayer extends SimpleMeshLayer {
     attribute.value = value;
   }
 }
-
-_MeshLayer.layerName = '_MeshLayer';
-_MeshLayer.defaultProps = defaultProps;
