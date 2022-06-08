@@ -21,24 +21,24 @@ const MAX_LEVEL = 30;
 const POS_BITS = 2 * MAX_LEVEL + 1; // 61 (60 bits of data, 1 bit lsb marker)
 const RADIAN_TO_DEGREE = 180 / Math.PI;
 
-export function IJToST(ij, order, offsets) {
+export function IJToST(ij: [number, number], order: number, offsets: [number, number]): number[] {
   const maxSize = 1 << order;
 
   return [(ij[0] + offsets[0]) / maxSize, (ij[1] + offsets[1]) / maxSize];
 }
 
-function singleSTtoUV(st) {
+function singleSTtoUV(st: number): number {
   if (st >= 0.5) {
     return (1 / 3.0) * (4 * st * st - 1);
   }
   return (1 / 3.0) * (1 - 4 * (1 - st) * (1 - st));
 }
 
-export function STToUV(st) {
+export function STToUV(st: [number, number]): [number, number] {
   return [singleSTtoUV(st[0]), singleSTtoUV(st[1])];
 }
 
-export function FaceUVToXYZ(face, [u, v]) {
+export function FaceUVToXYZ(face: number, [u, v]: [number, number]): [number, number, number] {
   switch (face) {
     case 0:
       return [1, u, v];
@@ -57,14 +57,14 @@ export function FaceUVToXYZ(face, [u, v]) {
   }
 }
 
-export function XYZToLngLat([x, y, z]) {
+export function XYZToLngLat([x, y, z]: [number, number, number]): [number, number] {
   const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
   const lng = Math.atan2(y, x);
 
   return [lng * RADIAN_TO_DEGREE, lat * RADIAN_TO_DEGREE];
 }
 
-export function toHilbertQuadkey(idS) {
+export function toHilbertQuadkey(idS: string): string {
   let bin = Long.fromString(idS, true, 10).toString(2);
 
   while (bin.length < FACE_BITS + POS_BITS) {
@@ -92,7 +92,7 @@ export function toHilbertQuadkey(idS) {
   return `${faceS}/${posS}`;
 }
 
-function rotateAndFlipQuadrant(n, point, rx, ry) {
+function rotateAndFlipQuadrant(n: number, point: [number, number], rx: number, ry: number): void {
   if (ry === 0) {
     if (rx === 1) {
       point[0] = n - 1 - point[0];
@@ -105,12 +105,16 @@ function rotateAndFlipQuadrant(n, point, rx, ry) {
   }
 }
 
-export function FromHilbertQuadKey(hilbertQuadkey) {
+export function FromHilbertQuadKey(hilbertQuadkey: string): {
+  face: number;
+  ij: [number, number];
+  level: number;
+} {
   const parts = hilbertQuadkey.split('/');
   const face = parseInt(parts[0], 10);
   const position = parts[1];
   const maxLevel = position.length;
-  const point = [0, 0];
+  const point = [0, 0] as [number, number];
   let level;
 
   for (let i = maxLevel - 1; i >= 0; i--) {
