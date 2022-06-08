@@ -35,4 +35,5 @@ export {default as _AggregationLayer} from './aggregation-layer';
 export {default as _BinSorter} from './utils/bin-sorter';
 
 // types
+export type {ContourLayerProps} from './contour-layer/contour-layer';
 export type {HexagonLayerProps} from './hexagon-layer/hexagon-layer';

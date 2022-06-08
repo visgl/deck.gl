@@ -21,12 +21,20 @@
 import GL from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
-import {log} from '@deck.gl/core';
+import {
+  Accessor,
+  AccessorFunction,
+  Color,
+  Layer,
+  log,
+  Position,
+  UpdateParameters
+} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
-import GridAggregationLayer from '../grid-aggregation-layer';
+import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -58,8 +66,83 @@ const DIMENSIONS = {
   }
 };
 
-export default class ContourLayer extends GridAggregationLayer {
-  initializeState() {
+/** All properties supported by ContourLayer. */
+export type ContourLayerProps<DataT = any> = _ContourLayerProps<DataT> &
+  GridAggregationLayerProps<DataT>;
+
+/** Properties added by ContourLayer. */
+export type _ContourLayerProps<DataT> = {
+  /**
+   * Size of each cell in meters.
+   * @default 1000
+   */
+  cellSize?: number;
+
+  /**
+   * When set to true, aggregation is performed on GPU, provided other conditions are met.
+   * @default true
+   */
+  gpuAggregation?: boolean;
+
+  /**
+   * Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'.
+   * @default 'SUM'
+   */
+  aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+
+  /**
+   * Definition of contours to be drawn.
+   * @default [{threshold: 1}]
+   */
+  contours: {
+    /**
+     * Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
+     *
+     * Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
+     */
+    threshold: number | number[];
+
+    /**
+     * RGBA color array to be used to render the contour.
+     * @default [255, 255, 255, 255]
+     */
+    color?: Color;
+
+    /**
+     * Applicable for `Isoline`s only, width of the Isoline in pixels.
+     * @default 1
+     */
+    strokeWidth?: number;
+
+    /** Defines z order of the contour. */
+    zIndex?: number;
+  }[];
+
+  /**
+   * A very small z offset that is added for each vertex of a contour (Isoline or Isoband).
+   * @default 0.005
+   */
+  zOffset?: number;
+
+  /**
+   * Method called to retrieve the position of each object.
+   * @default object => object.position
+   */
+  getPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * The weight of each object.
+   * @default 1
+   */
+  getWeight?: Accessor<DataT, number>;
+};
+export default class ContourLayer<DataT = any, ExtraPropsT = {}> extends GridAggregationLayer<
+  ExtraPropsT & Required<_ContourLayerProps<DataT>>
+> {
+  static layerName = 'ContourLayer';
+  static defaultProps = defaultProps;
+
+  initializeState(): void {
     super.initializeAggregationLayer({
       dimensions: DIMENSIONS
     });
@@ -73,7 +156,7 @@ export default class ContourLayer extends GridAggregationLayer {
         }
       }
     });
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
@@ -86,7 +169,7 @@ export default class ContourLayer extends GridAggregationLayer {
     });
   }
 
-  updateState(opts) {
+  updateState(opts: UpdateParameters<this>): void {
     super.updateState(opts);
     let contoursChanged = false;
     const {oldProps, props} = opts;
@@ -102,7 +185,7 @@ export default class ContourLayer extends GridAggregationLayer {
     }
   }
 
-  renderLayers() {
+  renderLayers(): Layer[] {
     const {contourSegments, contourPolygons} = this.state.contourData;
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', LineLayer);
@@ -219,7 +302,7 @@ export default class ContourLayer extends GridAggregationLayer {
 
   // Private (Aggregation)
 
-  _updateAccessors(opts) {
+  private _updateAccessors(opts) {
     const {getWeight, aggregation, data} = opts.props;
     const {count} = this.state.weights;
     if (count) {
@@ -229,7 +312,7 @@ export default class ContourLayer extends GridAggregationLayer {
     this.setState({getValue: getValueFunc(aggregation, getWeight, {data})});
   }
 
-  _resetResults() {
+  private _resetResults() {
     const {count} = this.state.weights;
     if (count) {
       count.aggregationData = null;
@@ -238,7 +321,7 @@ export default class ContourLayer extends GridAggregationLayer {
 
   // Private (Contours)
 
-  _generateContours() {
+  private _generateContours() {
     const {numCol, numRow, gridOrigin, gridOffset, thresholdData} = this.state;
     const {count} = this.state.weights;
     let {aggregationData} = count;
@@ -260,7 +343,7 @@ export default class ContourLayer extends GridAggregationLayer {
     this.setState({contourData});
   }
 
-  _updateThresholdData(props) {
+  private _updateThresholdData(props) {
     const {contours, zOffset} = props;
     const count = contours.length;
     const thresholdData = new Array(count);
@@ -275,6 +358,3 @@ export default class ContourLayer extends GridAggregationLayer {
     this.setState({thresholdData});
   }
 }
-
-ContourLayer.layerName = 'ContourLayer';
-ContourLayer.defaultProps = defaultProps;

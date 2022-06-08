@@ -18,15 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import AggregationLayer from './aggregation-layer';
+import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {Buffer} from '@luma.gl/core';
-import {log} from '@deck.gl/core';
+import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 
-export default class GridAggregationLayer extends AggregationLayer {
+export type GridAggregationLayerProps<DataT = any> = AggregationLayerProps<DataT>;
+
+export default abstract class GridAggregationLayer<
+  ExtraPropsT = {}
+> extends AggregationLayer<ExtraPropsT> {
+  static layerName = 'GridAggregationLayer';
+
+  state!: AggregationLayer['state'] & {
+    aggregationDataDirty?: any;
+    aggregationWeightsDirty?: any;
+    gpuAggregation?: any;
+    getValue?: () => any;
+    sortedBins?: BinSorter;
+  };
+
   initializeAggregationLayer({dimensions}) {
     const {gl} = this.context;
     super.initializeAggregationLayer(dimensions);
@@ -38,7 +52,7 @@ export default class GridAggregationLayer extends AggregationLayer {
     });
   }
 
-  updateState(opts) {
+  updateState(opts: UpdateParameters<this>) {
     // get current attributes
     super.updateState(opts);
 
@@ -68,16 +82,16 @@ export default class GridAggregationLayer extends AggregationLayer {
     this.setState({aggregationDirty});
   }
 
-  finalizeState() {
+  finalizeState(context: LayerContext) {
     const {count} = this.state.weights;
     if (count && count.aggregationBuffer) {
       count.aggregationBuffer.delete();
     }
     this.state.gpuGridAggregator?.delete();
-    super.finalizeState();
+    super.finalizeState(context);
   }
 
-  updateShaders(shaders) {
+  updateShaders(shaders: any): void {
     if (this.state.gpuAggregation) {
       this.state.gpuGridAggregator.updateShaders(shaders);
     }
@@ -179,10 +193,10 @@ export default class GridAggregationLayer extends AggregationLayer {
     this.setState({sortedBins});
   }
 
-  _uploadAggregationResults() {
+  _uploadAggregationResults(): void {
     const {numCol, numRow} = this.state;
     const {data} = this.state.layerData;
-    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins;
+    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins!;
 
     const ELEMENTCOUNT = 4;
     const aggregationSize = numCol * numRow * ELEMENTCOUNT;
@@ -200,5 +214,3 @@ export default class GridAggregationLayer extends AggregationLayer {
     this.updateResults({aggregationData, maxMinData, maxData, minData});
   }
 }
-
-GridAggregationLayer.layerName = 'GridAggregationLayer';

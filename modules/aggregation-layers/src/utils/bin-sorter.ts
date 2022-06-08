@@ -43,8 +43,23 @@ const defaultProps = {
   filterData: null
 };
 
+export type AggregatedBin = {
+  i: number;
+  value: any;
+  counts: number;
+};
+
 export default class BinSorter {
-  constructor(bins = [], props = defaultProps) {
+  maxCount!: number;
+  maxValue!: number;
+  minValue!: number;
+  totalCount!: number;
+
+  aggregatedBins: AggregatedBin[];
+  sortedBins!: AggregatedBin[];
+  binMap: Record<number, AggregatedBin>;
+
+  constructor(bins = [], props: Partial<typeof defaultProps> = defaultProps) {
     this.aggregatedBins = this.getAggregatedBins(bins, props);
     this._updateMinMaxValues();
     this.binMap = this.getBinMap();
@@ -57,7 +72,7 @@ export default class BinSorter {
    * @param {Function} getValue
    * @return {Array} array of values and index lookup
    */
-  getAggregatedBins(bins, props) {
+  getAggregatedBins(bins, props): AggregatedBin[] {
     const {
       getValue = defaultGetValue,
       getPoints = defaultGetPoints,
@@ -67,7 +82,7 @@ export default class BinSorter {
 
     const hasFilter = typeof filterData === 'function';
     const binCount = bins.length;
-    const aggregatedBins = [];
+    const aggregatedBins: AggregatedBin[] = [];
     let index = 0;
 
     for (let binIndex = 0; binIndex < binCount; binIndex++) {
@@ -94,7 +109,7 @@ export default class BinSorter {
     return aggregatedBins;
   }
 
-  _percentileToIndex(percentileRange) {
+  _percentileToIndex(percentileRange): [number, number] {
     const len = this.sortedBins.length;
     if (len < 2) {
       return [0, 0];
@@ -113,7 +128,7 @@ export default class BinSorter {
    * This is used to retrieve bin value for color calculation
    * @return {Object} bin index to aggregatedBins
    */
-  getBinMap() {
+  getBinMap(): Record<number, AggregatedBin> {
     const binMap = {};
     for (const bin of this.aggregatedBins) {
       binMap[bin.i] = bin;
@@ -125,9 +140,8 @@ export default class BinSorter {
 
   /**
    * Get ths max count of all bins
-   * @return {Number | Boolean} max count
    */
-  _updateMinMaxValues() {
+  _updateMinMaxValues(): void {
     let maxCount = 0;
     let maxValue = 0;
     let minValue = MAX_32_BIT_FLOAT;
@@ -151,11 +165,12 @@ export default class BinSorter {
    * @param {Number} range[1] - upper bound
    * @return {Array} array of new value range
    */
-  getValueRange(percentileRange) {
+  getValueRange(percentileRange: [number, number]): [number, number] {
     if (!this.sortedBins) {
       this.sortedBins = this.aggregatedBins.sort((a, b) => ascending(a.value, b.value));
     }
     if (!this.sortedBins.length) {
+      // @ts-expect-error
       return [];
     }
     let lowerIdx = 0;
@@ -170,7 +185,7 @@ export default class BinSorter {
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }
 
-  getValueDomainByScale(scale, [lower = 0, upper = 100] = []) {
+  getValueDomainByScale(scale: string, [lower = 0, upper = 100] = []) {
     if (!this.sortedBins) {
       this.sortedBins = this.aggregatedBins.sort((a, b) => ascending(a.value, b.value));
     }
@@ -182,7 +197,7 @@ export default class BinSorter {
     return this._getScaleDomain(scale, indexEdge);
   }
 
-  _getScaleDomain(scaleType, [lowerIdx, upperIdx]) {
+  _getScaleDomain(scaleType: string, [lowerIdx, upperIdx]: [number, number]): [number, number] {
     const bins = this.sortedBins;
 
     switch (scaleType) {
@@ -194,7 +209,7 @@ export default class BinSorter {
         return getQuantileDomain(bins.slice(lowerIdx, upperIdx + 1), d => d.value);
 
       case 'ordinal':
-        return getOrdinalDomain(bins, d => d.value);
+        return getOrdinalDomain(bins, d => d.value) as [number, number];
 
       default:
         return [bins[lowerIdx].value, bins[upperIdx].value];

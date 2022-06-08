@@ -16,7 +16,7 @@ const DEFAULT_THRESHOLD_DATA = {
 
 // Utility methods
 
-function getVertexCode(weight, threshold) {
+function getVertexCode(weight: number, threshold: number | number[]): number {
   // threshold must be a single value or a range (array of size 2)
 
   // Iso-bands
@@ -50,8 +50,8 @@ export function getCode(opts) {
   const isTopBoundary = y >= height - 1;
   const isBoundary = isLeftBoundary || isRightBoundary || isBottomBoundary || isTopBoundary;
 
-  const weights = {};
-  const codes = {};
+  const weights: Record<string, number> = {};
+  const codes: Record<string, number> = {};
 
   // TOP
   if (isLeftBoundary || isTopBoundary) {
@@ -147,9 +147,9 @@ export function getVertices(opts) {
   //      ]
 
   if (type === CONTOUR_TYPE.ISO_BANDS) {
-    const polygons = [];
+    const polygons: number[][][] = [];
     offsets.forEach(polygonOffsets => {
-      const polygon = [];
+      const polygon: number[][] = [];
       polygonOffsets.forEach(xyOffset => {
         const vX = refVertexX + xyOffset[0] * cellSize[0];
         const vY = refVertexY + xyOffset[1] * cellSize[1];
@@ -161,7 +161,7 @@ export function getVertices(opts) {
   }
 
   // default case is ISO_LINES
-  const lines = [];
+  const lines: number[][] = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
       const vX = refVertexX + offset[0] * cellSize[0];

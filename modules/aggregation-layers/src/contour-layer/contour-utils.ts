@@ -4,14 +4,19 @@ import {getCode, getVertices, CONTOUR_TYPE} from './marching-squares';
 /* eslint-disable max-depth */
 export function generateContours({
   thresholdData,
-  colors,
   cellWeights,
   gridSize,
   gridOrigin,
   cellSize
+}: {
+  thresholdData: any;
+  cellWeights: Float32Array;
+  gridSize: number[];
+  gridOrigin: number[];
+  cellSize: number[];
 }) {
-  const contourSegments = [];
-  const contourPolygons = [];
+  const contourSegments: {start: number[]; end: number[]; contour: any}[] = [];
+  const contourPolygons: {vertices: number[][]; contour: any}[] = [];
   const width = gridSize[0];
   const height = gridSize[1];
   let segmentIndex = 0;
@@ -32,6 +37,7 @@ export function generateContours({
           height
         });
         const opts = {
+          type: CONTOUR_TYPE.ISO_BANDS,
           gridOrigin,
           cellSize,
           x,
@@ -44,7 +50,7 @@ export function generateContours({
         };
         if (Array.isArray(threshold)) {
           opts.type = CONTOUR_TYPE.ISO_BANDS;
-          const polygons = getVertices(opts);
+          const polygons = getVertices(opts) as number[][][];
           for (const polygon of polygons) {
             contourPolygons[polygonIndex++] = {
               vertices: polygon,
@@ -54,7 +60,7 @@ export function generateContours({
         } else {
           // Get the intersection vertices based on MarchingSquares code.
           opts.type = CONTOUR_TYPE.ISO_LINES;
-          const vertices = getVertices(opts);
+          const vertices = getVertices(opts) as number[][];
           for (let i = 0; i < vertices.length; i += 2) {
             contourSegments[segmentIndex++] = {
               start: vertices[i],
