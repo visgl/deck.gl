@@ -44,6 +44,7 @@ export type {BitmapLayerProps} from './bitmap-layer/bitmap-layer';
 export type {ColumnLayerProps} from './column-layer/column-layer';
 export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer';
 export type {IconLayerProps} from './icon-layer/icon-layer';
+export type {LineLayerProps} from './line-layer/line-layer';
 export type {PolygonLayerProps} from './polygon-layer/polygon-layer';
 export type {GeoJsonLayerProps} from './geojson-layer/geojson-layer';
 export type {GridCellLayerProps} from './column-layer/grid-cell-layer';
