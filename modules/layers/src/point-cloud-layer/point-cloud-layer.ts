@@ -18,12 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, gouraudLighting, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  gouraudLighting,
+  picking,
+  UNIT,
+  LayerProps,
+  UpdateParameters,
+  Unit,
+  AccessorFunction,
+  Position,
+  Accessor,
+  Color
+} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
+import {MaterialProps} from '../types';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
@@ -62,14 +76,62 @@ function normalizeData(data) {
   }
 }
 
-export default class PointCloudLayer extends Layer {
+/** All properties supported by PointCloudLayer. */
+export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps<DataT>;
+
+/** Properties added by PointCloudLayer. */
+type _PointCloudLayerProps<DataT> = {
+  /**
+   * The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`.
+   * @default 'pixels'
+   */
+  sizeUnits?: Unit;
+
+  /**
+   * Global radius of all points, in units specified by `sizeUnits`
+   * @default 10
+   */
+  pointSize?: number;
+
+  /**
+   * This is an object that contains material props
+   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
+   * @default true
+   */
+  material?: MaterialProps | boolean;
+
+  /**
+   * Method called to retrieve the position of each object.
+   * @default object => object.position
+   */
+  getPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * The normal of each object, in `[nx, ny, nz]`.
+   * @default [0, 0, 1]
+   */
+  getNormal?: Accessor<DataT, [number, number, number]>;
+
+  /**
+   * The rgba color is in the format of `[r, g, b, [a]]`
+   * @default [0, 0, 0, 255]
+   */
+  getColor?: Accessor<DataT, Color>;
+};
+
+/** The Point Cloud Layer takes in points with 3d positions, normals and colors and renders them as spheres with a certain radius. */
+export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_PointCloudLayerProps<DataT>>
+> {
+  static layerName = 'PointCloudLayer';
+  static defaultProps = defaultProps;
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
 
   initializeState() {
-    /* eslint-disable max-len */
-    this.getAttributeManager().addInstanced({
+    this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -92,16 +154,16 @@ export default class PointCloudLayer extends Layer {
         defaultValue: DEFAULT_COLOR
       }
     });
-    /* eslint-enable max-len */
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>): void {
+    const {changeFlags, props} = params;
+    super.updateState(params);
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
     if (changeFlags.dataChanged) {
       normalizeData(props.data);
@@ -120,9 +182,9 @@ export default class PointCloudLayer extends Layer {
       .draw();
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     // a triangle that minimally cover the unit circle
-    const positions = [];
+    const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
       const angle = (i / 3) * Math.PI * 2;
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
@@ -141,6 +203,3 @@ export default class PointCloudLayer extends Layer {
     });
   }
 }
-
-PointCloudLayer.layerName = 'PointCloudLayer';
-PointCloudLayer.defaultProps = defaultProps;
