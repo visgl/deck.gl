@@ -122,7 +122,7 @@ const defaultProps = {
           resourceId: url,
           onChange: data => layer.internalState?.reloadAsyncProp(propName, data),
           consumerId: layer.id,
-          requestId: String(propName)
+          requestId: propName
         });
       }
 

@@ -111,7 +111,7 @@ export default class ComponentState<ComponentT extends Component> {
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props: ComponentT['props']) {
     // NOTE: prop param and default values are only support for testing
-    const resolvedValues = props[ASYNC_RESOLVED_SYMBOL];
+    const resolvedValues = props[ASYNC_RESOLVED_SYMBOL] || {};
     const originalValues = props[ASYNC_ORIGINAL_SYMBOL] || props;
     const defaultValues = props[ASYNC_DEFAULTS_SYMBOL] || {};
 
@@ -266,7 +266,7 @@ export default class ComponentState<ComponentT extends Component> {
     let count = 0;
 
     for await (const chunk of iterable) {
-      // @ts-expect-error dataTransform is not defined on the base Component. TODO: move this to LayerState
+      // @ts-expect-error (2339) dataTransform is not decared in base component props
       const {dataTransform} = this.component.props;
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];
