@@ -39,6 +39,7 @@ export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-ic
 export {default as _TextBackgroundLayer} from './text-layer/text-background-layer/text-background-layer';
 
 // Types
+export type {ArcLayerProps} from './arc-layer/arc-layer';
 export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer';
 export type {IconLayerProps} from './icon-layer/icon-layer';
 export type {PolygonLayerProps} from './polygon-layer/polygon-layer';
