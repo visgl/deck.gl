@@ -7360,10 +7360,10 @@ gzip-size@^5.0.0:
     duplexer "^0.1.1"
     pify "^4.0.1"
 
-h3-js@^3.6.0:
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-3.6.3.tgz#74807ddafc39f2e34688c6fc4cf225248c891c6c"
-  integrity sha512-sSfUD4WrqKDoGsGjeY/ih2kbl/HqunGzdAr4NL8Q1qHSAyGMvev3jABbsMvK9wJGmnGuGhIzgxX9kCbUsYcnwg==
+h3-js@^3.7.0:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-3.7.2.tgz#61d4feb7bb42868ca9cdb2d5cf9d9dda94f9e5a3"
+  integrity sha512-LPjlHSwB9zQZrMqKloCZmmmt3yZzIK7nqPcXqwU93zT3TtYG6jP4tZBzAPouxut7lLjdFbMQ75wRBiKfpsnY7w==
 
 hammerjs@^2.0.8:
   version "2.0.8"
