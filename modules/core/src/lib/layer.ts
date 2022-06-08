@@ -42,6 +42,7 @@ import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
 
+import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
@@ -80,7 +81,22 @@ const defaultProps = {
   onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {propName, layer, loaders, loadOptions, signal}) => {
+    value: (
+      url: string,
+      {
+        propName,
+        layer,
+        loaders,
+        loadOptions,
+        signal
+      }: {
+        propName: string;
+        layer: Layer;
+        loaders?: Loader[];
+        loadOptions?: any;
+        signal?: AbortSignal;
+      }
+    ) => {
       const {resourceManager} = layer.context;
       loadOptions = loadOptions || layer.getLoadOptions();
       loaders = loaders || layer.props.loaders;
@@ -104,7 +120,7 @@ const defaultProps = {
       if (inResourceManager) {
         return resourceManager.subscribe({
           resourceId: url,
-          onChange: data => layer.internalState.reloadAsyncProp(propName, data),
+          onChange: data => layer.internalState?.reloadAsyncProp(propName, data),
           consumerId: layer.id,
           requestId: propName
         });

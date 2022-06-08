@@ -12,17 +12,6 @@ test('TextLayer - LRUCache#Constructor', t => {
   t.end();
 });
 
-test('TextLayer - LRUCache#clear', t => {
-  const cache = new LRUCache();
-
-  cache.set('key1', 'val1');
-
-  cache.clear();
-  t.notOk(cache.get('key1'), 'Should be cleared.');
-
-  t.end();
-});
-
 test('TextLayer - LRUCache#set and get', t => {
   const cache = new LRUCache(2);
 

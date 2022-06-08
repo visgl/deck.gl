@@ -24,9 +24,22 @@ import IconLayer from '../../icon-layer/icon-layer';
 
 import fs from './multi-icon-layer-fragment.glsl';
 
+import type {IconLayerProps} from '../../icon-layer/icon-layer';
+import type {Accessor, Color, UpdateParameters} from '@deck.gl/core';
+
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
+
+type _MultiIconLayerProps<DataT> = {
+  getIconOffsets?: Accessor<DataT, number[]>;
+  sdf?: boolean;
+  smoothing?: number;
+  outlineWidth?: number;
+  outlineColor?: Color;
+};
+
+export type MultiIconLayerProps<DataT> = _MultiIconLayerProps<DataT> & IconLayerProps<DataT>;
 
 const defaultProps = {
   getIconOffsets: {type: 'accessor', value: x => x.offsets},
@@ -36,7 +49,17 @@ const defaultProps = {
   outlineColor: {type: 'color', value: [0, 0, 0, 255]}
 };
 
-export default class MultiIconLayer extends IconLayer {
+export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
+  DataT,
+  ExtraPropsT & Required<_MultiIconLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'MultiIconLayer';
+
+  state!: IconLayer['state'] & {
+    outlineColor: Color;
+  };
+
   getShaders() {
     return {...super.getShaders(), fs};
   }
@@ -45,7 +68,7 @@ export default class MultiIconLayer extends IconLayer {
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       instanceOffsets: {
         size: 2,
         accessor: 'getIconOffsets'
@@ -58,13 +81,13 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
-  updateState(params) {
+  updateState(params: UpdateParameters<this>) {
     super.updateState(params);
     const {props, oldProps} = params;
     let {outlineColor} = props;
 
     if (outlineColor !== oldProps.outlineColor) {
-      outlineColor = outlineColor.map(x => x / 255);
+      outlineColor = outlineColor.map(x => x / 255) as Color;
       outlineColor[3] = Number.isFinite(outlineColor[3]) ? outlineColor[3] : 1;
 
       this.setState({
@@ -93,18 +116,17 @@ export default class MultiIconLayer extends IconLayer {
     super.draw(params);
   }
 
-  getInstanceOffset(icons) {
-    return icons ? Array.from(icons).map(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
+  protected getInstanceOffset(icons: string): number[] {
+    return icons ? Array.from(icons).flatMap(icon => super.getInstanceOffset(icon)) : EMPTY_ARRAY;
   }
 
-  getInstanceColorMode(icons) {
+  getInstanceColorMode(icons: string): number {
     return 1; // mask
   }
 
-  getInstanceIconFrame(icons) {
-    return icons ? Array.from(icons).map(icon => super.getInstanceIconFrame(icon)) : EMPTY_ARRAY;
+  getInstanceIconFrame(icons: string): number[] {
+    return icons
+      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
+      : EMPTY_ARRAY;
   }
 }
-
-MultiIconLayer.layerName = 'MultiIconLayer';
-MultiIconLayer.defaultProps = defaultProps;

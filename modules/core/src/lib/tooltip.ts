@@ -19,34 +19,48 @@
 // THE SOFTWARE.
 
 /* global document */
-const defaultStyle = {
-  zIndex: 1,
+const defaultStyle: Partial<CSSStyleDeclaration> = {
+  zIndex: '1',
   position: 'absolute',
   pointerEvents: 'none',
   color: '#a0a7b4',
   backgroundColor: '#29323c',
   padding: '10px',
-  top: 0,
-  left: 0,
+  top: '0',
+  left: '0',
   display: 'none'
 };
 
-export default class Tooltip {
-  constructor(canvas) {
-    const canvasParent = canvas.parentElement;
+export type TooltipContent =
+  | null
+  | string
+  | {
+      text?: string;
+      html?: string;
+      className?: string;
+      style?: Partial<CSSStyleDeclaration>;
+    };
 
+export default class Tooltip {
+  private el: HTMLDivElement | null = null;
+
+  isVisible: boolean = false;
+
+  constructor(canvas: HTMLCanvasElement) {
+    const canvasParent = canvas.parentElement;
     if (canvasParent) {
       this.el = document.createElement('div');
       this.el.className = 'deck-tooltip';
       Object.assign(this.el.style, defaultStyle);
       canvasParent.appendChild(this.el);
     }
-
-    this.isVisible = false;
   }
 
-  setTooltip(displayInfo, x, y) {
+  setTooltip(displayInfo: TooltipContent, x?: number, y?: number): void {
     const el = this.el;
+    if (!el) {
+      return;
+    }
 
     if (typeof displayInfo === 'string') {
       el.innerText = displayInfo;
@@ -55,13 +69,13 @@ export default class Tooltip {
       el.style.display = 'none';
       return;
     } else {
-      if ('text' in displayInfo) {
+      if (displayInfo.text) {
         el.innerText = displayInfo.text;
       }
-      if ('html' in displayInfo) {
+      if (displayInfo.html) {
         el.innerHTML = displayInfo.html;
       }
-      if ('className' in displayInfo) {
+      if (displayInfo.className) {
         el.className = displayInfo.className;
       }
       Object.assign(el.style, displayInfo.style);
@@ -71,9 +85,10 @@ export default class Tooltip {
     el.style.transform = `translate(${x}px, ${y}px)`;
   }
 
-  remove() {
+  remove(): void {
     if (this.el) {
       this.el.remove();
+      this.el = null;
     }
   }
 }
