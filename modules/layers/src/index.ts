@@ -48,3 +48,4 @@ export type {MultiIconLayerProps} from './text-layer/multi-icon-layer/multi-icon
 export type {TextBackgroundLayerProps} from './text-layer/text-background-layer/text-background-layer';
 export type {PathLayerProps} from './path-layer/path-layer';
 export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';
+export type {MaterialProps as _MaterialProps} from './types';

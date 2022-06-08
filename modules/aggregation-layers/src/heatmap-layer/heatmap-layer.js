@@ -93,7 +93,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(DIMENSIONS);
+    super.initializeAggregationLayer(DIMENSIONS);
     this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();

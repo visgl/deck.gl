@@ -27,9 +27,9 @@ import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 
 export default class GridAggregationLayer extends AggregationLayer {
-  initializeState({dimensions}) {
+  initializeAggregationLayer({dimensions}) {
     const {gl} = this.context;
-    super.initializeState(dimensions);
+    super.initializeAggregationLayer(dimensions);
     this.setState({
       // CPU aggregation results
       layerData: {},

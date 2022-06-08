@@ -72,7 +72,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS
     });
     this.setState({
