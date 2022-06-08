@@ -6,7 +6,7 @@
     // "listEmittedFiles": true
   },
   "references": [
-    // {"path": "modules/aggregation-layers"},
+    {"path": "modules/aggregation-layers"},
     // {"path": "modules/arcgis"},
     {"path": "modules/carto"},
     {"path": "modules/core"},
