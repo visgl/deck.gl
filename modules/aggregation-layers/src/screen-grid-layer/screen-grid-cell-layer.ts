@@ -19,15 +19,16 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, FEATURES, hasFeatures} from '@luma.gl/core';
-import {Layer, log, picking} from '@deck.gl/core';
+import {Model, Geometry, FEATURES, hasFeatures, Texture2D} from '@luma.gl/core';
+import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+import type {_ScreenGridLayerProps} from './screen-grid-layer';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
-const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
+const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
@@ -37,19 +38,36 @@ const defaultProps = {
   colorRange: defaultColorRange
 };
 
-export default class ScreenGridCellLayer extends Layer {
+/** All properties supported by ScreenGridCellLayer. */
+export type ScreenGridCellLayerProps<DataT> = _ScreenGridCellLayerProps<DataT> & LayerProps<DataT>;
+
+/** Proprties added by ScreenGridCellLayer. */
+export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
+  maxTexture: Texture2D;
+};
+
+export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ScreenGridCellLayerProps<DataT>>
+> {
+  static layerName = 'ScreenGridCellLayer';
+  static defaultProps = defaultProps;
+
   static isSupported(gl) {
     return hasFeatures(gl, [FEATURES.TEXTURE_FLOAT]);
   }
 
+  state!: Layer['state'] & {
+    model: Model;
+  };
   getShaders() {
     return {vs, fs, modules: [picking]};
   }
 
   initializeState() {
     const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       instancePositions: {size: 3, update: this.calculateInstancePositions},
       instanceCounts: {size: 4, noAlloc: true}
     });
@@ -63,10 +81,12 @@ export default class ScreenGridCellLayer extends Layer {
     return changeFlags.somethingChanged;
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    super.updateState({oldProps, props, changeFlags});
+  updateState(params: UpdateParameters<this>) {
+    super.updateState(params);
 
-    const attributeManager = this.getAttributeManager();
+    const {oldProps, props, changeFlags} = params;
+
+    const attributeManager = this.getAttributeManager()!;
     if (props.numInstances !== oldProps.numInstances) {
       attributeManager.invalidateAll();
     } else if (oldProps.cellSizePixels !== props.cellSizePixels) {
@@ -120,7 +140,7 @@ export default class ScreenGridCellLayer extends Layer {
 
   // Private Methods
 
-  _getModel(gl) {
+  _getModel(gl: WebGLRenderingContext): Model {
     return new Model(gl, {
       ...this.getShaders(),
       id: this.props.id,
@@ -134,7 +154,7 @@ export default class ScreenGridCellLayer extends Layer {
     });
   }
 
-  _shouldUseMinMax() {
+  _shouldUseMinMax(): boolean {
     const {minColor, maxColor, colorDomain, colorRange} = this.props;
     if (minColor || maxColor) {
       log.deprecated('ScreenGridLayer props: minColor and maxColor', 'colorRange, colorDomain')();
@@ -149,7 +169,7 @@ export default class ScreenGridCellLayer extends Layer {
     return true;
   }
 
-  _updateUniforms(oldProps, props, changeFlags) {
+  _updateUniforms(oldProps, props, changeFlags): void {
     const {model} = this.state;
     if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
       model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
@@ -177,6 +197,3 @@ export default class ScreenGridCellLayer extends Layer {
     }
   }
 }
-
-ScreenGridCellLayer.layerName = 'ScreenGridCellLayer';
-ScreenGridCellLayer.defaultProps = defaultProps;

@@ -20,14 +20,24 @@
 
 import {Buffer} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import {log} from '@deck.gl/core';
+import {
+  Accessor,
+  AccessorFunction,
+  Color,
+  GetPickingInfoParams,
+  LayerContext,
+  log,
+  PickingInfo,
+  Position
+} from '@deck.gl/core';
+import {_MaterialProps as MaterialProps} from '@deck.gl/layers';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
 import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
-import GridAggregationLayer from '../grid-aggregation-layer';
+import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
 
 const defaultProps = {
@@ -65,14 +75,112 @@ const DIMENSIONS = {
 };
 const POSITION_ATTRIBUTE_NAME = 'positions';
 
-export default class GPUGridLayer extends GridAggregationLayer {
-  initializeState() {
-    const {gl} = this.context;
+/** All properties supported by GPUGridLayer. */
+export type GPUGridLayerProps<DataT = any> = _GPUGridLayerProps<DataT> &
+  GridAggregationLayerProps<DataT>;
+
+/** Properties added by GPUGridLayer. */
+export type _GPUGridLayerProps<DataT> = {
+  /**
+   * Size of each cell in meters.
+   * @default 1000
+   */
+  cellSize?: number;
+
+  /**
+   * Color scale domain, default is set to the extent of aggregated weights in each cell.
+   * @default [min(colorWeight), max(colorWeight)]
+   */
+  colorDomain?: [number, number] | null;
+
+  /**
+   * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
+   */
+  colorRange?: Color[];
+
+  /**
+   * Cell size multiplier, clamped between 0 - 1.
+   * @default 1
+   */
+  coverage?: number;
+
+  /**
+   * Elevation scale input domain, default is set to between 0 and the max of aggregated weights in each cell.
+   * @default [0, max(elevationWeight)]
+   */
+  elevationDomain?: [number, number] | null;
+
+  /**
+   * Elevation scale output range.
+   * @default [0, 1000]
+   */
+  elevationRange?: [number, number];
+
+  /**
+   * Cell elevation multiplier.
+   * @default 1
+   */
+  elevationScale?: number;
+
+  /**
+   * Whether to enable cell elevation. If set to false, all cell will be flat.
+   * @default true
+   */
+  extruded?: boolean;
+
+  /**
+   * This is an object that contains material props
+   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
+   * @default true
+   */
+  material?: MaterialProps | null;
+
+  /**
+   * Defines the operation used to aggregate all data object weights to calculate a cell's color value.
+   * @default 'SUM'
+   */
+  colorAggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+
+  /**
+   * Defines the operation used to aggregate all data object weights to calculate a cell's elevation value.
+   * @default 'SUM'
+   */
+  elevationAggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+
+  /**
+   * Method called to retrieve the position of each object.
+   * @default object => object.position
+   */
+  getPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * The weight of a data object used to calculate the color value for a cell.
+   * @default 1
+   */
+  getColorWeight?: Accessor<DataT, number>;
+
+  /**
+   * The weight of a data object used to calculate the elevation value for a cell.
+   * @default 1
+   */
+  getElevationWeight?: Accessor<DataT, number>;
+};
+
+/**
+ * The `GPUGridLayer` renders a grid heatmap based on an array of inputs.
+ */
+export default class GPUGridLayer<DataT = any, ExtraPropsT = {}> extends GridAggregationLayer<
+  ExtraPropsT & Required<_GPUGridLayerProps<DataT>>
+> {
+  static layerName = 'GPUGridLayer';
+  static defaultProps = defaultProps;
+
+  initializeState({gl}: LayerContext): void {
     const isSupported = GPUGridAggregator.isSupported(gl);
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS
     });
     this.setState({
@@ -101,7 +209,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
       },
       positionAttributeName: 'positions'
     });
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
@@ -129,7 +237,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     }
   }
 
-  getHashKeyForIndex(index) {
+  getHashKeyForIndex(index: number): string {
     const {numRow, numCol, boundingBox, gridOffset} = this.state;
     const gridSize = [numCol, numRow];
     const gridOrigin = [boundingBox.xMin, boundingBox.yMin];
@@ -147,7 +255,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
     return `${latIdx}-${lonIdx}`;
   }
 
-  getPositionForIndex(index) {
+  getPositionForIndex(index: number): Position {
     const {numRow, numCol, boundingBox, gridOffset} = this.state;
     const gridSize = [numCol, numRow];
     const gridOrigin = [boundingBox.xMin, boundingBox.yMin];
@@ -160,9 +268,9 @@ export default class GPUGridLayer extends GridAggregationLayer {
     return [xPos, yPos];
   }
 
-  getPickingInfo({info, mode}) {
+  getPickingInfo({info, mode}: GetPickingInfoParams): PickingInfo {
     const {index} = info;
-    let object = null;
+    let object: any = null;
     if (index >= 0) {
       const {gpuGridAggregator} = this.state;
       const position = this.getPositionForIndex(index);
@@ -190,7 +298,7 @@ export default class GPUGridLayer extends GridAggregationLayer {
           const {gridOffset, translation, boundingBox} = this.state;
           const {viewport} = this.context;
           const attributes = this.getAttributes();
-          const cpuAggregation = pointToDensityGridDataCPU(props, {
+          const cpuAggregation = pointToDensityGridDataCPU(props as any, {
             gridOffset,
             attributes,
             viewport,
@@ -267,14 +375,14 @@ export default class GPUGridLayer extends GridAggregationLayer {
     );
   }
 
-  finalizeState() {
+  finalizeState(context: LayerContext) {
     const {color, elevation} = this.state.weights;
     [color, elevation].forEach(weight => {
       const {aggregationBuffer, maxMinBuffer} = weight;
       maxMinBuffer.delete();
       aggregationBuffer?.delete();
     });
-    super.finalizeState();
+    super.finalizeState(context);
   }
 
   // Aggregation Overrides
@@ -338,6 +446,3 @@ export default class GPUGridLayer extends GridAggregationLayer {
     elevation.operation = AGGREGATION_OPERATION[elevationAggregation];
   }
 }
-
-GPUGridLayer.layerName = 'GPUGridLayer';
-GPUGridLayer.defaultProps = defaultProps;

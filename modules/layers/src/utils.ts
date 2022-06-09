@@ -2,7 +2,17 @@
 // Replaces the specified range with a new subarray
 // Mutates the data array
 // Returns {startRow, endRow} of the inserted items
-export function replaceInRange({data, getIndex, dataRange, replace}) {
+export function replaceInRange({
+  data,
+  getIndex,
+  dataRange,
+  replace
+}: {
+  data: any[];
+  getIndex: (d: any) => number;
+  dataRange: {startRow?: number; endRow?: number};
+  replace: any[];
+}): {startRow: Number; endRow: number} {
   const {startRow = 0, endRow = Infinity} = dataRange;
   const count = data.length;
   let replaceStart = count;
@@ -20,12 +30,12 @@ export function replaceInRange({data, getIndex, dataRange, replace}) {
   let index = replaceStart;
   const dataLengthChanged = replaceEnd - replaceStart !== replace.length;
   // Save the items after replaceEnd before we overwrite data
-  const endChunk = dataLengthChanged && data.slice(replaceEnd);
+  const endChunk = dataLengthChanged ? data.slice(replaceEnd) : undefined;
   // Insert new items
   for (let i = 0; i < replace.length; i++) {
     data[index++] = replace[i];
   }
-  if (dataLengthChanged) {
+  if (endChunk) {
     // Append items after replaceEnd
     for (let i = 0; i < endChunk.length; i++) {
       data[index++] = endChunk[i];

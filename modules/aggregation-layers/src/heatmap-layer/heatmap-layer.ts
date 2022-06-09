@@ -29,14 +29,27 @@ import {
   getTextureParams
 } from './heatmap-layer-utils';
 import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
-import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
+import {
+  Accessor,
+  AccessorFunction,
+  AttributeManager,
+  ChangeFlags,
+  Color,
+  COORDINATE_SYSTEM,
+  Layer,
+  LayerContext,
+  LayersList,
+  log,
+  Position,
+  UpdateParameters
+} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import AggregationLayer from '../aggregation-layer';
+import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
-import weights_vs from './weights-vs.glsl';
-import weights_fs from './weights-fs.glsl';
-import vs_max from './max-vs.glsl';
-import fs_max from './max-fs.glsl';
+import weightsVs from './weights-vs.glsl';
+import weightsFs from './weights-fs.glsl';
+import vsMax from './max-vs.glsl';
+import fsMax from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_OPTIONS = {
@@ -85,7 +98,103 @@ const DIMENSIONS = {
   }
 };
 
-export default class HeatmapLayer extends AggregationLayer {
+export type HeatmapLayerProps<DataT> = _HeatmapLayerProps<DataT> & AggregationLayerProps<DataT>;
+
+type _HeatmapLayerProps<DataT = any> = {
+  /**
+   * Radius of the circle in pixels, to which the weight of an object is distributed.
+   *
+   * @default 30
+   */
+  radiusPixels?: number;
+
+  /**
+   * Specified as an array of colors [color1, color2, ...].
+   *
+   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   */
+  colorRange?: Color[];
+
+  /**
+   * Value that is multiplied with the total weight at a pixel to obtain the final weight.
+   *
+   * @default 1
+   */
+  intensity?: number;
+
+  /**
+   * Ratio of the fading weight to the max weight, between `0` and `1`.
+   *
+   * For example, `0.1` affects all pixels with weight under 10% of the max.
+   *
+   * Ignored when `colorDomain` is specified.
+   * @default 0.05
+   */
+  threshold?: number;
+
+  /**
+   * Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
+   *
+   * @default null
+   */
+  colorDomain?: [number, number] | null;
+
+  /**
+   * Defines the type of aggregation operation
+   *
+   * V valid values are 'SUM', 'MEAN'.
+   *
+   * @default 'SUM'
+   */
+  aggregation?: 'SUM' | 'MEAN';
+
+  /**
+   * Specifies the size of weight texture.
+   * @default 2048
+   */
+  weightsTextureSize?: number;
+
+  /**
+   * Interval in milliseconds during which changes to the viewport don't trigger aggregation.
+   *
+   * @default 500
+   */
+  debounceTimeout?: number;
+
+  /**
+   * Method called to retrieve the position of each object.
+   *
+   * @default d => d.position
+   */
+  getPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * The weight of each object.
+   *
+   * @default 1
+   */
+  getWeight?: Accessor<DataT, number>;
+};
+
+export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
+  ExtraPropsT & Required<_HeatmapLayerProps<DataT>>
+> {
+  static layerName = 'HeatmapLayer';
+  static defaultProps = defaultProps;
+
+  state!: AggregationLayer['state'] & {
+    supported: boolean;
+    colorDomain?: number[];
+    isWeightMapDirty?: boolean;
+    weightsTexture?: Texture2D;
+    zoom?: number;
+    worldBounds?: number[];
+    normalizedCommonBounds?: number[];
+    updateTimer?: any;
+    triPositionBuffer?: Buffer;
+    triTexCoordBuffer?: Buffer;
+  };
+
   initializeState() {
     const {gl} = this.context;
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
@@ -93,20 +202,20 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(DIMENSIONS);
+    super.initializeAggregationLayer(DIMENSIONS);
     this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
   }
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}: UpdateParameters<this>) {
     // Need to be updated when viewport changes
     return changeFlags.somethingChanged;
   }
 
   /* eslint-disable max-statements,complexity */
-  updateState(opts) {
+  updateState(opts: UpdateParameters<this>) {
     if (!this.state.supported) {
       return;
     }
@@ -114,7 +223,7 @@ export default class HeatmapLayer extends AggregationLayer {
     this._updateHeatmapState(opts);
   }
 
-  _updateHeatmapState(opts) {
+  _updateHeatmapState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
@@ -144,7 +253,7 @@ export default class HeatmapLayer extends AggregationLayer {
     this.setState({zoom: opts.context.viewport.zoom});
   }
 
-  renderLayers() {
+  renderLayers(): LayersList | Layer {
     if (!this.state.supported) {
       return [];
     }
@@ -187,8 +296,8 @@ export default class HeatmapLayer extends AggregationLayer {
     );
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext) {
+    super.finalizeState(context);
     const {
       weightsTransform,
       weightsTexture,
@@ -221,8 +330,11 @@ export default class HeatmapLayer extends AggregationLayer {
     });
   }
 
-  _getChangeFlags(opts) {
-    const changeFlags = {};
+  _getChangeFlags(opts: UpdateParameters<this>) {
+    const changeFlags: Partial<ChangeFlags> & {
+      boundsChanged?: boolean;
+      viewportZoomChanged?: boolean;
+    } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
       this.isAttributeChanged() || // if any attribute is changed
@@ -257,7 +369,7 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   _setupAttributes() {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
@@ -285,12 +397,12 @@ export default class HeatmapLayer extends AggregationLayer {
     return super.getShaders(
       type === 'max-weights-transform'
         ? {
-            vs: vs_max,
-            _fs: fs_max
+            vs: vsMax,
+            _fs: fsMax
           }
         : {
-            vs: weights_vs,
-            _fs: weights_fs
+            vs: weightsVs,
+            _fs: weightsFs
           }
     );
   }
@@ -366,7 +478,7 @@ export default class HeatmapLayer extends AggregationLayer {
   }
 
   // Computes world bounds area that needs to be processed for generate heatmap
-  _updateBounds(forceUpdate = false) {
+  _updateBounds(forceUpdate: any = false): boolean {
     const {viewport} = this.context;
 
     // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
@@ -381,7 +493,7 @@ export default class HeatmapLayer extends AggregationLayer {
     // #1: get world bounds for current viewport extends
     const visibleWorldBounds = getBounds(viewportCorners); // TODO: Change to visible bounds
 
-    const newState = {visibleWorldBounds, viewportCorners};
+    const newState: Partial<HeatmapLayer['state']> = {visibleWorldBounds, viewportCorners};
     let boundsChanged = false;
 
     if (
@@ -426,7 +538,7 @@ export default class HeatmapLayer extends AggregationLayer {
     triPositionBuffer.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
     triTexCoordBuffer.subData(packVertices(textureBounds, 2));
   }
@@ -434,7 +546,7 @@ export default class HeatmapLayer extends AggregationLayer {
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
+    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
     if (colorTexture) {
       colorTexture.setImageData({
@@ -527,7 +639,7 @@ export default class HeatmapLayer extends AggregationLayer {
   // input: worldBounds: [minLong, minLat, maxLong, maxLat]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
   // optput: commonBounds: [minX, minY, maxX, maxY] scaled to fit the current texture
-  _worldToCommonBounds(worldBounds, opts = {}) {
+  _worldToCommonBounds(worldBounds, opts: {useLayerCoordinateSystem?: boolean} = {}) {
     const {useLayerCoordinateSystem = false} = opts;
     const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;
@@ -578,6 +690,3 @@ export default class HeatmapLayer extends AggregationLayer {
     return bottomLeftWorld.slice(0, 2).concat(topRightWorld.slice(0, 2));
   }
 }
-
-HeatmapLayer.layerName = 'HeatmapLayer';
-HeatmapLayer.defaultProps = defaultProps;

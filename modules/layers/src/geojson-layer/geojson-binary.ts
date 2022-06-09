@@ -2,18 +2,30 @@
 // the geojson-binary format defined at loaders.gl:
 // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
 
+import {
+  BinaryFeatures,
+  BinaryLineFeatures,
+  BinaryPointFeatures,
+  BinaryPolygonFeatures,
+  Feature
+} from '@loaders.gl/schema';
+
+export type BinaryFeatureTypes = BinaryPointFeatures | BinaryLineFeatures | BinaryPolygonFeatures;
+
+type FeaureOnlyProperties = Pick<Feature, 'properties'>;
+
 /**
  * Return the feature for an accesor
- *
- * @param {Object} data - The data in binary format
- * @param {Number} index - The requested index
  */
-export function binaryToFeatureForAccesor(data, index) {
+export function binaryToFeatureForAccesor(
+  data: BinaryFeatureTypes,
+  index: number
+): FeaureOnlyProperties | null {
   if (!data) {
     return null;
   }
 
-  const featureIndex = 'startIndices' in data ? data.startIndices[index] : index;
+  const featureIndex = 'startIndices' in data ? (data as any).startIndices[index] : index;
   const geometryIndex = data.featureIds.value[featureIndex];
 
   if (featureIndex !== -1) {
@@ -23,7 +35,11 @@ export function binaryToFeatureForAccesor(data, index) {
   return null;
 }
 
-function getPropertiesForIndex(data, propertiesIndex, numericPropsIndex) {
+function getPropertiesForIndex(
+  data: BinaryFeatureTypes,
+  propertiesIndex: number,
+  numericPropsIndex: number
+): FeaureOnlyProperties {
   const feature = {
     properties: {...data.properties[propertiesIndex]}
   };
@@ -36,8 +52,11 @@ function getPropertiesForIndex(data, propertiesIndex, numericPropsIndex) {
 }
 
 // Custom picking color to keep binary indexes
-export function calculatePickingColors(geojsonBinary, encodePickingColor) {
-  const pickingColors = {
+export function calculatePickingColors(
+  geojsonBinary: BinaryFeatures,
+  encodePickingColor: (id: number, result: number[]) => void
+): Record<string, Uint8ClampedArray | null> {
+  const pickingColors: Record<string, Uint8ClampedArray | null> = {
     points: null,
     lines: null,
     polygons: null
@@ -48,9 +67,9 @@ export function calculatePickingColors(geojsonBinary, encodePickingColor) {
     const pickingColor = [];
     for (let i = 0; i < featureIds.length; i++) {
       encodePickingColor(featureIds[i], pickingColor);
-      pickingColors[key][i * 3 + 0] = pickingColor[0];
-      pickingColors[key][i * 3 + 1] = pickingColor[1];
-      pickingColors[key][i * 3 + 2] = pickingColor[2];
+      pickingColors[key]![i * 3 + 0] = pickingColor[0];
+      pickingColors[key]![i * 3 + 1] = pickingColor[1];
+      pickingColors[key]![i * 3 + 2] = pickingColor[2];
     }
   }
 

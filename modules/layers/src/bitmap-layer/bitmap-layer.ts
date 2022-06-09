@@ -19,7 +19,20 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  picking,
+  CoordinateSystem,
+  COORDINATE_SYSTEM,
+  LayerProps,
+  PickingInfo,
+  GetPickingInfoParams,
+  UpdateParameters,
+  Color,
+  Texture,
+  Position
+} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
@@ -41,19 +54,75 @@ const defaultProps = {
   tintColor: {type: 'color', value: [255, 255, 255]}
 };
 
-/*
- * @class
- * @param {object} props
- * @param {number} props.transparentColor - color to interpret transparency to
- * @param {number} props.tintColor - color bias
- */
-export default class BitmapLayer extends Layer {
+/** All properties supported by BitmapLayer. */
+export type BitmapLayerProps = _BitmapLayerProps & LayerProps;
+
+/** Properties added by BitmapLayer. */
+type _BitmapLayerProps = {
+  /**
+   * The image to display.
+   *
+   * @default null
+   */
+  image?: string | Texture | null;
+
+  /**
+   * Supported formats:
+   *  - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
+   *  - Coordinates of four corners of the bitmap, should follow the sequence of `[[left, bottom], [left, top], [right, top], [right, bottom]]`.
+   *   Each position could optionally contain a third component `z`.
+   * @default [1, 0, 0, 1]
+   */
+  bounds?: [number, number, number, number] | [Position, Position, Position, Position];
+
+  /**
+   * > Note: this prop is experimental.
+   *
+   * Specifies how image coordinates should be geographically interpreted.
+   * @default COORDINATE_SYSTEM.DEFAULT
+   */
+  _imageCoordinateSystem?: CoordinateSystem;
+
+  /**
+   * The desaturation of the bitmap. Between `[0, 1]`.
+   * @default 0
+   */
+  desaturate?: number;
+
+  /**
+   * The color to use for transparent pixels, in `[r, g, b, a]`.
+   * @default [0, 0, 0, 0]
+   */
+  transparentColor?: Color;
+
+  /**
+   * The color to tint the bitmap by, in `[r, g, b]`.
+   * @default [255, 255, 255]
+   */
+  tintColor?: Color;
+};
+
+/** The BitmapLayer renders a bitmap at specified boundaries. */
+export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_BitmapLayerProps>
+> {
+  static layerName = 'BitmapLayer';
+  static defaultProps = defaultProps;
+
+  state!: Layer['state'] & {
+    disablePicking?: boolean;
+    model?: Model;
+    mesh?: any;
+    coordinateConversion?: number;
+    bounds?: number[];
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     attributeManager.remove(['instancePickingColors']);
     const noAlloc = true;
@@ -80,16 +149,16 @@ export default class BitmapLayer extends Layer {
     });
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     // setup model first
+    const attributeManager = this.getAttributeManager()!;
+
     if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      this.getAttributeManager().invalidateAll();
+      attributeManager.invalidateAll();
     }
-
-    const attributeManager = this.getAttributeManager();
 
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
@@ -106,15 +175,16 @@ export default class BitmapLayer extends Layer {
     }
   }
 
-  getPickingInfo({info}) {
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const {image} = this.props;
+    const info: PickingInfo & {bitmap?: any} = params.info;
 
     if (!info.color || !image) {
       info.bitmap = null;
       return info;
     }
 
-    const {width, height} = image;
+    const {width, height} = image as Texture;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;
@@ -122,7 +192,7 @@ export default class BitmapLayer extends Layer {
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
 
-    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
+    const pixel = [Math.floor(uv[0] * (width as number)), Math.floor(uv[1] * (height as number))];
 
     info.bitmap = {
       size: {width, height}, // Size of bitmap
@@ -142,19 +212,19 @@ export default class BitmapLayer extends Layer {
     this.setState({disablePicking: false});
   }
 
-  _updateAutoHighlight(info) {
+  protected _updateAutoHighlight(info) {
     super._updateAutoHighlight({
       ...info,
       color: this.encodePickingColor(0)
     });
   }
 
-  _createMesh() {
+  protected _createMesh() {
     const {bounds} = this.props;
 
     let normalizedBounds = bounds;
     // bounds as [minX, minY, maxX, maxY]
-    if (Number.isFinite(bounds[0])) {
+    if (isRectangularBounds(bounds)) {
       /*
         (minX0, maxY3) ---- (maxX2, maxY3)
                |                  |
@@ -173,7 +243,7 @@ export default class BitmapLayer extends Layer {
     return createMesh(normalizedBounds, this.context.viewport.resolution);
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     if (!gl) {
       return null;
     }
@@ -225,7 +295,7 @@ export default class BitmapLayer extends Layer {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
     if (imageCoordinateSystem !== DEFAULT) {
       const {bounds} = this.props;
-      if (!Number.isFinite(bounds[0])) {
+      if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
@@ -254,9 +324,6 @@ export default class BitmapLayer extends Layer {
   }
 }
 
-BitmapLayer.layerName = 'BitmapLayer';
-BitmapLayer.defaultProps = defaultProps;
-
 /**
  * Decode uv floats from rgb bytes where b contains 4-bit fractions of uv
  * @param {number[]} color
@@ -268,4 +335,10 @@ function unpackUVsFromRGB(color) {
   const vFrac = (fracUV & 0xf0) / 256;
   const uFrac = (fracUV & 0x0f) / 16;
   return [(u + uFrac) / 256, (v + vFrac) / 256];
+}
+
+function isRectangularBounds(
+  bounds: [number, number, number, number] | [Position, Position, Position, Position]
+): bounds is [number, number, number, number] {
+  return Number.isFinite(bounds[0]);
 }

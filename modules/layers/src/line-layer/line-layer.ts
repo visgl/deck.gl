@@ -18,7 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  picking,
+  UNIT,
+  LayerProps,
+  Unit,
+  Position,
+  Accessor,
+  Color,
+  UpdateParameters
+} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -39,18 +50,75 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
 };
 
-export default class LineLayer extends Layer {
+/** All properties supported by LineLayer. */
+export type LineLayerProps<DataT = any> = _LineLayerProps<DataT> & LayerProps<DataT>;
+
+/** Properties added by LineLayer. */
+type _LineLayerProps<DataT> = {
+  /**
+   * The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`.
+   * @default 'pixels'
+   */
+  widthUnits?: Unit;
+
+  /**
+   * The scaling multiplier for the width of each line.
+   * @default 1
+   */
+  widthScale?: number;
+
+  /**
+   * The minimum line width in pixels.
+   * @default 0
+   */
+  widthMinPixels?: number;
+
+  /**
+   * The maximum line width in pixels.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  widthMaxPixels?: number;
+
+  /**
+   * Source position of each object.
+   * @default object => object.sourcePosition
+   */
+  getSourcePosition?: Accessor<DataT, Position>;
+
+  /**
+   * Target position of each object.
+   * @default object => object.targetPosition
+   */
+  getTargetPosition?: Accessor<DataT, Position>;
+
+  /**
+   * The rgba color is in the format of `[r, g, b, [a]]`.
+   * @default [0, 0, 0, 255]
+   */
+  getSourceColor?: Accessor<DataT, Color>;
+};
+
+/**
+ * The Line Layer renders flat lines joining pairs of source and target points,
+ * specified as latitude/longitude coordinates.
+ */
+export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
+  ExtraProps & Required<_LineLayerProps<DataT>>
+> {
+  static layerName = 'LineLayer';
+  static defaultProps = defaultProps;
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   // This layer has its own wrapLongitude logic
-  get wrapLongitude() {
+  get wrapLongitude(): boolean {
     return false;
   }
 
   initializeState() {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -86,18 +154,18 @@ export default class LineLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
 
-    if (changeFlags.extensionsChanged) {
+    if (params.changeFlags.extensionsChanged) {
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      this.getAttributeManager().invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
-  draw({uniforms}) {
+  draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
 
     this.state.model
@@ -121,7 +189,7 @@ export default class LineLayer extends Layer {
     }
   }
 
-  _getModel(gl) {
+  protected _getModel(gl: WebGLRenderingContext): Model {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -144,6 +212,3 @@ export default class LineLayer extends Layer {
     });
   }
 }
-
-LineLayer.layerName = 'LineLayer';
-LineLayer.defaultProps = defaultProps;

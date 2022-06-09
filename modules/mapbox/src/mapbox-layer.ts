@@ -4,6 +4,8 @@ import type {Deck, Layer} from '@deck.gl/core';
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
   id: string;
+  renderingMode?: '2d' | '3d';
+  deck?: Deck;
 };
 
 export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInterface {

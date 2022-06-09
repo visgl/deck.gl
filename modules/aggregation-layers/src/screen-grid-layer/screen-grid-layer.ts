@@ -18,12 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {log} from '@deck.gl/core';
+import {
+  Accessor,
+  Color,
+  GetPickingInfoParams,
+  Layer,
+  LayerContext,
+  LayersList,
+  log,
+  PickingInfo,
+  Position,
+  UpdateParameters
+} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
+import type {Texture2D} from '@luma.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
-import GridAggregationLayer from '../grid-aggregation-layer';
+import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 import {getFloatTexture} from '../utils/resource-utils.js';
 
 const defaultProps = {
@@ -46,7 +58,99 @@ const DIMENSIONS = {
   }
 };
 
-export default class ScreenGridLayer extends GridAggregationLayer {
+/** All properties supported by ScreenGridLayer. */
+export type ScreenGridLayerProps<DataT> = _ScreenGridLayerProps<DataT> &
+  GridAggregationLayerProps<DataT>;
+
+/** Properties added by ScreenGridLayer. */
+export type _ScreenGridLayerProps<DataT = any> = {
+  /**
+   * Unit width/height of the bins.
+   * @default 100
+   */
+  cellSizePixels?: number;
+
+  /**
+   * Cell margin size in pixels.
+   * @default 2
+   */
+  cellMarginPixels?: number;
+
+  /**
+   * Expressed as an rgba array, minimal color that could be rendered by a tile.
+   * @default [0, 0, 0, 255]
+   * @deprecated Deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
+   */
+  minColor?: Color | null;
+
+  /**
+   * Expressed as an rgba array, maximal color that could be rendered by a tile.
+   * @default [0, 255, 0, 255]
+   * @deprecated Deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
+   */
+  maxColor?: Color | null;
+
+  /**
+   * Color scale input domain. The color scale maps continues numeric domain into discrete color range.
+   * @default [1, max(weight)]
+   */
+  colorDomain?: [number, number] | null;
+
+  /**
+   * Specified as an array of colors [color1, color2, ...].
+   *
+   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   */
+  colorRange?: Color[];
+
+  /**
+   * Method called to retrieve the position of each object.
+   *
+   * @default d => d.position
+   */
+  getPosition?: Accessor<DataT, Position>;
+
+  /**
+   * The weight of each object.
+   *
+   * @default 1
+   */
+  getWeight?: Accessor<DataT, number>;
+
+  /**
+   * Perform aggregation is performed on GPU.
+   *
+   * NOTE: GPU Aggregation requires WebGL2 support by the browser.
+   * When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
+   *
+   * @default true
+   */
+  gpuAggregation?: boolean;
+
+  /**
+   * Defines the type of aggregation operation
+   *
+   * V valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'.
+   *
+   * @default 'SUM'
+   */
+  aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+};
+
+export default class ScreenGridLayer<DataT = any, ExtraProps = {}> extends GridAggregationLayer<
+  ExtraProps & Required<_ScreenGridLayerProps<DataT>>
+> {
+  static layerName = 'ScreenGridLayer';
+  static defaultProps = defaultProps;
+
+  state!: GridAggregationLayer['state'] & {
+    supported: boolean;
+    gpuGridAggregator?: any;
+    gpuAggregation?: any;
+    weights?: any;
+    maxTexture?: Texture2D;
+  };
+
   initializeState() {
     const {gl} = this.context;
     if (!ScreenGridCellLayer.isSupported(gl)) {
@@ -55,9 +159,10 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS,
-      getCellSize: props => props.cellSizePixels
+      // @ts-expect-error
+      getCellSize: props => props.cellSizePixels // TODO
     });
     const weights = {
       count: {
@@ -77,7 +182,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
       posOffset: [0, 0],
       translation: [1, -1]
     });
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
@@ -90,15 +195,15 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     });
   }
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}: UpdateParameters<this>) {
     return this.state.supported && changeFlags.somethingChanged;
   }
 
-  updateState(opts) {
+  updateState(opts: UpdateParameters<this>) {
     super.updateState(opts);
   }
 
-  renderLayers() {
+  renderLayers(): LayersList | Layer {
     if (!this.state.supported) {
       return [];
     }
@@ -121,8 +226,8 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     );
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext): void {
+    super.finalizeState(context);
 
     const {aggregationBuffer, maxBuffer, maxTexture} = this.state;
 
@@ -131,7 +236,7 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     maxTexture?.delete();
   }
 
-  getPickingInfo({info, mode}) {
+  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     const {index} = info;
     if (index >= 0) {
       const {gpuGridAggregator, gpuAggregation, weights} = this.state;
@@ -244,6 +349,3 @@ export default class ScreenGridLayer extends GridAggregationLayer {
     }
   }
 }
-
-ScreenGridLayer.layerName = 'ScreenGridLayer';
-ScreenGridLayer.defaultProps = defaultProps;

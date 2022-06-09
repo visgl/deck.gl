@@ -81,7 +81,7 @@ const defaultProps = {
   onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (
+    value: <LayerT extends Layer>(
       url: string,
       {
         propName,
@@ -91,7 +91,7 @@ const defaultProps = {
         signal
       }: {
         propName: string;
-        layer: Layer;
+        layer: LayerT;
         loaders?: Loader[];
         loadOptions?: any;
         signal?: AbortSignal;
@@ -177,11 +177,11 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
-export default abstract class Layer<PropsT = any> extends Component<PropsT & Required<LayerProps>> {
+export default abstract class Layer<PropsT = {}> extends Component<PropsT & Required<LayerProps>> {
   static defaultProps: any = defaultProps;
   static layerName: string = 'Layer';
 
-  internalState: LayerState<PropsT> | null = null;
+  internalState: LayerState<this> | null = null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
 
   // context and state can technically be null before a layer is initialized/matched.
@@ -189,6 +189,17 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
   state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+
+  parent: Layer | null = null;
+
+  get root(): Layer {
+    // eslint-disable-next-line
+    let layer: Layer = this;
+    while (layer.parent) {
+      layer = layer.parent;
+    }
+    return layer;
+  }
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -781,7 +792,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
       });
     }
 
-    this.internalState = new LayerState<PropsT>({
+    this.internalState = new LayerState<this>({
       attributeManager,
       layer: this
     });
@@ -837,7 +848,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     }
 
     // Move internalState
-    this.internalState = internalState as LayerState<PropsT>;
+    this.internalState = internalState as LayerState<this>;
     this.internalState.layer = this;
 
     // Move state
@@ -864,7 +875,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
     const currentProps = this.props;
     const context = this.context;
-    const internalState = this.internalState as LayerState<PropsT>;
+    const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
