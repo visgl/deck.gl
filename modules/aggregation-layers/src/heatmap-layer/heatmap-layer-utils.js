@@ -80,9 +80,14 @@ export function getTextureCoordinates(point, bounds) {
 
 // Returns format and type for creating texture objects
 export function getTextureParams({gl, floatTargetSupport}) {
-  return {
-    // format:  should be RGBA32F on WebGL2 (float textures), RGBA in WebGL1 for float or non float textures
-    format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
-    type: floatTargetSupport ? GL.FLOAT : GL.UNSIGNED_BYTE
-  };
+  return floatTargetSupport
+    ? {
+        // format:  should be RGBA32F on WebGL2 (float textures), RGBA in WebGL1 for float or non float textures
+        format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+        type: GL.FLOAT
+      }
+    : {
+        format: GL.RGBA,
+        type: GL.UNSIGNED_BYTE
+      };
 }

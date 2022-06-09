@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.11] - Jun 6 2022
+
+- Fix HeatmapLayer on iOS (#6988)
+
 #### deck.gl [8.7.10] - May 19 2022
 
 - [google-maps] More robust offset calculation (#6903)
