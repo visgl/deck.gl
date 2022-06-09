@@ -22,7 +22,7 @@ import debug from '../debug';
 import {flatten} from '../utils/flatten';
 
 import type AttributeManager from './attribute/attribute-manager';
-import type {PickingInfo} from './picking/pick-info';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
@@ -30,7 +30,7 @@ import {ConstructorOf} from '../types/types';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<PropsT = any> extends Layer<
+export default abstract class CompositeLayer<PropsT = {}> extends Layer<
   PropsT & Required<CompositeLayerProps>
 > {
   static layerName: string = 'CompositeLayer';
@@ -69,7 +69,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<
   /** called to augment the info object that is bubbled up from a sublayer
       override Layer.getPickingInfo() because decoding / setting uniform do
       not apply to a composite layer. */
-  getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
+  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     const {object} = info;
     const isDataWrapped =
       object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
@@ -259,7 +259,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<
   }
 
   /** (Internal) Called after an update to rerender sub layers */
-  protected _postUpdate(updateParams: UpdateParameters<CompositeLayer>, forceUpdate: boolean) {
+  protected _postUpdate(updateParams: UpdateParameters<this>, forceUpdate: boolean) {
     // @ts-ignore (TS2531) this method is only called internally when internalState is defined
     let subLayers = this.internalState.subLayers as Layer[];
     const shouldUpdate = !subLayers || this.needsUpdate();

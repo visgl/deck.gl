@@ -17,7 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {NumericArray} from '../types/types';
+import type {NumericArray} from '../types/types';
+import type {AccessorFunction} from '../types/layer-props';
 
 const EMPTY_ARRAY = [];
 const placeholderArray = [];
@@ -85,7 +86,7 @@ export function getAccessorFromBuffer(
     startIndices?: NumericArray;
     nested?: boolean;
   }
-) {
+): AccessorFunction<any, NumericArray> {
   const {size, stride, offset, startIndices, nested} = options;
   const bytesPerElement = typedArray.BYTES_PER_ELEMENT;
   const elementStride = stride ? stride / bytesPerElement : size;

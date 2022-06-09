@@ -1,19 +1,23 @@
 // Extensions to math.gl library. Intended to be folded back.
 import typedArrayManager from './typed-array-manager';
-import {Vector3} from 'math.gl';
+import {Vector3, NumericArray} from '@math.gl/core';
+
+import type {Matrix4} from '@math.gl/core';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
-export function createMat4() {
+export function createMat4(): number[] {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 }
 
-export function mod(value, divisor) {
+export function mod(value: number, divisor: number): number {
   const modulus = value % divisor;
   return modulus < 0 ? divisor + modulus : modulus;
 }
 
 // Extract camera vectors (move to math library?)
-export function getCameraPosition(viewMatrixInverse) {
+export function getCameraPosition(
+  viewMatrixInverse: Matrix4 | NumericArray
+): [number, number, number] {
   // Read the translation from the inverse view matrix
   return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
@@ -24,7 +28,14 @@ export type FrustumPlane = {
 };
 
 // https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
-export function getFrustumPlanes(viewProjectionMatrix) {
+export function getFrustumPlanes(viewProjectionMatrix: Matrix4 | NumericArray): {
+  left: FrustumPlane;
+  right: FrustumPlane;
+  top: FrustumPlane;
+  bottom: FrustumPlane;
+  near: FrustumPlane;
+  far: FrustumPlane;
+} {
   return {
     left: getFrustumPlane(
       viewProjectionMatrix[3] + viewProjectionMatrix[0],
@@ -67,7 +78,7 @@ export function getFrustumPlanes(viewProjectionMatrix) {
 
 const scratchVector = new Vector3();
 
-function getFrustumPlane(a, b, c, d) {
+function getFrustumPlane(a: number, b: number, c: number, d: number): FrustumPlane {
   scratchVector.set(a, b, c);
   const L = scratchVector.len();
   return {distance: d / L, normal: new Vector3(-a / L, -b / L, -c / L)};
@@ -78,7 +89,7 @@ function getFrustumPlane(a, b, c, d) {
  * @param x {number} - the input float number
  * @returns {number} - the lower 32 bit of the number
  */
-export function fp64LowPart(x) {
+export function fp64LowPart(x: number): number {
   return x - Math.fround(x);
 }
 

@@ -76,7 +76,6 @@ export {default as OrbitController} from './controllers/orbit-controller';
 export {default as OrthographicController} from './controllers/orthographic-controller';
 
 // Extensions interface
-export {default as Effect} from './lib/effect';
 export {default as LayerExtension} from './lib/layer-extension';
 
 // Transitions
@@ -100,6 +99,7 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
+export type {CoordinateSystem} from './lib/constants';
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';
@@ -109,6 +109,7 @@ export type {ChangeFlags} from './lib/layer-state';
 export type {LayersList} from './lib/layer-manager';
 export type {LayerContext} from './lib/layer-manager';
 export type {UpdateParameters} from './lib/layer';
+export type {DeckProps} from './lib/deck';
 export type {
   LayerProps,
   CompositeLayerProps,
@@ -117,5 +118,10 @@ export type {
   LayerData,
   Unit,
   Position,
-  Color
+  Color,
+  Texture
 } from './types/layer-props';
+export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
+export type {ConstructorOf as _ConstructorOf} from './types/types';
+export type {BinaryAttribute} from './lib/attribute/attribute';
+export type {Effect} from './lib/effect';

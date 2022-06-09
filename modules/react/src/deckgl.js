@@ -27,7 +27,6 @@ import {
   useImperativeHandle,
   forwardRef
 } from 'react';
-import PropTypes from 'prop-types';
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
@@ -149,6 +148,10 @@ const DeckGL = forwardRef((props, ref) => {
       onInteractionStateChange: handleInteractionStateChange
     };
 
+    // The defaultValue for _customRender is null, which would overwrite the definition
+    // of _customRender. Remove to avoid frequently redeclaring the method here.
+    delete forwardProps._customRender;
+
     if (thisRef.deck) {
       thisRef.deck.setProps(forwardProps);
     }
@@ -234,7 +237,6 @@ const DeckGL = forwardRef((props, ref) => {
   return thisRef.control;
 });
 
-DeckGL.propTypes = Deck.getPropTypes(PropTypes);
 DeckGL.defaultProps = Deck.defaultProps;
 
 export default DeckGL;

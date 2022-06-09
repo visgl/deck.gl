@@ -38,6 +38,12 @@ export interface PickingInfo {
   pixelRatio: number;
 }
 
+export interface GetPickingInfoParams {
+  info: PickingInfo;
+  mode: string;
+  sourceLayer: Layer | null;
+}
+
 /** Generates some basic information of the picking action: x, y, coordinates etc.
  * Regardless if anything is picked
  */

@@ -173,6 +173,7 @@ export default class Viewport {
   viewProjectionMatrix!: number[];
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
+  resolution?: number;
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
