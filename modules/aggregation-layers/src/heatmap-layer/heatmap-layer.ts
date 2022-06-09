@@ -109,9 +109,9 @@ type _HeatmapLayerProps<DataT = any> = {
   radiusPixels?: number;
 
   /**
-   * Specified as an array of 6 colors.
+   * Specified as an array of colors [color1, color2, ...].
    *
-   * By default `colorRange` is set to [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
+   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange?: Color[];
 
