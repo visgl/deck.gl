@@ -4,6 +4,15 @@ import GL from '@luma.gl/constants';
 
 import {patternShaders} from './shaders.glsl';
 
+import type {
+  Layer,
+  LayerContext,
+  Accessor,
+  AccessorFunction,
+  Texture,
+  UpdateParameters
+} from '@deck.gl/core';
+
 const defaultProps = {
   fillPatternEnabled: true,
   fillPatternAtlas: null,
@@ -12,6 +21,54 @@ const defaultProps = {
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
   getFillPatternOffset: {type: 'accessor', value: [0, 0]}
+};
+
+export type FillStyleExtensionProps<DataT = any> = {
+  /** Cheap toggle to enable/disable pattern fill. Requires the `pattern` option to be on.
+   * @default true
+   */
+  fillPatternEnabled?: boolean;
+  /** Sprite image url or texture that packs all your patterns into one layout. */
+  fillPatternAtlas?: Texture;
+  /** Pattern names mapped to pattern definitions, or a url that points to a JSON file. */
+  fillPatternMapping?:
+    | string
+    | Record<
+        string,
+        {
+          /** Left position of the pattern on the atlas */
+          x: number;
+          /** Top position of the pattern on the atlas */
+          y: number;
+          /** Width of the pattern */
+          width: number;
+          /** Height of the pattern */
+          height: number;
+        }
+      >;
+  /**
+   * Whether to treat the patterns as transparency masks.
+   * @default true
+   */
+  fillPatternMask?: boolean;
+  /** Accessor for the name of the pattern. */
+  getFillPattern?: AccessorFunction<DataT, string>;
+  /** Accessor for the scale of the pattern, relative to the original size. If the pattern is 24 x 24 pixels, scale `1` roughly yields 24 meters.
+   * @default 1
+   */
+  getFillPatternScale?: Accessor<DataT, number>;
+  /**
+   * Accessor for the offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` shifts the pattern alignment by half.
+   * @default [0, 0]
+   */
+  getFillPatternOffset?: Accessor<DataT, [number, number]>;
+};
+
+type FillStyleExtensionOptions = {
+  /** If `true`, adds the ability to tile the filled area with a pattern.
+   * @default false
+   */
+  pattern: boolean;
 };
 
 const DEFAULT_TEXTURE_PARAMETERS = {
@@ -23,16 +80,20 @@ const DEFAULT_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
-export default class FillStyleExtension extends LayerExtension {
-  constructor({pattern = false} = {}) {
+/** Adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`. */
+export default class FillStyleExtension extends LayerExtension<FillStyleExtensionOptions> {
+  static defaultProps = defaultProps;
+  static extensionName = 'FillStyleExtension';
+
+  constructor({pattern = false}: Partial<FillStyleExtensionOptions> = {}) {
     super({pattern});
   }
 
-  isEnabled(layer) {
-    return layer.getAttributeManager() && !layer.state.pathTesselator;
+  isEnabled(layer: Layer<FillStyleExtensionProps>): boolean {
+    return layer.getAttributeManager() !== null && !('pathTesselator' in layer.state);
   }
 
-  getShaders(extension) {
+  getShaders(this: Layer<FillStyleExtensionProps>, extension: this): any {
     if (!extension.isEnabled(this)) {
       return null;
     }
@@ -42,7 +103,7 @@ export default class FillStyleExtension extends LayerExtension {
     };
   }
 
-  initializeState(context, extension) {
+  initializeState(this: Layer<FillStyleExtensionProps>, context: LayerContext, extension: this) {
     if (!extension.isEnabled(this)) {
       return;
     }
@@ -50,7 +111,7 @@ export default class FillStyleExtension extends LayerExtension {
     const attributeManager = this.getAttributeManager();
 
     if (extension.opts.pattern) {
-      attributeManager.add({
+      attributeManager!.add({
         fillPatternFrames: {
           size: 4,
           accessor: 'getFillPattern',
@@ -100,20 +161,24 @@ export default class FillStyleExtension extends LayerExtension {
     });
   }
 
-  updateState({props, oldProps}, extension) {
+  updateState(
+    this: Layer<FillStyleExtensionProps>,
+    {props, oldProps}: UpdateParameters<Layer<FillStyleExtensionProps>>,
+    extension: this
+  ) {
     if (!extension.isEnabled(this)) {
       return;
     }
 
     if (props.fillPatternAtlas && props.fillPatternAtlas !== oldProps.fillPatternAtlas) {
-      extension.loadPatternAtlas.call(this, props);
+      extension.loadPatternAtlas.call(this);
     }
     if (props.fillPatternMapping && props.fillPatternMapping !== oldProps.fillPatternMapping) {
-      extension.loadPatternMapping.call(this, props);
+      extension.loadPatternMapping.call(this);
     }
   }
 
-  draw(params, extension) {
+  draw(this: Layer<FillStyleExtensionProps>, params: any, extension: this) {
     if (!extension.isEnabled(this)) {
       return;
     }
@@ -124,13 +189,14 @@ export default class FillStyleExtension extends LayerExtension {
     });
   }
 
-  finalizeState() {
+  finalizeState(this: Layer<FillStyleExtensionProps>) {
     const {patternTexture, emptyTexture} = this.state;
     patternTexture?.delete();
     emptyTexture?.delete();
   }
 
-  async loadPatternAtlas({fillPatternAtlas, fetch}) {
+  async loadPatternAtlas(this: Layer<FillStyleExtensionProps>) {
+    const {fillPatternAtlas, fetch} = this.props;
     this.state.patternTexture?.delete();
     this.setState({patternTexture: null});
     let image = fillPatternAtlas;
@@ -147,7 +213,8 @@ export default class FillStyleExtension extends LayerExtension {
     this.setState({patternTexture});
   }
 
-  async loadPatternMapping({fillPatternMapping, fetch}) {
+  async loadPatternMapping(this: Layer<FillStyleExtensionProps>) {
+    const {fillPatternMapping, fetch} = this.props;
     this.setState({patternMapping: null});
     let patternMapping = fillPatternMapping;
     if (typeof patternMapping === 'string') {
@@ -157,16 +224,13 @@ export default class FillStyleExtension extends LayerExtension {
       });
     }
     this.setState({patternMapping});
-    this.getAttributeManager().invalidate('getFillPattern');
+    this.getAttributeManager()!.invalidate('getFillPattern');
     this.setNeedsUpdate();
   }
 
-  getPatternFrame(name) {
+  getPatternFrame(this: Layer<FillStyleExtensionProps>, name: string) {
     const {patternMapping} = this.state;
     const def = patternMapping && patternMapping[name];
     return def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
   }
 }
-
-FillStyleExtension.extensionName = 'FillStyleExtension';
-FillStyleExtension.defaultProps = defaultProps;

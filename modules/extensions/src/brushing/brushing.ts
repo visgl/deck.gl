@@ -21,6 +21,8 @@
 import {LayerExtension} from '@deck.gl/core';
 import shaderModule from './shader-module';
 
+import type {Layer, LayerContext, Accessor} from '@deck.gl/core';
+
 const defaultProps = {
   getBrushingTarget: {type: 'accessor', value: [0, 0]},
 
@@ -29,14 +31,39 @@ const defaultProps = {
   brushingRadius: 10000
 };
 
+export type BrushingExtensionProps<DataT = any> = {
+  /**
+   * Called to retrieve an arbitrary position for each object that it will be filtered by.
+   * Only effective if `brushingTarget` is set to `custom`.
+   */
+  getBrushingTarget?: Accessor<DataT, [number, number]>;
+  /**
+   * Enable/disable brushing. If brushing is disabled, all objects are rendered.
+   * @default true
+   */
+  brushingEnabled?: boolean;
+  /**
+   * The position used to filter each object by.
+   */
+  brushingTarget?: 'source' | 'target' | 'source_target' | 'custom';
+  /** The brushing radius centered at the pointer, in meters. If a data object is within this circle, it is rendered; otherwise it is hidden.
+   * @default 10000
+   */
+  brushingRadius?: number;
+};
+
+/** Adds GPU-based data brushing functionalities to layers. It allows the layer to show/hide objects based on the current pointer position. */
 export default class BrushingExtension extends LayerExtension {
-  getShaders(extension) {
+  static defaultProps = defaultProps;
+  static extensionName = 'BrushingExtension';
+
+  getShaders(): any {
     return {
       modules: [shaderModule]
     };
   }
 
-  initializeState(context, extension) {
+  initializeState(this: Layer<BrushingExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
       attributeManager.add({
@@ -45,7 +72,9 @@ export default class BrushingExtension extends LayerExtension {
           accessor: 'getBrushingTarget',
           // Hack: extension's defaultProps is not merged with the layer's defaultProps,
           // So we can't use the standard accessor when the prop is undefined
-          update: !this.props.getBrushingTarget && extension.useConstantTargetPositions,
+          // TODO - move to an option
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.props.getBrushingTarget ? undefined : extension.useConstantTargetPositions,
           shaderAttributes: {
             brushingTargets: {
               divisor: 0
@@ -60,23 +89,25 @@ export default class BrushingExtension extends LayerExtension {
 
     // Trigger redraw when mouse moves
     // TODO - expose this in a better way
-    extension.onMouseMove = () => {
-      this.getCurrentLayer().setNeedsRedraw();
+    this.state.onMouseMove = () => {
+      this.getCurrentLayer()?.setNeedsRedraw();
     };
-    if (this.context.deck) {
-      this.context.deck.eventManager.on({
-        pointermove: extension.onMouseMove,
-        pointerleave: extension.onMouseMove
+    if (context.deck) {
+      // @ts-expect-error (2446) accessing protected property
+      context.deck.eventManager.on({
+        pointermove: this.state.onMouseMove,
+        pointerleave: this.state.onMouseMove
       });
     }
   }
 
-  finalizeState(extension) {
+  finalizeState(this: Layer<BrushingExtensionProps>, context: LayerContext, extension: this) {
     // Remove event listeners
-    if (this.context.deck) {
-      this.context.deck.eventManager.off({
-        pointermove: extension.onMouseMove,
-        pointerleave: extension.onMouseMove
+    if (context.deck) {
+      // @ts-expect-error (2446) accessing protected property
+      context.deck.eventManager.off({
+        pointermove: this.state.onMouseMove,
+        pointerleave: this.state.onMouseMove
       });
     }
   }
@@ -87,6 +118,3 @@ export default class BrushingExtension extends LayerExtension {
     return;
   }
 }
-
-BrushingExtension.extensionName = 'BrushingExtension';
-BrushingExtension.defaultProps = defaultProps;

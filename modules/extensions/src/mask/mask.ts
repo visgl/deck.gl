@@ -1,17 +1,36 @@
 import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 
+import type {Layer} from '@deck.gl/core';
+
 const defaultProps = {
   maskId: ''
 };
 
+export type MaskExtensionProps = {
+  /**
+   * Id of the layer that defines the mask. The mask layer must use the prop `operation: 'mask'`.
+   * Masking is disabled if `maskId` is empty or no valid mask layer with the specified id is found.
+   */
+  maskId?: string;
+  /**
+   * controls whether an object is clipped by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
+   * If not specified, it is automatically deduced from the layer.
+   */
+  maskByInstance?: boolean;
+};
+
+/** Allows layers to show/hide objects by a geofence. */
 export default class MaskExtension extends LayerExtension {
-  getShaders() {
+  static defaultProps = defaultProps;
+  static extensionName = 'MaskExtension';
+
+  getShaders(this: Layer<MaskExtensionProps>): any {
     // Infer by geometry if 'maskByInstance' prop isn't explictly set
-    let maskByInstance = 'instancePositions' in this.getAttributeManager().attributes;
+    let maskByInstance = 'instancePositions' in this.getAttributeManager()!.attributes;
     // Users can override by setting the `maskByInstance` prop
     if ('maskByInstance' in this.props) {
-      maskByInstance = this.props.maskByInstance;
+      maskByInstance = Boolean(this.props.maskByInstance);
     }
     this.state.maskByInstance = maskByInstance;
 
@@ -20,9 +39,10 @@ export default class MaskExtension extends LayerExtension {
     };
   }
 
-  draw({uniforms, context, moduleParameters}) {
+  /* eslint-disable camelcase */
+  draw(this: Layer<MaskExtensionProps>, {uniforms, context, moduleParameters}: any) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskId} = this.props;
+    const {maskId = ''} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
@@ -48,6 +68,3 @@ export default class MaskExtension extends LayerExtension {
     }
   }
 }
-
-MaskExtension.extensionName = 'MaskExtension';
-MaskExtension.defaultProps = defaultProps;

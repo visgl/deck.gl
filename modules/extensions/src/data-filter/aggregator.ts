@@ -48,19 +48,19 @@ void main() {
 }
 `;
 
-export function supportsFloatTarget(gl) {
+export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
-  return (
+  return Boolean(
     gl.getExtension('EXT_float_blend') &&
-    // WebGL 2
-    (gl.getExtension('EXT_color_buffer_float') ||
-      // WebGL 1
-      gl.getExtension('WEBGL_color_buffer_float'))
+      // WebGL 2
+      (gl.getExtension('EXT_color_buffer_float') ||
+        // WebGL 1
+        gl.getExtension('WEBGL_color_buffer_float'))
   );
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
-export function getFramebuffer(gl, useFloatTarget) {
+export function getFramebuffer(gl: WebGLRenderingContext, useFloatTarget: boolean): Framebuffer {
   if (useFloatTarget) {
     return new Framebuffer(gl, {
       width: 1,
@@ -82,7 +82,11 @@ export function getFramebuffer(gl, useFloatTarget) {
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(gl, shaderOptions, useFloatTarget) {
+export function getModel(
+  gl: WebGLRenderingContext,
+  shaderOptions: any,
+  useFloatTarget: boolean
+): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;

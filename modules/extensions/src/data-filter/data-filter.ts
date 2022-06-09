@@ -24,6 +24,8 @@ import * as aggregator from './aggregator';
 import {readPixelsToArray, clear} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 
+import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
   onFilteredItemsChange: {type: 'function', value: null, compare: false},
@@ -35,6 +37,68 @@ const defaultProps = {
   filterTransformColor: true
 };
 
+export type DataFilterExtensionProps<DataT = any> = {
+  /**
+   * Accessor to retrieve the value for each object that it will be filtered by.
+   * Returns either a number (if `filterSize: 1`) or an array of numbers.
+   */
+  getFilterValue?: Accessor<DataT, number | number[]>;
+  /**
+   * Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
+   * @default true
+   */
+  filterEnabled?: boolean;
+  /**
+   * The [min, max] bounds which defines whether an object should be rendered.
+   * If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden.
+   * @default [-1, 1]
+   */
+  filterRange?: [number, number] | [number, number][];
+  /**
+   * If specified, objects will be faded in/out instead of abruptly shown/hidden.
+   * When the filtered value is outside of the bounds defined by `filterSoftRange` but still within the bounds defined by `filterRange`, the object will be rendered as "faded."
+   * @default null
+   */
+  filterSoftRange?: [number, number] | [number, number][] | null;
+  /**
+   * When an object is "faded", manipulate its size so that it appears smaller or thinner. Only works if `filterSoftRange` is specified.
+   * @default true
+   */
+  filterTransformSize?: boolean;
+  /**
+   * When an object is "faded", manipulate its opacity so that it appears more translucent. Only works if `filterSoftRange` is specified.
+   * @default true
+   */
+  filterTransformColor?: boolean;
+  /**
+   * Only called if the `countItems` option is enabled.
+   */
+  onFilteredItemsChange?: (evt: {
+    /** The id of the source layer. */
+    id: string;
+    /** The number of data objects that pass the filter. */
+    count: number;
+  }) => void;
+};
+
+type DataFilterExtensionOptions = {
+  /**
+   * The size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object.
+   * @default 1
+   */
+  filterSize: number;
+  /**
+   * Use 64-bit precision instead of 32-bit.
+   * @default false
+   */
+  fp64: boolean;
+  /**
+   * If `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback.
+   * @default `false`.
+   */
+  countItems: boolean;
+};
+
 const DATA_TYPE_FROM_SIZE = {
   1: 'float',
   2: 'vec2',
@@ -42,8 +106,16 @@ const DATA_TYPE_FROM_SIZE = {
   4: 'vec4'
 };
 
-export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1, fp64 = false, countItems = false} = {}) {
+/** Adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. */
+export default class DataFilterExtension extends LayerExtension<DataFilterExtensionOptions> {
+  static defaultProps = defaultProps;
+  static extensionName = 'DataFilterExtension';
+
+  constructor({
+    filterSize = 1,
+    fp64 = false,
+    countItems = false
+  }: Partial<DataFilterExtensionOptions> = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
@@ -51,7 +123,7 @@ export default class DataFilterExtension extends LayerExtension {
     super({filterSize, fp64, countItems});
   }
 
-  getShaders(extension) {
+  getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
     const {filterSize, fp64} = extension.opts;
 
     return {
@@ -63,7 +135,7 @@ export default class DataFilterExtension extends LayerExtension {
     };
   }
 
-  initializeState(context, extension) {
+  initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
       attributeManager.add({
@@ -111,16 +183,24 @@ export default class DataFilterExtension extends LayerExtension {
       });
 
       const filterFBO = aggregator.getFramebuffer(gl, useFloatTarget);
-      const filterModel = aggregator.getModel(gl, extension.getShaders(extension), useFloatTarget);
+      const filterModel = aggregator.getModel(
+        gl,
+        extension.getShaders.call(this, extension),
+        useFloatTarget
+      );
       this.setState({filterFBO, filterModel});
     }
   }
 
-  updateState({props, oldProps}) {
+  updateState(
+    this: Layer<DataFilterExtensionProps>,
+    {props, oldProps}: UpdateParameters<Layer<DataFilterExtensionProps>>
+  ) {
     if (this.state.filterModel) {
       const attributeManager = this.getAttributeManager();
       const filterNeedsUpdate =
-        attributeManager.attributes.filterValues.needsUpdate() ||
+        // attributeManager must be defined for filterModel to be set
+        attributeManager!.attributes.filterValues.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange;
@@ -130,13 +210,13 @@ export default class DataFilterExtension extends LayerExtension {
     }
   }
 
-  draw(params, extension) {
+  draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
     const {filterFBO, filterModel, filterNeedsUpdate} = this.state;
     const {onFilteredItemsChange} = this.props;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterIndices}
-      } = this.getAttributeManager();
+      } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
       const {gl} = this.context;
@@ -166,7 +246,7 @@ export default class DataFilterExtension extends LayerExtension {
     }
   }
 
-  finalizeState() {
+  finalizeState(this: Layer<DataFilterExtensionProps>) {
     const {filterFBO, filterModel} = this.state;
     if (filterFBO) {
       filterFBO.color.delete();
@@ -175,6 +255,3 @@ export default class DataFilterExtension extends LayerExtension {
     }
   }
 }
-
-DataFilterExtension.extensionName = 'DataFilterExtension';
-DataFilterExtension.defaultProps = defaultProps;
