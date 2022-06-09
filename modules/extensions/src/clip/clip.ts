@@ -18,10 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, _ShaderModule as ShaderModule} from '@deck.gl/core';
+
+import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
   clipBounds: [0, 0, 1, 1]
+};
+
+export type ClipExtensionProps = {
+  /** Rectangular bounds to be used for clipping the rendered region, in `[left, bottom, right, top]`.
+   * @default [0, 0, 1, 1]
+   */
+  clipBounds?: [number, number, number, number];
+  /**
+   * Controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon).
+   * If not specified, it is automatically deduced from the layer.
+   */
+  clipByInstance?: boolean;
 };
 
 const shaderFunction = `
@@ -36,7 +50,7 @@ bool clip_isInBounds(vec2 position) {
  * The vertex-shader version clips geometries by their anchor position
  * e.g. ScatterplotLayer - show if the center of a circle is within bounds
  */
-const shaderModuleVs = {
+const shaderModuleVs: ShaderModule = {
   name: 'clip-vs',
   vs: shaderFunction
 };
@@ -60,7 +74,7 @@ varying float clip_isVisible;
  * The fragment-shader version clips pixels at the bounds
  * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
  */
-const shaderModuleFs = {
+const shaderModuleFs: ShaderModule = {
   name: 'clip-fs',
   fs: shaderFunction
 };
@@ -80,16 +94,21 @@ varying vec2 clip_commonPosition;
 `
 };
 
+/** Adds support for clipping rendered layers by rectangular bounds. */
 export default class ClipExtension extends LayerExtension {
-  getShaders() {
+  static defaultProps: any = defaultProps;
+  static extensionName = 'ClipExtension';
+
+  getShaders(this: Layer<ClipExtensionProps>) {
     // If `clipByInstance: true`, the entire object is shown/hidden based on its anchor position (done by vertex shader)
     // Otherwise, the object is trimmed by the clip bounds (done by fragment shader)
 
     // Default behavior: consider a layer instanced if it has attribute `instancePositions`
+    // @ts-expect-error attributeManager is always defined for primitive layers
     let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
     // Users can override by setting the `clipByInstance` prop
     if ('clipByInstance' in this.props) {
-      clipByInstance = this.props.clipByInstance;
+      clipByInstance = this.props.clipByInstance as boolean;
     }
     this.state.clipByInstance = clipByInstance;
 
@@ -104,7 +123,8 @@ export default class ClipExtension extends LayerExtension {
         };
   }
 
-  draw({uniforms}) {
+  /* eslint-disable camelcase */
+  draw(this: Layer<ClipExtensionProps>, {uniforms}: any): void {
     const {clipBounds = defaultProps.clipBounds} = this.props;
     if (this.state.clipByInstance) {
       uniforms.clip_bounds = clipBounds;
@@ -121,6 +141,3 @@ export default class ClipExtension extends LayerExtension {
     }
   }
 }
-
-ClipExtension.extensionName = 'ClipExtension';
-ClipExtension.defaultProps = defaultProps;

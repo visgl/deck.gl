@@ -18,15 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {deepEqual} from '../utils/deep-equal';
+import type Layer from './layer';
+import type CompositeLayer from './composite-layer';
+import type {UpdateParameters} from './layer';
+import type {LayerContext} from './layer-manager';
 
-export default class LayerExtension {
-  props;
+export default abstract class LayerExtension<OptionsT = undefined> {
+  /**
+   * Note that defaultProps of a LayerExtension does not behave like defaultProps of a Layer:
+      - The default values are not automatically merged with user-supplied props when the layer is constructed
+      - The types are not used during props diff
+   * Currently they are only used in getSubLayerProps
+   * TODO: find a more consistent solution
+   */
+  static defaultProps: any = {};
+  opts!: OptionsT;
 
-  constructor(opts = {}) {
-    this.opts = opts;
+  constructor(opts?: OptionsT) {
+    if (opts) {
+      this.opts = opts;
+    }
   }
 
-  equals(extension) {
+  /** Returns true if two extensions are equivalent */
+  equals(extension: LayerExtension<OptionsT>): boolean {
     if (this === extension) {
       return true;
     }
@@ -34,12 +49,14 @@ export default class LayerExtension {
     return this.constructor === extension.constructor && deepEqual(this.opts, extension.opts);
   }
 
-  getShaders(extension) {
+  /** Only called if attached to a primitive layer */
+  getShaders(this: Layer, extension: this): any {
     return null;
   }
 
-  getSubLayerProps(extension) {
-    const {defaultProps = {}} = extension.constructor;
+  /** Only called if attached to a CompositeLayer */
+  getSubLayerProps(this: CompositeLayer, extension: this): any {
+    const {defaultProps} = extension.constructor as typeof LayerExtension;
     const newProps = {
       updateTriggers: {}
     };
@@ -53,8 +70,7 @@ export default class LayerExtension {
         if (propDef && propDef.type === 'accessor') {
           newProps.updateTriggers[key] = this.props.updateTriggers[key];
           if (typeof propValue === 'function') {
-            // @ts-expect-error
-            newProps[key] = this.getSubLayerAccessor(propValue, true);
+            newProps[key] = this.getSubLayerAccessor(propValue);
           }
         }
       }
@@ -63,11 +79,12 @@ export default class LayerExtension {
     return newProps;
   }
 
-  initializeState(context, extension) {}
+  /* eslint-disable @typescript-eslint/no-empty-function */
+  initializeState(this: Layer, context: LayerContext, extension: this): void {}
 
-  updateState(params, extension) {}
+  updateState(this: Layer, params: UpdateParameters<Layer>, extension: this): void {}
 
-  draw(params, extension) {}
+  draw(this: Layer, params: any, extension: this): void {}
 
-  finalizeState(extension) {}
+  finalizeState(this: Layer, context: LayerContext, extension: this): void {}
 }
