@@ -17,7 +17,8 @@
       "entries": [
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
-        {"entry": "docs/get-started/using-with-react"},        
+        {"entry": "docs/get-started/using-with-react"},
+        {"entry": "docs/get-started/using-with-typescript"},
         {"entry": "docs/get-started/learning-resources"}
       ]
     },
