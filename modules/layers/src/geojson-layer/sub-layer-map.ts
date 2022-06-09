@@ -1,3 +1,5 @@
+import {CompositeLayer, Layer} from '@deck.gl/core';
+
 import IconLayer from '../icon-layer/icon-layer';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import TextLayer from '../text-layer/text-layer';
@@ -115,7 +117,13 @@ export const POLYGON_LAYER = {
   }
 };
 
-export function getDefaultProps({type, props}) {
+export function getDefaultProps({
+  type,
+  props
+}: {
+  type: typeof Layer;
+  props: Record<string, string>;
+}): Record<string, any> {
   const result = {};
   for (const key in props) {
     result[key] = type.defaultProps[props[key]];
@@ -123,9 +131,12 @@ export function getDefaultProps({type, props}) {
   return result;
 }
 
-export function forwardProps(layer, mapping) {
+export function forwardProps(
+  layer: CompositeLayer,
+  mapping: Record<string, string>
+): Record<string, any> {
   const {transitions, updateTriggers} = layer.props;
-  const result = {
+  const result: Record<string, any> = {
     updateTriggers: {},
     transitions: transitions && {
       getPosition: transitions.geometry
@@ -137,7 +148,7 @@ export function forwardProps(layer, mapping) {
     let value = layer.props[sourceKey];
     if (sourceKey.startsWith('get')) {
       // isAccessor
-      value = layer.getSubLayerAccessor(value);
+      value = (layer as any).getSubLayerAccessor(value);
       result.updateTriggers[targetKey] = updateTriggers[sourceKey];
       if (transitions) {
         result.transitions[targetKey] = transitions[sourceKey];
