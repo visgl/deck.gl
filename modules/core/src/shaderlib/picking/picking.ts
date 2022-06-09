@@ -1,4 +1,16 @@
 import {picking} from '@luma.gl/core';
+import type {ShaderModule} from '../../types/types';
+
+type PickingModuleSettings = {
+  /** Set to a picking color to visually highlight that item */
+  pickingSelectedColor?: [number, number, number] | null;
+  /** Color of the highlight */
+  pickingHighlightColor?: [number, number, number, number];
+  /** Set to true when rendering to off-screen "picking" buffer */
+  pickingActive?: boolean;
+  /** Set to true when picking an attribute value instead of object index */
+  pickingAttribute?: boolean;
+};
 
 export default {
   inject: {
@@ -21,4 +33,4 @@ export default {
     }
   },
   ...picking
-};
+} as ShaderModule<PickingModuleSettings>;

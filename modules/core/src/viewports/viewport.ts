@@ -154,7 +154,7 @@ export default class Viewport {
   isGeospatial: boolean;
   zoom: number;
   focalDistance: number;
-  position?: number[];
+  position: number[];
   modelMatrix: number[] | null;
 
   /** Derived parameters */
@@ -189,7 +189,7 @@ export default class Viewport {
     this.zoom = opts.zoom || 0;
     this.distanceScales = opts.distanceScales || DEFAULT_DISTANCE_SCALES;
     this.focalDistance = opts.focalDistance || 1;
-    this.position = opts.position;
+    this.position = opts.position || ZERO_VECTOR;
     this.modelMatrix = opts.modelMatrix || null;
 
     const {longitude, latitude} = opts;
