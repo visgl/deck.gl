@@ -92,19 +92,19 @@ The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit 
 
 * Default: `0`
 
-The minimum size in pixels.
+The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
 
 ##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum size in pixels.
+The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
 
 ##### `billboard` (Boolean, optional)
 
 - Default: `true`
 
-If on, the text always faces camera. Otherwise the text faces up (z).
+If `true`, the text always faces camera. Otherwise the text faces up (z).
 
 ##### `background` (Boolean, optional)
 
@@ -148,9 +148,9 @@ css `font-weight`.
 
 ##### `lineHeight` (Number, optional)
 
-* Default: 1.0.
+* Default: `1.0`.
 
-A unitless number that will be multiplied with the current font-size to set the line height.
+A unitless number that will be multiplied with the current font size to set the line height.
 
 ##### `fontSettings` (Object, optional)
 

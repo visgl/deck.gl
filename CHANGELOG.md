@@ -21,6 +21,50 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-alpha.6] - Jun 6 2022
+
+- Bump devcert from 1.1.3 to 1.2.1 in /website (#6983)
+- chore: upgrade @loaders.gl version (#6968)
+- [ts] TextLayer (#6976)
+- [ts] Tooltip (#6980)
+- [ts] ResourceManager (#6978)
+- Fix HeatmapLayer on iOS (#6988)
+- [ts] Effects (#6982)
+- Export CartoLayerLibrary in carto module for pydeck integration (#6866)
+- Fix regression in DeckGL React component not syncing base map (#6977)
+- [ts] Carto spatial index layers (#6971)
+- [ts] Core utilities (#6979)
+- [ts] PathLayer and SolidPolygonLayer (#6974)
+- [ts] Tesselators (#6973)
+- [ts] IconLayer (#6962)
+- Bump eventsource from 1.0.7 to 1.1.1 (#6964)
+- [ts] ScatterplotLayerProps documentation (#6963)
+- [ts] Fix prop types of Polygon, GeoCell and Quadkey layers. (#6965)
+
+#### deck.gl [8.8.0-alpha.5] - Jun 1 2022
+
+- [ts] CartoTileLayer and utilities (#6891)
+- [ts] mesh layers (#6956)
+- [ts] Tile2DHeader generic (#6889)
+- [ts] mapbox module (#6957)
+- [ts] MVTLayer (#6842)
+- [ts] Deck class (#6947)
+- Add optional types entry point (#6946)
+- [ts] Handle nullable layer members in layer code (#6932)
+- Create separate basemap docs by provider (#6294)
+- [ts] GeoJsonLayer (#6940)
+- CARTO: fix spatial index H3tileLayer id (#6945,#6937)
+- chore(luma.gl): bump version to 8.5.12 (#6914)
+- Remove layer-specific logic from Component class (#6933)
+- Fix typo in mapbox access token (#6939)
+
+#### deck.gl [8.8.0-alpha.4] - May 20 2022
+
+- CARTO: Fix autohighlighting in spatial index tile layers (#6928)
+- [mapbox] restrict longitude returned by map.getCenter() (#6929)
+- CARTO: CartoLayer overzooming for H3 and Quadkey based on maxresolution (#6926)
+- CARTO: Default aggregationResLevel (#6922)
+
 #### deck.gl [8.8.0-alpha.3] - May 18 2022
 
 - CARTO: fetchMap stroke opacity correctly applied (#6911)

@@ -1,20 +1,21 @@
 import type Layer from './layer';
+import type {LayersPassRenderOptions} from '../passes/layers-pass';
+import type {Framebuffer} from '@luma.gl/webgl';
 
-export default class Effect {
+export type PreRenderOptions = LayersPassRenderOptions;
+export type PostRenderOptions = LayersPassRenderOptions & {
+  inputBuffer: Framebuffer;
+  swapBuffer: Framebuffer;
+};
+
+export interface Effect {
   id: string;
   props: any;
-  useInPicking: boolean;
+  useInPicking?: boolean;
 
-  constructor(props: {id?: string} = {}) {
-    const {id = 'effect'} = props;
-    this.id = id;
-    this.props = {...props};
-    this.useInPicking = false;
-  }
+  preRender: (gl: WebGLRenderingContext, opts: PreRenderOptions) => void;
+  postRender?: (gl: WebGLRenderingContext, opts: PostRenderOptions) => Framebuffer;
+  getModuleParameters?: (layer: Layer) => any;
 
-  preRender() {} // eslint-disable-line @typescript-eslint/no-empty-function
-
-  getModuleParameters(layer: Layer): any {} // eslint-disable-line @typescript-eslint/no-empty-function
-
-  cleanup() {} // eslint-disable-line @typescript-eslint/no-empty-function
+  cleanup(): void;
 }

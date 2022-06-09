@@ -1,5 +1,4 @@
 import ComponentState from '../lifecycle/component-state';
-import {StatefulComponentProps} from '../lifecycle/component';
 
 import type Layer from './layer';
 import type AttributeManager from './attribute/attribute-manager';
@@ -20,7 +19,7 @@ export type ChangeFlags = {
   somethingChanged: boolean;
 };
 
-export default class LayerState<PropsT> extends ComponentState<PropsT> {
+export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;
@@ -42,14 +41,14 @@ export default class LayerState<PropsT> extends ComponentState<PropsT> {
 
   uniformTransitions!: UniformTransitionManager;
   /** Populated during uniform transition to replace user-supplied values */
-  propsInTransition?: StatefulComponentProps<PropsT>;
+  propsInTransition?: LayerT['props'];
 
   constructor({
     attributeManager,
     layer
   }: {
     attributeManager: AttributeManager | null;
-    layer: Layer<PropsT>;
+    layer: LayerT;
   }) {
     super(layer);
     this.attributeManager = attributeManager;
@@ -59,11 +58,11 @@ export default class LayerState<PropsT> extends ComponentState<PropsT> {
     this.usesPickingColorCache = false;
   }
 
-  get layer(): Layer<PropsT> {
-    return this.component as Layer<PropsT>;
+  get layer(): LayerT {
+    return this.component;
   }
 
-  set layer(layer: Layer<PropsT>) {
+  set layer(layer: LayerT) {
     this.component = layer;
   }
 
@@ -77,14 +76,14 @@ export default class LayerState<PropsT> extends ComponentState<PropsT> {
     return super._fetch(propName, url);
   }
 
-  protected _onResolve(propName: keyof PropsT, value: any) {
+  protected _onResolve(propName: string, value: any) {
     const onDataLoad = this.component.props.onDataLoad;
     if (propName === 'data' && onDataLoad) {
       onDataLoad(value, {propName, layer: this.layer});
     }
   }
 
-  protected _onError(propName: keyof PropsT, error: Error) {
+  protected _onError(propName: string, error: Error) {
     this.layer.raiseError(error, `loading ${propName} of ${this.layer}`);
   }
 }

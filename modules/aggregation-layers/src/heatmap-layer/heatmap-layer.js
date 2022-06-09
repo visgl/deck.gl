@@ -72,7 +72,11 @@ const defaultProps = {
 const REQUIRED_FEATURES = [
   FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
   FEATURES.TEXTURE_FLOAT // weight-map as texture
-  // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
+];
+
+const FLOAT_TARGET_FEATURES = [
+  FEATURES.COLOR_ATTACHMENT_RGBA32F, // ability to render to float texture
+  FEATURES.FLOAT_BLEND // ability to blend when rendering to float texture
 ];
 
 const DIMENSIONS = {
@@ -89,7 +93,7 @@ export default class HeatmapLayer extends AggregationLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
-    super.initializeState(DIMENSIONS);
+    super.initializeAggregationLayer(DIMENSIONS);
     this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
@@ -266,7 +270,7 @@ export default class HeatmapLayer extends AggregationLayer {
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
+    const floatTargetSupport = hasFeatures(gl, FLOAT_TARGET_FEATURES);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, type, weightsScale});

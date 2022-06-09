@@ -21,7 +21,13 @@
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import {isWebGL2} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
-import {ScenegraphNode, createGLTFObjects} from '@luma.gl/experimental';
+import {
+  ScenegraphNode,
+  GroupNode,
+  GLTFAnimator,
+  GLTFEnvironment,
+  createGLTFObjects
+} from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
@@ -31,7 +37,106 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
+import type {
+  UpdateParameters,
+  LayerContext,
+  LayerProps,
+  Position,
+  Color,
+  Accessor
+} from '@deck.gl/core';
+
 const DEFAULT_COLOR = [255, 255, 255, 255];
+
+export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & LayerProps<DataT>;
+
+type _ScenegraphLayerProps<DataT> = {
+  // TODO - define in luma.gl
+  /**
+   * A url for a glTF model or scenegraph loaded via a [scenegraph loader](https://loaders.gl/docs/specifications/category-scenegraph)
+   */
+  scenegraph: any;
+  /**
+   * Create a luma.gl GroupNode from the resolved scenegraph prop
+   */
+  getScene?: (
+    scenegraph: any,
+    context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}
+  ) => GroupNode;
+  /**
+   * Create a luma.gl GLTFAnimator from the resolved scenegraph prop
+   */
+  getAnimator?: (
+    scenegraph: any,
+    context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}
+  ) => GLTFAnimator;
+  /**
+   * (Experimental) animation configurations. Requires `_animate` on deck object.
+   */
+  _animations?: {
+    [name: number | string | '*']: {
+      /** If the animation is playing */
+      playing?: boolean;
+      /** Start time of the animation, default `0` */
+      startTime?: number;
+      /** Speed multiplier of the animation, default `1` */
+      speed?: number;
+    };
+  };
+  /**
+   * (Experimental) lighting mode
+   * @default 'flat'
+   */
+  _lighting?: 'flat' | 'pbr';
+  /**
+   * (Experimental) lighting environment. Requires `_lighting` to be `'pbr'`.
+   */
+  _imageBasedLightingEnvironment?:
+    | GLTFEnvironment
+    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => GLTFEnvironment);
+
+  /** Anchor position accessor. */
+  getPosition?: Accessor<DataT, Position>;
+  /** Color value or accessor.
+   * @default [255, 255, 255, 255]
+   */
+  getColor?: Accessor<DataT, Color>;
+  /**
+   * Orientation in [pitch, yaw, roll] in degrees.
+   * @see https://en.wikipedia.org/wiki/Euler_angles
+   * @default [0, 0, 0]
+   */
+  getOrientation?: Accessor<DataT, [number, number, number]>;
+  /**
+   * Scaling factor of the model along each axis.
+   * @default [1, 1, 1]
+   */
+  getScale?: Accessor<DataT, [number, number, number]>;
+  /**
+   * Translation from the anchor point, [x, y, z] in meters.
+   * @default [0, 0, 0]
+   */
+  getTranslation?: Accessor<DataT, [number, number, number]>;
+  /**
+   * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
+   */
+  getTransformMatrix?: Accessor<DataT, number[]>;
+  /**
+   * Multiplier to scale each geometry by.
+   * @default 1
+   */
+  sizeScale?: number;
+  /**
+   * The minimum size in pixels for one unit of the scene.
+   * @default 0
+   */
+  sizeMinPixels?: number;
+  /**
+   * The maximum size in pixels for one unit of the scene.
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  sizeMaxPixels?: number;
+};
 
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
@@ -69,7 +174,18 @@ const defaultProps = {
   loaders: [GLTFLoader]
 };
 
-export default class ScenegraphLayer extends Layer {
+export default class ScenegraphLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+  ExtraPropsT & Required<_ScenegraphLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'ScenegraphLayer';
+
+  state!: {
+    scenegraph: GroupNode;
+    animator: GLTFAnimator;
+    attributesAvailable?: boolean;
+  };
+
   getShaders() {
     const modules = [project32, picking];
 
@@ -82,7 +198,8 @@ export default class ScenegraphLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
-    attributeManager.addInstanced({
+    // attributeManager is always defined for primitive layers
+    attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -102,25 +219,26 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 
-  updateState(params) {
+  updateState(params: UpdateParameters<this>) {
     super.updateState(params);
     const {props, oldProps} = params;
 
     if (props.scenegraph !== oldProps.scenegraph) {
-      this._updateScenegraph(props);
+      this._updateScenegraph();
     } else if (props._animations !== oldProps._animations) {
       this._applyAnimationsProp(this.state.scenegraph, this.state.animator, props._animations);
     }
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext) {
+    super.finalizeState(context);
     this._deleteScenegraph();
   }
 
-  _updateScenegraph(props) {
+  private _updateScenegraph(): void {
+    const props = this.props;
     const {gl} = this.context;
-    let scenegraphData = null;
+    let scenegraphData: any = null;
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
@@ -154,16 +272,21 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
-  _applyAllAttributes(scenegraph) {
+  private _applyAllAttributes(scenegraph: GroupNode): void {
     if (this.state.attributesAvailable) {
-      const allAttributes = this.getAttributeManager().getAttributes();
+      // attributeManager is always defined for primitive layers
+      const allAttributes = this.getAttributeManager()!.getAttributes();
       scenegraph.traverse(model => {
         this._setModelAttributes(model.model, allAttributes);
       });
     }
   }
 
-  _applyAnimationsProp(scenegraph, animator, animationsProp) {
+  private _applyAnimationsProp(
+    scenegraph: GroupNode,
+    animator: GLTFAnimator,
+    animationsProp: any
+  ): void {
     if (!scenegraph || !animator || !animationsProp) {
       return;
     }
@@ -202,17 +325,17 @@ export default class ScenegraphLayer extends Layer {
       });
   }
 
-  _deleteScenegraph() {
+  private _deleteScenegraph(): void {
     const {scenegraph} = this.state;
     if (scenegraph instanceof ScenegraphNode) {
       scenegraph.delete();
     }
   }
 
-  _getModelOptions() {
+  private _getModelOptions(): any {
     const {_imageBasedLightingEnvironment} = this.props;
 
-    let env = null;
+    let env: GLTFEnvironment | null = null;
     if (_imageBasedLightingEnvironment) {
       if (typeof _imageBasedLightingEnvironment === 'function') {
         env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
@@ -275,6 +398,3 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 }
-
-ScenegraphLayer.layerName = 'ScenegraphLayer';
-ScenegraphLayer.defaultProps = defaultProps;

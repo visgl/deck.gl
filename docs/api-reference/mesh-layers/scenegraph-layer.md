@@ -110,9 +110,10 @@ An object used to configure animations playing. _keys_ can be one of the followi
 - _name_ for animation name
 - `*` to affect all animations
 Each value is an object with:
-- `playing`: _true_ or _false_
-- `speed`: number, `1` for default speed.
-Animations are parsed automatically from `glTF` files. Requires `_animate` on deck object.
+- `playing` (Boolean) default `true`
+- `speed` (Number) speed multiplier, default `1`.
+- `startTime` (Number) start time, default `0`.
+Animations are parsed automatically from `glTF` files.
 
 ##### `getScene` (Function, optional)
 

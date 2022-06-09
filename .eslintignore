@@ -1,5 +1,6 @@
 dist/
 dist-es6/
+modules/*/typed
 node_modules/
 workers/
 dist.js

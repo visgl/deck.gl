@@ -1,11 +1,12 @@
-import {CompositeLayer, Layer, LayersList} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, LayersList} from '@deck.gl/core';
 import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 const defaultProps = {
   ...PolygonLayer.defaultProps
 };
 
-export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT>;
+/** All properties supported by GeoCellLayer. */
+export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
 
 export default class GeoCellLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
   Required<GeoCellLayerProps<DataT>> & ExtraProps

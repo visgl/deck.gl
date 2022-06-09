@@ -1,6 +1,7 @@
 /* global google, document */
 import {Deck} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
+import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
@@ -18,7 +19,7 @@ export function createDeckInstance(
   props
 ): Deck {
   if (deck) {
-    if (deck.props.userData._googleMap === map) {
+    if (deck.userData._googleMap === map) {
       return deck;
     }
     // deck instance was created for a different map
@@ -82,7 +83,7 @@ function getContainer(
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck: Deck) {
-  const {_eventListeners: eventListeners} = deck.props.userData;
+  const {_eventListeners: eventListeners} = deck.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
@@ -283,29 +284,26 @@ function handleMouseEvent(deck: Deck, type: string, event) {
 
   switch (type) {
     case 'click':
-      // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        ...mockEvent.offsetCenter,
-        radius: deck.props.pickingRadius
-      });
       mockEvent.tapCount = 1;
-      deck._onEvent(mockEvent);
+      // Hack: because we do not listen to pointer down, perform picking now
+      deck._onPointerDown(mockEvent as MjolnirPointerEvent);
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
       break;
 
     case 'dblclick':
       mockEvent.type = 'click';
       mockEvent.tapCount = 2;
-      deck._onEvent(mockEvent);
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
       break;
 
     case 'mousemove':
       mockEvent.type = 'pointermove';
-      deck._onPointerMove(mockEvent);
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
       break;
 
     case 'mouseout':
       mockEvent.type = 'pointerleave';
-      deck._onPointerMove(mockEvent);
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
       break;
 
     default:

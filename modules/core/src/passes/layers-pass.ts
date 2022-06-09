@@ -6,7 +6,7 @@ import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
-import type Effect from '../lib/effect';
+import type {Effect} from '../lib/effect';
 
 export type LayersPassRenderOptions = {
   target?: Framebuffer;
@@ -296,7 +296,7 @@ export default class LayersPass extends Pass {
 
     if (effects) {
       for (const effect of effects) {
-        Object.assign(moduleParameters, effect.getModuleParameters(layer));
+        Object.assign(moduleParameters, effect.getModuleParameters?.(layer));
       }
     }
 

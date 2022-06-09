@@ -1,17 +1,18 @@
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
-
-import type {ConstructorOf, NumericArray} from './types';
+import type {BinaryAttribute} from '../lib/attribute/attribute';
+import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
+import type {Loader} from '@loaders.gl/loader-utils';
 
 export type LayerData<T> =
   | Iterable<T>
   | {
       length: number;
-      attributes?: Record<string, BinaryAttribute>;
+      attributes?: Record<string, TypedArray | Buffer | BinaryAttribute>;
     };
 
 export type AccessorContext<T> = {
@@ -58,23 +59,14 @@ export type Color =
  */
 export type Unit = 'meters' | 'common' | 'pixels';
 
-/** Supply binary buffers directly to the layer */
-type BinaryAttribute =
-  | Buffer
-  | {
-      buffer?: Buffer;
-      value?: NumericArray;
-      /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
-      type?: number;
-      /** The number of elements per vertex attribute. */
-      size?: number;
-      /** Offset of the first vertex attribute into the buffer, in bytes. */
-      offset?: number;
-      /** The offset between the beginning of consecutive vertex attributes, in bytes. */
-      stride?: number;
-      /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
-      normalized?: boolean;
-    };
+export type Texture =
+  | Texture2D
+  | Texture2DProps
+  | HTMLImageElement
+  | ImageData
+  | HTMLCanvasElement
+  | HTMLVideoElement
+  | ImageBitmap;
 
 /**
  * Base Layer prop types
@@ -117,7 +109,7 @@ export type LayerProps<DataType = any> = {
     context: {
       propName: string;
       layer: Layer<PropsT>;
-      loaders?: any[];
+      loaders?: Loader[];
       loadOptions?: any;
       signal?: AbortSignal;
     }
@@ -181,7 +173,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add support for additional data formats.
    */
-  loaders?: any[];
+  loaders?: Loader[];
   /**
    * Options to customize the behavior of loaders
    */

@@ -4,6 +4,7 @@ import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxLayer} from '@deck.gl/mapbox';
 import {gl} from '@deck.gl/test-utils';
+import {equals} from '@math.gl/core';
 
 class MockMapboxMap {
   constructor(opts) {
@@ -104,19 +105,18 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
     ),
     'Layer is added to deck'
   );
-  t.deepEqual(deck.props.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
+  t.deepEqual(deck.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
   t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
 
-  t.deepEqual(
-    deck.props.viewState,
-    {
+  t.ok(
+    objectEqual(deck.props.viewState, {
       longitude: -122.45,
       latitude: 37.78,
       zoom: 12,
       bearing: 0,
       pitch: 0,
       repeat: true
-    },
+    }),
     'viewState is set correctly'
   );
 
@@ -177,7 +177,7 @@ test('MapboxLayer#external Deck', t => {
   deck.props.onLoad = () => {
     map.addLayer(layer);
     t.is(layer.deck, deck, 'Used external Deck instance');
-    t.ok(deck.props.userData.mapboxVersion, 'Mapbox version is parsed');
+    t.ok(deck.userData.mapboxVersion, 'Mapbox version is parsed');
     t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
 
     map.emit('render');
@@ -305,3 +305,17 @@ test('MapboxLayer#external Deck custom views', t => {
     t.end();
   });
 });
+
+function objectEqual(actual, expected) {
+  const keys0 = Object.keys(actual);
+  const keys1 = Object.keys(expected);
+  if (keys0.length !== keys1.length) {
+    return false;
+  }
+  for (const key of keys1) {
+    if (!equals(actual[key], expected[key])) {
+      return false;
+    }
+  }
+  return true;
+}

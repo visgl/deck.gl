@@ -75,7 +75,6 @@ export {
   LinearInterpolator,
   FlyToInterpolator,
   // Effects
-  Effect,
   LightingEffect,
   PostProcessEffect,
   // Lights

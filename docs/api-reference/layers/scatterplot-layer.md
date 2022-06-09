@@ -104,13 +104,13 @@ A global line width multiplier for all points.
 
 * Default: `false`
 
-Only draw outline of points. It falls back to `outline` if not provided.
+Draw the outline of points.
 
 ##### `filled` (Boolean, optional)
 
 * Default: `true`
 
-Draw the filled area of a point.
+Draw the filled area of points.
 
 ##### `radiusMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

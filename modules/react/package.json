@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "8.8.0-alpha.3",
+  "version": "8.8.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -20,13 +20,11 @@
   "module": "dist/esm/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "typed"
   ],
   "sideEffects": false,
   "scripts": {},
-  "dependencies": {
-    "prop-types": "^15.6.0"
-  },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "react": ">=16.3",
