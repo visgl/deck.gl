@@ -131,14 +131,10 @@ export default class _MeshLayer extends SimpleMeshLayer {
     attribute.value = value;
   }
 
-  destroyMaterialParserTextures() {
-    this.state.materialParser?.delete();
-    this.setState({materialParser: null});
-  }
-
   finalizeState() {
     super.finalizeState();
-    this.destroyMaterialParserTextures();
+    this.state.materialParser?.delete();
+    this.setState({materialParser: null});
   }
 }
 
