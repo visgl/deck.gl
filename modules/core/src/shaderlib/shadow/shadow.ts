@@ -23,6 +23,11 @@ import {Vector3, Matrix4} from '@math.gl/core';
 import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
+import type {Texture2D} from '@luma.gl/webgl';
+import type {ShaderModule, NumericArray} from '../../types/types';
+import type Viewport from '../../viewports/viewport';
+import type {ProjectUniforms} from '../project/viewport-uniforms';
+
 const vs = `
 const int max_lights = 2;
 uniform mat4 shadow_uViewProjectionMatrices[max_lights];
@@ -102,7 +107,18 @@ const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-function screenToCommonSpace(xyz, pixelUnprojectionMatrix) {
+type ShadowModuleSettings = {
+  viewport: Viewport;
+  shadowEnabled?: boolean;
+  drawToShadowMap?: boolean;
+  shadowMaps?: Texture2D[];
+  dummyShadowMap?: Texture2D;
+  shadowColor?: number[];
+  shadowMatrices?: Matrix4[];
+  shadowLightId?: number;
+};
+
+function screenToCommonSpace(xyz: number[], pixelUnprojectionMatrix: number[]): number[] {
   const [x, y, z] = xyz;
   const coord = pixelsToWorld([x, y, z], pixelUnprojectionMatrix);
 
@@ -112,12 +128,24 @@ function screenToCommonSpace(xyz, pixelUnprojectionMatrix) {
   return [coord[0], coord[1], 0];
 }
 
-function getViewportCenterPosition({viewport, center}) {
+function getViewportCenterPosition({
+  viewport,
+  center
+}: {
+  viewport: Viewport;
+  center: NumericArray;
+}): NumericArray {
   return new Matrix4(viewport.viewProjectionMatrix).invert().transform(center);
 }
 
-function getViewProjectionMatrices({viewport, shadowMatrices}) {
-  const projectionMatrices = [];
+function getViewProjectionMatrices({
+  viewport,
+  shadowMatrices
+}: {
+  viewport: Viewport;
+  shadowMatrices: Matrix4[];
+}): Matrix4[] {
+  const projectionMatrices: Matrix4[] = [];
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
   const farZ = viewport.isGeospatial ? undefined : 1;
   const corners = [
@@ -129,7 +157,10 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
     [viewport.width, 0, -1], // top right near
     [0, viewport.height, -1], // bottom left near
     [viewport.width, viewport.height, -1] // bottom right near
-  ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
+  ].map(pixel =>
+    // @ts-expect-error z may be undefined
+    screenToCommonSpace(pixel, pixelUnprojectionMatrix)
+  );
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
@@ -147,7 +178,18 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
   return projectionMatrices;
 }
 
-function createShadowUniforms(opts = {}, context = {}) {
+/* eslint-disable camelcase */
+function createShadowUniforms(
+  opts: ShadowModuleSettings,
+  context: ProjectUniforms
+): Record<string, any> {
+  const {shadowEnabled = true} = opts;
+  if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
+    return {
+      shadow_uDrawShadowMap: false,
+      shadow_uUseShadowMap: false
+    };
+  }
   const uniforms = {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
@@ -161,7 +203,7 @@ function createShadowUniforms(opts = {}, context = {}) {
     center: context.project_uCenter
   });
 
-  const projectCenters = [];
+  const projectCenters: NumericArray[] = [];
   const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
     shadowMatrices: opts.shadowMatrices,
     viewport: opts.viewport
@@ -214,15 +256,13 @@ export default {
     `
   },
   getUniforms: (opts = {}, context = {}) => {
-    if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
-      const {shadowEnabled = true} = opts;
-      return shadowEnabled && opts.shadowMatrices && opts.shadowMatrices.length > 0
-        ? createShadowUniforms(opts, context)
-        : {
-            shadow_uDrawShadowMap: false,
-            shadow_uUseShadowMap: false
-          };
+    if (
+      'viewport' in opts &&
+      (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))
+    ) {
+      // @ts-expect-error if opts.viewport is defined, context should contain the project module's uniforms
+      return createShadowUniforms(opts, context);
     }
     return {};
   }
-};
+} as ShaderModule<ShadowModuleSettings>;

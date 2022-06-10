@@ -149,5 +149,54 @@ export type {
   FirstPersonViewState,
   OrbitViewState,
   OrthographicViewState,
-  GlobeViewState
+  GlobeViewState,
+  CoordinateSystem,
+  ChangeFlags,
+  LayersList,
+  LayerContext,
+  UpdateParameters,
+  DeckProps,
+  LayerProps,
+  CompositeLayerProps,
+  Accessor,
+  AccessorFunction,
+  LayerData,
+  Unit,
+  Position,
+  Color,
+  Texture,
+  PickingInfo,
+  GetPickingInfoParams,
+  BinaryAttribute,
+  Effect
 } from '@deck.gl/core';
+
+export type {
+  ArcLayerProps,
+  BitmapLayerProps,
+  ColumnLayerProps,
+  ScatterplotLayerProps,
+  IconLayerProps,
+  LineLayerProps,
+  PolygonLayerProps,
+  GeoJsonLayerProps,
+  GridCellLayerProps,
+  TextLayerProps,
+  MultiIconLayerProps,
+  PointCloudLayerProps,
+  TextBackgroundLayerProps,
+  PathLayerProps,
+  SolidPolygonLayerProps
+} from '@deck.gl/layers';
+
+export type {
+  ContourLayerProps,
+  CPUGridLayerProps,
+  GridLayerProps,
+  GPUGridLayerProps,
+  HeatmapLayerProps,
+  HexagonLayerProps,
+  ScreenGridLayerProps
+} from '@deck.gl/aggregation-layers';
+
+export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
