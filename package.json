@@ -20,7 +20,6 @@
     "prettier: 2.3.2 breaks on `import type`, remove when ocular bumps"
   ],
   "resolutions": {
-    "acorn": "7.4.1",
     "prettier": "^2.4.1"
   },
   "scripts": {
