@@ -6,10 +6,11 @@
 
 [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) is a powerful open-source map renderer from [Mapbox](https://mapbox.com). deck.gl's `MapView` is designed to sync perfectly with the camera of Mapbox, at every zoom level and rotation angle.
 
-When using deck.gl and Mapbox, there are two options you can choose from:
+When using deck.gl and Mapbox, there are three options you can choose from:
 
-- Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) or [React](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/mapbox). This is the most tested and robust use case.
-- Using deck.gl layers as custom Mapbox layers, using the [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module. This allows you to interleave deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature is experimental: we are working closely with Mapbox to evolve the API.
+- Using the Deck canvas as a overlay on top of the Mapbox map, and deck.gl drives the base map. The [React get-started example](/examples/get-started/react/mapbox/) illustrates the basic pattern. In this option, deck.gl handles all user input, and holds the source of truth of the camera state. This is the most tested and robust use case, as you can find in all the [examples on this website](/examples/website). It supports all the features of Deck.
+- Using the Deck canvas as a overlay on top of the Mapbox map, and Mapbox drives deck.gl. In this option, mapbox-gl handles all user input, and holds the source of truth of the camera state. The [vanilla JS get-started example](/examples/get-started/pure-js/mapbox) illustrates this pattern. The [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module implements a mapbox-gl control that inserts deck into the map container. This is favorable if you need to use other mapbox-gl controls and plugins in addition to deck.gl.
+- Using deck.gl layers as Mapbox layers, also using the [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module. This allows you to interleave deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature subjects to bugs and limitations of mapbox-gl's custom layer interface.
 
 ![deck.gl interleaved with Mapbox layers](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg)
 

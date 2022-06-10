@@ -1,22 +1,12 @@
 # @deck.gl/mapbox
 
-Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Mapbox and deck.gl layers.
+This module makes it easy to use deck.gl as native layers and controls in the Mapbox GL JS ecosystem. 
+
+- It allows deck.gl to be used with other mapbox-gl controls such as `NavigationControl`, `GeolocateControl` and `mapbox-gl-geocoder`.
+- You may choose to interleave deck.gl layers with the base map layers, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
 
 <img src="https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
 
-
-## Advantages and Limitations
-
-### Advantages
-
-* Mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
-* Mapbox and deck.gl will share a single canvas and WebGL context, saving system resources.
-
-### Limitations
-
-* When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction.
-* Unless used with react-map-gl, WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
-* Mapbox 2.0's terrain feature is currently not supported.
 
 ## Installation
 
@@ -26,7 +16,7 @@ Use deck.gl layers as custom Mapbox layers, enabling seamless interleaving of Ma
 <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
 <script type="text/javascript">
-  const {MapboxLayer} = deck;
+  const {MapboxOverlay} = deck;
 </script>
 ```
 
@@ -37,156 +27,38 @@ npm install @deck.gl/mapbox
 ```
 
 ```js
-import {MapboxLayer} from '@deck.gl/mapbox';
+import {MapboxOverlay} from '@deck.gl/mapbox';
 ```
 
 
-## Examples
+## Use Cases
 
-### Using with Pure JS
-
-To create a Mapbox-compatible deck.gl layer:
-
-```js
-import {ScatterplotLayer} from '@deck.gl/layers';
-import {MapboxLayer} from '@deck.gl/mapbox';
-
-const myDeckLayer = new MapboxLayer({
-  id: 'my-scatterplot',
-  type: ScatterplotLayer,
-  data: [
-    {position: [-74.5, 40], size: 100}
-  ],
-  getPosition: d => d.position,
-  getRadius: d => d.size,
-  getColor: [255, 0, 0]
-});
-```
-
-To add the layer to Mapbox:
-
-```js
-import mapboxgl from 'mapbox-gl';
-
-mapboxgl.accessToken = '<your access token here>';
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/streets-v9',
-  center: [-74.50, 40],
-  zoom: 9,
-  antialias: true // Mapbox disables WebGL's antialiasing by default
-});
-
-map.on('load', () => {
-  map.addLayer(myDeckLayer);
-});
-```
+One should note that this module is *not required* to use mapbox-gl as a base map for deck.gl. It is easier to understand the concepts of the module if you are already a mapbox-gl developer. Visit the [mapbox base map developer guide](/docs/developer-guide/base-maps/using-with-mapbox.md) for a complete list of your options.
 
 
-### Using with React
+### Mixing deck.gl layers and Mapbox layers
 
-```js
-import React, {useState, useRef, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
-import {ScatterplotLayer} from '@deck.gl/layers';
-import {StaticMap} from 'react-map-gl';
+One major use case for interleaving deck.gl and Mapbox is that some important information in the Mapbox map could be hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
 
-import {MapboxLayer} from '@deck.gl/mapbox';
+To inject a deck layer into the Mapbox stack, either:
 
-const INITIAL_VIEW_STATE = {
-  longitude: -74.50,
-  latitude: 40,
-  zoom: 9
-};
-
-const data = [
-  {position: [-74.5, 40], size: 100}
-];
-
-function App() {
-  // DeckGL and mapbox will both draw into this WebGL context
-  const [glContext, setGLContext] = useState();
-  const deckRef = useRef(null);
-  const mapRef = useRef(null);
-
-  const onMapLoad = useCallback(() => {
-    const map = mapRef.current.getMap();
-    const deck = deckRef.current.deck;
-
-    // You must initialize an empty deck.gl layer to prevent flashing
-    map.addLayer(
-      // This id has to match the id of the deck.gl layer
-      new MapboxLayer({ id: "my-scatterplot", deck }),
-      // Optionally define id from Mapbox layer stack under which to add deck layer
-      // 'before-layer-id'
-    );
-  }, []);
-
-  const layers = [
-    new ScatterplotLayer({
-      id: 'my-scatterplot',
-      data,
-      getPosition: d => d.position,
-      getRadius: d => d.size,
-      getFillColor: [255, 0, 0]
-    })
-  ];
-
-  return (
-    <DeckGL
-      ref={deckRef}
-      layers={layers}
-      initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
-      onWebGLInitialized={setGLContext}
-      glOptions={{
-        /* To render vector tile polygons correctly */
-        stencil: true
-      }}
-    >
-      {glContext && (
-        /* This is important: Mapbox must be instantiated after the WebGLContext is available */
-        <StaticMap
-          ref={mapRef}
-          gl={glContext}
-          mapStyle="mapbox://styles/mapbox/light-v9"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          onLoad={onMapLoad}
-        />
-      )}
-    </DeckGL>
-  );
-}
-```
-
-Note that this usage pattern has a catch: the `DeckGL` instance does not know that it is sharing a context with Mapbox until `map.addLayer` is called for the first time. You may find the map blink due to competing rendering attempts between deck.gl and Mapbox if:
-
-- `map.addLayer` is not immediately called on `StaticMap`'s `onLoad` event
-- `map.addLayer` is called, but an invalid `beforeId` is supplied that does not match any layer id in the loaded map style. This causes `addLayer` to fail.
-
-If data layers are not immediately available when the component is mounted, you can work around this issue by:
-
-```js
-const onMapLoad = () => {
-  ...
-  // Insert a placeholder layer to connect Mapbox to Deck
-  // The id does not exist so it won't actually draw anything
-  map.addLayer(new MapboxLayer({ id: "dummy-layer", deck }));
-}
-```
-
-## Injecting Layers into Mapbox
-
-
-### Adding a 3D deck layer
-
-In this cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a Mapbox basemap, while seamlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and Mapbox layer catalogs. In this case, the Mapbox [`map.addLayer(layer)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API method can be used to add a mix of deck.gl and Mapbox layers to the top of the layer stack from the currently loaded Mapbox style.
-
-
-### Inserting a 2D deck layer before an existing Mapbox layer
-
-One major use case for mixing deck.gl and Mapbox layers is that some important information in the Mapbox map is hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
-
-A bit more control is provided by the optional `before` parameter of the Mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `MapboxLayer` instance just before any existing Mapbox layer in the layer stack of the currently loaded style.
+- Create a [MapboxLayer](/docs/api-reference/mapbox/mapbox-layer.md) and call the [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API.
+- Add a `beforeId` prop to any layer passed to the [MapboxOverlay](/docs/api-reference/mapbox/mapbox-overlay.md) control.
 
 Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of Mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).
+
+
+In some cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a Mapbox basemap, while seamlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and Mapbox layer catalogs. In this case, a `beforeId` is not needed.
+
+
+### Using mapbox-gl controls with deck.gl
+
+The Mapbox ecosystem offers many well-designed controls, from the basic functionalities of `NavigationControl`, `Popup` and `GeolocateControl`, to vendor-service-bound UI implementations such as `mapbox-gl-geocoder` and `mapbox-gl-directions`. These libraries require that the Mapbox Map holds the source of truth of the camera state, instead of the normal [state management](/docs/developer-guide/interactivity.md) by `Deck`. When you use the `MapboxLayer` or `MapboxOverlay` classes from this module, deck.gl plays nice with all the mapbox-gl peripherals.
+
+
+## Limitations
+
+* When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction. See [using MapboxOverlay with multi-views](/docs/api-reference/mapbox/mapbox-overlay.md#multi-view-usage) for details.
+* WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
+* Mapbox 2.0's terrain feature is currently not supported.
+
