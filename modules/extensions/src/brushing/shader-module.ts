@@ -17,7 +17,17 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable camelcase */
 import {project} from '@deck.gl/core';
+import type {Viewport, _ShaderModule as ShaderModule} from '@deck.gl/core';
+
+import type {BrushingExtensionProps} from './brushing';
+
+type BrushingModuleSettings = {
+  // From layer context
+  viewport: Viewport;
+  mousePosition?: {x: number; y: number};
+} & BrushingExtensionProps;
 
 const vs = `
   uniform bool brushing_enabled;
@@ -105,8 +115,8 @@ export default {
   vs,
   fs,
   inject,
-  getUniforms: opts => {
-    if (!opts || !opts.viewport) {
+  getUniforms: (opts?: BrushingModuleSettings | {}): Record<string, any> => {
+    if (!opts || !('viewport' in opts)) {
       return {};
     }
     const {
@@ -127,4 +137,4 @@ export default {
         : [0, 0]
     };
   }
-};
+} as ShaderModule<BrushingModuleSettings>;

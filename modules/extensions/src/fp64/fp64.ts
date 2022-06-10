@@ -21,8 +21,13 @@
 import {LayerExtension, COORDINATE_SYSTEM} from '@deck.gl/core';
 import project64 from './project64';
 
+import type {Layer} from '@deck.gl/core';
+
+/** @deprecated Adds the legacy 64-bit precision to geospatial layers. */
 export default class Fp64Extension extends LayerExtension {
-  getShaders(opts) {
+  static extensionName = 'Fp64Extension';
+
+  getShaders(this: Layer): any {
     const {coordinateSystem} = this.props;
     if (
       coordinateSystem !== COORDINATE_SYSTEM.LNGLAT &&
@@ -36,5 +41,3 @@ export default class Fp64Extension extends LayerExtension {
     };
   }
 }
-
-Fp64Extension.extensionName = 'Fp64Extension';

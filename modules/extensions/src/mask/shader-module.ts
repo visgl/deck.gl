@@ -1,4 +1,6 @@
 import {project} from '@deck.gl/core';
+import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
+import type {Texture2D} from '@luma.gl/webgl';
 
 const vs = `
 uniform vec4 mask_bounds;
@@ -60,12 +62,18 @@ varying vec2 mask_texCoords;
 `
 };
 
-const getMaskUniforms = (opts = {}) => {
-  const uniforms = {};
-  if (opts.maskMap) {
-    uniforms.mask_texture = opts.maskMap;
+type MaskModuleSettings = {
+  maskMap?: Texture2D;
+};
+
+/* eslint-disable camelcase */
+const getMaskUniforms = (opts?: MaskModuleSettings | {}): Record<string, any> => {
+  if (opts && 'maskMap' in opts) {
+    return {
+      mask_texture: opts.maskMap
+    };
   }
-  return uniforms;
+  return {};
 };
 
 export default {
@@ -75,4 +83,4 @@ export default {
   fs,
   inject,
   getUniforms: getMaskUniforms
-};
+} as ShaderModule<MaskModuleSettings>;

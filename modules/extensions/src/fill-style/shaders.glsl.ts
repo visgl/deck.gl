@@ -1,4 +1,7 @@
 import {project, COORDINATE_SYSTEM} from '@deck.gl/core';
+import type {Viewport, _ShaderModule as ShaderModule, ProjectUniforms} from '@deck.gl/core';
+
+import type {Texture2D} from '@luma.gl/webgl';
 
 /*
  * fill pattern shader module
@@ -69,7 +72,24 @@ const inject = {
   `
 };
 
-function getPatternUniforms(opts = {}, uniforms) {
+type FillStyleModuleSettings =
+  | {
+      viewport: Viewport;
+      fillPatternEnabled?: boolean;
+      fillPatternMask?: boolean;
+    }
+  | {
+      fillPatternTexture: Texture2D;
+    };
+
+/* eslint-disable camelcase */
+function getPatternUniforms(
+  opts: FillStyleModuleSettings | {},
+  uniforms: Record<string, any>
+): Record<string, any> {
+  if (!opts) {
+    return {};
+  }
   if ('fillPatternTexture' in opts) {
     const {fillPatternTexture} = opts;
     return {
@@ -77,9 +97,9 @@ function getPatternUniforms(opts = {}, uniforms) {
       fill_patternTextureSize: [fillPatternTexture.width, fillPatternTexture.height]
     };
   }
-  if (opts.viewport) {
+  if ('viewport' in opts) {
     const {viewport, fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const {project_uCoordinateOrigin, project_uCoordinateSystem} = uniforms;
+    const {project_uCoordinateOrigin, project_uCoordinateSystem} = uniforms as ProjectUniforms;
 
     const coordinateOriginCommon =
       project_uCoordinateSystem === COORDINATE_SYSTEM.CARTESIAN
@@ -95,7 +115,7 @@ function getPatternUniforms(opts = {}, uniforms) {
   return {};
 }
 
-export const patternShaders = {
+export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
   name: 'fill-pattern',
   vs: patternVs,
   fs: patternFs,

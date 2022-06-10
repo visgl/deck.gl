@@ -1,3 +1,7 @@
+import {_ShaderModule as ShaderModule} from '@deck.gl/core/typed';
+
+import type {DataFilterExtensionProps} from './data-filter';
+
 /*
  * data filter shader module
  */
@@ -63,8 +67,13 @@ uniform bool filter_transformColor;
 varying float dataFilter_value;
 `;
 
-const getUniforms = opts => {
-  if (!opts || !opts.extensions) {
+type DataFilterModuleSettings = {
+  extensions: any[]; // used to detect if layer props are present
+} & DataFilterExtensionProps;
+
+/* eslint-disable camelcase */
+function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> {
+  if (!opts || !('extensions' in opts)) {
     return {};
   }
   const {
@@ -75,29 +84,29 @@ const getUniforms = opts => {
   } = opts;
   const filterSoftRange = opts.filterSoftRange || filterRange;
 
-  const uniforms = Number.isFinite(filterRange[0])
-    ? {
-        filter_min: filterRange[0],
-        filter_softMin: filterSoftRange[0],
-        filter_softMax: filterSoftRange[1],
-        filter_max: filterRange[1]
-      }
-    : {
-        filter_min: filterRange.map(r => r[0]),
-        filter_softMin: filterSoftRange.map(r => r[0]),
-        filter_softMax: filterSoftRange.map(r => r[1]),
-        filter_max: filterRange.map(r => r[1])
-      };
-  uniforms.filter_enabled = filterEnabled;
-  uniforms.filter_useSoftMargin = Boolean(opts.filterSoftRange);
-  uniforms.filter_transformSize = filterEnabled && filterTransformSize;
-  uniforms.filter_transformColor = filterEnabled && filterTransformColor;
+  return {
+    ...(Number.isFinite(filterRange[0])
+      ? {
+          filter_min: filterRange[0],
+          filter_softMin: filterSoftRange[0],
+          filter_softMax: filterSoftRange[1],
+          filter_max: filterRange[1]
+        }
+      : {
+          filter_min: filterRange.map(r => r[0]),
+          filter_softMin: filterSoftRange.map(r => r[0]),
+          filter_softMax: filterSoftRange.map(r => r[1]),
+          filter_max: filterRange.map(r => r[1])
+        }),
+    filter_enabled: filterEnabled,
+    filter_useSoftMargin: Boolean(opts.filterSoftRange),
+    filter_transformSize: filterEnabled && filterTransformSize,
+    filter_transformColor: filterEnabled && filterTransformColor
+  };
+}
 
-  return uniforms;
-};
-
-const getUniforms64 = opts => {
-  if (!opts || !opts.extensions) {
+function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any> {
+  if (!opts || !('extensions' in opts)) {
     return {};
   }
   const uniforms = getUniforms(opts);
@@ -123,7 +132,7 @@ const getUniforms64 = opts => {
     uniforms.filter_max64High = max64High;
   }
   return uniforms;
-};
+}
 
 const inject = {
   'vs:#main-start': `
@@ -151,7 +160,7 @@ const inject = {
   `
 };
 
-export const shaderModule = {
+export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
   name: 'data-filter',
   vs,
   fs,
@@ -159,7 +168,7 @@ export const shaderModule = {
   getUniforms
 };
 
-export const shaderModule64 = {
+export const shaderModule64: ShaderModule<DataFilterModuleSettings> = {
   name: 'data-filter-fp64',
   vs,
   fs,

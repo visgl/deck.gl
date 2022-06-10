@@ -22,6 +22,8 @@ import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
 import {dist} from 'gl-matrix/vec3';
 
+import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
@@ -29,16 +31,66 @@ const defaultProps = {
   dashGapPickable: false
 };
 
-export default class PathStyleExtension extends LayerExtension {
-  constructor({dash = false, offset = false, highPrecisionDash = false} = {}) {
+export type PathStyleExtensionProps<DataT = any> = {
+  /**
+   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+   * Requires the `dash` option to be on.
+   */
+  getDashArray?: Accessor<DataT, [number, number]>;
+  /**
+   * Accessor for the offset to draw each path with, relative to the width of the path.
+   * Negative offset is to the left hand side, and positive offset is to the right hand side.
+   * @default 0
+   */
+  getOffset?: Accessor<DataT, number>;
+  /**
+   * If `true`, adjust gaps for the dashes to align at both ends.
+   * @default false
+   */
+  dashJustified?: boolean;
+  /**
+   * If `true`, gaps between solid strokes are pickable. If `false`, only the solid strokes are pickable.
+   * @default false
+   */
+  dashGapPickable?: boolean;
+};
+
+type PathStyleExtensionOptions = {
+  /**
+   * Add capability to render dashed lines.
+   * @default false
+   */
+  dash: boolean;
+  /**
+   * Add capability to offset lines.
+   * @default false
+   */
+  offset: boolean;
+  /**
+   * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
+   * @default false
+   */
+  highPrecisionDash: boolean;
+};
+
+/** Adds selected features to the `PathLayer` and composite layers that render the `PathLayer`. */
+export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
+  static defaultProps = defaultProps;
+  static extensionName = 'PathStyleExtension';
+
+  constructor({
+    dash = false,
+    offset = false,
+    highPrecisionDash = false
+  }: Partial<PathStyleExtensionOptions> = {}) {
     super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
   }
 
-  isEnabled(layer) {
-    return layer.state.pathTesselator;
+  isEnabled(layer: Layer<PathStyleExtensionProps>): boolean {
+    return 'pathTesselator' in layer.state;
   }
 
-  getShaders(extension) {
+  getShaders(this: Layer<PathStyleExtensionProps>, extension: this): any {
     if (!extension.isEnabled(this)) {
       return null;
     }
@@ -55,14 +107,12 @@ export default class PathStyleExtension extends LayerExtension {
     return result;
   }
 
-  initializeState(context, extension) {
+  initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager || !extension.isEnabled(this)) {
       // This extension only works with the PathLayer
       return;
     }
-
-    extension.enabled = true;
 
     if (extension.opts.dash) {
       attributeManager.addInstanced({
@@ -85,12 +135,16 @@ export default class PathStyleExtension extends LayerExtension {
     }
   }
 
-  updateState(params, extension) {
+  updateState(
+    this: Layer<PathStyleExtensionProps>,
+    params: UpdateParameters<Layer<PathStyleExtensionProps>>,
+    extension: this
+  ) {
     if (!extension.isEnabled(this)) {
       return;
     }
 
-    const uniforms = {};
+    const uniforms: any = {};
 
     if (extension.opts.dash) {
       uniforms.dashAlignMode = this.props.dashJustified ? 1 : 0;
@@ -100,7 +154,7 @@ export default class PathStyleExtension extends LayerExtension {
     this.state.model.setUniforms(uniforms);
   }
 
-  getDashOffsets(path) {
+  getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
     const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
     const isNested = Array.isArray(path[0]);
@@ -121,6 +175,3 @@ export default class PathStyleExtension extends LayerExtension {
     return result;
   }
 }
-
-PathStyleExtension.extensionName = 'PathStyleExtension';
-PathStyleExtension.defaultProps = defaultProps;
