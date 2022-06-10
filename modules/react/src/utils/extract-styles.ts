@@ -1,10 +1,23 @@
+import * as React from 'react';
+
 const CANVAS_ONLY_STYLES = {
   mixBlendMode: null
 };
 
-export default function extractStyles({width, height, style}) {
+export default function extractStyles({
+  width,
+  height,
+  style
+}: {
+  width?: string | number;
+  height?: string | number;
+  style?: Partial<CSSStyleDeclaration> | null;
+}): {
+  containerStyle: React.CSSProperties;
+  canvasStyle: React.CSSProperties;
+} {
   // This styling is enforced for correct positioning with children
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     position: 'absolute',
     zIndex: 0,
     left: 0,
@@ -14,7 +27,7 @@ export default function extractStyles({width, height, style}) {
   };
 
   // Fill the container
-  const canvasStyle = {
+  const canvasStyle: React.CSSProperties = {
     left: 0,
     top: 0
   };

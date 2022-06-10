@@ -1,38 +1,53 @@
-import React, {createElement} from 'react';
+import * as React from 'react';
+import {createElement} from 'react';
 import {inheritsFrom} from './inherits-from';
 import {Layer, View} from '@deck.gl/core';
+import {isComponent} from './evaluate-children';
+import type {LayersList} from '@deck.gl/core';
 
 // recursively wrap render callbacks in `View`
-function wrapInView(node) {
-  if (!node) {
-    return node;
-  }
+function wrapInView(node: React.ReactNode): React.ReactNode {
   if (typeof node === 'function') {
     // React.Children does not traverse functions.
     // All render callbacks must be protected under a <View>
+    // @ts-expect-error View is not a ReactJSXElement constructor. Only used as a temporary wrapper and will be removed in extractJSXLayers
     return createElement(View, {}, node);
   }
   if (Array.isArray(node)) {
     return node.map(wrapInView);
   }
-  if (node.type === React.Fragment) {
-    return wrapInView(node.props.children);
-  }
-  if (inheritsFrom(node.type, View)) {
-    return node;
+  if (isComponent(node)) {
+    if (node.type === React.Fragment) {
+      return wrapInView(node.props.children);
+    }
+    if (inheritsFrom(node.type, View)) {
+      return node;
+    }
   }
   return node;
 }
 
 // extracts any deck.gl layers masquerading as react elements from props.children
-export default function extractJSXLayers({children, layers, views}) {
-  const reactChildren = []; // extract real react elements (i.e. not deck.gl layers)
-  const jsxLayers = []; // extracted layer from react children, will add to deck.gl layer array
-  const jsxViews = {};
+export default function extractJSXLayers({
+  children,
+  layers = [],
+  views = null
+}: {
+  children?: React.ReactNode;
+  layers?: LayersList;
+  views?: View | View[] | null;
+}): {
+  children: React.ReactNode[];
+  layers: LayersList;
+  views: View | View[] | null;
+} {
+  const reactChildren: React.ReactNode[] = []; // extract real react elements (i.e. not deck.gl layers)
+  const jsxLayers: LayersList = []; // extracted layer from react children, will add to deck.gl layer array
+  const jsxViews: Record<string, View> = {};
 
   // React.children
   React.Children.forEach(wrapInView(children), reactElement => {
-    if (reactElement) {
+    if (isComponent(reactElement)) {
       // For some reason Children.forEach doesn't filter out `null`s
       const ElementType = reactElement.type;
       if (inheritsFrom(ElementType, Layer)) {
@@ -43,10 +58,13 @@ export default function extractJSXLayers({children, layers, views}) {
       }
 
       // empty id => default view
-      if (ElementType !== View && inheritsFrom(ElementType, View) && reactElement.props.id) {
+      if (inheritsFrom(ElementType, View) && ElementType !== View && reactElement.props.id) {
+        // @ts-ignore Cannot instantiate an abstract class (View)
         const view = new ElementType(reactElement.props);
         jsxViews[view.id] = view;
       }
+    } else if (reactElement) {
+      reactChildren.push(reactElement);
     }
   });
 
@@ -69,7 +87,7 @@ export default function extractJSXLayers({children, layers, views}) {
   return {layers, children: reactChildren, views};
 }
 
-function createLayer(LayerType, reactProps) {
+function createLayer(LayerType: typeof Layer, reactProps: any): Layer {
   const props = {};
   // Layer.defaultProps is treated as ReactElement.defaultProps and merged into react props
   // Remove them
@@ -79,5 +97,6 @@ function createLayer(LayerType, reactProps) {
       props[key] = reactProps[key];
     }
   }
+  // @ts-ignore Cannot instantiate an abstract class (Layer)
   return new LayerType(props);
 }

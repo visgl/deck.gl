@@ -200,3 +200,5 @@ export type {
 } from '@deck.gl/aggregation-layers';
 
 export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
