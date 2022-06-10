@@ -23,7 +23,7 @@ import type {GeoJsonLayerProps} from '@deck.gl/layers/typed';
 
 Note that the typed exports are a work in progress. They are not exposed by default to prevent any typing errors from breaking existing TypeScript applications. Help us improve them by reporting any issues or suggestions on GitHub!
 
-The typed exports will remain at the `typed` entry points throughout the rest of the 8.x releases. They will be exposed directly at the package roots starting v9.0.
+The typed exports will remain at the `typed` entry points throughout the rest of the 8.x releases. They will be exposed directly at the package roots starting in v9.0.
 
 
 ## Alternative Solution for Legacy Versions
