@@ -37,10 +37,10 @@
     "@deck.gl/layers": "8.8.0-alpha.6",
     "@deck.gl/mesh-layers": "8.8.0-alpha.6",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3",
-    "@loaders.gl/3d-tiles": "^3.2.0-alpha.4",
-    "@loaders.gl/core": "^3.2.0-alpha.4",
-    "@loaders.gl/csv": "^3.2.0-alpha.4",
-    "@luma.gl/constants": "^8.5.13",
+    "@loaders.gl/3d-tiles": "^3.2.0",
+    "@loaders.gl/core": "^3.2.0",
+    "@loaders.gl/csv": "^3.2.0",
+    "@luma.gl/constants": "^8.5.14",
     "mapbox-gl": "^1.2.1"
   },
   "jupyterlab": {
