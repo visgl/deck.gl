@@ -59,6 +59,7 @@ The Mapbox ecosystem offers many well-designed controls, from the basic function
 ## Limitations
 
 * When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction. See [using MapboxOverlay with multi-views](/docs/api-reference/mapbox/mapbox-overlay.md#multi-view-usage) for details.
+* When using deck.gl as Mapbox layers or controls, `Deck` only receives a subset of user inputs delegated by `Map`. Therefore, certain interactive callbacks like `onDrag`, `onInteractionStateChange` are not available.
 * WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
 * Mapbox 2.0's terrain feature is currently not supported.
 

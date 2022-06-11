@@ -66,6 +66,53 @@ const overlay = new MapboxOverlay({
 map.addControl(overlay);
 ```
 
+### Using with react-map-gl
+
+The following code demonstrates how to create a React component from `MapboxOverlay` with `react-map-gl@7.x`:
+
+```tsx
+import {ScatterplotLayer} from '@deck.gl/layers/typed';
+import {MapboxOverlay, MapboxOverlayProps} from '@deck.gl/mapbox/typed';
+import {useControl} from 'react-map-gl';
+
+import Map, {NavigationControl} from 'react-map-gl';
+
+function DeckGLOverlay(props: MapboxOverlayProps) {
+  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
+export default function App() {
+  const scatterplotLayer = new ScatterplotLayer({
+    id: 'my-scatterplot',
+    data: [
+      {position: [-74.5, 40], size: 100}
+    ],
+    getPosition: d => d.position,
+    getRadius: d => d.size,
+    getColor: [255, 0, 0]
+  });
+
+  return (
+    <Map
+      initialViewState={{
+        latitude: 37.78,
+        longitude: -122.45,
+        zoom: 12
+      }}
+      mapStyle="mapbox://styles/mapbox/light-v9"
+      mapboxAccessToken=""
+    >
+      <DeckGLOverlay layers={[scatterplotLayer]} />
+      <NavigationControl />
+    </Map>
+  );
+}
+```
+
+See react-map-gl's [useControl](https://visgl.github.io/react-map-gl/docs/api-reference/use-control) hook.
+
 
 ## Constructor
 
