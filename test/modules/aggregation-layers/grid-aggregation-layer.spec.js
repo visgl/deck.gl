@@ -57,7 +57,7 @@ const DIMENSIONS = {
 // Sample layer to test GridAggregationLayer, performs screen space aggregation
 class TestGridAggregationLayer extends GridAggregationLayer {
   initializeState() {
-    super.initializeState({
+    super.initializeAggregationLayer({
       dimensions: DIMENSIONS
     });
     this.setState({

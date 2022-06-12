@@ -30,7 +30,7 @@ import {ConstructorOf} from '../types/types';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<PropsT = any> extends Layer<
+export default abstract class CompositeLayer<PropsT = {}> extends Layer<
   PropsT & Required<CompositeLayerProps>
 > {
   static layerName: string = 'CompositeLayer';
@@ -259,7 +259,7 @@ export default abstract class CompositeLayer<PropsT = any> extends Layer<
   }
 
   /** (Internal) Called after an update to rerender sub layers */
-  protected _postUpdate(updateParams: UpdateParameters<CompositeLayer>, forceUpdate: boolean) {
+  protected _postUpdate(updateParams: UpdateParameters<this>, forceUpdate: boolean) {
     // @ts-ignore (TS2531) this method is only called internally when internalState is defined
     let subLayers = this.internalState.subLayers as Layer[];
     const shouldUpdate = !subLayers || this.needsUpdate();
