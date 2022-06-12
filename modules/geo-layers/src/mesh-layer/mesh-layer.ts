@@ -68,6 +68,7 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
           type: GL.UNSIGNED_BYTE,
           size: 3,
           noAlloc: true,
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           update: this.calculateFeatureIdsPickingColors
         }
       });
