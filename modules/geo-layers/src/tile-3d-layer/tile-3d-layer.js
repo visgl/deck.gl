@@ -3,7 +3,7 @@ import {Geometry} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {default as _MeshLayer} from '../mesh-layer/mesh-layer';
+import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
@@ -282,7 +282,7 @@ export default class Tile3DLayer extends CompositeLayer {
         indices
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', _MeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({
