@@ -1,13 +1,24 @@
 import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
-import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
+
+import {
+  AccessorFunction,
+  CompositeLayer,
+  CompositeLayerProps,
+  COORDINATE_SYSTEM,
+  createIterable,
+  Layer,
+  LayersList,
+  log,
+  UpdateParameters,
+  WebMercatorViewport
+} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
-import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
-import {Tileset3D, TILE_TYPE} from '@loaders.gl/tiles';
+import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
@@ -26,7 +37,27 @@ const defaultProps = {
   _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
-export default class Tile3DLayer extends CompositeLayer {
+/** All properties supported by Tile3DLayer */
+export type Tile3dLayerLayerProps<DataT = any> = _Tile3dLayerLayerProps<DataT> &
+  CompositeLayerProps<DataT>;
+
+/** Props added by the Tile3DLayer */
+type _Tile3dLayerLayerProps<DataT> = {};
+
+// export default class Tile3DLayer extends CompositeLayer {
+export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_Tile3dLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps as any;
+  static layerName = 'Tile3DLayer';
+
+  state!: {
+    layerMap: {[layerId: string]: any};
+    tileset3d: Tileset3D | null;
+    activeViewports: {};
+    lastUpdatedViewports: {} | null;
+  };
+
   initializeState() {
     if ('onTileLoadFail' in this.props) {
       log.removed('onTileLoadFail', 'onTileError')();
@@ -40,9 +71,9 @@ export default class Tile3DLayer extends CompositeLayer {
     };
   }
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     const {tileset3d} = this.state;
-    return tileset3d && tileset3d.isLoaded();
+    return tileset3d !== null && tileset3d.isLoaded();
   }
 
   shouldUpdateState({changeFlags}) {
@@ -73,7 +104,7 @@ export default class Tile3DLayer extends CompositeLayer {
 
   activateViewport(viewport) {
     const {activeViewports, lastUpdatedViewports} = this.state;
-    this.internalState.viewport = viewport;
+    this.internalState!.viewport = viewport;
 
     activeViewports[viewport.id] = viewport;
     const lastViewport = lastUpdatedViewports?.[viewport.id];
@@ -112,6 +143,7 @@ export default class Tile3DLayer extends CompositeLayer {
     const {loadOptions = {}} = this.props;
 
     // TODO: deprecate `loader` in v9.0
+    // @ts-ignore
     let loader = this.props.loader || this.props.loaders;
     if (Array.isArray(loader)) {
       loader = loader[0];
@@ -134,7 +166,7 @@ export default class Tile3DLayer extends CompositeLayer {
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
-      onTileLoadFail: this.props.onTileError,
+      onTileError: this.props.onTileError,
       ...options
     });
 
@@ -352,6 +384,3 @@ function getMeshGeometry(contentAttributes) {
   }
   return attributes;
 }
-
-Tile3DLayer.layerName = 'Tile3DLayer';
-Tile3DLayer.defaultProps = defaultProps;
