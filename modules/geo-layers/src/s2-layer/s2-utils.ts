@@ -62,7 +62,7 @@ function getGeoBounds({
       offset[1] += stepJ;
       // Cell can be represented by coordinates IJ, ST, UV, XYZ
       // http://s2geometry.io/devguide/s2cell_hierarchy#coordinate-systems
-      const st = IJToST(ij, level, offset) as [number, number];
+      const st = IJToST(ij, level, offset);
       const uv = STToUV(st);
       const xyz = FaceUVToXYZ(face, uv);
       const lngLat = XYZToLngLat(xyz);

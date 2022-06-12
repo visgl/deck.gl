@@ -21,7 +21,11 @@ const MAX_LEVEL = 30;
 const POS_BITS = 2 * MAX_LEVEL + 1; // 61 (60 bits of data, 1 bit lsb marker)
 const RADIAN_TO_DEGREE = 180 / Math.PI;
 
-export function IJToST(ij: [number, number], order: number, offsets: [number, number]): number[] {
+export function IJToST(
+  ij: [number, number],
+  order: number,
+  offsets: [number, number]
+): [number, number] {
   const maxSize = 1 << order;
 
   return [(ij[0] + offsets[0]) / maxSize, (ij[1] + offsets[1]) / maxSize];
