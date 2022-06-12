@@ -18,22 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
+import {AccessorFunction} from '@deck.gl/core';
+import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 const defaultProps = {
   getS2Token: {type: 'accessor', value: d => d.token}
 };
 
-export default class S2Layer extends GeoCellLayer {
-  indexToBounds() {
+/** All properties supported by S2Layer. */
+export type S2LayerProps<DataT = any> = _S2LayerProps<DataT> & GeoCellLayerProps<DataT>;
+
+/** Properties added by S2Layer. */
+type _S2LayerProps<DataT = any> = {
+  /**
+   * Called for each data object to retrieve the quadkey string identifier.
+   *
+   * By default, it reads `token` property of data object.
+   */
+  getS2Token?: AccessorFunction<DataT, string>;
+};
+
+export default class S2Layer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+  DataT,
+  Required<_S2LayerProps> & ExtraProps
+> {
+  static layerName = 'S2Layer';
+  static defaultProps: any = defaultProps;
+
+  indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getS2Token} = this.props;
 
     return {
       data,
       _normalize: false,
       positionFormat: 'XY',
-      getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
     };
   }
 }

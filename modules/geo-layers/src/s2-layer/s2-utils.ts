@@ -14,7 +14,7 @@ import Long from 'long';
  * Given an S2 token this function convert the token to 64 bit id
    https://github.com/google/s2-geometry-library-java/blob/c04b68bf3197a9c34082327eeb3aec7ab7c85da1/src/com/google/common/geometry/S2CellId.java#L439
  * */
-function getIdFromToken(token) {
+function getIdFromToken(token: string): number {
   // pad token with zeros to make the length 16
   const paddedToken = token.padEnd(16, '0');
   return Long.fromString(paddedToken, 16);
@@ -24,7 +24,15 @@ const MAX_RESOLUTION = 100;
 
 /* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
 /* eslint-disable max-statements */
-function getGeoBounds({face, ij, level}) {
+function getGeoBounds({
+  face,
+  ij,
+  level
+}: {
+  face: number;
+  ij: [number, number];
+  level: number;
+}): Float64Array {
   const offsets = [
     [0, 0],
     [0, 1],
@@ -44,7 +52,7 @@ function getGeoBounds({face, ij, level}) {
   let prevLng = 0;
 
   for (let i = 0; i < 4; i++) {
-    const offset = offsets[i].slice(0);
+    const offset = offsets[i].slice(0) as [number, number];
     const nextOffset = offsets[i + 1];
     const stepI = (nextOffset[0] - offset[0]) / resolution;
     const stepJ = (nextOffset[1] - offset[1]) / resolution;
@@ -78,7 +86,7 @@ function getGeoBounds({face, ij, level}) {
 }
 /* eslint-enable max-statements */
 
-export function getS2QuadKey(token) {
+export function getS2QuadKey(token: string | number): string {
   if (typeof token === 'string') {
     if (token.indexOf('/') > 0) {
       // is Hilbert quad key
@@ -94,11 +102,10 @@ export function getS2QuadKey(token) {
 /**
  * Get a polygon with corner coordinates for an s2 cell
  * @param {*} cell - This can be an S2 key or token
- * @return {Array} - a simple polygon in array format: [[lng, lat], ...]
- *   - each coordinate is an array [lng, lat]
+ * @return {Float64Array} - a simple polygon in flat array format: [lng0, lat0, lng1, lat1, ...]
  *   - the polygon is closed, i.e. last coordinate is a copy of the first coordinate
  */
-export function getS2Polygon(token) {
+export function getS2Polygon(token: string | number): Float64Array {
   const key = getS2QuadKey(token);
   const s2cell = FromHilbertQuadKey(key);
 
