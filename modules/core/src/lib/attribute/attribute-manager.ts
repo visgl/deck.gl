@@ -298,7 +298,7 @@ export default class AttributeManager {
 
   // Returns shader attributes
   getShaderAttributes(
-    attributes: {[id: string]: Attribute},
+    attributes?: {[id: string]: Attribute},
     excludeAttributes: Record<string, boolean> = {}
   ): {[id: string]: IShaderAttribute} {
     if (!attributes) {

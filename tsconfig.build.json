@@ -6,7 +6,7 @@
     // "listEmittedFiles": true
   },
   "references": [
-    // {"path": "modules/aggregation-layers"},
+    {"path": "modules/aggregation-layers"},
     // {"path": "modules/arcgis"},
     {"path": "modules/carto"},
     {"path": "modules/core"},
@@ -16,7 +16,7 @@
     // {"path": "modules/json"},
     // {"path": "modules/jupyter-widget"},
     {"path": "modules/layers"},
-    // {"path": "modules/main"},
+    {"path": "modules/main"},
     {"path": "modules/mapbox"},
     {"path": "modules/mesh-layers"},
     {"path": "modules/react"},

@@ -99,6 +99,7 @@ export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
+export type {CoordinateSystem} from './lib/constants';
 export type {MapViewState} from './views/map-view';
 export type {FirstPersonViewState} from './views/first-person-view';
 export type {OrbitViewState} from './views/orbit-view';
@@ -121,6 +122,7 @@ export type {
   Texture
 } from './types/layer-props';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
-export type {ConstructorOf as _ConstructorOf} from './types/types';
+export type {ConstructorOf as _ConstructorOf, ShaderModule as _ShaderModule} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect} from './lib/effect';
+export type {PickingUniforms, ProjectUniforms} from './shaderlib';

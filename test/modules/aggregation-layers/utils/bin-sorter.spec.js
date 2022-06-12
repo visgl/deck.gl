@@ -52,7 +52,8 @@ test('BinSorter.init', t => {
       0: expectedSortedBins[0],
       1: expectedSortedBins[1],
       2: expectedSortedBins[2]
-    }
+    },
+    sortedBins: undefined
   };
 
   t.deepEqual(sortedBins, expectedResult, 'should create correct sorted bins');
