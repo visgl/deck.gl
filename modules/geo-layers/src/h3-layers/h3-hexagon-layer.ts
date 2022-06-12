@@ -10,7 +10,16 @@ import {
   H3IndexInput
 } from 'h3-js';
 import {lerp} from '@math.gl/core';
-import {AccessorFunction, CompositeLayer, CompositeLayerProps, createIterable} from '@deck.gl/core';
+import {
+  AccessorFunction,
+  CompositeLayer,
+  CompositeLayerProps,
+  createIterable,
+  Layer,
+  LayersList,
+  UpdateParameters,
+  WebMercatorViewport
+} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
@@ -154,26 +163,42 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
   static defaultProps = defaultProps as any;
   static layerName = 'H3HexagonLayer';
 
-  shouldUpdateState({changeFlags}) {
+  initializeState() {
+    this.state = {
+      edgeLengthKM: 0,
+      resolution: -1
+    };
+  }
+
+  state!: {
+    centerHex?: H3Index;
+    edgeLengthKM: number;
+    hasMultipleRes?: boolean;
+    hasPentagon?: boolean;
+    resolution: number;
+    vertices?: number[][];
+  };
+
+  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
     return this._shouldUseHighPrecision()
       ? changeFlags.propsOrDataChanged
       : changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({props, changeFlags}: UpdateParameters<this>): void {
     if (
       props.highPrecision !== true &&
       (changeFlags.dataChanged ||
-        (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
+        (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagon))
     ) {
       const dataProps = this._calculateH3DataProps(props);
       this.setState(dataProps);
     }
 
-    this._updateVertices(this.context.viewport);
+    this._updateVertices(this.context.viewport as WebMercatorViewport);
   }
 
-  _calculateH3DataProps(props) {
+  _calculateH3DataProps(props: H3HexagonLayerProps) {
     let resolution = -1;
     let hasPentagon = false;
     let hasMultipleRes = false;
@@ -181,7 +206,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     const {iterable, objectInfo} = createIterable(props.data);
     for (const object of iterable) {
       objectInfo.index++;
-      const hexId = props.getHexagon(object, objectInfo);
+      const hexId = props.getHexagon!(object, objectInfo);
       // Take the resolution of the first hex
       const hexResolution = h3GetResolution(hexId);
       if (resolution < 0) {
@@ -205,19 +230,22 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     };
   }
 
-  _shouldUseHighPrecision() {
+  _shouldUseHighPrecision(): boolean {
     if (this.props.highPrecision === 'auto') {
       const {resolution, hasPentagon, hasMultipleRes} = this.state;
       const {viewport} = this.context;
       return (
-        viewport.resolution || hasMultipleRes || hasPentagon || (resolution >= 0 && resolution <= 5)
+        Boolean(viewport?.resolution) ||
+        hasMultipleRes ||
+        hasPentagon ||
+        (resolution >= 0 && resolution <= 5)
       );
     }
 
     return this.props.highPrecision;
   }
 
-  _updateVertices(viewport) {
+  _updateVertices(viewport: WebMercatorViewport): void {
     if (this._shouldUseHighPrecision()) {
       return;
     }
@@ -256,7 +284,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     this.setState({centerHex: hex, vertices});
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
@@ -307,7 +335,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     };
   }
 
-  _renderPolygonLayer() {
+  _renderPolygonLayer(): PolygonLayer {
     const {data, getHexagon, updateTriggers, coverage} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
@@ -335,7 +363,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     );
   }
 
-  _renderColumnLayer() {
+  _renderColumnLayer(): ColumnLayer {
     const {data, getHexagon, updateTriggers} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
@@ -360,6 +388,3 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     );
   }
 }
-
-H3HexagonLayer.defaultProps = defaultProps;
-H3HexagonLayer.layerName = 'H3HexagonLayer';
