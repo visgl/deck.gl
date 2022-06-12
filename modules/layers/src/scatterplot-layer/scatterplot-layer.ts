@@ -25,9 +25,17 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
-import type {LayerProps, UpdateParameters, Accessor, Unit, Position, Color} from '@deck.gl/core';
+import type {
+  LayerProps,
+  UpdateParameters,
+  Accessor,
+  Unit,
+  Position,
+  Color,
+  DefaultProps
+} from '@deck.gl/core';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
@@ -121,9 +129,21 @@ type _ScatterplotLayerProps<DataT> = {
    * @default 1
    */
   getLineWidth?: Accessor<DataT, number>;
+  /**
+   * @deprecated Use `getLineWidth` instead
+   */
+  strokeWidth?: number;
+  /**
+   * @deprecated Use `stroked` instead
+   */
+  outline?: boolean;
+  /**
+   * @deprecated Use `getFillColor` and `getLineColor` instead
+   */
+  getColor?: Accessor<DataT, Color>;
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   radiusUnits: 'meters',
   radiusScale: {type: 'number', min: 0, value: 1},
   radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
@@ -154,7 +174,7 @@ const defaultProps = {
 export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
 > {
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
   getShaders() {
