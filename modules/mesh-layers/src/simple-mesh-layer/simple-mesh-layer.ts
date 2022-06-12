@@ -303,7 +303,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
       .draw();
   }
 
-  private getModel(mesh: Mesh): Model {
+  protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,
