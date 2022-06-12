@@ -26,11 +26,11 @@ const defaultProps = {
   featureIds: {type: 'array', value: null, optional: true}
 };
 
-/** All properties supported by _MeshLayer. */
-export type _MeshLayerProps<DataT = any> = __MeshLayerProps<DataT> & SimpleMeshLayerProps<DataT>;
+/** All properties supported by MeshLayer. */
+export type MeshLayerProps<DataT = any> = _MeshLayerProps<DataT> & SimpleMeshLayerProps<DataT>;
 
-/** Properties added by _MeshLayer. */
-type __MeshLayerProps<DataT = any> = {
+/** Properties added by MeshLayer. */
+type _MeshLayerProps<DataT = any> = {
   /**
    * PBR material object. _lighting must be pbr for this to work
    */
@@ -42,11 +42,11 @@ type __MeshLayerProps<DataT = any> = {
   featureIds: NumericArray;
 };
 
-export default class _MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshLayer<
+export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshLayer<
   DataT,
-  Required<__MeshLayerProps> & ExtraProps
+  Required<_MeshLayerProps> & ExtraProps
 > {
-  static layerName = '_MeshLayer';
+  static layerName = 'MeshLayer';
   static defaultProps: any = defaultProps;
 
   getShaders() {
