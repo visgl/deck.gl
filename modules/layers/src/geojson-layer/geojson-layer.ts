@@ -34,7 +34,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
 import {replaceInRange} from '../utils';
-import {binaryToFeatureForAccesor} from './geojson-binary';
+import {BinaryFeatureTypes, binaryToFeatureForAccesor} from './geojson-binary';
 import {
   POINT_LAYER,
   LINE_LAYER,
@@ -516,7 +516,7 @@ export default class GeoJsonLayer<
         if (type === 'text' && binary) {
           // Picking colors are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
-          // eslint-disable-next-line no-unused-vars
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
@@ -565,7 +565,7 @@ export default class GeoJsonLayer<
 
     return (object, info) => {
       const {data, index} = info;
-      const feature = binaryToFeatureForAccesor(data, index);
+      const feature = binaryToFeatureForAccesor(data as unknown as BinaryFeatureTypes, index);
       // @ts-ignore (TS2349) accessor is always function
       return accessor(feature, info);
     };

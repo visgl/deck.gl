@@ -44,7 +44,7 @@ const DIMENSIONS = {
 
 class TestAggregationLayer extends AggregationLayer {
   initializeState() {
-    super.initializeState(DIMENSIONS);
+    super.initializeAggregationLayer(DIMENSIONS);
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
       aOne: {

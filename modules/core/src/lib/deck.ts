@@ -286,7 +286,6 @@ export default class Deck {
   readonly height: number = 0;
   // Allows attaching arbitrary data to the instance
   readonly userData: Record<string, any> = {};
-  readonly gl: WebGLRenderingContext | null = null;
 
   protected canvas: HTMLCanvasElement | null = null;
   protected viewManager: ViewManager | null = null;
