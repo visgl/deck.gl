@@ -202,7 +202,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
     const {iterable, objectInfo} = createIterable(this.props.data);
     for (const object of iterable) {
       objectInfo.index++;
-      const hexId = this.props.getHexagon!(object, objectInfo);
+      const hexId = this.props.getHexagon(object, objectInfo);
       // Take the resolution of the first hex
       const hexResolution = h3GetResolution(hexId);
       if (resolution < 0) {
