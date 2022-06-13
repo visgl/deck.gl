@@ -82,7 +82,12 @@ export type LayerProps<DataType = any> = {
   /**
    * The data to visualize.
    */
-  data?: LayerData<DataType> | string | AsyncIterable<DataType> | Promise<LayerData<DataType>>;
+  data?:
+    | LayerData<DataType>
+    | string
+    | AsyncIterable<DataType>
+    | Promise<LayerData<DataType>>
+    | null;
   /**
    * Callback to determine if two data values are equal.
    */

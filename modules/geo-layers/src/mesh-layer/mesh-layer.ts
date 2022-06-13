@@ -3,7 +3,7 @@ import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
-import type {UpdateParameters} from '@deck.gl/core';
+import type {UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
@@ -21,7 +21,7 @@ function validateGeometryAttributes(attributes) {
   }
 }
 
-const defaultProps = {
+const defaultProps: DefaultProps<MeshLayerProps> = {
   pbrMaterial: {type: 'object', value: null},
   featureIds: {type: 'array', value: null, optional: true}
 };
@@ -30,7 +30,7 @@ const defaultProps = {
 export type MeshLayerProps<DataT = any> = _MeshLayerProps<DataT> & SimpleMeshLayerProps<DataT>;
 
 /** Properties added by MeshLayer. */
-type _MeshLayerProps<DataT = any> = {
+type _MeshLayerProps<DataT> = {
   /**
    * PBR material object. _lighting must be pbr for this to work
    */
@@ -39,15 +39,15 @@ type _MeshLayerProps<DataT = any> = {
   /**
    * List of feature ids.
    */
-  featureIds: NumericArray;
+  featureIds?: NumericArray | null;
 };
 
 export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshLayer<
   DataT,
-  Required<_MeshLayerProps> & ExtraProps
+  Required<_MeshLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'MeshLayer';
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
 
   getShaders() {
     const shaders = super.getShaders();
@@ -91,8 +91,9 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
+      // eslint-disable-next-line camelcase
       u_Camera: this.state.model.getUniforms().project_uCameraPosition,
-      u_pickFeatureIds: Boolean(featureIds)
+      pickFeatureIds: Boolean(featureIds)
     });
 
     super.draw(opts);
@@ -144,7 +145,8 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
   }
 
   calculateFeatureIdsPickingColors(attribute) {
-    const {featureIds} = this.props;
+    // This updater is only called if featureIds is not null
+    const featureIds = this.props.featureIds!;
     const value = new Uint8ClampedArray(featureIds.length * attribute.size);
 
     const pickingColor = [];

@@ -4,7 +4,7 @@ export default `#version 300 es
 // Scale the model
 uniform float sizeScale;
 uniform bool composeModelMatrix;
-uniform bool u_pickFeatureIds;
+uniform bool pickFeatureIds;
 
 // Primitive attributes
 in vec3 positions;
@@ -39,7 +39,7 @@ void main(void) {
   vec2 uv = applyUVRegion(texCoords);
   geometry.uv = uv;
 
-  if (u_pickFeatureIds) {
+  if (pickFeatureIds) {
     geometry.pickingColor = featureIdsPickingColors;
   } else {
     geometry.pickingColor = instancePickingColors;

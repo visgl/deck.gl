@@ -6,8 +6,7 @@ import {
   h3IsPentagon,
   h3Distance,
   edgeLength,
-  H3Index,
-  H3IndexInput
+  H3Index
 } from 'h3-js';
 import {lerp} from '@math.gl/core';
 import {
@@ -18,7 +17,8 @@ import {
   Layer,
   LayersList,
   UpdateParameters,
-  WebMercatorViewport
+  WebMercatorViewport,
+  DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
@@ -99,7 +99,7 @@ function mergeTriggers(getHexagon, coverage) {
   return trigger;
 }
 
-const defaultProps = {
+const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   ...PolygonLayer.defaultProps,
   highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
@@ -117,7 +117,7 @@ export type H3HexagonLayerProps<DataT = any> = _H3HexagonLayerProps<DataT> &
 type _H3HexagonLayerProps<DataT> = {
   /**
    * Whether or not draw hexagons with high precision.
-   * @default true
+   * @default 'auto'
    */
   highPrecision?: boolean | 'auto';
   /**
@@ -126,9 +126,9 @@ type _H3HexagonLayerProps<DataT> = {
    */
   coverage?: number;
   /**
-   * Center hexagon.
+   * Center hexagon that best represents the shape of the set. If not specified, the hexagon closest to the center of the viewport is used.
    */
-  centerHexagon?: H3Index;
+  centerHexagon?: H3Index | null;
   /**
    * Called for each data object to retrieve the quadkey string identifier.
    *
@@ -156,7 +156,7 @@ type _H3HexagonLayerProps<DataT> = {
 export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
   ExtraPropsT & Required<_H3HexagonLayerProps<DataT> & Required<PolygonLayerProps<DataT>>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
   static layerName = 'H3HexagonLayer';
 
   initializeState() {
