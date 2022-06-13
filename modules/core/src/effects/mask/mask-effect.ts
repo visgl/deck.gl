@@ -55,7 +55,7 @@ export default class MaskEffect implements Effect {
       });
     }
 
-    const maskLayers = layers.filter(l => l.props.operation === OPERATION.MASK && l.props.visible);
+    const maskLayers = layers.filter(l => l.props.visible && l.props.operation === OPERATION.MASK);
     if (maskLayers.length === 0) {
       this.masks = null;
       this.channels.length = 0;

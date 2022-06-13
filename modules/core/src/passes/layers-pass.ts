@@ -23,7 +23,7 @@ export type LayersPassRenderOptions = {
 
 type DrawLayerParameters = {
   shouldDrawLayer: boolean;
-  layerRenderIndex: number;
+  layerRenderIndex?: number;
   moduleParameters?: any;
   layerParameters?: any;
 };
@@ -125,17 +125,16 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      // This is the "logical" index for ordering this layer in the stack
-      // used to calculate polygon offsets
-      // It can be the same as another layer
-      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
-
       const layerParam: DrawLayerParameters = {
-        shouldDrawLayer,
-        layerRenderIndex
+        shouldDrawLayer
       };
 
       if (shouldDrawLayer) {
+        // This is the "logical" index for ordering this layer in the stack
+        // used to calculate polygon offsets
+        // It can be the same as another layer
+        layerParam.layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+
         layerParam.moduleParameters = this._getModuleParameters(
           layer,
           effects,
@@ -241,7 +240,7 @@ export default class LayersPass extends Pass {
     layerFilter: ((params: FilterContext) => boolean) | undefined,
     layerFilterCache: Record<string, boolean>
   ) {
-    const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
+    const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
     if (!shouldDrawLayer) {
       return false;
