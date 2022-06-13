@@ -67,7 +67,7 @@ type _Tile3dLayerProps<DataT> = {
   /** Called when a tile fails to load. **/
   onTileError?: (tile: Tile3D, url: string, message: string) => void;
 
-  /** Accessor to change color of mesh based on properties. **/
+  /** (Experimental) Accessor to change color of mesh based on properties. **/
   _getMeshColor?: (tile: Tile3D) => Color;
 };
 
