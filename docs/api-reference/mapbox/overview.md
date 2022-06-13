@@ -33,8 +33,9 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 
 ## Use Cases
 
-One should note that this module is *not required* to use mapbox-gl as a base map for deck.gl. It is easier to understand the concepts of the module if you are already a mapbox-gl developer. Visit the [mapbox base map developer guide](/docs/developer-guide/base-maps/using-with-mapbox.md) for a complete list of your options.
+One should note that this module is *not required* to use mapbox-gl as a base map for deck.gl. When you use this module, Mapbox is the root element and deck.gl is the child, with Mapbox handling all user inputs. Some of deck.gl's features are therefore unavailable due to limitations of mapbox-gl's API, see [limitations](#limitations) below. If you just want the base map as a back drop, and do not need mapbox-gl's UI controls or mixing deck and Mapbox layers, it is recommended that you use deck.gl as the root element. Visit the [mapbox base map developer guide](/docs/developer-guide/base-maps/using-with-mapbox.md) for examples of each option.
 
+It may be easier to understand the concepts of the module if you are already a mapbox-gl developer.
 
 ### Mixing deck.gl layers and Mapbox layers
 
