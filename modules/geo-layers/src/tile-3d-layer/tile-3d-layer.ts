@@ -3,6 +3,7 @@ import {Geometry} from '@luma.gl/core';
 
 import {
   AccessorFunction,
+  Color,
   CompositeLayer,
   CompositeLayerProps,
   COORDINATE_SYSTEM,
@@ -18,6 +19,7 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
 import {load} from '@loaders.gl/core';
+import {MeshAttributes} from '@loaders.gl/schema';
 import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
@@ -38,11 +40,34 @@ const defaultProps = {
 };
 
 /** All properties supported by Tile3DLayer */
-export type Tile3dLayerLayerProps<DataT = any> = _Tile3dLayerLayerProps<DataT> &
-  CompositeLayerProps<DataT>;
+export type Tile3dLayerProps<DataT = any> = _Tile3dLayerProps<DataT> & CompositeLayerProps<DataT>;
 
 /** Props added by the Tile3DLayer */
-type _Tile3dLayerLayerProps<DataT> = {};
+type _Tile3dLayerProps<DataT> = {
+  /** Color Accessor for point clouds. **/
+  getPointColor?: AccessorFunction<DataT, Color>;
+
+  /** Global radius of all points in pixels. **/
+  pointSize?: number;
+
+  /** A loader which is used to decode the fetched tiles. **/
+  loader?: typeof Tiles3DLoader;
+
+  /** Called when Tileset JSON file is loaded. **/
+  onTilesetLoad?: (tile: Tileset3D) => void;
+
+  /** Called when a tile in the tileset hierarchy is loaded. **/
+  onTileLoad?: (tile: Tile3D) => void;
+
+  /** Called when a tile is unloaded. **/
+  onTileUnload?: (tile: Tile3D) => void;
+
+  /** Called when a tile fails to load. **/
+  onTileError?: (tile: Tile3D, url: string, message: string) => void;
+
+  /** Accessor to change color of mesh based on properties. **/
+  _getMeshColor?: (tile: Tile3D) => Color;
+};
 
 // export default class Tile3DLayer extends CompositeLayer {
 export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
@@ -52,10 +77,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   static layerName = 'Tile3DLayer';
 
   state!: {
+    activeViewports: {};
+    frameNumber?: number;
+    lastUpdatedViewports: {} | null;
     layerMap: {[layerId: string]: any};
     tileset3d: Tileset3D | null;
-    activeViewports: {};
-    lastUpdatedViewports: {} | null;
   };
 
   initializeState() {
@@ -207,7 +233,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
     });
   }
 
-  _getSubLayer(tileHeader, oldLayer) {
+  _getSubLayer(tileHeader: Tile3D, oldLayer?: Layer) {
     if (!tileHeader.content) {
       return null;
     }
@@ -216,7 +242,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
       case TILE_TYPE.POINTCLOUD:
         return this._makePointCloudLayer(tileHeader, oldLayer);
       case TILE_TYPE.SCENEGRAPH:
-        return this._make3DModelLayer(tileHeader, oldLayer);
+        return this._make3DModelLayer(tileHeader);
       case TILE_TYPE.MESH:
         return this._makeSimpleMeshLayer(tileHeader, oldLayer);
       default:
@@ -342,7 +368,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
       return null;
     }
 
-    return tileset3d.tiles
+    // loaders.gl doesn't provide a type for tileset3d.tiles
+    return (tileset3d.tiles as Tile3D[])
       .map(tile => {
         const layerCache = (layerMap[tile.id] = layerMap[tile.id] || {tile});
         let {layer} = layerCache;
@@ -364,8 +391,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 }
 
-function getMeshGeometry(contentAttributes) {
-  const attributes = {};
+function getMeshGeometry(contentAttributes: MeshAttributes): MeshAttributes {
+  const attributes: MeshAttributes = {};
   attributes.positions = {
     ...contentAttributes.positions,
     value: new Float32Array(contentAttributes.positions.value)
