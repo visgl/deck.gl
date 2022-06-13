@@ -6,6 +6,7 @@ import {
   UpdateParameters,
   PickingInfo,
   GetPickingInfoParams,
+  DefaultProps,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -16,9 +17,9 @@ import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from '.
 import {TileLoadProps, ZRange} from './types';
 import {urlType, getURLFromTemplate} from './utils';
 
-const defaultProps = {
+const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
-  data: [],
+  data: {type: 'data', value: []},
   dataComparator: urlType.equals,
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', optional: true, value: null, compare: false},
@@ -41,7 +42,7 @@ const defaultProps = {
 };
 
 /** All props supported by the TileLayer */
-export type TileLayerProps<DataT = any> = _TileLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type TileLayerProps<DataT = any> = CompositeLayerProps<any> & _TileLayerProps<DataT>;
 
 /** Props added by the TileLayer */
 type _TileLayerProps<DataT> = {
@@ -63,10 +64,10 @@ type _TileLayerProps<DataT> = {
   /**
    * If supplied, `getTileData` is called to retrieve the data of each tile.
    */
-  getTileData?: (props: TileLoadProps) => Promise<DataT> | DataT;
+  getTileData?: ((props: TileLoadProps) => Promise<DataT> | DataT) | null;
 
   /** Called when all tiles in the current viewport are loaded. */
-  onViewportLoad?: (tiles: Tile2DHeader<DataT>[]) => void;
+  onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
 
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;

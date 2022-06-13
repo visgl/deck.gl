@@ -30,19 +30,20 @@ import {
   AccessorFunction,
   Position,
   Accessor,
-  Color
+  Color,
+  Material,
+  DefaultProps
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
-import {MaterialProps} from '../types';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
-const DEFAULT_NORMAL = [0, 0, 1];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
 
-const defaultProps = {
+const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
 
@@ -94,11 +95,17 @@ type _PointCloudLayerProps<DataT> = {
   pointSize?: number;
 
   /**
-   * This is an object that contains material props
-   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-   * @default true
+   * @deprecated Use `pointSize` instead
    */
-  material?: MaterialProps | boolean;
+  radiusPixels?: number;
+
+  /**
+   * Material settings for lighting effect.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
+   */
+  material?: Material;
 
   /**
    * Method called to retrieve the position of each object.

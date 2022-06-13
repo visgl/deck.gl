@@ -2,7 +2,7 @@ import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
 
 import {
-  AccessorFunction,
+  Accessor,
   Color,
   CompositeLayer,
   CompositeLayerProps,
@@ -14,7 +14,8 @@ import {
   log,
   PickingInfo,
   UpdateParameters,
-  Viewport
+  Viewport,
+  DefaultProps
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
@@ -27,10 +28,11 @@ import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
 
-const defaultProps = {
+const defaultProps: DefaultProps<Tile3dLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
+  // @ts-expect-error Disable async data loading (handling it in _loadTileSet)
   data: null,
   loader: Tiles3DLoader,
 
@@ -47,12 +49,14 @@ export type Tile3dLayerProps<DataT = any> = _Tile3dLayerProps<DataT> & Composite
 /** Props added by the Tile3DLayer */
 type _Tile3dLayerProps<DataT> = {
   /** Color Accessor for point clouds. **/
-  getPointColor?: AccessorFunction<DataT, Color>;
+  getPointColor?: Accessor<DataT, Color>;
 
   /** Global radius of all points in pixels. **/
   pointSize?: number;
 
-  /** A loader which is used to decode the fetched tiles. **/
+  /** A loader which is used to decode the fetched tiles.
+   * @deprecated Use `loaders` instead
+   */
   loader?: typeof Tiles3DLoader;
 
   /** Called when Tileset JSON file is loaded. **/

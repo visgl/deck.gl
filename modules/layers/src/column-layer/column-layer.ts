@@ -31,7 +31,9 @@ import {
   AccessorFunction,
   Position,
   Accessor,
-  Color
+  Color,
+  Material,
+  DefaultProps
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, isWebGL2, hasFeature, FEATURES} from '@luma.gl/core';
@@ -39,11 +41,10 @@ import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
-import {_MaterialProps as MaterialProps} from '..';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
   vertices: null,
   radius: {type: 'number', min: 0, value: 1000},
@@ -72,7 +73,7 @@ const defaultProps = {
 };
 
 /** All properties supported by ColumnLayer. */
-export type ColumnLayerProps<DataT> = _ColumnLayerProps<DataT> & LayerProps<DataT>;
+export type ColumnLayerProps<DataT = any> = _ColumnLayerProps<DataT> & LayerProps<DataT>;
 
 /** Properties added by ColumnLayer. */
 type _ColumnLayerProps<DataT> = {
@@ -179,17 +180,23 @@ type _ColumnLayerProps<DataT> = {
   lineWidthMaxPixels?: number;
 
   /**
-   * This is an object that contains material props
-   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
+   * Material settings for lighting effect. Applies if `extruded: true`.
+   *
    * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
    */
-  material?: MaterialProps | boolean;
+  material?: Material;
 
   /**
    * Method called to retrieve the position of each column.
    * @default object => object.position
    */
   getPosition?: AccessorFunction<DataT, Position>;
+
+  /**
+   * @deprecated Use getFilledColor and getLineColor instead
+   */
+  getColor?: Accessor<DataT, Color>;
 
   /**
    * Fill collor value or accessor.

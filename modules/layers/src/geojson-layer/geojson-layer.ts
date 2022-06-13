@@ -26,8 +26,10 @@ import {
   Layer,
   PickingInfo,
   Unit,
+  Material,
   UpdateParameters,
-  _ConstructorOf
+  _ConstructorOf,
+  DefaultProps
 } from '@deck.gl/core';
 
 import type {BinaryFeatures} from '@loaders.gl/schema';
@@ -45,7 +47,6 @@ import {
 
 import {getGeojsonFeatures, SeparatedGeometries, separateGeojsonFeatures} from './geojson';
 import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
-import {MaterialProps} from '../types';
 
 /** All properties supported by GeoJsonLayer */
 export type GeoJsonLayerProps<DataT extends Feature = Feature> = _GeoJsonLayerProps<DataT> &
@@ -216,12 +217,12 @@ type _GeoJsonLayer3DProps<DataT> = {
   elevationScale?: boolean;
 
   /**
-   * Material props for lighting effect.
+   * Material settings for lighting effect. Applies to extruded polgons.
    *
    * @default true
-   * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
+   * @see https://deck.gl/docs/developer-guide/using-lighting
    */
-  material?: true | MaterialProps | null;
+  material?: Material;
 };
 
 /** GeoJsonLayer Properties forwarded to `ScatterPlotLayer` if `pointType` is `'circle'` */
@@ -287,7 +288,7 @@ type _GeojsonLayerTextPointProps<DataT> = {
 
 const FEATURE_TYPES = ['points', 'linestrings', 'polygons'];
 
-const defaultProps = {
+const defaultProps: DefaultProps<GeoJsonLayerProps> = {
   ...getDefaultProps(POINT_LAYER.circle),
   ...getDefaultProps(POINT_LAYER.icon),
   ...getDefaultProps(POINT_LAYER.text),

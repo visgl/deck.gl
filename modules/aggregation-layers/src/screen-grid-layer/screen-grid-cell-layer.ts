@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, FEATURES, hasFeatures, Texture2D} from '@luma.gl/core';
+import {Model, Geometry, FEATURES, hasFeatures, Texture2D, DefaultProps} from '@luma.gl/core';
 import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
@@ -30,7 +30,7 @@ const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
-const defaultProps = {
+const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
   cellSizePixels: {value: 100, min: 1},
   cellMarginPixels: {value: 2, min: 0, max: 5},
 
@@ -39,7 +39,8 @@ const defaultProps = {
 };
 
 /** All properties supported by ScreenGridCellLayer. */
-export type ScreenGridCellLayerProps<DataT> = _ScreenGridCellLayerProps<DataT> & LayerProps<DataT>;
+export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<DataT> &
+  LayerProps<DataT>;
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {

@@ -168,7 +168,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Create smooth transitions when prop values update.
    */
-  transitions?: Record<string, any>;
+  transitions?: Record<string, any> | null;
   /**
    * Add additional functionalities to this layer.
    */

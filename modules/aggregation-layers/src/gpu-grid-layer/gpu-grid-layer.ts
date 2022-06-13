@@ -24,13 +24,14 @@ import {
   Accessor,
   AccessorFunction,
   Color,
+  Material,
   GetPickingInfoParams,
   LayerContext,
   log,
   PickingInfo,
-  Position
+  Position,
+  DefaultProps
 } from '@deck.gl/core';
-import {_MaterialProps as MaterialProps} from '@deck.gl/layers';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
@@ -40,7 +41,7 @@ import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
 
-const defaultProps = {
+const defaultProps: DefaultProps<GPUGridLayerProps> = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -129,11 +130,12 @@ export type _GPUGridLayerProps<DataT> = {
   extruded?: boolean;
 
   /**
-   * This is an object that contains material props
-   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
+   * Material settings for lighting effect. Applies if `extruded: true`.
+   *
    * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
    */
-  material?: MaterialProps | null;
+  material?: Material;
 
   /**
    * Defines the operation used to aggregate all data object weights to calculate a cell's color value.

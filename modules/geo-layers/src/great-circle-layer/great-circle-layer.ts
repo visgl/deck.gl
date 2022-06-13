@@ -17,26 +17,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
+import {DefaultProps} from '@deck.gl/core';
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 
-const defaultProps = {
+const defaultProps: DefaultProps<ArcLayerProps> = {
   getHeight: {type: 'accessor', value: 0},
   greatCircle: true
 };
 
 /** All properties supported by GreatCircleLayer. */
-export type GreatCircleLayerProps<DataT = any> = _GreatCircleLayerProps<DataT> &
-  ArcLayerProps<DataT>;
-
-/** Properties added by GreatCircleLayer. */
-type _GreatCircleLayerProps<DataT = any> = {};
+export type GreatCircleLayerProps<DataT = any> = ArcLayerProps<DataT>;
 
 // This layer has been merged into the core ArcLayer
 // Keeping for backward-compatibility
+/** @deprecated Use ArcLayer with `greatCircle: true` instead */
 export default class GreatCircleLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
   DataT,
-  Required<_GreatCircleLayerProps<DataT>> & ExtraProps
+  ExtraProps
 > {
   static layerName = 'GreatCircleLayer';
   static defaultProps: any = defaultProps;
