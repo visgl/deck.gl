@@ -32,6 +32,7 @@ const defaultProps: DefaultProps<Tile3dLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
+  // @ts-expect-error Disable async data loading (handling it in _loadTileSet)
   data: null,
   loader: Tiles3DLoader,
 
