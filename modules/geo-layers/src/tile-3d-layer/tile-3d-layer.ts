@@ -1,13 +1,28 @@
 import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/core';
-import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
+
+import {
+  AccessorFunction,
+  Color,
+  CompositeLayer,
+  CompositeLayerProps,
+  COORDINATE_SYSTEM,
+  FilterContext,
+  GetPickingInfoParams,
+  Layer,
+  LayersList,
+  log,
+  PickingInfo,
+  UpdateParameters,
+  Viewport
+} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
-import {log} from '@deck.gl/core';
 
 import {load} from '@loaders.gl/core';
-import {Tileset3D, TILE_TYPE} from '@loaders.gl/tiles';
+import {MeshAttributes} from '@loaders.gl/schema';
+import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
@@ -26,7 +41,50 @@ const defaultProps = {
   _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
 };
 
-export default class Tile3DLayer extends CompositeLayer {
+/** All properties supported by Tile3DLayer */
+export type Tile3dLayerProps<DataT = any> = _Tile3dLayerProps<DataT> & CompositeLayerProps<DataT>;
+
+/** Props added by the Tile3DLayer */
+type _Tile3dLayerProps<DataT> = {
+  /** Color Accessor for point clouds. **/
+  getPointColor?: AccessorFunction<DataT, Color>;
+
+  /** Global radius of all points in pixels. **/
+  pointSize?: number;
+
+  /** A loader which is used to decode the fetched tiles. **/
+  loader?: typeof Tiles3DLoader;
+
+  /** Called when Tileset JSON file is loaded. **/
+  onTilesetLoad?: (tile: Tileset3D) => void;
+
+  /** Called when a tile in the tileset hierarchy is loaded. **/
+  onTileLoad?: (tile: Tile3D) => void;
+
+  /** Called when a tile is unloaded. **/
+  onTileUnload?: (tile: Tile3D) => void;
+
+  /** Called when a tile fails to load. **/
+  onTileError?: (tile: Tile3D, url: string, message: string) => void;
+
+  /** (Experimental) Accessor to change color of mesh based on properties. **/
+  _getMeshColor?: (tile: Tile3D) => Color;
+};
+
+export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_Tile3dLayerProps<DataT>>
+> {
+  static defaultProps = defaultProps as any;
+  static layerName = 'Tile3DLayer';
+
+  state!: {
+    activeViewports: {};
+    frameNumber?: number;
+    lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
+    layerMap: {[layerId: string]: any};
+    tileset3d: Tileset3D | null;
+  };
+
   initializeState() {
     if ('onTileLoadFail' in this.props) {
       log.removed('onTileLoadFail', 'onTileError')();
@@ -40,16 +98,16 @@ export default class Tile3DLayer extends CompositeLayer {
     };
   }
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     const {tileset3d} = this.state;
-    return tileset3d && tileset3d.isLoaded();
+    return tileset3d !== null && tileset3d.isLoaded();
   }
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
     return changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.data && props.data !== oldProps.data) {
       this._loadTileset(props.data);
     }
@@ -71,9 +129,9 @@ export default class Tile3DLayer extends CompositeLayer {
     }
   }
 
-  activateViewport(viewport) {
+  activateViewport(viewport: Viewport): void {
     const {activeViewports, lastUpdatedViewports} = this.state;
-    this.internalState.viewport = viewport;
+    this.internalState!.viewport = viewport;
 
     activeViewports[viewport.id] = viewport;
     const lastViewport = lastUpdatedViewports?.[viewport.id];
@@ -83,7 +141,7 @@ export default class Tile3DLayer extends CompositeLayer {
     }
   }
 
-  getPickingInfo({info, sourceLayer}) {
+  getPickingInfo({info, sourceLayer}: GetPickingInfoParams) {
     const {layerMap} = this.state;
     const layerId = sourceLayer && sourceLayer.id;
     if (layerId) {
@@ -96,22 +154,24 @@ export default class Tile3DLayer extends CompositeLayer {
     return info;
   }
 
-  filterSubLayer({layer, viewport}) {
-    const {tile} = layer.props;
+  filterSubLayer({layer, viewport}: FilterContext): boolean {
+    // All sublayers will have a tile prop
+    const {tile} = layer.props as unknown as {tile: Tile3D};
     const {id: viewportId} = viewport;
     return tile.selected && tile.viewportIds.includes(viewportId);
   }
 
-  _updateAutoHighlight(info) {
+  protected _updateAutoHighlight(info: PickingInfo): void {
     if (info.sourceLayer) {
       info.sourceLayer.updateAutoHighlight(info);
     }
   }
 
-  async _loadTileset(tilesetUrl) {
+  private async _loadTileset(tilesetUrl) {
     const {loadOptions = {}} = this.props;
 
     // TODO: deprecate `loader` in v9.0
+    // @ts-ignore
     let loader = this.props.loader || this.props.loaders;
     if (Array.isArray(loader)) {
       loader = loader[0];
@@ -134,7 +194,7 @@ export default class Tile3DLayer extends CompositeLayer {
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
-      onTileLoadFail: this.props.onTileError,
+      onTileError: this.props.onTileError,
       ...options
     });
 
@@ -147,20 +207,23 @@ export default class Tile3DLayer extends CompositeLayer {
     this.props.onTilesetLoad(tileset3d);
   }
 
-  _onTileLoad(tileHeader) {
+  private _onTileLoad(tileHeader: Tile3D): void {
     const {lastUpdatedViewports} = this.state;
     this.props.onTileLoad(tileHeader);
     this._updateTileset(lastUpdatedViewports);
     this.setNeedsUpdate();
   }
 
-  _onTileUnload(tileHeader) {
+  private _onTileUnload(tileHeader: Tile3D): void {
     // Was cleaned up from tileset cache. We no longer need to track it.
     delete this.state.layerMap[tileHeader.id];
     this.props.onTileUnload(tileHeader);
   }
 
-  _updateTileset(viewports) {
+  private _updateTileset(viewports: {[viewportId: string]: Viewport} | null): void {
+    if (!viewports) {
+      return;
+    }
     const {tileset3d} = this.state;
     const {timeline} = this.context;
     const viewportsNumber = Object.keys(viewports).length;
@@ -175,24 +238,30 @@ export default class Tile3DLayer extends CompositeLayer {
     });
   }
 
-  _getSubLayer(tileHeader, oldLayer) {
+  private _getSubLayer(
+    tileHeader: Tile3D,
+    oldLayer?: Layer
+  ): MeshLayer<DataT> | PointCloudLayer<DataT> | ScenegraphLayer<DataT> | null {
     if (!tileHeader.content) {
       return null;
     }
 
     switch (tileHeader.type) {
       case TILE_TYPE.POINTCLOUD:
-        return this._makePointCloudLayer(tileHeader, oldLayer);
+        return this._makePointCloudLayer(tileHeader, oldLayer as PointCloudLayer<DataT>);
       case TILE_TYPE.SCENEGRAPH:
-        return this._make3DModelLayer(tileHeader, oldLayer);
+        return this._make3DModelLayer(tileHeader);
       case TILE_TYPE.MESH:
-        return this._makeSimpleMeshLayer(tileHeader, oldLayer);
+        return this._makeSimpleMeshLayer(tileHeader, oldLayer as MeshLayer<DataT>);
       default:
         throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
   }
 
-  _makePointCloudLayer(tileHeader, oldLayer) {
+  private _makePointCloudLayer(
+    tileHeader: Tile3D,
+    oldLayer?: PointCloudLayer<DataT>
+  ): PointCloudLayer<DataT> | null {
     const {attributes, pointCount, constantRGBA, cartographicOrigin, modelMatrix} =
       tileHeader.content;
     const {positions, normals, colors} = attributes;
@@ -233,7 +302,7 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  _make3DModelLayer(tileHeader) {
+  private _make3DModelLayer(tileHeader: Tile3D): ScenegraphLayer<DataT> {
     const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
@@ -261,7 +330,7 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  _makeSimpleMeshLayer(tileHeader, oldLayer) {
+  private _makeSimpleMeshLayer(tileHeader: Tile3D, oldLayer?: MeshLayer<DataT>): MeshLayer<DataT> {
     const content = tileHeader.content;
     const {
       attributes,
@@ -304,13 +373,14 @@ export default class Tile3DLayer extends CompositeLayer {
     );
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     const {tileset3d, layerMap} = this.state;
     if (!tileset3d) {
       return null;
     }
 
-    return tileset3d.tiles
+    // loaders.gl doesn't provide a type for tileset3d.tiles
+    return (tileset3d.tiles as Tile3D[])
       .map(tile => {
         const layerCache = (layerMap[tile.id] = layerMap[tile.id] || {tile});
         let {layer} = layerCache;
@@ -332,8 +402,8 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 }
 
-function getMeshGeometry(contentAttributes) {
-  const attributes = {};
+function getMeshGeometry(contentAttributes: MeshAttributes): MeshAttributes {
+  const attributes: MeshAttributes = {};
   attributes.positions = {
     ...contentAttributes.positions,
     value: new Float32Array(contentAttributes.positions.value)
@@ -352,6 +422,3 @@ function getMeshGeometry(contentAttributes) {
   }
   return attributes;
 }
-
-Tile3DLayer.layerName = 'Tile3DLayer';
-Tile3DLayer.defaultProps = defaultProps;

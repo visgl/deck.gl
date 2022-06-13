@@ -121,6 +121,7 @@ export type {
   Color,
   Texture
 } from './types/layer-props';
+export type {FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf, ShaderModule as _ShaderModule} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
