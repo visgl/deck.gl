@@ -6,11 +6,21 @@ import {
   h3IsPentagon,
   h3Distance,
   edgeLength,
-  UNITS
+  H3Index,
+  H3IndexInput
 } from 'h3-js';
 import {lerp} from '@math.gl/core';
-import {CompositeLayer, createIterable} from '@deck.gl/core';
-import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
+import {
+  AccessorFunction,
+  CompositeLayer,
+  CompositeLayerProps,
+  createIterable,
+  Layer,
+  LayersList,
+  UpdateParameters,
+  WebMercatorViewport
+} from '@deck.gl/core';
+import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
 // This constant defines the distance between two hexagons that leads to "significant
@@ -18,7 +28,7 @@ import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 const UPDATE_THRESHOLD_KM = 10;
 
 // normalize longitudes w.r.t center (refLng), when not provided first vertex
-export function normalizeLongitudes(vertices, refLng) {
+export function normalizeLongitudes(vertices: number[][], refLng?: number): void {
   refLng = refLng === undefined ? vertices[0][0] : refLng;
   for (const pt of vertices) {
     const deltaLng = pt[0] - refLng;
@@ -31,7 +41,7 @@ export function normalizeLongitudes(vertices, refLng) {
 }
 
 // scale polygon vertices w.r.t center (hexId)
-export function scalePolygon(hexId, vertices, factor) {
+export function scalePolygon(hexId: H3Index, vertices: number[][], factor: number): void {
   const [lat, lng] = h3ToGeo(hexId);
   const actualCount = vertices.length;
 
@@ -53,7 +63,7 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-function h3ToPolygon(hexId, coverage = 1, flatten) {
+function h3ToPolygon(hexId: H3Index, coverage: number = 1): number[][] {
   const vertices = h3ToGeoBoundary(hexId, true);
 
   if (coverage !== 1) {
@@ -64,17 +74,17 @@ function h3ToPolygon(hexId, coverage = 1, flatten) {
     normalizeLongitudes(vertices);
   }
 
-  if (flatten) {
-    const positions = new Float64Array(vertices.length * 2);
-    let i = 0;
-    for (const pt of vertices) {
-      positions[i++] = pt[0];
-      positions[i++] = pt[1];
-    }
-    return positions;
-  }
-
   return vertices;
+}
+
+function flattenPolygon(vertices: number[][]): Float64Array {
+  const positions = new Float64Array(vertices.length * 2);
+  let i = 0;
+  for (const pt of vertices) {
+    positions[i++] = pt[0];
+    positions[i++] = pt[1];
+  }
+  return positions;
 }
 
 function mergeTriggers(getHexagon, coverage) {
@@ -98,8 +108,39 @@ const defaultProps = {
   extruded: true
 };
 
-// not supported
-delete defaultProps.getLineDashArray;
+/** All properties supported by H3HexagonLayer */
+export type H3HexagonLayerProps<DataT = any> = _H3HexagonLayerProps<DataT> &
+  PolygonLayerProps<DataT> &
+  CompositeLayerProps<DataT>;
+
+/** Props added by the H3HexagonLayer */
+type _H3HexagonLayerProps<DataT> = {
+  /**
+   * Whether or not draw hexagons with high precision.
+   * @default true
+   */
+  highPrecision?: boolean | 'auto';
+  /**
+   * Coverage of hexagon in cell.
+   * @default 1
+   */
+  coverage?: number;
+  /**
+   * Center hexagon.
+   */
+  centerHexagon?: H3Index;
+  /**
+   * Called for each data object to retrieve the quadkey string identifier.
+   *
+   * By default, it reads `hexagon` property of data object.
+   */
+  getHexagon?: AccessorFunction<DataT, string>;
+  /**
+   * Whether to extrude polygons.
+   * @default true
+   */
+  extruded?: boolean;
+};
 
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
@@ -112,40 +153,61 @@ delete defaultProps.getLineDashArray;
  * even when no corresponding hexagon is in the data set. You can check
  * index !== -1 to see if picking matches an actual object.
  */
-export default class H3HexagonLayer extends CompositeLayer {
-  shouldUpdateState({changeFlags}) {
+export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_H3HexagonLayerProps<DataT> & Required<PolygonLayerProps<DataT>>>
+> {
+  static defaultProps = defaultProps as any;
+  static layerName = 'H3HexagonLayer';
+
+  initializeState() {
+    this.state = {
+      edgeLengthKM: 0,
+      resolution: -1
+    };
+  }
+
+  state!: {
+    centerHex?: H3Index;
+    edgeLengthKM: number;
+    hasMultipleRes?: boolean;
+    hasPentagon?: boolean;
+    resolution: number;
+    vertices?: number[][];
+  };
+
+  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
     return this._shouldUseHighPrecision()
       ? changeFlags.propsOrDataChanged
       : changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({props, changeFlags}: UpdateParameters<this>): void {
     if (
       props.highPrecision !== true &&
       (changeFlags.dataChanged ||
-        (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon))
+        (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagon))
     ) {
-      const dataProps = this._calculateH3DataProps(props);
+      const dataProps = this._calculateH3DataProps();
       this.setState(dataProps);
     }
 
-    this._updateVertices(this.context.viewport);
+    this._updateVertices(this.context.viewport as WebMercatorViewport);
   }
 
-  _calculateH3DataProps(props) {
+  private _calculateH3DataProps() {
     let resolution = -1;
     let hasPentagon = false;
     let hasMultipleRes = false;
 
-    const {iterable, objectInfo} = createIterable(props.data);
+    const {iterable, objectInfo} = createIterable(this.props.data);
     for (const object of iterable) {
       objectInfo.index++;
-      const hexId = props.getHexagon(object, objectInfo);
+      const hexId = this.props.getHexagon(object, objectInfo);
       // Take the resolution of the first hex
       const hexResolution = h3GetResolution(hexId);
       if (resolution < 0) {
         resolution = hexResolution;
-        if (!props.highPrecision) break;
+        if (!this.props.highPrecision) break;
       } else if (resolution !== hexResolution) {
         hasMultipleRes = true;
         break;
@@ -158,25 +220,28 @@ export default class H3HexagonLayer extends CompositeLayer {
 
     return {
       resolution,
-      edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
+      edgeLengthKM: resolution >= 0 ? edgeLength(resolution, 'km') : 0,
       hasMultipleRes,
       hasPentagon
     };
   }
 
-  _shouldUseHighPrecision() {
+  private _shouldUseHighPrecision(): boolean {
     if (this.props.highPrecision === 'auto') {
       const {resolution, hasPentagon, hasMultipleRes} = this.state;
       const {viewport} = this.context;
       return (
-        viewport.resolution || hasMultipleRes || hasPentagon || (resolution >= 0 && resolution <= 5)
+        Boolean(viewport?.resolution) ||
+        hasMultipleRes ||
+        hasPentagon ||
+        (resolution >= 0 && resolution <= 5)
       );
     }
 
     return this.props.highPrecision;
   }
 
-  _updateVertices(viewport) {
+  private _updateVertices(viewport: WebMercatorViewport): void {
     if (this._shouldUseHighPrecision()) {
       return;
     }
@@ -215,11 +280,11 @@ export default class H3HexagonLayer extends CompositeLayer {
     this.setState({centerHex: hex, vertices});
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
-  _getForwardProps() {
+  private _getForwardProps() {
     const {
       elevationScale,
       material,
@@ -262,16 +327,22 @@ export default class H3HexagonLayer extends CompositeLayer {
         getElevation: updateTriggers.getElevation,
         getLineColor: updateTriggers.getLineColor,
         getLineWidth: updateTriggers.getLineWidth
+      } as {
+        getFillColor: any;
+        getElevation: any;
+        getLineColor: any;
+        getLineWidth: any;
+        getPolygon?: any;
+        getPosition?: any;
       }
     };
   }
 
-  _renderPolygonLayer() {
+  private _renderPolygonLayer(): PolygonLayer {
     const {data, getHexagon, updateTriggers, coverage} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
     const forwardProps = this._getForwardProps();
-
     forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
 
     return new SubLayerClass(
@@ -287,13 +358,13 @@ export default class H3HexagonLayer extends CompositeLayer {
         positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);
-          return h3ToPolygon(hexagonId, coverage, true);
+          return flattenPolygon(h3ToPolygon(hexagonId, coverage));
         }
       }
     );
   }
 
-  _renderColumnLayer() {
+  private _renderColumnLayer(): ColumnLayer {
     const {data, getHexagon, updateTriggers} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
@@ -317,6 +388,3 @@ export default class H3HexagonLayer extends CompositeLayer {
     );
   }
 }
-
-H3HexagonLayer.defaultProps = defaultProps;
-H3HexagonLayer.layerName = 'H3HexagonLayer';
