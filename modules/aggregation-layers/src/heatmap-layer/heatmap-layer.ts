@@ -41,7 +41,8 @@ import {
   LayersList,
   log,
   Position,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
@@ -68,7 +69,7 @@ const AGGREGATION_MODE = {
   MEAN: 1
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<HeatmapLayerProps> = {
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
@@ -98,9 +99,10 @@ const DIMENSIONS = {
   }
 };
 
-export type HeatmapLayerProps<DataT> = _HeatmapLayerProps<DataT> & AggregationLayerProps<DataT>;
+export type HeatmapLayerProps<DataT = any> = _HeatmapLayerProps<DataT> &
+  AggregationLayerProps<DataT>;
 
-type _HeatmapLayerProps<DataT = any> = {
+type _HeatmapLayerProps<DataT> = {
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
    *

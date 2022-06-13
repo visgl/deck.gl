@@ -38,7 +38,8 @@ import type {
   Color,
   UpdateParameters,
   GetPickingInfoParams,
-  PickingInfo
+  PickingInfo,
+  DefaultProps
 } from '@deck.gl/core';
 
 const TEXT_ANCHOR = {
@@ -53,7 +54,7 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 } as const;
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
@@ -185,11 +186,15 @@ type _TextLayerProps<DataT> = {
    * @default [0, 0]
    */
   getPixelOffset?: Accessor<DataT, [number, number]>;
+  /**
+   * @deprecated Use `background` and `getBackgroundColor` instead
+   */
+  backgroundColor?: Color;
 };
 
-export type TextLayerProps<DataT> = _TextLayerProps<DataT> & LayerProps<DataT>;
+export type TextLayerProps<DataT = any> = _TextLayerProps<DataT> & LayerProps<DataT>;
 
-const defaultProps = {
+const defaultProps: DefaultProps<TextLayerProps> = {
   billboard: true,
   sizeScale: 1,
   sizeUnits: 'pixels',

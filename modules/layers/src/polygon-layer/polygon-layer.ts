@@ -29,13 +29,14 @@ import {
   LayersList,
   log,
   Unit,
-  UpdateParameters
+  Material,
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
-import {MaterialProps} from '../types';
 
 /**
  * All properties supported by `PolygonLayer`.
@@ -84,7 +85,7 @@ type _PolygonLayerProps<DataT = any> = {
    *
    * @default 1
    */
-  elevationScale?: boolean;
+  elevationScale?: number;
 
   /**
    * Whether to generate a line wireframe of the hexagon.
@@ -203,18 +204,18 @@ type _PolygonLayerProps<DataT = any> = {
   _windingOrder?: 'CW' | 'CCW';
 
   /**
-   * Material props for lighting effect.
+   * Material settings for lighting effect. Applies if `extruded: true`.
    *
    * @default true
-   * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
+   * @see https://deck.gl/docs/developer-guide/using-lighting
    */
-  material?: true | MaterialProps | null;
+  material?: Material;
 };
 
-const defaultLineColor = [0, 0, 0, 255];
-const defaultFillColor = [0, 0, 0, 255];
+const defaultLineColor: [number, number, number, number] = [0, 0, 0, 255];
+const defaultFillColor: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<PolygonLayerProps> = {
   stroked: true,
   filled: true,
   extruded: false,

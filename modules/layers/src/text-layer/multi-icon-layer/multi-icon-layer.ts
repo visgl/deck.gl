@@ -25,7 +25,7 @@ import IconLayer from '../../icon-layer/icon-layer';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
-import type {Accessor, Color, UpdateParameters} from '@deck.gl/core';
+import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -39,9 +39,9 @@ type _MultiIconLayerProps<DataT> = {
   outlineColor?: Color;
 };
 
-export type MultiIconLayerProps<DataT> = _MultiIconLayerProps<DataT> & IconLayerProps<DataT>;
+export type MultiIconLayerProps<DataT = any> = _MultiIconLayerProps<DataT> & IconLayerProps<DataT>;
 
-const defaultProps = {
+const defaultProps: DefaultProps<MultiIconLayerProps> = {
   getIconOffsets: {type: 'accessor', value: x => x.offsets},
   alphaCutoff: 0.001,
   smoothing: 0.1,

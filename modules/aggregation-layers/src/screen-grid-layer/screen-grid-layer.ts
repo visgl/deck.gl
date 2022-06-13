@@ -28,7 +28,8 @@ import {
   log,
   PickingInfo,
   Position,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import type {Texture2D} from '@luma.gl/core';
@@ -38,7 +39,7 @@ import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 import {getFloatTexture} from '../utils/resource-utils.js';
 
-const defaultProps = {
+const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   ...ScreenGridCellLayer.defaultProps,
   getPosition: {type: 'accessor', value: d => d.position},
   getWeight: {type: 'accessor', value: 1},
@@ -59,11 +60,11 @@ const DIMENSIONS = {
 };
 
 /** All properties supported by ScreenGridLayer. */
-export type ScreenGridLayerProps<DataT> = _ScreenGridLayerProps<DataT> &
+export type ScreenGridLayerProps<DataT = any> = _ScreenGridLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
-export type _ScreenGridLayerProps<DataT = any> = {
+export type _ScreenGridLayerProps<DataT> = {
   /**
    * Unit width/height of the bins.
    * @default 100

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export const defaultColorRange = [
+export const defaultColorRange: [number, number, number][] = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],

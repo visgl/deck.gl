@@ -49,7 +49,6 @@ const STRATEGIES = {
 
 export type Tileset2DProps = Pick<
   Required<TileLayerProps>,
-  | 'getTileData'
   | 'tileSize'
   | 'maxCacheSize'
   | 'maxCacheByteSize'
@@ -60,6 +59,7 @@ export type Tileset2DProps = Pick<
   | 'maxRequests'
   | 'zoomOffset'
 > & {
+  getTileData: NonNullable<TileLayerProps['getTileData']>;
   onTileLoad: (tile: Tile2DHeader) => void;
   onTileUnload: (tile: Tile2DHeader) => void;
   onTileError: (error: any, tile: Tile2DHeader) => void;

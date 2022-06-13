@@ -6,7 +6,8 @@ import {
   UpdateParameters,
   GetPickingInfoParams,
   Viewport,
-  COORDINATE_SYSTEM
+  COORDINATE_SYSTEM,
+  DefaultProps
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {Matrix4} from '@math.gl/core';
@@ -28,9 +29,10 @@ import findIndexBinary from './find-index-binary';
 
 const WORLD_SIZE = 512;
 
-const defaultProps = {
+const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
-  uniqueIdProperty: {type: 'string', value: ''},
+  onDataLoad: {type: 'function', value: null, optional: true, compare: false},
+  uniqueIdProperty: '',
   highlightedFeatureId: null,
   loaders: [MVTWorkerLoader],
   binary: true

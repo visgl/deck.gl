@@ -5,7 +5,15 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
 
-import type {LayerProps, Accessor, Unit, Position, Color, UpdateParameters} from '@deck.gl/core';
+import type {
+  LayerProps,
+  Accessor,
+  Unit,
+  Position,
+  Color,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 
 type _TextBackgroundLayerProps<DataT> = {
   billboard?: boolean;
@@ -26,9 +34,10 @@ type _TextBackgroundLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 };
 
-export type TextBackgroundLayerProps<DataT> = _TextBackgroundLayerProps<DataT> & LayerProps<DataT>;
+export type TextBackgroundLayerProps<DataT = any> = _TextBackgroundLayerProps<DataT> &
+  LayerProps<DataT>;
 
-const defaultProps = {
+const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   billboard: true,
   sizeScale: 1,
   sizeUnits: 'pixels',

@@ -3,7 +3,8 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D from './h3-tileset-2d';
@@ -21,7 +22,7 @@ const renderSubLayers = props => {
   });
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   aggregationResLevel: 4
 };
 
@@ -33,7 +34,7 @@ export type H3TileLayerProps<DataT = any> = _H3TileLayerProps<DataT> & Composite
 type H3HexagonLayerProps<DataT = any> = Record<string, any>;
 
 /** Properties added by H3TileLayer. */
-type _H3TileLayerProps<DataT = any> = H3HexagonLayerProps<DataT> & {
+type _H3TileLayerProps<DataT> = H3HexagonLayerProps<DataT> & {
   aggregationResLevel?: number;
 };
 
