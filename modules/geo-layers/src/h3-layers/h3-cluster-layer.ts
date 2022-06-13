@@ -23,7 +23,7 @@ type _H3ClusterLayerProps<DataT = any> = {
 
 export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
   DataT,
-  Required<_H3ClusterLayerProps> & ExtraProps
+  Required<_H3ClusterLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'H3ClusterLayer';
   static defaultProps: any = defaultProps;
@@ -51,7 +51,7 @@ export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCel
     }
   }
 
-  indexToBounds(): Partial<GeoCellLayer['props']> | null {
+  indexToBounds(): Partial<GeoCellLayer['props']> {
     return {
       data: this.state.polygons,
       getPolygon: d => d.polygon
