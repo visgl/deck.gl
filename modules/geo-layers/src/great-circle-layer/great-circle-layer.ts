@@ -36,7 +36,7 @@ type _GreatCircleLayerProps<DataT = any> = {};
 // Keeping for backward-compatibility
 export default class GreatCircleLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
   DataT,
-  Required<_GreatCircleLayerProps> & ExtraProps
+  Required<_GreatCircleLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'GreatCircleLayer';
   static defaultProps: any = defaultProps;
