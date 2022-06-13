@@ -4,6 +4,8 @@ import MapboxLayer from './mapbox-layer';
 import type {Deck, LayersList, Layer} from '@deck.gl/core';
 import type {Map} from 'mapbox-gl';
 
+const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
+
 /** Insert Deck layers into the mapbox Map according to the user-defined order */
 export function resolveLayers(
   map?: Map,
@@ -58,8 +60,8 @@ export function resolveLayers(
   for (const layer of layers) {
     // @ts-expect-error beforeId is not defined in LayerProps
     let {beforeId} = layer.props;
-    if (!mapLayers.includes(beforeId)) {
-      beforeId = undefined;
+    if (!beforeId || !mapLayers.includes(beforeId)) {
+      beforeId = UNDEFINED_BEFORE_ID;
     }
     layerGroups[beforeId] = layerGroups[beforeId] || [];
     layerGroups[beforeId].push(layer.id);
@@ -67,8 +69,9 @@ export function resolveLayers(
 
   for (const beforeId in layerGroups) {
     const layerGroup = layerGroups[beforeId];
-    let lastLayerIndex = beforeId === 'undefined' ? mapLayers.length : mapLayers.indexOf(beforeId);
-    let lastLayerId = beforeId === 'undefined' ? undefined : beforeId;
+    let lastLayerIndex =
+      beforeId === UNDEFINED_BEFORE_ID ? mapLayers.length : mapLayers.indexOf(beforeId);
+    let lastLayerId = beforeId === UNDEFINED_BEFORE_ID ? undefined : beforeId;
     for (let i = layerGroup.length - 1; i >= 0; i--) {
       const layerId = layerGroup[i];
       const layerIndex = mapLayers.indexOf(layerId);
