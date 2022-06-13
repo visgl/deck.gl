@@ -48,6 +48,7 @@ type NumberPropType = BasePropType<number> & {
 };
 type ColorPropType = BasePropType<Color> & {
   type: 'color';
+  optional?: boolean;
 };
 type ArrayPropType<T = any[]> = BasePropType<T> & {
   type: 'array';
@@ -113,7 +114,10 @@ const TYPE_DEFINITIONS = {
   },
   color: {
     validate(value, propType: ColorPropType) {
-      return isArray(value) && (value.length === 3 || value.length === 4);
+      return (
+        (propType.optional && !value) ||
+        (isArray(value) && (value.length === 3 || value.length === 4))
+      );
     },
     equal(value1, value2, propType: ColorPropType) {
       return arrayEqual(value1, value2);
