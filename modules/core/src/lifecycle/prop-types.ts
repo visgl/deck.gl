@@ -46,7 +46,7 @@ type NumberPropType = BasePropType<number> & {
   min?: number;
   max?: number;
 };
-type ColorPropType = BasePropType<Color> & {
+type ColorPropType = BasePropType<Color | null> & {
   type: 'color';
   optional?: boolean;
 };
