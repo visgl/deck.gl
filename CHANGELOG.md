@@ -21,6 +21,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-beta.2] - Jun 13 2022
+
+- Update defaultProps typings (#7031)
+- Add interleaved prop to MapboxOverlay (#7027)
+- [ts] Tile3DLayer (#7038)
+- Improve performance for `visible: false` layers (#7035)
+- [ts] H3 layers (#7033)
+- [ts] GreatCircleLayer (#7034)
+- [ts] MeshLayer (#6998)
+- [ts] S2Layer (#6999)
+
 #### deck.gl [8.8.0-beta.1] - Jun 10 2022
 
 - [ts] react module (#7016)
