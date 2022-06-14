@@ -18,16 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {
+  AccessorFunction,
+  Color,
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  log
+} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
-import TileLayer from '../tile-layer/tile-layer';
+import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
+import {Bounds} from '../tile-layer/types';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
 
 const DUMMY_DATA = [1];
 
-const defaultProps = {
+const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
   // Image url that encodes height data
   elevationData: urlType,
@@ -66,13 +74,53 @@ function urlTemplateToUpdateTrigger(template) {
   return template;
 }
 
+type URLTemplate = string | string[];
+
+/** All properties supported by TerrainLayer */
+export type TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = _TerrainLayerProps<DataT> &
+  TileLayerProps<DataT> &
+  CompositeLayerProps<DataT>;
+
+/** Props added by the TerrainLayer */
+type _TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = {
+  /** Image url that encodes height data. **/
+  elevationData: DataT;
+
+  /** Image url to use as texture. **/
+  texture?: DataT;
+
+  /** Martini error tolerance in meters, smaller number -> more detailed mesh. **/
+  meshMaxError?: number;
+
+  /** Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. **/
+  bounds?: Bounds;
+
+  /** Color to use if texture is unavailable. **/
+  color?: Color;
+
+  /** Object to decode height data, from (r, g, b) to height in meters. **/
+  elevationDecoder: {rScaler: number; gScaler: number; bScaler: number; offset: number};
+
+  /** Same as SimpleMeshLayer wireframe. **/
+  wireframe: Boolean;
+  material: Boolean;
+};
+
 /**
  * state: {
  *   isTiled: True renders TileLayer of many SimpleMeshLayers, false renders one SimpleMeshLayer
  *   terrain: Mesh object. Only defined when isTiled is false.
  * }
  */
-export default class TerrainLayer extends CompositeLayer {
+export default class TerrainLayer<
+  DataT extends URLTemplate = URLTemplate,
+  ExtraPropsT = {}
+> extends CompositeLayer<
+  ExtraPropsT & Required<_TerrainLayerProps<DataT> & Required<TileLayerProps<DataT>>>
+> {
+  static defaultProps = defaultProps;
+  static layerName = 'TerrainLayer';
+
   updateState({props, oldProps}) {
     const elevationDataChanged = props.elevationData !== oldProps.elevationData;
     if (elevationDataChanged) {
