@@ -1,10 +1,11 @@
 import Tile2DHeader from './tile-2d-header';
-import {getTileIndices, tileToBoundingBox} from './utils';
+import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, equals} from '@math.gl/core';
 import {Viewport} from '@deck.gl/core';
 import {Bounds, TileIndex, ZRange} from './types';
 import {TileLayerProps} from './tile-layer';
+import {_memoize as memoize} from '@deck.gl/core';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
@@ -78,6 +79,7 @@ export default class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
+  private _zRange?: ZRange;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -184,12 +186,18 @@ export default class Tileset2D {
   ): number {
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
-    if (!this._viewport || !viewport.equals(this._viewport) || isModelMatrixNew) {
+    if (
+      !this._viewport ||
+      !viewport.equals(this._viewport) ||
+      !equals(this._zRange, zRange) ||
+      isModelMatrixNew
+    ) {
       if (isModelMatrixNew) {
         this._modelMatrixInverse = modelMatrixAsMatrix4.clone().invert();
         this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
+      this._zRange = zRange;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
@@ -223,6 +231,29 @@ export default class Tileset2D {
     }
 
     return this._frameNumber;
+  }
+
+  isTileVisible(
+    tile: Tile2DHeader,
+    cullRect?: {x: number; y: number; width: number; height: number}
+  ): boolean {
+    if (!tile.isVisible) {
+      return false;
+    }
+
+    if (cullRect && this._viewport) {
+      const [minX, minY, maxX, maxY] = getCullBounds({
+        viewport: this._viewport,
+        z: this._zRange,
+        cullRect
+      });
+      const {bbox} = tile;
+      if ('west' in bbox) {
+        return bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
+      }
+      return bbox.left < maxX && bbox.right > minX && bbox.bottom < maxY && bbox.top > minY;
+    }
+    return true;
   }
 
   /* Public interface for subclassing */
@@ -321,7 +352,9 @@ export default class Tileset2D {
 
   /* Private methods */
 
-  _pruneRequests(): void {
+  private _getCullBounds = memoize(getCullBounds);
+
+  private _pruneRequests(): void {
     const {maxRequests} = this.opts;
 
     const abortCandidates: Tile2DHeader[] = [];
@@ -345,7 +378,7 @@ export default class Tileset2D {
   }
 
   // This needs to be called every time some tiles have been added/removed from cache
-  _rebuildTree() {
+  private _rebuildTree() {
     const {_cache} = this;
 
     // Reset states
