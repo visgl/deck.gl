@@ -8,8 +8,7 @@ import {
   GetPickingInfoParams,
   DefaultProps,
   FilterContext,
-  _flatten as flatten,
-  _memoize as memoize
+  _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from 'modules/core/src/lib/layer-manager';
@@ -17,7 +16,7 @@ import Tile2DHeader from './tile-2d-header';
 
 import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
 import {TileLoadProps, ZRange} from './types';
-import {urlType, getURLFromTemplate, getCullBounds as _getCullBounds} from './utils';
+import {urlType, getURLFromTemplate} from './utils';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -42,8 +41,6 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   maxRequests: 6,
   zoomOffset: 0
 };
-
-const getCullBounds = memoize(_getCullBounds);
 
 /** All props supported by the TileLayer */
 export type TileLayerProps<DataT = any> = CompositeLayerProps<any> & _TileLayerProps<DataT>;
@@ -356,21 +353,8 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     });
   }
 
-  filterSubLayer({layer, viewport, cullRect}: FilterContext) {
+  filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-
-    if (!tile.isVisible) {
-      return false;
-    }
-
-    if (cullRect) {
-      const [minX, minY, maxX, maxY] = getCullBounds({viewport, z: this.props.zRange, cullRect});
-      const {bbox} = tile;
-      if ('west' in bbox) {
-        return bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
-      }
-      return bbox.left < maxX && bbox.right > minX && bbox.bottom < maxY && bbox.top > minY;
-    }
-    return true;
+    return this.state.tileset.isTileVisible(tile, cullRect);
   }
 }

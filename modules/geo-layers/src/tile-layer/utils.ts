@@ -136,7 +136,7 @@ export function getCullBounds({
   /** Current viewport */
   viewport: Viewport;
   /** Current z range */
-  z: ZRange | number | null;
+  z: ZRange | number | undefined;
   /** Culling rectangle in screen space */
   cullRect: {x: number; y: number; width: number; height: number};
 }): [number, number, number, number] {
