@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {
-  AccessorFunction,
   Color,
   CompositeLayer,
   CompositeLayerProps,
@@ -90,18 +89,20 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
+type MeshAndTexture = [MeshAttributes | null, Texture];
+
 /** All properties supported by TerrainLayer */
-export type TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = _TerrainLayerProps<DataT> &
-  TileLayerProps<DataT> &
-  CompositeLayerProps<DataT>;
+export type TerrainLayerProps = _TerrainLayerProps &
+  TileLayerProps<MeshAndTexture> &
+  CompositeLayerProps;
 
 /** Props added by the TerrainLayer */
-type _TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = {
+type _TerrainLayerProps = {
   /** Image url that encodes height data. **/
-  elevationData: DataT;
+  elevationData: URLTemplate;
 
   /** Image url to use as texture. **/
-  texture?: DataT;
+  texture?: URLTemplate;
 
   /** Martini error tolerance in meters, smaller number -> more detailed mesh. **/
   meshMaxError?: number;
@@ -122,11 +123,8 @@ type _TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = {
   material: boolean | any | null;
 };
 
-export default class TerrainLayer<
-  DataT extends URLTemplate = URLTemplate,
-  ExtraPropsT = {}
-> extends CompositeLayer<
-  ExtraPropsT & Required<_TerrainLayerProps<DataT> & Required<TileLayerProps<DataT>>>
+export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_TerrainLayerProps & Required<TileLayerProps<MeshAndTexture>>>
 > {
   static defaultProps = defaultProps;
   static layerName = 'TerrainLayer';
@@ -228,9 +226,17 @@ export default class TerrainLayer<
     return Promise.all([terrain, surface]);
   }
 
-  renderSubLayers(props) {
+  renderSubLayers(
+    props: TileLayerProps<MeshAndTexture> & {
+      id: string;
+      data: MeshAndTexture;
+      tile: Tile2DHeader<MeshAndTexture>;
+    }
+  ) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
-    const {data, color} = props;
+
+    const {color, wireframe, material} = this.props;
+    const {data} = props;
 
     if (!data) {
       return null;
@@ -245,12 +251,14 @@ export default class TerrainLayer<
       _instanced: false,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getPosition: d => [0, 0, 0],
-      getColor: color
+      getColor: color,
+      wireframe,
+      material
     });
   }
 
   // Update zRange of viewport
-  onViewportLoad(tiles?: Tile2DHeader<DataT>[]): void {
+  onViewportLoad(tiles?: Tile2DHeader<MeshAndTexture>[]): void {
     if (!tiles) {
       return;
     }
@@ -298,14 +306,11 @@ export default class TerrainLayer<
     } = this.props;
 
     if (this.state.isTiled) {
-      return new TileLayer(
+      return new TileLayer<MeshAndTexture>(
         this.getSubLayerProps({
           id: 'tiles'
         }),
         {
-          wireframe,
-          color,
-          material,
           getTileData: this.getTiledTerrainData.bind(this),
           renderSubLayers: this.renderSubLayers.bind(this),
           updateTriggers: {
