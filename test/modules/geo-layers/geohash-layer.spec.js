@@ -6,30 +6,15 @@ import {getGeohashPolygon, getGeohashBounds} from '@deck.gl/geo-layers/geohash-l
 const TEST_DATA = [
   {
     geohash: '9',
-    expectedBounds: [
-      0,
-      -135,
-      45,
-      -90
-    ]
+    expectedBounds: [0, -135, 45, -90]
   },
   {
     geohash: '9q8yybj',
-    expectedBounds: [
-      37.7490234375,
-      -122.39181518554688,
-      37.750396728515625,
-      -122.39044189453125
-    ]
+    expectedBounds: [37.7490234375, -122.39181518554688, 37.750396728515625, -122.39044189453125]
   },
   {
     geohash: '9q8yy',
-    expectedBounds: [
-      37.7490234375,
-      -122.431640625,
-      37.79296875,
-      -122.3876953125
-    ]
+    expectedBounds: [37.7490234375, -122.431640625, 37.79296875, -122.3876953125]
   }
 ];
 
