@@ -3,10 +3,11 @@ import requests
 
 
 def load_carto_credentials(filepath):
-    """Load credentials from file. It must contain the following attributes:
-    - api_base_url
-    - client_id
-    - client_secret
+    """Load credentials from file. It must contain the following attributes.
+       More information at https://api-docs.carto.com/.
+       - api_base_url
+       - client_id
+       - client_secret
     """
     with open(filepath, "r") as f:
         content = json.load(f)
