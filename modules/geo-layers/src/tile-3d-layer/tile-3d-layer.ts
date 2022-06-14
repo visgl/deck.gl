@@ -28,7 +28,7 @@ import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
 
-const defaultProps: DefaultProps<Tile3dLayerProps> = {
+const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
@@ -44,10 +44,10 @@ const defaultProps: DefaultProps<Tile3dLayerProps> = {
 };
 
 /** All properties supported by Tile3DLayer */
-export type Tile3dLayerProps<DataT = any> = _Tile3dLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type Tile3DLayerProps<DataT = any> = _Tile3DLayerProps<DataT> & CompositeLayerProps<DataT>;
 
 /** Props added by the Tile3DLayer */
-type _Tile3dLayerProps<DataT> = {
+type _Tile3DLayerProps<DataT> = {
   /** Color Accessor for point clouds. **/
   getPointColor?: Accessor<DataT, Color>;
 
@@ -76,7 +76,7 @@ type _Tile3dLayerProps<DataT> = {
 };
 
 export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
-  ExtraPropsT & Required<_Tile3dLayerProps<DataT>>
+  ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {
   static defaultProps = defaultProps as any;
   static layerName = 'Tile3DLayer';
