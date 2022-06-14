@@ -21,6 +21,39 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-beta.2] - Jun 13 2022
+
+- Update defaultProps typings (#7031)
+- Add interleaved prop to MapboxOverlay (#7027)
+- [ts] Tile3DLayer (#7038)
+- Improve performance for `visible: false` layers (#7035)
+- [ts] H3 layers (#7033)
+- [ts] GreatCircleLayer (#7034)
+- [ts] MeshLayer (#6998)
+- [ts] S2Layer (#6999)
+
+#### deck.gl [8.8.0-beta.1] - Jun 10 2022
+
+- [ts] react module (#7016)
+- [ts] extensions module (#7015)
+- [ts] LayerExtension (#7014)
+- Bump dependencies to production versions (#7018)
+- [ts] shader modules (#6984)
+- [ts] main: re-export recently added typings (#7012)
+- [ts] TripsLayer (#6997)
+- [ts] ScreenGridLayer & utils (#7002)
+- [ts] HeatmapLayer & utils (#7003)
+- [ts] modules/layers leftovers (#7010)
+- [ts] LineLayer (#7008)
+- [ts] PointCloudLayer (#7009)
+- [ts] ColumnLayer & GridCellLayer (#7007)
+- [ts] GridLayer & friends (#7004)
+- [ts] BitmapLayer (#7006)
+- [ts] ContourLayer & deps (#7001)
+- [ts] ArcLayer (#7005)
+- [ts] HexagonLayer & deps (#7000)
+- Improve default Layer type (#6992)
+
 #### deck.gl [8.8.0-alpha.6] - Jun 6 2022
 
 - Bump devcert from 1.1.3 to 1.2.1 in /website (#6983)

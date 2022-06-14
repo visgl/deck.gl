@@ -43,10 +43,11 @@ import type {
   LayerProps,
   Position,
   Color,
-  Accessor
+  Accessor,
+  DefaultProps
 } from '@deck.gl/core';
 
-const DEFAULT_COLOR = [255, 255, 255, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
 
 export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & LayerProps<DataT>;
 
@@ -82,7 +83,7 @@ type _ScenegraphLayerProps<DataT> = {
       /** Speed multiplier of the animation, default `1` */
       speed?: number;
     };
-  };
+  } | null;
   /**
    * (Experimental) lighting mode
    * @default 'flat'
@@ -92,6 +93,7 @@ type _ScenegraphLayerProps<DataT> = {
    * (Experimental) lighting environment. Requires `_lighting` to be `'pbr'`.
    */
   _imageBasedLightingEnvironment?:
+    | null
     | GLTFEnvironment
     | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => GLTFEnvironment);
 
@@ -138,7 +140,7 @@ type _ScenegraphLayerProps<DataT> = {
   sizeMaxPixels?: number;
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   scenegraph: {type: 'object', value: null, async: true},
   getScene: gltf => {
     if (gltf && gltf.scenes) {

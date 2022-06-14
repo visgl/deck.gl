@@ -22,13 +22,15 @@ import {CubeGeometry} from '@luma.gl/core';
 import {UNIT} from '@deck.gl/core';
 import ColumnLayer, {ColumnLayerProps} from './column-layer';
 
-const defaultProps = {
+import type {DefaultProps} from '@deck.gl/core';
+
+const defaultProps: DefaultProps<GridCellLayerProps> = {
   cellSize: {type: 'number', min: 0, value: 1000},
-  offset: {type: 'array', min: 0, value: [1, 1]}
+  offset: {type: 'array', value: [1, 1]}
 };
 
 /** All properties supported by GridCellLayer. */
-export type GridCellLayerProps<DataT> = _GridCellLayerProps & ColumnLayerProps<DataT>;
+export type GridCellLayerProps<DataT = any> = _GridCellLayerProps & ColumnLayerProps<DataT>;
 
 /** Properties added by GridCellLayer. */
 type _GridCellLayerProps = {
@@ -43,7 +45,7 @@ export default class GridCellLayer<DataT = any, ExtraPropsT = {}> extends Column
   ExtraPropsT & Required<_GridCellLayerProps>
 > {
   static layerName = 'GridCellLayer';
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
 
   getGeometry(diskResolution) {
     return new CubeGeometry();

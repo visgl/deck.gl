@@ -1,7 +1,7 @@
-import {CompositeLayer, CompositeLayerProps, Layer, LayersList} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
-const defaultProps = {
+const defaultProps: DefaultProps<GeoCellLayerProps> = {
   ...PolygonLayer.defaultProps
 };
 

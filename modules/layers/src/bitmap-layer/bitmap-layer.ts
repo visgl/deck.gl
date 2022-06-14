@@ -31,7 +31,8 @@ import {
   UpdateParameters,
   Color,
   Texture,
-  Position
+  Position,
+  DefaultProps
 } from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
@@ -41,7 +42,7 @@ import createMesh from './create-mesh';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
-const defaultProps = {
+const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT,

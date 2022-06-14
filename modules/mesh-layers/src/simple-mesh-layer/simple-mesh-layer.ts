@@ -27,7 +27,7 @@ import {
   project32,
   phongLighting,
   picking,
-  COORDINATE_SYSTEM,
+  DefaultProps,
   log,
   LayerContext
 } from '@deck.gl/core';
@@ -77,7 +77,7 @@ function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
   throw Error('Invalid mesh');
 }
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 type Mesh =
   | GeometryType
@@ -88,7 +88,7 @@ type Mesh =
   | MeshAttributes;
 
 type _SimpleMeshLayerProps<DataT> = {
-  mesh: string | Mesh | Promise<Mesh>;
+  mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | Texture | Promise<Texture>;
   textureParameters?: {[p: number]: number} | null;
 
@@ -157,10 +157,10 @@ type _SimpleMeshLayerProps<DataT> = {
   material?: true | any | null; // TODO - export Material def from lighting shader module
 };
 
-export type SimpleMeshLayerProps<DataT> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
+export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
 
-const defaultProps = {
-  mesh: {value: null, type: 'object', async: true},
+const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
+  mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   // Whether the color attribute in a mesh will be used
@@ -303,7 +303,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
       .draw();
   }
 
-  private getModel(mesh: Mesh): Model {
+  protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,

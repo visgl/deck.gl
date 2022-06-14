@@ -28,7 +28,8 @@ import {
   Position,
   Accessor,
   Color,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -36,9 +37,9 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<LineLayerProps> = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -95,7 +96,13 @@ type _LineLayerProps<DataT> = {
    * The rgba color is in the format of `[r, g, b, [a]]`.
    * @default [0, 0, 0, 255]
    */
-  getSourceColor?: Accessor<DataT, Color>;
+  getColor?: Accessor<DataT, Color>;
+
+  /**
+   * Width of each object
+   * @default 1
+   */
+  getWidth?: Accessor<DataT, number>;
 };
 
 /**

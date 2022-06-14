@@ -7,6 +7,7 @@ import type {MjolnirEvent} from 'mjolnir.js';
 
 import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
 import type {Loader} from '@loaders.gl/loader-utils';
+import type {LightingModuleSettings} from '../shaderlib';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -53,6 +54,8 @@ export type Color =
   | [number, number, number, number]
   | Uint8Array
   | Uint8ClampedArray;
+
+export type Material = LightingModuleSettings['material'];
 
 /** The unit of dimensions.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#dimensions
@@ -165,7 +168,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Create smooth transitions when prop values update.
    */
-  transitions?: Record<string, any>;
+  transitions?: Record<string, any> | null;
   /**
    * Add additional functionalities to this layer.
    */

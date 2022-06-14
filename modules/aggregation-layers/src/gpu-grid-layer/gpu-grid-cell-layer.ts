@@ -18,7 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, fp64LowPart, project32, gouraudLighting, picking, LayerContext} from '@deck.gl/core';
+import {
+  Layer,
+  fp64LowPart,
+  project32,
+  gouraudLighting,
+  picking,
+  LayerContext,
+  LayerProps,
+  DefaultProps
+} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CubeGeometry, Buffer} from '@luma.gl/core';
 import {fp64arithmetic} from '@luma.gl/shadertools';
@@ -30,7 +39,7 @@ import fs from './gpu-grid-cell-layer-fragment.glsl';
 const COLOR_DATA_UBO_INDEX = 0;
 const ELEVATION_DATA_UBO_INDEX = 1;
 
-const defaultProps = {
+const defaultProps: DefaultProps<_GPUGridCellLayerProps & LayerProps> = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -41,12 +50,12 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
 
   // grid
-  gridSize: {type: 'array', min: 0, value: [1, 1]},
-  gridOrigin: {type: 'array', min: 0, value: [0, 0]},
-  gridOffset: {type: 'array', min: 0, value: [0, 0]},
+  gridSize: {type: 'array', value: [1, 1]},
+  gridOrigin: {type: 'array', value: [0, 0]},
+  gridOffset: {type: 'array', value: [0, 0]},
 
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
-  offset: {type: 'array', min: 0, value: [1, 1]},
+  offset: {type: 'array', value: [1, 1]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   extruded: true,
 

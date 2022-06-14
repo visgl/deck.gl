@@ -3,7 +3,8 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import {QuadkeyLayer, QuadkeyLayerProps} from '@deck.gl/geo-layers';
 import QuadkeyTileset2D from './quadkey-tileset-2d';
@@ -15,7 +16,7 @@ const renderSubLayers = props => {
   return new QuadkeyLayer(props, {getQuadkey: d => d.id});
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<QuadkeyTileLayerProps> = {
   aggregationResLevel: 6
 };
 

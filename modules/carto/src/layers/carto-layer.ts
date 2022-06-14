@@ -1,4 +1,11 @@
-import {CompositeLayer, Layer, log} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Layer,
+  log,
+  CompositeLayerProps,
+  LayerProps,
+  ChangeFlags
+} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import H3TileLayer from './h3-tile-layer';
 import QuadkeyTileLayer from './quadkey-tile-layer';
@@ -21,8 +28,6 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {CompositeLayerProps, LayerProps} from 'modules/core/src/types/layer-props';
-import {ChangeFlags} from 'modules/core/src/lib/layer-state';
 import {FetchLayerDataResult} from '../api/maps-v3-client';
 import {assert} from '../utils';
 

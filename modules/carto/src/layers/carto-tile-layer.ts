@@ -1,6 +1,6 @@
 /* global TextDecoder */
 import Protobuf from 'pbf';
-import {log} from '@deck.gl/core';
+import {log, DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
@@ -79,7 +79,7 @@ const CartoTileLoader: LoaderWithParser = {
   }
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<CartoTileLayerProps> = {
   ...MVTLayer.defaultProps,
   formatTiles: defaultTileFormat,
   loaders: [CartoTileLoader]

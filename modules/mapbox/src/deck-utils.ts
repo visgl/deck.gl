@@ -119,7 +119,15 @@ export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
   });
 }
 
-export function getViewState(map: Map): MapViewState & {repeat: boolean} {
+export function getViewState(map: Map): MapViewState & {
+  repeat: boolean;
+  padding: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
+} {
   const {lng, lat} = map.getCenter();
   return {
     // Longitude returned by getCenter can be outside of [-180, 180] when zooming near the anti meridian
@@ -129,6 +137,7 @@ export function getViewState(map: Map): MapViewState & {repeat: boolean} {
     zoom: map.getZoom(),
     bearing: map.getBearing(),
     pitch: map.getPitch(),
+    padding: map.getPadding(),
     repeat: map.getRenderWorldCopies()
   };
 }

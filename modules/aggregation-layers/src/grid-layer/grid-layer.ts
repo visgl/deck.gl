@@ -1,9 +1,15 @@
-import {CompositeLayer, CompositeLayerProps, Layer, UpdateParameters} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  CompositeLayerProps,
+  Layer,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import GPUGridLayer, {_GPUGridLayerProps} from '../gpu-grid-layer/gpu-grid-layer';
 import CPUGridLayer, {_CPUGridLayerProps} from '../cpu-grid-layer/cpu-grid-layer';
 
-const defaultProps = {
+const defaultProps: DefaultProps<GridLayerProps> = {
   ...GPUGridLayer.defaultProps,
   ...CPUGridLayer.defaultProps,
   gpuAggregation: false
@@ -13,7 +19,7 @@ const defaultProps = {
 export type GridLayerProps<DataT = any> = _GridLayerProps<DataT> & CompositeLayerProps<DataT>;
 
 /** Properties added by GridLayer. */
-type _GridLayerProps<DataT = any> = _CPUGridLayerProps<DataT> &
+type _GridLayerProps<DataT> = _CPUGridLayerProps<DataT> &
   _GPUGridLayerProps<DataT> & {
     /**
      * Whether the aggregation should be performed in high-precision 64-bit mode.

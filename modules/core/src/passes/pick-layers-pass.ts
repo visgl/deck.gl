@@ -1,4 +1,4 @@
-import LayersPass, {LayersPassRenderOptions, RenderStats} from './layers-pass';
+import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {OPERATION} from '../lib/constants';
@@ -15,7 +15,7 @@ const PICKING_PARAMETERS = {
 
 type PickLayersPassRenderOptions = LayersPassRenderOptions & {
   pickingFBO: Framebuffer;
-  deviceRect: {x: number; y: number; width: number; height: number};
+  deviceRect: Rect;
   pickZ: boolean;
 };
 
@@ -60,6 +60,7 @@ export default class PickLayersPass extends LayersPass {
     onViewportActive,
     pickingFBO,
     deviceRect: {x, y, width, height},
+    cullRect,
     effects,
     pass = 'picking',
     pickZ
@@ -110,6 +111,7 @@ export default class PickLayersPass extends LayersPass {
           views,
           viewports,
           onViewportActive,
+          cullRect,
           effects: effects?.filter(e => e.useInPicking),
           pass
         })
