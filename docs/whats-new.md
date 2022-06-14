@@ -30,13 +30,6 @@ If you are using react-map-gl v7, this is the only solution to use deck.gl with 
 
 - CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org/) or QuadBin. 
 
-```js
-new CartoLayer({
-  ...
-  data: 'project.dataset.h3_table_500M_rows'
-  geoColumn: 'h3'
-})
-```
 
 
 ## deck.gl v8.7
