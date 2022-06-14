@@ -14,7 +14,7 @@ In v8.x, the types will not be exposed by default to prevent any typing errors f
 
 ### Custom Indexing System in TileLayer
 
-The [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) is foundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusivel implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
+The [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
 
 Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a cusom implementation of [Tileset2D](/docs/api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
 
