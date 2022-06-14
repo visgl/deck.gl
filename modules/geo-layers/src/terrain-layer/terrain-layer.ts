@@ -24,13 +24,19 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   DefaultProps,
-  log
+  Layer,
+  LayersList,
+  log,
+  Texture,
+  UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
-import {Bounds} from '../tile-layer/types';
+import Tile2DHeader from '../tile-layer/tile-2d-header';
+import {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tile-layer/types';
 import {urlType, getURLFromTemplate} from '../tile-layer/utils';
 
 const DUMMY_DATA = [1];
@@ -67,7 +73,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
 };
 
 // Turns array of templates into a single string to work around shallow change
-function urlTemplateToUpdateTrigger(template) {
+function urlTemplateToUpdateTrigger(template: string | string[]): string {
   if (Array.isArray(template)) {
     return template.join(';');
   }
@@ -75,6 +81,14 @@ function urlTemplateToUpdateTrigger(template) {
 }
 
 type URLTemplate = string | string[];
+type ElevationDecoder = {rScaler: number; gScaler: number; bScaler: number; offset: number};
+type TerrainLoadProps = {
+  bounds: Bounds;
+  elevationData: string | null;
+  elevationDecoder: ElevationDecoder;
+  meshMaxError: number;
+  signal?: AbortSignal;
+};
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = _TerrainLayerProps<DataT> &
@@ -99,19 +113,15 @@ type _TerrainLayerProps<DataT extends URLTemplate = URLTemplate> = {
   color?: Color;
 
   /** Object to decode height data, from (r, g, b) to height in meters. **/
-  elevationDecoder: {rScaler: number; gScaler: number; bScaler: number; offset: number};
+  elevationDecoder: ElevationDecoder;
 
-  /** Same as SimpleMeshLayer wireframe. **/
-  wireframe: Boolean;
-  material: Boolean;
+  /** Whether to render the mesh in wireframe mode. **/
+  wireframe: boolean;
+
+  /** Material props for lighting effect. **/
+  material: boolean | any | null;
 };
 
-/**
- * state: {
- *   isTiled: True renders TileLayer of many SimpleMeshLayers, false renders one SimpleMeshLayer
- *   terrain: Mesh object. Only defined when isTiled is false.
- * }
- */
 export default class TerrainLayer<
   DataT extends URLTemplate = URLTemplate,
   ExtraPropsT = {}
@@ -121,7 +131,13 @@ export default class TerrainLayer<
   static defaultProps = defaultProps;
   static layerName = 'TerrainLayer';
 
-  updateState({props, oldProps}) {
+  state!: {
+    isTiled?: boolean;
+    terrain: MeshAttributes;
+    zRange?: ZRange | null;
+  };
+
+  updateState({props, oldProps}: UpdateParameters<this>): void {
     const elevationDataChanged = props.elevationData !== oldProps.elevationData;
     if (elevationDataChanged) {
       const {elevationData} = props;
@@ -140,17 +156,25 @@ export default class TerrainLayer<
       props.bounds !== oldProps.bounds;
 
     if (!this.state.isTiled && shouldReload) {
-      const terrain = this.loadTerrain(props);
+      // When state.isTiled, elevationData cannot be an array
+      const terrain = this.loadTerrain(props as TerrainLoadProps);
       this.setState({terrain});
     }
 
     // TODO - remove in v9
+    // @ts-ignore
     if (props.workerUrl) {
       log.removed('workerUrl', 'loadOptions.terrain.workerUrl')();
     }
   }
 
-  loadTerrain({elevationData, bounds, elevationDecoder, meshMaxError, signal}) {
+  loadTerrain({
+    elevationData,
+    bounds,
+    elevationDecoder,
+    meshMaxError,
+    signal
+  }: TerrainLoadProps): Promise<MeshAttributes> | null {
     if (!elevationData) {
       return null;
     }
@@ -169,20 +193,25 @@ export default class TerrainLayer<
     return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
-  getTiledTerrainData(tile) {
+  getTiledTerrainData(tile: TileLoadProps): Promise<[MeshAttributes | null, Texture]> {
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const {viewport} = this.context;
     const dataUrl = getURLFromTemplate(elevationData, tile);
     const textureUrl = getURLFromTemplate(texture, tile);
 
-    const {bbox, signal} = tile;
-    const bottomLeft = viewport.isGeospatial
-      ? viewport.projectFlat([bbox.west, bbox.south])
-      : [bbox.left, bbox.bottom];
-    const topRight = viewport.isGeospatial
-      ? viewport.projectFlat([bbox.east, bbox.north])
-      : [bbox.right, bbox.top];
-    const bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
+    const {signal} = tile;
+    let bottomLeft = [0, 0] as [number, number];
+    let topRight = [0, 0] as [number, number];
+    if (viewport.isGeospatial) {
+      const bbox = tile.bbox as GeoBoundingBox;
+      bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
+      topRight = viewport.projectFlat([bbox.east, bbox.north]);
+    } else {
+      const bbox = tile.bbox as Exclude<TileBoundingBox, GeoBoundingBox>;
+      bottomLeft = [bbox.left, bbox.bottom];
+      topRight = [bbox.right, bbox.top];
+    }
+    const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
 
     const terrain = this.loadTerrain({
       elevationData: dataUrl,
@@ -221,7 +250,7 @@ export default class TerrainLayer<
   }
 
   // Update zRange of viewport
-  onViewportLoad(tiles) {
+  onViewportLoad(tiles?: Tile2DHeader<DataT>[]): void {
     if (!tiles) {
       return;
     }
@@ -231,6 +260,7 @@ export default class TerrainLayer<
       .map(tile => tile.content)
       .filter(Boolean)
       .map(arr => {
+        // @ts-ignore
         const bounds = arr[0].header.boundingBox;
         return bounds.map(bound => bound[2]);
       });
@@ -245,7 +275,7 @@ export default class TerrainLayer<
     }
   }
 
-  renderLayers() {
+  renderLayers(): Layer | null | LayersList {
     const {
       color,
       material,
@@ -321,6 +351,3 @@ export default class TerrainLayer<
     );
   }
 }
-
-TerrainLayer.layerName = 'TerrainLayer';
-TerrainLayer.defaultProps = defaultProps;
