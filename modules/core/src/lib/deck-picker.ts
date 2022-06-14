@@ -37,7 +37,7 @@ import {
 } from './picking/pick-info';
 
 import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl';
-import type {FilterContext} from '../passes/layers-pass';
+import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
 import type View from '../views/view';
@@ -68,8 +68,6 @@ type PickOperationContext = {
   onViewportActive: (viewport: Viewport) => void;
   effects: Effect[];
 };
-
-type Rect = {x: number; y: number; width: number; height: number};
 
 /** Manages picking in a Deck context */
 export default class DeckPicker {
