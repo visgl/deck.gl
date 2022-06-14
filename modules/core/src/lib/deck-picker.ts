@@ -233,6 +233,13 @@ export default class DeckPicker {
       deviceHeight: height
     });
 
+    const cullRect: Rect = {
+      x: x - radius,
+      y: y - radius,
+      width: radius * 2 + 1,
+      height: radius * 2 + 1
+    };
+
     let infos: Map<string | null, PickingInfo>;
     const result: PickingInfo[] = [];
     const affectedLayers = new Set<Layer>();
@@ -247,6 +254,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          cullRect,
           effects,
           pass: `picking:${mode}`
         });
@@ -279,6 +287,7 @@ export default class DeckPicker {
               width: 1,
               height: 1
             },
+            cullRect,
             effects,
             pass: `picking:${mode}:z`
           },
@@ -379,6 +388,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      cullRect: {x, y, width, height},
       effects,
       pass: `picking:${mode}`
     });
@@ -422,6 +432,7 @@ export default class DeckPicker {
     views: Record<string, View>;
     viewports: Viewport[];
     onViewportActive: (viewport: Viewport) => void;
+    cullRect?: Rect;
     effects: Effect[];
   }): {
     pickedColors: Uint8Array;
@@ -437,6 +448,7 @@ export default class DeckPicker {
       views: Record<string, View>;
       viewports: Viewport[];
       onViewportActive: (viewport: Viewport) => void;
+      cullRect?: Rect;
       effects: Effect[];
     },
     pickZ: true
@@ -452,6 +464,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      cullRect,
       effects,
       pass
     }: {
@@ -461,6 +474,7 @@ export default class DeckPicker {
       views: Record<string, View>;
       viewports: Viewport[];
       onViewportActive: (viewport: Viewport) => void;
+      cullRect?: Rect;
       effects: Effect[];
     },
     pickZ: boolean = false
@@ -478,6 +492,7 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      cullRect,
       effects,
       pass,
       pickZ
