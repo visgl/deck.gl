@@ -10,6 +10,14 @@ pip install pydeck-carto
 
 This also ensures [pydeck](https://pydeck.gl/) is installed. If you haven't previously enabled pydeck to be used with Jupyter, follow [its instructions](https://pydeck.gl/installation.html) to install.
 
+### Installing from source
+
+```bash
+git clone https://github.com/visgl/deck.gl
+cd deck.gl/bindings/pydeck-carto
+pip install .
+```
+
 ## Usage
 
 For an example, see the [`examples/hello_world.ipynb`](./examples/basic-examples/hello_world.ipynb) Jupyter Notebook.
