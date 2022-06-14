@@ -3,19 +3,20 @@ import {Layer, log} from '@deck.gl/core';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 
-export type TileLoadDataProps = {
+export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
-  getData: (props: TileLoadProps) => Promise<any>;
-  onLoad: (tile: Tile2DHeader) => void;
-  onError: (error: any, tile: Tile2DHeader) => void;
+  getData: (props: TileLoadProps) => Promise<DataT>;
+  onLoad: (tile: Tile2DHeader<DataT>) => void;
+  onError: (error: any, tile: Tile2DHeader<DataT>) => void;
 };
-export default class Tile2DHeader {
+
+export default class Tile2DHeader<DataT = any> {
   index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
-  content: any;
+  content: DataT | null;
   state?: number;
   layers?: Layer[] | null;
 
@@ -48,24 +49,24 @@ export default class Tile2DHeader {
     this._needsReload = false;
   }
 
-  get data() {
+  get data(): Promise<DataT | null> | DataT | null {
     return this.isLoading && this._loader ? this._loader.then(() => this.data) : this.content;
   }
 
-  get isLoaded() {
+  get isLoaded(): boolean {
     return this._isLoaded && !this._needsReload;
   }
 
-  get isLoading() {
+  get isLoading(): boolean {
     return Boolean(this._loader) && !this._isCancelled;
   }
 
-  get needsReload() {
+  get needsReload(): boolean {
     return this._needsReload || this._isCancelled;
   }
 
-  get byteLength() {
-    const result = this.content ? this.content.byteLength : 0;
+  get byteLength(): number {
+    const result = this.content ? (this.content as any).byteLength : 0;
     if (!Number.isFinite(result)) {
       log.error('byteLength not defined in tile data')();
     }
@@ -78,7 +79,7 @@ export default class Tile2DHeader {
     requestScheduler,
     onLoad,
     onError
-  }: TileLoadDataProps): Promise<void> {
+  }: TileLoadDataProps<DataT>): Promise<void> {
     const {index, id, bbox, userData, zoom} = this;
     const loaderId = this._loaderId;
 
@@ -100,7 +101,7 @@ export default class Tile2DHeader {
       return;
     }
 
-    let tileData = null;
+    let tileData: DataT | null = null;
     let error;
     try {
       tileData = await getData({index, id, bbox, userData, zoom, signal});

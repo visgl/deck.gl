@@ -21,8 +21,7 @@
   ],
   "resolutions": {
     "acorn": "7.4.1",
-    "prettier": "^2.4.1",
-    "@math.gl/core": "3.6.0-alpha.5"
+    "prettier": "^2.4.1"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
@@ -38,7 +37,7 @@
     "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
     "tsclean": "find . -name tsconfig.tsbuildinfo -exec rm {} \\;",
-    "tsbuild": "tsc -b tsconfig.build.json",
+    "tsbuild": "tsc -b tsconfig.build.json && node scripts/typed-entry.js",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",
     "metrics": "ocular-metrics",
@@ -53,11 +52,12 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^3.2.0-alpha.4",
-    "@loaders.gl/polyfills": "^3.2.0-alpha.4",
-    "@luma.gl/test-utils": "^8.5.12",
+    "@loaders.gl/csv": "^3.2.0",
+    "@loaders.gl/polyfills": "^3.2.0",
+    "@luma.gl/test-utils": "^8.5.14",
     "@probe.gl/bench": "^3.5.0",
     "@probe.gl/test-utils": "^3.5.0",
+    "@types/react": "^16.3.0",
     "abortcontroller-polyfill": "^1.5.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.3",

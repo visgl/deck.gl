@@ -6,6 +6,7 @@
       "entries": [
         {"entry": "docs"},
         {"entry": "docs/whats-new"},
+        {"entry": "docs/get-started/using-with-map"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/contributing"},
         {"entry": "docs/faq"}
@@ -17,7 +18,7 @@
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
         {"entry": "docs/get-started/using-with-react"},
-        {"entry": "docs/get-started/using-with-map"},
+        {"entry": "docs/get-started/using-with-typescript"},
         {"entry": "docs/get-started/learning-resources"}
       ]
     },
@@ -54,6 +55,14 @@
             {"entry": "docs/developer-guide/custom-layers/prop-types"},
             {"entry": "docs/developer-guide/custom-layers/attribute-management"},
             {"entry": "docs/developer-guide/custom-layers/writing-shaders"}
+          ]
+        },
+        {
+          "title": "Using with Supported Base Maps",
+          "entries": [
+            {"entry": "docs/developer-guide/base-maps/using-with-arcgis"},
+            {"entry": "docs/developer-guide/base-maps/using-with-google-maps"},
+            {"entry": "docs/developer-guide/base-maps/using-with-mapbox"}
           ]
         }
       ]

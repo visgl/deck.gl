@@ -45,7 +45,7 @@ const DEFAULT_TRANSITION_SETTINGS = {
 
 export function normalizeTransitionSettings(
   userSettings: number | InterpolationTransitionSettings | SpringTransitionSettings,
-  layerSettings?: boolean | TransitionSettings
+  layerSettings?: boolean | Partial<TransitionSettings>
 ): TransitionSettings | null {
   if (!userSettings) {
     return null;
@@ -81,7 +81,7 @@ export function getSourceBufferAttribute(
         divisor: 0,
         size: attribute.size,
         normalized: attribute.settings.normalized
-      }
+      } as BufferAccessor
     ];
   }
   // constant

@@ -32,8 +32,15 @@ export {default as MVTLayer} from './mvt-layer/mvt-layer';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tile-layer/utils';
 export {default as _Tileset2D} from './tile-layer/tileset-2d';
+export {default as _Tile2DHeader} from './tile-layer/tile-2d-header';
 
 // Types
-
+export type {H3ClusterLayerProps} from './h3-layers/h3-cluster-layer';
+export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
+export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
+export type {S2LayerProps} from './s2-layer/s2-layer';
 export type {TileLayerProps} from './tile-layer/tile-layer';
+export type {GeoBoundingBox} from './tile-layer/types';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
+export type {TileLoadProps as _TileLoadProps} from './tile-layer/types';
+export type {MVTLayerProps} from './mvt-layer/mvt-layer';

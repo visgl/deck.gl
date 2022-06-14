@@ -42,12 +42,14 @@ import {worldToPixels} from '@math.gl/web-mercator';
 
 import {load} from '@loaders.gl/core';
 
+import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
-import type {PickingInfo} from './picking/pick-info';
+import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
+import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 
@@ -70,17 +72,38 @@ const areViewportsEqual = memoize(
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
-const defaultProps = {
+const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: {type: 'function', value: null, compare: false, optional: true},
-  _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
+  _dataDiff: {
+    type: 'function',
+    // @ts-ignore __diff is not defined on data
+    value: data => data && data.__diff,
+    compare: false,
+    optional: true
+  },
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   onError: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
-    value: (url, {propName, layer, loaders, loadOptions, signal}) => {
+    value: <LayerT extends Layer>(
+      url: string,
+      {
+        propName,
+        layer,
+        loaders,
+        loadOptions,
+        signal
+      }: {
+        propName: string;
+        layer: LayerT;
+        loaders?: Loader[];
+        loadOptions?: any;
+        signal?: AbortSignal;
+      }
+    ) => {
       const {resourceManager} = layer.context;
       loadOptions = loadOptions || layer.getLoadOptions();
       loaders = loaders || layer.props.loaders;
@@ -104,7 +127,7 @@ const defaultProps = {
       if (inResourceManager) {
         return resourceManager.subscribe({
           resourceId: url,
-          onChange: data => layer.internalState.reloadAsyncProp(propName, data),
+          onChange: data => layer.internalState?.reloadAsyncProp(propName, data),
           consumerId: layer.id,
           requestId: propName
         });
@@ -161,14 +184,29 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
-export default abstract class Layer<PropsT = any> extends Component<PropsT & Required<LayerProps>> {
-  static defaultProps: any = defaultProps;
+export default abstract class Layer<PropsT = {}> extends Component<PropsT & Required<LayerProps>> {
+  static defaultProps = defaultProps;
   static layerName: string = 'Layer';
 
-  context: LayerContext | null = null; // Will reference layer manager's context, contains state shared by layers
-  internalState: LayerState<PropsT> | null = null;
+  internalState: LayerState<this> | null = null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
-  state: Record<string, any> | null = null; // Will be set to the shared layer state object during layer matching
+
+  // context and state can technically be null before a layer is initialized/matched.
+  // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
+  // Checking for null state constantly in layer implementation is unnecessarily verbose.
+  context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
+  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+
+  parent: Layer | null = null;
+
+  get root(): Layer {
+    // eslint-disable-next-line
+    let layer: Layer = this;
+    while (layer.parent) {
+      layer = layer.parent;
+    }
+    return layer;
+  }
 
   toString(): string {
     const className = (this.constructor as typeof Layer).layerName || this.constructor.name;
@@ -179,7 +217,8 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   /** Projects a point with current view state from the current layer's coordinate system to screen */
   project(xyz: number[]): number[] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
 
     const worldPosition = getWorldPosition(xyz, {
       viewport,
@@ -194,7 +233,8 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   /** Unprojects a screen pixel to the current view's default coordinate system
       Note: this does not reverse `project`. */
   unproject(xy: number[]): number[] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
     return viewport.unproject(xy);
   }
 
@@ -210,7 +250,8 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
       fromCoordinateOrigin?: [number, number, number];
     }
   ): [number, number, number] {
-    const viewport = this.internalState?.viewport || (this.context?.viewport as Viewport);
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
 
     return projectPosition(xyz, {
       viewport,
@@ -244,7 +285,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   /** Mark this layer as needs a deep update */
   setNeedsUpdate() {
-    if (this.context && this.internalState) {
+    if (this.internalState) {
       this.context.layerManager.setNeedsUpdate(String(this));
       this.internalState.needsUpdate = true;
     }
@@ -267,7 +308,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
   getModels(): Model[] {
-    return this.state && (this.state.models || (this.state.model ? [this.state.model] : []));
+    return (this.state && (this.state.models || (this.state.model && [this.state.model]))) || [];
   }
 
   /** Update shader module parameters */
@@ -471,7 +512,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   // called to populate the info object that is passed to the event handler
   // @return null to cancel event
-  getPickingInfo({info, mode, sourceLayer}) {
+  getPickingInfo({info, mode, sourceLayer}: GetPickingInfoParams) {
     const {index} = info;
 
     if (index >= 0) {
@@ -488,7 +529,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   // / INTERNAL METHODS - called by LayerManager, DeckRenderer and DeckPicker
 
-  /** Propagate an error event through the system */
+  /** (Internal) Propagate an error event through the system */
   raiseError(error: Error, message: string): void {
     if (message) {
       error.message = `${message}: ${error.message}`;
@@ -498,7 +539,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     }
   }
 
-  /** Checks if this layer needs redraw */
+  /** (Internal) Checks if this layer needs redraw */
   getNeedsRedraw(
     opts: {
       /** Reset redraw flags to false after the check */
@@ -508,7 +549,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     return this._getNeedsRedraw(opts);
   }
 
-  /** Checks if this layer needs a deep update */
+  /** (Internal) Checks if this layer needs a deep update */
   needsUpdate(): boolean {
     if (!this.internalState) {
       return false;
@@ -735,7 +776,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
   /* eslint-disable max-statements */
   /* (Internal) Called by layer manager when a new layer is found */
   _initialize() {
-    assert(!this.internalState && !this.state); // finalized layer cannot be reused
+    assert(!this.internalState); // finalized layer cannot be reused
     assert(Number.isFinite(this.props.coordinateSystem)); // invalid coordinateSystem
 
     debug(TRACE_INITIALIZE, this);
@@ -758,7 +799,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
       });
     }
 
-    this.internalState = new LayerState<PropsT>({
+    this.internalState = new LayerState<this>({
       attributeManager,
       layer: this
     });
@@ -777,16 +818,14 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     /* eslint-enable accessor-pairs */
 
     this.internalState.layer = this;
-    this.internalState.uniformTransitions = new UniformTransitionManager(
-      (this.context as LayerContext).timeline
-    );
+    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
     // Call subclass lifecycle methods
-    this.initializeState(this.context as LayerContext);
+    this.initializeState(this.context);
 
     // Initialize extensions
     for (const extension of this.props.extensions) {
@@ -816,7 +855,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     }
 
     // Move internalState
-    this.internalState = internalState as LayerState<PropsT>;
+    this.internalState = internalState as LayerState<this>;
     this.internalState.layer = this;
 
     // Move state
@@ -842,8 +881,8 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     }
 
     const currentProps = this.props;
-    const context = this.context as LayerContext;
-    const internalState = this.internalState as LayerState<PropsT>;
+    const context = this.context;
+    const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
@@ -894,7 +933,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     debug(TRACE_FINALIZE, this);
 
     // Call subclass lifecycle method
-    this.finalizeState(this.context as LayerContext);
+    this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
       extension.finalizeState.call(this, extension);
@@ -914,7 +953,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     this._updateAttributeTransition();
 
     const currentProps = this.props;
-    const context = this.context as LayerContext;
+    const context = this.context;
     // Overwrite this.props during redraw to use in-transition prop values
     // `internalState.propsInTransition` could be missing if `updateState` failed
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
@@ -1090,14 +1129,12 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
 
   /** Create new attribute manager */
   protected _getAttributeManager(): AttributeManager | null {
-    return (
-      this.context &&
-      new AttributeManager(this.context.gl, {
-        id: this.props.id,
-        stats: this.context.stats,
-        timeline: this.context.timeline
-      })
-    );
+    const context = this.context;
+    return new AttributeManager(context.gl, {
+      id: this.props.id,
+      stats: context.stats,
+      timeline: context.timeline
+    });
   }
 
   // Private methods
@@ -1111,7 +1148,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
     this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
-    const {model} = this.state as any;
+    const {model} = this.state;
     model?.setInstanceCount(this.getNumInstances());
 
     // Set picking module parameters to match props
@@ -1147,7 +1184,7 @@ export default abstract class Layer<PropsT = any> extends Component<PropsT & Req
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       oldProps: this.internalState.getOldProps() as PropsT,
-      context: this.context as LayerContext,
+      context: this.context,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       changeFlags: this.internalState.changeFlags
     };

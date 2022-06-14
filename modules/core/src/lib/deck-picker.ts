@@ -37,47 +37,37 @@ import {
 } from './picking/pick-info';
 
 import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl';
-import type {FilterContext} from '../passes/layers-pass';
+import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
-import type Effect from './effect';
+import type {Effect} from './effect';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 
 export type PickByPointOptions = {
-  // User config
   x: number;
   y: number;
   radius?: number;
   depth?: number;
   mode?: string;
   unproject3D?: boolean;
-
-  // Deck context
-  layers: Layer[];
-  views: Record<string, View>;
-  viewports: Viewport[];
-  onViewportActive: (viewport: Viewport) => void;
-  effects: Effect[];
 };
 
 export type PickByRectOptions = {
-  // User config
   x: number;
   y: number;
   width?: number;
   height?: number;
   mode?: string;
   maxObjects?: number | null;
+};
 
-  // Deck context
+type PickOperationContext = {
   layers: Layer[];
   views: Record<string, View>;
   viewports: Viewport[];
   onViewportActive: (viewport: Viewport) => void;
   effects: Effect[];
 };
-
-type Rect = {x: number; y: number; width: number; height: number};
 
 /** Manages picking in a Deck context */
 export default class DeckPicker {
@@ -127,12 +117,12 @@ export default class DeckPicker {
   }
 
   /** Pick the closest info at given coordinate */
-  pickObject(opts: PickByPointOptions) {
+  pickObject(opts: PickByPointOptions & PickOperationContext) {
     return this._pickClosestObject(opts);
   }
 
   /** Get all unique infos within a bounding box */
-  pickObjects(opts: PickByRectOptions) {
+  pickObjects(opts: PickByRectOptions & PickOperationContext) {
     return this._pickVisibleObjects(opts);
   }
 
@@ -206,9 +196,9 @@ export default class DeckPicker {
     unproject3D,
     onViewportActive,
     effects
-  }: PickByPointOptions): {
+  }: PickByPointOptions & PickOperationContext): {
     result: PickingInfo[];
-    emptyInfo: PickingInfo | undefined;
+    emptyInfo: PickingInfo;
   } {
     const pickableLayers = this._getPickable(layers);
     const pixelRatio = cssToDeviceRatio(this.gl);
@@ -241,7 +231,14 @@ export default class DeckPicker {
       deviceHeight: height
     });
 
-    let infos: Map<string | null, PickingInfo> | undefined;
+    const cullRect: Rect = {
+      x: x - radius,
+      y: y - radius,
+      width: radius * 2 + 1,
+      height: radius * 2 + 1
+    };
+
+    let infos: Map<string | null, PickingInfo>;
     const result: PickingInfo[] = [];
     const affectedLayers = new Set<Layer>();
 
@@ -255,6 +252,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          cullRect,
           effects,
           pass: `picking:${mode}`
         });
@@ -287,6 +285,7 @@ export default class DeckPicker {
               width: 1,
               height: 1
             },
+            cullRect,
             effects,
             pass: `picking:${mode}:z`
           },
@@ -335,7 +334,7 @@ export default class DeckPicker {
       layer.restorePickingColors();
     }
 
-    return {result, emptyInfo: infos && infos.get(null)};
+    return {result, emptyInfo: infos!.get(null) as PickingInfo};
   }
 
   /** Pick all objects within the given bounding box */
@@ -351,7 +350,7 @@ export default class DeckPicker {
     maxObjects = null,
     onViewportActive,
     effects
-  }: PickByRectOptions): PickingInfo[] {
+  }: PickByRectOptions & PickOperationContext): PickingInfo[] {
     const pickableLayers = this._getPickable(layers);
 
     if (!pickableLayers) {
@@ -387,6 +386,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      cullRect: {x, y, width, height},
       effects,
       pass: `picking:${mode}`
     });
@@ -430,6 +430,7 @@ export default class DeckPicker {
     views: Record<string, View>;
     viewports: Viewport[];
     onViewportActive: (viewport: Viewport) => void;
+    cullRect?: Rect;
     effects: Effect[];
   }): {
     pickedColors: Uint8Array;
@@ -445,6 +446,7 @@ export default class DeckPicker {
       views: Record<string, View>;
       viewports: Viewport[];
       onViewportActive: (viewport: Viewport) => void;
+      cullRect?: Rect;
       effects: Effect[];
     },
     pickZ: true
@@ -460,6 +462,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      cullRect,
       effects,
       pass
     }: {
@@ -469,6 +472,7 @@ export default class DeckPicker {
       views: Record<string, View>;
       viewports: Viewport[];
       onViewportActive: (viewport: Viewport) => void;
+      cullRect?: Rect;
       effects: Effect[];
     },
     pickZ: boolean = false
@@ -486,6 +490,7 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      cullRect,
       effects,
       pass,
       pickZ

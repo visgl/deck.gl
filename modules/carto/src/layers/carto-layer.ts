@@ -1,4 +1,11 @@
-import {CompositeLayer, Layer, log} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Layer,
+  log,
+  CompositeLayerProps,
+  LayerProps,
+  ChangeFlags
+} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import H3TileLayer from './h3-tile-layer';
 import QuadkeyTileLayer from './quadkey-tile-layer';
@@ -21,8 +28,6 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {CompositeLayerProps, LayerProps} from 'modules/core/src/types/layer-props';
-import {ChangeFlags} from 'modules/core/src/lib/layer-state';
 import {FetchLayerDataResult} from '../api/maps-v3-client';
 import {assert} from '../utils';
 
@@ -66,7 +71,11 @@ const defaultProps = {
   aggregationResLevel: null
 };
 
-export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT> {
+/** All properties supported by CartoLayer. */
+export type CartoLayerProps<DataT = any> = _CartoLayerProps & CompositeLayerProps<DataT>;
+
+/** Properties added by CartoLayer. */
+type _CartoLayerProps = {
   /**
    * Either a SQL query or a name of dataset/tileset.
    */
@@ -147,9 +156,11 @@ export interface CartoLayerProps<DataT = any> extends CompositeLayerProps<DataT>
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
-}
+};
 
-export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerProps<DataT>> {
+export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
+  Required<_CartoLayerProps> & ExtraProps
+> {
   static layerName = 'CartoLayer';
   static defaultProps = defaultProps as any;
 
@@ -237,7 +248,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
-      let result: FetchLayerDataResult;
+      let result: Partial<FetchLayerDataResult>;
       if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
         result = {
           data: await getDataV2({type, source, credentials: credentials as ClassicCredentials})
@@ -276,6 +287,7 @@ export default class CartoLayer<DataT = any> extends CompositeLayer<CartoLayerPr
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {data: _notUsed, ...propsNoData} = this.props;
+    // @ts-expect-error 'uniqueIdProperty' is specified more than once, so this usage will be overwritten.
     const props = {uniqueIdProperty, ...propsNoData};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {

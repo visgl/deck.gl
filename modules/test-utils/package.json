@@ -2,7 +2,7 @@
   "name": "@deck.gl/test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "8.8.0-alpha.4",
+  "version": "8.8.0-beta.2",
   "publishConfig": {
     "access": "public"
   },
@@ -20,7 +20,8 @@
   "module": "dist/esm/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "typed"
   ],
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

@@ -1,10 +1,11 @@
 import Tile2DHeader from './tile-2d-header';
-import {getTileIndices, tileToBoundingBox} from './utils';
+import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4} from '@math.gl/core';
-import {assert, Viewport} from '@deck.gl/core';
+import {Matrix4, equals} from '@math.gl/core';
+import {Viewport} from '@deck.gl/core';
 import {Bounds, TileIndex, ZRange} from './types';
 import {TileLayerProps} from './tile-layer';
+import {_memoize as memoize} from '@deck.gl/core';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
@@ -48,8 +49,7 @@ const STRATEGIES = {
 };
 
 export type Tileset2DProps = Pick<
-  TileLayerProps,
-  | 'getTileData'
+  Required<TileLayerProps>,
   | 'tileSize'
   | 'maxCacheSize'
   | 'maxCacheByteSize'
@@ -60,6 +60,7 @@ export type Tileset2DProps = Pick<
   | 'maxRequests'
   | 'zoomOffset'
 > & {
+  getTileData: NonNullable<TileLayerProps['getTileData']>;
   onTileLoad: (tile: Tile2DHeader) => void;
   onTileUnload: (tile: Tile2DHeader) => void;
   onTileError: (error: any, tile: Tile2DHeader) => void;
@@ -78,6 +79,7 @@ export default class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
+  private _zRange?: ZRange;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -145,10 +147,10 @@ export default class Tileset2D {
   setOptions(opts: Tileset2DProps): void {
     Object.assign(this.opts, opts);
     if (Number.isFinite(opts.maxZoom)) {
-      this._maxZoom = Math.floor(opts.maxZoom);
+      this._maxZoom = Math.floor(opts.maxZoom as number);
     }
     if (Number.isFinite(opts.minZoom)) {
-      this._minZoom = Math.ceil(opts.minZoom);
+      this._minZoom = Math.ceil(opts.minZoom as number);
     }
   }
 
@@ -184,12 +186,18 @@ export default class Tileset2D {
   ): number {
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
-    if (!this._viewport || !viewport.equals(this._viewport) || isModelMatrixNew) {
+    if (
+      !this._viewport ||
+      !viewport.equals(this._viewport) ||
+      !equals(this._zRange, zRange) ||
+      isModelMatrixNew
+    ) {
       if (isModelMatrixNew) {
         this._modelMatrixInverse = modelMatrixAsMatrix4.clone().invert();
         this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
+      this._zRange = zRange;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
@@ -206,7 +214,7 @@ export default class Tileset2D {
       }
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
-      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index));
+      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
     }
 
     // Update tile states
@@ -223,6 +231,29 @@ export default class Tileset2D {
     }
 
     return this._frameNumber;
+  }
+
+  isTileVisible(
+    tile: Tile2DHeader,
+    cullRect?: {x: number; y: number; width: number; height: number}
+  ): boolean {
+    if (!tile.isVisible) {
+      return false;
+    }
+
+    if (cullRect && this._viewport) {
+      const [minX, minY, maxX, maxY] = getCullBounds({
+        viewport: this._viewport,
+        z: this._zRange,
+        cullRect
+      });
+      const {bbox} = tile;
+      if ('west' in bbox) {
+        return bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
+      }
+      return bbox.left < maxX && bbox.right > minX && bbox.bottom < maxY && bbox.top > minY;
+    }
+    return true;
   }
 
   /* Public interface for subclassing */
@@ -270,9 +301,9 @@ export default class Tileset2D {
   }
 
   /** Returns additional metadata to add to tile, bbox by default */
-  getTileMetadata(index: TileIndex) {
-    assert(this._viewport);
+  getTileMetadata(index: TileIndex): Record<string, any> {
     const {tileSize} = this.opts;
+    // @ts-expect-error
     return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
@@ -285,8 +316,7 @@ export default class Tileset2D {
   }
 
   // Returns true if any tile's visibility changed
-  updateTileStates() {
-    assert(this._selectedTiles);
+  private updateTileStates() {
     const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
 
     const visibilities = new Array(this._cache.size);
@@ -298,6 +328,7 @@ export default class Tileset2D {
       tile.isSelected = false;
       tile.isVisible = false;
     }
+    // @ts-expect-error called only when _selectedTiles is already defined
     for (const tile of this._selectedTiles) {
       tile.isSelected = true;
       tile.isVisible = true;
@@ -321,7 +352,9 @@ export default class Tileset2D {
 
   /* Private methods */
 
-  _pruneRequests(): void {
+  private _getCullBounds = memoize(getCullBounds);
+
+  private _pruneRequests(): void {
     const {maxRequests} = this.opts;
 
     const abortCandidates: Tile2DHeader[] = [];
@@ -345,7 +378,7 @@ export default class Tileset2D {
   }
 
   // This needs to be called every time some tiles have been added/removed from cache
-  _rebuildTree() {
+  private _rebuildTree() {
     const {_cache} = this;
 
     // Reset states
@@ -370,12 +403,12 @@ export default class Tileset2D {
    * Clear tiles that are not visible when the cache is full
    */
   /* eslint-disable complexity */
-  _resizeCache() {
-    assert(this.selectedTiles);
+  private _resizeCache() {
     const {_cache, opts} = this;
 
     const maxCacheSize =
       opts.maxCacheSize ||
+      // @ts-expect-error called only when selectedTiles is initialized
       (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
     const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
 
@@ -405,9 +438,9 @@ export default class Tileset2D {
   }
   /* eslint-enable complexity */
 
-  _getTile(index: TileIndex, create: true): Tile2DHeader;
-  _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
-  _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
+  private _getTile(index: TileIndex, create: true): Tile2DHeader;
+  private _getTile(index: TileIndex, create?: false): Tile2DHeader | undefined;
+  private _getTile(index: TileIndex, create?: boolean): Tile2DHeader | undefined {
     const id = this.getTileId(index);
     let tile = this._cache.get(id);
     let needsReload = false;

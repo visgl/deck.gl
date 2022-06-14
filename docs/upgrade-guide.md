@@ -8,6 +8,10 @@
 
 - `Tile` class in `TileLayer` no longer has `x`, `y`, and `z` as top level properties, but instead an `index` property with shape `{x, y, z}`.
 
+#### Core
+
+- The base `Effect` class is removed. It has been migrated to `interface Effect` in TypeScript.
+
 ## Upgrading from deck.gl v8.6 to v8.7
 
 #### Deprecations

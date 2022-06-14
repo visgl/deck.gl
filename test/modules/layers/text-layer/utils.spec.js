@@ -21,8 +21,8 @@ test('TextLayer - utils#nextPowOfTwo', t => {
 
 test('TextLayer - utils#buildMapping', t => {
   const options = {
-    characterSet: 'asdf',
-    getFontWidth: (char, i) => i + 1,
+    characterSet: 'abcd',
+    getFontWidth: char => char.charCodeAt(0) - 96,
     fontHeight: 4,
     buffer: 2,
     maxCanvasWidth: 16
@@ -47,9 +47,9 @@ test('TextLayer - utils#buildMapping', t => {
    */
   const expected = {
     a: {x: 2, y: 2, width: 1, height: 4},
-    s: {x: 7, y: 2, width: 2, height: 4},
-    d: {x: 2, y: 10, width: 3, height: 4},
-    f: {x: 9, y: 10, width: 4, height: 4}
+    b: {x: 7, y: 2, width: 2, height: 4},
+    c: {x: 2, y: 10, width: 3, height: 4},
+    d: {x: 9, y: 10, width: 4, height: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');
@@ -59,8 +59,8 @@ test('TextLayer - utils#buildMapping', t => {
 
 test('TextLayer - utils#buildMapping with cache', t => {
   const options = {
-    characterSet: 'kl',
-    getFontWidth: (char, i) => i + 1,
+    characterSet: 'pq',
+    getFontWidth: char => char.charCodeAt(0) - 111,
     fontHeight: 4,
     buffer: 2,
     maxCanvasWidth: 16,
@@ -85,8 +85,8 @@ test('TextLayer - utils#buildMapping with cache', t => {
     s: {x: 7, y: 2, width: 2, height: 4},
     d: {x: 2, y: 10, width: 3, height: 4},
     f: {x: 9, y: 10, width: 4, height: 4},
-    k: {x: 2, y: 18, width: 1, height: 4},
-    l: {x: 7, y: 18, width: 2, height: 4}
+    p: {x: 2, y: 18, width: 1, height: 4},
+    q: {x: 7, y: 18, width: 2, height: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');

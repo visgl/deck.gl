@@ -6,7 +6,9 @@ import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
-import type Effect from '../lib/effect';
+import type {Effect} from '../lib/effect';
+
+export type Rect = {x: number; y: number; width: number; height: number};
 
 export type LayersPassRenderOptions = {
   target?: Framebuffer;
@@ -14,6 +16,7 @@ export type LayersPassRenderOptions = {
   layers: Layer[];
   viewports: Viewport[];
   onViewportActive: (viewport: Viewport) => void;
+  cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
   clearCanvas?: boolean;
@@ -23,7 +26,7 @@ export type LayersPassRenderOptions = {
 
 type DrawLayerParameters = {
   shouldDrawLayer: boolean;
-  layerRenderIndex: number;
+  layerRenderIndex?: number;
   moduleParameters?: any;
   layerParameters?: any;
 };
@@ -33,6 +36,7 @@ export type FilterContext = {
   viewport: Viewport;
   isPicking: boolean;
   renderPass: string;
+  cullRect?: Rect;
 };
 
 export type RenderStats = {
@@ -104,7 +108,7 @@ export default class LayersPass extends Pass {
   // this is only done once for the parent viewport
   private _getDrawLayerParams(
     viewport: Viewport,
-    {layers, pass, layerFilter, effects, moduleParameters}: LayersPassRenderOptions
+    {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions
   ): DrawLayerParameters[] {
     const drawLayerParams: DrawLayerParameters[] = [];
     const indexResolver = layerIndexResolver();
@@ -112,7 +116,8 @@ export default class LayersPass extends Pass {
       layer: layers[0],
       viewport,
       isPicking: pass.startsWith('picking'),
-      renderPass: pass
+      renderPass: pass,
+      cullRect
     };
     const layerFilterCache = {};
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -125,17 +130,16 @@ export default class LayersPass extends Pass {
         layerFilterCache
       );
 
-      // This is the "logical" index for ordering this layer in the stack
-      // used to calculate polygon offsets
-      // It can be the same as another layer
-      const layerRenderIndex = indexResolver(layer, shouldDrawLayer);
-
       const layerParam: DrawLayerParameters = {
-        shouldDrawLayer,
-        layerRenderIndex
+        shouldDrawLayer
       };
 
       if (shouldDrawLayer) {
+        // This is the "logical" index for ordering this layer in the stack
+        // used to calculate polygon offsets
+        // It can be the same as another layer
+        layerParam.layerRenderIndex = indexResolver(layer, shouldDrawLayer);
+
         layerParam.moduleParameters = this._getModuleParameters(
           layer,
           effects,
@@ -241,7 +245,7 @@ export default class LayersPass extends Pass {
     layerFilter: ((params: FilterContext) => boolean) | undefined,
     layerFilterCache: Record<string, boolean>
   ) {
-    const shouldDrawLayer = this.shouldDrawLayer(layer) && layer.props.visible;
+    const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
     if (!shouldDrawLayer) {
       return false;
@@ -296,7 +300,7 @@ export default class LayersPass extends Pass {
 
     if (effects) {
       for (const effect of effects) {
-        Object.assign(moduleParameters, effect.getModuleParameters(layer));
+        Object.assign(moduleParameters, effect.getModuleParameters?.(layer));
       }
     }
 
