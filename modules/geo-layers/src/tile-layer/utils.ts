@@ -127,6 +127,50 @@ function getBoundingBox(viewport: Viewport, zRange: number[] | null, extent: Bou
   ];
 }
 
+/** Get culling bounds in world space */
+export function getCullBounds({
+  viewport,
+  z,
+  cullRect
+}: {
+  /** Current viewport */
+  viewport: Viewport;
+  /** Current z range */
+  z: ZRange | number | undefined;
+  /** Culling rectangle in screen space */
+  cullRect: {x: number; y: number; width: number; height: number};
+}): [number, number, number, number] {
+  const x = cullRect.x - viewport.x;
+  const y = cullRect.y - viewport.y;
+  const {width, height} = cullRect;
+
+  if (!Array.isArray(z)) {
+    const unprojectOption = {targetZ: z || 0};
+
+    const topLeft = viewport.unproject([x, y], unprojectOption);
+    const topRight = viewport.unproject([x + width, y], unprojectOption);
+    const bottomLeft = viewport.unproject([x, y + height], unprojectOption);
+    const bottomRight = viewport.unproject([x + width, y + height], unprojectOption);
+
+    return [
+      Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]),
+      Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]),
+      Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1])
+    ];
+  }
+
+  const bounds0 = getCullBounds({viewport, z: z[0], cullRect});
+  const bounds1 = getCullBounds({viewport, z: z[1], cullRect});
+
+  return [
+    Math.min(bounds0[0], bounds1[0]),
+    Math.min(bounds0[1], bounds1[1]),
+    Math.max(bounds0[2], bounds1[2]),
+    Math.max(bounds0[3], bounds1[3])
+  ];
+}
+
 function getIndexingCoords(bbox: Bounds, scale: number, modelMatrixInverse?: Matrix4): Bounds {
   if (modelMatrixInverse) {
     const transformedTileIndex = transformBox(bbox, modelMatrixInverse).map(

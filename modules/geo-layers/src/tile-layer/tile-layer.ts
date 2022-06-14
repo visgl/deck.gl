@@ -7,6 +7,7 @@ import {
   PickingInfo,
   GetPickingInfoParams,
   DefaultProps,
+  FilterContext,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -352,7 +353,8 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     });
   }
 
-  filterSubLayer({layer}) {
-    return layer.props.tile.isVisible;
+  filterSubLayer({layer, cullRect}: FilterContext) {
+    const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
+    return this.state.tileset.isTileVisible(tile, cullRect);
   }
 }
