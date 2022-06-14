@@ -26,6 +26,7 @@ import {
   Layer,
   LayersList,
   log,
+  Material,
   Texture,
   UpdateParameters
 } from '@deck.gl/core';
@@ -71,15 +72,16 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   loaders: [TerrainWorkerLoader]
 };
 
+type URLTemplate = string | string[];
+
 // Turns array of templates into a single string to work around shallow change
-function urlTemplateToUpdateTrigger(template: string | string[]): string {
+function urlTemplateToUpdateTrigger(template: URLTemplate | null): string {
   if (Array.isArray(template)) {
     return template.join(';');
   }
-  return template;
+  return template || '';
 }
 
-type URLTemplate = string | string[];
 type ElevationDecoder = {rScaler: number; gScaler: number; bScaler: number; offset: number};
 type TerrainLoadProps = {
   bounds: Bounds;
@@ -89,7 +91,7 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, Texture];
+type MeshAndTexture = [MeshAttributes | null, Texture | null];
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &
@@ -102,25 +104,25 @@ type _TerrainLayerProps = {
   elevationData: URLTemplate;
 
   /** Image url to use as texture. **/
-  texture?: URLTemplate;
+  texture?: URLTemplate | null;
 
   /** Martini error tolerance in meters, smaller number -> more detailed mesh. **/
   meshMaxError?: number;
 
   /** Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. **/
-  bounds?: Bounds;
+  bounds?: Bounds | null;
 
   /** Color to use if texture is unavailable. **/
   color?: Color;
 
   /** Object to decode height data, from (r, g, b) to height in meters. **/
-  elevationDecoder: ElevationDecoder;
+  elevationDecoder?: ElevationDecoder;
 
   /** Whether to render the mesh in wireframe mode. **/
-  wireframe: boolean;
+  wireframe?: boolean;
 
   /** Material props for lighting effect. **/
-  material: boolean | any | null;
+  material?: Material;
 };
 
 export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
@@ -195,7 +197,7 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const {viewport} = this.context;
     const dataUrl = getURLFromTemplate(elevationData, tile);
-    const textureUrl = getURLFromTemplate(texture, tile);
+    const textureUrl = texture && getURLFromTemplate(texture, tile);
 
     const {signal} = tile;
     let bottomLeft = [0, 0] as [number, number];
