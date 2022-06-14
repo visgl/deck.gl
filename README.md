@@ -89,7 +89,7 @@ pip install pydeck
 
 ## Contributing
 
-deck.gl is part of vis.gl, a [Urban Computing Foundation](https://uc.foundation/) project. Read the [contribution guidelines](/CONTRIBUTING.md) if you are interested in contributing.
+deck.gl is part of vis.gl, an [OpenJS Foundation](https://openjsf.org/) project. Read the [contribution guidelines](/CONTRIBUTING.md) if you are interested in contributing.
 
 
 ## Attributions
