@@ -1,3 +1,3 @@
 # Code of Conduct
 
-vis.gl is part of the [Urban Computing Foundation](https://uc.foundation/), supported by the Linux Foundation. Please be mindful of and adhere to the Linux Foundation's [Code of Conduct](https://lfprojects.org/policies/code-of-conduct/) when contributing to deck.gl.
+vis.gl is an [OpenJS Foundation](https://openjsf.org/) project. Please be mindful of and adhere to the OpenJS Foundation's [Code of Conduct](https://github.com/openjs-foundation/cross-project-council/blob/main/CODE_OF_CONDUCT.md) when contributing to deck.gl.
