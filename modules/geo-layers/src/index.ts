@@ -44,4 +44,6 @@ export type {TileLayerProps} from './tile-layer/tile-layer';
 export type {GeoBoundingBox} from './tile-layer/types';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TileLoadProps as _TileLoadProps} from './tile-layer/types';
+export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
+export type {Tile3DLayerProps} from './tile-3d-layer/tile-3d-layer';
 export type {MVTLayerProps} from './mvt-layer/mvt-layer';
