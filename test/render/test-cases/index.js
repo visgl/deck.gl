@@ -20,6 +20,7 @@ import quadkeyLayerTests from './quadkey-layer';
 import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
+import geohashLayerTests from './geohash-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
 import scenegraphLayerTests from './scenegraph-layer';
@@ -48,6 +49,7 @@ export default [].concat(
   s2LayerTests,
   tripsLayerTests,
   mvtLayerTests,
+  geohashLayerTests,
   simpleMeshLayerTests,
   scenegraphLayerTests,
   viewsTests,

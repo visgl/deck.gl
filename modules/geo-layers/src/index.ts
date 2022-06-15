@@ -29,6 +29,7 @@ export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
 export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
 export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
+export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tile-layer/utils';
 export {default as _Tileset2D} from './tile-layer/tileset-2d';

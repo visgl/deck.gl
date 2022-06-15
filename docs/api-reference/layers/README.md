@@ -45,6 +45,7 @@ The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects lay
   - [GreatCircleLayer](/docs/api-reference/geo-layers/great-circle-layer.md)
   - [H3ClusterLayer](/docs/api-reference/geo-layers/h3-cluster-layer.md)
   - [H3HexagonLayer](/docs/api-reference/geo-layers/h3-hexagon-layer.md)
+  - [GeohashLayer](/docs/api-reference/geo-layers/geohash-layer.md)
   - [QuadkeyLayer](/docs/api-reference/geo-layers/quadkey-layer.md)
   - [S2Layer](/docs/api-reference/geo-layers/s2-layer.md)
   - [TileLayer](/docs/api-reference/geo-layers/tile-layer.md)
