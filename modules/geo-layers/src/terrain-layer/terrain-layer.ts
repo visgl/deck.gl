@@ -193,7 +193,7 @@ export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
     return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
-  getTiledTerrainData(tile: TileLoadProps): Promise<[MeshAttributes | null, Texture]> {
+  getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {
     const {elevationData, fetch, texture, elevationDecoder, meshMaxError} = this.props;
     const {viewport} = this.context;
     const dataUrl = getURLFromTemplate(elevationData, tile);
