@@ -19,7 +19,7 @@ function quadkeyToTile(index: QuadkeyTileIndex) {
 
   for (let i = tile.z; i > 0; i--) {
     const mask = 1 << (i - 1);
-    const q = +quadkey[tile.z - i];
+    const q = Number(quadkey[tile.z - i]);
     if (q === 1) tile.x |= mask;
     if (q === 2) tile.y |= mask;
     if (q === 3) {
