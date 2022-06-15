@@ -57,7 +57,7 @@ _Note that the configuration in `examples/webpack.config.local.js` will potentia
 
 ## Community Governance
 
-vis.gl is part of the [Urban Computing Foundation](https://uc.foundation/). See the organization's [Technical Charter](https://github.com/visgl/tsc/blob/master/Technical%20Charter.md).
+vis.gl is part of the [OpenJS Foundation](https://openjsf.org/). See the organization's [Technical Charter](https://github.com/visgl/tsc/blob/master/Technical%20Charter.md).
 
 
 ### Technical Steering Committee
