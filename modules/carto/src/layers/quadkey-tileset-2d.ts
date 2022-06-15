@@ -13,6 +13,23 @@ function tileToQuadkey(tile): QuadkeyTileIndex {
   return {i: index};
 }
 
+function quadkeyToTile(index: QuadkeyTileIndex) {
+  const quadkey = index.i;
+  const tile = {x: 0, y: 0, z: quadkey.length};
+
+  for (let i = tile.z; i > 0; i--) {
+    const mask = 1 << (i - 1);
+    const q = +quadkey[tile.z - i];
+    if (q === 1) tile.x |= mask;
+    if (q === 2) tile.y |= mask;
+    if (q === 3) {
+      tile.x |= mask;
+      tile.y |= mask;
+    }
+  }
+  return tile;
+}
+
 export default class QuadkeyTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadkeyTileIndex[] {
@@ -24,8 +41,9 @@ export default class QuadkeyTileset2D extends Tileset2D {
     return i;
   }
 
-  getTileMetadata() {
-    return {};
+  // @ts-expect-error TileIndex must be generic
+  getTileMetadata(index: QuadkeyTileIndex) {
+    return super.getTileMetadata(quadkeyToTile(index));
   }
 
   // @ts-expect-error TileIndex must be generic
