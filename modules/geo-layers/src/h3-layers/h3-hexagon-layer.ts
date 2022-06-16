@@ -1,4 +1,4 @@
-import {
+import h3, {
   h3ToGeoBoundary,
   h3GetResolution,
   h3ToGeo,
@@ -11,6 +11,7 @@ import {
 import {lerp} from '@math.gl/core';
 import {
   AccessorFunction,
+  assert,
   CompositeLayer,
   CompositeLayerProps,
   createIterable,
@@ -99,6 +100,13 @@ function mergeTriggers(getHexagon, coverage) {
   return trigger;
 }
 
+function checkH3Lib() {
+  assert(
+    h3,
+    'To use H3HexagonLayer, include the <script src="https://unpkg.com/h3-js"></script> tag before the deck.gl script tag. https://deck.gl/docs/api-reference/geo-layers/h3-hexagon-layer'
+  );
+}
+
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   ...PolygonLayer.defaultProps,
   highPrecision: 'auto',
@@ -160,6 +168,7 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
   static layerName = 'H3HexagonLayer';
 
   initializeState() {
+    checkH3Lib();
     this.state = {
       edgeLengthKM: 0,
       resolution: -1
