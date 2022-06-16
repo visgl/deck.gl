@@ -67,17 +67,10 @@ export function mockFetchMapsV3() {
           return GEOJSON_RESPONSE;
         }
 
-        if (url.indexOf('tileset') !== -1) {
+        if (url.indexOf('tileset') !== -1 || url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
             tilejson: {
               url: ['https://xyz.com?format=tilejson&cache=12345678']
-            }
-          };
-        }
-        if (url.indexOf('query') !== -1 || url.indexOf('table')) {
-          return {
-            geojson: {
-              url: ['https://xyz.com?format=geojson&cache=12345678']
             }
           };
         }
