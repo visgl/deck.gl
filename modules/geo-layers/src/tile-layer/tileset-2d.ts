@@ -251,7 +251,7 @@ export default class Tileset2D {
       if ('west' in bbox) {
         return bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
       }
-      return bbox.left < maxX && bbox.right > minX && bbox.bottom < maxY && bbox.top > minY;
+      return bbox.left < maxX && bbox.right > minX && bbox.top < maxY && bbox.bottom > minY;
     }
     return true;
   }
