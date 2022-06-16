@@ -156,6 +156,12 @@ type _CartoLayerProps = {
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
+
+  /** Aggregration SQL expression. Only used for spatial index datasets **/
+  aggregationExp?: string;
+
+  /** Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3. **/
+  aggregationResLevel?: number;
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
@@ -227,6 +233,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
+      props.aggregationExp !== oldProps.aggregationExp ||
+      props.aggregationResLevel !== oldProps.aggregationResLevel ||
       props.connection !== oldProps.connection ||
       props.geoColumn !== oldProps.geoColumn ||
       props.format !== oldProps.format ||

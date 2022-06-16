@@ -102,6 +102,9 @@ type _IconLayerProps<DataT> = {
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
   onIconError?: ((context: LoadIconErrorContext) => void) | null;
+
+  /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
+  textureParameters?: Record<number, number> | null;
 };
 
 export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps<DataT>;
