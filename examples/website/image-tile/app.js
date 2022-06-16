@@ -18,8 +18,9 @@ const ROOT_URL =
 
 function getTooltip({tile, bitmap}) {
   if (tile && bitmap) {
+    const {x, y, z} = tile.index;
     return `\
-    tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}
+    tile: x: ${x}, y: ${y}, z: ${z}
     (${bitmap.pixel[0]},${bitmap.pixel[1]}) in ${bitmap.size.width}x${bitmap.size.height}`;
   }
   return null;
@@ -59,7 +60,8 @@ export default function App({autoHighlight = true, onTilesLoad}) {
       maxZoom: 0,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       extent: [0, 0, dimensions.width, dimensions.height],
-      getTileData: ({x, y, z}) => {
+      getTileData: ({index}) => {
+        const {x, y, z} = index;
         return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
       },
       onViewportLoad: onTilesLoad,
