@@ -11,6 +11,8 @@ test('QuadkeyTileset2D', async t => {
     width: 300,
     height: 200
   });
+  // Required for getTileMetadata to function
+  tileset._viewport = viewport;
 
   const indices = tileset.getTileIndices({viewport});
   t.deepEqual(
@@ -19,7 +21,13 @@ test('QuadkeyTileset2D', async t => {
     'indices in viewport'
   );
   t.equal(tileset.getTileId({i: '0132'}), '0132', 'tile id');
-  t.deepEqual(tileset.getTileMetadata({i: '0132'}), {}, 'tile metadata');
+  t.deepEqual(
+    tileset.getTileMetadata({i: '0132'}),
+    {
+      bbox: {west: -45, north: 74.01954331150226, east: -22.5, south: 66.51326044311186}
+    },
+    'tile metadata'
+  );
   t.equal(tileset.getTileZoom({i: '0132'}), 4, 'tile zoom');
   t.deepEqual(tileset.getParentIndex({i: '0132'}), {i: '013'}, 'tile parent');
   t.end();
