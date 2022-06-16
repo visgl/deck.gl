@@ -204,6 +204,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
       canvas: canvasRef.current,
       onLoad: () => {
         setIsDeckLoaded(true);
+        if (deckProps.onLoad) deckProps.onLoad();
       }
     });
 
