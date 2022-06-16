@@ -101,6 +101,9 @@ type _BitmapLayerProps = {
    * @default [255, 255, 255]
    */
   tintColor?: Color;
+
+  /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
+  textureParameters?: Record<number, number> | null;
 };
 
 /** The BitmapLayer renders a bitmap at specified boundaries. */
