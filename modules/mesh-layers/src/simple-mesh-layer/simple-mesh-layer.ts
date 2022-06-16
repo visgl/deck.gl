@@ -29,7 +29,8 @@ import {
   picking,
   DefaultProps,
   log,
-  LayerContext
+  LayerContext,
+  Material
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
@@ -90,7 +91,8 @@ type Mesh =
 type _SimpleMeshLayerProps<DataT> = {
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | Texture | Promise<Texture>;
-  textureParameters?: {[p: number]: number} | null;
+  /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
+  textureParameters?: Record<number, number> | null;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -154,7 +156,7 @@ type _SimpleMeshLayerProps<DataT> = {
    * @default true
    * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
    */
-  material?: true | any | null; // TODO - export Material def from lighting shader module
+  material?: Material;
 };
 
 export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
