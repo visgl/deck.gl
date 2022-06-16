@@ -1,7 +1,9 @@
 import {Texture2D} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 
-const DEFAULT_TEXTURE_PARAMETERS = {
+import type Layer from '../lib/layer';
+
+const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
   [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
   [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
@@ -9,9 +11,9 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 };
 
 // Track the textures that are created by us. They need to be released when they are no longer used.
-const internalTextures = {};
+const internalTextures: Record<string, Texture2D> = {};
 
-export function createTexture(layer, image) {
+export function createTexture(layer: Layer, image: any): Texture2D | null {
   const gl = layer.context && layer.context.gl;
   if (!gl || !image) {
     return null;
@@ -40,6 +42,7 @@ export function createTexture(layer, image) {
     parameters: {
       ...DEFAULT_TEXTURE_PARAMETERS,
       ...specialTextureParameters,
+      // @ts-expect-error textureParameter may not be defined
       ...layer.props.textureParameters
     }
   });
@@ -48,7 +51,7 @@ export function createTexture(layer, image) {
   return texture;
 }
 
-export function destroyTexture(texture) {
+export function destroyTexture(texture: Texture2D) {
   if (!texture || !(texture instanceof Texture2D)) {
     return;
   }
