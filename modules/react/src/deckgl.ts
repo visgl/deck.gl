@@ -195,17 +195,15 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
     return forwardProps;
   }, [props]);
 
-  const [isWebGLInitialized, setIsWebGLInitialized] = useState(false);
+  const [isDeckLoaded, setIsDeckLoaded] = useState(false);
 
   useEffect(() => {
     thisRef.deck = createDeckInstance(thisRef, {
       ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current,
-      onWebGLInitialized: () => {
-        setTimeout(() => {
-          setIsWebGLInitialized(true);
-        });
+      onLoad: () => {
+        setIsDeckLoaded(true);
       }
     });
 
@@ -230,8 +228,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
 
   useImperativeHandle(ref, () => getRefHandles(thisRef), []);
 
-  const currentViewports =
-    thisRef.deck && isWebGLInitialized ? thisRef.deck.getViewports() : undefined;
+  const currentViewports = thisRef.deck && isDeckLoaded ? thisRef.deck.getViewports() : undefined;
 
   const {ContextProvider, width, height, id, style} = props;
 
