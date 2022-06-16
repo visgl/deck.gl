@@ -249,6 +249,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
           credentials: credentials as CloudNativeCredentials,
           connection,
           ...rest,
+          // CartoLayer only supports tiled output from v8.8, force data format
           format: FORMATS.TILEJSON
         });
       }

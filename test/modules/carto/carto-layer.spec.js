@@ -79,8 +79,6 @@ mockedV3Test('CartoLayer#v3', async t => {
           if (layer.props.formatTiles === TILE_FORMATS.MVT) {
             t.ok(subLayer instanceof MVTLayer, 'should be a MVTLayer');
           } else {
-            /* eslint-disable */
-            console.log('layer id', subLayer.id);
             t.ok(subLayer instanceof CartoTileLayer, 'should be a CartoTileLayer');
           }
           break;
