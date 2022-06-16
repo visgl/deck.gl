@@ -8,7 +8,7 @@ const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
-  tiles: ['https://xyz.com/{z}/{x}/{y}']
+  tiles: ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary']
 };
 
 export const GEOJSON_RESPONSE = {
