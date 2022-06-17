@@ -1,4 +1,3 @@
-import h3 from 'h3-js';
 import {
   CompositeLayer,
   CompositeLayerProps,
@@ -51,7 +50,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
   };
 
   initializeState(): void {
-    H3HexagonLayer._checkH3Lib(h3);
+    H3HexagonLayer._checkH3Lib();
     this.setState({data: null, tileJSON: null});
   }
 

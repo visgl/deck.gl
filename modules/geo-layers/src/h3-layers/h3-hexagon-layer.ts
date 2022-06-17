@@ -1,4 +1,4 @@
-import h3, {
+import {
   h3ToGeoBoundary,
   h3GetResolution,
   h3ToGeo,
@@ -161,10 +161,10 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
   static layerName = 'H3HexagonLayer';
 
   // See `geo-layers/bundle.ts`
-  static _checkH3Lib = lib => {};
+  static _checkH3Lib = () => {};
 
   initializeState() {
-    H3HexagonLayer._checkH3Lib(h3);
+    H3HexagonLayer._checkH3Lib();
     this.state = {
       edgeLengthKM: 0,
       resolution: -1
