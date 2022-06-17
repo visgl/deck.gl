@@ -11,7 +11,6 @@ import {
 import {lerp} from '@math.gl/core';
 import {
   AccessorFunction,
-  assert,
   CompositeLayer,
   CompositeLayerProps,
   createIterable,
