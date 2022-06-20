@@ -23,6 +23,23 @@ export const EMPTY_KEPLER_MAP_CONFIG = {
   }
 };
 
+const tilestats = {
+  layers: [
+    {
+      attributes: [
+        {
+          attribute: 'STRING_ATTR',
+          categories: [{category: '1'}, {category: '2'}, {category: '3'}]
+        },
+        {
+          attribute: 'NUMBER_ATTR',
+          min: 0,
+          max: 10
+        }
+      ]
+    }
+  ]
+};
 const DATASETS = [
   {
     id: 'DATA_ID',
@@ -38,23 +55,7 @@ const DATASETS = [
       tiles: [
         `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.MVT}`
       ],
-      tilestats: {
-        layers: [
-          {
-            attributes: [
-              {
-                attribute: 'STRING_ATTR',
-                categories: [{category: '1'}, {category: '2'}, {category: '3'}]
-              },
-              {
-                attribute: 'NUMBER_ATTR',
-                min: 0,
-                max: 10
-              }
-            ]
-          }
-        ]
-      }
+      tilestats
     },
     type: 'tileset'
   },
@@ -64,23 +65,7 @@ const DATASETS = [
       tiles: [
         `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.GEOJSON}`
       ],
-      tilestats: {
-        layers: [
-          {
-            attributes: [
-              {
-                attribute: 'STRING_ATTR',
-                categories: [{category: '1'}, {category: '2'}, {category: '3'}]
-              },
-              {
-                attribute: 'NUMBER_ATTR',
-                min: 0,
-                max: 10
-              }
-            ]
-          }
-        ]
-      }
+      tilestats
     },
     type: 'tileset'
   },
@@ -90,23 +75,29 @@ const DATASETS = [
       tiles: [
         `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{z}/{x}/{y}?name=my_data&formatTiles=${TILE_FORMATS.BINARY}`
       ],
-      tilestats: {
-        layers: [
-          {
-            attributes: [
-              {
-                attribute: 'STRING_ATTR',
-                categories: [{category: '1'}, {category: '2'}, {category: '3'}]
-              },
-              {
-                attribute: 'NUMBER_ATTR',
-                min: 0,
-                max: 10
-              }
-            ]
-          }
-        ]
-      }
+      tilestats
+    },
+    type: 'tileset'
+  },
+  {
+    id: 'DATA_TILESET_H3_ID',
+    scheme: 'h3',
+    data: {
+      tiles: [
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{i}?name=my_data&formatTiles=${TILE_FORMATS.JSON}&spatialIndex=h3`
+      ],
+      tilestats
+    },
+    type: 'tileset'
+  },
+  {
+    id: 'DATA_TILESET_QUADKEY_ID',
+    scheme: 'quadkey',
+    data: {
+      tiles: [
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{i}?name=my_data&formatTiles=${TILE_FORMATS.JSON}&spatialIndex=quadkey`
+      ],
+      tilestats
     },
     type: 'tileset'
   }
