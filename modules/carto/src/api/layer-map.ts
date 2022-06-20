@@ -19,6 +19,8 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 
 import CartoTileLayer from '../layers/carto-tile-layer';
+import H3TileLayer from '../layers/h3-tile-layer';
+import QuadkeyTileLayer from '../layers/quadkey-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
 
@@ -111,7 +113,7 @@ export function getLayer(
   config,
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
-  if (type === 'mvt' || type === 'tileset') {
+  if (type === 'tileset' || dataset.type === 'tileset') {
     return getTileLayer(dataset);
   }
 
@@ -163,17 +165,36 @@ export function getLayer(
   };
 }
 
+export function layerFromTileDataset(
+  formatTiles: string | null = TILE_FORMATS.MVT,
+  scheme: string
+): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadkeyTileLayer {
+  if (scheme === 'h3') {
+    return H3TileLayer;
+  }
+  if (scheme === 'quadkey') {
+    return QuadkeyTileLayer;
+  }
+  if (formatTiles === TILE_FORMATS.MVT) {
+    return MVTLayer;
+  }
+
+  // formatTiles === BINARY|JSON|GEOJSON
+  return CartoTileLayer;
+}
+
 function getTileLayer(dataset) {
   const {
     data: {
+      scheme,
       tiles: [tileUrl]
     }
   } = dataset;
   /* global URL */
-  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') || TILE_FORMATS.MVT;
+  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles');
 
   return {
-    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer,
+    Layer: layerFromTileDataset(formatTiles, scheme),
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
