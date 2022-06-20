@@ -159,7 +159,11 @@ export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends Compo
   static defaultProps = defaultProps;
   static layerName = 'H3HexagonLayer';
 
+  // See `main/bundle.ts`
+  static _checkH3Lib = () => {};
+
   initializeState() {
+    H3HexagonLayer._checkH3Lib();
     this.state = {
       edgeLengthKM: 0,
       resolution: -1

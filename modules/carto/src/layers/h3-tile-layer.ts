@@ -50,6 +50,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
   };
 
   initializeState(): void {
+    H3HexagonLayer._checkH3Lib();
     this.setState({data: null, tileJSON: null});
   }
 

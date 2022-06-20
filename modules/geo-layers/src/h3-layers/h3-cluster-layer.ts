@@ -1,6 +1,7 @@
 import {h3SetToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
@@ -27,6 +28,10 @@ export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCel
 > {
   static layerName = 'H3ClusterLayer';
   static defaultProps = defaultProps;
+
+  initializeState(): void {
+    H3HexagonLayer._checkH3Lib();
+  }
 
   updateState({props, changeFlags}: UpdateParameters<this>): void {
     if (
