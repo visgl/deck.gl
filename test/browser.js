@@ -53,6 +53,9 @@ test('deck.gl', t => {
   require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
   require('./modules/core/lib/pick-layers.spec');
 
+  // Need to fake out h3 library in order for tests to run (see `main/bundle.ts`)
+  window.h3 = {};
+
   require('./render');
   require('./interaction');
 
