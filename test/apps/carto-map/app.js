@@ -38,6 +38,9 @@ async function createMap(cartoMapId) {
 
 // Helper UI for dev
 const examples = [
+  // Spatial index layers
+  '0899a359-cb70-428c-97cb-61d5ef46d985', // H3 & quadkey tilesets
+
   // Aggregation layers
   'd91a6a6f-0290-4b22-b9cc-fa174cb31a23', // Grid
   '4b34fd92-7890-4bab-8601-008aefebc359', // hex bin
