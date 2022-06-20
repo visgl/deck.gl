@@ -1,8 +1,7 @@
 import {testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {CartoLayer, API_VERSIONS, FORMATS, MAP_TYPES, TILE_FORMATS} from '@deck.gl/carto';
+import {CartoLayer, API_VERSIONS, MAP_TYPES, TILE_FORMATS} from '@deck.gl/carto';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {GeoJsonLayer} from '@deck.gl/layers';
 import CartoTileLayer from '@deck.gl/carto/layers/carto-tile-layer';
 import {mockedV1Test, mockedV2Test, mockedV3Test} from './mock-fetch';
 
@@ -60,7 +59,7 @@ mockedV3Test('CartoLayer#v3', async t => {
   spy.returns([]);
 
   const onAfterUpdate = ({layer, subLayer, subLayers}) => {
-    const {data, format} = layer.state;
+    const {data} = layer.state;
     if (!data) {
       t.is(subLayers.length, 0, 'should no render subLayers');
     } else {
@@ -76,14 +75,12 @@ mockedV3Test('CartoLayer#v3', async t => {
           );
           break;
         case MAP_TYPES.TABLE:
-          if (format === FORMATS.TILEJSON) {
-            t.ok(subLayer instanceof CartoTileLayer, 'should be a CartoTileLayer');
-          } else {
-            t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
-          }
-          break;
         case MAP_TYPES.QUERY:
-          t.ok(subLayer instanceof GeoJsonLayer, 'should be a GeoJsonLayer');
+          if (layer.props.formatTiles === TILE_FORMATS.MVT) {
+            t.ok(subLayer instanceof MVTLayer, 'should be a MVTLayer');
+          } else {
+            t.ok(subLayer instanceof CartoTileLayer, 'should be a CartoTileLayer');
+          }
           break;
         default:
           t.ok(false, 'invalid prop type');
@@ -126,7 +123,6 @@ mockedV3Test('CartoLayer#v3', async t => {
           data: 'dynamic_tileset',
           connection: 'conn_name',
           type: MAP_TYPES.TABLE,
-          format: FORMATS.TILEJSON,
           formatTiles: TILE_FORMATS.BINARY,
           credentials: CREDENTIALS_V3
         },
@@ -510,7 +506,6 @@ mockedV3Test('CartoLayer#dynamic', async t => {
       props: {
         data: 'tileset',
         type: MAP_TYPES.TABLE,
-        format: FORMATS.TILEJSON,
         formatTiles: TILE_FORMATS.BINARY,
         connection: 'connection_name',
         credentials: CREDENTIALS_V3,

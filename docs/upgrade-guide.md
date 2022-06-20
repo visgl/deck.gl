@@ -12,6 +12,10 @@
 
 - The base `Effect` class is removed. It has been migrated to `interface Effect` in TypeScript.
 
+#### CARTO
+
+- `format` prop is removed from `CartoLayer`, with `format` is fixed to `'tilejson'`. `CartoLayer` no longer creates non-tiled layers. Use the `fetchLayerData` function with `GeoJSONLayer` for static queries and tables.
+
 ## Upgrading from deck.gl v8.6 to v8.7
 
 #### Deprecations

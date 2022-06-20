@@ -8,7 +8,7 @@ const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
-  tiles: ['https://xyz.com/{z}/{x}/{y}']
+  tiles: ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary']
 };
 
 export const GEOJSON_RESPONSE = {
@@ -76,6 +76,9 @@ export function mockFetchMapsV3() {
         }
         if (url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
+            tilejson: {
+              url: ['https://xyz.com?format=tilejson&cache=12345678']
+            },
             geojson: {
               url: ['https://xyz.com?format=geojson&cache=12345678']
             }
