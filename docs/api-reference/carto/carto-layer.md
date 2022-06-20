@@ -111,10 +111,6 @@ Required when `apiVersion` is `API_VERSIONS.V3`.
 
 Name of the connection registered in the CARTO workspace.
 
-##### `format` (String, optional)
-
-Only supported when `apiVersion` is `API_VERSIONS.V3`. Use to override the default data format. Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`. 
-
 ##### `formatTiles` (String, optional)
 
 Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`. Use to override the default tile data format. Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
@@ -173,23 +169,7 @@ The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-laye
 
 #### API v3
 
-When using v3, the behavior depends on the `type` property.
-
-##### `MAP_TYPES.QUERY`
-
-GeoJSON/JSON data will be used, depending on `format`. A [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created.
-
-##### `MAP_TYPES.TILESET`
-
 Tiled data will be used, depending on `formatTiles`. A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
-
-##### `MAP_TYPES.TABLE`
-
-Automatically based on the size of the table CARTO will decide whether to use tiles or a full document.
-
-For a full document a [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) will be created, while for tiles a vector tile layer that extends the current [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) and inherits all the properties will be created.
-
-Tiles can be forced by setting `format` to `FORMATS.TILEJSON`.
 
 ## Source
 
