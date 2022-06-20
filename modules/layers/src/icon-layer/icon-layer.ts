@@ -226,7 +226,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
       iconAtlas,
-      iconMapping: iconMapping as IconMapping
+      iconMapping: prePacked ? (iconMapping as IconMapping) : null
     });
 
     // prepacked iconAtlas from user
