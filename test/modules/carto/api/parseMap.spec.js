@@ -55,7 +55,8 @@ const DATASETS = [
           }
         ]
       }
-    }
+    },
+    type: 'tileset'
   },
   {
     id: 'DATA_TILESET_GEOJSON_FORMAT_ID',
@@ -80,7 +81,8 @@ const DATASETS = [
           }
         ]
       }
-    }
+    },
+    type: 'tileset'
   },
   {
     id: 'DATA_TILESET_BINARY_FORMAT_ID',
@@ -105,7 +107,8 @@ const DATASETS = [
           }
         ]
       }
-    }
+    },
+    type: 'tileset'
   }
 ];
 

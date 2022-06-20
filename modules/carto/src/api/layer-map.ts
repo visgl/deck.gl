@@ -113,7 +113,7 @@ export function getLayer(
   config,
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
-  if (type === 'tileset' || dataset.type === 'tileset') {
+  if (type === 'tileset' || dataset?.type === 'tileset') {
     return getTileLayer(dataset);
   }
 
