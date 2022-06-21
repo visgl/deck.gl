@@ -51,7 +51,7 @@ test('GoogleMapsOverlay#interleaved prop', t => {
   t.end();
 });
 
-test.only('GoogleMapsOverlay#useDevicePixels prop', t => {
+test('GoogleMapsOverlay#useDevicePixels prop', t => {
   const map = new mapsApi.Map({width: 1, height: 1, longitude: 0, latitude: 0, zoom: 1});
 
   let overlay = new GoogleMapsOverlay({useDevicePixels: 3, layers: []});
