@@ -98,7 +98,7 @@ export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error TileIndex must be generic
   getTileZoom(index: QuadbinTileIndex) {
     const quadbin = BigInt('0x' + index.i);
-    return (quadbin >> 52n) & 0x1Fn;
+    return Number((quadbin >> 52n) & 0x1Fn);
   }
 
   // @ts-expect-error TileIndex must be generic
