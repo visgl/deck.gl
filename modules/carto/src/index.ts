@@ -15,7 +15,6 @@ export {
   fetchLayerData,
   fetchMap,
   getDataV2 as _getDataV2,
-  getData,
   mapInstantiation as _mapInstantiation
 } from './api';
 
