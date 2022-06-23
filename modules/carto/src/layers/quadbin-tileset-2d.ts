@@ -12,6 +12,14 @@ const B = [
 ];
 const S = [0n, 1n, 2n, 4n, 8n, 16n];
 
+function indexToBigInt(index: QuadbinTileIndex): bigint {
+  return BigInt(`0x${index.i}`);
+}
+
+function bigIntToIndex(quadbin: bigint): QuadbinTileIndex {
+  return {i: quadbin.toString(16)};
+}
+
 export function tileToQuadbin(tile): QuadbinTileIndex {
   if (tile.z < 0 || tile.z > 26) {
     throw new Error('Wrong zoom');
@@ -33,11 +41,11 @@ export function tileToQuadbin(tile): QuadbinTileIndex {
     (z << 52n) |
     ((x | (y << 1n)) >> 12n) |
     (0xfffffffffffffn >> (z * 2n));
-  return {i: quadbin.toString(16)};
+  return bigIntToIndex(quadbin);
 }
 
 export function quadbinToTile(index: QuadbinTileIndex) {
-  const quadbin = BigInt(`0x${index.i}`);
+  const quadbin = indexToBigInt(index);
   const mode = (quadbin >> 59n) & 7n;
   const modeDep = (quadbin >> 57n) & 3n;
   const z = (quadbin >> 52n) & 0x1fn;
@@ -63,6 +71,19 @@ export function quadbinToTile(index: QuadbinTileIndex) {
   return {z: Number(z), x: Number(x), y: Number(y)};
 }
 
+export function quadbinZoom(index: QuadbinTileIndex) {
+  const quadbin = indexToBigInt(index);
+  return (quadbin >> 52n) & 0x1fn;
+}
+
+export function quadbinParent(index: QuadbinTileIndex) {
+  const quadbin = indexToBigInt(index);
+  const zparent = quadbinZoom(index) - 1n;
+  const parent =
+    (quadbin & ~(0x1fn << 52n)) | (zparent << 52n) | (0xfffffffffffffn >> (zparent * 2n));
+  return bigIntToIndex(parent);
+}
+
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadbinTileIndex[] {
@@ -81,16 +102,11 @@ export default class QuadbinTileset2D extends Tileset2D {
 
   // @ts-expect-error TileIndex must be generic
   getTileZoom(index: QuadbinTileIndex) {
-    const quadbin = BigInt(`0x${index.i}`);
-    return Number((quadbin >> 52n) & 0x1fn);
+    return Number(quadbinZoom(index));
   }
 
   // @ts-expect-error TileIndex must be generic
   getParentIndex(index: QuadbinTileIndex) {
-    const quadbin = BigInt(`0x${index.i}`);
-    const zparent = ((quadbin >> 52n) & 0x1fn) - 1n;
-    const parent =
-      (quadbin & ~(0x1fn << 52n)) | (zparent << 52n) | (0xfffffffffffffn >> (zparent * 2n));
-    return {i: parent.toString(16)};
+    return quadbinParent(index);
   }
 }
