@@ -29,6 +29,7 @@ export function createDeckInstance(map, overlay, deck, props) {
 
   deck = new Deck({
     ...props,
+    useDevicePixels: props.interleaved ? true : props.useDevicePixels,
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     initialViewState: {
