@@ -28,7 +28,15 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
+import {
+  Buffer,
+  Texture2D,
+  Transform,
+  getParameters,
+  withParameters,
+  FEATURES,
+  hasFeatures
+} from '@luma.gl/core';
 import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer from '../aggregation-layer';
@@ -484,17 +492,20 @@ export default class HeatmapLayer extends AggregationLayer {
     weightsTransform.update({
       elementCount: this.getNumInstances()
     });
-    weightsTransform.run({
-      uniforms,
-      parameters: {
-        blend: true,
-        depthTest: false,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.FUNC_ADD
-      },
-      clearRenderTarget: true,
-      attributes: this.getAttributes(),
-      moduleSettings: this.getModuleSettings()
+    // Need to explictly specify clearColor as external context may have modified it
+    withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
+      weightsTransform.run({
+        uniforms,
+        parameters: {
+          blend: true,
+          depthTest: false,
+          blendFunc: [GL.ONE, GL.ONE],
+          blendEquation: GL.FUNC_ADD
+        },
+        clearRenderTarget: true,
+        attributes: this.getAttributes(),
+        moduleSettings: this.getModuleSettings()
+      });
     });
     this._updateMaxWeightValue();
 
