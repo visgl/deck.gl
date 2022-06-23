@@ -107,7 +107,7 @@ export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error TileIndex must be generic
   getParentIndex(index: QuadbinTileIndex) {
     const quadbin = BigInt(`0x${index.i}`);
-    const zparent = (quadbin >> 52n) & (0x1fn - 1n);
+    const zparent = ((quadbin >> 52n) & 0x1fn) - 1n;
     const parent =
       (quadbin & ~(0x1fn << 52n)) | (zparent << 52n) | (0xfffffffffffffn >> (zparent * 2n));
     return {i: parent.toString(16)};

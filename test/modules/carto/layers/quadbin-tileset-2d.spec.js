@@ -3,7 +3,7 @@ import QuadbinTileset2D, {
   tileToQuadbin,
   quadbinToTile
 } from '@deck.gl/carto/layers/quadbin-tileset-2d';
-import {WebMercatorViewport} from '@deck.gl/core';
+// import {WebMercatorViewport} from '@deck.gl/core';
 
 const TEST_TILES = [
   {x: 0, y: 0, z: 0, q: '480fffffffffffff'},
@@ -19,6 +19,37 @@ test('Quadbin conversion', async t => {
 
     const tile2 = quadbinToTile(quadbin);
     t.deepEqual(tile, tile2, 'tiles match');
+  }
+
+  t.end();
+});
+
+function tileToQuadkey(tile) {
+  let index = '';
+  for (let z = tile.z; z > 0; z--) {
+    let b = 0;
+    const mask = 1 << (z - 1);
+    if ((tile.x & mask) !== 0) b++;
+    if ((tile.y & mask) !== 0) b += 2;
+    index += b.toString();
+  }
+  return index;
+}
+
+test.only('Quadbin getParent', async t => {
+  let tile = {x: 134, y: 1238, z: 10};
+  const quadkey = tileToQuadkey(tile);
+  const tileset = new QuadbinTileset2D({});
+
+  while (tile.z > 0) {
+    const quadbin = tileToQuadbin(tile);
+    const parent = tileset.getParentIndex(quadbin);
+    const zoom = tileset.getTileZoom(parent);
+    tile = quadbinToTile(parent);
+    const quadkey2 = tileToQuadkey(tile);
+
+    t.deepEquals(quadkey2, quadkey.slice(0, tile.z), `parent correct ${quadkey2}`);
+    t.deepEquals(zoom, tile.z, `zoom correct ${zoom}`);
   }
 
   t.end();
