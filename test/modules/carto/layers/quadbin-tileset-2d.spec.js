@@ -1,7 +1,9 @@
 import test from 'tape-promise/tape';
-import QuadbinTileset2D, {
+import {
   tileToQuadbin,
-  quadbinToTile
+  quadbinToTile,
+  quadbinParent,
+  quadbinZoom
 } from '@deck.gl/carto/layers/quadbin-tileset-2d';
 // import {WebMercatorViewport} from '@deck.gl/core';
 
@@ -36,20 +38,19 @@ function tileToQuadkey(tile) {
   return index;
 }
 
-test.only('Quadbin getParent', async t => {
+test('Quadbin getParent', async t => {
   let tile = {x: 134, y: 1238, z: 10};
   const quadkey = tileToQuadkey(tile);
-  const tileset = new QuadbinTileset2D({});
 
   while (tile.z > 0) {
     const quadbin = tileToQuadbin(tile);
-    const parent = tileset.getParentIndex(quadbin);
-    const zoom = tileset.getTileZoom(parent);
+    const parent = quadbinParent(quadbin);
+    const zoom = quadbinZoom(parent);
     tile = quadbinToTile(parent);
     const quadkey2 = tileToQuadkey(tile);
 
     t.deepEquals(quadkey2, quadkey.slice(0, tile.z), `parent correct ${quadkey2}`);
-    t.deepEquals(zoom, tile.z, `zoom correct ${zoom}`);
+    t.deepEquals(Number(zoom), tile.z, `zoom correct ${zoom}`);
   }
 
   t.end();
