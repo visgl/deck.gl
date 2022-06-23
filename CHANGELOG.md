@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.7
 
+#### deck.gl [8.7.12] - Jun 23 2022
+
+- Fix FillStyleExtension precision (#7074)
+- GoogleMapsOverlay: Force useDevicePixels to true in interleaved mode (#7066)
+- GoogleMapsOverlay: HeatmapLayer weightsTransform uses correct clearColor (#7071)
+
 #### deck.gl [8.7.11] - Jun 6 2022
 
 - Fix HeatmapLayer on iOS (#6988)
