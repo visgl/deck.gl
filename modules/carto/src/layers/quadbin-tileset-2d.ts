@@ -20,20 +20,12 @@ export function tileToQuadbin(tile): QuadbinTileIndex {
   let x = BigInt(tile.x) << (32n - z);
   let y = BigInt(tile.y) << (32n - z);
 
-  x = (x | (x << S[5])) & B[4];
-  y = (y | (y << S[5])) & B[4];
-
-  x = (x | (x << S[4])) & B[3];
-  y = (y | (y << S[4])) & B[3];
-
-  x = (x | (x << S[3])) & B[2];
-  y = (y | (y << S[3])) & B[2];
-
-  x = (x | (x << S[2])) & B[1];
-  y = (y | (y << S[2])) & B[1];
-
-  x = (x | (x << S[1])) & B[0];
-  y = (y | (y << S[1])) & B[0];
+  for (let i = 0; i < 5; i++) {
+    const s = S[5 - i];
+    const b = B[4 - i];
+    x = (x | (x << s)) & b;
+    y = (y | (y << s)) & b;
+  }
 
   const quadbin =
     0x4000000000000000n |
@@ -58,23 +50,12 @@ export function quadbinToTile(index: QuadbinTileIndex) {
   let x = q;
   let y = q >> 1n;
 
-  x = (x | (x >> S[0])) & B[0];
-  y = (y | (y >> S[0])) & B[0];
-
-  x = (x | (x >> S[1])) & B[1];
-  y = (y | (y >> S[1])) & B[1];
-
-  x = (x | (x >> S[2])) & B[2];
-  y = (y | (y >> S[2])) & B[2];
-
-  x = (x | (x >> S[3])) & B[3];
-  y = (y | (y >> S[3])) & B[3];
-
-  x = (x | (x >> S[4])) & B[4];
-  y = (y | (y >> S[4])) & B[4];
-
-  x = (x | (x >> S[5])) & B[5];
-  y = (y | (y >> S[5])) & B[5];
+  for (let i = 0; i < 6; i++) {
+    const s = S[i];
+    const b = B[i];
+    x = (x | (x >> s)) & b;
+    y = (y | (y >> s)) & b;
+  }
 
   x = x >> (32n - z);
   y = y >> (32n - z);
