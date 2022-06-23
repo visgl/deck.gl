@@ -2,13 +2,17 @@ import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 
 type QuadbinTileIndex = {i: string};
 
-function tileToQuadbin(tile): QuadbinTileIndex {
+export function tileToQuadbin(tile): QuadbinTileIndex {
   if (tile.z < 0 || tile.z > 26) {
     throw new Error('Wrong zoom');
   }
   const B = [
-    0x5555555555555555n, 0x3333333333333333n, 0x0F0F0F0F0F0F0F0Fn,
-    0x00FF00FF00FF00FFn, 0x0000FFFF0000FFFFn];
+    0x5555555555555555n,
+    0x3333333333333333n,
+    0x0f0f0f0f0f0f0f0fn,
+    0x00ff00ff00ff00ffn,
+    0x0000ffff0000ffffn
+  ];
   const S = [1n, 2n, 4n, 8n, 16n];
   let z = BigInt(tile.z);
   let x = BigInt(tile.x) << (32n - z);
@@ -29,24 +33,30 @@ function tileToQuadbin(tile): QuadbinTileIndex {
   x = (x | (x << S[0])) & B[0];
   y = (y | (y << S[0])) & B[0];
 
-  let quadbin = 0x4000000000000000n
-    | (1n << 59n) // | (mode << 59) | (mode_dep << 57)
-    | (z << 52n)
-    | ((x | (y << 1n)) >> 12n)
-    | (0xFFFFFFFFFFFFFn >> (z * 2n));
+  let quadbin =
+    0x4000000000000000n |
+    (1n << 59n) | // | (mode << 59) | (mode_dep << 57)
+    (z << 52n) |
+    ((x | (y << 1n)) >> 12n) |
+    (0xfffffffffffffn >> (z * 2n));
   return {i: quadbin.toString(16)};
 }
 
-function quadbinToTile(index: QuadbinTileIndex) {
+export function quadbinToTile(index: QuadbinTileIndex) {
   const B = [
-    0x5555555555555555n, 0x3333333333333333n, 0x0F0F0F0F0F0F0F0Fn,
-    0x00FF00FF00FF00FFn, 0x0000FFFF0000FFFFn, 0x00000000FFFFFFFFn];
+    0x5555555555555555n,
+    0x3333333333333333n,
+    0x0f0f0f0f0f0f0f0fn,
+    0x00ff00ff00ff00ffn,
+    0x0000ffff0000ffffn,
+    0x00000000ffffffffn
+  ];
   const S = [0n, 1n, 2n, 4n, 8n, 16n];
   const quadbin = BigInt('0x' + index.i);
   const mode = (quadbin >> 59n) & 7n;
   const modeDep = (quadbin >> 57n) & 3n;
-  const z = (quadbin >> 52n) & 0x1Fn;
-  const q = (quadbin & 0xFFFFFFFFFFFFFn) << 12n;
+  const z = (quadbin >> 52n) & 0x1fn;
+  const q = (quadbin & 0xfffffffffffffn) << 12n;
 
   if (mode != 1n && modeDep != 0n) {
     throw new Error('Wrong mode');
@@ -76,7 +86,7 @@ function quadbinToTile(index: QuadbinTileIndex) {
   x = x >> (32n - z);
   y = y >> (32n - z);
 
-  return { z: Number(z), x: Number(x), y: Number(y) };
+  return {z: Number(z), x: Number(x), y: Number(y)};
 }
 
 export default class QuadbinTileset2D extends Tileset2D {
@@ -98,16 +108,15 @@ export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error TileIndex must be generic
   getTileZoom(index: QuadbinTileIndex) {
     const quadbin = BigInt('0x' + index.i);
-    return Number((quadbin >> 52n) & 0x1Fn);
+    return Number((quadbin >> 52n) & 0x1fn);
   }
 
   // @ts-expect-error TileIndex must be generic
   getParentIndex(index: QuadbinTileIndex) {
     const quadbin = BigInt('0x' + index.i);
-    const zparent = (quadbin >> 52n) & 0x1Fn - 1n;
-    const parent = (quadbin & ~(0x1Fn << 52n))
-      | (zparent << 52n)
-      | (0xFFFFFFFFFFFFFn >> (zparent * 2n));
+    const zparent = (quadbin >> 52n) & (0x1fn - 1n);
+    const parent =
+      (quadbin & ~(0x1fn << 52n)) | (zparent << 52n) | (0xfffffffffffffn >> (zparent * 2n));
     return {i: parent.toString(16)};
   }
 }
