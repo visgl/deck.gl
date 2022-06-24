@@ -84,10 +84,29 @@ export function quadbinParent(index: QuadbinTileIndex) {
   return bigIntToIndex(parent);
 }
 
+function tileToQuadkey(tile) {
+  let index = '';
+  for (let z = tile.z; z > 0; z--) {
+    let b = 0;
+    const mask = 1 << (z - 1);
+    if ((tile.x & mask) !== 0) b++;
+    if ((tile.y & mask) !== 0) b += 2;
+    index += b.toString();
+  }
+  return index;
+}
+
+// Hack in quadkeys so we can use API
+function addQuadkey(index: QuadbinTileIndex) {
+  const tile = quadbinToTile(index);
+  const quadkey = tileToQuadkey(tile);
+  return {...index, quadkey};
+}
+
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadbinTileIndex[] {
-    return super.getTileIndices(opts).map(tileToQuadbin);
+    return super.getTileIndices(opts).map(tileToQuadbin).map(addQuadkey);
   }
 
   // @ts-expect-error TileIndex must be generic
@@ -107,6 +126,6 @@ export default class QuadbinTileset2D extends Tileset2D {
 
   // @ts-expect-error TileIndex must be generic
   getParentIndex(index: QuadbinTileIndex) {
-    return quadbinParent(index);
+    return addQuadkey(quadbinParent(index));
   }
 }

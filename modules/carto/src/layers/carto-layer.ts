@@ -8,7 +8,7 @@ import {
 } from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import H3TileLayer from './h3-tile-layer';
-import QuadkeyTileLayer from './quadkey-tile-layer';
+import QuadbinTileLayer from './quadbin-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
 import {
@@ -304,7 +304,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       return [H3TileLayer, props];
     }
     if (data.scheme === 'quadkey') {
-      return [QuadkeyTileLayer, props];
+      return [QuadbinTileLayer, props];
     }
     return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
   }
