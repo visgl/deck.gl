@@ -691,6 +691,10 @@ Notes:
 
 ## Member Variables
 
+##### `isLoaded`
+
+Flag indicating that the Deck instance has initialized its resources.
+
 ##### `metrics`
 
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:

@@ -535,6 +535,11 @@ export default class Deck {
   }
 
   /** Get a list of views that are currently rendered */
+  get isLoaded(): boolean {
+    return this.viewManager !== null;
+  }
+
+  /** Get a list of views that are currently rendered */
   getViews(): View[] {
     assert(this.viewManager);
     return this.viewManager.views;
