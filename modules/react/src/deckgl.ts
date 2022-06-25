@@ -224,7 +224,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
   useImperativeHandle(ref, () => getRefHandles(thisRef), []);
 
   const currentViewports =
-    thisRef.deck && thisRef.deck.isLoaded ? thisRef.deck.getViewports() : undefined;
+    thisRef.deck && thisRef.deck.isInitialized ? thisRef.deck.getViewports() : undefined;
 
   const {ContextProvider, width, height, id, style} = props;
 

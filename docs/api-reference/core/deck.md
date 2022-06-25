@@ -691,9 +691,9 @@ Notes:
 
 ## Member Variables
 
-##### `isLoaded`
+##### `isInitialized`
 
-Flag indicating that the Deck instance has initialized its resources.
+Flag indicating that the Deck instance has initialized its resources. It is safe to call public methods when `isInitialized` is `true`.
 
 ##### `metrics`
 

@@ -62,26 +62,27 @@ export function getDeckInstance({
     map.on('move', () => onMapMove(deck!, map));
   }
 
+  let deckInstance: Deck;
   if (deck) {
+    deckInstance = deck;
     deck.setProps(deckProps);
     (deck.userData as UserData).isExternal = true;
   } else {
-    deck = new Deck(deckProps);
+    deckInstance = new Deck(deckProps);
     map.on('remove', () => {
-      deck!.finalize();
+      deckInstance.finalize();
       map.__deck = null;
     });
   }
 
-  (deck.userData as UserData).mapboxLayers = new Set();
-  (deck.userData as UserData).mapboxVersion = getMapboxVersion(map);
-  map.__deck = deck;
+  (deckInstance.userData as UserData).mapboxLayers = new Set();
+  (deckInstance.userData as UserData).mapboxVersion = getMapboxVersion(map);
+  map.__deck = deckInstance;
   map.on('render', () => {
-    // @ts-expect-error (2445) protected property
-    if (deck.layerManager) afterRender(deck, map);
+    if (deckInstance.isInitialized) afterRender(deckInstance, map);
   });
 
-  return deck;
+  return deckInstance;
 }
 
 export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {
@@ -107,8 +108,7 @@ export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
     (deck.userData as UserData).currentViewport = currentViewport;
   }
 
-  // @ts-expect-error (2445) protected property
-  if (!deck.layerManager) {
+  if (!deck.isInitialized) {
     return;
   }
 
