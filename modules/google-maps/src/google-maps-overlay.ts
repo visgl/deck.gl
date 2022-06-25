@@ -229,8 +229,7 @@ export default class GoogleMapsOverlay {
       height: null
     });
 
-    // @ts-ignore accessing protected member
-    if (deck.layerManager) {
+    if (deck.isInitialized) {
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
       const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);

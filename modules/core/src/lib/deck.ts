@@ -534,6 +534,11 @@ export default class Deck {
     }
   }
 
+  /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
+  get isInitialized(): boolean {
+    return this.viewManager !== null;
+  }
+
   /** Get a list of views that are currently rendered */
   getViews(): View[] {
     assert(this.viewManager);
@@ -646,12 +651,15 @@ export default class Deck {
     statKey: string,
     opts: (PickByPointOptions | PickByRectOptions) & {layerIds?: string[]}
   ) {
+    assert(this.deckPicker);
+
     const {stats} = this;
 
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
 
-    const infos = this.deckPicker![method]({
+    const infos = this.deckPicker[method]({
+      // layerManager, viewManager and effectManager are always defined if deckPicker is
       layers: this.layerManager!.getLayers(opts),
       views: this.viewManager!.getViews(),
       viewports: this.getViewports(opts),
