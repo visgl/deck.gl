@@ -90,7 +90,11 @@ function redrawDeck(thisRef: DeckInstanceRef) {
   }
 }
 
-function createDeckInstance(thisRef: DeckInstanceRef, DeckClass: typeof Deck, props: DeckProps): Deck {
+function createDeckInstance(
+  thisRef: DeckInstanceRef,
+  DeckClass: typeof Deck,
+  props: DeckProps
+): Deck {
   const deck = new DeckClass({
     ...props,
     // The Deck's animation loop is independent from React's render cycle, causing potential
