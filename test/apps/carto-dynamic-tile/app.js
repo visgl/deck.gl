@@ -75,7 +75,12 @@ function Root() {
         title="connection"
         obj={Object.keys(config)}
         value={connection}
-        onSelect={setConnection}
+        onSelect={c => {
+          setConnection(c);
+          if (!config[c][dataset]) {
+            setDataset(Object.keys(config[c])[0]);
+          }
+        }}
       />
       <ObjectSelect
         title="dataset"
