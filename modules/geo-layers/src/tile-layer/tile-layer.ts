@@ -284,13 +284,14 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
 
     // Hack in quadkeys so we ca work with API
     // @ts-ignore
-    const quadkeyTile = {...tile, index: {i: tile.index.quadkey}};
+    // const quadkeyTile = {...tile, index: {i: tile.index.quadkey}};
 
     tile.url =
-      typeof data === 'string' || Array.isArray(data)
-        ? // @ts-ignore
-          getURLFromTemplate(data, quadkeyTile)
-        : null;
+      typeof data === 'string' || Array.isArray(data) ? getURLFromTemplate(data, tile) : null;
+    // typeof data === 'string' || Array.isArray(data)
+    //   ? // @ts-ignore
+    //     getURLFromTemplate(data, quadkeyTile)
+    //   : null;
 
     if (getTileData) {
       return getTileData(tile);

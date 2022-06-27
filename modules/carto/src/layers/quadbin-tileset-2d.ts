@@ -106,7 +106,7 @@ function addQuadkey(index: QuadbinTileIndex) {
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadbinTileIndex[] {
-    return super.getTileIndices(opts).map(tileToQuadbin).map(addQuadkey);
+    return super.getTileIndices(opts).map(tileToQuadbin);
   }
 
   // @ts-expect-error TileIndex must be generic
@@ -126,6 +126,6 @@ export default class QuadbinTileset2D extends Tileset2D {
 
   // @ts-expect-error TileIndex must be generic
   getParentIndex(index: QuadbinTileIndex) {
-    return addQuadkey(quadbinParent(index));
+    return quadbinParent(index);
   }
 }
