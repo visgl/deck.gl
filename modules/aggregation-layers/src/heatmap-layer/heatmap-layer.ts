@@ -186,6 +186,7 @@ type _HeatmapLayerProps<DataT> = {
   getWeight?: Accessor<DataT, number>;
 };
 
+/** Visualizes the spatial distribution of data. */
 export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_HeatmapLayerProps<DataT>>
 > {

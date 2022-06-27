@@ -106,8 +106,7 @@ type _LineLayerProps<DataT> = {
 };
 
 /**
- * The Line Layer renders flat lines joining pairs of source and target points,
- * specified as latitude/longitude coordinates.
+ * A layer that renders straight lines joining pairs of source and target coordinates.
  */
 export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
   ExtraProps & Required<_LineLayerProps<DataT>>

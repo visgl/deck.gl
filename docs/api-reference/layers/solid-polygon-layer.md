@@ -4,7 +4,7 @@
 
 # SolidPolygonLayer
 
-The SolidPolygon Layer renders filled polygons.
+The `SolidPolygonLayer` renders filled and/or extruded polygons.
 
 ```js
 import DeckGL from '@deck.gl/react';

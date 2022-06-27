@@ -143,15 +143,7 @@ type _H3HexagonLayerProps<DataT> = {
 };
 
 /**
- * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
- * rather than centroid lat/longs. The shape of each hexagon is determined
- * based on a single "center" hexagon, which can be selected by passing in
- * a center lat/lon pair. If not provided, the map center will be used.
- *
- * Also sets the `hexagonId` field in the onHover/onClick callback's info
- * objects. Since this is calculated using math, hexagonId will be present
- * even when no corresponding hexagon is in the data set. You can check
- * index !== -1 to see if picking matches an actual object.
+ * Render hexagons from the [H3](https://h3geo.org/) geospatial indexing system.
  */
 export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
   ExtraPropsT & Required<_H3HexagonLayerProps<DataT> & Required<PolygonLayerProps<DataT>>>

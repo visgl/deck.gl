@@ -237,6 +237,7 @@ export type _CPUGridLayerProps<DataT> = {
   _filterData: null | ((d: DataT) => boolean);
 };
 
+/** Aggregate data into a grid-based heatmap. Aggregation is performed on CPU. */
 export default class CPUGridLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_CPUGridLayerProps<DataT>>
 > {
