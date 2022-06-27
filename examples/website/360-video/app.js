@@ -87,7 +87,7 @@ export default function App() {
     >
       {!isPlaying && (
         <div style={PLAY_BUTTON_STYLE}>
-          <img src="/images/play.png" width={150} />
+          <img src="https://deck.gl/images/play.png" width={150} />
         </div>
       )}
     </DeckGL>

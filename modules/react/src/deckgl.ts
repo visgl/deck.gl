@@ -55,6 +55,7 @@ export type DeckGLProps = Omit<
   DeckProps,
   'width' | 'height' | 'gl' | 'parent' | 'canvas' | '_customRender'
 > & {
+  Deck?: typeof Deck;
   width?: string | number;
   height?: string | number;
   children?: React.ReactNode;
@@ -89,15 +90,13 @@ function redrawDeck(thisRef: DeckInstanceRef) {
   }
 }
 
-function createDeckInstance(thisRef: DeckInstanceRef, props): Deck {
-  // Allows a subclass of Deck to be used
-  // TODO - update propTypes / defaultProps?
-  const DeckClass = props.Deck || Deck;
+function createDeckInstance(
+  thisRef: DeckInstanceRef,
+  DeckClass: typeof Deck,
+  props: DeckProps
+): Deck {
   const deck = new DeckClass({
     ...props,
-    style: null,
-    width: '100%',
-    height: '100%',
     // The Deck's animation loop is independent from React's render cycle, causing potential
     // synchronization issues. We provide this custom render function to make sure that React
     // and Deck update on the same schedule.
@@ -107,7 +106,7 @@ function createDeckInstance(thisRef: DeckInstanceRef, props): Deck {
 
       // Viewport/view state is passed to child components as props.
       // If they have changed, we need to trigger a React rerender to update children props.
-      const viewports = deck.viewManager.getViewports();
+      const viewports = deck.getViewports();
       if (thisRef.lastRenderedViewports !== viewports) {
         // Viewports have changed, update children props first.
         // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
@@ -178,6 +177,8 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
       style: null,
       width: '100%',
       height: '100%',
+      parent: containerRef.current,
+      canvas: canvasRef.current,
       layers: jsxProps.layers,
       views: jsxProps.views,
       onViewStateChange: handleViewStateChange,
@@ -196,7 +197,9 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
   }, [props]);
 
   useEffect(() => {
-    thisRef.deck = createDeckInstance(thisRef, {
+    const DeckClass = props.Deck || Deck;
+
+    thisRef.deck = createDeckInstance(thisRef, DeckClass, {
       ...deckProps,
       parent: containerRef.current,
       canvas: canvasRef.current
