@@ -1,11 +1,12 @@
 import test from 'tape-promise/tape';
-import {
+import QuadbinTileset2D, {
   tileToQuadbin,
+  tileToQuadkey,
   quadbinToTile,
   quadbinParent,
   quadbinZoom
 } from '@deck.gl/carto/layers/quadbin-tileset-2d';
-// import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport} from '@deck.gl/core';
 
 const TEST_TILES = [
   {x: 0, y: 0, z: 0, q: '480fffffffffffff'},
@@ -26,18 +27,6 @@ test('Quadbin conversion', async t => {
   t.end();
 });
 
-function tileToQuadkey(tile) {
-  let index = '';
-  for (let z = tile.z; z > 0; z--) {
-    let b = 0;
-    const mask = 1 << (z - 1);
-    if ((tile.x & mask) !== 0) b++;
-    if ((tile.y & mask) !== 0) b += 2;
-    index += b.toString();
-  }
-  return index;
-}
-
 test('Quadbin getParent', async t => {
   let tile = {x: 134, y: 1238, z: 10};
   const quadkey = tileToQuadkey(tile);
@@ -56,33 +45,42 @@ test('Quadbin getParent', async t => {
   t.end();
 });
 
-// test('QuadbinTileset2D', async t => {
-//   const tileset = new QuadbinTileset2D({});
-//   const viewport = new WebMercatorViewport({
-//     latitude: 0,
-//     longitude: 0,
-//     zoom: 6,
-//     width: 300,
-//     height: 200
-//   });
-//   // Required for getTileMetadata to function
-//   tileset._viewport = viewport;
-//
-//   const indices = tileset.getTileIndices({viewport});
-//   t.deepEqual(
-//     indices,
-//     [{i: '033333'}, {i: '211111'}, {i: '122222'}, {i: '300000'}],
-//     'indices in viewport'
-//   );
-//   t.equal(tileset.getTileId({i: '0132'}), '0132', 'tile id');
-//   t.deepEqual(
-//     tileset.getTileMetadata({i: '0132'}),
-//     {
-//       bbox: {west: -45, north: 74.01954331150226, east: -22.5, south: 66.51326044311186}
-//     },
-//     'tile metadata'
-//   );
-//   t.equal(tileset.getTileZoom({i: '0132'}), 4, 'tile zoom');
-//   t.deepEqual(tileset.getParentIndex({i: '0132'}), {i: '013'}, 'tile parent');
-//   t.end();
-// });
+test.only('QuadbinTileset2D', async t => {
+  const tileset = new QuadbinTileset2D({});
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 6,
+    width: 300,
+    height: 200
+  });
+  // Required for getTileMetadata to function
+  tileset._viewport = viewport;
+
+  const indices = tileset.getTileIndices({viewport});
+  t.deepEqual(
+    indices,
+    [
+      {i: '4863ffffffffffff'},
+      {i: '486955ffffffffff'},
+      {i: '4866aaffffffffff'},
+      {i: '486c00ffffffffff'}
+    ],
+    'indices in viewport'
+  );
+  t.equal(tileset.getTileId({i: '4863ffffffffffff'}), '4863ffffffffffff', 'tile id');
+  t.deepEqual(
+    tileset.getTileMetadata({i: '4841efffffffffff'}),
+    {
+      bbox: {west: -45, north: 74.01954331150226, east: -22.5, south: 66.51326044311186}
+    },
+    'tile metadata'
+  );
+  t.equal(tileset.getTileZoom({i: '4841efffffffffff'}), 4, 'tile zoom');
+  t.deepEqual(
+    tileset.getParentIndex({i: '4841efffffffffff'}),
+    {i: '4831ffffffffffff'},
+    'tile parent'
+  );
+  t.end();
+});
