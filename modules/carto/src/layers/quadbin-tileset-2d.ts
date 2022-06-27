@@ -84,7 +84,7 @@ export function quadbinParent(index: QuadbinTileIndex) {
   return bigIntToIndex(parent);
 }
 
-function tileToQuadkey(tile) {
+export function tileToQuadkey(tile) {
   let index = '';
   for (let z = tile.z; z > 0; z--) {
     let b = 0;

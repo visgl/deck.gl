@@ -7,13 +7,17 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {QuadkeyLayer, QuadkeyLayerProps} from '@deck.gl/geo-layers';
-import QuadbinTileset2D from './quadbin-tileset-2d';
+import QuadbinTileset2D, {quadbinToTile, tileToQuadkey} from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
-  return new QuadkeyLayer(props, {getQuadkey: d => d.id});
+  return new QuadkeyLayer(props, {
+    getQuadkey: d => {
+      return tileToQuadkey(quadbinToTile({i: d.id}));
+    }
+  });
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
