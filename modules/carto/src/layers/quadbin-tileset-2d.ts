@@ -96,13 +96,6 @@ export function tileToQuadkey(tile) {
   return index;
 }
 
-// Hack in quadkeys so we can use API
-function addQuadkey(index: QuadbinTileIndex) {
-  const tile = quadbinToTile(index);
-  const quadkey = tileToQuadkey(tile);
-  return {...index, quadkey};
-}
-
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadbinTileIndex[] {
