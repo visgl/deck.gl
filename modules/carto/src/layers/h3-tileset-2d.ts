@@ -59,7 +59,7 @@ function tileToBoundingBox(index: string): GeoBoundingBox {
 // similar
 // Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
 const BIAS = 2;
-function getHexagonResolution(viewport): number {
+export function getHexagonResolution(viewport): number {
   const hexagonScaleFactor = (2 / 3) * viewport.zoom;
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
 

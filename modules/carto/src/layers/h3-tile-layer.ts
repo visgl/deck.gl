@@ -7,7 +7,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import H3Tileset2D from './h3-tileset-2d';
+import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
@@ -64,8 +64,22 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   renderLayers(): Layer | null | LayersList {
+    // Handling min/max zoom it complex as the values given by in props
+    // refer to Mercator zoom levels, whereas those in the tileJSON to
+    // H3 resolutions
+    if (this.context.viewport.zoom < this.props.minZoom) {
+      // TODO support correct behavior when extent defined
+      return null;
+    }
     const {data, tileJSON} = this.state;
-    const maxZoom = parseInt(tileJSON.maxresolution);
+    let minZoom = parseInt(tileJSON.minresolution);
+    let maxZoom = parseInt(tileJSON.maxresolution);
+    if (this.props.maxZoom) {
+      maxZoom = Math.min(maxZoom, getHexagonResolution(this.props.maxZoom));
+    }
+
+    // The naming is unfortunate, but minZoom & maxZoom in the context
+    // of a Tileset2D refer to the resolution levels, not the Mercator zooms
     return [
       new SpatialIndexTileLayer(this.props, {
         id: `h3-tile-layer-${this.props.id}`,
@@ -73,6 +87,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         // @ts-expect-error Tileset2D should be generic over TileIndex
         TilesetClass: H3Tileset2D,
         renderSubLayers,
+        minZoom,
         maxZoom
       })
     ];
