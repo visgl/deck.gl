@@ -520,7 +520,9 @@ export default class Deck {
       return;
     }
     // Check if we need to redraw
-    const redrawReason = this.needsRedraw({clearRedrawFlags: true}) || reason;
+    let redrawReason = this.needsRedraw({clearRedrawFlags: true});
+    // User-supplied should take precedent, however the redraw flags get cleared regardless
+    redrawReason = reason || redrawReason;
 
     if (!redrawReason) {
       return;
