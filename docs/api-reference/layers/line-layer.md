@@ -4,8 +4,7 @@ import {LineLayerDemo} from 'website-components/doc-demos/layers';
 
 # LineLayer
 
-The Line Layer renders flat lines joining pairs of source and target points,
-specified as latitude/longitude coordinates.
+The `LineLayer` renders straight lines joining pairs of source and target coordinates.
 
 ```js
 import DeckGL from '@deck.gl/react';

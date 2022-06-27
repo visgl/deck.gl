@@ -191,6 +191,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   getTransformMatrix: {type: 'accessor', value: []}
 };
 
+/** Render a number of instances of an arbitrary 3D geometry. */
 export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_SimpleMeshLayerProps<DataT>>
 > {

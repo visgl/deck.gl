@@ -4,7 +4,7 @@ import {TripsLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 # Trips Layer
 
-This layer renders animated paths that represent vehicle trips.
+The `TripsLayer` renders animated paths that represent vehicle trips.
 
 ```js
 import {TripsLayer} from '@deck.gl/geo-layers';

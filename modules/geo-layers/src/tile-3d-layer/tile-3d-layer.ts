@@ -75,6 +75,7 @@ type _Tile3DLayerProps<DataT> = {
   _getMeshColor?: (tile: Tile3D) => Color;
 };
 
+/** Render 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) */
 export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
   ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {

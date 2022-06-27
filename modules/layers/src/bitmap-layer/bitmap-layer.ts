@@ -106,7 +106,7 @@ type _BitmapLayerProps = {
   textureParameters?: Record<number, number> | null;
 };
 
-/** The BitmapLayer renders a bitmap at specified boundaries. */
+/** Render a bitmap at specified boundaries. */
 export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_BitmapLayerProps>
 > {

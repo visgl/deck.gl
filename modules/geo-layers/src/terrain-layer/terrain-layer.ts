@@ -125,6 +125,7 @@ type _TerrainLayerProps = {
   material?: Material;
 };
 
+/** Render mesh surfaces from height map images. */
 export default class TerrainLayer<ExtraPropsT = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TerrainLayerProps & Required<TileLayerProps<MeshAndTexture>>>
 > {

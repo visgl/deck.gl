@@ -8,9 +8,9 @@ import {PolygonLayerDemo} from 'website-components/doc-demos/layers';
 
 # PolygonLayer
 
-The Polygon Layer renders filled and/or stroked polygons.
+The `PolygonLayer` renders filled, stroked and/or extruded polygons.
 
-PolygonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+PolygonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md) that wraps around the [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) and the [PathLayer]((/docs/api-reference/layers/path-layer.md)).
 
 ```js
 import DeckGL from '@deck.gl/react';

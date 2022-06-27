@@ -131,6 +131,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   onIconError: {type: 'function', value: null, compare: false, optional: true}
 };
 
+/** Render raster icons at given coordinates. */
 export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
