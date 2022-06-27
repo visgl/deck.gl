@@ -105,7 +105,14 @@ function createBasemap() {
 function createCarto(connection, zoom, table) {
   console.log(connection, zoom, table);
   const isH3 = table.includes('h3');
-  const geoColumn = isH3 ? 'h3' : table.endsWith('_quadkey') ? 'quadkey' : 'quadint';
+  const isQuadbin = table.includes('quadbin');
+  const geoColumn = isH3
+    ? 'h3'
+    : isQuadbin
+    ? 'quadbin'
+    : table.endsWith('_quadkey')
+    ? 'quadkey'
+    : 'quadint';
   return new CartoLayer({
     id: 'carto',
     connection,
