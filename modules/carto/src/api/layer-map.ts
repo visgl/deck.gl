@@ -113,7 +113,8 @@ export function getLayer(
   config,
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
-  if (type === 'tileset' || dataset?.type === 'tileset') {
+  // TODO rename to quadbin
+  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadkey') {
     return getTileLayer(dataset);
   }
 
@@ -185,6 +186,8 @@ export function layerFromTileDataset(
 
 function getTileLayer(dataset) {
   const {
+    aggregationExp,
+    aggregationResLevel,
     data: {
       scheme,
       tiles: [tileUrl]
@@ -198,8 +201,10 @@ function getTileLayer(dataset) {
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
-      uniqueIdProperty: 'geoid',
-      formatTiles
+      ...(aggregationExp && {aggregationExp}),
+      ...(aggregationResLevel && {aggregationResLevel}),
+      formatTiles,
+      uniqueIdProperty: 'geoid'
     }
   };
 }
