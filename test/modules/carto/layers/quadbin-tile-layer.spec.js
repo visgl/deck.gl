@@ -1,8 +1,9 @@
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
-import {_QuadkeyTileLayer as QuadkeyTileLayer} from '@deck.gl/carto';
+import {_QuadbinTileLayer as QuadbinTileLayer} from '@deck.gl/carto';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {testPickingLayer} from '../../layers/test-picking-layer';
+import {tileToQuadbin, tileToQuadkey, quadbinToTile} from '@deck.gl/carto/layers/quadbin-utils';
 
 const TILES = ['https://tile-url.com/{i}'];
 const TILEJSON = {
@@ -10,20 +11,20 @@ const TILEJSON = {
   tiles: TILES
 };
 
-test('QuadkeyTileLayer', async t => {
+test('QuadbinTileLayer', async t => {
   const testCases = generateLayerTests({
-    Layer: QuadkeyTileLayer,
+    Layer: QuadbinTileLayer,
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
-  await testLayerAsync({Layer: QuadkeyTileLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: QuadbinTileLayer, testCases, onError: t.notOk});
   t.end();
 });
 
-test('QuadkeyTileLayer tilejson', async t => {
+test('QuadbinTileLayer tilejson', async t => {
   const testCases = [
     {
-      Layer: QuadkeyTileLayer,
+      Layer: QuadbinTileLayer,
       props: {
         data: TILEJSON,
         getTileData: () => []
@@ -38,18 +39,40 @@ test('QuadkeyTileLayer tilejson', async t => {
       }
     }
   ];
-  await testLayerAsync({Layer: QuadkeyTileLayer, testCases, onError: t.notOk});
+  await testLayerAsync({Layer: QuadbinTileLayer, testCases, onError: t.notOk});
   t.end();
 });
 
-test('QuadkeyTileLayer autoHighlight', async t => {
+function quadkeyToTile(quadkey) {
+  const tile = {x: 0, y: 0, z: quadkey.length};
+
+  for (let i = tile.z; i > 0; i--) {
+    const mask = 1 << (i - 1);
+    const q = Number(quadkey[tile.z - i]);
+    if (q === 1) tile.x |= mask;
+    if (q === 2) tile.y |= mask;
+    if (q === 3) {
+      tile.x |= mask;
+      tile.y |= mask;
+    }
+  }
+  return tile;
+}
+
+test('QuadbinTileLayer autoHighlight', async t => {
   await testPickingLayer({
-    layer: new QuadkeyTileLayer({
-      id: 'quadkey-tile',
+    layer: new QuadbinTileLayer({
+      id: 'quadbin-tile',
       data: TILEJSON,
       getTileData(e) {
-        // Generate 4 quadkeys to fill the tile
-        return [0, 1, 2, 3].map(i => ({id: `${e.index.i}${i}`, value: i}));
+        // Generate 4 quadbins to fill the tile
+        return [0, 1, 2, 3].map(i => {
+          let tile = quadbinToTile(e.index.i);
+          const quadkey = tileToQuadkey(tile);
+          const child = `${quadkey}${i}`;
+          tile = quadkeyToTile(child);
+          return {id: tileToQuadbin(tile), value: i};
+        });
       },
       autoHighlight: true,
       pickable: true
@@ -58,12 +81,12 @@ test('QuadkeyTileLayer autoHighlight', async t => {
     testCases: [
       {
         pickedColor: new Uint8Array([4, 0, 0, 0]),
-        pickedLayerId: 'quadkey-tile-layer-quadkey-tile-2-cell-fill',
+        pickedLayerId: 'quadbin-tile-layer-quadbin-tile-481bffffffffffff-cell-fill',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.comment('hover over quadkey');
+          t.comment('hover over quadbin');
           t.ok(info.object, 'info.object is populated');
-          t.equal(info.object.id, '23', 'quadkey is correct');
+          t.equal(info.object.id, '482bffffffffffff', 'quadbin is correct');
           t.equal(info.object.value, 3, 'object value is correct');
         }
       },
