@@ -8,7 +8,7 @@ import {
 } from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import H3TileLayer from './h3-tile-layer';
-import QuadkeyTileLayer from './quadkey-tile-layer';
+import QuadbinTileLayer from './quadbin-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
 import {
@@ -65,7 +65,7 @@ const defaultProps = {
   // (String, optional): aggregration SQL expression. Only used for spatial index datasets
   aggregationExp: null,
 
-  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
+  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
   aggregationResLevel: null
 };
 
@@ -149,7 +149,7 @@ type _CartoLayerProps = {
   /** Aggregration SQL expression. Only used for spatial index datasets **/
   aggregationExp?: string;
 
-  /** Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3. **/
+  /** Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
   aggregationResLevel?: number;
 };
 
@@ -303,8 +303,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     if (data.scheme === 'h3') {
       return [H3TileLayer, props];
     }
-    if (data.scheme === 'quadkey') {
-      return [QuadkeyTileLayer, props];
+    if (data.scheme === 'quadbin') {
+      return [QuadbinTileLayer, props];
     }
     return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
   }

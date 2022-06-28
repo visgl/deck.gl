@@ -6,33 +6,35 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {QuadkeyLayer, QuadkeyLayerProps} from '@deck.gl/geo-layers';
-import QuadkeyTileset2D from './quadkey-tileset-2d';
+import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
+import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
-  return new QuadkeyLayer(props, {getQuadkey: d => d.id});
+  return new QuadbinLayer(props, {
+    getQuadbin: d => d.id
+  });
 };
 
-const defaultProps: DefaultProps<QuadkeyTileLayerProps> = {
+const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
   aggregationResLevel: 6
 };
 
-/** All properties supported by QuadkeyTileLayer. */
-export type QuadkeyTileLayerProps<DataT = any> = _QuadkeyTileLayerProps<DataT> &
+/** All properties supported by QuadbinTileLayer. */
+export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
   CompositeLayerProps<DataT>;
 
-/** Properties added by QuadkeyTileLayer. */
-type _QuadkeyTileLayerProps<DataT> = QuadkeyLayerProps<DataT> & {
+/** Properties added by QuadbinTileLayer. */
+type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
   aggregationResLevel?: number;
 };
 
-export default class QuadkeyTileLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  ExtraProps & Required<_QuadkeyTileLayerProps<DataT>>
+export default class QuadbinTileLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  ExtraProps & Required<_QuadbinTileLayerProps<DataT>>
 > {
-  static layerName = 'QuadkeyTileLayer';
+  static layerName = 'QuadbinTileLayer';
   static defaultProps = defaultProps;
 
   state!: {
@@ -57,10 +59,10 @@ export default class QuadkeyTileLayer<DataT = any, ExtraProps = {}> extends Comp
     const maxZoom = parseInt(tileJSON?.maxresolution);
     return [
       new SpatialIndexTileLayer(this.props, {
-        id: `quadkey-tile-layer-${this.props.id}`,
+        id: `quadbin-tile-layer-${this.props.id}`,
         data,
         // TODO: Tileset2D should be generic over TileIndex type
-        TilesetClass: QuadkeyTileset2D as any,
+        TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
         maxZoom
       })
