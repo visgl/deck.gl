@@ -138,6 +138,7 @@ export type _ScreenGridLayerProps<DataT> = {
   aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
 };
 
+/** Aggregates data into histogram bins and renders them as a grid. */
 export default class ScreenGridLayer<DataT = any, ExtraProps = {}> extends GridAggregationLayer<
   ExtraProps & Required<_ScreenGridLayerProps<DataT>>
 > {

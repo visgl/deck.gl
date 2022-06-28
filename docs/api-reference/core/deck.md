@@ -691,6 +691,10 @@ Notes:
 
 ## Member Variables
 
+##### `isInitialized`
+
+Flag indicating that the Deck instance has initialized its resources. It is safe to call public methods when `isInitialized` is `true`.
+
 ##### `metrics`
 
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:

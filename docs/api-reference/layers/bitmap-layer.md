@@ -4,7 +4,7 @@ import {BitmapLayerDemo} from 'website-components/doc-demos/layers';
 
 # BitmapLayer
 
-The BitmapLayer renders a bitmap at specified boundaries.
+The `BitmapLayer` renders a bitmap at specified boundaries.
 
 ```js
 import DeckGL from '@deck.gl/react';

@@ -171,6 +171,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
+/** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
 > {

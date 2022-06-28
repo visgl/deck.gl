@@ -9,7 +9,6 @@ import {
   _getDataV2,
   fetchLayerData,
   fetchMap,
-  getData,
   getDefaultCredentials,
   setDefaultCredentials
 } from '@deck.gl/carto';
@@ -285,7 +284,7 @@ const TABLE_PARAMS = {
     };
 
     try {
-      await getData({
+      await fetchLayerData({
         type: MAP_TYPES.QUERY,
         source: 'select * from a',
         connection: 'connection_name',
@@ -319,7 +318,7 @@ Object.values(API_VERSIONS).forEach(apiVersion => {
 
     const legacy = [API_VERSIONS.V1, API_VERSIONS.V2].includes(apiVersion);
     try {
-      await (legacy ? _getDataV2 : getData)({
+      await (legacy ? _getDataV2 : fetchLayerData)({
         type: MAP_TYPES.QUERY,
         source: 'select * from a',
         ...(!legacy && {
@@ -500,7 +499,7 @@ test(`getDataV2#versionError`, async t => {
   }
 });
 
-test('getData#post', async t => {
+test('fetchLayerData#post', async t => {
   const geojsonURL = 'http://geojson';
   const mapInstantiationUrl = 'http://carto-api/v3/maps/connection_name/query';
 
@@ -551,7 +550,7 @@ test('getData#post', async t => {
   };
 
   try {
-    await getData({
+    await fetchLayerData({
       type: MAP_TYPES.QUERY,
       connection: 'connection_name',
       source: `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`,

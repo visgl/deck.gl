@@ -8,9 +8,7 @@ import {GridLayerDemo} from 'website-components/doc-demos/aggregation-layers';
 
 # GridLayer
 
-The `GridLayer` renders a grid heatmap based on an array of inputs.
-It takes the constant cell size and aggregates input objects into cells. The color
-and height of a cell are determined based on the objects it contains.
+The `GridLayer` aggregates data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains.
 
 This layer renders either a [GPUGridLayer](/docs/api-reference/aggregation-layers/gpu-grid-layer.md) or a [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md), depending on its props and whether GPU aggregation is supported. For more details check the `GPU Aggregation` section below.
 

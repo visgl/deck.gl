@@ -95,6 +95,7 @@ type _SolidPolygonLayerProps<DataT> = {
   material?: Material;
 };
 
+/** Render filled and/or extruded polygons. */
 export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> &
   LayerProps<DataT>;
 

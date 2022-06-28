@@ -85,6 +85,7 @@ export type _MVTLayerProps = {
 
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
+/** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
 export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> extends TileLayer<
   ParsedMvtTile,
   Required<_MVTLayerProps> & ExtraProps

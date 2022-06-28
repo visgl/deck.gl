@@ -225,6 +225,7 @@ type _ColumnLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 };
 
+/** Render extruded cylinders (tessellated regular polygons) at given coordinates. */
 export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ColumnLayerProps<DataT>>
 > {

@@ -4,8 +4,7 @@ import {ScatterplotLayerDemo} from 'website-components/doc-demos/layers';
 
 # ScatterplotLayer
 
-The Scatterplot Layer takes in paired latitude and longitude coordinated
-points and renders them as circles with a certain radius.
+The `ScatterplotLayer` renders circles at given coordinates.
 
 ```js
 import DeckGL from '@deck.gl/react';

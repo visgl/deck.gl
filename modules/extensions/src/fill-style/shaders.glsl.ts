@@ -1,4 +1,4 @@
-import {project, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, _ShaderModule as ShaderModule, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/webgl';
@@ -34,6 +34,7 @@ uniform bool fill_patternEnabled;
 uniform bool fill_patternMask;
 uniform sampler2D fill_patternTexture;
 uniform vec2 fill_uvCoordinateOrigin;
+uniform vec2 fill_uvCoordinateOrigin64Low;
 
 varying vec4 fill_patternBounds;
 varying vec3 fill_patternPlacement;
@@ -58,7 +59,7 @@ const inject = {
   'fs:DECKGL_FILTER_COLOR': `
     if (fill_patternEnabled) {
       float scale = FILL_UV_SCALE * fill_patternPlacement.z;
-      vec2 patternUV = mod(mod(fill_uvCoordinateOrigin, scale) + fill_uv, scale) / scale;
+      vec2 patternUV = mod(mod(fill_uvCoordinateOrigin, scale) + fill_uvCoordinateOrigin64Low + fill_uv, scale) / scale;
       patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
 
       vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
@@ -99,15 +100,17 @@ function getPatternUniforms(
   }
   if ('viewport' in opts) {
     const {viewport, fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const {project_uCoordinateOrigin, project_uCoordinateSystem} = uniforms as ProjectUniforms;
+    const {project_uCoordinateOrigin} = uniforms as ProjectUniforms;
 
-    const coordinateOriginCommon =
-      project_uCoordinateSystem === COORDINATE_SYSTEM.CARTESIAN
-        ? project_uCoordinateOrigin
-        : viewport.projectPosition(project_uCoordinateOrigin);
+    const coordinateOriginCommon = viewport.projectPosition(project_uCoordinateOrigin);
+    const coordinateOriginCommon64Low = [
+      fp64LowPart(coordinateOriginCommon[0]),
+      fp64LowPart(coordinateOriginCommon[1])
+    ];
 
     return {
       fill_uvCoordinateOrigin: coordinateOriginCommon.slice(0, 2),
+      fill_uvCoordinateOrigin64Low: coordinateOriginCommon64Low,
       fill_patternMask: fillPatternMask,
       fill_patternEnabled: fillPatternEnabled
     };

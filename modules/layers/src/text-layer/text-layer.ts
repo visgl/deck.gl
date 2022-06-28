@@ -232,6 +232,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   backgroundColor: {deprecatedFor: ['background', 'getBackgroundColor']}
 };
 
+/** Render text labels at given coordinates. */
 export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TextLayerProps<DataT>>
 > {

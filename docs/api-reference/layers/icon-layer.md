@@ -4,7 +4,7 @@ import {IconLayerDemo} from 'website-components/doc-demos/layers';
 
 # IconLayer
 
-The Icon Layer renders raster icons at given coordinates.
+The `IconLayer` renders raster icons at given coordinates.
 
 There are two approaches to load icons. You can pre-generated a sprite image (`iconAtlas`), which packs all your icons
 into one layout, and a JSON descriptor (`iconMapping`), which describes the position and size of each icon in the `iconAtlas`.
