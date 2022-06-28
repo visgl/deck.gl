@@ -96,25 +96,10 @@ export function tileToQuadkey(tile) {
   return index;
 }
 
-// Use existing functions for now
 export function quadbinToWorldBounds(quadbin: string): [number[], number[]] {
-  const tile = quadbinToTile(quadbin);
-  const quadkey = tileToQuadkey(tile);
-  return quadkeyToWorldBounds(quadkey);
-}
-
-function quadkeyToWorldBounds(quadkey: string): [number[], number[]] {
-  let x = 0;
-  let y = 0;
-  let mask = 1 << quadkey.length;
+  const {x, y, z} = quadbinToTile(quadbin);
+  const mask = 1 << z;
   const scale = mask / TILE_SIZE;
-
-  for (let i = 0; i < quadkey.length; i++) {
-    mask >>= 1;
-    const q = parseInt(quadkey[i]);
-    if (q % 2) x |= mask;
-    if (q > 1) y |= mask;
-  }
   return [
     [x / scale, TILE_SIZE - y / scale],
     [(x + 0.99) / scale, TILE_SIZE - (y + 0.99) / scale]

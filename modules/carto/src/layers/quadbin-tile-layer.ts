@@ -8,7 +8,6 @@ import {
 } from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import {quadbinToTile, tileToQuadkey} from './quadbin-utils';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
