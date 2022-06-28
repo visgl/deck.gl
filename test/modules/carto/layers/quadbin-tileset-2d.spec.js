@@ -45,7 +45,7 @@ test('Quadbin getParent', async t => {
   t.end();
 });
 
-test.only('QuadbinTileset2D', async t => {
+test('QuadbinTileset2D', async t => {
   const tileset = new QuadbinTileset2D({});
   const viewport = new WebMercatorViewport({
     latitude: 0,
