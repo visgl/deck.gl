@@ -179,6 +179,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getFillColor = getColorAccessor(
       colorField,
       colorScale,
+      visConfig.colorAggregation,
       visConfig.colorRange,
       visConfig.opacity,
       data
@@ -192,6 +193,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
+      visConfig.strokeColorAggregation,
       visConfig.strokeColorRange,
       opacity,
       data
@@ -201,6 +203,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getElevation = getSizeAccessor(
       heightField,
       heightScale,
+      visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
       data
     );
@@ -209,6 +212,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getPointRadius = getSizeAccessor(
       sizeField,
       sizeScale,
+      visConfig.sizeAggregation,
       visConfig.radiusRange || visConfig.sizeRange,
       data
     );

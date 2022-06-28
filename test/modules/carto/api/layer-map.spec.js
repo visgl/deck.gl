@@ -97,7 +97,7 @@ const COLOR_TESTS = [
 
 for (const {colorField, colorScale, colorRange, opacity, data, d, expected} of COLOR_TESTS) {
   test(`getColorAccessor#${colorScale}`, t => {
-    const accessor = getColorAccessor(colorField, colorScale, colorRange, opacity, data);
+    const accessor = getColorAccessor(colorField, colorScale, undefined, colorRange, opacity, data);
     t.deepEquals(accessor(d), expected, `getColorAccessor correctly returns ${expected}`);
     t.end();
   });
@@ -132,7 +132,7 @@ const SIZE_TESTS = [
 
 for (const {sizeField, sizeScale, sizeRange, data, d, expected} of SIZE_TESTS) {
   test(`getSizeAccessor#${sizeScale}`, t => {
-    const accessor = getSizeAccessor(sizeField, sizeScale, sizeRange, data);
+    const accessor = getSizeAccessor(sizeField, sizeScale, undefined, sizeRange, data);
     t.deepEquals(accessor(d), expected, `getSizeAccessor correctly returns ${expected}`);
     t.end();
   });

@@ -269,6 +269,10 @@ export function opacityToAlpha(opacity) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
+function getAccessorKey(name: string, aggregation: string | undefined): string {
+  return aggregation ? `${name}_${aggregation}` : name;
+}
+
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
   const aggregator = AGGREGATION_FUNC[colorAggregation];
   const accessor = values => aggregator(values, p => p[name]);
@@ -278,6 +282,7 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 export function getColorAccessor(
   {name},
   scaleType: SCALE_TYPE,
+  aggregation: string | undefined,
   {colors, colorMap},
   opacity: number | undefined,
   data: any
@@ -305,21 +310,29 @@ export function getColorAccessor(
   scale.unknown(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
+  const key = getAccessorKey(name, aggregation);
   const accessor = properties => {
-    const propertyValue = properties[name];
+    const propertyValue = properties[key];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
 }
 
-export function getSizeAccessor({name}, scaleType: SCALE_TYPE, range: Iterable<Range>, data: any) {
+export function getSizeAccessor(
+  {name},
+  scaleType: SCALE_TYPE,
+  aggregation,
+  range: Iterable<Range>,
+  data: any
+) {
   const scale = SCALE_FUNCS[scaleType as any]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
 
+  const key = getAccessorKey(name, aggregation);
   const accessor = properties => {
-    return scale(properties[name]);
+    return scale(properties[key]);
   };
   return normalizeAccessor(accessor, data);
 }
