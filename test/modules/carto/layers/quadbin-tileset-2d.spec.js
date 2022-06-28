@@ -1,11 +1,12 @@
 import test from 'tape-promise/tape';
-import QuadbinTileset2D, {
+import QuadbinTileset2D from '@deck.gl/carto/layers/quadbin-tileset-2d';
+import {
   tileToQuadbin,
   tileToQuadkey,
   quadbinToTile,
   quadbinParent,
   quadbinZoom
-} from '@deck.gl/carto/layers/quadbin-tileset-2d';
+} from '@deck.gl/carto/layers/quadbin-utils';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 const TEST_TILES = [
@@ -18,7 +19,7 @@ test('Quadbin conversion', async t => {
   for (const {x, y, z, q} of TEST_TILES) {
     const tile = {x, y, z};
     const quadbin = tileToQuadbin(tile);
-    t.deepEqual(quadbin.i, q, 'quadbins match');
+    t.deepEqual(quadbin, q, 'quadbins match');
 
     const tile2 = quadbinToTile(quadbin);
     t.deepEqual(tile, tile2, 'tiles match');
