@@ -18,6 +18,7 @@ type GeohashLayerProps<DataT = any> = {
   getGeohash?: AccessorFunction<DataT, string>;
 };
 
+/** Render filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system. */
 export default class GeohashLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
   DataT,
   Required<GeohashLayerProps> & ExtraProps

@@ -5,7 +5,7 @@ import {ContourLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # ContourLayer
 
-`ContourLayer` renders `Isoline`s or `Isoband`s for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
+The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
 
 ```js

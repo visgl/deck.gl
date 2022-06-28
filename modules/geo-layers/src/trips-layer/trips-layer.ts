@@ -55,6 +55,7 @@ type _TripsLayerProps<DataT = any> = {
   getTimestamps?: AccessorFunction<DataT, NumericArray>;
 };
 
+/** Render animated paths that represent vehicle trips. */
 export default class TripsLayer<DataT = any, ExtraProps = {}> extends PathLayer<
   DataT,
   Required<_TripsLayerProps> & ExtraProps

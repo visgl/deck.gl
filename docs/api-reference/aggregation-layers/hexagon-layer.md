@@ -8,9 +8,7 @@ import {HexagonLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HexagonLayer
 
-The Hexagon Layer renders a hexagon heatmap based on an array of inputs.
-It takes the radius of hexagon bin and aggregates input objects into hexagon bins. The color
-and height of a hexagon are determined based on the objects it contains.
+The `HexagonLayer` aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains.
 
 HexagonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md) and at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 

@@ -317,6 +317,7 @@ type GeoJsonPickingInfo = PickingInfo & {
   info?: any;
 };
 
+/** Render GeoJSON formatted data as polygons, lines and points (circles, icons and/or texts). */
 export default class GeoJsonLayer<
   DataT extends Feature = Feature,
   ExtraProps = {}

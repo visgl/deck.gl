@@ -8,7 +8,7 @@ import {GeohashLayerDemo} from 'website-components/doc-demos/geo-layers';
 
 # GeohashLayer
 
-The GeohashLayer renders filled and/or stroked polygons, with geometry automatically calculated based on a geohash (geospatial index).
+The `GeohashLayer` renders filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system.
 
 `GeohashLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
 

@@ -136,7 +136,7 @@ type _ArcLayerProps<DataT> = {
   getTilt?: Accessor<DataT, number>;
 };
 
-/** The Arc Layer renders raised arcs joining pairs of source and target points. */
+/** Render raised arcs joining pairs of source and target coordinates. */
 export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ArcLayerProps<DataT>>
 > {

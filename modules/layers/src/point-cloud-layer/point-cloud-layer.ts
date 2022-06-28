@@ -126,7 +126,7 @@ type _PointCloudLayerProps<DataT> = {
   getColor?: Accessor<DataT, Color>;
 };
 
-/** The Point Cloud Layer takes in points with 3d positions, normals and colors and renders them as spheres with a certain radius. */
+/** Render a point cloud with 3D positions, normals and colors. */
 export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_PointCloudLayerProps<DataT>>
 > {

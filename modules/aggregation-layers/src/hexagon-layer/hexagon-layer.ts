@@ -246,6 +246,7 @@ type _HexagonLayerProps<DataT = any> = {
   _filterData: null | ((d: DataT) => boolean);
 };
 
+/** Aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains. */
 export default class HexagonLayer<ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_HexagonLayerProps>
 > {

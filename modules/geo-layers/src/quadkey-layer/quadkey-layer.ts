@@ -19,6 +19,7 @@ type _QuadkeyLayerProps<DataT> = {
   getQuadkey?: AccessorFunction<DataT, string>;
 };
 
+/** Render filled and/or stroked polygons based on the [Quadkey](https://towardsdatascience.com/geospatial-indexing-with-quadkeys-d933dff01496) geospatial indexing system. */
 export default class QuadkeyLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
   DataT,
   Required<_QuadkeyLayerProps<DataT>> & ExtraProps

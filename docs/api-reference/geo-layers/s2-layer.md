@@ -8,7 +8,7 @@ import {S2LayerDemo} from 'website-components/doc-demos/geo-layers';
 
 # S2Layer
 
-The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an S2 token (geospatial index). It uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
+The `S2Layer` renders filled and/or stroked polygons based on the [S2](http://s2geometry.io/) geospatial indexing system.
 
 `S2Layer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
 

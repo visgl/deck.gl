@@ -8,8 +8,7 @@ import {PointCloudLayerDemo} from 'website-components/doc-demos/layers';
 
 # PointCloudLayer
 
-The Point Cloud Layer takes in points with 3d positions, normals and colors
-and renders them as spheres with a certain radius.
+The `PointCloudLayer` renders a point cloud with 3D positions, normals and colors.
 
 ```js
 import DeckGL from '@deck.gl/react';

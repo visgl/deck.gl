@@ -176,6 +176,7 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   loaders: [GLTFLoader]
 };
 
+/** Render a number of instances of a complete glTF scenegraph. */
 export default class ScenegraphLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ScenegraphLayerProps<DataT>>
 > {

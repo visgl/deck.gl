@@ -4,7 +4,7 @@ import {ArcLayerDemo} from 'website-components/doc-demos/layers';
 
 # ArcLayer
 
-The Arc Layer renders raised arcs joining pairs of source and target points.
+The `ArcLayer` renders raised arcs joining pairs of source and target coordinates.
 
 ```js
 import DeckGL from '@deck.gl/react';
