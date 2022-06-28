@@ -31,6 +31,7 @@ export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
 export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 
+export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
 export {getURLFromTemplate as _getURLFromTemplate} from './tile-layer/utils';
 export {default as _Tileset2D} from './tile-layer/tileset-2d';
 export {default as _Tile2DHeader} from './tile-layer/tile-2d-header';
@@ -47,3 +48,4 @@ export type {TileLoadProps as _TileLoadProps} from './tile-layer/types';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
 export type {Tile3DLayerProps} from './tile-3d-layer/tile-3d-layer';
 export type {MVTLayerProps} from './mvt-layer/mvt-layer';
+export type {GeoCellLayerProps as _GeoCellLayerProps} from './geo-cell-layer/GeoCellLayer';

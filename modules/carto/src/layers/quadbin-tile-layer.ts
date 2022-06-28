@@ -6,17 +6,15 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {QuadkeyLayer, QuadkeyLayerProps} from '@deck.gl/geo-layers';
+import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D, {quadbinToTile, tileToQuadkey} from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
-  return new QuadkeyLayer(props, {
-    getQuadkey: d => {
-      return tileToQuadkey(quadbinToTile({i: d.id}));
-    }
+  return new QuadbinLayer(props, {
+    getQuadbin: d => d.id
   });
 };
 
@@ -29,7 +27,7 @@ export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
   CompositeLayerProps<DataT>;
 
 /** Properties added by QuadbinTileLayer. */
-type _QuadbinTileLayerProps<DataT> = QuadkeyLayerProps<DataT> & {
+type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
   aggregationResLevel?: number;
 };
 
