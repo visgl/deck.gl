@@ -303,7 +303,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     if (data.scheme === 'h3') {
       return [H3TileLayer, props];
     }
-    if (data.scheme === 'quadbin' || data.scheme === 'quadkey' /* TODO remove quadkey */) {
+    if (data.scheme === 'quadbin') {
       return [QuadbinTileLayer, props];
     }
     return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
