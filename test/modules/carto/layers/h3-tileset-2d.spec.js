@@ -55,7 +55,7 @@ test('H3Tileset2D res0', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 1,
-    width: 1023,
+    width: 1024,
     height: 1024
   });
 
@@ -70,12 +70,12 @@ test('H3Tileset2D large span', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 1,
-    width: 1000,
-    height: 400
+    width: 2048,
+    height: 800
   });
 
   const indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 114, 'large viewport span');
+  t.equal(indices.length, 122, 'large viewport span');
   t.end();
 });
 
