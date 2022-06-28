@@ -363,9 +363,20 @@ async function _fetchMapDataset(
   credentials: CloudNativeCredentials,
   clientId?: string
 ) {
-  const {connectionName: connection, columns, format, geoColumn, source, type} = dataset;
+  const {
+    aggregationExp,
+    aggregationResLevel,
+    connectionName: connection,
+    columns,
+    format,
+    geoColumn,
+    source,
+    type
+  } = dataset;
   // First fetch metadata
   const {url, mapFormat} = await _fetchDataUrl({
+    aggregationExp,
+    aggregationResLevel,
     clientId,
     credentials: {...credentials, accessToken},
     connection,
