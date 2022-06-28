@@ -84,18 +84,6 @@ export function quadbinParent(index: string) {
   return bigIntToIndex(parent);
 }
 
-export function tileToQuadkey(tile) {
-  let index = '';
-  for (let z = tile.z; z > 0; z--) {
-    let b = 0;
-    const mask = 1 << (z - 1);
-    if ((tile.x & mask) !== 0) b++;
-    if ((tile.y & mask) !== 0) b += 2;
-    index += b.toString();
-  }
-  return index;
-}
-
 export function quadbinToWorldBounds(quadbin: string): [number[], number[]] {
   const {x, y, z} = quadbinToTile(quadbin);
   const mask = 1 << z;

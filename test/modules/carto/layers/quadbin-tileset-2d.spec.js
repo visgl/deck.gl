@@ -2,12 +2,12 @@ import test from 'tape-promise/tape';
 import QuadbinTileset2D from '@deck.gl/carto/layers/quadbin-tileset-2d';
 import {
   tileToQuadbin,
-  tileToQuadkey,
   quadbinToTile,
   quadbinParent,
   quadbinZoom
 } from '@deck.gl/carto/layers/quadbin-utils';
 import {WebMercatorViewport} from '@deck.gl/core';
+import {tileToQuadkey} from './quadbin-tile-layer.spec';
 
 const TEST_TILES = [
   {x: 0, y: 0, z: 0, q: '480fffffffffffff'},
