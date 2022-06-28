@@ -19,7 +19,7 @@ const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
 // const apiBaseUrl = 'http://localhost:8002'
 
 const config = {
-  'deb-bigquery': {
+  'dev-bigquery': {
     quadbin:
       'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2_quadbin_final'
   },
@@ -58,7 +58,7 @@ const showBasemap = true;
 const showCarto = true;
 
 function Root() {
-  const [connection, setConnection] = useState('deb-bigquery');
+  const [connection, setConnection] = useState('dev-bigquery');
   const [dataset, setDataset] = useState('quadbin');
   const [zoom, setZoom] = useState(5);
   const table = config[connection][dataset];
