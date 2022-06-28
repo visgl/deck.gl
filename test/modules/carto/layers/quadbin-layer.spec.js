@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {_QuadbinLayer as QuadbinLayer} from '@deck.gl/carto';
+import QuadbinLayer from '@deck.gl/carto/layers/quadbin-layer';
 import {quadbinToWorldBounds, getQuadbinPolygon} from '@deck.gl/carto/layers/quadbin-utils';
 
 const TEST_DATA = [
