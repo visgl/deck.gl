@@ -80,7 +80,9 @@ Required. Data type. Possible values are:
 
 ##### `connection` (String, optional)
 
-Required. Name of the connection registered in the CARTO workspace.
+Required when `apiVersion` is `API_VERSIONS.V3`.
+
+Name of the connection registered in the CARTO workspace.
 
 ##### `formatTiles` (String, optional)
 
