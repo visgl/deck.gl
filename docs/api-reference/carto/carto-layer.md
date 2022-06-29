@@ -37,8 +37,8 @@ function App({viewState}) {
 
 The CARTO platform supports storing data using a spatial index. The `geoColumn` prop is used to specify a database column that contains geographic data. When `geoColumn` has one of the following values, the data will be interpreted as a spatial index:
 
-- `h3` [H3](https://h3geo.org/) indexing system will be used
-- `quadbin` Quadbin indexing system will be used
+- `h3` [H3](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#h3) indexing system will be used
+- `quadbin` [Quadbin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin) indexing system will be used
 
 Tiled data will be used, with the layer created depending on the spatial index used:
 
@@ -103,7 +103,9 @@ new deck.carto.CartoLayer({});
 
 ## Properties
 
-Depending on the datasource, different properties will be inherited from the created sublayer:
+In all cases the properties of [`TileLayer`](/docs/api-reference/geo-layers/tile-layer.md) will be inherited.
+
+Depending on the datasource, additional properties will be inherited from the created sublayer:
 
 - For the `h3` spatial index: [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md).
 - For the `quadbin` spatial index: [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md). _Note the `getQuadkey` accessor is replaced with `getQuadbin`_.
