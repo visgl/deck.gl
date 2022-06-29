@@ -154,6 +154,14 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 
 Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
 
+##### `aggregationExp` (String, optional)
+
+Optional. Aggregration SQL expression. Only used for spatial index datasets.
+
+##### `aggregationResLevel` (Number, optional)
+
+Optional. Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
+
 ### Callbacks
 
 #### `onDataLoad` (Function, optional)
