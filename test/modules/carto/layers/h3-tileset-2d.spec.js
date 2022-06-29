@@ -92,7 +92,7 @@ test('H3Tileset2D min zoom', async t => {
   let indices = tileset.getTileIndices({viewport});
   t.equal(indices.length, 28, 'without min zoom');
   indices = tileset.getTileIndices({viewport, minZoom: 1});
-  t.equal(indices.length, 157, 'min zoom added');
+  t.equal(indices.length, 0, 'min zoom added');
   t.end();
 });
 
