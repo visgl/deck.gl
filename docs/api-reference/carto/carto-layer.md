@@ -2,7 +2,12 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
 
-## Usage
+## Usage 
+
+### Geometry data
+
+By default the `CartoLayer` expects the data to be described using longitude & latitude. Tiled data will be used, with the format depending on `formatTiles`.
+A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -22,6 +27,42 @@ function App({viewState}) {
     getLineColor: [0, 0, 0, 200],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
+  })
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
+
+### Spatial index data
+
+The CARTO platform supports storing data using a spatial index. The `geoColumn` prop is used to specify a database column that contains geographic data. When `geoColumn` has one of the following values, the data will be interpreted as a spatial index:
+
+- `h3` [H3](https://h3geo.org/) indexing system will be used
+- `quadbin` Quadbin indexing system will be used
+
+Tiled data will be used, with the layer created depending on the spatial index used:
+
+- `h3` [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md) will be created and all properties will be inherited.
+- `quadbin` [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md) will be created and all properties will be inherited. Note the `getQuadkey` accessor is replaced with `getQuadbin`.
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
+
+setDefaultCredentials({
+  accessToken: 'XXX'
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com' // Default value (optional)
+});
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.TABLE,
+    connection: 'bigquery',
+    data: 'cartobq.testtables.h3',
+    geoColumn: 'h3',
+    aggregationExp: 'AVG(population) as population',
+    getFillColor: [238, 77, 90],
+    getElevation: d => d.properties.population
   })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
