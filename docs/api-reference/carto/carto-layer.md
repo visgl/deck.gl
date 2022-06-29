@@ -43,7 +43,7 @@ The CARTO platform supports storing data using a spatial index. The `geoColumn` 
 Tiled data will be used, with the layer created depending on the spatial index used:
 
 - `h3` [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md) will be created and all properties will be inherited.
-- `quadbin` [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md) will be created and all properties will be inherited. Note the `getQuadkey` accessor is replaced with `getQuadbin`.
+- `quadbin` [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md) will be created and all properties will be inherited. _Note the `getQuadkey` accessor is replaced with `getQuadbin`_.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -103,9 +103,12 @@ new deck.carto.CartoLayer({});
 
 ## Properties
 
-Inherits the properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md).
+Depending on the datasource, different properties will be inherited from the created sublayer:
 
-Additional properties may be available depending on the configuration. For details see: [Sublayer details](/docs/api-reference/carto/carto-layer#sublayer-details).
+- For the `h3` spatial index: [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md).
+- For the `quadbin` spatial index: [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md). _Note the `getQuadkey` accessor is replaced with `getQuadbin`_.
+- Otherwise (longitude/latitude): [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
+
 
 ##### `data` (String)
 
@@ -172,12 +175,6 @@ Receives arguments:
 Receives arguments:
 
 - `error` (`Error`)
-
-### SubLayers
-
-The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-layer.md), and will generate different sublayers depending on the configuration. In all cases, properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md) will be inherited.
-
-Tiled data will be used, depending on `formatTiles`. A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ## Source
 
