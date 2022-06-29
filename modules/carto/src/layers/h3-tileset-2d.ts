@@ -80,6 +80,7 @@ export default class H3Tileset2D extends Tileset2D {
     let z = getHexagonResolution(viewport);
     let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
+      // TODO support `extent` prop
       return [];
     }
     if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
