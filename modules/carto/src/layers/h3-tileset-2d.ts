@@ -68,6 +68,11 @@ export function getHexagonResolution(viewport): number {
 }
 
 export default class H3Tileset2D extends Tileset2D {
+  /**
+   * Returns all tile indices in the current viewport. If the current zoom level is smaller
+   * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
+   * return tiles that are on maxZoom.
+   */
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     const [east, south, west, north] = viewport.getBounds();
@@ -75,7 +80,7 @@ export default class H3Tileset2D extends Tileset2D {
     let z = getHexagonResolution(viewport);
     let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
-      z = minZoom;
+      return [];
     }
     if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
       z = maxZoom;

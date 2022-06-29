@@ -7,22 +7,18 @@ import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const ZOOMS = {3: 3, 4: 4, 5: 5, 6: 6};
-const INITIAL_VIEW_STATE = {longitude: -108, latitude: 47, zoom: 2};
+const INITIAL_VIEW_STATE = {longitude: 18, latitude: 47, zoom: 2};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
 // Skip CDN
 // const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 // PROD US GCP
-const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // Localhost
 // const apiBaseUrl = 'http://localhost:8002'
 
 const config = {
-  'dev-bigquery': {
-    quadbin:
-      'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2_quadbin_final'
-  },
   bigquery: {
     che15: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
     che18: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2',
@@ -58,8 +54,8 @@ const showBasemap = true;
 const showCarto = true;
 
 function Root() {
-  const [connection, setConnection] = useState('dev-bigquery');
-  const [dataset, setDataset] = useState('quadbin');
+  const [connection, setConnection] = useState('redshift');
+  const [dataset, setDataset] = useState('che15_h3');
   const [zoom, setZoom] = useState(5);
   const table = config[connection][dataset];
   return (
@@ -132,6 +128,10 @@ function createCarto(connection, zoom, table) {
     aggregationResLevel: zoom,
     geoColumn,
     getQuadkey: d => d.id,
+
+    // Visibilty (will be converted to H3 levels in the case of H3 tiles)
+    minZoom: 5,
+    maxZoom: 9,
 
     // autohighlight
     pickable: true,

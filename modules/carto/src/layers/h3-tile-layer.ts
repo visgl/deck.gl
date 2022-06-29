@@ -64,19 +64,26 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   renderLayers(): Layer | null | LayersList {
-    // Handling min/max zoom it complex as the values given by in props
-    // refer to Mercator zoom levels, whereas those in the tileJSON to
-    // H3 resolutions
-    if (this.context.viewport.zoom < this.props.minZoom) {
-      // TODO support correct behavior when extent defined
-      return null;
-    }
     const {data, tileJSON} = this.state;
-    let minZoom = parseInt(tileJSON.minresolution);
-    let maxZoom = parseInt(tileJSON.maxresolution);
-    if (this.props.maxZoom) {
-      maxZoom = Math.min(maxZoom, getHexagonResolution(this.props.maxZoom));
+    let minresolution = parseInt(tileJSON.minresolution);
+    let maxresolution = parseInt(tileJSON.maxresolution);
+    console.log(minresolution, maxresolution);
+
+    // Convert Mercator zooms provided in props into H3 res levels
+    // and clip into valid range provided from the tilejson
+    if (this.props.minZoom) {
+      minresolution = Math.max(
+        minresolution,
+        getHexagonResolution({zoom: this.props.minZoom, latitude: 0})
+      );
     }
+    if (this.props.maxZoom) {
+      maxresolution = Math.min(
+        maxresolution,
+        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0})
+      );
+    }
+    console.log(minresolution, maxresolution);
 
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
@@ -87,8 +94,8 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         // @ts-expect-error Tileset2D should be generic over TileIndex
         TilesetClass: H3Tileset2D,
         renderSubLayers,
-        minZoom,
-        maxZoom
+        minZoom: minresolution,
+        maxZoom: maxresolution
       })
     ];
   }
