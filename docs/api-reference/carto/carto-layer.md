@@ -2,17 +2,13 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
 
-## Usage CARTO 3
+## Usage
 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
 
-setDefaultCredentials({
-  apiVersion: API_VERSIONS.V3
-  apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
-  accessToken: 'XXX',
-});
+setDefaultCredentials({accessToken: 'XXX'});
 
 function App({viewState}) {
   const layer = new CartoLayer({
@@ -24,32 +20,6 @@ function App({viewState}) {
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   })
-
-  return <DeckGL viewState={viewState} layers={[layer]} />;
-}
-```
-
-## Usage CARTO 2
-
-```js
-import DeckGL from '@deck.gl/react';
-import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
-
-setDefaultCredentials({
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'default_public'
-});
-
-function App({viewState}) {
-  const layer = new CartoLayer({
-    type: MAP_TYPES.QUERY,
-    data: 'SELECT * FROM world_population_2015',
-    pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 125],
-    getFillColor: [238, 77, 90],
-    lineWidthMinPixels: 1
-  });
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
@@ -107,9 +77,7 @@ Required. Data type. Possible values are:
 
 ##### `connection` (String)
 
-Required when `apiVersion` is `API_VERSIONS.V3`.
-
-Name of the connection registered in the CARTO workspace.
+Required. Name of the connection registered in the CARTO workspace.
 
 ##### `formatTiles` (String, optional)
 
@@ -117,13 +85,13 @@ Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.T
 
 ##### `geoColumn` (String, optional)
 
-Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `type` is `MAP_TYPES.TABLE`.
 
 Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
 
 ##### `columns` (Array, optional)
 
-Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `type` is `MAP_TYPES.TABLE`.
 
 Names of columns to fetch. By default, all columns are fetched.
 
@@ -162,12 +130,6 @@ Receives arguments:
 ### SubLayers
 
 The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-layer.md), and will generate different sublayers depending on the configuration. In all cases, properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md) will be inherited.
-
-#### API v1 & v2
-
-`CartoLayer` works with the different CARTO Maps API versions (v1, v2, and v3). When using version v1 and v2, the layer always works with vector tiles so it inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
-
-#### API v3
 
 Tiled data will be used, depending on `formatTiles`. A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
