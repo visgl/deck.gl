@@ -67,7 +67,6 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
     const {data, tileJSON} = this.state;
     let minresolution = parseInt(tileJSON.minresolution);
     let maxresolution = parseInt(tileJSON.maxresolution);
-    console.log(minresolution, maxresolution);
 
     // Convert Mercator zooms provided in props into H3 res levels
     // and clip into valid range provided from the tilejson
@@ -83,7 +82,6 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         getHexagonResolution({zoom: this.props.maxZoom, latitude: 0})
       );
     }
-    console.log(minresolution, maxresolution);
 
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
