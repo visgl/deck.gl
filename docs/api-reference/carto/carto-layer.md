@@ -8,7 +8,10 @@
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
 
-setDefaultCredentials({accessToken: 'XXX'});
+setDefaultCredentials({
+  accessToken: 'XXX'
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com' // Default value (optional)
+});
 
 function App({viewState}) {
   const layer = new CartoLayer({
@@ -75,9 +78,11 @@ Required. Data type. Possible values are:
 - `MAP_TYPES.TILESET`, if `data` is a tileset name.
 - `MAP_TYPES.TABLE`, if `data` is a dataset name. Only supported with API v3.
 
-##### `connection` (String)
+##### `connection` (String, optional)
 
-Required. Name of the connection registered in the CARTO workspace.
+Required when `apiVersion` is `API_VERSIONS.V3`.
+
+Name of the connection registered in the CARTO workspace.
 
 ##### `formatTiles` (String, optional)
 
