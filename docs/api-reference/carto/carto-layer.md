@@ -156,11 +156,11 @@ Optional. Overrides the configuration to connect with CARTO. Check the parameter
 
 ##### `aggregationExp` (String, optional)
 
-Optional. Aggregration SQL expression. Only used for spatial index datasets.
+Optional. Aggregation SQL expression. Only used for spatial index datasets.
 
 ##### `aggregationResLevel` (Number, optional)
 
-Optional. Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
+Optional. Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
 
 ### Callbacks
 
