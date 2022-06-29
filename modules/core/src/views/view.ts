@@ -170,20 +170,30 @@ export default abstract class View<
     y: number;
     width: number;
     height: number;
-    padding: Padding | null;
+    padding?: Padding;
   } {
-    return {
+    const dimensions: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      padding?: Padding;
+    } = {
       x: getPosition(this._x, width),
       y: getPosition(this._y, height),
       width: getPosition(this._width, width),
-      height: getPosition(this._height, height),
-      padding: this._padding && {
+      height: getPosition(this._height, height)
+    };
+
+    if (this._padding) {
+      dimensions.padding = {
         left: getPosition(this._padding.left, width),
         top: getPosition(this._padding.top, height),
         right: getPosition(this._padding.right, width),
         bottom: getPosition(this._padding.bottom, height)
-      }
-    };
+      };
+    }
+    return dimensions;
   }
 
   // Used by sub classes to resolve controller props

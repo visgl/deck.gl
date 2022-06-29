@@ -4,9 +4,7 @@ import {ScreenGridLayerDemo} from 'website-components/doc-demos/aggregation-laye
 
 # ScreenGridLayer
 
-The Screen Grid Layer takes in an array of latitude and longitude
-coordinated points, aggregates them into histogram bins and
-renders as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to false.
+The `ScreenGridLayer` aggregates data into histogram bins and renders them as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to 1.
 
 ```js
 import DeckGL from '@deck.gl/react';

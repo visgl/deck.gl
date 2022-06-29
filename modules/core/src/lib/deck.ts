@@ -286,7 +286,6 @@ export default class Deck {
   readonly height: number = 0;
   // Allows attaching arbitrary data to the instance
   readonly userData: Record<string, any> = {};
-  readonly gl: WebGLRenderingContext | null = null;
 
   protected canvas: HTMLCanvasElement | null = null;
   protected viewManager: ViewManager | null = null;
@@ -521,7 +520,9 @@ export default class Deck {
       return;
     }
     // Check if we need to redraw
-    const redrawReason = this.needsRedraw({clearRedrawFlags: true}) || reason;
+    let redrawReason = this.needsRedraw({clearRedrawFlags: true});
+    // User-supplied should take precedent, however the redraw flags get cleared regardless
+    redrawReason = reason || redrawReason;
 
     if (!redrawReason) {
       return;
@@ -533,6 +534,11 @@ export default class Deck {
     } else {
       this._drawLayers(redrawReason);
     }
+  }
+
+  /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
+  get isInitialized(): boolean {
+    return this.viewManager !== null;
   }
 
   /** Get a list of views that are currently rendered */
@@ -647,12 +653,15 @@ export default class Deck {
     statKey: string,
     opts: (PickByPointOptions | PickByRectOptions) & {layerIds?: string[]}
   ) {
+    assert(this.deckPicker);
+
     const {stats} = this;
 
     stats.get('Pick Count').incrementCount();
     stats.get(statKey).timeStart();
 
-    const infos = this.deckPicker![method]({
+    const infos = this.deckPicker[method]({
+      // layerManager, viewManager and effectManager are always defined if deckPicker is
       layers: this.layerManager!.getLayers(opts),
       views: this.viewManager!.getViews(),
       viewports: this.getViewports(opts),

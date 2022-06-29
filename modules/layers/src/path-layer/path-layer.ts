@@ -34,7 +34,8 @@ import type {
   Unit,
   UpdateParameters,
   GetPickingInfoParams,
-  PickingInfo
+  PickingInfo,
+  DefaultProps
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
 
@@ -99,13 +100,17 @@ type _PathLayerProps<DataT> = {
    * @default 1
    */
   getWidth?: Accessor<DataT, number | number[]>;
+  /**
+   * @deprecated Use `jointRounded` and `capRounded` instead
+   */
+  rounded?: boolean;
 };
 
-export type PathLayerProps<DataT> = _PathLayerProps<DataT> & LayerProps<DataT>;
+export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps<DataT>;
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<PathLayerProps> = {
   widthUnits: 'meters',
   widthScale: {type: 'number', min: 0, value: 1},
   widthMinPixels: {type: 'number', min: 0, value: 0},
@@ -130,6 +135,7 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
+/** Render lists of coordinate points as extruded polylines with mitering. */
 export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_PathLayerProps<DataT>>
 > {

@@ -34,7 +34,8 @@ const LINK_STYLE = {
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
 function getTooltip({tile}) {
-  return tile && `tile: x: ${tile.x}, y: ${tile.y}, z: ${tile.z}`;
+  const {x, y, z} = tile.index;
+  return tile && `tile: x: ${x}, y: ${y}, z: ${z}`;
 }
 
 export default function App({showBorder = false, onTilesLoad = null}) {

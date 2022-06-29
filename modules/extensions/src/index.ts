@@ -8,3 +8,11 @@ export {default as MaskExtension} from './mask/mask';
 
 // Shader module
 export {default as project64} from './fp64/project64';
+
+// Types
+export type {BrushingExtensionProps} from './brushing/brushing';
+export type {DataFilterExtensionProps} from './data-filter/data-filter';
+export type {PathStyleExtensionProps} from './path-style/path-style';
+export type {FillStyleExtensionProps} from './fill-style/fill-style';
+export type {ClipExtensionProps} from './clip/clip';
+export type {MaskExtensionProps} from './mask/mask';

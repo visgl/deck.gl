@@ -8,9 +8,7 @@ import {CPUGridLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # CPUGridLayer
 
-The `CPUGridLayer` renders a grid heatmap based on an array of inputs.
-It takes the constant cell size and aggregates input objects into cells. The color
-and height of a cell are determined based on the objects it contains. Aggregation is performed on CPU.
+The `CPUGridLayer` aggregates data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. Aggregation is performed on CPU.
 
 `CPUGridLayer` is one of the sublayers for [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md), and is provided to customize CPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md) is recommended.
 

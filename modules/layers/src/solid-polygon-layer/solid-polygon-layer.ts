@@ -32,14 +32,15 @@ import fs from './solid-polygon-layer-fragment.glsl';
 import type {
   LayerProps,
   Color,
+  Material,
   Accessor,
   AccessorFunction,
   UpdateParameters,
   GetPickingInfoParams,
-  PickingInfo
+  PickingInfo,
+  DefaultProps
 } from '@deck.gl/core';
 import type {PolygonGeometry} from './polygon';
-import type {MaterialProps} from '../types';
 
 type _SolidPolygonLayerProps<DataT> = {
   /** Whether to fill the polygons
@@ -72,22 +73,35 @@ type _SolidPolygonLayerProps<DataT> = {
 
   /** Polygon geometry accessor. */
   getPolygon?: AccessorFunction<DataT, PolygonGeometry>;
-  /** Extrusion height accessor. */
+  /** Extrusion height accessor.
+   * @default 1000
+   */
   getElevation?: Accessor<DataT, number>;
-  /** Fill color accessor. */
+  /** Fill color accessor.
+   * @default [0, 0, 0, 255]
+   */
   getFillColor?: Accessor<DataT, Color>;
-  /** Wireframe color accessor. */
+  /** Stroke color accessor.
+   * @default [0, 0, 0, 255]
+   */
   getLineColor?: Accessor<DataT, Color>;
 
-  /** Optional settings for 'lighting' shader module */
-  material?: boolean | MaterialProps;
+  /**
+   * Material settings for lighting effect. Applies if `extruded: true`
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
+   */
+  material?: Material;
 };
 
-export type SolidPolygonLayerProps<DataT> = _SolidPolygonLayerProps<DataT> & LayerProps<DataT>;
+/** Render filled and/or extruded polygons. */
+export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> &
+  LayerProps<DataT>;
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   filled: true,
   extruded: false,
   wireframe: false,

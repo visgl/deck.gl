@@ -17,6 +17,7 @@ export {default as SFTrips} from '../data/sf.trips';
 export {default as iconAtlas} from '../data/icon-atlas.json';
 export {default as quadkeys} from '../data/sf.quadkeys.json';
 export {default as s2cells} from '../data/sf.s2cells.json';
+export {default as geohashes} from '../data/sf.geohashes.json';
 export {choropleths};
 
 export const positionOrigin = [-122.42694203247012, 37.751537058389985];

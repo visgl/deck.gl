@@ -29,7 +29,8 @@ import {
   AccessorFunction,
   Position,
   Accessor,
-  Color
+  Color,
+  DefaultProps
 } from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
@@ -38,9 +39,9 @@ import {Model, Geometry} from '@luma.gl/core';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<ArcLayerProps> = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -120,7 +121,7 @@ type _ArcLayerProps<DataT> = {
    * The line width of each object, in units specified by `widthUnits`.
    * @default 1
    */
-  getWidth?: Accessor<DataT, Color>;
+  getWidth?: Accessor<DataT, number>;
 
   /**
    * Multiplier of layer height. `0` will make the layer flat.
@@ -135,7 +136,7 @@ type _ArcLayerProps<DataT> = {
   getTilt?: Accessor<DataT, number>;
 };
 
-/** The Arc Layer renders raised arcs joining pairs of source and target points. */
+/** Render raised arcs joining pairs of source and target coordinates. */
 export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_ArcLayerProps<DataT>>
 > {

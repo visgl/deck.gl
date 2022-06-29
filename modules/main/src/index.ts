@@ -131,7 +131,8 @@ export {
   TripsLayer,
   Tile3DLayer,
   TerrainLayer,
-  MVTLayer
+  MVTLayer,
+  GeohashLayer
 } from '@deck.gl/geo-layers';
 
 export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
@@ -200,3 +201,5 @@ export type {
 } from '@deck.gl/aggregation-layers';
 
 export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';

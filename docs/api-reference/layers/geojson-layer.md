@@ -8,10 +8,9 @@ import {GeoJsonLayerDemo} from 'website-components/doc-demos/layers';
 
 # GeoJsonLayer
 
-The GeoJsonLayer takes in [GeoJSON](http://geojson.org) formatted data and
-renders it as interactive polygons, lines and points (circles, icons and/or texts).
+The `GeoJsonLayer` renders [GeoJSON](http://geojson.org) formatted data as polygons, lines and points (circles, icons and/or texts).
 
-GeoJsonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md). See the [sub layers](#sub-layers) that it renders.
+`GeoJsonLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md). See the [sub layers](#sub-layers) that it renders.
 
 ```js
 import DeckGL from '@deck.gl/react';

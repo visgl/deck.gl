@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@googlemaps/react-wrapper": "^1.1.32",
-    "deck.gl": "^8.7.0-beta.6",
+    "deck.gl": "^8.8.0-beta.2",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"
   },

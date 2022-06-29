@@ -28,7 +28,8 @@ import {
   Layer,
   log,
   Position,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
@@ -40,7 +41,7 @@ const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
 const DEFAULT_THRESHOLD = 1;
 
-const defaultProps = {
+const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
@@ -136,6 +137,8 @@ export type _ContourLayerProps<DataT> = {
    */
   getWeight?: Accessor<DataT, number>;
 };
+
+/** Aggregate data into iso-lines or iso-bands for a given threshold and cell size. */
 export default class ContourLayer<DataT = any, ExtraPropsT = {}> extends GridAggregationLayer<
   ExtraPropsT & Required<_ContourLayerProps<DataT>>
 > {

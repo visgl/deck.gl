@@ -356,30 +356,6 @@ async function _fetchDataUrl({
   return {url, accessToken, mapFormat, metadata};
 }
 
-export async function getData({
-  type,
-  source,
-  connection,
-  credentials,
-  geoColumn,
-  columns,
-  format,
-  clientId
-}: FetchLayerDataParams) {
-  log.deprecated('getData', 'fetchLayerData')();
-  const layerData = await fetchLayerData({
-    type,
-    source,
-    connection,
-    credentials,
-    geoColumn,
-    columns,
-    format,
-    clientId
-  });
-  return layerData.data;
-}
-
 /* global clearInterval, setInterval, URL */
 async function _fetchMapDataset(
   dataset,

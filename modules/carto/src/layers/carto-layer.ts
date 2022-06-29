@@ -1,13 +1,18 @@
-import {CompositeLayer, Layer, log} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Layer,
+  log,
+  CompositeLayerProps,
+  LayerProps,
+  ChangeFlags
+} from '@deck.gl/core';
 import CartoTileLayer from './carto-tile-layer';
 import H3TileLayer from './h3-tile-layer';
-import QuadkeyTileLayer from './quadkey-tile-layer';
+import QuadbinTileLayer from './quadbin-tile-layer';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
 import {
   COLUMNS_SUPPORT,
-  Format,
   FORMATS,
   GEO_COLUMN_SUPPORT,
   MapType,
@@ -21,8 +26,6 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {CompositeLayerProps, LayerProps} from 'modules/core/src/types/layer-props';
-import {ChangeFlags} from 'modules/core/src/lib/layer-state';
 import {FetchLayerDataResult} from '../api/maps-v3-client';
 import {assert} from '../utils';
 
@@ -62,7 +65,7 @@ const defaultProps = {
   // (String, optional): aggregration SQL expression. Only used for spatial index datasets
   aggregationExp: null,
 
-  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
+  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
   aggregationResLevel: null
 };
 
@@ -94,18 +97,9 @@ type _CartoLayerProps = {
   connection?: string;
 
   /**
-   * Use to override the default data format.
-   *
-   * Only supported when apiVersion is `API_VERSIONS.V3`.
-   *
-   * Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`.
-   */
-  format?: Format;
-
-  /**
    * Use to override the default tile data format.
    *
-   * Only supported when apiVersion is `API_VERSIONS.V3` and format is `FORMATS.TILEJSON`.
+   * Only supported when apiVersion is `API_VERSIONS.V3`.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
    */
@@ -151,6 +145,12 @@ type _CartoLayerProps = {
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
+
+  /** Aggregration SQL expression. Only used for spatial index datasets **/
+  aggregationExp?: string;
+
+  /** Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
+  aggregationResLevel?: number;
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
@@ -222,9 +222,10 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
+      props.aggregationExp !== oldProps.aggregationExp ||
+      props.aggregationResLevel !== oldProps.aggregationResLevel ||
       props.connection !== oldProps.connection ||
       props.geoColumn !== oldProps.geoColumn ||
-      props.format !== oldProps.format ||
       props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
       JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
@@ -255,7 +256,9 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
           clientId,
           credentials: credentials as CloudNativeCredentials,
           connection,
-          ...rest
+          ...rest,
+          // CartoLayer only supports tiled output from v8.8, force data format
+          format: FORMATS.TILEJSON
         });
       }
 
@@ -277,7 +280,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
   _getSubLayerAndProps(): [any, LayerProps] {
     assert(this.state);
 
-    const {data, format, apiVersion} = this.state;
+    const {data, apiVersion} = this.state;
 
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -289,26 +292,21 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       return [MVTLayer, props];
     }
 
-    if (format === FORMATS.TILEJSON) {
-      /* global URL */
-      const tileUrl = new URL(data.tiles[0]);
+    /* global URL */
+    const tileUrl = new URL(data.tiles[0]);
 
-      props.formatTiles =
-        props.formatTiles ||
-        (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
-        TILE_FORMATS.MVT;
+    props.formatTiles =
+      props.formatTiles ||
+      (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
+      TILE_FORMATS.MVT;
 
-      if (data.scheme === 'h3') {
-        return [H3TileLayer, props];
-      }
-      if (data.scheme === 'quadkey') {
-        return [QuadkeyTileLayer, props];
-      }
-      return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
+    if (data.scheme === 'h3') {
+      return [H3TileLayer, props];
     }
-
-    // It's a geojson layer
-    return [GeoJsonLayer, props];
+    if (data.scheme === 'quadbin') {
+      return [QuadbinTileLayer, props];
+    }
+    return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
   }
 
   renderLayers(): Layer | null {

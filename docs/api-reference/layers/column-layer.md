@@ -10,7 +10,7 @@ import {ColumnLayerDemo} from 'website-components/doc-demos/layers';
 
 > This is the primitive layer rendered by [HexagonLayer](/docs/api-reference/aggregation-layers/hexagon-layer.md) after aggregation. Unlike the HexagonLayer, it renders one column for each data object.
 
-The ColumnLayer can be used to render a heatmap of vertical cylinders. It renders a tessellated regular polygon centered at each given position (a "disk"), and extrude it in 3d.
+The `ColumnLayer` renders extruded cylinders (tessellated regular polygons) at given coordinates.
 
 ```js
 import DeckGL from '@deck.gl/react';
