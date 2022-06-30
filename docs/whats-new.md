@@ -28,7 +28,7 @@ If you are using react-map-gl v7, this is the only solution to use deck.gl with 
 
 ### `@deck.gl/carto`
 
-CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin).
+CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin). More info [here](/docs/api-reference/carto/carto-layer#spatial-index-data).
 
 ### Enhancements
 
