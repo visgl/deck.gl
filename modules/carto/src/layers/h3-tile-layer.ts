@@ -92,6 +92,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         // @ts-expect-error Tileset2D should be generic over TileIndex
         TilesetClass: H3Tileset2D,
         renderSubLayers,
+        // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
         minZoom: minresolution,
         maxZoom: maxresolution
       })
