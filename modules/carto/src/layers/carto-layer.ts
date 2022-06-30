@@ -62,10 +62,10 @@ const defaultProps = {
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null},
 
-  // (String, optional): aggregration SQL expression. Only used for spatial index datasets
+  // (String, optional): aggregation SQL expression. Only used for spatial index datasets
   aggregationExp: null,
 
-  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
+  // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
   aggregationResLevel: null
 };
 
@@ -146,10 +146,10 @@ type _CartoLayerProps = {
 
   clientId?: string;
 
-  /** Aggregration SQL expression. Only used for spatial index datasets **/
+  /** Aggregation SQL expression. Only used for spatial index datasets **/
   aggregationExp?: string;
 
-  /** Aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
+  /** Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
   aggregationResLevel?: number;
 };
 
