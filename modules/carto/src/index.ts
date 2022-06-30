@@ -3,6 +3,10 @@ export {default as CartoLayer} from './layers/carto-layer';
 export {default as _CartoTileLayer} from './layers/carto-tile-layer';
 export {default as _H3TileLayer} from './layers/h3-tile-layer';
 export {default as _QuadbinTileLayer} from './layers/quadbin-tile-layer';
+export {
+  tileToQuadbin as _tileToQuadbin,
+  quadbinToTile as _quadbinToTile
+} from './layers/quadbin-utils';
 export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
