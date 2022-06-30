@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-beta.5] - Jun 30 2022
+
+- CARTO: Handle minZoom&maxZoom in H3TileLayer (#7108)
+- CARTO: document use of spatial indices (#7107)
+- CARTO: Remove CARTO 2 for documentation (#7106)
+- CARTO - H3Tileset handles large latitude span (#7103)
+- CARTO: Add QuadbinTileLayer (#7095)
+- Add annotation to all layer classes (#7099)
+- Resolve async prop to null if fetch is undefined (#7098)
+
 #### deck.gl [8.8.0-beta.4] - Jun 27 2022
 
 - Fix arcgis integration (#7092)
