@@ -16,7 +16,7 @@ In v8.x, the types will not be exposed by default to prevent any typing errors f
 
 The [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
 
-Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a cusom implementation of [Tileset2D](/docs/api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
+Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](/docs/api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
 
 Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](/docs/upgrade-guide.md) for details.
 
@@ -28,7 +28,13 @@ If you are using react-map-gl v7, this is the only solution to use deck.gl with 
 
 ### `@deck.gl/carto`
 
-- CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin).
+CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin).
+
+### Enhancements
+
+- Views now accept a [padding](/docs/api-reference/core/view.md#padding) option to offset the focal point.
+- Improved performance when there are many invisible layers
+- Improved picking performance when using the `TileLayer`
 
 ## deck.gl v8.7
 
