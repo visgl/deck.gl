@@ -12,10 +12,10 @@ rm -rf ./.cache ./public
 
 case $MODE in
   "prod")
-    gatsby build
+    NODE_OPTIONS=--max-old-space-size=4096 gatsby build
     ;;
   "staging")
-    gatsby build --prefix-paths
+    NODE_OPTIONS=--max-old-space-size=4096 gatsby build --prefix-paths
     ;;
 esac
 
