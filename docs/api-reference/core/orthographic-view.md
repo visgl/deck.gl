@@ -58,4 +58,4 @@ Visit the [OrthographicController](/docs/api-reference/core/orthographic-control
 
 ## Source
 
-[modules/core/src/views/orthographic-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orthographic-view.js)
+[modules/core/src/views/orthographic-view.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/views/orthographic-view.js)

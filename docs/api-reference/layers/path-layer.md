@@ -239,4 +239,4 @@ new PathLayer({
 
 ## Source
 
-[modules/layers/src/path-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/path-layer)
+[modules/layers/src/path-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/layers/src/path-layer)

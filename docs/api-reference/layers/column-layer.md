@@ -243,4 +243,4 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 
 ## Source
 
-[modules/layers/src/column-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer)
+[modules/layers/src/column-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/layers/src/column-layer)

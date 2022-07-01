@@ -56,4 +56,4 @@ Array of [PointLight](/docs/api-reference/core/point-light.md) source which emit
 
 ## Source
 
-[/modules/core/src/effects/lighting/lighting-effect.js](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/lighting-effect.js)
+[/modules/core/src/effects/lighting/lighting-effect.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/effects/lighting/lighting-effect.js)

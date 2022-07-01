@@ -480,4 +480,4 @@ It is recommended to set `fontAtlasCacheLimit` once in your application since it
 
 ## Source
 
-[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/text-layer)
+[modules/layers/src/text-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/layers/src/text-layer)

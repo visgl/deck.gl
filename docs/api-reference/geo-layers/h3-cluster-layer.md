@@ -107,4 +107,4 @@ The `H3ClusterLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)
+[modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)

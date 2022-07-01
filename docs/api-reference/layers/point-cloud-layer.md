@@ -135,4 +135,4 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 ## Source
 
-[modules/layers/src/point-cloud-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/point-cloud-layer)
+[modules/layers/src/point-cloud-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/layers/src/point-cloud-layer)
