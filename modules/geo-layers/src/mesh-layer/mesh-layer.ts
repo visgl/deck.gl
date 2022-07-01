@@ -137,7 +137,7 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     const unlit = Boolean(
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
-    
+
     // @ts-expect-error - Need to add delete method to the luma gltf-material-parser.d.ts
     this.state.materialParser?.delete();
 

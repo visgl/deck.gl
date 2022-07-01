@@ -44,7 +44,7 @@ import fs from './simple-mesh-layer-fragment.glsl';
 import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import { GLTFMaterialParser } from '@luma.gl/experimental';
+import {GLTFMaterialParser} from '@luma.gl/experimental';
 
 function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
