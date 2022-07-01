@@ -387,6 +387,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       angle: (angle / 180) * Math.PI,
       offset,
       extruded,
+      stroked,
       coverage,
       elevationScale,
       edgeDistance,

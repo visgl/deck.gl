@@ -40,6 +40,7 @@ uniform float radius;
 uniform float angle;
 uniform vec2 offset;
 uniform bool extruded;
+uniform bool stroked;
 uniform bool isStroke;
 uniform float coverage;
 uniform float elevationScale;
@@ -71,11 +72,16 @@ void main(void) {
 
   if (extruded) {
     elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
-  } else if (isStroke) {
+  } else if (stroked) {
     float widthPixels = clamp(
       project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
       widthMinPixels, widthMaxPixels) / 2.0;
-    strokeOffsetRatio -= sign(positions.z) * project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
+    float halfOffset = project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
+    if (isStroke) {
+      strokeOffsetRatio -= sign(positions.z) * halfOffset;
+    } else {
+      strokeOffsetRatio -= halfOffset;
+    }
   }
 
   // if alpha == 0.0 or z < 0.0, do not render element
