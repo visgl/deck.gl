@@ -2,16 +2,20 @@
 
 `CartoLayer` is the layer to visualize data using the CARTO Maps API.
 
-## Usage CARTO 3
+## Usage 
+
+### Geometry data
+
+By default the `CartoLayer` expects the data to be described using longitude & latitude. Tiled data will be used, with the format depending on `formatTiles`.
+A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
 
 setDefaultCredentials({
-  apiVersion: API_VERSIONS.V3
-  apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
-  accessToken: 'XXX',
+  accessToken: 'XXX'
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com' // Default value (optional)
 });
 
 function App({viewState}) {
@@ -29,27 +33,37 @@ function App({viewState}) {
 }
 ```
 
-## Usage CARTO 2
+### Spatial index data
+
+The CARTO platform supports storing data using a spatial index. The `geoColumn` prop is used to specify a database column that contains geographic data. When `geoColumn` has one of the following values, the data will be interpreted as a spatial index:
+
+- `h3` [H3](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#h3) indexing system will be used
+- `quadbin` [Quadbin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin) indexing system will be used
+
+Tiled data will be used, with the layer created depending on the spatial index used:
+
+- `h3` [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md) will be created and all properties will be inherited.
+- `quadbin` [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md) will be created and all properties will be inherited. _Note the `getQuadkey` accessor is replaced with `getQuadbin`_.
 
 ```js
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, setDefaultCredentials, MAP_TYPES, API_VERSIONS} from '@deck.gl/carto';
 
 setDefaultCredentials({
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'default_public'
+  accessToken: 'XXX'
+  apiBaseUrl: 'https://gcp-us-east1.api.carto.com' // Default value (optional)
 });
 
 function App({viewState}) {
   const layer = new CartoLayer({
-    type: MAP_TYPES.QUERY,
-    data: 'SELECT * FROM world_population_2015',
-    pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 125],
+    type: MAP_TYPES.TABLE,
+    connection: 'bigquery',
+    data: 'cartobq.testtables.h3',
+    geoColumn: 'h3',
+    aggregationExp: 'AVG(population) as population',
     getFillColor: [238, 77, 90],
-    lineWidthMinPixels: 1
-  });
+    getElevation: d => d.properties.population
+  })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
@@ -89,9 +103,14 @@ new deck.carto.CartoLayer({});
 
 ## Properties
 
-Inherits the properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md).
+In all cases the properties of [`TileLayer`](/docs/api-reference/geo-layers/tile-layer.md) will be inherited.
 
-Additional properties may be available depending on the configuration. For details see: [Sublayer details](/docs/api-reference/carto/carto-layer#sublayer-details).
+Depending on the datasource, additional properties will be inherited from the created sublayer:
+
+- For the `h3` spatial index: [`H3HexagonLayer`](/docs/api-reference/geo-layers/h3-hexagon-layer.md).
+- For the `quadbin` spatial index: [`QuadkeyLayer`](/docs/api-reference/geo-layers/quadkey-layer.md). _Note the `getQuadkey` accessor is replaced with `getQuadbin`_.
+- Otherwise (longitude/latitude): [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
+
 
 ##### `data` (String)
 
@@ -105,7 +124,7 @@ Required. Data type. Possible values are:
 - `MAP_TYPES.TILESET`, if `data` is a tileset name.
 - `MAP_TYPES.TABLE`, if `data` is a dataset name. Only supported with API v3.
 
-##### `connection` (String)
+##### `connection` (String, optional)
 
 Required when `apiVersion` is `API_VERSIONS.V3`.
 
@@ -117,13 +136,13 @@ Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.T
 
 ##### `geoColumn` (String, optional)
 
-Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `type` is `MAP_TYPES.TABLE`.
 
 Name of the `geo_column` in the CARTO platform. Use this override the default column ('geom'), from which the geometry information should be fetched.
 
 ##### `columns` (Array, optional)
 
-Only supported when `apiVersion` is `API_VERSIONS.V3` and `type` is `MAP_TYPES.TABLE`.
+Only supported when `type` is `MAP_TYPES.TABLE`.
 
 Names of columns to fetch. By default, all columns are fetched.
 
@@ -136,6 +155,14 @@ Optional. A string pointing to a unique attribute at the result of the query. A 
 ##### `credentials` (Object)
 
 Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
+
+##### `aggregationExp` (String, optional)
+
+Optional. Aggregation SQL expression. Only used for spatial index datasets.
+
+##### `aggregationResLevel` (Number, optional)
+
+Optional. Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
 
 ### Callbacks
 
@@ -158,18 +185,6 @@ Receives arguments:
 Receives arguments:
 
 - `error` (`Error`)
-
-### SubLayers
-
-The `CartoLayer` is a [`CompositeLayer`](/docs/api-reference/core/composite-layer.md), and will generate different sublayers depending on the configuration. In all cases, properties of the [`GeoJsonLayer`](/docs/api-reference/layers/geojson-layer.md) will be inherited.
-
-#### API v1 & v2
-
-`CartoLayer` works with the different CARTO Maps API versions (v1, v2, and v3). When using version v1 and v2, the layer always works with vector tiles so it inherits all properties from [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md).
-
-#### API v3
-
-Tiled data will be used, depending on `formatTiles`. A [`MVTLayer`](/docs/api-reference/geo-layers/mvt-layer.md) will be created and all properties will be inherited.
 
 ## Source
 

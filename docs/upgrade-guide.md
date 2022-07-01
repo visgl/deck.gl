@@ -2,15 +2,17 @@
 
 ## Upgrading from deck.gl v8.7 to v8.8
 
-### Layers
-
 #### Breaking changes
 
-- `Tile` class in `TileLayer` no longer has `x`, `y`, and `z` as top level properties, but instead an `index` property with shape `{x, y, z}`.
+- In order to generalize the `TileLayer` to work with non-OSM indexing systems, the `Tile` class no longer has `x`, `y`, and `z` as top level properties, but instead an `index` property with shape `{x, y, z}`. This affects the following callback props:
+  + `getTileData({x, y, z, ...opts})` --> `getTileData({index: {x, y, z}, ...opts})`
+  + `onViewportLoad(tiles)`
+  + `onTileLoad(tile)`
+  + `onTileUnload(tile)`
+  + `onTileError(tile)`
+  + `pickingInfo.tile` returned by `onHover`, `onClick` etc.
+- The base `Effect` class is removed. Custom effects should implement the new `interface Effect` in TypeScript.
 
-#### Core
-
-- The base `Effect` class is removed. It has been migrated to `interface Effect` in TypeScript.
 
 #### CARTO
 
