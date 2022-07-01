@@ -19,6 +19,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.0] - Jun 30 2022
+
+- Official TypeScript typings are now available for public preview
+- `TileLayer` supports custom indexing systems
+- The `@deck.gl/mapbox` module now exports a new class `MapboxOverlay`, which implements Mapbox GL JS's `IControl` API. This control supports both overlaid and interleaved rendering modes.
+- CartoLayer includes native support to work with spatial indexes like `H3` or `QuadBin`
+- Views now accept a `padding` option to offset the focal point
+- Improved performance when there are many invisible layers
+- Improved picking performance when using the `TileLayer`
+
+Visit the [upgrade guide](https://deck.gl/docs/upgrade-guide) for deprecations and breacking changes.
+
 ### deck.gl v8.8 Prereleases
 
 #### deck.gl [8.8.0-beta.5] - Jun 30 2022
