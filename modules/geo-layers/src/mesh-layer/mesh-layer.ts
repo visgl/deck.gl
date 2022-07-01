@@ -3,7 +3,7 @@ import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
-import type {UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
@@ -137,7 +137,8 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     const unlit = Boolean(
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
-
+    
+    // @ts-expect-error - Need to add delete method to the luma gltf-material-parser.d.ts
     this.state.materialParser?.delete();
 
     return new GLTFMaterialParser(this.context.gl, {
@@ -167,8 +168,9 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     attribute.value = value;
   }
 
-  finalizeState() {
-    super.finalizeState();
+  finalizeState(context: LayerContext) {
+    super.finalizeState(context);
+    // @ts-expect-error - Need to add delete method to the luma gltf-material-parser.d.ts
     this.state.materialParser?.delete();
     this.setState({materialParser: null});
   }
