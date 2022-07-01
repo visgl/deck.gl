@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.1] - Jul 1 2022
+
+- chore(mesh-layer): cleanup material parser textures (#6764)
+- Fix z fighting in ColumnLayer when using 2d stroke (#7116)
+
 #### deck.gl [8.8.0] - Jun 30 2022
 
 - Official TypeScript typings are now available for public preview
