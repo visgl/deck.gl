@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.3] - Jul 5 2022
+
+- Fix error when using MapboxLayer stand along (#7123)
+
 #### deck.gl [8.8.2] - Jul 2 2022
 
 - [ts] Fix broken imports (#7117)
