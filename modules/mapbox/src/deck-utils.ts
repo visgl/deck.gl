@@ -47,6 +47,8 @@ export function getDeckInstance({
     views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };
 
+  let deckInstance: Deck;
+
   if (!deck || deck.props.gl === gl) {
     // deck is using the WebGLContext created by mapbox
     // block deck from setting the canvas size
@@ -59,10 +61,9 @@ export function getDeckInstance({
     });
     // If using the WebGLContext created by deck (React use case), we use deck's viewState to drive the map.
     // Otherwise (pure JS use case), we use the map's viewState to drive deck.
-    map.on('move', () => onMapMove(deck!, map));
+    map.on('move', () => onMapMove(deckInstance, map));
   }
 
-  let deckInstance: Deck;
   if (deck) {
     deckInstance = deck;
     deck.setProps(deckProps);
