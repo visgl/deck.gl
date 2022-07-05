@@ -10,7 +10,7 @@
   "dependencies": {
     "@deck.gl/core": "^8.8.0-beta.2",
     "@deck.gl/layers": "^8.8.0-beta.2",
-    "mapbox-gl": "^1.0.0"
+    "mapbox-gl": "^1.13.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",
