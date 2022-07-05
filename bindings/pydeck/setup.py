@@ -214,7 +214,6 @@ if __name__ == "__main__":
                 "traitlets>=4.3.2",
                 'ipykernel>=5.1.2;python_version>="3.4"',
             ],
-            "testing": ["pytest"],
         },
         install_requires=[
             "jinja2>=2.10.1",

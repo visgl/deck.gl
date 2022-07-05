@@ -55,14 +55,12 @@ bump-version:
 
 publish-pypi:
 	rm -rf ./dist/*
-	pip install .
 	python setup.py sdist bdist_wheel
 	pip install twine
 	python -m twine upload dist/*
 
 publish-test-pypi:
 	rm -rf ./dist/*
-	pip install .
 	python setup.py sdist bdist_wheel
 	pip install twine
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
