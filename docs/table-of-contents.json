@@ -244,7 +244,8 @@
           "title": "@deck.gl/mapbox",
           "entries": [
             {"entry": "docs/api-reference/mapbox/overview"},
-            {"entry": "docs/api-reference/mapbox/mapbox-layer"}
+            {"entry": "docs/api-reference/mapbox/mapbox-layer"},
+            {"entry": "docs/api-reference/mapbox/mapbox-overlay"}
           ]
         },
         {
