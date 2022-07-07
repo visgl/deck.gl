@@ -1,9 +1,13 @@
+import {Feature} from 'geojson';
+
 const ALLOWED_ATTR_TYPES = Object.freeze(['function', 'string']);
 
-type Row = {properties: Record<string, unknown>};
-export type AttributeSelector = string | ((d: Row) => unknown);
+export type AttributeSelector<DataT = Feature, OutT = any> = string | ((d: DataT) => OutT);
 
-export function getAttrValue(attr: AttributeSelector, d: Row): unknown {
+export function getAttrValue<DataT = Feature, OutT = any>(
+  attr: string | AttributeSelector<DataT, OutT>,
+  d: DataT
+): OutT {
   assert(typeof d === 'object', 'Expected "data" to be an object');
   assert(ALLOWED_ATTR_TYPES.includes(typeof attr), 'Expected "attr" to be a function or string');
 
@@ -11,7 +15,7 @@ export function getAttrValue(attr: AttributeSelector, d: Row): unknown {
   if (typeof attr === 'function') {
     return attr(d);
   }
-  return d.properties[attr];
+  return (d as unknown as Feature)?.properties?.[attr] as OutT;
 }
 
 export function assert(condition, message = ''): asserts condition {
