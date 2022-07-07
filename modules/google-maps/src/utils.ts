@@ -6,6 +6,16 @@ import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
 
+type UserData = {
+  _googleMap: google.maps.Map;
+  _eventListeners: {
+    click: google.maps.MapsEventListener;
+    dblclick: google.maps.MapsEventListener;
+    mousemove: google.maps.MapsEventListener;
+    mouseout: google.maps.MapsEventListener;
+  };
+};
+
 /**
  * Get a new deck instance
  * @param map (google.maps.Map) - The parent Map instance
@@ -19,7 +29,7 @@ export function createDeckInstance(
   props
 ): Deck {
   if (deck) {
-    if (deck.props.userData._googleMap === map) {
+    if (deck.userData._googleMap === map) {
       return deck;
     }
     // deck instance was created for a different map
@@ -43,13 +53,9 @@ export function createDeckInstance(
       latitude: 0,
       zoom: 1
     },
-    controller: false,
-    userData: {
-      _googleMap: map,
-      _eventListeners: eventListeners
-    }
+    controller: false
   });
-
+  
   // Register event listeners
   for (const eventType in eventListeners) {
     eventListeners[eventType] = map.addListener(eventType, evt =>
@@ -57,6 +63,10 @@ export function createDeckInstance(
     );
   }
 
+  // Attach userData directly to Deck instance
+  (deck.userData as UserData)._googleMap = map;
+  (deck.userData as UserData)._eventListeners = eventListeners;
+  
   return newDeck;
 }
 
@@ -84,7 +94,7 @@ function getContainer(
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck: Deck) {
-  const {_eventListeners: eventListeners} = deck.props.userData;
+  const {_eventListeners: eventListeners} = deck.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
