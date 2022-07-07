@@ -84,7 +84,7 @@ function getContainer(
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck: Deck) {
-  const {_eventListeners: eventListeners} = deck.userData;
+  const {_eventListeners: eventListeners} = deck.props.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
