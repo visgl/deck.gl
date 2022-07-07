@@ -19,7 +19,7 @@ export function createDeckInstance(
   props
 ): Deck {
   if (deck) {
-    if (deck.userData._googleMap === map) {
+    if (deck.props.userData._googleMap === map) {
       return deck;
     }
     // deck instance was created for a different map
