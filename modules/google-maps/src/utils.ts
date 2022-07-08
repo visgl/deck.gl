@@ -8,12 +8,7 @@ const MAX_LATITUDE = 85.05113;
 
 type UserData = {
   _googleMap: google.maps.Map;
-  _eventListeners: {
-    click: google.maps.MapsEventListener;
-    dblclick: google.maps.MapsEventListener;
-    mousemove: google.maps.MapsEventListener;
-    mouseout: google.maps.MapsEventListener;
-  };
+  _eventListeners: Record<string, google.maps.MapsEventListener>;
 };
 
 /**
