@@ -8,7 +8,7 @@ const MAX_LATITUDE = 85.05113;
 
 type UserData = {
   _googleMap: google.maps.Map;
-  _eventListeners: Record<string, google.maps.MapsEventListener>;
+  _eventListeners: Record<string, google.maps.MapsEventListener | null>;
 };
 
 /**
@@ -93,7 +93,10 @@ export function destroyDeckInstance(deck: Deck) {
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
-    eventListeners[eventType].remove();
+    // Check that event listener was set before trying to remove.
+    if (eventListeners[eventType]) {
+      eventListeners[eventType].remove();
+    }
   }
 
   deck.finalize();
