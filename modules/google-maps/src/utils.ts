@@ -50,7 +50,7 @@ export function createDeckInstance(
     },
     controller: false
   });
-  
+
   // Register event listeners
   for (const eventType in eventListeners) {
     eventListeners[eventType] = map.addListener(eventType, evt =>
@@ -61,7 +61,7 @@ export function createDeckInstance(
   // Attach userData directly to Deck instance
   (newDeck.userData as UserData)._googleMap = map;
   (newDeck.userData as UserData)._eventListeners = eventListeners;
-  
+
   return newDeck;
 }
 
