@@ -59,8 +59,8 @@ export function createDeckInstance(
   }
 
   // Attach userData directly to Deck instance
-  (deck.userData as UserData)._googleMap = map;
-  (deck.userData as UserData)._eventListeners = eventListeners;
+  (newDeck.userData as UserData)._googleMap = map;
+  (newDeck.userData as UserData)._eventListeners = eventListeners;
   
   return newDeck;
 }
