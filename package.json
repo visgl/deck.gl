@@ -21,7 +21,8 @@
   ],
   "resolutions": {
     "acorn": "7.4.1",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "puppeteer": "15.3.1"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
