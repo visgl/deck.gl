@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.4] - Jul 11 2022
+
+- Bump dependency versions (#7134)
+- Fix TRANSITION_EVENTS export (#7131)
+- Fixing issue where event listeners were not being removed after finalizing DeckGL when used with google maps (#7127)
+- [ts] Improve carto/style typings. (#7120)
+
 #### deck.gl [8.8.3] - Jul 5 2022
 
 - Fix error when using MapboxLayer stand along (#7123)
