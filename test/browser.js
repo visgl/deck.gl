@@ -45,19 +45,19 @@ test('deck.gl', t => {
   require('./modules');
 
   // Tests currently only work in browser
-  require('./modules/json/json-render.spec');
-  require('./modules/main/bundle');
-  require('./modules/aggregation-layers/utils/gpu-grid-aggregator.spec');
-  require('./modules/aggregation-layers/gpu-cpu-aggregator.spec');
-  require('./modules/aggregation-layers/gpu-grid-layer/gpu-grid-layer.spec');
-  require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
-  require('./modules/core/lib/pick-layers.spec');
+  // require('./modules/json/json-render.spec');
+  // require('./modules/main/bundle');
+  // require('./modules/aggregation-layers/utils/gpu-grid-aggregator.spec');
+  // require('./modules/aggregation-layers/gpu-cpu-aggregator.spec');
+  // require('./modules/aggregation-layers/gpu-grid-layer/gpu-grid-layer.spec');
+  // require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
+  // require('./modules/core/lib/pick-layers.spec');
 
   // Need to fake out h3 library in order for tests to run (see `main/bundle.ts`)
   window.h3 = {};
 
-  require('./render');
-  require('./interaction');
+  // require('./render');
+  // require('./interaction');
 
   t.end();
 });
