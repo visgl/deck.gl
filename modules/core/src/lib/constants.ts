@@ -57,10 +57,7 @@ export const COORDINATE_SYSTEM = {
   CARTESIAN: 0
 } as const;
 
-// We can't define enum COORDINATE_SYSTEM to use it as both type and value because
-// TypeScript emits reverse mapping for enums which adds integer keys to the object
-// project.glsl dynamically generates shader constant declarations from COORDINATE_SYSTEM and will break if the key is a number
-// TODO - Find a cleaner solution
+// Enums cannot be directly exported as they are not transpiled correctly into ES5, see https://github.com/visgl/deck.gl/issues/7130
 export type CoordinateSystem = -1 | 0 | 1 | 2 | 3;
 
 // Deprecated
