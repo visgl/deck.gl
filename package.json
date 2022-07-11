@@ -52,9 +52,9 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^3.2.0",
-    "@loaders.gl/polyfills": "^3.2.0",
-    "@luma.gl/test-utils": "^8.5.14",
+    "@loaders.gl/csv": "^3.2.5",
+    "@loaders.gl/polyfills": "^3.2.5",
+    "@luma.gl/test-utils": "^8.5.16",
     "@probe.gl/bench": "^3.5.0",
     "@probe.gl/test-utils": "^3.5.0",
     "@types/react": "^16.3.0",
