@@ -148,7 +148,7 @@ function copyNestedRing(
   /** size of a position, 2 (xy) or 3 (xyz) */
   size: number,
   /** modify polygon to be of the specified winding direction */
-  windingDirection: WINDING
+  windingDirection: number
 ): number {
   let targetIndex = targetStartIndex;
   const len = simplePolygon.length;
@@ -189,7 +189,7 @@ function copyFlatRing(
   srcStartIndex: number = 0,
   /** end index of the path in the positions array */
   srcEndIndex: number,
-  windingDirection: WINDING
+  windingDirection: number
 ): number {
   srcEndIndex = srcEndIndex || positions.length;
   const srcLength = srcEndIndex - srcStartIndex;
