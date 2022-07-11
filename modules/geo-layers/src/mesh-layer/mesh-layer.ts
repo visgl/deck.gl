@@ -138,7 +138,6 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
 
-    // @ts-expect-error - Need to add delete method to the luma gltf-material-parser.d.ts
     this.state.materialParser?.delete();
 
     return new GLTFMaterialParser(this.context.gl, {
@@ -170,7 +169,6 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    // @ts-expect-error - Need to add delete method to the luma gltf-material-parser.d.ts
     this.state.materialParser?.delete();
     this.setState({materialParser: null});
   }
