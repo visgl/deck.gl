@@ -7,11 +7,14 @@ import type {InteractionState} from './controller';
 
 const noop = () => {};
 
-export enum TRANSITION_EVENTS {
-  BREAK = 1,
-  SNAP_TO_END = 2,
-  IGNORE = 3
-}
+// Enums cannot be directly exported as they are not transpiled correctly into ES5, see https://github.com/visgl/deck.gl/issues/7130
+export const TRANSITION_EVENTS = {
+  BREAK: 1,
+  SNAP_TO_END: 2,
+  IGNORE: 3
+} as const;
+
+type TransitionEvent = 1 | 2 | 3;
 
 export type TransitionProps = {
   /** Transition duration in milliseconds, default value 0, implies no transition. When using `FlyToInterpolator`, it can also be set to `'auto'`. */
@@ -21,7 +24,7 @@ export type TransitionProps = {
   /** Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. */
   transitionEasing?: (t: number) => number;
   /** Controls how to process a new view state change that occurs during an existing transition. */
-  transitionInterruption?: TRANSITION_EVENTS;
+  transitionInterruption?: TransitionEvent;
   /** Callback fired when requested transition starts. */
   onTransitionStart?: (transition: Transition) => void;
   /** Callback fired when requested transition is interrupted. */
@@ -36,7 +39,7 @@ const DEFAULT_INTERRUPTION = TRANSITION_EVENTS.BREAK;
 type TransitionSettings = BaseTransitionSettings & {
   interpolator: TransitionInterpolator;
   easing: (t: number) => number;
-  interruption: TRANSITION_EVENTS;
+  interruption: TransitionEvent;
   startProps: Record<string, any>;
   endProps: Record<string, any>;
 };
