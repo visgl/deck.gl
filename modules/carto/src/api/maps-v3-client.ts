@@ -409,6 +409,26 @@ async function fillInMapDatasets(
   return await Promise.all(promises);
 }
 
+async function fillInTileStats(
+  {datasets, keplerMapConfig},
+  clientId: string,
+  credentials: CloudNativeCredentials
+) {
+  const {layers} = keplerMapConfig.config.visState;
+  for (const layer of layers) {
+    for (const channel of Object.keys(layer.visualChannels)) {
+      const attribute = layer.visualChannels[channel]?.name;
+      if (attribute) {
+        const datasetId = layer.config.dataId;
+        console.log('Need tilestats for', attribute, datasetId);
+      }
+    }
+  }
+
+  // const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
+  return; // await Promise.all(promises);
+}
+
 export async function fetchMap({
   cartoMapId,
   clientId,
@@ -477,6 +497,8 @@ export async function fetchMap({
 
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);
+
+  await fillInTileStats(map, clientId, localCreds);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}

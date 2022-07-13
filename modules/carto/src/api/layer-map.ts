@@ -113,7 +113,6 @@ export function getLayer(
   config,
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
-  // TODO rename to quadbin
   if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
     return getTileLayer(dataset);
   }
