@@ -20,7 +20,7 @@ import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 
 import CartoTileLayer from '../layers/carto-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
-import QuadkeyTileLayer from '../layers/quadkey-tile-layer';
+import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
 
@@ -114,7 +114,7 @@ export function getLayer(
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
   // TODO rename to quadbin
-  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadkey') {
+  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
     return getTileLayer(dataset);
   }
 
@@ -169,12 +169,12 @@ export function getLayer(
 export function layerFromTileDataset(
   formatTiles: string | null = TILE_FORMATS.MVT,
   scheme: string
-): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadkeyTileLayer {
+): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
   if (scheme === 'h3') {
     return H3TileLayer;
   }
-  if (scheme === 'quadkey') {
-    return QuadkeyTileLayer;
+  if (scheme === 'quadbin') {
+    return QuadbinTileLayer;
   }
   if (formatTiles === TILE_FORMATS.MVT) {
     return MVTLayer;
