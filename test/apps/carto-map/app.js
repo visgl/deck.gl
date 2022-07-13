@@ -6,10 +6,9 @@ import mapboxgl from 'mapbox-gl';
 // const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 // fetchMap({cartoMapId}).then(map => new Deck(map));
 
-const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
-setDefaultCredentials({
-  apiBaseUrl
-});
+const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
+setDefaultCredentials({apiBaseUrl});
 
 async function createMap(cartoMapId) {
   const deck = new Deck({canvas: 'deck-canvas'});
@@ -44,7 +43,8 @@ async function createMap(cartoMapId) {
 // Helper UI for dev
 const examples = [
   // Spatial index layers
-  '144ef6b5-4618-4f5b-9b57-de3e3ae57b90', // Only on ded-5
+  '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
+  '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
   '0899a359-cb70-428c-97cb-61d5ef46d985', // H3 & quadkey tilesets
 
   // Aggregation layers
@@ -74,7 +74,7 @@ const id = params.has('id') ? params.get('id') : examples[0];
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
 iframe.style.height = 'calc(50% + 20px)';
-iframe.src = `https://gcp-us-east1-05.dev.app.carto.com/map/${id}`;
+iframe.src = `${apiBaseUrl.replace('api', 'app')}/map/${id}`;
 document.body.appendChild(iframe);
 
 for (const e of examples) {
