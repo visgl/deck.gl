@@ -400,6 +400,21 @@ async function _fetchMapDataset(
   return true;
 }
 
+async function _fetchTilestats(
+  attribute,
+  dataset,
+  accessToken: string,
+  credentials: CloudNativeCredentials
+) {
+  const {connectionName: connection, geoColumn, source, type} = dataset;
+
+  // const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
+  const url = `https://gcp-us-east1.api.carto.com/v3/stats/${connection}/${source}/${attribute}`;
+  const stats = await requestData({url, format: FORMATS.JSON, accessToken});
+  console.log('STATS', stats);
+  return true;
+}
+
 async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
@@ -410,23 +425,25 @@ async function fillInMapDatasets(
 }
 
 async function fillInTileStats(
-  {datasets, keplerMapConfig},
-  clientId: string,
+  {datasets, keplerMapConfig, token},
   credentials: CloudNativeCredentials
 ) {
+  const attributes: {attribute?: string; dataset?: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
     for (const channel of Object.keys(layer.visualChannels)) {
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
-        const datasetId = layer.config.dataId;
-        console.log('Need tilestats for', attribute, datasetId);
+        const dataset = datasets.find(d => d.id === layer.config.dataId);
+        console.log('Need tilestats for', attribute, dataset);
+        attributes.push({attribute, dataset});
       }
     }
   }
-
-  // const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
-  return; // await Promise.all(promises);
+  const promises = attributes.map(({attribute, dataset}) =>
+    _fetchTilestats(attribute, dataset, token, credentials)
+  );
+  return await Promise.all(promises);
 }
 
 export async function fetchMap({
@@ -498,7 +515,7 @@ export async function fetchMap({
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);
 
-  await fillInTileStats(map, clientId, localCreds);
+  await fillInTileStats(map, localCreds);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}
