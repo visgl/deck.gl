@@ -208,9 +208,13 @@ function getTileLayer(dataset) {
   };
 }
 
-function domainFromAttribute(attribute, scaleType: SCALE_TYPE) {
+function domainFromAttribute(attribute, scaleType: SCALE_TYPE, scaleLength: number) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
     return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
+  }
+
+  if (scaleType === 'quantile' && attribute.quantiles) {
+    return attribute.quantiles[scaleLength];
   }
 
   let {min} = attribute;
@@ -236,12 +240,12 @@ function domainFromValues(values, scaleType: SCALE_TYPE) {
   return extent(values);
 }
 
-function calculateDomain(data, name, scaleType) {
+function calculateDomain(data, name, scaleType, scaleLength?) {
   if (data.tilestats) {
     // Tileset data type
     const {attributes} = data.tilestats.layers[0];
     const attribute = attributes.find(a => a.attribute === name);
-    return domainFromAttribute(attribute, scaleType);
+    return domainFromAttribute(attribute, scaleType, scaleLength);
   } else if (data.features) {
     // GeoJSON data type
     const values = data.features.map(({properties}) => properties[name]);
@@ -296,7 +300,7 @@ export function getColorAccessor(
       scaleColor.push(color);
     });
   } else {
-    domain = calculateDomain(data, name, scaleType);
+    domain = calculateDomain(data, name, scaleType, colors.length);
     scaleColor = colors;
   }
 
