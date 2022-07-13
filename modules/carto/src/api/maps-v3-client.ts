@@ -412,6 +412,11 @@ async function _fetchTilestats(
   const url = `https://gcp-us-east1.api.carto.com/v3/stats/${connection}/${source}/${attribute}`;
   const stats = await requestData({url, format: FORMATS.JSON, accessToken});
   console.log('STATS', stats);
+
+  // Replace tilestats for attribute with value from API
+  const {attributes} = dataset.data.tilestats.layers[0];
+  const index = attributes.findIndex(d => d.attribute === attribute);
+  attributes[index] = stats;
   return true;
 }
 
