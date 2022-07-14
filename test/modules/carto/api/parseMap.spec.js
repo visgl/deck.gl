@@ -91,11 +91,11 @@ const DATASETS = [
     type: 'tileset'
   },
   {
-    id: 'DATA_TILESET_QUADKEY_ID',
+    id: 'DATA_TILESET_QUADBIN_ID',
     data: {
-      scheme: 'quadkey',
+      scheme: 'quadbin',
       tiles: [
-        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{i}?name=my_data&formatTiles=${TILE_FORMATS.JSON}&spatialIndex=quadkey`
+        `https://gcp-us-east1.api.carto.com/v3/maps/my_connection/tileset/{i}?name=my_data&formatTiles=${TILE_FORMATS.JSON}&spatialIndex=quadbin`
       ],
       tilestats
     },
@@ -170,8 +170,8 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
       if (layerProps.data === 'DATA_TILESET_H3') {
         layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_H3_ID').data;
       }
-      if (layerProps.data === 'DATA_TILESET_QUADKEY') {
-        layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_QUADKEY_ID').data;
+      if (layerProps.data === 'DATA_TILESET_QUADBIN') {
+        layerProps.data = DATASETS.find(({id}) => id === 'DATA_TILESET_QUADBIN_ID').data;
       }
     });
 

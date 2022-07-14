@@ -1448,11 +1448,11 @@
       "layers": [
         {
           "id": "a6bbdbj",
-          "type": "quadkey",
+          "type": "quadbin",
           "config": {
             "color": [246, 209, 138],
             "label": "Layer 2",
-            "dataId": "DATA_TILESET_QUADKEY_ID",
+            "dataId": "DATA_TILESET_QUADBIN_ID",
             "hidden": false,
             "columns": {},
             "isVisible": true,
@@ -1630,7 +1630,7 @@
         }
       },
       {
-        "name": "QuadkeyTileLayer({id: 'a6bbdbj'})",
+        "name": "QuadbinTileLayer({id: 'a6bbdbj'})",
         "props": {
           "id": "a6bbdbj",
           "lineMiterLimit": 2,

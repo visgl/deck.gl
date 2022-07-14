@@ -45,7 +45,6 @@ const examples = [
   // Spatial index layers
   '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
   '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
-  '0899a359-cb70-428c-97cb-61d5ef46d985', // H3 & quadkey tilesets
 
   // Aggregation layers
   'd91a6a6f-0290-4b22-b9cc-fa174cb31a23', // Grid
