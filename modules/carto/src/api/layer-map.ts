@@ -285,8 +285,7 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 export function getColorAccessor(
   {name},
   scaleType: SCALE_TYPE,
-  aggregation: string | undefined,
-  {colors, colorMap},
+  {aggregation, range: {colors, colorMap}},
   opacity: number | undefined,
   data: any
 ) {

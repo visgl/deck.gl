@@ -411,7 +411,7 @@ async function _fetchTilestats(
   accessToken: string,
   credentials: CloudNativeCredentials
 ) {
-  const {connectionName: connection, geoColumn, source, type} = dataset;
+  const {connectionName: connection, source} = dataset;
 
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
   const url = `${statsUrl}/${connection}/${source}/${attribute}`;
