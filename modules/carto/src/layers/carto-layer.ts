@@ -1,5 +1,4 @@
 import {
-  ChangeFlags,
   CompositeLayer,
   CompositeLayerProps,
   Layer,
@@ -17,8 +16,7 @@ import {
   GEO_COLUMN_SUPPORT,
   MapType,
   MAP_TYPES,
-  TileFormat,
-  TILE_FORMATS
+  TileFormat
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
