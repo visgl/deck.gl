@@ -97,7 +97,7 @@ const COLOR_TESTS = [
 
 for (const {colorField, colorScale, colorRange, opacity, data, d, expected} of COLOR_TESTS) {
   test(`getColorAccessor#${colorScale}`, t => {
-    const accessor = getColorAccessor(colorField, colorScale, undefined, colorRange, opacity, data);
+    const accessor = getColorAccessor(colorField, colorScale, {range: colorRange}, opacity, data);
     t.deepEquals(accessor(d), expected, `getColorAccessor correctly returns ${expected}`);
     t.end();
   });
