@@ -11,7 +11,7 @@ import {
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {LayersList} from 'modules/core/src/lib/layer-manager';
+import {LayersList} from '@deck.gl/core';
 import Tile2DHeader from './tile-2d-header';
 
 import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';

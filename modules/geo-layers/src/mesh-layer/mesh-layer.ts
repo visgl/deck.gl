@@ -3,7 +3,7 @@ import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {Model, pbr} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
-import type {UpdateParameters, DefaultProps} from '@deck.gl/core';
+import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import vs from './mesh-layer-vertex.glsl';
@@ -102,6 +102,8 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
   protected getModel(mesh: Mesh): Model {
     const {id, pbrMaterial} = this.props;
     const materialParser = this.parseMaterial(pbrMaterial, mesh);
+    // Keep material parser to explicitly remove textures
+    this.setState({materialParser});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
     const model = new Model(this.context.gl, {
@@ -125,6 +127,8 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     if (model) {
       const {mesh} = this.props;
       const materialParser = this.parseMaterial(pbrMaterial, mesh);
+      // Keep material parser to explicitly remove textures
+      this.setState({materialParser});
       model.setUniforms(materialParser.uniforms);
     }
   }
@@ -133,7 +137,10 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     const unlit = Boolean(
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
-    const materialParser = new GLTFMaterialParser(this.context.gl, {
+
+    this.state.materialParser?.delete();
+
+    return new GLTFMaterialParser(this.context.gl, {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       material: {unlit, ...pbrMaterial},
       pbrDebug: false,
@@ -141,7 +148,6 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
       lights: true,
       useTangents: false
     });
-    return materialParser;
   }
 
   calculateFeatureIdsPickingColors(attribute) {
@@ -159,5 +165,11 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     }
 
     attribute.value = value;
+  }
+
+  finalizeState(context: LayerContext) {
+    super.finalizeState(context);
+    this.state.materialParser?.delete();
+    this.setState({materialParser: null});
   }
 }

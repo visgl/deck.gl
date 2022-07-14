@@ -27,8 +27,7 @@ import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 
-import Layer, {UpdateParameters} from 'modules/core/src/lib/layer';
-import {GetPickingInfoParams, PickingInfo} from 'modules/core/src/lib/picking/pick-info';
+import {Layer, UpdateParameters, GetPickingInfoParams, PickingInfo} from '@deck.gl/core';
 import {AggregateAccessor} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
