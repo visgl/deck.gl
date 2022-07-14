@@ -1,7 +1,12 @@
 /**
  * Maps API Client for Carto 3
  */
-import {getDefaultCredentials, buildMapsUrlFromBase, CloudNativeCredentials} from '../config';
+import {
+  getDefaultCredentials,
+  buildMapsUrlFromBase,
+  buildStatsUrlFromBase,
+  CloudNativeCredentials
+} from '../config';
 import {
   API_VERSIONS,
   COLUMNS_SUPPORT,
@@ -408,10 +413,9 @@ async function _fetchTilestats(
 ) {
   const {connectionName: connection, geoColumn, source, type} = dataset;
 
-  // const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `https://gcp-us-east1.api.carto.com/v3/stats/${connection}/${source}/${attribute}`;
+  const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
+  const url = `${statsUrl}/${connection}/${source}/${attribute}`;
   const stats = await requestData({url, format: FORMATS.JSON, accessToken});
-  console.log('STATS', stats);
 
   // Replace tilestats for attribute with value from API
   const {attributes} = dataset.data.tilestats.layers[0];
@@ -440,7 +444,6 @@ async function fillInTileStats(
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
         const dataset = datasets.find(d => d.id === layer.config.dataId);
-        console.log('Need tilestats for', attribute, dataset);
         attributes.push({attribute, dataset});
       }
     }
