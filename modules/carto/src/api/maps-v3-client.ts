@@ -418,6 +418,7 @@ async function _fetchTilestats(
   if (type === MAP_TYPES.QUERY) {
     url += `${attribute}?q=${source}`;
   } else {
+    // MAP_TYPE.TABLE
     url += `${source}/${attribute}`;
   }
   const stats = await requestData({url, format: FORMATS.JSON, accessToken});
@@ -449,7 +450,10 @@ async function fillInTileStats(
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
         const dataset = datasets.find(d => d.id === layer.config.dataId);
-        attributes.push({attribute, dataset});
+        if (dataset.type !== MAP_TYPES.TILESET) {
+          // Only fetch stats for QUERY & TABLE map types
+          attributes.push({attribute, dataset});
+        }
       }
     }
   }
