@@ -448,7 +448,19 @@ async function fillInTileStats(
       }
     }
   }
-  const promises = attributes.map(({attribute, dataset}) =>
+  // Remove duplicates to avoid repeated requests
+  const filteredAttributes: {attribute?: string; dataset?: any}[] = [];
+  for (const a of attributes) {
+    if (
+      !filteredAttributes.find(
+        ({attribute, dataset}) => attribute === a.attribute && dataset === a.dataset
+      )
+    ) {
+      filteredAttributes.push(a);
+    }
+  }
+
+  const promises = filteredAttributes.map(({attribute, dataset}) =>
     _fetchTilestats(attribute, dataset, token, credentials)
   );
   return await Promise.all(promises);
@@ -523,6 +535,7 @@ export async function fetchMap({
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);
 
+  // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
   return {
     ...parseMap(map),
