@@ -149,12 +149,20 @@ function getParameters({
   }
   if (aggregationExp) {
     parameters.push(encodeParameter('aggregationExp', aggregationExp));
+  } else if (isSpatialIndexGeoColumn(geoColumn)) {
+    // Default aggregationExp required for spatial index layers
+    parameters.push(encodeParameter('aggregationExp', '1 AS value'));
   }
   if (aggregationResLevel) {
     parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
   }
 
   return parameters.join('&');
+}
+
+function isSpatialIndexGeoColumn(geoColumn: string) {
+  const spatialIndex = geoColumn?.split(':')[0];
+  return spatialIndex === 'h3' || spatialIndex === 'quadbin';
 }
 
 export async function mapInstantiation({
@@ -175,8 +183,8 @@ export async function mapInstantiation({
     geoColumn,
     columns,
     clientId,
-    aggregationExp,
-    aggregationResLevel
+    aggregationResLevel,
+    aggregationExp
   })}`;
   const {accessToken} = credentials;
 
