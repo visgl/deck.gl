@@ -272,8 +272,9 @@ export function opacityToAlpha(opacity) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
-function getAccessorKey(name: string, aggregation: string | undefined): string {
-  return aggregation ? `${name}_${aggregation}` : name;
+function getAccessorKeys(name: string, aggregation: string | undefined): string[] {
+  // Snowflake will capitalized the keys, need to check lower and upper case version
+  return aggregation ? [aggregation, aggregation.toUpperCase()].map(a => `${name}_${a}`) : [name];
 }
 
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
@@ -312,9 +313,10 @@ export function getColorAccessor(
   scale.unknown(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
-  const key = getAccessorKey(name, aggregation);
+  const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
+
   const accessor = properties => {
-    const propertyValue = properties[key];
+    const propertyValue = properties[key] || properties[keyCapitalized];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
@@ -332,9 +334,10 @@ export function getSizeAccessor(
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
 
-  const key = getAccessorKey(name, aggregation);
+  const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    return scale(properties[key]);
+    const propertyValue = properties[key] || properties[keyCapitalized];
+    return scale(propertyValue);
   };
   return normalizeAccessor(accessor, data);
 }
