@@ -51,6 +51,7 @@ const examples = [
   '465f9b51-8256-4582-a9f0-a23757aefc39', // dynamic spatial index quadbin ana (table)
   '433b5f7e-af50-4da3-8803-26dfe58972d8', // dynamic tiling ana
   'ab8cc16b-e6b2-409a-8e0a-39ad6f6dfc12', // dynamic tiling snowflake
+  'a42992e9-df58-451e-ad71-d7e91fe4a0df', // No aggregationExp provided
 
   // Aggregation layers
   'd91a6a6f-0290-4b22-b9cc-fa174cb31a23', // Grid
