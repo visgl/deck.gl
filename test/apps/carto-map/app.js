@@ -45,6 +45,11 @@ const examples = [
   // Spatial index layers
   '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
   '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
+  'a29d4941-a683-4516-9479-9db05a5b6bd9', // dynamic spatial index h3 ana (table)
+  '38255824-e1d5-4a8f-b803-324aa75ef08a', // dynamic spatial index h3 ana (tileset)
+  'bee8c9c4-f12a-4cec-87f6-021bd52df942', // dynamic spatial index h3 ana (query)
+  '465f9b51-8256-4582-a9f0-a23757aefc39', // dynamic spatial index quadbin ana (table)
+  '433b5f7e-af50-4da3-8803-26dfe58972d8', // dynamic tiling ana
 
   // Aggregation layers
   'd91a6a6f-0290-4b22-b9cc-fa174cb31a23', // Grid
