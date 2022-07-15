@@ -411,10 +411,15 @@ async function _fetchTilestats(
   accessToken: string,
   credentials: CloudNativeCredentials
 ) {
-  const {connectionName: connection, source} = dataset;
+  const {connectionName: connection, source, type} = dataset;
 
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
-  const url = `${statsUrl}/${connection}/${source}/${attribute}`;
+  let url = `${statsUrl}/${connection}/`;
+  if (type === MAP_TYPES.QUERY) {
+    url += `${attribute}?q=${source}`;
+  } else {
+    url += `${source}/${attribute}`;
+  }
   const stats = await requestData({url, format: FORMATS.JSON, accessToken});
 
   // Replace tilestats for attribute with value from API
