@@ -160,7 +160,7 @@ function getParameters({
   return parameters.join('&');
 }
 
-function isSpatialIndexGeoColumn(geoColumn: string) {
+function isSpatialIndexGeoColumn(geoColumn: string | undefined) {
   const spatialIndex = geoColumn?.split(':')[0];
   return spatialIndex === 'h3' || spatialIndex === 'quadbin';
 }
