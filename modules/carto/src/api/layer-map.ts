@@ -316,7 +316,7 @@ export function getColorAccessor(
   const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
 
   const accessor = properties => {
-    const propertyValue = properties[key] || properties[keyCapitalized];
+    const propertyValue = key in properties ? properties[key] : properties[keyCapitalized];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
@@ -336,7 +336,7 @@ export function getSizeAccessor(
 
   const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    const propertyValue = properties[key] || properties[keyCapitalized];
+    const propertyValue = key in properties ? properties[key] : properties[keyCapitalized];
     return scale(propertyValue);
   };
   return normalizeAccessor(accessor, data);
