@@ -37,7 +37,7 @@ const App = (data) => (
   >
     <StaticMap
       mapStyle="mapbox://styles/mapbox/dark-v9"
-      mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
   </DeckGL>
 );
 
@@ -96,7 +96,7 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 ```jsx
   <DeckGL initialViewState={...viewState} layers={layers} >
     <MapView id="map" width="50%" controller={true} >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <StaticMap mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
     </MapView>
     <FirstPersonView width="50%" x="50%" fovy={50} />
   <DeckGL />
@@ -112,7 +112,7 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
   <DeckGL initialViewState={...viewState} layers={layers} views={views} >
     <View id="map">
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <StaticMap mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
     </View>
   <DeckGL />
 ```

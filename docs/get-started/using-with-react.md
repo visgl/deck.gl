@@ -80,7 +80,7 @@ function App({data}) {
       controller={true}
       layers={layers}
     >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <StaticMap mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
     </DeckGL>
   );
 }
@@ -126,7 +126,7 @@ function App() {
       controller={true}
       layers={layers} >
       <MapView id="map" width="50%" controller={true}>
-        <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+        <StaticMap mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
       </MapView>
       <FirstPersonView width="50%" x="50%" fovy={50} />
     </DeckGL>

@@ -97,7 +97,7 @@ function App() {
           ref={mapRef}
           gl={glContext}
           mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
+          mapboxAccessToken={MAPBOX_TOKEN}
           onLoad={onMapLoad}
         />
       )}

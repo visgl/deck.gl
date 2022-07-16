@@ -142,7 +142,7 @@ function createStandaloneFromProvider({
         ...sharedProps,
         ...props,
         map: mapboxgl,
-        mapboxApiAccessToken: mapboxApiKey,
+        mapboxAccessToken: mapboxApiKey,
         onLoad: modifyMapboxElements
       });
     case 'carto':
@@ -165,7 +165,7 @@ function createStandaloneFromProvider({
         ...sharedProps,
         ...props,
         map: null,
-        mapboxApiAccessToken: null
+        mapboxAccessToken: null
       });
   }
 }

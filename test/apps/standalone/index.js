@@ -18,7 +18,7 @@ for (let x = 0; x < SAMPLE_SIZE; x++) {
 }
 
 const geoExample = new deck.DeckGL({
-  mapboxApiAccessToken: __MAPBOX_TOKEN__, // eslint-disable-line
+  mapboxAccessToken: __MAPBOX_TOKEN__, // eslint-disable-line
   container: document.getElementById('geo'),
   initialViewState: {
     longitude: -122.45,

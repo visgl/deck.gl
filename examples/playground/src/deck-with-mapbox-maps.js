@@ -14,7 +14,7 @@ export default class DeckWithMapboxMaps extends Component {
             <this.props.Map
               reuseMap
               mapStyle={view.props.mapStyle}
-              mapboxApiAccessToken={view.props.mapToken || this.props.mapboxApiAccessToken}
+              mapboxAccessToken={view.props.mapToken || this.props.mapboxAccessToken}
             />
           </View>
         );
