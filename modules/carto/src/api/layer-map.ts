@@ -273,8 +273,22 @@ export function opacityToAlpha(opacity) {
 }
 
 function getAccessorKeys(name: string, aggregation: string | undefined): string[] {
-  // Snowflake will capitalized the keys, need to check lower and upper case version
-  return aggregation ? [aggregation, aggregation.toUpperCase()].map(a => `${name}_${a}`) : [name];
+  let keys = [name];
+  if (aggregation) {
+    // Snowflake will capitalized the keys, need to check lower and upper case version
+    keys = keys.concat([aggregation, aggregation.toUpperCase()].map(a => `${name}_${a}`));
+  }
+  return keys;
+}
+
+function findAccessorKey(keys: string[], properties): string[] {
+  for (const key of keys) {
+    if (key in properties) {
+      return [key];
+    }
+  }
+
+  throw new Error(`Could not find property for any accessor key: ${keys}`);
 }
 
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
@@ -313,10 +327,12 @@ export function getColorAccessor(
   scale.unknown(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
-  const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
-
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    const propertyValue = key in properties ? properties[key] : properties[keyCapitalized];
+    if (!(accessorKeys[0] in properties)) {
+      accessorKeys = findAccessorKey(accessorKeys, properties);
+    }
+    const propertyValue = properties[accessorKeys[0]];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
@@ -334,9 +350,12 @@ export function getSizeAccessor(
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
 
-  const [key, keyCapitalized] = getAccessorKeys(name, aggregation);
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    const propertyValue = key in properties ? properties[key] : properties[keyCapitalized];
+    if (!(accessorKeys[0] in properties)) {
+      accessorKeys = findAccessorKey(accessorKeys, properties);
+    }
+    const propertyValue = properties[accessorKeys[0]];
     return scale(propertyValue);
   };
   return normalizeAccessor(accessor, data);
