@@ -176,10 +176,11 @@ function createChannelProps(visualChannels, type, config, data) {
       }
     }
   } else if (colorField) {
+    const {colorAggregation: aggregation, colorRange: range} = visConfig;
     result.getFillColor = getColorAccessor(
       colorField,
       colorScale,
-      visConfig.colorRange,
+      {aggregation, range},
       visConfig.opacity,
       data
     );
@@ -189,10 +190,11 @@ function createChannelProps(visualChannels, type, config, data) {
     const fallbackOpacity = type === 'point' ? visConfig.opacity : 1;
     const opacity =
       visConfig.strokeOpacity !== undefined ? visConfig.strokeOpacity : fallbackOpacity;
+    const {strokeColorAggregation: aggregation, strokeColorRange: range} = visConfig;
     result.getLineColor = getColorAccessor(
       strokeColorField,
       strokeColorScale,
-      visConfig.strokeColorRange,
+      {aggregation, range},
       opacity,
       data
     );
@@ -201,6 +203,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getElevation = getSizeAccessor(
       heightField,
       heightScale,
+      visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
       data
     );
@@ -209,6 +212,7 @@ function createChannelProps(visualChannels, type, config, data) {
     result.getPointRadius = getSizeAccessor(
       sizeField,
       sizeScale,
+      visConfig.sizeAggregation,
       visConfig.radiusRange || visConfig.sizeRange,
       data
     );
