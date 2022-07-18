@@ -458,7 +458,7 @@ async function fillInTileStats(
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
         const dataset = datasets.find(d => d.id === layer.config.dataId);
-        if (dataset.type !== MAP_TYPES.TILESET) {
+        if (dataset.data.tilestats && dataset.type !== MAP_TYPES.TILESET) {
           // Only fetch stats for QUERY & TABLE map types
           attributes.push({attribute, dataset});
         }
