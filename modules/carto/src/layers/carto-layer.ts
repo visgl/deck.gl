@@ -1,24 +1,22 @@
 import {
   CompositeLayer,
-  Layer,
-  log,
   CompositeLayerProps,
+  Layer,
   LayerProps,
-  ChangeFlags
+  log,
+  UpdateParameters
 } from '@deck.gl/core';
-import CartoTileLayer from './carto-tile-layer';
-import H3TileLayer from './h3-tile-layer';
-import QuadbinTileLayer from './quadbin-tile-layer';
+
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {layerFromTileDataset} from '../api/layer-map';
 import {
   COLUMNS_SUPPORT,
   FORMATS,
   GEO_COLUMN_SUPPORT,
   MapType,
   MAP_TYPES,
-  TileFormat,
-  TILE_FORMATS
+  TileFormat
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
@@ -209,16 +207,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     }
   }
 
-  updateState({
-    props,
-    oldProps,
-    changeFlags
-  }: {
-    props: CartoLayerProps;
-    oldProps: CartoLayerProps;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
@@ -294,19 +283,10 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
     /* global URL */
     const tileUrl = new URL(data.tiles[0]);
-
     props.formatTiles =
-      props.formatTiles ||
-      (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
-      TILE_FORMATS.MVT;
+      props.formatTiles || (tileUrl.searchParams.get('formatTiles') as TileFormat);
 
-    if (data.scheme === 'h3') {
-      return [H3TileLayer, props];
-    }
-    if (data.scheme === 'quadbin') {
-      return [QuadbinTileLayer, props];
-    }
-    return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
+    return [layerFromTileDataset(props.formatTiles, data.scheme), props];
   }
 
   renderLayers(): Layer | null {
