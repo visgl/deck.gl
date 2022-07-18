@@ -1,7 +1,12 @@
 /**
  * Maps API Client for Carto 3
  */
-import {getDefaultCredentials, buildMapsUrlFromBase, CloudNativeCredentials} from '../config';
+import {
+  getDefaultCredentials,
+  buildMapsUrlFromBase,
+  buildStatsUrlFromBase,
+  CloudNativeCredentials
+} from '../config';
 import {
   API_VERSIONS,
   COLUMNS_SUPPORT,
@@ -144,12 +149,20 @@ function getParameters({
   }
   if (aggregationExp) {
     parameters.push(encodeParameter('aggregationExp', aggregationExp));
+  } else if (isSpatialIndexGeoColumn(geoColumn)) {
+    // Default aggregationExp required for spatial index layers
+    parameters.push(encodeParameter('aggregationExp', '1 AS value'));
   }
   if (aggregationResLevel) {
     parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
   }
 
   return parameters.join('&');
+}
+
+function isSpatialIndexGeoColumn(geoColumn: string | undefined) {
+  const spatialIndex = geoColumn?.split(':')[0];
+  return spatialIndex === 'h3' || spatialIndex === 'quadbin';
 }
 
 export async function mapInstantiation({
@@ -170,8 +183,8 @@ export async function mapInstantiation({
     geoColumn,
     columns,
     clientId,
-    aggregationExp,
-    aggregationResLevel
+    aggregationResLevel,
+    aggregationExp
   })}`;
   const {accessToken} = credentials;
 
@@ -363,9 +376,20 @@ async function _fetchMapDataset(
   credentials: CloudNativeCredentials,
   clientId?: string
 ) {
-  const {connectionName: connection, columns, format, geoColumn, source, type} = dataset;
+  const {
+    aggregationExp,
+    aggregationResLevel,
+    connectionName: connection,
+    columns,
+    format,
+    geoColumn,
+    source,
+    type
+  } = dataset;
   // First fetch metadata
   const {url, mapFormat} = await _fetchDataUrl({
+    aggregationExp,
+    aggregationResLevel,
     clientId,
     credentials: {...credentials, accessToken},
     connection,
@@ -389,12 +413,73 @@ async function _fetchMapDataset(
   return true;
 }
 
+async function _fetchTilestats(
+  attribute,
+  dataset,
+  accessToken: string,
+  credentials: CloudNativeCredentials
+) {
+  const {connectionName: connection, source, type} = dataset;
+
+  const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
+  let url = `${statsUrl}/${connection}/`;
+  if (type === MAP_TYPES.QUERY) {
+    url += `${attribute}?q=${source}`;
+  } else {
+    // MAP_TYPE.TABLE
+    url += `${source}/${attribute}`;
+  }
+  const stats = await requestData({url, format: FORMATS.JSON, accessToken});
+
+  // Replace tilestats for attribute with value from API
+  const {attributes} = dataset.data.tilestats.layers[0];
+  const index = attributes.findIndex(d => d.attribute === attribute);
+  attributes[index] = stats;
+  return true;
+}
+
 async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
   credentials: CloudNativeCredentials
 ) {
   const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
+  return await Promise.all(promises);
+}
+
+async function fillInTileStats(
+  {datasets, keplerMapConfig, token},
+  credentials: CloudNativeCredentials
+) {
+  const attributes: {attribute?: string; dataset?: any}[] = [];
+  const {layers} = keplerMapConfig.config.visState;
+  for (const layer of layers) {
+    for (const channel of Object.keys(layer.visualChannels)) {
+      const attribute = layer.visualChannels[channel]?.name;
+      if (attribute) {
+        const dataset = datasets.find(d => d.id === layer.config.dataId);
+        if (dataset.data.tilestats && dataset.type !== MAP_TYPES.TILESET) {
+          // Only fetch stats for QUERY & TABLE map types
+          attributes.push({attribute, dataset});
+        }
+      }
+    }
+  }
+  // Remove duplicates to avoid repeated requests
+  const filteredAttributes: {attribute?: string; dataset?: any}[] = [];
+  for (const a of attributes) {
+    if (
+      !filteredAttributes.find(
+        ({attribute, dataset}) => attribute === a.attribute && dataset === a.dataset
+      )
+    ) {
+      filteredAttributes.push(a);
+    }
+  }
+
+  const promises = filteredAttributes.map(({attribute, dataset}) =>
+    _fetchTilestats(attribute, dataset, token, credentials)
+  );
   return await Promise.all(promises);
 }
 
@@ -466,6 +551,9 @@ export async function fetchMap({
 
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, localCreds);
+
+  // Mutates attributes in visualChannels to contain tile stats
+  await fillInTileStats(map, localCreds);
   return {
     ...parseMap(map),
     ...{stopAutoRefresh}
