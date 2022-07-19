@@ -50,7 +50,7 @@ An important companion to deck.gl is `react-map-gl`. It is a React wrapper for [
 import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {LineLayer} from '@deck.gl/layers';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl';
 
 // Set your mapbox access token here
 const MAPBOX_ACCESS_TOKEN = 'your_mapbox_token';
@@ -80,7 +80,7 @@ function App({data}) {
       controller={true}
       layers={layers}
     >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <Map mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
     </DeckGL>
   );
 }
@@ -126,7 +126,7 @@ function App() {
       controller={true}
       layers={layers} >
       <MapView id="map" width="50%" controller={true}>
-        <StaticMap mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
+        <Map mapboxAccessToken={MAPBOX_ACCESS_TOKEN} />
       </MapView>
       <FirstPersonView width="50%" x="50%" fovy={50} />
     </DeckGL>
