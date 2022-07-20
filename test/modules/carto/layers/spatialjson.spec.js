@@ -51,7 +51,7 @@ const TEST_CASES = [
   }
 ];
 
-test('Spatialjson to binary', async t => {
+test.only('Spatialjson to binary', async t => {
   for (const {name, spatial, expected} of TEST_CASES) {
     const converted = spatialjsonToBinary(spatial);
     t.deepEqual(converted, expected, `Spatialjson is converted to binary: ${name}`);
@@ -71,6 +71,21 @@ test.only('Spatialjson to pbf', async t => {
     path.join(__dirname, '../../../../modules/carto/src/layers/schema/carto-spatial-tile.proto')
   );
   t.ok(root);
+  const Tile = root.lookupType('carto.Tile');
+  t.ok(Tile);
+
+  for (const {name, spatial} of TEST_CASES) {
+    // To binary
+    const converted = spatialjsonToBinary(spatial);
+
+    const pbDoc = Tile.fromObject(converted);
+    const output = Tile.encode(pbDoc).finish();
+    t.ok(output, `Tile encoded: ${name}`);
+
+    // ...and back
+    const original = Tile.toObject(output);
+    t.deepEqual(original, converted, `Tile decoded: ${name}`);
+  }
 
   t.end();
 });
