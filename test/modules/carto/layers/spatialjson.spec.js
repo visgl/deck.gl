@@ -10,7 +10,7 @@ const TEST_CASES = [
       cells: {
         indices: {value: new BigUint64Array([594786321193500671n]), size: 1},
         numericProps: {},
-        properties: []
+        properties: [{}]
       }
     }
   },
@@ -22,7 +22,7 @@ const TEST_CASES = [
       cells: {
         indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
         numericProps: {},
-        properties: []
+        properties: [{}]
       }
     }
   },
@@ -39,7 +39,7 @@ const TEST_CASES = [
           floatProp: {value: new Float64Array([123.45]), size: 1},
           intProp: {value: new Int32Array([12345]), size: 1}
         },
-        properties: [{data: [{key: 'stringProp', value: 'abc'}]}]
+        properties: [[{key: 'stringProp', value: 'abc'}]]
       }
     }
   }

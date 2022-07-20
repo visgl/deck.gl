@@ -6,6 +6,11 @@ type SCHEME = 'h3' | 'quadbin';
 type PropArrayConstructor = Float32ArrayConstructor | Float64ArrayConstructor | ArrayConstructor;
 type TypedArray = Float32Array | Float64Array;
 
+type Indices = {value: BigUint64Array; size: number};
+type NumericProps = {[x: string]: {value: TypedArray; size: number}};
+type Property = {key: string; value: string | number | boolean | null};
+type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
+
 function inferSpatialIndexType(index: string): SCHEME {
   return h3IsValid(index) ? 'h3' : 'quadbin';
 }
@@ -15,14 +20,14 @@ export function spatialjsonToBinary(spatial): any {
 
   const scheme = count ? inferSpatialIndexType(spatial[0].id) : undefined;
   const indices = {value: new BigUint64Array(count), size: 1};
-  const cells = {indices, numericProps: {}, properties: []};
+  const cells: Cells = {indices, numericProps: {}, properties: []};
 
   // Create numeric property arrays
   const propArrayTypes = extractNumericPropTypes(spatial);
   const numericPropKeys = Object.keys(propArrayTypes).filter(k => propArrayTypes[k] !== Array);
   for (const propName of numericPropKeys) {
     const T = propArrayTypes[propName];
-    cells.numericProps[propName] = new T(count) as TypedArray;
+    cells.numericProps[propName] = {value: new T(count) as TypedArray, size: 1};
   }
 
   let i = 0;
@@ -30,10 +35,27 @@ export function spatialjsonToBinary(spatial): any {
     cells.indices.value[i] = indexToBigInt(id);
 
     fillNumericProperties(cells.numericProps, properties, i);
+    const stringProps = keepStringProperties(properties, numericPropKeys);
+    cells.properties.push(
+      Object.entries(stringProps).map(([key, value]) => ({key, value} as Property))
+    );
     i++;
   }
 
   return {scheme, cells};
+}
+
+function keepStringProperties(
+  properties: {[x: string]: string | number | boolean | null},
+  numericKeys: string[]
+) {
+  const props = {};
+  for (const key in properties) {
+    if (!numericKeys.includes(key)) {
+      props[key] = properties[key];
+    }
+  }
+  return props;
 }
 
 function extractNumericPropTypes(features: any[]): {
@@ -62,10 +84,9 @@ function fillNumericProperties(
   index: number
 ): void {
   for (const numericPropName in numericProps) {
-    console.log('fill', numericPropName, properties);
     if (numericPropName in properties) {
       const value = properties[numericPropName] as number;
-      numericProps[numericPropName][index] = value;
+      numericProps[numericPropName].value[index] = value;
     }
   }
 }
