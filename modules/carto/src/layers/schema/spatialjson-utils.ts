@@ -43,13 +43,17 @@ export function spatialjsonToBinary(spatial): SpatialBinary {
 }
 
 export function binaryToSpatialjson(binary: SpatialBinary) {
-  const {indices, numericProps, properties} = binary.cells;
-  const count = indices.value.length;
+  const {cells} = binary;
+  const count = cells.indices.value.length;
   const spatial: any[] = [];
   for (let i = 0; i < count; i++) {
-    const id = bigIntToIndex(indices.value[i]);
+    const id = bigIntToIndex(cells.indices.value[i]);
+    const properties = {};
+    for (const {key, value} of cells.properties[i]) {
+      properties[key] = value;
+    }
 
-    spatial.push({id});
+    spatial.push({id, properties});
   }
 
   return spatial;
