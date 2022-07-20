@@ -20,7 +20,7 @@ export interface Properties {
   data: KeyValueObject[];
 }
 
-class PropertiesReader {
+export class PropertiesReader {
   static read(pbf, end?: number) {
     return pbf.readFields(PropertiesReader._readField, {data: []}, end);
   }
@@ -69,7 +69,7 @@ class IntsReader {
 
 // NumericProp ========================================
 
-interface NumericProp {
+export interface NumericProp {
   value: number[];
 }
 
@@ -88,7 +88,7 @@ interface NumbericPropKeyValue {
   value: NumericProp;
 }
 
-class NumericPropKeyValueReader {
+export class NumericPropKeyValueReader {
   static read(pbf, end?: number): NumbericPropKeyValue {
     return pbf.readFields(NumericPropKeyValueReader._readField, {key: '', value: null}, end);
   }

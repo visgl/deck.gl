@@ -2,22 +2,22 @@ import {h3IsValid} from 'h3-js';
 
 import {bigIntToIndex, indexToBigInt} from '../quadbin-utils';
 
-type SCHEME = 'h3' | 'quadbin';
+export type IndexScheme = 'h3' | 'quadbin';
 type PropArrayConstructor = Float32ArrayConstructor | Float64ArrayConstructor | ArrayConstructor;
 type TypedArray = Float32Array | Float64Array;
 
-type Indices = {value: BigUint64Array; size: number};
-type NumericProps = {[x: string]: {value: TypedArray; size: number}};
-type Property = {key: string; value: string | number | boolean | null};
-type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
-type SpatialBinary = {scheme?: SCHEME; cells: Cells};
+export type Indices = {value: BigUint64Array};
+export type NumericProps = {[x: string]: {value: TypedArray}};
+export type Property = {key: string; value: string | number | boolean | null};
+export type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
+type SpatialBinary = {scheme?: IndexScheme; cells: Cells};
 type SpatialJson = {id: string; properties: {[x: string]: string | number | boolean | null}}[];
 
 export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
   const count = spatial.length;
 
   const scheme = count ? inferSpatialIndexType(spatial[0].id) : undefined;
-  const indices = {value: new BigUint64Array(count), size: 1};
+  const indices = {value: new BigUint64Array(count)};
   const cells: Cells = {indices, numericProps: {}, properties: []};
 
   // Create numeric property arrays
@@ -25,7 +25,7 @@ export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
   const numericPropKeys = Object.keys(propArrayTypes).filter(k => propArrayTypes[k] !== Array);
   for (const propName of numericPropKeys) {
     const T = propArrayTypes[propName];
-    cells.numericProps[propName] = {value: new T(count) as TypedArray, size: 1};
+    cells.numericProps[propName] = {value: new T(count) as TypedArray};
   }
 
   let i = 0;
@@ -64,7 +64,7 @@ export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
   return spatial;
 }
 
-function inferSpatialIndexType(index: string): SCHEME {
+function inferSpatialIndexType(index: string): IndexScheme {
   return h3IsValid(index) ? 'h3' : 'quadbin';
 }
 

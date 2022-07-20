@@ -1,4 +1,6 @@
 import test from 'tape-promise/tape';
+
+import Protobuf from 'pbf';
 import protobuf from 'protobufjs'; // Remove from final PR
 import path from 'path';
 
@@ -6,6 +8,7 @@ import {
   binaryToSpatialjson,
   spatialjsonToBinary
 } from '@deck.gl/carto/layers/schema/spatialjson-utils';
+import {TileReader} from '@deck.gl/carto/layers/schema/carto-spatial-tile';
 
 const TEST_CASES = [
   {
@@ -14,7 +17,7 @@ const TEST_CASES = [
     expected: {
       scheme: 'h3',
       cells: {
-        indices: {value: new BigUint64Array([594786321193500671n]), size: 1},
+        indices: {value: new BigUint64Array([594786321193500671n])},
         numericProps: {},
         properties: [[]]
       }
@@ -26,7 +29,7 @@ const TEST_CASES = [
     expected: {
       scheme: 'quadbin',
       cells: {
-        indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
+        indices: {value: new BigUint64Array([5252931537380311039n])},
         numericProps: {},
         properties: [[]]
       }
@@ -40,10 +43,10 @@ const TEST_CASES = [
     expected: {
       scheme: 'quadbin',
       cells: {
-        indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
+        indices: {value: new BigUint64Array([5252931537380311039n])},
         numericProps: {
-          floatProp: {value: new Float64Array([123.45]), size: 1},
-          intProp: {value: new Int32Array([12345]), size: 1}
+          floatProp: {value: new Float64Array([123.45])},
+          intProp: {value: new Int32Array([12345])}
         },
         properties: [[{key: 'stringProp', value: 'abc'}]]
       }
@@ -51,7 +54,7 @@ const TEST_CASES = [
   }
 ];
 
-test.only('Spatialjson to binary', async t => {
+test('Spatialjson to binary', async t => {
   for (const {name, spatial, expected} of TEST_CASES) {
     const converted = spatialjsonToBinary(spatial);
     t.deepEqual(converted, expected, `Spatialjson is converted to binary: ${name}`);
@@ -78,13 +81,31 @@ test.only('Spatialjson to pbf', async t => {
     // To binary
     const converted = spatialjsonToBinary(spatial);
 
-    const pbDoc = Tile.fromObject(converted);
-    const output = Tile.encode(pbDoc).finish();
-    t.ok(output, `Tile encoded: ${name}`);
+    // To tile
+    const tile = {...converted};
+    tile.scheme = tile.scheme === 'h3' ? 0 : 1;
+    tile.cells.indices.value = new Uint32Array([3]); // Array.from(tile.cells.indices.value);
+
+    const keys = Object.keys(tile.cells.numericProps);
+    for (const key of keys) {
+      tile.cells.numericProps[key] = {
+        value: Array.from(tile.cells.numericProps[key].value)
+      };
+    }
+    tile.cells.properties = tile.cells.properties.map(data => ({data}));
+
+    const pbDoc = Tile.create(tile);
+    const buffer = Tile.encode(pbDoc).finish();
+    t.ok(buffer, `Tile encoded: ${name}`);
 
     // ...and back
-    const original = Tile.toObject(output);
-    t.deepEqual(original, converted, `Tile decoded: ${name}`);
+    const original = Tile.decode(buffer);
+    t.deepEqual(original, tile, `Tile decoded: ${name}`);
+
+    // Inbuilt parser
+    const pbf = new Protobuf(buffer);
+    const original2 = TileReader.read(pbf);
+    t.deepEqual(original2, tile, `Tile decoded 2: ${name}`);
   }
 
   t.end();
