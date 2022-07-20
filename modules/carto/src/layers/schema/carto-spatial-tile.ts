@@ -4,16 +4,18 @@ import {NumericProp, NumericPropKeyValueReader, Properties, PropertiesReader} fr
 // Ints ========================================
 
 export interface Ints {
-  value: BigInt64Array;
+  // value: BigInt64Array;
+  value: number[];
 }
 
 export class IntsReader {
   static read(pbf, end?: number): Ints {
     const {value} = pbf.readFields(IntsReader._readField, {value: []}, end);
-    return {value: new BigInt64Array(value.map(v => BigInt(`0x${v}`)))};
+    // return {value: new BigInt64Array(value.map(v => BigInt(`0x${v}`)))};
+    return {value};
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) pbf.readPackedVarint(obj.value);
+    if (tag === 1) pbf.readPackedFixed64(obj.value);
   }
 }
 

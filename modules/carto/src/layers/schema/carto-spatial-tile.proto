@@ -7,7 +7,7 @@ enum IndexScheme {
 }
 
 message Ints {
-    repeated uint64 value = 1;
+    repeated fixed64 value = 1;
 }
 
 message NumericProp {

@@ -102,7 +102,9 @@ test.only('Spatialjson to pbf', async t => {
     /* eslint-disable */
     const pbf = new Protobuf(buffer);
     const original2 = TileReader.read(pbf);
-    // t.deepEqual(original2, tile, `Tile decoded 2: ${name}`);
+    original2.cells.properties = original2.cells.properties.map(({data}) => data);
+    const parsedSpatial2 = binaryToSpatialjson(original2);
+    t.deepEqual(parsedSpatial2, spatial, `Tile decoded 2: ${name}`);
   }
 
   t.end();
