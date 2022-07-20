@@ -11,8 +11,9 @@ type NumericProps = {[x: string]: {value: TypedArray; size: number}};
 type Property = {key: string; value: string | number | boolean | null};
 type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
 type SpatialBinary = {scheme?: SCHEME; cells: Cells};
+type SpatialJson = {id: string; properties: {[x: string]: string | number | boolean | null}}[];
 
-export function spatialjsonToBinary(spatial): SpatialBinary {
+export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
   const count = spatial.length;
 
   const scheme = count ? inferSpatialIndexType(spatial[0].id) : undefined;
@@ -42,13 +43,17 @@ export function spatialjsonToBinary(spatial): SpatialBinary {
   return {scheme, cells};
 }
 
-export function binaryToSpatialjson(binary: SpatialBinary) {
+export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
   const {cells} = binary;
   const count = cells.indices.value.length;
   const spatial: any[] = [];
   for (let i = 0; i < count; i++) {
     const id = bigIntToIndex(cells.indices.value[i]);
+
     const properties = {};
+    for (const key of Object.keys(cells.numericProps)) {
+      properties[key] = cells.numericProps[key].value[i];
+    }
     for (const {key, value} of cells.properties[i]) {
       properties[key] = value;
     }
