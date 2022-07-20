@@ -4,11 +4,11 @@ import {spatialjsonToBinary} from '@deck.gl/carto/layers/schema/spatialjson-util
 const TEST_CASES = [
   {
     name: 'H3 index only',
-    spatial: [{id: '85283473fffffff', properties: {}}],
+    spatial: [{id: '8411b01ffffffff', properties: {}}],
     expected: {
       scheme: 'h3',
       cells: {
-        indices: {value: new BigUint64Array([1234n]), size: 1},
+        indices: {value: new BigUint64Array([594786321193500671n]), size: 1},
         numericProps: {},
         properties: []
       }
@@ -20,7 +20,7 @@ const TEST_CASES = [
     expected: {
       scheme: 'quadbin',
       cells: {
-        indices: {value: new BigUint64Array([1234n]), size: 1},
+        indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
         numericProps: {},
         properties: []
       }
@@ -34,7 +34,7 @@ const TEST_CASES = [
     expected: {
       scheme: 'quadbin',
       cells: {
-        indices: {value: new BigUint64Array([1234n]), size: 1},
+        indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
         numericProps: {
           floatProp: {value: new Float32Array([123.45]), size: 1},
           intProp: {value: new Int32Array([12345]), size: 1}
