@@ -1,5 +1,8 @@
 import test from 'tape-promise/tape';
-import {spatialjsonToBinary} from '@deck.gl/carto/layers/schema/spatialjson-utils';
+import {
+  binaryToSpatialjson,
+  spatialjsonToBinary
+} from '@deck.gl/carto/layers/schema/spatialjson-utils';
 
 const TEST_CASES = [
   {
@@ -47,10 +50,12 @@ const TEST_CASES = [
 
 test.only('Spatialjson to binary', async t => {
   for (const {name, spatial, expected} of TEST_CASES) {
+    const converted = spatialjsonToBinary(spatial);
+    t.deepEqual(converted, expected, `Spatialjson is converted to binary: ${name}`);
     t.deepEqual(
-      spatialjsonToBinary(spatial),
-      expected,
-      `Spatialjson is converted to binary: ${name}`
+      binaryToSpatialjson(converted),
+      spatial,
+      `Spatialjson is converted from binary: ${name}`
     );
   }
   t.end();

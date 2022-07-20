@@ -1,6 +1,6 @@
 import {h3IsValid} from 'h3-js';
 
-import {indexToBigInt} from '../quadbin-utils';
+import {bigIntToIndex, indexToBigInt} from '../quadbin-utils';
 
 type SCHEME = 'h3' | 'quadbin';
 type PropArrayConstructor = Float32ArrayConstructor | Float64ArrayConstructor | ArrayConstructor;
@@ -10,12 +10,9 @@ type Indices = {value: BigUint64Array; size: number};
 type NumericProps = {[x: string]: {value: TypedArray; size: number}};
 type Property = {key: string; value: string | number | boolean | null};
 type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
+type SpatialBinary = {scheme?: SCHEME; cells: Cells};
 
-function inferSpatialIndexType(index: string): SCHEME {
-  return h3IsValid(index) ? 'h3' : 'quadbin';
-}
-
-export function spatialjsonToBinary(spatial): any {
+export function spatialjsonToBinary(spatial): SpatialBinary {
   const count = spatial.length;
 
   const scheme = count ? inferSpatialIndexType(spatial[0].id) : undefined;
@@ -43,6 +40,23 @@ export function spatialjsonToBinary(spatial): any {
   }
 
   return {scheme, cells};
+}
+
+export function binaryToSpatialjson(binary: SpatialBinary) {
+  const {indices, numericProps, properties} = binary.cells;
+  const count = indices.value.length;
+  const spatial: any[] = [];
+  for (let i = 0; i < count; i++) {
+    const id = bigIntToIndex(indices.value[i]);
+
+    spatial.push({id});
+  }
+
+  return spatial;
+}
+
+function inferSpatialIndexType(index: string): SCHEME {
+  return h3IsValid(index) ? 'h3' : 'quadbin';
 }
 
 function keepStringProperties(
