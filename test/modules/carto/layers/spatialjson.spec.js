@@ -1,4 +1,7 @@
 import test from 'tape-promise/tape';
+import protobuf from 'protobufjs'; // Remove from final PR
+import path from 'path';
+
 import {
   binaryToSpatialjson,
   spatialjsonToBinary
@@ -48,7 +51,7 @@ const TEST_CASES = [
   }
 ];
 
-test.only('Spatialjson to binary', async t => {
+test('Spatialjson to binary', async t => {
   for (const {name, spatial, expected} of TEST_CASES) {
     const converted = spatialjsonToBinary(spatial);
     t.deepEqual(converted, expected, `Spatialjson is converted to binary: ${name}`);
@@ -58,5 +61,16 @@ test.only('Spatialjson to binary', async t => {
       `Spatialjson is converted from binary: ${name}`
     );
   }
+  t.end();
+});
+
+// Requires "protobufjs": "^6.11.2" in devDependencies
+
+test.only('Spatialjson to pbf', async t => {
+  const root = await protobuf.load(
+    path.join(__dirname, '../../../../modules/carto/src/layers/schema/carto-spatial-tile.proto')
+  );
+  t.ok(root);
+
   t.end();
 });
