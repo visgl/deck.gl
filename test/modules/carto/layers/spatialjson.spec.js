@@ -36,7 +36,7 @@ const TEST_CASES = [
       cells: {
         indices: {value: new BigUint64Array([5252931537380311039n]), size: 1},
         numericProps: {
-          floatProp: {value: new Float32Array([123.45]), size: 1},
+          floatProp: {value: new Float64Array([123.45]), size: 1},
           intProp: {value: new Int32Array([12345]), size: 1}
         },
         properties: [{data: [{key: 'stringProp', value: 'abc'}]}]
