@@ -4,18 +4,16 @@ import {NumericProp, NumericPropKeyValueReader, Properties, PropertiesReader} fr
 // Ints ========================================
 
 export interface Ints {
-  // value: BigInt64Array;
-  value: number[];
+  value: BigInt64Array;
 }
 
 export class IntsReader {
   static read(pbf, end?: number): Ints {
     const {value} = pbf.readFields(IntsReader._readField, {value: []}, end);
-    // return {value: new BigInt64Array(value.map(v => BigInt(`0x${v}`)))};
-    return {value};
+    return {value: new BigInt64Array(value)};
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) pbf.readPackedFixed64(obj.value);
+    if (tag === 1) readPackedFixed64(pbf, obj.value);
   }
 }
 
@@ -65,6 +63,26 @@ export class TileReader {
     if (tag === 1) obj.scheme = pbf.readVarint();
     else if (tag === 2) obj.cells = CellsReader.read(pbf, pbf.readVarint() + pbf.pos);
   }
+}
+
+// pbf doesn't support BigInt natively, implement support for packed fixed64 type
+const SHIFT_LEFT_32 = BigInt((1 << 16) * (1 << 16));
+
+function readPackedEnd(pbf) {
+  return pbf.type === 2 ? pbf.readVarint() + pbf.pos : pbf.pos + 1;
+}
+function readFixed64(pbf) {
+  const a = BigInt(pbf.readFixed32());
+  const b = BigInt(pbf.readFixed32());
+  return a + b * SHIFT_LEFT_32;
+}
+
+function readPackedFixed64(pbf, arr) {
+  if (pbf.type !== 2) return arr.push(readFixed64(pbf));
+  const end = readPackedEnd(pbf);
+  arr = arr || [];
+  while (pbf.pos < end) arr.push(readFixed64(pbf));
+  return arr;
 }
 
 // Binary-Tile conversion, only need for wiriting using protobufjs
