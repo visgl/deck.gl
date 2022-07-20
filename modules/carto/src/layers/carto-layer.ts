@@ -240,10 +240,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       const {
         type,
         data: source,
-        clientId,
         credentials,
         connection,
-        queryParameters,
         ...rest
       } = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
@@ -258,10 +256,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
         result = await fetchLayerData({
           type,
           source,
-          clientId,
           credentials: credentials as CloudNativeCredentials,
           connection,
-          queryParameters,
           ...rest,
           // CartoLayer only supports tiled output from v8.8, force data format
           format: FORMATS.TILEJSON
