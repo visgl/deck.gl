@@ -77,3 +77,9 @@ type MapInstantiationFormats = Record<
 export function encodeParameter(name: string, value: string | boolean | number): string {
   return `${name}=${encodeURIComponent(value)}`;
 }
+
+export type QueryParameter = {
+  value: string | number;
+  name?: string;
+  type?: string;
+};

@@ -16,7 +16,8 @@ import {
   GEO_COLUMN_SUPPORT,
   MapType,
   MAP_TYPES,
-  TileFormat
+  TileFormat,
+  QueryParameter
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
@@ -64,7 +65,10 @@ const defaultProps = {
   aggregationExp: null,
 
   // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
-  aggregationResLevel: null
+  aggregationResLevel: null,
+
+  // {name: string; value: string | number; type: string}[]: query parameters to be sent to the server.
+  queryParameters: null
 };
 
 /** All properties supported by CartoLayer. */
@@ -149,6 +153,9 @@ type _CartoLayerProps = {
 
   /** Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
   aggregationResLevel?: number;
+
+  /** Query parameters to be sent to the server. **/
+  queryParameters?: QueryParameter[];
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
@@ -218,7 +225,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
       JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
-      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
+      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials) ||
+      JSON.stringify(props.queryParameters) !== JSON.stringify(oldProps.queryParameters);
 
     if (shouldUpdateData) {
       this.setState({data: null, apiVersion: null});
@@ -229,7 +237,15 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
   async _updateData(): Promise<void> {
     try {
-      const {type, data: source, clientId, credentials, connection, ...rest} = this.props;
+      const {
+        type,
+        data: source,
+        clientId,
+        credentials,
+        connection,
+        queryParameters,
+        ...rest
+      } = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -245,6 +261,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
           clientId,
           credentials: credentials as CloudNativeCredentials,
           connection,
+          queryParameters,
           ...rest,
           // CartoLayer only supports tiled output from v8.8, force data format
           format: FORMATS.TILEJSON
