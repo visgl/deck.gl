@@ -77,7 +77,9 @@ import {useControl} from 'react-map-gl';
 
 import Map, {NavigationControl} from 'react-map-gl';
 
-function DeckGLOverlay(props: MapboxOverlayProps) {
+function DeckGLOverlay(props: MapboxOverlayProps & {
+  interleaved?: boolean;
+}) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
