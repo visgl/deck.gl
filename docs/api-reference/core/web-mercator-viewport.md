@@ -127,12 +127,14 @@ Returns:
 
 ##### `fitBounds`
 
-Returns a new viewport that fit around the given bounding box. Only supports non-perspective mode.
+Returns a new viewport that fit around the given bounding box. Viewport `width` and `height` must be either set or provided as options. Only supports non-perspective mode.
 
 Parameters:
 
 * `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
-* `opts` (Object)
+* `opts` (Object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
+  + `width` (Number) - Required unless set on viewport.
+  + `height` (Number) - Required unless set on viewport.
   + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
   + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
   
