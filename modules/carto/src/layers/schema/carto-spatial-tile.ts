@@ -85,7 +85,7 @@ function readPackedFixed64(pbf, arr) {
   return arr;
 }
 
-// Binary-Tile conversion, only need for wiriting using protobufjs
+// Binary-Tile conversion, only need for writing using protobufjs
 export function binaryToTile(binary) {
   const tile = {...binary};
   tile.scheme = tile.scheme === 'h3' ? 0 : 1;
@@ -105,6 +105,7 @@ export function binaryToTile(binary) {
   return tile;
 }
 
+// Tile-Bionary conversion, only need for reading using protobufjs
 export function tileToBinary(tile) {
   const binary = {...tile};
   // Undo hacks needed
