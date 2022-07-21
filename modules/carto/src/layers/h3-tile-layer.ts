@@ -10,10 +10,47 @@ import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
+import {binaryToSpatialjson, spatialjsonToBinary} from './schema/spatialjson-utils';
+import {binaryToTile, tileToBinary, TileReader} from './schema/carto-spatial-tile';
+
+import Protobuf from 'pbf';
+import protobuf from 'protobufjs'; // Remove from final PR
+import path from 'path';
+
+let Tile = null;
+const root = protobuf.load(
+  path.join(__dirname, './carto-spatial-tile.proto'),
+  function (err, root) {
+    // @ts-ignore
+    Tile = root.lookupType('carto.Tile');
+  }
+);
+
 const renderSubLayers = props => {
   const {data} = props;
   const {index} = props.tile;
   if (!data || !data.length) return null;
+
+  // Try if conversion working
+  // To binary
+  const binary = spatialjsonToBinary(data);
+
+  // To tile
+  const tile = binaryToTile(binary);
+  // @ts-ignore
+  const pbDoc = Tile.create(tile);
+  // @ts-ignore
+  const buffer = Tile.encode(pbDoc).finish();
+
+  // Load buffer
+  const pbf = new Protobuf(buffer);
+  const decodedTile = TileReader.read(pbf);
+  // @ts-ignore
+  decodedTile.cells.properties = decodedTile.cells.properties.map(({data}) => data);
+
+  // Back to standard data format to display
+  // @ts-ignore
+  props.data = binaryToSpatialjson(decodedTile);
 
   return new H3HexagonLayer(props, {
     getHexagon: d => d.id,
