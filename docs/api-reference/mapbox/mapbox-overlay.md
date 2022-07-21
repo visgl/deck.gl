@@ -26,7 +26,7 @@ const overlay = new MapboxOverlay({
       ],
       getPosition: d => d.position,
       getRadius: d => d.size,
-      getColor: [255, 0, 0]
+      getFillColor: [255, 0, 0]
     })
   ]
 });
@@ -56,7 +56,7 @@ const overlay = new MapboxOverlay({
       ],
       getPosition: d => d.position,
       getRadius: d => d.size,
-      getColor: [255, 0, 0],
+      getFillColor: [255, 0, 0],
 
       beforeId: 'admin_labels' // Insert before this Mapbox layer
     })
@@ -91,7 +91,7 @@ export default function App() {
     ],
     getPosition: d => d.position,
     getRadius: d => d.size,
-    getColor: [255, 0, 0]
+    getFillColor: [255, 0, 0]
   });
 
   return (
