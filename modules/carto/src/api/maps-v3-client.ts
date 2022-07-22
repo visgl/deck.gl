@@ -145,16 +145,7 @@ function getParameters({
   parameters.push(encodeParameter(sourceName, source));
 
   if (queryParameters?.length) {
-    const queryParametersUrl = queryParameters
-      .map((param, i) => {
-        const params: string[] = [];
-        Object.keys(param).forEach(key => {
-          params.push(`queryParameters[${i}].${key}=${encodeURIComponent(param[key])}`);
-        });
-        return params.join('&');
-      })
-      .join('&');
-    parameters.push(queryParametersUrl);
+    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters)));
   }
 
   if (geoColumn) {
