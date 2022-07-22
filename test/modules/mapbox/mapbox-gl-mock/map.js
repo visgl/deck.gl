@@ -109,7 +109,7 @@ export default class Map extends Evented {
   removeLayer(layerId) {
     const layer = this.getLayer(layerId);
     if (layer.type === 'custom') {
-      layer.onRemove(this);
+      layer.implementation.onRemove(this);
     }
     this.style.removeLayer(layerId);
   }
