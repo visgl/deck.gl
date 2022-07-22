@@ -237,13 +237,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
   async _updateData(): Promise<void> {
     try {
-      const {
-        type,
-        data: source,
-        credentials,
-        connection,
-        ...rest
-      } = this.props;
+      const {type, data: source, credentials, connection, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
