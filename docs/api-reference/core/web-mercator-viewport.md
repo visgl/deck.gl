@@ -133,7 +133,7 @@ Parameters:
 
 * `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
 * `opts` (Object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
-  + `width` (Number) - Required unless set on viewport.
+  + `width` (Number) - If not supplied, will use the current width of the viewport (default `1`)
   + `height` (Number) - Required unless set on viewport.
   + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
   + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
