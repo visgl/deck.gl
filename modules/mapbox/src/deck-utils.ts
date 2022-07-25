@@ -102,11 +102,13 @@ export function updateLayer(deck: Deck, layer: MapboxLayer<any>): void {
 
 export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
   let {currentViewport} = deck.userData as UserData;
+  let clearStack: boolean = false;
   if (!currentViewport) {
     // This is the first layer drawn in this render cycle.
     // Generate viewport from the current map state.
     currentViewport = getViewport(deck, map, true);
     (deck.userData as UserData).currentViewport = currentViewport;
+    clearStack = true;
   }
 
   if (!deck.isInitialized) {
@@ -116,6 +118,7 @@ export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
     layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
+    clearStack,
     clearCanvas: false
   });
 }
@@ -236,10 +239,9 @@ function updateLayers(deck: Deck): void {
   }
 
   const layers: Layer[] = [];
-  let layerIndex = 0;
   (deck.userData as UserData).mapboxLayers.forEach(deckLayer => {
     const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props, {_offset: layerIndex++});
+    const layer = new LayerType(deckLayer.props);
     layers.push(layer);
   });
   deck.setProps({layers});
