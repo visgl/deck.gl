@@ -385,7 +385,7 @@ export default class IconManager {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
           height: this._canvasHeight,
-          parameters: this._textureParameters ?? DEFAULT_TEXTURE_PARAMETERS
+          parameters: this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
         });
       }
 
