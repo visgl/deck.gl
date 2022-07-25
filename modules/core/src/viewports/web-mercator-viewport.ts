@@ -20,7 +20,7 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import Viewport, {Padding} from './viewport';
+import Viewport from './viewport';
 
 import {
   pixelsToWorld,
