@@ -32,6 +32,7 @@ import {
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
+import {Padding} from './viewport';
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
@@ -294,13 +295,25 @@ export default class WebMercatorViewport extends Viewport {
   /**
    * Returns a new viewport that fit around the given rectangle.
    * Only supports non-perspective mode.
-   * @param {Array} bounds - [[lon, lat], [lon, lat]]
-   * @param {Number} [options.padding] - The amount of padding in pixels to add to the given bounds.
-   * @param {Array} [options.offset] - The center of the given bounds relative to the map's center,
-   *    [x, y] measured in pixels.
-   * @returns {WebMercatorViewport}
    */
-  fitBounds(bounds: [[number, number], [number, number]], options = {}) {
+  fitBounds(
+    /** [[lon, lat], [lon, lat]] */
+    bounds: [[number, number], [number, number]],
+    options: {
+      /** If not supplied, will use the current width of the viewport (default `1`) */
+      width?: number;
+      /** If not supplied, will use the current height of the viewport (default `1`) */
+      height?: number;
+      /** In degrees, 0.01 would be about 1000 meters */
+      minExtent?: number;
+      /** Max zoom level */
+      maxZoom?: number;
+      /** Extra padding in pixels */
+      padding?: number | Required<Padding>;
+      /** Center shift in pixels */
+      offset?: number[];
+    } = {}
+  ) {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
