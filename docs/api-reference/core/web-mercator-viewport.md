@@ -154,4 +154,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/viewports/web-mercator-viewport.js)
+[modules/core/src/viewports/web-mercator-viewport.ts](https://github.com/visgl/deck.gl/blob/8.8-release/modules/core/src/viewports/web-mercator-viewport.ts)

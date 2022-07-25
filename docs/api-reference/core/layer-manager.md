@@ -79,4 +79,4 @@ Updates the current list of layers.
 
 ## Source
 
-[modules/core/src/lib/layer-manager.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/lib/layer-manager.js)
+[modules/core/src/lib/layer-manager.ts](https://github.com/visgl/deck.gl/blob/8.8-release/modules/core/src/lib/layer-manager.ts)

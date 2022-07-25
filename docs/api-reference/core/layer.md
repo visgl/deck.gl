@@ -814,4 +814,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/lib/layer.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/lib/layer.js)
+[modules/core/src/lib/layer.ts](https://github.com/visgl/deck.gl/blob/8.8-release/modules/core/src/lib/layer.ts)

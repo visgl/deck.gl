@@ -131,4 +131,4 @@ The `H3HexagonLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/h3-layers/h3-hexagon-layer](https://github.com/visgl/deck.gl/tree/8.8-release/modules/geo-layers/src/h3-layers/h3-hexagon-layer.js)
+[modules/geo-layers/src/h3-layers/h3-hexagon-layer.ts](https://github.com/visgl/deck.gl/tree/8.8-release/modules/geo-layers/src/h3-layers/h3-hexagon-layer.ts)

@@ -158,4 +158,4 @@ Returns an object containing the following fields:
 
 ## Source
 
-[modules/core/src/views/view.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/views/view.js)
+[modules/core/src/views/view.ts](https://github.com/visgl/deck.gl/blob/8.8-release/modules/core/src/views/view.ts)

@@ -118,4 +118,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/transitions/transition-interpolator.js](https://github.com/visgl/deck.gl/tree/8.8-release/modules/core/src/transitions/transition-interpolator.js)
+[modules/core/src/transitions/transition-interpolator.ts](https://github.com/visgl/deck.gl/blob/8.8-release/modules/core/src/transitions/transition-interpolator.ts)
