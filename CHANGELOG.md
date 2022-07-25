@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.5] - Jul 25 2022
+
+- Support customising textureParameters on auto-packed texture (#7126) (#7136)
+- Fix MapboxLayer index resolution (#7164)
+- CARTO: fetchMap support spatial index layers (#7065)
+
 #### deck.gl [8.8.4] - Jul 11 2022
 
 - Bump dependency versions (#7134)
