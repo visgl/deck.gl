@@ -70,4 +70,4 @@ See the `Controller` class [documentation](/docs/api-reference/core/controller.m
 
 ## Source
 
-[modules/core/src/controllers/orbit-controller.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/orbit-controller.js)
+[modules/core/src/controllers/orbit-controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/orbit-controller.ts)
