@@ -118,6 +118,14 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
             presets: [
               '@babel/typescript',
               ['@babel/env', {targets: '> 1%, not ie 11'}]
+            ],
+            plugins: [
+              // webpack 4 cannot parse the most recent JS syntax
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-proposal-nullish-coalescing-operator',
+              // typescript syntax supports the class properties proposal,
+              // but we also need to let babel know how to transpile these
+              '@babel/plugin-proposal-class-properties'
             ]
           },
           include: [resolve(ROOT_DIR, 'modules'), resolve(ROOT_DIR, '../luma.gl/modules')]
