@@ -26,6 +26,7 @@ import {
   pixelsToWorld,
   getViewMatrix,
   addMetersToLngLat,
+  unitsPerMeter,
   getProjectionParameters,
   altitudeToFovy,
   fovyToAltitude,
@@ -36,11 +37,7 @@ import {Padding} from './viewport';
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
-import {Matrix4} from '@math.gl/core';
-
-const TILE_SIZE = 512;
-const EARTH_CIRCUMFERENCE = 40.03e6;
-const DEGREES_TO_RADIANS = Math.PI / 180;
+import {Matrix4, clamp} from '@math.gl/core';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -69,6 +66,8 @@ export type WebMercatorViewportOptions = {
   position?: number[];
   /** Zoom level */
   zoom?: number;
+  /** Padding around the viewport, in pixels. */
+  padding?: Padding | null;
   /** Model matrix of viewport center */
   modelMatrix?: number[] | null;
   /** Custom projection matrix */
@@ -86,11 +85,6 @@ export type WebMercatorViewportOptions = {
   /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
   legacyMeterSizes?: boolean;
 };
-
-function unitsPerMeter(latitude: number): number {
-  const latCosine = Math.cos(latitude * DEGREES_TO_RADIANS);
-  return TILE_SIZE / EARTH_CIRCUMFERENCE / latCosine;
-}
 
 /**
  * Manages transformations to/from WGS84 coordinates using the Web Mercator Projection.
@@ -126,6 +120,8 @@ export default class WebMercatorViewport extends Viewport {
 
       repeat = false,
       worldOffset = 0,
+      position,
+      padding,
 
       // backward compatibility
       // TODO: remove in v9
@@ -151,9 +147,19 @@ export default class WebMercatorViewport extends Viewport {
       } else {
         fovy = altitudeToFovy(altitude);
       }
+
+      let offset: [number, number] | undefined;
+      if (padding) {
+        const {top = 0, bottom = 0} = padding;
+        offset = [0, clamp((top + height - bottom) / 2, 0, height) - height / 2];
+      }
+
       projectionParameters = getProjectionParameters({
         width,
         height,
+        scale,
+        center: position && [0, 0, position[2] * unitsPerMeter(latitude)],
+        offset,
         pitch,
         fovy,
         nearZMultiplier,

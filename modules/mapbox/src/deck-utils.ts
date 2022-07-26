@@ -3,12 +3,18 @@ import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
 import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
 
+import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
+
 type UserData = {
   isExternal: boolean;
   currentViewport?: WebMercatorViewport | null;
   mapboxLayers: Set<MapboxLayer<any>>;
   mapboxVersion: {minor: number; major: number};
 };
+
+// Mercator constants
+const TILE_SIZE = 512;
+const DEGREES_TO_RADIANS = Math.PI / 180;
 
 export function getDeckInstance({
   map,
@@ -133,7 +139,16 @@ export function getViewState(map: Map): MapViewState & {
   };
 } {
   const {lng, lat} = map.getCenter();
-  return {
+
+  const viewState: MapViewState & {
+    repeat: boolean;
+    padding: {
+      left: number;
+      right: number;
+      top: number;
+      bottom: number;
+    };
+  } = {
     // Longitude returned by getCenter can be outside of [-180, 180] when zooming near the anti meridian
     // https://github.com/visgl/deck.gl/issues/6894
     longitude: ((lng + 540) % 360) - 180,
@@ -144,6 +159,53 @@ export function getViewState(map: Map): MapViewState & {
     padding: map.getPadding(),
     repeat: map.getRenderWorldCopies()
   };
+
+  if (map.getTerrain?.()) {
+    // When the base map has terrain, we need to target the camera at the terrain surface
+    centerCameraOnTerrain(map, viewState);
+  }
+
+  return viewState;
+}
+
+function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
+  if (map.getFreeCameraOptions) {
+    // mapbox-gl v2
+    const {position} = map.getFreeCameraOptions();
+    if (!position || position.z === undefined) {
+      return;
+    }
+
+    // @ts-ignore transform is not typed
+    const height = map.transform.height;
+    const {longitude, latitude, pitch} = viewState;
+
+    // Convert mapbox mercator coordinate to deck common space
+    const cameraX = position.x * TILE_SIZE;
+    const cameraY = (1 - position.y) * TILE_SIZE;
+    const cameraZ = position.z * TILE_SIZE;
+
+    // Mapbox manipulates zoom in terrain mode, see discussion here: https://github.com/mapbox/mapbox-gl-js/issues/12040
+    const center = lngLatToWorld([longitude, latitude]);
+    const dx = cameraX - center[0];
+    const dy = cameraY - center[1];
+    const cameraToCenterDistanceGround = Math.sqrt(dx * dx + dy * dy);
+
+    const pitchRadians = pitch! * DEGREES_TO_RADIANS;
+    const altitudePixels = 1.5 * height;
+    const scale = (altitudePixels * Math.sin(pitchRadians)) / cameraToCenterDistanceGround;
+    viewState.zoom = Math.log2(scale);
+
+    const cameraZFromSurface = (altitudePixels * Math.cos(pitchRadians)) / scale;
+    const surfaceElevation = cameraZ - cameraZFromSurface;
+    viewState.position = [0, 0, surfaceElevation / unitsPerMeter(latitude)];
+  }
+  // @ts-ignore transform is not typed
+  else if (typeof map.transform.elevation === 'number') {
+    // maplibre-gl
+    // @ts-ignore transform is not typed
+    viewState.position = [0, 0, map.transform.elevation];
+  }
 }
 
 function getMapboxVersion(map: Map): {minor: number; major: number} {
