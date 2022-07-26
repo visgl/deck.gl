@@ -51,8 +51,8 @@ class FirstPersonState extends ViewState<
       longitude = null,
       latitude = null,
 
-      maxPitch = -90,
-      minPitch = 90,
+      maxPitch = 90,
+      minPitch = -90,
 
       // Model state when the rotate operation first started
       startRotatePos,
