@@ -144,8 +144,8 @@ function getParameters({
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
 
-  if (queryParameters?.length) {
-    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters)));
+  if (queryParameters) {
+    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters || [])));
   }
 
   if (geoColumn) {
