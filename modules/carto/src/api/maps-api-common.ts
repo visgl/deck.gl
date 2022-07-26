@@ -78,8 +78,20 @@ export function encodeParameter(name: string, value: string | boolean | number):
   return `${name}=${encodeURIComponent(value)}`;
 }
 
-export type QueryParameter = {
+export type QueryParameterValue = string | number | boolean | Array<QueryParameterValue> | object;
+
+export type NamedQueryParameter = Record<string, QueryParameterValue>;
+
+// TODO: Remove this once backend is adapted to support NamedQueryParameter (line 83)
+export type OldNamedQueryParameter = {
   value: string | number;
-  name?: string;
+  name: string;
   type?: string;
 };
+
+export type PositionalQueryParameter = QueryParameterValue[];
+
+export type QueryParameters =
+  | NamedQueryParameter
+  | OldNamedQueryParameter[]
+  | PositionalQueryParameter;

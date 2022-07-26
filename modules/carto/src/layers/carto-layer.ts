@@ -17,7 +17,7 @@ import {
   MapType,
   MAP_TYPES,
   TileFormat,
-  QueryParameter
+  QueryParameters
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
@@ -67,7 +67,7 @@ const defaultProps = {
   // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
   aggregationResLevel: null,
 
-  // {name: string; value: string | number; type: string}[]: query parameters to be sent to the server.
+  // (NamedQueryParameter[] | Record<string, PositionalQueryParameter>, optional): query parameters to be sent to the server.
   queryParameters: null
 };
 
@@ -155,7 +155,7 @@ type _CartoLayerProps = {
   aggregationResLevel?: number;
 
   /** Query parameters to be sent to the server. **/
-  queryParameters?: QueryParameter[];
+  queryParameters?: QueryParameters;
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<

@@ -20,7 +20,8 @@ export {
   fetchLayerData,
   fetchMap,
   getDataV2 as _getDataV2,
-  mapInstantiation as _mapInstantiation
+  mapInstantiation as _mapInstantiation,
+  QueryParameters
 } from './api';
 
 export type {CartoLayerProps} from './layers/carto-layer';

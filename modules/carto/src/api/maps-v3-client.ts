@@ -17,7 +17,7 @@ import {
   MapInstantiation,
   MapType,
   MAP_TYPES,
-  QueryParameter,
+  QueryParameters,
   SchemaField,
   TileFormat,
   TILE_FORMATS
@@ -123,7 +123,7 @@ type FetchLayerDataParams = {
   formatTiles?: TileFormat;
   aggregationExp?: string;
   aggregationResLevel?: number;
-  queryParameters?: QueryParameter[];
+  queryParameters?: QueryParameters;
 };
 
 /**
@@ -202,7 +202,7 @@ export async function mapInstantiation({
     const body = JSON.stringify({
       q: source,
       client: clientId || DEFAULT_CLIENT,
-      queryParameters
+      queryParameters // TODO: NamedQueryParameter will not be supported
     });
     return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
   }
@@ -389,7 +389,7 @@ async function _fetchMapDataset(
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
-  queryParameters?: QueryParameter[]
+  queryParameters?: QueryParameters
 ) {
   const {
     aggregationExp,
