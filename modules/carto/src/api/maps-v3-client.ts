@@ -202,7 +202,7 @@ export async function mapInstantiation({
     const body = JSON.stringify({
       q: source,
       client: clientId || DEFAULT_CLIENT,
-      queryParameters // TODO: NamedQueryParameter will not be supported
+      queryParameters
     });
     return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
   }
