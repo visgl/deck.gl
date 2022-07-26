@@ -145,7 +145,7 @@ function getParameters({
   parameters.push(encodeParameter(sourceName, source));
 
   if (queryParameters) {
-    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters || [])));
+    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters)));
   }
 
   if (geoColumn) {

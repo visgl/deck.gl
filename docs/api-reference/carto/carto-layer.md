@@ -189,7 +189,7 @@ const layer = new CartoLayer({
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=@username`,
-     queryParameters: [{ username: 'alasarr' }]
+     queryParameters: { username: 'alasarr' }
 })
 ```
 
