@@ -82,16 +82,6 @@ export type QueryParameterValue = string | number | boolean | Array<QueryParamet
 
 export type NamedQueryParameter = Record<string, QueryParameterValue>;
 
-// TODO: Remove this once backend is adapted to support NamedQueryParameter (line 83)
-export type OldNamedQueryParameter = {
-  value: string | number;
-  name: string;
-  type?: string;
-};
-
 export type PositionalQueryParameter = QueryParameterValue[];
 
-export type QueryParameters =
-  | NamedQueryParameter
-  | OldNamedQueryParameter[]
-  | PositionalQueryParameter;
+export type QueryParameters = NamedQueryParameter | PositionalQueryParameter;
