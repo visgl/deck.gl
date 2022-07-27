@@ -67,7 +67,7 @@ const defaultProps = {
   // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
   aggregationResLevel: null,
 
-  // (NamedQueryParameter[] | Record<string, PositionalQueryParameter>, optional): query parameters to be sent to the server.
+  // (QueryParameters, optional): query parameters to be sent to the server.
   queryParameters: null
 };
 
