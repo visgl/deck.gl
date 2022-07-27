@@ -22,5 +22,5 @@ export {
   getDataV2 as _getDataV2,
   mapInstantiation as _mapInstantiation
 } from './api';
-
+export type {QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';

@@ -91,10 +91,11 @@ import {H3HexagonLayer} from '@deck.gl/geo-layers/';
 const {data} = await fetchLayerData({
   type: MAP_TYPES.QUERY,
   source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
-              FROM bigquery-public-data.geo_us_census_places.us_national_places 
+              FROM bigquery-public-data.geo_us_census_places.us_national_places WHERE state=?
             GROUP BY h3`,
   connection: 'connection_name',
-  format: FORMATS.JSON
+  format: FORMATS.JSON,
+  queryParameters: ['AL']
 });
 
 new H3HexagonLayer({
