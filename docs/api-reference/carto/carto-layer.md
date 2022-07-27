@@ -241,4 +241,4 @@ Receives arguments:
 
 ## Source
 
-[modules/carto/src/layers/carto-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-layer.js)
+[modules/carto/src/layers/carto-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-layer.ts)

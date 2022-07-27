@@ -26,20 +26,18 @@ import {
   pixelsToWorld,
   getViewMatrix,
   addMetersToLngLat,
+  unitsPerMeter,
   getProjectionParameters,
   altitudeToFovy,
   fovyToAltitude,
   fitBounds,
   getBounds
 } from '@math.gl/web-mercator';
+import {Padding} from './viewport';
 
 // TODO - import from math.gl
 import * as vec2 from 'gl-matrix/vec2';
-import {Matrix4} from '@math.gl/core';
-
-const TILE_SIZE = 512;
-const EARTH_CIRCUMFERENCE = 40.03e6;
-const DEGREES_TO_RADIANS = Math.PI / 180;
+import {Matrix4, clamp} from '@math.gl/core';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -68,6 +66,8 @@ export type WebMercatorViewportOptions = {
   position?: number[];
   /** Zoom level */
   zoom?: number;
+  /** Padding around the viewport, in pixels. */
+  padding?: Padding | null;
   /** Model matrix of viewport center */
   modelMatrix?: number[] | null;
   /** Custom projection matrix */
@@ -85,11 +85,6 @@ export type WebMercatorViewportOptions = {
   /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
   legacyMeterSizes?: boolean;
 };
-
-function unitsPerMeter(latitude: number): number {
-  const latCosine = Math.cos(latitude * DEGREES_TO_RADIANS);
-  return TILE_SIZE / EARTH_CIRCUMFERENCE / latCosine;
-}
 
 /**
  * Manages transformations to/from WGS84 coordinates using the Web Mercator Projection.
@@ -125,6 +120,8 @@ export default class WebMercatorViewport extends Viewport {
 
       repeat = false,
       worldOffset = 0,
+      position,
+      padding,
 
       // backward compatibility
       // TODO: remove in v9
@@ -150,9 +147,19 @@ export default class WebMercatorViewport extends Viewport {
       } else {
         fovy = altitudeToFovy(altitude);
       }
+
+      let offset: [number, number] | undefined;
+      if (padding) {
+        const {top = 0, bottom = 0} = padding;
+        offset = [0, clamp((top + height - bottom) / 2, 0, height) - height / 2];
+      }
+
       projectionParameters = getProjectionParameters({
         width,
         height,
+        scale,
+        center: position && [0, 0, position[2] * unitsPerMeter(latitude)],
+        offset,
         pitch,
         fovy,
         nearZMultiplier,
@@ -294,13 +301,25 @@ export default class WebMercatorViewport extends Viewport {
   /**
    * Returns a new viewport that fit around the given rectangle.
    * Only supports non-perspective mode.
-   * @param {Array} bounds - [[lon, lat], [lon, lat]]
-   * @param {Number} [options.padding] - The amount of padding in pixels to add to the given bounds.
-   * @param {Array} [options.offset] - The center of the given bounds relative to the map's center,
-   *    [x, y] measured in pixels.
-   * @returns {WebMercatorViewport}
    */
-  fitBounds(bounds: [[number, number], [number, number]], options = {}) {
+  fitBounds(
+    /** [[lon, lat], [lon, lat]] */
+    bounds: [[number, number], [number, number]],
+    options: {
+      /** If not supplied, will use the current width of the viewport (default `1`) */
+      width?: number;
+      /** If not supplied, will use the current height of the viewport (default `1`) */
+      height?: number;
+      /** In degrees, 0.01 would be about 1000 meters */
+      minExtent?: number;
+      /** Max zoom level */
+      maxZoom?: number;
+      /** Extra padding in pixels */
+      padding?: number | Required<Padding>;
+      /** Center shift in pixels */
+      offset?: number[];
+    } = {}
+  ) {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});

@@ -23,7 +23,9 @@ export default class Style {
   render() {
     for (const layerId of this._order) {
       const layer = this._layers[layerId];
-      if (layer.render) {
+      if (layer.implementation) {
+        layer.implementation.render();
+      } else if (layer.render) {
         layer.render();
       }
     }
@@ -50,6 +52,13 @@ export default class Style {
     const layerId = layer.id;
     if (layerId in this._layers) {
       throw new Error(`Layer with the id ${layerId} already exists`);
+    }
+    if (layer.type === 'custom') {
+      layer = {
+        id: layer.id,
+        type: 'custom',
+        implementation: layer
+      };
     }
     this._layers[layerId] = layer;
     if (beforeId) {

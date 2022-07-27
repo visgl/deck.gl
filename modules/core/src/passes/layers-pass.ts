@@ -19,6 +19,8 @@ export type LayersPassRenderOptions = {
   cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
+  /** If true, recalculates render index (z) from 0. Set to false if a stack of layers are rendered in multiple passes. */
+  clearStack?: boolean;
   clearCanvas?: boolean;
   layerFilter?: (context: FilterContext) => boolean;
   moduleParameters?: any;
@@ -47,6 +49,8 @@ export type RenderStats = {
 };
 
 export default class LayersPass extends Pass {
+  _lastRenderIndex: number = -1;
+
   render(options: LayersPassRenderOptions): any {
     const gl = this.gl;
 
@@ -62,6 +66,7 @@ export default class LayersPass extends Pass {
       viewports,
       views,
       onViewportActive,
+      clearStack = true,
       clearCanvas = true
     } = options;
     options.pass = options.pass || 'unknown';
@@ -69,6 +74,10 @@ export default class LayersPass extends Pass {
     const gl = this.gl;
     if (clearCanvas) {
       clearGLCanvas(gl);
+    }
+
+    if (clearStack) {
+      this._lastRenderIndex = -1;
     }
 
     const renderStats: RenderStats[] = [];
@@ -111,7 +120,7 @@ export default class LayersPass extends Pass {
     {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions
   ): DrawLayerParameters[] {
     const drawLayerParams: DrawLayerParameters[] = [];
-    const indexResolver = layerIndexResolver();
+    const indexResolver = layerIndexResolver(this._lastRenderIndex + 1);
     const drawContext: FilterContext = {
       layer: layers[0],
       viewport,
@@ -205,6 +214,8 @@ export default class LayersPass extends Pass {
       } else if (shouldDrawLayer) {
         // Draw the layer
         renderStatus.visibleCount++;
+
+        this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex);
 
         // overwrite layer.context.viewport with the sub viewport
         moduleParameters.viewport = viewport;
