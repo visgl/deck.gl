@@ -169,7 +169,7 @@ Optional. Aggregation resolution level. Only used for spatial index datasets, de
 Optional. Use it to parametrize SQL queries. The format depends on the source's provider, some examples:
 
 
-##### - [PostgreSQL and Redshift](https://node-postgres.com/features/queries):
+[PostgreSQL and Redshift](https://node-postgres.com/features/queries):
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=$1`
@@ -177,7 +177,7 @@ const layer = new CartoLayer({
 })
 ```
 
-##### - [BigQuery positional](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+[BigQuery positional](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=?`,
@@ -185,7 +185,7 @@ const layer = new CartoLayer({
 })
 ```
 
-##### - [BigQuery named parameters](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+[BigQuery named parameters](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=@username`,
@@ -193,7 +193,7 @@ const layer = new CartoLayer({
 })
 ```
 
-##### - [Snowflake positional](https://docs.snowflake.com/en/user-guide/nodejs-driver-use.html#binding-statement-parameters) :
+[Snowflake positional](https://docs.snowflake.com/en/user-guide/nodejs-driver-use.html#binding-statement-parameters) :
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=?`,
@@ -208,7 +208,7 @@ const layer = new CartoLayer({
 })
 ```
 
-##### - [Databricks ODBC](https://github.com/markdirish/node-odbc#bindparameters-callback)
+[Databricks ODBC](https://github.com/markdirish/node-odbc#bindparameters-callback)
 ```js
 const layer = new CartoLayer({
      data: `select * from users where username=?`,
