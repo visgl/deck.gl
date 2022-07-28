@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+
+#### deck.gl [8.8.6] - Jul 28 2022
+
+- CARTO: add queryParameters (#7155) 
+- Fix FirstPersonController default (#7171)
+
 #### deck.gl [8.8.5] - Jul 25 2022
 
 - Support customising textureParameters on auto-packed texture (#7126) (#7136)
