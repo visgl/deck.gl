@@ -96,7 +96,6 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
       new SpatialIndexTileLayer(this.props, {
         id: `h3-tile-layer-${this.props.id}`,
         data,
-        // data: data.map(url => `${url}&formatTiles=binary`),
         // @ts-expect-error Tileset2D should be generic over TileIndex
         TilesetClass: H3Tileset2D,
         renderSubLayers,
