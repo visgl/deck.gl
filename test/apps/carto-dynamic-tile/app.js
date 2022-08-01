@@ -7,55 +7,40 @@ import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const ZOOMS = {3: 3, 4: 4, 5: 5, 6: 6};
-const INITIAL_VIEW_STATE = {longitude: 18, latitude: 47, zoom: 2};
+const INITIAL_VIEW_STATE = {longitude: 8, latitude: 47, zoom: 6};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
 // Skip CDN
 // const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 // PROD US GCP
-const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1-06.dev.api.carto.com';
 // Localhost
 // const apiBaseUrl = 'http://localhost:8002'
 
 const config = {
   bigquery: {
-    che15: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
-    che18: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2',
-    esp15: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2',
-    esp18: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2',
-    ukr15: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2',
-    ukr18: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2',
-    usa15: 'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2',
-    che15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadkey',
-    che18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2_quadkey',
-    esp15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2_quadkey',
-    esp18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2_quadkey',
-    ukr15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2_quadkey',
-    ukr18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2_quadkey',
-    usa15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2_quadkey'
-  },
-  redshift: {
-    che15: 'public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
-    che15_h3: 'public.derived_spatialfeatures_che_h3res10_v1_yearly_v2_interpolated'
+    h3: 'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
   }
 };
 
-const accessToken = 'XXXX';
-
+const accessToken = {
+  'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2':
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiIxNjY4YTFmNSJ9.Hr5HDfA0vPyjqXqnTb9_Bk7fgTjoishYTkAzRDv0Hvg',
+  'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2':
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiI5MjIyNDg1NiJ9.ABoadsJi44OnmzqC_126lkaaxQXLc272PRILLSFaAZc',
+  'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin':
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiIxNjFhNjIwYyJ9.DbmzesHPX3TbM3J9yZYBJnJXH0Pd5DofOa76nDWDzII'
+};
 const showBasemap = true;
 const showCarto = true;
 
 function Root() {
-  const [connection, setConnection] = useState('redshift');
-  const [dataset, setDataset] = useState('che15_h3');
+  const [connection, setConnection] = useState('bigquery');
+  const [dataset, setDataset] = useState('h3');
   const [zoom, setZoom] = useState(5);
   const table = config[connection][dataset];
   return (
@@ -103,7 +88,6 @@ function createBasemap() {
 
 // Add aggregation expressions
 function createCarto(connection, zoom, table) {
-  console.log(connection, zoom, table);
   const isH3 = table.includes('h3');
   const isQuadbin = table.includes('quadbin');
   const geoColumn = isH3
@@ -117,11 +101,14 @@ function createCarto(connection, zoom, table) {
     id: 'carto',
     connection,
     data: table,
-    credentials: {accessToken, apiBaseUrl},
+    credentials: {accessToken: accessToken[table], apiBaseUrl},
 
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
+
+    // binary data
+    formatTiles: 'binary',
 
     // Aggregation
     aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation',
