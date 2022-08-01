@@ -963,6 +963,7 @@ export default class Deck {
       views?: {[viewId: string]: View};
       pass?: string;
       effects?: Effect[];
+      clearStack?: boolean;
       clearCanvas?: boolean;
     }
   ) {

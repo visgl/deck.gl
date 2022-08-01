@@ -268,6 +268,8 @@ export default class IconManager {
   private _texture: Texture2D | null = null;
   private _externalTexture: Texture2D | null = null;
   private _mapping: IconMapping = {};
+  private _textureParameters: Record<number, number> | null = null;
+
   /** count of pending requests to fetch icons */
   private _pendingCount: number = 0;
 
@@ -317,12 +319,14 @@ export default class IconManager {
     loadOptions,
     autoPacking,
     iconAtlas,
-    iconMapping
+    iconMapping,
+    textureParameters
   }: {
     loadOptions?: any;
     autoPacking?: boolean;
     iconAtlas?: Texture2D | null;
     iconMapping?: IconMapping | null;
+    textureParameters?: Record<number, number> | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
@@ -340,6 +344,10 @@ export default class IconManager {
       this._texture?.delete();
       this._texture = null;
       this._externalTexture = iconAtlas;
+    }
+
+    if (textureParameters) {
+      this._textureParameters = textureParameters;
     }
   }
 
@@ -377,7 +385,7 @@ export default class IconManager {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
           height: this._canvasHeight,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          parameters: this._textureParameters ?? DEFAULT_TEXTURE_PARAMETERS
         });
       }
 

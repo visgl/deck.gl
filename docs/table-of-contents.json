@@ -6,7 +6,6 @@
       "entries": [
         {"entry": "docs"},
         {"entry": "docs/whats-new"},
-        {"entry": "docs/get-started/using-with-map"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/contributing"},
         {"entry": "docs/faq"}
@@ -17,6 +16,7 @@
       "entries": [
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
+        {"entry": "docs/get-started/using-with-map"},
         {"entry": "docs/get-started/using-with-react"},
         {"entry": "docs/get-started/using-with-typescript"},
         {"entry": "docs/get-started/learning-resources"}

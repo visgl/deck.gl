@@ -17,6 +17,7 @@ import {
   MapInstantiation,
   MapType,
   MAP_TYPES,
+  QueryParameters,
   SchemaField,
   TileFormat,
   TILE_FORMATS
@@ -122,6 +123,7 @@ type FetchLayerDataParams = {
   formatTiles?: TileFormat;
   aggregationExp?: string;
   aggregationResLevel?: number;
+  queryParameters?: QueryParameters;
 };
 
 /**
@@ -134,12 +136,17 @@ function getParameters({
   columns,
   clientId,
   aggregationExp,
-  aggregationResLevel
+  aggregationResLevel,
+  queryParameters
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
+
+  if (queryParameters) {
+    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters)));
+  }
 
   if (geoColumn) {
     parameters.push(encodeParameter('geo_column', geoColumn));
@@ -174,7 +181,8 @@ export async function mapInstantiation({
   columns,
   clientId,
   aggregationExp,
-  aggregationResLevel
+  aggregationResLevel,
+  queryParameters
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
   const url = `${baseUrl}?${getParameters({
@@ -184,7 +192,8 @@ export async function mapInstantiation({
     columns,
     clientId,
     aggregationResLevel,
-    aggregationExp
+    aggregationExp,
+    queryParameters
   })}`;
   const {accessToken} = credentials;
 
@@ -192,7 +201,8 @@ export async function mapInstantiation({
     // need to be a POST request
     const body = JSON.stringify({
       q: source,
-      client: clientId || DEFAULT_CLIENT
+      client: clientId || DEFAULT_CLIENT,
+      queryParameters
     });
     return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
   }
@@ -268,7 +278,8 @@ export async function fetchLayerData({
   formatTiles,
   clientId,
   aggregationExp,
-  aggregationResLevel
+  aggregationResLevel,
+  queryParameters
 }: FetchLayerDataParams): Promise<FetchLayerDataResult> {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
@@ -283,7 +294,8 @@ export async function fetchLayerData({
     formatTiles,
     clientId,
     aggregationExp,
-    aggregationResLevel
+    aggregationResLevel,
+    queryParameters
   });
 
   const data = await requestData({url, format: mapFormat, accessToken});
@@ -302,7 +314,8 @@ async function _fetchDataUrl({
   formatTiles,
   clientId,
   aggregationExp,
-  aggregationResLevel
+  aggregationResLevel,
+  queryParameters
 }: FetchLayerDataParams) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
@@ -335,7 +348,8 @@ async function _fetchDataUrl({
     columns,
     clientId,
     aggregationExp,
-    aggregationResLevel
+    aggregationResLevel,
+    queryParameters
   });
   let url: string | null = null;
   let mapFormat: Format | undefined;
@@ -374,7 +388,8 @@ async function _fetchMapDataset(
   dataset,
   accessToken: string,
   credentials: CloudNativeCredentials,
-  clientId?: string
+  clientId?: string,
+  queryParameters?: QueryParameters
 ) {
   const {
     aggregationExp,
@@ -397,7 +412,8 @@ async function _fetchMapDataset(
     format,
     geoColumn,
     source,
-    type
+    type,
+    queryParameters
   });
 
   // Extract the last time the data changed

@@ -26,7 +26,7 @@ const overlay = new MapboxOverlay({
       ],
       getPosition: d => d.position,
       getRadius: d => d.size,
-      getColor: [255, 0, 0]
+      getFillColor: [255, 0, 0]
     })
   ]
 });
@@ -56,7 +56,7 @@ const overlay = new MapboxOverlay({
       ],
       getPosition: d => d.position,
       getRadius: d => d.size,
-      getColor: [255, 0, 0],
+      getFillColor: [255, 0, 0],
 
       beforeId: 'admin_labels' // Insert before this Mapbox layer
     })
@@ -77,7 +77,9 @@ import {useControl} from 'react-map-gl';
 
 import Map, {NavigationControl} from 'react-map-gl';
 
-function DeckGLOverlay(props: MapboxOverlayProps) {
+function DeckGLOverlay(props: MapboxOverlayProps & {
+  interleaved?: boolean;
+}) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
@@ -91,7 +93,7 @@ export default function App() {
     ],
     getPosition: d => d.position,
     getRadius: d => d.size,
-    getColor: [255, 0, 0]
+    getFillColor: [255, 0, 0]
   });
 
   return (
