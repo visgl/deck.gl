@@ -17,40 +17,10 @@ import Protobuf from 'pbf';
 import protobuf from 'protobufjs'; // Remove from final PR
 import path from 'path';
 
-let Tile = null;
-const root = protobuf.load(
-  path.join(__dirname, './carto-spatial-tile.proto'),
-  function (err, root) {
-    // @ts-ignore
-    Tile = root.lookupType('carto.Tile');
-  }
-);
-
 const renderSubLayers = props => {
   const {data} = props;
   const {index} = props.tile;
   if (!data || !data.length) return null;
-
-  // Try if conversion working
-  // To binary
-  const binary = spatialjsonToBinary(data);
-
-  // To tile
-  const tile = binaryToTile(binary);
-  // @ts-ignore
-  const pbDoc = Tile.create(tile);
-  // @ts-ignore
-  const buffer = Tile.encode(pbDoc).finish();
-
-  // Load buffer
-  const pbf = new Protobuf(buffer);
-  const decodedTile = TileReader.read(pbf);
-  // @ts-ignore
-  decodedTile.cells.properties = decodedTile.cells.properties.map(({data}) => data);
-
-  // Back to standard data format to display
-  // @ts-ignore
-  props.data = binaryToSpatialjson(decodedTile);
 
   return new H3HexagonLayer(props, {
     getHexagon: d => d.id,
@@ -125,8 +95,8 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
     return [
       new SpatialIndexTileLayer(this.props, {
         id: `h3-tile-layer-${this.props.id}`,
-        // data,
-        data: data.map(url => `${url}&formatTiles=binary`),
+        data,
+        // data: data.map(url => `${url}&formatTiles=binary`),
         // @ts-expect-error Tileset2D should be generic over TileIndex
         TilesetClass: H3Tileset2D,
         renderSubLayers,
