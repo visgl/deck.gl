@@ -122,7 +122,7 @@ function createCarto(connection, zoom, table, formatTiles) {
     formatTiles,
 
     // Aggregation
-    aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation',
+    aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation, "test" as str',
     aggregationResLevel: zoom,
     geoColumn,
     getQuadkey: d => d.id,
