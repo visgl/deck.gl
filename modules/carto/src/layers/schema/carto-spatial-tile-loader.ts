@@ -4,6 +4,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {TILE_FORMATS} from '../../api/maps-api-common';
 import {Properties} from './carto-tile';
+import {binaryToSpatialjson} from './spatialjson-utils';
 import {binaryToTile, tileToBinary, Tile, TileReader} from './carto-spatial-tile';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
@@ -57,5 +58,9 @@ function parseCartoSpatialTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions
     cells: {...cells, properties: unpackProperties(cells.properties)}
   };
 
-  return data;
+  // Return as JSON format
+  // @ts-ignore
+  return binaryToSpatialjson(data);
 }
+
+export default CartoSpatialTileLoader;

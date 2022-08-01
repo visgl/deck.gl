@@ -54,9 +54,10 @@ export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
     for (const key of Object.keys(cells.numericProps)) {
       properties[key] = cells.numericProps[key].value[i];
     }
-    for (const {key, value} of cells.properties[i]) {
-      properties[key] = value;
-    }
+    // TODO Not working
+    // for (const {key, value} of cells.properties[i]) {
+    //   properties[key] = value;
+    // }
 
     spatial.push({id, properties});
   }
