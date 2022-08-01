@@ -7,6 +7,7 @@ import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const ZOOMS = {3: 3, 4: 4, 5: 5, 6: 6};
+const FORMATTILES = {binary: 'binary', json: 'json'};
 const INITIAL_VIEW_STATE = {longitude: 8, latitude: 47, zoom: 6};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
@@ -42,15 +43,25 @@ function Root() {
   const [connection, setConnection] = useState('bigquery');
   const [dataset, setDataset] = useState('h3');
   const [zoom, setZoom] = useState(5);
+  const [formatTiles, setFormatTiles] = useState('binary');
   const table = config[connection][dataset];
   return (
     <>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[showBasemap && createBasemap(), showCarto && createCarto(connection, zoom, table)]}
+        layers={[
+          showBasemap && createBasemap(),
+          showCarto && createCarto(connection, zoom, table, formatTiles)
+        ]}
       />
       <ObjectSelect title="zooms" obj={ZOOMS} value={zoom} onSelect={setZoom} />
+      <ObjectSelect
+        title="formatTiles"
+        obj={FORMATTILES}
+        value={formatTiles}
+        onSelect={setFormatTiles}
+      />
       <ObjectSelect
         title="connection"
         obj={Object.keys(config)}
@@ -87,7 +98,7 @@ function createBasemap() {
 }
 
 // Add aggregation expressions
-function createCarto(connection, zoom, table) {
+function createCarto(connection, zoom, table, formatTiles) {
   const isH3 = table.includes('h3');
   const isQuadbin = table.includes('quadbin');
   const geoColumn = isH3
@@ -107,8 +118,8 @@ function createCarto(connection, zoom, table) {
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
 
-    // binary data
-    formatTiles: 'binary',
+    // tile data format
+    formatTiles,
 
     // Aggregation
     aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation',
