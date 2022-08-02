@@ -20,11 +20,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoSpatialTile(arrayBuffer, options),
   parseSync: parseCartoSpatialTile,
-  options: {
-    cartoSpatialTile: {
-      formatTiles: defaultTileFormat
-    }
-  }
+  options: {}
 };
 
 function parsePbf(buffer: ArrayBuffer): Tile {
@@ -48,9 +44,6 @@ function unpackProperties(properties: Properties[]) {
 
 function parseCartoSpatialTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions) {
   if (!arrayBuffer) return null;
-  const formatTiles = options && options.cartoTile && options.cartoTile.formatTiles;
-  // if (formatTiles === TILE_FORMATS.JSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
-
   const tile = parsePbf(arrayBuffer);
 
   const {cells} = tile;
