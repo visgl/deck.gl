@@ -84,35 +84,3 @@ function readPackedFixed64(pbf, arr) {
   while (pbf.pos < end) arr.push(readFixed64(pbf));
   return arr;
 }
-
-// Binary-Tile conversion, only need for writing using protobufjs
-export function binaryToTile(binary) {
-  const tile = {...binary};
-  tile.scheme = tile.scheme === 'h3' ? 0 : 1;
-
-  // Split out BigInt into low/high to allow writing
-  const lowHigh = [];
-  for (const v of binary.cells.indices.value) {
-    const low = Number(v % BigInt(0x100000000)) | 0;
-    const high = Number(v / BigInt(0x100000000)) | 0;
-
-    // @ts-ignore
-    lowHigh.push({low, high, unsigned: true});
-  }
-  tile.cells.indices.value = lowHigh;
-
-  tile.cells.properties = tile.cells.properties.map(data => ({data}));
-  return tile;
-}
-
-// Tile-Bionary conversion, only need for reading using protobufjs
-export function tileToBinary(tile) {
-  const binary = {...tile};
-  // Undo hacks needed
-  binary.cells.properties = binary.cells.properties.map(({data}) => data);
-  binary.cells.indices.value = binary.cells.indices.value.map(({low, high}) => {
-    return BigInt(high >>> 0) * BigInt(0x100000000) + BigInt(low >>> 0);
-  });
-
-  return binary;
-}

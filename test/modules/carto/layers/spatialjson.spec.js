@@ -1,18 +1,10 @@
 import test from 'tape-promise/tape';
 
-import Protobuf from 'pbf';
-import protobuf from 'protobufjs'; // Remove from final PR
-import path from 'path';
-
 import {
   binaryToSpatialjson,
   spatialjsonToBinary
 } from '@deck.gl/carto/layers/schema/spatialjson-utils';
-import {
-  binaryToTile,
-  tileToBinary,
-  TileReader
-} from '@deck.gl/carto/layers/schema/carto-spatial-tile';
+import {TileReader} from '@deck.gl/carto/layers/schema/carto-spatial-tile';
 
 const TEST_CASES = [
   {
@@ -68,44 +60,5 @@ test('Spatialjson to binary', async t => {
       `Spatialjson is converted from binary: ${name}`
     );
   }
-  t.end();
-});
-
-// Requires "protobufjs": "^6.11.2" in devDependencies
-
-test.only('Spatialjson to pbf', async t => {
-  const root = await protobuf.load(
-    path.join(__dirname, '../../../../modules/carto/src/layers/schema/carto-spatial-tile.proto')
-  );
-  t.ok(root);
-  const Tile = root.lookupType('carto.Tile');
-  t.ok(Tile);
-
-  for (const {name, spatial} of TEST_CASES) {
-    // To binary
-    const converted = spatialjsonToBinary(spatial);
-
-    // To tile
-    const tile = binaryToTile(converted);
-
-    const pbDoc = Tile.create(tile);
-    const buffer = Tile.encode(pbDoc).finish();
-    t.ok(buffer, `Tile encoded: ${name}`);
-
-    // ...and back
-    const original = tileToBinary(Tile.decode(buffer));
-
-    const parsedSpatial = binaryToSpatialjson(original);
-    t.deepEqual(parsedSpatial, spatial, `Tile decoded: ${name}`);
-
-    // Inbuilt parser
-    /* eslint-disable */
-    const pbf = new Protobuf(buffer);
-    const original2 = TileReader.read(pbf);
-    original2.cells.properties = original2.cells.properties.map(({data}) => data);
-    const parsedSpatial2 = binaryToSpatialjson(original2);
-    t.deepEqual(parsedSpatial2, spatial, `Tile decoded 2: ${name}`);
-  }
-
   t.end();
 });

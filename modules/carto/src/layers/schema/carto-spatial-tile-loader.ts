@@ -5,7 +5,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TILE_FORMATS} from '../../api/maps-api-common';
 import {Properties} from './carto-tile';
 import {binaryToSpatialjson} from './spatialjson-utils';
-import {binaryToTile, tileToBinary, Tile, TileReader} from './carto-spatial-tile';
+import {Tile, TileReader} from './carto-spatial-tile';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
