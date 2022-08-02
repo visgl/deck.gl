@@ -1,9 +1,7 @@
 import test from 'tape-promise/tape';
 
-import {
-  binaryToSpatialjson,
-  spatialjsonToBinary
-} from '@deck.gl/carto/layers/schema/spatialjson-utils';
+import {binaryToSpatialjson} from '@deck.gl/carto/layers/schema/spatialjson-utils';
+import {spatialjsonToBinary} from './spatialjson-utils';
 
 const TEST_CASES = [
   {
