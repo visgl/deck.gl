@@ -3,22 +3,13 @@
   "description": "WebGL-powered visualization framework for large-scale datasets",
   "license": "MIT",
   "private": true,
-  "keywords": [
-    "webgl",
-    "visualization",
-    "overlay",
-    "layer"
-  ],
+  "keywords": ["webgl", "visualization", "overlay", "layer"],
   "repository": {
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "workspaces": [
-    "modules/*"
-  ],
-  "resolutions_comments": [
-    "prettier: 2.3.2 breaks on `import type`, remove when ocular bumps"
-  ],
+  "workspaces": ["modules/*"],
+  "resolutions_comments": ["prettier: 2.3.2 breaks on `import type`, remove when ocular bumps"],
   "resolutions": {
     "acorn": "7.4.1",
     "prettier": "^2.4.1"
@@ -71,7 +62,6 @@
     "ocular-dev-tools": "1.0.0-alpha.7",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
-    "protobufjs": "^6.11.2",
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -80,10 +70,7 @@
     "tape-catch": "^1.0.6",
     "typescript": "^4.4.4"
   },
-  "pre-commit": [
-    "test-fast",
-    "bindings-precommit-tests"
-  ],
+  "pre-commit": ["test-fast", "bindings-precommit-tests"],
   "engines": {
     "node": ">=14"
   },

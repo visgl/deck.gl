@@ -29,12 +29,9 @@ const config = {
 };
 
 const accessToken = {
-  'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2':
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiIxNjY4YTFmNSJ9.Hr5HDfA0vPyjqXqnTb9_Bk7fgTjoishYTkAzRDv0Hvg',
-  'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2':
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiI5MjIyNDg1NiJ9.ABoadsJi44OnmzqC_126lkaaxQXLc272PRILLSFaAZc',
-  'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin':
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfNWg2bXlsaHEiLCJqdGkiOiIxNjFhNjIwYyJ9.DbmzesHPX3TbM3J9yZYBJnJXH0Pd5DofOa76nDWDzII'
+  'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2': 'XXX',
+  'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2': 'XXX',
+  'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin': 'XXX'
 };
 const showBasemap = true;
 const showCarto = true;
