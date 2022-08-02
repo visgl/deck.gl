@@ -2,6 +2,11 @@ import test from 'tape-promise/tape';
 
 import {binaryToSpatialjson} from '@deck.gl/carto/layers/schema/spatialjson-utils';
 import {spatialjsonToBinary} from './spatialjson-utils';
+import CartoSpatialTileLoader from '@deck.gl/carto/layers/schema/carto-spatial-tile-loader';
+
+// See test/modules/carto/responseToJson for details for creating test data
+import binarySpatialTileData from '../data/binarySpatialTile.json';
+const BINARY_SPATIAL_TILE = new Uint8Array(binarySpatialTileData).buffer;
 
 const TEST_CASES = [
   {
@@ -57,5 +62,26 @@ test('Spatialjson to binary', async t => {
       `Spatialjson is converted from binary: ${name}`
     );
   }
+  t.end();
+});
+
+test('Parse Carto Spatial Tile', async t => {
+  const expected = [
+    {
+      id: '881f884931fffff',
+      properties: {value: 3.463996610619824, elevation: 0.3463996610619824, str: 'test'}
+    },
+    {
+      id: '881f884937fffff',
+      properties: {value: 3.1231066988791127, elevation: 0.3123106698879113, str: 'test'}
+    },
+    {
+      id: '881f884935fffff',
+      properties: {value: 3.860728273341417, elevation: 0.3860728273341417, str: 'test'}
+    }
+  ];
+
+  const converted = CartoSpatialTileLoader.parseSync(BINARY_SPATIAL_TILE);
+  t.deepEqual(converted, expected, 'Test data correctly decoded');
   t.end();
 });
