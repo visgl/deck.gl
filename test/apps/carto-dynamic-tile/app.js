@@ -25,14 +25,30 @@ const config = {
     h3: 'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
     h3int: 'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
     quadbin: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  snowflake: {
+    h3: 'carto_dev_data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  redshift: {
+    h3: 'carto_dev_data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  postgres: {
+    h3: 'carto_dev_data.public.derived_spatialfeatures_esp_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_esp_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  databricks: {
+    h3: 'cluster.carto_dev_data.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'cluster.carto_dev_data.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2'
   }
 };
 
-const accessToken = {
-  'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2': 'XXX',
-  'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2': 'XXX',
-  'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin': 'XXX'
-};
+const accessToken = 'XXX';
+
 const showBasemap = true;
 const showCarto = true;
 
@@ -109,7 +125,7 @@ function createCarto(connection, zoom, table, formatTiles) {
     id: 'carto',
     connection,
     data: table,
-    credentials: {accessToken: accessToken[table], apiBaseUrl},
+    credentials: {accessToken, apiBaseUrl},
 
     // Dynamic tiling. Request TILEJSON format with TABLE
     type: MAP_TYPES.TABLE,
