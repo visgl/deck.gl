@@ -50,15 +50,10 @@ export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
   for (let i = 0; i < count; i++) {
     const id = bigIntToIndex(cells.indices.value[i]);
 
-    const properties = {};
+    const properties = {...cells.properties[i]};
     for (const key of Object.keys(cells.numericProps)) {
       properties[key] = cells.numericProps[key].value[i];
     }
-    // TODO Not working
-    // for (const {key, value} of cells.properties[i]) {
-    //   properties[key] = value;
-    // }
-
     spatial.push({id, properties});
   }
 
