@@ -10,17 +10,9 @@ import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
-import {binaryToSpatialjson, spatialjsonToBinary} from './schema/spatialjson-utils';
-import {binaryToTile, tileToBinary, TileReader} from './schema/carto-spatial-tile';
-
-import Protobuf from 'pbf';
-import protobuf from 'protobufjs'; // Remove from final PR
-import path from 'path';
-
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
-
   return new QuadbinLayer(props, {
     getQuadbin: d => d.id
   });
