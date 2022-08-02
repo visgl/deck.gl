@@ -4,7 +4,6 @@ import {
   binaryToSpatialjson,
   spatialjsonToBinary
 } from '@deck.gl/carto/layers/schema/spatialjson-utils';
-import {TileReader} from '@deck.gl/carto/layers/schema/carto-spatial-tile';
 
 const TEST_CASES = [
   {
@@ -15,7 +14,7 @@ const TEST_CASES = [
       cells: {
         indices: {value: new BigUint64Array([594786321193500671n])},
         numericProps: {},
-        properties: [[]]
+        properties: [{}]
       }
     }
   },
@@ -27,7 +26,7 @@ const TEST_CASES = [
       cells: {
         indices: {value: new BigUint64Array([5252931537380311039n])},
         numericProps: {},
-        properties: [[]]
+        properties: [{}]
       }
     }
   },
@@ -44,7 +43,7 @@ const TEST_CASES = [
           floatProp: {value: new Float64Array([123.45])},
           intProp: {value: new Int32Array([12345])}
         },
-        properties: [[{key: 'stringProp', value: 'abc'}]]
+        properties: [{stringProp: 'abc'}]
       }
     }
   }

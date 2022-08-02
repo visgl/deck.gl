@@ -9,7 +9,11 @@ type TypedArray = Float32Array | Float64Array;
 export type Indices = {value: BigUint64Array};
 export type NumericProps = {[x: string]: {value: TypedArray}};
 export type Property = {key: string; value: string | number | boolean | null};
-export type Cells = {indices: Indices; numericProps: NumericProps; properties: Property[][]};
+export type Cells = {
+  indices: Indices;
+  numericProps: NumericProps;
+  properties: {[x: string]: string | number | boolean | null}[];
+};
 type SpatialBinary = {scheme?: IndexScheme; cells: Cells};
 type SpatialJson = {id: string; properties: {[x: string]: string | number | boolean | null}}[];
 
@@ -33,10 +37,7 @@ export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
     cells.indices.value[i] = indexToBigInt(id);
 
     fillNumericProperties(cells.numericProps, properties, i);
-    const stringProps = keepStringProperties(properties, numericPropKeys);
-    cells.properties.push(
-      Object.entries(stringProps).map(([key, value]) => ({key, value} as Property))
-    );
+    cells.properties.push(keepStringProperties(properties, numericPropKeys));
     i++;
   }
 
@@ -67,7 +68,7 @@ function inferSpatialIndexType(index: string): IndexScheme {
 function keepStringProperties(
   properties: {[x: string]: string | number | boolean | null},
   numericKeys: string[]
-) {
+): {[x: string]: string | number | boolean | null} {
   const props = {};
   for (const key in properties) {
     if (!numericKeys.includes(key)) {
