@@ -12,7 +12,7 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {Properties, Tile, TileReader} from './schema/carto-tile';
+import {KeyValueProperties, Tile, TileReader} from './schema/carto-tile';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
@@ -28,7 +28,7 @@ function parsePbf(buffer: ArrayBuffer): Tile {
   return tile;
 }
 
-function unpackProperties(properties: Properties[]) {
+function unpackProperties(properties: KeyValueProperties[]) {
   if (!properties || !properties.length) {
     return [];
   }
