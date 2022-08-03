@@ -3,8 +3,8 @@ import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {TILE_FORMATS} from '../../api/maps-api-common';
-import {Properties} from './carto-tile';
-import {binaryToSpatialjson} from './spatialjson-utils';
+import {KeyValueProperties} from './carto-tile';
+import {binaryToSpatialjson, Properties, SpatialBinary, SpatialJson} from './spatialjson-utils';
 import {Tile, TileReader} from './carto-spatial-tile';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
@@ -29,12 +29,12 @@ function parsePbf(buffer: ArrayBuffer): Tile {
   return tile;
 }
 
-function unpackProperties(properties: Properties[]) {
+function unpackProperties(properties: KeyValueProperties[]): Properties[] {
   if (!properties || !properties.length) {
     return [];
   }
   return properties.map(item => {
-    const currentRecord: Record<string, unknown> = {};
+    const currentRecord: Properties = {};
     item.data.forEach(({key, value}) => {
       currentRecord[key] = value;
     });
@@ -42,7 +42,10 @@ function unpackProperties(properties: Properties[]) {
   });
 }
 
-function parseCartoSpatialTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions) {
+function parseCartoSpatialTile(
+  arrayBuffer: ArrayBuffer,
+  options?: LoaderOptions
+): SpatialJson | null {
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer);
 
@@ -51,8 +54,6 @@ function parseCartoSpatialTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions
     cells: {...cells, properties: unpackProperties(cells.properties)}
   };
 
-  // Return as JSON format
-  // @ts-ignore
   return binaryToSpatialjson(data);
 }
 

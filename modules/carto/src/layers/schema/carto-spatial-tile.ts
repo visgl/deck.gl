@@ -1,15 +1,16 @@
-import {IndexScheme} from './spatialjson-utils';
-import {NumericProp, NumericPropKeyValueReader, Properties, PropertiesReader} from './carto-tile';
+import {Indices, IndexScheme} from './spatialjson-utils';
+import {
+  KeyValueProperties,
+  NumericProp,
+  NumericPropKeyValueReader,
+  PropertiesReader
+} from './carto-tile';
 
-// Ints ========================================
+// Indices =====================================
 
-export interface Ints {
-  value: BigUint64Array;
-}
-
-export class IntsReader {
-  static read(pbf, end?: number): Ints {
-    const {value} = pbf.readFields(IntsReader._readField, {value: []}, end);
+export class IndicesReader {
+  static read(pbf, end?: number): Indices {
+    const {value} = pbf.readFields(IndicesReader._readField, {value: []}, end);
     return {value: new BigUint64Array(value)};
   }
   static _readField(this: void, tag: number, obj, pbf) {
@@ -20,8 +21,8 @@ export class IntsReader {
 // Cells =========================================
 
 interface Cells {
-  indices: Ints;
-  properties: Properties[];
+  indices: Indices;
+  properties: KeyValueProperties[];
   numericProps: Record<string, NumericProp>;
 }
 
@@ -34,7 +35,7 @@ class CellsReader {
     );
   }
   static _readField(this: void, tag: number, obj: Cells, pbf) {
-    if (tag === 1) obj.indices = IntsReader.read(pbf, pbf.readVarint() + pbf.pos);
+    if (tag === 1) obj.indices = IndicesReader.read(pbf, pbf.readVarint() + pbf.pos);
     else if (tag === 2) obj.properties.push(PropertiesReader.read(pbf, pbf.readVarint() + pbf.pos));
     else if (tag === 3) {
       const entry = NumericPropKeyValueReader.read(pbf, pbf.readVarint() + pbf.pos);
@@ -45,11 +46,7 @@ class CellsReader {
 
 // Tile ========================================
 
-const IndexSchemeMap = {
-  0: 'h3',
-  1: 'quadbin'
-};
-
+// TODO this type is very similar to SpatialBinary, should align
 export interface Tile {
   scheme: IndexScheme;
   cells: Cells;

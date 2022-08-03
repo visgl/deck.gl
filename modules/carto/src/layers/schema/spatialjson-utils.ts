@@ -4,14 +4,18 @@ export type IndexScheme = 'h3' | 'quadbin';
 type TypedArray = Float32Array | Float64Array;
 
 export type Indices = {value: BigUint64Array};
-export type NumericProps = {[x: string]: {value: TypedArray}};
+export type NumericProps = Record<string, {value: number[] | TypedArray}>;
+export type Properties = Record<string, string | number | boolean | null>;
 export type Cells = {
   indices: Indices;
   numericProps: NumericProps;
-  properties: {[x: string]: string | number | boolean | null}[];
+  properties: Properties[];
 };
-type SpatialBinary = {scheme?: IndexScheme; cells: Cells};
-type SpatialJson = {id: string; properties: {[x: string]: string | number | boolean | null}}[];
+export type SpatialBinary = {scheme?: IndexScheme; cells: Cells};
+export type SpatialJson = {
+  id: string;
+  properties: Properties;
+}[];
 
 export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
   const {cells} = binary;

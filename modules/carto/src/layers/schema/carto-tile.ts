@@ -16,7 +16,7 @@ class KeyValueObjectReader {
 
 // Properties ========================================
 
-export interface Properties {
+export interface KeyValueProperties {
   data: KeyValueObject[];
 }
 
@@ -24,7 +24,7 @@ export class PropertiesReader {
   static read(pbf, end?: number) {
     return pbf.readFields(PropertiesReader._readField, {data: []}, end);
   }
-  static _readField(this: void, tag: number, obj: Properties, pbf) {
+  static _readField(this: void, tag: number, obj: KeyValueProperties, pbf) {
     if (tag === 1) obj.data.push(KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
@@ -104,7 +104,7 @@ interface Points {
   positions: Doubles;
   globalFeatureIds: Ints;
   featureIds: Ints;
-  properties: Properties[];
+  properties: KeyValueProperties[];
   numericProps: Record<string, NumericProp>;
 }
 
