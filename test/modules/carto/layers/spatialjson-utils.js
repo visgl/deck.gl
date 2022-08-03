@@ -1,30 +1,20 @@
 import {h3IsValid} from 'h3-js';
-
-import {
-  Cells,
-  IndexScheme,
-  SpatialJson,
-  SpatialBinary
-} from '@deck.gl/carto/layers/schema/spatialjson-utils';
 import {indexToBigInt} from '@deck.gl/carto/layers/quadbin-utils';
 
-type PropArrayConstructor = Float32ArrayConstructor | Float64ArrayConstructor | ArrayConstructor;
-type TypedArray = Float32Array | Float64Array;
-
 // Mimic encoding from backend for testing decoding
-export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
+export function spatialjsonToBinary(spatial) {
   const count = spatial.length;
 
   const scheme = count ? inferSpatialIndexType(spatial[0].id) : undefined;
   const indices = {value: new BigUint64Array(count)};
-  const cells: Cells = {indices, numericProps: {}, properties: []};
+  const cells = {indices, numericProps: {}, properties: []};
 
   // Create numeric property arrays
   const propArrayTypes = extractNumericPropTypes(spatial);
   const numericPropKeys = Object.keys(propArrayTypes).filter(k => propArrayTypes[k] !== Array);
   for (const propName of numericPropKeys) {
     const T = propArrayTypes[propName];
-    cells.numericProps[propName] = {value: new T(count) as TypedArray};
+    cells.numericProps[propName] = {value: new T(count)};
   }
 
   let i = 0;
@@ -39,14 +29,11 @@ export function spatialjsonToBinary(spatial: SpatialJson): SpatialBinary {
   return {scheme, cells};
 }
 
-function inferSpatialIndexType(index: string): IndexScheme {
+function inferSpatialIndexType(index) {
   return h3IsValid(index) ? 'h3' : 'quadbin';
 }
 
-function keepStringProperties(
-  properties: {[x: string]: string | number | boolean | null},
-  numericKeys: string[]
-): {[x: string]: string | number | boolean | null} {
+function keepStringProperties(properties, numericKeys) {
   const props = {};
   for (const key in properties) {
     if (!numericKeys.includes(key)) {
@@ -56,9 +43,7 @@ function keepStringProperties(
   return props;
 }
 
-function extractNumericPropTypes(features: any[]): {
-  [key: string]: PropArrayConstructor;
-} {
+function extractNumericPropTypes(features) {
   const propArrayTypes = {};
   for (const feature of features) {
     if (feature.properties) {
@@ -76,20 +61,16 @@ function extractNumericPropTypes(features: any[]): {
   return propArrayTypes;
 }
 
-function fillNumericProperties(
-  numericProps,
-  properties: {[x: string]: string | number | boolean | null},
-  index: number
-): void {
+function fillNumericProperties(numericProps, properties, index) {
   for (const numericPropName in numericProps) {
     if (numericPropName in properties) {
-      const value = properties[numericPropName] as number;
+      const value = properties[numericPropName];
       numericProps[numericPropName].value[index] = value;
     }
   }
 }
 
-function deduceArrayType(x: any, constructor: PropArrayConstructor): PropArrayConstructor {
+function deduceArrayType(x, constructor) {
   if (constructor === Array || !Number.isFinite(x)) {
     return Array;
   }
