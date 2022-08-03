@@ -1,13 +1,10 @@
 import Protobuf from 'pbf';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {TILE_FORMATS} from '../../api/maps-api-common';
 import {KeyValueProperties} from './carto-tile';
-import {binaryToSpatialjson, Properties, SpatialBinary, SpatialJson} from './spatialjson-utils';
+import {binaryToSpatialjson, Properties, SpatialJson} from './spatialjson-utils';
 import {Tile, TileReader} from './carto-spatial-tile';
-
-const defaultTileFormat = TILE_FORMATS.BINARY;
 
 const CartoSpatialTileLoader: LoaderWithParser = {
   name: 'CARTO Spatial Tile',
