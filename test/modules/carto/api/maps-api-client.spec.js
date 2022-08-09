@@ -511,6 +511,7 @@ test('fetchLayerData#post', async t => {
   const mapInstantiationUrl = 'http://carto-api/v3/maps/connection_name/query';
 
   const accessToken = 'XXX';
+  const headers = {'Custom-Header': 'Custom-Header-Value'};
 
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
@@ -529,6 +530,11 @@ test('fetchLayerData#post', async t => {
         options.headers.Authorization,
         `Bearer ${accessToken}`,
         'should provide a valid authentication header'
+      );
+      t.is(
+        options.headers['Custom-Header'],
+        'Custom-Header-Value',
+        'should include custom header in instantiation request'
       );
 
       return Promise.resolve({
@@ -561,7 +567,8 @@ test('fetchLayerData#post', async t => {
       type: MAP_TYPES.QUERY,
       connection: 'connection_name',
       source: `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`,
-      credentials: getDefaultCredentials()
+      credentials: getDefaultCredentials(),
+      headers
     });
   } catch (e) {
     t.error(e, 'should not throw');
