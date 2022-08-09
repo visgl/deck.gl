@@ -61,7 +61,7 @@ const defaultProps = {
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null},
 
-  // (Record<String, String>, optional): Custom headers to include in the map instantiation request.
+  // (Headers, optional): Custom headers to include in the map instantiation request.
   headers: {type: 'object', value: {}, optional: true},
 
   // (String, optional): aggregation SQL expression. Only used for spatial index datasets
