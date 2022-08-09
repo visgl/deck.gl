@@ -68,7 +68,7 @@ const CartoTileLoader: LoaderWithParser = {
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: [
-    'application/vnd.carto-tile',
+    'application/vnd.carto-vector-tile',
     'application/x-protobuf' // Back-compatibility
   ],
   category: 'geometry',
