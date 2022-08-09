@@ -1,7 +1,6 @@
 import Protobuf from 'pbf';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
-import {TILE_FORMATS} from '../../api/maps-api-common';
 import {KeyValueProperties} from './carto-tile';
 import {binaryToSpatialjson, Properties, SpatialJson} from './spatialjson-utils';
 import {Tile, TileReader} from './carto-spatial-tile';
