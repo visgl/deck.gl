@@ -29,7 +29,7 @@ import {assert} from '../utils';
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 
-type Headers = Record<string, string>;
+export type Headers = Record<string, string>;
 interface RequestParams {
   method?: string;
   url: string;
