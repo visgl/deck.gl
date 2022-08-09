@@ -132,6 +132,8 @@ Name of the connection registered in the CARTO workspace.
 
 ##### `formatTiles` (String, optional)
 
+- Default: `TILE_FORMATS.BINARY`
+
 Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`. Use to override the default tile data format. Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
 
 ##### `geoColumn` (String, optional)
