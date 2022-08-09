@@ -29,9 +29,11 @@ import {assert} from '../utils';
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 
+type Headers = Record<string, string>;
 interface RequestParams {
   method?: string;
   url: string;
+  headers?: Headers;
   accessToken?: string;
   body?: any;
 }
@@ -39,8 +41,15 @@ interface RequestParams {
 /**
  * Request against Maps API
  */
-async function request({method, url, accessToken, body}: RequestParams): Promise<Response> {
-  const headers: Record<string, string> = {
+async function request({
+  method,
+  url,
+  headers: customHeaders,
+  accessToken,
+  body
+}: RequestParams): Promise<Response> {
+  const headers: Headers = {
+    ...customHeaders,
     Accept: 'application/json'
   };
 
@@ -67,10 +76,11 @@ async function request({method, url, accessToken, body}: RequestParams): Promise
 async function requestJson<T = unknown>({
   method,
   url,
+  headers,
   accessToken,
   body
 }: RequestParams): Promise<T> {
-  const response = await request({method, url, accessToken, body});
+  const response = await request({method, url, headers, accessToken, body});
   const json = await response.json();
 
   if (!response.ok) {
@@ -121,6 +131,7 @@ type FetchLayerDataParams = {
   clientId?: string;
   format?: Format;
   formatTiles?: TileFormat;
+  headers?: Headers;
   aggregationExp?: string;
   aggregationResLevel?: number;
   queryParameters?: QueryParameters;
@@ -180,6 +191,7 @@ export async function mapInstantiation({
   geoColumn,
   columns,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -204,10 +216,10 @@ export async function mapInstantiation({
       client: clientId || DEFAULT_CLIENT,
       queryParameters
     });
-    return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
+    return await requestJson({method: 'POST', url: baseUrl, headers, accessToken, body});
   }
 
-  return await requestJson({url, accessToken});
+  return await requestJson({url, headers, accessToken});
 }
 
 function getUrlFromMetadata(metadata: MapInstantiation, format: Format): string | null {
@@ -277,6 +289,7 @@ export async function fetchLayerData({
   format,
   formatTiles,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -293,6 +306,7 @@ export async function fetchLayerData({
     format,
     formatTiles,
     clientId,
+    headers,
     aggregationExp,
     aggregationResLevel,
     queryParameters
@@ -313,6 +327,7 @@ async function _fetchDataUrl({
   format,
   formatTiles,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -347,6 +362,7 @@ async function _fetchDataUrl({
     geoColumn,
     columns,
     clientId,
+    headers,
     aggregationExp,
     aggregationResLevel,
     queryParameters
