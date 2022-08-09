@@ -435,6 +435,7 @@ test(`getDataV2#versionError`, async t => {
         apiBaseUrl: 'http://carto-api',
         accessToken
       };
+      const headers = {'Custom-Header': 'Custom-Header-Value'};
 
       setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
@@ -447,6 +448,11 @@ test(`getDataV2#versionError`, async t => {
             options.headers.Authorization,
             `Bearer ${accessToken}`,
             'should provide a valid authentication header'
+          );
+          t.is(
+            options.headers['Custom-Header'],
+            'Custom-Header-Value',
+            'should include custom header in instantiation request'
           );
           return Promise.resolve({
             json: () => {
@@ -484,6 +490,7 @@ test(`getDataV2#versionError`, async t => {
           connection: 'connection_name',
           source: 'table',
           credentials: useSetDefaultCredentials ? getDefaultCredentials() : credentials,
+          headers,
           ...props
         });
       } catch (e) {
