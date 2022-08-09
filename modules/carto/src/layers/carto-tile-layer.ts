@@ -67,7 +67,10 @@ const CartoTileLoader: LoaderWithParser = {
   id: 'cartoTile',
   module: 'carto',
   extensions: ['pbf'],
-  mimeTypes: ['application/x-protobuf'],
+  mimeTypes: [
+    'application/vnd.carto-tile',
+    'application/x-protobuf' // Back-compatibility
+  ],
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoTile(arrayBuffer, options),
