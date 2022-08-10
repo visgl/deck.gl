@@ -560,7 +560,7 @@ export async function fetchMap({
   }
 
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const map = await requestJson<any>({url, accessToken});
+  const map = await requestJson<any>({url, headers, accessToken});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
