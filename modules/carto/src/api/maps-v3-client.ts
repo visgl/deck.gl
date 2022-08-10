@@ -405,6 +405,7 @@ async function _fetchMapDataset(
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
+  headers?: Headers,
   queryParameters?: QueryParameters
 ) {
   const {
@@ -427,6 +428,7 @@ async function _fetchMapDataset(
     columns,
     format,
     geoColumn,
+    headers,
     source,
     type,
     queryParameters
@@ -473,9 +475,12 @@ async function _fetchTilestats(
 async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
-  credentials: CloudNativeCredentials
+  credentials: CloudNativeCredentials,
+  headers?: Headers
 ) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
+  const promises = datasets.map(dataset =>
+    _fetchMapDataset(dataset, token, credentials, clientId, headers)
+  );
   return await Promise.all(promises);
 }
 
@@ -519,12 +524,14 @@ export async function fetchMap({
   cartoMapId,
   clientId,
   credentials,
+  headers,
   autoRefresh,
   onNewData
 }: {
   cartoMapId: string;
   clientId: string;
   credentials?: CloudNativeCredentials;
+  headers?: Headers;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 }) {
@@ -561,7 +568,7 @@ export async function fetchMap({
   if (autoRefresh) {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, localCreds);
+      const changed = await fillInMapDatasets(map, clientId, localCreds, headers);
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -582,7 +589,7 @@ export async function fetchMap({
   });
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, clientId, localCreds);
+  await fillInMapDatasets(map, clientId, localCreds, headers);
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
