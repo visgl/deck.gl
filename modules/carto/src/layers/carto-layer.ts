@@ -25,7 +25,7 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {FetchLayerDataResult} from '../api/maps-v3-client';
+import {FetchLayerDataResult, Headers} from '../api/maps-v3-client';
 import {assert} from '../utils';
 
 const defaultProps = {
@@ -60,6 +60,9 @@ const defaultProps = {
 
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null},
+
+  // (Headers, optional): Custom headers to include in the map instantiation request.
+  headers: {type: 'object', value: {}, optional: true},
 
   // (String, optional): aggregation SQL expression. Only used for spatial index datasets
   aggregationExp: null,
@@ -147,6 +150,9 @@ type _CartoLayerProps = {
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
+
+  /** Custom headers to include in the map instantiation request **/
+  headers?: Headers;
 
   /** Aggregation SQL expression. Only used for spatial index datasets **/
   aggregationExp?: string;

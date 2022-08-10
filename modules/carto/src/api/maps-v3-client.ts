@@ -29,9 +29,11 @@ import {assert} from '../utils';
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 
+export type Headers = Record<string, string>;
 interface RequestParams {
   method?: string;
   url: string;
+  headers?: Headers;
   accessToken?: string;
   body?: any;
 }
@@ -39,8 +41,15 @@ interface RequestParams {
 /**
  * Request against Maps API
  */
-async function request({method, url, accessToken, body}: RequestParams): Promise<Response> {
-  const headers: Record<string, string> = {
+async function request({
+  method,
+  url,
+  headers: customHeaders,
+  accessToken,
+  body
+}: RequestParams): Promise<Response> {
+  const headers: Headers = {
+    ...customHeaders,
     Accept: 'application/json'
   };
 
@@ -67,10 +76,11 @@ async function request({method, url, accessToken, body}: RequestParams): Promise
 async function requestJson<T = unknown>({
   method,
   url,
+  headers,
   accessToken,
   body
 }: RequestParams): Promise<T> {
-  const response = await request({method, url, accessToken, body});
+  const response = await request({method, url, headers, accessToken, body});
   const json = await response.json();
 
   if (!response.ok) {
@@ -121,6 +131,7 @@ type FetchLayerDataParams = {
   clientId?: string;
   format?: Format;
   formatTiles?: TileFormat;
+  headers?: Headers;
   aggregationExp?: string;
   aggregationResLevel?: number;
   queryParameters?: QueryParameters;
@@ -180,6 +191,7 @@ export async function mapInstantiation({
   geoColumn,
   columns,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -204,10 +216,10 @@ export async function mapInstantiation({
       client: clientId || DEFAULT_CLIENT,
       queryParameters
     });
-    return await requestJson({method: 'POST', url: baseUrl, accessToken, body});
+    return await requestJson({method: 'POST', url: baseUrl, headers, accessToken, body});
   }
 
-  return await requestJson({url, accessToken});
+  return await requestJson({url, headers, accessToken});
 }
 
 function getUrlFromMetadata(metadata: MapInstantiation, format: Format): string | null {
@@ -277,6 +289,7 @@ export async function fetchLayerData({
   format,
   formatTiles,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -293,6 +306,7 @@ export async function fetchLayerData({
     format,
     formatTiles,
     clientId,
+    headers,
     aggregationExp,
     aggregationResLevel,
     queryParameters
@@ -313,6 +327,7 @@ async function _fetchDataUrl({
   format,
   formatTiles,
   clientId,
+  headers,
   aggregationExp,
   aggregationResLevel,
   queryParameters
@@ -347,6 +362,7 @@ async function _fetchDataUrl({
     geoColumn,
     columns,
     clientId,
+    headers,
     aggregationExp,
     aggregationResLevel,
     queryParameters
@@ -389,6 +405,7 @@ async function _fetchMapDataset(
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
+  headers?: Headers,
   queryParameters?: QueryParameters
 ) {
   const {
@@ -411,6 +428,7 @@ async function _fetchMapDataset(
     columns,
     format,
     geoColumn,
+    headers,
     source,
     type,
     queryParameters
@@ -457,9 +475,12 @@ async function _fetchTilestats(
 async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
-  credentials: CloudNativeCredentials
+  credentials: CloudNativeCredentials,
+  headers?: Headers
 ) {
-  const promises = datasets.map(dataset => _fetchMapDataset(dataset, token, credentials, clientId));
+  const promises = datasets.map(dataset =>
+    _fetchMapDataset(dataset, token, credentials, clientId, headers)
+  );
   return await Promise.all(promises);
 }
 
@@ -503,12 +524,14 @@ export async function fetchMap({
   cartoMapId,
   clientId,
   credentials,
+  headers,
   autoRefresh,
   onNewData
 }: {
   cartoMapId: string;
   clientId: string;
   credentials?: CloudNativeCredentials;
+  headers?: Headers;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 }) {
@@ -537,7 +560,7 @@ export async function fetchMap({
   }
 
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const map = await requestJson<any>({url, accessToken});
+  const map = await requestJson<any>({url, headers, accessToken});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
@@ -545,7 +568,7 @@ export async function fetchMap({
   if (autoRefresh) {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, localCreds);
+      const changed = await fillInMapDatasets(map, clientId, localCreds, headers);
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -566,7 +589,7 @@ export async function fetchMap({
   });
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, clientId, localCreds);
+  await fillInMapDatasets(map, clientId, localCreds, headers);
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);

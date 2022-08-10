@@ -53,6 +53,10 @@ Required. Identifier of map created in CARTO Builder.
 
 [CARTO Credentials](/docs/api-reference/carto/overview.md#carto-credentials) to use in API requests.
 
+##### `headers` (Object, optional)
+
+Custom headers to include in the map instantiation requests.
+
 ##### `autoRefresh` (Number, optional)
 
 Interval in seconds at which to autoRefresh the data. If provided, `onNewData` must also be provided.
