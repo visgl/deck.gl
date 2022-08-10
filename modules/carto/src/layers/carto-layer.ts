@@ -17,7 +17,6 @@ import {
   MapType,
   MAP_TYPES,
   TileFormat,
-  TILE_FORMATS,
   QueryParameters
 } from '../api/maps-api-common';
 import {
@@ -50,7 +49,7 @@ const defaultProps = {
   // (String, optional): format of data
   format: null,
 
-  // (String, optional): force format of data for tiles. Defaults to `TILE_FORMATS.BINARY
+  // (String, optional): force format of data for tiles
   formatTiles: null,
 
   // (String, optional): clientId identifier used for internal tracing, place here a string to identify the client who is doing the request.
@@ -100,7 +99,7 @@ type _CartoLayerProps = {
   connection?: string;
 
   /**
-   * Use to override the default tile data format. Defaults to `TILE_FORMATS.BINARY.
+   * Use to override the default tile data format.
    *
    * Only supported when apiVersion is `API_VERSIONS.V3`.
    *
@@ -253,8 +252,6 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
           source,
           credentials: credentials as CloudNativeCredentials,
           connection,
-          // @ts-expect-error 'formatTiles' is specified more than once, so this usage will be overwritten.
-          formatTiles: TILE_FORMATS.BINARY,
           ...rest,
           // CartoLayer only supports tiled output from v8.8, force data format
           format: FORMATS.TILEJSON
