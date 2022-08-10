@@ -9,7 +9,7 @@ type UserData = {
   isExternal: boolean;
   currentViewport?: WebMercatorViewport | null;
   mapboxLayers: Set<MapboxLayer<any>>;
-  mapboxVersion: {minor: number; major: number};
+  // mapboxVersion: {minor: number; major: number};
 };
 
 // Mercator constants
@@ -85,7 +85,7 @@ export function getDeckInstance({
   }
 
   (deckInstance.userData as UserData).mapboxLayers = new Set();
-  (deckInstance.userData as UserData).mapboxVersion = getMapboxVersion(map);
+  // (deckInstance.userData as UserData).mapboxVersion = getMapboxVersion(map);
   map.__deck = deckInstance;
   map.on('render', () => {
     if (deckInstance.isInitialized) afterRender(deckInstance, map);
@@ -210,47 +210,32 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
   }
 }
 
-function getMapboxVersion(map: Map): {minor: number; major: number} {
-  // parse mapbox version string
-  let major = 0;
-  let minor = 0;
-  // @ts-ignore (2339) undefined property
-  const version: string = map.version;
-  if (version) {
-    [major, minor] = version.split('.').slice(0, 2).map(Number);
-  }
-  return {major, minor};
-}
+// function getMapboxVersion(map: Map): {minor: number; major: number} {
+//   // parse mapbox version string
+//   let major = 0;
+//   let minor = 0;
+//   // @ts-ignore (2339) undefined property
+//   const version: string = map.version;
+//   if (version) {
+//     [major, minor] = version.split('.').slice(0, 2).map(Number);
+//   }
+//   return {major, minor};
+// }
 
 function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMercatorViewport {
-  const {mapboxVersion} = deck.userData as UserData;
-
-  return new WebMercatorViewport(
-    Object.assign(
-      {
-        id: 'mapbox',
-        x: 0,
-        y: 0,
-        width: deck.width,
-        height: deck.height
-      },
-      getViewState(map),
-      useMapboxProjection
-        ? {
-            // match mapbox's projection matrix
-            // A change of near plane was made in 1.3.0
-            // https://github.com/mapbox/mapbox-gl-js/pull/8502
-            nearZMultiplier:
-              (mapboxVersion.major === 1 && mapboxVersion.minor >= 3) || mapboxVersion.major >= 2
-                ? 0.02
-                : 1 / (deck.height || 1)
-          }
-        : {
-            // use deck.gl's own default
-            nearZMultiplier: 0.1
-          }
-    )
-  );
+  return new WebMercatorViewport({
+    id: 'mapbox',
+    x: 0,
+    y: 0,
+    width: deck.width,
+    height: deck.height,
+    ...getViewState(map),
+    nearZMultiplier: useMapboxProjection
+      ? // match mapbox's projection matrix
+        0.02
+      : // use deck.gl's own default
+        0.1
+  });
 }
 
 function afterRender(deck: Deck, map: Map): void {
