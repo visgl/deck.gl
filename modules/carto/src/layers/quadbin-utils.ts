@@ -12,11 +12,11 @@ const B = [
 ];
 const S = [0n, 1n, 2n, 4n, 8n, 16n];
 
-function indexToBigInt(index: string): bigint {
+export function indexToBigInt(index: string): bigint {
   return BigInt(`0x${index}`);
 }
 
-function bigIntToIndex(quadbin: bigint): string {
+export function bigIntToIndex(quadbin: bigint): string {
   return quadbin.toString(16);
 }
 
