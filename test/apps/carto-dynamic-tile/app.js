@@ -15,8 +15,8 @@ const COUNTRIES =
 // Skip CDN
 // const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 // PROD US GCP
-// const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
-const apiBaseUrl = 'https://gcp-us-east1-06.dev.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1-06.dev.api.carto.com';
 // Localhost
 // const apiBaseUrl = 'http://localhost:8002'
 
