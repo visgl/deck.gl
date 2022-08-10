@@ -7,7 +7,8 @@ import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 const ZOOMS = {3: 3, 4: 4, 5: 5, 6: 6};
-const INITIAL_VIEW_STATE = {longitude: 18, latitude: 47, zoom: 2};
+const FORMATTILES = {binary: 'binary', json: 'json'};
+const INITIAL_VIEW_STATE = {longitude: 8, latitude: 47, zoom: 6};
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 
@@ -15,57 +16,65 @@ const COUNTRIES =
 // const apiBaseUrl = 'https://direct-gcp-us-east1.api.carto.com';
 // PROD US GCP
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1-06.dev.api.carto.com';
 // Localhost
 // const apiBaseUrl = 'http://localhost:8002'
 
 const config = {
   bigquery: {
-    che15: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
-    che18: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2',
-    esp15: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2',
-    esp18: 'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2',
-    ukr15: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2',
-    ukr18: 'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2',
-    usa15: 'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2',
-    che15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadkey',
-    che18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_che_quadgrid18_v1_yearly_v2_quadkey',
-    esp15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid15_v1_yearly_v2_quadkey',
-    esp18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_esp_quadgrid18_v1_yearly_v2_quadkey',
-    ukr15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid15_v1_yearly_v2_quadkey',
-    ukr18_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_ukr_quadgrid18_v1_yearly_v2_quadkey',
-    usa15_quadkey:
-      'carto-dev-data.public.derived_spatialfeatures_usa_quadgrid15_v1_yearly_v2_quadkey'
+    h3: 'carto-dev-data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto-dev-data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto-dev-data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  snowflake: {
+    h3: 'carto_dev_data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
   },
   redshift: {
-    che15: 'public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2',
-    che15_h3: 'public.derived_spatialfeatures_che_h3res10_v1_yearly_v2_interpolated'
+    h3: 'carto_dev_data.public.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  postgres: {
+    h3: 'carto_dev_data.public.derived_spatialfeatures_esp_h3res8_v1_yearly_v2',
+    h3int: 'carto_dev_data.public.derived_spatialfeatures_esp_h3int_res8_v1_yearly_v2',
+    quadbin: 'carto_dev_data.public.derived_spatialfeatures_che_quadgrid15_v1_yearly_v2_quadbin'
+  },
+  databricks: {
+    h3: 'cluster.carto_dev_data.derived_spatialfeatures_che_h3res8_v1_yearly_v2',
+    h3int: 'cluster.carto_dev_data.derived_spatialfeatures_che_h3int_res8_v1_yearly_v2'
   }
 };
 
-const accessToken = 'XXXX';
+const accessToken = 'XXX';
 
 const showBasemap = true;
 const showCarto = true;
 
 function Root() {
-  const [connection, setConnection] = useState('redshift');
-  const [dataset, setDataset] = useState('che15_h3');
+  const [connection, setConnection] = useState('bigquery');
+  const [dataset, setDataset] = useState('h3');
   const [zoom, setZoom] = useState(5);
+  const [formatTiles, setFormatTiles] = useState('binary');
   const table = config[connection][dataset];
   return (
     <>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[showBasemap && createBasemap(), showCarto && createCarto(connection, zoom, table)]}
+        layers={[
+          showBasemap && createBasemap(),
+          showCarto && createCarto(connection, zoom, table, formatTiles)
+        ]}
       />
       <ObjectSelect title="zooms" obj={ZOOMS} value={zoom} onSelect={setZoom} />
+      <ObjectSelect
+        title="formatTiles"
+        obj={FORMATTILES}
+        value={formatTiles}
+        onSelect={setFormatTiles}
+      />
       <ObjectSelect
         title="connection"
         obj={Object.keys(config)}
@@ -102,8 +111,7 @@ function createBasemap() {
 }
 
 // Add aggregation expressions
-function createCarto(connection, zoom, table) {
-  console.log(connection, zoom, table);
+function createCarto(connection, zoom, table, formatTiles) {
   const isH3 = table.includes('h3');
   const isQuadbin = table.includes('quadbin');
   const geoColumn = isH3
@@ -123,8 +131,11 @@ function createCarto(connection, zoom, table) {
     type: MAP_TYPES.TABLE,
     format: FORMATS.TILEJSON,
 
+    // tile data format
+    formatTiles,
+
     // Aggregation
-    aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation',
+    aggregationExp: 'avg(population) as value, 0.1*avg(population) as elevation, "test" as str',
     aggregationResLevel: zoom,
     geoColumn,
     getQuadkey: d => d.id,

@@ -1,3 +1,7 @@
+import {registerLoaders} from '@loaders.gl/core';
+import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
+registerLoaders([CartoSpatialTileLoader]);
+
 import {PickingInfo} from '@deck.gl/core';
 import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 
