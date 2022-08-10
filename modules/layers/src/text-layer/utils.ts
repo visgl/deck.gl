@@ -11,6 +11,8 @@ export type Character = {
   y: number;
   width: number;
   height: number;
+  textureWidth: number;
+  textureOffsetY: number;
 };
 
 export type CharacterMapping = Record<string, Character>;
@@ -77,7 +79,9 @@ export function buildMapping({
         x: x + buffer,
         y: yOffset + row * (fontHeight + buffer * 2) + buffer,
         width,
-        height: fontHeight
+        height: fontHeight,
+        textureWidth: width,
+        textureOffsetY: 0
       };
       x += width + buffer * 2;
     }
@@ -301,9 +305,13 @@ export function transformParagraph(
       for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
         const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
         const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
+
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
-          y[j] = rowOffsetTop + rowSize[1] / 2;
+          const char = characters[j];
+          const {textureOffsetY = 0} = iconMapping[char];
+
+          y[j] = rowOffsetTop + rowSize[1] / 2 + textureOffsetY;
           rowWidth[j] = rowSize[0];
         }
 
@@ -386,4 +394,12 @@ export function getTextFromBuffer({
   }
 
   return {texts, characterCount};
+}
+
+export function resizeCanvas(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  const {canvas} = ctx;
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  canvas.width = width;
+  canvas.height = height;
+  ctx.putImageData(imageData, 0, 0);
 }

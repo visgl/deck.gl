@@ -26,6 +26,7 @@ import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {Character} from '../utils';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -125,8 +126,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   }
 
   getInstanceIconFrame(icons: string): number[] {
-    return icons
-      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
-      : EMPTY_ARRAY;
+    if (!icons) return EMPTY_ARRAY;
+
+    return Array.from(icons).flatMap(icon => {
+      const {x, y, textureWidth, height} = this.state.iconManager.getIconMapping(icon) as Character;
+      return [x, y, textureWidth, height];
+    });
   }
 }
