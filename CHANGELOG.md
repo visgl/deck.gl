@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.7] - Aug 28 2022
+
+- CARTO: Add headers prop to CartoLayer (#7188)
+- CARTO: binary data for spatial index layers (#7160)
 
 #### deck.gl [8.8.6] - Jul 28 2022
 
