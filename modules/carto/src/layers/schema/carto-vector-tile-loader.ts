@@ -1,11 +1,8 @@
-import Protobuf from 'pbf';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 
-import {KeyValueProperties, Tile, TileReader} from './carto-tile';
-
-// TODO move type into shared file?
-import {Properties} from './spatialjson-utils';
+import {Tile, TileReader} from './carto-tile';
+import {parsePbf, unpackProperties} from './tile-loader-utils';
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',
@@ -21,31 +18,13 @@ const CartoVectorTileLoader: LoaderWithParser = {
   options: {}
 };
 
-function parsePbf(buffer: ArrayBuffer): Tile {
-  const pbf = new Protobuf(buffer);
-  const tile = TileReader.read(pbf);
-  return tile;
-}
-
-function unpackProperties(properties: KeyValueProperties[]): Properties[] {
-  if (!properties || !properties.length) {
-    return [];
-  }
-  return properties.map(item => {
-    const currentRecord: Properties = {};
-    item.data.forEach(({key, value}) => {
-      currentRecord[key] = value;
-    });
-    return currentRecord;
-  });
-}
 
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
   options?: LoaderOptions
 ): BinaryFeatures | null {
   if (!arrayBuffer) return null;
-  const tile = parsePbf(arrayBuffer);
+  const tile = parsePbf(arrayBuffer, TileReader);
 
   const {points, lines, polygons} = tile;
   const data = {
