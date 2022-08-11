@@ -16,7 +16,6 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
 
-// TODO do not define default twice
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
 const defaultProps: DefaultProps<CartoTileLayerProps> = {
@@ -61,13 +60,6 @@ export default class CartoTileLayer<
     let loadOptions = this.getLoadOptions();
     const {fetch, formatTiles} = this.props;
     const {signal} = tile;
-
-    if (formatTiles) {
-      log.assert(
-        Object.values(TILE_FORMATS).includes(formatTiles),
-        `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
-      );
-    }
 
     // The backend doesn't yet support our custom mime-type, so force it here
     // TODO remove once backend sends the correct mime-type

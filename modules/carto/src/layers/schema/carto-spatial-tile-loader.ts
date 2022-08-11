@@ -10,10 +10,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   id: 'cartoSpatialTile',
   module: 'carto',
   extensions: ['pbf'],
-  mimeTypes: [
-    'application/vnd.carto-spatial-tile',
-    'application/x-protobuf' // Back-compatibility
-  ],
+  mimeTypes: ['application/vnd.carto-spatial-tile'],
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoSpatialTile(arrayBuffer, options),

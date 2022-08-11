@@ -18,7 +18,6 @@ const CartoVectorTileLoader: LoaderWithParser = {
   options: {}
 };
 
-
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
   options?: LoaderOptions
