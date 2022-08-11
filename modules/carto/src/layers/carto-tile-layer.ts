@@ -1,5 +1,7 @@
-/* global TextDecoder */
-import Protobuf from 'pbf';
+import {registerLoaders} from '@loaders.gl/core';
+import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
+registerLoaders([CartoVectorTileLoader]);
+
 import {log, DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
@@ -14,15 +16,12 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
 
-import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
-
 // TODO do not define default twice
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
 const defaultProps: DefaultProps<CartoTileLayerProps> = {
   ...MVTLayer.defaultProps,
-  formatTiles: defaultTileFormat,
-  loaders: [CartoVectorTileLoader]
+  formatTiles: defaultTileFormat
 };
 
 /** All properties supported by CartoTileLayer. */
@@ -47,6 +46,12 @@ export default class CartoTileLayer<
   static layerName = 'CartoTileLayer';
   static defaultProps = defaultProps;
 
+  initializeState(): void {
+    super.initializeState();
+    const binary = this.props.formatTiles === TILE_FORMATS.BINARY;
+    this.setState({binary});
+  }
+
   getTileData(tile: TileLoadProps) {
     const url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
@@ -57,16 +62,20 @@ export default class CartoTileLayer<
     const {fetch, formatTiles} = this.props;
     const {signal} = tile;
 
-    loadOptions = {
-      ...loadOptions,
-      mimeType: 'application/vnd.carto-vector-tile'
-    };
-
     if (formatTiles) {
       log.assert(
         Object.values(TILE_FORMATS).includes(formatTiles),
         `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
       );
+    }
+
+    // The backend doesn't yet support our custom mime-type, so force it here
+    if (formatTiles === TILE_FORMATS.BINARY) {
+      loadOptions = {
+        ...loadOptions,
+        mimeType: 'application/vnd.carto-vector-tile'
+      };
+      // TODO remove!!!
       loadOptions.cartoTile = {formatTiles};
     }
 
