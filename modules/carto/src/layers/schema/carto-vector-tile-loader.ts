@@ -1,13 +1,11 @@
 import Protobuf from 'pbf';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
-import {geojsonToBinary} from '@loaders.gl/gis';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {KeyValueProperties, Tile, TileReader} from './carto-tile';
-import {binaryToSpatialjson, Properties, SpatialJson} from './spatialjson-utils';
-import {TILE_FORMATS} from '../../api/maps-api-common';
 
-const defaultTileFormat = TILE_FORMATS.BINARY;
+// TODO move type into shared file?
+import {Properties} from './spatialjson-utils';
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',
@@ -15,24 +13,13 @@ const CartoVectorTileLoader: LoaderWithParser = {
   id: 'cartoVectorTile',
   module: 'carto',
   extensions: ['pbf'],
-  mimeTypes: [
-    'application/vnd.carto-vector-tile',
-    'application/x-protobuf' // Back-compatibility
-  ],
+  mimeTypes: ['application/vnd.carto-vector-tile'],
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
-  options: {
-    cartoTile: {
-      formatTiles: defaultTileFormat
-    }
-  }
+  options: {}
 };
-
-function parseJSON(arrayBuffer: ArrayBuffer): any {
-  return JSON.parse(new TextDecoder().decode(arrayBuffer));
-}
 
 function parsePbf(buffer: ArrayBuffer): Tile {
   const pbf = new Protobuf(buffer);
@@ -58,9 +45,6 @@ function parseCartoVectorTile(
   options?: LoaderOptions
 ): BinaryFeatures | null {
   if (!arrayBuffer) return null;
-  const formatTiles = options && options.cartoTile && options.cartoTile.formatTiles;
-  if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
-
   const tile = parsePbf(arrayBuffer);
 
   const {points, lines, polygons} = tile;
