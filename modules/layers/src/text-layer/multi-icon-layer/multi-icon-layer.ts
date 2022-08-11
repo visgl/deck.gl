@@ -114,7 +114,20 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
       sdf: Boolean(sdf),
       outlineColor
     };
+
     super.draw(params);
+
+    // draw text without outline on top to ensure a thick outline won't occlude other characters
+    if (outlineWidth) {
+      const {iconManager} = this.state;
+      const iconsTexture = iconManager.getTexture();
+
+      if (iconsTexture) {
+        this.state.model
+          .setUniforms({ outlineBuffer: 0 })
+          .draw();
+      }
+    }
   }
 
   protected getInstanceOffset(icons: string): number[] {
