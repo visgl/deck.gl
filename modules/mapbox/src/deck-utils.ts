@@ -28,11 +28,13 @@ export function getDeckInstance({
 
   const deckProps: DeckProps = {
     useDevicePixels: true,
-    _customRender: (reason: string) => {
+    _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props
       // make sure it is still called
-      customRender?.(reason);
+      // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
+      // Rerender will be triggered by MapboxLayer's render()
+      customRender?.('');
     },
     // TODO: import these defaults from a single source of truth
     parameters: {
