@@ -231,7 +231,7 @@ function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMerca
     height: deck.height,
     ...getViewState(map),
     nearZMultiplier: useMapboxProjection
-      ? // match mapbox's projection matrix
+      ? // match mapbox-gl@>=1.3.0's projection matrix
         0.02
       : // use deck.gl's own default
         0.1
