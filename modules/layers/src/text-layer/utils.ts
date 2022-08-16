@@ -10,7 +10,7 @@ export type Character = {
   x: number;
   y: number;
   width: number;
-  height: number;
+  textureHeight: number;
   textureWidth: number;
   textureOffsetY: number;
 };
@@ -79,7 +79,7 @@ export function buildMapping({
         x: x + buffer,
         y: yOffset + row * (fontHeight + buffer * 2) + buffer,
         width,
-        height: fontHeight,
+        textureHeight: fontHeight,
         textureWidth: width,
         textureOffsetY: 0
       };

@@ -142,8 +142,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
     if (!icons) return EMPTY_ARRAY;
 
     return Array.from(icons).flatMap(icon => {
-      const {x, y, textureWidth, height} = this.state.iconManager.getIconMapping(icon) as Character;
-      return [x, y, textureWidth, height];
+      const {x, y, textureWidth, textureHeight} = this.state.iconManager.getIconMapping(icon) as unknown as Character;
+      return [x, y, textureWidth, textureHeight];
     });
   }
 }

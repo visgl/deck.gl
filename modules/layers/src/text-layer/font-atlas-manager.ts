@@ -257,7 +257,7 @@ export default class FontAtlasManager {
         y,
         // use glyphAdvance over glyphWidth due to whitespace characters
         width: glyphAdvance,
-        height: cellSize,
+        textureHeight: cellSize,
         textureWidth: width,
         textureOffsetY: fontSize - glyphTop
       };
@@ -277,7 +277,7 @@ export default class FontAtlasManager {
       width: canvas.width,
       height: canvas.height,
       rowHeight: layoutRowHeight,
-      textureScale: cellSize / layoutRowHeight,
+      textureScale: cellSize / layoutRowHeight
     };
   }
 
@@ -325,7 +325,7 @@ export default class FontAtlasManager {
       width: canvas.width,
       height: canvas.height,
       rowHeight: fontSize * HEIGHT_SCALE,
-      textureScale: 1,
+      textureScale: 1
     };
   }
 
