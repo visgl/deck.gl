@@ -88,6 +88,10 @@ type FontAtlas = {
   width: number;
   /** texture height */
   height: number;
+  /** base row height for font in pixels (multiplied by line-height property) */
+  rowHeight: number;
+  /** as the scaling of each icon is impacted by it's bounding box (returned by IconLayer.getInstanceIconFrame) we must correct the texture scaling as the buffer increases the size of each characters texture */
+  textureScale: number;
 };
 
 let cache = new LRUCache<FontAtlas>(CACHE_LIMIT);
@@ -164,7 +168,12 @@ export default class FontAtlasManager {
   }
 
   get scale(): number {
-    return HEIGHT_SCALE;
+    const textureScale = this._atlas?.textureScale ?? 1;
+    return HEIGHT_SCALE * textureScale;
+  }
+
+  get rowHeight(): number | undefined {
+    return this._atlas && this._atlas.rowHeight;
   }
 
   setProps(props: FontSettings = {}) {
@@ -225,6 +234,7 @@ export default class FontAtlasManager {
       fontWeight: `${fontWeight}`
     });
     const cellSize = fontSize + buffer * 2;
+    const layoutRowHeight = fontSize * HEIGHT_SCALE;
     const columns = Math.floor(canvas.width / cellSize);
     const rows = Math.ceil(characterSet.size / columns);
     const requiredCanvasHeight = nextPowOfTwo(rows * cellSize);
@@ -249,7 +259,7 @@ export default class FontAtlasManager {
         width: glyphAdvance,
         height: cellSize,
         textureWidth: width,
-        textureOffsetY: cellSize - glyphTop + buffer
+        textureOffsetY: fontSize - glyphTop
       };
 
       x += width;
@@ -265,7 +275,9 @@ export default class FontAtlasManager {
       mapping,
       data: canvas,
       width: canvas.width,
-      height: canvas.height
+      height: canvas.height,
+      rowHeight: layoutRowHeight,
+      textureScale: cellSize / layoutRowHeight,
     };
   }
 
@@ -311,7 +323,9 @@ export default class FontAtlasManager {
       mapping,
       data: canvas,
       width: canvas.width,
-      height: canvas.height
+      height: canvas.height,
+      rowHeight: fontSize * HEIGHT_SCALE,
+      textureScale: 1,
     };
   }
 

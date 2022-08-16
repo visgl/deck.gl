@@ -228,16 +228,11 @@ function transformRow(
   rowSize: [number, number]
 ) {
   let x = 0;
-  let rowHeight = 0;
 
   for (let i = startIndex; i < endIndex; i++) {
     const character = line[i];
     const frame = iconMapping[character];
     if (frame) {
-      if (!rowHeight) {
-        // frame.height should be a constant
-        rowHeight = frame.height;
-      }
       leftOffsets[i] = x + frame.width / 2;
       x += frame.width;
     } else {
@@ -248,7 +243,6 @@ function transformRow(
   }
 
   rowSize[0] = x;
-  rowSize[1] = rowHeight;
 }
 
 /**
@@ -256,6 +250,8 @@ function transformRow(
  */
 export function transformParagraph(
   paragraph: string,
+  /** Base height of row in pixels (multiplied by line-height) */
+  baseRowHeight: number,
   /** CSS line-height */
   lineHeight: number,
   /** CSS word-break option */
@@ -286,7 +282,7 @@ export function transformParagraph(
 
   // maxWidth and height of the paragraph
   const size: [number, number] = [0, 0];
-  const rowSize: [number, number] = [0, 0];
+  const rowSize: [number, number] = [0, baseRowHeight];
   let rowOffsetTop = 0;
   let lineStartIndex = 0;
   let lineEndIndex = 0;
