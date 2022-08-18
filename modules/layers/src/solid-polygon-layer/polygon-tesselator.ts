@@ -56,6 +56,7 @@ export default class PolygonTesselator extends Tesselator<
     resolution?: number;
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
+    full3d?: boolean;
   }
 > {
   constructor(opts) {
@@ -180,7 +181,12 @@ export default class PolygonTesselator extends Tesselator<
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
-    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize, this.opts.preproject);
+    const indices = Polygon.getSurfaceIndices(
+      polygon,
+      this.positionSize,
+      this.opts.preproject,
+      this.opts.full3d
+    );
 
     // make sure the buffer is large enough
     target = typedArrayManager.allocate(target, indexStart + indices.length, {

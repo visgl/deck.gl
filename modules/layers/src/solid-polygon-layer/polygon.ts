@@ -288,12 +288,42 @@ export function normalize(
 /* eslint-enable max-statements */
 
 /*
+ * Calculate the area of a single plane of the polygon
+ */
+function getPlaneArea(positions: NumericArray, xIndex: number, yIndex: number): number {
+  const numVerts = positions.length / 3;
+  let area = 0;
+  for (let i = 0; i < numVerts; i++) {
+    const j = (i + 1) % numVerts;
+    area += positions[i * 3 + xIndex] * positions[j * 3 + yIndex];
+    area -= positions[j * 3 + xIndex] * positions[i * 3 + yIndex];
+  }
+  return Math.abs(area / 2);
+}
+
+function permutePositions(positions: NumericArray, xIndex: number, yIndex: number, zIndex: number) {
+  const numVerts = positions.length / 3;
+  for (let i = 0; i < numVerts; i++) {
+    const o = i * 3;
+
+    const x = positions[o + 0];
+    const y = positions[o + 1];
+    const z = positions[o + 2];
+
+    positions[o + xIndex] = x;
+    positions[o + yIndex] = y;
+    positions[o + zIndex] = z;
+  }
+}
+
+/*
  * Get vertex indices for drawing polygon mesh (triangulation)
  */
 export function getSurfaceIndices(
   polygon: NormalizedPolygonGeometry,
   positionSize: number,
-  preproject?: (xy: number[]) => number[]
+  preproject?: (xy: number[]) => number[],
+  full3d?: boolean
 ): number[] {
   let holeIndices = getHoleIndices(polygon);
   if (holeIndices) {
@@ -314,6 +344,34 @@ export function getSurfaceIndices(
       const xy = preproject(p);
       positions[i] = xy[0];
       positions[i + 1] = xy[1];
+    }
+  }
+  
+  if (full3d && positionSize === 3) {
+    // calculate plane with largest area
+    const xyArea = getPlaneArea(positions, 0, 1);
+    const xzArea = getPlaneArea(positions, 0, 2);
+    const yzArea = getPlaneArea(positions, 1, 2);
+
+    if (!xyArea && !xzArea && !yzArea) {
+      return []; // no planes have area, nothing we can do
+    }
+
+    // permute positions to make the largest plane xy for earcut
+    if (xyArea > xzArea && xyArea > yzArea) {
+      // xy plane largest, nothing to do
+    } else if (xzArea > yzArea) {
+      // xz plane largest, permute to make xyz -> xzy
+      if (!preproject) {
+        positions = positions.slice();
+      }
+      permutePositions(positions, 0, 2, 1);
+    } else {
+      // yz plane largest, permute to make xyz -> yzx
+      if (!preproject) {
+        positions = positions.slice();
+      }
+      permutePositions(positions, 1, 2, 0);
     }
   }
 
