@@ -266,6 +266,20 @@ This is an object that contains material props for [lighting effect](/docs/api-r
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
 
+##### `_full3d` (Boolean, optional)
+
+* Default: `false`
+
+> Note: This prop is experimental
+
+When true, polygon tesselation will be performed on the plane with the largest area, instead of the xy plane.
+
+Remarks:
+
+* Only use this if you experience issues rendering features that only change on the z axis.
+* This prop is only effective with `XYZ` data.
+
+
 ### pointType:circle Options
 
 The following props are forwarded to a `ScatterplotLayer` if `pointType` is `'circle'`.
