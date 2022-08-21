@@ -297,7 +297,7 @@ export default class ViewManager {
       onViewStateChange: this._onViewStateChange.bind(this, props.id),
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
-        view.makeViewport({
+        this.getView(view.id)?.makeViewport({
           viewState,
           width: this.width,
           height: this.height
