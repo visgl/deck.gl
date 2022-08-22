@@ -331,7 +331,33 @@ export function getSurfaceIndices(
   }
 
   let positions = getPositions(polygon);
-  let positionsCloned = false;
+
+  if (preproject) {
+    // When tesselating lnglat coordinates, project them to the common space for accuracy
+    const n = positions.length;
+
+    // Clone the array
+    positions = positions.slice();
+
+    const p: number[] = [];
+    for (let i = 0; i < n; i += positionSize) {
+      p[0] = positions[i];
+      p[1] = positions[i + 1];
+
+      if (full3d) {
+        p[2] = positions[i + 2];
+      }
+
+      const xy = preproject(p);
+
+      positions[i] = xy[0];
+      positions[i + 1] = xy[1];
+
+      if (full3d) {
+        positions[i + 2] = xy[2];
+      }
+    }
+  }
 
   if (full3d && positionSize === 3) {
     // calculate plane with largest area
@@ -348,33 +374,16 @@ export function getSurfaceIndices(
       // xy plane largest, nothing to do
     } else if (xzArea > yzArea) {
       // xz plane largest, permute to make xyz -> xzy
-      positions = positions.slice();
-      positionsCloned = true;
+      if (!preproject) {
+        positions = positions.slice();
+      }
       permutePositions(positions, 0, 2, 1);
     } else {
       // yz plane largest, permute to make xyz -> yzx
-      positions = positions.slice();
-      positionsCloned = true;
+      if (!preproject) {
+        positions = positions.slice();
+      }
       permutePositions(positions, 1, 2, 0);
-    }
-  }
-
-  if (preproject) {
-    // When tesselating lnglat coordinates, project them to the common space for accuracy
-    const n = positions.length;
-
-    if (positionsCloned) {
-      // Clone the array
-      positions = positions.slice();
-    }
-
-    const p: number[] = [];
-    for (let i = 0; i < n; i += positionSize) {
-      p[0] = positions[i];
-      p[1] = positions[i + 1];
-      const xy = preproject(p);
-      positions[i] = xy[0];
-      positions[i + 1] = xy[1];
     }
   }
 

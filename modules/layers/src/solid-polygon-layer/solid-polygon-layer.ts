@@ -163,9 +163,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
 
   initializeState() {
     const {gl, viewport} = this.context;
-    let {coordinateSystem, _full3d} = this.props;
+    let {coordinateSystem} = this.props;
+    const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
       coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    }
+
+    let preproject: ((xy: number[]) => number[]) | undefined;
+
+    if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (_full3d) {
+        preproject = viewport.projectPosition.bind(viewport);
+      } else {
+        preproject = viewport.projectFlat.bind(viewport);
+      }
     }
 
     this.setState({
@@ -173,10 +184,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
       polygonTesselator: new PolygonTesselator({
         // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
         // Provide a preproject function if the coordinates are in lnglat
-        preproject:
-          coordinateSystem === COORDINATE_SYSTEM.LNGLAT && viewport.projectFlat.bind(viewport),
+        preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array,
+        IndexType:
+          !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array,
         full3d: _full3d
       })
     });
