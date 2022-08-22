@@ -103,13 +103,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   draw(params) {
     const {sdf, smoothing, outlineWidth} = this.props;
     const {outlineColor} = this.state;
-
+    const outlineBuffer = outlineWidth ? Math.min(1, 1 - Math.min(outlineWidth, 9) / 10) : -1;
+ 
     params.uniforms = {
       ...params.uniforms,
       // Refer the following doc about gamma and buffer
       // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
       buffer: DEFAULT_BUFFER,
-      outlineBuffer: outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth)) : -1,
+      outlineBuffer,
       gamma: smoothing,
       sdf: Boolean(sdf),
       outlineColor
@@ -118,7 +119,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
-    if (outlineWidth) {
+    if (sdf && outlineWidth) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
 
