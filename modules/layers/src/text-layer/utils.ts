@@ -305,10 +305,14 @@ export function transformParagraph(
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
           const char = characters[j];
-          const {textureOffsetY = 0} = iconMapping[char];
 
-          y[j] = rowOffsetTop + rowSize[1] / 2 + textureOffsetY;
-          rowWidth[j] = rowSize[0];
+          if (!iconMapping[char]) {
+            log.warn(`Missing character: ${char} (${char.codePointAt(0)})`)();
+          } else {
+            const {textureOffsetY} = iconMapping[char];
+            y[j] = rowOffsetTop + rowSize[1] / 2 + textureOffsetY;
+            rowWidth[j] = rowSize[0];
+          }
         }
 
         rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;

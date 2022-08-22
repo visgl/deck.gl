@@ -104,7 +104,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
     const {sdf, smoothing, outlineWidth} = this.props;
     const {outlineColor} = this.state;
     const outlineBuffer = outlineWidth ? Math.min(1, 1 - Math.min(outlineWidth, 9) / 10) : -1;
- 
+
     params.uniforms = {
       ...params.uniforms,
       // Refer the following doc about gamma and buffer
@@ -124,9 +124,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        this.state.model
-          .setUniforms({ outlineBuffer: 0 })
-          .draw();
+        this.state.model.setUniforms({outlineBuffer: 0}).draw();
       }
     }
   }
@@ -143,7 +141,9 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
     if (!icons) return EMPTY_ARRAY;
 
     return Array.from(icons).flatMap(icon => {
-      const {x, y, textureWidth, textureHeight} = this.state.iconManager.getIconMapping(icon) as unknown as Character;
+      const {x, y, textureWidth, textureHeight} = this.state.iconManager.getIconMapping(
+        icon
+      ) as unknown as Character;
       return [x, y, textureWidth, textureHeight];
     });
   }
