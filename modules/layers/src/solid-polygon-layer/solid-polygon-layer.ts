@@ -186,9 +186,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType:
-          !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array,
-        full3d: _full3d
+        IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
     });
 

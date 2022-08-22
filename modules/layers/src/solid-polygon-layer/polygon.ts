@@ -344,7 +344,7 @@ export function getSurfaceIndices(
       p[0] = positions[i];
       p[1] = positions[i + 1];
 
-      if (full3d) {
+      if (full3d && positionSize === 3) {
         p[2] = positions[i + 2];
       }
 
@@ -353,7 +353,7 @@ export function getSurfaceIndices(
       positions[i] = xy[0];
       positions[i + 1] = xy[1];
 
-      if (full3d) {
+      if (full3d && positionSize === 3) {
         positions[i + 2] = xy[2];
       }
     }
