@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.9] - Aug 22 2022
+
+- Fix controller bug when view props change (#7208)
+
 #### deck.gl [8.8.8] - Aug 13 2022
 
 - add BitmapBoundingBox and NonGeoBoundingBox types. (#7180)
