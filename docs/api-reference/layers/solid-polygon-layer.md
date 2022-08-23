@@ -134,6 +134,18 @@ This prop is only effective with `_normalize: false`. It specifies the winding o
 
 The proper value depends on the source of your data. Most geometry formats [enforce a specific winding order](https://gis.stackexchange.com/a/147971). Incorrectly set winding order will cause an extruded polygon's surfaces to be flipped, affecting culling and the lighting effect.
 
+##### `_full3d` (Boolean, optional)
+
+* Default: `false`
+
+> Note: This prop is experimental
+
+When true, polygon tesselation will be performed on the plane with the largest area, instead of the xy plane.
+
+Remarks:
+
+* Only use this if you experience issues rendering features that only change on the z axis.
+* This prop is only effective with `XYZ` data.
 
 ### Data Accessors
 
