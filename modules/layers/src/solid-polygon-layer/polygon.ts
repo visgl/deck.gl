@@ -332,6 +332,8 @@ export function getSurfaceIndices(
 
   let positions = getPositions(polygon);
 
+  const is3d = full3d && positionSize === 3;
+
   if (preproject) {
     // When tesselating lnglat coordinates, project them to the common space for accuracy
     const n = positions.length;
@@ -344,7 +346,7 @@ export function getSurfaceIndices(
       p[0] = positions[i];
       p[1] = positions[i + 1];
 
-      if (full3d && positionSize === 3) {
+      if (is3d) {
         p[2] = positions[i + 2];
       }
 
@@ -353,13 +355,13 @@ export function getSurfaceIndices(
       positions[i] = xy[0];
       positions[i + 1] = xy[1];
 
-      if (full3d && positionSize === 3) {
+      if (is3d) {
         positions[i + 2] = xy[2];
       }
     }
   }
 
-  if (full3d && positionSize === 3) {
+  if (is3d) {
     // calculate plane with largest area
     const xyArea = getPlaneArea(positions, 0, 1);
     const xzArea = getPlaneArea(positions, 0, 2);
