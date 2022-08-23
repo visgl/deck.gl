@@ -57,6 +57,9 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
 
 /** All properties supported by BitmapLayer. */
 export type BitmapLayerProps = _BitmapLayerProps & LayerProps;
+export type BitmapBoundingBox =
+  | [left: number, bottom: number, right: number, top: number]
+  | [Position, Position, Position, Position];
 
 /** Properties added by BitmapLayer. */
 type _BitmapLayerProps = {
@@ -74,7 +77,7 @@ type _BitmapLayerProps = {
    *   Each position could optionally contain a third component `z`.
    * @default [1, 0, 0, 1]
    */
-  bounds?: [number, number, number, number] | [Position, Position, Position, Position];
+  bounds?: BitmapBoundingBox;
 
   /**
    * > Note: this prop is experimental.

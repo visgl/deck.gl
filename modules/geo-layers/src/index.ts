@@ -42,7 +42,7 @@ export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
 export type {S2LayerProps} from './s2-layer/s2-layer';
 export type {TileLayerProps} from './tile-layer/tile-layer';
-export type {GeoBoundingBox} from './tile-layer/types';
+export type {GeoBoundingBox, NonGeoBoundingBox} from './tile-layer/types';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TileLoadProps as _TileLoadProps} from './tile-layer/types';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';

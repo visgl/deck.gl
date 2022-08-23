@@ -18,11 +18,11 @@ init:
 	yarn bootstrap; \
 	$(BIN)pip install -r requirements/requirements.txt; \
 	$(BIN)pip install -r requirements/requirements-dev.txt; \
-	$(BIN)pip install -e .;
+	python setup.py develop
 
 fast-build:
 	cd ../../modules/jupyter-widget; webpack; cd -; \
-	pip install -e .
+	python setup.py develop
 
 pre-commit:
 	python -m black . --target-version py34 && $(MAKE) test
