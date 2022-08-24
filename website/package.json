@@ -24,8 +24,7 @@
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
-    "expr-eval": "^2.0.2",
-    "purify-css": "^1.2.5"
+    "expr-eval": "^2.0.2"
   },
   "devDependencies": {
     "gatsby": "^2.20.0",
