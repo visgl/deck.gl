@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 
 import type {NumericArray} from '@math.gl/core';
-import {AccessorFunction} from '@deck.gl/core';
+import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
-const defaultProps = {
+const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
-  getTimestamps: {type: 'accessor', value: null}
+  getTimestamps: {type: 'accessor', value: d => d.timestamps}
 };
 
 /** All properties supported by TripsLayer. */
@@ -55,12 +55,13 @@ type _TripsLayerProps<DataT = any> = {
   getTimestamps?: AccessorFunction<DataT, NumericArray>;
 };
 
+/** Render animated paths that represent vehicle trips. */
 export default class TripsLayer<DataT = any, ExtraProps = {}> extends PathLayer<
   DataT,
   Required<_TripsLayerProps> & ExtraProps
 > {
   static layerName = 'TripsLayer';
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
 
   getShaders() {
     const shaders = super.getShaders();

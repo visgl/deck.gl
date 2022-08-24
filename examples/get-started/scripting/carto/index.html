@@ -1,12 +1,12 @@
 <html>
     <head>
         <!-- deck.gl standalone bundle -->
-        <script src="https://unpkg.com/deck.gl@^8.7.0-beta.6/dist.min.js"></script>
-        <script src="https://unpkg.com/@deck.gl/carto@^8.7.0-beta.6/dist.min.js"></script>
+        <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
+        <script src="https://unpkg.com/@deck.gl/carto@^8.8.0/dist.min.js"></script>
         <!-- Mapbox dependencies -->
-        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
         <link
-            href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css"
+            href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css"
             rel="stylesheet"
         />
 
@@ -18,27 +18,14 @@
                 font-family: UberMove, Helvetica, Arial, sans-serif;
             }
             #container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
-            #container > * {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                width: 100vw;
+                height: 100vh;
             }
         </style>
     </head>
 
     <body>
-        <div id="container">
-            <div id="map"></div>
-            <canvas id="deck-canvas"></canvas>
-        </div>
+        <div id="container"></div>
     </body>
 
     <script type="text/javascript">
@@ -46,21 +33,13 @@
 
         // Get map info from CARTO and update deck
         deck.carto.fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
+            const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
             const deckgl = new deck.DeckGL({
-                canvas: 'deck-canvas',
+                container: 'container',
                 controller: true,
+                mapStyle: MAP_STYLE,
                 initialViewState,
                 layers
-            });
-
-            // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
-            const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
-            const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
-            deckgl.setProps({
-                onViewStateChange: ({viewState}) => {
-                    const {longitude, latitude, ...rest} = viewState;
-                    map.jumpTo({center: [longitude, latitude], ...rest});
-                }
             });
         });
     </script>

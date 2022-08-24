@@ -19,6 +19,8 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 
 import CartoTileLayer from '../layers/carto-tile-layer';
+import H3TileLayer from '../layers/h3-tile-layer';
+import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
 
@@ -111,7 +113,7 @@ export function getLayer(
   config,
   dataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
-  if (type === 'mvt' || type === 'tileset') {
+  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
     return getTileLayer(dataset);
   }
 
@@ -163,29 +165,56 @@ export function getLayer(
   };
 }
 
+export function layerFromTileDataset(
+  formatTiles: string | null = TILE_FORMATS.MVT,
+  scheme: string
+): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
+  if (scheme === 'h3') {
+    return H3TileLayer;
+  }
+  if (scheme === 'quadbin') {
+    return QuadbinTileLayer;
+  }
+  if (formatTiles === TILE_FORMATS.MVT) {
+    return MVTLayer;
+  }
+
+  // formatTiles === BINARY|JSON|GEOJSON
+  return CartoTileLayer;
+}
+
 function getTileLayer(dataset) {
   const {
+    aggregationExp,
+    aggregationResLevel,
     data: {
+      scheme,
       tiles: [tileUrl]
     }
   } = dataset;
   /* global URL */
-  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') || TILE_FORMATS.MVT;
+  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles');
 
   return {
-    Layer: formatTiles === TILE_FORMATS.MVT ? MVTLayer : CartoTileLayer,
+    Layer: layerFromTileDataset(formatTiles, scheme),
     propMap: sharedPropMap,
     defaultProps: {
       ...defaultProps,
-      uniqueIdProperty: 'geoid',
-      formatTiles
+      ...(aggregationExp && {aggregationExp}),
+      ...(aggregationResLevel && {aggregationResLevel}),
+      formatTiles,
+      uniqueIdProperty: 'geoid'
     }
   };
 }
 
-function domainFromAttribute(attribute, scaleType: SCALE_TYPE) {
+function domainFromAttribute(attribute, scaleType: SCALE_TYPE, scaleLength: number) {
   if (scaleType === 'ordinal' || scaleType === 'point') {
     return attribute.categories.map(c => c.category).filter(c => c !== undefined && c !== null);
+  }
+
+  if (scaleType === 'quantile' && attribute.quantiles) {
+    return attribute.quantiles[scaleLength];
   }
 
   let {min} = attribute;
@@ -211,12 +240,12 @@ function domainFromValues(values, scaleType: SCALE_TYPE) {
   return extent(values);
 }
 
-function calculateDomain(data, name, scaleType) {
+function calculateDomain(data, name, scaleType, scaleLength?) {
   if (data.tilestats) {
     // Tileset data type
     const {attributes} = data.tilestats.layers[0];
     const attribute = attributes.find(a => a.attribute === name);
-    return domainFromAttribute(attribute, scaleType);
+    return domainFromAttribute(attribute, scaleType, scaleLength);
   } else if (data.features) {
     // GeoJSON data type
     const values = data.features.map(({properties}) => properties[name]);
@@ -243,6 +272,25 @@ export function opacityToAlpha(opacity) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
+function getAccessorKeys(name: string, aggregation: string | undefined): string[] {
+  let keys = [name];
+  if (aggregation) {
+    // Snowflake will capitalized the keys, need to check lower and upper case version
+    keys = keys.concat([aggregation, aggregation.toUpperCase()].map(a => `${name}_${a}`));
+  }
+  return keys;
+}
+
+function findAccessorKey(keys: string[], properties): string[] {
+  for (const key of keys) {
+    if (key in properties) {
+      return [key];
+    }
+  }
+
+  throw new Error(`Could not find property for any accessor key: ${keys}`);
+}
+
 export function getColorValueAccessor({name}, colorAggregation, data: any) {
   const aggregator = AGGREGATION_FUNC[colorAggregation];
   const accessor = values => aggregator(values, p => p[name]);
@@ -252,7 +300,7 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 export function getColorAccessor(
   {name},
   scaleType: SCALE_TYPE,
-  {colors, colorMap},
+  {aggregation, range: {colors, colorMap}},
   opacity: number | undefined,
   data: any
 ) {
@@ -266,7 +314,7 @@ export function getColorAccessor(
       scaleColor.push(color);
     });
   } else {
-    domain = calculateDomain(data, name, scaleType);
+    domain = calculateDomain(data, name, scaleType, colors.length);
     scaleColor = colors;
   }
 
@@ -279,21 +327,36 @@ export function getColorAccessor(
   scale.unknown(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    const propertyValue = properties[name];
+    if (!(accessorKeys[0] in properties)) {
+      accessorKeys = findAccessorKey(accessorKeys, properties);
+    }
+    const propertyValue = properties[accessorKeys[0]];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
 }
 
-export function getSizeAccessor({name}, scaleType: SCALE_TYPE, range: Iterable<Range>, data: any) {
+export function getSizeAccessor(
+  {name},
+  scaleType: SCALE_TYPE,
+  aggregation,
+  range: Iterable<Range>,
+  data: any
+) {
   const scale = SCALE_FUNCS[scaleType as any]();
   scale.domain(calculateDomain(data, name, scaleType));
   scale.range(range);
 
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    return scale(properties[name]);
+    if (!(accessorKeys[0] in properties)) {
+      accessorKeys = findAccessorKey(accessorKeys, properties);
+    }
+    const propertyValue = properties[accessorKeys[0]];
+    return scale(propertyValue);
   };
   return normalizeAccessor(accessor, data);
 }

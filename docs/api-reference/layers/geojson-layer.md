@@ -8,10 +8,9 @@ import {GeoJsonLayerDemo} from 'website-components/doc-demos/layers';
 
 # GeoJsonLayer
 
-The GeoJsonLayer takes in [GeoJSON](http://geojson.org) formatted data and
-renders it as interactive polygons, lines and points (circles, icons and/or texts).
+The `GeoJsonLayer` renders [GeoJSON](http://geojson.org) formatted data as polygons, lines and points (circles, icons and/or texts).
 
-GeoJsonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md). See the [sub layers](#sub-layers) that it renders.
+`GeoJsonLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md). See the [sub layers](#sub-layers) that it renders.
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -265,6 +264,20 @@ all polygon elevation without updating the data.
 
 This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+
+
+##### `_full3d` (Boolean, optional)
+
+* Default: `false`
+
+> Note: This prop is experimental
+
+When true, polygon tesselation will be performed on the plane with the largest area, instead of the xy plane.
+
+Remarks:
+
+* Only use this if you experience issues rendering features that only change on the z axis.
+* This prop is only effective with `XYZ` data.
 
 
 ### pointType:circle Options

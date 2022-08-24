@@ -70,4 +70,4 @@ Visit the [FirstPersonController](/docs/api-reference/core/first-person-controll
 
 ## Source
 
-[modules/core/src/views/first-person-view.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/first-person-view.js)
+[modules/core/src/views/first-person-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/first-person-view.ts)

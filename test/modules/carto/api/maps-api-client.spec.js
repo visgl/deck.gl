@@ -9,7 +9,6 @@ import {
   _getDataV2,
   fetchLayerData,
   fetchMap,
-  getData,
   getDefaultCredentials,
   setDefaultCredentials
 } from '@deck.gl/carto';
@@ -285,7 +284,7 @@ const TABLE_PARAMS = {
     };
 
     try {
-      await getData({
+      await fetchLayerData({
         type: MAP_TYPES.QUERY,
         source: 'select * from a',
         connection: 'connection_name',
@@ -319,7 +318,7 @@ Object.values(API_VERSIONS).forEach(apiVersion => {
 
     const legacy = [API_VERSIONS.V1, API_VERSIONS.V2].includes(apiVersion);
     try {
-      await (legacy ? _getDataV2 : getData)({
+      await (legacy ? _getDataV2 : fetchLayerData)({
         type: MAP_TYPES.QUERY,
         source: 'select * from a',
         ...(!legacy && {
@@ -436,6 +435,7 @@ test(`getDataV2#versionError`, async t => {
         apiBaseUrl: 'http://carto-api',
         accessToken
       };
+      const headers = {'Custom-Header': 'Custom-Header-Value'};
 
       setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
@@ -448,6 +448,11 @@ test(`getDataV2#versionError`, async t => {
             options.headers.Authorization,
             `Bearer ${accessToken}`,
             'should provide a valid authentication header'
+          );
+          t.is(
+            options.headers['Custom-Header'],
+            'Custom-Header-Value',
+            'should include custom header in instantiation request'
           );
           return Promise.resolve({
             json: () => {
@@ -485,6 +490,7 @@ test(`getDataV2#versionError`, async t => {
           connection: 'connection_name',
           source: 'table',
           credentials: useSetDefaultCredentials ? getDefaultCredentials() : credentials,
+          headers,
           ...props
         });
       } catch (e) {
@@ -500,11 +506,12 @@ test(`getDataV2#versionError`, async t => {
   }
 });
 
-test('getData#post', async t => {
+test('fetchLayerData#post', async t => {
   const geojsonURL = 'http://geojson';
   const mapInstantiationUrl = 'http://carto-api/v3/maps/connection_name/query';
 
   const accessToken = 'XXX';
+  const headers = {'Custom-Header': 'Custom-Header-Value'};
 
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
@@ -523,6 +530,11 @@ test('getData#post', async t => {
         options.headers.Authorization,
         `Bearer ${accessToken}`,
         'should provide a valid authentication header'
+      );
+      t.is(
+        options.headers['Custom-Header'],
+        'Custom-Header-Value',
+        'should include custom header in instantiation request'
       );
 
       return Promise.resolve({
@@ -551,11 +563,12 @@ test('getData#post', async t => {
   };
 
   try {
-    await getData({
+    await fetchLayerData({
       type: MAP_TYPES.QUERY,
       connection: 'connection_name',
       source: `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`,
-      credentials: getDefaultCredentials()
+      credentials: getDefaultCredentials(),
+      headers
     });
   } catch (e) {
     t.error(e, 'should not throw');
@@ -572,6 +585,7 @@ test('fetchMap#no datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
   const mapResponse = {id: cartoMapId, datasets: [], keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG};
+  const headers = {'Custom-Header': 'Custom-Header-Value'};
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
 
@@ -581,6 +595,11 @@ test('fetchMap#no datasets', async t => {
   globalThis.fetch = (url, options) => {
     if (url === mapUrl) {
       t.pass('should call to the right instantiation url');
+      t.is(
+        options.headers['Custom-Header'],
+        'Custom-Header-Value',
+        'should include custom header in public map request'
+      );
       return Promise.resolve({json: () => mapResponse, ok: true});
     }
 
@@ -589,7 +608,7 @@ test('fetchMap#no datasets', async t => {
   };
 
   try {
-    await fetchMap({cartoMapId});
+    await fetchMap({cartoMapId, headers});
   } catch (e) {
     t.error(e, 'should not throw');
   }

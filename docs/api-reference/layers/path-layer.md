@@ -4,7 +4,7 @@ import {PathLayerDemo} from 'website-components/doc-demos/layers';
 
 # PathLayer
 
-The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
+The `PathLayer` renders lists of coordinate points as extruded polylines with mitering.
 
 ```js
 import DeckGL from '@deck.gl/react';

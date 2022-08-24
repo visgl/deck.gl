@@ -8,7 +8,7 @@ import {ScenegraphLayerDemo} from 'website-components/doc-demos/mesh-layers';
 
 # ScenegraphLayer
 
-The `ScenegraphLayer` renders a number of instances of a complete luma.gl scenegraph. While scenegraphs can be created programmatically, they are typically obtained by loading glTF files.
+The `ScenegraphLayer` renders a number of instances of a complete glTF scenegraph.
 
 ```js
 import DeckGL from '@deck.gl/react';

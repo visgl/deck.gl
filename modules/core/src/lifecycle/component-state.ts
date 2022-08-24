@@ -135,7 +135,7 @@ export default class ComponentState<ComponentT extends Component> {
   /* Placeholder methods for subclassing */
 
   protected _fetch(propName: string, url: string): any {
-    return url;
+    return null;
   }
 
   protected _onResolve(propName: string, value: any) {} // eslint-disable-line @typescript-eslint/no-empty-function

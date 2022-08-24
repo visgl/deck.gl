@@ -12,14 +12,17 @@ test('H3Tileset2D', async t => {
     height: 200
   });
 
-  const indices = tileset.getTileIndices({viewport});
+  const indices = tileset
+    .getTileIndices({viewport})
+    // Sort for reliable test output
+    .sort((a, b) => parseInt(a.i, 16) - parseInt(b.i, 16));
   t.deepEqual(
     indices,
     [
+      {i: '8274effffffffff'},
+      {i: '827547fffffffff'},
       {i: '82754ffffffffff'},
       {i: '82755ffffffffff'},
-      {i: '827547fffffffff'},
-      {i: '8274effffffffff'},
       {i: '82756ffffffffff'}
     ],
     'indices in viewport'
@@ -52,7 +55,7 @@ test('H3Tileset2D res0', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 1,
-    width: 1023,
+    width: 1024,
     height: 1024
   });
 
@@ -67,12 +70,12 @@ test('H3Tileset2D large span', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 1,
-    width: 1000,
-    height: 400
+    width: 2048,
+    height: 800
   });
 
   const indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 114, 'large viewport span');
+  t.equal(indices.length, 122, 'large viewport span');
   t.end();
 });
 
@@ -89,7 +92,7 @@ test('H3Tileset2D min zoom', async t => {
   let indices = tileset.getTileIndices({viewport});
   t.equal(indices.length, 28, 'without min zoom');
   indices = tileset.getTileIndices({viewport, minZoom: 1});
-  t.equal(indices.length, 157, 'min zoom added');
+  t.equal(indices.length, 0, 'min zoom added');
   t.end();
 });
 

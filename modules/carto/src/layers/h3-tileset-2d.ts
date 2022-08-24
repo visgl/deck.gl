@@ -7,16 +7,20 @@ function getHexagonsInBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
   resolution: number
 ): string[] {
-  if (Math.abs(east - west) > 180) {
+  const longitudeSpan = Math.abs(east - west);
+  if (longitudeSpan > 180) {
     // This is a known issue in h3-js: polyfill does not work correctly
     // when longitude span is larger than 180 degrees.
-    return [
-      ...new Set(
-        getHexagonsInBoundingBox({west, north, east: 0, south}, resolution).concat(
-          getHexagonsInBoundingBox({west: 0, north, east, south}, resolution)
-        )
-      )
-    ];
+    const nSegments = Math.ceil(longitudeSpan / 180);
+    let h3Indices: string[] = [];
+    for (let s = 0; s < nSegments; s++) {
+      const segmentEast = east + s * 180;
+      const segmentWest = Math.min(segmentEast + 179.9999999, west);
+      h3Indices = h3Indices.concat(
+        getHexagonsInBoundingBox({west: segmentWest, north, east: segmentEast, south}, resolution)
+      );
+    }
+    return [...new Set(h3Indices)];
   }
 
   // `polyfill()` fills based on hexagon center, which means tiles vanish
@@ -55,7 +59,7 @@ function tileToBoundingBox(index: string): GeoBoundingBox {
 // similar
 // Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
 const BIAS = 2;
-function getHexagonResolution(viewport): number {
+export function getHexagonResolution(viewport): number {
   const hexagonScaleFactor = (2 / 3) * viewport.zoom;
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
 
@@ -64,6 +68,11 @@ function getHexagonResolution(viewport): number {
 }
 
 export default class H3Tileset2D extends Tileset2D {
+  /**
+   * Returns all tile indices in the current viewport. If the current zoom level is smaller
+   * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
+   * return tiles that are on maxZoom.
+   */
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     const [east, south, west, north] = viewport.getBounds();
@@ -71,7 +80,8 @@ export default class H3Tileset2D extends Tileset2D {
     let z = getHexagonResolution(viewport);
     let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
-      z = minZoom;
+      // TODO support `extent` prop
+      return [];
     }
     if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
       z = maxZoom;

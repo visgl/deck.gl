@@ -28,7 +28,15 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {Buffer, Texture2D, Transform, getParameters, FEATURES, hasFeatures} from '@luma.gl/core';
+import {
+  Buffer,
+  Texture2D,
+  Transform,
+  getParameters,
+  withParameters,
+  FEATURES,
+  hasFeatures
+} from '@luma.gl/core';
 import {
   Accessor,
   AccessorFunction,
@@ -41,7 +49,8 @@ import {
   LayersList,
   log,
   Position,
-  UpdateParameters
+  UpdateParameters,
+  DefaultProps
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
@@ -68,7 +77,7 @@ const AGGREGATION_MODE = {
   MEAN: 1
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<HeatmapLayerProps> = {
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
@@ -98,9 +107,10 @@ const DIMENSIONS = {
   }
 };
 
-export type HeatmapLayerProps<DataT> = _HeatmapLayerProps<DataT> & AggregationLayerProps<DataT>;
+export type HeatmapLayerProps<DataT = any> = _HeatmapLayerProps<DataT> &
+  AggregationLayerProps<DataT>;
 
-type _HeatmapLayerProps<DataT = any> = {
+type _HeatmapLayerProps<DataT> = {
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
    *
@@ -176,6 +186,7 @@ type _HeatmapLayerProps<DataT = any> = {
   getWeight?: Accessor<DataT, number>;
 };
 
+/** Visualizes the spatial distribution of data. */
 export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_HeatmapLayerProps<DataT>>
 > {
@@ -596,17 +607,20 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     weightsTransform.update({
       elementCount: this.getNumInstances()
     });
-    weightsTransform.run({
-      uniforms,
-      parameters: {
-        blend: true,
-        depthTest: false,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.FUNC_ADD
-      },
-      clearRenderTarget: true,
-      attributes: this.getAttributes(),
-      moduleSettings: this.getModuleSettings()
+    // Need to explictly specify clearColor as external context may have modified it
+    withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
+      weightsTransform.run({
+        uniforms,
+        parameters: {
+          blend: true,
+          depthTest: false,
+          blendFunc: [GL.ONE, GL.ONE],
+          blendEquation: GL.FUNC_ADD
+        },
+        clearRenderTarget: true,
+        attributes: this.getAttributes(),
+        moduleSettings: this.getModuleSettings()
+      });
     });
     this._updateMaxWeightValue();
 

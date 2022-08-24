@@ -1,19 +1,23 @@
-import {CompositeLayer, Layer, log} from '@deck.gl/core';
-import CartoTileLayer from './carto-tile-layer';
-import H3TileLayer from './h3-tile-layer';
-import QuadkeyTileLayer from './quadkey-tile-layer';
+import {
+  CompositeLayer,
+  CompositeLayerProps,
+  Layer,
+  LayerProps,
+  log,
+  UpdateParameters
+} from '@deck.gl/core';
+
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {GeoJsonLayer} from '@deck.gl/layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {layerFromTileDataset} from '../api/layer-map';
 import {
   COLUMNS_SUPPORT,
-  Format,
   FORMATS,
   GEO_COLUMN_SUPPORT,
   MapType,
   MAP_TYPES,
   TileFormat,
-  TILE_FORMATS
+  QueryParameters
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
@@ -21,9 +25,7 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {CompositeLayerProps, LayerProps} from 'modules/core/src/types/layer-props';
-import {ChangeFlags} from 'modules/core/src/lib/layer-state';
-import {FetchLayerDataResult} from '../api/maps-v3-client';
+import {FetchLayerDataResult, Headers} from '../api/maps-v3-client';
 import {assert} from '../utils';
 
 const defaultProps = {
@@ -59,11 +61,17 @@ const defaultProps = {
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null},
 
-  // (String, optional): aggregration SQL expression. Only used for spatial index datasets
+  // (Headers, optional): Custom headers to include in the map instantiation request.
+  headers: {type: 'object', value: {}, optional: true},
+
+  // (String, optional): aggregation SQL expression. Only used for spatial index datasets
   aggregationExp: null,
 
-  // (Number, optional): aggregration resolution level. Only used for spatial index datasets, defaults to 6 for quadkeys, 4 for h3
-  aggregationResLevel: null
+  // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
+  aggregationResLevel: null,
+
+  // (QueryParameters, optional): query parameters to be sent to the server.
+  queryParameters: null
 };
 
 /** All properties supported by CartoLayer. */
@@ -94,18 +102,9 @@ type _CartoLayerProps = {
   connection?: string;
 
   /**
-   * Use to override the default data format.
-   *
-   * Only supported when apiVersion is `API_VERSIONS.V3`.
-   *
-   * Possible values are: `FORMATS.GEOJSON`, `FORMATS.JSON` and `FORMATS.TILEJSON`.
-   */
-  format?: Format;
-
-  /**
    * Use to override the default tile data format.
    *
-   * Only supported when apiVersion is `API_VERSIONS.V3` and format is `FORMATS.TILEJSON`.
+   * Only supported when apiVersion is `API_VERSIONS.V3`.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
    */
@@ -151,6 +150,18 @@ type _CartoLayerProps = {
   onDataError?: (err: unknown) => void;
 
   clientId?: string;
+
+  /** Custom headers to include in the map instantiation request **/
+  headers?: Headers;
+
+  /** Aggregation SQL expression. Only used for spatial index datasets **/
+  aggregationExp?: string;
+
+  /** Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
+  aggregationResLevel?: number;
+
+  /** Query parameters to be sent to the server. **/
+  queryParameters?: QueryParameters;
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
@@ -209,26 +220,19 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     }
   }
 
-  updateState({
-    props,
-    oldProps,
-    changeFlags
-  }: {
-    props: CartoLayerProps;
-    oldProps: CartoLayerProps;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
+      props.aggregationExp !== oldProps.aggregationExp ||
+      props.aggregationResLevel !== oldProps.aggregationResLevel ||
       props.connection !== oldProps.connection ||
       props.geoColumn !== oldProps.geoColumn ||
-      props.format !== oldProps.format ||
       props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
       JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
-      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
+      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials) ||
+      JSON.stringify(props.queryParameters) !== JSON.stringify(oldProps.queryParameters);
 
     if (shouldUpdateData) {
       this.setState({data: null, apiVersion: null});
@@ -239,7 +243,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
   async _updateData(): Promise<void> {
     try {
-      const {type, data: source, clientId, credentials, connection, ...rest} = this.props;
+      const {type, data: source, credentials, connection, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -252,10 +256,11 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
         result = await fetchLayerData({
           type,
           source,
-          clientId,
           credentials: credentials as CloudNativeCredentials,
           connection,
-          ...rest
+          ...rest,
+          // CartoLayer only supports tiled output from v8.8, force data format
+          format: FORMATS.TILEJSON
         });
       }
 
@@ -277,7 +282,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
   _getSubLayerAndProps(): [any, LayerProps] {
     assert(this.state);
 
-    const {data, format, apiVersion} = this.state;
+    const {data, apiVersion} = this.state;
 
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -289,26 +294,12 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       return [MVTLayer, props];
     }
 
-    if (format === FORMATS.TILEJSON) {
-      /* global URL */
-      const tileUrl = new URL(data.tiles[0]);
+    /* global URL */
+    const tileUrl = new URL(data.tiles[0]);
+    props.formatTiles =
+      props.formatTiles || (tileUrl.searchParams.get('formatTiles') as TileFormat);
 
-      props.formatTiles =
-        props.formatTiles ||
-        (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
-        TILE_FORMATS.MVT;
-
-      if (data.scheme === 'h3') {
-        return [H3TileLayer, props];
-      }
-      if (data.scheme === 'quadkey') {
-        return [QuadkeyTileLayer, props];
-      }
-      return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
-    }
-
-    // It's a geojson layer
-    return [GeoJsonLayer, props];
+    return [layerFromTileDataset(props.formatTiles, data.scheme), props];
   }
 
   renderLayers(): Layer | null {

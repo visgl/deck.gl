@@ -40,7 +40,7 @@ export {default as _TextBackgroundLayer} from './text-layer/text-background-laye
 
 // Types
 export type {ArcLayerProps} from './arc-layer/arc-layer';
-export type {BitmapLayerProps} from './bitmap-layer/bitmap-layer';
+export type {BitmapLayerProps, BitmapBoundingBox} from './bitmap-layer/bitmap-layer';
 export type {ColumnLayerProps} from './column-layer/column-layer';
 export type {ScatterplotLayerProps} from './scatterplot-layer/scatterplot-layer';
 export type {IconLayerProps} from './icon-layer/icon-layer';
@@ -54,4 +54,3 @@ export type {PointCloudLayerProps} from './point-cloud-layer/point-cloud-layer';
 export type {TextBackgroundLayerProps} from './text-layer/text-background-layer/text-background-layer';
 export type {PathLayerProps} from './path-layer/path-layer';
 export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';
-export type {MaterialProps as _MaterialProps} from './types';

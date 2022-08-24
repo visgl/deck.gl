@@ -21,6 +21,73 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.8 Prereleases
 
+#### deck.gl [8.8.0-beta.5] - Jun 30 2022
+
+- CARTO: Handle minZoom&maxZoom in H3TileLayer (#7108)
+- CARTO: document use of spatial indices (#7107)
+- CARTO: Remove CARTO 2 for documentation (#7106)
+- CARTO - H3Tileset handles large latitude span (#7103)
+- CARTO: Add QuadbinTileLayer (#7095)
+- Add annotation to all layer classes (#7099)
+- Resolve async prop to null if fetch is undefined (#7098)
+
+#### deck.gl [8.8.0-beta.4] - Jun 27 2022
+
+- Fix arcgis integration (#7092)
+- Fix DeckGL component event root (#7091)
+- Add isInitialized flag to Deck class (#7084)
+- Fix FillStyleExtension precision (#7074)
+- GoogleMapsOverlay: Force useDevicePixels to true in interleaved mode (#7066)
+- GoogleMapsOverlay: HeatmapLayer weightsTransform uses correct clearColor (#7071)
+- CARTO: Remove deprecated `getData` function (#7063)
+- CARTO: Remove format prop from CartoLayer (#7056)
+- Add runtime check for H3 library (#7058)
+
+#### deck.gl [8.8.0-beta.3] - Jun 20 2022
+
+- Avoid mutating iconMapping value in autopacking (#7060)
+- Fix picking in non-geospatial TileLayer (#7052)
+- Do not access viewports before viewManager initialization (#7049)
+- QuadkeyTileset2D add missing metadata (#7047)
+- Add type for textureParameters (#7045)
+- [ts] Types for CartoLayer aggregation parameters (#7048)
+- Geohash layer (#6917)
+- [ts] TerrainLayer (#7044)
+- Cull TileLayer sub layers during picking (#6733)
+
+#### deck.gl [8.8.0-beta.2] - Jun 13 2022
+
+- Update defaultProps typings (#7031)
+- Add interleaved prop to MapboxOverlay (#7027)
+- [ts] Tile3DLayer (#7038)
+- Improve performance for `visible: false` layers (#7035)
+- [ts] H3 layers (#7033)
+- [ts] GreatCircleLayer (#7034)
+- [ts] MeshLayer (#6998)
+- [ts] S2Layer (#6999)
+
+#### deck.gl [8.8.0-beta.1] - Jun 10 2022
+
+- [ts] react module (#7016)
+- [ts] extensions module (#7015)
+- [ts] LayerExtension (#7014)
+- Bump dependencies to production versions (#7018)
+- [ts] shader modules (#6984)
+- [ts] main: re-export recently added typings (#7012)
+- [ts] TripsLayer (#6997)
+- [ts] ScreenGridLayer & utils (#7002)
+- [ts] HeatmapLayer & utils (#7003)
+- [ts] modules/layers leftovers (#7010)
+- [ts] LineLayer (#7008)
+- [ts] PointCloudLayer (#7009)
+- [ts] ColumnLayer & GridCellLayer (#7007)
+- [ts] GridLayer & friends (#7004)
+- [ts] BitmapLayer (#7006)
+- [ts] ContourLayer & deps (#7001)
+- [ts] ArcLayer (#7005)
+- [ts] HexagonLayer & deps (#7000)
+- Improve default Layer type (#6992)
+
 #### deck.gl [8.8.0-alpha.6] - Jun 6 2022
 
 - Bump devcert from 1.1.3 to 1.2.1 in /website (#6983)

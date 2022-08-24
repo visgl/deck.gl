@@ -34,7 +34,8 @@ import type {
   Texture,
   Unit,
   UpdateParameters,
-  LayerContext
+  LayerContext,
+  DefaultProps
 } from '@deck.gl/core';
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
@@ -100,36 +101,17 @@ type _IconLayerProps<DataT> = {
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
-  onIconError?: (context: LoadIconErrorContext) => void;
+  onIconError?: ((context: LoadIconErrorContext) => void) | null;
+
+  /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
+  textureParameters?: Record<number, number> | null;
 };
 
-export type IconLayerProps<DataT> = _IconLayerProps<DataT> & LayerProps<DataT>;
+export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps<DataT>;
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
-/*
- * @param {object} props
- * @param {Texture2D | string} props.iconAtlas - atlas image url or texture
- * @param {object} props.iconMapping - icon names mapped to icon definitions
- * @param {object} props.iconMapping[icon_name].x - x position of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].y - y position of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].width - width of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].height - height of icon on the atlas image
- * @param {object} props.iconMapping[icon_name].anchorX - x anchor of icon on the atlas image,
- *   default to width / 2
- * @param {object} props.iconMapping[icon_name].anchorY - y anchor of icon on the atlas image,
- *   default to height / 2
- * @param {object} props.iconMapping[icon_name].mask - whether icon is treated as a transparency
- *   mask. If true, user defined color is applied. If false, original color from the image is
- *   applied. Default to false.
- * @param {number} props.size - icon size in pixels
- * @param {func} props.getPosition - returns anchor position of the icon, in [lng, lat, z]
- * @param {func} props.getIcon - returns icon name as a string
- * @param {func} props.getSize - returns icon size multiplier as a number
- * @param {func} props.getColor - returns color of the icon in [r, g, b, a]. Only works on icons
- *   with mask: true.
- * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
- */
-const defaultProps = {
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+
+const defaultProps: DefaultProps<IconLayerProps> = {
   iconAtlas: {type: 'image', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
@@ -149,10 +131,11 @@ const defaultProps = {
   onIconError: {type: 'function', value: null, compare: false, optional: true}
 };
 
+/** Render raster icons at given coordinates. */
 export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
   static layerName = 'IconLayer';
 
   state!: {
@@ -235,7 +218,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
-    const {iconAtlas, iconMapping, data, getIcon} = props;
+    const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
     // internalState is always defined during updateState
@@ -244,7 +227,8 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
       iconAtlas,
-      iconMapping: iconMapping as IconMapping
+      iconMapping: prePacked ? (iconMapping as IconMapping) : null,
+      textureParameters
     });
 
     // prepacked iconAtlas from user

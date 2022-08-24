@@ -9,7 +9,8 @@ import {
   MVTLayer,
   H3HexagonLayer,
   H3ClusterLayer,
-  QuadkeyLayer
+  QuadkeyLayer,
+  GeohashLayer
 } from '@deck.gl/geo-layers';
 
 import {makeLayerDemo} from './demo-base';
@@ -26,6 +27,23 @@ export const GreatCircleLayerDemo = makeLayerDemo({
     getTargetColor: [0, 128, 200],
     widthMinPixels: 5,
     pickable: true
+  }`
+});
+
+
+export const GeohashLayerDemo = makeLayerDemo({
+  Layer: GeohashLayer,
+  getTooltip: '({object}) => object && `${object.geohash} value: ${object.value}`',
+  props: `{
+    data: '${DATA_URI}/sf.geohashes.json',
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 1000,
+    getGeohash: d => d.geohash,
+    getFillColor: d => [d.value * 255, (1 - d.value) * 128, (1 - d.value) * 255],
+    getElevation: d => d.value
   }`
 });
 
@@ -63,7 +81,7 @@ export const S2LayerDemo = makeLayerDemo({
 
 export const H3HexagonLayerDemo = makeLayerDemo({
   Layer: H3HexagonLayer,
-  dependencies: ['https://unpkg.com/h3-js'],
+  dependencies: ['https://unpkg.com/h3-js@3.7.2'],
   getTooltip: '({object}) => object && `${object.hex} count: ${object.count}`',
   props: `{
     data: '${DATA_URI}/sf.h3cells.json',
@@ -80,7 +98,7 @@ export const H3HexagonLayerDemo = makeLayerDemo({
 
 export const H3ClusterLayerDemo = makeLayerDemo({
   Layer: H3ClusterLayer,
-  dependencies: ['https://unpkg.com/h3-js'],
+  dependencies: ['https://unpkg.com/h3-js@3.7.2'],
   getTooltip: '({object}) => object && `density: ${object.mean}`',
   props: `{
     data: '${DATA_URI}/sf.h3clusters.json',

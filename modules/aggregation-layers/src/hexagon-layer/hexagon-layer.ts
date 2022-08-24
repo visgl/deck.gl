@@ -18,8 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Accessor, AccessorFunction, Color, log, Position, UpdateParameters} from '@deck.gl/core';
-import {ColumnLayer, _MaterialProps as MaterialProps} from '@deck.gl/layers';
+import {
+  Accessor,
+  AccessorFunction,
+  Color,
+  log,
+  Position,
+  Material,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
+import {ColumnLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 
@@ -33,7 +42,7 @@ import {AggregateAccessor} from '../types';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function nop() {}
 
-const defaultProps = {
+const defaultProps: DefaultProps<HexagonLayerProps> = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -85,13 +94,13 @@ type _HexagonLayerProps<DataT = any> = {
    * Function to aggregate data into hexagonal bins.
    * @default d3-hexbin
    */
-  hexagonAggregator?: () => any;
+  hexagonAggregator?: (props: any, params: any) => any;
 
   /**
    * Color scale input domain.
    * @default [min(colorWeight), max(colorWeight)]
    */
-  colorDomain?: number[];
+  colorDomain?: [number, number] | null;
 
   /**
    * Specified as an array of colors [color1, color2, ...].
@@ -109,13 +118,13 @@ type _HexagonLayerProps<DataT = any> = {
    * Elevation scale input domain. The elevation scale is a linear scale that maps number of counts to elevation.
    * @default [0, max(elevationWeight)]
    */
-  elevationDomain?: number[];
+  elevationDomain?: [number, number] | null;
 
   /**
    * Elevation scale output range.
    * @default [0, 1000]
    */
-  elevationRange?: number[];
+  elevationRange?: [number, number];
 
   /**
    * Hexagon elevation multiplier.
@@ -165,11 +174,17 @@ type _HexagonLayerProps<DataT = any> = {
   colorScaleType?: 'quantize' | 'quantile' | 'ordinal';
 
   /**
-   * This is an object that contains material props
-   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-   * @default true
+   * Scaling function used to determine the elevation of the grid cell, only supports 'linear'.
    */
-  material?: MaterialProps | boolean;
+  elevationScaleType?: 'linear';
+
+  /**
+   * Material settings for lighting effect. Applies if `extruded: true`.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
+   */
+  material?: Material;
 
   /**
    * Defines the operation used to aggregate all data object weights to calculate a cell's color value.
@@ -224,8 +239,14 @@ type _HexagonLayerProps<DataT = any> = {
    * @default () => {}
    */
   onSetElevationDomain?: (minMax: [number, number]) => void;
+
+  /**
+   * (Experimental) Filter data objects
+   */
+  _filterData: null | ((d: DataT) => boolean);
 };
 
+/** Aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains. */
 export default class HexagonLayer<ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_HexagonLayerProps>
 > {

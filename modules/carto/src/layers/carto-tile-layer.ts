@@ -1,6 +1,6 @@
 /* global TextDecoder */
 import Protobuf from 'pbf';
-import {log} from '@deck.gl/core';
+import {log, DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
@@ -12,7 +12,7 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {Properties, Tile, TileReader} from './schema/carto-tile';
+import {KeyValueProperties, Tile, TileReader} from './schema/carto-tile';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
@@ -28,7 +28,7 @@ function parsePbf(buffer: ArrayBuffer): Tile {
   return tile;
 }
 
-function unpackProperties(properties: Properties[]) {
+function unpackProperties(properties: KeyValueProperties[]) {
   if (!properties || !properties.length) {
     return [];
   }
@@ -67,7 +67,10 @@ const CartoTileLoader: LoaderWithParser = {
   id: 'cartoTile',
   module: 'carto',
   extensions: ['pbf'],
-  mimeTypes: ['application/x-protobuf'],
+  mimeTypes: [
+    'application/vnd.carto-vector-tile',
+    'application/x-protobuf' // Back-compatibility
+  ],
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoTile(arrayBuffer, options),
@@ -79,7 +82,7 @@ const CartoTileLoader: LoaderWithParser = {
   }
 };
 
-const defaultProps = {
+const defaultProps: DefaultProps<CartoTileLayerProps> = {
   ...MVTLayer.defaultProps,
   formatTiles: defaultTileFormat,
   loaders: [CartoTileLoader]

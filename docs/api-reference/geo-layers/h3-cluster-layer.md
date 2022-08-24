@@ -73,7 +73,7 @@ new H3ClusterLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/h3-js"></script>
+<script src="https://unpkg.com/h3-js@^3.0.0"></script>
 <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
@@ -107,4 +107,4 @@ The `H3ClusterLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)
+[modules/geo-layers/src/h3-layers/h3-cluster-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-cluster-layer.ts)

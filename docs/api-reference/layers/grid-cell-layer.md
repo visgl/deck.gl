@@ -10,7 +10,7 @@ import {GridCellLayerDemo} from 'website-components/doc-demos/layers';
 
 > This is the primitive layer rendered by [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) after aggregation. Unlike the CPUGridLayer, it renders one column for each data object.
 
-The GridCellLayer can render a grid-based heatmap.
+The `GridCellLayer` can render a grid-based heatmap.
 It is a variation of the [ColumnLayer](/docs/api-reference/layers/column-layer.md).
 It takes the constant width / height of all cells and bottom-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
@@ -145,4 +145,4 @@ The elevation of each cell in meters.
 
 ## Source
 
-[modules/layers/src/grid-cell-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer/grid-cell-layer.js)
+[modules/layers/src/column-layer/grid-cell-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer/grid-cell-layer.ts)

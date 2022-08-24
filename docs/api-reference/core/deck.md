@@ -214,6 +214,7 @@ Receives arguments:
 - `layer` (Layer) - the layer to be drawn
 - `viewport` (Viewport) - the current viewport
 - `isPicking` (Boolean) - whether this is a picking pass
+- `cullRect` (Object) - if defined, indicates that only the content rendered to the given rectangle is needed.
 - `renderPass` (String) - the name of the current render pass. Some standard passes are:
   + `'screen'` - drawing to screen
   + `'picking:hover'` - drawing to offscreen picking buffer due to pointer move
@@ -690,6 +691,10 @@ Notes:
 
 ## Member Variables
 
+##### `isInitialized`
+
+Flag indicating that the Deck instance has initialized its resources. It is safe to call public methods when `isInitialized` is `true`.
+
 ##### `metrics`
 
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
@@ -712,4 +717,4 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 
 ## Source
 
-[modules/core/src/lib/deck.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.js)
+[modules/core/src/lib/deck.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.ts)

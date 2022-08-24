@@ -6,7 +6,6 @@
       "entries": [
         {"entry": "docs"},
         {"entry": "docs/whats-new"},
-        {"entry": "docs/get-started/using-with-map"},
         {"entry": "docs/upgrade-guide"},
         {"entry": "docs/contributing"},
         {"entry": "docs/faq"}
@@ -17,6 +16,7 @@
       "entries": [
         {"entry": "docs/get-started/getting-started"},
         {"entry": "docs/get-started/using-standalone"},
+        {"entry": "docs/get-started/using-with-map"},
         {"entry": "docs/get-started/using-with-react"},
         {"entry": "docs/get-started/using-with-typescript"},
         {"entry": "docs/get-started/learning-resources"}
@@ -103,6 +103,7 @@
             {"entry": "docs/api-reference/layers/path-layer"},
             {"entry": "docs/api-reference/layers/point-cloud-layer"},
             {"entry": "docs/api-reference/layers/polygon-layer"},
+            {"entry": "docs/api-reference/geo-layers/geohash-layer"},
             {"entry": "docs/api-reference/geo-layers/quadkey-layer"},
             {"entry": "docs/api-reference/geo-layers/s2-layer"},
             {"entry": "docs/api-reference/layers/scatterplot-layer"},
@@ -243,7 +244,8 @@
           "title": "@deck.gl/mapbox",
           "entries": [
             {"entry": "docs/api-reference/mapbox/overview"},
-            {"entry": "docs/api-reference/mapbox/mapbox-layer"}
+            {"entry": "docs/api-reference/mapbox/mapbox-layer"},
+            {"entry": "docs/api-reference/mapbox/mapbox-overlay"}
           ]
         },
         {

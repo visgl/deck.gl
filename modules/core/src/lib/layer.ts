@@ -49,6 +49,7 @@ import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
+import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 
@@ -71,11 +72,17 @@ const areViewportsEqual = memoize(
 
 let pickingColorCache = new Uint8ClampedArray(0);
 
-const defaultProps = {
+const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: {type: 'function', value: null, compare: false, optional: true},
-  _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
+  _dataDiff: {
+    type: 'function',
+    // @ts-ignore __diff is not defined on data
+    value: data => data && data.__diff,
+    compare: false,
+    optional: true
+  },
   dataTransform: {type: 'function', value: null, compare: false, optional: true},
   onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   onError: {type: 'function', value: null, compare: false, optional: true},
@@ -178,7 +185,7 @@ export type UpdateParameters<LayerT extends Layer> = {
 };
 
 export default abstract class Layer<PropsT = {}> extends Component<PropsT & Required<LayerProps>> {
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
   static layerName: string = 'Layer';
 
   internalState: LayerState<this> | null = null;

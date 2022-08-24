@@ -206,7 +206,10 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.7",
             "Framework :: Jupyter",
         ],
-        extras_require={"testing": ["pytest"]},
+        extras_require={
+            "carto": ["pydeck_carto"],
+            "testing": ["pytest"],
+        },
         install_requires=[
             'ipykernel>=5.1.2;python_version>="3.4"',
             'ipython>=5.8.0;python_version<"3.4"',
@@ -215,7 +218,7 @@ if __name__ == "__main__":
             "jinja2>=2.10.1",
             "numpy>=1.16.4",
         ],
-        setup_requires=["Jinja2>=2.10.1"],
+        setup_requires=["Jinja2>=2.10.1", "jupyter>=1.0.0"],
         tests_require=["pytest>=4.0.2", "pandas", "requests"],
         data_files=[
             (

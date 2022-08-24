@@ -2,61 +2,74 @@ import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
+import type {Color, Texture} from '../types/layer-props';
 
-type BasePropType = {
-  value: any;
+type BasePropType<ValueT> = {
+  value: ValueT;
   async?: boolean;
   validate?: (value: any, propType: PropType) => boolean;
-  equal?: (value1: any, value2: any, propType: PropType) => boolean;
+  equal?: (value1: ValueT, value2: ValueT, propType: PropType) => boolean;
 };
 
 /**
  * Normalized prop type definition
  */
-export type PropType = BasePropType & {
+export type PropType = BasePropType<any> & {
   type: string;
   name: string;
   transform?: (value: any, propType: PropType, component: Component<any>) => any;
   release?: (value: any, propType: PropType, component: Component<any>) => void;
 };
 
-type BooleanPropType = BasePropType & {
-  type: 'boolean';
-  value: boolean;
+type DefaultProp<T> =
+  | T
+  | DeprecatedProp
+  | BooleanPropType
+  | NumberPropType
+  | ColorPropType
+  | ImagePropType
+  | DataPropType<T>
+  | ArrayPropType<T>
+  | ObjectPropType<T>
+  | AccessorPropType<T>
+  | FunctionPropType<T>;
+
+export type DefaultProps<T extends Record<string, any>> = {
+  [propName in keyof T]?: DefaultProp<Required<T>[propName]>;
 };
-type NumberPropType = BasePropType & {
+
+type BooleanPropType = BasePropType<boolean> & {
+  type: 'boolean';
+};
+type NumberPropType = BasePropType<number> & {
   type: 'number';
-  value: number;
   min?: number;
   max?: number;
 };
-type ColorPropType = BasePropType & {
+type ColorPropType = BasePropType<Color | null> & {
   type: 'color';
-  value: [number, number, number, number];
   optional?: boolean;
 };
-type ArrayPropType = BasePropType & {
+type ArrayPropType<T = any[]> = BasePropType<T> & {
   type: 'array';
-  value: any[];
   optional?: boolean;
   compare?: boolean;
 };
-type AccessorPropType = BasePropType & {
+type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
 };
-type FunctionPropType = BasePropType & {
+type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
-  value: Function;
   optional?: boolean;
   compare?: boolean;
 };
-type DataPropType = BasePropType & {
+type DataPropType<T = any> = BasePropType<T> & {
   type: 'data';
 };
-type ImagePropType = BasePropType & {
+type ImagePropType = BasePropType<Texture | null> & {
   type: 'image';
 };
-type ObjectPropType = BasePropType & {
+type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
   optional?: boolean;
   compare?: boolean;
@@ -64,7 +77,7 @@ type ObjectPropType = BasePropType & {
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
 };
-export type PropTypeDef =
+type PropTypeDef =
   | DeprecatedProp
   | boolean
   | BooleanPropType

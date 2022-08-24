@@ -8,12 +8,12 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.7.0-beta.6",
-    "@deck.gl/layers": "^8.7.0-beta.6",
-    "@deck.gl/geo-layers": "^8.7.0-beta.6",
-    "@deck.gl/mesh-layers": "^8.7.0-beta.6",
-    "@deck.gl/carto": "^8.7.0-beta.6",
-    "mapbox-gl": "^1.12.0"
+    "@deck.gl/core": "^8.8.0",
+    "@deck.gl/layers": "^8.8.0",
+    "@deck.gl/geo-layers": "^8.8.0",
+    "@deck.gl/mesh-layers": "^8.8.0",
+    "@deck.gl/carto": "^8.8.0",
+    "mapbox-gl": "^1.13.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",

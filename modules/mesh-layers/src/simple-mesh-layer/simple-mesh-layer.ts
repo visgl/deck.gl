@@ -27,9 +27,10 @@ import {
   project32,
   phongLighting,
   picking,
-  COORDINATE_SYSTEM,
+  DefaultProps,
   log,
-  LayerContext
+  LayerContext,
+  Material
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
@@ -43,6 +44,7 @@ import fs from './simple-mesh-layer-fragment.glsl';
 import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
+import {GLTFMaterialParser} from '@luma.gl/experimental';
 
 function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
@@ -77,7 +79,7 @@ function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
   throw Error('Invalid mesh');
 }
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 type Mesh =
   | GeometryType
@@ -88,9 +90,10 @@ type Mesh =
   | MeshAttributes;
 
 type _SimpleMeshLayerProps<DataT> = {
-  mesh: string | Mesh | Promise<Mesh>;
+  mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | Texture | Promise<Texture>;
-  textureParameters?: {[p: number]: number} | null;
+  /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
+  textureParameters?: Record<number, number> | null;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -154,13 +157,13 @@ type _SimpleMeshLayerProps<DataT> = {
    * @default true
    * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
    */
-  material?: true | any | null; // TODO - export Material def from lighting shader module
+  material?: Material;
 };
 
-export type SimpleMeshLayerProps<DataT> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
+export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
 
-const defaultProps = {
-  mesh: {value: null, type: 'object', async: true},
+const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
+  mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   // Whether the color attribute in a mesh will be used
@@ -189,6 +192,7 @@ const defaultProps = {
   getTransformMatrix: {type: 'accessor', value: []}
 };
 
+/** Render a number of instances of an arbitrary 3D geometry. */
 export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   ExtraPropsT & Required<_SimpleMeshLayerProps<DataT>>
 > {
@@ -196,6 +200,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
   static layerName = 'SimpleMeshLayer';
 
   state!: {
+    materialParser?: GLTFMaterialParser;
     model?: Model;
     emptyTexture: Texture2D;
     hasNormals?: boolean;
@@ -303,7 +308,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
       .draw();
   }
 
-  private getModel(mesh: Mesh): Model {
+  protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
       id: this.props.id,

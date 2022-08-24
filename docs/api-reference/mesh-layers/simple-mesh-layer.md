@@ -8,7 +8,7 @@ import {SimpleMeshLayerDemo} from 'website-components/doc-demos/mesh-layers';
 
 # SimpleMeshLayer
 
-The `SimpleMeshLayer` renders a number of arbitrary geometries. For example, a fleet of 3d cars each with a position and an orientation over the map.
+The `SimpleMeshLayer` renders a number of instances of an arbitrary 3D geometry. For example, it can be used to visualize a fleet of 3d cars each with a position and an orientation over the map.
 
 ```js
 import DeckGL from '@deck.gl/react';

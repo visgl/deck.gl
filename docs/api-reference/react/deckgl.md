@@ -58,7 +58,8 @@ A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) comp
 - `eventManager` ([EventManager](https://uber-web.github.io/mjolnir.js/docs/api-reference/event-manager))
 
 ```jsx
-/// Example using react-map-gl controls with deck.gl
+/// Example using react-map-gl v6 controls with deck.gl
+/// To use react-map-gl v7, see https://deck.gl/docs/api-reference/mapbox/mapbox-overlay
 import DeckGL from '@deck.gl/react';
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
@@ -183,4 +184,4 @@ We do recommend you to use the pure JavaScript version of deck.gl if you are mor
 
 ## Source
 
-[modules/react/src/deckgl.js](https://github.com/visgl/deck.gl/blob/master/modules/react/src/deckgl.js)
+[modules/react/src/deckgl.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/deckgl.ts)

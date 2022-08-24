@@ -2,6 +2,40 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.8
+
+Release date: June, 2022
+
+### TypeScript
+
+Official typings are now available in deck.gl for public preview. It was a tremendous effort converting the deck.gl code base into TypeScript. We did it not just for TypeScript users to easily consume this library, but also for the overall robustness and maintainability of our own code base.
+
+In v8.x, the types will not be exposed by default to prevent any typing errors from breaking existing TypeScript applications. You can opt in to using the typed version by switching your import statements to the `@deck.gl/*/typed` endpoints. Visit [getting started with TypeScript](/docs/get-started/using-with-typescript.md) to find out more.
+
+### Custom Indexing System in TileLayer
+
+The [TileLayer](/docs/api-reference/geo-layers/tile-layer.md) is fundamental when it comes to visualizing datasets so big that they cannot fit in the browser's memory. The idea is to only fetch and render content that is visible in the current viewport, and at the appropriate detail level. Up till now, the `TileLayer` has exclusively implemented [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames). If you wish to use it with your dataset, you had to use an offline tool or an backend that partitioned geospatial data into OSM tiles.
+
+Starting from v8.8, the `TileLayer` supports custom indexing systems. Applications can now supply a custom implementation of [Tileset2D](/docs/api-reference/geo-layers/tile-layer.md#tilesest2d) to the `TilesetClass` prop. This makes it possible to use incremental loading with other indexing systems such as [H3](https://h3geo.org/) and [S2](https://s2geometry.io/). The immediate use case is to allow the client visualization to work with any geospatial partitioning algorithm available in a database solution.
+
+Due to this generalization, there is a breaking change affecting indexing properties (`x`, `y` and `z`) in the `TileLayer` API. See [upgrade guide](/docs/upgrade-guide.md) for details.
+
+### MapboxOverlay
+
+The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](/docs/api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](/docs/get-started/using-with-map.md) rendering modes. See the new [get started example](/examples/get-started/pure-js/mapbox/).
+
+If you are using react-map-gl v7, this is the only solution to use deck.gl with React map control components (`Navigationcontrol`, `GeolocateControl`, etc.). See [example](https://github.com/visgl/react-map-gl/blob/master/examples/deckgl-overlay/src/app.tsx).
+
+### `@deck.gl/carto`
+
+CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin). More info [here](/docs/api-reference/carto/carto-layer#spatial-index-data).
+
+### Enhancements
+
+- Views now accept a [padding](/docs/api-reference/core/view.md#padding) option to offset the focal point.
+- Improved performance when there are many invisible layers
+- Improved picking performance when using the `TileLayer`
+
 ## deck.gl v8.7
 
 Release date: February 25, 2022

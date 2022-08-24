@@ -19,22 +19,21 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {GridCellLayer, _MaterialProps as MaterialProps} from '@deck.gl/layers';
-import {Accessor, AccessorFunction, Color, Position} from '@deck.gl/core';
+import {GridCellLayer} from '@deck.gl/layers';
+import {Accessor, AccessorFunction, Color, Position, Material, DefaultProps} from '@deck.gl/core';
 
 import {defaultColorRange} from '../utils/color-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 
-import Layer, {UpdateParameters} from 'modules/core/src/lib/layer';
-import {GetPickingInfoParams, PickingInfo} from 'modules/core/src/lib/picking/pick-info';
+import {Layer, UpdateParameters, GetPickingInfoParams, PickingInfo} from '@deck.gl/core';
 import {AggregateAccessor} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function nop() {}
 
-const defaultProps = {
+const defaultProps: DefaultProps<CPUGridLayerProps> = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -162,11 +161,20 @@ export type _CPUGridLayerProps<DataT> = {
   colorScaleType?: 'quantize' | 'linear' | 'quantile' | 'ordinal';
 
   /**
-   * This is an object that contains material props
-   * for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-   * @default true
+   * Scaling function used to determine the elevation of the grid cell, only supports 'linear'.
    */
-  material?: MaterialProps | null;
+  elevationScaleType?: 'linear';
+
+  // TODO - document
+  gridAggregator?: (props: any, params: any) => any;
+
+  /**
+   * Material settings for lighting effect. Applies if `extruded: true`.
+   *
+   * @default true
+   * @see https://deck.gl/docs/developer-guide/using-lighting
+   */
+  material?: Material;
 
   /**
    * Defines the operation used to aggregate all data object weights to calculate a cell's color value.
@@ -221,8 +229,14 @@ export type _CPUGridLayerProps<DataT> = {
    * @default () => {}
    */
   onSetElevationDomain?: (minMax: [number, number]) => void;
+
+  /**
+   * (Experimental) Filter data objects
+   */
+  _filterData: null | ((d: DataT) => boolean);
 };
 
+/** Aggregate data into a grid-based heatmap. Aggregation is performed on CPU. */
 export default class CPUGridLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
   ExtraPropsT & Required<_CPUGridLayerProps<DataT>>
 > {

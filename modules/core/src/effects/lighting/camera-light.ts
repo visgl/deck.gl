@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {PointLight} from './point-light';
 import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 import type Layer from '../../lib/layer';
