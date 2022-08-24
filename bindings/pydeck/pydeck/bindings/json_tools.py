@@ -12,6 +12,7 @@ IGNORE_KEYS = [
     "deck_widget",
     "binary_data_sets",
     "_binary_data",
+    "_tooltip",
     "_kwargs",
 ]
 

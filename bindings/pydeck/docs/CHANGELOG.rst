@@ -3,6 +3,13 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.8 Releases
+------------
+
+0.8.0b1 - Jul 4 2022
+^^^^^^^^^^^^^^^^^^^
+- Move Jupyter plugin to an extra (#TBD)
+
 0.7 Releases
 ------------
 
