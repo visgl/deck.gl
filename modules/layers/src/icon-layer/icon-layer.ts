@@ -218,7 +218,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
-    const {iconAtlas, iconMapping, data, getIcon} = props;
+    const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
     // internalState is always defined during updateState
@@ -227,7 +227,8 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
       iconAtlas,
-      iconMapping: prePacked ? (iconMapping as IconMapping) : null
+      iconMapping: prePacked ? (iconMapping as IconMapping) : null,
+      textureParameters
     });
 
     // prepacked iconAtlas from user

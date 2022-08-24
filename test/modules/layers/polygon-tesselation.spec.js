@@ -274,6 +274,54 @@ test('PolygonTesselator#tesselation', t => {
   t.end();
 });
 
+test('PolygonTesselator#3dtesselation', t => {
+  const tesselator = new PolygonTesselator({
+    data: [
+      {
+        polygon: [
+          [1, 0, 1],
+          [2, 0, 2],
+          [3, 0, 0],
+          [1, 0, 1]
+        ],
+        name: 'simple loop'
+      },
+      {
+        polygon: [
+          [
+            [0, 0, 0],
+            [2, 0, 0],
+            [2, 0, 2],
+            [0, 0, 2]
+          ],
+          [
+            [0.5, 0, 0.5],
+            [1, 0, 0.5],
+            [0.5, 0, 1]
+          ]
+        ],
+        name: 'with 1 hole'
+      }
+    ],
+    getGeometry: d => d.polygon,
+    positionFormat: 'XYZ',
+    full3d: true
+  });
+
+  t.deepEquals(
+    tesselator.get('indices').slice(0, 24),
+    [2, 0, 1, 8, 9, 10, 11, 9, 8, 7, 6, 5, 5, 8, 10, 11, 8, 7, 7, 5, 10, 10, 11, 7],
+    'returned correct indices'
+  );
+  t.deepEquals(
+    tesselator.get('vertexValid').slice(0, 13),
+    [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+    'returned correct vertexValid'
+  );
+
+  t.end();
+});
+
 /* eslint-disable max-statements */
 test('PolygonTesselator#partial update', t => {
   const accessorCalled = new Set();

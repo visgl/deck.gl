@@ -36,7 +36,7 @@
     "@math.gl/core": "^3.6.2",
     "@math.gl/polygon": "^3.6.2",
     "@math.gl/web-mercator": "^3.6.2",
-    "earcut": "^2.0.6"
+    "earcut": "^2.2.4"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

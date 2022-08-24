@@ -435,6 +435,7 @@ test(`getDataV2#versionError`, async t => {
         apiBaseUrl: 'http://carto-api',
         accessToken
       };
+      const headers = {'Custom-Header': 'Custom-Header-Value'};
 
       setDefaultCredentials(useSetDefaultCredentials ? credentials : {});
 
@@ -447,6 +448,11 @@ test(`getDataV2#versionError`, async t => {
             options.headers.Authorization,
             `Bearer ${accessToken}`,
             'should provide a valid authentication header'
+          );
+          t.is(
+            options.headers['Custom-Header'],
+            'Custom-Header-Value',
+            'should include custom header in instantiation request'
           );
           return Promise.resolve({
             json: () => {
@@ -484,6 +490,7 @@ test(`getDataV2#versionError`, async t => {
           connection: 'connection_name',
           source: 'table',
           credentials: useSetDefaultCredentials ? getDefaultCredentials() : credentials,
+          headers,
           ...props
         });
       } catch (e) {
@@ -504,6 +511,7 @@ test('fetchLayerData#post', async t => {
   const mapInstantiationUrl = 'http://carto-api/v3/maps/connection_name/query';
 
   const accessToken = 'XXX';
+  const headers = {'Custom-Header': 'Custom-Header-Value'};
 
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
@@ -522,6 +530,11 @@ test('fetchLayerData#post', async t => {
         options.headers.Authorization,
         `Bearer ${accessToken}`,
         'should provide a valid authentication header'
+      );
+      t.is(
+        options.headers['Custom-Header'],
+        'Custom-Header-Value',
+        'should include custom header in instantiation request'
       );
 
       return Promise.resolve({
@@ -554,7 +567,8 @@ test('fetchLayerData#post', async t => {
       type: MAP_TYPES.QUERY,
       connection: 'connection_name',
       source: `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`,
-      credentials: getDefaultCredentials()
+      credentials: getDefaultCredentials(),
+      headers
     });
   } catch (e) {
     t.error(e, 'should not throw');
@@ -571,6 +585,7 @@ test('fetchMap#no datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
   const mapResponse = {id: cartoMapId, datasets: [], keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG};
+  const headers = {'Custom-Header': 'Custom-Header-Value'};
 
   setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
 
@@ -580,6 +595,11 @@ test('fetchMap#no datasets', async t => {
   globalThis.fetch = (url, options) => {
     if (url === mapUrl) {
       t.pass('should call to the right instantiation url');
+      t.is(
+        options.headers['Custom-Header'],
+        'Custom-Header-Value',
+        'should include custom header in public map request'
+      );
       return Promise.resolve({json: () => mapResponse, ok: true});
     }
 
@@ -588,7 +608,7 @@ test('fetchMap#no datasets', async t => {
   };
 
   try {
-    await fetchMap({cartoMapId});
+    await fetchMap({cartoMapId, headers});
   } catch (e) {
     t.error(e, 'should not throw');
   }

@@ -127,12 +127,16 @@ Returns:
 
 ##### `fitBounds`
 
-Returns a new viewport that fit around the given bounding box. Only supports non-perspective mode.
+Returns a new viewport that fit around the given bounding box. Viewport `width` and `height` must be either set or provided as options. Only supports non-perspective mode.
 
 Parameters:
 
 * `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
-* `opts` (Object)
+* `opts` (Object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
+  + `width` (Number) - If not supplied, will use the current width of the viewport (default `1`)
+  + `height` (Number) - If not supplied, will use the current height of the viewport (default `1`)
+  + `minExtent` (Number) - In degrees, 0.01 would be about 1000 meters
+  + `maxZoom` (Number) - Max zoom level
   + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
   + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
   
@@ -150,4 +154,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/viewports/web-mercator-viewport.js](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/web-mercator-viewport.js)
+[modules/core/src/viewports/web-mercator-viewport.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/web-mercator-viewport.ts)

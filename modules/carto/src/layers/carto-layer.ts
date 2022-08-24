@@ -1,16 +1,15 @@
 import {
   CompositeLayer,
-  Layer,
-  log,
   CompositeLayerProps,
+  Layer,
   LayerProps,
-  ChangeFlags
+  log,
+  UpdateParameters
 } from '@deck.gl/core';
-import CartoTileLayer from './carto-tile-layer';
-import H3TileLayer from './h3-tile-layer';
-import QuadbinTileLayer from './quadbin-tile-layer';
+
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {layerFromTileDataset} from '../api/layer-map';
 import {
   COLUMNS_SUPPORT,
   FORMATS,
@@ -18,7 +17,7 @@ import {
   MapType,
   MAP_TYPES,
   TileFormat,
-  TILE_FORMATS
+  QueryParameters
 } from '../api/maps-api-common';
 import {
   ClassicCredentials,
@@ -26,7 +25,7 @@ import {
   Credentials,
   getDefaultCredentials
 } from '../config';
-import {FetchLayerDataResult} from '../api/maps-v3-client';
+import {FetchLayerDataResult, Headers} from '../api/maps-v3-client';
 import {assert} from '../utils';
 
 const defaultProps = {
@@ -62,11 +61,17 @@ const defaultProps = {
   // (Array<String>, optional): names of columns to fetch. By default, all columns are fetched.
   columns: {type: 'array', value: null},
 
+  // (Headers, optional): Custom headers to include in the map instantiation request.
+  headers: {type: 'object', value: {}, optional: true},
+
   // (String, optional): aggregation SQL expression. Only used for spatial index datasets
   aggregationExp: null,
 
   // (Number, optional): aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3
-  aggregationResLevel: null
+  aggregationResLevel: null,
+
+  // (QueryParameters, optional): query parameters to be sent to the server.
+  queryParameters: null
 };
 
 /** All properties supported by CartoLayer. */
@@ -146,11 +151,17 @@ type _CartoLayerProps = {
 
   clientId?: string;
 
+  /** Custom headers to include in the map instantiation request **/
+  headers?: Headers;
+
   /** Aggregation SQL expression. Only used for spatial index datasets **/
   aggregationExp?: string;
 
   /** Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3. **/
   aggregationResLevel?: number;
+
+  /** Query parameters to be sent to the server. **/
+  queryParameters?: QueryParameters;
 };
 
 export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
@@ -209,16 +220,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
     }
   }
 
-  updateState({
-    props,
-    oldProps,
-    changeFlags
-  }: {
-    props: CartoLayerProps;
-    oldProps: CartoLayerProps;
-    context: any;
-    changeFlags: ChangeFlags;
-  }): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
     this._checkProps(props);
     const shouldUpdateData =
       changeFlags.dataChanged ||
@@ -229,7 +231,8 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       props.formatTiles !== oldProps.formatTiles ||
       props.type !== oldProps.type ||
       JSON.stringify(props.columns) !== JSON.stringify(oldProps.columns) ||
-      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials);
+      JSON.stringify(props.credentials) !== JSON.stringify(oldProps.credentials) ||
+      JSON.stringify(props.queryParameters) !== JSON.stringify(oldProps.queryParameters);
 
     if (shouldUpdateData) {
       this.setState({data: null, apiVersion: null});
@@ -240,7 +243,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
   async _updateData(): Promise<void> {
     try {
-      const {type, data: source, clientId, credentials, connection, ...rest} = this.props;
+      const {type, data: source, credentials, connection, ...rest} = this.props;
       const localConfig = {...getDefaultCredentials(), ...credentials};
       const {apiVersion} = localConfig;
 
@@ -253,7 +256,6 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
         result = await fetchLayerData({
           type,
           source,
-          clientId,
           credentials: credentials as CloudNativeCredentials,
           connection,
           ...rest,
@@ -294,19 +296,10 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
 
     /* global URL */
     const tileUrl = new URL(data.tiles[0]);
-
     props.formatTiles =
-      props.formatTiles ||
-      (tileUrl.searchParams.get('formatTiles') as TileFormat) ||
-      TILE_FORMATS.MVT;
+      props.formatTiles || (tileUrl.searchParams.get('formatTiles') as TileFormat);
 
-    if (data.scheme === 'h3') {
-      return [H3TileLayer, props];
-    }
-    if (data.scheme === 'quadbin') {
-      return [QuadbinTileLayer, props];
-    }
-    return props.formatTiles === TILE_FORMATS.MVT ? [MVTLayer, props] : [CartoTileLayer, props];
+    return [layerFromTileDataset(props.formatTiles, data.scheme), props];
   }
 
   renderLayers(): Layer | null {

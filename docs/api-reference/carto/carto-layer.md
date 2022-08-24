@@ -146,23 +146,80 @@ Only supported when `type` is `MAP_TYPES.TABLE`.
 
 Names of columns to fetch. By default, all columns are fetched.
 
-##### `uniqueIdProperty` (String)
+##### `uniqueIdProperty` (String, optional)
 
 - Default: `cartodb_id`
 
-Optional. A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting with vector tiles when a feature is split across two or more tiles.
+A string pointing to a unique attribute at the result of the query. A unique attribute is needed for highlighting with vector tiles when a feature is split across two or more tiles.
 
-##### `credentials` (Object)
+##### `credentials` (Object, optional)
 
-Optional. Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
+Overrides the configuration to connect with CARTO. Check the parameters [here](overview#carto-credentials).
+
+##### `headers` (Object, optional)
+
+Custom headers to include in the map instantiation request.
 
 ##### `aggregationExp` (String, optional)
 
-Optional. Aggregation SQL expression. Only used for spatial index datasets.
+Aggregation SQL expression. Only used for spatial index datasets.
 
 ##### `aggregationResLevel` (Number, optional)
 
-Optional. Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
+Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
+
+##### `queryParameters` (Depends on provider, optional)
+
+Use it to parametrize SQL queries. The format depends on the source's provider, some examples:
+
+
+[PostgreSQL and Redshift](https://node-postgres.com/features/queries):
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=$1`
+     queryParameters: ['alasarr']
+})
+```
+
+[BigQuery positional](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=?`,
+     queryParameters: ['alasarr']
+})
+```
+
+[BigQuery named parameters](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=@username`,
+     queryParameters: { username: 'alasarr' }
+})
+```
+
+[Snowflake positional](https://docs.snowflake.com/en/user-guide/nodejs-driver-use.html#binding-statement-parameters) :
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=?`,
+     queryParameters: ['alasarr']
+})
+```
+or
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=:1`,
+     queryParameters: ['alasarr']
+})
+```
+
+[Databricks ODBC](https://github.com/markdirish/node-odbc#bindparameters-callback)
+```js
+const layer = new CartoLayer({
+     data: `select * from users where username=?`,
+     queryParameters: ['alasarr']
+})
+```
+
 
 ### Callbacks
 
@@ -188,4 +245,4 @@ Receives arguments:
 
 ## Source
 
-[modules/carto/src/layers/carto-layer.js](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-layer.js)
+[modules/carto/src/layers/carto-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/carto-layer.ts)

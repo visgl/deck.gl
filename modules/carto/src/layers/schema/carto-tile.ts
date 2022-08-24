@@ -16,15 +16,15 @@ class KeyValueObjectReader {
 
 // Properties ========================================
 
-export interface Properties {
+export interface KeyValueProperties {
   data: KeyValueObject[];
 }
 
-class PropertiesReader {
+export class PropertiesReader {
   static read(pbf, end?: number) {
     return pbf.readFields(PropertiesReader._readField, {data: []}, end);
   }
-  static _readField(this: void, tag: number, obj: Properties, pbf) {
+  static _readField(this: void, tag: number, obj: KeyValueProperties, pbf) {
     if (tag === 1) obj.data.push(KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
@@ -69,7 +69,7 @@ class IntsReader {
 
 // NumericProp ========================================
 
-interface NumericProp {
+export interface NumericProp {
   value: number[];
 }
 
@@ -88,7 +88,7 @@ interface NumbericPropKeyValue {
   value: NumericProp;
 }
 
-class NumericPropKeyValueReader {
+export class NumericPropKeyValueReader {
   static read(pbf, end?: number): NumbericPropKeyValue {
     return pbf.readFields(NumericPropKeyValueReader._readField, {key: '', value: null}, end);
   }
@@ -104,7 +104,7 @@ interface Points {
   positions: Doubles;
   globalFeatureIds: Ints;
   featureIds: Ints;
-  properties: Properties[];
+  properties: KeyValueProperties[];
   numericProps: Record<string, NumericProp>;
 }
 

@@ -39,7 +39,11 @@ export function resolveLayers(
 
   // Step 2: add missing layers
   for (const layer of layers) {
-    if (!map.getLayer(layer.id)) {
+    const mapboxLayer = map.getLayer(layer.id) as MapboxLayer<Layer>;
+    if (mapboxLayer) {
+      // @ts-expect-error not typed
+      mapboxLayer.implementation.setProps(layer.props);
+    } else {
       map.addLayer(
         new MapboxLayer({id: layer.id, deck}),
         // @ts-expect-error beforeId is not defined in LayerProps
