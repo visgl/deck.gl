@@ -1,6 +1,22 @@
 import pydeck as pdk
 
-CARTO_LAYER_BUNDLE_URL = "https://libs.cartocdn.com/pydeck/@deck.gl/carto@8.7.8/dist.min.js"
+CARTO_LAYER_BUNDLE_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/" \
+                         "carto@~8.8.*/dist.min.js"
+
+
+class MapType:
+    QUERY = pdk.types.String("query")
+    TABLE = pdk.types.String("table")
+    TILESET = pdk.types.String("tileset")
+
+
+class CartoConnection:
+    CARTO_DW = pdk.types.String("carto_dw")
+
+
+class GeoColumType:
+    H3 = pdk.types.String("h3")
+    QUADBIN = pdk.types.String("quadbin")
 
 
 def register_carto_layer():
