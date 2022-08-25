@@ -69,7 +69,7 @@ def render_json_to_html(
         mapbox_key=mapbox_key,
         google_maps_key=google_maps_key,
         json_input=json_input,
-        deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
+        deckgl_jupyter_widget_bundle=cdn_picker(offline=offline)+"<script src='https://cdn.jsdelivr.net/npm/@deck.gl/extensions@~8.8.*/dist.min.js'></script>",
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,
