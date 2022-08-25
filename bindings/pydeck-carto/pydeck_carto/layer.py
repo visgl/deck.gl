@@ -1,7 +1,9 @@
 import pydeck as pdk
 
-CARTO_LAYER_BUNDLE_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/" \
-                         "carto@~8.8.*/dist.min.js"
+VERSION = '@~8.8.*'
+CARTO_LAYER_BUNDLE_URL = "https://cdn.jsdelivr.net/combine/npm/@deck.gl/" \
+                         f"extensions{VERSION}/dist.min.js" \
+                         f",npm/@deck.gl/carto{VERSION}/dist.min.js"
 
 
 class MapType:
