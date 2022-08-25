@@ -110,6 +110,7 @@ export const POLYGON_LAYER = {
     wireframe: 'wireframe',
     elevationScale: 'elevationScale',
     material: 'material',
+    _full3d: '_full3d',
 
     getElevation: 'getElevation',
     getFillColor: 'getFillColor',
