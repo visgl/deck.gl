@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "^8.8.0",
-    "@deck.gl/extensions": "^8.8.0",
     "@deck.gl/geo-layers": "^8.8.0",
     "@deck.gl/google-maps": "^8.8.0",
     "@deck.gl/json": "^8.8.0",
