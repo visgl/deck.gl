@@ -1,9 +1,12 @@
 import pydeck as pdk
 
-VERSION = '@~8.8.*'
-CARTO_LAYER_BUNDLE_URL = "https://cdn.jsdelivr.net/combine/npm/@deck.gl/" \
-                         f"extensions{VERSION}/dist.min.js" \
-                         f",npm/@deck.gl/carto{VERSION}/dist.min.js"
+PYDECK_VERSION = '@~8.8.*'
+
+LIBRARIES_TO_INCLUDE = ['npm/h3-js@~3.7.*/dist/h3-js.umd.js',
+                        f'npm/@deck.gl/extensions{PYDECK_VERSION}/dist.min.js',
+                        f'npm/@deck.gl/carto{PYDECK_VERSION}/dist.min.js']
+SELECTED_LIBRARIES = ','.join(LIBRARIES_TO_INCLUDE)
+CARTO_LAYER_BUNDLE_URL = f"https://cdn.jsdelivr.net/combine/{SELECTED_LIBRARIES}"
 
 
 class MapType:

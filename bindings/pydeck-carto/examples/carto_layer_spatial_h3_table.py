@@ -18,6 +18,7 @@ layer = pdk.Layer(
     type_=MapType.TABLE,
     connection=CartoConnection.CARTO_DW,
     credentials=credentials,
+    pickable=True,
     geo_column=GeoColumType.H3,
     get_fill_color=[200, 0, 80],
     pointRadiusMinPixels=2)
