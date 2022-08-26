@@ -1,8 +1,9 @@
 import pydeck as pdk
 
 PYDECK_VERSION = '@~8.8.*'
+H3_VERSION = '@~3.7.*'
 
-LIBRARIES_TO_INCLUDE = ['npm/h3-js@~3.7.*/dist/h3-js.umd.js',
+LIBRARIES_TO_INCLUDE = [f'npm/h3-js{H3_VERSION}/dist/h3-js.umd.js',
                         f'npm/@deck.gl/extensions{PYDECK_VERSION}/dist.min.js',
                         f'npm/@deck.gl/carto{PYDECK_VERSION}/dist.min.js']
 SELECTED_LIBRARIES = ','.join(LIBRARIES_TO_INCLUDE)

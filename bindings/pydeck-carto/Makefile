@@ -9,10 +9,10 @@ init:
 	$(PIP) install -e .
 
 lint:
-	$(PYTHON) -m flake8 pydeck_carto tests setup.py
+	$(PYTHON) -m flake8 pydeck_carto tests examples setup.py
 
 lint-fix:
-	$(PYTHON) -m black pydeck_carto tests setup.py
+	$(PYTHON) -m black pydeck_carto tests examples setup.py
 
 test:
 	$(MAKE) lint

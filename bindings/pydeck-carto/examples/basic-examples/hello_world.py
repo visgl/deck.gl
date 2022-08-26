@@ -18,9 +18,11 @@ layer = pdk.Layer(
     connection=pdk.types.String("bqconn"),
     credentials={
         "apiBaseUrl": "https://gcp-us-east1.api.carto.com",
-        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiI1YjI0OWE2ZCJ9.Y7zB30NJFzq5fPv8W5nkoH5lPXFWQP0uywDtqUg8y8c"},
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3Ui"
+                       "LCJqdGkiOiI1YjI0OWE2ZCJ9.Y7zB30NJFzq5fPv8W5nk"
+                       "oH5lPXFWQP0uywDtqUg8y8c"},
     get_fill_color=[238, 77, 90],
-    pointRadiusMinPixels=2.5)
+    point_radius_min_pixels=2.5)
 
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 

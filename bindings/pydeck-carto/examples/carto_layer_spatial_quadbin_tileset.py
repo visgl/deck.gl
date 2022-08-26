@@ -4,26 +4,23 @@ CartoLayer
 
 Render cloud data with a session token.
 """
-import subprocess
-
 import pydeck as pdk
 from pydeck_carto import register_carto_layer, load_carto_credentials
-
-# Initialize
-from pydeck_carto.layer import CartoConnection, MapType, GeoColumType
+from pydeck_carto.layer import CartoConnection, MapType
 
 register_carto_layer()
 credentials = load_carto_credentials("./carto_credentials.json")
 
 layer = pdk.Layer(
     "CartoLayer",
-    data="carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset",
+    data="carto-demo-data.demo_tilesets"
+         ".derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset",
     type_=MapType.TILESET,
     connection=CartoConnection.CARTO_DW,
     credentials=credentials,
     get_fill_color=[200, 0, 80],
     pickable=True,
-    pointRadiusMinPixels=2)
+    point_radius_min_pixels=2)
 
 view_state = pdk.ViewState(latitude=44, longitude=-122, zoom=3)
 

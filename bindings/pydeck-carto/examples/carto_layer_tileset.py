@@ -6,8 +6,6 @@ Render cloud data with a session token.
 """
 import pydeck as pdk
 from pydeck_carto import register_carto_layer, load_carto_credentials
-
-# Initialize
 from pydeck_carto.layer import CartoConnection, MapType
 
 register_carto_layer()
@@ -22,7 +20,7 @@ layer = pdk.Layer(
     get_fill_color=[200, 0, 80],
     stroked=False,
     pickable=True,
-    pointRadiusMinPixels=2)
+    point_radius_min_pixels=2)
 
 view_state = pdk.ViewState(latitude=36, longitude=-7.44, zoom=5)
 
