@@ -10,9 +10,9 @@ project = "pydeck"
 copyright = "2021, vis.gl, a Series of LF Projects, LLC"
 author = "Andrew Duberstein"
 # The short X.Y version
-version = "0.7"
+version = "0.8"
 # The full version, including alpha/beta/rc tags
-release = "0.7.1"
+release = "0.8.0b1"
 # Extensions to generate documents from our docstrings here
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 templates_path = ["_templates"]
