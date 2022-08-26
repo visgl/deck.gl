@@ -19,11 +19,11 @@ layer = pdk.Layer(
     credentials=credentials,
     get_fill_color=[200, 0, 80],
     stroked=False,
-    pickable=True,
     point_radius_min_pixels=2,
+    pickable=True,
 )
 
 view_state = pdk.ViewState(latitude=36, longitude=-7.44, zoom=5)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
-r.to_html("outputs/carto_layer_tileset.html", open_browser=True)
+r.to_html("outputs/carto_layer_geo_tileset.html", open_browser=True)

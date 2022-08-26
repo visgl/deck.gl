@@ -20,7 +20,6 @@ layer = pdk.Layer(
     credentials=credentials,
     get_fill_color=[200, 0, 80],
     pickable=True,
-    point_radius_min_pixels=2,
 )
 
 view_state = pdk.ViewState(latitude=44, longitude=-122, zoom=3)
