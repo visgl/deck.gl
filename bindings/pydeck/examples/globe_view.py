@@ -57,6 +57,7 @@ deck = pdk.Deck(
     initial_view_state=view_state,
     tooltip={"text": "{name}, {primary_fuel} plant, {country}"},
     layers=layers,
+    map_provider=None,
     # Note that this must be set for the globe to be opaque
     parameters={"cull": True},
 )

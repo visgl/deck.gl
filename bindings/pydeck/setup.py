@@ -209,7 +209,7 @@ if __name__ == "__main__":
         extras_require={
             "carto": ["pydeck_carto"],
             "jupyter": [
-                "ipywidgets>=7.0.0",
+                "ipywidgets>=7,<8",
                 "traitlets>=4.3.2",
                 'ipython>=5.8.0;python_version<"3.4"',
                 'ipykernel>=5.1.2;python_version>="3.4"',
