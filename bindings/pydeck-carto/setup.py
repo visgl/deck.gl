@@ -19,7 +19,7 @@ setup(
     packages=find_packages(include=["pydeck_carto"]),
     python_requires=">=3.7",
     install_requires=[
-        "pydeck>=0.3.0",
+        "pydeck>=0.8.0b1",
         "requests",
     ],
     classifiers=[

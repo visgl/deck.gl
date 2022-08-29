@@ -29,14 +29,14 @@ Getting a Mapbox API key
 
 By default, pydeck v0.6 onwards provides basemap tiles through Carto.
 
-You can optionally use a Mapbox API key, by 
-registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_. 
+You can optionally use a Mapbox API key, by
+registering for Mapbox via `this link <https://account.mapbox.com/auth/signup/>`_.
 You should then create a `new public API token <https://account.mapbox.com/access-tokens/>`_.
 You can learn more about Mapbox tokens via their `documentation <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#how-access-tokens-work>`_.
 
 You can also use a Google Maps API key in a similar way. Currently Google Maps is not supported for 3D visualizations.
 
-If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables, pydeck will detect them. 
+If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables, pydeck will detect them.
 
 Enabling pydeck for Jupyter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,8 +75,6 @@ If you want to install the library from its source:
         yarn bootstrap
         pip install .
 
-You can run the local tests to verify that the installation worked via ``make test``.
-
 Development
 ^^^^^^^^^^^
 
@@ -90,6 +88,8 @@ If you want to install pydeck for development, you may want to use the ``make`` 
         . env/bin/activate
         make init
         make prepare-jupyter
+
+You can run the local tests to verify that the installation worked via ``make test``.
 
 Note on pre-releases
 ^^^^^^^^^^^^^^^^^^^^

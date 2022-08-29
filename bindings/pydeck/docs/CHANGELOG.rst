@@ -1,42 +1,43 @@
 CHANGELOG
-================
+=========
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
 0.8 Releases
 ------------
 
-0.8.0b1 - Jul 4 2022
-^^^^^^^^^^^^^^^^^^^
-- Move Jupyter plugin to an extra (#TBD)
+0.8.0b1 - Aug 25 2022
+^^^^^^^^^^^^^^^^^^^^^
+- Update jupyter-widget to work with JupyterLab 3 (#7026)
+- Make Jupyter widget into a Python extra / optional module (#7125)
 
 0.7 Releases
 ------------
 
 0.7.1 - Oct 25 2021
--------------------
+^^^^^^^^^^^^^^^^^^^
 - Add support for experimental props and add ScenegraphLayer example (#6308)
 - Enable custom_map_style and file encoding for HTML on Windows (#6121)
 
 0.7.0 - Aug 27 2021
--------------------
+^^^^^^^^^^^^^^^^^^^
 - Lock to @deck.gl/jupyter-widget@~8.5.* (#6141)
 
 0.6 Releases
 ------------
 
 0.6.2 - Apr 12 2021
-------------------
+^^^^^^^^^^^^^^^^^^^
 - Fix bug that prevents pydeck from rendering in Colab (#5655)
 - Add ``_repr_html_`` for automatic Jupyter rendering (#5486)
 
 0.6.1 - Feb 12 2021
-------------------
+^^^^^^^^^^^^^^^^^^^
 - Fix API keys bug where pydeck fails to use API keys passed
   as parameters to a Deck object (#5475)
 
 0.6.0 - Feb 7 2021
-------------------
+^^^^^^^^^^^^^^^^^^
 - Lock to @deck.gl/jupyter-widget@~8.4.*
 - Improve support for multiple map providders; make Carto default base map provider (#5131)
 - Improve local image file loading experience for BitmapLayer and TileLayer (#5269)
