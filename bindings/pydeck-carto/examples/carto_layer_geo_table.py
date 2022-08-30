@@ -5,18 +5,19 @@ CartoLayer
 Render cloud data from a table.
 """
 import pydeck as pdk
-from pydeck_carto import register_carto_layer, load_carto_credentials
+from pydeck_carto import register_carto_layer
+from pydeck_carto.carto_auth.auth import CartoAuth
 from pydeck_carto.layer import CartoConnection, MapType
 
 register_carto_layer()
-credentials = load_carto_credentials("./carto_credentials.json")
+carto_auth = CartoAuth("./carto_credentials.json")
 
 layer = pdk.Layer(
     "CartoLayer",
     data="carto-demo-data.demo_tables.airports",
     type_=MapType.TABLE,
     connection=CartoConnection.CARTO_DW,
-    credentials=credentials,
+    credentials=carto_auth.credentials(),
     get_fill_color=[200, 0, 80],
     point_radius_min_pixels=2,
     pickable=True,

@@ -5,11 +5,12 @@ CartoLayer
 Render cloud data in H3 grid from a query.
 """
 import pydeck as pdk
-from pydeck_carto import register_carto_layer, load_carto_credentials
+from pydeck_carto import register_carto_layer
+from pydeck_carto.carto_auth.auth import CartoAuth
 from pydeck_carto.layer import MapType, GeoColumnType, CartoConnection
 
 register_carto_layer()
-credentials = load_carto_credentials("./carto_credentials.json")
+carto_auth = CartoAuth("./carto_credentials.json")
 
 layer = pdk.Layer(
     "CartoLayer",
@@ -17,7 +18,7 @@ layer = pdk.Layer(
     ".derived_spatialfeatures_usa_h3res8_v1_yearly_v2",
     type_=MapType.QUERY,
     connection=CartoConnection.CARTO_DW,
-    credentials=credentials,
+    credentials=carto_auth.credentials(),
     geo_column=GeoColumnType.H3,
     get_fill_color=[200, 0, 80],
     pickable=True,

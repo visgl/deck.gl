@@ -1,0 +1,6 @@
+{
+  "accessToken": "testAccessToken-Expired",
+  "expiresTS": 946681200.0,
+  "audience": "carto-cloud-native-api",
+  "scope": "read:connections"
+}

@@ -12,7 +12,7 @@ lint:
 	$(BIN)/flake8 pydeck_carto tests examples setup.py
 
 test:
-	$(BIN)/pytest tests
+	$(BIN)/pytest .
 
 publish-pypi:
 	rm -rf ./dist/*
