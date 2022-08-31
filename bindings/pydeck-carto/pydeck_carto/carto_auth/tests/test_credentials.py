@@ -15,7 +15,8 @@ Check if the token has been expired, refresh token function
 import datetime
 import os
 
-from pydeck_carto.carto_auth.auth import CartoAuth, CredentialsError
+from pydeck_carto.carto_auth.auth import CartoAuth
+from pydeck_carto import CredentialsError
 
 
 def test_credentials_from_file(requests_mock):

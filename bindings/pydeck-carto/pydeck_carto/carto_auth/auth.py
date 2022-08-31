@@ -4,12 +4,14 @@ import os.path
 
 import requests as requests
 
-
-class CredentialsError(Exception):
-    pass
+from pydeck_carto.carto_auth.errors import CredentialsError
+from pydeck_carto.carto_auth.oauth2 import CartoPKCE
 
 
 class CartoAuth:
+    # OAUTH_TOKEN_URL = "https://auth.carto.com/oauth/token"
+    OAUTH_TOKEN_URL = "https://carto-development.us.auth0.com/oauth/token"
+
     def __init__(
         self,
         filepath=None,
@@ -20,7 +22,7 @@ class CartoAuth:
         grant_type="client_credentials",
         cache_filepath=".carto_token.json",
         access_token=None,
-        expire_in=None,
+        expires_in=None,
         scope=None,
     ):
         self.grant_type = grant_type
@@ -30,9 +32,9 @@ class CartoAuth:
         self.client_id = client_id
         self.client_secret = client_secret
 
-        if access_token and expire_in:
+        if access_token and expires_in:
             now = datetime.datetime.utcnow()
-            expires_in = now + datetime.timedelta(seconds=expire_in)
+            expires_in = now + datetime.timedelta(seconds=expires_in)
             self.expiration_ts = expires_in.timestamp()
             self._access_token = access_token
             self.scope = scope
@@ -106,7 +108,7 @@ class CartoAuth:
             msg += " and ".join(missing)
             raise CredentialsError(msg)
 
-        url = "https://auth.carto.com/oauth/token"
+        url = self.OAUTH_TOKEN_URL
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {
             "grant_type": self.grant_type,
@@ -215,3 +217,16 @@ class CartoAuth:
         """Checking if the data with this credential, data, connection
         and layer_type is correct to get information from the carto servers"""
         raise NotImplementedError()
+
+    @classmethod
+    def from_oauth(cls,
+                   api_base_url="https://gcp-europe-west1.api.carto.com",
+                   audience="carto-cloud-native-api",
+                   cache_filepath=".carto_token.json"):
+        pkce_auth = CartoPKCE()
+        code = pkce_auth.get_auth_response()
+        token_info = pkce_auth.get_token_info(code)
+        return CartoAuth(api_base_url=api_base_url, audience=audience,
+                         cache_filepath=cache_filepath,
+                         access_token=token_info['access_token'],
+                         expires_in=token_info['expires_in'])
