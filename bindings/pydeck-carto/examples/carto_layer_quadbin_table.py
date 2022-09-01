@@ -17,7 +17,7 @@ layer = pdk.Layer(
     ".derived_spatialfeatures_esp_quadbin15_v1_yearly_v2",
     type_=MapType.TABLE,
     connection=CartoConnection.CARTO_DW,
-    credentials=carto_auth.credentials(),
+    credentials=carto_auth.get_layer_credentials(),
     geo_column=GeoColumnType.QUADBIN,
     get_fill_color=[200, 0, 80],
     pickable=True,
