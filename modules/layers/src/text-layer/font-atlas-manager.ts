@@ -255,11 +255,11 @@ export default class FontAtlasManager {
       mapping[char] = {
         x,
         y,
+        width,
+        height: cellSize,
         // use glyphAdvance over glyphWidth due to whitespace characters
-        width: glyphAdvance,
-        textureHeight: cellSize,
-        textureWidth: width,
-        textureOffsetY: fontSize - glyphTop
+        layoutWidth: glyphAdvance,
+        layoutOffsetY: fontSize - glyphTop
       };
 
       x += width;

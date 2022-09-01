@@ -10,9 +10,9 @@ export type Character = {
   x: number;
   y: number;
   width: number;
-  textureHeight: number;
-  textureWidth: number;
-  textureOffsetY: number;
+  height: number;
+  layoutWidth: number;
+  layoutOffsetY: number;
 };
 
 export type CharacterMapping = Record<string, Character>;
@@ -79,9 +79,9 @@ export function buildMapping({
         x: x + buffer,
         y: yOffset + row * (fontHeight + buffer * 2) + buffer,
         width,
-        textureHeight: fontHeight,
-        textureWidth: width,
-        textureOffsetY: 0
+        height: fontHeight,
+        layoutWidth: width,
+        layoutOffsetY: 0
       };
       x += width + buffer * 2;
     }
@@ -106,7 +106,7 @@ function getTextWidth(
   let width = 0;
   for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
-    width += mapping[character]?.width || 0;
+    width += mapping[character]?.layoutWidth || 0;
   }
 
   return width;
@@ -233,8 +233,8 @@ function transformRow(
     const character = line[i];
     const frame = iconMapping[character];
     if (frame) {
-      leftOffsets[i] = x + frame.width / 2;
-      x += frame.width;
+      leftOffsets[i] = x + frame.layoutWidth / 2;
+      x += frame.layoutWidth;
     } else {
       log.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
       leftOffsets[i] = x;
@@ -309,8 +309,8 @@ export function transformParagraph(
           if (!iconMapping[char]) {
             log.warn(`Missing character: ${char} (${char.codePointAt(0)})`)();
           } else {
-            const {textureOffsetY} = iconMapping[char];
-            y[j] = rowOffsetTop + rowSize[1] / 2 + textureOffsetY;
+            const {layoutOffsetY} = iconMapping[char];
+            y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
             rowWidth[j] = rowSize[0];
           }
         }
