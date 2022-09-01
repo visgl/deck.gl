@@ -231,13 +231,13 @@ class CartoAuth:
 
     @classmethod
     def from_oauth(cls,
-                   api_base_url="https://gcp-europe-west1.api.carto.com",
-                   audience="carto-cloud-native-api",
+                   api_base_url="https://gcp-us-east1.api.carto.com",
                    cache_filepath=".carto_token.json"):
         pkce_auth = CartoPKCE()
         code = pkce_auth.get_auth_response()
         token_info = pkce_auth.get_token_info(code)
-        return CartoAuth(api_base_url=api_base_url, audience=audience,
+        return CartoAuth(access_token=token_info['access_token'],
+                         expires_in=token_info['expires_in'],
+                         api_base_url=api_base_url,
                          cache_filepath=cache_filepath,
-                         access_token=token_info['access_token'],
-                         expires_in=token_info['expires_in'])
+                         )

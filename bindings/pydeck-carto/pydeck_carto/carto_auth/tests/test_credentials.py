@@ -16,7 +16,7 @@ import datetime
 import os
 
 from pydeck_carto.carto_auth.auth import CartoAuth
-from pydeck_carto import CredentialsError
+from pydeck_carto.carto_auth.errors import CredentialsError
 
 
 def test_credentials_from_file(requests_mock):

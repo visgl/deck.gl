@@ -1,3 +1,4 @@
+import os
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qsl
@@ -23,14 +24,13 @@ def get_host_port(netloc):
 
 class CartoPKCE:
     """ Implements PKCE Authorization Flow for client apps """
-    OAUTH_AUTHORIZE_URL = "https://carto-development.us.auth0.com/authorize"
-    OAUTH_TOKEN_URL = "https://carto-development.us.auth0.com/oauth/token"
-    CLIENT_ID = "6kTPK9zcOV3PZgTLXgc5njpVdnRSUySc"
+    OAUTH_AUTHORIZE_URL = "https://auth.carto.com/authorize"
+    OAUTH_TOKEN_URL = "https://auth.carto.com/oauth/token"
+    CLIENT_ID = "AtxvHDeuXlR8XPfF2nj2Uv2I29pvmCxu"
     REDIRECT_URI = "http://localhost:10000/callback/"
 
     def __init__(self,
                  state=None,
-                 scope='read:maps read:tilesets',
                  proxies=None,
                  open_browser=True,
                  requests_session=None,
@@ -40,7 +40,6 @@ class CartoPKCE:
 
         Parameters:
              * state: Optional
-             * scope: Optional, a string like e.g, "read:maps read:tilesets"
              * proxies: Optional, proxy for the Requests library to route through
              * requests_timeout: Optional, tell Requests to stop waiting for a response after
                                  a given number of seconds
@@ -52,7 +51,6 @@ class CartoPKCE:
         self.client_id = self.CLIENT_ID
         self.redirect_uri = self.REDIRECT_URI
         self.state = state
-        self.scope = scope
         self.proxies = proxies
         self.requests_timeout = requests_timeout
 
@@ -94,12 +92,11 @@ class CartoPKCE:
         payload = {
             "client_id": self.client_id,
             "response_type": "code",
+            "scope": None,
             "redirect_uri": self.redirect_uri,
             "code_challenge_method": self._code_challenge_method,
             "code_challenge": self.code_challenge
         }
-        if self.scope:
-            payload["scope"] = self.scope
         if state is None:
             state = self.state
         if state is not None:
@@ -186,6 +183,7 @@ class CartoPKCE:
         payload = {
             "client_id": self.client_id,
             "grant_type": "authorization_code",
+            "audience": "carto-cloud-native-api",
             "code": code or self.get_authorization_code(),
             "redirect_uri": self.redirect_uri,
             "code_verifier": self.code_verifier
@@ -245,26 +243,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         if self.server.auth_code:
-            status = "successful"
-        elif self.server.error:
-            status = f"failed ({self.server.error})"
+            template_path = 'templates/callback_valid.html'
         else:
-            self._write("<html><body><h1>Invalid request</h1></body></html>")
-            return
+            template_path = 'templates/callback_invalid.html'
 
-        self._write("""<html>
-<script>
-window.close()
-</script>
-<body>
-<h1>Authentication status: {}</h1>
-This window can be closed.
-<script>
-window.close()
-</script>
-<button class="closeButton" style="cursor: pointer" onclick="window.close();">Close Window</button>
-</body>
-</html>""".format(status))
+        fullpath = os.path.join(os.path.dirname(__file__), template_path)
+        with open(fullpath, 'r') as fr:
+            self._write(fr.read())
 
     def _write(self, text):
         return self.wfile.write(text.encode("utf-8"))
