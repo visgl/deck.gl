@@ -183,3 +183,62 @@ test('ViewManager#controllers', t => {
 
   t.end();
 });
+
+test('ViewManager#update view props', t => {
+  let viewStateChangedEvent;
+
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'main', controller: true, width: '50%'})],
+    onViewStateChange: evt => (viewStateChangedEvent = evt),
+    viewState: {
+      longitude: -122,
+      latitude: 38,
+      zoom: 1
+    },
+    width: 100,
+    height: 100
+  });
+
+  // Scroll at the viewport center
+  viewManager.controllers.main.handleEvent(
+    mockControllerEvent('wheel', 25, 50, {
+      delta: 10
+    })
+  );
+
+  t.ok(
+    equals(viewStateChangedEvent.viewState.longitude, -122),
+    'Map center is calculated correctly'
+  );
+
+  viewManager.setProps({
+    views: [new MapView({id: 'main', controller: true, width: '100%'})]
+  });
+
+  // Scroll at the viewport center
+  viewManager.controllers.main.handleEvent(
+    mockControllerEvent('wheel', 50, 50, {
+      delta: 10
+    })
+  );
+
+  t.ok(
+    equals(viewStateChangedEvent.viewState.longitude, -122),
+    'Map center is calculated correctly'
+  );
+
+  viewManager.finalize();
+  t.end();
+});
+
+function mockControllerEvent(type, x, y, details) {
+  return {
+    type,
+    offsetCenter: {x, y},
+    ...details,
+    stopPropagation: () => {},
+    srcEvent: {
+      preventDefault: () => {}
+    }
+  };
+}

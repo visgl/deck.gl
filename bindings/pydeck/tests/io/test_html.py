@@ -1,8 +1,6 @@
 import html
 import webbrowser
 
-import IPython
-
 try:
     from unittest.mock import MagicMock
 except ImportError:
@@ -35,6 +33,9 @@ def test_cdn_picker(monkeypatch):
 
 
 def test_iframe_with_srcdoc():
+
+    import IPython
+
     IPython.display.HTML = MagicMock()
     html_str = "<html></html>"
     iframe_with_srcdoc(html_str)
