@@ -23,26 +23,29 @@ def get_host_port(netloc):
 
 
 class CartoPKCE:
-    """ Implements PKCE Authorization Flow for client apps """
+    """Implements PKCE Authorization Flow for client apps"""
+
     OAUTH_AUTHORIZE_URL = "https://auth.carto.com/authorize"
     OAUTH_TOKEN_URL = "https://auth.carto.com/oauth/token"
     CLIENT_ID = "AtxvHDeuXlR8XPfF2nj2Uv2I29pvmCxu"
     REDIRECT_URI = "http://localhost:10000/callback/"
 
-    def __init__(self,
-                 state=None,
-                 proxies=None,
-                 open_browser=True,
-                 requests_session=None,
-                 requests_timeout=None, ):
+    def __init__(
+        self,
+        state=None,
+        proxies=None,
+        open_browser=True,
+        requests_session=None,
+        requests_timeout=None,
+    ):
         """
         Creates PKCE Auth flow.
 
         Parameters:
              * state: Optional
              * proxies: Optional, proxy for the Requests library to route through
-             * requests_timeout: Optional, tell Requests to stop waiting for a response after
-                                 a given number of seconds
+             * requests_timeout: Optional, tell Requests to stop waiting for a
+                                 response after a given number of seconds
              * open_browser: Optional, whether the web browser should be opened to
                              authorize a user
         """
@@ -64,45 +67,32 @@ class CartoPKCE:
     def _get_code_verifier():
         """Auth PCKE code verifier"""
         import random
+
         length = random.randint(33, 96)
         try:
             import secrets
+
             verifier = secrets.token_urlsafe(length)
         except ImportError:  # For python 3.5 support
             import base64
             import os
+
             rand_bytes = os.urandom(length)
-            verifier = base64.urlsafe_b64encode(rand_bytes).decode('utf-8').replace('=',
-                                                                                    '')
+            verifier = (
+                base64.urlsafe_b64encode(rand_bytes).decode("utf-8").replace("=", "")
+            )
         return verifier
 
     def _get_code_challenge(self):
         """Auth PCKE code challenge"""
         import base64
         import hashlib
-        code_challenge_digest = hashlib.sha256(
-            self.code_verifier.encode('utf-8')).digest()
-        code_challenge = base64.urlsafe_b64encode(code_challenge_digest).decode('utf-8')
-        return code_challenge.replace('=', '')
 
-    def get_authorize_url(self, state=None):
-        """ Gets the URL to use to authorize this app """
-        if not self.code_challenge:
-            self.get_pkce_handshake_parameters()
-        payload = {
-            "client_id": self.client_id,
-            "response_type": "code",
-            "scope": None,
-            "redirect_uri": self.redirect_uri,
-            "code_challenge_method": self._code_challenge_method,
-            "code_challenge": self.code_challenge
-        }
-        if state is None:
-            state = self.state
-        if state is not None:
-            payload["state"] = state
-        urlparams = urlencode(payload)
-        return "%s?%s" % (self.OAUTH_AUTHORIZE_URL, urlparams)
+        code_challenge_digest = hashlib.sha256(
+            self.code_verifier.encode("utf-8")
+        ).digest()
+        code_challenge = base64.urlsafe_b64encode(code_challenge_digest).decode("utf-8")
+        return code_challenge.replace("=", "")
 
     def _open_auth_url(self, state=None):
         auth_url = self.get_authorize_url(state)
@@ -112,12 +102,34 @@ class CartoPKCE:
         except webbrowser.Error:
             logger.error("Please navigate here: %s", auth_url)
 
+    def get_authorize_url(self, state=None):
+        """Gets the URL to use to authorize this app"""
+        if not self.code_challenge:
+            self.get_pkce_handshake_parameters()
+        payload = {
+            "client_id": self.client_id,
+            "response_type": "code",
+            "scope": None,
+            "audience": "carto-cloud-native-api",
+            "redirect_uri": self.redirect_uri,
+            "code_challenge_method": self._code_challenge_method,
+            "code_challenge": self.code_challenge,
+        }
+        if state is None:
+            state = self.state
+        if state is not None:
+            payload["state"] = state
+        urlparams = urlencode(payload)
+        return "%s?%s" % (self.OAUTH_AUTHORIZE_URL, urlparams)
+
     def get_auth_response(self, open_browser=None):
-        logger.info('User authentication requires interaction with your '
-                    'web browser. Once you enter your credentials and '
-                    'give authorization, you will be redirected to '
-                    'a url.  Paste that url you were directed to to '
-                    'complete the authorization.')
+        logger.info(
+            "User authentication requires interaction with your "
+            "web browser. Once you enter your credentials and "
+            "give authorization, you will be redirected to "
+            "a url.  Paste that url you were directed to to "
+            "complete the authorization."
+        )
 
         redirect_info = urlparse(self.redirect_uri)
         redirect_host, redirect_port = get_host_port(redirect_info.netloc)
@@ -126,9 +138,9 @@ class CartoPKCE:
             open_browser = self.open_browser
 
         if (
-                open_browser
-                and redirect_host in ("127.0.0.1", "localhost")
-                and redirect_info.scheme == "http"
+            open_browser
+            and redirect_host in ("127.0.0.1", "localhost")
+            and redirect_info.scheme == "http"
         ):
             return self._get_auth_response_local_server(redirect_port)
         return self._get_auth_response_interactive(open_browser=open_browser)
@@ -145,10 +157,15 @@ class CartoPKCE:
             return server.auth_code
         elif server.error is not None:
             raise CredentialsError(
-                "Received error from OAuth server: {}".format(server.error))
+                "Received error from OAuth server: {}".format(server.error)
+            )
         else:
             raise CredentialsError(
-                "Server listening on localhost has not been accessed")
+                "Server listening on localhost has not been accessed"
+            )
+
+    def _input(self, prompt):
+        return input(prompt)
 
     def _get_auth_response_interactive(self, open_browser=False):
         if open_browser or self.open_browser:
@@ -160,7 +177,7 @@ class CartoPKCE:
                 "Go to the following URL: {}\n"
                 "Enter the URL you were redirected to: ".format(url)
             )
-        response = input(prompt)
+        response = self._input(prompt)
         state, code = self.parse_auth_response_url(response)
         if self.state is not None and self.state != state:
             raise CredentialsError(self.state, state)
@@ -176,7 +193,7 @@ class CartoPKCE:
         self.code_challenge = self._get_code_challenge()
 
     def get_token_info(self, code=None):
-        """ Gets the access token for the carto API using the authorization code"""
+        """Gets the access token for the carto API using the authorization code"""
         if self.code_verifier is None or self.code_challenge is None:
             self.get_pkce_handshake_parameters()
 
@@ -186,14 +203,16 @@ class CartoPKCE:
             "audience": "carto-cloud-native-api",
             "code": code or self.get_authorization_code(),
             "redirect_uri": self.redirect_uri,
-            "code_verifier": self.code_verifier
+            "code_verifier": self.code_verifier,
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         logger.debug(
             "sending POST request to %s with Headers: %s and Body: %r",
-            self.OAUTH_TOKEN_URL, headers, payload
+            self.OAUTH_TOKEN_URL,
+            headers,
+            payload,
         )
 
         try:
@@ -243,12 +262,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         if self.server.auth_code:
-            template_path = 'templates/callback_valid.html'
+            template_path = "templates/callback_valid.html"
         else:
-            template_path = 'templates/callback_invalid.html'
+            template_path = "templates/callback_invalid.html"
 
         fullpath = os.path.join(os.path.dirname(__file__), template_path)
-        with open(fullpath, 'r') as fr:
+        with open(fullpath, "r") as fr:
             self._write(fr.read())
 
     def _write(self, text):

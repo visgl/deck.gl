@@ -4,19 +4,19 @@ CartoLayer
 
 Use CARTO DW client (BigQuery)
 """
-from pydeck_carto import CartoAuth
+from pydeck_carto.carto_auth.auth import CartoAuth
 
 ca = CartoAuth.from_file("./carto_credentials.json")
 
-cdw_client = ca.get_carto_dw_client()
+bq_client = ca.get_bigquery_client()
 
-datasets = cdw_client.list_datasets()
+table_list = bq_client.list_tables("shared")
+print("- Available Big Query Shared tables -")
+for table in table_list:
+    print(table)
+
+datasets = bq_client.list_datasets()
 print("- Available datasets -")
 for dataset in datasets:
     ds_info = dataset.friendly_name or dataset.labels
     print(ds_info)
-
-table_list = cdw_client.list_tables("shared")
-print("- Available Big Query Shared tables -")
-for table in table_list:
-    print(table)
