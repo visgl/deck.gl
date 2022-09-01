@@ -1,4 +1,4 @@
-VENV=venv
+VENV=env
 BIN=$(VENV)/bin
 
 init:
@@ -11,8 +11,8 @@ lint:
 	$(BIN)/black pydeck_carto tests examples setup.py
 	$(BIN)/flake8 pydeck_carto tests examples setup.py
 
-test: lint
-	$(BIN)/pytest tests
+test:
+	$(BIN)/pytest tests pydeck_carto
 
 publish-pypi:
 	rm -rf ./dist/*
@@ -26,3 +26,4 @@ publish-test-pypi:
 
 clean:
 	rm -rf venv
+	rm -rf *.egg-info

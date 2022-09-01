@@ -165,3 +165,4 @@ test.html
 # Custom
 carto_credentials.json
 *.html
+.carto_token.json
