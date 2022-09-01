@@ -16,18 +16,13 @@ setup(
     author_email="jarroyo@carto.com",
     url="https://github.com/visgl/deck.gl/tree/master/bindings/pydeck-carto",
     license="BSD 3-Clause",
-    packages=find_packages(include=["pydeck_carto"]),
+    packages=find_packages(exclude=["tests"]),
     python_requires=">=3.7",
     install_requires=[
         "pydeck>=0.8.0b1",
         "requests",
     ],
-    extras_require={
-      "bigquery": [
-          "google-auth",
-          "google-cloud-bigquery"
-      ]
-    },
+    extras_require={"bigquery": ["google-auth", "google-cloud-bigquery"]},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Jupyter",
