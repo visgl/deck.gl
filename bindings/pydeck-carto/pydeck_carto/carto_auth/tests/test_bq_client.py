@@ -9,12 +9,12 @@ requesting:
 """
 import os
 
-from pydeck_carto.carto_auth.auth import CartoAuth
+from pydeck_carto import CartoAuth
 from google.cloud.bigquery import Client as GClient
 
 dummy_response = {
-    "projectId": "carto-dw-ac-hbnregaf",
-    "token": "ya29.c.b0AXv0zTP4-ML3gMXEIiZTy5HRkAUKYCKNtI_8UUx6Ziu4y7jXC5lnetZyXXvLir1CNAzA918XqufrFhUKMlcjNBFOrODlUM_2yEFb9Oz-1zC5hVVoMt9Lmcl7_P1u_b2M6Xc2y_4PFN52xluoHJIx4GFrKDX9EQZiaveci6Mux1pWG47WfwYn3Pk80Cvnik7-1_kXPUZA26Qo5Dy-uuVW3HMgtL_JiAA........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................",  # noqa: E501
+    "projectId": "project-id-mock",
+    "token": "token-mock",
 }
 
 
@@ -27,9 +27,9 @@ def test_cw_credentials(requests_mock):
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
     ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
 
-    carto_dw_project_id, carto_dw_token = ca.cw_credentials()
-    assert carto_dw_project_id is not None
-    assert carto_dw_token is not None
+    carto_dw_project_id, carto_dw_token = ca.get_carto_dw_credentials()
+    assert carto_dw_project_id == "project-id-mock"
+    assert carto_dw_token == "token-mock"
 
 
 def test_big_query_client(requests_mock):
@@ -41,7 +41,7 @@ def test_big_query_client(requests_mock):
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
     ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
 
-    bq_client = ca.get_bigquery_client()
+    bq_client = ca.get_carto_dw_client()
     assert bq_client is not None
 
     assert hasattr(bq_client, "query")

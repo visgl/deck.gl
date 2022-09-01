@@ -15,8 +15,7 @@ Check if the token has been expired, refresh token function
 import datetime
 import os
 
-from pydeck_carto.carto_auth.auth import CartoAuth
-from pydeck_carto.carto_auth.errors import CredentialsError
+from pydeck_carto import CartoAuth, CredentialsError
 
 
 def test_credentials_from_file(requests_mock):
@@ -40,7 +39,7 @@ def test_credentials_from_file(requests_mock):
 
     assert ca.token_expired() is True
 
-    creds = ca.credentials()
+    creds = ca.get_layer_credentials()
     assert creds["apiVersion"] == "v3"
     assert creds["apiBaseUrl"] == ca.api_base_url
     assert len(creds["accessToken"]) > 0
@@ -70,7 +69,7 @@ def test_credentials_from_parameters(requests_mock):
     assert ca.client_secret == "1234567890"
     assert ca.api_base_url == "https://gcp-us-east1.api.carto.com"
 
-    creds = ca.credentials()
+    creds = ca.get_layer_credentials()
     assert creds["apiVersion"] == "v3"
     assert creds["apiBaseUrl"] == ca.api_base_url
     assert len(creds["accessToken"]) > 0
@@ -79,7 +78,7 @@ def test_credentials_from_parameters(requests_mock):
 def test_handle_file_token_cached_on_file():
     cache_filepath = "fixtures/.carto_token.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath, scope='read:connections')
+    ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
 
     saved_token = "testAccessTokenlkjsdofiuqwelrkjas908d7"  # encoded on the file
     assert saved_token == ca._get_token()
@@ -108,7 +107,7 @@ def test_handle_auth_tokens():
     expire_in = 7200
     ca = CartoAuth(access_token=access_token, expires_in=expire_in)
 
-    creds = ca.credentials()
+    creds = ca.get_layer_credentials()
     assert creds["apiVersion"] == "v3"
     assert creds["apiBaseUrl"] == ca.api_base_url
     assert creds["accessToken"] == access_token

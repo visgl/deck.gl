@@ -17,7 +17,7 @@ layer = pdk.Layer(
     ".derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset",
     type_=MapType.TILESET,
     connection=CartoConnection.CARTO_DW,
-    credentials=carto_auth.credentials(),
+    credentials=carto_auth.get_layer_credentials(),
     get_fill_color=[200, 0, 80],
     pickable=True,
 )

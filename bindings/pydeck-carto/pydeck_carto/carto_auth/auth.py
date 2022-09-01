@@ -4,14 +4,15 @@ import os.path
 
 import requests as requests
 
-from pydeck_carto.carto_auth.errors import CredentialsError
-from pydeck_carto.carto_auth.oauth2 import CartoPKCE
+
+class CredentialsError(Exception):
+    pass
 
 
 class CartoAuth:
     """Carto Authentication object used to gather connect with the carto services
 
-    It can be initialized from the parameters or using the from_file(<filepath>) function
+    It can be initialized using the parameters or the from_file(<filepath>) function
 
     Parameters
     ----------
@@ -27,18 +28,16 @@ class CartoAuth:
     .. How to get the API credentials:
         https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
     """
-    # OAUTH_TOKEN_URL = "https://auth.carto.com/oauth/token"
-    OAUTH_TOKEN_URL = "https://carto-development.us.auth0.com/oauth/token"
 
     def __init__(
-            self,
-            client_id=None,
-            client_secret=None,
-            api_base_url="https://gcp-us-east1.api.carto.com",
-            access_token=None,
-            expires_in=None,
-            scope=None,
-            cache_filepath=".carto_token.json",
+        self,
+        client_id=None,
+        client_secret=None,
+        api_base_url="https://gcp-us-east1.api.carto.com",
+        access_token=None,
+        expires_in=None,
+        scope=None,
+        cache_filepath=".carto_token.json",
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
@@ -58,7 +57,7 @@ class CartoAuth:
                 self._access_token = None
                 self.scope = None
             else:
-                populated = self._get_file_token(scope)
+                populated = self._load_file_token(scope)
                 if not populated:
                     raise CredentialsError("Unable to populate credentials object")
 
@@ -70,30 +69,31 @@ class CartoAuth:
             content = json.load(f)
         for attr in ("client_id", "api_base_url", "client_secret"):
             if attr not in content:
-                raise AttributeError(f'Missing attribute {attr} from {filepath}')
+                raise AttributeError(f"Missing attribute {attr} from {filepath}")
             if not content[attr]:
-                raise ValueError(f'Missing value for {attr} in {filepath}')
+                raise ValueError(f"Missing value for {attr} in {filepath}")
 
-        return cls(client_id=content['client_id'],
-                   client_secret=content['client_secret'],
-                   api_base_url=content['api_base_url'],
-                   )
+        return cls(
+            client_id=content["client_id"],
+            client_secret=content["client_secret"],
+            api_base_url=content["api_base_url"],
+        )
 
-    def credentials(self) -> dict:
+    def get_layer_credentials(self) -> dict:
         """Get the layer credentials object to gather information
         from carto warehouses"""
-        oauth_token = self._get_token()
+        access_token = self._get_token()
         return {
             "apiVersion": "v3",
             "apiBaseUrl": self.api_base_url,
-            "accessToken": oauth_token,
+            "accessToken": access_token,
         }
 
     def _get_token(self):
         if self._access_token and not self.token_expired():
             return self._access_token
 
-        stored_token = self._get_file_token(self.scope)
+        stored_token = self._load_file_token(self.scope)
         if not stored_token or not self._access_token or self.token_expired():
             try:
                 self._get_new_token()
@@ -118,7 +118,7 @@ class CartoAuth:
             msg += " and ".join(missing)
             raise CredentialsError(msg)
 
-        url = self.OAUTH_TOKEN_URL
+        url = "https://auth.carto.com/oauth/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {
             "grant_type": "client_credentials",
@@ -160,7 +160,7 @@ class CartoAuth:
         now_utc_ts = datetime.datetime.utcnow().timestamp()
         return now_utc_ts > self.expiration_ts
 
-    def cw_credentials(self) -> tuple:
+    def get_carto_dw_credentials(self) -> tuple:
         """Get the carto data warehouse credentials
         returns: (project_id,carto_data_warehouse_token)"""
         if not self.api_base_url:
@@ -193,7 +193,7 @@ class CartoAuth:
             json.dump(info_to_cache, fw)
         return True
 
-    def _get_file_token(self, scope):
+    def _load_file_token(self, scope):
         """Tries to get the hidden token on filesystem"""
         if not self.cache_filepath or not os.path.exists(self.cache_filepath):
             return False
@@ -208,36 +208,10 @@ class CartoAuth:
 
         return True
 
-    def get_bigquery_client(self):
+    def get_carto_dw_client(self):
         """Returns a client to query directly the CARTO DW (BigQuery)"""
         from google.cloud.bigquery import Client as GClient
         from google.oauth2.credentials import Credentials as GCredentials
 
-        project_id, cw_token = self.cw_credentials()
+        project_id, cw_token = self.get_carto_dw_credentials()
         return GClient(project_id, credentials=GCredentials(cw_token))
-
-    def connections_list(self) -> list:
-        """Returns the list of available connections using this credential"""
-        raise NotImplementedError()
-
-    def is_valid_connection(self, connection_id):
-        """Checks if the connection_id is valid using this credentials"""
-        raise NotImplementedError()
-
-    def is_valid_data(self, data, layer_type, connection_id):
-        """Checking if the data with this credential, data, connection
-        and layer_type is correct to get information from the carto servers"""
-        raise NotImplementedError()
-
-    @classmethod
-    def from_oauth(cls,
-                   api_base_url="https://gcp-us-east1.api.carto.com",
-                   cache_filepath=".carto_token.json"):
-        pkce_auth = CartoPKCE()
-        code = pkce_auth.get_auth_response()
-        token_info = pkce_auth.get_token_info(code)
-        return CartoAuth(access_token=token_info['access_token'],
-                         expires_in=token_info['expires_in'],
-                         api_base_url=api_base_url,
-                         cache_filepath=cache_filepath,
-                         )
