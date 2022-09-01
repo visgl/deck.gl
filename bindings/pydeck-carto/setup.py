@@ -22,8 +22,14 @@ setup(
         "pydeck>=0.8.0b1",
         "requests",
     ],
+    extras_require={
+      "bigquery": [
+          "google-auth",
+          "google-cloud-bigquery"
+      ]
+    },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Framework :: Jupyter",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
