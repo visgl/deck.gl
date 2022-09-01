@@ -10,78 +10,89 @@ class CredentialsError(Exception):
 
 
 class CartoAuth:
+    """Carto Authentication object used to gather connect with the carto services
+
+    It can be initialized from the parameters or using the from_file(<filepath>) function
+
+    Parameters
+    ----------
+
+    client_id : client_id of your application API keys provided by Carto
+    client_secret: client_secret of your application API keys provided by Carto
+    api_base_url: base url where your application is connected to
+    access_token: access_token already generated for your user
+    expires_in: time in seconds when the token will be expired
+    scope: limited scope where the token can be used
+    cache_filepath: specific path where the tokens saved on the cache will be stored
+
+    .. How to get the API credentials:
+        https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
+    """
+
     def __init__(
-        self,
-        filepath=None,
-        client_id=None,
-        client_secret=None,
-        api_base_url="https://gcp-europe-west1.api.carto.com",
-        audience="carto-cloud-native-api",
-        grant_type="client_credentials",
-        cache_filepath=".carto_token.json",
-        access_token=None,
-        expire_in=None,
-        scope=None,
+            self,
+            client_id=None,
+            client_secret=None,
+            api_base_url="https://gcp-us-east1.api.carto.com",
+            access_token=None,
+            expires_in=None,
+            scope=None,
+            cache_filepath=".carto_token.json",
     ):
-        self.grant_type = grant_type
         self.cache_filepath = cache_filepath
-        self.audience = audience
         self.api_base_url = api_base_url
         self.client_id = client_id
         self.client_secret = client_secret
 
-        if access_token and expire_in:
+        if access_token and expires_in:
             now = datetime.datetime.utcnow()
-            expires_in = now + datetime.timedelta(seconds=expire_in)
+            expires_in = now + datetime.timedelta(seconds=expires_in)
             self.expiration_ts = expires_in.timestamp()
             self._access_token = access_token
             self.scope = scope
             self._dump_token()
         else:
-            content = {}
-            if filepath:
-                with open(filepath, "r") as f:
-                    content = json.load(f)
-            elif api_base_url and client_id and client_secret:
-                content = dict(
-                    zip(
-                        ["api_base_url", "client_id", "client_secret"],
-                        [api_base_url, client_id, client_secret],
-                    )
-                )
-
-            if content:
-                self.client_id = content["client_id"]
-                self.client_secret = content["client_secret"]
-                self.api_base_url = content["api_base_url"]
+            if client_id and client_secret and api_base_url:
                 self.expiration_ts = None
                 self._access_token = None
                 self.scope = None
-                self.audience = audience
             else:
-                populated = self._get_file_token()
+                populated = self._get_file_token(scope)
                 if not populated:
                     raise CredentialsError("Unable to populate credentials object")
 
         self.auth_type = None
-        self.filepath = None or filepath
-        self.bg_client = None
+
+    @classmethod
+    def from_file(cls, filepath):
+        with open(filepath, "r") as f:
+            content = json.load(f)
+        for attr in ("client_id", "api_base_url", "client_secret"):
+            if attr not in content:
+                raise AttributeError(f'Missing attribute {attr} from {filepath}')
+            if not content[attr]:
+                raise ValueError(f'Missing value for {attr} in {filepath}')
+
+        return cls(client_id=content['client_id'],
+                   client_secret=content['client_secret'],
+                   api_base_url=content['api_base_url'],
+                   )
 
     def credentials(self) -> dict:
         """Get the layer credentials object to gather information
         from carto warehouses"""
-        oauth_token = self.get_token()
+        oauth_token = self._get_token()
         return {
             "apiVersion": "v3",
             "apiBaseUrl": self.api_base_url,
             "accessToken": oauth_token,
         }
 
-    def get_token(self):
+    def _get_token(self):
         if self._access_token and not self.token_expired():
             return self._access_token
 
-        stored_token = self._get_file_token()
+        stored_token = self._get_file_token(self.scope)
         if not stored_token or not self._access_token or self.token_expired():
             try:
                 self._get_new_token()
@@ -109,8 +120,8 @@ class CartoAuth:
         url = "https://auth.carto.com/oauth/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {
-            "grant_type": self.grant_type,
-            "audience": self.audience,
+            "grant_type": "client_credentials",
+            "audience": "carto-cloud-native-api",
             "client_id": self.client_id,
             "client_secret": self.client_secret,
         }
@@ -156,7 +167,7 @@ class CartoAuth:
 
         url = f"{self.api_base_url}/v3/connections/carto-dw/token"
 
-        access_token = self.get_token()
+        access_token = self._get_token()
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {access_token}",
@@ -176,27 +187,28 @@ class CartoAuth:
             info_to_cache = {
                 "accessToken": self._access_token,
                 "expiresTS": self.expiration_ts,
-                "audience": self.audience,
                 "scope": self.scope,
             }
             json.dump(info_to_cache, fw)
         return True
 
-    def _get_file_token(self):
+    def _get_file_token(self, scope):
         """Tries to get the hidden token on filesystem"""
         if not self.cache_filepath or not os.path.exists(self.cache_filepath):
             return False
 
         with open(self.cache_filepath, "r") as fr:
             info = json.load(fr)
+            if scope != info["scope"]:
+                return False
             self._access_token = info["accessToken"]
             self.expiration_ts = info["expiresTS"]
-            self.audience = info["audience"]
             self.scope = info["scope"]
+
         return True
 
     def get_bigquery_client(self):
-        """Returns a client to query directly big query"""
+        """Returns a client to query directly the CARTO DW (BigQuery)"""
         from google.cloud.bigquery import Client as GClient
         from google.oauth2.credentials import Credentials as GCredentials
 

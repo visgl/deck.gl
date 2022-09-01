@@ -2,11 +2,11 @@
 CartoLayer
 ==========
 
-Render cloud data from a query.
+Use CARTO DW client (BigQuery)
 """
 from pydeck_carto.carto_auth.auth import CartoAuth
 
-ca = CartoAuth("./carto_credentials.json")
+ca = CartoAuth.from_file("./carto_credentials.json")
 
 bq_client = ca.get_bigquery_client()
 

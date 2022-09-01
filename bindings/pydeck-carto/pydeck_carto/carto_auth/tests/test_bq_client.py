@@ -20,12 +20,12 @@ dummy_response = {
 
 def test_cw_credentials(requests_mock):
     requests_mock.get(
-        "https://gcp-europe-west1.api.carto.com/v3/connections/carto-dw/token",
+        "https://gcp-us-east1.api.carto.com/v3/connections/carto-dw/token",
         json=dummy_response,
     )
     cache_filepath = "fixtures/.carto_token.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath)
+    ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
 
     carto_dw_project_id, carto_dw_token = ca.cw_credentials()
     assert carto_dw_project_id is not None
@@ -34,21 +34,15 @@ def test_cw_credentials(requests_mock):
 
 def test_big_query_client(requests_mock):
     requests_mock.get(
-        "https://gcp-europe-west1.api.carto.com/v3/connections/carto-dw/token",
+        "https://gcp-us-east1.api.carto.com/v3/connections/carto-dw/token",
         json=dummy_response,
     )
     cache_filepath = "fixtures/.carto_token.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath)
+    ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
 
     bq_client = ca.get_bigquery_client()
     assert bq_client is not None
 
     assert hasattr(bq_client, "query")
     assert isinstance(bq_client, GClient)
-
-    # table_list = bq_client.list_tables("shared")
-    # assert len(table_list) > 0
-
-    # datasets = [x for x in bq_client.list_datasets()]
-    # assert len(datasets) > 0
