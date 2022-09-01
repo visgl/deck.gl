@@ -5,12 +5,11 @@ CartoLayer
 Render cloud data in H3 grid from a tileset.
 """
 import pydeck as pdk
-from pydeck_carto import register_carto_layer
-from pydeck_carto.carto_auth.auth import CartoAuth
+from pydeck_carto import register_carto_layer, CartoAuth
 from pydeck_carto.layer import MapType, CartoConnection
 
 register_carto_layer()
-carto_auth = CartoAuth("./carto_credentials.json")
+carto_auth = CartoAuth.from_file("./carto_credentials.json")
 
 layer = pdk.Layer(
     "CartoLayer",
