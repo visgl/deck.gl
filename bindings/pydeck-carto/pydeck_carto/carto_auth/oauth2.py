@@ -1,4 +1,5 @@
 import os
+import sys
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qsl
@@ -49,6 +50,9 @@ class CartoPKCE:
              * open_browser: Optional, whether the web browser should be opened to
                              authorize a user
         """
+        using_google_colab = 'google.colab' in sys.modules
+        if using_google_colab and open_browser:
+            raise ValueError("open_browser=True can't be used on Google Colab")
 
         self._session = requests_session or requests.Session()
         self.client_id = self.CLIENT_ID
@@ -97,8 +101,11 @@ class CartoPKCE:
     def _open_auth_url(self, state=None):
         auth_url = self.get_authorize_url(state)
         try:
-            webbrowser.open(auth_url)
-            logger.info("Opened %s in your browser", auth_url)
+            opened = webbrowser.open(auth_url)
+            if opened:
+                logger.info("Opened %s in your browser", auth_url)
+            else:
+                raise webbrowser.Error()
         except webbrowser.Error:
             logger.error("Please navigate here: %s", auth_url)
 
