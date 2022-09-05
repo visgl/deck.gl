@@ -198,7 +198,7 @@ export default class FontAtlasManager {
 
   // eslint-disable-next-line max-statements
   private _generateFontAtlas(characterSet: Set<string>, cachedFontAtlas?: FontAtlas): FontAtlas {
-    const {fontFamily, fontWeight, fontSize, buffer, sdf} = this.props;
+    const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
     let canvas = cachedFontAtlas && cachedFontAtlas.data;
     if (!canvas) {
       canvas = document.createElement('canvas');
@@ -233,7 +233,6 @@ export default class FontAtlasManager {
 
     // 3. layout characters
     if (sdf) {
-      const {fontFamily, fontWeight, fontSize, buffer, radius, cutoff} = this.props;
       const tinySDF = new TinySDF({
         fontSize,
         buffer,
