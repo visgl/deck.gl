@@ -12,7 +12,7 @@ export type Character = {
   width: number;
   height: number;
   layoutWidth: number;
-  layoutOffsetY: number;
+  layoutOffsetY?: number;
 };
 
 export type CharacterMapping = Record<string, Character>;
@@ -63,6 +63,7 @@ export function buildMapping({
   let row = 0;
   // continue from x position of last character in the old mapping
   let x = xOffset;
+  const rowHeight = fontHeight + buffer * 2;
 
   for (const char of characterSet) {
     if (!mapping[char]) {
@@ -77,17 +78,14 @@ export function buildMapping({
       }
       mapping[char] = {
         x: x + buffer,
-        y: yOffset + row * (fontHeight + buffer * 2) + buffer,
+        y: yOffset + row * rowHeight + buffer,
         width,
-        height: fontHeight,
-        layoutWidth: width,
-        layoutOffsetY: 0
+        height: rowHeight,
+        layoutWidth: width
       };
       x += width + buffer * 2;
     }
   }
-
-  const rowHeight = fontHeight + buffer * 2;
 
   return {
     mapping,
@@ -250,8 +248,6 @@ function transformRow(
  */
 export function transformParagraph(
   paragraph: string,
-  /** Base height of row in pixels (multiplied by line-height) */
-  baseRowHeight: number,
   /** CSS line-height */
   lineHeight: number,
   /** CSS word-break option */
@@ -282,7 +278,7 @@ export function transformParagraph(
 
   // maxWidth and height of the paragraph
   const size: [number, number] = [0, 0];
-  const rowSize: [number, number] = [0, baseRowHeight];
+  const rowSize: [number, number] = [0, 0];
   let rowOffsetTop = 0;
   let lineStartIndex = 0;
   let lineEndIndex = 0;
@@ -305,14 +301,9 @@ export function transformParagraph(
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
           const char = characters[j];
-
-          if (!iconMapping[char]) {
-            log.warn(`Missing character: ${char} (${char.codePointAt(0)})`)();
-          } else {
-            const {layoutOffsetY} = iconMapping[char];
-            y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
-            rowWidth[j] = rowSize[0];
-          }
+          const layoutOffsetY = iconMapping[char]?.layoutOffsetY || 0;
+          y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
+          rowWidth[j] = rowSize[0];
         }
 
         rowOffsetTop = rowOffsetTop + rowSize[1] * lineHeight;
@@ -394,12 +385,4 @@ export function getTextFromBuffer({
   }
 
   return {texts, characterCount};
-}
-
-export function resizeCanvas(ctx: CanvasRenderingContext2D, width: number, height: number) {
-  const {canvas} = ctx;
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  canvas.width = width;
-  canvas.height = height;
-  ctx.putImageData(imageData, 0, 0);
 }

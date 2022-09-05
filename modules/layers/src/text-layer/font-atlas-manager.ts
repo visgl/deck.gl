@@ -3,7 +3,7 @@ import TinySDF from '@mapbox/tiny-sdf';
 
 import {log} from '@deck.gl/core';
 
-import {buildMapping, CharacterMapping, nextPowOfTwo, resizeCanvas} from './utils';
+import {buildMapping, CharacterMapping} from './utils';
 import LRUCache from './lru-cache';
 
 import type {Texture} from '@deck.gl/core';
@@ -88,10 +88,6 @@ type FontAtlas = {
   width: number;
   /** texture height */
   height: number;
-  /** base row height for font in pixels (multiplied by line-height property) */
-  rowHeight: number;
-  /** as the scaling of each icon is impacted by it's bounding box (returned by IconLayer.getInstanceIconFrame) we must correct the texture scaling as the buffer increases the size of each characters texture */
-  textureScale: number;
 };
 
 let cache = new LRUCache<FontAtlas>(CACHE_LIMIT);
@@ -168,12 +164,8 @@ export default class FontAtlasManager {
   }
 
   get scale(): number {
-    const textureScale = this._atlas?.textureScale ?? 1;
-    return HEIGHT_SCALE * textureScale;
-  }
-
-  get rowHeight(): number | undefined {
-    return this._atlas && this._atlas.rowHeight;
+    const {fontSize, buffer} = this.props;
+    return (fontSize * HEIGHT_SCALE + buffer * 2) / fontSize;
   }
 
   setProps(props: FontSettings = {}) {
@@ -205,89 +197,13 @@ export default class FontAtlasManager {
   }
 
   private _generateFontAtlas(characterSet: Set<string>, cachedFontAtlas?: FontAtlas): FontAtlas {
+    const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
     let canvas = cachedFontAtlas && cachedFontAtlas.data;
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.width = MAX_CANVAS_WIDTH;
     }
-
     const ctx = canvas.getContext('2d')!;
-
-    return this.props.sdf
-      ? this._generateSDFFontAtlas(canvas, ctx, characterSet)
-      : this._generateRegularFontAtlas(canvas, ctx, characterSet, cachedFontAtlas);
-  }
-
-  private _generateSDFFontAtlas(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    characterSet: Set<string>
-  ): FontAtlas {
-    const {fontFamily, fontWeight, fontSize, buffer, radius, cutoff} = this.props;
-    const mapping: CharacterMapping = {};
-    const tinySDF = new TinySDF({
-      fontSize,
-      buffer,
-      radius,
-      cutoff,
-      fontFamily,
-      fontWeight: `${fontWeight}`
-    });
-    const cellSize = fontSize + buffer * 2;
-    const layoutRowHeight = fontSize * HEIGHT_SCALE;
-    const columns = Math.floor(canvas.width / cellSize);
-    const rows = Math.ceil(characterSet.size / columns);
-    const requiredCanvasHeight = nextPowOfTwo(rows * cellSize);
-
-    if (canvas.height !== requiredCanvasHeight) {
-      resizeCanvas(ctx, canvas.width, requiredCanvasHeight);
-    }
-
-    let x = 0;
-    let y = 0;
-    for (const char of characterSet) {
-      const {data, width, height, glyphTop, glyphAdvance} = tinySDF.draw(char);
-
-      const imageData = ctx.createImageData(width, height);
-      populateAlphaChannel(data, imageData);
-      ctx.putImageData(imageData, x, y);
-
-      mapping[char] = {
-        x,
-        y,
-        width,
-        height: cellSize,
-        // use glyphAdvance over glyphWidth due to whitespace characters
-        layoutWidth: glyphAdvance,
-        layoutOffsetY: fontSize - glyphTop
-      };
-
-      x += width;
-      if (x + cellSize >= canvas.width) {
-        y += cellSize;
-        x = 0;
-      }
-    }
-
-    return {
-      xOffset: 0,
-      yOffset: 0,
-      mapping,
-      data: canvas,
-      width: canvas.width,
-      height: canvas.height,
-      rowHeight: layoutRowHeight,
-      textureScale: cellSize / layoutRowHeight
-    };
-  }
-
-  private _generateRegularFontAtlas(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    characterSet: Set<string>,
-    cachedFontAtlas?: FontAtlas
-  ): FontAtlas {
-    const {fontFamily, fontWeight, fontSize, buffer} = this.props;
 
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
@@ -308,13 +224,37 @@ export default class FontAtlasManager {
     // 2. update canvas
     // copy old canvas data to new canvas only when height changed
     if (canvas.height !== canvasHeight) {
-      resizeCanvas(ctx, canvas.width, canvasHeight);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      canvas.height = canvasHeight;
+      ctx.putImageData(imageData, 0, 0);
     }
+    setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
     // 3. layout characters
-    setTextStyle(ctx, fontFamily, fontSize, fontWeight);
-    for (const char of characterSet) {
-      ctx.fillText(char, mapping[char].x, mapping[char].y + fontSize * BASELINE_SCALE);
+    if (sdf) {
+      const {fontFamily, fontWeight, fontSize, buffer, radius, cutoff} = this.props;
+      const tinySDF = new TinySDF({
+        fontSize,
+        buffer,
+        radius,
+        cutoff,
+        fontFamily,
+        fontWeight: `${fontWeight}`
+      });
+
+      for (const char of characterSet) {
+        const {data, width, height, glyphTop} = tinySDF.draw(char);
+        mapping[char].width = width;
+        mapping[char].layoutOffsetY = fontSize * BASELINE_SCALE - glyphTop;
+
+        const imageData = ctx.createImageData(width, height);
+        populateAlphaChannel(data, imageData);
+        ctx.putImageData(imageData, mapping[char].x, mapping[char].y);
+      }
+    } else {
+      for (const char of characterSet) {
+        ctx.fillText(char, mapping[char].x, mapping[char].y + buffer + fontSize * BASELINE_SCALE);
+      }
     }
 
     return {
@@ -323,9 +263,7 @@ export default class FontAtlasManager {
       mapping,
       data: canvas,
       width: canvas.width,
-      height: canvas.height,
-      rowHeight: fontSize * HEIGHT_SCALE,
-      textureScale: 1
+      height: canvas.height
     };
   }
 
