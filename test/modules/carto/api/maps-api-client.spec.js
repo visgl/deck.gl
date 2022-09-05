@@ -423,10 +423,21 @@ test(`getDataV2#versionError`, async t => {
     props: {geoColumn: 'geog', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
     mapInstantiationUrl:
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
+  },
+  {
+    props: {
+      type: MAP_TYPES.QUERY,
+      source: 'select * from table',
+      queryParameters: {end: '2021-09-17', start: '2021-09-15'}
+    },
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/query?client=deck-gl-carto&q=select%20*%20from%20table&queryParameters=%7B%22end%22%3A%222021-09-17%22%2C%22start%22%3A%222021-09-15%22%7D'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
-    test(`fetchLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
+    test(`fetchLayerData#setDefaultCredentials(${String(
+      useSetDefaultCredentials
+    )})`, async t => {
       const geojsonURL = 'http://geojson';
       const ndjsonURL = 'http://ndjson';
       const accessToken = 'XXX';
