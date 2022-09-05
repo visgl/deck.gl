@@ -12,6 +12,7 @@ export type Character = {
   width: number;
   height: number;
   layoutWidth: number;
+  layoutHeight: number;
   layoutOffsetY?: number;
 };
 
@@ -81,7 +82,8 @@ export function buildMapping({
         y: yOffset + row * rowHeight + buffer,
         width,
         height: rowHeight,
-        layoutWidth: width
+        layoutWidth: width,
+        layoutHeight: fontHeight,
       };
       x += width + buffer * 2;
     }
@@ -226,11 +228,16 @@ function transformRow(
   rowSize: [number, number]
 ) {
   let x = 0;
+  let rowHeight = 0;
 
   for (let i = startIndex; i < endIndex; i++) {
     const character = line[i];
     const frame = iconMapping[character];
     if (frame) {
+      if (!rowHeight) {
+        // frame.height should be a constant
+        rowHeight = frame.layoutHeight;
+      }
       leftOffsets[i] = x + frame.layoutWidth / 2;
       x += frame.layoutWidth;
     } else {
@@ -241,6 +248,7 @@ function transformRow(
   }
 
   rowSize[0] = x;
+  rowSize[1] = rowHeight;
 }
 
 /**
