@@ -25,7 +25,7 @@ def test_cw_credentials(requests_mock):
     )
     cache_filepath = "fixtures/.carto_token.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
+    ca = CartoAuth(cache_filepath=fullpath)
 
     carto_dw_project_id, carto_dw_token = ca.get_carto_dw_credentials()
     assert carto_dw_project_id == "project-id-mock"
@@ -39,7 +39,7 @@ def test_big_query_client(requests_mock):
     )
     cache_filepath = "fixtures/.carto_token.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath, scope="read:connections")
+    ca = CartoAuth(cache_filepath=fullpath)
 
     bq_client = ca.get_carto_dw_client()
     assert bq_client is not None
