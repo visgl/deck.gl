@@ -103,7 +103,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   draw(params) {
     const {sdf, smoothing, outlineWidth} = this.props;
     const {outlineColor} = this.state;
-    const outlineBuffer = outlineWidth ? Math.min(1, 1 - Math.min(outlineWidth, 9) / 10) : -1;
+    const outlineBuffer = outlineWidth ? DEFAULT_BUFFER * (1 - outlineWidth) : -1;
 
     params.uniforms = {
       ...params.uniforms,

@@ -371,14 +371,13 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     objectInfo
   ) => {
     const iconMapping = this.state.fontAtlasManager.mapping!;
-    const rowHeight = this.state.fontAtlasManager.rowHeight!;
     const getText = this.state.getText!;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
     const {
       size: [width, height]
-    } = transformParagraph(paragraph, rowHeight, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -396,7 +395,6 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   // Returns the x, y, w, h of each text object
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
     const iconMapping = this.state.fontAtlasManager.mapping!;
-    const rowHeight = this.state.fontAtlasManager.rowHeight!;
     const getText = this.state.getText!;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
@@ -406,7 +404,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       y,
       rowWidth,
       size: [width, height]
-    } = transformParagraph(paragraph, rowHeight, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -537,7 +535,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
           smoothing: Number.isFinite(fontSettings.smoothing)
             ? fontSettings.smoothing
             : DEFAULT_FONT_SETTINGS.smoothing,
-          outlineWidth,
+          outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
           iconAtlas: texture,
           iconMapping: mapping,
