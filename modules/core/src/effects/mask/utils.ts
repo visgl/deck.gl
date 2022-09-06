@@ -115,7 +115,11 @@ export function getMaskViewport({
   }
 
   const center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0];
-  const scale = Math.min(20, width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
+  const scale = Math.min(
+    1048576, // maxZoom of 20: Math.pow(2, 20) = 1048576
+    width / (bounds[2] - bounds[0]),
+    height / (bounds[3] - bounds[1])
+  );
 
   return new OrthographicView({
     x: padding,
