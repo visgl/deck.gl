@@ -22,7 +22,6 @@ class CartoAuth:
     api_base_url: base url where your application is connected to
     access_token: access_token already generated for your user
     expires_in: time in seconds when the token will be expired
-    scope: limited scope where the token can be used
     cache_filepath: specific path where the tokens saved on the cache will be stored
 
     .. How to get the API credentials:
@@ -36,7 +35,6 @@ class CartoAuth:
         api_base_url="https://gcp-us-east1.api.carto.com",
         access_token=None,
         expires_in=None,
-        scope=None,
         cache_filepath=".carto_token.json",
     ):
         self.cache_filepath = cache_filepath
@@ -49,15 +47,13 @@ class CartoAuth:
             expires_in = now + datetime.timedelta(seconds=expires_in)
             self.expiration_ts = expires_in.timestamp()
             self._access_token = access_token
-            self.scope = scope
             self._dump_token()
         else:
             if client_id and client_secret and api_base_url:
                 self.expiration_ts = None
                 self._access_token = None
-                self.scope = None
             else:
-                populated = self._load_file_token(scope)
+                populated = self._load_file_token()
                 if not populated:
                     raise CredentialsError("Unable to populate credentials object")
 
@@ -93,7 +89,7 @@ class CartoAuth:
         if self._access_token and not self.token_expired():
             return self._access_token
 
-        stored_token = self._load_file_token(self.scope)
+        stored_token = self._load_file_token()
         if not stored_token or not self._access_token or self.token_expired():
             try:
                 self._get_new_token()
@@ -141,7 +137,6 @@ class CartoAuth:
             raise CredentialsError(msg)
         else:
             response_data = response.json()
-            self.scope = response_data["scope"]
             self._access_token = response_data["access_token"]
             self.token_type = response_data["token_type"]
             expires_in_seconds = response_data["expires_in"]
@@ -188,23 +183,19 @@ class CartoAuth:
             info_to_cache = {
                 "accessToken": self._access_token,
                 "expiresTS": self.expiration_ts,
-                "scope": self.scope,
             }
             json.dump(info_to_cache, fw)
         return True
 
-    def _load_file_token(self, scope):
+    def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
         if not self.cache_filepath or not os.path.exists(self.cache_filepath):
             return False
 
         with open(self.cache_filepath, "r") as fr:
             info = json.load(fr)
-            if scope != info["scope"]:
-                return False
             self._access_token = info["accessToken"]
             self.expiration_ts = info["expiresTS"]
-            self.scope = info["scope"]
 
         return True
 

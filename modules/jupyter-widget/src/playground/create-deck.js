@@ -14,6 +14,7 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
+import {colorBins, colorCategories, colorContinuous} from "@deck.gl/carto";
 
 function extractClasses(library = {}) {
   // Extracts exported class constructors as a dictionary from a library
@@ -32,7 +33,9 @@ const jsonConverterConfiguration = {
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
     GL: GLConstants
-  }
+  },
+  // Adding the carto-color functions by default on the json converter
+  functions: {colorBins, colorCategories, colorContinuous}
 };
 
 registerLoaders([CSVLoader]);
