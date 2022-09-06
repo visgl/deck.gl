@@ -93,7 +93,7 @@ export function getMaskViewport({
   width -= padding * 2;
   height -= padding * 2;
 
-  if (viewport instanceof WebMercatorViewport) {
+  if (viewport.isGeospatial) {
     const {longitude, latitude, zoom} = fitBounds({
       width,
       height,
