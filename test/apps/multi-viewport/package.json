@@ -7,6 +7,7 @@
   "dependencies": {
     "deck.gl": "^8.4.0",
     "@math.gl/core": "3.6.0",
+    "@turf/circle": "6.5.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^4.1.2"

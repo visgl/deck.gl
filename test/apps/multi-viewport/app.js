@@ -2,152 +2,88 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
+import TurfCircle from '@turf/circle';
 
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  PolygonLayer,
-  PointCloudLayer,
-  MapView,
-  FirstPersonView,
-  // ThirdPersonView,
-  TripsLayer
-} from 'deck.gl';
+import {Deck, FirstPersonView, MapView, GeoJsonLayer, BitmapLayer, TileLayer} from 'deck.gl';
 
-// Source data CSV
-const DATA_URL = {
-  BUILDINGS:
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
-  TRIPS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
+import {MaskExtension} from '@deck.gl/extensions';
+
+const GEOMETRIES = JSON.parse(
+  '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-74.00551557540894,40.72392515042114],[-74.00969982147217,40.72026611026408],[-74.00206089019774,40.71393956189477],[-73.99783372879028,40.71886749066927],[-73.99916410446167,40.72294942604715],[-74.00148153305054,40.723811316647875],[-74.00551557540894,40.72392515042114]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-73.99600982666016,40.718704858576665],[-73.99661064147949,40.71636291238809],[-73.9918041229248,40.71629785715124],[-73.98849964141846,40.71922527987441],[-73.98794174194336,40.72316083420869],[-73.99600982666016,40.72338850378556],[-73.99600982666016,40.718704858576665]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-73.99789810180664,40.728494602539605],[-73.99789810180664,40.728494602539605],[-73.99789810180664,40.728494602539605],[-73.99789810180664,40.728494602539605]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-73.99703979492188,40.72410403167144],[-73.99073123931885,40.72410403167144],[-73.99073123931885,40.72781164387366],[-73.99703979492188,40.72781164387366],[-73.99703979492188,40.72410403167144]]]}},{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[[-74.00206089019774,40.72657579608992],[-73.99708271026611,40.719192753662504],[-74.00158882141113,40.71291489723403]]}}]}'
+);
+
+const INITIAL_VIEW_STATE = {
+  latitude: 40.72185171902871,
+  longitude: -73.99830043315887,
+  bearing: 90,
+  pitch: 0,
+  maxPitch: 90,
+  minPitch: 0
 };
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
-  ambientRatio: 0.05,
-  diffuseRatio: 0.6,
-  specularRatio: 0.8,
-  lightsStrength: [3.0, 0.0, 0.5, 0.0],
-  numberOfLights: 2
+const INITIAL_VIEW_STATE_FPV = {
+  ...INITIAL_VIEW_STATE,
+  position: [0, 0, 100]
 };
 
-const DEFAULT_VIEWPORT_PROPS = {
-  longitude: -74,
-  latitude: 40.72,
-  zoom: 13,
-  bearing: 270
+const INITIAL_VIEW_STATE_MAP = {
+  ...INITIAL_VIEW_STATE,
+  zoom: 15
 };
 
-class Root extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      time: 1000,
-      trailLength: 50,
-      viewStates: {
-        firstPerson: {...DEFAULT_VIEWPORT_PROPS, pitch: 0, zoom: 0, position: [0, 0, 2]},
-        baseMap: {...DEFAULT_VIEWPORT_PROPS, pitch: 60}
+const GEOFENCE_IN_KM = 0.5;
+
+const deckgl = new Deck({
+  // views: new FirstPersonView({controller: {scrollZoom: true}}),
+  // initialViewState: INITIAL_VIEW_STATE_FPV,
+
+  views: new MapView({controller: {scrollZoom: true}}),
+  initialViewState: INITIAL_VIEW_STATE_MAP,
+
+  onHover: ({coordinate}) => {
+    redraw(
+      coordinate ? [TurfCircle(coordinate, GEOFENCE_IN_KM, {steps: 20, units: 'kilometers'})] : []
+    );
+  }
+});
+
+function redraw(geofence) {
+  const layers = [
+    new TileLayer({
+      data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      minZoom: 0,
+      maxZoom: 19,
+      tileSize: 256,
+      renderSubLayers: props => {
+        const {
+          bbox: {west, south, east, north}
+        } = props.tile;
+
+        return new BitmapLayer(props, {
+          data: null,
+          image: props.data,
+          bounds: [west, south, east, north]
+        });
       }
-    };
-
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-  }
-
-  _onViewStateChange({viewId, viewState}) {
-    const viewStates = {...this.state.viewStates, [viewId]: viewState};
-
-    if (viewId === 'baseMap') {
-      viewStates.firstPerson = {
-        ...viewStates.firstPerson,
-        ...viewState,
-        pitch: viewStates.firstPerson.pitch,
-        zoom: viewStates.firstPerson.zoom
-      };
-    }
-    if (viewId === 'firstPerson') {
-      viewStates.baseMap = {
-        ...viewStates.baseMap,
-        ...viewState,
-        pitch: viewStates.baseMap.pitch,
-        zoom: viewStates.baseMap.zoom
-      };
-    }
-
-    this.setState({viewStates});
-  }
-
-  _renderLayers() {
-    const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
-    const {trailLength, time} = this.state;
-
-    return [
-      new TripsLayer({
-        id: 'trips',
-        data: DATA_URL.TRIPS,
-        getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
-        opacity: 0.3,
-        getWidth: 2,
-        widthMinPixels: 2,
-        trailLength,
-        currentTime: time
-      }),
-      new PolygonLayer({
-        id: 'buildings',
-        data: DATA_URL.BUILDINGS,
-        extruded: true,
-        wireframe: false,
-        fp64: true,
-        opacity: 0.5,
-        getPolygon: f => f.polygon,
-        getElevation: f => f.height,
-        getFillColor: f => [74, 80, 87],
-        lightSettings: LIGHT_SETTINGS
-      }),
-      new PointCloudLayer({
-        id: 'ref-point',
-        data: [
-          {
-            position: [0, 0, 2],
-            color: [255, 0, 0, 255]
-          }
-        ],
-        getColor: d => d.color,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: [longitude, latitude],
-        opacity: 1,
-        pointSize: 5
-      })
-    ];
-  }
-
-  _renderMap({width, height, viewState}) {
-    return (
-      <StaticMap
-        {...viewState}
-        width={width}
-        height={height}
-        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
-      />
-    );
-  }
-
-  render() {
-    return (
-      <DeckGL
-        id="first-person"
-        width="100%"
-        height="100%"
-        viewState={this.state.viewStates}
-        onViewStateChange={this._onViewStateChange}
-        layers={this._renderLayers()}
-      >
-        <FirstPersonView id="firstPerson" controller={true} height="50%" fovy={50} />
-
-        <MapView id="baseMap" controller={true} y="50%" height="50%" position={[0, 0, 0]}>
-          {this._renderMap}
-        </MapView>
-      </DeckGL>
-    );
-  }
+    }),
+    new GeoJsonLayer({
+      id: 'geofence',
+      data: geofence,
+      operation: 'mask'
+    }),
+    new GeoJsonLayer({
+      id: 'geofence-geojson',
+      data: geofence,
+      filled: false
+    }),
+    new GeoJsonLayer({
+      id: 'geometries',
+      data: GEOMETRIES,
+      // filled: false,
+      maskId: 'geofence',
+      extensions: [new MaskExtension()]
+    })
+  ];
+  deckgl.setProps({layers});
 }
-
-render(<Root />, document.body.appendChild(document.createElement('div')));
+redraw([]);
