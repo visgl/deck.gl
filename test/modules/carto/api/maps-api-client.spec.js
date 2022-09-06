@@ -435,9 +435,7 @@ test(`getDataV2#versionError`, async t => {
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
-    test(`fetchLayerData#setDefaultCredentials(${String(
-      useSetDefaultCredentials
-    )})`, async t => {
+    test(`fetchLayerData#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
       const geojsonURL = 'http://geojson';
       const ndjsonURL = 'http://ndjson';
       const accessToken = 'XXX';
