@@ -30,6 +30,7 @@ class CartoPKCE:
     OAUTH_TOKEN_URL = "https://auth.carto.com/oauth/token"
     CLIENT_ID = "AtxvHDeuXlR8XPfF2nj2Uv2I29pvmCxu"
     REDIRECT_URI = "http://localhost:10000/callback/"
+    REDIRECT_URI_CLI = "https://callbacks.carto.com/token"
 
     def __init__(
         self,
@@ -56,7 +57,7 @@ class CartoPKCE:
 
         self._session = requests_session or requests.Session()
         self.client_id = self.CLIENT_ID
-        self.redirect_uri = self.REDIRECT_URI
+        self.redirect_uri = self.REDIRECT_URI if open_browser else self.REDIRECT_URI_CLI
         self.state = state
         self.proxies = proxies
         self.requests_timeout = requests_timeout
@@ -107,6 +108,8 @@ class CartoPKCE:
             else:
                 raise webbrowser.Error()
         except webbrowser.Error:
+            self.redirect_uri = self.REDIRECT_URI_CLI
+            auth_url = self.get_authorize_url(state)
             logger.error("Please navigate here: %s", auth_url)
 
     def get_authorize_url(self, state=None):
