@@ -405,8 +405,7 @@ async function _fetchMapDataset(
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
-  headers?: Headers,
-  queryParameters?: QueryParameters
+  headers?: Headers
 ) {
   const {
     aggregationExp,
@@ -416,7 +415,8 @@ async function _fetchMapDataset(
     format,
     geoColumn,
     source,
-    type
+    type,
+    queryParameters
   } = dataset;
   // First fetch metadata
   const {url, mapFormat} = await _fetchDataUrl({
