@@ -6,9 +6,7 @@ require('fs').copyFileSync(
 
 require('@babel/register')({
   extensions: ['.js', '.jsx', '.cjs', '.ts', '.tsx'],
-  ignore: [
-    /node_modules\/(?!@mapbox)/
-  ]
+  ignore: [/node_modules\/(?!@mapbox)/]
 });
 
 // Must import before the polyfills for h3 to detect the environment correctly

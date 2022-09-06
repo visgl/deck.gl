@@ -83,7 +83,7 @@ export function buildMapping({
         width,
         height: rowHeight,
         layoutWidth: width,
-        layoutHeight: fontHeight,
+        layoutHeight: fontHeight
       };
       x += width + buffer * 2;
     }

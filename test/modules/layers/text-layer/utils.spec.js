@@ -68,7 +68,7 @@ test('TextLayer - utils#buildMapping with cache', t => {
       a: {x: 2, y: 2, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
       s: {x: 7, y: 2, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4},
       d: {x: 2, y: 10, width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
-      f: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4},
+      f: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4}
     },
     xOffset: 15,
     yOffset: 8
