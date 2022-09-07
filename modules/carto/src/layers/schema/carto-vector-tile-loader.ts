@@ -1,7 +1,7 @@
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 
-import {Tile, TileReader} from './carto-tile';
+import {TileReader} from './carto-tile';
 import {parsePbf, unpackProperties} from './tile-loader-utils';
 
 const CartoVectorTileLoader: LoaderWithParser = {

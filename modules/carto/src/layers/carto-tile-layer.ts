@@ -2,7 +2,7 @@ import {registerLoaders} from '@loaders.gl/core';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
 registerLoaders([CartoVectorTileLoader]);
 
-import {log, DefaultProps} from '@deck.gl/core';
+import {DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
