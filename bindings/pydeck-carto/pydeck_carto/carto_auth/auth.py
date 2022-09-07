@@ -31,14 +31,14 @@ class CartoAuth:
     """
 
     def __init__(
-            self,
-            client_id=None,
-            client_secret=None,
-            api_base_url=DEFAULT_API_BASE_URL,
-            access_token=None,
-            expires_in=None,
-            cache_filepath=".carto_token.json",
-            using_cache=True,
+        self,
+        client_id=None,
+        client_secret=None,
+        api_base_url=DEFAULT_API_BASE_URL,
+        access_token=None,
+        expires_in=None,
+        cache_filepath=".carto_token.json",
+        using_cache=True,
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
@@ -197,9 +197,9 @@ class CartoAuth:
     def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
         if (
-                not self.using_cache
-                or not self.cache_filepath
-                or not os.path.exists(self.cache_filepath)
+            not self.using_cache
+            or not self.cache_filepath
+            or not os.path.exists(self.cache_filepath)
         ):
             return False
 
@@ -231,11 +231,11 @@ class CartoAuth:
 
     @classmethod
     def from_oauth(
-            cls,
-            open_browser=True,
-            api_base_url=DEFAULT_API_BASE_URL,
-            cache_filepath=".carto_token.json",
-            using_cache=True,
+        cls,
+        open_browser=True,
+        api_base_url=DEFAULT_API_BASE_URL,
+        cache_filepath=".carto_token.json",
+        using_cache=True,
     ):
         if using_cache and cache_filepath:
             try:
