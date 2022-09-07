@@ -29,14 +29,14 @@ class CartoAuth:
     """
 
     def __init__(
-            self,
-            client_id=None,
-            client_secret=None,
-            api_base_url="https://gcp-us-east1.api.carto.com",
-            access_token=None,
-            expires_in=None,
-            cache_filepath=".carto_token.json",
-            using_cache=True
+        self,
+        client_id=None,
+        client_secret=None,
+        api_base_url="https://gcp-us-east1.api.carto.com",
+        access_token=None,
+        expires_in=None,
+        cache_filepath=".carto_token.json",
+        using_cache=True,
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
@@ -75,7 +75,7 @@ class CartoAuth:
             client_id=content["client_id"],
             client_secret=content["client_secret"],
             api_base_url=content["api_base_url"],
-            using_cache=using_cache
+            using_cache=using_cache,
         )
 
     def get_layer_credentials(self) -> dict:
@@ -194,8 +194,11 @@ class CartoAuth:
 
     def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
-        if not self.using_cache or not self.cache_filepath \
-                or not os.path.exists(self.cache_filepath):
+        if (
+            not self.using_cache
+            or not self.cache_filepath
+            or not os.path.exists(self.cache_filepath)
+        ):
             return False
 
         with open(self.cache_filepath, "r") as fr:
@@ -213,15 +216,11 @@ class CartoAuth:
         project_id, cw_token = self.get_carto_dw_credentials()
         return GClient(project_id, credentials=GCredentials(cw_token))
 
-    def connections_list(self) -> list:
+    def list_connections(self) -> list:
         """Returns the list of available connections using this credential"""
-        url = f'{self.api_base_url}/v3/connections'
+        url = f"{self.api_base_url}/v3/connections"
         headers = self._api_headers()
 
         response = requests.get(url, headers=headers)
         connections_response = response.json()
-        return [conn.get('name') for conn in connections_response]
-
-    def is_valid_connection(self, connection_id):
-        """Checks if the connection_id is valid using this credentials"""
-        return connection_id in self.connections_list()
+        return [conn.get("name") for conn in connections_response]
