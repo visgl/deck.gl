@@ -124,7 +124,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        this.state.model.setUniforms({outlineBuffer: 0}).draw();
+        this.state.model.draw({uniforms: {outlineBuffer: DEFAULT_BUFFER}});
       }
     }
   }
@@ -138,11 +138,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   }
 
   getInstanceIconFrame(icons: string): number[] {
-    if (!icons) return EMPTY_ARRAY;
-
-    return Array.from(icons).flatMap(icon => {
-      const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
-      return [x, y, width, height];
-    });
+    return icons
+      ? Array.from(icons).flatMap(icon => super.getInstanceIconFrame(icon))
+      : EMPTY_ARRAY;
   }
 }
