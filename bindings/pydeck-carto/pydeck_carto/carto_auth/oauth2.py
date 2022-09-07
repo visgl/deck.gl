@@ -77,7 +77,7 @@ class CartoPKCE:
     def _open_auth_url(self, state=None):
         auth_url = self.get_authorize_url(state)
         try:
-            opened = webbrowser.open(auth_url)
+            opened = webbrowser.open_new(auth_url)
             if opened:
                 logger.info("Opened %s in your browser", auth_url)
             else:
