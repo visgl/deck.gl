@@ -198,6 +198,13 @@ type _GeoJsonLayer3DProps<DataT> = {
   wireframe?: boolean;
 
   /**
+   * (Experimental) This prop is only effective with `XYZ` data.
+   * When true, polygon tesselation will be performed on the plane with the largest area, instead of the xy plane.
+   * @default false
+   */
+  _full3d?: boolean;
+
+  /**
    * Elevation valur or accessor.
    *
    * Only used if `extruded: true`.
@@ -300,6 +307,7 @@ const defaultProps: DefaultProps<GeoJsonLayerProps> = {
   filled: true,
   extruded: false,
   wireframe: false,
+  _full3d: false,
   iconAtlas: {type: 'object', value: null},
   iconMapping: {type: 'object', value: {}},
   getIcon: {type: 'accessor', value: f => f.properties.icon},

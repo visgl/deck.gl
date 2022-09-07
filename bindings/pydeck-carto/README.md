@@ -27,8 +27,7 @@ For an example, see the [`examples/hello_world.ipynb`](./examples/basic-examples
 Make commands:
 
 - init: create the environment and install dependencies
-- lint: run linter (flake8)
-- lint-fix: run linter fix (black)
+- lint: run linter (black + flake8)
 - test: run tests (pytest)
 - publish-pypi: publish package in pypi.org
 - publish-test-pypi: publish package in test.pypi.org

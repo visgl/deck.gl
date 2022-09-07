@@ -4,11 +4,19 @@ from .json_tools import JSONMixin
 from .layer import Layer
 from ..io.html import deck_to_html
 from ..settings import settings as pydeck_settings
-from ..widget import DeckGLWidget
 from .view import View
 from .view_state import ViewState
 from .base_map_provider import BaseMapProvider
 from .map_styles import DARK, get_from_map_identifier
+
+
+def has_jupyter_extra():
+    try:
+        from ..widget import DeckGLWidget
+        DeckGLWidget()
+        return True
+    except ImportError:
+        return False
 
 
 class Deck(JSONMixin):
@@ -76,20 +84,26 @@ class Deck(JSONMixin):
         self.views = views
         # Use passed view state
         self.initial_view_state = initial_view_state
-        self.deck_widget = DeckGLWidget()
-        self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
-        api_keys = api_keys or {}
-        self._set_api_keys(api_keys)
 
-        self.deck_widget.height = height
-        self.deck_widget.width = width
-        self.deck_widget.tooltip = tooltip
+        api_keys = api_keys or {}
 
         self.description = description
         self.effects = effects
-
         self.map_provider = str(map_provider).lower() if map_provider else None
-        self.deck_widget.map_provider = map_provider
+        self._tooltip = tooltip
+
+        if has_jupyter_extra():
+            from ..widget import DeckGLWidget
+
+            self.deck_widget = DeckGLWidget()
+            self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
+
+            self.deck_widget.height = height
+            self.deck_widget.width = width
+            self.deck_widget.tooltip = tooltip
+            self.deck_widget.map_provider = map_provider
+
+        self._set_api_keys(api_keys)
 
         custom_map_style_error = "The map_provider parameter must be 'mapbox' when map_style is provided as a dict."
 
@@ -116,7 +130,8 @@ class Deck(JSONMixin):
             provider_env_var = f"{provider.name}_API_KEY"
             attr_value = api_keys.get(provider.value) or os.getenv(provider_env_var)
             setattr(self, attr_name, attr_value)
-            setattr(self.deck_widget, attr_name, attr_value)
+            if has_jupyter_extra():
+                setattr(self.deck_widget, attr_name, attr_value)
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
@@ -131,6 +146,8 @@ class Deck(JSONMixin):
 
         Intended for use in a Jupyter environment.
         """
+        if not has_jupyter_extra():
+            raise ImportError("Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`")
         self.deck_widget.json_input = self.to_json()
         has_binary = False
         binary_data_sets = []
@@ -187,7 +204,7 @@ class Deck(JSONMixin):
             notebook_display=notebook_display,
             iframe_height=iframe_height,
             iframe_width=iframe_width,
-            tooltip=self.deck_widget.tooltip,
+            tooltip=self._tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
             as_string=as_string,
             offline=offline,

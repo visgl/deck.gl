@@ -17,6 +17,15 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.9
+
+### deck.gl v8.9 Prereleases
+
+#### deck.gl [8.9.0-alpha.1] - Sep 1 2022
+
+- [feat] Add a _full3d prop that uses the plane with the maximum area to tesselate (#7205)
+- [mapbox] Match base map camera when terrain is used (#7114)
+
 ## deck.gl v8.8
 
 ### deck.gl v8.8 Prereleases
