@@ -75,7 +75,7 @@ def test_carto_auth_from_oauth(mocker, requests_mock):
         },
     )
 
-    carto_auth = CartoAuth.from_oauth(open_browser=False, using_cache=False)
+    carto_auth = CartoAuth.from_oauth(open_browser=False, use_cache=False)
     assert carto_auth.get_layer_credentials() == {
         "apiVersion": "v3",
         "apiBaseUrl": "https://gcp-us-east1.api.carto.com",

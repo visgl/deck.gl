@@ -24,7 +24,7 @@ class CartoAuth:
     access_token: access_token already generated for your user
     expires_in: time in seconds when the token will be expired
     cache_filepath: specific path where the tokens saved on the cache will be stored
-    using_cache: to use by default the cached token
+    use_cache: to use by default the cached token
 
     .. How to get the API credentials:
         https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
@@ -38,13 +38,13 @@ class CartoAuth:
         access_token=None,
         expires_in=None,
         cache_filepath=".carto_token.json",
-        using_cache=True,
+        use_cache=True,
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
         self.client_id = client_id
         self.client_secret = client_secret
-        self.using_cache = using_cache
+        self.use_cache = use_cache
 
         if access_token and expires_in:
             now = datetime.datetime.utcnow()
@@ -64,7 +64,7 @@ class CartoAuth:
         self.auth_type = None
 
     @classmethod
-    def from_file(cls, filepath, using_cache=True):
+    def from_file(cls, filepath, use_cache=True):
         with open(filepath, "r") as f:
             content = json.load(f)
         for attr in ("client_id", "api_base_url", "client_secret"):
@@ -77,7 +77,7 @@ class CartoAuth:
             client_id=content["client_id"],
             client_secret=content["client_secret"],
             api_base_url=content["api_base_url"],
-            using_cache=using_cache,
+            use_cache=use_cache,
         )
 
     def get_layer_credentials(self) -> dict:
@@ -183,7 +183,7 @@ class CartoAuth:
 
     def _dump_token(self):
         """Saves the token into a hidden file for cache"""
-        if not self.using_cache or not self.cache_filepath:
+        if not self.use_cache or not self.cache_filepath:
             return False
 
         with open(self.cache_filepath, "w") as fw:
@@ -197,7 +197,7 @@ class CartoAuth:
     def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
         if (
-            not self.using_cache
+            not self.use_cache
             or not self.cache_filepath
             or not os.path.exists(self.cache_filepath)
         ):
@@ -235,9 +235,9 @@ class CartoAuth:
         open_browser=True,
         api_base_url=DEFAULT_API_BASE_URL,
         cache_filepath=".carto_token.json",
-        using_cache=True,
+        use_cache=True,
     ):
-        if using_cache and cache_filepath:
+        if use_cache and cache_filepath:
             try:
                 return CartoAuth(
                     api_base_url=api_base_url, cache_filepath=cache_filepath
