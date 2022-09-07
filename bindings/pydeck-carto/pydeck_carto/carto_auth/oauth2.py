@@ -1,4 +1,3 @@
-import os
 import sys
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
