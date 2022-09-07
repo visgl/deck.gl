@@ -91,11 +91,8 @@ def test_handle_file_token_cached_on_file():
 def test_handle_file_token_cached_expired_on_file():
     cache_filepath = "fixtures/.carto_token_expired.json"
     fullpath = os.path.join(os.path.dirname(__file__), cache_filepath)
-    ca = CartoAuth(cache_filepath=fullpath)
-
-    saved_token = "testAccessToken-Expired"  # encoded on the file
     try:
-        assert saved_token == ca._get_token()
+        _ = CartoAuth(cache_filepath=fullpath)
         assert 1 == 2, "Saved expired token returned instead of an error"
     except CredentialsError:
         assert 1 == 1

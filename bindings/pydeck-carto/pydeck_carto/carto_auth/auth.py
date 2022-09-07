@@ -4,9 +4,10 @@ import os.path
 
 import requests as requests
 
+from pydeck_carto.carto_auth.errors import CredentialsError
+from pydeck_carto.carto_auth.oauth2 import CartoPKCE
 
-class CredentialsError(Exception):
-    pass
+DEFAULT_API_BASE_URL = "https://gcp-us-east1.api.carto.com"
 
 
 class CartoAuth:
@@ -23,6 +24,7 @@ class CartoAuth:
     access_token: access_token already generated for your user
     expires_in: time in seconds when the token will be expired
     cache_filepath: specific path where the tokens saved on the cache will be stored
+    use_cache: to use by default the cached token
 
     .. How to get the API credentials:
         https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
@@ -32,17 +34,17 @@ class CartoAuth:
         self,
         client_id=None,
         client_secret=None,
-        api_base_url="https://gcp-us-east1.api.carto.com",
+        api_base_url=DEFAULT_API_BASE_URL,
         access_token=None,
         expires_in=None,
         cache_filepath=".carto_token.json",
-        using_cache=True,
+        use_cache=True,
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
         self.client_id = client_id
         self.client_secret = client_secret
-        self.using_cache = using_cache
+        self.use_cache = use_cache
 
         if access_token and expires_in:
             now = datetime.datetime.utcnow()
@@ -62,7 +64,7 @@ class CartoAuth:
         self.auth_type = None
 
     @classmethod
-    def from_file(cls, filepath, using_cache=True):
+    def from_file(cls, filepath, use_cache=True):
         with open(filepath, "r") as f:
             content = json.load(f)
         for attr in ("client_id", "api_base_url", "client_secret"):
@@ -75,7 +77,7 @@ class CartoAuth:
             client_id=content["client_id"],
             client_secret=content["client_secret"],
             api_base_url=content["api_base_url"],
-            using_cache=using_cache,
+            use_cache=use_cache,
         )
 
     def get_layer_credentials(self) -> dict:
@@ -181,7 +183,7 @@ class CartoAuth:
 
     def _dump_token(self):
         """Saves the token into a hidden file for cache"""
-        if not self.using_cache or not self.cache_filepath:
+        if not self.use_cache or not self.cache_filepath:
             return False
 
         with open(self.cache_filepath, "w") as fw:
@@ -195,7 +197,7 @@ class CartoAuth:
     def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
         if (
-            not self.using_cache
+            not self.use_cache
             or not self.cache_filepath
             or not os.path.exists(self.cache_filepath)
         ):
@@ -205,6 +207,8 @@ class CartoAuth:
             info = json.load(fr)
             self._access_token = info["accessToken"]
             self.expiration_ts = info["expiresTS"]
+        if self.token_expired():
+            return False
 
         return True
 
@@ -224,3 +228,29 @@ class CartoAuth:
         response = requests.get(url, headers=headers)
         connections_response = response.json()
         return [conn.get("name") for conn in connections_response]
+
+    @classmethod
+    def from_oauth(
+        cls,
+        open_browser=True,
+        api_base_url=DEFAULT_API_BASE_URL,
+        cache_filepath=".carto_token.json",
+        use_cache=True,
+    ):
+        if use_cache and cache_filepath:
+            try:
+                return CartoAuth(
+                    api_base_url=api_base_url, cache_filepath=cache_filepath
+                )
+            except CredentialsError:
+                print("Unable to get the cached token, requesting it via oauth")
+
+        pkce_auth = CartoPKCE(open_browser=open_browser)
+        code = pkce_auth.get_auth_response()
+        token_info = pkce_auth.get_token_info(code)
+        return CartoAuth(
+            access_token=token_info["access_token"],
+            expires_in=token_info["expires_in"],
+            api_base_url=api_base_url,
+            cache_filepath=cache_filepath,
+        )
