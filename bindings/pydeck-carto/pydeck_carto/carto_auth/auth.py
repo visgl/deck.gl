@@ -24,24 +24,27 @@ class CartoAuth:
     access_token: access_token already generated for your user
     expires_in: time in seconds when the token will be expired
     cache_filepath: specific path where the tokens saved on the cache will be stored
+    using_cache: to use by default the cached token
 
     .. How to get the API credentials:
         https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
     """
 
     def __init__(
-        self,
-        client_id=None,
-        client_secret=None,
-        api_base_url=DEFAULT_API_BASE_URL,
-        access_token=None,
-        expires_in=None,
-        cache_filepath=".carto_token.json",
+            self,
+            client_id=None,
+            client_secret=None,
+            api_base_url=DEFAULT_API_BASE_URL,
+            access_token=None,
+            expires_in=None,
+            cache_filepath=".carto_token.json",
+            using_cache=True,
     ):
         self.cache_filepath = cache_filepath
         self.api_base_url = api_base_url
         self.client_id = client_id
         self.client_secret = client_secret
+        self.using_cache = using_cache
 
         if access_token and expires_in:
             now = datetime.datetime.utcnow()
@@ -61,7 +64,7 @@ class CartoAuth:
         self.auth_type = None
 
     @classmethod
-    def from_file(cls, filepath):
+    def from_file(cls, filepath, using_cache=True):
         with open(filepath, "r") as f:
             content = json.load(f)
         for attr in ("client_id", "api_base_url", "client_secret"):
@@ -74,6 +77,7 @@ class CartoAuth:
             client_id=content["client_id"],
             client_secret=content["client_secret"],
             api_base_url=content["api_base_url"],
+            using_cache=using_cache,
         )
 
     def get_layer_credentials(self) -> dict:
@@ -149,6 +153,13 @@ class CartoAuth:
 
         return self._access_token
 
+    def _api_headers(self):
+        access_token = self._get_token()
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}",
+        }
+
     def token_expired(self):
         if not self.expiration_ts:
             return True
@@ -163,12 +174,7 @@ class CartoAuth:
             raise CredentialsError("api_base_url required")
 
         url = f"{self.api_base_url}/v3/connections/carto-dw/token"
-
-        access_token = self._get_token()
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {access_token}",
-        }
+        headers = self._api_headers()
 
         response = requests.get(url, headers=headers)
         creds = response.json()
@@ -177,7 +183,7 @@ class CartoAuth:
 
     def _dump_token(self):
         """Saves the token into a hidden file for cache"""
-        if not self.cache_filepath:
+        if not self.using_cache or not self.cache_filepath:
             return False
 
         with open(self.cache_filepath, "w") as fw:
@@ -190,7 +196,11 @@ class CartoAuth:
 
     def _load_file_token(self):
         """Tries to get the hidden token on filesystem"""
-        if not self.cache_filepath or not os.path.exists(self.cache_filepath):
+        if (
+                not self.using_cache
+                or not self.cache_filepath
+                or not os.path.exists(self.cache_filepath)
+        ):
             return False
 
         with open(self.cache_filepath, "r") as fr:
@@ -210,13 +220,22 @@ class CartoAuth:
         project_id, cw_token = self.get_carto_dw_credentials()
         return GClient(project_id, credentials=GCredentials(cw_token))
 
+    def list_connections(self) -> list:
+        """Returns the list of available connections using this credential"""
+        url = f"{self.api_base_url}/v3/connections"
+        headers = self._api_headers()
+
+        response = requests.get(url, headers=headers)
+        connections_response = response.json()
+        return [conn.get("name") for conn in connections_response]
+
     @classmethod
     def from_oauth(
-        cls,
-        open_browser=True,
-        api_base_url=DEFAULT_API_BASE_URL,
-        cache_filepath=".carto_token.json",
-        using_cache=True,
+            cls,
+            open_browser=True,
+            api_base_url=DEFAULT_API_BASE_URL,
+            cache_filepath=".carto_token.json",
+            using_cache=True,
     ):
         if using_cache and cache_filepath:
             try:

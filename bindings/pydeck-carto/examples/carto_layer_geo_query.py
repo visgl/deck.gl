@@ -5,7 +5,7 @@ CartoLayer
 Render cloud data from a query.
 """
 import pydeck as pdk
-from pydeck_carto import register_carto_layer, CartoAuth
+from pydeck_carto import register_carto_layer, CartoAuth, is_valid_carto_layer
 from pydeck_carto.layer import MapType, CartoConnection
 
 register_carto_layer()
@@ -21,6 +21,8 @@ layer = pdk.Layer(
     point_radius_min_pixels=2.5,
     pickable=True,
 )
+
+assert is_valid_carto_layer(layer, carto_auth)
 
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 
