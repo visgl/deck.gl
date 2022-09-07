@@ -1,4 +1,6 @@
 VENV=env
+DIST=dist
+BUILD=build
 BIN=$(VENV)/bin
 
 init:
@@ -15,15 +17,14 @@ test:
 	$(BIN)/pytest tests pydeck_carto
 
 publish-pypi:
-	rm -rf ./dist/*
+	rm -rf $(DIST) $(BUILD) *.egg-info
 	$(BIN)/python setup.py sdist bdist_wheel
-	$(BIN)/twine upload dist/*
+	$(BIN)/twine upload $(DIST)/*
 
 publish-test-pypi:
-	rm -rf ./dist/*
+	rm -rf $(DIST) $(BUILD) *.egg-info
 	$(BIN)/python setup.py sdist bdist_wheel
-	$(BIN)/twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose
+	$(BIN)/twine upload --repository-url https://test.pypi.org/legacy/ $(DIST)/* --verbose
 
 clean:
-	rm -rf venv
-	rm -rf *.egg-info
+	rm -rf $(VENV) $(DIST) $(BUILD) *.egg-info

@@ -21,7 +21,7 @@ def carto_dummy_auth(requests_mock):
     )
     filepath = "fixtures/mock_credentials.json"
     fullpath = os.path.join(os.path.dirname(__file__), filepath)
-    return CartoAuth.from_file(filepath=fullpath, using_cache=False)
+    return CartoAuth.from_file(filepath=fullpath, use_cache=False)
 
 
 @pytest.mark.parametrize(
