@@ -239,13 +239,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         if self.server.auth_code:
-            template_path = "templates/callback_valid.html"
+            callback_html = """<script>
+            window.location.href = "https://callbacks.carto.com/success";
+            </script>"""
         else:
-            template_path = "templates/callback_invalid.html"
+            callback_html = """<script>
+            window.location.href = "https://callbacks.carto.com/error";
+            </script>"""
 
-        fullpath = os.path.join(os.path.dirname(__file__), template_path)
-        with open(fullpath, "r") as fr:
-            self._write(fr.read())
+        self._write(callback_html)
 
     def _write(self, text):
         return self.wfile.write(text.encode("utf-8"))
