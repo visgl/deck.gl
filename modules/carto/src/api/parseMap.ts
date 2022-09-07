@@ -8,10 +8,86 @@ import {
   getTextAccessor,
   getTextPixelOffsetAccessor,
   OPACITY_MAP,
-  opacityToAlpha
+  opacityToAlpha,
+  SCALE_TYPE,
+  getIconUrlAccessor,
+  getIdentityAccessor
 } from './layer-map';
-import {_flatten as flatten, log} from '@deck.gl/core';
+import {_flatten as flatten, log, Accessor} from '@deck.gl/core';
 import {assert} from '../utils';
+
+type VisualChannelField = {
+  name: string;
+  type: string;
+};
+
+type VisualChannels = {
+  colorField?: VisualChannelField;
+  colorScale?: SCALE_TYPE;
+
+  customMarkersField?: VisualChannelField;
+  customMarkersScale?: SCALE_TYPE;
+
+  rotationScale?: SCALE_TYPE;
+  rotationField?: VisualChannelField;
+
+  sizeField?: VisualChannelField;
+  sizeScale?: SCALE_TYPE;
+
+  strokeColorField?: VisualChannelField;
+  strokeColorScale?: SCALE_TYPE;
+
+  heightField?: VisualChannelField;
+  heightScale?: SCALE_TYPE;
+};
+
+type ColorRange = {
+  category: string;
+  colors: string[];
+  colorMap: string[][] | undefined;
+  name: string;
+  type: string;
+};
+
+type LayerConfig = {
+  color?: number[];
+  textLabel: {
+    field: VisualChannelField;
+    alignment: unknown;
+    anchor: unknown;
+    size: unknown;
+  };
+  visConfig: {
+    filled?: boolean;
+    opacity?: number;
+
+    colorAggregation?: any;
+    colorRange: ColorRange;
+
+    customMarkers: boolean;
+    customMarkersRange?: {
+      markersMap?: {
+        value: string | null;
+        markerUrl?: string;
+      }[];
+      othersMarker?: string;
+    };
+    customMarkersUrl?: string | null;
+
+    radius?: number;
+    radiusRange?: number;
+
+    sizeAggregation?: any;
+    sizeRange?: any;
+
+    strokeColorAggregation?: any;
+    strokeOpacity?: number;
+    strokeColorRange?: ColorRange;
+
+    heightRange?: any;
+    heightAggregation?: any;
+  };
+};
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
@@ -152,8 +228,25 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
+function getMaxMarkerSize(config: LayerConfig, visualChannels: VisualChannels): number {
+  // Layer config
+  const {visConfig} = config;
+  const {sizeField} = visualChannels;
+  const {radiusRange, radius} = visConfig;
+  return Math.ceil(radiusRange && sizeField ? radiusRange[1] : radius ? radius : 8);
+}
+
+export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, number> {
+  return typeof accessor === 'function' ? (d, i) => -accessor(d, i) : -accessor;
+}
+
 /* eslint-disable complexity, max-statements */
-function createChannelProps(visualChannels, type, config, data) {
+function createChannelProps(
+  visualChannels: VisualChannels,
+  type: string,
+  config: LayerConfig,
+  data
+) {
   const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
     visualChannels;
   let {heightField, heightScale} = visualChannels;
@@ -162,7 +255,7 @@ function createChannelProps(visualChannels, type, config, data) {
     heightScale = sizeScale;
   }
   const {textLabel, visConfig} = config;
-  const result: Record<string, any> = {};
+  let result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
 
   if (type === 'grid' || type === 'hexagon') {
@@ -179,11 +272,72 @@ function createChannelProps(visualChannels, type, config, data) {
     const {colorAggregation: aggregation, colorRange: range} = visConfig;
     result.getFillColor = getColorAccessor(
       colorField,
+      // @ts-ignore
       colorScale,
       {aggregation, range},
       visConfig.opacity,
       data
     );
+  }
+
+  if (sizeField) {
+    result.getPointRadius = getSizeAccessor(
+      sizeField,
+      // @ts-ignore
+      sizeScale,
+      visConfig.sizeAggregation,
+      visConfig.radiusRange || visConfig.sizeRange,
+      data
+    );
+  } else if (
+    visConfig.customMarkers &&
+    (Boolean(visConfig.customMarkersUrl) || visualChannels.customMarkersField)
+  ) {
+    const maxIconSize = getMaxMarkerSize(config, visualChannels);
+    const {getPointRadius, getFillColor} = result;
+    result = {
+      pointType: 'icon',
+      getIcon: getIconUrlAccessor(
+        visualChannels.customMarkersField,
+        visConfig.customMarkersUrl,
+        visConfig.customMarkersRange,
+        maxIconSize,
+        data
+      ),
+      _subLayerProps: {
+        'points-icon': {
+          loadOptions: {
+            image: {
+              type: 'imagebitmap'
+            },
+            imagebitmap: {
+              resizeWidth: maxIconSize,
+              resizeHeight: maxIconSize,
+              resizeQuality: 'high'
+            }
+          }
+        }
+      }
+    };
+
+    if (getFillColor) {
+      result.getIconColor = getFillColor;
+    } else if (config.color) {
+      result.getIconColor = config.color;
+    }
+
+    if (getPointRadius) {
+      result.getIconSize = getPointRadius;
+    } else if (visConfig.radius) {
+      result.getIconSize = visConfig.radius;
+    }
+
+    if (visualChannels.rotationField) {
+      result.getIconAngle = negateAccessor(
+        getIdentityAccessor(visualChannels.rotationField.name, null, data)
+      );
+    }
+    return result;
   }
 
   if (strokeColorField) {
@@ -193,7 +347,9 @@ function createChannelProps(visualChannels, type, config, data) {
     const {strokeColorAggregation: aggregation, strokeColorRange: range} = visConfig;
     result.getLineColor = getColorAccessor(
       strokeColorField,
+      // @ts-ignore
       strokeColorScale,
+      // @ts-ignore
       {aggregation, range},
       opacity,
       data
@@ -202,21 +358,14 @@ function createChannelProps(visualChannels, type, config, data) {
   if (heightField) {
     result.getElevation = getSizeAccessor(
       heightField,
+      // @ts-ignore
       heightScale,
       visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
       data
     );
   }
-  if (sizeField) {
-    result.getPointRadius = getSizeAccessor(
-      sizeField,
-      sizeScale,
-      visConfig.sizeAggregation,
-      visConfig.radiusRange || visConfig.sizeRange,
-      data
-    );
-  }
+
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField, data);
     result.pointType = 'text';

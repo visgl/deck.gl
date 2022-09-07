@@ -268,7 +268,7 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
-export function opacityToAlpha(opacity) {
+export function opacityToAlpha(opacity?: number) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
@@ -335,6 +335,66 @@ export function getColorAccessor(
     const propertyValue = properties[accessorKeys[0]];
     const {r, g, b} = rgb(scale(propertyValue));
     return [r, g, b, propertyValue === null ? 0 : alpha];
+  };
+  return normalizeAccessor(accessor, data);
+}
+
+const FALLBACK_ICON =
+  'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiLz4NCjwvc3ZnPg==';
+
+export function getIconUrlAccessor(
+  field: any,
+  fallbackUrl: string | null | undefined,
+  range: any,
+  maxIconSize: number,
+  data: any
+) {
+  const urlToUnpackedIcon = (url: string) => ({
+    id: `${url}@@${maxIconSize}`,
+    url,
+    width: maxIconSize,
+    height: maxIconSize,
+    mask: true
+  });
+  let unknownValue = fallbackUrl || FALLBACK_ICON;
+
+  if (range?.othersMarker) {
+    unknownValue = range.othersMarker;
+  }
+
+  const unknownIcon = urlToUnpackedIcon(unknownValue);
+  if (!range || !field) {
+    return () => unknownIcon;
+  }
+
+  const mapping = new Map();
+  for (const {value, markerUrl} of range.markerMap) {
+    if (markerUrl) {
+      mapping.set(value, urlToUnpackedIcon(markerUrl));
+    }
+  }
+
+  const scale = scaleOrdinal()
+    .domain(Array.from(mapping.keys()))
+    .range(Array.from(mapping.values()))
+    .unknown(unknownIcon);
+
+  const accessor = properties => {
+    // TODO: i don't think markers suppoer spatial indexes
+    const propertyValue = properties[field.name];
+    return scale(propertyValue);
+  };
+  return normalizeAccessor(accessor, data);
+}
+
+export function getIdentityAccessor(name, aggregation, data) {
+  const accessorKeys = getAccessorKeys(name, aggregation);
+  const accessor = properties => {
+    // TODO: i don't think markers suppoer spatial indexes
+    // if (!(accessorKeys[0] in properties)) {
+    //   accessorKeys = findAccessorKey(accessorKeys, properties);
+    // }
+    return properties[accessorKeys[0]] || 0;
   };
   return normalizeAccessor(accessor, data);
 }
