@@ -153,10 +153,7 @@ class CartoPKCE:
             prompt = "Enter the URL you were redirected to: "
         else:
             url = self.get_authorize_url()
-            prompt = (
-                "Go to the following URL: {}\n"
-                "Enter the URL you were redirected to: ".format(url)
-            )
+            prompt = "Go to the following URL:\n{}\nEnter the Access Code: ".format(url)
         response = self._input(prompt)
         if "code=" in response:
             state, code = self.parse_auth_response_url(response)
