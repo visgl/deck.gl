@@ -14,7 +14,6 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
-import {colorBins, colorCategories, colorContinuous} from "@deck.gl/carto";
 
 function extractClasses(library = {}) {
   // Extracts exported class constructors as a dictionary from a library
@@ -26,6 +25,16 @@ function extractClasses(library = {}) {
   return classesDict;
 }
 
+function extractFunctions(library = {}) {
+  // Extracts functions as a dictionary from a library
+  const functionsDict = {};
+  const functions = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_');
+  for (const fun of functions) {
+    functionsDict[fun] = library[fun];
+  }
+  return functionsDict;
+}
+
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
   classes: extractClasses(deck),
@@ -33,9 +42,7 @@ const jsonConverterConfiguration = {
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
     GL: GLConstants
-  },
-  // Adding the carto-color functions by default on the json converter
-  functions: {colorBins, colorCategories, colorContinuous}
+  }
 };
 
 registerLoaders([CSVLoader]);
@@ -46,7 +53,8 @@ const jsonConverter = new deck.JSONConverter({
 
 function addModuleToConverter(module, converter) {
   const newConfiguration = {
-    classes: extractClasses(module)
+    classes: extractClasses(module),
+    functions: extractFunctions(module)
   };
   converter.mergeConfiguration(newConfiguration);
 }
@@ -180,10 +188,15 @@ function createDeck({
   jsonInput,
   tooltip,
   handleEvent,
-  customLibraries
+  customLibraries,
+  configuration
 }) {
   let deckgl;
   try {
+    if (configuration) {
+      jsonConverter.mergeConfiguration(configuration);
+    }
+
     const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
 
