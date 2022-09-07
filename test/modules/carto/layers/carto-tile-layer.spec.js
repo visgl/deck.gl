@@ -1,5 +1,4 @@
 import test from 'tape-promise/tape';
-import {MVTLayer} from '@deck.gl/geo-layers';
 import {_CartoTileLayer as CartoTileLayer} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {testPickingLayer} from '../../layers/test-picking-layer';
