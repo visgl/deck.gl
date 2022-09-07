@@ -1,6 +1,6 @@
 /* global document */
 import GL from '@luma.gl/constants';
-import {Texture2D, copyToTexture, cloneTextureFrom} from '@luma.gl/core';
+import {Texture2D, copyToTexture} from '@luma.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
@@ -98,11 +98,16 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-function resizeTexture(texture: Texture2D, width: number, height: number): Texture2D {
+function resizeTexture(
+  texture: Texture2D,
+  width: number,
+  height: number,
+  parameters: any
+): Texture2D {
   const oldWidth = texture.width;
   const oldHeight = texture.height;
 
-  const newTexture = cloneTextureFrom(texture, {width, height});
+  const newTexture = new Texture2D(texture.gl, {width, height, parameters});
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
@@ -385,12 +390,17 @@ export default class IconManager {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
           height: this._canvasHeight,
-          parameters: this._textureParameters ?? DEFAULT_TEXTURE_PARAMETERS
+          parameters: this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
         });
       }
 
       if (this._texture.height !== this._canvasHeight) {
-        this._texture = resizeTexture(this._texture, this._canvasWidth, this._canvasHeight);
+        this._texture = resizeTexture(
+          this._texture,
+          this._canvasWidth,
+          this._canvasHeight,
+          this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
+        );
       }
 
       this.onUpdate();
