@@ -49,15 +49,15 @@ varying vec2 mask_texCoords;
   'fs:#decl': `
 varying vec2 mask_texCoords;
 `,
-  'fs:#main-start': `
+  'fs:#main-end': `
   if (mask_enabled) {
     bool mask = mask_isInBounds(mask_texCoords);
 
     // Debug: show extent of render target
-    // gl_FragColor = vec4(mask_texCoords, 0.0, 1.0);
-    gl_FragColor = texture2D(mask_texture, mask_texCoords);
+    gl_FragColor = vec4(mask_texCoords, 0.0, 1.0);
+    // gl_FragColor = vec4(1.0);
 
-    if (!mask) discard;
+    // if (!mask) discard;
   }
 `
 };

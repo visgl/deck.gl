@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, UpdateParameters} from '@luma.gl/core';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
@@ -39,7 +39,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   static layerName = 'TriangleLayer';
 
   getShaders() {
-    return {vs, fs, modules: [project32]};
+    return super.getShaders({vs, fs, modules: [project32]});
+    // return {vs, fs, modules: [project32]};
   }
 
   initializeState({gl}: LayerContext): void {
@@ -51,6 +52,16 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     this.setState({
       model: this._getModel(gl)
     });
+  }
+
+  updateState(opts: UpdateParameters<this>) {
+    super.updateState(opts);
+    const {changeFlags} = opts;
+    if (changeFlags.extensionsChanged) {
+      this.setState({
+        model: this._getModel(opts.context.gl)
+      });
+    }
   }
 
   _getModel(gl: WebGLRenderingContext): Model {
@@ -75,9 +86,9 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     model
       .setUniforms({
         ...uniforms,
-        texture,
-        maxTexture,
         colorTexture,
+        texture, // <---- PROBLEM (put second to avoid warning :/)
+        maxTexture,
         intensity,
         threshold,
         aggregationMode,

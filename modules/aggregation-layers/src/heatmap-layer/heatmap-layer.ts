@@ -276,6 +276,14 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       colorTexture,
       colorDomain
     } = this.state;
+    console.log(
+      'weightsTexture',
+      weightsTexture.textureUnit,
+      'maxWeightsTexture',
+      maxWeightsTexture.textureUnit,
+      'colorTexture',
+      colorTexture.textureUnit
+    );
     const {updateTriggers, intensity, threshold, aggregation} = this.props;
 
     const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
@@ -299,7 +307,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
         maxTexture: maxWeightsTexture,
         colorTexture,
         aggregationMode: AGGREGATION_MODE[aggregation] || 0,
-        texture: weightsTexture,
+        texture: weightsTexture, /// <-- PROBLEM
         intensity,
         threshold,
         colorDomain

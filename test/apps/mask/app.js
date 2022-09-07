@@ -6,6 +6,7 @@ import DeckGL from '@deck.gl/react';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
@@ -154,26 +155,14 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         getPolygon: d => d
       }),
       // Boundary around USA (masked by selected state)
-      new SolidPolygonLayer({
-        id: 'masked-layer',
-        data: [{polygon: rectangle}],
-        getFillColor: [...TARGET_COLOR, 200],
-        maskId: maskEnabled && 'mask',
-        extensions: [new MaskExtension()]
-      }),
-      new MVTLayer({
-        id: 'mvt-layer',
-        data: 'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
-        maskId: maskEnabled && 'mask',
-        extensions: [new MaskExtension()],
-        maxZoom: 14,
-        getFillColor: [255, 255, 255],
-        getLineColor: [192, 192, 192],
-        getLineWidth: 1,
-        getPointRadius: 2,
-        lineWidthUnits: 'pixels',
-        pointRadiusUnits: 'pixels'
-      }),
+      false &&
+        new SolidPolygonLayer({
+          id: 'masked-layer',
+          data: [{polygon: rectangle}],
+          getFillColor: [...TARGET_COLOR, 200],
+          maskId: maskEnabled && 'mask',
+          extensions: [new MaskExtension()]
+        }),
       // US states (used to select & define masks)
       new GeoJsonLayer({
         id: 'us-states',
@@ -191,54 +180,25 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
       }),
       // Rings around target (clipped by mask)
       new ScatterplotLayer({
-        id: 'targets-ring',
-        data: targets,
-        lineWidthMinPixels: 2,
-        filled: true,
-        stroked: true,
-        radiusScale: 100000,
-        getFillColor: [255, 255, 255, 150],
-        getLineColor: [0, 0, 0, 100],
-        parameters: {depthTest: false},
-        extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask2',
-        maskByInstance: false
-      }),
-      new ScatterplotLayer({
         id: 'sources',
         data: sources,
         radiusScale: 3000,
+        radiusMinPixels: 10,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
         maskId: maskEnabled && 'mask2'
       }),
-      new ScatterplotLayer({
-        id: 'targets',
-        data: targets,
-        pickable: true,
-        onClick: ({object}) => {
-          console.log(object);
-        },
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 150],
-        radiusScale: 3000,
-        getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask2'
-      }),
-      new ArcLayer({
-        id: 'arc',
-        data: arcs,
-        getWidth: strokeWidth,
-        opacity: 0.7,
-        getSourcePosition: d => d.source,
-        getTargetPosition: d => d.target,
-        getSourceColor: SOURCE_COLOR,
-        getTargetColor: TARGET_COLOR,
-        extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask',
-        maskByInstance: true
-      })
+      false &&
+        new HeatmapLayer({
+          id: 'sources-heatmap',
+          data: sources,
+          radiusMinPixels: 10,
+          getPosition: d => d.position,
+          getWeight: d => Math.abs(d.gain),
+          extensions: maskEnabled ? [new MaskExtension()] : [],
+          maskId: maskEnabled && 'mask2',
+          maskByInstance: false
+        })
     ];
 
   return (
