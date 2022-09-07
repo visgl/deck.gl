@@ -7,6 +7,8 @@ import requests as requests
 from pydeck_carto.carto_auth.errors import CredentialsError
 from pydeck_carto.carto_auth.oauth2 import CartoPKCE
 
+DEFAULT_API_BASE_URL = "https://gcp-us-east1.api.carto.com"
+
 
 class CartoAuth:
     """Carto Authentication object used to gather connect with the carto services
@@ -31,7 +33,7 @@ class CartoAuth:
         self,
         client_id=None,
         client_secret=None,
-        api_base_url="https://gcp-us-east1.api.carto.com",
+        api_base_url=DEFAULT_API_BASE_URL,
         access_token=None,
         expires_in=None,
         cache_filepath=".carto_token.json",
@@ -195,6 +197,8 @@ class CartoAuth:
             info = json.load(fr)
             self._access_token = info["accessToken"]
             self.expiration_ts = info["expiresTS"]
+        if self.token_expired():
+            return False
 
         return True
 
@@ -209,10 +213,19 @@ class CartoAuth:
     @classmethod
     def from_oauth(
         cls,
-        api_base_url="https://gcp-us-east1.api.carto.com",
-        cache_filepath=".carto_token.json",
         open_browser=True,
+        api_base_url=DEFAULT_API_BASE_URL,
+        cache_filepath=".carto_token.json",
+        using_cache=True,
     ):
+        if using_cache and cache_filepath:
+            try:
+                return CartoAuth(
+                    api_base_url=api_base_url, cache_filepath=cache_filepath
+                )
+            except CredentialsError:
+                print("Unable to get the cached token, requesting it via oauth")
+
         pkce_auth = CartoPKCE(open_browser=open_browser)
         code = pkce_auth.get_auth_response()
         token_info = pkce_auth.get_token_info(code)

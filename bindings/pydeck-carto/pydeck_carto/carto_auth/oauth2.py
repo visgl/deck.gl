@@ -4,6 +4,8 @@ import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qsl
 import requests
+import secrets
+import random
 import logging
 from urllib.parse import urlparse, urlencode
 
@@ -34,59 +36,32 @@ class CartoPKCE:
 
     def __init__(
         self,
-        state=None,
-        proxies=None,
         open_browser=True,
-        requests_session=None,
-        requests_timeout=None,
     ):
         """
         Creates PKCE Auth flow.
 
         Parameters:
-             * state: Optional
-             * proxies: Optional, proxy for the Requests library to route through
-             * requests_timeout: Optional, tell Requests to stop waiting for a
-                                 response after a given number of seconds
              * open_browser: Optional, whether the web browser should be opened to
                              authorize a user
         """
-        using_google_colab = 'google.colab' in sys.modules
-        if using_google_colab and open_browser:
-            raise ValueError("open_browser=True can't be used on Google Colab")
-
-        self._session = requests_session or requests.Session()
+        self._session = requests.Session()
         self.client_id = self.CLIENT_ID
         self.redirect_uri = self.REDIRECT_URI if open_browser else self.REDIRECT_URI_CLI
-        self.state = state
-        self.proxies = proxies
-        self.requests_timeout = requests_timeout
 
         self._code_challenge_method = "S256"
         self.code_verifier = None
         self.code_challenge = None
         self.authorization_code = None
-        self.open_browser = open_browser
+
+        using_google_colab = "google.colab" in sys.modules
+        self.open_browser = False if using_google_colab else open_browser
 
     @staticmethod
     def _get_code_verifier():
         """Auth PCKE code verifier"""
-        import random
-
         length = random.randint(33, 96)
-        try:
-            import secrets
-
-            verifier = secrets.token_urlsafe(length)
-        except ImportError:  # For python 3.5 support
-            import base64
-            import os
-
-            rand_bytes = os.urandom(length)
-            verifier = (
-                base64.urlsafe_b64encode(rand_bytes).decode("utf-8").replace("=", "")
-            )
-        return verifier
+        return secrets.token_urlsafe(length)
 
     def _get_code_challenge(self):
         """Auth PCKE code challenge"""
@@ -125,8 +100,6 @@ class CartoPKCE:
             "code_challenge_method": self._code_challenge_method,
             "code_challenge": self.code_challenge,
         }
-        if state is None:
-            state = self.state
         if state is not None:
             payload["state"] = state
         urlparams = urlencode(payload)
@@ -160,9 +133,6 @@ class CartoPKCE:
         self._open_auth_url()
         server.handle_request()
 
-        if self.state is not None and server.state != self.state:
-            raise CredentialsError(self.state, server.state)
-
         if server.auth_code is not None:
             return server.auth_code
         elif server.error is not None:
@@ -188,15 +158,17 @@ class CartoPKCE:
                 "Enter the URL you were redirected to: ".format(url)
             )
         response = self._input(prompt)
-        state, code = self.parse_auth_response_url(response)
-        if self.state is not None and self.state != state:
-            raise CredentialsError(self.state, state)
+        if "code=" in response:
+            state, code = self.parse_auth_response_url(response)
+        else:
+            # just in case the user just copy and paste the access code from the button
+            code = response
         return code
 
     def get_authorization_code(self, response=None):
         if response:
             return self.parse_response_code(response)
-        return self._get_auth_response()
+        return self.get_auth_response()
 
     def get_pkce_handshake_parameters(self):
         self.code_verifier = self._get_code_verifier()
@@ -231,8 +203,6 @@ class CartoPKCE:
                 data=payload,
                 headers=headers,
                 verify=True,
-                proxies=self.proxies,
-                timeout=self.requests_timeout,
             )
             response.raise_for_status()
             token_info = response.json()
@@ -288,7 +258,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 
 def start_local_http_server(port, handler=RequestHandler):
-    server = HTTPServer(("127.0.0.1", port), handler)
+    server = HTTPServer(("localhost", port), handler)
     server.allow_reuse_address = True
     server.auth_code = None
     server.auth_token_form = None
