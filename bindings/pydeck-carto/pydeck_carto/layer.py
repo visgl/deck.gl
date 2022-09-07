@@ -32,24 +32,23 @@ class CartoColor(pdk.types.Function):
 
     def __init__(self, attr: str, domain: list, colors: str):
         if self.function_name is None:
-            raise NotImplemented('Specify the function_name of the class')
+            raise NotImplemented("Specify the function_name of the class")
 
-        super(CartoColor, self).__init__(self.function_name,
-                                         **{'attr': attr,
-                                            'domain': domain,
-                                            'colors': colors})
+        super(CartoColor, self).__init__(
+            self.function_name, **{"attr": attr, "domain": domain, "colors": colors}
+        )
 
 
 class CartoColorBins(CartoColor):
-    function_name = 'colorBins'
+    function_name = "colorBins"
 
 
 class CartoColorCategories(CartoColor):
-    function_name = 'colorCategories'
+    function_name = "colorCategories"
 
 
 class CartoColorContinuous(CartoColor):
-    function_name = 'colorContinuous'
+    function_name = "colorContinuous"
 
 
 def register_carto_layer():
