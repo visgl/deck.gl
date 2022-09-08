@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.10] - Sep 8 2022
+
+- CARTO: Support fields when parsing CartoVectorTiles (#7248, #7194)
+- CARTO: CartoTileLayer picking coordinates correct (#7242)
+- Support dynamic functions in configuration (#7253)
+- CARTO fetchMap fix: parametrized queries are not working (#7238)
+- Use correct parameters when resizing icon atlas (#7232)
+
 #### deck.gl [8.8.9] - Aug 22 2022
 
 - Fix controller bug when view props change (#7208)
