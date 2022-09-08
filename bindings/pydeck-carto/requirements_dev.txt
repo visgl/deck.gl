@@ -7,3 +7,4 @@ tokenize-rt>=3.2.0
 twine==4.0.0
 pytest==7.1.2
 requests-mock==1.9.3
+pytest-mock==3.8.2

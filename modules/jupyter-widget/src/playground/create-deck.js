@@ -15,19 +15,22 @@ import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
 
-function extractClasses(library = {}) {
-  // Extracts exported class constructors as a dictionary from a library
-  const classesDict = {};
-  const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
-  for (const cls of classes) {
-    classesDict[cls] = library[cls];
+const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
+const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
+
+function extractElements(library = {}, filter) {
+  // Extracts exported elements as a dictionary from a library
+  const dict = {};
+  const elements = Object.keys(library).filter(filter);
+  for (const el of elements) {
+    dict[el] = library[el];
   }
-  return classesDict;
+  return dict;
 }
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractClasses(deck),
+  classes: extractElements(deck, classesFilter),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
@@ -43,7 +46,8 @@ const jsonConverter = new deck.JSONConverter({
 
 function addModuleToConverter(module, converter) {
   const newConfiguration = {
-    classes: extractClasses(module)
+    classes: extractElements(module, classesFilter),
+    functions: extractElements(module, functionsFilter)
   };
   converter.mergeConfiguration(newConfiguration);
 }
@@ -177,10 +181,15 @@ function createDeck({
   jsonInput,
   tooltip,
   handleEvent,
-  customLibraries
+  customLibraries,
+  configuration
 }) {
   let deckgl;
   try {
+    if (configuration) {
+      jsonConverter.mergeConfiguration(configuration);
+    }
+
     const oldLayers = jsonInput.layers || [];
     const props = jsonConverter.convert(jsonInput);
 
