@@ -2,9 +2,9 @@
    :class: logo
    :target: /
 
-| High-scale spatial rendering in Python, using CARTO information and powered by `deck.gl <https://deck.gl/#/>`__.
+| Wrapper of `Pydeck <https://pydeck.gl/index.html>`_ to use CARTO information and powered by `deck.gl <https://deck.gl/#/>`_.
 
-Get started by `installing pydeck-carto <installation.html>`__.
+Get started by `installing pydeck-carto <installation.html>`_.
 
 Index
 ^^^^^
