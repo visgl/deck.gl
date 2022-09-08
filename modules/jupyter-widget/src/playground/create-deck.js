@@ -22,8 +22,8 @@ function extractElements(library = {}, filter) {
   // Extracts exported elements as a dictionary from a library
   const dict = {};
   const elements = Object.keys(library).filter(filter);
-  for (const cls of elements) {
-    dict[cls] = library[cls];
+  for (const el of elements) {
+    dict[el] = library[el];
   }
   return dict;
 }
