@@ -47,6 +47,7 @@ export type CustomMarkersRange = {
 export type VisConfig = {
   filled?: boolean;
   opacity?: number;
+  enable3d?: boolean;
 
   colorAggregation?: any;
   colorRange: ColorRange;
@@ -55,8 +56,8 @@ export type VisConfig = {
   customMarkersRange?: CustomMarkersRange | null;
   customMarkersUrl?: string | null;
 
-  radius?: number;
-  radiusRange?: number;
+  radius: number;
+  radiusRange?: number[];
 
   sizeAggregation?: any;
   sizeRange?: any;
@@ -79,6 +80,7 @@ export type TextLabel = {
 };
 
 export type MapLayerConfig = {
+  columns?: Record<string, any>;
   color?: number[];
   label?: string;
   dataId: string;
@@ -95,4 +97,12 @@ export type MapConfigLayer = {
   id: string;
   config: MapLayerConfig;
   visualChannels: VisualChannels;
+};
+
+export type MapDataset = {
+  id: string;
+  data: any;
+  aggregationExp: string | null;
+  aggregationResLevel: number | null;
+  geoColumn: string;
 };

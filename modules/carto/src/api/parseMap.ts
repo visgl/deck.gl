@@ -10,11 +10,12 @@ import {
   OPACITY_MAP,
   opacityToAlpha,
   getIconUrlAccessor,
-  getIdentityAccessor
+  negateAccessor,
+  getMaxMarkerSize
 } from './layer-map';
-import {_flatten as flatten, log, Accessor} from '@deck.gl/core';
+import {_flatten as flatten, log} from '@deck.gl/core';
 import {assert} from '../utils';
-import {MapTextSubLayerConfig, VisualChannels} from './types';
+import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
@@ -33,7 +34,7 @@ export function parseMap(json) {
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
-        const dataset = datasets.find(d => d.id === dataId);
+        const dataset: MapDataset | null = datasets.find(d => d.id === dataId);
         assert(dataset, `No dataset matching dataId: ${dataId}`);
         const {data} = dataset;
         assert(data, `No data loaded for dataId: ${dataId}`);
@@ -131,7 +132,7 @@ function mapProps(source, target, mapping) {
   }
 }
 
-function createStyleProps(config, mapping) {
+function createStyleProps(config: MapTextSubLayerConfig, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
 
@@ -153,18 +154,6 @@ function createStyleProps(config, mapping) {
 
   result.highlightColor = config.visConfig.enable3d ? [255, 255, 255, 60] : [252, 242, 26, 255];
   return result;
-}
-
-function getMaxMarkerSize(config: MapTextSubLayerConfig, visualChannels: VisualChannels): number {
-  // Layer config
-  const {visConfig} = config;
-  const {radiusField} = visualChannels;
-  const {radiusRange, radius} = visConfig;
-  return Math.ceil(radiusRange && radiusField ? radiusRange[1] : radius ? radius : 8);
-}
-
-export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, number> {
-  return typeof accessor === 'function' ? (d, i) => -accessor(d, i) : -accessor;
 }
 
 /* eslint-disable complexity, max-statements */
@@ -190,7 +179,7 @@ function createChannelProps(
     heightScale = sizeScale;
   }
   const {textLabel, visConfig} = config;
-  let result: Record<string, any> = {};
+  const result: Record<string, any> = {};
   const textLabelField = textLabel && textLabel.field;
 
   if (type === 'grid' || type === 'hexagon') {
@@ -227,58 +216,6 @@ function createChannelProps(
     );
   }
 
-  if (
-    !textLabelField &&
-    visConfig.customMarkers &&
-    (Boolean(visConfig.customMarkersUrl) || visualChannels.customMarkersField)
-  ) {
-    const maxIconSize = getMaxMarkerSize(config, visualChannels);
-    const {getPointRadius, getFillColor} = result;
-    result = {
-      pointType: 'icon',
-      getIcon: getIconUrlAccessor(
-        visualChannels.customMarkersField,
-        visConfig.customMarkersUrl,
-        visConfig.customMarkersRange,
-        maxIconSize,
-        data
-      ),
-      _subLayerProps: {
-        'points-icon': {
-          loadOptions: {
-            image: {
-              type: 'imagebitmap'
-            },
-            imagebitmap: {
-              resizeWidth: maxIconSize,
-              resizeHeight: maxIconSize,
-              resizeQuality: 'high'
-            }
-          }
-        }
-      }
-    };
-
-    if (getFillColor) {
-      result.getIconColor = getFillColor;
-    } else if (config.color) {
-      result.getIconColor = config.color;
-    }
-
-    if (getPointRadius) {
-      result.getIconSize = getPointRadius;
-    } else if (visConfig.radius) {
-      result.getIconSize = visConfig.radius;
-    }
-
-    if (visualChannels.rotationField) {
-      result.getIconAngle = negateAccessor(
-        getIdentityAccessor(visualChannels.rotationField.name, null, data)
-      );
-    }
-    return result;
-  }
-
   if (strokeColorField) {
     const fallbackOpacity = type === 'point' ? visConfig.opacity : 1;
     const opacity =
@@ -311,6 +248,45 @@ function createChannelProps(
     result.pointType = 'text';
     const radius = result.getPointRadius || visConfig.radius;
     result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
+  } else if (visConfig.customMarkers) {
+    const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
+    const {getPointRadius, getFillColor} = result;
+    result.pointType = 'icon';
+    result.getIcon = getIconUrlAccessor(
+      visualChannels.customMarkersField,
+      visConfig.customMarkersUrl,
+      visConfig.customMarkersRange,
+      maxIconSize,
+      data
+    );
+    result._subLayerProps = {
+      'points-icon': {
+        loadOptions: {
+          image: {
+            type: 'imagebitmap'
+          },
+          imagebitmap: {
+            resizeWidth: maxIconSize,
+            resizeHeight: maxIconSize,
+            resizeQuality: 'high'
+          }
+        }
+      }
+    };
+
+    if (getFillColor) {
+      result.getIconColor = getFillColor;
+    }
+
+    if (getPointRadius) {
+      result.getIconSize = getPointRadius;
+    }
+
+    if (visualChannels.rotationField) {
+      result.getIconAngle = negateAccessor(
+        getSizeAccessor(visualChannels.rotationField, undefined, null, undefined, data)
+      );
+    }
   }
 
   return result;

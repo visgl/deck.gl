@@ -365,13 +365,12 @@
           "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
           "autoHighlight": true,
           "pickable": true,
-          "getFillColor": [18, 147, 154, 172],
+          "getIconColor": [18, 147, 154],
           "visible": true,
           "cartoLabel": "Stores",
           "filled": true,
-          "getLineColor": [232, 250, 250, 255],
           "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
+          "getIconSize": 20.2,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "pointType": "icon",
@@ -388,9 +387,7 @@
                 }
               }
             }
-          },
-          "getIconColor": [18, 147, 154],
-          "getIconSize": 20.2
+          }
         }
       },
       {
@@ -519,13 +516,12 @@
           "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
           "autoHighlight": true,
           "pickable": true,
-          "getFillColor": [18, 147, 154, 172],
+          "getIconColor": [18, 147, 154],
           "visible": true,
           "cartoLabel": "Stores",
           "filled": true,
-          "getLineColor": [232, 250, 250, 255],
           "getLineWidth": 4.5,
-          "getPointRadius": 32,
+          "getIconSize": 32,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "pointType": "icon",
@@ -542,9 +538,7 @@
                 }
               }
             }
-          },
-          "getIconColor": [18, 147, 154],
-          "getIconSize": 32
+          }
         }
       }
     ]
