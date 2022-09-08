@@ -67,6 +67,21 @@ class IntsReader {
   }
 }
 
+// Fields ========================================
+
+interface Fields {
+  id: number;
+}
+
+class FieldsReader {
+  static read(pbf, end?: number): Fields {
+    return pbf.readFields(FieldsReader._readField, {id: 0}, end);
+  }
+  static _readField(this: void, tag: number, obj: Fields, pbf) {
+    if (tag === 1) obj.id = pbf.readVarint();
+  }
+}
+
 // NumericProp ========================================
 
 export interface NumericProp {
@@ -106,13 +121,21 @@ interface Points {
   featureIds: Ints;
   properties: KeyValueProperties[];
   numericProps: Record<string, NumericProp>;
+  fields: Fields[];
 }
 
 class PointsReader {
   static read(pbf, end?: number): Points {
     return pbf.readFields(
       PointsReader._readField,
-      {positions: null, globalFeatureIds: null, featureIds: null, properties: [], numericProps: {}},
+      {
+        positions: null,
+        globalFeatureIds: null,
+        featureIds: null,
+        properties: [],
+        numericProps: {},
+        fields: []
+      },
       end
     );
   }
@@ -124,7 +147,7 @@ class PointsReader {
     else if (tag === 5) {
       const entry = NumericPropKeyValueReader.read(pbf, pbf.readVarint() + pbf.pos);
       obj.numericProps[entry.key] = entry.value;
-    }
+    } else if (tag === 6) obj.fields.push(FieldsReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
 
@@ -143,7 +166,8 @@ class LinesReader {
         globalFeatureIds: null,
         featureIds: null,
         properties: [],
-        numericProps: {}
+        numericProps: {},
+        fields: []
       },
       end
     );
@@ -157,7 +181,7 @@ class LinesReader {
     else if (tag === 6) {
       const entry = NumericPropKeyValueReader.read(pbf, pbf.readVarint() + pbf.pos);
       obj.numericProps[entry.key] = entry.value;
-    }
+    } else if (tag === 7) obj.fields.push(FieldsReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
 // Polygons ========================================
@@ -180,7 +204,8 @@ class PolygonsReader {
         primitivePolygonIndices: null,
         triangles: null,
         properties: [],
-        numericProps: {}
+        numericProps: {},
+        fields: []
       },
       end
     );
@@ -197,7 +222,7 @@ class PolygonsReader {
     else if (tag === 8) {
       const entry = NumericPropKeyValueReader.read(pbf, pbf.readVarint() + pbf.pos);
       obj.numericProps[entry.key] = entry.value;
-    }
+    } else if (tag === 9) obj.fields.push(FieldsReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
 
