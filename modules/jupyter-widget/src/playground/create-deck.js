@@ -28,7 +28,9 @@ function extractClasses(library = {}) {
 function extractFunctions(library = {}) {
   // Extracts functions as a dictionary from a library
   const functionsDict = {};
-  const functions = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_');
+  const functions = Object.keys(library).filter(
+    x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_'
+  );
   for (const fun of functions) {
     functionsDict[fun] = library[fun];
   }

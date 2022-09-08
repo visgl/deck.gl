@@ -11,7 +11,7 @@
 import assert from './utils/assert';
 import JSONConfiguration from './json-configuration';
 import {instantiateClass} from './helpers/instantiate-class';
-import { executeFunction } from './helpers/execute-function';
+import {executeFunction} from './helpers/execute-function';
 
 import {FUNCTION_IDENTIFIER, CONSTANT_IDENTIFIER, FUNCTION_KEY} from './syntactic-sugar';
 import parseJSON from './helpers/parse-json';
@@ -132,17 +132,17 @@ function convertClassInstance(json, configuration) {
 
 // Plain JS object, embed functions.
 function convertFunctionObject(json, configuration) {
-    // Extract the target function field
-    const {functionKey} = configuration;
-    const targetFunction = json[functionKey];
+  // Extract the target function field
+  const {functionKey} = configuration;
+  const targetFunction = json[functionKey];
 
-    // Prepare a props object and ensure all values have been converted
-    let props = {...json};
-    delete props[functionKey];
+  // Prepare a props object and ensure all values have been converted
+  let props = {...json};
+  delete props[functionKey];
 
-    props = convertPlainObject(props, configuration);
+  props = convertPlainObject(props, configuration);
 
-    return executeFunction(targetFunction, props, configuration);
+  return executeFunction(targetFunction, props, configuration);
 }
 
 // Plain JS object, convert each key and return.
