@@ -1,5 +1,5 @@
-Contributing to pydeck
-======================
+Contributing to pydeck-carto
+============================
 
 We encourage users to report bugs, fix them, and add features as desired.
 If you run into issues while using this guide, let us know.

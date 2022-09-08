@@ -6,9 +6,8 @@ on the pydeck gallery page
 from multiprocessing import Pool
 import os
 import subprocess
-import sys
 
-from const import DECKGL_URL_BASE, EXAMPLE_GLOB, GALLERY_DIR, HTML_DIR, HOSTED_STATIC_PATH
+from const import DECKGL_URL_BASE, GALLERY_DIR, HTML_DIR, HOSTED_STATIC_PATH, ALL_EXAMPLE_GLOB
 
 from utils import to_presentation_name, to_snake_case_string
 from templates import DOC_TEMPLATE
@@ -26,15 +25,15 @@ def create_rst(pydeck_example_file_name):
     html_fname = os.path.basename(pydeck_example_file_name).replace(".py", ".html")
     # Run the pydeck example and move the .html output
     subprocess.call(
-        "{python} {fname}; mv {html_src} {html_dest}".format(
-            python=sys.executable, fname=pydeck_example_file_name, html_src=html_fname, html_dest=HTML_DIR
-        ),
-        shell=True,
-    )
+        "mv {html_src} {html_dest}".format(html_src=html_fname, html_dest=HTML_DIR),shell=True,)
     python_code = open(pydeck_example_file_name, "r").read()
+    presentation_name = to_presentation_name(asset_name)
+    title_underline = '^' * len(presentation_name)
     doc_source = DOC_TEMPLATE.render(
-        page_title=to_presentation_name(asset_name),
+        page_title=presentation_name,
+        title_underline=title_underline,
         snake_name=asset_name,
+        asset_name=asset_name,
         python_code=python_code,
         hosted_html_path=os.path.join(HOSTED_STATIC_PATH, html_fname),
         deckgl_doc_url=deckgl_doc_url,
@@ -48,7 +47,7 @@ def create_rst(pydeck_example_file_name):
 
 def main():
     pool = Pool(processes=4)
-    candidate_files = [f for f in EXAMPLE_GLOB]
+    candidate_files = [f for f in ALL_EXAMPLE_GLOB]
     if not candidate_files:
         raise Exception("No files found to convert")
     subprocess.call("mkdir -p %s" % HTML_DIR, shell=True)

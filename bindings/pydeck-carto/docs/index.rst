@@ -6,6 +6,12 @@
 
 Get started by `installing pydeck-carto <installation.html>`_.
 
+Examples Gallery
+^^^^^^^^^^^^^^^^
+
+.. raw:: html
+   :file: gallery/html/grid.html
+
 Index
 ^^^^^
 

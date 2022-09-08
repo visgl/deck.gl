@@ -42,42 +42,15 @@ HTML_TEMPLATE = jinja2.Template(
 DOC_TEMPLATE = jinja2.Template(
     """
 {{ page_title }}
-^^^^^^^^^^^^^^^^
-
-.. raw:: html
-
-    {% if deckgl_doc_url %}
-    <a id="deck-link" target="_blank" href="{{deckgl_doc_url}}">deck.gl docs</a>
-    {% endif %}
-    <br />
-
-.. raw:: html
-   :file: ./html/{{ snake_name }}.html
-
-.. raw:: html
-
-    <style>
-   .wy-nav-content {
-        max-width: 100% !important;
-    }
-    #deck-container {
-        height: 50vh;
-        width: 100%;
-    }
-    #deck-link {
-        float: right;
-        position: relative;
-        top: -20px;
-    }
-    </style>
-
-Source
-------
+{{ title_underline }} 
 
 .. code-block:: python
 
 {{ python_code|indent(4, True) }}
 
+.. image:: images/manual/{{asset_name}}.png
+   :width: 500
+   :align: center
 """
 )
 

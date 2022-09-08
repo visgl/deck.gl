@@ -40,11 +40,11 @@ async def snap(fname):
     html_fname = os.path.join(HTML_DIR, os.path.splitext(os.path.basename(fname))[0] + ".html")
     png_fname = os.path.join(LOCAL_IMAGE_DIR, os.path.splitext(os.path.basename(fname))[0] + ".png")
     fpath = "file://%s" % html_fname
-    if html_fname.replace(".html", "") in LARGE_EXAMPLES:
+    if html_fname.replace(".html", "") in LARGE_EXAMPLES or True:
         await page.goto(fpath)
-        await asyncio.sleep(10)
+        await asyncio.sleep(20)
     else:
-        await page.goto(fpath, waitUntil=["load", "networkidle2", "networkidle0"], timeout=30000)
+        await page.goto(fpath, waitUntil=["load", "networkidle2", "networkidle0"], timeout=60000)
     await page.screenshot({"path": png_fname})
     print("[info] Sucessfully converted %s to a png at %s" % (fname, png_fname))
     await browser.close()

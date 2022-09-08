@@ -13,7 +13,7 @@ gallery_examples = sorted([to_snake_case_string(file_name=gallery_example) for g
 
 def create_grid():
     doc_source = HTML_TEMPLATE.render(gallery_examples=gallery_examples, to_presentation_name=to_presentation_name)
-    with open(os.path.join(HTML_DIR, "grid.html"), "w+") as f:
+    with open(os.path.join(here, '../gallery/html/grid.html'), "w") as f:
         f.write(doc_source)
 
 
