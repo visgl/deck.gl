@@ -15,7 +15,7 @@ class Function(PydeckType):
     **kwargs
         arguments and value of each argument to be storing the function information
     """
-    __PREFIX = '@@function'
+    __KEY = '@@function'
 
     def __init__(self, name: str, **kwargs):
         self.name = name
@@ -27,12 +27,9 @@ class Function(PydeckType):
     def __eq__(self, other):
         return str(self) == str(other)
 
-    def __repr__(self):
-        return self.to_deck()
-
-    def to_deck(self):
-        deck_fun = {
-            self.__PREFIX: self.name
+    def serialize(self):
+        repr = {
+            self.__KEY: self.name
         }
-        deck_fun.update(self.arguments)
-        return deck_fun
+        repr.update(self.arguments)
+        return repr

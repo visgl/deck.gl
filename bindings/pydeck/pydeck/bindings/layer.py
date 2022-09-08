@@ -106,7 +106,7 @@ class Layer(JSONMixin):
                             array_as_str += "{}, ".format(identifier)
                     kwargs[k] = "{}[{}]".format(FUNCTION_IDENTIFIER, array_as_str)
                 elif isinstance(v, Function):
-                    kwargs[k] = v.to_deck()
+                    kwargs[k] = v.serialize()
 
             self.__dict__.update(kwargs)
 

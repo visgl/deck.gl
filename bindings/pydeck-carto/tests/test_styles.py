@@ -1,18 +1,19 @@
-from pydeck_carto.layer import (
-    CartoColorBins,
-    CartoColorCategories,
-    CartoColorContinuous,
+from pydeck_carto import (
+    color_bins,
+    color_categories,
+    color_continuous,
 )
 
 
 def test_color_bins():
-    assert CartoColorBins(
+    assert color_bins(
         attr="pct_higher_ed", domain=[0, 20, 30, 40, 50, 60, 70], colors="PinkYl"
-    ).to_deck() == {
+    ).serialize() == {
         "@@function": "colorBins",
         "attr": "pct_higher_ed",
         "domain": [0, 20, 30, 40, 50, 60, 70],
         "colors": "PinkYl",
+        "nullColor": [204, 204, 204],
     }
 
 
@@ -31,24 +32,27 @@ def test_color_categories():
         "Industrial and Manufacturing",
     ]
 
-    assert CartoColorCategories(
+    assert color_categories(
         attr="landuse_type", domain=domain_values, colors="Bold"
-    ).to_deck() == {
+    ).serialize() == {
         "@@function": "colorCategories",
         "attr": "landuse_type",
         "domain": domain_values,
         "colors": "Bold",
+        "nullColor": [204, 204, 204],
+        "othersColor": [119, 119, 119],
     }
 
 
 def test_color_continuous():
     domain_values = [70, 75, 80, 85, 90, 95, 100]
 
-    assert CartoColorContinuous(
+    assert color_continuous(
         attr="value", domain=domain_values, colors="BluYl"
-    ).to_deck() == {
+    ).serialize() == {
         "@@function": "colorContinuous",
         "attr": "value",
         "domain": domain_values,
         "colors": "BluYl",
+        "nullColor": [204, 204, 204],
     }
