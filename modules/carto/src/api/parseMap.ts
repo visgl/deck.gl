@@ -28,6 +28,9 @@ type VisualChannels = {
   customMarkersField?: VisualChannelField;
   customMarkersScale?: SCALE_TYPE;
 
+  radiusField?: VisualChannelField;
+  radiusScale?: SCALE_TYPE;
+
   rotationScale?: SCALE_TYPE;
   rotationField?: VisualChannelField;
 
@@ -231,9 +234,9 @@ function createStyleProps(config, mapping) {
 function getMaxMarkerSize(config: LayerConfig, visualChannels: VisualChannels): number {
   // Layer config
   const {visConfig} = config;
-  const {sizeField} = visualChannels;
+  const {radiusField} = visualChannels;
   const {radiusRange, radius} = visConfig;
-  return Math.ceil(radiusRange && sizeField ? radiusRange[1] : radius ? radius : 8);
+  return Math.ceil(radiusRange && radiusField ? radiusRange[1] : radius ? radius : 8);
 }
 
 export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, number> {
@@ -247,8 +250,16 @@ function createChannelProps(
   config: LayerConfig,
   data
 ) {
-  const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
-    visualChannels;
+  const {
+    colorField,
+    colorScale,
+    radiusField,
+    radiusScale,
+    sizeField,
+    sizeScale,
+    strokeColorField,
+    strokeColorScale
+  } = visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
     heightField = sizeField;
@@ -280,11 +291,12 @@ function createChannelProps(
     );
   }
 
-  if (sizeField) {
+  if (radiusField || sizeField) {
     result.getPointRadius = getSizeAccessor(
-      sizeField,
       // @ts-ignore
-      sizeScale,
+      radiusField || sizeField,
+      // @ts-ignore
+      radiusScale || sizeScale,
       visConfig.sizeAggregation,
       visConfig.radiusRange || visConfig.sizeRange,
       data
