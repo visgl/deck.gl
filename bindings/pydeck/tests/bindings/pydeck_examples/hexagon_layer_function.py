@@ -57,7 +57,11 @@ def create_heatmap_test_object():
     )
     # This will render
     successful_heatmap_layer = Layer(
-        type="HeatmapLayer", id="successful-heatmap", data=data, get_position=["lon", "lat"], color_range=color_range,
+        type="HeatmapLayer",
+        id="successful-heatmap",
+        data=data,
+        get_position=["lon", "lat"],
+        color_range=color_range,
     )
 
     return Deck(

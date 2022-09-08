@@ -15,7 +15,8 @@ class Function(PydeckType):
     **kwargs
         arguments and value of each argument to be storing the function information
     """
-    __KEY = '@@function'
+
+    __KEY = "@@function"
 
     def __init__(self, name: str, **kwargs):
         self.name = name
@@ -28,8 +29,6 @@ class Function(PydeckType):
         return str(self) == str(other)
 
     def serialize(self):
-        repr = {
-            self.__KEY: self.name
-        }
+        repr = {self.__KEY: self.name}
         repr.update(self.arguments)
         return repr
