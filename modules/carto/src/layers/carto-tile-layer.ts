@@ -1,6 +1,8 @@
-/* global TextDecoder */
-import Protobuf from 'pbf';
-import {log, DefaultProps} from '@deck.gl/core';
+import {registerLoaders} from '@loaders.gl/core';
+import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
+registerLoaders([CartoVectorTileLoader]);
+
+import {DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {
   MVTLayer,
@@ -12,80 +14,15 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson, geojsonToBinary} from '@loaders.gl/gis';
-import {KeyValueProperties, Tile, TileReader} from './schema/carto-tile';
-import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
+import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
-
-function parseJSON(arrayBuffer: ArrayBuffer): any {
-  return JSON.parse(new TextDecoder().decode(arrayBuffer));
-}
-
-function parsePbf(buffer: ArrayBuffer): Tile {
-  const pbf = new Protobuf(buffer);
-  const tile = TileReader.read(pbf);
-  return tile;
-}
-
-function unpackProperties(properties: KeyValueProperties[]) {
-  if (!properties || !properties.length) {
-    return [];
-  }
-  return properties.map(item => {
-    const currentRecord: Record<string, unknown> = {};
-    item.data.forEach(({key, value}) => {
-      currentRecord[key] = value;
-    });
-    return currentRecord;
-  });
-}
-
-function parseCartoTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions): BinaryFeatures | null {
-  if (!arrayBuffer) return null;
-  const formatTiles = options && options.cartoTile && options.cartoTile.formatTiles;
-  if (formatTiles === TILE_FORMATS.GEOJSON) return geojsonToBinary(parseJSON(arrayBuffer).features);
-
-  const tile = parsePbf(arrayBuffer);
-
-  const {points, lines, polygons} = tile;
-  const data = {
-    points: {...points, properties: unpackProperties(points.properties)},
-    lines: {...lines, properties: unpackProperties(lines.properties)},
-    polygons: {...polygons, properties: unpackProperties(polygons.properties)}
-  };
-
-  // Note: there is slight, difference in `numericProps` type, however geojson/mvtlayer can cope with this
-  return data as unknown as BinaryFeatures;
-}
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
-const CartoTileLoader: LoaderWithParser = {
-  name: 'CARTO Tile',
-  version: '1',
-  id: 'cartoTile',
-  module: 'carto',
-  extensions: ['pbf'],
-  mimeTypes: [
-    'application/vnd.carto-vector-tile',
-    'application/x-protobuf' // Back-compatibility
-  ],
-  category: 'geometry',
-  worker: false,
-  parse: async (arrayBuffer, options) => parseCartoTile(arrayBuffer, options),
-  parseSync: parseCartoTile,
-  options: {
-    cartoTile: {
-      formatTiles: defaultTileFormat
-    }
-  }
-};
-
 const defaultProps: DefaultProps<CartoTileLayerProps> = {
   ...MVTLayer.defaultProps,
-  formatTiles: defaultTileFormat,
-  loaders: [CartoTileLoader]
+  formatTiles: defaultTileFormat
 };
 
 /** All properties supported by CartoTileLayer. */
@@ -110,6 +47,12 @@ export default class CartoTileLayer<
   static layerName = 'CartoTileLayer';
   static defaultProps = defaultProps;
 
+  initializeState(): void {
+    super.initializeState();
+    const binary = this.props.formatTiles === TILE_FORMATS.BINARY;
+    this.setState({binary});
+  }
+
   getTileData(tile: TileLoadProps) {
     const url = _getURLFromTemplate(this.state.data, tile);
     if (!url) {
@@ -120,17 +63,13 @@ export default class CartoTileLayer<
     const {fetch, formatTiles} = this.props;
     const {signal} = tile;
 
-    loadOptions = {
-      ...loadOptions,
-      mimeType: 'application/x-protobuf'
-    };
-
-    if (formatTiles) {
-      log.assert(
-        Object.values(TILE_FORMATS).includes(formatTiles),
-        `Invalid value for formatTiles: ${formatTiles}. Use value from TILE_FORMATS`
-      );
-      loadOptions.cartoTile = {formatTiles};
+    // The backend doesn't yet support our custom mime-type, so force it here
+    // TODO remove once backend sends the correct mime-type
+    if (formatTiles === TILE_FORMATS.BINARY) {
+      loadOptions = {
+        ...loadOptions,
+        mimeType: 'application/vnd.carto-vector-tile'
+      };
     }
 
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
