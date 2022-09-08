@@ -13,7 +13,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
-import {Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
+import {Accessor, Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
@@ -23,6 +23,7 @@ import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
+import {CustomMarkersRange, TextLabel, VisualChannelField} from './types';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -343,9 +344,9 @@ const FALLBACK_ICON =
   'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiLz4NCjwvc3ZnPg==';
 
 export function getIconUrlAccessor(
-  field: any,
+  field: VisualChannelField | null | undefined,
   fallbackUrl: string | null | undefined,
-  range: any,
+  range: CustomMarkersRange | null | undefined,
   maxIconSize: number,
   data: any
 ) {
@@ -380,20 +381,18 @@ export function getIconUrlAccessor(
     .unknown(unknownIcon);
 
   const accessor = properties => {
-    // TODO: i don't think markers suppoer spatial indexes
     const propertyValue = properties[field.name];
     return scale(propertyValue);
   };
   return normalizeAccessor(accessor, data);
 }
 
-export function getIdentityAccessor(name, aggregation, data) {
-  const accessorKeys = getAccessorKeys(name, aggregation);
+export function getIdentityAccessor(name: string, aggregation, data) {
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
-    // TODO: i don't think markers suppoer spatial indexes
-    // if (!(accessorKeys[0] in properties)) {
-    //   accessorKeys = findAccessorKey(accessorKeys, properties);
-    // }
+    if (!(accessorKeys[0] in properties)) {
+      accessorKeys = findAccessorKey(accessorKeys, properties);
+    }
     return properties[accessorKeys[0]] || 0;
   };
   return normalizeAccessor(accessor, data);
@@ -429,7 +428,7 @@ const FORMATS: Record<string, (value: any) => string> = {
   default: String
 };
 
-export function getTextAccessor({name, type}, data) {
+export function getTextAccessor({name, type}: VisualChannelField, data) {
   const format = FORMATS[type] || FORMATS.default;
   const accessor = properties => {
     return format(properties[name]);
@@ -437,17 +436,23 @@ export function getTextAccessor({name, type}, data) {
   return normalizeAccessor(accessor, data);
 }
 
-export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
+export function getTextPixelOffsetAccessor(
+  {alignment, anchor, size}: TextLabel,
+  radius: Accessor<unknown, number>
+): Accessor<unknown, [number, number]> {
   const padding = 20;
   const signX = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
   const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
   const sizeOffset = alignment === 'center' ? 0 : size;
 
-  const calculateOffset = r => [signX * (r + padding), signY * (r + padding + sizeOffset)];
+  const calculateOffset = (r: number): [number, number] => [
+    signX * (r + padding),
+    signY * (r + padding + sizeOffset)
+  ];
 
   return typeof radius === 'function'
-    ? d => {
-        return calculateOffset(radius(d));
+    ? (d, oi) => {
+        return calculateOffset(radius(d, oi));
       }
     : calculateOffset(radius);
 }

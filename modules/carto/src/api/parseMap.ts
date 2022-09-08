@@ -9,88 +9,12 @@ import {
   getTextPixelOffsetAccessor,
   OPACITY_MAP,
   opacityToAlpha,
-  SCALE_TYPE,
   getIconUrlAccessor,
   getIdentityAccessor
 } from './layer-map';
 import {_flatten as flatten, log, Accessor} from '@deck.gl/core';
 import {assert} from '../utils';
-
-type VisualChannelField = {
-  name: string;
-  type: string;
-};
-
-type VisualChannels = {
-  colorField?: VisualChannelField;
-  colorScale?: SCALE_TYPE;
-
-  customMarkersField?: VisualChannelField;
-  customMarkersScale?: SCALE_TYPE;
-
-  radiusField?: VisualChannelField;
-  radiusScale?: SCALE_TYPE;
-
-  rotationScale?: SCALE_TYPE;
-  rotationField?: VisualChannelField;
-
-  sizeField?: VisualChannelField;
-  sizeScale?: SCALE_TYPE;
-
-  strokeColorField?: VisualChannelField;
-  strokeColorScale?: SCALE_TYPE;
-
-  heightField?: VisualChannelField;
-  heightScale?: SCALE_TYPE;
-};
-
-type ColorRange = {
-  category: string;
-  colors: string[];
-  colorMap: string[][] | undefined;
-  name: string;
-  type: string;
-};
-
-type LayerConfig = {
-  color?: number[];
-  textLabel: {
-    field: VisualChannelField;
-    alignment: unknown;
-    anchor: unknown;
-    size: unknown;
-  };
-  visConfig: {
-    filled?: boolean;
-    opacity?: number;
-
-    colorAggregation?: any;
-    colorRange: ColorRange;
-
-    customMarkers: boolean;
-    customMarkersRange?: {
-      markerMap?: {
-        value: string | null;
-        markerUrl?: string;
-      }[];
-      othersMarker?: string;
-    };
-    customMarkersUrl?: string | null;
-
-    radius?: number;
-    radiusRange?: number;
-
-    sizeAggregation?: any;
-    sizeRange?: any;
-
-    strokeColorAggregation?: any;
-    strokeOpacity?: number;
-    strokeColorRange?: ColorRange;
-
-    heightRange?: any;
-    heightAggregation?: any;
-  };
-};
+import {MapTextSubLayerConfig, VisualChannels} from './types';
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets} = json;
@@ -231,7 +155,7 @@ function createStyleProps(config, mapping) {
   return result;
 }
 
-function getMaxMarkerSize(config: LayerConfig, visualChannels: VisualChannels): number {
+function getMaxMarkerSize(config: MapTextSubLayerConfig, visualChannels: VisualChannels): number {
   // Layer config
   const {visConfig} = config;
   const {radiusField} = visualChannels;
@@ -247,7 +171,7 @@ export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, nu
 function createChannelProps(
   visualChannels: VisualChannels,
   type: string,
-  config: LayerConfig,
+  config: MapTextSubLayerConfig,
   data
 ) {
   const {
