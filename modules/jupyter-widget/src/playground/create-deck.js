@@ -15,19 +15,22 @@ import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
 
+const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
+const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
+
 function extractElements(library = {}, filter) {
   // Extracts exported elements as a dictionary from a library
   const dict = {};
   const elements = Object.keys(library).filter(filter);
-  for (const cls of elements) {
-    dict[cls] = library[cls];
+  for (const el of elements) {
+    dict[el] = library[el];
   }
   return dict;
 }
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractClasses(deck),
+  classes: extractElements(deck, classesFilter),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
@@ -42,8 +45,6 @@ const jsonConverter = new deck.JSONConverter({
 });
 
 function addModuleToConverter(module, converter) {
-  const classesFilter = (x) => x.charAt(0) === x.charAt(0).toUpperCase();
-  const functionsFilter = (x) => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
   const newConfiguration = {
     classes: extractElements(module, classesFilter),
     functions: extractElements(module, functionsFilter)
