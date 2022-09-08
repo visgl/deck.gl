@@ -66,7 +66,7 @@ type LayerConfig = {
 
     customMarkers: boolean;
     customMarkersRange?: {
-      markersMap?: {
+      markerMap?: {
         value: string | null;
         markerUrl?: string;
       }[];
@@ -289,7 +289,10 @@ function createChannelProps(
       visConfig.radiusRange || visConfig.sizeRange,
       data
     );
-  } else if (
+  }
+
+  if (
+    !textLabelField &&
     visConfig.customMarkers &&
     (Boolean(visConfig.customMarkersUrl) || visualChannels.customMarkersField)
   ) {
@@ -355,6 +358,7 @@ function createChannelProps(
       data
     );
   }
+
   if (heightField) {
     result.getElevation = getSizeAccessor(
       heightField,
