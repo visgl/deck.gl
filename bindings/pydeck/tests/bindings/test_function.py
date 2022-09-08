@@ -12,6 +12,6 @@ def test_calculate_radius():
 def test_custom_function():
     assert Function("add", op_a=6, op_b=24).serialize() == {
         "@@function": "add",
-        "op_a": 2,
+        "op_a": 6,
         "op_b": 24
     }
