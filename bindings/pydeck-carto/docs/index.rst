@@ -27,7 +27,22 @@ Index
    authentication
    carto_layer
    carto_auth
-   styling
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples
+
+   gallery/carto_layer_geo_query
+   gallery/carto_layer_geo_query_param
+   gallery/carto_layer_geo_table
+   gallery/carto_layer_geo_table_with_oauth
+   gallery/carto_layer_geo_tileset
+   gallery/carto_layer_h3_query
+   gallery/carto_layer_h3_table
+   gallery/carto_layer_h3_tileset
+   gallery/carto_layer_quadbin_query
+   gallery/carto_layer_quadbin_table
+   gallery/carto_layer_quadbin_tileset
 
 
 .. toctree::

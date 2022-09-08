@@ -25,9 +25,6 @@ class CartoAuth:
     expires_in: time in seconds when the token will be expired
     cache_filepath: specific path where the tokens saved on the cache will be stored
     use_cache: to use by default the cached token
-
-    .. How to get the API credentials:
-        https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
     """
 
     def __init__(
@@ -65,6 +62,7 @@ class CartoAuth:
 
     @classmethod
     def from_file(cls, filepath, use_cache=True):
+        """Initialize CartoAuth object using a credentials' file"""
         with open(filepath, "r") as f:
             content = json.load(f)
         for attr in ("client_id", "api_base_url", "client_secret"):
@@ -81,8 +79,7 @@ class CartoAuth:
         )
 
     def get_layer_credentials(self) -> dict:
-        """Get the layer credentials object to gather information
-        from carto warehouses"""
+        """Return the required Layer credentials"""
         access_token = self._get_token()
         return {
             "apiVersion": "v3",
@@ -161,6 +158,7 @@ class CartoAuth:
         }
 
     def token_expired(self):
+        """Returns if the token has expired already"""
         if not self.expiration_ts:
             return True
 
@@ -168,8 +166,7 @@ class CartoAuth:
         return now_utc_ts > self.expiration_ts
 
     def get_carto_dw_credentials(self) -> tuple:
-        """Get the carto data warehouse credentials
-        returns: (project_id,carto_data_warehouse_token)"""
+        """Get the CARTO data warehouse credentials"""
         if not self.api_base_url:
             raise CredentialsError("api_base_url required")
 
@@ -237,6 +234,7 @@ class CartoAuth:
         cache_filepath=".carto_token.json",
         use_cache=True,
     ):
+        """Perform the oauth2 flow authentication"""
         if use_cache and cache_filepath:
             try:
                 return CartoAuth(
