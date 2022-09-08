@@ -15,26 +15,14 @@ import {addSupportComponents} from '../lib/components/index';
 
 import * as deck from '../deck-bundle';
 
-function extractClasses(library = {}) {
-  // Extracts exported class constructors as a dictionary from a library
-  const classesDict = {};
-  const classes = Object.keys(library).filter(x => x.charAt(0) === x.charAt(0).toUpperCase());
-  for (const cls of classes) {
-    classesDict[cls] = library[cls];
+function extractElements(library = {}, filter) {
+  // Extracts exported elements as a dictionary from a library
+  const dict = {};
+  const elements = Object.keys(library).filter(filter);
+  for (const cls of elements) {
+    dict[cls] = library[cls];
   }
-  return classesDict;
-}
-
-function extractFunctions(library = {}) {
-  // Extracts functions as a dictionary from a library
-  const functionsDict = {};
-  const functions = Object.keys(library).filter(
-    x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_'
-  );
-  for (const fun of functions) {
-    functionsDict[fun] = library[fun];
-  }
-  return functionsDict;
+  return dict;
 }
 
 // Handle JSONConverter and loaders configuration
@@ -54,9 +42,11 @@ const jsonConverter = new deck.JSONConverter({
 });
 
 function addModuleToConverter(module, converter) {
+  const classesFilter = (x) => x.charAt(0) === x.charAt(0).toUpperCase();
+  const functionsFilter = (x) => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
   const newConfiguration = {
-    classes: extractClasses(module),
-    functions: extractFunctions(module)
+    classes: extractElements(module, classesFilter),
+    functions: extractElements(module, functionsFilter)
   };
   converter.mergeConfiguration(newConfiguration);
 }
