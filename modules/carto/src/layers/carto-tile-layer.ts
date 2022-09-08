@@ -11,7 +11,7 @@ import {
   _TileLoadProps as TileLoadProps
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {binaryToGeojson, geojsonToBinary} from '@loaders.gl/gis';
 import {KeyValueProperties, Tile, TileReader} from './schema/carto-tile';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
@@ -160,5 +160,16 @@ export default class CartoTileLayer<
 
     const subLayer = new GeoJsonLayer(subLayerProps);
     return subLayer;
+  }
+
+  getPickingInfo(params) {
+    const info = super.getPickingInfo(params);
+
+    if (this.state.binary && info.index !== -1) {
+      const {data} = params.sourceLayer!.props;
+      info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
+    }
+
+    return info;
   }
 }
