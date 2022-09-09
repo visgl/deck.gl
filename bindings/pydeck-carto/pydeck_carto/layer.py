@@ -38,11 +38,12 @@ def register_carto_layer():
         functions: {
             notifyError: () => {
                 return (e) => {
-                    document.body.style.cssText = 'padding: 24px; fontSize: 14px; fontFamily: monospace';
+                    let css = 'padding: 24px; fontSize: 14px; fontFamily: monospace';
+                    document.body.style.cssText = css;
                     document.body.innerHTML = `<b>Layer Error</b>: ${e.message}`;
-                }
             }
         }
+    }
     }"""
 
     if pdk.settings.configuration is None:

@@ -22,10 +22,8 @@ def test_notify_error_func():
     )
     json_input = json.loads(layer.to_json())
 
-    assert json_input['@@type'] == 'CartoLayer'
-    assert json_input['onDataError'] == {
-        "@@function": "notifyError"
-    }
+    assert json_input["@@type"] == "CartoLayer"
+    assert json_input["onDataError"] == {"@@function": "notifyError"}
 
 
 def test_carto_configuration():
@@ -34,4 +32,4 @@ def test_carto_configuration():
 
     register_carto_layer()
     clean_carto_deck = pdk.Deck()
-    assert 'notifyError' in clean_carto_deck.deck_widget.configuration
+    assert "notifyError" in clean_carto_deck.deck_widget.configuration
