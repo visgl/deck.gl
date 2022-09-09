@@ -27,9 +27,6 @@ def test_notify_error_func():
 
 
 def test_carto_configuration():
-    clean_deck = pdk.Deck()
-    assert clean_deck.deck_widget.configuration is None
-
+    pdk.settings.configuration = None
     register_carto_layer()
-    clean_carto_deck = pdk.Deck()
-    assert "notifyError" in clean_carto_deck.deck_widget.configuration
+    assert "notifyError" in pdk.settings.configuration
