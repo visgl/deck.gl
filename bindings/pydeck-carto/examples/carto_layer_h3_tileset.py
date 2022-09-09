@@ -22,8 +22,6 @@ layer = pdk.Layer(
     pickable=True,
 )
 
-assert is_valid_carto_layer(layer, carto_auth)
-
 view_state = pdk.ViewState(latitude=44, longitude=-122, zoom=3)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
