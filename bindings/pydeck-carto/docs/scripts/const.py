@@ -14,6 +14,9 @@ GALLERY_IMAGES = [
     'carto_layer_quadbin_query',
     'carto_layer_quadbin_table',
     'carto_layer_quadbin_tileset',
+    'carto_styles_color_bins',
+    'carto_styles_color_categories',
+    'carto_styles_color_continuous',
 ]
 
 ALL_EXAMPLES = glob.glob("../examples/*.py")

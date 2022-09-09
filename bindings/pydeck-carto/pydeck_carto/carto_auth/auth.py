@@ -25,9 +25,6 @@ class CartoAuth:
     expires_in: time in seconds when the token will be expired
     cache_filepath: specific path where the tokens saved on the cache will be stored
     use_cache: to use by default the cached token
-
-    .. How to get the API credentials:
-        https://docs.carto.com/carto-user-manual/developers/carto-for-developers/
     """
 
     def __init__(

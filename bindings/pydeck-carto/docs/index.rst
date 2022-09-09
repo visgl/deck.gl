@@ -49,6 +49,11 @@ Index
    gallery/carto_layer_quadbin_query
    gallery/carto_layer_quadbin_table
    gallery/carto_layer_quadbin_tileset
+   gallery/carto_styles_color_bins
+   gallery/carto_styles_color_categories
+   gallery/carto_styles_color_continuous
+   gallery/carto_layer_validation
+   gallery/carto_notify_error
 
 
 .. toctree::
