@@ -1,5 +1,12 @@
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {tileToQuadbin, quadbinToTile, quadbinParent, quadbinZoom} from './quadbin-utils';
+import {
+  bigIntToHex,
+  cellToParent,
+  cellToTile,
+  getResolution,
+  hexToBigInt,
+  tileToCell
+} from 'quadbin';
 
 type QuadbinTileIndex = {i: string};
 
@@ -8,7 +15,8 @@ export default class QuadbinTileset2D extends Tileset2D {
   getTileIndices(opts): QuadbinTileIndex[] {
     return super
       .getTileIndices(opts)
-      .map(tileToQuadbin)
+      .map(tileToCell)
+      .map(bigIntToHex)
       .map(i => ({i}));
   }
 
@@ -19,16 +27,16 @@ export default class QuadbinTileset2D extends Tileset2D {
 
   // @ts-expect-error TileIndex must be generic
   getTileMetadata({i}: QuadbinTileIndex) {
-    return super.getTileMetadata(quadbinToTile(i));
+    return super.getTileMetadata(cellToTile(hexToBigInt(i)));
   }
 
   // @ts-expect-error TileIndex must be generic
   getTileZoom({i}: QuadbinTileIndex): number {
-    return Number(quadbinZoom(i));
+    return Number(getResolution(hexToBigInt(i)));
   }
 
   // @ts-expect-error TileIndex must be generic
   getParentIndex({i}: QuadbinTileIndex): QuadbinTileIndex {
-    return {i: quadbinParent(i)};
+    return {i: bigIntToHex(cellToParent(hexToBigInt(i)))};
   }
 }
