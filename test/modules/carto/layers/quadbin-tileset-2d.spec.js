@@ -1,11 +1,13 @@
 import test from 'tape-promise/tape';
 import QuadbinTileset2D from '@deck.gl/carto/layers/quadbin-tileset-2d';
 import {
-  tileToQuadbin,
-  quadbinToTile,
-  quadbinParent,
-  quadbinZoom
-} from '@deck.gl/carto/layers/quadbin-utils';
+  bigIntToHex,
+  cellToParent,
+  cellToTile,
+  getResolution,
+  hexToBigInt,
+  tileToCell
+} from 'quadbin';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {tileToQuadkey} from './quadbin-tile-layer.spec';
 
@@ -18,10 +20,10 @@ const TEST_TILES = [
 test('Quadbin conversion', async t => {
   for (const {x, y, z, q} of TEST_TILES) {
     const tile = {x, y, z};
-    const quadbin = tileToQuadbin(tile);
+    const quadbin = bigIntToHex(tileToCell(tile));
     t.deepEqual(quadbin, q, 'quadbins match');
 
-    const tile2 = quadbinToTile(quadbin);
+    const tile2 = cellToTile(hexToBigInt(quadbin));
     t.deepEqual(tile, tile2, 'tiles match');
   }
 
@@ -33,10 +35,10 @@ test('Quadbin getParent', async t => {
   const quadkey = tileToQuadkey(tile);
 
   while (tile.z > 0) {
-    const quadbin = tileToQuadbin(tile);
-    const parent = quadbinParent(quadbin);
-    const zoom = quadbinZoom(parent);
-    tile = quadbinToTile(parent);
+    const quadbin = tileToCell(tile);
+    const parent = cellToParent(quadbin);
+    const zoom = getResolution(parent);
+    tile = cellToTile(parent);
     const quadkey2 = tileToQuadkey(tile);
 
     t.deepEquals(quadkey2, quadkey.slice(0, tile.z), `parent correct ${quadkey2}`);
