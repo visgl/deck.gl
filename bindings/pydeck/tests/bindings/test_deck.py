@@ -35,7 +35,7 @@ def test_json_output():
     ]
     for t in TEST_CASES:
         actual, expected = t[0], t[1]
-        assert actual.to_json() == json.dumps(json.loads(expected), sort_keys=True)
+        assert json.loads(str(actual.to_json())) == json.loads(expected)
 
 
 def test_update():
@@ -47,4 +47,4 @@ def test_update():
     expected_results = json.loads(fixtures["minimal"])
     expected_results["initialViewState"]["latitude"] = 0
     expected_results["initialViewState"]["longitude"] = 0
-    assert str(deck) == json.dumps(expected_results, sort_keys=True)
+    assert json.loads(str(deck)) == expected_results

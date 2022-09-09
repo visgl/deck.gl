@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 
 from pydeck.data_utils.viewport_helpers import (
@@ -51,6 +52,6 @@ def test_is_pandas_df():
 def test_compute_view():
     actual = compute_view(POINTS, 0.95, ViewState)
     actual_pandas = compute_view(pd.DataFrame(POINTS), 0.95, ViewState)
-    EXPECTED = '{"latitude": 20.0, "longitude": 20.0, "zoom": 7}'
+    EXPECTED = {"latitude": 20.0, "longitude": 20.0, "zoom": 7}
     assert str(actual) == str(actual_pandas)
-    assert str(actual) == str(EXPECTED)
+    assert json.loads(str(actual)) == EXPECTED

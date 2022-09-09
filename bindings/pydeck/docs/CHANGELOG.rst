@@ -6,6 +6,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.8 Releases
 ------------
 
+0.8.0b3 - Sep 09 2022
+^^^^^^^^^^^^^^^^^^^^^
+- Add configuration. Fix css_background_color (#7249)
+
 0.8.0b2 - Sep 08 2022
 ^^^^^^^^^^^^^^^^^^^^^
 - Add styling functions in pydeck (#7249)
