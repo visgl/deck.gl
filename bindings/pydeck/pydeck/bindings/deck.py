@@ -13,6 +13,7 @@ from .map_styles import DARK, get_from_map_identifier
 def has_jupyter_extra():
     try:
         from ..widget import DeckGLWidget
+
         DeckGLWidget()
         return True
     except ImportError:
@@ -147,7 +148,9 @@ class Deck(JSONMixin):
         Intended for use in a Jupyter environment.
         """
         if not has_jupyter_extra():
-            raise ImportError("Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`")
+            raise ImportError(
+                "Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`"
+            )
         self.deck_widget.json_input = self.to_json()
         has_binary = False
         binary_data_sets = []

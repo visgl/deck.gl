@@ -6,6 +6,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.8 Releases
 ------------
 
+0.8.0b2 - Sep 08 2022
+^^^^^^^^^^^^^^^^^^^^^
+- Add styling functions in pydeck (#7249)
+
 0.8.0b1 - Aug 25 2022
 ^^^^^^^^^^^^^^^^^^^^^
 - Update jupyter-widget to work with JupyterLab 3 (#7026)

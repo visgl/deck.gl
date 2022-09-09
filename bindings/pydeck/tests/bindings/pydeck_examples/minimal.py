@@ -3,7 +3,9 @@ from pydeck import Deck, Layer, LightSettings, View, ViewState
 
 def create_minimal_test_object():
     lights = LightSettings(
-        lights_position=[-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000], ambient_ratio=0.4, diffuse_ratio=0.6,
+        lights_position=[-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
+        ambient_ratio=0.4,
+        diffuse_ratio=0.6,
     )
     layer = Layer(
         "HexagonLayer",

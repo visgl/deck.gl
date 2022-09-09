@@ -19,7 +19,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     python_requires=">=3.7",
     install_requires=[
-        "pydeck>=0.8.0b1",
+        "pydeck>=0.8.0b2",
         "requests",
     ],
     extras_require={"bigquery": ["google-auth", "google-cloud-bigquery"]},
@@ -33,6 +33,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     zip_safe=False,
 )
