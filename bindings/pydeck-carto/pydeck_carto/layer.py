@@ -1,7 +1,7 @@
 import pydeck as pdk
 
 H3_VERSION = "~3.7.*"
-PYDECK_VERSION = "~8.8.*"
+PYDECK_VERSION = "~8.8.10"
 
 LIBRARIES_TO_INCLUDE = [
     f"npm/h3-js@{H3_VERSION}/dist/h3-js.umd.js",
@@ -34,6 +34,20 @@ def register_carto_layer():
         "libraryName": library_name,
         "resourceUri": CARTO_LAYER_BUNDLE_URL,
     }
+    configuration = """{
+        functions: {
+            notifyError: () => {
+                return (e) => {
+                    let css = 'padding: 24px; fontSize: 14px; fontFamily: monospace';
+                    document.body.style.cssText = css;
+                    document.body.innerHTML = `<b>Layer Error</b>: ${e.message}`;
+            }
+        }
+    }
+    }"""
+
+    if pdk.settings.configuration is None:
+        pdk.settings.configuration = configuration
 
     if pdk.settings.custom_libraries is None:
         pdk.settings.custom_libraries = [custom_library]

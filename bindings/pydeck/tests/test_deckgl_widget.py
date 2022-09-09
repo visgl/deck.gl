@@ -6,6 +6,7 @@ try:
     from pydeck.widget import DeckGLWidget
 except ModuleNotFoundError:
     import warnings
+
     warnings.warn("Widget test will fail")
 
 

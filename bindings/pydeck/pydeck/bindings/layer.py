@@ -5,7 +5,7 @@ import numpy as np
 from ..data_utils import is_pandas_df, has_geo_interface, records_from_geo_interface
 from .json_tools import JSONMixin, camel_and_lower
 
-from pydeck.types import Image
+from pydeck.types import Image, Function
 from pydeck.exceptions import BinaryTransportException
 
 
@@ -105,6 +105,8 @@ class Layer(JSONMixin):
                         else:
                             array_as_str += "{}, ".format(identifier)
                     kwargs[k] = "{}[{}]".format(FUNCTION_IDENTIFIER, array_as_str)
+                elif isinstance(v, Function):
+                    kwargs[k] = v.serialize()
 
             self.__dict__.update(kwargs)
 

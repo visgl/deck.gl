@@ -20,9 +20,11 @@
     </div>
   </body>
   <script>
+    const container = document.getElementById('deck-container');
     const jsonInput = {{json_input}};
     const tooltip = {{tooltip}};
-    const customLibraries = {{ custom_libraries or 'null' }};
+    const customLibraries = {{custom_libraries or 'null'}};
+    const configuration = {{configuration or 'null'}};
 
     const deckInstance = createDeck({
       {% if mapbox_key %}
@@ -31,10 +33,11 @@
       {% if google_maps_key %}
       googleMapsKey: '{{google_maps_key}}',
       {% endif %}
-      container: document.getElementById('deck-container'),
+      container,
       jsonInput,
       tooltip,
-      customLibraries
+      customLibraries,
+      configuration
     });
 
   </script>

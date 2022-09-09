@@ -1,9 +1,8 @@
-import Protobuf from 'pbf';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
-import {KeyValueProperties} from './carto-tile';
-import {binaryToSpatialjson, Properties, SpatialJson} from './spatialjson-utils';
 import {Tile, TileReader} from './carto-spatial-tile';
+import {parsePbf, unpackProperties} from './tile-loader-utils';
+import {binaryToSpatialjson, SpatialJson} from './spatialjson-utils';
 
 const CartoSpatialTileLoader: LoaderWithParser = {
   name: 'CARTO Spatial Tile',
@@ -11,10 +10,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   id: 'cartoSpatialTile',
   module: 'carto',
   extensions: ['pbf'],
-  mimeTypes: [
-    'application/vnd.carto-spatial-tile',
-    'application/x-protobuf' // Back-compatibility
-  ],
+  mimeTypes: ['application/vnd.carto-spatial-tile'],
   category: 'geometry',
   worker: false,
   parse: async (arrayBuffer, options) => parseCartoSpatialTile(arrayBuffer, options),
@@ -22,31 +18,12 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   options: {}
 };
 
-function parsePbf(buffer: ArrayBuffer): Tile {
-  const pbf = new Protobuf(buffer);
-  const tile = TileReader.read(pbf);
-  return tile;
-}
-
-function unpackProperties(properties: KeyValueProperties[]): Properties[] {
-  if (!properties || !properties.length) {
-    return [];
-  }
-  return properties.map(item => {
-    const currentRecord: Properties = {};
-    item.data.forEach(({key, value}) => {
-      currentRecord[key] = value;
-    });
-    return currentRecord;
-  });
-}
-
 function parseCartoSpatialTile(
   arrayBuffer: ArrayBuffer,
   options?: LoaderOptions
 ): SpatialJson | null {
   if (!arrayBuffer) return null;
-  const tile = parsePbf(arrayBuffer);
+  const tile: Tile = parsePbf(arrayBuffer, TileReader);
 
   const {cells} = tile;
   const data = {
