@@ -51,7 +51,13 @@ arc_layer = pdk.Layer(
     auto_highlight=True,
 )
 
-view_state = pdk.ViewState(latitude=37.7576171, longitude=-122.5776844, bearing=45, pitch=50, zoom=8,)
+view_state = pdk.ViewState(
+    latitude=37.7576171,
+    longitude=-122.5776844,
+    bearing=45,
+    pitch=50,
+    zoom=8,
+)
 
 
 TOOLTIP_TEXT = {"html": "{S000} jobs <br /> Home of commuter in red; work location in green"}

@@ -1,7 +1,6 @@
 """
 CartoLayer
 ==========
-
 Use CARTO DW client (BigQuery)
 """
 from pydeck_carto import CartoAuth
