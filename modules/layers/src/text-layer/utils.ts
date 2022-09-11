@@ -11,6 +11,9 @@ export type Character = {
   y: number;
   width: number;
   height: number;
+  layoutWidth: number;
+  layoutHeight: number;
+  layoutOffsetY?: number;
 };
 
 export type CharacterMapping = Record<string, Character>;
@@ -61,6 +64,7 @@ export function buildMapping({
   let row = 0;
   // continue from x position of last character in the old mapping
   let x = xOffset;
+  const rowHeight = fontHeight + buffer * 2;
 
   for (const char of characterSet) {
     if (!mapping[char]) {
@@ -75,15 +79,15 @@ export function buildMapping({
       }
       mapping[char] = {
         x: x + buffer,
-        y: yOffset + row * (fontHeight + buffer * 2) + buffer,
+        y: yOffset + row * rowHeight + buffer,
         width,
-        height: fontHeight
+        height: rowHeight,
+        layoutWidth: width,
+        layoutHeight: fontHeight
       };
       x += width + buffer * 2;
     }
   }
-
-  const rowHeight = fontHeight + buffer * 2;
 
   return {
     mapping,
@@ -102,7 +106,7 @@ function getTextWidth(
   let width = 0;
   for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
-    width += mapping[character]?.width || 0;
+    width += mapping[character]?.layoutWidth || 0;
   }
 
   return width;
@@ -232,10 +236,10 @@ function transformRow(
     if (frame) {
       if (!rowHeight) {
         // frame.height should be a constant
-        rowHeight = frame.height;
+        rowHeight = frame.layoutHeight;
       }
-      leftOffsets[i] = x + frame.width / 2;
-      x += frame.width;
+      leftOffsets[i] = x + frame.layoutWidth / 2;
+      x += frame.layoutWidth;
     } else {
       log.warn(`Missing character: ${character} (${character.codePointAt(0)})`)();
       leftOffsets[i] = x;
@@ -301,9 +305,12 @@ export function transformParagraph(
       for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
         const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
         const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
+
         transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
         for (let j = rowStart; j < rowEnd; j++) {
-          y[j] = rowOffsetTop + rowSize[1] / 2;
+          const char = characters[j];
+          const layoutOffsetY = iconMapping[char]?.layoutOffsetY || 0;
+          y[j] = rowOffsetTop + rowSize[1] / 2 + layoutOffsetY;
           rowWidth[j] = rowSize[0];
         }
 
