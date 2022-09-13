@@ -64,25 +64,30 @@ test('QuadbinTileset2D', async t => {
   t.deepEqual(
     indices,
     [
-      {i: '4863ffffffffffff'},
-      {i: '486955ffffffffff'},
-      {i: '4866aaffffffffff'},
-      {i: '486c00ffffffffff'}
+      {q: 5216294268401876991n, i: '4863ffffffffffff'},
+      {q: 5217796201285419007n, i: '486955ffffffffff'},
+      {q: 5217045234843647999n, i: '4866aaffffffffff'},
+      {q: 5218547167727190015n, i: '486c00ffffffffff'}
     ],
     'indices in viewport'
   );
   t.equal(tileset.getTileId({i: '4863ffffffffffff'}), '4863ffffffffffff', 'tile id');
+  t.equal(
+    tileset.getTileId({q: hexToBigInt('4863ffffffffffff')}),
+    '4863ffffffffffff',
+    'tile id from q'
+  );
   t.deepEqual(
-    tileset.getTileMetadata({i: '4841efffffffffff'}),
+    tileset.getTileMetadata({q: 5206706527007670271n}),
     {
       bbox: {west: -45, north: 74.01954331150226, east: -22.5, south: 66.51326044311186}
     },
     'tile metadata'
   );
-  t.equal(tileset.getTileZoom({i: '4841efffffffffff'}), 4, 'tile zoom');
+  t.equal(tileset.getTileZoom({q: 5206706527007670271n}), 4, 'tile zoom');
   t.deepEqual(
-    tileset.getParentIndex({i: '4841efffffffffff'}),
-    {i: '4831ffffffffffff'},
+    tileset.getParentIndex({q: 5206706527007670271n}),
+    {q: 5202220519566344191n},
     'tile parent'
   );
   t.end();

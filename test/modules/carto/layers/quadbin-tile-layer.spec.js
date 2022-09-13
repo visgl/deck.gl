@@ -3,7 +3,7 @@ import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_QuadbinTileLayer as QuadbinTileLayer} from '@deck.gl/carto';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {testPickingLayer} from '../../layers/test-picking-layer';
-import {bigIntToHex, cellToTile, hexToBigInt, tileToCell} from 'quadbin';
+import {cellToTile, hexToBigInt, tileToCell} from 'quadbin';
 
 const TILES = ['https://tile-url.com/{i}'];
 const TILEJSON = {
@@ -83,7 +83,7 @@ test('QuadbinTileLayer autoHighlight', async t => {
           const quadkey = tileToQuadkey(tile);
           const child = `${quadkey}${i}`;
           tile = quadkeyToTile(child);
-          return {id: bigIntToHex(tileToCell(tile)), value: i};
+          return {id: tileToCell(tile), value: i};
         });
       },
       autoHighlight: true,
@@ -98,7 +98,7 @@ test('QuadbinTileLayer autoHighlight', async t => {
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.comment('hover over quadbin');
           t.ok(info.object, 'info.object is populated');
-          t.equal(info.object.id, '482bffffffffffff', 'quadbin is correct');
+          t.equal(info.object.id, 5200531669706080255n, 'quadbin is correct');
           t.equal(info.object.value, 3, 'object value is correct');
         }
       },

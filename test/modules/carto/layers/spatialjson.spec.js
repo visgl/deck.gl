@@ -23,7 +23,7 @@ const TEST_CASES = [
   },
   {
     name: 'Quadbin index only',
-    spatial: [{id: '48e62966eaffffff', properties: {}}],
+    spatial: [{id: 5252931537380311039n, properties: {}}],
     expected: {
       scheme: 'quadbin',
       cells: {
@@ -36,7 +36,7 @@ const TEST_CASES = [
   {
     name: 'Mixed props',
     spatial: [
-      {id: '48e62966eaffffff', properties: {stringProp: 'abc', floatProp: 123.45, intProp: 12345}}
+      {id: 5252931537380311039n, properties: {stringProp: 'abc', floatProp: 123.45, intProp: 12345}}
     ],
     expected: {
       scheme: 'quadbin',
@@ -68,15 +68,15 @@ test('Spatialjson to binary', async t => {
 test('Parse Carto Spatial Tile', async t => {
   const expected = [
     {
-      id: '881f884931fffff',
+      id: 613044272586817535n,
       properties: {value: 3.463996610619824, elevation: 0.3463996610619824, str: 'test'}
     },
     {
-      id: '881f884937fffff',
+      id: 613044272593108991n,
       properties: {value: 3.1231066988791127, elevation: 0.3123106698879113, str: 'test'}
     },
     {
-      id: '881f884935fffff',
+      id: 613044272591011839n,
       properties: {value: 3.860728273341417, elevation: 0.3860728273341417, str: 'test'}
     }
   ];

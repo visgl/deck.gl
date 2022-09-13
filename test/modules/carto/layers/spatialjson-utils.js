@@ -1,4 +1,3 @@
-import {h3IsValid} from 'h3-js';
 import {hexToBigInt} from 'quadbin';
 
 // Mimic encoding from backend for testing decoding
@@ -19,7 +18,7 @@ export function spatialjsonToBinary(spatial) {
 
   let i = 0;
   for (const {id, properties} of spatial) {
-    cells.indices.value[i] = hexToBigInt(id);
+    cells.indices.value[i] = scheme === 'h3' ? hexToBigInt(id) : id;
 
     fillNumericProperties(cells.numericProps, properties, i);
     cells.properties.push(keepStringProperties(properties, numericPropKeys));
@@ -30,7 +29,7 @@ export function spatialjsonToBinary(spatial) {
 }
 
 function inferSpatialIndexType(index) {
-  return h3IsValid(index) ? 'h3' : 'quadbin';
+  return typeof index === 'bigint' ? 'quadbin' : 'h3';
 }
 
 function keepStringProperties(properties, numericKeys) {
