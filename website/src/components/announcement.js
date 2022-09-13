@@ -83,6 +83,7 @@ const Button = styled.a`
   &:hover {
     background: #FFF;
     border-color: #FFF;
+    cursor: pointer;
   }
 `
 const localStorageKey = 'madridSummit2022'
