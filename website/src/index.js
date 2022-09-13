@@ -4,6 +4,7 @@ import {withPrefix} from 'gatsby';
 import styled from 'styled-components';
 
 import HeroExample from './examples/home-demo';
+import Announcement from './components/announcement';
 
 const FeatureImage = styled.div`
 position: absolute;
@@ -65,6 +66,7 @@ export default class IndexPage extends React.Component {
     return (
       <Home HeroExample={HeroExample} theme="light">
         <div style={{position: 'relative'}}>
+          <Announcement />
           <FeatureImage />
           <TextContainer>
             <h2>
