@@ -26,6 +26,7 @@ import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {Accessor, Color, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {Character} from '../utils';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -102,18 +103,32 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
   draw(params) {
     const {sdf, smoothing, outlineWidth} = this.props;
     const {outlineColor} = this.state;
+    const outlineBuffer = outlineWidth
+      ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
+      : -1;
 
     params.uniforms = {
       ...params.uniforms,
       // Refer the following doc about gamma and buffer
       // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
       buffer: DEFAULT_BUFFER,
-      outlineBuffer: outlineWidth ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth)) : -1,
+      outlineBuffer,
       gamma: smoothing,
       sdf: Boolean(sdf),
       outlineColor
     };
+
     super.draw(params);
+
+    // draw text without outline on top to ensure a thick outline won't occlude other characters
+    if (sdf && outlineWidth) {
+      const {iconManager} = this.state;
+      const iconsTexture = iconManager.getTexture();
+
+      if (iconsTexture) {
+        this.state.model.draw({uniforms: {outlineBuffer: DEFAULT_BUFFER}});
+      }
+    }
   }
 
   protected getInstanceOffset(icons: string): number[] {

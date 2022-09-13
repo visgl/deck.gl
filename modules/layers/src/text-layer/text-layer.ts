@@ -535,7 +535,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
           smoothing: Number.isFinite(fontSettings.smoothing)
             ? fontSettings.smoothing
             : DEFAULT_FONT_SETTINGS.smoothing,
-          outlineWidth,
+          outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
           iconAtlas: texture,
           iconMapping: mapping,
