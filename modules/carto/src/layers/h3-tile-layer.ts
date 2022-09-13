@@ -94,7 +94,12 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         renderSubLayers,
         // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
         minZoom: minresolution,
-        maxZoom: maxresolution
+        maxZoom: maxresolution,
+        loadOptions: {
+          cartoSpatialTile: {
+            scheme: 'h3'
+          }
+        }
       })
     ];
   }
