@@ -1,12 +1,5 @@
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {
-  bigIntToHex,
-  cellToParent,
-  cellToTile,
-  getResolution,
-  hexToBigInt,
-  tileToCell
-} from 'quadbin';
+import {bigIntToHex, cellToParent, cellToTile, getResolution, tileToCell} from 'quadbin';
 
 // For calculations bigint representation is used, but
 // for constructing URL also provide the hexidecimal value

@@ -1,5 +1,3 @@
-import {bigIntToHex} from 'quadbin';
-
 export type IndexScheme = 'h3' | 'quadbin';
 type TypedArray = Float32Array | Float64Array;
 
@@ -13,7 +11,7 @@ export type Cells = {
 };
 export type SpatialBinary = {scheme?: IndexScheme; cells: Cells};
 export type SpatialJson = {
-  id: string;
+  id: string | bigint;
   properties: Properties;
 }[];
 
@@ -22,7 +20,7 @@ export function binaryToSpatialjson(binary: SpatialBinary): SpatialJson {
   const count = cells.indices.value.length;
   const spatial: any[] = [];
   for (let i = 0; i < count; i++) {
-    const id = bigIntToHex(cells.indices.value[i]);
+    const id = cells.indices.value[i];
 
     const properties = {...cells.properties[i]};
     for (const key of Object.keys(cells.numericProps)) {

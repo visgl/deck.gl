@@ -19,7 +19,7 @@ type _QuadbinLayerProps<DataT> = {
    *
    * By default, it reads `quadbin` property of data object.
    */
-  getQuadbin?: AccessorFunction<DataT, string>;
+  getQuadbin?: AccessorFunction<DataT, bigint>;
 };
 
 export default class QuadbinLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<

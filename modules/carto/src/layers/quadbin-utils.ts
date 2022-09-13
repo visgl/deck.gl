@@ -1,10 +1,10 @@
 import {worldToLngLat} from '@math.gl/web-mercator';
-import {cellToTile, hexToBigInt} from 'quadbin';
+import {cellToTile} from 'quadbin';
 
 const TILE_SIZE = 512;
 
-export function quadbinToWorldBounds(quadbin: string): [number[], number[]] {
-  const {x, y, z} = cellToTile(hexToBigInt(quadbin));
+export function quadbinToWorldBounds(quadbin: bigint): [number[], number[]] {
+  const {x, y, z} = cellToTile(quadbin);
   const mask = 1 << z;
   const scale = mask / TILE_SIZE;
   return [
@@ -13,7 +13,7 @@ export function quadbinToWorldBounds(quadbin: string): [number[], number[]] {
   ];
 }
 
-export function getQuadbinPolygon(quadbin: string): number[] {
+export function getQuadbinPolygon(quadbin: bigint): number[] {
   const [topLeft, bottomRight] = quadbinToWorldBounds(quadbin);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);
