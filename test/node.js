@@ -1,5 +1,12 @@
+// Hack: work around "type": "module" from @mapbox/tiny-sdf, for node test only
+require('fs').copyFileSync(
+  `${__dirname}/../node_modules/@mapbox/tiny-sdf/index.js`,
+  `${__dirname}/../node_modules/@mapbox/tiny-sdf/index.cjs`
+);
+
 require('@babel/register')({
-  extensions: ['.js', '.jsx', '.ts', '.tsx']
+  extensions: ['.js', '.jsx', '.cjs', '.ts', '.tsx'],
+  ignore: [/node_modules\/(?!@mapbox)/]
 });
 
 // Must import before the polyfills for h3 to detect the environment correctly
@@ -31,6 +38,9 @@ moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
 });
 moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
   return path.resolve(`${__dirname}/../node_modules/react-map-gl/dist/es5/mapbox/mapbox`);
+});
+moduleAlias.addAlias('@mapbox/tiny-sdf', (fromPath, request, alias) => {
+  return path.resolve(`${__dirname}/../node_modules/@mapbox/tiny-sdf/index.cjs`);
 });
 
 const {gl} = require('@deck.gl/test-utils');

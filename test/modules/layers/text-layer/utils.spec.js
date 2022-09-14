@@ -46,10 +46,10 @@ test('TextLayer - utils#buildMapping', t => {
     -----------+---------------
    */
   const expected = {
-    a: {x: 2, y: 2, width: 1, height: 4},
-    b: {x: 7, y: 2, width: 2, height: 4},
-    c: {x: 2, y: 10, width: 3, height: 4},
-    d: {x: 9, y: 10, width: 4, height: 4}
+    a: {x: 2, y: 2, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    b: {x: 7, y: 2, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4},
+    c: {x: 2, y: 10, width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
+    d: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');
@@ -65,10 +65,10 @@ test('TextLayer - utils#buildMapping with cache', t => {
     buffer: 2,
     maxCanvasWidth: 16,
     mapping: {
-      a: {x: 2, y: 2, width: 1, height: 4},
-      s: {x: 7, y: 2, width: 2, height: 4},
-      d: {x: 2, y: 10, width: 3, height: 4},
-      f: {x: 9, y: 10, width: 4, height: 4}
+      a: {x: 2, y: 2, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+      s: {x: 7, y: 2, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4},
+      d: {x: 2, y: 10, width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
+      f: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4}
     },
     xOffset: 15,
     yOffset: 8
@@ -81,12 +81,12 @@ test('TextLayer - utils#buildMapping with cache', t => {
   t.equal(canvasHeight, 32, 'canvasHeight should match.');
 
   const expected = {
-    a: {x: 2, y: 2, width: 1, height: 4},
-    s: {x: 7, y: 2, width: 2, height: 4},
-    d: {x: 2, y: 10, width: 3, height: 4},
-    f: {x: 9, y: 10, width: 4, height: 4},
-    p: {x: 2, y: 18, width: 1, height: 4},
-    q: {x: 7, y: 18, width: 2, height: 4}
+    a: {x: 2, y: 2, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    s: {x: 7, y: 2, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4},
+    d: {x: 2, y: 10, width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
+    f: {x: 9, y: 10, width: 4, height: 8, layoutWidth: 4, layoutHeight: 4},
+    p: {x: 2, y: 18, width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    q: {x: 7, y: 18, width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
   t.deepEqual(mapping, expected, 'mapping should match.');
@@ -99,8 +99,8 @@ test('TextLayer - utils#transformParagraph - single line', t => {
   const lineHeight = 1.0;
 
   const iconMapping = {
-    a: {width: 1, height: 4},
-    b: {width: 2, height: 4}
+    a: {width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    b: {width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
   const expected = {
@@ -122,9 +122,9 @@ test('TextLayer - utils#transformParagraph - multiple lines', t => {
   const lineHeight = 1.0;
 
   const iconMapping = {
-    a: {width: 1, height: 4},
-    b: {width: 3, height: 4},
-    c: {width: 2, height: 4}
+    a: {width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    b: {width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
+    c: {width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
   const expected = {
@@ -145,8 +145,8 @@ test('TextLayer - utils#transformParagraph - unicode', t => {
   const lineHeight = 1.0;
 
   const iconMapping = {
-    ['\u{F0004}']: {width: 1, height: 4},
-    ['\u{F0005}']: {width: 2, height: 4}
+    ['\u{F0004}']: {width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    ['\u{F0005}']: {width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
   const expected = {
@@ -168,9 +168,9 @@ test('TextLayer - utils#transformParagraph - multiple lines with line height', t
   const lineHeight = 1.5;
 
   const iconMapping = {
-    a: {width: 1, height: 4},
-    b: {width: 3, height: 4},
-    c: {width: 2, height: 4}
+    a: {width: 1, height: 8, layoutWidth: 1, layoutHeight: 4},
+    b: {width: 3, height: 8, layoutWidth: 3, layoutHeight: 4},
+    c: {width: 2, height: 8, layoutWidth: 2, layoutHeight: 4}
   };
 
   const expected = {
@@ -190,19 +190,19 @@ test('TextLayer - utils#autoWrapping', t => {
   const text = 'Amy: Hello, Ben.';
 
   const iconMapping = {
-    ' ': {width: 1},
-    A: {width: 4},
-    m: {width: 3},
-    y: {width: 2},
-    ':': {width: 1},
-    H: {width: 4},
-    e: {width: 2},
-    l: {width: 2},
-    o: {width: 1},
-    ',': {width: 2},
-    B: {width: 1},
-    n: {width: 3},
-    '.': {width: 1}
+    ' ': {width: 1, layoutWidth: 1},
+    A: {width: 4, layoutWidth: 4},
+    m: {width: 3, layoutWidth: 3},
+    y: {width: 2, layoutWidth: 2},
+    ':': {width: 1, layoutWidth: 1},
+    H: {width: 4, layoutWidth: 4},
+    e: {width: 2, layoutWidth: 2},
+    l: {width: 2, layoutWidth: 2},
+    o: {width: 1, layoutWidth: 1},
+    ',': {width: 2, layoutWidth: 2},
+    B: {width: 1, layoutWidth: 1},
+    n: {width: 3, layoutWidth: 3},
+    '.': {width: 1, layoutWidth: 1}
   };
 
   const getStartIndices = parts => {
@@ -260,12 +260,12 @@ test('TextLayer - utils#transformParagraph - autoWrapping', t => {
   const lineHeight = 1.5;
 
   const iconMapping = {
-    a: {width: 1, height: 4},
-    b: {width: 3, height: 4},
-    c: {width: 2, height: 4},
-    d: {width: 10, height: 4},
-    e: {width: 2, height: 4},
-    ' ': {width: 1, height: 4}
+    a: {width: 5, height: 8, layoutWidth: 1, layoutHeight: 4},
+    b: {width: 7, height: 8, layoutWidth: 3, layoutHeight: 4},
+    c: {width: 6, height: 8, layoutWidth: 2, layoutHeight: 4},
+    d: {width: 14, height: 8, layoutWidth: 10, layoutHeight: 4},
+    e: {width: 6, height: 8, layoutWidth: 2, layoutHeight: 4},
+    ' ': {width: 5, height: 8, layoutWidth: 1, layoutHeight: 4}
   };
 
   const expected = {
