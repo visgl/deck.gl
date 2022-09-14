@@ -408,8 +408,9 @@ export function getIconUrlAccessor(
 
 export function getMaxMarkerSize(visConfig: VisConfig, visualChannels: VisualChannels): number {
   const {radiusRange, radius} = visConfig;
-  const {radiusField} = visualChannels;
-  return Math.ceil(radiusRange && radiusField ? radiusRange[1] : radius);
+  const {radiusField, sizeField} = visualChannels;
+  const field = radiusField || sizeField;
+  return Math.ceil(radiusRange && field ? radiusRange[1] : radius);
 }
 
 export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, number> {
