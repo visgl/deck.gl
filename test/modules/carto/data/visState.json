@@ -269,6 +269,281 @@
     ]
   },
   {
+    "title": "point + label + single marker",
+    "visState": {
+      "layers": [
+        {
+          "id": "vlu4f7d",
+          "type": "point",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Stores",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude", "altitude": null},
+            "isVisible": true,
+            "textLabel": [
+              {
+                "size": 18,
+                "color": [255, 255, 255],
+                "field": {"name": "city", "type": "string"},
+                "anchor": "end",
+                "offset": [0, 0],
+                "alignment": "top"
+              }
+            ],
+            "visConfig": {
+              "filled": true,
+              "radius": 20.2,
+              "opacity": 0.42,
+              "outline": true,
+              "thickness": 4.5,
+              "customMarkers": true,
+              "customMarkersUrl": "https://icon.somewhere.com/icon.svg",
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "fixedRadius": false,
+              "radiusRange": [0, 50],
+              "strokeColor": [232, 250, 250],
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": {"name": "size_m2", "type": "integer"},
+            "strokeColorScale": "quantile"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "additive",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "0424a64c-8ba1-4ee9-a5ab-9f5d58f065f6": [
+              {"name": "cartodb_id", "format": null},
+              {"name": "storetype", "format": null},
+              {"name": "address", "format": null},
+              {"name": "city", "format": null},
+              {"name": "state", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "props": {
+          "id": "vlu4f7d",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
+          "autoHighlight": true,
+          "pickable": true,
+          "getIconColor": [18, 147, 154],
+          "visible": true,
+          "cartoLabel": "Stores",
+          "filled": true,
+          "getLineWidth": 4.5,
+          "getIconSize": 20.2,
+          "stroked": true,
+          "highlightColor": [252, 242, 26, 255],
+          "pointType": "icon",
+          "_subLayerProps": {
+            "points-icon": {
+              "loadOptions": {
+                "image": {
+                  "type": "imagebitmap"
+                },
+                "imagebitmap": {
+                  "resizeWidth": 21,
+                  "resizeHeight": 21,
+                  "resizeQuality": "high"
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
+        "props": {
+          "id": "vlu4f7d-label-city",
+
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
+          "getFillColor": [18, 147, 154, 255],
+          "visible": true,
+          "cartoLabel": "Stores-label-city",
+          "getTextAlignmentBaseline": "top",
+          "getTextAnchor": "end",
+          "getTextColor": [255, 255, 255, 255],
+          "getTextSize": 18,
+          "filled": true,
+          "getLineWidth": 4.5,
+          "getPointRadius": 20.2,
+          "stroked": true,
+          "highlightColor": [252, 242, 26, 255],
+          "pointType": "text",
+          "getTextPixelOffset": [-40.2, -58.2]
+        }
+      }
+    ]
+  },
+  {
+    "title": "point + multi markers",
+    "visState": {
+      "layers": [
+        {
+          "id": "vlu4f7d",
+          "type": "point",
+          "config": {
+            "color": [18, 147, 154],
+            "label": "Stores",
+            "dataId": "DATA_ID",
+            "hidden": false,
+            "columns": {"lat": "latitude", "lng": "longitude", "altitude": null},
+            "isVisible": true,
+            "textLabel": [],
+            "visConfig": {
+              "filled": true,
+              "radius": 32,
+              "opacity": 0.42,
+              "outline": true,
+              "thickness": 4.5,
+              "customMarkers": true,
+              "customMarkersUrl": "https://icon.somewhere.com/icon.svg",
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "fixedRadius": false,
+              "radiusRange": [0, 50],
+              "strokeColor": [232, 250, 250],
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "colors": ["#5A1846", "#900C3F", "#C70039", "#E3611C", "#F1920E", "#FFC300"],
+                "category": "Uber"
+              },
+              "customMarkersRange": {
+                "markerMap": [
+                  {"value": "Supermarket", "markerUrl": "https://example.com/icon.svg"},
+                  {"value": "Drugstore", "markerUrl": "https://example.com/2.svg"}
+                ],
+                "othersMarker": "https://example.com/2.svg"
+              }
+            },
+            "highlightColor": [252, 242, 26, 255]
+          },
+          "visualChannels": {
+            "sizeField": null,
+            "sizeScale": "linear",
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": {"name": "size_m2", "type": "integer"},
+            "strokeColorScale": "quantile",
+            "customMarkersField": {"name": "storetype", "type": "string"},
+            "customMarkersScale": "ordinal"
+          }
+        }
+      ],
+      "filters": [],
+      "splitMaps": [],
+      "layerBlending": "additive",
+      "animationConfig": {"speed": 1, "currentTime": null},
+      "interactionConfig": {
+        "brush": {"size": 0.5, "enabled": false},
+        "tooltip": {
+          "enabled": true,
+          "compareMode": false,
+          "compareType": "absolute",
+          "fieldsToShow": {
+            "0424a64c-8ba1-4ee9-a5ab-9f5d58f065f6": [
+              {"name": "cartodb_id", "format": null},
+              {"name": "storetype", "format": null},
+              {"name": "address", "format": null},
+              {"name": "city", "format": null},
+              {"name": "state", "format": null}
+            ]
+          }
+        },
+        "geocoder": {"enabled": false},
+        "coordinate": {"enabled": false}
+      }
+    },
+    "layers": [
+      {
+        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "props": {
+          "id": "vlu4f7d",
+          "lineMiterLimit": 2,
+          "lineWidthUnits": "pixels",
+          "pointRadiusUnits": "pixels",
+          "rounded": true,
+          "wrapLongitude": false,
+          "parameters": {"blendFunc": [770, 772], "blendEquation": 32774},
+          "autoHighlight": true,
+          "pickable": true,
+          "getIconColor": [18, 147, 154],
+          "visible": true,
+          "cartoLabel": "Stores",
+          "filled": true,
+          "getLineWidth": 4.5,
+          "getIconSize": 32,
+          "stroked": true,
+          "highlightColor": [252, 242, 26, 255],
+          "pointType": "icon",
+          "_subLayerProps": {
+            "points-icon": {
+              "loadOptions": {
+                "image": {
+                  "type": "imagebitmap"
+                },
+                "imagebitmap": {
+                  "resizeWidth": 32,
+                  "resizeHeight": 32,
+                  "resizeQuality": "high"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
     "title": "tileset point and line",
     "visState": {
       "layers": [

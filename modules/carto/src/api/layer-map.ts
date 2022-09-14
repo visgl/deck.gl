@@ -13,7 +13,7 @@ import {
 import {format as d3Format} from 'd3-format';
 import moment from 'moment-timezone';
 
-import {Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
+import {Accessor, Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
@@ -23,6 +23,15 @@ import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import {TILE_FORMATS} from './maps-api-common';
 import {assert} from '../utils';
+import {
+  CustomMarkersRange,
+  MapDataset,
+  MapTextSubLayerConfig,
+  TextLabel,
+  VisConfig,
+  VisualChannelField,
+  VisualChannels
+} from './types';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -35,6 +44,10 @@ const SCALE_FUNCS = {
   custom: scaleThreshold
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
+
+function identity<T>(v: T): T {
+  return v;
+}
 
 const UNKNOWN_COLOR = '#868d91';
 
@@ -88,6 +101,13 @@ const sharedPropMap = {
   }
 };
 
+const customMarkersPropsMap = {
+  color: 'getIconColor',
+  visConfig: {
+    radius: 'getIconSize'
+  }
+};
+
 const aggregationVisConfig = {
   colorAggregation: x => ({colorAggregation: AGGREGATION[x] || AGGREGATION.sum}),
   colorRange: x => ({colorRange: x.colors.map(hexToRGBA)}),
@@ -110,11 +130,16 @@ function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {})
 
 export function getLayer(
   type: string,
-  config,
-  dataset
+  config: MapTextSubLayerConfig,
+  dataset: MapDataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
+  let basePropMap: any = sharedPropMap;
+
+  if (config.visConfig?.customMarkers && !config.textLabel) {
+    basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
+  }
   if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
-    return getTileLayer(dataset);
+    return getTileLayer(dataset, basePropMap);
   }
 
   const geoColumn = dataset?.geoColumn;
@@ -160,7 +185,7 @@ export function getLayer(
   assert(layer, `Unsupported layer type: ${type}`);
   return {
     ...layer,
-    propMap: mergePropMaps(sharedPropMap, layer.propMap),
+    propMap: mergePropMaps(basePropMap, layer.propMap),
     defaultProps: {...defaultProps, ...layer.defaultProps}
   };
 }
@@ -183,7 +208,7 @@ export function layerFromTileDataset(
   return CartoTileLayer;
 }
 
-function getTileLayer(dataset) {
+function getTileLayer(dataset: MapDataset, basePropMap) {
   const {
     aggregationExp,
     aggregationResLevel,
@@ -197,7 +222,7 @@ function getTileLayer(dataset) {
 
   return {
     Layer: layerFromTileDataset(formatTiles, scheme),
-    propMap: sharedPropMap,
+    propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
       ...(aggregationExp && {aggregationExp}),
@@ -225,7 +250,7 @@ function domainFromAttribute(attribute, scaleType: SCALE_TYPE, scaleLength: numb
 }
 
 function domainFromValues(values, scaleType: SCALE_TYPE) {
-  if (scaleType === 'ordinal') {
+  if (scaleType === 'ordinal' || scaleType === 'point') {
     return groupSort(
       values,
       g => -g.length,
@@ -268,7 +293,7 @@ function normalizeAccessor(accessor, data) {
   return accessor;
 }
 
-export function opacityToAlpha(opacity) {
+export function opacityToAlpha(opacity?: number) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
@@ -339,16 +364,71 @@ export function getColorAccessor(
   return normalizeAccessor(accessor, data);
 }
 
-export function getSizeAccessor(
-  {name},
-  scaleType: SCALE_TYPE,
-  aggregation,
-  range: Iterable<Range>,
+const FALLBACK_ICON =
+  'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiLz4NCjwvc3ZnPg==';
+
+export function getIconUrlAccessor(
+  field: VisualChannelField | null | undefined,
+  fallbackUrl: string | null | undefined,
+  range: CustomMarkersRange | null | undefined,
+  maxIconSize: number,
   data: any
 ) {
-  const scale = SCALE_FUNCS[scaleType as any]();
-  scale.domain(calculateDomain(data, name, scaleType));
-  scale.range(range);
+  const urlToUnpackedIcon = (url: string) => ({
+    id: `${url}@@${maxIconSize}`,
+    url,
+    width: maxIconSize,
+    height: maxIconSize,
+    mask: true
+  });
+  let unknownValue = fallbackUrl || FALLBACK_ICON;
+
+  if (range?.othersMarker) {
+    unknownValue = range.othersMarker;
+  }
+
+  const unknownIcon = urlToUnpackedIcon(unknownValue);
+  if (!range || !field) {
+    return () => unknownIcon;
+  }
+
+  const mapping: Record<string, any> = {};
+  for (const {value, markerUrl} of range.markerMap) {
+    if (markerUrl) {
+      mapping[value] = urlToUnpackedIcon(markerUrl);
+    }
+  }
+
+  const accessor = properties => {
+    const propertyValue = properties[field.name];
+    return mapping[propertyValue] || unknownIcon;
+  };
+  return normalizeAccessor(accessor, data);
+}
+
+export function getMaxMarkerSize(visConfig: VisConfig, visualChannels: VisualChannels): number {
+  const {radiusRange, radius} = visConfig;
+  const {radiusField, sizeField} = visualChannels;
+  const field = radiusField || sizeField;
+  return Math.ceil(radiusRange && field ? radiusRange[1] : radius);
+}
+
+export function negateAccessor<T>(accessor: Accessor<T, number>): Accessor<T, number> {
+  return typeof accessor === 'function' ? (d, i) => -accessor(d, i) : -accessor;
+}
+
+export function getSizeAccessor(
+  {name},
+  scaleType: SCALE_TYPE | undefined,
+  aggregation,
+  range: Iterable<Range> | undefined,
+  data: any
+) {
+  const scale = scaleType ? SCALE_FUNCS[scaleType as any]() : identity;
+  if (scaleType) {
+    scale.domain(calculateDomain(data, name, scaleType));
+    scale.range(range);
+  }
 
   let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
@@ -369,7 +449,7 @@ const FORMATS: Record<string, (value: any) => string> = {
   default: String
 };
 
-export function getTextAccessor({name, type}, data) {
+export function getTextAccessor({name, type}: VisualChannelField, data) {
   const format = FORMATS[type] || FORMATS.default;
   const accessor = properties => {
     return format(properties[name]);
@@ -377,13 +457,19 @@ export function getTextAccessor({name, type}, data) {
   return normalizeAccessor(accessor, data);
 }
 
-export function getTextPixelOffsetAccessor({alignment, anchor, size}, radius) {
+export function getTextPixelOffsetAccessor(
+  {alignment, anchor, size}: TextLabel,
+  radius
+): Accessor<unknown, [number, number]> {
   const padding = 20;
   const signX = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
   const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
   const sizeOffset = alignment === 'center' ? 0 : size;
 
-  const calculateOffset = r => [signX * (r + padding), signY * (r + padding + sizeOffset)];
+  const calculateOffset = (r: number): [number, number] => [
+    signX * (r + padding),
+    signY * (r + padding + sizeOffset)
+  ];
 
   return typeof radius === 'function'
     ? d => {
