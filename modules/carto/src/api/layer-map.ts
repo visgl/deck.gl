@@ -250,7 +250,7 @@ function domainFromAttribute(attribute, scaleType: SCALE_TYPE, scaleLength: numb
 }
 
 function domainFromValues(values, scaleType: SCALE_TYPE) {
-  if (scaleType === 'ordinal') {
+  if (scaleType === 'ordinal' || scaleType === 'point') {
     return groupSort(
       values,
       g => -g.length,
