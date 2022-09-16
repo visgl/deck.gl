@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.11] - Sep 16 2022
+
+- Carto: fetchMap support for custom markers (#7250)
+
 #### deck.gl [8.8.10] - Sep 8 2022
 
 - CARTO: Support fields when parsing CartoVectorTiles (#7248, #7194)
