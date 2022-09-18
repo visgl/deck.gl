@@ -81,13 +81,40 @@ test('jupyter-widget: tooltip', t0 => {
   });
 
   t0.test('substituteIn', t => {
-    t.equal(
-      substituteIn('"{quote}" - {origin}', {
-        quote: "Be an optimist. There's not much use being anything else.",
-        origin: 'Winston Churchill'
-      }),
-      '"Be an optimist. There\'s not much use being anything else." - Winston Churchill'
-    );
+    const TESTING_TABLE = [
+      {
+        template: '"{quote}" - {origin}',
+        json: {
+          quote: "Be an optimist. There's not much use being anything else.",
+          origin: 'Winston Churchill'
+        },
+        expected: '"Be an optimist. There\'s not much use being anything else." - Winston Churchill'
+      },
+      {
+        template: 'Total population ({city}): {pop}',
+        json: {
+          properties: {
+            pop: 3305408,
+            city: "Madrid"
+          }
+        },
+        expected: 'Total population (Madrid): 3305408'
+      },
+      {
+        template: 'The Answer to the Ultimate Question of Life, The Universe, and Everything: {a.b.c}',
+        json: {
+          a: {
+            b: {
+              c: 42
+            }
+          }
+        },
+        expected: 'The Answer to the Ultimate Question of Life, The Universe, and Everything: 42'
+      }
+    ];
+    for (const kv of TESTING_TABLE) {
+      t.equal(substituteIn(kv.template, kv.json), kv.expected);
+    }
     t.end();
   });
 
