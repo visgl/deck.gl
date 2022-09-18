@@ -95,13 +95,14 @@ test('jupyter-widget: tooltip', t0 => {
         json: {
           properties: {
             pop: 3305408,
-            city: "Madrid"
+            city: 'Madrid'
           }
         },
         expected: 'Total population (Madrid): 3305408'
       },
       {
-        template: 'The Answer to the Ultimate Question of Life, The Universe, and Everything: {a.b.c}',
+        template:
+          'The Answer to the Ultimate Question of Life, The Universe, and Everything: {a.b.c}',
         json: {
           a: {
             b: {
