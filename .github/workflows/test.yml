@@ -55,7 +55,14 @@ jobs:
           make setup-env
           make init
 
-      - name: Run tests
+      - name: Run pydeck tests
         run: |
           cd bindings/pydeck
+          make test
+
+      - name: Run pydeck-carto tests
+        run: |
+          cd bindings/pydeck-carto
+          make init
+          make lint
           make test
