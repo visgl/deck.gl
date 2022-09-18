@@ -2,11 +2,11 @@ from os.path import join
 from setuptools import find_packages, setup
 
 version_ns = {}
-with open(join("carto_pydeck", "_version.py")) as f:
+with open(join("pydeck_carto", "_version.py")) as f:
     exec(f.read(), {}, version_ns)
 
 setup(
-    name="carto-pydeck",
+    name="pydeck-carto",
     version=version_ns["__version__"],
     description="Pydeck wrapper for use with CARTO",
     long_description=open("README.md").read(),
@@ -14,7 +14,7 @@ setup(
     keywords=["pydeck", "carto", "visualization", "graphics", "GIS", "maps"],
     author="CARTO",
     author_email="jarroyo@carto.com",
-    url="https://github.com/visgl/deck.gl/tree/master/bindings/carto-pydeck",
+    url="https://github.com/visgl/deck.gl/tree/master/bindings/pydeck-carto",
     license="BSD 3-Clause",
     packages=find_packages(exclude=["examples", "tests"]),
     python_requires=">=3.7",

@@ -10,11 +10,11 @@ init:
 	$(BIN)/pip install -e .
 
 lint:
-	$(BIN)/black carto_pydeck tests examples setup.py
-	$(BIN)/flake8 carto_pydeck tests examples setup.py
+	$(BIN)/black pydeck_carto tests examples setup.py
+	$(BIN)/flake8 pydeck_carto tests examples setup.py
 
 test:
-	$(BIN)/pytest tests carto_pydeck
+	$(BIN)/pytest tests pydeck_carto
 
 publish-pypi:
 	rm -rf $(DIST) $(BUILD) *.egg-info

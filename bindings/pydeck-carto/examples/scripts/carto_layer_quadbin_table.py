@@ -5,14 +5,13 @@ CartoLayer
 Render cloud data in Quadbin grid from a table.
 """
 import pydeck as pdk
-
 from carto_auth import CartoAuth
-from carto_pydeck import register_carto_layer, get_layer_credentials, notify_error
-from carto_pydeck.layer import MapType, CartoConnection, GeoColumnType
-
-register_carto_layer()
+from pydeck_carto import register_carto_layer, get_layer_credentials, notify_error
+from pydeck_carto.layer import MapType, CartoConnection, GeoColumnType
 
 carto_auth = CartoAuth.from_oauth()
+
+register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
@@ -30,4 +29,4 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=36, longitude=-7.44, zoom=5)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
-r.to_html("carto_layer_spatial_quadbin_table.html", open_browser=True)
+r.to_html("carto_layer_quadbin_table.html", open_browser=True)

@@ -5,15 +5,14 @@ CartoLayer
 Render cloud data with color categories style.
 """
 import pydeck as pdk
-
 from carto_auth import CartoAuth
-from carto_pydeck import register_carto_layer, get_layer_credentials, notify_error
-from carto_pydeck.layer import MapType, CartoConnection
-from carto_pydeck.styles import color_categories
-
-register_carto_layer()
+from pydeck_carto import register_carto_layer, get_layer_credentials, notify_error
+from pydeck_carto.layer import MapType, CartoConnection
+from pydeck_carto.styles import color_categories
 
 carto_auth = CartoAuth.from_oauth()
+
+register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
@@ -43,6 +42,7 @@ layer = pdk.Layer(
     pickable=True,
     on_data_error=notify_error(),
 )
+
 view_state = pdk.ViewState(latitude=40.715, longitude=-73.959, zoom=14)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.LIGHT, initial_view_state=view_state)

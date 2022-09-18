@@ -2,8 +2,8 @@ import json
 import pydeck as pdk
 
 from carto_auth import CartoAuth
-from carto_pydeck import register_carto_layer, get_layer_credentials, notify_error
-from carto_pydeck.layer import MapType, CartoConnection
+from pydeck_carto import register_carto_layer, get_layer_credentials, notify_error
+from pydeck_carto.layer import MapType, CartoConnection
 
 
 def test_register_carto_layer():

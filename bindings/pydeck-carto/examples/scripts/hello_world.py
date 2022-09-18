@@ -6,8 +6,8 @@ https://docs.carto.com/deck-gl/examples/basic-examples/hello-world/
 """
 
 import pydeck as pdk
-from carto_pydeck import register_carto_layer
-from carto_pydeck.layer import MapType
+from pydeck_carto import register_carto_layer
+from pydeck_carto.layer import MapType
 
 register_carto_layer()
 
