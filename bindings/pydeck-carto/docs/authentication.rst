@@ -1,7 +1,7 @@
 Authentication
 ==============
 
-Pydeck-carto supports two types of authentications using the `carto-auth <https://github.com/cartodb/carto-auth>`_ package.
+Pydeck-carto supports two types of authentication using the `carto-auth <https://github.com/cartodb/carto-auth>`_ package.
 
 * Authentication using OAuth
 * Authentication using a credentials file
