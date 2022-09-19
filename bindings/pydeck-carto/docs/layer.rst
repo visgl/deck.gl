@@ -12,7 +12,7 @@ Example
 
     import pydeck as pdk
     from carto_auth import CartoAuth
-    from pydeck_carto import register_carto_layer, get_layer_credentials, notify_error
+    from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
     from pydeck_carto.layer import MapType, CartoConnection
 
     # Authentication with CARTO
@@ -31,7 +31,7 @@ Example
         get_fill_color=[238, 77, 90],
         point_radius_min_pixels=2.5,
         pickable=True,
-        on_data_error=notify_error(),
+        on_data_error=get_error_notifier(),
     )
     view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
     pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
@@ -51,7 +51,7 @@ Parameters
 
 * **geo_column**: (``pydeck.types.String``, optional) Name of the geo_column in the CARTO platform. It also support spatial indexes (h3, quadbin) :meth:`pydeck_carto.layer.GeoColumnType`.
 
-* **on_data_error** (``pydeck.types.Function``, optional): Callback called when the request to the CARTO Maps API failed. It is recommended to use with :meth:`pydeck_carto.notify_error` to display the error in the visualization.
+* **on_data_error** (``pydeck.types.Function``, optional): Callback called when the request to the CARTO Maps API failed. It is recommended to use with :meth:`pydeck_carto.get_error_notifier` to display the error in the visualization.
 
 Reference
 ^^^^^^^^^
