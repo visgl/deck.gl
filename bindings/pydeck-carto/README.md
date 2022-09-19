@@ -60,3 +60,8 @@ Make commands:
 - publish-pypi: publish package in pypi.org
 - publish-test-pypi: publish package in test.pypi.org
 - clean: remove the environment
+
+## Contributors
+
+- [Jesús Arroyo](https://github.com/jesus89)
+- [Óscar Ramírez](https://github.com/tuxskar)

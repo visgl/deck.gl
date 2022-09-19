@@ -16,7 +16,8 @@ register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
-    data="SELECT geom, pct_higher_ed FROM `cartobq.public_account.higher_edu_by_county`",
+    data="SELECT geom, pct_higher_ed "
+    "FROM `cartobq.public_account.higher_edu_by_county`",
     type_=MapType.QUERY,
     connection=CartoConnection.CARTO_DW,
     credentials=get_layer_credentials(carto_auth),
