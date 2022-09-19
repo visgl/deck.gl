@@ -1,7 +1,7 @@
 import json
 
 import pydeck as pdk
-from pydeck_carto import register_carto_layer, notify_error
+from pydeck_carto import register_carto_layer, get_error_notifier
 from pydeck_carto.layer import MapType, CartoConnection
 
 
@@ -11,14 +11,14 @@ def test_register_carto_layer():
     assert pdk.settings.custom_libraries[0]["libraryName"] == "CartoLayerLibrary"
 
 
-def test_notify_error_func():
+def test_get_error_notifier_func():
     layer = pdk.Layer(
         "CartoLayer",
         data="carto-demo-data.demo_tables.wrong_table",
         type_=MapType.TABLE,
         connection=CartoConnection.CARTO_DW,
         credentials={},
-        on_data_error=notify_error(),
+        on_data_error=get_error_notifier(),
     )
     json_input = json.loads(layer.to_json())
 

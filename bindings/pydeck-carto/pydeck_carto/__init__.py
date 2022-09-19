@@ -3,7 +3,7 @@ from .layer import register_carto_layer
 from .carto_auth.auth import CartoAuth, CredentialsError
 from .carto_auth.layer_validator import is_valid_carto_layer
 from .styles import color_bins, color_categories, color_continuous
-from .error import notify_error
+from .error import get_error_notifier
 
 __all__ = [
     "__version__",
@@ -14,5 +14,5 @@ __all__ = [
     "color_bins",
     "color_categories",
     "color_continuous",
-    "notify_error",
+    "get_error_notifier",
 ]
