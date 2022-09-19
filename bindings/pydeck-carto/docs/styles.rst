@@ -1,7 +1,7 @@
 CARTO Styles
 ============
 
-CARTO provides data-driven out-of-the-box styling functions for colors. Can be used with any pydeck layer.
+CARTO provides data-driven out-of-the-box styling functions for colors. Check the full list of `Carto styles in deck.gl <https://deck.gl/docs/api-reference/carto/styles>`_.
 
 Example
 ^^^^^^^
