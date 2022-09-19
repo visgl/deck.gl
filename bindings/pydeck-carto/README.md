@@ -1,6 +1,9 @@
 # pydeck-carto
 
-Pydeck wrapper for use with CARTO
+[![PyPI version](https://badge.fury.io/py/pydeck-carto.svg)](https://badge.fury.io/py/pydeck-carto)
+[![Documentation Status](https://readthedocs.org/projects/pydeck-carto/badge/?version=latest)](https://pydeck-carto.readthedocs.io)
+
+[Pydeck](https://pydeck.gl/) wrapper for use with [CARTO](carto.com).
 
 ## Install
 
@@ -48,7 +51,7 @@ view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
 ```
 
-For more information, check the [examples](./examples) section.
+For more information, check the [examples](./examples) section and the [documentation](https://pydeck-carto.readthedocs.io).
 
 ## Development
 
