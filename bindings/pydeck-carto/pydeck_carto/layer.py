@@ -34,6 +34,19 @@ def register_carto_layer():
         "libraryName": library_name,
         "resourceUri": CARTO_LAYER_BUNDLE_URL,
     }
+    configuration = """{
+        functions: {
+            notifyError: () => {
+                return (e) => {
+                    document.body.style.cssText = 'padding:24px;font-size:14px;font-family:monospace';
+                    document.body.innerHTML = `<b>Layer Error</b>: ${e.message}`;
+                }
+            }
+        }
+    }"""  # noqa
+
+    if pdk.settings.configuration is None:
+        pdk.settings.configuration = configuration
 
     if pdk.settings.custom_libraries is None:
         pdk.settings.custom_libraries = [custom_library]
