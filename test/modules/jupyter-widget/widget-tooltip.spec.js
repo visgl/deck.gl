@@ -101,6 +101,16 @@ test('jupyter-widget: tooltip', t0 => {
         expected: 'Total population (Madrid): 3305408'
       },
       {
+        template: 'Total population ({properties.city}): {properties.pop}',
+        json: {
+          properties: {
+            pop: 3305408,
+            city: 'Madrid'
+          }
+        },
+        expected: 'Total population (Madrid): 3305408'
+      },
+      {
         template:
           'The Answer to the Ultimate Question of Life, The Universe, and Everything: {a.b.c}',
         json: {
