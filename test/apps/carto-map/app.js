@@ -72,7 +72,9 @@ const examples = [
   '6a447e5b-9bb8-41f0-99aa-2e081371b7da',
   'eb6fa89b-d8d1-4431-ab40-73b0c4b290bd',
   '12119dd2-0ddb-4fd2-b48a-15a1b7511e52',
-  '3c892452-3806-4ebf-821b-a76f4562dd0c'
+  '3c892452-3806-4ebf-821b-a76f4562dd0c',
+  '21cc8261-e626-4778-a78b-76fe8b808214', // markers tilesets
+  '4e8f215f-97b4-4f4e-8b53-465c3908c317' // markers points
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id') : examples[0];

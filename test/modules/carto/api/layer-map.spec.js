@@ -127,6 +127,14 @@ const SIZE_TESTS = [
     data: [{v: 1}, {v: 10}],
     d: {v: 5},
     expected: 698.9700043360187
+  },
+  {
+    sizeField: {name: 'v'},
+    sizeScale: 'point',
+    sizeRange: [0, 1000],
+    data: [{v: 'a'}, {v: 'b'}, {v: 'c'}],
+    d: {v: 'b'},
+    expected: 500
   }
 ];
 
@@ -218,5 +226,6 @@ test('domainFromValues', t => {
   t.deepEquals(_domainFromValues([1, 4, 2, 3, 1], 'quantile'), [1, 1, 2, 3, 4]);
   t.deepEquals(_domainFromValues([1, 0, -3], 'log'), [-3, 1]);
   t.deepEquals(_domainFromValues([1, 0, 3], 'log'), [0.00001, 3]);
+  t.deepEquals(_domainFromValues(['a', 'c', 'b', 'c', 'a'], 'point'), ['a', 'c', 'b']);
   t.end();
 });
