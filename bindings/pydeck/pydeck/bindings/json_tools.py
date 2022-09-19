@@ -83,7 +83,7 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
 
 def serialize(serializable):
     """Takes a serializable object and JSONifies it"""
-    return json.dumps(serializable, sort_keys=True, default=default_serialize)
+    return json.dumps(serializable, sort_keys=True, default=default_serialize, indent=2)
 
 
 class JSONMixin(object):
