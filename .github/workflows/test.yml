@@ -54,15 +54,15 @@ jobs:
           cd bindings/pydeck
           make setup-env
           make init
+          cd ../pydeck-carto
+          make init
 
       - name: Run pydeck tests
         run: |
           cd bindings/pydeck
-          make test
+          make ci
 
       - name: Run pydeck-carto tests
         run: |
           cd bindings/pydeck-carto
-          make init
-          make lint
-          make test
+          make ci

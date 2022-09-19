@@ -47,7 +47,7 @@ prepare-jupyter:
 
 test:
 	$(BIN)python -m flake8 . && \
-	$(BIN)python -m pytest --cov=pydeck 
+	$(BIN)python -m pytest --cov=pydeck
 
 bump-version:
 	@read -p "Choose a release type {MAJOR, MINOR, PATCH, BETA, ALPHA, RC}:" choice; \
@@ -71,3 +71,6 @@ release:
 	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
 	git commit -am "pydeck $$VERSION";
 	$(MAKE) publish-pypi;
+
+ci:
+	$(MAKE) test
