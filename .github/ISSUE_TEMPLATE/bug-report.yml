@@ -7,7 +7,7 @@ body:
   attributes:
     value: |
       Thank you for taking the time to report a bug!
-      You may find answers faster by searching in [the documentation](https://deck.gl/search) and [existing issues](https://github.com/visgl/deck.gl/issue).
+      You may find answers faster by searching in [the documentation](https://deck.gl/search) and [existing issues](https://github.com/visgl/deck.gl/issues).
       If you are unsure whether it is a bug in your own implementation or the library itself, consider starting a conversation in [Discussions](https://github.com/visgl/deck.gl/discussions) instead.
 - type: textarea
   attributes:
@@ -38,7 +38,7 @@ body:
     label: Steps to Reproduce
     description: |
       Providing the following could help us resolve this issue faster:
-        - A Codepen that reproduces the behavior. A good starting point is the "edit in CodePen" links in the layer documentations. 
+        - A Codepen that reproduces the behavior. A good starting point is the "edit in CodePen" links in the layer documentations.
         - A sample of your dataset
   validations:
     required: true

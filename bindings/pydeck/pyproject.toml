@@ -1,6 +1,6 @@
 [project]
 name = "pydeck"
-version = "0.8.0b2"
+version = "0.8.0b3"
 requires-python = ">=3.7"
 
 [build-system]

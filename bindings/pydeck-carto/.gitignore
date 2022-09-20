@@ -163,6 +163,7 @@ $RECYCLE.BIN/
 test.html
 
 # Custom
+.carto_token.json
 carto_credentials.json
 *.html
-.carto_token.json
+
