@@ -98,6 +98,7 @@ class Deck(JSONMixin):
 
             self.deck_widget = DeckGLWidget()
             self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
+            self.deck_widget.configuration = pydeck_settings.configuration
 
             self.deck_widget.height = height
             self.deck_widget.width = width
@@ -209,6 +210,7 @@ class Deck(JSONMixin):
             iframe_width=iframe_width,
             tooltip=self._tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
+            configuration=pydeck_settings.configuration,
             as_string=as_string,
             offline=offline,
             **kwargs,

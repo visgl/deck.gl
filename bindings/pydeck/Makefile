@@ -25,7 +25,7 @@ fast-build:
 	python setup.py develop
 
 pre-commit:
-	python -m black . --target-version py34 && $(MAKE) test
+	python -m black . --exclude=env --target-version py34 && $(MAKE) test
 
 setup-env:
 	test `command -v python3` || echo Please install python3

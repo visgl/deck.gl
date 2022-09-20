@@ -61,6 +61,7 @@ class DeckGLWidget(DOMWidget):
     json_input = Unicode("").tag(sync=True)
     data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
     custom_libraries = Any(allow_none=True).tag(sync=True)
+    configuration = Any(allow_none=True).tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Any("100%").tag(sync=True)
