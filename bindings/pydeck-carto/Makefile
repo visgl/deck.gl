@@ -28,3 +28,7 @@ publish-test-pypi:
 
 clean:
 	rm -rf $(VENV) $(DIST) $(BUILD) *.egg-info
+
+ci:
+	$(MAKE) lint
+	$(MAKE) test

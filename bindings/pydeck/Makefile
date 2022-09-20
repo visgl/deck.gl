@@ -71,3 +71,6 @@ release:
 	VERSION=$$(python -c "import pydeck; print(pydeck.__version__)");
 	git commit -am "pydeck $$VERSION";
 	$(MAKE) publish-pypi;
+
+ci:
+	$(MAKE) test
