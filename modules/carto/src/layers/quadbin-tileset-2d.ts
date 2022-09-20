@@ -1,34 +1,36 @@
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {tileToQuadbin, quadbinToTile, quadbinParent, quadbinZoom} from './quadbin-utils';
+import {bigIntToHex, cellToParent, cellToTile, getResolution, tileToCell} from 'quadbin';
 
-type QuadbinTileIndex = {i: string};
+// For calculations bigint representation is used, but
+// for constructing URL also provide the hexidecimal value
+type QuadbinTileIndex = {q: bigint; i?: string};
 
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
   getTileIndices(opts): QuadbinTileIndex[] {
     return super
       .getTileIndices(opts)
-      .map(tileToQuadbin)
-      .map(i => ({i}));
+      .map(tileToCell)
+      .map(q => ({q, i: bigIntToHex(q)}));
   }
 
   // @ts-expect-error TileIndex must be generic
-  getTileId({i}: QuadbinTileIndex): string {
-    return i;
+  getTileId({q, i}: QuadbinTileIndex): string {
+    return i || bigIntToHex(q);
   }
 
   // @ts-expect-error TileIndex must be generic
-  getTileMetadata({i}: QuadbinTileIndex) {
-    return super.getTileMetadata(quadbinToTile(i));
+  getTileMetadata({q}: QuadbinTileIndex) {
+    return super.getTileMetadata(cellToTile(q));
   }
 
   // @ts-expect-error TileIndex must be generic
-  getTileZoom({i}: QuadbinTileIndex): number {
-    return Number(quadbinZoom(i));
+  getTileZoom({q}: QuadbinTileIndex): number {
+    return Number(getResolution(q));
   }
 
   // @ts-expect-error TileIndex must be generic
-  getParentIndex({i}: QuadbinTileIndex): QuadbinTileIndex {
-    return {i: quadbinParent(i)};
+  getParentIndex({q}: QuadbinTileIndex): QuadbinTileIndex {
+    return {q: cellToParent(q)};
   }
 }
