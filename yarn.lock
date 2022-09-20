@@ -11030,6 +11030,11 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
+quadbin@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/quadbin/-/quadbin-0.1.2.tgz#7af916bcdb4dbbbb2722b076906b9dab25bd6647"
+  integrity sha512-tARFTuto2M11HqBTiVAEkagfTlkf+8dHfqiSG+yEYNo7Na4pvsjBLAkrdysp+AUnqSg8ZwHPigtK7u4CmaIySw==
+
 querystring-es3@^0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"

@@ -64,7 +64,12 @@ export default class QuadbinTileLayer<DataT = any, ExtraProps = {}> extends Comp
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
-        maxZoom
+        maxZoom,
+        loadOptions: {
+          cartoSpatialTile: {
+            scheme: 'quadbin'
+          }
+        }
       })
     ];
   }
