@@ -60,6 +60,7 @@ def render_json_to_html(
     tooltip=True,
     css_background_color=None,
     custom_libraries=None,
+    configuration=None,
     offline=False,
 ):
     js = j2_env.get_template("index.j2")
@@ -73,6 +74,7 @@ def render_json_to_html(
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,
+        configuration=configuration,
     )
     return html_str
 
@@ -127,6 +129,7 @@ def deck_to_html(
     iframe_width="100%",
     tooltip=True,
     custom_libraries=None,
+    configuration=None,
     as_string=False,
     offline=False,
 ):
@@ -138,6 +141,7 @@ def deck_to_html(
         tooltip=tooltip,
         css_background_color=css_background_color,
         custom_libraries=custom_libraries,
+        configuration=configuration,
         offline=offline,
     )
 

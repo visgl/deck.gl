@@ -1,4 +1,4 @@
-from pydeck_carto import (
+from pydeck_carto.styles import (
     color_bins,
     color_categories,
     color_continuous,
