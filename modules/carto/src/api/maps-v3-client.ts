@@ -28,6 +28,7 @@ import {assert} from '../utils';
 
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
+const V3_MINOR_VERSION = '3.1';
 
 export type Headers = Record<string, string>;
 interface RequestParams {
@@ -60,6 +61,11 @@ async function request({
   if (method === 'POST') {
     headers['Content-Type'] = 'application/json';
   }
+
+  // HACK to work with old proposal. REMOVE in final PR
+  // Will trigger a CORS error, need to launch Chrome like so (OSX):
+  // open -n -a Google\ Chrome --args --disable-web-security --user-data-dir=/tmp/chrome
+  headers['Carto-Shared-Cache'] = 'True';
 
   try {
     /* global fetch */
@@ -151,6 +157,7 @@ function getParameters({
   queryParameters
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
+  parameters.push(encodeParameter('v', V3_MINOR_VERSION));
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
