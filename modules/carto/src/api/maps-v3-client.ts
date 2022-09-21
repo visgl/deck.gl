@@ -62,11 +62,6 @@ async function request({
     headers['Content-Type'] = 'application/json';
   }
 
-  // HACK to work with old proposal. REMOVE in final PR
-  // Will trigger a CORS error, need to launch Chrome like so (OSX):
-  // open -n -a Google\ Chrome --args --disable-web-security --user-data-dir=/tmp/chrome
-  headers['Carto-Shared-Cache'] = 'True';
-
   try {
     /* global fetch */
     return await fetch(url, {
