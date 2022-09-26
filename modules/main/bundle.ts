@@ -20,7 +20,7 @@ deck.H3HexagonLayer._checkH3Lib = () => {
     throw new Error(`To use H3 functionality, ${installHelp}`);
     // @ts-ignore
   } else if (!window.h3.polyfill && window.h3.polygonToCells) {
-    throw new Error(`Only H3-js v3 is supported, you are using v4. To use v3, ${installHelp}`);
+    throw new Error(`Incompatible h3-js version. ${installHelp}`);
   }
 };
 
