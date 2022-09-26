@@ -96,7 +96,8 @@
           "getLineWidth": 4.5,
           "getPointRadius": 20.2,
           "stroked": true,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -211,7 +212,8 @@
           "getLineWidth": 4.5,
           "getPointRadius": 20.2,
           "stroked": true,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -237,7 +239,8 @@
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "pointType": "text",
-          "getTextPixelOffset": [-40.2, -58.2]
+          "getTextPixelOffset": [-40.2, -58.2],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -263,7 +266,8 @@
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "pointType": "text",
-          "getTextPixelOffset": [40.2, 0]
+          "getTextPixelOffset": [40.2, 0],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -387,7 +391,8 @@
                 }
               }
             }
-          }
+          },
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -414,7 +419,8 @@
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "pointType": "text",
-          "getTextPixelOffset": [-40.2, -58.2]
+          "getTextPixelOffset": [-40.2, -58.2],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -538,7 +544,8 @@
                 }
               }
             }
-          }
+          },
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -773,7 +780,8 @@
           "getLineWidth": 2,
           "getPointRadius": 35.8,
           "stroked": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -799,7 +807,8 @@
           "getLineWidth": 5.2,
           "getPointRadius": 10,
           "wireframe": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -828,7 +837,8 @@
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
-          "formatTiles": "mvt"
+          "formatTiles": "mvt",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -930,7 +940,8 @@
           "elevationScale": 70.1,
           "coverage": 0.9,
           "elevationScale": 70.1,
-          "highlightColor": [255, 255, 255, 60]
+          "highlightColor": [255, 255, 255, 60],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1050,7 +1061,8 @@
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
-          "formatTiles": "mvt"
+          "formatTiles": "mvt",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1170,7 +1182,8 @@
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
-          "formatTiles": "geojson"
+          "formatTiles": "geojson",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1290,7 +1303,8 @@
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
-          "formatTiles": "binary"
+          "formatTiles": "binary",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1430,7 +1444,8 @@
           "upperPercentile": 100,
           "cellSize": 500,
           "highlightColor": [252, 242, 26, 255],
-          "colorScaleType": "quantile"
+          "colorScaleType": "quantile",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1571,7 +1586,8 @@
           "colorAggregation": "SUM",
           "radius": 300,
           "highlightColor": [252, 242, 26, 255],
-          "colorScaleType": "quantile"
+          "colorScaleType": "quantile",
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1712,7 +1728,8 @@
           "elevationUpperPercentile": 100,
           "lowerPercentile": 0,
           "upperPercentile": 100,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1901,7 +1918,8 @@
           "getLineWidth": 1,
           "getPointRadius": 2,
           "wireframe": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -1929,7 +1947,8 @@
           "getLineWidth": 1,
           "getPointRadius": 2,
           "wireframe": false,
-          "highlightColor": [252, 242, 26, 255]
+          "highlightColor": [252, 242, 26, 255],
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]

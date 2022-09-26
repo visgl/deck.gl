@@ -31,6 +31,7 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     initialViewState: mapState,
     mapStyle,
+    token,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
