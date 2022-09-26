@@ -18,7 +18,7 @@ import {assert} from '../utils';
 import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
 
 export function parseMap(json) {
-  const {keplerMapConfig, datasets} = json;
+  const {keplerMapConfig, datasets, token} = json;
   assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState, mapStyle} = keplerMapConfig.config;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
@@ -46,7 +46,8 @@ export function parseMap(json) {
           ...createBlendingProps(layerBlending),
           ...(!config.textLabel && createInteractionProps(interactionConfig)),
           ...createStyleProps(config, propMap),
-          ...createChannelProps(visualChannels, type, config, data) // Must come after style
+          ...createChannelProps(visualChannels, type, config, data), // Must come after style
+          ...createLoadOptions(token)
         });
       } catch (e: any) {
         log.error(e.message)();
@@ -290,4 +291,10 @@ function createChannelProps(
   }
 
   return result;
+}
+
+function createLoadOptions(accessToken: string) {
+  return {
+    loadOptions: {fetch: {headers: {Authorization: `Bearer ${accessToken}`}}}
+  };
 }
