@@ -66,6 +66,7 @@ export default class QuadbinTileLayer<DataT = any, ExtraProps = {}> extends Comp
         renderSubLayers,
         maxZoom,
         loadOptions: {
+          ...this.getLoadOptions(),
           cartoSpatialTile: {
             scheme: 'quadbin'
           }
