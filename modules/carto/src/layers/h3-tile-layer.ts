@@ -96,6 +96,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT = {}> extends Composit
         minZoom: minresolution,
         maxZoom: maxresolution,
         loadOptions: {
+          ...this.getLoadOptions(),
           cartoSpatialTile: {
             scheme: 'h3'
           }

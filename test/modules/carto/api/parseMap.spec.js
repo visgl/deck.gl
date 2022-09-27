@@ -9,7 +9,8 @@ const METADATA = {
   title: 'Title',
   description: 'Description',
   createdAt: 'createdAt timestamp',
-  updatedAt: 'updatedAt timestamp'
+  updatedAt: 'updatedAt timestamp',
+  token: 'API_TOKEN'
 };
 
 export const EMPTY_KEPLER_MAP_CONFIG = {
