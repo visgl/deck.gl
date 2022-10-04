@@ -254,11 +254,12 @@ function createChannelProps(
     const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
     const {getPointRadius, getFillColor} = result;
     result.pointType = 'icon';
+    const useMaskedIcons = visConfig.filled;
     result.getIcon = getIconUrlAccessor(
       visualChannels.customMarkersField,
-      visConfig.customMarkersUrl,
+
       visConfig.customMarkersRange,
-      maxIconSize,
+      {fallbackUrl: visConfig.customMarkersUrl, maxIconSize, useMaskedIcons},
       data
     );
     result._subLayerProps = {
@@ -276,7 +277,7 @@ function createChannelProps(
       }
     };
 
-    if (getFillColor) {
+    if (getFillColor && useMaskedIcons) {
       result.getIconColor = getFillColor;
     }
 
