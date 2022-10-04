@@ -369,9 +369,8 @@ const FALLBACK_ICON =
 
 export function getIconUrlAccessor(
   field: VisualChannelField | null | undefined,
-  fallbackUrl: string | null | undefined,
   range: CustomMarkersRange | null | undefined,
-  maxIconSize: number,
+  {fallbackUrl, maxIconSize, useMaskedIcons},
   data: any
 ) {
   const urlToUnpackedIcon = (url: string) => ({
@@ -379,7 +378,7 @@ export function getIconUrlAccessor(
     url,
     width: maxIconSize,
     height: maxIconSize,
-    mask: true
+    mask: useMaskedIcons
   });
   let unknownValue = fallbackUrl || FALLBACK_ICON;
 
