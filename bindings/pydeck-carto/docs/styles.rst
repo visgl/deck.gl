@@ -30,6 +30,7 @@ Example
         get_fill_color=color_bins("pct_higher_ed", [0, 20, 30, 40, 50, 60, 70], "PinkYl"),
         get_line_color=[0, 0, 0, 100],
         line_width_min_pixels=0.5,
+        extruded=False,
         pickable=True,
         on_data_error=get_error_notifier(),
     )
