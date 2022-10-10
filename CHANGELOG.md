@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-alpha.4] - Oct 4 2022
+
+- [CARTO] Support custom markers with original colors (#7311)
+
 #### deck.gl [8.9.0-alpha.3] - Sep 27 2022
 - CARTO: Pass access token in load options (#7287)
 - Improve makeTooltip template in jupyter-widget (#7278)
