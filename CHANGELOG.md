@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.13] - Oct 11 2022
+
+- Fix altitude projection dependence on geometry.worldPosition (#7318)
+
+#### deck.gl [8.8.12] - Oct 4 2022
+
+- Improve makeTooltip template in jupyter-widget (#7278)
+
 #### deck.gl [8.8.11] - Sep 16 2022
 
 - Carto: fetchMap support for custom markers (#7250)
