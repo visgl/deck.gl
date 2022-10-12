@@ -1,7 +1,8 @@
+import json
 import pandas as pd
 import numpy as np
 
-from pydeck import Layer, Deck
+from pydeck import Layer, Deck, settings
 
 df = pd.DataFrame({"position": [[0, 0], [0, 0]]})
 
@@ -33,3 +34,24 @@ def test_constructor_binary_transport():
     assert EXPECTED_DATUM["accessor"] == actual_datum["accessor"]
     assert np.array_equal(EXPECTED_DATUM["np_data"], actual_datum["np_data"])
     assert "0, 0" not in Deck(test_layer).to_json(), "Should not write data to JSON output"
+
+
+def test_default_layer_attributes():
+    settings.default_layer_attributes = {
+        "ScatterplotLayer": {
+            "extra_attribute": 1,
+            "radius": 1
+        }
+    }
+
+    test_layer = Layer(
+        "ScatterplotLayer",
+        data=df,
+        radius=10,
+    )
+
+    json_input = json.loads(Deck(test_layer).to_json())
+
+    assert json_input["layers"][0]["@@type"] == "ScatterplotLayer"
+    assert json_input["layers"][0]["extraAttribute"] == 1
+    assert json_input["layers"][0]["radius"] == 10
