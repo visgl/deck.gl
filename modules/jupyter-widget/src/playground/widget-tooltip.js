@@ -138,6 +138,8 @@ export function substituteIn(template, json) {
       value = json[key];
     } else if (json[propsKey] && json[propsKey].hasOwnProperty(key)) {
       value = json[propsKey][key];
+    } else {
+      value = undefined;
     }
     if (value) {
       output = output.replaceAll(`{${key}}`, value);
