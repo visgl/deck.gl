@@ -48,11 +48,11 @@ def test_color_continuous():
     domain_values = [70, 75, 80, 85, 90, 95, 100]
 
     assert color_continuous(
-        attr="value", domain=domain_values, colors="BluYl"
+        attr="value", domain=domain_values, colors="Peach"
     ).serialize() == {
         "@@function": "colorContinuous",
         "attr": "value",
         "domain": domain_values,
-        "colors": "BluYl",
+        "colors": "Peach",
         "nullColor": [204, 204, 204],
     }

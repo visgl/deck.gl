@@ -12,7 +12,7 @@ Example
 
     import pydeck as pdk
     from carto_auth import CartoAuth
-    from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
+    from pydeck_carto import register_carto_layer, get_layer_credentials
     from pydeck_carto.layer import MapType, CartoConnection
 
     # Authentication with CARTO
@@ -24,19 +24,54 @@ Example
     # Render CartoLayer in pydeck
     layer = pdk.Layer(
         "CartoLayer",
-        data="SELECT geom, name FROM carto-demo-data.demo_tables.airports",
-        type_=MapType.QUERY,
+        data="carto-demo-data.demo_tables.world_airports",
+        type_=MapType.TABLE,
         connection=CartoConnection.CARTO_DW,
         credentials=get_layer_credentials(carto_auth),
         get_fill_color=[238, 77, 90],
         point_radius_min_pixels=2.5,
         pickable=True,
-        on_data_error=get_error_notifier(),
     )
+    map_style = pdk.map_styles.ROAD
     view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
-    pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
+    tooltip={"html": "<b>Name:</b> {name}", "style": {"color": "white"}}
+    pdk.Deck(layer, map_style=map_style, initial_view_state=view_state, tooltip=tooltip)
 
-.. figure:: images/pydeck-carto-layer-example.png
+.. figure:: images/layer-table.png
+
+.. code-block:: python
+
+    # Render CartoLayer in pydeck:
+    # - SQL query from a BigQuery connection
+    layer = pdk.Layer(
+        "CartoLayer",
+        data="""
+            SELECT a.geom, a.name
+            FROM `carto-demo-data.demo_tables.world_airports` AS a,
+                 `carto-do-public-data.natural_earth.geography_glo_admin0countries_410` AS g
+            WHERE g.ADMIN = 'Spain' AND
+                  ST_INTERSECTS(a.geom, g.geom)
+        """,
+        type_=MapType.QUERY,
+        connection=pdk.types.String("bigquery"),
+        credentials=get_layer_credentials(carto_auth),
+        get_fill_color=[238, 77, 90],
+        point_radius_min_pixels=2.5,
+        pickable=True,
+    )
+    map_style = pdk.map_styles.ROAD
+    view_state = pdk.ViewState(latitude=36, longitude=-7.44, zoom=4)
+    tooltip = {"html": "<b>Name:</b> {name}", "style": {"color": "white"}}
+    pdk.Deck(layer, map_style=map_style, initial_view_state=view_state, tooltip=tooltip)
+
+.. figure:: images/layer-query.png
+
+Error management
+^^^^^^^^^^^^^^^^
+
+Any data error is displayed instead of the map to provide instant feedback about the input parameters. For example, the user is not authorized, the connection or the column names do not exist, etc.
+
+.. figure:: images/error-message-column.png
 
 Properties
 ^^^^^^^^^^
@@ -54,8 +89,6 @@ Properties
 * **aggregation_exp**: (``pydeck.types.String``, optional) Aggregation SQL expression. Only used for spatial index datasets.
 
 * **aggregation_res_level**: (``int``, optional) Aggregation resolution level. Only used for spatial index datasets, defaults to 6 for quadbins, 4 for h3.
-
-* **on_data_error** (``pydeck.types.Function``, optional): Callback called when the request to the CARTO Maps API failed. It is recommended to use with :meth:`pydeck_carto.get_error_notifier` to display the error in the visualization.
 
 Check the full list of `CartoLayer properties <https://deck.gl/docs/api-reference/carto/carto-layer#properties>`_.
 

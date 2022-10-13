@@ -6,7 +6,7 @@ Render cloud data from a query.
 """
 import pydeck as pdk
 from carto_auth import CartoAuth
-from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
+from pydeck_carto import register_carto_layer, get_layer_credentials
 from pydeck_carto.layer import MapType, CartoConnection
 
 carto_auth = CartoAuth.from_oauth()
@@ -22,7 +22,6 @@ layer = pdk.Layer(
     get_fill_color=[238, 77, 90],
     point_radius_min_pixels=2.5,
     pickable=True,
-    on_data_error=get_error_notifier(),
 )
 
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)

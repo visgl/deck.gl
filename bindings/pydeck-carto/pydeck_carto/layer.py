@@ -28,7 +28,7 @@ class GeoColumnType:
 
 
 def register_carto_layer():
-    """Add CartoLayer JS bundle to pydeck"s custom libraries."""
+    """Add CartoLayer JS bundle to pydeck's custom libraries."""
     library_name = "CartoLayerLibrary"
     custom_library = {
         "libraryName": library_name,
@@ -77,7 +77,11 @@ def register_carto_layer():
 
 def get_layer_credentials(carto_auth) -> dict:
     """Get the layer credentials object to gather information
-    from carto warehouses."""
+    from carto warehouses.
+
+    The return object has the following structure:
+    ``{"apiVersion": "v3", "apiBaseUrl": "...", "accessToken": "...",}``
+    """
     access_token = carto_auth.get_access_token()
     return {
         "apiVersion": "v3",
