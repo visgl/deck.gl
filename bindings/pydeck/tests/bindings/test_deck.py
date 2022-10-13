@@ -117,4 +117,4 @@ def test_repr_html_google_colab():
     pydeck.io.html.in_google_colab = False
     pydeck.io.html.iframe_with_srcdoc.assert_not_called()
     pydeck.io.html.render_for_colab.assert_called_once()
-    assert output is None
+    assert output == ''

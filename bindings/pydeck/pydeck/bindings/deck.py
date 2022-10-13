@@ -230,3 +230,5 @@ class Deck(JSONMixin):
         html = self.to_html(notebook_display=True)
         if hasattr(html, 'data'):
             return html.data
+        else:
+            return ''
