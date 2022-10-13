@@ -1,4 +1,5 @@
 import os
+import sys
 
 from .json_tools import JSONMixin
 from .layer import Layer
@@ -18,6 +19,9 @@ def has_jupyter_extra():
         return True
     except ImportError:
         return False
+
+
+in_google_colab = "google.colab" in sys.modules
 
 
 class Deck(JSONMixin):
@@ -137,8 +141,11 @@ class Deck(JSONMixin):
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
-        self.update()
-        return self.deck_widget
+        if in_google_colab:
+            self.to_html(notebook_display=True)
+        else:
+            self.update()
+            return self.deck_widget
 
     def update(self):
         """Update a deck.gl map to reflect the current configuration
@@ -220,4 +227,8 @@ class Deck(JSONMixin):
     def _repr_html_(self):
         # doesn't actually need the HTML packaging in iframe_with_srcdoc,
         # so we just take the HTML.data part
-        return self.to_html(notebook_display=True).data
+        html = self.to_html(notebook_display=True)
+        if hasattr(html, 'data'):
+            return html.data
+        else:
+            return ''
