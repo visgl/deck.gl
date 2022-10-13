@@ -1,13 +1,16 @@
-import pytest
-
 import json
-import os
+import pydeck
 
-from ..fixtures import fixtures
-
-from . import pydeck_examples
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    from mock import MagicMock
 
 from pydeck import Deck
+from IPython.display import HTML
+
+from . import pydeck_examples
+from ..fixtures import fixtures
 
 
 def test_deck_layer_args():
@@ -48,3 +51,70 @@ def test_update():
     expected_results["initialViewState"]["latitude"] = 0
     expected_results["initialViewState"]["longitude"] = 0
     assert json.loads(str(deck)) == expected_results
+
+
+def test_show_jupyter():
+    pydeck.io.html.render_for_colab = MagicMock()
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck.show()
+    pydeck.io.html.render_for_colab.assert_not_called()
+    assert isinstance(output, pydeck.widget.DeckGLWidget)
+
+
+def test_show_google_colab():
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_google_colab = True
+    pydeck.bindings.deck.in_google_colab = True
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck.show()
+    pydeck.bindings.deck.in_google_colab = False
+    pydeck.io.html.in_google_colab = False
+    pydeck.io.html.render_for_colab.assert_called_once()
+    assert output is None
+
+
+def test_to_html_jupyter():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_jupyter = MagicMock(return_value=True)
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck.to_html()
+    pydeck.io.html.iframe_with_srcdoc.assert_called_once()
+    pydeck.io.html.render_for_colab.assert_not_called()
+    assert isinstance(output, HTML)
+    assert output.data == "Hello"
+
+
+def test_to_html_google_colab():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_google_colab = True
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck.to_html()
+    pydeck.io.html.in_google_colab = False
+    pydeck.io.html.iframe_with_srcdoc.assert_not_called()
+    pydeck.io.html.render_for_colab.assert_called_once()
+    assert output is None
+
+
+def test_repr_html_jupyter():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_jupyter = MagicMock(return_value=True)
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck._repr_html_()
+    pydeck.io.html.iframe_with_srcdoc.assert_called_once()
+    pydeck.io.html.render_for_colab.assert_not_called()
+    assert output == "Hello"
+
+
+def test_repr_html_google_colab():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_google_colab = True
+    deck = pydeck_examples.create_minimal_test_object()
+    output = deck._repr_html_()
+    pydeck.io.html.in_google_colab = False
+    pydeck.io.html.iframe_with_srcdoc.assert_not_called()
+    pydeck.io.html.render_for_colab.assert_called_once()
+    assert output is None
