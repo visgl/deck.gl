@@ -37,12 +37,7 @@ def test_constructor_binary_transport():
 
 
 def test_default_layer_attributes():
-    settings.default_layer_attributes = {
-        "ScatterplotLayer": {
-            "extra_attribute": 1,
-            "radius": 1
-        }
-    }
+    settings.default_layer_attributes = {"ScatterplotLayer": {"extra_attribute": 1, "radius": 1}}
 
     test_layer = Layer(
         "ScatterplotLayer",
