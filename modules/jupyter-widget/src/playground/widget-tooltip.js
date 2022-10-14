@@ -132,16 +132,19 @@ export function substituteIn(template, json) {
       for (const subkey of subkeys) {
         if (value.hasOwnProperty(subkey)) {
           value = value[subkey];
+        } else {
+          value = undefined;
+          break;
         }
       }
     } else if (json.hasOwnProperty(key)) {
       value = json[key];
     } else if (json[propsKey] && json[propsKey].hasOwnProperty(key)) {
       value = json[propsKey][key];
+    } else {
+      value = undefined;
     }
-    if (value) {
-      output = output.replaceAll(`{${key}}`, value);
-    }
+    output = output.replaceAll(`{${key}}`, value);
   }
 
   return output;
