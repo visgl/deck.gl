@@ -111,13 +111,13 @@ test('jupyter-widget: tooltip', t0 => {
         expected: 'Total population (Madrid): 3305408'
       },
       {
-        template: 'Total population ({city}): {pop}',
+        template: '{true} {false} {null} {undefined}',
         json: {
-          properties: {
-            city: 'Madrid'
-          }
+          true: true,
+          false: false,
+          null: null
         },
-        expected: 'Total population (Madrid): {pop}'
+        expected: 'true false null undefined'
       },
       {
         template:
@@ -130,6 +130,15 @@ test('jupyter-widget: tooltip', t0 => {
           }
         },
         expected: 'The Answer to the Ultimate Question of Life, The Universe, and Everything: 42'
+      },
+      {
+        template:
+          'The Answer to the Ultimate Question of Life, The Universe, and Everything: {a.b.c}',
+        json: {
+          a: {}
+        },
+        expected:
+          'The Answer to the Ultimate Question of Life, The Universe, and Everything: undefined'
       }
     ];
     for (const kv of TESTING_TABLE) {
