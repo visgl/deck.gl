@@ -40,14 +40,15 @@ export function parseMap(json) {
         const {data} = dataset;
         assert(data, `No data loaded for dataId: ${dataId}`);
         const {Layer, propMap, defaultProps} = getLayer(type, config, dataset);
+        const styleProps = createStyleProps(config, propMap);
         return new Layer({
           id,
           data,
           ...defaultProps,
-          ...createParametersProp(layerBlending),
           ...(!config.textLabel && createInteractionProps(interactionConfig)),
-          ...createStyleProps(config, propMap),
+          ...styleProps,
           ...createChannelProps(visualChannels, type, config, data), // Must come after style
+          ...createParametersProp(layerBlending, styleProps.parameters || {}), // Must come after style
           ...createLoadOptions(token)
         });
       } catch (e: any) {
@@ -86,8 +87,7 @@ function extractTextLayers(layers) {
   );
 }
 
-function createParametersProp(layerBlending) {
-  const parameters: Record<string, any> = {};
+function createParametersProp(layerBlending, parameters: Record<string, any>) {
   if (layerBlending === 'additive') {
     parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
     parameters.blendEquation = GL.FUNC_ADD;

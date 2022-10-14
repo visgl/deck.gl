@@ -78,14 +78,19 @@ const hexToRGBA = c => {
   return [r, g, b, 255 * opacity];
 };
 
-// Kepler -> Deck.gl
+// Kepler prop value -> Deck.gl prop value
+// Supports nested definitions, and function transforms:
+//   {keplerProp: 'deckProp'} is equivalent to:
+//   {keplerProp: x => ({deckProp: x})}
 const sharedPropMap = {
+  // Apply the value of Kepler `color` prop to the deck `getFillColor` prop
   color: 'getFillColor',
   isVisible: 'visible',
   label: 'cartoLabel',
   textLabel: {
     alignment: 'getTextAlignmentBaseline',
     anchor: 'getTextAnchor',
+    // Apply the value of Kepler `textLabel.color` prop to the deck `getTextColor` prop
     color: 'getTextColor',
     size: 'getTextSize'
   },
@@ -153,7 +158,12 @@ export function getLayer(
   > = {
     point: {
       Layer: GeoJsonLayer,
-      propMap: {visConfig: {outline: 'stroked'}}
+      propMap: {
+        columns: {
+          altitude: x => ({parameters: {depthTest: x?.fieldIdx > -1}})
+        },
+        visConfig: {outline: 'stroked'}
+      }
     },
     geojson: {
       Layer: GeoJsonLayer
