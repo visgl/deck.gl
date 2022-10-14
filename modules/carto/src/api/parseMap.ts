@@ -44,7 +44,7 @@ export function parseMap(json) {
           id,
           data,
           ...defaultProps,
-          ...createBlendingProps(layerBlending),
+          ...createParametersProp(layerBlending),
           ...(!config.textLabel && createInteractionProps(interactionConfig)),
           ...createStyleProps(config, propMap),
           ...createChannelProps(visualChannels, type, config, data), // Must come after style
@@ -86,24 +86,17 @@ function extractTextLayers(layers) {
   );
 }
 
-function createBlendingProps(layerBlending) {
+function createParametersProp(layerBlending) {
+  const parameters: Record<string, any> = {};
   if (layerBlending === 'additive') {
-    return {
-      parameters: {
-        blendFunc: [GL.SRC_ALPHA, GL.DST_ALPHA],
-        blendEquation: GL.FUNC_ADD
-      }
-    };
+    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
+    parameters.blendEquation = GL.FUNC_ADD;
   } else if (layerBlending === 'subtractive') {
-    return {
-      parameters: {
-        blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-        blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
-      }
-    };
+    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
+    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
   }
 
-  return {};
+  return Object.keys(parameters).length ? {parameters} : {};
 }
 
 function createInteractionProps(interactionConfig) {
