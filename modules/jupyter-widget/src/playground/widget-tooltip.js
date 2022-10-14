@@ -132,6 +132,9 @@ export function substituteIn(template, json) {
       for (const subkey of subkeys) {
         if (value.hasOwnProperty(subkey)) {
           value = value[subkey];
+        } else {
+          value = undefined;
+          break;
         }
       }
     } else if (json.hasOwnProperty(key)) {
@@ -141,9 +144,7 @@ export function substituteIn(template, json) {
     } else {
       value = undefined;
     }
-    if (value) {
-      output = output.replaceAll(`{${key}}`, value);
-    }
+    output = output.replaceAll(`{${key}}`, value);
   }
 
   return output;
