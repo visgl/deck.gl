@@ -228,7 +228,4 @@ class Deck(JSONMixin):
         # doesn't actually need the HTML packaging in iframe_with_srcdoc,
         # so we just take the HTML.data part
         html = self.to_html(notebook_display=True)
-        if hasattr(html, "data"):
-            return html.data
-        else:
-            return ""
+        return getattr(html, "data", "")
