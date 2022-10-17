@@ -160,7 +160,7 @@ export function getLayer(
       Layer: GeoJsonLayer,
       propMap: {
         columns: {
-          altitude: x => ({parameters: {depthTest: x !== null}})
+          altitude: x => ({parameters: {depthTest: Boolean(x)}})
         },
         visConfig: {outline: 'stroked'}
       }
