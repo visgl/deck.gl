@@ -16,7 +16,7 @@
             "label": "Stores",
             "dataId": "DATA_ID",
             "hidden": false,
-            "columns": {"lat": "latitude", "lng": "longitude", "altitude": 100},
+            "columns": {"lat": "latitude", "lng": "longitude", "altitude": "altitude"},
             "isVisible": true,
             "textLabel": [],
             "visConfig": {
