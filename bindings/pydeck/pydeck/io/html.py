@@ -155,9 +155,9 @@ def deck_to_html(
     if notebook_display is None:
         notebook_display = in_jupyter()
 
-    if notebook_display and in_google_colab:
+    if in_google_colab:
         render_for_colab(html_str, iframe_height)
-        return html_str
+        return None
     elif not filename and as_string:
         return html_str
     elif notebook_display:

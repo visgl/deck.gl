@@ -58,3 +58,14 @@ def register_carto_layer():
 
     if not exists:
         pdk.settings.custom_libraries.append(custom_library)
+
+
+def get_layer_credentials(carto_auth) -> dict:
+    """Get the layer credentials object to gather information
+    from carto warehouses."""
+    access_token = carto_auth.get_access_token()
+    return {
+        "apiVersion": "v3",
+        "apiBaseUrl": carto_auth.api_base_url,
+        "accessToken": access_token,
+    }

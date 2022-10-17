@@ -66,9 +66,9 @@ const overlay = new MapboxOverlay({
 map.addControl(overlay);
 ```
 
-### Using with react-map-gl
+### Using with [react-map-gl](https://visgl.github.io/react-map-gl)
 
-The following code demonstrates how to create a React component from `MapboxOverlay` with `react-map-gl@7.x`:
+The following code demonstrates how to create a React component from `MapboxOverlay` with `react-map-gl@7.x` and Typescript:
 
 ```tsx
 import {ScatterplotLayer} from '@deck.gl/layers/typed';
@@ -99,8 +99,8 @@ export default function App() {
   return (
     <Map
       initialViewState={{
-        latitude: 37.78,
-        longitude: -122.45,
+        latitude: 40,
+        longitude: -74.5,
         zoom: 12
       }}
       mapStyle="mapbox://styles/mapbox/light-v9"
@@ -114,6 +114,7 @@ export default function App() {
 ```
 
 See react-map-gl's [useControl](https://visgl.github.io/react-map-gl/docs/api-reference/use-control) hook.
+See [using deck.gl with Typescript](https://deck.gl/docs/get-started/using-with-typescript).
 
 
 ## Constructor

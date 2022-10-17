@@ -69,13 +69,14 @@ pip install pydeck
 - [Get started](https://pydeck.gl/installation.html)
 - [Examples](https://pydeck.gl/)
 
-### Third-Party Bindings
+### Third-Party Goodies
 
 - [deckgl-typings](https://github.com/danmarshall/deckgl-typings) (Typescript)
 - [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) (R)
 - [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) ([Vega](https://vega.github.io/))
 - [earthengine-layers](https://earthengine-layers.com/) ([Google Earth Engine](https://earthengine.google.com/))
 - [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native) (C++)
+- [deck.gl-raster](https://github.com/kylebarron/deck.gl-raster/) (Computation on rasters)
 
 ## Learning Resources
 

@@ -305,11 +305,17 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
   renderLayers(): Layer | null {
     assert(this.state);
 
-    const {data} = this.state;
+    const {apiVersion, data} = this.state;
 
     if (!data) return null;
 
-    const {updateTriggers} = this.props;
+    const {credentials, updateTriggers} = this.props;
+    const loadOptions: any = {};
+    if (apiVersion === API_VERSIONS.V3) {
+      const localConfig = {...getDefaultCredentials(), ...credentials} as CloudNativeCredentials;
+      const {accessToken} = localConfig;
+      loadOptions.fetch = {headers: {Authorization: `Bearer ${accessToken}`}};
+    }
 
     const [layer, props] = this._getSubLayerAndProps();
 
@@ -319,6 +325,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       this.getSubLayerProps({
         id: `carto-${layer.layerName}`,
         data,
+        loadOptions,
         updateTriggers
       })
     );

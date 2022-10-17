@@ -6,7 +6,7 @@ BIN=$(VENV)/bin
 init:
 	test `command -v python3` || echo Please install python3
 	[ -d $(VENV) ] || python3 -m venv $(VENV)
-	$(BIN)/pip install -r requirements_dev.txt
+	$(BIN)/pip install -r requirements/requirements-dev.txt
 	$(BIN)/pip install -e .
 
 lint:
@@ -28,3 +28,7 @@ publish-test-pypi:
 
 clean:
 	rm -rf $(VENV) $(DIST) $(BUILD) *.egg-info
+
+ci:
+	$(MAKE) lint
+	$(MAKE) test
