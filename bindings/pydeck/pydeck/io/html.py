@@ -157,6 +157,7 @@ def deck_to_html(
 
     if in_google_colab:
         render_for_colab(html_str, iframe_height)
+        return None
     elif not filename and as_string:
         return html_str
     elif notebook_display:
