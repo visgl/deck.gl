@@ -87,11 +87,12 @@ document.body.appendChild(iframe);
 
 for (const e of examples) {
   const btn = document.createElement('button');
-  btn.innerHTML = e.slice(0, 8);
+  btn.innerHTML = e.slice(0, 4);
   btn.style.position = 'relative';
-  btn.style.bottom = '40px';
-  btn.style.padding = '4px';
-  btn.style.float = 'left';
+  btn.style.bottom = '80px';
+  btn.style.padding = '8px 0px';
+  btn.style.opacity = '0.8';
+  btn.style.width = '40px';
   if (e === id) {
     btn.style.background = '#e3f6ff';
   }
