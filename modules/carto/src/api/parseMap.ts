@@ -199,6 +199,21 @@ function createChannelProps(
     );
   }
 
+  if (type === 'point') {
+    const altitude = config.columns?.altitude;
+    if (altitude) {
+      result.dataTransform = data => {
+        data.features.forEach(({geometry, properties}) => {
+          const {type, coordinates} = geometry;
+          if (type === 'Point') {
+            coordinates[2] = properties[altitude];
+          }
+        });
+        return data;
+      };
+    }
+  }
+
   if (radiusField || sizeField) {
     result.getPointRadius = getSizeAccessor(
       // @ts-ignore
