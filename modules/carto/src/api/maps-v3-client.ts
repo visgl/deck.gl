@@ -586,7 +586,9 @@ export async function fetchMap({
   const geojsonDatasetIds = geojsonLayers.map(({config}) => config.dataId);
   map.datasets.forEach(dataset => {
     if (geojsonDatasetIds.includes(dataset.id)) {
+      const {config} = geojsonLayers.find(({config}) => config.dataId === dataset.id);
       dataset.format = 'geojson';
+      dataset.geoColumn = config.columns.geojson;
     }
   });
 
