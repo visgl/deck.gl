@@ -458,7 +458,7 @@ async function _fetchTilestats(
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
   let url = `${statsUrl}/${connection}/`;
   if (type === MAP_TYPES.QUERY) {
-    url += `${attribute}?q=${source}`;
+    url += `${attribute}?${encodeParameter('q', source)}`;
   } else {
     // MAP_TYPE.TABLE
     url += `${source}/${attribute}`;
