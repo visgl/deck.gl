@@ -71,6 +71,22 @@ type MapInstantiationFormats = Record<
   }
 >;
 
+export const REQUEST_TYPES = {
+  DATA: 'Map data',
+  INSTANTIATION: 'Map instantiation',
+  PUBLIC_MAP: 'Public map',
+  TILE_STATS: 'Tile stats'
+} as const;
+type RequestType = ValuesOf<typeof REQUEST_TYPES>;
+
+export type APIErrorContext = {
+  requestType: RequestType;
+  mapId?: string;
+  connection?: string;
+  source?: string;
+  type?: MapType;
+};
+
 /**
  * Simple encode parameter
  */
