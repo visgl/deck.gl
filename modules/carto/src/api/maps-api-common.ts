@@ -77,15 +77,7 @@ export const REQUEST_TYPES = {
   PUBLIC_MAP: 'Public map',
   TILE_STATS: 'Tile stats'
 } as const;
-type RequestType = ValuesOf<typeof REQUEST_TYPES>;
-
-export type APIErrorContext = {
-  requestType: RequestType;
-  mapId?: string;
-  connection?: string;
-  source?: string;
-  type?: MapType;
-};
+export type RequestType = ValuesOf<typeof REQUEST_TYPES>;
 
 /**
  * Simple encode parameter

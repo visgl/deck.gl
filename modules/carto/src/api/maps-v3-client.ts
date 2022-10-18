@@ -9,7 +9,6 @@ import {
 } from '../config';
 import {
   API_VERSIONS,
-  APIErrorContext,
   COLUMNS_SUPPORT,
   encodeParameter,
   Format,
@@ -24,6 +23,8 @@ import {
   TileFormat,
   TILE_FORMATS
 } from './maps-api-common';
+
+import {APIErrorContext, CartoAPIError} from './carto-api-error';
 
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
@@ -110,70 +111,8 @@ async function requestData({
     return request({method, url, accessToken, body, errorContext});
   }
 
-  const data = await requestJson<any>({method, url, accessToken: 'a', body, errorContext});
+  const data = await requestJson<any>({method, url, accessToken, body, errorContext});
   return data.rows ? data.rows : data;
-}
-
-/**
- * Converts camelCase to Camel Case
- */
-function formatErrorKey(key) {
-  return key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-}
-
-class CartoAPIError extends Error {
-  error: Error;
-  errorContext: APIErrorContext;
-  response?: Response;
-
-  constructor(error: Error, errorContext: APIErrorContext, response?: Response) {
-    let responseString = 'Failed to connect';
-    if (response) {
-      responseString = 'Server returned: ';
-      if (response.status === 400) {
-        responseString += 'Bad request';
-      } else if (response.status === 401 || response.status === 403) {
-        responseString += 'Unauthorized access';
-      } else if (response.status === 404 || response.status === 403) {
-        responseString += 'Not found';
-      } else {
-        responseString += `Error`;
-      }
-
-      responseString += ` (${response.status}):`;
-    }
-    responseString += ` ${error.message || error}`;
-
-    let message = `${errorContext.requestType} API request failed`;
-    message += `\n${responseString}`;
-    for (const key of Object.keys(errorContext)) {
-      if (key === 'requestType') continue;
-      message += `\n${formatErrorKey(key)}: ${errorContext[key]}`;
-    }
-    message += `\n`;
-
-    super(message);
-
-    this.name = 'CartoAPIError';
-    this.response = response;
-    this.error = error;
-    this.errorContext = errorContext;
-  }
-}
-
-/**
- * Display proper message from Maps API error
- */
-function dealWithError({
-  response,
-  error,
-  errorContext
-}: {
-  response?: Response;
-  error: Error;
-  errorContext: APIErrorContext;
-}): never {
-  throw new CartoAPIError(error, errorContext, response);
 }
 
 type FetchLayerDataParams = {
