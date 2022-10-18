@@ -172,7 +172,6 @@ export default class FontAtlasManager {
     Object.assign(this.props, props);
 
     // update cache key
-    const oldKey = this._key;
     this._key = this._getKey();
 
     const charSet = getNewChars(this._key, this.props.characterSet);
@@ -182,7 +181,7 @@ export default class FontAtlasManager {
     // there are no new chars
     if (cachedFontAtlas && charSet.size === 0) {
       // update texture with cached fontAtlas
-      if (this._key !== oldKey) {
+      if (this._atlas !== cachedFontAtlas) {
         this._atlas = cachedFontAtlas;
       }
       return;
