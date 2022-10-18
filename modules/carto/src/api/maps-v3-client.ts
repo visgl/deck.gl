@@ -460,7 +460,7 @@ async function _fetchTilestats(
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
   let url = `${statsUrl}/${connection}/`;
   if (type === MAP_TYPES.QUERY) {
-    url += `${attribute}?q=${source}`;
+    url += `${attribute}?${encodeParameter('q', source)}`;
   } else {
     // MAP_TYPE.TABLE
     url += `${source}/${attribute}`;
@@ -586,7 +586,9 @@ export async function fetchMap({
   const geojsonDatasetIds = geojsonLayers.map(({config}) => config.dataId);
   map.datasets.forEach(dataset => {
     if (geojsonDatasetIds.includes(dataset.id)) {
+      const {config} = geojsonLayers.find(({config}) => config.dataId === dataset.id);
       dataset.format = 'geojson';
+      dataset.geoColumn = config.columns.geojson;
     }
   });
 
