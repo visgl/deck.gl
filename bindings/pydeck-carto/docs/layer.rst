@@ -66,6 +66,8 @@ Example
 
 .. figure:: images/layer-query.png
 
+Note that `show()` function is not supported with CARTO layers yet.
+
 Error management
 ^^^^^^^^^^^^^^^^
 
