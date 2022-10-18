@@ -1,12 +1,22 @@
 import html
 import webbrowser
+import pydeck
 
 try:
     from unittest.mock import MagicMock
 except ImportError:
     from mock import MagicMock
 
-from pydeck.io.html import cdn_picker, display_html, iframe_with_srcdoc, in_jupyter, render_json_to_html, CDN_URL
+from pydeck.io.html import (
+    cdn_picker,
+    display_html,
+    iframe_with_srcdoc,
+    in_jupyter,
+    render_json_to_html,
+    deck_to_html,
+    CDN_URL,
+)
+from IPython.display import HTML
 
 from ..fixtures import fixtures
 
@@ -55,3 +65,30 @@ def test_iframe_with_srcdoc():
 
 def test_in_jupyter():
     assert not in_jupyter()
+
+
+def test_deck_to_html_string():
+    output = deck_to_html(fixtures["minimal"], as_string=True)
+    assert isinstance(output, str)
+
+
+def test_deck_to_html_jupyter():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_jupyter = MagicMock(return_value=True)
+    output = deck_to_html(fixtures["minimal"])
+    pydeck.io.html.iframe_with_srcdoc.assert_called_once()
+    pydeck.io.html.render_for_colab.assert_not_called()
+    assert isinstance(output, HTML)
+    assert output.data == "Hello"
+
+
+def test_deck_to_html():
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.render_for_colab = MagicMock()
+    pydeck.io.html.in_google_colab = True
+    html = deck_to_html(fixtures["minimal"])
+    pydeck.io.html.in_google_colab = False
+    pydeck.io.html.iframe_with_srcdoc.assert_not_called()
+    pydeck.io.html.render_for_colab.assert_called_once()
+    assert html is None
