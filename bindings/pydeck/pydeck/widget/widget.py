@@ -59,10 +59,9 @@ class DeckGLWidget(DOMWidget):
     google_maps_key = Unicode("", allow_none=True).tag(sync=True)
 
     json_input = Unicode("").tag(sync=True)
-    data_buffer = Any(default_value=None, allow_none=True).tag(
-        sync=True, **data_buffer_serialization
-    )
+    data_buffer = Any(default_value=None, allow_none=True).tag(sync=True, **data_buffer_serialization)
     custom_libraries = Any(allow_none=True).tag(sync=True)
+    configuration = Any(allow_none=True).tag(sync=True)
     tooltip = Any(True).tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Any("100%").tag(sync=True)
@@ -89,9 +88,7 @@ class DeckGLWidget(DOMWidget):
         self._resize_handlers.register_callback(callback, remove=remove)
 
     def on_view_state_change(self, callback, debounce_seconds=0.2, remove=False):
-        callback = (
-            debounce(debounce_seconds)(callback) if debounce_seconds > 0 else callback
-        )
+        callback = debounce(debounce_seconds)(callback) if debounce_seconds > 0 else callback
         self._view_state_handlers.register_callback(callback, remove=remove)
 
     def on_click(self, callback, remove=False):

@@ -111,9 +111,40 @@ export function toText(jsonValue) {
 }
 
 export function substituteIn(template, json) {
+  /*
+   * Flexible substitution of templates using a json:
+   * - if the json contains the key, use [key]
+   * - if the json does not contain the key, try ['properties'][key]
+   * - if the key contains several keys separated with dots, use them all in a row:
+   *   e.g. 'a.b.c' will read json['a']['b']['c']
+   */
+  let value;
   let output = template;
-  for (const key in json) {
-    output = output.replace(`{${key}}`, json[key]);
+  const propsKey = 'properties';
+  const keyPattern = /{[^}]*}/g;
+  const cleanKey = k => k.replace(/[{}]/g, '');
+  const keys = [...new Set(template.match(keyPattern).map(cleanKey))];
+
+  for (const key of keys) {
+    if (key.includes('.')) {
+      value = json;
+      const subkeys = key.split('.');
+      for (const subkey of subkeys) {
+        if (value.hasOwnProperty(subkey)) {
+          value = value[subkey];
+        } else {
+          value = undefined;
+          break;
+        }
+      }
+    } else if (json.hasOwnProperty(key)) {
+      value = json[key];
+    } else if (json[propsKey] && json[propsKey].hasOwnProperty(key)) {
+      value = json[propsKey][key];
+    } else {
+      value = undefined;
+    }
+    output = output.replaceAll(`{${key}}`, value);
   }
 
   return output;

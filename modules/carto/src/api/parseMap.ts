@@ -8,13 +8,17 @@ import {
   getTextAccessor,
   getTextPixelOffsetAccessor,
   OPACITY_MAP,
-  opacityToAlpha
+  opacityToAlpha,
+  getIconUrlAccessor,
+  negateAccessor,
+  getMaxMarkerSize
 } from './layer-map';
 import {_flatten as flatten, log} from '@deck.gl/core';
 import {assert} from '../utils';
+import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
 
 export function parseMap(json) {
-  const {keplerMapConfig, datasets} = json;
+  const {keplerMapConfig, datasets, token} = json;
   assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
   const {mapState, mapStyle} = keplerMapConfig.config;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
@@ -27,22 +31,25 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     initialViewState: mapState,
     mapStyle,
+    token,
     layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
-        const dataset = datasets.find(d => d.id === dataId);
+        const dataset: MapDataset | null = datasets.find(d => d.id === dataId);
         assert(dataset, `No dataset matching dataId: ${dataId}`);
         const {data} = dataset;
         assert(data, `No data loaded for dataId: ${dataId}`);
         const {Layer, propMap, defaultProps} = getLayer(type, config, dataset);
+        const styleProps = createStyleProps(config, propMap);
         return new Layer({
           id,
           data,
           ...defaultProps,
-          ...createBlendingProps(layerBlending),
           ...(!config.textLabel && createInteractionProps(interactionConfig)),
-          ...createStyleProps(config, propMap),
-          ...createChannelProps(visualChannels, type, config, data) // Must come after style
+          ...styleProps,
+          ...createChannelProps(visualChannels, type, config, data), // Must come after style
+          ...createParametersProp(layerBlending, styleProps.parameters || {}), // Must come after style
+          ...createLoadOptions(token)
         });
       } catch (e: any) {
         log.error(e.message)();
@@ -80,24 +87,16 @@ function extractTextLayers(layers) {
   );
 }
 
-function createBlendingProps(layerBlending) {
+function createParametersProp(layerBlending, parameters: Record<string, any>) {
   if (layerBlending === 'additive') {
-    return {
-      parameters: {
-        blendFunc: [GL.SRC_ALPHA, GL.DST_ALPHA],
-        blendEquation: GL.FUNC_ADD
-      }
-    };
+    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
+    parameters.blendEquation = GL.FUNC_ADD;
   } else if (layerBlending === 'subtractive') {
-    return {
-      parameters: {
-        blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-        blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
-      }
-    };
+    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
+    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
   }
 
-  return {};
+  return Object.keys(parameters).length ? {parameters} : {};
 }
 
 function createInteractionProps(interactionConfig) {
@@ -128,7 +127,7 @@ function mapProps(source, target, mapping) {
   }
 }
 
-function createStyleProps(config, mapping) {
+function createStyleProps(config: MapTextSubLayerConfig, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
 
@@ -153,9 +152,22 @@ function createStyleProps(config, mapping) {
 }
 
 /* eslint-disable complexity, max-statements */
-function createChannelProps(visualChannels, type, config, data) {
-  const {colorField, colorScale, sizeField, sizeScale, strokeColorField, strokeColorScale} =
-    visualChannels;
+function createChannelProps(
+  visualChannels: VisualChannels,
+  type: string,
+  config: MapTextSubLayerConfig,
+  data
+) {
+  const {
+    colorField,
+    colorScale,
+    radiusField,
+    radiusScale,
+    sizeField,
+    sizeScale,
+    strokeColorField,
+    strokeColorScale
+  } = visualChannels;
   let {heightField, heightScale} = visualChannels;
   if (type === 'hexagonId') {
     heightField = sizeField;
@@ -179,9 +191,37 @@ function createChannelProps(visualChannels, type, config, data) {
     const {colorAggregation: aggregation, colorRange: range} = visConfig;
     result.getFillColor = getColorAccessor(
       colorField,
+      // @ts-ignore
       colorScale,
       {aggregation, range},
       visConfig.opacity,
+      data
+    );
+  }
+
+  if (type === 'point') {
+    const altitude = config.columns?.altitude;
+    if (altitude) {
+      result.dataTransform = data => {
+        data.features.forEach(({geometry, properties}) => {
+          const {type, coordinates} = geometry;
+          if (type === 'Point') {
+            coordinates[2] = properties[altitude];
+          }
+        });
+        return data;
+      };
+    }
+  }
+
+  if (radiusField || sizeField) {
+    result.getPointRadius = getSizeAccessor(
+      // @ts-ignore
+      radiusField || sizeField,
+      // @ts-ignore
+      radiusScale || sizeScale,
+      visConfig.sizeAggregation,
+      visConfig.radiusRange || visConfig.sizeRange,
       data
     );
   }
@@ -193,36 +233,78 @@ function createChannelProps(visualChannels, type, config, data) {
     const {strokeColorAggregation: aggregation, strokeColorRange: range} = visConfig;
     result.getLineColor = getColorAccessor(
       strokeColorField,
+      // @ts-ignore
       strokeColorScale,
+      // @ts-ignore
       {aggregation, range},
       opacity,
       data
     );
   }
+
   if (heightField) {
     result.getElevation = getSizeAccessor(
       heightField,
+      // @ts-ignore
       heightScale,
       visConfig.heightAggregation,
       visConfig.heightRange || visConfig.sizeRange,
       data
     );
   }
-  if (sizeField) {
-    result.getPointRadius = getSizeAccessor(
-      sizeField,
-      sizeScale,
-      visConfig.sizeAggregation,
-      visConfig.radiusRange || visConfig.sizeRange,
-      data
-    );
-  }
+
   if (textLabelField) {
     result.getText = getTextAccessor(textLabelField, data);
     result.pointType = 'text';
     const radius = result.getPointRadius || visConfig.radius;
     result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
+  } else if (visConfig.customMarkers) {
+    const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
+    const {getPointRadius, getFillColor} = result;
+    const {customMarkersUrl, customMarkersRange, filled: useMaskedIcons} = visConfig;
+
+    result.pointType = 'icon';
+    result.getIcon = getIconUrlAccessor(
+      visualChannels.customMarkersField,
+      customMarkersRange,
+      {fallbackUrl: customMarkersUrl, maxIconSize, useMaskedIcons},
+      data
+    );
+    result._subLayerProps = {
+      'points-icon': {
+        loadOptions: {
+          image: {
+            type: 'imagebitmap'
+          },
+          imagebitmap: {
+            resizeWidth: maxIconSize,
+            resizeHeight: maxIconSize,
+            resizeQuality: 'high'
+          }
+        }
+      }
+    };
+
+    if (getFillColor && useMaskedIcons) {
+      result.getIconColor = getFillColor;
+    }
+
+    if (getPointRadius) {
+      result.getIconSize = getPointRadius;
+    }
+
+    if (visualChannels.rotationField) {
+      result.getIconAngle = negateAccessor(
+        getSizeAccessor(visualChannels.rotationField, undefined, null, undefined, data)
+      );
+    }
   }
 
   return result;
+}
+
+function createLoadOptions(accessToken: string) {
+  return {
+    loadOptions: {fetch: {headers: {Authorization: `Bearer ${accessToken}`}}}
+  };
 }

@@ -117,7 +117,7 @@ function getNewChars(cacheKey: string, characterSet: Set<string> | string[] | st
   return newCharSet;
 }
 
-function populateAlphaChannel(alphaChannel: number[], imageData: ImageData): void {
+function populateAlphaChannel(alphaChannel: Uint8ClampedArray, imageData: ImageData): void {
   // populate distance value from tinySDF to image alpha channel
   for (let i = 0; i < alphaChannel.length; i++) {
     imageData.data[4 * i + 3] = alphaChannel[i];
@@ -164,14 +164,14 @@ export default class FontAtlasManager {
   }
 
   get scale(): number {
-    return HEIGHT_SCALE;
+    const {fontSize, buffer} = this.props;
+    return (fontSize * HEIGHT_SCALE + buffer * 2) / fontSize;
   }
 
   setProps(props: FontSettings = {}) {
     Object.assign(this.props, props);
 
     // update cache key
-    const oldKey = this._key;
     this._key = this._getKey();
 
     const charSet = getNewChars(this._key, this.props.characterSet);
@@ -181,25 +181,22 @@ export default class FontAtlasManager {
     // there are no new chars
     if (cachedFontAtlas && charSet.size === 0) {
       // update texture with cached fontAtlas
-      if (this._key !== oldKey) {
+      if (this._atlas !== cachedFontAtlas) {
         this._atlas = cachedFontAtlas;
       }
       return;
     }
 
     // update fontAtlas with new settings
-    const fontAtlas = this._generateFontAtlas(this._key, charSet, cachedFontAtlas);
+    const fontAtlas = this._generateFontAtlas(charSet, cachedFontAtlas);
     this._atlas = fontAtlas;
 
     // update cache
     cache.set(this._key, fontAtlas);
   }
 
-  private _generateFontAtlas(
-    key: string,
-    characterSet: Set<string>,
-    cachedFontAtlas?: FontAtlas
-  ): FontAtlas {
+  // eslint-disable-next-line max-statements
+  private _generateFontAtlas(characterSet: Set<string>, cachedFontAtlas?: FontAtlas): FontAtlas {
     const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
     let canvas = cachedFontAtlas && cachedFontAtlas.data;
     if (!canvas) {
@@ -235,18 +232,27 @@ export default class FontAtlasManager {
 
     // 3. layout characters
     if (sdf) {
-      const tinySDF = new TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight);
-      // used to store distance values from tinySDF
-      // tinySDF.size equals `fontSize + buffer * 2`
-      const imageData = ctx.getImageData(0, 0, tinySDF.size, tinySDF.size);
+      const tinySDF = new TinySDF({
+        fontSize,
+        buffer,
+        radius,
+        cutoff,
+        fontFamily,
+        fontWeight: `${fontWeight}`
+      });
 
       for (const char of characterSet) {
-        populateAlphaChannel(tinySDF.draw(char), imageData);
-        ctx.putImageData(imageData, mapping[char].x - buffer, mapping[char].y + buffer);
+        const {data, width, height, glyphTop} = tinySDF.draw(char);
+        mapping[char].width = width;
+        mapping[char].layoutOffsetY = fontSize * BASELINE_SCALE - glyphTop;
+
+        const imageData = ctx.createImageData(width, height);
+        populateAlphaChannel(data, imageData);
+        ctx.putImageData(imageData, mapping[char].x, mapping[char].y);
       }
     } else {
       for (const char of characterSet) {
-        ctx.fillText(char, mapping[char].x, mapping[char].y + fontSize * BASELINE_SCALE);
+        ctx.fillText(char, mapping[char].x, mapping[char].y + buffer + fontSize * BASELINE_SCALE);
       }
     }
 

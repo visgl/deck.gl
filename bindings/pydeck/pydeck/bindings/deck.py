@@ -1,4 +1,5 @@
 import os
+import sys
 
 from .json_tools import JSONMixin
 from .layer import Layer
@@ -13,10 +14,14 @@ from .map_styles import DARK, get_from_map_identifier
 def has_jupyter_extra():
     try:
         from ..widget import DeckGLWidget
+
         DeckGLWidget()
         return True
     except ImportError:
         return False
+
+
+in_google_colab = "google.colab" in sys.modules
 
 
 class Deck(JSONMixin):
@@ -97,6 +102,7 @@ class Deck(JSONMixin):
 
             self.deck_widget = DeckGLWidget()
             self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
+            self.deck_widget.configuration = pydeck_settings.configuration
 
             self.deck_widget.height = height
             self.deck_widget.width = width
@@ -135,8 +141,11 @@ class Deck(JSONMixin):
 
     def show(self):
         """Display current Deck object for a Jupyter notebook"""
-        self.update()
-        return self.deck_widget
+        if in_google_colab:
+            self.to_html(notebook_display=True)
+        else:
+            self.update()
+            return self.deck_widget
 
     def update(self):
         """Update a deck.gl map to reflect the current configuration
@@ -147,7 +156,9 @@ class Deck(JSONMixin):
         Intended for use in a Jupyter environment.
         """
         if not has_jupyter_extra():
-            raise ImportError("Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`")
+            raise ImportError(
+                "Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`"
+            )
         self.deck_widget.json_input = self.to_json()
         has_binary = False
         binary_data_sets = []
@@ -206,6 +217,7 @@ class Deck(JSONMixin):
             iframe_width=iframe_width,
             tooltip=self._tooltip,
             custom_libraries=pydeck_settings.custom_libraries,
+            configuration=pydeck_settings.configuration,
             as_string=as_string,
             offline=offline,
             **kwargs,
@@ -215,4 +227,5 @@ class Deck(JSONMixin):
     def _repr_html_(self):
         # doesn't actually need the HTML packaging in iframe_with_srcdoc,
         # so we just take the HTML.data part
-        return self.to_html(notebook_display=True).data
+        html = self.to_html(notebook_display=True)
+        return getattr(html, "data", "")

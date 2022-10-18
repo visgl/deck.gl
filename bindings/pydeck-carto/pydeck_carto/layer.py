@@ -1,7 +1,7 @@
 import pydeck as pdk
 
 H3_VERSION = "~3.7.*"
-PYDECK_VERSION = "~8.8.*"
+PYDECK_VERSION = "~8.8.10"
 
 LIBRARIES_TO_INCLUDE = [
     f"npm/h3-js@{H3_VERSION}/dist/h3-js.umd.js",
@@ -34,6 +34,19 @@ def register_carto_layer():
         "libraryName": library_name,
         "resourceUri": CARTO_LAYER_BUNDLE_URL,
     }
+    configuration = """{
+        functions: {
+            notifyError: () => {
+                return (e) => {
+                    document.body.style.cssText = 'padding:24px;font-size:14px;font-family:monospace';
+                    document.body.innerHTML = `<b>Layer Error</b>: ${e.message}`;
+                }
+            }
+        }
+    }"""  # noqa
+
+    if pdk.settings.configuration is None:
+        pdk.settings.configuration = configuration
 
     if pdk.settings.custom_libraries is None:
         pdk.settings.custom_libraries = [custom_library]
@@ -45,3 +58,14 @@ def register_carto_layer():
 
     if not exists:
         pdk.settings.custom_libraries.append(custom_library)
+
+
+def get_layer_credentials(carto_auth) -> dict:
+    """Get the layer credentials object to gather information
+    from carto warehouses."""
+    access_token = carto_auth.get_access_token()
+    return {
+        "apiVersion": "v3",
+        "apiBaseUrl": carto_auth.api_base_url,
+        "accessToken": access_token,
+    }

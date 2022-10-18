@@ -28,6 +28,7 @@ import {assert} from '../utils';
 
 const MAX_GET_LENGTH = 2048;
 const DEFAULT_CLIENT = 'deck-gl-carto';
+const V3_MINOR_VERSION = '3.1';
 
 export type Headers = Record<string, string>;
 interface RequestParams {
@@ -151,6 +152,7 @@ function getParameters({
   queryParameters
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
   const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
+  parameters.push(encodeParameter('v', V3_MINOR_VERSION));
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
   parameters.push(encodeParameter(sourceName, source));
@@ -458,7 +460,7 @@ async function _fetchTilestats(
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
   let url = `${statsUrl}/${connection}/`;
   if (type === MAP_TYPES.QUERY) {
-    url += `${attribute}?q=${source}`;
+    url += `${attribute}?${encodeParameter('q', source)}`;
   } else {
     // MAP_TYPE.TABLE
     url += `${source}/${attribute}`;
@@ -584,7 +586,9 @@ export async function fetchMap({
   const geojsonDatasetIds = geojsonLayers.map(({config}) => config.dataId);
   map.datasets.forEach(dataset => {
     if (geojsonDatasetIds.includes(dataset.id)) {
+      const {config} = geojsonLayers.find(({config}) => config.dataId === dataset.id);
       dataset.format = 'geojson';
+      dataset.geoColumn = config.columns.geojson;
     }
   });
 

@@ -20,7 +20,8 @@ const CONFIG = {
     alias: {
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js'),
-      '@math.gl/web-mercator': resolve('../../node_modules/@math.gl/web-mercator')
+      '@math.gl/web-mercator': resolve('../../node_modules/@math.gl/web-mercator'),
+      '@mapbox/tiny-sdf': resolve('../../node_modules/@mapbox/tiny-sdf')
     }
   },
 

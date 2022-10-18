@@ -21,6 +21,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-alpha.4] - Oct 4 2022
+
+- [CARTO] Support custom markers with original colors (#7311)
+
+#### deck.gl [8.9.0-alpha.3] - Sep 27 2022
+- CARTO: Pass access token in load options (#7287)
+- Improve makeTooltip template in jupyter-widget (#7278)
+- Add configuration attribute in pydeck. Fix css_background_color (#7255)
+- Carto: fetchMap support for custom markers (#7250)
+- Text-Layer: Improve SDF Font Rendering (Text Outlines) (#7212)
+- Add styling functions in pydeck (#7249)
+- CARTO: Support fields when parsing CartoVectorTiles (#7248)
+- CARTO: Tidy up binary loaders (#7194)
+- CARTO: CartoTileLayer picking coordinates correct (#7242)
+- Support dynamic functions in configuration (#7253)
+- CARTO fetchMap fix: parametrized queries are not working (#7238)
+- Use correct parameters when resizing icon atlas (#7232)
+
 #### deck.gl [8.9.0-alpha.1] - Sep 1 2022
 
 - [feat] Add a _full3d prop that uses the plane with the maximum area to tesselate (#7205)
