@@ -1,3 +1,4 @@
+import {log} from '@deck.gl/core';
 import OrthographicView from '../../views/orthographic-view';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {fitBounds} from '@math.gl/web-mercator';
@@ -85,6 +86,11 @@ export function getMaskViewport({
   height: number;
 }): Viewport | null {
   if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
+    return null;
+  }
+
+  if (viewport.resolution !== undefined) {
+    log.warn('MaskExtension is not supported in GlobeView')();
     return null;
   }
 

@@ -93,6 +93,7 @@ Id of the layer that defines the mask. The mask layer must use the prop `operati
 
 - The current implementation supports up to 4 masks at the same time.
 - Given that masking is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
+- Masking is not supported in [GlobeView](/docs/api-reference/core/globe-view.md)
 
 ## Source
 
