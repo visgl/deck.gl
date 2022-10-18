@@ -75,7 +75,7 @@ async function request({
       body
     });
   } catch (error) {
-    dealWithError({error: error as Error, errorContext});
+    throw new CartoAPIError(error as Error, errorContext);
   }
 }
 
@@ -91,7 +91,7 @@ async function requestJson<T = unknown>({
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, error: json.error, errorContext});
+    throw new CartoAPIError(json.error, errorContext, response);
   }
   return json as T;
 }
@@ -110,7 +110,7 @@ async function requestData({
     return request({method, url, accessToken, body, errorContext});
   }
 
-  const data = await requestJson<any>({method, url, accessToken, body, errorContext});
+  const data = await requestJson<any>({method, url, accessToken: 'a', body, errorContext});
   return data.rows ? data.rows : data;
 }
 
@@ -122,11 +122,42 @@ function formatErrorKey(key) {
 }
 
 class CartoAPIError extends Error {
-  constructor(...params) {
-    super(...params);
+  error: Error;
+  errorContext: APIErrorContext;
+  response?: Response;
+
+  constructor(error: Error, errorContext: APIErrorContext, response?: Response) {
+    let responseString = 'Failed to connect';
+    if (response) {
+      responseString = 'Server returned: ';
+      if (response.status === 400) {
+        responseString += 'Bad request';
+      } else if (response.status === 401 || response.status === 403) {
+        responseString += 'Unauthorized access';
+      } else if (response.status === 404 || response.status === 403) {
+        responseString += 'Not found';
+      } else {
+        responseString += `Error`;
+      }
+
+      responseString += ` (${response.status}):`;
+    }
+    responseString += ` ${error.message || error}`;
+
+    let message = `${errorContext.requestType} API request failed`;
+    message += `\n${responseString}`;
+    for (const key of Object.keys(errorContext)) {
+      if (key === 'requestType') continue;
+      message += `\n${formatErrorKey(key)}: ${errorContext[key]}`;
+    }
+    message += `\n`;
+
+    super(message);
 
     this.name = 'CartoAPIError';
-    // this.message = 'asdf';
+    this.response = response;
+    this.error = error;
+    this.errorContext = errorContext;
   }
 }
 
@@ -142,32 +173,7 @@ function dealWithError({
   error: Error;
   errorContext: APIErrorContext;
 }): never {
-  let responseString = 'Failed to connect';
-  if (response) {
-    responseString = 'Server returned: ';
-    if (response.status === 400) {
-      responseString += 'Bad request';
-    } else if (response.status === 401 || response.status === 403) {
-      responseString += 'Unauthorized access';
-    } else if (response.status === 404 || response.status === 403) {
-      responseString += 'Not found';
-    } else {
-      responseString += `Error`;
-    }
-
-    responseString += ` (${response.status}):`;
-  }
-  responseString += ` ${error.message || error}`;
-
-  let message = `${errorContext.requestType} API request failed`;
-  message += `\n${responseString}`;
-  for (const key of Object.keys(errorContext)) {
-    if (key === 'requestType') continue;
-    message += `\n${formatErrorKey(key)}: ${errorContext[key]}`;
-  }
-  message += `\n`;
-
-  throw new CartoAPIError(message);
+  throw new CartoAPIError(error, errorContext, response);
 }
 
 type FetchLayerDataParams = {
