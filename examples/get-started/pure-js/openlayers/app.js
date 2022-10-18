@@ -8,7 +8,6 @@ import {fromLonLat, toLonLat} from 'ol/proj';
 // DECK
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {fetchMap} from '@deck.gl/carto';
 
 // Datasource: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
