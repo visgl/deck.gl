@@ -1,5 +1,14 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v8.6 to v8.7
+
+#### Deprecations
+
+##### Core
+
+- `ColumnLayer` prop `coverage` is deprecated. Use `getCoverage` instead.
+
+
 ## Upgrading from deck.gl v8.7 to v8.8
 
 #### Breaking changes
