@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.14] - Oct 20 2022
+
+- Minor fix in widget-tooltip: reset value on every iteration (#7329)
+- CARTO: Explicitly set geoColumn when requesting GeoJSON (#7338)
+- add Encode stats URL query value #7319 
+
 #### deck.gl [8.8.13] - Oct 11 2022
 
 - Fix altitude projection dependence on geometry.worldPosition (#7318)
