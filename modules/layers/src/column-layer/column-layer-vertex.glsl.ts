@@ -26,6 +26,7 @@ in vec3 positions;
 in vec3 normals;
 
 in vec3 instancePositions;
+in float instanceCoverage;
 in float instanceElevations;
 in vec3 instancePositions64Low;
 in vec4 instanceFillColors;
@@ -42,7 +43,6 @@ uniform vec2 offset;
 uniform bool extruded;
 uniform bool stroked;
 uniform bool isStroke;
-uniform float coverage;
 uniform float elevationScale;
 uniform float edgeDistance;
 uniform float widthScale;
@@ -76,7 +76,7 @@ void main(void) {
     float widthPixels = clamp(
       project_size_to_pixel(instanceStrokeWidths * widthScale, widthUnits),
       widthMinPixels, widthMaxPixels) / 2.0;
-    float halfOffset = project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
+    float halfOffset = project_pixel_size(widthPixels) / project_size(edgeDistance * instanceCoverage * radius);
     if (isStroke) {
       strokeOffsetRatio -= sign(positions.z) * halfOffset;
     } else {
@@ -86,7 +86,7 @@ void main(void) {
 
   // if alpha == 0.0 or z < 0.0, do not render element
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
-  float dotRadius = radius * coverage * shouldRender;
+  float dotRadius = radius * instanceCoverage * shouldRender;
 
   geometry.pickingColor = instancePickingColors;
 
