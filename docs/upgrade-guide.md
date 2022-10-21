@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-## Upgrading from deck.gl v8.6 to v8.7
+## Upgrading from deck.gl v8.8 to v8.9
 
 #### Deprecations
 
