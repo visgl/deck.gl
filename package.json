@@ -63,7 +63,7 @@
     "babel-plugin-inline-webgl-constants": "^1.0.3",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-preset-minify": "^0.5.0",
-    "canvas": "^2.6.0",
+    "canvas": "^2.10.1",
     "coveralls": "^3.0.0",
     "gl": "^4.9.0",
     "glsl-transpiler": "^1.8.3",
