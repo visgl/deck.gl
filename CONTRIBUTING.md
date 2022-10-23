@@ -145,3 +145,9 @@ After this `yarn bootstrap` can be run with
 ```
 CPLUS_INCLUDE_PATH=/opt/homebrew/include yarn bootstrap
 ```
+
+Additional flags that may be required to build are:
+```
+CXXFLAGS="--std=c++17 -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR" CPLUS_INCLUDE_PATH=/opt/homebrew/include yarn bootstrap
+```
+In addition, you may need to force-link some of the packages installed with homebrew.

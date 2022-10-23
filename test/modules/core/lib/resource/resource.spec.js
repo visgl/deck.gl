@@ -2,6 +2,7 @@
 import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 import Resource from '@deck.gl/core/lib/resource/resource';
+import path from 'path';
 
 function mockLoadData(value, delay) {
   return new Promise(resolve => {
@@ -15,9 +16,12 @@ test('Resource#setData', async t => {
   const resource = new Resource('test', [], {gl});
   t.deepEqual(resource.getData(), []);
 
-  resource.setData('./test.json');
+  resource.setData(path.resolve(__dirname, 'test.json'));
   t.ok(resource.getData() instanceof Promise, 'data is being loaded');
+  t.deepEqual(await resource.getData(), {}, 'json file is loaded');
+
   let errors = 0;
+  resource.setData('not-existing.json');
   try {
     await resource.getData();
   } catch (e) {
@@ -42,5 +46,6 @@ test('Resource#setData', async t => {
   t.is(resource.getData(), 'B');
 
   resource.delete();
+
   t.end();
 });
