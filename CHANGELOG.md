@@ -19,6 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.15] - Oct 27 2022
+
+- CARTO: fetchMap disable depthTest for point layers (#7332)
+- [CARTO] Support custom markers with original colors (#7311)
+- CARTO: Pass access token in load options (#7287)
+- CARTO: switch to using quadbin library (#7257)
+- Display helpful error if h3 v4 is accidentally included (#7283)
+- Chore: Bump loaders to 3.2.10 (#7305)
+
 #### deck.gl [8.8.14] - Oct 20 2022
 
 - Minor fix in widget-tooltip: reset value on every iteration (#7329)
