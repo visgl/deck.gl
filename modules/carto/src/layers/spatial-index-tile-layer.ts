@@ -6,7 +6,6 @@ registerLoaders([CartoSpatialTileLoader]);
 import {PickingInfo} from '@deck.gl/core';
 import {
   TileLayer,
-  TileLayerProps,
   _getURLFromTemplate,
   _Tile2DHeader as Tile2DHeader,
   _TileLoadProps as TileLoadProps
@@ -26,7 +25,7 @@ export type SpatialIndexTileLayerProps<DataT = any> = _SpatialIndexTileLayerProp
   TileLayer<DataT>;
 
 /** Properties added by SpatialIndexTileLayer. */
-type _SpatialIndexTileLayerProps<DataT> = {
+type _SpatialIndexTileLayerProps<DataT = any> = {
   aggregationResLevel?: number;
 };
 

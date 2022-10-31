@@ -1,4 +1,4 @@
-import {log} from '@deck.gl/core';
+import log from '../../utils/log';
 import OrthographicView from '../../views/orthographic-view';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {fitBounds} from '@math.gl/web-mercator';
