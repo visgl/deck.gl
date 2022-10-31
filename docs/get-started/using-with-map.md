@@ -25,5 +25,6 @@ There are two types of integration between deck.gl and a base map renderer:
 | [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  | |
 | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) | [link](/docs/developer-guide/base-maps/using-with-mapbox.md) |
 | [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) | [link](/docs/developer-guide/base-maps/using-with-mapbox.md#compatibility-with-mapbox-gl-js-forks) |
+| [OpenLayers](https://openlayers.org/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/openlayers) |  | |
 
 It is also important to understand the difference between the JS library that renders the map and the map data provider. For example, you can use Mapbox GL JS with the Mapbox service, but also with any other service that hosts Mapbox Vector Tiles. When using a base map, be sure to follow the terms and conditions, as well as the attribution requirements of both the JS library and the data provider.
