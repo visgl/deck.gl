@@ -35,7 +35,7 @@ export class CartoAPIError extends Error {
       } else if (response.status === 404 || response.status === 403) {
         responseString += 'Not found';
       } else {
-        responseString += `Error`;
+        responseString += 'Error';
       }
 
       responseString += ` (${response.status}):`;
@@ -45,10 +45,10 @@ export class CartoAPIError extends Error {
     let message = `${errorContext.requestType} API request failed`;
     message += `\n${responseString}`;
     for (const key of Object.keys(errorContext)) {
-      if (key === 'requestType') continue;
+      if (key === 'requestType') continue; // eslint-disable-line no-continue
       message += `\n${formatErrorKey(key)}: ${errorContext[key]}`;
     }
-    message += `\n`;
+    message += '\n';
 
     super(message);
 
