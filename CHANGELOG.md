@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.16] - Nov 2 2022
+
+- CARTO: remove aggregationExp parameter check (#7368)
+- CARTO: Recreate tileset if aggregationResLevel changes (#7360)
+
 #### deck.gl [8.8.15] - Oct 27 2022
 
 - CARTO: fetchMap disable depthTest for point layers (#7332)
