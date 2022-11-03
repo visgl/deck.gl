@@ -158,13 +158,13 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         id: 'masked-layer',
         data: [{polygon: rectangle}],
         getFillColor: [...TARGET_COLOR, 200],
-        maskId: 'mask',
+        maskId: maskEnabled && 'mask',
         extensions: [new MaskExtension()]
       }),
       new MVTLayer({
         id: 'mvt-layer',
         data: 'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt',
-        maskId: 'mask',
+        maskId: maskEnabled && 'mask',
         extensions: [new MaskExtension()],
         maxZoom: 14,
         getFillColor: [255, 255, 255],
@@ -187,8 +187,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         onClick: onClickState,
         pickable: true,
         autoHighlight: true,
-        highlightColor: [255, 255, 255, 150],
-        maskEnabled: false
+        highlightColor: [255, 255, 255, 150]
       }),
       // Rings around target (clipped by mask)
       new ScatterplotLayer({
@@ -202,8 +201,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         getLineColor: [0, 0, 0, 100],
         parameters: {depthTest: false},
         extensions: [new MaskExtension()],
-        maskId: 'mask2',
-        maskEnabled,
+        maskId: maskEnabled && 'mask2',
         maskByInstance: false
       }),
       new ScatterplotLayer({
@@ -212,8 +210,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
-        maskId: 'mask2',
-        maskEnabled
+        maskId: maskEnabled && 'mask2'
       }),
       new ScatterplotLayer({
         id: 'targets',
@@ -227,8 +224,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
-        maskId: 'mask2',
-        maskEnabled
+        maskId: maskEnabled && 'mask2'
       }),
       new ArcLayer({
         id: 'arc',
@@ -240,8 +236,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         getSourceColor: SOURCE_COLOR,
         getTargetColor: TARGET_COLOR,
         extensions: [new MaskExtension()],
-        maskId: 'mask',
-        maskEnabled,
+        maskId: maskEnabled && 'mask',
         maskByInstance: true
       })
     ];

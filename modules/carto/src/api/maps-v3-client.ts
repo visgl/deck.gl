@@ -267,13 +267,6 @@ function checkFetchLayerDataParameters({
     assert(!aggregationExp, 'Have aggregationExp, but geoColumn parameter is missing');
     assert(!aggregationResLevel, 'Have aggregationResLevel, but geoColumn parameter is missing');
   }
-
-  if (!aggregationExp) {
-    assert(
-      !aggregationResLevel,
-      'Have aggregationResLevel, but aggregationExp parameter is missing'
-    );
-  }
 }
 
 export interface FetchLayerDataResult {

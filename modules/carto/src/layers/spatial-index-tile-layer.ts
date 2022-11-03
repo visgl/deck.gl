@@ -1,4 +1,5 @@
 import {registerLoaders} from '@loaders.gl/core';
+import {DefaultProps, UpdateParameters} from '@deck.gl/core';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoSpatialTileLoader]);
 
@@ -15,8 +16,25 @@ function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-export default class SpatialIndexTileLayer<ExtraProps = {}> extends TileLayer<any, ExtraProps> {
+const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {
+  aggregationResLevel: 4
+};
+
+/** All properties supported by SpatialIndexTileLayer. */
+export type SpatialIndexTileLayerProps<DataT = any> = _SpatialIndexTileLayerProps<DataT> &
+  TileLayer<DataT>;
+
+/** Properties added by SpatialIndexTileLayer. */
+type _SpatialIndexTileLayerProps<DataT = any> = {
+  aggregationResLevel?: number;
+};
+
+export default class SpatialIndexTileLayer<DataT = any, ExtraProps = {}> extends TileLayer<
+  DataT,
+  ExtraProps & Required<_SpatialIndexTileLayerProps<DataT>>
+> {
   static layerName = 'SpatialIndexTileLayer';
+  static defaultProps = defaultProps;
 
   getTileData(tile: TileLoadProps) {
     const {data, getTileData, fetch} = this.props;
@@ -46,6 +64,15 @@ export default class SpatialIndexTileLayer<ExtraProps = {}> extends TileLayer<an
     }
 
     return fetch(tile.url, {propName: 'data', layer: this, loadOptions, signal});
+  }
+
+  updateState(params: UpdateParameters<this>) {
+    const {props, oldProps} = params;
+    if (props.aggregationResLevel !== oldProps.aggregationResLevel) {
+      // Tileset cache is invalid when resLevel changes
+      this.setState({tileset: null});
+    }
+    super.updateState(params);
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {

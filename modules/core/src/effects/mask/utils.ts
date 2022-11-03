@@ -1,3 +1,4 @@
+import log from '../../utils/log';
 import OrthographicView from '../../views/orthographic-view';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {fitBounds} from '@math.gl/web-mercator';
@@ -88,12 +89,17 @@ export function getMaskViewport({
     return null;
   }
 
+  if (viewport.resolution !== undefined) {
+    log.warn('MaskExtension is not supported in GlobeView')();
+    return null;
+  }
+
   // Single pixel border to prevent mask bleeding at edge of texture
   const padding = 1;
   width -= padding * 2;
   height -= padding * 2;
 
-  if (viewport instanceof WebMercatorViewport) {
+  if (viewport.isGeospatial) {
     const {longitude, latitude, zoom} = fitBounds({
       width,
       height,
@@ -115,7 +121,11 @@ export function getMaskViewport({
   }
 
   const center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0];
-  const scale = Math.min(20, width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
+  const scale = Math.min(
+    1048576, // maxZoom of 20: Math.pow(2, 20) = 1048576
+    width / (bounds[2] - bounds[0]),
+    height / (bounds[3] - bounds[1])
+  );
 
   return new OrthographicView({
     x: padding,
