@@ -4,7 +4,7 @@ Authentication
 Pydeck-carto supports two types of authentication using the `carto-auth <https://github.com/cartodb/carto-auth>`_ package:
 
 * Authentication using OAuth
-* Authentication using a credentials file
+* Authentication using M2M file
 
 OAuth
 ^^^^^
@@ -23,12 +23,11 @@ The `carto_auth` object will be used to obtain the CartoLayer credentials.
 
 This method supports the following parameters:
 
-* *api_base_url* (str, optional): API Base URL for a CARTO account. Default "https://gcp-us-east1.api.carto.com".
-* *cache_filepath* (str, optional): File path where the token is stored. Default ".carto_token.json".
-* *use_cache* (bool, optional): Whether the stored cached token should be used.  Default True.
+* *cache_filepath* (str, optional): File path where the token is stored. Default "home()/.carto-auth/token_oauth.json".
+* *use_cache* (bool, optional): Whether the stored cached token should be used. Default True.
 * *open_browser* (bool, optional): Whether the web browser should be opened to authorize a user. Default True.
 
-File (advanced)
+M2M (advanced)
 ^^^^^^^^^^^^^^^
 
 Use a file with M2M credentials to automatically login into a CARTO account. It can be uses for ETL processes .This is available for Enterprise CARTO users.
@@ -37,11 +36,12 @@ Use a file with M2M credentials to automatically login into a CARTO account. It 
 
     from carto_auth import CartoAuth
 
-    carto_auth = CartoAuth.from_file("./carto-credentials.json")
+    carto_auth = CartoAuth.from_m2m("./carto-credentials.json")
 
 This method supports the following parameters:
 
 * *filepath* (str): File path of the CARTO credentials file.
+* *cache_filepath* (str, optional): File path where the token is stored. Default "home()/.carto-auth/token_m2m.json".
 * *use_cache* (bool, optional): Whether the stored cached token should be used. Default True.
 
 CARTO credentials file

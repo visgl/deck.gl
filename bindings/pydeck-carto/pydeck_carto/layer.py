@@ -85,6 +85,6 @@ def get_layer_credentials(carto_auth) -> dict:
     access_token = carto_auth.get_access_token()
     return {
         "apiVersion": "v3",
-        "apiBaseUrl": carto_auth.api_base_url,
+        "apiBaseUrl": carto_auth._api_base_url,
         "accessToken": access_token,
     }

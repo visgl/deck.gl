@@ -5,22 +5,21 @@ CartoLayer
 Render cloud data in Quadbin grid from a table.
 """
 import pydeck as pdk
+import pydeck_carto as pdkc
 from carto_auth import CartoAuth
-from pydeck_carto import register_carto_layer, get_layer_credentials
-from pydeck_carto.layer import MapType, CartoConnection, GeoColumnType
 
 carto_auth = CartoAuth.from_oauth()
 
-register_carto_layer()
+pdkc.register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
     data="carto-demo-data.demo_tables"
     ".derived_spatialfeatures_esp_quadbin15_v1_yearly_v2",
-    type_=MapType.TABLE,
-    connection=CartoConnection.CARTO_DW,
-    credentials=get_layer_credentials(carto_auth),
-    geo_column=GeoColumnType.QUADBIN,
+    type_=pdkc.MapType.TABLE,
+    connection=pdkc.CartoConnection.CARTO_DW,
+    credentials=pdkc.get_layer_credentials(carto_auth),
+    geo_column=pdkc.GeoColumnType.QUADBIN,
     get_fill_color=[200, 0, 80],
     pickable=True,
 )

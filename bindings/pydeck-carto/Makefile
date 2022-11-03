@@ -14,7 +14,7 @@ lint:
 	$(BIN)/flake8 pydeck_carto tests examples setup.py
 
 test:
-	$(BIN)/pytest tests pydeck_carto
+	$(BIN)/pytest tests --cov=pydeck_carto
 
 publish-pypi:
 	rm -rf $(DIST) $(BUILD) *.egg-info

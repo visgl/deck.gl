@@ -17,10 +17,13 @@ def test_register_carto_layer():
 
 
 def test_get_layer_credentials():
-    carto_auth_mock = CartoAuth(
-        api_base_url="https://api.carto.com", access_token="1234567890", expires_in=1
+    carto_auth = CartoAuth(
+        mode="oauth",
+        api_base_url="https://api.carto.com",
+        access_token="1234567890",
+        expiration=10000000000,
     )
-    assert get_layer_credentials(carto_auth_mock) == {
+    assert get_layer_credentials(carto_auth) == {
         "apiVersion": "v3",
         "apiBaseUrl": "https://api.carto.com",
         "accessToken": "1234567890",
