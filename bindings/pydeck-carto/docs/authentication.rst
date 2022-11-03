@@ -28,7 +28,7 @@ This method supports the following parameters:
 * *open_browser* (bool, optional): Whether the web browser should be opened to authorize a user. Default True.
 
 M2M (advanced)
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
 
 Use a file with M2M credentials to automatically login into a CARTO account. It can be uses for ETL processes .This is available for Enterprise CARTO users.
 
