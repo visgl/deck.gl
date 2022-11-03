@@ -1,0 +1,115 @@
+<html>
+  <head>
+    <!-- deck.gl standalone bundle -->
+    <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
+
+    <!-- OpenLayers dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css" />
+
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+  </body>
+
+  <script type="text/javascript">
+    // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
+    const AIR_PORTS =
+      'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+
+    const layers = [
+      new deck.GeoJsonLayer({
+        id: 'airports',
+        data: AIR_PORTS,
+        // Styles
+        filled: true,
+        pointRadiusMinPixels: 2,
+        pointRadiusScale: 2000,
+        getPointRadius: f => 11 - f.properties.scalerank,
+        getFillColor: [200, 0, 80, 180],
+        // Interactive props
+        pickable: true,
+        autoHighlight: true,
+        onClick: info =>
+          // eslint-disable-next-line
+          info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      }),
+      new deck.ArcLayer({
+        id: 'arcs',
+        data: AIR_PORTS,
+        dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+        // Styles
+        getSourcePosition: f => [-0.4531566, 51.4709959], // London
+        getTargetPosition: f => f.geometry.coordinates,
+        getSourceColor: [0, 128, 200],
+        getTargetColor: [200, 0, 80],
+        getWidth: 1
+      })
+    ];
+
+    // Create deck instance
+    const deckGL = new deck.Deck({
+      initialViewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 1
+      },
+      controller: false,
+      parent: document.getElementById('map'),
+      style: {
+        pointerEvents: 'none',
+        'z-index': 1
+      },
+      layers
+    });
+
+    // Sync deck view with OL view
+    const deckLayer = new ol.layer.Layer({
+      render: function ({size, viewState}) {
+        const [width, height] = size;
+        const [longitude, latitude] = ol.proj.toLonLat(viewState.center);
+        const zoom = viewState.zoom - 1;
+        const bearing = (-viewState.rotation * 180) / Math.PI;
+        const deckViewState = {
+          bearing,
+          longitude,
+          latitude,
+          zoom
+        };
+        deckGL.setProps({
+          width,
+          height,
+          viewState: deckViewState
+        });
+        deckGL.redraw();
+      }
+    });
+
+    // Create OL map with native OSM basemap and deck.gl overlay
+    const view = new ol.View({
+      center: ol.proj.fromLonLat([0, 0]),
+      zoom: 1
+    });
+    const map = new ol.Map({
+      target: 'map',
+      view,
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        }),
+        deckLayer
+      ]
+    });
+  </script>
+</html>

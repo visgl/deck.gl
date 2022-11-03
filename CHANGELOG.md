@@ -21,6 +21,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+
+#### deck.gl [8.9.0-alpha.5] - Oct 20 2022
+
+- Support MaskExtension in FirstPersonView (#7240)
+- CARTO: Encode stats URL query value (#7319)
+- Chore: Bump loaders to 3.2.10 (#7305)
+- Font Atlas Manager: Always update the atlas with the cached version (#7337)
+- CARTO: Explicitly set geoColumn when requesting GeoJSON (#7338)
+- Display helpful error if h3 v4 is accidentally included (#7283)
+- CARTO: fetchMap disable depthTest for point layers (#7332)
+- Fix pydeck render in Google Colab (#7325)
+- Minor fix in widget-tooltip: reset value on every iteration (#7329)
+- Update MapboxOverlay docs (#7320)
+- Fix altitude projection dependence on geometry.worldPosition (#7318)
+- [pydeck-carto] fixed example for H3 strokes (#7306)
+
 #### deck.gl [8.9.0-alpha.4] - Oct 4 2022
 
 - [CARTO] Support custom markers with original colors (#7311)
