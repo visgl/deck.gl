@@ -90,10 +90,12 @@ export function separateGeojsonFeatures(
 
   for (let featureIndex = startRow; featureIndex < endRow; featureIndex++) {
     const feature = features[featureIndex];
-
-    log.assert(feature && feature.geometry, 'GeoJSON does not have geometry');
-
     const {geometry} = feature;
+
+    if (!geometry) {
+      // geometry can be null per specification
+      continue;
+    }
 
     if (geometry.type === 'GeometryCollection') {
       log.assert(Array.isArray(geometry.geometries), 'GeoJSON does not have geometries array');

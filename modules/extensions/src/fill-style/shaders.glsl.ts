@@ -26,7 +26,7 @@ uniform vec2 fill_patternTextureSize;
 
 varying vec2 fill_uv;
 varying vec4 fill_patternBounds;
-varying vec3 fill_patternPlacement;
+varying vec4 fill_patternPlacement;
 `;
 
 const patternFs = `
@@ -37,7 +37,7 @@ uniform vec2 fill_uvCoordinateOrigin;
 uniform vec2 fill_uvCoordinateOrigin64Low;
 
 varying vec4 fill_patternBounds;
-varying vec3 fill_patternPlacement;
+varying vec4 fill_patternPlacement;
 varying vec2 fill_uv;
 
 const float FILL_UV_SCALE = 512.0 / 40000000.0;
@@ -52,13 +52,13 @@ const inject = {
     if (fill_patternEnabled) {
       fill_patternBounds = FILL_PATTERN_FRAME_ATTRIB / vec4(fill_patternTextureSize, fill_patternTextureSize);
       fill_patternPlacement.xy = FILL_PATTERN_OFFSET_ATTRIB;
-      fill_patternPlacement.z = FILL_PATTERN_SCALE_ATTRIB * FILL_PATTERN_FRAME_ATTRIB.w;
+      fill_patternPlacement.zw = FILL_PATTERN_SCALE_ATTRIB * FILL_PATTERN_FRAME_ATTRIB.zw;
     }
   `,
 
   'fs:DECKGL_FILTER_COLOR': `
     if (fill_patternEnabled) {
-      float scale = FILL_UV_SCALE * fill_patternPlacement.z;
+      vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
       vec2 patternUV = mod(mod(fill_uvCoordinateOrigin, scale) + fill_uvCoordinateOrigin64Low + fill_uv, scale) / scale;
       patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
 
