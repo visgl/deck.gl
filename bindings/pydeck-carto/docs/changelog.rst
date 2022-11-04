@@ -12,4 +12,4 @@ Releases and associated GitHub PRs for pydeck-carto are documented here.
 - Add get_layer_credentials function: integration with carto-auth.
 - Add layer enums: MapType, CartoConnection, GeoColumnType.
 - Add styling functions: color_bins, color_categories, color continuous.
-- Add on_data_error notifier
+- Add implicit on_data_error notifier
