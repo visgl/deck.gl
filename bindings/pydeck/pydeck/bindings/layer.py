@@ -4,6 +4,7 @@ import numpy as np
 
 from ..data_utils import is_pandas_df, has_geo_interface, records_from_geo_interface
 from .json_tools import JSONMixin, camel_and_lower
+from ..settings import settings as pydeck_settings
 
 from pydeck.types import Image, Function
 from pydeck.exceptions import BinaryTransportException
@@ -77,8 +78,11 @@ class Layer(JSONMixin):
         self.type = type
         self.id = id or str(uuid.uuid4())
 
+        kwargs = self._add_default_layer_attributes(kwargs)
+
         # Add any other kwargs to the JSON output
         self._kwargs = kwargs.copy()
+
         if kwargs:
             for k, v in kwargs.items():
                 # We assume strings and arrays of strings are identifiers
@@ -172,3 +176,11 @@ class Layer(JSONMixin):
     @type.setter
     def type(self, type_name):
         self.__setattr__(TYPE_IDENTIFIER, type_name)
+
+    def _add_default_layer_attributes(self, kwargs):
+        attributes = pydeck_settings.default_layer_attributes
+
+        if isinstance(attributes, dict) and self.type in attributes and isinstance(attributes[self.type], dict):
+            kwargs = {**attributes[self.type], **kwargs}
+
+        return kwargs

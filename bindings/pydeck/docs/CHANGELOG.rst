@@ -6,6 +6,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.8 Releases
 ------------
 
+0.8.0b4 - Oct 12 2022
+^^^^^^^^^^^^^^^^^^^^^
+- Add default_layer_attributes in settings. Improve variable substitution in tooltips (#)
+
 0.8.0b3 - Sep 09 2022
 ^^^^^^^^^^^^^^^^^^^^^
 - Add configuration attribute in pydeck. Fix css_background_color (#7255)
