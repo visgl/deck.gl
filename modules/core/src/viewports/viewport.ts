@@ -151,6 +151,7 @@ export default class Viewport {
   y: number;
   width: number;
   height: number;
+  padding?: Padding | null;
   isGeospatial: boolean;
   zoom: number;
   focalDistance: number;
@@ -187,6 +188,7 @@ export default class Viewport {
     this.width = opts.width || 1;
     this.height = opts.height || 1;
     this.zoom = opts.zoom || 0;
+    this.padding = opts.padding;
     this.distanceScales = opts.distanceScales || DEFAULT_DISTANCE_SCALES;
     this.focalDistance = opts.focalDistance || 1;
     this.position = opts.position || ZERO_VECTOR;

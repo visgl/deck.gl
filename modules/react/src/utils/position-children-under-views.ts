@@ -57,6 +57,7 @@ export default function positionChildrenUnderViews({
 
     // Drop (auto-hide) elements with viewId that are not matched by any current view
     if (viewport) {
+      viewState.padding = viewport.padding;
       const {x, y, width, height} = viewport;
       // Resolve potentially relative dimensions using the deck.gl container size
       viewChildren = evaluateChildren(viewChildren, {
