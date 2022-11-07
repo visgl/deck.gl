@@ -9,12 +9,14 @@ import {
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
+import {hexToBigInt} from 'quadbin';
 
 const renderSubLayers = props => {
   const {data} = props;
   if (!data || !data.length) return null;
+  const isBigInt = typeof data[0].id === 'bigint';
   return new QuadbinLayer(props, {
-    getQuadbin: d => d.id
+    getQuadbin: isBigInt ? d => d.id : d => hexToBigInt(d.id)
   });
 };
 
