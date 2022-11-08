@@ -255,12 +255,12 @@ const TABLE_PARAMS = {
   {
     status: 400,
     title: 'Should catch bad request',
-    regex: /Bad request. SERVER ERROR MESSAGE/i
+    regex: /Bad request \(400\): SERVER ERROR MESSAGE/i
   },
   ...[401, 403].map(status => ({
     status,
     title: 'Should catch unauthorized access to data',
-    regex: /Unauthorized access. SERVER ERROR MESSAGE/i
+    regex: new RegExp(`Unauthorized access \\(${status}\\): SERVER ERROR MESSAGE`, 'i')
   })),
   {
     status: 500,
