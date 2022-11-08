@@ -11,7 +11,7 @@ export type APIErrorContext = {
 /**
  *
  * Custom error for reported errors in CARTO Maps API.
- * Provides useful debuggin information in console and context for applications.
+ * Provides useful debugging information in console and context for applications.
  *
  */
 export class CartoAPIError extends Error {
