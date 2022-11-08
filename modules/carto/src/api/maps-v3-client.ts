@@ -18,10 +18,14 @@ import {
   MapType,
   MAP_TYPES,
   QueryParameters,
+  REQUEST_TYPES,
   SchemaField,
   TileFormat,
   TILE_FORMATS
 } from './maps-api-common';
+
+import {APIErrorContext, CartoAPIError} from './carto-api-error';
+
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
@@ -37,6 +41,7 @@ interface RequestParams {
   headers?: Headers;
   accessToken?: string;
   body?: any;
+  errorContext: APIErrorContext;
 }
 
 /**
@@ -47,7 +52,8 @@ async function request({
   url,
   headers: customHeaders,
   accessToken,
-  body
+  body,
+  errorContext
 }: RequestParams): Promise<Response> {
   const headers: Headers = {
     ...customHeaders,
@@ -70,7 +76,7 @@ async function request({
       body
     });
   } catch (error) {
-    throw new Error(`Failed to connect to Maps API: ${error}`);
+    throw new CartoAPIError(error as Error, errorContext);
   }
 }
 
@@ -79,13 +85,14 @@ async function requestJson<T = unknown>({
   url,
   headers,
   accessToken,
-  body
+  body,
+  errorContext
 }: RequestParams): Promise<T> {
-  const response = await request({method, url, headers, accessToken, body});
+  const response = await request({method, url, headers, accessToken, body, errorContext});
   const json = await response.json();
 
   if (!response.ok) {
-    dealWithError({response, error: json.error});
+    throw new CartoAPIError(json.error, errorContext, response);
   }
   return json as T;
 }
@@ -95,31 +102,17 @@ async function requestData({
   url,
   accessToken,
   format,
-  body
+  body,
+  errorContext
 }: RequestParams & {
   format: Format;
 }): Promise<Response | unknown> {
   if (format === FORMATS.NDJSON) {
-    return request({method, url, accessToken, body});
+    return request({method, url, accessToken, body, errorContext});
   }
 
-  const data = await requestJson<any>({method, url, accessToken, body});
+  const data = await requestJson<any>({method, url, accessToken, body, errorContext});
   return data.rows ? data.rows : data;
-}
-
-/**
- * Display proper message from Maps API error
- */
-function dealWithError({response, error}: {response: Response; error?: string}): never {
-  switch (response.status) {
-    case 400:
-      throw new Error(`Bad request. ${error}`);
-    case 401:
-    case 403:
-      throw new Error(`Unauthorized access. ${error}`);
-    default:
-      throw new Error(error);
-  }
 }
 
 type FetchLayerDataParams = {
@@ -211,6 +204,7 @@ export async function mapInstantiation({
   })}`;
   const {accessToken} = credentials;
 
+  const errorContext = {requestType: REQUEST_TYPES.INSTANTIATION, connection, type, source};
   if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
     // need to be a POST request
     const body = JSON.stringify({
@@ -218,10 +212,17 @@ export async function mapInstantiation({
       client: clientId || DEFAULT_CLIENT,
       queryParameters
     });
-    return await requestJson({method: 'POST', url: baseUrl, headers, accessToken, body});
+    return await requestJson({
+      method: 'POST',
+      url: baseUrl,
+      headers,
+      accessToken,
+      body,
+      errorContext
+    });
   }
 
-  return await requestJson({url, headers, accessToken});
+  return await requestJson({url, headers, accessToken, errorContext});
 }
 
 function getUrlFromMetadata(metadata: MapInstantiation, format: Format): string | null {
@@ -307,7 +308,8 @@ export async function fetchLayerData({
     queryParameters
   });
 
-  const data = await requestData({url, format: mapFormat, accessToken});
+  const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
+  const data = await requestData({url, format: mapFormat, accessToken, errorContext});
   const result: FetchLayerDataResult = {data, format: mapFormat, schema: metadata.schema};
   return result;
 }
@@ -437,7 +439,8 @@ async function _fetchMapDataset(
   dataset.cache = cache;
 
   // Only fetch if the data has changed
-  dataset.data = await requestData({url, format: mapFormat, accessToken});
+  const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
+  dataset.data = await requestData({url, format: mapFormat, accessToken, errorContext});
 
   return true;
 }
@@ -458,7 +461,8 @@ async function _fetchTilestats(
     // MAP_TYPE.TABLE
     url += `${source}/${attribute}`;
   }
-  const stats = await requestData({url, format: FORMATS.JSON, accessToken});
+  const errorContext = {requestType: REQUEST_TYPES.TILE_STATS, connection, type, source};
+  const stats = await requestData({url, format: FORMATS.JSON, accessToken, errorContext});
 
   // Replace tilestats for attribute with value from API
   const {attributes} = dataset.data.tilestats.layers[0];
@@ -555,7 +559,8 @@ export async function fetchMap({
   }
 
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const map = await requestJson<any>({url, headers, accessToken});
+  const errorContext = {requestType: REQUEST_TYPES.PUBLIC_MAP, mapId: cartoMapId};
+  const map = await requestJson<any>({url, headers, accessToken, errorContext});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
