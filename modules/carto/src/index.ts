@@ -12,10 +12,11 @@ export {
   TILE_FORMATS,
   MAP_TYPES,
   API_VERSIONS,
+  CartoAPIError,
   fetchLayerData,
   fetchMap,
   getDataV2 as _getDataV2,
   mapInstantiation as _mapInstantiation
 } from './api';
-export type {QueryParameters} from './api';
+export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';

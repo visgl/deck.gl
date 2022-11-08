@@ -9,6 +9,7 @@ import {
 
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {fetchLayerData, getDataV2, API_VERSIONS} from '../api';
+import {CartoAPIError} from '../api/carto-api-error';
 import {layerFromTileDataset} from '../api/layer-map';
 import {
   COLUMNS_SUPPORT,
@@ -145,9 +146,9 @@ type _CartoLayerProps = {
   /**
    * Called when the request to the CARTO Maps API failed.
    *
-   * By default the Error is thrown.
+   * By default the CartoAPIError is thrown.
    */
-  onDataError?: (err: unknown) => void;
+  onDataError?: (err: CartoAPIError) => void;
 
   clientId?: string;
 
@@ -272,7 +273,7 @@ export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
       });
     } catch (err) {
       if (this.props.onDataError) {
-        this.props.onDataError(err as Error);
+        this.props.onDataError(err as CartoAPIError);
       } else {
         throw err;
       }
