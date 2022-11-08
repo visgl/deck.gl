@@ -32,7 +32,7 @@ export class CartoAPIError extends Error {
         responseString += 'Bad request';
       } else if (response.status === 401 || response.status === 403) {
         responseString += 'Unauthorized access';
-      } else if (response.status === 404 || response.status === 403) {
+      } else if (response.status === 404) {
         responseString += 'Not found';
       } else {
         responseString += 'Error';
