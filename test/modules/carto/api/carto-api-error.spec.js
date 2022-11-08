@@ -1,9 +1,8 @@
 import test from 'tape-catch';
 
-import {APIErrorContext, CartoAPIError} from '@deck.gl/carto';
+import {CartoAPIError} from '@deck.gl/carto';
 
 [
-  ,
   {
     title: '400 error',
     error: new Error('Bad'),
@@ -52,6 +51,58 @@ Server returned: Not found (404): Not found
     message: `
 Map data API request failed
 Server returned: Error (500): Source error
+`
+  },
+  {
+    title: 'Full error context: instantiation',
+    error: new Error('Source error'),
+    errorContext: {
+      requestType: 'Map instantiation',
+      connection: 'connectionName',
+      source: 'sourceName',
+      type: 'query'
+    },
+    response: {status: 500},
+    message: `
+Map instantiation API request failed
+Server returned: Error (500): Source error
+Connection: connectionName
+Source: sourceName
+Type: query
+`
+  },
+  {
+    title: 'Full error context: public map',
+    error: new Error('Source error'),
+    errorContext: {
+      requestType: 'Public map',
+      mapId: 'abcd'
+    },
+    response: {status: 500},
+    message: `
+Public map API request failed
+Server returned: Error (500): Source error
+Map Id: abcd
+`
+  },
+  {
+    title: 'Full error context: custom value',
+    error: new Error('Source error'),
+    errorContext: {
+      requestType: 'Tile stats',
+      connection: 'connectionName',
+      source: 'sourceName',
+      type: 'tileset',
+      customKey: 'customValue'
+    },
+    response: {status: 500},
+    message: `
+Tile stats API request failed
+Server returned: Error (500): Source error
+Connection: connectionName
+Source: sourceName
+Type: tileset
+Custom Key: customValue
 `
   }
 ].forEach(({title, error, errorContext, response, message}) => {
