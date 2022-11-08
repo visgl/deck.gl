@@ -1,6 +1,7 @@
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_QuadbinTileLayer as QuadbinTileLayer} from '@deck.gl/carto';
+import {renderSubLayers} from '@deck.gl/carto/layers/quadbin-tile-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {testPickingLayer} from '../../layers/test-picking-layer';
 import {bigIntToHex, cellToTile, hexToBigInt, tileToCell} from 'quadbin';
@@ -126,4 +127,28 @@ test('QuadbinTileLayer tilejson', async t => {
 
     t.end();
   });
+});
+
+test('QuadbinTileLayer.renderSubLayers', async t => {
+  let layer = renderSubLayers({});
+  t.equal(layer, null, 'No sublayers with null data');
+
+  let data = [{id: 5200531669706080255n}];
+  layer = renderSubLayers({data});
+  t.ok(layer, 'Sublayer rendered with BigInt data');
+  t.equal(
+    layer.props.getQuadbin(data[0]),
+    5200531669706080255n,
+    'BigInt value returned in accessor'
+  );
+
+  data = [{id: '482bffffffffffff'}];
+  layer = renderSubLayers({data});
+  t.ok(layer, 'Sublayer rendered with hexidecimal data');
+  t.equal(
+    layer.props.getQuadbin(data[0]),
+    5200531669706080255n,
+    'converted BigInt value returned in accessor'
+  );
+  t.end();
 });
