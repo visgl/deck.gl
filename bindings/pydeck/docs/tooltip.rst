@@ -3,7 +3,7 @@
 Configuring tooltips
 ===============================
 
-While you can get a tooltip in pydeck by simply setting ``Deck(tooltip=True)`` in the 
+While you can get a tooltip in pydeck by simply setting ``Deck(tooltip=True)`` in the
 :class:`pydeck.bindings.deck.Deck` constructor, you may want a more customizable one than the default.
 
 To achieve this, :class:`pydeck.bindings.deck.Deck` ``tooltip`` parameter can take a dictionary with the following keys:
@@ -39,6 +39,9 @@ top-level attributes for an individual picked datum include ``elevationValue``,
 ``elevationValue`` and ``colorValue`` would be available to the template engine,
 whereas individual points in the ``points`` array would not.
 
+It allows using a JSON path as a template, separated with dots. For example: ``{a.b.c}``, or ``{properties.value}``.
+For the ``properties`` attributes, the key ``properties`` can be omitted, using simply ``{value}``.
+
 
 Examples
 --------
@@ -66,7 +69,7 @@ Just setting the text:
    }
 
 .. image:: https://i.imgur.com/FSkiBVW.png
-   
+
 A full demo is below:
 
 .. code-block:: python

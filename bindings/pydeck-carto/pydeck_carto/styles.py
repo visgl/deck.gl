@@ -23,7 +23,7 @@ def color_bins(
     colors : Union[str, list], optional
         Color assigned to each domain value.
         - str: A valid named CARTOColors palette.
-        - list: Array of colors in RGBA [ [r, g, b, [a]] ].
+        - list: Array of colors in RGBA ``[ [r, g, b, [a]] ]``.
         Default is PurpOr.
     null_color : list, optional
         Color for null values.
@@ -56,7 +56,7 @@ def color_categories(
     colors : Union[str, list], optional
         Color assigned to each domain value.
         - str: A valid named CARTOColors palette.
-        - list: Array of colors in RGBA [ [r, g, b, [a]] ].
+        - list: Array of colors in RGBA ``[ [r, g, b, [a]] ]``.
         Default: PurpOr.
     null_color : list, optional
         Color for null values.
@@ -97,7 +97,7 @@ def color_continuous(
     colors : Union[str, list], optional
         Color assigned to each domain value.
         - str: A valid named CARTOColors palette.
-        - list: Array of colors in RGBA [ [r, g, b, [a]] ].
+        - list: Array of colors in RGBA ``[ [r, g, b, [a]] ]``.
         Default is PurpOr.
     null_color : list, optional
         Color for null values.

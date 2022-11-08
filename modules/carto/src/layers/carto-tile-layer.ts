@@ -13,7 +13,7 @@ import {
   _TileLoadProps as TileLoadProps
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {binaryToGeojson, geojsonToBinary} from '@loaders.gl/gis';
+import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';

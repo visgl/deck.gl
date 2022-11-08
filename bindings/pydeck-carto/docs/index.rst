@@ -6,7 +6,7 @@
 
 Get started by `installing pydeck-carto <installation.html>`_.
 
-.. figure:: images/pydeck-carto-styles-example.png
+.. figure:: images/pydeck-carto-example.png
 
 Index
 ^^^^^

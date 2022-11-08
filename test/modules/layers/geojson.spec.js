@@ -277,6 +277,24 @@ const TEST_CASES = [
     }
   },
   {
+    title: 'null geometry',
+    argument: {type: 'Feature', geometry: null},
+    expected: {
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
+    }
+  },
+  {
     title: 'FeatureCollection',
     argument: {
       type: 'FeatureCollection',
@@ -317,11 +335,6 @@ const TEST_CASES = [
     title: 'malformed geojson',
     argument: {},
     error: /does not have type/i
-  },
-  {
-    title: 'malformed geojson',
-    argument: {type: 'Feature'},
-    error: /does not have geometry/i
   },
   {
     title: 'malformed geojson: GeometryCollection',

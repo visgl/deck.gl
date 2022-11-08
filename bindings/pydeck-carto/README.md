@@ -25,27 +25,25 @@ pip install .
 
 ```py
 import pydeck as pdk
+import pydeck_carto as pdkc
 from carto_auth import CartoAuth
-from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
-from pydeck_carto.layer import MapType, CartoConnection
 
 # Authentication with CARTO
 carto_auth = CartoAuth.from_oauth()
 
 # Register CartoLayer in pydeck
-register_carto_layer()
+pdkc.register_carto_layer()
 
 # Render CartoLayer in pydeck
 layer = pdk.Layer(
     "CartoLayer",
     data="SELECT geom, name FROM carto-demo-data.demo_tables.airports",
-    type_=MapType.QUERY,
-    connection=CartoConnection.CARTO_DW,
-    credentials=get_layer_credentials(carto_auth),
+    type_=pdkc.MapType.QUERY,
+    connection=pdkc.CartoConnection.CARTO_DW,
+    credentials=pdkc.get_layer_credentials(carto_auth),
     get_fill_color=[238, 77, 90],
     point_radius_min_pixels=2.5,
     pickable=True,
-    on_data_error=get_error_notifier(),
 )
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)

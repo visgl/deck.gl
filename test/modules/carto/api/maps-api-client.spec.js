@@ -160,11 +160,6 @@ const TABLE_PARAMS = {
     title: 'no geoColumn + aggregationResLevel',
     params: {...TABLE_PARAMS, aggregationResLevel: 8},
     regex: /aggregationResLevel, but geoColumn parameter is missing/
-  },
-  {
-    title: 'no aggregationExp + aggregationResLevel',
-    params: {...TABLE_PARAMS, geoColumn: 'geo', aggregationResLevel: 8},
-    regex: /aggregationResLevel, but aggregationExp parameter is missing/
   }
 ].forEach(({title, params, regex}) => {
   test(`fetchLayerData#parameters ${title}`, async t => {
@@ -420,9 +415,14 @@ test(`getDataV2#versionError`, async t => {
       'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'
   },
   {
-    props: {geoColumn: 'geog', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
+    props: {geoColumn: 'quadbin:quadbin', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=quadbin%3Aquadbin&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
+  },
+  {
+    props: {geoColumn: 'h3:h3', aggregationResLevel: 7},
+    mapInstantiationUrl:
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=h3%3Ah3&aggregationExp=1%20AS%20value&aggregationResLevel=7'
   },
   {
     props: {

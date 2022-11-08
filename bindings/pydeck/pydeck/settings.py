@@ -25,12 +25,14 @@ class Settings:
         )
         ```
     configuration : str
+    default_layer_attributes : dict
     """
 
-    def __init__(self, custom_libraries: list = None, configuration: str = None):
+    def __init__(self, custom_libraries: list = None, configuration: str = None, default_layer_attributes: dict = None):
         assert not settings, "Cannot instantiate more than one Settings object"
         self.custom_libraries = custom_libraries or []
         self.configuration = configuration
+        self.default_layer_attributes = default_layer_attributes
 
     def register_library(self, name, uri):
         self.custom_libraries.append({"libraryName": name, "uri": uri})

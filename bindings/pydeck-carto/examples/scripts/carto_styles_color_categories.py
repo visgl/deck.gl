@@ -5,22 +5,20 @@ CartoLayer
 Render cloud data with color categories style.
 """
 import pydeck as pdk
+import pydeck_carto as pdkc
 from carto_auth import CartoAuth
-from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
-from pydeck_carto.layer import MapType, CartoConnection
-from pydeck_carto.styles import color_categories
 
 carto_auth = CartoAuth.from_oauth()
 
-register_carto_layer()
+pdkc.register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
     data="SELECT geom, landuse_type FROM `cartobq.public_account.wburg_parcels`",
-    type_=MapType.QUERY,
-    connection=CartoConnection.CARTO_DW,
-    credentials=get_layer_credentials(carto_auth),
-    get_fill_color=color_categories(
+    type_=pdkc.MapType.QUERY,
+    connection=pdkc.CartoConnection.CARTO_DW,
+    credentials=pdkc.get_layer_credentials(carto_auth),
+    get_fill_color=pdkc.styles.color_categories(
         "landuse_type",
         [
             "Multi-Family Walk-Up Buildings",
@@ -40,7 +38,6 @@ layer = pdk.Layer(
     get_line_color=[0, 0, 0, 100],
     line_width_min_pixels=0.5,
     pickable=True,
-    on_data_error=get_error_notifier(),
 )
 
 view_state = pdk.ViewState(latitude=40.715, longitude=-73.959, zoom=14)

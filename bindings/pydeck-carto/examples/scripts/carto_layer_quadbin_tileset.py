@@ -5,24 +5,22 @@ CartoLayer
 Render cloud data in Quadbin grid from a tileset.
 """
 import pydeck as pdk
+import pydeck_carto as pdkc
 from carto_auth import CartoAuth
-from pydeck_carto import register_carto_layer, get_layer_credentials, get_error_notifier
-from pydeck_carto.layer import MapType, CartoConnection
 
 carto_auth = CartoAuth.from_oauth()
 
-register_carto_layer()
+pdkc.register_carto_layer()
 
 layer = pdk.Layer(
     "CartoLayer",
     data="carto-demo-data.demo_tilesets"
     ".derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset",
-    type_=MapType.TILESET,
-    connection=CartoConnection.CARTO_DW,
-    credentials=get_layer_credentials(carto_auth),
+    type_=pdkc.MapType.TILESET,
+    connection=pdkc.CartoConnection.CARTO_DW,
+    credentials=pdkc.get_layer_credentials(carto_auth),
     get_fill_color=[200, 0, 80],
     pickable=True,
-    on_data_error=get_error_notifier(),
 )
 
 view_state = pdk.ViewState(latitude=44, longitude=-122, zoom=3)

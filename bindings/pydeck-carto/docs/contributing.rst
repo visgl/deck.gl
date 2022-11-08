@@ -37,7 +37,7 @@ To build the documentation locally, run the following:
 .. code-block:: bash
 
     cd deck.gl/bindings/pydeck-carto/docs
-    make clean && make html && browser _build/html/index.html
+    make clean && make html
 
 You can find the homepage at ``pydeck/docs/_build/html/index.html``.
 
