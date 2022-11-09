@@ -57,9 +57,9 @@ varying vec2 mask_texCoords;
     // gl_FragColor = vec4(mask_texCoords, 0.0, 1.0);
     // gl_FragColor = vec4(1.0);
 
-    // if (!mask) discard;
+    if (!mask) discard;
     // Debug (mask out in blue, not discard)
-    if (!mask) gl_FragColor = vec4(0.0, 0.0, 1.0, 0.1);
+    // if (!mask) gl_FragColor = vec4(0.0, 0.0, 1.0, 0.1);
   }
 `
 };

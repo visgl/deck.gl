@@ -15,6 +15,7 @@ void main()
   gl_PointSize = radiusTexels * 2.;
 
   vec3 commonPosition = project_position(positions, positions64Low);
+  geometry.position = vec4(commonPosition, 1.0);
 
   // map xy from commonBounds to [-1, 1]
   gl_Position.xy = (commonPosition.xy - commonBounds.xy) / (commonBounds.zw - commonBounds.xy) ;

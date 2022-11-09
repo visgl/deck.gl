@@ -86,6 +86,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     model
       .setUniforms({
         ...uniforms,
+        mask_enabled: false, // <-- masking happens in weightsTransform
         colorTexture,
         texture, // <---- PROBLEM (put second to avoid warning :/)
         maxTexture,
