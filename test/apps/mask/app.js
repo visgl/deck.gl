@@ -188,7 +188,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         extensions: [new MaskExtension()],
         maskId: maskEnabled && 'mask2'
       }),
-      false &&
+      true &&
         new HeatmapLayer({
           id: 'sources-heatmap',
           data: sources,

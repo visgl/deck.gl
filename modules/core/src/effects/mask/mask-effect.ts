@@ -1,5 +1,5 @@
 import {Texture2D} from '@luma.gl/core';
-// import {readPixelsToArray} from '@luma.gl/core';
+import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import {OPERATION} from '../../lib/constants';
@@ -84,31 +84,32 @@ export default class MaskEffect implements Effect {
       });
     }
 
-    // // Debug show FBO contents on screen
-    // const color = readPixelsToArray(this.maskMap);
-    // let canvas = document.getElementById('fbo-canvas');
-    // if (!canvas) {
-    //   canvas = document.createElement('canvas');
-    //   canvas.id = 'fbo-canvas';
-    //   canvas.width = this.maskMap.width;
-    //   canvas.height = this.maskMap.height;
-    //   canvas.style.zIndex = 100;
-    //   canvas.style.position = 'absolute';
-    //   canvas.style.right = 0;
-    //   canvas.style.border = 'blue 1px solid';
-    //   canvas.style.width = '256px';
-    //   canvas.style.transform = 'scaleY(-1)';
-    //   document.body.appendChild(canvas);
-    // }
-    // const ctx = canvas.getContext('2d');
-    // const imageData = ctx.createImageData(this.maskMap.width, this.maskMap.height);
-    // for (let i = 0; i < color.length; i += 4) {
-    //   imageData.data[i + 0] = color[i + 0];
-    //   imageData.data[i + 1] = color[i + 1];
-    //   imageData.data[i + 2] = color[i + 2];
-    //   imageData.data[i + 3] = color[i + 3] + 128;
-    // }
-    // ctx.putImageData(imageData, 0, 0);
+    // Debug show FBO contents on screen
+    const color = readPixelsToArray(this.maskMap);
+    let canvas = document.getElementById('fbo-canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'fbo-canvas';
+      canvas.width = this.maskMap.width;
+      canvas.height = this.maskMap.height;
+      canvas.style.zIndex = 100;
+      canvas.style.position = 'absolute';
+      canvas.style.right = 0;
+      canvas.style.top = 0;
+      canvas.style.border = 'blue 1px solid';
+      canvas.style.width = '256px';
+      canvas.style.transform = 'scaleY(-1)';
+      document.body.appendChild(canvas);
+    }
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(this.maskMap.width, this.maskMap.height);
+    for (let i = 0; i < color.length; i += 4) {
+      imageData.data[i + 0] = color[i + 0];
+      imageData.data[i + 1] = color[i + 1];
+      imageData.data[i + 2] = color[i + 2];
+      imageData.data[i + 3] = color[i + 3] + 128;
+    }
+    ctx.putImageData(imageData, 0, 0);
   }
 
   private _renderChannel(
