@@ -249,13 +249,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
-    const {maskRenderCount} = this.getModuleSettings();
-    if (maskRenderCount !== this.state.maskRenderCount) {
-      // Treat new mask as if data had changed
-      changeFlags.dataChanged = 'mask';
-      this.setState({maskRenderCount});
-    }
-
     if (changeFlags.dataChanged || changeFlags.viewportChanged) {
       // if data is changed, do not debounce and immediately update the weight map
       changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
