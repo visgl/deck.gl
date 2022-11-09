@@ -197,6 +197,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   state!: AggregationLayer['state'] & {
     supported: boolean;
     colorDomain?: number[];
+    maskRenderCount: number;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture2D;
     zoom?: number;
@@ -239,6 +240,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
 
+    const {maskRenderCount} = this.getModuleSettings();
+    if (maskRenderCount !== this.state.maskRenderCount) {
+      changeFlags.dataChanged = 'mask';
+      this.setState({maskRenderCount});
+    }
+
     if (changeFlags.dataChanged || changeFlags.viewportChanged) {
       // if data is changed, do not debounce and immediately update the weight map
       changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
@@ -259,6 +266,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
 
     if (this.state.isWeightMapDirty) {
+      console.log('updating weightmap');
       this._updateWeightmap();
     }
 
@@ -598,11 +606,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
 
     const uniforms = {
-      // Force mask (trouble is getting these from mask extension...
-      mask_enabled: true,
-      mask_bounds: [77.87691066740754, 304.98062194849194, 94.83216756252682, 321.93587884361136],
-
-      //
       radiusPixels,
       commonBounds,
       textureWidth: textureSize,
