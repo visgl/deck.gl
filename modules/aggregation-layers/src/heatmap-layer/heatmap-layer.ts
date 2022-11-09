@@ -223,8 +223,10 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   shouldUpdateState({changeFlags}: UpdateParameters<this>) {
-    // Need to be updated when viewport changes
-    return changeFlags.somethingChanged;
+    // Need to be updated when viewport or mask changes
+    const {maskRenderCount} = this.getModuleSettings();
+    const maskChanged = maskRenderCount !== this.state.maskRenderCount;
+    return changeFlags.somethingChanged || maskChanged;
   }
 
   /* eslint-disable max-statements,complexity */
@@ -242,6 +244,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
 
     const {maskRenderCount} = this.getModuleSettings();
     if (maskRenderCount !== this.state.maskRenderCount) {
+      // Treat new mask as if data had changed
       changeFlags.dataChanged = 'mask';
       this.setState({maskRenderCount});
     }
@@ -266,7 +269,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
 
     if (this.state.isWeightMapDirty) {
-      console.log('updating weightmap');
       this._updateWeightmap();
     }
 
@@ -277,6 +279,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     if (!this.state.supported) {
       return [];
     }
+
     const {
       weightsTexture,
       triPositionBuffer,
