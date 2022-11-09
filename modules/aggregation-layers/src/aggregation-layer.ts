@@ -86,6 +86,16 @@ export default abstract class AggregationLayer<
       pickingActive: 0,
       devicePixelRatio: cssToDeviceRatio(gl)
     });
+
+    // @ts-ignore
+    const effects = this.context.deck?.effectManager?.getEffects();
+    // HACK needed to get maskChannels & maskMap
+    if (effects) {
+      for (const effect of effects) {
+        Object.assign(moduleSettings, effect.getModuleParameters?.(this));
+      }
+    }
+
     return moduleSettings;
   }
 

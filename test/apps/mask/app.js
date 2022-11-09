@@ -128,11 +128,13 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   }, [selectedCounty2]);
 
   const onClickState = useCallback((info, evt) => {
-    if (evt.srcEvent.shiftKey) {
-      selectCounty2(info.object);
-    } else {
-      selectCounty(info.object);
-    }
+    // if (evt.srcEvent.shiftKey) {
+    //   selectCounty2(info.object);
+    // } else {
+    //   selectCounty(info.object);
+    // }
+    selectCounty(info.object);
+    selectCounty2(info.object);
   }, []);
 
   const onDataLoad = useCallback(geojson => {

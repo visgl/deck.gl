@@ -277,14 +277,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       colorTexture,
       colorDomain
     } = this.state;
-    console.log(
-      'weightsTexture',
-      weightsTexture.textureUnit,
-      'maxWeightsTexture',
-      maxWeightsTexture.textureUnit,
-      'colorTexture',
-      colorTexture.textureUnit
-    );
     const {updateTriggers, intensity, threshold, aggregation} = this.props;
 
     const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
@@ -616,6 +608,20 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       textureWidth: textureSize,
       weightsScale
     };
+
+    // Process extensions for transform
+    const moduleSettings = this.getModuleSettings();
+    const parameters = {
+      blend: true,
+      depthTest: false,
+      blendFunc: [GL.ONE, GL.ONE],
+      blendEquation: GL.FUNC_ADD
+    };
+    const opts = {moduleParameters: moduleSettings, uniforms, parameters, context: this.context};
+    for (const extension of this.props.extensions) {
+      extension.draw.call(this, opts, extension);
+    }
+
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
@@ -625,15 +631,10 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
       weightsTransform.run({
         uniforms,
-        parameters: {
-          blend: true,
-          depthTest: false,
-          blendFunc: [GL.ONE, GL.ONE],
-          blendEquation: GL.FUNC_ADD
-        },
+        parameters,
         clearRenderTarget: true,
         attributes: this.getAttributes(),
-        moduleSettings: this.getModuleSettings()
+        moduleSettings
       });
     });
     this._updateMaxWeightValue();
