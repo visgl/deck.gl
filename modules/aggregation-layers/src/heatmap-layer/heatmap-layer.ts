@@ -241,7 +241,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     const maskChanged = maskRenderCount !== this.state.maskRenderCount;
     if (maskChanged) {
       this.setState({maskRenderCount});
-      this._updateWeightmap();
+      this._debouncedUpdateWeightmap();
     }
   }
 
