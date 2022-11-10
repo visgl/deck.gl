@@ -1498,45 +1498,45 @@
     "@babel/runtime" "^7.7.2"
     regenerator-runtime "^0.13.3"
 
-"@loaders.gl/loader-utils@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.2.3.tgz#c5b9deec11970789c561754aac1ea740206b5df5"
-  integrity sha512-TyAHXaXjDZM/5X451MIixOqztEyGCSBJYqNw1ctaVAHruryisJcCscNHipRngbNw/2gVV74ANigv0s44F27WtQ==
+"@loaders.gl/loader-utils@3.2.11":
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.2.11.tgz#584e687f8c031342a467700323f04a7a88f2131e"
+  integrity sha512-/eQjBLQI1x+5MG3b235xrUcMdKl9ALtzOPMINYeA9TI1TJBULv1xNWBg6HqVdS2ZfaC+JFc9vMxrPI7YaklqNw==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/worker-utils" "3.2.3"
+    "@loaders.gl/worker-utils" "3.2.11"
     "@probe.gl/stats" "^3.5.0"
 
-"@loaders.gl/obj@^3.2.0-alpha.4":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/obj/-/obj-3.2.3.tgz#1581604e1e73ca9c7a2f521365071fe507f2e07c"
-  integrity sha512-Tc4CE8KGmrLi9dS/7KZMw7YU+rqURlvwm/bxdT44w0nlanglSBTaYW6+qHxRfplUZCcRTSLfz3KfTmYJTxV9XA==
+"@loaders.gl/obj@^3.2.10":
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/obj/-/obj-3.2.11.tgz#9cd6f24e8df505f9ab9d9dace5d9322719457d78"
+  integrity sha512-vQYkC4YJbrCc2fbRGqqJuYDdN4SB0hD6HXEl3RsIod7SFnZg+DD5RyrlrW+sH0bAgLKyBqJyIucNuRygpFDfjw==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "3.2.3"
-    "@loaders.gl/schema" "3.2.3"
+    "@loaders.gl/loader-utils" "3.2.11"
+    "@loaders.gl/schema" "3.2.11"
 
-"@loaders.gl/ply@^3.2.0-alpha.4":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/ply/-/ply-3.2.3.tgz#e197b6c147d073515b6302220859356d5948e067"
-  integrity sha512-/1Jm0zOsyxxlcxV59cfB7pJ16cSg9JNoxlXDqyo89u/BpFgoAOBuoTv0303PLqr4vCpew8ANx10Nm6Qh3g3dKg==
+"@loaders.gl/ply@^3.2.10":
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/ply/-/ply-3.2.11.tgz#fef8d85252c6ea01a89470c9a910f47f3d89e08a"
+  integrity sha512-96IAFVDiZMoeiQYz/FbaAA+co18/T5XE5CC1OQhbcjiZLtIDg3Tc5wI4uL/WsCSB31Qzyi6JHEkMS27lPDKDdw==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "3.2.3"
-    "@loaders.gl/schema" "3.2.3"
+    "@loaders.gl/loader-utils" "3.2.11"
+    "@loaders.gl/schema" "3.2.11"
 
-"@loaders.gl/schema@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.2.3.tgz#469bd80a72a50590c9cbb9b87534f506b600884c"
-  integrity sha512-mylwvB6Fjrt6MRQyIFdC0B6z4yZ/sXMmGb03qh5MSdoIIdFVMMHjlt5DykhRT0eNZREBorKfMrcu/LCBbO7jKg==
+"@loaders.gl/schema@3.2.11":
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.2.11.tgz#8650f98446c0437f788d00a1d30092082f157057"
+  integrity sha512-Fz0cWtHwE5Os0HxhEYxLCnJz5LD7djpZnNWk+lPVzIJ6HWPFlxI6lbD4zc1auN5omD2EXFkJigi8on8l3i63fQ==
   dependencies:
     "@types/geojson" "^7946.0.7"
     apache-arrow "^4.0.0"
 
-"@loaders.gl/worker-utils@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.2.3.tgz#a295d5350a2faab59dc543d7f889393b1bfd8611"
-  integrity sha512-ABlcuTTeqJ8/ZOLXaS7Kwz6htixTFlPdtlpM9ks9rZtqDaqLn6SIdzjZHy/We1ko8Ve/Zawpwr9RM1b+3G6lsQ==
+"@loaders.gl/worker-utils@3.2.11":
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.2.11.tgz#76cc457ace34eb2e28b87f2c1e494b20cefb8a89"
+  integrity sha512-2DyBkBJGDU66XbLz+eBByTlfbjUD3OarjzqAifenIrOaX1IuOcSqa8r6w2FOgsjlpT1ujcn0d4QO/o0zM8IWJA==
   dependencies:
     "@babel/runtime" "^7.3.1"
 
@@ -4856,10 +4856,10 @@ d3-collection@1:
   resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-2.0.0.tgz#8d625cab42ed9b8f601a1760a389f7ea9189d62e"
   integrity sha512-SPXi0TSKPD4g9tw0NMZFnR95XVgUZiBH+uUTqQuDu1OsE2zomHU7ho0FISciaPvosimixwHFl3WHLGabv6dDgQ==
 
-d3-color@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.4.1.tgz#c52002bf8846ada4424d55d97982fef26eb3bc8a"
-  integrity sha512-p2sTHSLCJI2QKunbGb7ocOh7DgTAn8IrLx21QRc/BSnodXM4sv6aLQlnfpvehFMLZEfBc6g9pH9SWQccFYfJ9Q==
+d3-color@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-3.1.0.tgz#395b2833dfac71507f12ac2f7af23bf819de24e2"
+  integrity sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==
 
 d3-dispatch@1:
   version "1.0.6"

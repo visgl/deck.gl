@@ -20,7 +20,7 @@
   "dependencies": {
     "@loaders.gl/obj": "^3.2.10",
     "@loaders.gl/ply": "^3.2.10",
-    "d3-color": "^1.4.1",
+    "d3-color": "^3.1.0",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
