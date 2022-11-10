@@ -83,10 +83,14 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
       this.props;
 
+    if (uniforms.mask_enabled) {
+      // Instance based masking happens in weightsTransform
+      uniforms.mask_enabled = !uniforms.mask_maskByInstance;
+    }
+
     model
       .setUniforms({
         ...uniforms,
-        mask_enabled: false, // <-- masking happens in weightsTransform
         colorTexture,
         texture, // <---- PROBLEM (put second to avoid warning :/)
         maxTexture,

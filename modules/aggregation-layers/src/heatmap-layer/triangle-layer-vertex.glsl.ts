@@ -38,6 +38,7 @@ varying float vIntensityMax;
 
 void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
+  geometry.position = project_position(vec4(positions, 1.0));
   vTexCoords = texCoords;
   vec4 maxTexture = texture2D(maxTexture, vec2(0.5));
   float maxValue = aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;

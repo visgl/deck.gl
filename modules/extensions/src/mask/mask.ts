@@ -1,7 +1,7 @@
 import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 
-import type {Layer} from '@deck.gl/core';
+import type {CompositeLayer, Layer} from '@deck.gl/core';
 
 const defaultProps = {
   maskId: ''
@@ -24,6 +24,17 @@ export type MaskExtensionProps = {
 export default class MaskExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'MaskExtension';
+
+  // @ts-ignore
+  getSubLayerProps(this: CompositeLayer, extension: this): any {
+    // @ts-ignore
+    const newProps = super.getSubLayerProps(extension);
+    if ('maskByInstance' in this.props) {
+      // @ts-ignore
+      newProps.maskByInstance = this.props.maskByInstance;
+    }
+    return newProps;
+  }
 
   getShaders(this: Layer<MaskExtensionProps>): any {
     // Infer by geometry if 'maskByInstance' prop isn't explictly set

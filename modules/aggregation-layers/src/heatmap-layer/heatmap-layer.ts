@@ -628,6 +628,13 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       extension.draw.call(this, opts, extension);
     }
 
+    // Only instance-based masking affects the weights transform
+    // @ts-ignore
+    if (uniforms.mask_enabled) {
+      // @ts-ignore
+      uniforms.mask_enabled = uniforms.mask_maskByInstance;
+    }
+
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
