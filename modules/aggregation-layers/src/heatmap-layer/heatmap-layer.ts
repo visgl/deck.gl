@@ -278,7 +278,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     if (!this.state.supported) {
       return [];
     }
-
     const {
       weightsTexture,
       triPositionBuffer,
@@ -607,7 +606,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
-    const uniforms = {
+    const uniforms: any = {
       radiusPixels,
       commonBounds,
       textureWidth: textureSize,
@@ -628,9 +627,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
 
     // Only instance-based masking affects the weights transform
-    // @ts-ignore
     if (uniforms.mask_enabled) {
-      // @ts-ignore
       uniforms.mask_enabled = uniforms.mask_maskByInstance;
     }
 

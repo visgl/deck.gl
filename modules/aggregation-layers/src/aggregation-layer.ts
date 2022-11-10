@@ -53,7 +53,7 @@ export default abstract class AggregationLayer<
   updateState(opts: UpdateParameters<this>) {
     super.updateState(opts);
     const {changeFlags} = opts;
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || changeFlags.propsChanged) {
       const shaders = this.getShaders({});
       if (shaders && shaders.defines) {
         shaders.defines.NON_INSTANCED_MODEL = 1;

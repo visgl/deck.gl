@@ -40,7 +40,6 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32]});
-    // return {vs, fs, modules: [project32]};
   }
 
   initializeState({gl}: LayerContext): void {
@@ -57,7 +56,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   updateState(opts: UpdateParameters<this>) {
     super.updateState(opts);
     const {changeFlags} = opts;
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || changeFlags.propsChanged) {
       this.setState({
         model: this._getModel(opts.context.gl)
       });
