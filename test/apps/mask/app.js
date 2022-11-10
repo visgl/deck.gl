@@ -115,7 +115,7 @@ function getLayerData(data) {
 export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [maskEnabled, setMaskEnabled] = useState(true);
-  const [showLayers, setShowLayers] = useState(true);
+  const [showLayers, setShowLayers] = useState(false);
   const [selectedCounty, selectCounty] = useState(null);
   const [selectedCounty2, selectCounty2] = useState(null);
 
@@ -181,35 +181,33 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         highlightColor: [255, 255, 255, 150]
       }),
       // Rings around target (clipped by mask)
-      new ScatterplotLayer({
-        id: 'sources',
-        data: sources,
-        radiusScale: 3000,
-        radiusMinPixels: 10,
-        getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask2'
-      }),
+      false &&
+        new ScatterplotLayer({
+          id: 'sources',
+          data: sources,
+          radiusScale: 3000,
+          radiusMinPixels: 10,
+          getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
+          extensions: [new MaskExtension()],
+          maskId: maskEnabled && 'mask2'
+        }),
       true &&
         new HeatmapLayer({
           id: 'sources-heatmap',
+          weightsTextureSize: 512,
           data: sources,
           radiusMinPixels: 10,
           getPosition: d => d.position,
           getWeight: d => Math.abs(d.gain),
           extensions: maskEnabled ? [new MaskExtension()] : [],
           maskId: maskEnabled && 'mask2',
-          maskByInstance: false
+          maskByInstance: showLayers
         })
     ];
 
   return (
     <>
-      <DeckGL
-        layers={showLayers ? layers : []}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-      >
+      <DeckGL layers={true ? layers : []} initialViewState={INITIAL_VIEW_STATE} controller={true}>
         <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
       <div style={{position: 'absolute', background: 'white', padding: 10, userSelect: 'none'}}>
@@ -223,7 +221,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         </label>
         <label>
           <input type="checkbox" checked={showLayers} onChange={() => setShowLayers(!showLayers)} />
-          Show layers
+          maskByInstance
         </label>
       </div>
     </>
