@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* global setTimeout clearTimeout */
-import {readPixelsToArray} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {
   getBounds,
@@ -651,43 +650,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       });
     });
     this._updateMaxWeightValue();
-    this._debug();
 
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
     weightsTexture.setParameters({
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
       [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
     });
-  }
-
-  _debug() {
-    // Debug show FBO contents on screen
-    const {weightsTexture} = this.state;
-    const color = readPixelsToArray(weightsTexture);
-    let canvas = document.getElementById('weights-canvas') as HTMLCanvasElement;
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.id = 'weights-canvas';
-      canvas.width = weightsTexture.width;
-      canvas.height = weightsTexture.height;
-      canvas.style.zIndex = '100';
-      canvas.style.position = 'absolute';
-      canvas.style.right = '0';
-      canvas.style.top = '256px';
-      canvas.style.border = 'blue 1px solid';
-      canvas.style.width = '256px';
-      canvas.style.transform = 'scaleY(-1)';
-      document.body.appendChild(canvas);
-    }
-    const ctx = canvas.getContext('2d')!;
-    const imageData = ctx.createImageData(weightsTexture.width, weightsTexture.height);
-    for (let i = 0; i < color.length; i += 4) {
-      imageData.data[i + 0] = color[i + 0];
-      imageData.data[i + 1] = color[i + 1];
-      imageData.data[i + 2] = color[i + 2];
-      imageData.data[i + 3] = 255; //color[i + 3];
-    }
-    ctx.putImageData(imageData, 0, 0);
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {
