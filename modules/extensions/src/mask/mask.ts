@@ -25,12 +25,9 @@ export default class MaskExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'MaskExtension';
 
-  // @ts-ignore
-  getSubLayerProps(this: CompositeLayer, extension: this): any {
-    // @ts-ignore
-    const newProps = super.getSubLayerProps(extension);
+  getSubLayerProps(this: CompositeLayer<MaskExtensionProps>, extension: this): any {
+    const newProps = super.getSubLayerProps.call(this, extension);
     if ('maskByInstance' in this.props) {
-      // @ts-ignore
       newProps.maskByInstance = this.props.maskByInstance;
     }
     return newProps;
