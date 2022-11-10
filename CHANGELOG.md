@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.18] - Nov 10 2022
+
+- Upgrade d3 packages (#7395)
+- [react] Fix padding compatibility with react-map-gl v7 (#7384)
+
 #### deck.gl [8.8.17] - Nov 3 2022
 
 - Fix FillStyleExtension scaling (#7373)
