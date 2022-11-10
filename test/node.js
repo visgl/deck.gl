@@ -41,6 +41,9 @@ function useEsmModule(importPath, file) {
 moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
   return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
 });
+moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
+  return path.resolve(`${__dirname}/../node_modules/react-map-gl/dist/es5/mapbox/mapbox`);
+});
 useEsmModule('@mapbox/tiny-sdf', '@mapbox/tiny-sdf/index.js');
 [
   'd3-array',
