@@ -311,7 +311,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
         maxTexture: maxWeightsTexture,
         colorTexture,
         aggregationMode: AGGREGATION_MODE[aggregation] || 0,
-        texture: weightsTexture, /// <-- PROBLEM
+        texture: weightsTexture,
         intensity,
         threshold,
         colorDomain

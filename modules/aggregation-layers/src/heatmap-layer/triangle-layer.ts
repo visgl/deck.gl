@@ -91,9 +91,9 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     model
       .setUniforms({
         ...uniforms,
-        colorTexture,
-        texture, // <---- PROBLEM (put second to avoid warning :/)
+        texture,
         maxTexture,
+        colorTexture,
         intensity,
         threshold,
         aggregationMode,
