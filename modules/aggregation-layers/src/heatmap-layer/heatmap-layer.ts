@@ -627,6 +627,9 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
 
     // Only instance-based masking affects the weights transform
+    // TODO: do we want to do this? On one hand it makes sense,
+    // but can result in starnge colors as the maxWeightValue is
+    // calculated on the unmasked dataset
     if (uniforms.mask_enabled) {
       uniforms.mask_enabled = uniforms.mask_maskByInstance;
     }
