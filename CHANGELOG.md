@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.19] - Nov 11 2022
+
+- TileLayer exposes accurate picking info on pointer out (#7403)
+- Fix TileLayer cache pruning (#7402)
+
 #### deck.gl [8.8.18] - Nov 10 2022
 
 - Upgrade d3 packages (#7395)
