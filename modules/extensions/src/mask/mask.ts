@@ -4,7 +4,8 @@ import mask from './shader-module';
 import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
-  maskId: ''
+  maskId: '',
+  maskByInstance: undefined
 };
 
 export type MaskExtensionProps = {

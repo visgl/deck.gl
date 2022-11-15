@@ -23,7 +23,8 @@ import {LayerExtension, _ShaderModule as ShaderModule} from '@deck.gl/core';
 import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
-  clipBounds: [0, 0, 1, 1]
+  clipBounds: [0, 0, 1, 1],
+  clipByInstance: undefined
 };
 
 export type ClipExtensionProps = {
