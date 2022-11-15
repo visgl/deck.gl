@@ -2,7 +2,7 @@
   "name": "@deck.gl/json",
   "description": "JSON format rendering components for deck.gl",
   "license": "MIT",
-  "version": "8.8.19",
+  "version": "8.8.20",
   "publishConfig": {
     "access": "public"
   },

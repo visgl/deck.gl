@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.20] - Nov 15 2022
+
+- CARTO: Include aggregation and geoColumn in POST (#7404)
+- CARTO: better API error reporting (#7340)
+- CARTO: Support JSON format in QuadbinLayer (#7383)
+
 #### deck.gl [8.8.19] - Nov 11 2022
 
 - TileLayer exposes accurate picking info on pointer out (#7403)
