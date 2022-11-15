@@ -522,6 +522,13 @@ test('fetchLayerData#post', async t => {
   const accessToken = 'XXX';
   const headers = {'Custom-Header': 'Custom-Header-Value'};
 
+  const source = `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`;
+  const aggregationExp = 'avg(value) as value';
+  const aggregationResLevel = 4;
+  const geoColumn = 'customGeom';
+  const queryParameters = ['a', 'b'];
+  const props = {aggregationExp, aggregationResLevel, geoColumn, queryParameters};
+
   setDefaultCredentials({
     apiVersion: API_VERSIONS.V3,
     apiBaseUrl: 'http://carto-api',
@@ -545,6 +552,13 @@ test('fetchLayerData#post', async t => {
         'Custom-Header-Value',
         'should include custom header in instantiation request'
       );
+      t.ok(options.body, 'should have POST body');
+      const body = JSON.parse(options.body);
+      t.is(body.q, source, 'should have query in body');
+      t.is(body.client, 'deck-gl-carto', 'should have client in body');
+      for (const prop in props) {
+        t.deepEqual(body[prop], props[prop], `should have ${prop} in body`);
+      }
 
       return Promise.resolve({
         json: () => {
@@ -575,9 +589,10 @@ test('fetchLayerData#post', async t => {
     await fetchLayerData({
       type: MAP_TYPES.QUERY,
       connection: 'connection_name',
-      source: `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`,
+      source,
       credentials: getDefaultCredentials(),
-      headers
+      headers,
+      ...props
     });
   } catch (e) {
     t.error(e, 'should not throw');
