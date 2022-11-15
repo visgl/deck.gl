@@ -210,6 +210,9 @@ export async function mapInstantiation({
     const body = JSON.stringify({
       q: source,
       client: clientId || DEFAULT_CLIENT,
+      aggregationResLevel,
+      aggregationExp,
+      geoColumn,
       queryParameters
     });
     return await requestJson({
