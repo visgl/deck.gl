@@ -419,7 +419,7 @@ export default class Tileset2D {
 
     if (overflown) {
       for (const [id, tile] of _cache) {
-        if (!tile.isVisible) {
+        if (!tile.isVisible && !tile.isSelected) {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(id);

@@ -310,7 +310,9 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   }
 
   getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
-    (info as any).tile = (sourceLayer as any).props.tile;
+    if (info.picked) {
+      (info as any).tile = (sourceLayer as any).props.tile;
+    }
     return info;
   }
 
