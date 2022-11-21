@@ -7,7 +7,7 @@ import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
+import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
 export type BufferAccessor = {
@@ -199,7 +199,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         id: this.id,
         target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
         accessor: {type}
-      }) as LumaBuffer;
+      });
     }
     return this._buffer;
   }
@@ -324,7 +324,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
     } else if (data instanceof Buffer) {
-      opts = {buffer: data as LumaBuffer};
+      opts = {buffer: data};
     } else {
       opts = data;
     }

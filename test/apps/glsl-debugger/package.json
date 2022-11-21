@@ -4,7 +4,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
   },
   "dependencies": {
-    "@luma.gl/debug": "^8.5.2",
+    "@luma.gl/debug": "9.0.0-alpha.5",
     "deck.gl": "^8.4.0",
     "glsl-transpiler": "^1.8.5"
   },

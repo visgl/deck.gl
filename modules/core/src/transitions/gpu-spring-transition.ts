@@ -12,12 +12,13 @@ import {
 import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
-import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
+import type {Timeline} from '@luma.gl/engine';
+import type {Transform as LumaTransform} from '@luma.gl/gltools';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
   Texture2D as LumaTexture2D
-} from '@luma.gl/webgl';
+} from '@luma.gl/gltools';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 

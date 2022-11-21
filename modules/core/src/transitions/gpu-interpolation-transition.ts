@@ -11,8 +11,9 @@ import {
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
-import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
+import type {Timeline} from '@luma.gl/engine';
+import type {Transform as LumaTransform} from '@luma.gl/gltools';
+import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
