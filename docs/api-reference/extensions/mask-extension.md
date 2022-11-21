@@ -89,6 +89,10 @@ Id of the layer that defines the mask. The mask layer must use the prop `operati
 
 ![maskByInstance](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/mask-by-instance.png)
 
+##### `maskInverted` (Boolean, optional)
+
+When `maskInverted` is true the result of the masking operation is inverted. Inversion is applied when reading the mask, thus is it possible to use the same mask normally as well as using the inverse on different layers. Defaults to `false`.
+
 ## Limitations
 
 - The current implementation supports up to 4 masks at the same time.
