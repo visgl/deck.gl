@@ -73,8 +73,8 @@ export default [
     goldenImage: './test/render/golden-images/shadow-effect.png'
   },
 
-  {
-    name: 'mask-effect',
+  ...[true, false].map(maskInverted => ({
+    name: `mask-effect${maskInverted ? '-inverted' : ''}`,
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -98,6 +98,7 @@ export default [
       new SolidPolygonLayer({
         id: 'polygon-masked',
         maskId: 'mask-layer',
+        maskInverted,
         extensions: [new MaskExtension()],
         data: polygons,
         getPolygon: f => f,
@@ -106,6 +107,7 @@ export default [
       new ScatterplotLayer({
         id: 'points',
         maskId: 'mask-layer',
+        maskInverted,
         extensions: [new MaskExtension()],
         data: points,
         getPosition: d => d.COORDINATES,
@@ -119,8 +121,8 @@ export default [
     imageDiffOptions: {
       threshold: 0.985
     },
-    goldenImage: './test/render/golden-images/mask-effect.png'
-  },
+    goldenImage: `./test/render/golden-images/mask-effect${maskInverted ? '-inverted' : ''}.png`
+  })),
 
   {
     name: 'post-process-effects',

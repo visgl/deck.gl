@@ -14,6 +14,7 @@ const fs = `
 uniform sampler2D mask_texture;
 uniform int mask_channel;
 uniform bool mask_enabled;
+uniform bool mask_inverted;
 bool mask_isInBounds(vec2 texCoords) {
   if (!mask_enabled) {
     return true;
@@ -29,7 +30,12 @@ bool mask_isInBounds(vec2 texCoords) {
   } else if (mask_channel == 3) {
     maskValue = maskColor.a;
   }
-  return maskValue < 0.5;
+
+  if (mask_inverted) {
+    return maskValue >= 0.5;
+  } else {
+    return maskValue < 0.5;
+  }
 }
 `;
 

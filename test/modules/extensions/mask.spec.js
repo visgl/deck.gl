@@ -28,8 +28,18 @@ test('MaskExtension', t => {
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].getUniforms();
         t.ok(uniforms.mask_enabled, 'mask_enabled in uniforms');
+        t.equal(uniforms.mask_inverted, false, 'mask_inverted defaults to false in uniforms');
         t.ok(uniforms.mask_maskByInstance, 'mask_maskByInstance in uniforms');
         t.ok(uniforms.mask_bounds.every(Number.isFinite), 'mask_bounds in uniforms');
+      }
+    },
+    {
+      updateProps: {
+        maskInverted: true
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = layer.getModels()[0].getUniforms();
+        t.ok(uniforms.mask_inverted, 'mask_inverted true in uniforms');
       }
     },
     {
