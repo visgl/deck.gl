@@ -82,7 +82,13 @@ vec3 color_tint(vec3 color) {
 
 // blend with background color
 vec4 apply_opacity(vec3 color, float alpha) {
-  return mix(transparentColor, vec4(color, 1.0), alpha);
+  if (transparentColor.a == 0.0) {
+    return vec4(color, alpha);
+  }
+  float blendedAlpha = alpha + transparentColor.a * (1.0 - alpha);
+  float highLightRatio = alpha / blendedAlpha;
+  vec3 blendedRGB = mix(transparentColor.rgb, color, highLightRatio);
+  return vec4(blendedRGB, blendedAlpha);
 }
 
 vec2 getUV(vec2 pos) {
