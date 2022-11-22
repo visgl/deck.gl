@@ -110,14 +110,34 @@ export type InteractionState = {
   isZooming?: boolean;
 }
 
+export type ViewState = {
+  zoom: number;
+  longitude: number;
+  latitude: number;
+  bearing?: number;
+  pitch?: number;
+  transitionDuration?: number;
+  width?: number;
+  height?: number;
+  altitude?: number;
+  maxPitch?: number;
+  maxZoom?: number;
+  minPitch?: number;
+  minZoom?: number;
+  normalize?: any;
+  position?: number[];
+  transitionEasing?: any;
+  transitionInterpolator?: any;
+}
+
 /** Parameters passed to the onViewStateChange callback */
 export type ViewStateChangeParameters = {
   /** The next view state, either from user input or transition */
-  viewState: Record<string, any>;
+  viewState: ViewState;
   /** Object describing the nature of the view state change */
   interactionState: InteractionState;
   /** The current view state */
-  oldViewState?: Record<string, any>;
+  oldViewState?: ViewState;
 }
 
 const pinchEventWorkaround: any = {};
