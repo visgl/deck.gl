@@ -78,7 +78,7 @@ test('MaskExtension#maskByInstance', t => {
         stroked: false,
         extensions: [new MaskExtension()]
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           if (layer.id.includes('points')) {
             checkLayer(layer, true);
@@ -93,7 +93,7 @@ test('MaskExtension#maskByInstance', t => {
         id: 'maskByInstance:true',
         maskByInstance: true
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           checkLayer(layer, true);
         }
@@ -104,7 +104,7 @@ test('MaskExtension#maskByInstance', t => {
         id: 'maskByInstance:false',
         maskByInstance: false
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           checkLayer(layer, false);
         }
@@ -112,7 +112,7 @@ test('MaskExtension#maskByInstance', t => {
     }
   ];
 
-  testLayer({ Layer: GeoJsonLayer, testCases, onError: t.notOk });
+  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
 
   t.end();
 });

@@ -22,7 +22,7 @@ test('ClipExtension#clipByInstance', t => {
         stroked: false,
         extensions: [new ClipExtension()]
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           if (layer.id.includes('points')) {
             checkLayer(layer, true);
@@ -37,7 +37,7 @@ test('ClipExtension#clipByInstance', t => {
         id: 'clipByInstance:true',
         clipByInstance: true
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           checkLayer(layer, true);
         }
@@ -48,7 +48,7 @@ test('ClipExtension#clipByInstance', t => {
         id: 'clipByInstance:false',
         clipByInstance: false
       },
-      onAfterUpdate: ({ subLayers }) => {
+      onAfterUpdate: ({subLayers}) => {
         for (const layer of subLayers) {
           checkLayer(layer, false);
         }
@@ -56,7 +56,7 @@ test('ClipExtension#clipByInstance', t => {
     }
   ];
 
-  testLayer({ Layer: GeoJsonLayer, testCases, onError: t.notOk });
+  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
 
   t.end();
 });
