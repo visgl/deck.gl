@@ -35,7 +35,7 @@ export default class MaskExtension extends LayerExtension {
     // Infer by geometry if 'maskByInstance' prop isn't explictly set
     let maskByInstance = 'instancePositions' in this.getAttributeManager()!.attributes;
     // Users can override by setting the `maskByInstance` prop
-    if ('maskByInstance' in this.props) {
+    if (this.props.maskByInstance !== undefined) {
       maskByInstance = Boolean(this.props.maskByInstance);
     }
     this.state.maskByInstance = maskByInstance;
