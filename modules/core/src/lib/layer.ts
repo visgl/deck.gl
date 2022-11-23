@@ -488,7 +488,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
   finalizeState(context: LayerContext): void {
     for (const model of this.getModels()) {
-      model.delete();
+      model.destroy();
     }
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {

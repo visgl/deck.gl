@@ -385,8 +385,7 @@ export default class Deck {
 
   /** Stop rendering and dispose all resources */
   finalize() {
-    this.animationLoop.stop();
-    this.animationLoop = null;
+    this.animationLoop.destroy();
     this._lastPointerDownInfo = null;
 
     this.layerManager?.finalize();

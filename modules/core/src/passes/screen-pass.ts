@@ -12,7 +12,7 @@ import type {ShaderModule} from '../types/types';
 
 type ScreenPassProps = {
   module: ShaderModule;
-  fs: string | null;
+  fs?: string;
   id: string;
   moduleSettings: any;
 };

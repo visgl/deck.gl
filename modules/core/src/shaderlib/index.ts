@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {ProgramManager} from '@luma.gl/core';
-import {gouraudLighting, phongLighting} from '@luma.gl/core';
+import {PipelineFactory} from '@luma.gl/engine';
+import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
 import project from './project/project';
 import project32 from './project32/project32';
 import shadow from './shadow/shadow';
@@ -34,17 +34,17 @@ const SHADER_HOOKS = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function createProgramManager(gl) {
-  const programManager = ProgramManager.getDefaultProgramManager(gl);
+export function createPipelineFactory(gl) {
+  const pipelineFactory = PipelineFactory.getDefaultPipelineFactory(gl);
 
   for (const shaderModule of DEFAULT_MODULES) {
-    programManager.addDefaultModule(shaderModule);
+    pipelineFactory.addDefaultModule(shaderModule);
   }
   for (const shaderHook of SHADER_HOOKS) {
-    programManager.addShaderHook(shaderHook);
+    pipelineFactory.addShaderHook(shaderHook);
   }
 
-  return programManager;
+  return pipelineFactory;
 }
 
 export {picking, project, project32, gouraudLighting, phongLighting, shadow};

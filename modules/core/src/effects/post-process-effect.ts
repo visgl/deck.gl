@@ -112,7 +112,7 @@ void main() {
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module) {
+function getFragmentShaderForRenderPass(module, pass = module): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);
@@ -124,5 +124,5 @@ function getFragmentShaderForRenderPass(module, pass = module) {
   }
 
   // console.error(`${module.name} no fragment shader generated`);
-  return null;
+  return undefined;
 }

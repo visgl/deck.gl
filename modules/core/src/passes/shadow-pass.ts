@@ -87,18 +87,15 @@ export default class ShadowPass extends LayersPass {
 
   delete() {
     if (this.fbo) {
-      this.fbo.delete();
-      this.fbo = null;
+      this.fbo.destroy();
     }
 
     if (this.shadowMap) {
-      this.shadowMap.delete();
-      this.shadowMap = null;
+      this.shadowMap.destroy();
     }
 
     if (this.depthBuffer) {
-      this.depthBuffer.delete();
-      this.depthBuffer = null;
+      this.depthBuffer.destroy();
     }
   }
 }

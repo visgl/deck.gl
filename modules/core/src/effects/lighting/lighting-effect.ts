@@ -31,12 +31,12 @@ export default class LightingEffect implements Effect {
   shadowColor: number[] = DEFAULT_SHADOW_COLOR;
 
   private shadow: boolean;
-  private ambientLight: AmbientLight | null = null;
+  private ambientLight?: AmbientLight;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap: Texture2D | null = null;
+  private dummyShadowMap?: Texture2D;
   private programManager?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
@@ -111,7 +111,7 @@ export default class LightingEffect implements Effect {
   getModuleParameters(layer: Layer) {
     const parameters: {
       lightSources?: {
-        ambientLight: AmbientLight | null;
+        ambientLight?: AmbientLight;
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };
@@ -150,12 +150,12 @@ export default class LightingEffect implements Effect {
 
     if (this.dummyShadowMap) {
       this.dummyShadowMap.delete();
-      this.dummyShadowMap = null;
+      this.dummyShadowMap = undefined;
     }
 
     if (this.shadow && this.programManager) {
       this.programManager.removeDefaultModule(shadow);
-      this.programManager = null;
+      this.programManager = undefined;
     }
   }
 

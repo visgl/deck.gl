@@ -27,12 +27,12 @@ import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 
 import Viewport from '../viewports/viewport';
-import {createProgramManager} from '../shaderlib';
+import {createPipelineFactory} from '../shaderlib';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
-import type {ProgramManager} from '@luma.gl/engine';
+import type {PipelineFactory} from '@luma.gl/engine';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
@@ -42,7 +42,7 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck;
   gl: WebGLRenderingContext;
-  programManager: ProgramManager;
+  pipelineFactory: PipelineFactory;
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
@@ -98,7 +98,7 @@ export default class LayerManager {
       gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      programManager: gl && createProgramManager(gl),
+      pipelineFactory: gl && createPipelineFactory(gl),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
