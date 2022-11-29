@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, PolygonLayer, LayerManager} from '@deck.gl/core';
-import {PipelineFactory} from '@luma.gl/engine';
+import {ProgramManager} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl, device} from '@deck.gl/test-utils';
@@ -114,7 +114,7 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
-  const pipelineManager = PipelineFactory.getDefaultPipelineFactory(device);
+  const pipelineManager = ProgramManager.getDefaultProgramManager(device);
   lightingEffect.preRender(gl, {
     layers: [],
     viewports: [testViewport],

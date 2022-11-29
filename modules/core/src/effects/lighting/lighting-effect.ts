@@ -1,4 +1,4 @@
-import {PipelineFactory} from '@luma.gl/engine';
+import {ProgramManager} from '@luma.gl/core';
 import {Texture2D} from '@luma.gl/gltools';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
@@ -38,7 +38,7 @@ export default class LightingEffect implements Effect {
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
   private dummyShadowMap?: Texture2D;
-  private pipelineFactory?: PipelineFactory;
+  private pipelineFactory?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: Record<string, PointLight | DirectionalLight | AmbientLight> = {}) {
@@ -81,7 +81,7 @@ export default class LightingEffect implements Effect {
       this._createShadowPasses(gl);
     }
     if (!this.pipelineFactory) {
-      this.pipelineFactory = PipelineFactory.getDefaultPipelineFactory(device);
+      this.pipelineFactory = ProgramManager.getDefaultProgramManager(device);
       if (shadow) {
         this.pipelineFactory.addDefaultModule(shadow);
       }
