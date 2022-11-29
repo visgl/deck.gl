@@ -265,7 +265,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (this.state.constant) {
       return this.value;
     }
-    return [this.getBuffer() as LumaBuffer, this.getAccessor() as BufferAccessor];
+    return [this.getBuffer(), this.getAccessor() as BufferAccessor];
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -335,7 +335,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
 
     if (opts.constant) {
       // set constant
-      let value = opts.value as NumericArray;
+      let value = opts.value;
       value = this._normalizeValue(value, [], 0);
       if (this.settings.normalized) {
         value = this.normalizeConstant(value);

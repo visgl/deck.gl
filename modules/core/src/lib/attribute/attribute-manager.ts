@@ -390,7 +390,7 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
-      attribute.setConstantValue(attribute.value as NumericArray);
+      attribute.setConstantValue(attribute.value);
       return;
     }
 

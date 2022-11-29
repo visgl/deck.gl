@@ -111,7 +111,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const attributeManager = this.getAttributeManager();
 
     if (extension.opts.pattern) {
-      attributeManager!.add({
+      attributeManager.add({
         fillPatternFrames: {
           size: 4,
           accessor: 'getFillPattern',

@@ -209,7 +209,7 @@ export default class ViewManager {
     }
 
     if ('width' in props || 'height' in props) {
-      this._setSize(props.width as number, props.height as number);
+      this._setSize(props.width, props.height);
     }
 
     // Important: avoid invoking _update() inside itself

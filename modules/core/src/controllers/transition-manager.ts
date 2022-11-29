@@ -152,10 +152,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
     }
     if (this._isTransitionEnabled(nextProps)) {
       // Ignore if none of the viewport props changed.
-      return (nextProps.transitionInterpolator as TransitionInterpolator).arePropsEqual(
-        currentProps,
-        nextProps
-      );
+      return nextProps.transitionInterpolator.arePropsEqual(currentProps, nextProps);
     }
     return true;
   }
@@ -165,7 +162,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
     const endViewStateProps = this.getControllerState(endProps).shortestPathFrom(startViewstate);
 
     // update transitionDuration for 'auto' mode
-    const transitionInterpolator = endProps.transitionInterpolator as TransitionInterpolator;
+    const transitionInterpolator = endProps.transitionInterpolator;
     const duration = transitionInterpolator.getDuration
       ? transitionInterpolator.getDuration(startProps, endProps)
       : (endProps.transitionDuration as number);
@@ -231,7 +228,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
 
     this.onViewStateChange({
       viewState: this.propsInTransition,
-      oldViewState: this.props as TransitionProps
+      oldViewState: this.props
     });
   };
 }

@@ -103,7 +103,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value as NumericArray
+      value: attribute.value
     });
 
     this.transition.start(transitionSettings);
@@ -123,7 +123,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
   update(): boolean {
     const updated = this.transition.update();
     if (updated) {
-      const {duration, easing} = this.settings as InterpolationTransitionSettings;
+      const {duration, easing} = this.settings;
       const {time} = this.transition;
       let t = time / duration;
       if (easing) {

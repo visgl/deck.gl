@@ -63,7 +63,7 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
     const attributeManager = this.getAttributeManager();
     if (featureIds) {
       // attributeManager is always defined in a primitive layer
-      attributeManager!.add({
+      attributeManager.add({
         featureIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
@@ -152,7 +152,7 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
 
   calculateFeatureIdsPickingColors(attribute) {
     // This updater is only called if featureIds is not null
-    const featureIds = this.props.featureIds!;
+    const featureIds = this.props.featureIds;
     const value = new Uint8ClampedArray(featureIds.length * attribute.size);
 
     const pickingColor = [];

@@ -69,8 +69,8 @@ export default class LightingEffect implements Effect {
     gl: WebGLRenderingContext,
     {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
   ) {
-      // @ts-expect-error
-      const device = gl.device;
+    // @ts-expect-error
+    const device = gl.device;
 
     if (!this.shadow) return;
 

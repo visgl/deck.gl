@@ -87,7 +87,7 @@ export function getSourceBufferAttribute(
   // constant
   // don't pass normalized here because the `value` from a normalized attribute is
   // already normalized
-  return attribute.value as NumericArray;
+  return attribute.value;
 }
 
 export function getAttributeTypeFromSize(size: number): string {
@@ -106,13 +106,13 @@ export function getAttributeTypeFromSize(size: number): string {
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {
-  buffers.push(buffers.shift() as Buffer);
+  buffers.push(buffers.shift());
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -155,7 +155,7 @@ export function padBuffer({
 
   const toData = isConstant
     ? attribute.value
-    : (attribute.getBuffer() as Buffer).getData({srcByteOffset: byteOffset});
+    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));

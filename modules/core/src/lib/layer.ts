@@ -393,7 +393,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   getNumInstances(): number {
     // First Check if app has provided an explicit value
     if (Number.isFinite(this.props.numInstances)) {
-      return this.props.numInstances as number;
+      return this.props.numInstances;
     }
 
     // Second check if the layer has set its own value
@@ -882,7 +882,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     const currentProps = this.props;
     const context = this.context;
-    const internalState = this.internalState as LayerState<this>;
+    const internalState = this.internalState;
 
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
@@ -1170,7 +1170,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       if (Number.isInteger(highlightedObjectIndex)) {
         parameters.pickingSelectedColor =
-          Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
+          Number.isFinite(highlightedObjectIndex) && highlightedObjectIndex >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }

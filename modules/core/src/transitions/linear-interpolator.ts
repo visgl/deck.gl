@@ -104,7 +104,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
         viewport.panByPosition(
           endProps.aroundPosition,
           // anchor point in current screen coordinates
-          lerp(startProps.around as number[], endProps.around as number[], t) as number[]
+          lerp(startProps.around, endProps.around, t) as number[]
         )
       );
     }

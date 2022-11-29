@@ -202,7 +202,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT = {}> extends Laye
   initializeState() {
     const attributeManager = this.getAttributeManager();
     // attributeManager is always defined for primitive layers
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,

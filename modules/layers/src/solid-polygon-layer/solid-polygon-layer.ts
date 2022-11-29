@@ -375,7 +375,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
       this.state.models?.forEach(model => model.delete());
 
       this.setState(this._getModels(this.context.gl));
-      attributeManager!.invalidateAll();
+      attributeManager.invalidateAll();
     }
   }
 

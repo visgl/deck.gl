@@ -456,13 +456,13 @@ export default class Deck {
 
     // If initialized, update sub manager props
     if (this.layerManager) {
-      this.viewManager!.setProps(resolvedProps);
+      this.viewManager.setProps(resolvedProps);
       // Make sure that any new layer gets initialized with the current viewport
       this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
-      this.effectManager!.setProps(resolvedProps);
-      this.deckRenderer!.setProps(resolvedProps);
-      this.deckPicker!.setProps(resolvedProps);
+      this.effectManager.setProps(resolvedProps);
+      this.deckRenderer.setProps(resolvedProps);
+      this.deckPicker.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -494,10 +494,10 @@ export default class Deck {
       this._needsRedraw = false;
     }
 
-    const viewManagerNeedsRedraw = this.viewManager!.needsRedraw(opts);
+    const viewManagerNeedsRedraw = this.viewManager.needsRedraw(opts);
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw(opts);
-    const effectManagerNeedsRedraw = this.effectManager!.needsRedraw(opts);
-    const deckRendererNeedsRedraw = this.deckRenderer!.needsRedraw(opts);
+    const effectManagerNeedsRedraw = this.effectManager.needsRedraw(opts);
+    const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw(opts);
 
     redraw =
       redraw ||
@@ -618,7 +618,7 @@ export default class Deck {
     forceUpdate = false
   ) {
     for (const id in resources) {
-      this.layerManager!.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
+      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
     }
   }
 
@@ -627,7 +627,7 @@ export default class Deck {
    */
   _removeResources(resourceIds: string[]) {
     for (const id of resourceIds) {
-      this.layerManager!.resourceManager.remove(id);
+      this.layerManager.resourceManager.remove(id);
     }
   }
 
@@ -661,11 +661,11 @@ export default class Deck {
 
     const infos = this.deckPicker[method]({
       // layerManager, viewManager and effectManager are always defined if deckPicker is
-      layers: this.layerManager!.getLayers(opts),
-      views: this.viewManager!.getViews(),
+      layers: this.layerManager.getLayers(opts),
+      views: this.viewManager.getViews(),
       viewports: this.getViewports(opts),
-      onViewportActive: this.layerManager!.activateViewport,
-      effects: this.effectManager!.getEffects(),
+      onViewportActive: this.layerManager.activateViewport,
+      effects: this.effectManager.getEffects(),
       ...opts
     });
 
@@ -966,21 +966,21 @@ export default class Deck {
       clearCanvas?: boolean;
     }
   ) {
-    const {gl} = this.layerManager!.context;
+    const {gl} = this.layerManager.context;
 
     setParameters(gl, this.props.parameters);
 
     this.props.onBeforeRender({gl});
 
-    this.deckRenderer!.renderLayers({
+    this.deckRenderer.renderLayers({
       target: this.props._framebuffer,
-      layers: this.layerManager!.getLayers(),
-      viewports: this.viewManager!.getViewports(),
-      onViewportActive: this.layerManager!.activateViewport,
-      views: this.viewManager!.getViews(),
+      layers: this.layerManager.getLayers(),
+      viewports: this.viewManager.getViewports(),
+      onViewportActive: this.layerManager.activateViewport,
+      views: this.viewManager.getViews(),
       pass: 'screen',
       redrawReason,
-      effects: this.effectManager!.getEffects(),
+      effects: this.effectManager.getEffects(),
       ...renderOptions
     });
 
@@ -1009,13 +1009,13 @@ export default class Deck {
     this._updateCursor();
 
     // If view state has changed, clear tooltip
-    if (this.tooltip!.isVisible && this.viewManager!.needsRedraw()) {
-      this.tooltip!.setTooltip(null);
+    if (this.tooltip.isVisible && this.viewManager.needsRedraw()) {
+      this.tooltip.setTooltip(null);
     }
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
-    this.layerManager!.updateLayers();
+    this.layerManager.updateLayers();
 
     // Perform picking request if any
     this._pickAndCallback();
@@ -1065,7 +1065,7 @@ export default class Deck {
 
     // Reuse last picked object
     const layers = this.layerManager.getLayers();
-    const info = this.deckPicker!.getLastPickedObject(
+    const info = this.deckPicker.getLastPickedObject(
       {
         x: pos.x,
         y: pos.y,

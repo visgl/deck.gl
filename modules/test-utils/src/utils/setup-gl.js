@@ -16,4 +16,3 @@ globalThis.glContext =
 export default globalThis.glContext;
 
 export const device = globalThis.glContext.device;
-
