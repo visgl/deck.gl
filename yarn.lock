@@ -2395,93 +2395,88 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
 
-"@luma.gl/api@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/api/-/api-9.0.0-alpha.6.tgz#a18d5b95acca9d855ccc79c2fdf2b17132d0c068"
-  integrity sha512-2mX4L5ayu5l8JQbgSUM5F6gPfG+Ny0zS7mCid05Sv4Wm/deei/Rb4yyIm3onQY3ZlUYocnhkgAoTRrOHIGJ17A==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-"@luma.gl/constants@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.0-alpha.6.tgz#248d4dc0bfb2decb7bd963e2556c5d576843c0f0"
-  integrity sha512-nqankbMqA1ACHTHgtwWYc3LXEwiuagT5XaRcYSElcaIn3RYP08070kj/rA+cG+GMV4eeMkIqqCkVly6HEQWuEQ==
+"@luma.gl/constants@8.5.16", "@luma.gl/constants@^8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.5.16.tgz#196f270d0e7735cafe264e994ee34ebfaa11906a"
+  integrity sha512-b9JrfhlU4tgQWa7vAzQzzw3yS0NdJBrTEZ6LA9XRKSwVV5VunHXApnrnN4v1oA0AGgnknnUf40PRBZolsVK+7Q==
 
 "@luma.gl/constants@^8.4.0":
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-8.4.0.tgz#07584e76fbb184f8b26d323b8d52e3a6c8815ce8"
   integrity sha512-R4lW8nZ2Mon+62uOH6l1M7KlCMzxhr+J2cHuArK8KzvdUz/+oJU/GdII6AP9zvix3A0rpGRf5p0hpL2tnjzXGw==
 
-"@luma.gl/core@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.0-alpha.6.tgz#3e8e20bf0996917cde1598513daad35079d5fa7e"
-  integrity sha512-v+8mFUTAvauf1Wf5paa9fUvKG8uiEaoFqgJUbtyC10St0jXkAT+IKbVFbb2oYp31vgecIZW85DN5ImhJsch9Gw==
+"@luma.gl/core@^8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-8.5.16.tgz#a8ad0afbb68885913d4a18add5b3926c8c9be39d"
+  integrity sha512-w3goHMFEhQFlpoXXygFD6zaZvu4rYvMLfDXThpBMUYm8Y4k46UREFYhsV1aOe1aJlaolsRT/9J2fgSDXr0yA3w==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/constants" "9.0.0-alpha.6"
-    "@luma.gl/engine" "9.0.0-alpha.6"
-    "@luma.gl/gltools" "9.0.0-alpha.6"
-    "@luma.gl/shadertools" "9.0.0-alpha.6"
-    "@luma.gl/webgl" "9.0.0-alpha.6"
+    "@luma.gl/constants" "8.5.16"
+    "@luma.gl/engine" "8.5.16"
+    "@luma.gl/gltools" "8.5.16"
+    "@luma.gl/shadertools" "8.5.16"
+    "@luma.gl/webgl" "8.5.16"
 
-"@luma.gl/engine@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.0-alpha.6.tgz#bc99bad6bf1f7222f92e509143086babd69a60e7"
-  integrity sha512-jV8PITw89cUbB7vKhDUan+Krv4DQK0tArA3q6DoHd5n7BO/R/MokpbGmdiwsX+d0BdaP18uoig6n90XyeX9y9g==
+"@luma.gl/engine@8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-8.5.16.tgz#d8b4bdf8d63fbb470c0416a0cfde6513bace2bed"
+  integrity sha512-F9wMLg+ystsXa3oOzLezaD1K7ot+kL69IKIJqVjxNecPLf8E/BxJlKL+AZW7SCluka6pFMlGomog0GnjjCxH8Q==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/constants" "9.0.0-alpha.6"
-    "@luma.gl/shadertools" "9.0.0-alpha.6"
-    "@luma.gl/webgl" "9.0.0-alpha.6"
+    "@luma.gl/constants" "8.5.16"
+    "@luma.gl/gltools" "8.5.16"
+    "@luma.gl/shadertools" "8.5.16"
+    "@luma.gl/webgl" "8.5.16"
     "@math.gl/core" "^3.5.0"
-    "@probe.gl/log" "^3.5.0"
+    "@probe.gl/env" "^3.5.0"
     "@probe.gl/stats" "^3.5.0"
+    "@types/offscreencanvas" "^2019.7.0"
 
-"@luma.gl/experimental@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/experimental/-/experimental-9.0.0-alpha.6.tgz#af12fc3a4ab8c0796a2cd5fe18ea790e68fd89ef"
-  integrity sha512-2aeRLU+cPLi+hqLLuF9wjpDNFRw/KQCe9FnwZT0OCWzI4jVjJDXd+HlzEsQg31jlNdRJkXmK+Y1TbKNFy9qHJA==
+"@luma.gl/experimental@^8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/experimental/-/experimental-8.5.16.tgz#3fc46bbbbd82a057f8233a9ba0ac464078e5d874"
+  integrity sha512-5bbb3DgyNGlfKtEGN+Ztu4WdMy7bHMKUkQ7UzHoRHsjXSB54rzlSuqfxM0royfljSCnDNhDmSUagSuwnkwNkMg==
   dependencies:
-    "@luma.gl/constants" "9.0.0-alpha.6"
+    "@luma.gl/constants" "8.5.16"
     "@math.gl/core" "^3.5.0"
     earcut "^2.0.6"
 
-"@luma.gl/gltools@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/gltools/-/gltools-9.0.0-alpha.6.tgz#f4ccf9f0e7b3a5d87d247436f207226caa9061eb"
-  integrity sha512-LE8o7FMx0z6upsv7LxaLHo1KOXtHPDmIxRtRXo5Nq7aqoaaFaKGaBF4MYbfsPvIPYIKhJGqJ2mtivojLDVjEXw==
+"@luma.gl/gltools@8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gltools/-/gltools-8.5.16.tgz#d2c9feb3645bbf36220719c70ed13623eeca8074"
+  integrity sha512-CNCLbKtMRep7tTuB5x3RA7tD70U8XXA8xhABDZs7oAQ0Q/K2EjnwskSUlWzgD3ZPluh6JZzvQBEi4DSmeW3NZA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/constants" "9.0.0-alpha.6"
-    "@luma.gl/engine" "9.0.0-alpha.6"
-    "@luma.gl/webgl" "9.0.0-alpha.6"
+    "@luma.gl/constants" "8.5.16"
+    "@probe.gl/env" "^3.5.0"
     "@probe.gl/log" "^3.5.0"
+    "@types/offscreencanvas" "^2019.7.0"
 
-"@luma.gl/shadertools@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.0-alpha.6.tgz#fff6dcf088b37e75bc806013beacc526e9ed67e0"
-  integrity sha512-ZU/JbYxkSpldgkAbLiRDeY0mw1OpxdVUW3x19E6IFqzun9XAXOxuSeeIBVht2kA7XEINND4xq+P7L9UyoM9ejA==
+"@luma.gl/shadertools@8.5.16", "@luma.gl/shadertools@^8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-8.5.16.tgz#90eeed64fc4dfce9e87cd096238988cff06dda30"
+  integrity sha512-L3M3v6bQhIT8McCeqLvHnLJBmBXYDog1QblF4PVszuIB/WH+cHxZ0I26X2a1eEsVCvdeCrxRBxr42743oyfUNA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/api" "9.0.0-alpha.6"
     "@math.gl/core" "^3.5.0"
 
-"@luma.gl/test-utils@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.0.0-alpha.6.tgz#b6fb1dbd330566bd32dc314730511ce0b8cd56fc"
-  integrity sha512-1maJaiTfE0COC1syfwEDkB3hE6ZkkdagpUwtI2ZClPq6mwIiz7/KeVkPTy2q6ngXWwbxZ32R3GYTrEFTZP+hsQ==
+"@luma.gl/test-utils@^8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-8.5.16.tgz#c05451075e4c3d58bafe1646670b1a2b720c088c"
+  integrity sha512-MNZc+h9QdfcDNBKgF0GWypRU+fTUlKsDHnkgzIloR8Kx6Oz+vkgWyIPDunVpcnxEnIpwmOCGGwTR5E9rahT7BA==
   dependencies:
-    "@probe.gl/env" "^3.5.0"
+    "@probe.gl/stats" "^3.5.0"
 
-"@luma.gl/webgl@9.0.0-alpha.6":
-  version "9.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.0.0-alpha.6.tgz#f0fe8562a4be7988834c8ef35e6e54939aa9fe25"
-  integrity sha512-c/pmhDQ+ZCfLZvKHl05o8Z7sIB6o3yr595054wq78VS8u8Q7UsooLI+yHLQhTnUazD6iZkNJ/ZuAzT8qZl2KSg==
+"@luma.gl/webgl@8.5.16":
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-8.5.16.tgz#a0d68802b00e881a36181f65f12f703550c35cd9"
+  integrity sha512-vyzr4Mu3+6rKnyu4c5gmTcuDG6xKF49qy316v8oMp45VT0xCQBP17Poq0b0j0VqbGOOtXGI/pxOtr68Ii9fDuA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/api" "9.0.0-alpha.6"
-    "@luma.gl/constants" "9.0.0-alpha.6"
+    "@luma.gl/constants" "8.5.16"
+    "@luma.gl/gltools" "8.5.16"
     "@probe.gl/env" "^3.5.0"
+    "@probe.gl/stats" "^3.5.0"
 
 "@lumino/algorithm@^1.3.0":
   version "1.3.0"
@@ -3094,7 +3089,7 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.13.tgz#6ad4d9db59e6b3faf98dcfe4ca9d2aec84443277"
   integrity sha512-Z6/KzgyWOga3pJNS42A+zayjhPbf2zM3hegRQaOPnLOzEi86VV++6FLDWgR1LGrVCRufP/ph2daa3tEa5br1zA==
 
-"@types/offscreencanvas@^2019.6.4":
+"@types/offscreencanvas@^2019.7.0":
   version "2019.7.0"
   resolved "https://registry.yarnpkg.com/@types/offscreencanvas/-/offscreencanvas-2019.7.0.tgz#e4a932069db47bb3eabeb0b305502d01586fa90d"
   integrity sha512-PGcyveRIpL1XIqK8eBsmRBt76eFgtzuPiSTyKHZxnGemp2yzGzWpjYKAfK3wIMiU7eH+851yEpiuP8JZerTmWg==
@@ -4609,9 +4604,9 @@ camelcase@^5.0.0, camelcase@^5.3.1:
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
 caniuse-lite@^1.0.30001254:
-  version "1.0.30001434"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001434.tgz"
-  integrity sha512-aOBHrLmTQw//WFa2rcF1If9fa3ypkC1wzqqiKHgfdrXTWcU8C4gKVZT77eQAPWN1APys3+uQ0Df07rKauXGEYA==
+  version "1.0.30001374"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001374.tgz"
+  integrity sha512-mWvzatRx3w+j5wx/mpFN5v5twlPrabG8NqX2c6e45LCpymdoGqNvRkRutFUqpRTXKFQFNQJasvK0YT7suW6/Hw==
 
 canvas@^2.6.0:
   version "2.6.1"

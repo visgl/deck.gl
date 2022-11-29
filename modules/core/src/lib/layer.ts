@@ -45,7 +45,7 @@ import {load} from '@loaders.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/core';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';

@@ -438,7 +438,7 @@ export default class Deck {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Required<DeckProps> & {
+    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
       width: number;
       height: number;
       views: View[];
@@ -749,8 +749,8 @@ export default class Deck {
     } = props;
 
     return new AnimationLoop({
-      width,
-      height,
+      // width,
+      // height,
       useDevicePixels,
       autoResizeViewport: false,
       gl,
@@ -764,8 +764,8 @@ export default class Deck {
         }),
       onInitialize: context => this._setGLContext(context.gl),
       onRender: this._onRenderFrame.bind(this),
-      onBeforeRender,
-      onAfterRender,
+      // onBeforeRender,
+      // onAfterRender,
       onError
     });
   }
@@ -882,7 +882,8 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = gl.canvas;
+      this.canvas = gl.canvas as HTMLCanvasElement;
+      // @ts-expect-error - Currently luma.gl v9 does not expose these options
       instrumentGLContext(gl, {enable: true, copyState: true});
     }
 

@@ -32,7 +32,7 @@ import {createProgramManager} from '../shaderlib';
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
-import type {ProgramManager} from '@luma.gl/engine';
+import type {ProgramManager} from '@luma.gl/core';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';

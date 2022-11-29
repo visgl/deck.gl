@@ -1,5 +1,5 @@
 import GL from '@luma.gl/constants';
-import {Buffer, Transform} from '@luma.gl/core';
+import {Buffer, Transform, Timeline} from '@luma.gl/core';
 import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
@@ -11,9 +11,6 @@ import {
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
-import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/gltools';
-import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
@@ -27,8 +24,8 @@ export default class GPUInterpolationTransition implements GPUTransition {
   private transition: Transition;
   private currentStartIndices: NumericArray | null;
   private currentLength: number;
-  private transform: LumaTransform;
-  private buffers: LumaBuffer[];
+  private transform: Transform;
+  private buffers: Buffer[];
 
   constructor({
     gl,
@@ -160,7 +157,7 @@ void main(void) {
 }
 `;
 
-function getTransform(gl: WebGLRenderingContext, attribute: Attribute): LumaTransform {
+function getTransform(gl: WebGLRenderingContext, attribute: Attribute): Transform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(gl, {
     vs,
