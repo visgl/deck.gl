@@ -37,8 +37,8 @@
     "@loaders.gl/schema": "^3.2.10",
     "@loaders.gl/terrain": "^3.2.10",
     "@loaders.gl/tiles": "^3.2.10",
-    "@luma.gl/constants": "9.0.0-alpha.5",
-    "@luma.gl/experimental": "9.0.0-alpha.5",
+    "@luma.gl/constants": "9.0.0-alpha.6",
+    "@luma.gl/experimental": "9.0.0-alpha.6",
     "@math.gl/core": "^3.6.2",
     "@math.gl/culling": "^3.6.2",
     "@math.gl/web-mercator": "^3.6.2",
@@ -52,7 +52,7 @@
     "@deck.gl/layers": "^8.0.0",
     "@deck.gl/mesh-layers": "^8.0.0",
     "@loaders.gl/core": "^3.0.0",
-    "@luma.gl/core": "9.0.0-alpha.5"
+    "@luma.gl/core": "9.0.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

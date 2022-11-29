@@ -43,7 +43,6 @@ export default class ScreenPass extends Pass {
 
   delete() {
     this.model.delete();
-    // @ts-expect-error
     this.model = null;
   }
 
