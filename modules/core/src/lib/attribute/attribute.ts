@@ -6,6 +6,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
+import type {Device} from '@luma.gl/api';
 import type {Buffer} from '@luma.gl/gltools';
 
 import type {NumericArray, TypedArray} from '../../types/types';
@@ -63,8 +64,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
   constant: boolean = false;
 
-  constructor(gl: WebGLRenderingContext, opts: AttributeOptions) {
-    super(gl, opts, {
+  constructor(device: Device, opts: AttributeOptions) {
+    super(device, opts, {
       startIndices: null,
       lastExternalBuffer: null,
       binaryValue: null,

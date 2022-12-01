@@ -83,7 +83,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     });
   }
 
-  initializeState({gl}: LayerContext) {
+  initializeState(): void {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       colors: {
@@ -95,13 +95,13 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
         noAlloc: true
       }
     });
-    const model = this._getModel(gl);
+    const model = this._getModel();
     this._setupUniformBuffer(model);
     this.setState({model});
   }
 
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new CubeGeometry(),

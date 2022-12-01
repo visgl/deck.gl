@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {
   Model,
@@ -106,7 +107,9 @@ export default class GPUGridAggregator {
     return {cellCounts, cellWeights};
   }
 
-  static isSupported(gl) {
+  static isSupported(device: Device) {
+    // @ts-expect-error
+    const gl = device.gl as WebGLRenderingContext;
     return hasFeatures(gl, REQUIRED_FEATURES);
   }
 
@@ -135,7 +138,7 @@ export default class GPUGridAggregator {
   //   }
   // }
 
-  constructor(gl, opts = {}) {
+  constructor(device: Device, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.gl = gl;
     this.state = {

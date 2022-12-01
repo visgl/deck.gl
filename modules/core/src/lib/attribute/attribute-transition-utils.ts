@@ -1,3 +1,4 @@
+import type {Device} from '@luma.gl/api';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';
 import Attribute from './attribute';
@@ -67,7 +68,7 @@ export function normalizeTransitionSettings(
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(
-  gl: WebGLRenderingContext,
+  device: Device,
   attribute: Attribute
 ): [Buffer, BufferAccessor] | NumericArray {
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}

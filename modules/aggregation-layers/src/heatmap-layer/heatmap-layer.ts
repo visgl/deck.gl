@@ -335,7 +335,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
+    return new AttributeManager(this.context.device, {
       id: this.props.id,
       stats: this.context.stats
     });
@@ -364,18 +364,17 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   _createTextures() {
-    const {gl} = this.context;
     const {textureSize, format, type} = this.state;
 
     this.setState({
-      weightsTexture: new Texture2D(gl, {
+      weightsTexture: new Texture2D(this.context.device, {
         width: textureSize,
         height: textureSize,
         format,
         type,
         ...TEXTURE_OPTIONS
       }),
-      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
+      maxWeightsTexture: new Texture2D(this.context.device, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
     });
   }
 
@@ -419,12 +418,11 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   _createWeightsTransform(shaders = {}) {
-    const {gl} = this.context;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     weightsTransform?.delete();
 
-    weightsTransform = new Transform(gl, {
+    weightsTransform = new Transform(this.context.device, {
       id: `${this.id}-weights-transform`,
       elementCount: 1,
       _targetTexture: weightsTexture,
@@ -435,7 +433,6 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   _setupResources() {
-    const {gl} = this.context;
     this._createTextures();
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
 
@@ -443,7 +440,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new Transform(gl, {
+    const maxWeightTransform = new Transform(this.context.device, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
         inTexture: weightsTexture
@@ -459,11 +456,11 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       maxWeightsTexture,
       maxWeightTransform,
       zoom: null,
-      triPositionBuffer: new Buffer(gl, {
+      triPositionBuffer: new Buffer(this.context.device, {
         byteLength: 48,
         accessor: {size: 3}
       }),
-      triTexCoordBuffer: new Buffer(gl, {
+      triTexCoordBuffer: new Buffer(this.context.device, {
         byteLength: 48,
         accessor: {size: 2}
       })
@@ -565,7 +562,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
         width: colorRange.length
       });
     } else {
-      colorTexture = new Texture2D(this.context.gl, {
+      colorTexture = new Texture2D(this.context.device, {
         data: colors,
         width: colorRange.length,
         height: 1,

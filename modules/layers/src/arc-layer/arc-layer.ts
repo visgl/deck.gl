@@ -217,9 +217,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     super.updateState(opts);
     // Re-generate model if geometry changed
     if (opts.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
       this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -241,7 +240,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     let positions: number[] = [];
     const NUM_SEGMENTS = 50;
     /*
@@ -255,7 +254,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
-    const model = new Model(gl, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

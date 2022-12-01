@@ -1,4 +1,5 @@
 /* eslint-disable complexity, max-statements, max-params */
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {Buffer, Transform, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/core';
 import {
@@ -23,7 +24,7 @@ import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
 export default class GPUSpringTransition implements GPUTransition {
-  gl: WebGLRenderingContext;
+  device: Device;
   type = 'spring';
   attributeInTransition: Attribute;
 
@@ -38,15 +39,15 @@ export default class GPUSpringTransition implements GPUTransition {
   private buffers: LumaBuffer[];
 
   constructor({
-    gl,
+    device,
     attribute,
     timeline
   }: {
-    gl: WebGLRenderingContext;
+    device: Device;
     attribute: Attribute;
     timeline: Timeline;
   }) {
-    this.gl = gl;
+    this.device = device;
     this.type = 'spring';
     this.transition = new Transition(timeline);
     this.attribute = attribute;
@@ -54,23 +55,23 @@ export default class GPUSpringTransition implements GPUTransition {
     // attribute, it will be converted and returned as a regular attribute
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(gl, {...attribute.settings, normalized: false});
+    this.attributeInTransition = new Attribute(device, {...attribute.settings, normalized: false});
     this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
     this.currentLength = 0;
-    this.texture = getTexture(gl);
-    this.framebuffer = getFramebuffer(gl, this.texture);
-    this.transform = getTransform(gl, attribute, this.framebuffer);
+    this.texture = getTexture(device);
+    this.framebuffer = getFramebuffer(device, this.texture);
+    this.transform = getTransform(device, attribute, this.framebuffer);
     const bufferOpts = {
       byteLength: 0,
       usage: GL.DYNAMIC_COPY
     };
     this.buffers = [
-      new Buffer(gl, bufferOpts), // previous
-      new Buffer(gl, bufferOpts), // current
-      new Buffer(gl, bufferOpts) // next
+      new Buffer(device, bufferOpts), // previous
+      new Buffer(device, bufferOpts), // current
+      new Buffer(device, bufferOpts) // next
     ];
   }
 
@@ -84,7 +85,7 @@ export default class GPUSpringTransition implements GPUTransition {
   // in case the attribute's buffer has changed in length or in
   // startIndices
   start(transitionSettings: SpringTransitionSettings, numInstances: number): void {
-    const {gl, buffers, attribute} = this;
+    const {device, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
       attribute,
@@ -116,7 +117,7 @@ export default class GPUSpringTransition implements GPUTransition {
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
-        aTo: getSourceBufferAttribute(gl, attribute)
+        aTo: getSourceBufferAttribute(device, attribute)
       }
     });
   }
@@ -185,12 +186,12 @@ export default class GPUSpringTransition implements GPUTransition {
 }
 
 function getTransform(
-  gl: WebGLRenderingContext,
+  device: Device,
   attribute: Attribute,
   framebuffer: LumaFramebuffer
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(gl, {
+  return new Transform(device, {
     framebuffer,
     vs: `
 #define SHADER_NAME spring-transition-vertex-shader
@@ -240,8 +241,8 @@ void main(void) {
   });
 }
 
-function getTexture(gl: WebGLRenderingContext): LumaTexture2D {
-  return new Texture2D(gl, {
+function getTexture(device: Device): LumaTexture2D {
+  return new Texture2D(device, {
     data: new Uint8Array(4),
     format: GL.RGBA,
     type: GL.UNSIGNED_BYTE,
@@ -253,8 +254,8 @@ function getTexture(gl: WebGLRenderingContext): LumaTexture2D {
   });
 }
 
-function getFramebuffer(gl: WebGLRenderingContext, texture: LumaTexture2D): LumaFramebuffer {
-  return new Framebuffer(gl, {
+function getFramebuffer(device: Device, texture: LumaTexture2D): LumaFramebuffer {
+  return new Framebuffer(device, {
     id: 'spring-transition-is-transitioning-framebuffer',
     width: 1,
     height: 1,
