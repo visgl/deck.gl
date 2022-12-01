@@ -37,7 +37,7 @@ export default class LightingEffect implements Effect {
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap?: Texture2D;
+  private dummyShadowMap: Texture2D | null = null;
   private pipelineFactory?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
@@ -158,7 +158,7 @@ export default class LightingEffect implements Effect {
 
     if (this.shadow && this.pipelineFactory) {
       this.pipelineFactory.removeDefaultModule(shadow);
-      this.pipelineFactory = undefined;
+      this.pipelineFactory = null!;
     }
   }
 

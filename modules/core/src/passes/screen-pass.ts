@@ -42,8 +42,8 @@ export default class ScreenPass extends Pass {
   }
 
   delete() {
-    this.model.delete();
-    this.model = null;
+    this.model.destroy();
+    this.model = null!;
   }
 
   // Private methods

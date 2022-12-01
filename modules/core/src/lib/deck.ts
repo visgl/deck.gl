@@ -31,6 +31,8 @@ import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from '@probe.gl/env';
+import {Device} from '@luma.gl/api';
+import {WebGLDevice} from '@luma.gl/webgl';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
@@ -179,7 +181,9 @@ export type DeckProps = {
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
 
-  /** Called once the WebGL context has been initiated. */
+  /** Called once the GPU Device has been initiated. */
+  onDeviceInitialized?: (device: Device) => void;
+  /** @deprecated Called once the WebGL context has been initiated. */
   onWebGLInitialized?: (gl: WebGLRenderingContext) => void;
   /** Called when the canvas resizes. */
   onResize?: (dimensions: {width: number; height: number}) => void;
@@ -188,9 +192,9 @@ export type DeckProps = {
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
-  onBeforeRender?: (context: {gl: WebGLRenderingContext}) => void;
+  onBeforeRender?: (context: {device: Device; gl: WebGLRenderingContext}) => void;
   /** Called right after the canvas rerenders. */
-  onAfterRender?: (context: {gl: WebGLRenderingContext}) => void;
+  onAfterRender?: (context: {device: Device; gl: WebGLRenderingContext}) => void;
   /** Called once after gl context and all Deck components are created. */
   onLoad?: () => void;
   /** Called if deck.gl encounters an error.
@@ -252,6 +256,7 @@ const defaultProps = {
   _typedArrayManagerProps: {},
   _customRender: null,
 
+  onDeviceInitialized: noop,
   onWebGLInitialized: noop,
   onResize: noop,
   onViewStateChange: noop,
@@ -763,6 +768,7 @@ export default class Deck {
           onContextLost: () => this._onContextLost()
         }),
       onInitialize: context => this._setGLContext(context.gl),
+
       onRender: this._onRenderFrame.bind(this),
       // onBeforeRender,
       // onAfterRender,
@@ -875,7 +881,10 @@ export default class Deck {
     }
   }
 
+  /** @deprecated */
   private _setGLContext(gl: WebGLRenderingContext) {
+    const device = WebGLDevice.attach(gl);
+
     if (this.layerManager) {
       return;
     }
@@ -897,6 +906,7 @@ export default class Deck {
       depthFunc: GL.LEQUAL
     });
 
+    this.props.onDeviceInitialized(device);
     this.props.onWebGLInitialized(gl);
 
     // timeline for transitions
@@ -933,7 +943,8 @@ export default class Deck {
     const viewport = this.viewManager.getViewports()[0];
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager(gl, {
+    this.layerManager = new LayerManager({
+      device, 
       deck: this,
       stats: this.stats,
       viewport,
@@ -967,25 +978,25 @@ export default class Deck {
       clearCanvas?: boolean;
     }
   ) {
-    const {gl} = this.layerManager.context;
+    const {device, gl} = this.layerManager?.context;
 
     setParameters(gl, this.props.parameters);
 
-    this.props.onBeforeRender({gl});
+    this.props.onBeforeRender({device, gl});
 
-    this.deckRenderer.renderLayers({
+    this.deckRenderer?.renderLayers({
       target: this.props._framebuffer,
-      layers: this.layerManager.getLayers(),
-      viewports: this.viewManager.getViewports(),
-      onViewportActive: this.layerManager.activateViewport,
-      views: this.viewManager.getViews(),
+      layers: this.layerManager?.getLayers(),
+      viewports: this.viewManager?.getViewports(),
+      onViewportActive: this.layerManager?.activateViewport,
+      views: this.viewManager?.getViews(),
       pass: 'screen',
       redrawReason,
-      effects: this.effectManager.getEffects(),
+      effects: this.effectManager?.getEffects(),
       ...renderOptions
     });
 
-    this.props.onAfterRender({gl});
+    this.props.onAfterRender({device, gl});
   }
 
   // Callbacks

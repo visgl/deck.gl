@@ -20,7 +20,7 @@
 
 import {Device} from '@luma.gl/api';
 import {Timeline} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
+import type {ProgramManager} from '@luma.gl/core';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
@@ -34,7 +34,6 @@ import {createProgramManager} from '../shaderlib';
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
-import type {ProgramManager} from '@luma.gl/core';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
@@ -44,7 +43,6 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck;
   device: Device;
-  gl: WebGLRenderingContext;
   pipelineFactory: ProgramManager;
   stats: Stats;
   viewport: Viewport;
@@ -52,10 +50,20 @@ export type LayerContext = {
   mousePosition: {x: number; y: number} | null;
   userData: any;
   onError?: <PropsT>(error: Error, source: Layer<PropsT>) => void;
+  /** @deprecated Use context.device */
+  gl: WebGLRenderingContext;
 };
 
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
 
+export type LayerManagerProps = {
+  // Apparently LayerManager is supposed to be instantiatable without gl context?
+  device: Device | null;
+  deck?: Deck;
+  stats?: Stats;
+  viewport?: Viewport;
+  timeline?: Timeline;
+};
 export default class LayerManager {
   layers: Layer[];
   context: LayerContext;
@@ -68,20 +76,7 @@ export default class LayerManager {
   private _debug: boolean = false;
 
   // eslint-disable-next-line
-  constructor(
-    gl,
-    {
-      deck,
-      stats,
-      viewport,
-      timeline
-    }: {
-      deck?: Deck;
-      stats?: Stats;
-      viewport?: Viewport;
-      timeline?: Timeline;
-    } = {}
-  ) {
+  constructor({device, deck, stats, viewport, timeline}: LayerManagerProps) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -92,20 +87,18 @@ export default class LayerManager {
     // If it's the same across two React render calls, the diffing logic
     // will be skipped.
     this.layers = [];
-    this.resourceManager = new ResourceManager({gl, protocol: 'deck://'});
-
-    // Apparently LayerManager is supposed to be instantiatable without gl context?
-    const device = gl && WebGLDevice.attach(gl)!;
+    this.resourceManager = new ResourceManager({device, protocol: 'deck://'});
 
     this.context = {
       mousePosition: null,
       userData: {},
       layerManager: this,
-      device,
-      gl,
+      device: device!,
+      // @ts-expect-error
+      gl: device && device.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      pipelineFactory: gl && createProgramManager(device),
+      pipelineFactory: (device && createProgramManager(device))!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
