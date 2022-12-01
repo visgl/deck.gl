@@ -882,7 +882,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = gl.canvas as HTMLCanvasElement;
+      this.canvas = gl.canvas;
       // @ts-expect-error - Currently luma.gl v9 does not expose these options
       instrumentGLContext(gl, {enable: true, copyState: true});
     }

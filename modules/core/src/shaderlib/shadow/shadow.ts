@@ -255,7 +255,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (opts: {drawToShadowMap?: boolean, shadowMaps?: unknown[]} = {}, context = {}) => {
+  getUniforms: (opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {}, context = {}) => {
     if (
       'viewport' in opts &&
       (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))
