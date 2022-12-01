@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
+import {LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';

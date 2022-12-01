@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {CompositeLayer} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';

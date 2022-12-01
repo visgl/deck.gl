@@ -172,7 +172,8 @@ export default class AttributeManager {
     debug(TRACE_INVALIDATE, this, 'all');
   }
 
-  // Ensure all attribute buffers are updated from props or data.
+  /** Ensure all attribute buffers are updated from props or data. */
+  /* eslint-disable complexity */
   update({
     data,
     numInstances,
