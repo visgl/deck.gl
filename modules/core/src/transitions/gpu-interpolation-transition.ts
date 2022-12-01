@@ -1,5 +1,5 @@
 import GL from '@luma.gl/constants';
-import {Buffer, Transform} from '@luma.gl/core';
+import {Buffer, Transform, Timeline} from '@luma.gl/core';
 import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
@@ -11,8 +11,6 @@ import {
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
-import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
@@ -26,8 +24,8 @@ export default class GPUInterpolationTransition implements GPUTransition {
   private transition: Transition;
   private currentStartIndices: NumericArray | null;
   private currentLength: number;
-  private transform: LumaTransform;
-  private buffers: LumaBuffer[];
+  private transform: Transform;
+  private buffers: Buffer[];
 
   constructor({
     gl,
@@ -102,7 +100,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value as NumericArray
+      value: attribute.value
     });
 
     this.transition.start(transitionSettings);
@@ -122,7 +120,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
   update(): boolean {
     const updated = this.transition.update();
     if (updated) {
-      const {duration, easing} = this.settings as InterpolationTransitionSettings;
+      const {duration, easing} = this.settings;
       const {time} = this.transition;
       let t = time / duration;
       if (easing) {
@@ -159,7 +157,7 @@ void main(void) {
 }
 `;
 
-function getTransform(gl: WebGLRenderingContext, attribute: Attribute): LumaTransform {
+function getTransform(gl: WebGLRenderingContext, attribute: Attribute): Transform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(gl, {
     vs,

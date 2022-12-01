@@ -7,20 +7,14 @@ export type ResourceManagerContext = {
   resourceManager: ResourceManager;
 };
 
+type Consumer = Record<string, ResourceSubscriber & {resourceId: string}>;
+
 export default class ResourceManager {
   protocol: string;
 
   private _context: ResourceManagerContext;
   private _resources: Record<string, Resource>;
-  private _consumers: Record<
-    string,
-    Record<
-      string,
-      ResourceSubscriber & {
-        resourceId: string;
-      }
-    >
-  >;
+  private _consumers: Record<string, Consumer>;
   private _pruneRequest: number | null;
 
   constructor({gl, protocol}) {
@@ -142,17 +136,24 @@ export default class ResourceManager {
   ) {
     const consumers = this._consumers;
     const consumer = (consumers[consumerId] = consumers[consumerId] || {});
-    const request = consumer[requestId] || {};
+    let request = consumer[requestId];
 
-    const oldResource = request.resourceId && this._resources[request.resourceId];
+    const oldResource = request && request.resourceId && this._resources[request.resourceId];
     if (oldResource) {
       oldResource.unsubscribe(request);
       this.prune();
     }
     if (resource) {
+      if (request) {
+        request.onChange = onChange;
+        request.resourceId = resource.id;
+      } else {
+        request = {
+          onChange,
+          resourceId: resource.id
+        };
+      }
       consumer[requestId] = request;
-      request.onChange = onChange;
-      request.resourceId = resource.id;
       resource.subscribe(request);
     }
   }

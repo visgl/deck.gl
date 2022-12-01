@@ -2,7 +2,7 @@ import ScreenPass from '../passes/screen-pass';
 import {normalizeShaderModule} from '@luma.gl/core';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {Framebuffer} from '@luma.gl/webgl';
+import type {Framebuffer} from '@luma.gl/gltools';
 import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
@@ -116,7 +116,7 @@ void main() {
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module) {
+function getFragmentShaderForRenderPass(module, pass = module): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);
@@ -128,5 +128,5 @@ function getFragmentShaderForRenderPass(module, pass = module) {
   }
 
   // console.error(`${module.name} no fragment shader generated`);
-  return null;
+  return undefined;
 }

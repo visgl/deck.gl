@@ -59,7 +59,7 @@ export default class FirstPersonViewport extends Viewport {
     const center = modelMatrix ? new Matrix4(modelMatrix).transformAsVector(dir) : dir;
 
     // Just the direction. All the positioning is done in viewport.js
-    const zoom = Number.isFinite(latitude) ? getMeterZoom({latitude: latitude as number}) : 0;
+    const zoom = Number.isFinite(latitude) ? getMeterZoom({latitude}) : 0;
     const scale = Math.pow(2, zoom);
     const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 0], center, up}).scale(scale);
 

@@ -6,7 +6,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer} from '@luma.gl/gltools';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -309,7 +309,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         size: binaryValue.size || this.size,
         stride: binaryValue.stride,
         offset: binaryValue.offset,
-        startIndices: startIndices as NumericArray,
+        startIndices,
         nested: needsNormalize
       });
       // Fall through to auto updater

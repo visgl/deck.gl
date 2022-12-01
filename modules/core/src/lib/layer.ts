@@ -45,7 +45,7 @@ import {load} from '@loaders.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/core';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -394,7 +394,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   getNumInstances(): number {
     // First Check if app has provided an explicit value
     if (Number.isFinite(this.props.numInstances)) {
-      return this.props.numInstances as number;
+      return this.props.numInstances;
     }
 
     // Second check if the layer has set its own value
@@ -489,7 +489,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
   finalizeState(context: LayerContext): void {
     for (const model of this.getModels()) {
-      model.delete();
+      model.destroy();
     }
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
@@ -883,7 +883,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     const currentProps = this.props;
     const context = this.context;
-    const internalState = this.internalState as LayerState<this>;
+    const internalState = this.internalState;
 
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
@@ -1171,7 +1171,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       if (Number.isInteger(highlightedObjectIndex)) {
         parameters.pickingSelectedColor =
-          Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
+          Number.isFinite(highlightedObjectIndex) && highlightedObjectIndex >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }

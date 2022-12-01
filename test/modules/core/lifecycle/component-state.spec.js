@@ -208,7 +208,7 @@ test('ComponentState#async props with transform', t => {
     },
     (propName, value) => {
       if (propName === 'image') {
-        t.notOk(image.handle, 'Last texture is deleted');
+        t.ok(image.destroyed, 'Last texture is deleted');
         image = component.props.image;
         t.ok(image, 'Async value for image should be transformed');
       }
@@ -219,7 +219,7 @@ test('ComponentState#async props with transform', t => {
 
       if (!state.isAsyncPropLoading()) {
         state.finalize();
-        t.notOk(image.handle, 'Texture is deleted on finalization');
+        t.ok(image.destroyed, 'Texture is deleted on finalization');
 
         t.end();
       }

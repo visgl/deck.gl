@@ -276,7 +276,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT = {}> extends Lay
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-strip',
         vertexCount: 4,
         attributes: {
           positions: {size: 3, value: new Float32Array(positions)}

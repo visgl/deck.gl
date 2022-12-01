@@ -264,14 +264,14 @@ export default class LayersPass extends Pass {
 
     drawContext.layer = layer;
 
-    let parent = layer.parent as Layer;
+    let parent = layer.parent;
     while (parent) {
       // @ts-ignore
       if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
         return false;
       }
       drawContext.layer = parent;
-      parent = parent.parent as Layer;
+      parent = parent.parent;
     }
 
     if (layerFilter) {

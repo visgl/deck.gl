@@ -157,7 +157,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
 
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -222,7 +222,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {iconManager} = this.state;
 
     // internalState is always defined during updateState
-    const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
+    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
@@ -234,7 +234,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     // prepacked iconAtlas from user
     if (prePacked) {
       if (oldProps.iconMapping !== props.iconMapping) {
-        attributeManager!.invalidate('getIcon');
+        attributeManager.invalidate('getIcon');
       }
     } else if (
       changeFlags.dataChanged ||
@@ -249,7 +249,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      attributeManager!.invalidateAll();
+      attributeManager.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */

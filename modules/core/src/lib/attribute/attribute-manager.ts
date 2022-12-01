@@ -27,7 +27,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Stat} from 'probe.gl';
+import type {Stats} from 'probe.gl';
 import type {Timeline} from '@luma.gl/engine';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
@@ -68,7 +68,7 @@ export default class AttributeManager {
   needsRedraw: string | boolean;
   userData: any;
 
-  private stats?: Stat;
+  private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
 
   constructor(
@@ -79,7 +79,7 @@ export default class AttributeManager {
       timeline
     }: {
       id?: string;
-      stats?: Stat;
+      stats?: Stats;
       timeline?: Timeline;
     } = {}
   ) {
@@ -390,7 +390,7 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
-      attribute.setConstantValue(attribute.value as NumericArray);
+      attribute.setConstantValue(attribute.value);
       return;
     }
 

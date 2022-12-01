@@ -1,4 +1,5 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
+import type {GLParameters} from '@luma.gl/webgl';
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {OPERATION} from '../lib/constants';
@@ -8,7 +9,7 @@ import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS = {
+const PICKING_PARAMETERS: GLParameters = {
   blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
   blendEquation: GL.FUNC_ADD
 };

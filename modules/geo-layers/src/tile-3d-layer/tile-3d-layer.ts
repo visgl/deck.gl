@@ -136,7 +136,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
 
   activateViewport(viewport: Viewport): void {
     const {activeViewports, lastUpdatedViewports} = this.state;
-    this.internalState!.viewport = viewport;
+    this.internalState.viewport = viewport;
 
     activeViewports[viewport.id] = viewport;
     const lastViewport = lastUpdatedViewports?.[viewport.id];

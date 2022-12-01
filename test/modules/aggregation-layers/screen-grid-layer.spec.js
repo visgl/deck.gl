@@ -25,7 +25,7 @@ import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
 
-test('ScreenGridLayer', t => {
+test.only('ScreenGridLayer', t => {
   let testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {

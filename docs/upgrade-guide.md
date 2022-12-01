@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading to v9.0
+
+### Custom Layers
+
+- drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are no longer supported when creating geometries.
+
 ## Upgrading from deck.gl v8.7 to v8.8
 
 #### Breaking changes

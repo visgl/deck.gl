@@ -159,7 +159,7 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       positions: {
         size: 3,
         // Start filling buffer from 1 vertex in
@@ -258,7 +258,7 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
-        attributeManager!.invalidateAll();
+        attributeManager.invalidateAll();
       }
     }
 
@@ -266,7 +266,7 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       const {gl} = this.context;
       this.state.model?.delete();
       this.state.model = this._getModel(gl);
-      attributeManager!.invalidateAll();
+      attributeManager.invalidateAll();
     }
   }
 

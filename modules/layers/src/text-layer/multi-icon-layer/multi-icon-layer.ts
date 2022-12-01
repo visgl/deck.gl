@@ -69,7 +69,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT = {}> extends IconLayer<
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       instanceOffsets: {
         size: 2,
         accessor: 'getIconOffsets'

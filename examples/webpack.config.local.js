@@ -41,6 +41,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
     '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core`,
     '@luma.gl/engine': `${ROOT_DIR}/node_modules/@luma.gl/engine`,
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
+    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
     '@luma.gl/gltools': `${ROOT_DIR}/node_modules/@luma.gl/gltools`,
     '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`,
     '@luma.gl/experimental': `${ROOT_DIR}/node_modules/@luma.gl/experimental`,

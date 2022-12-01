@@ -549,7 +549,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     triPositionBuffer.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds)
     );
     triTexCoordBuffer.subData(packVertices(textureBounds, 2));
   }
