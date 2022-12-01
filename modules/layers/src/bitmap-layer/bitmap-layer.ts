@@ -29,12 +29,13 @@ import {
   GetPickingInfoParams,
   UpdateParameters,
   Color,
-  Texture,
+  TextureSource,
   Position,
   DefaultProps
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -71,7 +72,7 @@ type _BitmapLayerProps = {
    *
    * @default null
    */
-  image?: string | Texture | null;
+  image?: string | TextureSource | null;
 
   /**
    * Supported formats:
@@ -172,6 +173,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
+      // @ts-expect-error v9 API is not as dynamic
       this.state.model.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
@@ -301,7 +303,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
           coordinateConversion,
           bounds
         })
-        .draw();
+        .draw(this.context.renderPass);
     }
   }
 

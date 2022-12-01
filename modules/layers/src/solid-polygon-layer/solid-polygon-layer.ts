@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {GL, Model, hasFeatures, FEATURES} from '@luma.gl/webgl-legacy';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -163,7 +163,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {gl, viewport} = this.context;
+    const {device, viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
@@ -187,7 +187,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !gl || hasFeatures(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+        IndexType: !device || device.features.has('index-uint32-webgl1') ? Uint32Array : Uint16Array
       })
     });
 
@@ -339,24 +339,25 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       elevationScale
     };
 
+    // TODO - v9 Model API not as dynamic
     // Note: the order is important
-    if (sideModel) {
-      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      sideModel.setUniforms(renderUniforms);
-      if (wireframe) {
-        sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.setUniforms({isWireframe: true}).draw();
-      }
-      if (filled) {
-        sideModel.setDrawMode(GL.TRIANGLE_FAN);
-        sideModel.setUniforms({isWireframe: false}).draw();
-      }
-    }
+    // if (sideModel) {
+    //   sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+    //   sideModel.setUniforms(renderUniforms);
+    //   if (wireframe) {
+    //     sideModel.setDrawMode(GL.LINE_STRIP);
+    //     sideModel.setUniforms({isWireframe: true}).draw(this.context.renderPass);
+    //   }
+    //   if (filled) {
+    //     sideModel.setDrawMode(GL.TRIANGLE_FAN);
+    //     sideModel.setUniforms({isWireframe: false}).draw(this.context.renderPass);
+    //   }
+    // }
 
-    if (topModel) {
-      topModel.setVertexCount(polygonTesselator.vertexCount);
-      topModel.setUniforms(renderUniforms).draw();
-    }
+    // if (topModel) {
+    //   topModel.setVertexCount(polygonTesselator.vertexCount);
+    //   topModel.setUniforms(renderUniforms).draw(this.context.renderPass);
+    // }
   }
 
   updateState(updateParams: UpdateParameters<this>) {

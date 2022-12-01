@@ -4,7 +4,7 @@ import {
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
-import {withParameters} from '@luma.gl/webgl-legacy';
+import {withParameters} from '@luma.gl/webgl';
 import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {

@@ -29,7 +29,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 
 import {defaultColorRange} from '../utils/color-utils';
 

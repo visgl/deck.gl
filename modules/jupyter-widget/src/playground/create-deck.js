@@ -9,7 +9,7 @@ import {WebGLDevice} from '@luma.gl/webgl';
 luma.registerDevices([WebGLDevice]);
 
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import {GL as GLConstants} from '@luma.gl/webgl-legacy';
+import {GL as GLConstants} from '@luma.gl/constants';
 
 import makeTooltip from './widget-tooltip';
 

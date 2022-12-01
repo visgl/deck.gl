@@ -1,5 +1,4 @@
-import {Device} from '@luma.gl/api';
-import {Texture2D} from '@luma.gl/webgl-legacy';
+import {Device, Texture} from '@luma.gl/api';
 import {log, getProgramManager} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
@@ -21,7 +20,7 @@ export class TerrainEffect implements Effect {
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
-  private dummyHeightMap: Texture2D;
+  private dummyHeightMap: Texture;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
@@ -30,7 +29,7 @@ export class TerrainEffect implements Effect {
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
   initialize(device: Device) {
-    this.dummyHeightMap = new Texture2D(device, {
+    this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
       data: new Uint8Array([0, 0, 0, 0])

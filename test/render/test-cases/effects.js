@@ -3,7 +3,8 @@ import {zoomBlur, vignette} from '@luma.gl/shadertools';
 import {hexagons, points} from 'deck.gl-test/data';
 
 import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+// TODO v9 
+// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 
 import {CubeGeometry} from '@luma.gl/engine';
@@ -21,6 +22,8 @@ const MASK_POLYGON = [
 ];
 
 export default [
+  // TODO v9 
+  /*
   {
     name: 'shadow-effect',
     effects: [
@@ -72,7 +75,7 @@ export default [
     ],
     goldenImage: './test/render/golden-images/shadow-effect.png'
   },
-
+  */
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
     viewState: {

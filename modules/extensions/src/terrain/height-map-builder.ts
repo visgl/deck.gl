@@ -1,5 +1,4 @@
-import {Device} from '@luma.gl/api';
-import {Framebuffer} from '@luma.gl/webgl-legacy';
+import {Device, Framebuffer} from '@luma.gl/api';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
@@ -31,7 +30,7 @@ export class HeightMapBuilder {
   private lastViewport: Viewport | null = null;
 
   static isSupported(device: Device): boolean {
-    return Framebuffer.isSupported(device, {colorBufferFloat: true});
+    return device.isTextureFormatRenderable('rgba32float');
   }
 
   constructor(device: Device) {
@@ -119,7 +118,7 @@ export class HeightMapBuilder {
 
   delete() {
     if (this.fbo) {
-      this.fbo.color.delete();
+      this.fbo.colorAttachments[0].delete();
       this.fbo.delete();
     }
   }

@@ -1,6 +1,7 @@
 /* global document */
 
-import {Framebuffer, readPixelsToArray} from '@luma.gl/webgl-legacy';
+import {Framebuffer} from '@luma.gl/api';
+import {readPixelsToArray} from '@luma.gl/webgl';
 
 /** Debug utility to draw FBO contents onto screen */
 // eslint-disable-next-line

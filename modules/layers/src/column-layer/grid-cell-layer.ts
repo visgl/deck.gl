@@ -65,6 +65,6 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
         edgeDistance: 1,
         isWireframe: false
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 }

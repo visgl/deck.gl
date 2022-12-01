@@ -1,5 +1,6 @@
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
-import GLConstants from '@luma.gl/constants';
+// Rename so that unused constants are not stripped at end of build
+import {GL as GLConstants} from '@luma.gl/constants';
 import * as deckglLayers from '@deck.gl/layers';
 
 export const log = console; // eslint-disable-line

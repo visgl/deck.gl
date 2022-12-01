@@ -24,7 +24,7 @@ import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl'
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform, Buffer} from '@luma.gl/webgl-legacy';
+import {Transform} from '@luma.gl/engine';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
@@ -61,8 +61,8 @@ const TEST_VIEWPORT_ORTHO = new OrthographicView().makeViewport({
   }
 });
 
-const DUMMY_SOURCE_BUFFER = new Buffer(device, 1);
-const OUT_BUFFER = new Buffer(device, 16);
+const DUMMY_SOURCE_BUFFER = device.createBuffer({byteLength: 1});
+const OUT_BUFFER = device.createBuffer({byteLength: 16});
 
 // used in printing a float into GLSL code, 1 will be 1.0 to avoid GLSL compile errors
 const MAX_FRACTION_DIGITS = 5;

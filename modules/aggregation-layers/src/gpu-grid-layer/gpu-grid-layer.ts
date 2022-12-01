@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   AccessorFunction,
@@ -192,8 +192,9 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(device, {
+          maxMinBuffer: device.createBuffer({
             byteLength: 4 * 4,
+            // @ts-expect-error webgl-legacy
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         },
@@ -201,8 +202,9 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(device, {
+          maxMinBuffer: device.createBuffer({
             byteLength: 4 * 4,
+            // @ts-expect-error
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         }

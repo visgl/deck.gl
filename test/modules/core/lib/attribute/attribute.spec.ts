@@ -21,11 +21,12 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
 import test from 'tape-promise/tape';
-import Attribute from '@deck.gl/core/lib/attribute/attribute';
-import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/webgl-legacy';
 import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
+
+import Attribute from '@deck.gl/core/lib/attribute/attribute';
+import {Buffer} from '@luma.gl/api';
+import {GL} from '@luma.gl/constants';
 
 test('Attribute#imports', t => {
   t.equals(typeof Attribute, 'function', 'Attribute import successful');
@@ -36,7 +37,6 @@ test('Attribute#constructor', t => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
 
   t.ok(attribute, 'Attribute construction successful');
-  t.is(typeof attribute.getBuffer, 'function', 'Attribute.getBuffer function available');
   t.ok(attribute.allocate, 'Attribute.allocate function available');
   t.ok(attribute.updateBuffer, 'Attribute.update function available');
 
@@ -251,7 +251,7 @@ test('Attribute#allocate - partial', t => {
 test('Attribute#shaderAttributes', t => {
   const update = () => {};
 
-  const buffer1 = new Buffer(device, 10);
+  const buffer1 = device.createBuffer({byteLength: 10});
 
   const attribute = new Attribute(device, {
     id: 'positions',
@@ -782,7 +782,7 @@ test('Attribute#setExternalBuffer', t => {
     size: 3,
     update: () => {}
   });
-  const buffer = new Buffer(device, 12);
+  const buffer = device.createBuffer({byteLength: 12});
   const value1 = new Float32Array(4);
   const value2 = new Uint8Array(4);
 
@@ -872,7 +872,7 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
     }
   });
 
-  const buffer = new Buffer(device, 16);
+  const buffer = device.createBuffer({byteLength: 16});
   const value8 = new Uint8Array(16);
   const value32 = new Float32Array(16);
   const value64 = new Float64Array(16);
@@ -1046,7 +1046,7 @@ test('Attribute#doublePrecision', t0 => {
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
-    const buffer = new Buffer(device, 12);
+    const buffer = device.createBuffer({byteLength: 12});
     attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 
@@ -1089,7 +1089,7 @@ test('Attribute#doublePrecision', t0 => {
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
-    const buffer = new Buffer(device, 12);
+    const buffer = device.createBuffer({byteLength: 12});
     attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 

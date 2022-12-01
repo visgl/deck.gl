@@ -20,7 +20,8 @@
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -266,7 +267,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         lineWidthMinPixels,
         lineWidthMaxPixels
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 
   protected _getModel() {

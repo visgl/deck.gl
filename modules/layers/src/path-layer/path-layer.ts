@@ -20,7 +20,8 @@
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
@@ -325,7 +326,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         widthMinPixels,
         widthMaxPixels
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {

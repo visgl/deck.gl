@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform, Buffer} from '@luma.gl/webgl-legacy';
+import {Transform} from '@luma.gl/engine';
 import {equals, config} from '@math.gl/core';
 
 test('gpu-grid-cell-layer-vertex#quantizeScale', t => {
@@ -55,8 +55,8 @@ void main(void) {
   //       'vs:#main-end': '  }\n'
   //     };
   const values = [2, 2, 2, 2, 2, 2, 20.999998092651367, 2, 20, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2];
-  const valueBuffer = new Buffer(device, new Float32Array(values));
-  const outBuffer = new Buffer(device, values.length * 4 * 4);
+  const valueBuffer = device.createBuffer(new Float32Array(values));
+  const outBuffer = device.createBuffer(values.length * 4 * 4);
   const domain = [2, 20.999998092651367];
   const colorRange = [
     [0, 0, 0, 0],

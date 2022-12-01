@@ -27,7 +27,7 @@ import {
   LayersList,
   log,
   Material,
-  Texture,
+  TextureSource,
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -88,7 +88,7 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, Texture | null];
+type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &

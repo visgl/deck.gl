@@ -1,4 +1,4 @@
-import {GL} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   CompositeLayer,

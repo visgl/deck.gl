@@ -1,6 +1,6 @@
 /* global google */
-import {getParameters, setParameters, withParameters, GLParameters} from '@luma.gl/webgl-legacy';
-import {GL} from '@luma.gl/webgl-legacy';
+import {getParameters, setParameters, withParameters, GLParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {
   createDeckInstance,
   destroyDeckInstance,
@@ -173,7 +173,7 @@ export default class GoogleMapsOverlay {
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       withParameters(gl, {}, () => {
-        animationLoop.onRender(animationLoop.animationProps);
+        animationLoop.props.onRender(animationLoop.animationProps);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };

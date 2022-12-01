@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {equals} from '@math.gl/core';
-import {Transform} from '@luma.gl/webgl-legacy';
+import {Transform} from '@luma.gl/engine';
 import {project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 

@@ -34,6 +34,7 @@ export default class JSONConverter {
     this.setProps(props);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   finalize() {}
 
   setProps(props: JSONConverterProps) {

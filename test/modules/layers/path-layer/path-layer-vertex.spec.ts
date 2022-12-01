@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {device} from '@deck.gl/test-utils';
 import {picking, project32} from '@deck.gl/core';
-import {Transform, Buffer} from '@luma.gl/webgl-legacy';
+import {Transform} from '@luma.gl/engine';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
 test('path-layer-vertex#flipIfTrue', t => {
@@ -21,7 +21,7 @@ varying float result;
     'vs:#main-start': '  if (true) { result = flipIfTrue(bool(inFlag)); } else {\n',
     'vs:#main-end': '  }\n'
   };
-  const inFlag = new Buffer(device, new Float32Array([0, 1]));
+  const inFlag = device.createBuffer({data: Float32Array([0, 1])});
   const expectedResult = [1, -1];
   const transform = new Transform(device, {
     sourceBuffers: {

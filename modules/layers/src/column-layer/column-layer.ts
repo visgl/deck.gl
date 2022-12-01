@@ -36,7 +36,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import {GL, Model, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -238,7 +239,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const transpileToGLSL100 = device.info.type === 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && hasFeature(device, FEATURES.GLSL_DERIVATIVES);
+    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
     if (useDerivatives) {
       defines.FLAT_SHADING = 1;
     }
@@ -405,7 +406,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         .setVertexCount(wireframeVertexCount)
         .setDrawMode(GL.LINES)
         .setUniforms({isStroke: true})
-        .draw();
+        .draw(this.context.renderPass);
     }
     if (filled) {
       model.setProps({isIndexed: false});
@@ -413,7 +414,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         .setVertexCount(fillVertexCount)
         .setDrawMode(GL.TRIANGLE_STRIP)
         .setUniforms({isStroke: false})
-        .draw();
+        .draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
@@ -424,7 +425,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         .setVertexCount((fillVertexCount * 2) / 3)
         .setDrawMode(GL.TRIANGLE_STRIP)
         .setUniforms({isStroke: true})
-        .draw();
+        .draw(this.context.renderPass);
     }
   }
 }

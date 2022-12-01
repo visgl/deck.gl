@@ -1,7 +1,8 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/api';
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl-legacy';
-import {GL, hasFeature, FEATURES, Buffer} from '@luma.gl/webgl-legacy';
+import {Buffer} from '@luma.gl/api';
+import {BufferWithAccessor} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType} from './gl-utils';
@@ -109,7 +110,7 @@ type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 };
 
 type DataColumnInternalState<Options, State> = State & {
-  externalBuffer: LumaBuffer | null;
+  externalBuffer: BufferWithAccessor | null;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -125,7 +126,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   value: NumericArray | null;
   doublePrecision: boolean;
 
-  protected _buffer: LumaBuffer | null;
+  protected _buffer: BufferWithAccessor | null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -146,10 +147,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
-      bufferType =
-        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32)
-          ? GL.UNSIGNED_INT
-          : GL.UNSIGNED_SHORT;
+      bufferType = device.features.has('index-uint32-webgl1') ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }
@@ -195,12 +193,14 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.state.constant;
   }
 
-  get buffer(): LumaBuffer {
+  get buffer(): BufferWithAccessor {
     if (!this._buffer) {
       const {isIndexed, type} = this.settings;
-      this._buffer = new Buffer(this.device, {
+      // @ts-expect-error This returns a classic buffer under the hood
+      this._buffer = this.device.createBuffer({
         id: this.id,
-        target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
+        usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+        // @ts-expect-error acceessor is deprecated
         accessor: {type}
       });
     }
@@ -257,14 +257,14 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return {[id]: this};
   }
 
-  getBuffer(): LumaBuffer | null {
+  getBuffer(): BufferWithAccessor | null {
     if (this.state.constant) {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(): [LumaBuffer, BufferAccessor] | NumericArray | null {
+  getValue(): [BufferWithAccessor, BufferAccessor] | NumericArray | null {
     if (this.state.constant) {
       return this.value;
     }
@@ -310,11 +310,11 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   setData(
     data:
       | TypedArray
-      | LumaBuffer
+      | BufferWithAccessor
       | ({
           constant?: boolean;
           value?: NumericArray;
-          buffer?: LumaBuffer;
+          buffer?: BufferWithAccessor;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -322,7 +322,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     let opts: {
       constant?: boolean;
       value?: NumericArray;
-      buffer?: LumaBuffer;
+      buffer?: BufferWithAccessor;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};

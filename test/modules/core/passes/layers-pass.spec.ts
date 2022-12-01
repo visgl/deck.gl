@@ -4,7 +4,8 @@ import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {device} from '@deck.gl/test-utils';
-import {GL, Framebuffer, getParameters} from '@luma.gl/webgl-legacy';
+import {getParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -271,7 +272,7 @@ test('LayersPass#GLViewport', t => {
 
   const layerManager = new LayerManager(device, {});
   const layersPass = new DrawLayersPass(device);
-  const framebuffer = new Framebuffer(device, {width: 100, height: 100});
+  const framebuffer = device.createFramebuffer({width: 100, height: 100});
   layerManager.setLayers(layers);
 
   const testCases = [

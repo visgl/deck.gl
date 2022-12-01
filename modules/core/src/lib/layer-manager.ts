@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/api';
+import type {Device, RenderPass} from '@luma.gl/api';
 import {Timeline} from '@luma.gl/engine';
-import type {ProgramManager} from '@luma.gl/webgl-legacy';
+import type {PipelineFactory} from '@luma.gl/engine';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
@@ -43,7 +43,8 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck;
   device: Device;
-  pipelineFactory: ProgramManager;
+  pipelineFactory: PipelineFactory;
+  renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
@@ -103,6 +104,7 @@ export default class LayerManager {
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       pipelineFactory: (device && getProgramManager(device))!,
+      renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function

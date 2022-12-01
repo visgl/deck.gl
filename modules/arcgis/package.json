@@ -32,7 +32,7 @@
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.21"
+    "@luma.gl/api": "9.0.0-alpha.25"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",

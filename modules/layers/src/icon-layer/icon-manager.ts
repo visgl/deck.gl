@@ -1,6 +1,6 @@
 /* global document */
-import {Device} from '@luma.gl/api';
-import {GL, Texture2D, copyToTexture} from '@luma.gl/webgl-legacy';
+import {Device, Texture, SamplerProps} from '@luma.gl/api';
+// import {copyToTexture} from '@luma.gl/webgl';
 // import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
@@ -12,13 +12,14 @@ const DEFAULT_BUFFER = 4;
 
 const noop = () => {};
 
-const DEFAULT_TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  // GL.LINEAR is the default value but explicitly set it here
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  // for texture boundary artifact
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+const DEFAULT_SAMPLER_PARAMETERS: SamplerProps = {
+  minFilter: 'linear',
+  mipmapFilter: 'linear',
+  // LINEAR is the default value but explicitly set it here
+  magFilter: 'linear',
+  // minimize texture boundary artifacts
+  addressModeU: 'clamp-to-edge',
+  addressModeV: 'clamp-to-edge'
 };
 
 type IconDef = {
@@ -106,16 +107,12 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-function resizeTexture(
-  texture: Texture2D,
-  width: number,
-  height: number,
-  parameters: any
-): Texture2D {
+function resizeTexture(texture: Texture, width: number, height: number, sampler: SamplerProps): Texture {
   const oldWidth = texture.width;
   const oldHeight = texture.height;
 
-  const newTexture = new Texture2D(texture.device, {width, height, parameters});
+  const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
+  // @ts-expect-error TODO v9 import
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
@@ -278,10 +275,10 @@ export default class IconManager {
   private onUpdate: () => void;
   private onError: (context: LoadIconErrorContext) => void;
   private _loadOptions: any = null;
-  private _texture: Texture2D | null = null;
-  private _externalTexture: Texture2D | null = null;
+  private _texture: Texture | null = null;
+  private _externalTexture: Texture | null = null;
   private _mapping: IconMapping = {};
-  private _textureParameters: Record<number, number> | null = null;
+  private _textureParameters: SamplerProps | null = null;
 
   /** count of pending requests to fetch icons */
   private _pendingCount: number = 0;
@@ -319,7 +316,7 @@ export default class IconManager {
     this._texture?.delete();
   }
 
-  getTexture(): Texture2D | null {
+  getTexture(): Texture | null {
     return this._texture || this._externalTexture;
   }
 
@@ -337,7 +334,7 @@ export default class IconManager {
   }: {
     loadOptions?: any;
     autoPacking?: boolean;
-    iconAtlas?: Texture2D | null;
+    iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
     textureParameters?: Record<number, number> | null;
   }) {
@@ -395,10 +392,11 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        this._texture = new Texture2D(this.device, {
+        this._texture = this.device.createTexture({
+          format: 'rgba8unorm',
           width: this._canvasWidth,
           height: this._canvasHeight,
-          parameters: this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
+          sampler: this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
         });
       }
 
@@ -407,7 +405,7 @@ export default class IconManager {
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
-          this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
+          this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
         );
       }
 
@@ -441,6 +439,7 @@ export default class IconManager {
 
           const {data, width, height} = resizeImage(ctx, imageData, maxWidth, maxHeight);
 
+          // @ts-expect-error TODO v9 API not yet clear
           this._texture.setSubImageData({
             data,
             x: x + (maxWidth - width) / 2,
@@ -452,6 +451,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
+          // @ts-expect-error TODO v9 API not yet clear
           this._texture.generateMipmap();
 
           this.onUpdate();

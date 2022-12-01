@@ -18,19 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device} from '@luma.gl/api';
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import {isWebGL2} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/api';
 import {pbr} from '@luma.gl/shadertools';
-import {
-  ScenegraphNode,
-  GroupNode,
-  ModelNode,
-  GLTFAnimator,
-  GLTFEnvironment,
-  createGLTFObjects
-} from '@luma.gl/experimental';
-import {GL} from '@luma.gl/webgl-legacy';
+import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
+import {GLTFAnimator, GLTFEnvironment, createGLTFObjects} from '@luma.gl/experimental';
+import {GL} from '@luma.gl/constants';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -357,7 +350,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       imageBasedLightingEnvironment: env,
       modelOptions: {
         isInstanced: true,
-        transpileToGLSL100: !isWebGL2(this.context.gl),
+        transpileToGLSL100: this.context.device.info.type !== 'webgl2',
         ...this.getShaders()
       },
       // tangents are not supported

@@ -1,3 +1,6 @@
+// deck.gl, MIT license
+import type {Model} from '@luma.gl/engine';
+
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';

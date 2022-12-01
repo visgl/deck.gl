@@ -1,4 +1,4 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {WebMercatorViewport} from 'deck.gl';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {device} from '@deck.gl/test-utils';

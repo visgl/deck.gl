@@ -7,7 +7,7 @@ import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
 import type {Device} from '@luma.gl/api';
-import type {Buffer} from '@luma.gl/webgl-legacy';
+import type {Buffer} from '@luma.gl/api';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -265,6 +265,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     state.lastExternalBuffer = buffer;
     this.setNeedsRedraw();
+    // @ts-expect-error BufferWithAccessor
     this.setData(buffer);
     return true;
   }
@@ -318,6 +319,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     this.clearNeedsUpdate();
+    // @ts-expect-error BufferWithAccessor
     this.setData(buffer);
     return true;
   }
