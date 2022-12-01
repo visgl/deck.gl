@@ -1,3 +1,4 @@
+/* global window */
 const deck = require('../core/bundle');
 
 Object.assign(
