@@ -57,7 +57,7 @@ export function pointToDensityGridDataCPU(props, aggregationParams) {
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
-/* eslint-disable max-statements, complexity */
+/* eslint-disable-next-line max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
   const {attributes, viewport, projectPoints, numInstances} = aggregationParams;

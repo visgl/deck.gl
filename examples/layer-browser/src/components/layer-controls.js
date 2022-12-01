@@ -215,7 +215,7 @@ export default class LayerControls extends PureComponent {
     );
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable-next-line complexity */
   _renderSetting({settingName, value, propType, data, transitions}) {
     const originalValue = value;
 

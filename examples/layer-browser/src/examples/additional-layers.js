@@ -122,8 +122,8 @@ const TripsLayerExample = {
   }
 };
 
-/* eslint-disable quote-props */
 export default {
+  /* eslint-disable-next-line quote-props */
   'Geo Layers': {
     S2Layer: S2LayerExample,
     QuadkeyLayer: QuadkeyLayerExample,
