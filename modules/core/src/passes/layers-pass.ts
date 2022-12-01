@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import {clear, setParameters, withParameters} from '@luma.gl/webgl-legacy';
-import type {Framebuffer} from '@luma.gl/webgl-legacy';
+import {clear, setParameters, withParameters} from '@luma.gl/webgl';
+import type {Framebuffer} from '@luma.gl/api';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';

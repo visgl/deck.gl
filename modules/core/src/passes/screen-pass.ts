@@ -2,8 +2,9 @@
 // the THREE.js EffectComposer and *Pass classes
 
 import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/webgl-legacy';
-import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/webgl-legacy';
+import type {Framebuffer} from '@luma.gl/api';
+import {ClipSpace} from '@luma.gl/engine';
+import {setParameters, withParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
 
 import type {ShaderModule} from '../types/types';
@@ -57,16 +58,18 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(this.device, {color: true});
-    this.model.draw({
+    this.model.setProps({
       moduleSettings: options.moduleSettings,
       uniforms: {
         texture: inputBuffer,
         texSize: [inputBuffer.width, inputBuffer.height]
-      },
-      parameters: {
-        depthWrite: false,
-        depthTest: false
       }
+      // luma v9
+      // parameters: {
+      //   depthWrite: false,
+      //   depthTest: false
+      // }
     });
+    this.model.draw(this.device.getDefaultRenderPass());
   }
 }

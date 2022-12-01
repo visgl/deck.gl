@@ -18,18 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device} from '@luma.gl/api';
-import {
-  GL,
-  Model,
-  Transform,
-  FEATURES,
-  hasFeatures,
-  readPixelsToBuffer,
-  withParameters,
-  clear
-} from '@luma.gl/webgl-legacy';
+import type {Device, DeviceFeature} from '@luma.gl/api';
+import {Model, Transform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
+import {readPixelsToBuffer, withParameters, clear} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {log, project32, _mergeShaders as mergeShaders, getProgramManager} from '@deck.gl/core';
 
 import {
@@ -58,12 +51,12 @@ const ARRAY_BUFFER_MAP = {
   maxMinData: 'maxMinBuffer'
 };
 
-const REQUIRED_FEATURES = [
-  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
-  FEATURES.COLOR_ATTACHMENT_RGBA32F,
-  FEATURES.BLEND_EQUATION_MINMAX,
-  FEATURES.FLOAT_BLEND,
-  FEATURES.TEXTURE_FLOAT
+const REQUIRED_FEATURES: DeviceFeature[] = [
+  'webgl2',
+  'blend-minmax-webgl1',
+  'texture-renderable-float32-webgl',
+  'texture-blend-float-webgl1',
+  'texture-formats-float32-webgl1'
 ];
 
 export type GPUGridAggregatorProps = {
@@ -112,7 +105,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(device: Device) {
-    return hasFeatures(device, REQUIRED_FEATURES);
+    return REQUIRED_FEATURES.every(feature => device.features.has(feature));
   }
 
   // DEBUG ONLY
@@ -174,14 +167,16 @@ export default class GPUGridAggregator {
     this.id = props.id || 'gpu-grid-aggregator';
     this.device = device;
 
+    const REQUIRED_FEATURES: DeviceFeature[] = [
+      'blend-minmax-webgl1', // set min/max blend modes
+      'texture-renderable-float32-webgl', // render to float texture
+      'texture-formats-float32-webgl1' // sample from a float texture
+    ];
+
     // gl_InstanceID usage in min/max calculation shaders
     this._hasGPUSupport =
       this.device.info.type === 'webgl2' &&
-      hasFeatures(this.device, [
-        FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
-        FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture
-        FEATURES.TEXTURE_FLOAT // sample from a float texture
-      ]);
+      REQUIRED_FEATURES.every(feature => device.features.has(feature));
     if (this._hasGPUSupport) {
       this._setupModels();
     }
@@ -589,7 +584,7 @@ export default class GPUGridAggregator {
     }
   }
 
-  // GPU Aggregation results are provided in Buffers, if new Buffer objects are created track them for later deletion.
+  /** GPU Aggregation results are provided in Buffers, if new Buffer objects are created track them for later deletion. */
   /* eslint-disable max-depth */
   _trackGPUResultBuffers(results, weights) {
     const {resources} = this.state;

@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {GL, withParameters, setParameters} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
+import {withParameters, setParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -44,7 +45,7 @@ import {load} from '@loaders.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/webgl-legacy';
+import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -182,6 +183,11 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type SharedLayerState = {
+  model?: Model;
+  [key: string]: any;
+}
+
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
 > {
@@ -199,7 +205,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
-  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+  state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
 
@@ -735,13 +741,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   ) {
     const attributeManager = this.getAttributeManager();
     // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData.excludeAttributes || {};
+    const excludeAttributes = model.userData?.excludeAttributes || {};
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const shaderAttributes = attributeManager.getShaderAttributes(
       changedAttributes,
       excludeAttributes
     );
 
+    // @ts-expect-error v9 shader attributes
     model.setAttributes(shaderAttributes);
   }
 
@@ -1189,7 +1196,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Note: Automatic instance count update only works for single layers
     const {model} = this.state;
-    model?.setInstanceCount(this.getNumInstances());
+    // TODO luma v9
+    // model?.setInstanceCount(this.getNumInstances());
+    if (model) {
+      model.props.instanceCount = this.getNumInstances();
+    }
 
     // Set picking module parameters to match props
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;

@@ -1,21 +1,15 @@
 /* eslint-disable no-invalid-this */
 
 import type {Device} from '@luma.gl/api';
-import {
-  GL,
-  Model,
-  Buffer,
-  Framebuffer,
-  instrumentGLContext,
-  withParameters
-} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
+import {withParameters} from '@luma.gl/webgl';
+
 import {Deck} from '@deck.gl/core';
 
 export function initializeResources(device: Device) {
-  // @ts-expect-error
-  instrumentGLContext(device.gl);
-
-  this.buffer = new Buffer(device, new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  // What is `this` referring to this function???
+  this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
 
   this.model = new Model(device, {
     vs: `
@@ -44,7 +38,7 @@ export function initializeResources(device: Device) {
     drawMode: GL.TRIANGLE_STRIP
   });
 
-  this.deckFbo = new Framebuffer(device, {width: 1, height: 1});
+  this.deckFbo = device.createFramebuffer({width: 1, height: 1});
 
   this.deckInstance = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
@@ -103,7 +97,7 @@ export function render({gl, width, height, viewState}) {
     },
     () => {
       // eslint-disable-next-line camelcase
-      this.model.setUniforms({u_texture: this.deckFbo}).draw();
+      this.model.setUniforms({u_texture: this.deckFbo}).draw(this.context.renderPass);
     }
   );
 }

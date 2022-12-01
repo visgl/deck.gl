@@ -1,9 +1,10 @@
 import type {Device} from '@luma.gl/api';
+import type {Buffer} from '@luma.gl/api';
+import type {BufferWithAccessor} from '@luma.gl/webgl';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import type {Buffer} from '@luma.gl/webgl-legacy';
 
 export interface TransitionSettings {
   type: string;
@@ -166,7 +167,8 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
-  const source = buffer.getData({length: fromLength});
+  const bufferWithAccessor = buffer as BufferWithAccessor;
+  const source = bufferWithAccessor.getData({length: fromLength});
   const data = new Float32Array(toLength);
   padArray({
     source,
@@ -178,8 +180,8 @@ export function padBuffer({
   });
 
   // TODO: support offset in buffer.setData?
-  if (buffer.byteLength < data.byteLength + byteOffset) {
-    buffer.reallocate(data.byteLength + byteOffset);
+  if (bufferWithAccessor.byteLength < data.byteLength + byteOffset) {
+    bufferWithAccessor.reallocate(data.byteLength + byteOffset);
   }
-  buffer.subData({data, offset: byteOffset});
+  bufferWithAccessor.subData({data, offset: byteOffset});
 }

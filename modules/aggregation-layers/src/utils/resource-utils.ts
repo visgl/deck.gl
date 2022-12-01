@@ -1,9 +1,9 @@
 import {Device} from '@luma.gl/api';
-import {GL, Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 
 const DEFAULT_PARAMETERS = {
-  [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
-  [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
+  minFilter: 'nearest',
+  magFilter: 'nearest',
 };
 
 type FloatTextureOptions = {
@@ -23,7 +23,7 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
-  const texture = new Texture2D(device, {
+  const texture =  this.context.device.createTexture({
     data,
     format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
     type: GL.FLOAT,
@@ -33,7 +33,7 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     dataFormat: GL.RGBA,
     width,
     height,
-    // @ts-expect-error
+    // ts-expect-error
     unpackFlipY
   });
   return texture;
@@ -41,13 +41,11 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
 
 export function getFramebuffer(device: Device, opts) {
   const {id, width = 1, height = 1, texture} = opts;
-  const fb = new Framebuffer(device, {
+  const fb = device.createFramebuffer({
     id,
     width,
     height,
-    attachments: {
-      [GL.COLOR_ATTACHMENT0]: texture
-    }
+    colorAttachments: [texture]
   });
 
   return fb;

@@ -35,9 +35,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl-legacy';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -188,7 +187,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
         sizeUnits: UNIT[sizeUnits],
         radiusPixels: pointSize
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {

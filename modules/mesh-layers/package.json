@@ -35,9 +35,8 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/gltf": "^3.4.13",
-    "@luma.gl/experimental": "9.0.0-alpha.21",
-    "@luma.gl/shadertools": "9.0.0-alpha.21",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.21"
+    "@luma.gl/api": "9.0.0-alpha.25",
+    "@luma.gl/shadertools": "9.0.0-alpha.25"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/webgl-legacy';
+import {Framebuffer} from '@luma.gl/api';
 
 import type {Layer, Viewport} from '@deck.gl/core';
 
@@ -187,12 +187,12 @@ export class TerrainCover {
   delete() {
     const {fbo, pickingFbo} = this;
     if (fbo) {
-      fbo.texture.delete();
-      fbo.delete();
+      fbo.colorAttachments[0].destroy();
+      fbo.destroy();
     }
     if (pickingFbo) {
-      pickingFbo.texture.delete();
-      pickingFbo.delete();
+      pickingFbo.colorAttachments[0].destroy();
+      pickingFbo.destroy();
     }
   }
 }

@@ -1,6 +1,5 @@
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
-import {Framebuffer} from '@luma.gl/webgl-legacy';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 
 const fs = `\
@@ -28,8 +27,8 @@ test('PostProcessEffect#constructor', t => {
 test('PostProcessEffect#postRender', t => {
   const effect = new PostProcessEffect(testModule);
   effect.preRender(device);
-  const inputBuffer = new Framebuffer(device);
-  const outputBuffer = new Framebuffer(device);
+  const inputBuffer = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+  const outputBuffer = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
   const buffer1 = effect.postRender(device, {inputBuffer, swapBuffer: outputBuffer});
   t.ok(effect.passes, 'post-processing pass created');

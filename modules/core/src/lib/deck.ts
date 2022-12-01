@@ -35,7 +35,10 @@ import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
-import {GL, AnimationLoop, instrumentGLContext, setParameters} from '@luma.gl/webgl-legacy';
+import {setParameters} from '@luma.gl/webgl';
+import {AnimationLoop} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
+import type {Framebuffer} from '@luma.gl/api';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -49,7 +52,6 @@ import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {Framebuffer} from '@luma.gl/webgl-legacy';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -799,9 +801,10 @@ export default class Deck {
           ...props,
           canvas: this.canvas,
           debug,
-          // @ts-expect-error Note can use device.lost
+          // Note can use device.lost
           onContextLost: () => this._onContextLost()
         }),
+      // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
@@ -921,10 +924,11 @@ export default class Deck {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
-      // @ts-expect-error - Currently luma.gl v9 does not expose these options
+      // TODO v9 
+      // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
       // should have a method to start state tracking even if not enabled?
-      instrumentGLContext(this.device.gl, {enable: true, copyState: true});
+      // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
     setParameters(this.device, {

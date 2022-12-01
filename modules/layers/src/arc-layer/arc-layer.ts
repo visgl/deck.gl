@@ -35,7 +35,8 @@ import {
 } from '@deck.gl/core';
 
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -254,7 +255,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         widthMaxPixels,
         useShortestPath: wrapLongitude
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {

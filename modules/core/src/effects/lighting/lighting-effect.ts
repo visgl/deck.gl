@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/webgl-legacy';
-import {Texture2D} from '@luma.gl/webgl-legacy';
+import {PipelineFactory} from '@luma.gl/engine';
+import {Texture} from '@luma.gl/api';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
@@ -40,9 +40,9 @@ export default class LightingEffect implements Effect {
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
-  private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap: Texture2D | null = null;
-  private pipelineFactory?: ProgramManager;
+  private shadowMaps: Texture[] = [];
+  private dummyShadowMap: Texture | null = null;
+  private pipelineFactory?: PipelineFactory;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
@@ -98,7 +98,7 @@ export default class LightingEffect implements Effect {
     }
 
     if (!this.dummyShadowMap) {
-      this.dummyShadowMap = new Texture2D(device, {
+      this.dummyShadowMap = device.createTexture({
         width: 1,
         height: 1
       });
@@ -128,8 +128,8 @@ export default class LightingEffect implements Effect {
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };
-      shadowMaps?: Texture2D[];
-      dummyShadowMap?: Texture2D;
+      shadowMaps?: Texture[];
+      dummyShadowMap?: Texture;
       shadowColor?: number[];
       shadowMatrices?: Matrix4[];
     } = this.shadow

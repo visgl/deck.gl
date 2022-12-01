@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/webgl-legacy';
+import {PipelineFactory} from '@luma.gl/engine';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
 import project from './project/project';
@@ -37,7 +37,7 @@ const SHADER_HOOKS = [
 ];
 
 export function getProgramManager(device: Device) {
-  const pipelineFactory = ProgramManager.getDefaultProgramManager(device);
+  const pipelineFactory = PipelineFactory.getDefaultPipelineFactory(device);
 
   for (const shaderModule of DEFAULT_MODULES) {
     pipelineFactory.addDefaultModule(shaderModule);

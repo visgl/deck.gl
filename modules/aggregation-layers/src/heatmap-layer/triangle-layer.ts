@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device} from '@luma.gl/api';
-import {GL, Model, Texture2D} from '@luma.gl/webgl-legacy';
-import {Geometry} from '@luma.gl/engine';
+import type {Device, Texture} from '@luma.gl/api';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
@@ -31,9 +31,9 @@ type _TriangleLayerProps = {
   threshold: number;
   intensity: number;
   vertexCount: number;
-  colorTexture: Texture2D;
-  maxTexture: Texture2D;
-  texture: Texture2D;
+  colorTexture: Texture;
+  maxTexture: Texture;
+  texture: Texture;
 };
 
 export default class TriangleLayer extends Layer<_TriangleLayerProps> {
@@ -84,6 +84,6 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
         aggregationMode,
         colorDomain
       })
-      .draw();
+      .draw(this.context.renderPass);
   }
 }

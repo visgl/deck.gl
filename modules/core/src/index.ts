@@ -124,7 +124,7 @@ export type {
   Operation,
   Position,
   Color,
-  Texture,
+  TextureSource,
   Material
 } from './types/layer-props';
 export type {FilterContext} from './passes/layers-pass';

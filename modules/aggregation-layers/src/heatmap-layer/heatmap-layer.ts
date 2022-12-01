@@ -27,16 +27,10 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {
-  GL,
-  Buffer,
-  Texture2D,
-  Transform,
-  getParameters,
-  withParameters,
-  FEATURES,
-  hasFeatures
-} from '@luma.gl/webgl-legacy';
+import {DeviceFeature, Texture, TextureProps} from '@luma.gl/api';
+import {GL} from '@luma.gl/constants';
+import {Transform} from '@luma.gl/engine';
+import {BufferWithAccessor, getParameters, withParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -61,15 +55,15 @@ import vsMax from './max-vs.glsl';
 import fsMax from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
-const TEXTURE_OPTIONS = {
+const TEXTURE_PROPS: TextureProps = {
+  format: 'rgba8unorm',
   mipmaps: false,
-  parameters: {
-    [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-    [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-    [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-    [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-  },
-  dataFormat: GL.RGBA
+  sampler: {
+    minFilter: 'nearest',
+    magFilter: 'nearest',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge'
+  }
 };
 const DEFAULT_COLOR_DOMAIN = [0, 0];
 const AGGREGATION_MODE = {
@@ -91,14 +85,14 @@ const defaultProps: DefaultProps<HeatmapLayerProps> = {
   debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500}
 };
 
-const REQUIRED_FEATURES = [
-  FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
-  FEATURES.TEXTURE_FLOAT // weight-map as texture
+const REQUIRED_FEATURES: DeviceFeature[] = [
+  'blend-minmax-webgl1', // max weight calculation
+  'texture-formats-float32-webgl1' // weight-map as texture
 ];
 
-const FLOAT_TARGET_FEATURES = [
-  FEATURES.COLOR_ATTACHMENT_RGBA32F, // ability to render to float texture
-  FEATURES.FLOAT_BLEND // ability to blend when rendering to float texture
+const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'texture-renderable-float32-webgl', // ability to render to float texture
+  'texture-blend-float-webgl1' // ability to blend when rendering to float texture
 ];
 
 const DIMENSIONS = {
@@ -198,17 +192,17 @@ export default class HeatmapLayer<
     supported: boolean;
     colorDomain?: number[];
     isWeightMapDirty?: boolean;
-    weightsTexture?: Texture2D;
+    weightsTexture?: Texture;
     zoom?: number;
     worldBounds?: number[];
     normalizedCommonBounds?: number[];
     updateTimer?: any;
-    triPositionBuffer?: Buffer;
-    triTexCoordBuffer?: Buffer;
+    triPositionBuffer?: BufferWithAccessor;
+    triTexCoordBuffer?: BufferWithAccessor;
   };
 
   initializeState() {
-    if (!hasFeatures(this.context.device, REQUIRED_FEATURES)) {
+    if (!REQUIRED_FEATURES.every(feature => this.context.device.features.has(feature))) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
@@ -368,14 +362,14 @@ export default class HeatmapLayer<
     const {textureSize, format, type} = this.state;
 
     this.setState({
-      weightsTexture: new Texture2D(this.context.device, {
+      weightsTexture: this.context.device.createTexture({
         width: textureSize,
         height: textureSize,
         format,
         type,
-        ...TEXTURE_OPTIONS
+        ...TEXTURE_PROPS
       }),
-      maxWeightsTexture: new Texture2D(this.context.device, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
+      maxWeightsTexture: this.context.device.createTexture({format, type, ...TEXTURE_PROPS}) // 1 X 1 texture,
     });
   }
 
@@ -392,9 +386,8 @@ export default class HeatmapLayer<
     const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    // @ts-expect-error
-    const textureSize = Math.min(weightsTextureSize, getParameters(device, GL.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(device, FLOAT_TARGET_FEATURES);
+    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
+    const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
     const {format, type} = getTextureParams({device, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, type, weightsScale});
@@ -458,12 +451,14 @@ export default class HeatmapLayer<
       maxWeightsTexture,
       maxWeightTransform,
       zoom: null,
-      triPositionBuffer: new Buffer(this.context.device, {
+      triPositionBuffer: this.context.device.createBuffer({
         byteLength: 48,
+        // @ts-expect-error
         accessor: {size: 3}
       }),
-      triTexCoordBuffer: new Buffer(this.context.device, {
+      triTexCoordBuffer: this.context.device.createBuffer({
         byteLength: 48,
+        // @ts-expect-error
         accessor: {size: 2}
       })
     });
@@ -564,11 +559,11 @@ export default class HeatmapLayer<
         width: colorRange.length
       });
     } else {
-      colorTexture = new Texture2D(this.context.device, {
+      colorTexture = this.context.device.createTexture({
         data: colors,
         width: colorRange.length,
         height: 1,
-        ...TEXTURE_OPTIONS
+        ...TEXTURE_PROPS
       });
     }
     this.setState({colorTexture});
@@ -624,10 +619,11 @@ export default class HeatmapLayer<
     this._updateMaxWeightValue();
 
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
-    weightsTexture.setParameters({
-      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
-    });
+    // TODO v9 sampler support in luma.gl needs to improve
+    // weightsTexture.setSampler({
+    //   magFilter: 'linear',
+    //   minFilter: 'linear'
+    // });
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {

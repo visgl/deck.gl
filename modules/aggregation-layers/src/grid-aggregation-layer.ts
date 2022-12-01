@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
@@ -114,8 +114,9 @@ export default abstract class GridAggregationLayer<
         if (weight.aggregationBuffer) {
           weight.aggregationBuffer.delete();
         }
-        weight.aggregationBuffer = new Buffer(this.context.device, {
+        weight.aggregationBuffer = this.context.device.createBuffer({
           byteLength: dataBytes,
+          // @ts-expect-error legacy
           accessor: {
             size: 4,
             type: GL.FLOAT,

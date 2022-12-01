@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import DataColumn from '@deck.gl/core/lib/attribute/data-column';
 import ShaderAttribute from '@deck.gl/core/lib/attribute/shader-attribute';
-import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {device} from '@deck.gl/test-utils';
 
 test('ShaderAttribute#constructor', t => {
@@ -45,7 +45,7 @@ test('ShaderAttribute#getValue#constant', t => {
 /* eslint-disable max-statements */
 test('ShaderAttribute#getValue#buffer', t => {
   const dataColumn = new DataColumn(device, {id: 'positions', size: 3});
-  const buffer = new Buffer(device, {data: new Float32Array([1, 1, 1])});
+  const buffer = device.createBuffer({data: new Float32Array([1, 1, 1])});
   const shaderAttribute1 = new ShaderAttribute(dataColumn, {divisor: 0});
   const shaderAttribute2 = new ShaderAttribute(dataColumn, {divisor: 1});
 

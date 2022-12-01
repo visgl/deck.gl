@@ -23,7 +23,7 @@ import {Vector3, Matrix4} from '@math.gl/core';
 import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
-import type {Texture2D} from '@luma.gl/webgl-legacy';
+import type {Texture} from '@luma.gl/api';
 import type {ShaderModule, NumericArray} from '../../types/types';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
@@ -111,8 +111,8 @@ type ShadowModuleSettings = {
   viewport: Viewport;
   shadowEnabled?: boolean;
   drawToShadowMap?: boolean;
-  shadowMaps?: Texture2D[];
-  dummyShadowMap?: Texture2D;
+  shadowMaps?: Texture[];
+  dummyShadowMap?: Texture;
   shadowColor?: number[];
   shadowMatrices?: Matrix4[];
   shadowLightId?: number;

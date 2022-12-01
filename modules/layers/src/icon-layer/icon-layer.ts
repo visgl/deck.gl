@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl-legacy';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {Texture} from '@luma.gl/api';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -38,14 +38,13 @@ import type {
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/webgl-legacy';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
-  iconAtlas?: string | Texture2D;
+  iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
 
@@ -291,7 +290,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           billboard,
           alphaCutoff
         })
-        .draw();
+        .draw(this.context.renderPass);
     }
   }
 

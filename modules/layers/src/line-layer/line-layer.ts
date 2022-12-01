@@ -33,7 +33,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
@@ -191,7 +192,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         widthMaxPixels,
         useShortestPath: wrapLongitude ? 1 : 0
       })
-      .draw();
+      .draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
@@ -199,7 +200,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         .setUniforms({
           useShortestPath: -1
         })
-        .draw();
+        .draw(this.context.renderPass);
     }
   }
 

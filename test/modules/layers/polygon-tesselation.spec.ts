@@ -23,7 +23,6 @@ import test from 'tape-promise/tape';
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
-import {Buffer} from '@luma.gl/webgl-legacy';
 import {device} from '@deck.gl/test-utils';
 
 const SAMPLE_DATA = [
@@ -547,7 +546,7 @@ test('PolygonTesselator#geometryBuffer', t => {
 });
 
 test('PolygonTesselator#geometryBuffer#buffer', t => {
-  const buffer = new Buffer(device, {
+  const buffer = device.createBuffer({
     data: new Float32Array([1, 1, 2, 2, 3, 3, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0])
   });
   const sampleData = {

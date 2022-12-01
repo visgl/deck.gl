@@ -31,8 +31,7 @@ import {
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from '@math.gl/core';
-import {Timeline} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {Timeline, Model} from '@luma.gl/engine';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 
