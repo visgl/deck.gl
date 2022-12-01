@@ -6,7 +6,7 @@ import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollisionFilterEffect from '@deck.gl/extensions/collision-filter/collision-filter-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 
 const testViewport = new MapView().makeViewport({
@@ -60,11 +60,11 @@ test('CollisionFilterEffect#constructor', t => {
 test('CollisionFilterEffect#cleanup', t => {
   const collisionFilterEffect = new CollisionFilterEffect();
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([TEST_LAYER]);
   layerManager.updateLayers();
 
-  collisionFilterEffect.preRender(gl, {
+  collisionFilterEffect.preRender(device, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     ...PRERENDEROPTIONS
@@ -95,14 +95,14 @@ test('CollisionFilterEffect#update', t => {
     collisionGroup: 'COLLISION_GROUP_2'
   });
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
     t.comment(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    collisionFilterEffect.preRender(gl, {
+    collisionFilterEffect.preRender(device, {
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       ...PRERENDEROPTIONS
@@ -145,7 +145,7 @@ test('CollisionFilterEffect#update', t => {
 // Render test using makeSpy to check CollisionFilterPass.render is called including with didRender from Mask
 test('CollisionFilterEffect#render', t => {
   const collisionFilterEffect = new CollisionFilterEffect();
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
   const TEST_LAYER_2 = TEST_LAYER.clone({id: 'test-layer-2'});
 
   const preRenderWithLayers = (layers, description, opts) => {
@@ -153,7 +153,7 @@ test('CollisionFilterEffect#render', t => {
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    collisionFilterEffect.preRender(gl, {
+    collisionFilterEffect.preRender(device, {
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       ...PRERENDEROPTIONS,

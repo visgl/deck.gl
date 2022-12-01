@@ -1,5 +1,5 @@
 export {toLowPrecision} from './utils/precision';
-export {default as gl} from './utils/setup-gl';
+export {gl, device} from './utils/setup-gl';
 
 // Utilities for update tests (lifecycle tests)
 export {

@@ -19,12 +19,12 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import {Buffer} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/webgl-legacy';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {setupSpysForWebGL1, restoreSpies} from './webgl1-spies-utils';
-import {gl} from '@deck.gl/test-utils';
-const SAMPLE_BUFFER = new Buffer(gl);
+import {device} from '@deck.gl/test-utils';
+const SAMPLE_BUFFER = new Buffer(device);
 const SAMPLE_PROPS = {
   data: {
     attributes: {
@@ -41,19 +41,19 @@ const SAMPLE_PROPS = {
 };
 
 test('GPUGridCellLayer#initializeState', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const deviceSpies = setupSpysForWebGL1(device);
   const layer = new GPUGridCellLayer(SAMPLE_PROPS);
 
   testInitializeLayer({layer, onError: t.notOk});
 
   t.ok(layer.state.model, 'should set state.model');
 
-  restoreSpies(webgl1Spies);
+  restoreSpies(deviceSpies);
   t.end();
 });
 
 test('GPUGridCellLayer#updates', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const deviceSpies = setupSpysForWebGL1(device);
 
   testLayer({
     Layer: GPUGridCellLayer,
@@ -76,6 +76,6 @@ test('GPUGridCellLayer#updates', t => {
     ]
   });
 
-  restoreSpies(webgl1Spies);
+  restoreSpies(deviceSpies);
   t.end();
 });

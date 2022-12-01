@@ -158,6 +158,7 @@ const TEST_CASES = [
           }
         }
       ],
+      /* luma.gl v9 test disable 
       pickObjects: [
         {
           parameters: {
@@ -182,6 +183,7 @@ const TEST_CASES = [
           }
         }
       ],
+      */
       pickMultipleObjects: [
         {
           parameters: {

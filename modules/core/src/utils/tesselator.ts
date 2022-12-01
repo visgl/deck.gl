@@ -21,7 +21,7 @@ import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
 import assert from './assert';
 
-import {Buffer} from '@luma.gl/webgl';
+import {Buffer} from '@luma.gl/webgl-legacy';
 
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {TypedArray} from '../types/types';
@@ -233,7 +233,6 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (ArrayBuffer.isView(geometryBuffer)) {
         instanceCount = instanceCount || geometryBuffer.length / this.positionSize;
       } else if (geometryBuffer instanceof Buffer) {
-        // @ts-expect-error (2339) accessor is not typed
         const byteStride = geometryBuffer.accessor.stride || this.positionSize * 4;
         instanceCount = instanceCount || geometryBuffer.byteLength / byteStride;
       } else if (geometryBuffer.buffer) {

@@ -27,7 +27,7 @@ import {ConstructorOf} from '../types/types';
 import type Viewport from '../viewports/viewport';
 
 import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -126,7 +126,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   abstract get ControllerState(): ConstructorOf<ControllerState>;
   abstract get transition(): TransitionProps;
 
-  // @ts-expect-error (2564) - not assigned in the constructor
+  // ts-expect-error (2564) - not assigned in the constructor
   protected props: ControllerProps;
   protected state: Record<string, any> = {};
 

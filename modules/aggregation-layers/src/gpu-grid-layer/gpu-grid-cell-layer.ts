@@ -24,13 +24,12 @@ import {
   project32,
   gouraudLighting,
   picking,
-  LayerContext,
   LayerProps,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, Buffer} from '@luma.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
+import {GL, Model, Buffer} from '@luma.gl/webgl-legacy';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';
@@ -83,7 +82,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     });
   }
 
-  initializeState({gl}: LayerContext) {
+  initializeState(): void {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       colors: {
@@ -95,13 +94,13 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
         noAlloc: true
       }
     });
-    const model = this._getModel(gl);
+    const model = this._getModel();
     this._setupUniformBuffer(model);
     this.setState({model});
   }
 
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new CubeGeometry(),
@@ -179,9 +178,9 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   }
 
   private _setupUniformBuffer(model: Model): void {
-    const gl = this.context.gl as WebGL2RenderingContext;
     const programHandle = model.program.handle;
 
+    const gl = this.context.gl as WebGL2RenderingContext;
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
     const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
     gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);

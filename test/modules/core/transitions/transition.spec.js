@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import Transition from '@deck.gl/core/transitions/transition';
-import {Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
 
 test('Transition#constructor', t => {
   const transition = new Transition(new Timeline());

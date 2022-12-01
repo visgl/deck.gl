@@ -25,12 +25,11 @@ import {
   AGGREGATION_OPERATION,
   getValueFunc
 } from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
-import GL from '@luma.gl/constants';
 import {Layer} from 'deck.gl';
-import {testLayer, gl} from '@deck.gl/test-utils';
+import {testLayer, device} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
 import {equals} from '@math.gl/core';
-import {Buffer} from '@luma.gl/core';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
 
 const BASE_LAYER_ID = 'composite-layer-id';
 const PROPS = {
@@ -65,7 +64,7 @@ class TestGridAggregationLayer extends GridAggregationLayer {
         count: {
           needMax: true,
           size: 1,
-          maxBuffer: new Buffer(gl, {
+          maxBuffer: new Buffer(device, {
             byteLength: 4 * 4,
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
@@ -130,7 +129,7 @@ class TestGridAggregationLayer extends GridAggregationLayer {
 
     let gpuAggregation = opts.props.gpuAggregation;
     if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.device)) {
         gpuAggregation = false;
       }
     }
@@ -307,7 +306,7 @@ test('GridAggregationLayer#state updates', t => {
       ],
       onAfterUpdate({layer, spies}) {
         t.ok(spies.updateAggregationState.called, 'should call updateAggregationState');
-        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+        if (GPUGridAggregator.isSupported(layer.context.device)) {
           t.comment('GPU Aggregation is supported');
           t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
           t.notOk(
@@ -331,7 +330,7 @@ test('GridAggregationLayer#state updates', t => {
       spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
       onAfterUpdate({layer, spies}) {
         // applicable only when switching from GPU to CPU
-        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+        if (GPUGridAggregator.isSupported(layer.context.device)) {
           t.ok(spies._updateAggregation.called, 'should call _updateAggregation');
           t.ok(spies._updateWeightBins.called, 'should call _updateWeightBins');
           t.ok(spies._uploadAggregationResults.called, 'should call _uploadAggregationResults');
@@ -396,7 +395,7 @@ test('GridAggregationLayer#state updates', t => {
       },
       spies: ['_updateAggregation', '_updateWeightBins', '_uploadAggregationResults'],
       onAfterUpdate({layer, spies}) {
-        if (GPUGridAggregator.isSupported(layer.context.gl)) {
+        if (GPUGridAggregator.isSupported(layer.context.device)) {
           t.ok(spies._updateAggregation.called, 'should not call _updateAggregation');
           t.notOk(spies._updateWeightBins.called, 'should not call _updateWeightBins');
         } else {
@@ -409,7 +408,7 @@ test('GridAggregationLayer#state updates', t => {
     }
   ];
 
-  if (GPUGridAggregator.isSupported(gl)) {
+  if (GPUGridAggregator.isSupported(device)) {
     testCases = testCases.concat([
       ...getTestCases(t, {cellSize: 60, aggregation: 'SUM'}),
       ...getTestCases(t, {aggregation: 'MAX'}),

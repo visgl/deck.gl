@@ -1,6 +1,6 @@
 /* global setTimeout */
 import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import Resource from '@deck.gl/core/lib/resource/resource';
 
 function mockLoadData(value, delay) {
@@ -12,7 +12,7 @@ function mockLoadData(value, delay) {
 }
 
 test('Resource#setData', async t => {
-  const resource = new Resource('test', [], {gl});
+  const resource = new Resource('test', [], {device});
   t.deepEqual(resource.getData(), []);
 
   resource.setData('./test.json');

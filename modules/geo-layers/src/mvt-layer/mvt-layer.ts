@@ -168,15 +168,15 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
-      if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
-        opts.minZoom = tileJSON.minzoom as number;
+      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
+        opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
+        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
       ) {
-        opts.maxZoom = tileJSON.maxzoom as number;
+        opts.maxZoom = tileJSON.maxzoom;
       }
     }
     return opts;
@@ -288,7 +288,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const isWGS84 = Boolean(this.context.viewport.resolution);
 
     if (this.state.binary && info.index !== -1) {
-      const {data} = params.sourceLayer!.props;
+      const {data} = params.sourceLayer.props;
       info.object = binaryToGeojson(data as BinaryFeatures, {
         globalFeatureId: info.index
       }) as Feature;
@@ -355,7 +355,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck!.pickObjects({x, y, width, height, layerIds, maxObjects});
+    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
   }
 
   /** Get the rendered features in the current viewport. */
@@ -384,7 +384,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const propName = 'dataInWGS84';
     const tileset: Tileset2D = this.state.tileset;
 
-    // @ts-expect-error selectedTiles are always initialized when tile is being processed
+    // TODO ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs

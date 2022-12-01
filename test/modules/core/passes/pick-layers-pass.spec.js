@@ -2,12 +2,12 @@ import test from 'tape-promise/tape';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
-import {Framebuffer} from '@luma.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
-import gl from '@deck.gl/test-utils/utils/setup-gl';
+import {device} from '@deck.gl/test-utils';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 
 test('PickLayersPass#drawPickingBuffer', t => {
-  const pickingFBO = new Framebuffer(gl);
+  const pickingFBO = new Framebuffer(device);
 
   // Resize it to current canvas size (this is a noop if size hasn't changed)
   pickingFBO.resize({width: 100, height: 100});
@@ -25,8 +25,8 @@ test('PickLayersPass#drawPickingBuffer', t => {
     pickable: true
   });
 
-  const layerManager = new LayerManager(gl, {viewport});
-  const pickLayersPass = new PickLayersPass(gl);
+  const layerManager = new LayerManager(device, {viewport});
+  const pickLayersPass = new PickLayersPass(device);
 
   layerManager.setLayers([layer]);
   pickLayersPass.render({

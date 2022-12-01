@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
-import {Framebuffer} from '@luma.gl/core';
+import {device} from '@deck.gl/test-utils';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 
 const fs = `\
@@ -27,23 +27,27 @@ test('PostProcessEffect#constructor', t => {
 
 test('PostProcessEffect#postRender', t => {
   const effect = new PostProcessEffect(testModule);
-  effect.preRender(gl);
-  const inputBuffer = new Framebuffer(gl);
-  const outputBuffer = new Framebuffer(gl);
+  effect.preRender(device);
+  const inputBuffer = new Framebuffer(device);
+  const outputBuffer = new Framebuffer(device);
 
-  const buffer1 = effect.postRender(gl, {inputBuffer, swapBuffer: outputBuffer});
+  const buffer1 = effect.postRender(device, {inputBuffer, swapBuffer: outputBuffer});
   t.ok(effect.passes, 'post-processing pass created');
 
   t.ok(buffer1, 'post-processing effect rendered without throwing');
   t.is(buffer1, outputBuffer, 'post-processing effect buffer swapped');
 
-  const buffer2 = effect.postRender(gl, {
+  const buffer2 = effect.postRender(device, {
     inputBuffer,
     swapBuffer: outputBuffer,
-    target: Framebuffer.getDefaultFramebuffer(gl)
+    target: Framebuffer.getDefaultFramebuffer(device)
   });
   t.ok(buffer2, 'post-processing effect rendered without throwing');
-  t.is(buffer2, Framebuffer.getDefaultFramebuffer(gl), 'post-processing effect rendered to target');
+  t.is(
+    buffer2,
+    Framebuffer.getDefaultFramebuffer(device),
+    'post-processing effect rendered to target'
+  );
 
   effect.cleanup();
   inputBuffer.delete();

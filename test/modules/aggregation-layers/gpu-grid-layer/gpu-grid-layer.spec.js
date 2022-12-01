@@ -25,7 +25,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {setupSpysForWebGL1, restoreSpies} from './webgl1-spies-utils';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -33,7 +33,7 @@ const SAMPLE_PROPS = {
 };
 
 test('GPUGridLayer', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const webgl1Spies = setupSpysForWebGL1(device);
   const testCases = generateLayerTests({
     Layer: GPUGridLayer,
     sampleProps: SAMPLE_PROPS,
@@ -51,7 +51,7 @@ test('GPUGridLayer', t => {
 });
 
 test('GPUGridLayer#renderLayers', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const webgl1Spies = setupSpysForWebGL1(device);
 
   makeSpy(GPUGridLayer.prototype, '_updateAggregation');
 
@@ -73,7 +73,7 @@ test('GPUGridLayer#renderLayers', t => {
 });
 
 test('GPUGridLayer#updates', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const webgl1Spies = setupSpysForWebGL1(device);
   testLayer({
     Layer: GPUGridLayer,
     onError: t.notOk,

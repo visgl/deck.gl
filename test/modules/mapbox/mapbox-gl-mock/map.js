@@ -4,7 +4,7 @@
 import {Evented, Event} from './evented';
 import Style from './style';
 import Transform from './transform';
-import {gl} from '@deck.gl/test-utils';
+import {device, gl} from '@deck.gl/test-utils';
 
 /* global document, setTimeout */
 export default class Map extends Evented {
@@ -18,7 +18,7 @@ export default class Map extends Evented {
     this._controls = [];
     this.transform = new Transform(options);
     this._loaded = false;
-    this.painter = {context: {gl}};
+    this.painter = {context: {device, gl}};
 
     setTimeout(() => {
       this.style._loaded = true;

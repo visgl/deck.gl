@@ -66,6 +66,7 @@ export class Evented {
     return this;
   }
 
+  /* eslint-disable complexity */
   fire(event, properties) {
     // Compatibility with (type: string, properties: Object) signature from previous versions.
     // See https://github.com/mapbox/mapbox-gl-js/issues/6522,

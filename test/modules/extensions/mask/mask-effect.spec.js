@@ -1,10 +1,10 @@
 import test from 'tape-promise/tape';
-import {MapView, LayerManager} from 'deck.gl';
+import {MapView, LayerManager} from '@deck.gl/core';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -35,7 +35,7 @@ test('MaskEffect#constructor', t => {
 test('MaskEffect#cleanup', t => {
   const maskEffect = new MaskEffect();
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
   layerManager.updateLayers();
 
@@ -72,7 +72,7 @@ test('MaskEffect#update', t => {
   });
   const TEST_MASK_LAYER3 = TEST_MASK_LAYER.clone({id: 'test-mask-layer-3'});
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
     t.comment(description);
@@ -140,7 +140,7 @@ test('MaskEffect#coordinates', t => {
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
 
   const preRenderWithLayers = (layers, description) => {
     t.comment(description);

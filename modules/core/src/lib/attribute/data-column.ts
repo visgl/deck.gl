@@ -1,13 +1,14 @@
 /* eslint-disable complexity */
-import GL from '@luma.gl/constants';
-import {hasFeature, FEATURES, Buffer} from '@luma.gl/core';
+import type {Device} from '@luma.gl/api';
+import type {Buffer as LumaBuffer} from '@luma.gl/webgl-legacy';
+import {GL, hasFeature, FEATURES, Buffer} from '@luma.gl/webgl-legacy';
+
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
 export type BufferAccessor = {
@@ -117,7 +118,7 @@ type DataColumnInternalState<Options, State> = State & {
 };
 
 export default class DataColumn<Options, State> implements IShaderAttribute {
-  gl: WebGLRenderingContext;
+  device: Device;
   id: string;
   size: number;
   settings: DataColumnSettings<Options>;
@@ -128,8 +129,8 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
-  constructor(gl: WebGLRenderingContext, opts: DataColumnOptions<Options>, state: State) {
-    this.gl = gl;
+  constructor(device: Device, opts: DataColumnOptions<Options>, state: State) {
+    this.device = device;
     this.id = opts.id || '';
     this.size = opts.size || 1;
 
@@ -146,7 +147,9 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
       bufferType =
-        gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32)
+          ? GL.UNSIGNED_INT
+          : GL.UNSIGNED_SHORT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }
@@ -195,11 +198,11 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   get buffer(): LumaBuffer {
     if (!this._buffer) {
       const {isIndexed, type} = this.settings;
-      this._buffer = new Buffer(this.gl, {
+      this._buffer = new Buffer(this.device, {
         id: this.id,
         target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
         accessor: {type}
-      }) as LumaBuffer;
+      });
     }
     return this._buffer;
   }
@@ -265,7 +268,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (this.state.constant) {
       return this.value;
     }
-    return [this.getBuffer() as LumaBuffer, this.getAccessor() as BufferAccessor];
+    return [this.getBuffer(), this.getAccessor() as BufferAccessor];
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -324,7 +327,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
     } else if (data instanceof Buffer) {
-      opts = {buffer: data as LumaBuffer};
+      opts = {buffer: data};
     } else {
       opts = data;
     }
@@ -335,7 +338,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
 
     if (opts.constant) {
       // set constant
-      let value = opts.value as NumericArray;
+      let value = opts.value;
       value = this._normalizeValue(value, [], 0);
       if (this.settings.normalized) {
         value = this.normalizeConstant(value);

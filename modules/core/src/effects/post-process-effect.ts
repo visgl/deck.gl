@@ -1,8 +1,10 @@
+import type {Device} from '@luma.gl/api';
+import {normalizeShaderModule} from '@luma.gl/shadertools';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
+
 import ScreenPass from '../passes/screen-pass';
-import {normalizeShaderModule} from '@luma.gl/core';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {Framebuffer} from '@luma.gl/webgl';
 import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
@@ -25,8 +27,10 @@ export default class PostProcessEffect implements Effect {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
-  postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(gl, this.module, this.id);
+  postRender(device: Device, params: PostRenderOptions): Framebuffer {
+    const passes = this.passes || createPasses(device, this.module, this.id);
+    // TODO from v9 merge - remove
+    // const passes = this.passes || createPasses(device, this.module, this.id, this.props);
     this.passes = passes;
 
     const {target} = params;
@@ -55,10 +59,11 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
+// function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
+function createPasses(device: Device, module: ShaderModule, id: string): ScreenPass[] {
   if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
-    const pass = new ScreenPass(gl, {
+    const pass = new ScreenPass(device, {
       id,
       module,
       fs
@@ -70,7 +75,7 @@ function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: strin
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
 
-    return new ScreenPass(gl, {
+    return new ScreenPass(device, {
       id: idn,
       module,
       fs
@@ -109,7 +114,7 @@ void main() {
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module) {
+function getFragmentShaderForRenderPass(module, pass = module): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);
@@ -121,5 +126,5 @@ function getFragmentShaderForRenderPass(module, pass = module) {
   }
 
   // console.error(`${module.name} no fragment shader generated`);
-  return null;
+  return undefined;
 }

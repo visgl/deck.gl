@@ -1,4 +1,5 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
+import {log} from '@deck.gl/core';
 import {
   AGGREGATION,
   getLayer,
@@ -13,7 +14,6 @@ import {
   getMaxMarkerSize
 } from './layer-map';
 import PointLabelLayer from '../layers/point-label-layer';
-import {log} from '@deck.gl/core';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {MapDataset, MapLayerConfig, VisualChannels} from './types';

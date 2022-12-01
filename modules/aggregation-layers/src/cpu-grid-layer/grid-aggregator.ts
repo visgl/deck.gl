@@ -41,6 +41,7 @@ import {getGridOffset} from '../utils/grid-aggregation-utils';
  */
 export function pointToDensityGridDataCPU(props, aggregationParams) {
   const hashInfo = pointsToGridHashing(props, aggregationParams);
+  // @ts-expect-error
   const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {
@@ -57,7 +58,7 @@ export function pointToDensityGridDataCPU(props, aggregationParams) {
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
-/* eslint-disable max-statements, complexity */
+/* eslint-disable-next-line max-statements, complexity */
 function pointsToGridHashing(props, aggregationParams) {
   const {data = [], cellSize} = props;
   const {attributes, viewport, projectPoints, numInstances} = aggregationParams;

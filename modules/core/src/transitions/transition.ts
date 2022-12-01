@@ -1,4 +1,4 @@
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 export type TransitionSettings = {
   duration: number;
@@ -9,24 +9,21 @@ export type TransitionSettings = {
 };
 
 export default class Transition {
-  private _inProgress: boolean;
-  private _handle: number | null;
+  private _inProgress: boolean = false;
+  private _handle: number | null = null;
   private _timeline: Timeline;
 
-  time: number;
-  settings: TransitionSettings;
+  time: number = 0;
+  // @ts-expect-error
+  settings: TransitionSettings & {fromValue; toValue; duration; easing; damping; stiffness} = {
+    duration: 0
+  };
 
   /**
    * @params timeline {Timeline}
    */
   constructor(timeline: Timeline) {
-    this._inProgress = false;
-    this._handle = null;
     this._timeline = timeline;
-    this.time = 0;
-
-    // Defaults
-    this.settings = {duration: 0};
   }
 
   /* Public API */
@@ -40,6 +37,7 @@ export default class Transition {
    */
   start(settings: TransitionSettings) {
     this.cancel();
+    // @ts-expect-error
     this.settings = settings;
     this._inProgress = true;
     this.settings.onStart?.(this);

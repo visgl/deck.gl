@@ -359,7 +359,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         subLayerProps &&
         tile.layers[0] &&
         Object.keys(subLayerProps).some(
-          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
+          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
         )
       ) {
         tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));

@@ -6,7 +6,7 @@ import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers'
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 
-import {CubeGeometry} from '@luma.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
 import {polygons} from 'deck.gl-test/data';
 
 const cube = new CubeGeometry();

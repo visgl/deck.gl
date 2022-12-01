@@ -20,11 +20,11 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
+import test from 'tape-promise/tape';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import GL from '@luma.gl/constants';
-import {Buffer, isWebGL2} from '@luma.gl/core';
-import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {Buffer} from '@luma.gl/webgl-legacy';
+import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 
 test('Attribute#imports', t => {
@@ -33,20 +33,20 @@ test('Attribute#imports', t => {
 });
 
 test('Attribute#constructor', t => {
-  const attribute = new Attribute(gl, {size: 1, accessor: 'a'});
+  const attribute = new Attribute(device, {size: 1, accessor: 'a'});
 
   t.ok(attribute, 'Attribute construction successful');
   t.is(typeof attribute.getBuffer, 'function', 'Attribute.getBuffer function available');
   t.ok(attribute.allocate, 'Attribute.allocate function available');
   t.ok(attribute.updateBuffer, 'Attribute.update function available');
 
-  t.throws(() => new Attribute(gl, {size: 1}), 'Attribute missing update option');
+  t.throws(() => new Attribute(device, {size: 1}), 'Attribute missing update option');
 
   t.end();
 });
 
 test('Attribute#delete', t => {
-  const attribute = new Attribute(gl, {size: 1, accessor: 'a'});
+  const attribute = new Attribute(device, {size: 1, accessor: 'a'});
   attribute.setData(new Float32Array(4));
 
   t.ok(attribute._buffer, 'Attribute created Buffer object');
@@ -60,17 +60,17 @@ test('Attribute#delete', t => {
 test('Attribute#getUpdateTriggers', t => {
   const update = () => {};
 
-  let attribute = new Attribute(gl, {id: 'indices', isIndexed: true, size: 1, update});
+  let attribute = new Attribute(device, {id: 'indices', isIndexed: true, size: 1, update});
   t.deepEqual(attribute.getUpdateTriggers(), ['indices'], 'returns correct update triggers');
 
-  attribute = new Attribute(gl, {id: 'instanceSizes', size: 1, accessor: 'getSize', update});
+  attribute = new Attribute(device, {id: 'instanceSizes', size: 1, accessor: 'getSize', update});
   t.deepEqual(
     attribute.getUpdateTriggers(),
     ['instanceSizes', 'getSize'],
     'returns correct update triggers'
   );
 
-  attribute = new Attribute(gl, {
+  attribute = new Attribute(device, {
     id: 'instancePositions',
     size: 1,
     accessor: ['getPosition', 'getElevation'],
@@ -86,14 +86,14 @@ test('Attribute#getUpdateTriggers', t => {
 });
 
 test('Attribute#allocate', t => {
-  const attributeNoAlloc = new Attribute(gl, {
+  const attributeNoAlloc = new Attribute(device, {
     id: 'positions',
     size: 3,
     accessor: 'a',
     noAlloc: true
   });
 
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'sizes',
     update: attr => {
       attr.constant = true;
@@ -135,7 +135,7 @@ test('Attribute#allocate', t => {
 });
 
 test('Attribute#setConstantValue', t => {
-  let attribute = new Attribute(gl, {
+  let attribute = new Attribute(device, {
     id: 'positions',
     size: 3,
     accessor: 'getPosition'
@@ -166,7 +166,7 @@ test('Attribute#setConstantValue', t => {
 
   attribute.delete();
 
-  attribute = new Attribute(gl, {
+  attribute = new Attribute(device, {
     id: 'colors',
     size: 3,
     type: GL.UNSIGNED_BYTE,
@@ -181,14 +181,14 @@ test('Attribute#setConstantValue', t => {
 });
 
 test('Attribute#allocate - partial', t => {
-  if (!isWebGL2(gl)) {
+  if (device.info.type !== 'webgl2') {
     // buffer.getData() is WebGL2 only
     t.comment('This test requires WebGL2');
     t.end();
     return;
   }
 
-  let positions = new Attribute(gl, {
+  let positions = new Attribute(device, {
     id: 'positions',
     update: attr => {
       attr.value[0] = 180;
@@ -214,7 +214,7 @@ test('Attribute#allocate - partial', t => {
   positions.delete();
 
   // double precision
-  positions = new Attribute(gl, {
+  positions = new Attribute(device, {
     id: 'positions64',
     type: GL.DOUBLE,
     update: attr => {
@@ -251,9 +251,9 @@ test('Attribute#allocate - partial', t => {
 test('Attribute#shaderAttributes', t => {
   const update = () => {};
 
-  const buffer1 = new Buffer(gl, 10);
+  const buffer1 = new Buffer(device, 10);
 
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'positions',
     update,
     size: 3,
@@ -328,7 +328,7 @@ test('Attribute#updateBuffer', t => {
   const TEST_CASES = [
     {
       title: 'standard accessor',
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'values',
         type: GL.FLOAT,
         size: 1,
@@ -339,7 +339,7 @@ test('Attribute#updateBuffer', t => {
     },
     {
       title: 'standard accessor with default value',
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'colors',
         type: GL.UNSIGNED_BYTE,
         size: 4,
@@ -364,7 +364,7 @@ test('Attribute#updateBuffer', t => {
     },
     {
       title: 'standard accessor with transform',
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'values',
         type: GL.FLOAT,
         size: 1,
@@ -376,7 +376,7 @@ test('Attribute#updateBuffer', t => {
     },
     {
       title: 'custom accessor',
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'values',
         size: 3,
         accessor: (_, {index}) => [index, 0, 0]
@@ -398,7 +398,7 @@ test('Attribute#updateBuffer', t => {
     },
     {
       title: 'custom update',
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'values',
         size: 3,
         update: attribute => {
@@ -452,7 +452,7 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
     // Attribute.value must be >= Math.min(4, size) to trigger check
     // Setup attribute value to have length 5, with NaN elements for entries > attribute.size
     // e.g [2, 2, NaN, NaN, NaN]
-    const attribute = new Attribute(gl, {
+    const attribute = new Attribute(device, {
       id: 'values',
       size,
       update: attr => {
@@ -480,7 +480,7 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
     // Attribute.value must be >= Math.min(4, size) to trigger check
     //
     // Setup attribute value with NaN elements that trigger an exception
-    const attribute = new Attribute(gl, {
+    const attribute = new Attribute(device, {
       id: 'values',
       size,
       update: attr => {
@@ -500,7 +500,7 @@ test('Attribute#updateBuffer _checkAttributeArray', t => {
 
 test('Attribute#updateBuffer#noAlloc', t => {
   let value;
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'values',
     vertexOffset: 1,
     size: 2,
@@ -560,7 +560,7 @@ test('Attribute#standard accessor - variable width', t => {
 
   const TEST_CASES = [
     {
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'values',
         type: GL.FLOAT,
         size: 1,
@@ -569,7 +569,7 @@ test('Attribute#standard accessor - variable width', t => {
       result: [10, 11, 20, 30, 31, 32]
     },
     {
-      attribute: new Attribute(gl, {
+      attribute: new Attribute(device, {
         id: 'colors',
         type: GL.UNSIGNED_BYTE,
         size: 4,
@@ -615,14 +615,14 @@ test('Attribute#updateBuffer - partial', t => {
     getValue: (d, {index}) => accessorCalled++ + index * 10
   };
 
-  const ATTRIBUTE_1 = new Attribute(gl, {
+  const ATTRIBUTE_1 = new Attribute(device, {
     id: 'values-1',
     type: GL.FLOAT,
     size: 1,
     accessor: 'getValue'
   });
 
-  const ATTRIBUTE_2 = new Attribute(gl, {
+  const ATTRIBUTE_2 = new Attribute(device, {
     id: 'values-2',
     type: GL.FLOAT,
     size: 1,
@@ -776,13 +776,13 @@ test('Attribute#updateBuffer - partial', t => {
 });
 
 test('Attribute#setExternalBuffer', t => {
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'test-attribute',
     type: GL.FLOAT,
     size: 3,
     update: () => {}
   });
-  const buffer = new Buffer(gl, 12);
+  const buffer = new Buffer(device, 12);
   const value1 = new Float32Array(4);
   const value2 = new Uint8Array(4);
 
@@ -851,7 +851,7 @@ test('Attribute#setExternalBuffer', t => {
 });
 
 test('Attribute#setExternalBuffer#shaderAttributes', t => {
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'test-attribute-with-shader-attributes',
     type: GL.UNSIGNED_BYTE,
     size: 4,
@@ -861,7 +861,7 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
       a: {size: 1, elementOffset: 1}
     }
   });
-  const attribute2 = new Attribute(gl, {
+  const attribute2 = new Attribute(device, {
     id: 'test-attribute-with-shader-attributes',
     type: GL.DOUBLE,
     size: 4,
@@ -872,7 +872,7 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
     }
   });
 
-  const buffer = new Buffer(gl, 16);
+  const buffer = new Buffer(device, 16);
   const value8 = new Uint8Array(16);
   const value32 = new Float32Array(16);
   const value64 = new Float64Array(16);
@@ -921,7 +921,7 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
 });
 
 test('Attribute#setBinaryValue', t => {
-  let attribute = new Attribute(gl, {
+  let attribute = new Attribute(device, {
     id: 'test-attribute',
     type: GL.FLOAT,
     size: 3,
@@ -946,7 +946,7 @@ test('Attribute#setBinaryValue', t => {
   spy.reset();
   attribute.delete();
 
-  attribute = new Attribute(gl, {
+  attribute = new Attribute(device, {
     id: 'test-attribute',
     type: GL.FLOAT,
     size: 3,
@@ -957,7 +957,7 @@ test('Attribute#setBinaryValue', t => {
   t.notOk(attribute.setBinaryValue(value), 'should do nothing if noAlloc');
   t.ok(attribute.needsUpdate(), 'attribute still needs update');
 
-  attribute = new Attribute(gl, {
+  attribute = new Attribute(device, {
     id: 'test-attribute-with-transform',
     type: GL.UNSIGNED_BYTE,
     size: 4,
@@ -1014,7 +1014,7 @@ test('Attribute#doublePrecision', t0 => {
   };
 
   t0.test('Attribute#doublePrecision#fp64:true', t => {
-    const attribute = new Attribute(gl, {
+    const attribute = new Attribute(device, {
       id: 'positions',
       type: GL.DOUBLE,
       size: 3,
@@ -1046,7 +1046,7 @@ test('Attribute#doublePrecision', t0 => {
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
-    const buffer = new Buffer(gl, 12);
+    const buffer = new Buffer(device, 12);
     attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 
@@ -1056,7 +1056,7 @@ test('Attribute#doublePrecision', t0 => {
   });
 
   t0.test('Attribute#doublePrecision#fp64:false', t => {
-    const attribute = new Attribute(gl, {
+    const attribute = new Attribute(device, {
       id: 'positions',
       type: GL.DOUBLE,
       fp64: false,
@@ -1089,7 +1089,7 @@ test('Attribute#doublePrecision', t0 => {
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
-    const buffer = new Buffer(gl, 12);
+    const buffer = new Buffer(device, 12);
     attribute.setExternalBuffer(buffer);
     validateShaderAttributes(t, attribute, false);
 
@@ -1102,7 +1102,7 @@ test('Attribute#doublePrecision', t0 => {
 });
 
 test('Attribute#updateBuffer', t => {
-  const attribute = new Attribute(gl, {
+  const attribute = new Attribute(device, {
     id: 'positions',
     type: GL.DOUBLE,
     fp64: false,

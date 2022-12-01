@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxLayer} from '@deck.gl/mapbox';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {equals} from '@math.gl/core';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
@@ -100,7 +100,7 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
 
 test('MapboxLayer#external Deck', t => {
   const deck = new Deck({
-    gl,
+    device,
     viewState: {
       longitude: 0,
       latitude: 0,
@@ -168,7 +168,7 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
   map.on('load', () => {
     const deck = new Deck({
-      gl,
+      device,
       views: [new MapView({id: 'view-two'}), new MapView({id: 'mapbox'})],
       viewState: {
         longitude: 0,
@@ -234,7 +234,7 @@ test('MapboxLayer#external Deck custom views', t => {
 
   map.on('load', () => {
     const deck = new Deck({
-      gl,
+      device,
       views: [new MapView({id: 'view-two'})],
       viewState: {
         longitude: 0,

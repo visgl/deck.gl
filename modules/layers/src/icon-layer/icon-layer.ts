@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {GL} from '@luma.gl/webgl-legacy';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -32,18 +33,19 @@ import type {
   AccessorFunction,
   Position,
   Color,
-  Texture,
   Unit,
   UpdateParameters,
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
+import {Texture2D} from '@luma.gl/webgl-legacy';
+
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
-  iconAtlas?: string | Texture;
+  iconAtlas?: string | Texture2D;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
 
@@ -153,7 +155,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {
+      iconManager: new IconManager(this.context.device, {
         onUpdate: this._onUpdate.bind(this),
         onError: this._onError.bind(this)
       })
@@ -161,7 +163,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -225,8 +227,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
+    if (typeof iconAtlas === 'string') {
+      return;
+    }
+
     // internalState is always defined during updateState
-    const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
+    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
@@ -238,7 +244,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     // prepacked iconAtlas from user
     if (prePacked) {
       if (oldProps.iconMapping !== props.iconMapping) {
-        attributeManager!.invalidate('getIcon');
+        attributeManager.invalidate('getIcon');
       }
     } else if (
       changeFlags.dataChanged ||
@@ -250,10 +256,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
-      attributeManager!.invalidateAll();
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      attributeManager.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */
@@ -290,12 +295,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
@@ -327,13 +332,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected getInstanceOffset(icon: string): number[] {
-    const {
-      width,
-      height,
-      anchorX = width / 2,
-      anchorY = height / 2
-    } = this.state.iconManager.getIconMapping(icon);
-    return [width / 2 - anchorX, height / 2 - anchorY];
+    const mapping = this.state.iconManager.getIconMapping(icon);
+    if (mapping) {
+      return [mapping.width / 2 - mapping.anchorX, mapping.height / 2 - mapping.anchorY];
+    }
+    // TODO - this was undefined before...
+    return [0, 0];
   }
 
   protected getInstanceColorMode(icon: string): number {

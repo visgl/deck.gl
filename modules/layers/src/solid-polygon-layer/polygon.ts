@@ -316,7 +316,7 @@ function permutePositions(positions: NumericArray, xIndex: number, yIndex: numbe
   }
 }
 
-/*
+/**
  * Get vertex indices for drawing polygon mesh (triangulation)
  */
 // eslint-disable-next-line complexity, max-statements

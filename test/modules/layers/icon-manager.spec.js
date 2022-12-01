@@ -1,6 +1,6 @@
 import test from 'tape';
 import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const DATA = [
   {
@@ -229,7 +229,7 @@ test('IconManager#events', t => {
     iconManager.finalize(); // eslint-disable-line
     t.end();
   };
-  const iconManager = new IconManager(gl, {onError});
+  const iconManager = new IconManager(device, {onError});
 
   iconManager.setProps({
     autoPacking: true,
@@ -266,7 +266,7 @@ test('IconManager#resize', t => {
     t.end();
   };
 
-  const iconManager = new IconManager(gl, {onUpdate, onError});
+  const iconManager = new IconManager(device, {onUpdate, onError});
 
   iconManager.setProps({
     autoPacking: true

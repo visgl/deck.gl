@@ -1,8 +1,7 @@
 import test from 'tape-promise/tape';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {Matrix4} from 'math.gl';
-
 import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
   bearing: 0,

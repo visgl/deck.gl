@@ -31,7 +31,8 @@ import {
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from '@math.gl/core';
-import {Timeline, Model} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 
@@ -616,7 +617,7 @@ test('Layer#updateModules', async t => {
     }
 
     _getModel() {
-      return new Model(this.context.gl, {
+      return new Model(this.context.device, {
         vs: `\
   void main() {
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);

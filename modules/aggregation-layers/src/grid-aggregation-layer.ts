@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {Buffer} from '@luma.gl/core';
-import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 
@@ -43,12 +42,13 @@ export default abstract class GridAggregationLayer<
   };
 
   initializeAggregationLayer({dimensions}) {
-    const {gl} = this.context;
     super.initializeAggregationLayer(dimensions);
     this.setState({
       // CPU aggregation results
       layerData: {},
-      gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`}),
+      gpuGridAggregator: new GPUGridAggregator(this.context.device, {
+        id: `${this.id}-gpu-aggregator`
+      }),
       cpuGridAggregator: pointToDensityGridDataCPU
     });
   }
@@ -108,14 +108,13 @@ export default abstract class GridAggregationLayer<
   allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const dataBytes = numCol * numRow * 4 * 4;
-      const gl = this.context.gl;
       const {weights} = this.state;
       for (const name in weights) {
         const weight = weights[name];
         if (weight.aggregationBuffer) {
           weight.aggregationBuffer.delete();
         }
-        weight.aggregationBuffer = new Buffer(gl, {
+        weight.aggregationBuffer = new Buffer(this.context.device, {
           byteLength: dataBytes,
           accessor: {
             size: 4,
@@ -197,7 +196,7 @@ export default abstract class GridAggregationLayer<
   _uploadAggregationResults(): void {
     const {numCol, numRow} = this.state;
     const {data} = this.state.layerData;
-    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins!;
+    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins;
 
     const ELEMENTCOUNT = 4;
     const aggregationSize = numCol * numRow * ELEMENTCOUNT;

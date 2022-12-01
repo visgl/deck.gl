@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Buffer} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
 import {
   Accessor,
   AccessorFunction,
@@ -176,8 +175,8 @@ export default class GPUGridLayer<
   static layerName = 'GPUGridLayer';
   static defaultProps = defaultProps;
 
-  initializeState({gl}: LayerContext): void {
-    const isSupported = GPUGridAggregator.isSupported(gl);
+  initializeState({device}: LayerContext): void {
+    const isSupported = GPUGridAggregator.isSupported(device);
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
@@ -193,7 +192,7 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(gl, {
+          maxMinBuffer: new Buffer(device, {
             byteLength: 4 * 4,
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
@@ -202,7 +201,7 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(gl, {
+          maxMinBuffer: new Buffer(device, {
             byteLength: 4 * 4,
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })

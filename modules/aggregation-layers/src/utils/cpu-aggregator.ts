@@ -21,7 +21,8 @@ import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
 import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
-function nop() {}
+// @eslint-disable-next-line @typescript-eslint/no-empty-function
+function noop() {}
 
 const dimensionSteps = ['getBins', 'getDomain', 'getScaleFunc'];
 const defaultDimensions = [
@@ -122,27 +123,32 @@ const defaultDimensions = [
 ];
 const defaultGetCellSize = props => props.cellSize;
 export default class CPUAggregator {
-  constructor(opts) {
-    this.state = {
-      layerData: {},
-      dimensions: {
-        // color: {
-        //   getValue: null,
-        //   domain: null,
-        //   sortedBins: null,
-        //   scaleFunc: nop
-        // },
-        // elevation: {
-        //   getValue: null,
-        //   domain: null,
-        //   sortedBins: null,
-        //   scaleFunc: nop
-        // }
-      }
-    };
-    this.changeFlags = {};
-    this.dimensionUpdaters = {};
+  state = {
+    layerData: {
+      data: undefined
+    },
+    dimensions: {
+      // color: {
+      //   getValue: null,
+      //   domain: null,
+      //   sortedBins: null,
+      //   scaleFunc: noop
+      // },
+      // elevation: {
+      //   getValue: null,
+      //   domain: null,
+      //   sortedBins: null,
+      //   scaleFunc: noop
+      // }
+    }
+  };
+  changeFlags = {};
+  dimensionUpdaters = {};
 
+  _getCellSize;
+  _getAggregator;
+
+  constructor(opts) {
     this._getCellSize = opts.getCellSize || defaultGetCellSize;
     this._getAggregator = opts.getAggregator;
     this._addDimension(opts.dimensions || defaultDimensions);
@@ -187,7 +193,7 @@ export default class CPUAggregator {
     });
   }
 
-  normalizeResult(result = {}) {
+  normalizeResult(result: {hexagons?; layerData?} = {}) {
     // support previous hexagonAggregator API
     if (result.hexagons) {
       return {data: result.hexagons, ...result};
@@ -259,7 +265,7 @@ export default class CPUAggregator {
         getValue: null,
         domain: null,
         sortedBins: null,
-        scaleFunc: nop
+        scaleFunc: noop
       };
     });
   }
@@ -269,9 +275,9 @@ export default class CPUAggregator {
       key,
       accessor,
       pickingInfo,
-      getBins: {updater: this.getDimensionSortedBins, ...getBins},
-      getDomain: {updater: this.getDimensionValueDomain, ...getDomain},
-      getScaleFunc: {updater: this.getDimensionScale, ...getScaleFunc},
+      getBins: {updater: this.getDimensionSortedBins.bind(this), ...getBins},
+      getDomain: {updater: this.getDimensionValueDomain.bind(this), ...getDomain},
+      getScaleFunc: {updater: this.getDimensionScale.bind(this), ...getScaleFunc},
       attributeAccessor: this.getSubLayerDimensionAttribute(key, nullValue)
     };
   }
@@ -294,7 +300,7 @@ export default class CPUAggregator {
     //     prop: 'elevationAggregation'
     //   }
     // }
-    return Object.values(dimensionStep.triggers).some(item => {
+    return Object.values(dimensionStep.triggers).some((item: any) => {
       if (item.updateTrigger) {
         // check based on updateTriggers change first
         // if data has changed, always update value
@@ -484,7 +490,7 @@ export default class CPUAggregator {
 
   getAccessor(dimensionKey) {
     if (!this.dimensionUpdaters.hasOwnProperty(dimensionKey)) {
-      return nop;
+      return noop;
     }
     return this.dimensionUpdaters[dimensionKey].attributeAccessor;
   }

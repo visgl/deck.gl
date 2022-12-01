@@ -54,6 +54,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render() {
-    drawLayer(this.deck!, this.map!, this);
+    drawLayer(this.deck, this.map, this);
   }
 }

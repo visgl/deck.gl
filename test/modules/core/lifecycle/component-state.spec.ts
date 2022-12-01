@@ -1,9 +1,16 @@
+// loaders.gl, MIT license
+
 import test from 'tape-promise/tape';
-import ComponentState from '@deck.gl/core/lifecycle/component-state';
-import Component from '@deck.gl/core/lifecycle/component';
-import {gl} from '@deck.gl/test-utils';
+import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
+import {device} from '@deck.gl/test-utils';
 
 const EMPTY_ARRAY = Object.freeze([]);
+
+type TestComponentProps = {
+  data?: any;
+  dataTransform?: (any) => any;
+  image?: any;
+};
 
 const defaultProps = {
   // data: Special handling for null, see below
@@ -12,14 +19,24 @@ const defaultProps = {
   image: {type: 'image', value: null, async: true}
 };
 
-class TestComponent extends Component {}
+class TestComponent extends Component<TestComponentProps> {
+  constructor(props: TestComponentProps) {
+    super(props);
+  }
+  static componentName = 'TestComponent';
+  static defaultProps = defaultProps;
+}
 
-TestComponent.componentName = 'TestComponent';
-TestComponent.defaultProps = defaultProps;
+type Resolvers = {resolve(T): void; reject(Error): void};
 
-function makePromise() {
-  const resolvers = {};
-  const promise = new Promise((resolve, reject) => {
+class PromiseWithResolvers<T> extends Promise<T> {
+  resolve(value: T): void {}
+  reject(error: Error): void {}
+}
+
+function makePromise<T = unknown>(): PromiseWithResolvers<T> {
+  const resolvers = {} as Resolvers;
+  const promise = new Promise<T>((resolve, reject) => {
     resolvers.resolve = resolve;
     resolvers.reject = reject;
   });
@@ -38,8 +55,10 @@ test('ComponentState#imports', t => {
 });
 
 test('ComponentState#finalize', async t => {
-  const component = new TestComponent();
+  const component = new TestComponent({});
+  // @ts-expect-error
   component.internalState = new ComponentState(component);
+  // @ts-expect-error
   const state = component.internalState;
   t.is(state.component, component, 'state.component is present');
 
@@ -71,7 +90,9 @@ test('ComponentState#finalize', async t => {
 
 test('ComponentState#synchronous async props', t => {
   const component = new Component();
+  // @ts-expect-error
   component.internalState = new ComponentState(component);
+  // @ts-expect-error
   const state = component.internalState;
   t.ok(state, 'ComponentState construction ok');
 
@@ -89,7 +110,9 @@ test('ComponentState#synchronous async props', t => {
 
 test('ComponentState#asynchronous async props', async t => {
   const component = new Component();
+  // @ts-expect-error
   component.internalState = new ComponentState(component);
+  // @ts-expect-error
   const state = component.internalState;
   t.ok(state, 'ComponentState construction ok');
 
@@ -169,8 +192,9 @@ test('ComponentState#asynchronous async props', async t => {
   t.end();
 });
 
+// TODO - disabled for v9
 test('ComponentState#async props with transform', t => {
-  const testContext = {gl};
+  const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
   // prettier-ignore
@@ -184,14 +208,16 @@ test('ComponentState#async props with transform', t => {
   const state = new ComponentState();
 
   // Simulate Layer class
-  const makeComponent = (props, onAsyncPropUpdated) => {
+  const makeComponent = (props: Record<string, unknown>, onAsyncPropUpdated = () => {}) => {
     const comp = new TestComponent(props);
+    // @ts-expect-error
     comp.internalState = state;
+    // @ts-expect-error
     comp.context = testContext;
 
     state.component = comp;
     state.setAsyncProps(comp.props);
-    state.onAsyncPropUpdated = onAsyncPropUpdated || (() => {});
+    state.onAsyncPropUpdated = onAsyncPropUpdated;
 
     return comp;
   };
@@ -202,6 +228,7 @@ test('ComponentState#async props with transform', t => {
     dataTransform: d => d.slice(0, 2),
     image: testImage
   });
+
   let image = component.props.image;
   let data = component.props.data;
   t.deepEqual(data, [0, 1], 'Synchronous value for data should be transformed');
@@ -230,9 +257,10 @@ test('ComponentState#async props with transform', t => {
       dataTransform: d => d.slice(0, 2),
       image: Promise.resolve(testImage)
     },
+    // @ts-expect-error
     (propName, value) => {
       if (propName === 'image') {
-        t.notOk(image.handle, 'Last texture is deleted');
+        t.ok(image.destroyed, 'Last texture is deleted');
         image = component.props.image;
         t.ok(image, 'Async value for image should be transformed');
       }
@@ -241,9 +269,11 @@ test('ComponentState#async props with transform', t => {
         t.deepEqual(data, [0, 1], 'Async value for data should be transformed');
       }
 
+      // @ts-expect-error
       if (!state.isAsyncPropLoading()) {
+        // @ts-expect-error
         state.finalize();
-        t.notOk(image.handle, 'Texture is deleted on finalization');
+        t.ok(image.destroyed, 'Texture is deleted on finalization');
 
         t.end();
       }
