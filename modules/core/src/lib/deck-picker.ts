@@ -36,7 +36,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl';
+import type {Framebuffer as LumaFramebuffer} from '@luma.gl/gltools';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
@@ -222,7 +222,7 @@ export default class DeckPicker {
     ];
 
     const deviceRadius = Math.round(radius * pixelRatio);
-    const {width, height} = this.pickingFBO as LumaFramebuffer;
+    const {width, height} = this.pickingFBO;
     const deviceRect = this._getPickingRect({
       deviceX: devicePixel[0],
       deviceY: devicePixel[1],
@@ -280,8 +280,8 @@ export default class DeckPicker {
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX as number,
-              y: pickInfo.pickedY as number,
+              x: pickInfo.pickedX,
+              y: pickInfo.pickedY,
               width: 1,
               height: 1
             },
@@ -334,7 +334,7 @@ export default class DeckPicker {
       layer.restorePickingColors();
     }
 
-    return {result, emptyInfo: infos!.get(null) as PickingInfo};
+    return {result, emptyInfo: infos.get(null)};
   }
 
   /** Pick all objects within the given bounding box */
@@ -413,7 +413,7 @@ export default class DeckPicker {
         pixelRatio
       };
 
-      info = getLayerPickingInfo({layer: pickInfo.pickedLayer as Layer, info, mode});
+      info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
       if (!uniqueInfos.has(info.object)) {
         uniqueInfos.set(info.object, info);
       }

@@ -370,8 +370,8 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
     object,
     objectInfo
   ) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
+    const iconMapping = this.state.fontAtlasManager.mapping;
+    const getText = this.state.getText;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
@@ -394,8 +394,8 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
 
   // Returns the x, y, w, h of each text object
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
+    const iconMapping = this.state.fontAtlasManager.mapping;
+    const getText = this.state.getText;
     const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';

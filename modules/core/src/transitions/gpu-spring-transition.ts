@@ -12,12 +12,13 @@ import {
 import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
-import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
+import type {Timeline} from '@luma.gl/engine';
+import type {Transform as LumaTransform} from '@luma.gl/gltools';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
   Texture2D as LumaTexture2D
-} from '@luma.gl/webgl';
+} from '@luma.gl/gltools';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
@@ -103,7 +104,7 @@ export default class GPUSpringTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value as NumericArray
+      value: attribute.value
     });
 
     // when an attribute changes values, a new transition is started. These
@@ -126,7 +127,7 @@ export default class GPUSpringTransition implements GPUTransition {
     if (!updated) {
       return false;
     }
-    const settings = this.settings as SpringTransitionSettings;
+    const settings = this.settings;
 
     transform.update({
       sourceBuffers: {
@@ -159,7 +160,7 @@ export default class GPUSpringTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value as NumericArray
+      value: this.attribute.value
     });
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;

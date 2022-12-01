@@ -25,8 +25,8 @@
   ],
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/test-utils": "^8.5.0",
-    "@luma.gl/webgl": "^8.5.0",
+    "@luma.gl/test-utils": "9.0.0-alpha.8",
+    "@luma.gl/webgl": "9.0.0-alpha.8",
     "@probe.gl/test-utils": "^3.5.0"
   },
   "scripts": {},

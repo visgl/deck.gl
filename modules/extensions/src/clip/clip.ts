@@ -109,7 +109,7 @@ export default class ClipExtension extends LayerExtension {
     let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
     // Users can override by setting the `clipByInstance` prop
     if ('clipByInstance' in this.props) {
-      clipByInstance = this.props.clipByInstance as boolean;
+      clipByInstance = this.props.clipByInstance;
     }
     this.state.clipByInstance = clipByInstance;
 

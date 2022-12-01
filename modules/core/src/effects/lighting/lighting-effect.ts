@@ -1,4 +1,5 @@
-import {Texture2D, ProgramManager} from '@luma.gl/core';
+import {ProgramManager} from '@luma.gl/core';
+import {Texture2D} from '@luma.gl/gltools';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
@@ -31,13 +32,13 @@ export default class LightingEffect implements Effect {
   shadowColor: number[] = DEFAULT_SHADOW_COLOR;
 
   private shadow: boolean;
-  private ambientLight: AmbientLight | null = null;
+  private ambientLight?: AmbientLight;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap: Texture2D | null = null;
-  private programManager?: ProgramManager;
+  private dummyShadowMap?: Texture2D;
+  private pipelineFactory?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: Record<string, PointLight | DirectionalLight | AmbientLight> = {}) {
@@ -68,6 +69,9 @@ export default class LightingEffect implements Effect {
     gl: WebGLRenderingContext,
     {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
   ) {
+    // @ts-expect-error
+    const device = gl.device;
+
     if (!this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
@@ -76,11 +80,10 @@ export default class LightingEffect implements Effect {
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl);
     }
-    if (!this.programManager) {
-      // TODO - support multiple contexts
-      this.programManager = ProgramManager.getDefaultProgramManager(gl);
+    if (!this.pipelineFactory) {
+      this.pipelineFactory = ProgramManager.getDefaultProgramManager(device);
       if (shadow) {
-        this.programManager.addDefaultModule(shadow);
+        this.pipelineFactory.addDefaultModule(shadow);
       }
     }
 
@@ -111,7 +114,7 @@ export default class LightingEffect implements Effect {
   getModuleParameters(layer: Layer) {
     const parameters: {
       lightSources?: {
-        ambientLight: AmbientLight | null;
+        ambientLight?: AmbientLight;
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };
@@ -150,12 +153,12 @@ export default class LightingEffect implements Effect {
 
     if (this.dummyShadowMap) {
       this.dummyShadowMap.delete();
-      this.dummyShadowMap = null;
+      this.dummyShadowMap = undefined;
     }
 
-    if (this.shadow && this.programManager) {
-      this.programManager.removeDefaultModule(shadow);
-      this.programManager = null;
+    if (this.shadow && this.pipelineFactory) {
+      this.pipelineFactory.removeDefaultModule(shadow);
+      this.pipelineFactory = undefined;
     }
   }
 

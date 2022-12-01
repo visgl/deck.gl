@@ -7,7 +7,7 @@ import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
+import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
 export type BufferAccessor = {
@@ -199,7 +199,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         id: this.id,
         target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
         accessor: {type}
-      }) as LumaBuffer;
+      });
     }
     return this._buffer;
   }
@@ -265,7 +265,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (this.state.constant) {
       return this.value;
     }
-    return [this.getBuffer() as LumaBuffer, this.getAccessor() as BufferAccessor];
+    return [this.getBuffer(), this.getAccessor() as BufferAccessor];
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -324,7 +324,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
     } else if (data instanceof Buffer) {
-      opts = {buffer: data as LumaBuffer};
+      opts = {buffer: data};
     } else {
       opts = data;
     }
@@ -335,7 +335,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
 
     if (opts.constant) {
       // set constant
-      let value = opts.value as NumericArray;
+      let value = opts.value;
       value = this._normalizeValue(value, [], 0);
       if (this.settings.normalized) {
         value = this.normalizeConstant(value);

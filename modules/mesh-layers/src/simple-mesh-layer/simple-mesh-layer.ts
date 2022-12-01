@@ -34,7 +34,7 @@ import {
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
-import {hasFeature, FEATURES} from '@luma.gl/webgl';
+import {hasFeature, FEATURES} from '@luma.gl/gltools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 

@@ -191,7 +191,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
       return info;
     }
 
-    const {width, height} = image as Texture;
+    const {width, height} = image;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;

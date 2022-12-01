@@ -14,3 +14,5 @@ globalThis.glContext =
 // // console.log('Context', globalThis.glContext);
 
 export default globalThis.glContext;
+
+export const device = globalThis.glContext.device;

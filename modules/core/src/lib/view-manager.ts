@@ -209,7 +209,7 @@ export default class ViewManager {
     }
 
     if ('width' in props || 'height' in props) {
-      this._setSize(props.width as number, props.height as number);
+      this._setSize(props.width, props.height);
     }
 
     // Important: avoid invoking _update() inside itself
@@ -254,7 +254,7 @@ export default class ViewManager {
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
   private _setViews(views: View[]): void {
-    views = flatten(views, Boolean);
+    views = flatten(views, Boolean) as View[];
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
