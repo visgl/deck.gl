@@ -41,7 +41,6 @@ export default class SurfaceLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     const noAlloc = true;
 
-    /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 4, accessor: 'getPosition', update: this.calculatePositions, noAlloc},
@@ -176,7 +175,7 @@ export default class SurfaceLayer extends Layer {
   }
 
   // the fourth component is a flag for invalid z (NaN or Infinity)
-  /* eslint-disable max-statements */
+  /* eslint-disable-next-line max-statements */
   calculatePositions(attribute) {
     const {vertexCount} = this.state;
     const {uCount, vCount, getPosition, xScale, yScale, zScale} = this.props;

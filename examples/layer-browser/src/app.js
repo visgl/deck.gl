@@ -160,7 +160,7 @@ export default class App extends PureComponent {
     return new Layer(layerProps);
   }
 
-  /* eslint-disable max-depth */
+  /* eslint-disable-next-line max-depth */
   _renderExamples() {
     let index = 1;
     const layers = [

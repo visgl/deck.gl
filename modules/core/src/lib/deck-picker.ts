@@ -182,8 +182,8 @@ export default class DeckPicker {
     return pickableLayers.length ? pickableLayers : null;
   }
 
-  // eslint-disable-next-line max-statements,complexity
   /** Pick the closest object at the given coordinate */
+  /* eslint-disable-next-line max-statements,complexity */
   _pickClosestObject({
     layers,
     views,

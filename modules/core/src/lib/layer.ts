@@ -449,8 +449,8 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     return params.changeFlags.propsOrDataChanged;
   }
 
-  /* eslint-disable-next-line complexity */
   /** Default implementation, all attributes will be invalidated and updated when data changes */
+  /* eslint-disable-next-line complexity */
   updateState(params: UpdateParameters<Layer<PropsT>>): void {
     const attributeManager = this.getAttributeManager();
     const {dataChanged} = params.changeFlags;

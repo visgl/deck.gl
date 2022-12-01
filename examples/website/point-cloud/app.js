@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, {useState, useEffect} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';

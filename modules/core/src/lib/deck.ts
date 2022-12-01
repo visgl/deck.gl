@@ -737,14 +737,14 @@ export default class Deck {
 
   private _createAnimationLoop(props: DeckProps): AnimationLoop {
     const {
-      width,
-      height,
+      // width,
+      // height,
       gl,
       glOptions,
       debug,
       onError,
-      onBeforeRender,
-      onAfterRender,
+      // onBeforeRender,
+      // onAfterRender,
       useDevicePixels
     } = props;
 
