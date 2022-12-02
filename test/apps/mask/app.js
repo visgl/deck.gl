@@ -114,6 +114,7 @@ function getLayerData(data) {
 export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
   const {arcs, targets, sources} = useMemo(() => getLayerData(data), [data]);
   const [maskEnabled, setMaskEnabled] = useState(true);
+  const [maskInverted, setMaskInverted] = useState(false);
   const [showLayers, setShowLayers] = useState(true);
   const [selectedCounty, selectCounty] = useState(null);
   const [selectedCounty2, selectCounty2] = useState(null);
@@ -202,7 +203,8 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         parameters: {depthTest: false},
         extensions: [new MaskExtension()],
         maskId: maskEnabled && 'mask2',
-        maskByInstance: false
+        maskByInstance: false,
+        maskInverted
       }),
       new ScatterplotLayer({
         id: 'sources',
@@ -210,7 +212,8 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         radiusScale: 3000,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask2'
+        maskId: maskEnabled && 'mask2',
+        maskInverted
       }),
       new ScatterplotLayer({
         id: 'targets',
@@ -224,7 +227,8 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         radiusScale: 3000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
-        maskId: maskEnabled && 'mask2'
+        maskId: maskEnabled && 'mask2',
+        maskInverted
       }),
       new ArcLayer({
         id: 'arc',
@@ -258,6 +262,14 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
             onChange={() => setMaskEnabled(!maskEnabled)}
           />
           Use mask
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={maskInverted}
+            onChange={() => setMaskInverted(!maskInverted)}
+          />
+          Invert mask
         </label>
         <label>
           <input type="checkbox" checked={showLayers} onChange={() => setShowLayers(!showLayers)} />

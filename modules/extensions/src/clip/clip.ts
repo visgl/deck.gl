@@ -108,8 +108,8 @@ export default class ClipExtension extends LayerExtension {
     // @ts-expect-error attributeManager is always defined for primitive layers
     let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
     // Users can override by setting the `clipByInstance` prop
-    if ('clipByInstance' in this.props) {
-      clipByInstance = this.props.clipByInstance as boolean;
+    if (this.props.clipByInstance !== undefined) {
+      clipByInstance = Boolean(this.props.clipByInstance);
     }
     this.state.clipByInstance = clipByInstance;
 
