@@ -46,7 +46,9 @@ export default abstract class GridAggregationLayer<
     this.setState({
       // CPU aggregation results
       layerData: {},
-      gpuGridAggregator: new GPUGridAggregator(this.context.device, {id: `${this.id}-gpu-aggregator`}),
+      gpuGridAggregator: new GPUGridAggregator(this.context.device, {
+        id: `${this.id}-gpu-aggregator`
+      }),
       cpuGridAggregator: pointToDensityGridDataCPU
     });
   }

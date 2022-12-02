@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, FEATURES, hasFeatures, Texture2D, DefaultProps} from '@luma.gl/core';
 import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
@@ -53,7 +54,9 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
   static layerName = 'ScreenGridCellLayer';
   static defaultProps = defaultProps;
 
-  static isSupported(gl) {
+  static isSupported(device: Device) {
+    // @ts-expect-error
+    const gl = device.gl as WebGLRenderingContext;
     return hasFeatures(gl, [FEATURES.TEXTURE_FLOAT]);
   }
 
@@ -65,7 +68,6 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
   }
 
   initializeState() {
-    const {gl} = this.context;
     const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -73,7 +75,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
       instanceCounts: {size: 4, noAlloc: true}
     });
     this.setState({
-      model: this._getModel(gl)
+      model: this._getModel()
     });
   }
 
@@ -141,8 +143,8 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
 
   // Private Methods
 
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
