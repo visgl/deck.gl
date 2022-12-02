@@ -211,5 +211,3 @@ export class App extends Component {
 export function renderToDOM(container) {
   render(<App />, container);
 }
-
-renderToDOM(document.getElementById('app'));
