@@ -6,7 +6,7 @@ export default class DeckWithMapboxMaps extends Component {
   render() {
     const {views = []} = this.props;
 
-    const maps = [];
+    const maps: any[] = [];
     for (const view of views) {
       if (view.props.map || view.props.mapStyle) {
         maps.push(

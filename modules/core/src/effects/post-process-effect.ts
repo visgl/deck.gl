@@ -1,8 +1,10 @@
-import ScreenPass from '../passes/screen-pass';
+import type {Device} from '@luma.gl/api';
+import type {Framebuffer} from '@luma.gl/gltools';
 import {normalizeShaderModule} from '@luma.gl/core';
 
+import ScreenPass from '../passes/screen-pass';
+
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {Framebuffer} from '@luma.gl/gltools';
 import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
@@ -25,8 +27,8 @@ export default class PostProcessEffect implements Effect {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
-  postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(gl, this.module, this.id, this.props);
+  postRender(device: Device, params: PostRenderOptions): Framebuffer {
+    const passes = this.passes || createPasses(device, this.module, this.id, this.props);
     this.passes = passes;
 
     const {target} = params;
@@ -56,14 +58,14 @@ export default class PostProcessEffect implements Effect {
 }
 
 function createPasses(
-  gl: WebGLRenderingContext,
+  device: Device,
   module: ShaderModule,
   id: string,
   moduleSettings: any
 ): ScreenPass[] {
   if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
-    const pass = new ScreenPass(gl, {
+    const pass = new ScreenPass(device, {
       id,
       module,
       fs,
@@ -76,7 +78,7 @@ function createPasses(
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
 
-    return new ScreenPass(gl, {
+    return new ScreenPass(device, {
       id: idn,
       module,
       fs,

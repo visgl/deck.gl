@@ -1,3 +1,4 @@
+import type {Device} from '@luma.gl/api';
 import {ProgramManager} from '@luma.gl/core';
 import {Texture2D} from '@luma.gl/gltools';
 import {AmbientLight} from './ambient-light';
@@ -39,7 +40,7 @@ export default class LightingEffect implements Effect {
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap?: Texture2D;
+  private dummyShadowMap: Texture2D | null = null;
   private pipelineFactory?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
@@ -77,19 +78,16 @@ export default class LightingEffect implements Effect {
   }
 
   preRender(
-    gl: WebGLRenderingContext,
+    device: Device,
     {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
   ) {
-    // @ts-expect-error
-    const device = gl.device;
-
     if (!this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
     this.shadowMatrices = this._calculateMatrices();
 
     if (this.shadowPasses.length === 0) {
-      this._createShadowPasses(gl);
+      this._createShadowPasses(device);
     }
     if (!this.pipelineFactory) {
       this.pipelineFactory = ProgramManager.getDefaultProgramManager(device);
@@ -99,7 +97,7 @@ export default class LightingEffect implements Effect {
     }
 
     if (!this.dummyShadowMap) {
-      this.dummyShadowMap = new Texture2D(gl, {
+      this.dummyShadowMap = new Texture2D(device, {
         width: 1,
         height: 1
       });
@@ -169,7 +167,7 @@ export default class LightingEffect implements Effect {
 
     if (this.shadow && this.pipelineFactory) {
       this.pipelineFactory.removeDefaultModule(shadow);
-      this.pipelineFactory = undefined;
+      this.pipelineFactory = null!;
     }
   }
 
@@ -185,9 +183,9 @@ export default class LightingEffect implements Effect {
     return lightMatrices;
   }
 
-  private _createShadowPasses(gl: WebGLRenderingContext): void {
+  private _createShadowPasses(device: Device): void {
     for (let i = 0; i < this.directionalLights.length; i++) {
-      const shadowPass = new ShadowPass(gl);
+      const shadowPass = new ShadowPass(device);
       this.shadowPasses[i] = shadowPass;
       this.shadowMaps[i] = shadowPass.shadowMap;
     }

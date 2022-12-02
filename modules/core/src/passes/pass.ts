@@ -1,12 +1,14 @@
+import type {Device} from '@luma.gl/api';
+
 export default class Pass {
   id: string;
-  gl: WebGLRenderingContext;
+  device: Device;
   props: any;
 
-  constructor(gl: WebGLRenderingContext, props: {id: string} = {id: 'pass'}) {
+  constructor(device: Device, props: {id: string} = {id: 'pass'}) {
     const {id} = props;
     this.id = id; // id of this pass
-    this.gl = gl;
+    this.device = device;
     this.props = {...props};
   }
 

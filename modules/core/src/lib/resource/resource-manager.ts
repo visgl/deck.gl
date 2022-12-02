@@ -1,10 +1,13 @@
 /* global setTimeout */
+import {Device} from '@luma.gl/api';
 import Resource from './resource';
 import type {ResourceSubscriber} from './resource';
 
 export type ResourceManagerContext = {
-  gl: WebGLRenderingContext;
+  device: Device;
   resourceManager: ResourceManager;
+  /** @deprecated */
+  gl: WebGLRenderingContext;
 };
 
 type Consumer = Record<string, ResourceSubscriber & {resourceId: string}>;
@@ -17,11 +20,13 @@ export default class ResourceManager {
   private _consumers: Record<string, Consumer>;
   private _pruneRequest: number | null;
 
-  constructor({gl, protocol}) {
-    this.protocol = protocol || 'resource://';
+  constructor(props: {device: Device; protocol?: string}) {
+    this.protocol = props.protocol || 'resource://';
 
     this._context = {
-      gl,
+      device: props.device,
+      // @ts-expect-error
+      gl: props.device.gl,
       resourceManager: this
     };
     this._resources = {};

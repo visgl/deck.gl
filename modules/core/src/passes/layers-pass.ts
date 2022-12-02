@@ -1,8 +1,9 @@
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
-
 import type {Framebuffer} from '@luma.gl/core';
+
+import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
@@ -52,7 +53,8 @@ export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
   render(options: LayersPassRenderOptions): any {
-    const gl = this.gl;
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
 
     setParameters(gl, {framebuffer: options.target});
     return this._drawLayers(options);
@@ -71,7 +73,8 @@ export default class LayersPass extends Pass {
     } = options;
     options.pass = options.pass || 'unknown';
 
-    const gl = this.gl;
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
     if (clearCanvas) {
       clearGLCanvas(gl);
     }
@@ -296,6 +299,9 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
+
     const moduleParameters = Object.assign(
       Object.create(layer.internalState?.propsInTransition || layer.props),
       {
@@ -305,7 +311,7 @@ export default class LayersPass extends Pass {
         // @ts-ignore
         mousePosition: layer.context.mousePosition,
         pickingActive: 0,
-        devicePixelRatio: cssToDeviceRatio(this.gl)
+        devicePixelRatio: cssToDeviceRatio(gl)
       }
     );
 

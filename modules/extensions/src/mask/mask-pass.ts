@@ -37,7 +37,8 @@ export default class MaskPass extends LayersPass {
   }
 
   render(options: MaskPassRenderOptions) {
-    const gl = this.gl;
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
 
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;

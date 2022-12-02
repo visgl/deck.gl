@@ -1,5 +1,6 @@
 import type Layer from './layer';
 import type {LayersPassRenderOptions} from '../passes/layers-pass';
+import type {Device} from '@luma.gl/api';
 import type {Framebuffer} from '@luma.gl/gltools';
 
 export type PreRenderOptions = LayersPassRenderOptions;
@@ -13,8 +14,8 @@ export interface Effect {
   props: any;
   useInPicking?: boolean;
 
-  preRender: (gl: WebGLRenderingContext, opts: PreRenderOptions) => void;
-  postRender?: (gl: WebGLRenderingContext, opts: PostRenderOptions) => Framebuffer;
+  preRender: (device: Device, opts: PreRenderOptions) => void;
+  postRender?: (device: Device, opts: PostRenderOptions) => Framebuffer;
   getModuleParameters?: (layer: Layer) => any;
 
   setProps?: (props: any) => void;

@@ -69,7 +69,8 @@ export default class PickLayersPass extends LayersPass {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
-    const gl = this.gl;
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
     this.pickZ = pickZ;
 
     // Track encoded layer indices

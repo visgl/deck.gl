@@ -7,6 +7,7 @@ import {
   CoordinateSystem,
   log
 } from '@deck.gl/core';
+import type {Device} from '@luma.gl/api';
 import {Texture2D} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
@@ -46,11 +47,11 @@ export default class MaskEffect implements Effect {
   private lastViewport?: Viewport;
 
   preRender(
-    gl: WebGLRenderingContext,
+    device: Device,
     {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
   ): void {
     if (!this.dummyMaskMap) {
-      this.dummyMaskMap = new Texture2D(gl, {
+      this.dummyMaskMap = new Texture2D(device, {
         width: 1,
         height: 1
       });
@@ -65,7 +66,7 @@ export default class MaskEffect implements Effect {
     this.masks = {};
 
     if (!this.maskPass) {
-      this.maskPass = new MaskPass(gl, {id: 'default-mask'});
+      this.maskPass = new MaskPass(device, {id: 'default-mask'});
       this.maskMap = this.maskPass.maskMap;
     }
 
