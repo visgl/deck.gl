@@ -292,6 +292,8 @@ export default class Deck {
   // Allows attaching arbitrary data to the instance
   readonly userData: Record<string, any> = {};
 
+  protected device: Device | null = null;
+
   protected canvas: HTMLCanvasElement | null = null;
   protected viewManager: ViewManager | null = null;
   protected layerManager: LayerManager | null = null;
@@ -883,7 +885,7 @@ export default class Deck {
 
   /** @deprecated */
   private _setGLContext(gl: WebGLRenderingContext) {
-    const device = WebGLDevice.attach(gl);
+    this.device = WebGLDevice.attach(gl);
 
     if (this.layerManager) {
       return;
@@ -898,7 +900,7 @@ export default class Deck {
 
     this.tooltip = new Tooltip(this.canvas);
 
-    setParameters(gl, {
+    setParameters(this.device, {
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
@@ -906,7 +908,7 @@ export default class Deck {
       depthFunc: GL.LEQUAL
     });
 
-    this.props.onDeviceInitialized(device);
+    this.props.onDeviceInitialized(this.device);
     this.props.onWebGLInitialized(gl);
 
     // timeline for transitions
@@ -944,7 +946,7 @@ export default class Deck {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager({
-      device, 
+      device: this.device,
       deck: this,
       stats: this.stats,
       viewport,
@@ -953,9 +955,9 @@ export default class Deck {
 
     this.effectManager = new EffectManager();
 
-    this.deckRenderer = new DeckRenderer(gl);
+    this.deckRenderer = new DeckRenderer(this.device);
 
-    this.deckPicker = new DeckPicker(gl);
+    this.deckPicker = new DeckPicker(this.device);
 
     this.setProps(this.props);
 

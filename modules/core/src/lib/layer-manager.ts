@@ -93,7 +93,7 @@ export default class LayerManager {
       mousePosition: null,
       userData: {},
       layerManager: this,
-      device: device!,
+      device,
       // @ts-expect-error
       gl: device && device.gl,
       deck,

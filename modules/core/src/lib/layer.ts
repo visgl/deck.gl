@@ -899,7 +899,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       const oldModels = this.getModels();
 
       // Safely call subclass lifecycle methods
-      if (context.gl) {
+      if (context.device) {
         this.updateState(updateParams);
       } else {
         try {
@@ -974,7 +974,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setParameters(context.gl, {polygonOffset: offsets});
+      setParameters(context.device, {polygonOffset: offsets});
 
       // Call subclass lifecycle method
       withParameters(context.gl, parameters, () => {

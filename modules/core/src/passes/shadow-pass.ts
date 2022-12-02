@@ -1,4 +1,5 @@
 import {default as LayersPass} from './layers-pass';
+import type {Device} from '@luma.gl/api';
 import {
   Framebuffer,
   Texture2D,
@@ -13,15 +14,18 @@ export default class ShadowPass extends LayersPass {
   fbo: Framebuffer;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     props?: {
       id;
     }
   ) {
-    super(gl, props);
+    super(device, props);
+
+    // @ts-expect-error
+    const gl = device.gl;
 
     // The shadowMap texture
-    this.shadowMap = new Texture2D(gl, {
+    this.shadowMap = new Texture2D(device, {
       width: 1,
       height: 1,
       parameters: {
@@ -38,7 +42,7 @@ export default class ShadowPass extends LayersPass {
       height: 1
     });
 
-    this.fbo = new Framebuffer(gl, {
+    this.fbo = new Framebuffer(device, {
       id: 'shadowmap',
       width: 1,
       height: 1,
@@ -53,8 +57,11 @@ export default class ShadowPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
+    // @ts-expect-error
+    const gl = device.gl;
+
     withParameters(
-      this.gl,
+      gl,
       {
         depthRange: [0, 1],
         depthTest: true,
@@ -63,7 +70,7 @@ export default class ShadowPass extends LayersPass {
       },
       () => {
         const viewport = params.viewports[0];
-        const pixelRatio = cssToDeviceRatio(this.gl);
+        const pixelRatio = cssToDeviceRatio(gl);
         const width = viewport.width * pixelRatio;
         const height = viewport.height * pixelRatio;
         if (width !== target.width || height !== target.height) {
