@@ -1,21 +1,26 @@
+import type {Device} from '@luma.gl/api';
+import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-import {Framebuffer} from '@luma.gl/core';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 export default class DeckRenderer {
-  constructor(gl) {
-    this.gl = gl;
-    this.layerFilter = null;
-    this.drawPickingColors = false;
-    this.drawLayersPass = new DrawLayersPass(gl);
-    this.pickLayersPass = new PickLayersPass(gl);
-    this.renderCount = 0;
-    this._needsRedraw = 'Initial render';
-    this.renderBuffers = [];
-    this.lastPostProcessEffect = null;
+  device: Device;
+  layerFilter: Function | null = null;
+  drawPickingColors = false;
+  drawLayersPass: DrawLayersPass;
+  pickLayersPass: PickLayersPass;
+  renderCount = 0;
+  _needsRedraw: string | false = 'Initial render';
+  renderBuffers: any[] = [];
+  lastPostProcessEffect = null;
+
+  constructor(device: Device) {
+    this.device = device;
+    this.drawLayersPass = new DrawLayersPass(device);
+    this.pickLayersPass = new PickLayersPass(device);
   }
 
   setProps(props) {
@@ -47,7 +52,9 @@ export default class DeckRenderer {
 
     opts.layerFilter = opts.layerFilter || this.layerFilter;
     opts.effects = opts.effects || [];
-    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
+    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(gl);
 
     this._preRender(opts.effects, opts);
 
@@ -82,7 +89,7 @@ export default class DeckRenderer {
     let lastPostProcessEffect = null;
 
     for (const effect of effects) {
-      effect.preRender(this.gl, opts);
+      effect.preRender(this.device, opts);
       if (effect.postRender) {
         lastPostProcessEffect = effect;
       }
@@ -97,7 +104,7 @@ export default class DeckRenderer {
   _resizeRenderBuffers() {
     const {renderBuffers} = this;
     if (renderBuffers.length === 0) {
-      renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
+      renderBuffers.push(new Framebuffer(this.device), new Framebuffer(this.device));
     }
     for (const buffer of renderBuffers) {
       buffer.resize();
@@ -115,10 +122,10 @@ export default class DeckRenderer {
       if (effect.postRender) {
         if (effect === this.lastPostProcessEffect) {
           params.target = opts.target;
-          effect.postRender(this.gl, params);
+          effect.postRender(this.device, params);
           break;
         }
-        const buffer = effect.postRender(this.gl, params);
+        const buffer = effect.postRender(this.device, params);
         params.inputBuffer = buffer;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }

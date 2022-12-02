@@ -15,9 +15,10 @@
 </head>
 <body>
   <div id="app"></div>
+  <script type="module" src="./src/app.tsx" ></script>
+  <script type="module">
+    import {renderToDOM} from './src/app.tsx';
+    renderToDOM(document.getElementById('app'));
+  </script>
 </body>
-<script type="text/javascript" src="app.js"></script>
-<script type="text/javascript">
-  App.renderToDOM(document.getElementById('app'));
-</script>
 </html>

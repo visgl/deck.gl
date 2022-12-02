@@ -1,4 +1,4 @@
-import {createTestContext} from '@luma.gl/test-utils';
+import {createTestContext, webgl1TestDevice} from '@luma.gl/test-utils';
 
 globalThis.glContext =
   globalThis.glContext ||
@@ -15,4 +15,4 @@ globalThis.glContext =
 
 export default globalThis.glContext;
 
-export const device = globalThis.glContext.device;
+export const device = webgl1TestDevice;

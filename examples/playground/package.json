@@ -1,11 +1,12 @@
 {
   "name": "playground",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.local --env.production=true"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@loaders.gl/3d-tiles": "^3.2.10",
@@ -23,11 +24,7 @@
     "react-virtualized-auto-sizer": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "typescript": "^4.3.2",
+    "vite": "^3.2.4"
   }
 }

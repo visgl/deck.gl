@@ -115,7 +115,7 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
-  const pipelineManager = ProgramManager.getDefaultProgramManager(device);
+  const pipelineFactory = ProgramManager.getDefaultProgramManager(device);
   lightingEffect.preRender(gl, {
     layers: [],
     viewports: [testViewport],
@@ -124,13 +124,13 @@ test('LightingEffect#shadow module', t => {
     pixelRatio: 1
   });
   // @ts-expect-error private
-  let defaultModules = pipelineManager._defaultModules;
+  let defaultModules = pipelineFactory._defaultModules;
   let hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
 
   lightingEffect.cleanup();
   // @ts-expect-error private
-  defaultModules = pipelineManager._defaultModules;
+  defaultModules = pipelineFactory._defaultModules;
   hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');
   t.end();

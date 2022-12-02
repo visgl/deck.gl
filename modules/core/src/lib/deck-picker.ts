@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {Device} from '@luma.gl/api';
 import {
   Framebuffer,
   Texture2D,
@@ -71,7 +72,7 @@ type PickOperationContext = {
 
 /** Manages picking in a Deck context */
 export default class DeckPicker {
-  gl: WebGLRenderingContext;
+  device: Device;
   pickingFBO?: LumaFramebuffer;
   depthFBO?: LumaFramebuffer;
   pickLayersPass: PickLayersPass;
@@ -86,9 +87,9 @@ export default class DeckPicker {
 
   _pickable: boolean = true;
 
-  constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
-    this.pickLayersPass = new PickLayersPass(gl);
+  constructor(device: Device) {
+    this.device = device;
+    this.pickLayersPass = new PickLayersPass(device);
     this.lastPickedInfo = {
       index: -1,
       layerId: null,
@@ -151,16 +152,17 @@ export default class DeckPicker {
 
   /** Ensures that picking framebuffer exists and matches the canvas size */
   _resizeBuffer() {
-    const {gl} = this;
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
 
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
-      this.pickingFBO = new Framebuffer(gl);
+      this.pickingFBO = new Framebuffer(this.device);
 
       if (Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
-        const depthFBO = new Framebuffer(gl);
+        const depthFBO = new Framebuffer(this.device);
         depthFBO.attach({
-          [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
+          [GL.COLOR_ATTACHMENT0]: new Texture2D(this.device, {
             format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
             type: GL.FLOAT
           })
@@ -200,8 +202,11 @@ export default class DeckPicker {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   } {
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
+
     const pickableLayers = this._getPickable(layers);
-    const pixelRatio = cssToDeviceRatio(this.gl);
+    const pixelRatio = cssToDeviceRatio(gl);
 
     if (!pickableLayers) {
       return {
@@ -215,7 +220,7 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
-    const devicePixelRange = cssToDevicePixels(this.gl, [x, y], true);
+    const devicePixelRange = cssToDevicePixels(gl, [x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
       devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
@@ -351,6 +356,9 @@ export default class DeckPicker {
     onViewportActive,
     effects
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
+
     const pickableLayers = this._getPickable(layers);
 
     if (!pickableLayers) {
@@ -360,15 +368,15 @@ export default class DeckPicker {
     this._resizeBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
-    const pixelRatio = cssToDeviceRatio(this.gl);
-    const leftTop = cssToDevicePixels(this.gl, [x, y], true);
+    const pixelRatio = cssToDeviceRatio(gl);
+    const leftTop = cssToDevicePixels(gl, [x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
     const deviceLeft = leftTop.x;
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
-    const rightBottom = cssToDevicePixels(this.gl, [x + width, y + height], true);
+    const rightBottom = cssToDevicePixels(gl, [x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
 
