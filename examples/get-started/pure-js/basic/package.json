@@ -1,20 +1,30 @@
 {
-  "name": "pure-js-basic",
+  "name": "layer-browser",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0"
+    "@loaders.gl/ply": "^3.2.10",
+    "@loaders.gl/gltf": "^3.2.10",
+    "@luma.gl/experimental": "9.0.0-alpha.9",
+    "@luma.gl/debug": "9.0.0-alpha.9",
+    "colorbrewer": "^1.0.0",
+    "d3-request": "^1.0.6",
+    "d3-scale": "^3.1.0",
+    "extrude-polyline": "^1.0.6",
+    "react": "^16.3.0",
+    "react-autobind": "^1.0.6",
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^5.1.0",
+    "react-stats-zavatta": "^0.0.6"
   },
   "devDependencies": {
-    "html-webpack-plugin": "^3.0.7",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "typescript": "^4.3.2",
+    "vite": "^3.2.4"
   }
 }

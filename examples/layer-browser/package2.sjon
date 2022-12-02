@@ -1,0 +1,21 @@
+{
+  "name": "luma.gl-examples-instancing",
+  "version": "9.0.0-alpha.9",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@luma.gl/engine": "9.0.0-alpha.9",
+    "@luma.gl/gltools": "9.0.0-alpha.9",
+    "@luma.gl/shadertools": "9.0.0-alpha.9",
+    "@luma.gl/webgl": "9.0.0-alpha.9",
+    "@math.gl/core": "^3.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.2",
+    "vite": "^3.2.4"
+  }
+}
