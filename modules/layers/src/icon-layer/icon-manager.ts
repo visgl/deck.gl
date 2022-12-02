@@ -422,7 +422,7 @@ export default class IconManager {
 
     for (const icon of icons) {
       this._pendingCount++;
-      load(icon.url, ImageLoader, this._loadOptions)
+      load(icon.url, this._loadOptions)
         .then(imageData => {
           const id = getIconId(icon);
           const {x, y, width, height} = this._mapping[id];
