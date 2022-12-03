@@ -316,8 +316,8 @@ export default class App extends PureComponent {
   }
 }
 
-export function renderToDOM(container) {
-  render(<App />, container);
-}
+// export function renderToDOM(container) {
+//   render(<App />, container);
+// }
 
-renderToDOM(document.getElementById('app'));
+// renderToDOM(document.getElementById('app'));

@@ -1,11 +1,12 @@
 {
-  "name": "react-basic",
+  "name": "react-basic-example",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
     "deck.gl": "^8.8.0",
@@ -13,12 +14,7 @@
     "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "html-webpack-plugin": "^3.0.7",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "typescript": "^4.3.2",
+    "vite": "^3.2.4"
   }
 }
