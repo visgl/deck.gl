@@ -1,11 +1,12 @@
 {
   "name": "pure-js-carto",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@deck.gl/core": "^8.8.0",
@@ -16,13 +17,7 @@
     "mapbox-gl": "^1.13.0"
   },
   "devDependencies": {
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
-  },
-  "eslintConfig": {
-    "globals": {
-      "document": true
-    }
+    "typescript": "^4.3.2",
+    "vite": "^3.2.4"
   }
 }
