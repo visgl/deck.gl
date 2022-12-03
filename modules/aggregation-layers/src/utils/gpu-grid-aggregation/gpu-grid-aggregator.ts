@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {
   Model,
@@ -106,7 +107,9 @@ export default class GPUGridAggregator {
     return {cellCounts, cellWeights};
   }
 
-  static isSupported(gl) {
+  static isSupported(device: Device) {
+    // @ts-expect-error
+    const gl = device.gl as WebGLRenderingContext;
     return hasFeatures(gl, REQUIRED_FEATURES);
   }
 
@@ -135,35 +138,43 @@ export default class GPUGridAggregator {
   //   }
   // }
 
-  constructor(gl, opts = {}) {
+  state = {
+    // per weight GPU resources
+    weightAttributes: {},
+    textures: {},
+    meanTextures: {},
+    buffers: {},
+    framebuffers: {},
+    maxMinFramebuffers: {},
+    minFramebuffers: {},
+    maxFramebuffers: {},
+    equations: {},
+
+    // common resources to be deleted
+    resources: {},
+
+    // results
+    results: {}
+  };
+
+  device: Device;
+  /** @deprecated */
+  gl: WebGLRenderingContext;
+  _hasGPUSupport: boolean;
+
+  constructor(device: Device, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
-    this.gl = gl;
-    this.state = {
-      // per weight GPU resources
-      weightAttributes: {},
-      textures: {},
-      meanTextures: {},
-      buffers: {},
-      framebuffers: {},
-      maxMinFramebuffers: {},
-      minFramebuffers: {},
-      maxFramebuffers: {},
-      equations: {},
+    this.device = device;
 
-      // common resources to be deleted
-      resources: {},
-
-      // results
-      results: {}
-    };
+    // @ts-expect-error;
+    this.gl = device.gl as WebGLRenderingContext;
     this._hasGPUSupport =
-      isWebGL2(gl) && // gl_InstanceID usage in min/max calculation shaders
-      hasFeatures(
-        this.gl,
+      isWebGL2(this.gl) && // gl_InstanceID usage in min/max calculation shaders
+      hasFeatures(this.gl, [
         FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
         FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture
         FEATURES.TEXTURE_FLOAT // sample from a float texture
-      );
+      ]);
     if (this._hasGPUSupport) {
       this._setupModels();
     }
@@ -381,7 +392,10 @@ export default class GPUGridAggregator {
   _renderToMaxMinTexture(opts) {
     const {id, parameters, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
     const {framebuffers} = this.state;
-    const {gl, allAggregationModel} = this;
+    const {allAggregationModel} = this;
+
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
 
     withParameters(
       gl,
@@ -489,21 +503,21 @@ export default class GPUGridAggregator {
       textures[id] =
         weights[id].aggregationTexture ||
         textures[id] ||
-        getFloatTexture(this.gl, {id: `${id}-texture`, width: numCol, height: numRow});
+        getFloatTexture(this.device, {id: `${id}-texture`, width: numCol, height: numRow});
       textures[id].resize(framebufferSize);
       let texture = textures[id];
       if (operation === AGGREGATION_OPERATION.MEAN) {
         // For MEAN, we first aggregatet into a temp texture
         meanTextures[id] =
           meanTextures[id] ||
-          getFloatTexture(this.gl, {id: `${id}-mean-texture`, width: numCol, height: numRow});
+          getFloatTexture(this.device, {id: `${id}-mean-texture`, width: numCol, height: numRow});
         meanTextures[id].resize(framebufferSize);
         texture = meanTextures[id];
       }
       if (framebuffers[id]) {
         framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: texture});
       } else {
-        framebuffers[id] = getFramebuffer(this.gl, {
+        framebuffers[id] = getFramebuffer(this.device, {
           id: `${id}-fb`,
           width: numCol,
           height: numRow,
@@ -517,13 +531,13 @@ export default class GPUGridAggregator {
         if (needMin && needMax && combineMaxMin) {
           if (!maxMinFramebuffers[id]) {
             texture = weights[id].maxMinTexture || this._getMinMaxTexture(`${id}-maxMinTexture`);
-            maxMinFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxMinFb`, texture});
+            maxMinFramebuffers[id] = getFramebuffer(this.device, {id: `${id}-maxMinFb`, texture});
           }
         } else {
           if (needMin) {
             if (!minFramebuffers[id]) {
               texture = weights[id].minTexture || this._getMinMaxTexture(`${id}-minTexture`);
-              minFramebuffers[id] = getFramebuffer(this.gl, {
+              minFramebuffers[id] = getFramebuffer(this.device, {
                 id: `${id}-minFb`,
                 texture
               });
@@ -532,7 +546,7 @@ export default class GPUGridAggregator {
           if (needMax) {
             if (!maxFramebuffers[id]) {
               texture = weights[id].maxTexture || this._getMinMaxTexture(`${id}-maxTexture`);
-              maxFramebuffers[id] = getFramebuffer(this.gl, {
+              maxFramebuffers[id] = getFramebuffer(this.device, {
                 id: `${id}-maxFb`,
                 texture
               });
@@ -547,19 +561,18 @@ export default class GPUGridAggregator {
   _getMinMaxTexture(name) {
     const {resources} = this.state;
     if (!resources[name]) {
-      resources[name] = getFloatTexture(this.gl, {id: `resourceName`});
+      resources[name] = getFloatTexture(this.device, {id: 'resourceName'});
     }
     return resources[name];
   }
 
   _setupModels({numCol = 0, numRow = 0} = {}) {
-    const {gl} = this;
     const {shaderOptions} = this.state;
     this.gridAggregationModel?.delete();
-    this.gridAggregationModel = getAggregationModel(gl, shaderOptions);
+    this.gridAggregationModel = getAggregationModel(this.device, shaderOptions);
     if (!this.allAggregationModel) {
       const instanceCount = numCol * numRow;
-      this.allAggregationModel = getAllAggregationModel(gl, instanceCount);
+      this.allAggregationModel = getAllAggregationModel(this.device, instanceCount);
     }
   }
 
@@ -632,7 +645,7 @@ function deleteResources(resources) {
   });
 }
 
-function getAggregationModel(gl, shaderOptions) {
+function getAggregationModel(device: Device, shaderOptions) {
   const shaders = mergeShaders(
     {
       vs: AGGREGATE_TO_GRID_VS,
@@ -642,7 +655,7 @@ function getAggregationModel(gl, shaderOptions) {
     shaderOptions
   );
 
-  return new Model(gl, {
+  return new Model(device, {
     id: 'Gird-Aggregation-Model',
     vertexCount: 1,
     drawMode: GL.POINTS,
@@ -650,8 +663,8 @@ function getAggregationModel(gl, shaderOptions) {
   });
 }
 
-function getAllAggregationModel(gl, instanceCount) {
-  return new Model(gl, {
+function getAllAggregationModel(device: Device, instanceCount) {
+  return new Model(device, {
     id: 'All-Aggregation-Model',
     vs: AGGREGATE_ALL_VS,
     fs: AGGREGATE_ALL_FS,
@@ -666,8 +679,8 @@ function getAllAggregationModel(gl, instanceCount) {
   });
 }
 
-function getMeanTransform(gl, opts) {
-  return new Transform(gl, {
+function getMeanTransform(device: Device, opts) {
+  return new Transform(device, {
     vs: TRANSFORM_MEAN_VS,
     _targetTextureVarying: 'meanValues',
     ...opts

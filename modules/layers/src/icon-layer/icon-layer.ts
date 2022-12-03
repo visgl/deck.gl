@@ -149,7 +149,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {
+      iconManager: new IconManager(this.context.device, {
         onUpdate: this._onUpdate.bind(this),
         onError: this._onError.bind(this)
       })
@@ -246,9 +246,8 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
       this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }
   }
@@ -286,12 +285,12 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

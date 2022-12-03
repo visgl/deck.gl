@@ -1,13 +1,14 @@
 /* eslint-disable complexity */
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {hasFeature, FEATURES, Buffer} from '@luma.gl/core';
+import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
-import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
 export type BufferAccessor = {
@@ -117,7 +118,7 @@ type DataColumnInternalState<Options, State> = State & {
 };
 
 export default class DataColumn<Options, State> implements IShaderAttribute {
-  gl: WebGLRenderingContext;
+  device: Device;
   id: string;
   size: number;
   settings: DataColumnSettings<Options>;
@@ -128,8 +129,8 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
-  constructor(gl: WebGLRenderingContext, opts: DataColumnOptions<Options>, state: State) {
-    this.gl = gl;
+  constructor(device: Device, opts: DataColumnOptions<Options>, state: State) {
+    this.device = device;
     this.id = opts.id || '';
     this.size = opts.size || 1;
 
@@ -145,6 +146,9 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
+      // @ts-expect-error
+      const gl = device.gl as WebGLRenderingContext;
+
       bufferType =
         gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
     } else {
@@ -195,7 +199,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   get buffer(): LumaBuffer {
     if (!this._buffer) {
       const {isIndexed, type} = this.settings;
-      this._buffer = new Buffer(this.gl, {
+      this._buffer = new Buffer(this.device, {
         id: this.id,
         target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
         accessor: {type}
