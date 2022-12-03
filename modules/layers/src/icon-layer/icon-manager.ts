@@ -1,4 +1,5 @@
 /* global document */
+import {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture} from '@luma.gl/core';
 import {ImageLoader} from '@loaders.gl/images';

@@ -27,6 +27,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
+import type {Device} from '@luma.gl/api';
 import type {Stats} from 'probe.gl';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -62,7 +63,7 @@ export default class AttributeManager {
    * by offering the ability to "invalidate" each attribute separately.
    */
   id: string;
-  gl: WebGLRenderingContext;
+  device: Device;
   attributes: Record<string, Attribute>;
   updateTriggers: {[name: string]: string[]};
   needsRedraw: string | boolean;
@@ -72,7 +73,7 @@ export default class AttributeManager {
   private attributeTransitionManager: AttributeTransitionManager;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       id = 'attribute-manager',
       stats,
@@ -84,7 +85,7 @@ export default class AttributeManager {
     } = {}
   ) {
     this.id = id;
-    this.gl = gl;
+    this.device = device;
 
     this.attributes = {};
 
@@ -94,7 +95,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = stats;
 
-    this.attributeTransitionManager = new AttributeTransitionManager(gl, {
+    this.attributeTransitionManager = new AttributeTransitionManager(device, {
       id: `${id}-transitions`,
       timeline
     });
@@ -340,7 +341,7 @@ export default class AttributeManager {
       divisor: extraProps.instanced ? 1 : attribute.divisor || 0
     };
 
-    return new Attribute(this.gl, props);
+    return new Attribute(this.device, props);
   }
 
   // build updateTrigger name to attribute name mapping

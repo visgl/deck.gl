@@ -161,9 +161,8 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
     const attributeManager = this.getAttributeManager()!;
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
       this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }
 
@@ -250,8 +249,9 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
     return createMesh(normalizedBounds, this.context.viewport.resolution);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
-    if (!gl) {
+  protected _getModel(): Model {
+    // TODO - why? are we really supporting context-less BitmapLayer
+    if (!this.context.device) {
       return null;
     }
 
@@ -260,7 +260,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
        |       |
       0,1 --- 1,1
     */
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

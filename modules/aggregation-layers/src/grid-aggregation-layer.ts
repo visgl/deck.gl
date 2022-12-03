@@ -42,12 +42,13 @@ export default abstract class GridAggregationLayer<
   };
 
   initializeAggregationLayer({dimensions}) {
-    const {gl} = this.context;
     super.initializeAggregationLayer(dimensions);
     this.setState({
       // CPU aggregation results
       layerData: {},
-      gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`}),
+      gpuGridAggregator: new GPUGridAggregator(this.context.device, {
+        id: `${this.id}-gpu-aggregator`
+      }),
       cpuGridAggregator: pointToDensityGridDataCPU
     });
   }

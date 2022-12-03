@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
@@ -42,21 +43,21 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     return {vs, fs, modules: [project32]};
   }
 
-  initializeState({gl}: LayerContext): void {
+  initializeState({device}: LayerContext): void {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
       positions: {size: 3, noAlloc: true},
       texCoords: {size: 2, noAlloc: true}
     });
     this.setState({
-      model: this._getModel(gl)
+      model: this._getModel(device)
     });
   }
 
-  _getModel(gl: WebGLRenderingContext): Model {
+  _getModel(device: Device): Model {
     const {vertexCount} = this.props;
 
-    return new Model(gl, {
+    return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

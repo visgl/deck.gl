@@ -1130,7 +1130,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** Create new attribute manager */
   protected _getAttributeManager(): AttributeManager | null {
     const context = this.context;
-    return new AttributeManager(context.gl, {
+    return new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
