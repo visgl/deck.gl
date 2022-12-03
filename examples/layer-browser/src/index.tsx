@@ -30,14 +30,16 @@ document.body.appendChild(container);
 
 import App from './app';
 
-const render = () => {
+const renderDOM = () => {
   render(<Root AppComponent={App} />, container);
 };
 
-render();
+renderDOM();
 
-if (module.hot) {
-  module.hot.accept('./app', () => {
+// @ts-expect-error
+if (globalThis.module?.hot) {
+  // @ts-expect-error
+  globalThis.module.hot.accept('./app', () => {
     console.log('Hot reloading App component'); // eslint-disable-line
     render();
   });

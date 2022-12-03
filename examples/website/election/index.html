@@ -25,7 +25,9 @@
     <div id="app"></div>
     <script src='app.js'></script>
   </body>
-  <script type="text/javascript">
-    App.renderToDOM(document.getElementById('app'));
+  <script type="module" src="app.tsx"></script>
+  <script type="module">
+    import {renderToDOM} from './app.tsx';
+    renderToDOM(document.getElementById('app'));
   </script>
-</html>
+  </html>
