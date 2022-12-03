@@ -1,5 +1,6 @@
 import {default as LayersPass} from './layers-pass';
 import type {Device} from '@luma.gl/api';
+import GL from '@luma.gl/constants';
 import {
   Framebuffer,
   Texture2D,
@@ -21,23 +22,23 @@ export default class ShadowPass extends LayersPass {
   ) {
     super(device, props);
 
-    // @ts-expect-error
-    const gl = device.gl;
-
     // The shadowMap texture
     this.shadowMap = new Texture2D(device, {
       width: 1,
       height: 1,
       parameters: {
-        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
       }
     });
 
+    // @ts-expect-error
+    const gl = device.gl as WebGLRenderingContext;
+
     this.depthBuffer = new Renderbuffer(gl, {
-      format: gl.DEPTH_COMPONENT16,
+      format: GL.DEPTH_COMPONENT16,
       width: 1,
       height: 1
     });
@@ -47,9 +48,9 @@ export default class ShadowPass extends LayersPass {
       width: 1,
       height: 1,
       attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.shadowMap,
+        [GL.COLOR_ATTACHMENT0]: this.shadowMap,
         // Depth attachment has to be specified for depth test to work
-        [gl.DEPTH_ATTACHMENT]: this.depthBuffer
+        [GL.DEPTH_ATTACHMENT]: this.depthBuffer
       }
     });
   }
@@ -57,11 +58,8 @@ export default class ShadowPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
-    // @ts-expect-error
-    const gl = device.gl;
-
     withParameters(
-      gl,
+      this.device,
       {
         depthRange: [0, 1],
         depthTest: true,
@@ -69,8 +67,11 @@ export default class ShadowPass extends LayersPass {
         clearColor: [1, 1, 1, 1]
       },
       () => {
-        const viewport = params.viewports[0];
+        // @ts-expect-error
+        const gl = this.device.gl;
         const pixelRatio = cssToDeviceRatio(gl);
+
+        const viewport = params.viewports[0];
         const width = viewport.width * pixelRatio;
         const height = viewport.height * pixelRatio;
         if (width !== target.width || height !== target.height) {

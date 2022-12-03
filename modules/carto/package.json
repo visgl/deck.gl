@@ -36,7 +36,7 @@
     "@loaders.gl/loader-utils": "^3.2.10",
     "@loaders.gl/mvt": "^3.2.10",
     "@loaders.gl/tiles": "^3.2.10",
-    "@luma.gl/constants": "9.0.0-alpha.9",
+    "@luma.gl/constants": "9.0.0-alpha.10",
     "@math.gl/web-mercator": "^3.6.2",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",

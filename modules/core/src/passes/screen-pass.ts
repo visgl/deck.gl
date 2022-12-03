@@ -27,19 +27,16 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
-    // @ts-expect-error
-    const gl = device.gl as WebGLRenderingContext;
-    this.model = new ClipSpace(gl, {id, fs, modules: [module]});
+    this.model = new ClipSpace(device, {id, fs, modules: [module]});
   }
 
   render(params: ScreenPassRenderOptions): void {
     // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-
+    const gl = device.gl as WebGLRenderingContext;
     setParameters(this.device, {viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]});
 
     // TODO change to device when luma.gl is fixed
-    withParameters(gl, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
+    withParameters(this.device, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
       this._renderPass(this.device, params)
     );
   }

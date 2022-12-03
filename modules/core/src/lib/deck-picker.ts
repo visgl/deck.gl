@@ -152,25 +152,25 @@ export default class DeckPicker {
 
   /** Ensures that picking framebuffer exists and matches the canvas size */
   _resizeBuffer() {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(this.device);
 
-      if (Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
+      if (Framebuffer.isSupported(this.device, {colorBufferFloat: true})) {
         const depthFBO = new Framebuffer(this.device);
         depthFBO.attach({
           [GL.COLOR_ATTACHMENT0]: new Texture2D(this.device, {
-            format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+            format: this.device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
             type: GL.FLOAT
           })
         });
         this.depthFBO = depthFBO;
       }
     }
+
     // Resize it to current canvas size (this is a noop if size hasn't changed)
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
     this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
     this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
   }
@@ -204,9 +204,9 @@ export default class DeckPicker {
   } {
     // @ts-expect-error
     const gl = this.device.gl as WebGLRenderingContext;
+    const pixelRatio = cssToDeviceRatio(gl);
 
     const pickableLayers = this._getPickable(layers);
-    const pixelRatio = cssToDeviceRatio(gl);
 
     if (!pickableLayers) {
       return {
@@ -356,9 +356,6 @@ export default class DeckPicker {
     onViewportActive,
     effects
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-
     const pickableLayers = this._getPickable(layers);
 
     if (!pickableLayers) {
@@ -366,8 +363,11 @@ export default class DeckPicker {
     }
 
     this._resizeBuffer();
+
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
+    // @ts-expect-error
+    const gl = this.device.gl as WebGLRenderingContext;
     const pixelRatio = cssToDeviceRatio(gl);
     const leftTop = cssToDevicePixels(gl, [x, y], true);
 
