@@ -1,6 +1,5 @@
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {clear, setParameters, withParameters} from '@luma.gl/core';
 import type {Framebuffer} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -53,10 +52,7 @@ export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
   render(options: LayersPassRenderOptions): any {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-
-    setParameters(gl, {framebuffer: options.target});
+    setParameters(this.device, {framebuffer: options.target});
     return this._drawLayers(options);
   }
 
@@ -73,10 +69,8 @@ export default class LayersPass extends Pass {
     } = options;
     options.pass = options.pass || 'unknown';
 
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
     if (clearCanvas) {
-      clearGLCanvas(gl);
+      clearGLCanvas(this.device);
     }
 
     if (clearStack) {
@@ -98,7 +92,7 @@ export default class LayersPass extends Pass {
       const subViewports = viewport.subViewports || [viewport];
       for (const subViewport of subViewports) {
         const stats = this._drawLayersInViewport(
-          gl,
+          this.device,
           {
             target,
             moduleParameters,
@@ -170,11 +164,11 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   /* eslint-disable max-depth, max-statements */
   private _drawLayersInViewport(
-    gl,
+    device: Device,
     {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
     drawLayerParams
   ): RenderStats {
-    const glViewport = getGLViewport(gl, {
+    const glViewport = getGLViewport(device, {
       moduleParameters: globalModuleParameters,
       target,
       viewport
@@ -183,12 +177,12 @@ export default class LayersPass extends Pass {
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
       withParameters(
-        gl,
+        device,
         {
           scissorTest: true,
           scissor: glViewport
         },
-        () => clear(gl, clearOpts)
+        () => clear(device, clearOpts)
       );
     }
 
@@ -200,7 +194,7 @@ export default class LayersPass extends Pass {
       pickableCount: 0
     };
 
-    setParameters(gl, {viewport: glViewport});
+    setParameters(device, {viewport: glViewport});
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -299,8 +293,7 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
+    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
     const moduleParameters = Object.assign(
       Object.create(layer.internalState?.propsInTransition || layer.props),
@@ -311,7 +304,7 @@ export default class LayersPass extends Pass {
         // @ts-ignore
         mousePosition: layer.context.mousePosition,
         pickingActive: 0,
-        devicePixelRatio: cssToDeviceRatio(gl)
+        devicePixelRatio
       }
     );
 
@@ -375,7 +368,7 @@ export function layerIndexResolver(
 
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
 function getGLViewport(
-  gl,
+  device: Device,
   {
     moduleParameters,
     target,
@@ -387,11 +380,13 @@ function getGLViewport(
   }
 ): [number, number, number, number] {
   const useTarget = target && target.id !== 'default-framebuffer';
+
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) || cssToDeviceRatio(gl);
+    (moduleParameters && moduleParameters.devicePixelRatio) || device.canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  const height = useTarget ? target.height : gl.drawingBufferHeight;
+  const [,drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const height = useTarget ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
   const dimensions = viewport;
@@ -403,10 +398,10 @@ function getGLViewport(
   ];
 }
 
-function clearGLCanvas(gl: WebGLRenderingContext) {
-  const width = gl.drawingBufferWidth;
-  const height = gl.drawingBufferHeight;
+function clearGLCanvas(device: Device) {
+  const [width, height] = device.canvasContext.getDrawingBufferSize();
+
   // clear depth and color buffers, restoring transparency
-  setParameters(gl, {viewport: [0, 0, width, height]});
-  gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+  setParameters(device, {viewport: [0, 0, width, height]});
+  clear(device, {color: true, depth: true});
 }

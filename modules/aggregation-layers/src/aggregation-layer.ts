@@ -25,7 +25,6 @@ import {
   UpdateParameters,
   CompositeLayerProps
 } from '@deck.gl/core';
-import {cssToDeviceRatio} from '@luma.gl/core';
 import {filterProps} from './utils/prop-utils';
 
 export type AggregationLayerProps<DataT = any> = CompositeLayerProps<DataT>;
@@ -79,12 +78,12 @@ export default abstract class AggregationLayer<
     // For regular layer draw this happens during draw cycle (_drawLayersInViewport) not during update cycle
     // For aggregation layers this is called during updateState to update aggregation data
     // NOTE: it is similar to LayerPass._getModuleParameters() but doesn't inlcude `effects` it is not needed for aggregation
-    const {viewport, mousePosition, gl} = this.context;
+    const {viewport, mousePosition, device} = this.context;
     const moduleSettings = Object.assign(Object.create(this.props), {
       viewport,
       mousePosition,
       pickingActive: 0,
-      devicePixelRatio: cssToDeviceRatio(gl)
+      devicePixelRatio: device.canvasContext.cssToDeviceRatio()
     });
     return moduleSettings;
   }

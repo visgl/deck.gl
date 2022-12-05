@@ -105,7 +105,6 @@ export default class ClipExtension extends LayerExtension {
     // Otherwise, the object is trimmed by the clip bounds (done by fragment shader)
 
     // Default behavior: consider a layer instanced if it has attribute `instancePositions`
-    // @ts-expect-error attributeManager is always defined for primitive layers
     let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
     // Users can override by setting the `clipByInstance` prop
     if (this.props.clipByInstance !== undefined) {

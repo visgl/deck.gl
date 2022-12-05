@@ -27,7 +27,8 @@ import {
   hasFeatures,
   isWebGL2,
   readPixelsToBuffer,
-  withParameters
+  withParameters,
+  clear
 } from '@luma.gl/core';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {log, project32, _mergeShaders as mergeShaders} from '@deck.gl/core';
@@ -394,18 +395,15 @@ export default class GPUGridAggregator {
     const {framebuffers} = this.state;
     const {allAggregationModel} = this;
 
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-
     withParameters(
-      gl,
+      this.device,
       {
         ...clearParams,
         framebuffer: minOrMaxFb,
         viewport: [0, 0, gridSize[0], gridSize[1]]
       },
       () => {
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        clear(this.device, {color: true});
 
         allAggregationModel.draw({
           parameters,
@@ -423,7 +421,7 @@ export default class GPUGridAggregator {
   _renderToWeightsTexture(opts) {
     const {id, parameters, moduleSettings, uniforms, gridSize, weights} = opts;
     const {framebuffers, equations, weightAttributes} = this.state;
-    const {gl, gridAggregationModel} = this;
+    const {gridAggregationModel} = this;
     const {operation} = weights[id];
 
     const clearColor =
@@ -431,14 +429,14 @@ export default class GPUGridAggregator {
         ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
         : [0, 0, 0, 0];
     withParameters(
-      gl,
+      this.device,
       {
         framebuffer: framebuffers[id],
         viewport: [0, 0, gridSize[0], gridSize[1]],
         clearColor
       },
       () => {
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        clear(this.device, {color: true});
 
         const attributes = {weights: weightAttributes[id]};
         gridAggregationModel.draw({

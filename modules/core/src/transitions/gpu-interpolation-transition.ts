@@ -110,6 +110,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
         aFrom: buffers[0],
+        // @ts-expect-error TODO - this looks like a real type mismatch!!!
         aTo: getSourceBufferAttribute(device, attribute)
       },
       feedbackBuffers: {

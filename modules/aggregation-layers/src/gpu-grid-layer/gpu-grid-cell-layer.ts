@@ -179,9 +179,9 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   }
 
   private _setupUniformBuffer(model: Model): void {
-    const gl = this.context.gl as WebGL2RenderingContext;
     const programHandle = model.program.handle;
 
+    const gl = this.context.gl as WebGL2RenderingContext;
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
     const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
     gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);
