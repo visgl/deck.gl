@@ -4,7 +4,9 @@ import mask from './shader-module';
 import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
-  maskId: ''
+  maskId: '',
+  maskByInstance: undefined,
+  maskInverted: false
 };
 
 export type MaskExtensionProps = {
@@ -18,6 +20,10 @@ export type MaskExtensionProps = {
    * If not specified, it is automatically deduced from the layer.
    */
   maskByInstance?: boolean;
+  /**
+   * Inverts the masking operation
+   */
+  maskInverted?: boolean;
 };
 
 /** Allows layers to show/hide objects by a geofence. */
@@ -29,7 +35,7 @@ export default class MaskExtension extends LayerExtension {
     // Infer by geometry if 'maskByInstance' prop isn't explictly set
     let maskByInstance = 'instancePositions' in this.getAttributeManager()!.attributes;
     // Users can override by setting the `maskByInstance` prop
-    if ('maskByInstance' in this.props) {
+    if (this.props.maskByInstance !== undefined) {
       maskByInstance = Boolean(this.props.maskByInstance);
     }
     this.state.maskByInstance = maskByInstance;
@@ -42,7 +48,7 @@ export default class MaskExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<MaskExtensionProps>, {uniforms, context, moduleParameters}: any) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskId = ''} = this.props;
+    const {maskId = '', maskInverted = false} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
@@ -50,6 +56,7 @@ export default class MaskExtension extends LayerExtension {
       let {coordinateSystem: fromCoordinateSystem} = maskChannels[maskId];
       uniforms.mask_enabled = true;
       uniforms.mask_channel = index;
+      uniforms.mask_inverted = maskInverted;
 
       if (fromCoordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
         fromCoordinateSystem = viewport.isGeospatial

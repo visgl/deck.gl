@@ -1,9 +1,3 @@
-// Hack: work around "type": "module" from @mapbox/tiny-sdf, for node test only
-require('fs').copyFileSync(
-  `${__dirname}/../node_modules/@mapbox/tiny-sdf/index.js`,
-  `${__dirname}/../node_modules/@mapbox/tiny-sdf/index.cjs`
-);
-
 require('@babel/register')({
   extensions: ['.js', '.jsx', '.cjs', '.ts', '.tsx'],
   ignore: [/node_modules\/(?!@mapbox)/]
@@ -31,17 +25,35 @@ globalThis.HTMLVideoElement = dom.window.HTMLVideoElement;
 require('abortcontroller-polyfill');
 
 const moduleAlias = require('module-alias');
-
+const {copyFileSync} = require('fs');
 const path = require('path');
+
+// Hack: work around cannot require() packages with type: "module"
+// This is only a problem in node tests due to @babel/register not supporting ESM modules
+// TODO - move away from @babel/register
+function useEsmModule(importPath, file) {
+  file = path.resolve(`${__dirname}/../node_modules`, file);
+  const fileAlt = file.replace(/\.js$/, '.cjs');
+  copyFileSync(file, fileAlt);
+  moduleAlias.addAlias(importPath, () => fileAlt);
+}
+
 moduleAlias.addAlias('@jupyter-widgets/base', (fromPath, request, alias) => {
   return `${__dirname}/modules/jupyter-widget/mock-widget-base.js`;
 });
 moduleAlias.addAlias('react-map-gl/dist/esm/mapbox/mapbox', (fromPath, request, alias) => {
   return path.resolve(`${__dirname}/../node_modules/react-map-gl/dist/es5/mapbox/mapbox`);
 });
-moduleAlias.addAlias('@mapbox/tiny-sdf', (fromPath, request, alias) => {
-  return path.resolve(`${__dirname}/../node_modules/@mapbox/tiny-sdf/index.cjs`);
-});
+useEsmModule('@mapbox/tiny-sdf', '@mapbox/tiny-sdf/index.js');
+[
+  'd3-array',
+  'd3-color',
+  'd3-format',
+  'd3-interpolate',
+  'd3-scale',
+  'd3-time',
+  'd3-time-format'
+].map(pkg => useEsmModule(pkg, `${pkg}/dist/${pkg}.js`));
 
 const {gl} = require('@deck.gl/test-utils');
 // Create a dummy canvas for the headless gl context

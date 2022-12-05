@@ -112,21 +112,15 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
           // Compile source using babel. This is not necessary for src to run in the browser
           // However class inheritance cannot happen between transpiled/non-transpiled code
           // Which affects some examples
-          test: /(\.js|\.ts|\.tsx)$/,
-          loader: 'babel-loader',
+          test: /(\.ts|\.tsx)$/,
+          loader: 'ts-loader',
           options: {
-            presets: [
-              '@babel/typescript',
-              ['@babel/env', {targets: '> 1%, not ie 11'}]
-            ],
-            plugins: [
-              // webpack 4 cannot parse the most recent JS syntax
-              '@babel/plugin-proposal-optional-chaining',
-              '@babel/plugin-proposal-nullish-coalescing-operator',
-              // typescript syntax supports the class properties proposal,
-              // but we also need to let babel know how to transpile these
-              '@babel/plugin-proposal-class-properties'
-            ]
+            configFile: resolve(ROOT_DIR, "tsconfig.build.json"),
+            transpileOnly: true,
+            compilerOptions: {
+              target: "es2019",
+              noEmit: false
+            }
           },
           include: [resolve(ROOT_DIR, 'modules'), resolve(ROOT_DIR, '../luma.gl/modules')]
         }
