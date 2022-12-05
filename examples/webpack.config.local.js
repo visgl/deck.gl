@@ -113,13 +113,13 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
           // Compile source using babel. This is not necessary for src to run in the browser
           // However class inheritance cannot happen between transpiled/non-transpiled code
           // Which affects some examples
-          test: /(\.ts|\.tsx)$/,
+          test: /(\.js|\.ts|\.tsx)$/,
           loader: 'ts-loader',
           options: {
-            configFile: resolve(ROOT_DIR, "tsconfig.build.json"),
+            configFile: resolve(ROOT_DIR, 'tsconfig.build.json'),
             transpileOnly: true,
             compilerOptions: {
-              target: "es2019",
+              target: 'es2019',
               noEmit: false
             }
           },
