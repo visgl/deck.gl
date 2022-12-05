@@ -30,14 +30,16 @@ export default class QuadbinLayer<DataT = any, ExtraProps = {}> extends GeoCellL
   static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
-    const {data, getQuadbin} = this.props;
+    const {data, extruded, getQuadbin} = this.props;
+    // To avoid z-fighting reduce polygon footprint when extruding
+    const coverage = extruded ? 0.99 : 1;
 
     return {
       data,
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage)
     };
   }
 }
