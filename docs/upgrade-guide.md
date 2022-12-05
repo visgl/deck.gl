@@ -11,6 +11,7 @@
   + `onTileUnload(tile)`
   + `onTileError(tile)`
   + `pickingInfo.tile` returned by `onHover`, `onClick` etc.
+- `TileLayer` and `MVTLayer` that render extruded GeoJSON content must set the [zRange](/docs/api-reference/geo-layers/tile-layer.md#zrange) prop. See documentation for details.
 - The base `Effect` class is removed. Custom effects should implement the new `interface Effect` in TypeScript.
 
 
