@@ -117,6 +117,7 @@ export default class GPUSpringTransition implements GPUTransition {
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
+        // @ts-expect-error TODO - this looks like a real type mismatch!!!
         aTo: getSourceBufferAttribute(device, attribute)
       }
     });

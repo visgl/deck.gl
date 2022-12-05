@@ -316,7 +316,7 @@ export default class IconManager {
     return this._texture || this._externalTexture;
   }
 
-  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon {
+  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon | {} {
     const id = this._autoPacking ? getIconId(icon as UnpackedIcon) : (icon as string);
     return this._mapping[id] || {};
   }

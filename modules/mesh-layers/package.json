@@ -31,13 +31,13 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/core": "9.0.0-alpha.10"
+    "@luma.gl/core": "9.0.0-alpha.11"
   },
   "dependencies": {
     "@loaders.gl/gltf": "^3.2.10",
-    "@luma.gl/constants": "9.0.0-alpha.10",
-    "@luma.gl/experimental": "9.0.0-alpha.10",
-    "@luma.gl/shadertools": "9.0.0-alpha.10"
+    "@luma.gl/constants": "9.0.0-alpha.11",
+    "@luma.gl/experimental": "9.0.0-alpha.11",
+    "@luma.gl/shadertools": "9.0.0-alpha.11"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

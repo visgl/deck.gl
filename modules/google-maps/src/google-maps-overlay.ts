@@ -1,5 +1,5 @@
 /* global google */
-import {getParameters, setParameters, withParameters} from '@luma.gl/core';
+import {getParameters, setParameters, withParameters} from '@luma.gl/gltools';
 import GL from '@luma.gl/constants';
 import {
   createDeckInstance,
@@ -233,6 +233,7 @@ export default class GoogleMapsOverlay {
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
       const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
+      // @ts-expect-error
       deck.setProps({_framebuffer});
 
       // Camera changed, will trigger a map repaint right after this
