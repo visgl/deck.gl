@@ -1,13 +1,7 @@
 import {default as LayersPass} from './layers-pass';
 import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {
-  Framebuffer,
-  Texture2D,
-  Renderbuffer,
-  withParameters,
-  cssToDeviceRatio
-} from '@luma.gl/core';
+import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture2D;
@@ -67,9 +61,7 @@ export default class ShadowPass extends LayersPass {
         clearColor: [1, 1, 1, 1]
       },
       () => {
-        // @ts-expect-error
-        const gl = this.device.gl;
-        const pixelRatio = cssToDeviceRatio(gl);
+        const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
         const viewport = params.viewports[0];
         const width = viewport.width * pixelRatio;

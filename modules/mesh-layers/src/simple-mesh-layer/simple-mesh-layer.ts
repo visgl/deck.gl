@@ -33,7 +33,8 @@ import {
   Material
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
+import {Model, Geometry, isWebGL2} from '@luma.gl/core';
+import {Texture2D} from '@luma.gl/gltools';
 import {hasFeature, FEATURES} from '@luma.gl/gltools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -41,7 +42,7 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
-import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} from '@deck.gl/core';
+import type {LayerProps, UpdateParameters, Accessor, Position, Color} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
@@ -73,6 +74,7 @@ function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
   } else if ((data as MeshAttributes).positions || (data as MeshAttributes).POSITION) {
     validateGeometryAttributes(data, useMeshColors);
     return new Geometry({
+      // @ts-expect-error Type incompatiblity between luma.gl and loaders.gl
       attributes: data
     });
   }
@@ -91,7 +93,7 @@ type Mesh =
 
 type _SimpleMeshLayerProps<DataT> = {
   mesh: string | Mesh | Promise<Mesh> | null;
-  texture?: string | Texture | Promise<Texture>;
+  texture?: string | Texture2D | Promise<Texture2D>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
   textureParameters?: Record<number, number> | null;
 
@@ -275,7 +277,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
       this.getAttributeManager()!.invalidateAll();
     }
 
-    if (props.texture !== oldProps.texture) {
+    if (props.texture !== oldProps.texture && props.texture instanceof Texture2D) {
       this.setTexture(props.texture);
     }
 

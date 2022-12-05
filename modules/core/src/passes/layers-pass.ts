@@ -1,6 +1,5 @@
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {clear, setParameters, withParameters} from '@luma.gl/core';
 import type {Framebuffer} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -294,9 +293,7 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-    const devicePixelRatio = cssToDeviceRatio(gl);
+    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
     const moduleParameters = Object.assign(
       Object.create(layer.internalState?.propsInTransition || layer.props),
@@ -384,13 +381,12 @@ function getGLViewport(
 ): [number, number, number, number] {
   const useTarget = target && target.id !== 'default-framebuffer';
 
-  // @ts-expect-error
-  const gl = device.gl as WebGLRenderingContext;
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) || cssToDeviceRatio(gl);
+    (moduleParameters && moduleParameters.devicePixelRatio) || this.device.canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  const height = useTarget ? target.height : gl.drawingBufferHeight;
+  const [,drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const height = useTarget ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
   const dimensions = viewport;
@@ -403,10 +399,7 @@ function getGLViewport(
 }
 
 function clearGLCanvas(device: Device) {
-  // @ts-expect-error
-  const gl = device.gl as WebGLRenderingContext;
-  const width = gl.drawingBufferWidth;
-  const height = gl.drawingBufferHeight;
+  const [width, height] = device.canvasContext.getDrawingBufferSize();
 
   // clear depth and color buffers, restoring transparency
   setParameters(device, {viewport: [0, 0, width, height]});

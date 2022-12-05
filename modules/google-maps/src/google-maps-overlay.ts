@@ -169,7 +169,7 @@ export default class GoogleMapsOverlay {
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       withParameters(gl, {}, () => {
-        animationLoop.onRender();
+        animationLoop.onRender(animationLoop.animationProps);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
