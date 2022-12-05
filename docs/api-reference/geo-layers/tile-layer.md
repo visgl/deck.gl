@@ -243,7 +243,9 @@ Note that the following sub layer props are overridden by `TileLayer` internally
 
 ##### `zRange` (Array, optional)
 
-An array representing the range of minimum and maximum heights in the tile. This is designed to support extruded layers, such as the TerrainLayer, ensuring the right tiles are loaded and rendered. This prop currently only has effect when used with a geospatial view.
+An array representing the height range of the content in the tiles, as `[minZ, maxZ]`. This is designed to support tiles with 2.5D content, such as buildings or terrains. At high pitch angles, such a tile may "extrude into" the viewport even if its 2D bounding box is out of view. Therefore, it is necesary to provide additional information for the layer to behave correctly. The value of this prop is used for two purposes: 1) to determine the necesary tiles to load and/or render; 2) to determine the possible intersecting tiles during picking.
+
+This prop currently only has effect when used with a geospatial view.
 
 - Default: `null` (interpreted as `[0, 0]`)
 
