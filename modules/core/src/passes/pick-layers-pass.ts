@@ -69,8 +69,6 @@ export default class PickLayersPass extends LayersPass {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
     this.pickZ = pickZ;
 
     // Track encoded layer indices
@@ -89,7 +87,7 @@ export default class PickLayersPass extends LayersPass {
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
     const renderStatus = withParameters(
-      gl,
+      this.device,
       {
         scissorTest: true,
         scissor: [x, y, width, height],

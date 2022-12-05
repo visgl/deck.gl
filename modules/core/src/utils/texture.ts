@@ -14,8 +14,8 @@ const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
 const internalTextures: Record<string, boolean> = {};
 
 export function createTexture(layer: Layer, image: any): Texture2D | null {
-  const gl = layer.context && layer.context.gl;
-  if (!gl || !image) {
+  const device = layer.context.device;
+  if (!device || !image) {
     return null;
   }
 
@@ -37,7 +37,7 @@ export function createTexture(layer: Layer, image: any): Texture2D | null {
     };
   }
 
-  const texture = new Texture2D(gl, {
+  const texture = new Texture2D(device, {
     ...image,
     parameters: {
       ...DEFAULT_TEXTURE_PARAMETERS,

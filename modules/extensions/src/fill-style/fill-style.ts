@@ -191,13 +191,13 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
 
   finalizeState(this: Layer<FillStyleExtensionProps>) {
     const {patternTexture, emptyTexture} = this.state;
-    patternTexture?.delete();
-    emptyTexture?.delete();
+    patternTexture?.destroy();
+    emptyTexture?.destroy();
   }
 
   async loadPatternAtlas(this: Layer<FillStyleExtensionProps>) {
     const {fillPatternAtlas, fetch} = this.props;
-    this.state.patternTexture?.delete();
+    this.state.patternTexture?.destroy();
     this.setState({patternTexture: null});
     let image = fillPatternAtlas;
     if (typeof image === 'string') {
@@ -206,7 +206,8 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const patternTexture =
       image instanceof Texture2D
         ? image
-        : new Texture2D(this.context.gl, {
+        : new Texture2D(this.context.device, {
+            // @ts-expect-error
             data: image,
             parameters: DEFAULT_TEXTURE_PARAMETERS
           });

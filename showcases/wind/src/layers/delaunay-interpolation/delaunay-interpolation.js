@@ -1,4 +1,5 @@
 /* global document */
+import 
 import {createGLContext, Texture2D, Transform, Buffer} from 'luma.gl';
 
 import vertex from './delaunay-interpolation-vertex.glsl';
@@ -104,7 +105,7 @@ export default class DelaunayInterpolation {
     return texture;
   }
 
-  _generateTextures(gl, bbox, triangulation, measures) {
+  _generateTextures(device: Device, bbox, triangulation, measures) {
     const lngDiff = Math.abs(bbox.maxLng - bbox.minLng);
     const latDiff = Math.abs(bbox.maxLat - bbox.minLat);
     const width = this.getTextureWidth();

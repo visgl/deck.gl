@@ -31,17 +31,18 @@ import type {
   AccessorFunction,
   Position,
   Color,
-  Texture,
   Unit,
   UpdateParameters,
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
+import {Texture2D} from '@luma.gl/gltools';
+
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
   /** A prepacked image that contains all icons. */
-  iconAtlas?: string | Texture;
+  iconAtlas?: string | Texture2D;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
 
@@ -221,6 +222,10 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
+    if (typeof iconAtlas === 'string') {
+      return;
+    }
+
     // internalState is always defined during updateState
     const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
@@ -322,13 +327,12 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   }
 
   protected getInstanceOffset(icon: string): number[] {
-    const {
-      width,
-      height,
-      anchorX = width / 2,
-      anchorY = height / 2
-    } = this.state.iconManager.getIconMapping(icon);
-    return [width / 2 - anchorX, height / 2 - anchorY];
+    const mapping = this.state.iconManager.getIconMapping(icon);
+    if (mapping) {
+      return [mapping.width / 2 - mapping.anchorX, mapping.height / 2 -mapping. anchorY];
+    }
+    // TODO - this was undefined before...
+    return [0, 0];
   }
 
   protected getInstanceColorMode(icon: string): number {

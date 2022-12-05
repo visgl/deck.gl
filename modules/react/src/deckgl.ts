@@ -84,7 +84,7 @@ function getRefHandles(thisRef: DeckInstanceRef): DeckGLRef {
 function redrawDeck(thisRef: DeckInstanceRef) {
   if (thisRef.redrawReason) {
     // Only redraw if we have received a dirty flag
-    // @ts-expect-error accessing protected method
+    // ts-expect-error accessing protected method
     thisRef.deck._drawLayers(thisRef.redrawReason);
     thisRef.redrawReason = null;
   }

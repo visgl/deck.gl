@@ -52,9 +52,7 @@ export default class DeckRenderer {
 
     opts.layerFilter = opts.layerFilter || this.layerFilter;
     opts.effects = opts.effects || [];
-    // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
-    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(gl);
+    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.device);
 
     this._preRender(opts.effects, opts);
 

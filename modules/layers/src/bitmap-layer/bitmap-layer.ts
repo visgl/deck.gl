@@ -190,6 +190,11 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
       return info;
     }
 
+    // TODO shouldn't happen, this is an async prop...
+    if (typeof image === 'string') {
+      return;
+    }
+
     const {width, height} = image;
 
     // Picking color doesn't represent object index in this layer
