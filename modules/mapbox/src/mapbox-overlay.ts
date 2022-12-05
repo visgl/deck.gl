@@ -1,5 +1,5 @@
 import {Deck, assert} from '@deck.gl/core';
-import {getViewState} from './deck-utils';
+import {getViewState, getDeckInstance} from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -94,6 +94,14 @@ export default class MapboxOverlay implements IControl {
       // @ts-ignore non-public map property
       gl: map.painter.context.gl
     });
+
+    this._deck = getDeckInstance({
+      map,
+      // @ts-ignore non-public map property
+      gl: map.painter.context.gl,
+      deck: this._deck
+    });
+    this.setProps(this._deck.props);
 
     map.on('styledata', this._handleStyleChange);
     resolveLayers(map, this._deck, [], this._props.layers);

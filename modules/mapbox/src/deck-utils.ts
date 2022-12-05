@@ -33,7 +33,7 @@ export function getDeckInstance({
   const customRender = deck?.props._customRender;
 
   const deckProps: DeckProps = {
-    useDevicePixels: true,
+    useDevicePixels: (deck && deck.props.useDevicePixels) || true,
     _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props
@@ -44,6 +44,7 @@ export function getDeckInstance({
     },
     // TODO: import these defaults from a single source of truth
     parameters: {
+      ...(deck && deck.props.parameters),
       depthMask: true,
       depthTest: true,
       blend: true,

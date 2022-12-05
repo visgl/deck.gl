@@ -2,6 +2,7 @@ import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
+import GL from '@luma.gl/constants';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
@@ -69,7 +70,11 @@ test('MapboxOverlay#interleaved', t => {
   });
   const overlay = new MapboxOverlay({
     interleaved: true,
-    layers: [new ScatterplotLayer({id: 'poi'})]
+    layers: [new ScatterplotLayer({id: 'poi'})],
+    parameters: {
+      depthMask: false, // Expected to be overwritten.
+      cull: true // Expected to merge in.
+    }
   });
 
   map.addControl(overlay);
@@ -77,18 +82,30 @@ test('MapboxOverlay#interleaved', t => {
   t.ok(overlay._deck, 'Deck instance is created');
 
   map.on('render', () => {
-    t.ok(
-      objectEqual(overlay._deck.props.viewState, {
-        longitude: -122.45,
-        latitude: 37.78,
-        zoom: 14,
-        bearing: 0,
-        pitch: 0,
-        padding: {left: 0, right: 0, top: 0, bottom: 0},
-        repeat: true
-      }),
-      'View state is set correcly'
-    );
+    const VIEW_STATE = {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 14,
+      bearing: 0,
+      pitch: 0,
+      padding: {left: 0, right: 0, top: 0, bottom: 0},
+      repeat: true
+    };
+    t.ok(objectEqual(overlay._deck.props.viewState, VIEW_STATE), 'View state is set correcly');
+    t.ok(objectEqual(overlay._props.viewState, VIEW_STATE), 'View state is in sync');
+
+    const PARAMETERS = {
+      depthMask: true,
+      depthTest: true,
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: GL.LEQUAL,
+      blendEquation: GL.FUNC_ADD,
+      cull: true
+    };
+    t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
+    t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
 
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
 
@@ -97,6 +114,55 @@ test('MapboxOverlay#interleaved', t => {
     });
     t.notOk(map.getLayer('poi'), 'MapboxLayer is removed');
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});
+
+test('MapboxOverlay#interleavedNoInitialLayers', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    interleaved: true
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+
+  map.on('render', () => {
+    t.equals(overlay._deck.props.layers.length, 0, 'Layers are empty');
+    t.equals(overlay._props.layers.length, 0, 'Layers are in sync');
+
+    const PARAMETERS = {
+      depthMask: true,
+      depthTest: true,
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: GL.LEQUAL,
+      blendEquation: GL.FUNC_ADD
+    };
+    t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
+    t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
+
+    overlay.setProps({
+      layers: [new ScatterplotLayer({id: 'cities'})]
+    });
+    t.ok(map.getLayer('cities'), 'MapboxLayer is added');
+
+    t.ok(
+      objectEqual(overlay._deck.props.parameters, PARAMETERS),
+      'Parameters are set correctly after first layer'
+    );
+    t.ok(
+      objectEqual(overlay._props.parameters, PARAMETERS),
+      'Parameters are still in sync after first layer'
+    );
 
     map.removeControl(overlay);
     t.notOk(overlay._deck, 'Deck instance is finalized');
