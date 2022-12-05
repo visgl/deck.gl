@@ -6,6 +6,15 @@ import {quadbinToWorldBounds, getQuadbinPolygon} from '@deck.gl/carto/layers/qua
 const TEST_DATA = [
   {
     quadbin: 5193776270265024511n, // quadkey '0'
+    coverage: 1,
+    expectedBounds: [
+      [0, 512],
+      [256, 256]
+    ]
+  },
+  {
+    quadbin: 5193776270265024511n, // quadkey '0'
+    coverage: 0.99,
     expectedBounds: [
       [0, 512],
       [253.44, 258.56]
@@ -13,6 +22,7 @@ const TEST_DATA = [
   },
   {
     quadbin: 5206653750449537023n, // quadkey 0123
+    coverage: 0.99,
     expectedBounds: [
       [160, 416],
       [191.68, 384.32]
@@ -20,6 +30,7 @@ const TEST_DATA = [
   },
   {
     quadbin: 5206161169240293375n, // quadkey 333
+    coverage: 0.99,
     expectedBounds: [
       [448, 64],
       [511.36, 0.6399999999999864]
@@ -55,8 +66,8 @@ test('QuadbinLayer', t => {
 });
 
 test('QuadbinLayer#quadbinToWorldBounds', t => {
-  for (const {quadbin, expectedBounds} of TEST_DATA) {
-    const bounds = quadbinToWorldBounds(quadbin);
+  for (const {quadbin, coverage, expectedBounds} of TEST_DATA) {
+    const bounds = quadbinToWorldBounds(quadbin, coverage);
     t.deepEquals(bounds, expectedBounds, 'Quadbin bounds calculated');
   }
 
