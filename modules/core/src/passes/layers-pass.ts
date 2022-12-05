@@ -382,7 +382,7 @@ function getGLViewport(
   const useTarget = target && target.id !== 'default-framebuffer';
 
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) || this.device.canvasContext.cssToDeviceRatio();
+    (moduleParameters && moduleParameters.devicePixelRatio) || device.canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
   const [,drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
