@@ -161,7 +161,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
     const attributeManager = this.getAttributeManager()!;
 
     if (changeFlags.extensionsChanged) {
-      this.state.model?.delete();
+      this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }

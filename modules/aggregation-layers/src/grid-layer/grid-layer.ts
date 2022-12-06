@@ -90,7 +90,7 @@ export default class GridLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       // cpu aggregation is requested
       return false;
     }
-    if (!GPUGridAggregator.isSupported(this.context.gl)) {
+    if (!GPUGridAggregator.isSupported(this.context.device)) {
       return false;
     }
     if (lowerPercentile !== 0 || upperPercentile !== 100) {

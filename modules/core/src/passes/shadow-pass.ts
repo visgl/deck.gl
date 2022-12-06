@@ -28,10 +28,7 @@ export default class ShadowPass extends LayersPass {
       }
     });
 
-    // @ts-expect-error
-    const gl = device.gl as WebGLRenderingContext;
-
-    this.depthBuffer = new Renderbuffer(gl, {
+    this.depthBuffer = new Renderbuffer(device, {
       format: GL.DEPTH_COMPONENT16,
       width: 1,
       height: 1

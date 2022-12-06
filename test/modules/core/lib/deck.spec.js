@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {sleep} from './async-iterator-test-utils';
 
 test('Deck#constructor', t => {
@@ -13,11 +13,11 @@ test('Deck#constructor', t => {
   };
 
   const deck = new Deck({
-    gl,
+    device,
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.htmlCanvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -61,11 +61,11 @@ test('Deck#rendering, picking, logging', t => {
   log.priority = 4;
 
   const deck = new Deck({
-    gl,
+    device,
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.htmlCanvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -103,11 +103,11 @@ test('Deck#auto view state', t => {
   let onViewStateChangeCalled = 0;
 
   const deck = new Deck({
-    gl,
+    device,
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     views: [
       new MapView({id: 'default'}),
@@ -187,11 +187,11 @@ test('Deck#resourceManager', async t => {
   });
 
   const deck = new Deck({
-    gl,
+    device,
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.htmlCanvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,

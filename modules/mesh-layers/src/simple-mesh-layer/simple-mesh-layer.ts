@@ -264,7 +264,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Laye
 
     const {props, oldProps, changeFlags} = params;
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
-      this.state.model?.delete();
+      this.state.model?.destroy();
       if (props.mesh) {
         this.state.model = this.getModel(props.mesh as Mesh);
 

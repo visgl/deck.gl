@@ -164,9 +164,8 @@ export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -195,7 +194,7 @@ export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -205,7 +204,7 @@ export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

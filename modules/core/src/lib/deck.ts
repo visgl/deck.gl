@@ -893,6 +893,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
+      debugger
       this.canvas = gl.canvas;
       // @ts-expect-error - Currently luma.gl v9 does not expose these options
       instrumentGLContext(gl, {enable: true, copyState: true});
@@ -945,8 +946,7 @@ export default class Deck {
     const viewport = this.viewManager.getViewports()[0];
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager({
-      device: this.device,
+    this.layerManager = new LayerManager(this.device, {
       deck: this,
       stats: this.stats,
       viewport,

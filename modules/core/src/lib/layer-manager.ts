@@ -57,8 +57,6 @@ export type LayerContext = {
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
 
 export type LayerManagerProps = {
-  // Apparently LayerManager is supposed to be instantiatable without gl context?
-  device: Device | null;
   deck?: Deck;
   stats?: Stats;
   viewport?: Viewport;
@@ -75,8 +73,14 @@ export default class LayerManager {
   private _nextLayers: LayersList | null = null;
   private _debug: boolean = false;
 
+  /**
+   * @param device 
+   * @param param1 
+   */
   // eslint-disable-next-line
-  constructor({device, deck, stats, viewport, timeline}: LayerManagerProps) {
+  constructor(device: Device, props: LayerManagerProps) {
+    const {deck, stats, viewport, timeline} = props || {};
+
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -95,7 +99,7 @@ export default class LayerManager {
       layerManager: this,
       device,
       // @ts-expect-error
-      gl: device && device.gl,
+      gl: device?.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       pipelineFactory: (device && createProgramManager(device))!,

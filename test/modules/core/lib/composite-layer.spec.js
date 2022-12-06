@@ -26,7 +26,7 @@ import {
   COORDINATE_SYSTEM,
   WebMercatorViewport
 } from '@deck.gl/core';
-import {gl, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -109,7 +109,7 @@ test('CompositeLayer#getSubLayerProps', t => {
     );
   }
 
-  const layerManager = new LayerManager(gl);
+  const layerManager = new LayerManager(device);
   layerManager.setLayers([layer]);
   const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
@@ -324,7 +324,7 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
 });
 
 test('CompositeLayer#setState', t => {
-  const layerManager = new LayerManager(gl);
+  const layerManager = new LayerManager(device);
   const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
   let subLayer = null;
 

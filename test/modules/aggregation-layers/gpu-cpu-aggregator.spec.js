@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {
   AGGREGATION_OPERATION,
@@ -53,7 +53,7 @@ function testAggregationOperations(opts) {
     config.EPSILON = 1e-6;
   }
 
-  const gpuAggregator = new GPUGridAggregator(gl);
+  const gpuAggregator = new GPUGridAggregator(device);
 
   const weight1 = Object.assign({}, params.weights.weight1, {operation: op});
   const maxMinweight = Object.assign({}, weight1, {combineMaxMin: true});

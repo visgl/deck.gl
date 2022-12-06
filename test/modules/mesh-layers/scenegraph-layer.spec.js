@@ -97,9 +97,9 @@ test('ScenegraphLayer#tests', t => {
           speed: 30
         }
       },
-      getScene: (_scenegraph, {gl}) => {
+      getScene: (_scenegraph, {device}) => {
         return new GroupNode([
-          new ModelNode(gl, {
+          new ModelNode(device, {
             geometry: new CubeGeometry(),
             vs,
             fs,

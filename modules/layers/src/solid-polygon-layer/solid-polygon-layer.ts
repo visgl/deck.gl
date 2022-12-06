@@ -473,7 +473,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT = {}> extends La
       models.push(topModel);
     }
 
-
     return {
       models,
       topModel,
