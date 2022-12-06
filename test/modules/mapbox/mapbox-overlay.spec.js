@@ -74,7 +74,8 @@ test('MapboxOverlay#interleaved', t => {
     parameters: {
       depthMask: false, // Expected to be overwritten.
       cull: true // Expected to merge in.
-    }
+    },
+    useDevicePixels: 1
   });
 
   map.addControl(overlay);
@@ -106,6 +107,9 @@ test('MapboxOverlay#interleaved', t => {
     };
     t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
     t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
+
+    t.equals(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
+    t.equals(overlay._props.useDevicePixels, 1, 'useDevicePixels are in sync');
 
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
 
@@ -149,6 +153,9 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     };
     t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
     t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
+
+    t.equals(overlay._deck.props.useDevicePixels, true, 'useDevicePixels is set correctly');
+    t.equals(overlay._props.useDevicePixels, true, 'useDevicePixels are in sync');
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})]
