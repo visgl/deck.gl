@@ -44,14 +44,14 @@ export function getDeckInstance({
     },
     // TODO: import these defaults from a single source of truth
     parameters: {
-      ...(deck && deck.props.parameters),
       depthMask: true,
       depthTest: true,
       blend: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
       depthFunc: gl.LEQUAL,
-      blendEquation: gl.FUNC_ADD
+      blendEquation: gl.FUNC_ADD,
+      ...(deck && deck.props.parameters)
     },
     views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
   };

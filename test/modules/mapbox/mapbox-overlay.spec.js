@@ -72,7 +72,7 @@ test('MapboxOverlay#interleaved', t => {
     interleaved: true,
     layers: [new ScatterplotLayer({id: 'poi'})],
     parameters: {
-      depthMask: false, // Expected to be overwritten.
+      depthMask: false, // User defined parameters should override defaults.
       cull: true // Expected to merge in.
     },
     useDevicePixels: 1
@@ -96,7 +96,7 @@ test('MapboxOverlay#interleaved', t => {
     t.ok(objectEqual(overlay._props.viewState, VIEW_STATE), 'View state is in sync');
 
     const PARAMETERS = {
-      depthMask: true,
+      depthMask: false,
       depthTest: true,
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],

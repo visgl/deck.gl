@@ -89,17 +89,15 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
-    this._deck = new Deck({
-      ...this._props,
-      // @ts-ignore non-public map property
-      gl: map.painter.context.gl
-    });
-
     this._deck = getDeckInstance({
       map,
       // @ts-ignore non-public map property
       gl: map.painter.context.gl,
-      deck: this._deck
+      deck: new Deck({
+        ...this._props,
+        // @ts-ignore non-public map property
+        gl: map.painter.context.gl
+      })
     });
     this.setProps(this._deck.props);
 
