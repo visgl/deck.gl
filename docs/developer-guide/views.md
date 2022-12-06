@@ -267,7 +267,7 @@ function App() {
     return <DeckGL
       views={views: [
         new MapView({id: 'main', controller: true}),
-        new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%', controller: true}})
+        new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%', controller: true})
       ]}
       viewState={viewStates}
       onViewStateChange={onViewStateChange}
