@@ -31,9 +31,11 @@ export function getDeckInstance({
   }
 
   const customRender = deck?.props._customRender;
+  const useDevicePixels =
+    deck && 'useDevicePixels' in deck.props ? deck.props.useDevicePixels : true;
 
   const deckProps: DeckProps = {
-    useDevicePixels: (deck && deck.props.useDevicePixels) || true,
+    useDevicePixels,
     _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props

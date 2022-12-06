@@ -34,6 +34,8 @@ test('MapboxOverlay#overlaid', t => {
     'View state is set correctly'
   );
 
+  t.equals(overlay._deck.props.useDevicePixels, true, 'useDevicePixels is set correctly');
+
   overlay.setProps({
     layers: [new ScatterplotLayer()]
   });
@@ -131,7 +133,8 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     zoom: 14
   });
   const overlay = new MapboxOverlay({
-    interleaved: true
+    interleaved: true,
+    useDevicePixels: false
   });
 
   map.addControl(overlay);
@@ -154,8 +157,8 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
     t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
 
-    t.equals(overlay._deck.props.useDevicePixels, true, 'useDevicePixels is set correctly');
-    t.equals(overlay._props.useDevicePixels, true, 'useDevicePixels are in sync');
+    t.equals(overlay._deck.props.useDevicePixels, false, 'useDevicePixels is set correctly');
+    t.equals(overlay._props.useDevicePixels, false, 'useDevicePixels are in sync');
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})]
