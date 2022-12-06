@@ -233,11 +233,11 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   static defaultProps = defaultProps;
 
   getShaders() {
-    const {gl} = this.context;
-    const transpileToGLSL100 = !isWebGL2(gl);
+    const {device} = this.context;
+    const transpileToGLSL100 = device.info.type === 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && hasFeature(gl, FEATURES.GLSL_DERIVATIVES);
+    const useDerivatives = this.props.flatShading && hasFeature(device, FEATURES.GLSL_DERIVATIVES);
     if (useDerivatives) {
       defines.FLAT_SHADING = 1;
     }
@@ -303,9 +303,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       changeFlags.extensionsChanged || props.flatShading !== oldProps.flatShading;
 
     if (regenerateModels) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
 
@@ -344,8 +343,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     return geometry;
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  protected _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       isInstanced: true

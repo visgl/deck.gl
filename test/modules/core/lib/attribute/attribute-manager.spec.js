@@ -22,7 +22,7 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import GL from '@luma.gl/constants';
 import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -41,14 +41,14 @@ test('AttributeManager imports', t => {
 });
 
 test('AttributeManager constructor', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
 
   t.ok(attributeManager, 'AttributeManager construction successful');
   t.end();
 });
 
 test('AttributeManager.add', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
 
   // Now autodeduced from shader declarations
   // t.throws(
@@ -80,7 +80,7 @@ test('AttributeManager.add', t => {
 });
 
 test('AttributeManager.update', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
   let attribute;
@@ -122,7 +122,7 @@ test('AttributeManager.update', t => {
 });
 
 test('AttributeManager.update - 0 numInstances', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
 
   // First update, should autoalloc and update the value array
@@ -138,7 +138,7 @@ test('AttributeManager.update - 0 numInstances', t => {
 });
 
 test('AttributeManager.update - constant attribute', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
   let updateCalled = 0;
   attributeManager.add({
     colors: {
@@ -207,7 +207,7 @@ test('AttributeManager.update - constant attribute', t => {
 });
 
 test('AttributeManager.update - external virtual buffers', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
 
   const dummyUpdate = () => t.fail('updater should not be called when external buffer is present');
 
@@ -240,7 +240,7 @@ test('AttributeManager.update - external virtual buffers', t => {
     }
   });
 
-  t.is(colors.getAccessor().type, gl.FLOAT, 'colors accessor is set to correct type');
+  t.is(colors.getAccessor().type, GL.FLOAT, 'colors accessor is set to correct type');
 
   attributeManager.update({
     numInstances: 1,
@@ -249,13 +249,13 @@ test('AttributeManager.update - external virtual buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  t.is(colors.getAccessor().type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
+  t.is(colors.getAccessor().type, GL.UNSIGNED_INT, 'colors accessor is set to correct type');
 
   t.end();
 });
 
 test('AttributeManager.update - external logical buffers', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
 
   const dummyAccessor = () =>
     t.fail('accessor should not be called when external buffer is present');
@@ -300,7 +300,7 @@ test('AttributeManager.update - external logical buffers', t => {
 });
 
 test('AttributeManager.update - external logical buffers - variable width', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
 
   const dummyAccessor = () =>
     t.fail('accessor should not be called when external buffer is present');
@@ -346,7 +346,7 @@ test('AttributeManager.update - external logical buffers - variable width', t =>
 });
 
 test('AttributeManager.invalidate', t => {
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
   attributeManager.add({positions: {size: 2, update}});
   attributeManager.add({colors: {size: 2, accessor: 'getColor', update}});
   attributeManager.update({

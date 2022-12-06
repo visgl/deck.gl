@@ -1,5 +1,5 @@
 /* global google */
-import {getParameters, setParameters, withParameters} from '@luma.gl/gltools';
+import {getParameters, setParameters, withParameters, GLParameters} from '@luma.gl/gltools';
 import GL from '@luma.gl/constants';
 import {
   createDeckInstance,
@@ -12,7 +12,7 @@ import {Deck} from '@deck.gl/core';
 import type {DeckProps} from '@deck.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
-const GL_STATE = {
+const GL_STATE: GLParameters = {
   depthMask: true,
   depthTest: true,
   blend: true,

@@ -207,8 +207,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   };
 
   initializeState() {
-    const {gl} = this.context;
-    if (!hasFeatures(gl, REQUIRED_FEATURES)) {
+    if (!hasFeatures(this.context.device, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
@@ -388,12 +387,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   }
 
   _setupTextureParams() {
-    const {gl} = this.context;
+    const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(gl, FLOAT_TARGET_FEATURES);
-    const {format, type} = getTextureParams({gl, floatTargetSupport});
+    const textureSize = Math.min(weightsTextureSize, getParameters(device, GL.MAX_TEXTURE_SIZE));
+    const floatTargetSupport = hasFeatures(device, FLOAT_TARGET_FEATURES);
+    const {format, type} = getTextureParams({device, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, type, weightsScale});
     if (!floatTargetSupport) {

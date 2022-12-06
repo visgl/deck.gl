@@ -263,9 +263,8 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }
   }
@@ -327,7 +326,7 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -372,7 +371,7 @@ export default class PathLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       1, 0
     ];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

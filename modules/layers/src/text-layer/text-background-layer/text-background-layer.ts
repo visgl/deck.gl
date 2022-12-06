@@ -128,9 +128,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT = {}> extends 
     super.updateState(params);
     const {changeFlags} = params;
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -158,11 +157,11 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT = {}> extends 
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

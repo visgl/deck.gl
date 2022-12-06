@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {GridLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import * as FIXTURES from 'deck.gl-test/data';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -47,7 +47,7 @@ test('GridLayer', t => {
 });
 
 test('GridLayer#updates', t => {
-  if (!GPUGridAggregator.isSupported(gl)) {
+  if (!GPUGridAggregator.isSupported(device)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
     return;

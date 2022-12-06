@@ -6,7 +6,7 @@ import {PolygonLayer} from '@deck.gl/layers';
 import {ProgramManager} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
-import {gl, device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -37,10 +37,10 @@ test('LightingEffect#getModuleParameters', t => {
   pointLight.intensity = 2.0;
   pointLight.color = [255, 0, 0];
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(gl, {
+  lightingEffect.preRender(device, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
@@ -87,10 +87,10 @@ test('LightingEffect#preRender, cleanup', t => {
 
   layer.context = {viewport: testViewport};
 
-  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(gl, {
+  lightingEffect.preRender(device, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
@@ -116,7 +116,7 @@ test('LightingEffect#shadow module', t => {
 
   const lightingEffect = new LightingEffect({dirLight});
   const pipelineFactory = ProgramManager.getDefaultProgramManager(device);
-  lightingEffect.preRender(gl, {
+  lightingEffect.preRender(device, {
     layers: [],
     viewports: [testViewport],
     onViewportActive: () => {},

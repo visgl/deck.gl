@@ -26,7 +26,7 @@ export default class ResourceManager {
     this._context = {
       device: props.device,
       // @ts-expect-error
-      gl: props.device.gl,
+      gl: props.device?.gl,
       resourceManager: this
     };
     this._resources = {};

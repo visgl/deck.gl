@@ -123,7 +123,7 @@ export default class LightingEffect implements Effect {
   getModuleParameters(layer: Layer) {
     const parameters: {
       lightSources?: {
-        ambientLight?: AmbientLight;
+        ambientLight?: AmbientLight | null;
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };

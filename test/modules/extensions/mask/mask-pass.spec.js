@@ -2,7 +2,6 @@ import test from 'tape-promise/tape';
 
 import {Layer, LayerManager, OPERATION, Viewport} from '@deck.gl/core';
 import MaskPass from '@deck.gl/extensions/mask/mask-pass';
-import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -28,8 +27,8 @@ test('MaskPass#shouldDrawLayer', t => {
     })
   ];
 
-  const layerManager = new LayerManager(gl, {});
-  const maskPass = new MaskPass(gl, {});
+  const layerManager = new LayerManager(device, {});
+  const maskPass = new MaskPass(device, {});
   layerManager.setLayers(layers);
 
   const renderStats = maskPass.render({

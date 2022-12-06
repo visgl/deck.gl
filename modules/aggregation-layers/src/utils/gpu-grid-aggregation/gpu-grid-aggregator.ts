@@ -50,7 +50,7 @@ import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS from './aggregate-all-vs.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
-import {getFloatTexture, getFramebuffer} from './../resource-utils.js';
+import {getFloatTexture, getFramebuffer} from './../resource-utils';
 
 const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
 const ARRAY_BUFFER_MAP = {
@@ -109,9 +109,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(device: Device) {
-    // @ts-expect-error
-    const gl = device.gl as WebGLRenderingContext;
-    return hasFeatures(gl, REQUIRED_FEATURES);
+    return hasFeatures(device, REQUIRED_FEATURES);
   }
 
   // DEBUG ONLY
@@ -159,19 +157,15 @@ export default class GPUGridAggregator {
   };
 
   device: Device;
-  /** @deprecated */
-  gl: WebGLRenderingContext;
   _hasGPUSupport: boolean;
 
   constructor(device: Device, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.device = device;
 
-    // @ts-expect-error;
-    this.gl = device.gl as WebGLRenderingContext;
-    this._hasGPUSupport =
-      isWebGL2(this.gl) && // gl_InstanceID usage in min/max calculation shaders
-      hasFeatures(this.gl, [
+    // gl_InstanceID usage in min/max calculation shaders
+    this._hasGPUSupport = this.device.info.type === 'webgl2' &&
+      hasFeatures(this.device, [
         FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
         FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture
         FEATURES.TEXTURE_FLOAT // sample from a float texture
@@ -458,7 +452,7 @@ export default class GPUGridAggregator {
       if (this.meanTransform) {
         this.meanTransform.update(transformOptions);
       } else {
-        this.meanTransform = getMeanTransform(gl, transformOptions);
+        this.meanTransform = getMeanTransform(this.device, transformOptions);
       }
       this.meanTransform.run({
         parameters: {

@@ -217,7 +217,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     super.updateState(opts);
     // Re-generate model if geometry changed
     if (opts.changeFlags.extensionsChanged) {
-      this.state.model?.delete();
+      this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }

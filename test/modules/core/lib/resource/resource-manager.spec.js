@@ -1,6 +1,6 @@
 /* deviceobal setTimeout */
 import test from 'tape-promise/tape';
-import {device} from '@deck/test-utils';
+import {device} from '@deck.gl/test-utils';
 import ResourceManager from '@deck.gl/core/lib/resource/resource-manager';
 
 test('ResourceManager#protocol', t => {

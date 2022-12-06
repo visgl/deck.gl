@@ -3,7 +3,8 @@ import test from 'tape-promise/tape';
 import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
+import GL from '@luma.gl/constants';
 import {Framebuffer, getParameters} from '@luma.gl/core';
 
 class TestLayer extends Layer {
@@ -179,7 +180,7 @@ test('LayersPass#layerIndexResolver', t => {
     const resolver = layerIndexResolver();
     const resolver2 = layerIndexResolver();
 
-    const layerManager = new LayerManager(gl, {});
+    const layerManager = new LayerManager(device, {});
     layerManager.setLayers(testCase.layers);
     const layers = layerManager.getLayers();
 
@@ -226,8 +227,8 @@ test('LayersPass#shouldDrawLayer', t => {
     })
   ];
 
-  const layerManager = new LayerManager(gl, {});
-  const layersPass = new DrawLayersPass(gl);
+  const layerManager = new LayerManager(device, {});
+  const layersPass = new DrawLayersPass(device);
   layerManager.setLayers(layers);
 
   const layerFilterCalls = [];
@@ -269,9 +270,9 @@ test('LayersPass#GLViewport', t => {
     })
   ];
 
-  const layerManager = new LayerManager(gl, {});
-  const layersPass = new DrawLayersPass(gl);
-  const framebuffer = new Framebuffer(gl, {width: 100, height: 100});
+  const layerManager = new LayerManager(device, {});
+  const layersPass = new DrawLayersPass(device);
+  const framebuffer = new Framebuffer(device, {width: 100, height: 100});
   layerManager.setLayers(layers);
 
   const testCases = [
@@ -337,7 +338,7 @@ test('LayersPass#GLViewport', t => {
     });
 
     t.deepEqual(
-      getParameters(gl, gl.VIEWPORT),
+      getParameters(device, GL.VIEWPORT),
       expectedGLViewport,
       `${name} sets viewport correctly`
     );

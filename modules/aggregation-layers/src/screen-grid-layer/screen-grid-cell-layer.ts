@@ -55,9 +55,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = {}> extends 
   static defaultProps = defaultProps;
 
   static isSupported(device: Device) {
-    // @ts-expect-error
-    const gl = device.gl as WebGLRenderingContext;
-    return hasFeatures(gl, [FEATURES.TEXTURE_FLOAT]);
+    return hasFeatures(device, [FEATURES.TEXTURE_FLOAT]);
   }
 
   state!: Layer['state'] & {
