@@ -906,8 +906,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      // @ts-expect-error
-      this.canvas = device.canvasContext.canvas;
+      this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
       // @ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
       // should have a method to start state tracking even if not enabled?

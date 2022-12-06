@@ -25,7 +25,6 @@ import {
   Transform,
   FEATURES,
   hasFeatures,
-  isWebGL2,
   readPixelsToBuffer,
   withParameters,
   clear

@@ -203,7 +203,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
 
-    const pixel = [Math.floor(uv[0] * (width as number)), Math.floor(uv[1] * (height as number))];
+    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
 
     info.bitmap = {
       size: {width, height}, // Size of bitmap

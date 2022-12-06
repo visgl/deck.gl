@@ -38,6 +38,7 @@
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
+    "@luma.gl/api": "9.0.0-alpha.11",
     "@luma.gl/core": "9.0.0-alpha.11"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
