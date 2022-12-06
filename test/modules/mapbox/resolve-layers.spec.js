@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {resolveLayers} from '@deck.gl/mapbox/resolve-layers';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
 
@@ -140,7 +140,7 @@ test('MapboxOverlay#resolveLayers', async t => {
     style: MAP_STYLE
   });
   const deck = new Deck({
-    gl,
+    device,
     viewState: {
       longitude: 0,
       latitude: 0,

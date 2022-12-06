@@ -22,11 +22,11 @@ import test from 'tape-promise/tape';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
 import LayerManager from '@deck.gl/core/lib/layer-manager';
 
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 
-const layerManager = new LayerManager(gl);
+const layerManager = new LayerManager(device);
 
 class TestEffect {
   constructor() {
@@ -63,13 +63,13 @@ const testModule = {
 };
 
 test('EffectManager#constructor', t => {
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager({device, layerManager});
   t.ok(effectManager, 'Effect Manager created');
   t.end();
 });
 
 test('EffectManager#set and get Effects', t => {
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager({device, layerManager});
   const effect1 = new TestEffect();
   const effect2 = new TestEffect();
   effectManager.setEffects([effect1, effect2]);
@@ -84,10 +84,10 @@ test('EffectManager#set and get Effects', t => {
 
 test('EffectManager#cleanup resource', t => {
   const effect = new PostProcessEffect(testModule);
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager({device, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.preRender(gl);
+  effect.preRender(device);
   effectManager.setEffects([]);
   const resEnd = getResourceCounts();
 
@@ -97,10 +97,10 @@ test('EffectManager#cleanup resource', t => {
 
 test('EffectManager#finalize', t => {
   const effect = new PostProcessEffect(testModule);
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager({device, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.preRender(gl);
+  effect.preRender(device);
   effectManager.finalize();
   const resEnd = getResourceCounts();
 
@@ -110,7 +110,7 @@ test('EffectManager#finalize', t => {
 
 test('EffectManager#setProps', t => {
   const effect = new LightingEffect();
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager({device, layerManager});
   effectManager.setProps({effects: [effect]});
 
   t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');

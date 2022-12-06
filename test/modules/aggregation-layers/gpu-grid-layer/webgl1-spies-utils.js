@@ -28,7 +28,8 @@ const VS = 'void main() {gl_Position = vec4(0);}';
 const FS = 'void main() {gl_FragColor = vec4(0);}';
 
 // Spiy methods to avoid usage of WebGL2 API when running under Node.
-export function setupSpysForWebGL1(gl) {
+export function setupSpysForWebGL1(device) {
+  const gl = device.gl;
   let getShadersSpy = null;
   let setupUniformBufferSpy = null;
   let bindUniformBuffersSpy = null;

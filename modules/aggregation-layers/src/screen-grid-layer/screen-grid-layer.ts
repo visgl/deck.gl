@@ -37,7 +37,7 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
-import {getFloatTexture} from '../utils/resource-utils.js';
+import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   ...ScreenGridCellLayer.defaultProps,

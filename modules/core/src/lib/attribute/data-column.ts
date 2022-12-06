@@ -146,11 +146,9 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
-      // @ts-expect-error
-      const gl = device.gl as WebGLRenderingContext;
 
       bufferType =
-        gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }

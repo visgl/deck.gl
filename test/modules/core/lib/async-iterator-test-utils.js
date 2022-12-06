@@ -1,6 +1,6 @@
 /* global setTimeout */
 import {Deck, Layer} from '@deck.gl/core';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 export function sleep(milliseconds) {
   return new Promise(resolve => {
@@ -35,7 +35,7 @@ export function testAsyncData(t, data) {
     let loadedData = null;
 
     const deck = new Deck({
-      gl,
+      device,
       width: 1,
       height: 1,
       viewState: {longitude: 0, latitude: 0, zoom: 0},

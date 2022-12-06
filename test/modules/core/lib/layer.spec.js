@@ -591,7 +591,7 @@ test('Layer#updateModules', async t => {
     }
 
     _getModel() {
-      return new Model(this.context.gl, {
+      return new Model(this.context.device, {
         vs: `\
   void main() {
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);

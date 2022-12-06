@@ -50,7 +50,7 @@ import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS from './aggregate-all-vs.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
-import {getFloatTexture, getFramebuffer} from './../resource-utils.js';
+import {getFloatTexture, getFramebuffer} from './../resource-utils';
 
 const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
 const ARRAY_BUFFER_MAP = {
@@ -109,9 +109,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(device: Device) {
-    // @ts-expect-error
-    const gl = device.gl as WebGLRenderingContext;
-    return hasFeatures(gl, REQUIRED_FEATURES);
+    return hasFeatures(device, REQUIRED_FEATURES);
   }
 
   // DEBUG ONLY
@@ -458,7 +456,7 @@ export default class GPUGridAggregator {
       if (this.meanTransform) {
         this.meanTransform.update(transformOptions);
       } else {
-        this.meanTransform = getMeanTransform(gl, transformOptions);
+        this.meanTransform = getMeanTransform(device, transformOptions);
       }
       this.meanTransform.run({
         parameters: {

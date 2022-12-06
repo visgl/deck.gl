@@ -1,4 +1,4 @@
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import LayerManager from '@deck.gl/core/lib/layer-manager';
 
@@ -11,7 +11,7 @@ import LayerManager from '@deck.gl/core/lib/layer-manager';
 // @param testCase.onAfterUpdate {Function} - callback after picking
 export async function testPickingLayer({layer, viewport, testCases}) {
   // Initialize layer
-  const layerManager = new LayerManager(gl, {viewport});
+  const layerManager = new LayerManager(device, {viewport});
   layerManager.setLayers([layer]);
 
   await updateAll(layerManager);

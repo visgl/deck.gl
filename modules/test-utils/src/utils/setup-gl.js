@@ -1,18 +1,20 @@
-import {createTestContext, webgl1TestDevice} from '@luma.gl/test-utils';
+import {createTestContext, webgl1Device} from '@luma.gl/test-utils';
 
-globalThis.glContext =
-  globalThis.glContext ||
-  createTestContext({
-    width: 1,
-    height: 1,
-    debug: true
-    // throwOnFailure: false,
-    // throwOnError: false
-  });
+/** Test device */
+export const device = webgl1Device;
+
+/** Test context */
+export const gl = createTestContext({
+  width: 1,
+  height: 1,
+  debug: true
+  // throwOnFailure: false,
+  // throwOnError: false
+});
+
 //   // TODO - Seems to be an issue in luma.gl
 //   (createContext && createContext(100, 100, {}));
 // // console.log('Context', globalThis.glContext);
 
-export default globalThis.glContext;
+globalThis.glContext = globalThis.glContext || gl;
 
-export const device = webgl1TestDevice;

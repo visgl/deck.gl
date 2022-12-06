@@ -19,12 +19,7 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/api';
-import {
-  Framebuffer,
-  Texture2D,
-  isWebGL2,
-  readPixelsToArray
-} from '@luma.gl/core';
+import {Framebuffer, Texture2D, isWebGL2, readPixelsToArray} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
@@ -363,14 +358,14 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
     const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
-    const leftTop =  this.device.canvasContext.cssToDevicePixels([x, y], true);
+    const leftTop = this.device.canvasContext.cssToDevicePixels([x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
     const deviceLeft = leftTop.x;
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
-    const rightBottom =  this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
+    const rightBottom = this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
 

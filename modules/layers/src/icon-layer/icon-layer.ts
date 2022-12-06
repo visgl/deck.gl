@@ -251,7 +251,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
     }
 
     if (changeFlags.extensionsChanged) {
-      this.state.model?.delete();
+      this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }
@@ -329,7 +329,7 @@ export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
   protected getInstanceOffset(icon: string): number[] {
     const mapping = this.state.iconManager.getIconMapping(icon);
     if (mapping) {
-      return [mapping.width / 2 - mapping.anchorX, mapping.height / 2 -mapping. anchorY];
+      return [mapping.width / 2 - mapping.anchorX, mapping.height / 2 - mapping.anchorY];
     }
     // TODO - this was undefined before...
     return [0, 0];

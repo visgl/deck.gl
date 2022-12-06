@@ -108,14 +108,13 @@ export default abstract class GridAggregationLayer<
   allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const dataBytes = numCol * numRow * 4 * 4;
-      const gl = this.context.gl;
       const {weights} = this.state;
       for (const name in weights) {
         const weight = weights[name];
         if (weight.aggregationBuffer) {
           weight.aggregationBuffer.delete();
         }
-        weight.aggregationBuffer = new Buffer(gl, {
+        weight.aggregationBuffer = new Buffer(this.context.device, {
           byteLength: dataBytes,
           accessor: {
             size: 4,

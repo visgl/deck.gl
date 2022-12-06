@@ -382,10 +382,11 @@ function getGLViewport(
   const useTarget = target && target.id !== 'default-framebuffer';
 
   const pixelRatio =
-    (moduleParameters && moduleParameters.devicePixelRatio) || device.canvasContext.cssToDeviceRatio();
+    (moduleParameters && moduleParameters.devicePixelRatio) ||
+    device.canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  const [,drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
   const height = useTarget ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

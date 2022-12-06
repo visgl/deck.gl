@@ -23,7 +23,7 @@ import * as data from 'deck.gl-test/data';
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 // import {testInitializeLayer} from '@deck.gl/test-utils';
 
@@ -36,8 +36,8 @@ const testViewport = new MapView().makeViewport({
   viewState: {longitude: 0, latitude: 0, zoom: 1}
 });
 
-const layerManager = new LayerManager(gl, {viewport: testViewport});
-const deckRenderer = new DeckRenderer(gl);
+const layerManager = new LayerManager(device, {viewport: testViewport});
+const deckRenderer = new DeckRenderer(device);
 
 // add tests
 

@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
-import {gl} from '@deck.gl/test-utils';
+import {device, gl} from '@deck.gl/test-utils';
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -146,7 +146,7 @@ test('ComponentState#asynchronous async props', t => {
 });
 
 test('ComponentState#async props with transform', t => {
-  const testContext = {gl};
+  const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
   // prettier-ignore
