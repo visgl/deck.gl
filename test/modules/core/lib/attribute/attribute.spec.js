@@ -22,7 +22,7 @@
 /* global console */
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import GL from '@luma.gl/constants';
-import {Buffer, isWebGL2} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
@@ -181,7 +181,7 @@ test('Attribute#setConstantValue', t => {
 });
 
 test('Attribute#allocate - partial', t => {
-  if (!isWebGL2(device)) {
+  if (device.info.type !== 'webgl2') {
     // buffer.getData() is WebGL2 only
     t.comment('This test requires WebGL2');
     t.end();

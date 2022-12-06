@@ -33,7 +33,7 @@ export default class LightingEffect implements Effect {
   shadowColor: number[] = DEFAULT_SHADOW_COLOR;
 
   private shadow: boolean;
-  private ambientLight?: AmbientLight;
+  private ambientLight?: AmbientLight | null = null;
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
@@ -112,7 +112,7 @@ export default class LightingEffect implements Effect {
   getModuleParameters(layer: Layer) {
     const parameters: {
       lightSources?: {
-        ambientLight?: AmbientLight;
+        ambientLight?: AmbientLight | null;
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };

@@ -37,6 +37,12 @@ import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
+import {Device} from '@luma.gl/api';
+Object.defineProperty(Device, 'beginQuery', {
+  set: function(value) { debugger }
+});
+
+
 const GRID = [
   {position: [37, 122]},
   {position: [37.1, 122]},

@@ -41,19 +41,19 @@ const SAMPLE_PROPS = {
 };
 
 test('GPUGridCellLayer#initializeState', t => {
-  const webdevice1Spies = setupSpysForWebGL1(device);
+  const deviceSpies = setupSpysForWebGL1(device);
   const layer = new GPUGridCellLayer(SAMPLE_PROPS);
 
   testInitializeLayer({layer, onError: t.notOk});
 
   t.ok(layer.state.model, 'should set state.model');
 
-  restoreSpies(webgl1Spies);
+  restoreSpies(deviceSpies);
   t.end();
 });
 
 test('GPUGridCellLayer#updates', t => {
-  const webgl1Spies = setupSpysForWebGL1(device);
+  const deviceSpies = setupSpysForWebGL1(device);
 
   testLayer({
     Layer: GPUGridCellLayer,
@@ -76,6 +76,6 @@ test('GPUGridCellLayer#updates', t => {
     ]
   });
 
-  restoreSpies(webgl1Spies);
+  restoreSpies(deviceSpies);
   t.end();
 });

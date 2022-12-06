@@ -31,8 +31,8 @@ TestLayer.layerName = 'TestLayer';
 class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
     return [
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-1`}, this.getSubLayerProps())),
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-2`}, this.getSubLayerProps()))
+      new TestLayer({id: `${this.props.id}-sublayer-1`, ...this.getSubLayerProps()}),
+      new TestLayer({id: `${this.props.id}-sublayer-2`, ...this.getSubLayerProps()})
     ];
   }
 }

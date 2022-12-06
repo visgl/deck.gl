@@ -55,8 +55,8 @@ void main(void) {
   //       'vs:#main-end': '  }\n'
   //     };
   const values = [2, 2, 2, 2, 2, 2, 20.999998092651367, 2, 20, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2];
-  const valueBuffer = new Buffer(gl, new Float32Array(values));
-  const outBuffer = new Buffer(gl, values.length * 4 * 4);
+  const valueBuffer = new Buffer(device, new Float32Array(values));
+  const outBuffer = new Buffer(device, values.length * 4 * 4);
   const domain = [2, 20.999998092651367];
   const colorRange = [
     [0, 0, 0, 0],
@@ -76,7 +76,7 @@ void main(void) {
     const c = color.map(v => v);
     colorRangeUniform.push(c[0] * 255, c[1] * 255, c[2] * 255, c[3] * 255);
   });
-  const transform = new Transform(gl, {
+  const transform = new Transform(device, {
     sourceBuffers: {
       inValue: valueBuffer
     },

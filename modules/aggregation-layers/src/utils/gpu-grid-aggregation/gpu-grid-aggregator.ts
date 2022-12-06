@@ -157,19 +157,15 @@ export default class GPUGridAggregator {
   };
 
   device: Device;
-  /** @deprecated */
-  gl: WebGLRenderingContext;
   _hasGPUSupport: boolean;
 
   constructor(device: Device, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.device = device;
 
-    // @ts-expect-error;
-    this.gl = device.gl as WebGLRenderingContext;
-    this._hasGPUSupport =
-      isWebGL2(this.gl) && // gl_InstanceID usage in min/max calculation shaders
-      hasFeatures(this.gl, [
+    // gl_InstanceID usage in min/max calculation shaders
+    this._hasGPUSupport = this.device.info.type === 'webgl2' &&
+      hasFeatures(this.device, [
         FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
         FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture
         FEATURES.TEXTURE_FLOAT // sample from a float texture
@@ -456,7 +452,7 @@ export default class GPUGridAggregator {
       if (this.meanTransform) {
         this.meanTransform.update(transformOptions);
       } else {
-        this.meanTransform = getMeanTransform(device, transformOptions);
+        this.meanTransform = getMeanTransform(this.device, transformOptions);
       }
       this.meanTransform.run({
         parameters: {

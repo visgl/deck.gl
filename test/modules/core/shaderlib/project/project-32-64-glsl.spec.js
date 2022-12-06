@@ -75,13 +75,6 @@ function toGLSLVec(array) {
   return vecString;
 }
 
-function getVendor() {
-  const vendorMasked = gl.getParameter(GL.VENDOR);
-  const ext = gl.getExtension('WEBGL_debug_renderer_info');
-  const vendorUnmasked = ext && gl.getParameter(ext.UNMASKED_VENDOR_WEBGL || GL.VENDOR);
-  return vendorUnmasked || vendorMasked;
-}
-
 const TRANSFORM_VS = {
   project_position_to_clipspace: (pos, pos64Low = [0, 0, 0]) => `\
 varying vec4 outValue;
@@ -249,9 +242,9 @@ const TEST_CASES = [
   }
 ];
 
-test('project32&64#vs', t => {
+// TODO - luma.gl v9
+test.skip('project32&64#vs', t => {
   const oldEpsilon = config.EPSILON;
-  const vendor = getVendor(device);
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
@@ -268,7 +261,8 @@ test('project32&64#vs', t => {
       }
       testCase.tests.forEach(c => {
         const expected = (usefp64 && c.output64) || c.output;
-        const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
+        // TODO - luma v9 - switch to device.info.gpu ?
+        const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => device.info.vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(device) && !skipOnGPU) {
           // Reduced precision tolerencewhen using 64 bit project module.
@@ -276,7 +270,7 @@ test('project32&64#vs', t => {
           const sourceBuffers = {dummy: DUMMY_SOURCE_BUFFER};
           const feedbackBuffers = {outValue: OUT_BUFFER};
           let actual = runOnGPU({
-            gl,
+            device,
             uniforms,
             vs: c.vs,
             sourceBuffers,

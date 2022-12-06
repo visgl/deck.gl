@@ -46,8 +46,9 @@ test('DeckPicker#getPickingRect', t => {
   t.end();
 });
 
+// TODO - luma v9
 /* eslint-disable max-statements */
-test('DeckPicker#pick empty', t => {
+test.skip('DeckPicker#pick empty', t => {
   const deckPicker = new DeckPicker(device);
   const view = new MapView();
   const viewport = view.makeViewport({

@@ -1,7 +1,7 @@
-import {createTestContext, webgl1Device} from '@luma.gl/test-utils';
+import {createTestContext, webgl1Device, webgl2Device} from '@luma.gl/test-utils';
 
 /** Test device */
-export const device = webgl1Device;
+export const device = webgl2Device || webgl1Device;
 
 /** Test context */
 export const gl = createTestContext({

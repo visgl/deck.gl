@@ -2,7 +2,7 @@
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import test from 'tape-promise/tape';
-import {isWebGL2, Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/core';
 import {device} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = (function () {
@@ -40,7 +40,7 @@ test('AttributeTransitionManager#constructor', t => {
   t.ok(manager, 'AttributeTransitionManager is constructed');
   t.is(
     Boolean(manager.isSupported),
-    isWebGL2(device),
+    device.info.type === 'webgl2',
     'AttributeTransitionManager checks WebGL support'
   );
 
@@ -57,7 +57,7 @@ test('AttributeTransitionManager#constructor', t => {
   t.end();
 });
 
-if (isWebGL2(device)) {
+if (device.info.type === 'webgl2') {
   test('AttributeTransitionManager#update', t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});

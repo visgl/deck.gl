@@ -99,7 +99,7 @@ export default class LayerManager {
       layerManager: this,
       device,
       // @ts-expect-error
-      gl: device && device.gl,
+      gl: device?.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       pipelineFactory: (device && createProgramManager(device))!,

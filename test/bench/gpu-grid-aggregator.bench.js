@@ -23,7 +23,6 @@
 import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
-import {isWebGL2} from '@luma.gl/core';
 
 const {fixture, generateRandomGridPoints} = GridAggregationData;
 const aggregator = new GPUGridAggregator(device);
@@ -33,7 +32,7 @@ const points100K = generateRandomGridPoints(100000);
 const points1M = generateRandomGridPoints(1000000);
 
 export default function gridAggregatorBench(suite) {
-  if (!isWebGL2(gl)) {
+  if (device.info.type !== 'webgl2') {
     return suite;
   }
   return suite
