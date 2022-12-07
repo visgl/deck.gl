@@ -43,7 +43,11 @@ test('PostProcessEffect#postRender', t => {
     target: Framebuffer.getDefaultFramebuffer(device)
   });
   t.ok(buffer2, 'post-processing effect rendered without throwing');
-  t.is(buffer2, Framebuffer.getDefaultFramebuffer(device), 'post-processing effect rendered to target');
+  t.is(
+    buffer2,
+    Framebuffer.getDefaultFramebuffer(device),
+    'post-processing effect rendered to target'
+  );
 
   effect.cleanup();
   inputBuffer.delete();

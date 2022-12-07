@@ -51,7 +51,7 @@ test('GPUGridLayer', t => {
 });
 
 test('GPUGridLayer#renderLayers', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const webgl1Spies = setupSpysForWebGL1(device);
 
   makeSpy(GPUGridLayer.prototype, '_updateAggregation');
 
@@ -73,7 +73,7 @@ test('GPUGridLayer#renderLayers', t => {
 });
 
 test('GPUGridLayer#updates', t => {
-  const webgl1Spies = setupSpysForWebGL1(gl);
+  const webgl1Spies = setupSpysForWebGL1(device);
   testLayer({
     Layer: GPUGridLayer,
     onError: t.notOk,

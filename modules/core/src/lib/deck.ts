@@ -31,7 +31,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
 import {getBrowser} from '@probe.gl/env';
-import {Device} from '@luma.gl/api';
+import {luma, Device, DeviceProps} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
 import GL from '@luma.gl/constants';
 import {
@@ -132,9 +132,15 @@ export type DeckProps = {
    * Will be auto-created if not supplied.
    */
   canvas?: HTMLCanvasElement | string | null;
-  /** WebGL context. Will be auto-created if not supplied. */
+
+  /** luma.gl GPU device. A device will be auto-created if not supplied. */
+  device?: Device | null;
+  /** A device will be auto-created if not supplied using these props. */
+  deviceProps?: DeviceProps;
+
+  /** WebGL context @deprecated Use props.device */
   gl?: WebGLRenderingContext | null;
-  /** Additional options used when creating the WebGL context. */
+  /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
   glOptions?: WebGLContextAttributes;
 
   /**
@@ -238,10 +244,12 @@ const defaultProps = {
   initialViewState: null,
   pickingRadius: 0,
   layerFilter: null,
-  glOptions: {},
   parameters: {},
   parent: null,
+  device: null,
+  deviceProps: {},
   gl: null,
+  glOptions: {},
   canvas: null,
   layers: [],
   effects: [],
@@ -302,46 +310,58 @@ export default class Deck {
   protected deckPicker: DeckPicker | null = null;
   protected eventManager: EventManager | null = null;
   protected tooltip: Tooltip | null = null;
-  protected metrics: DeckMetrics;
   protected animationLoop: AnimationLoop;
-  protected stats: Stats;
 
   /** Internal view state if no callback is supplied */
   protected viewState: any;
-  protected cursorState: CursorState;
+  protected cursorState: CursorState = {
+    isHovering: false,
+    isDragging: false
+  };
 
-  private _needsRedraw: false | string;
+  protected stats = new Stats({id: 'deck.gl'});
+  protected metrics: DeckMetrics = {
+    fps: 0,
+    setPropsTime: 0,
+    updateAttributesTime: 0,
+    framesRedrawn: 0,
+    pickTime: 0,
+    pickCount: 0,
+    gpuTime: 0,
+    gpuTimePerFrame: 0,
+    cpuTime: 0,
+    cpuTimePerFrame: 0,
+    bufferMemory: 0,
+    textureMemory: 0,
+    renderbufferMemory: 0,
+    gpuMemory: 0
+  };
+  private _metricsCounter: number = 0;
+
+  private _needsRedraw: false | string = 'Initial render';
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
     x: number;
     y: number;
     radius: number;
+  } = {
+    mode: 'hover',
+    x: -1,
+    y: -1,
+    radius: 0,
+    event: null
   };
+
   /**
    * Pick and store the object under the pointer on `pointerdown`.
    * This object is reused for subsequent `onClick` and `onDrag*` callbacks.
    */
   private _lastPointerDownInfo: PickingInfo | null = null;
-  private _metricsCounter: number;
 
   constructor(props: DeckProps) {
     this.props = {...defaultProps, ...props};
     props = this.props;
-
-    this._needsRedraw = 'Initial render';
-    this._pickRequest = {
-      mode: 'hover',
-      x: -1,
-      y: -1,
-      radius: 0,
-      event: null
-    };
-
-    this.cursorState = {
-      isHovering: false,
-      isDragging: false
-    };
 
     if (props.viewState && props.initialViewState) {
       log.warn(
@@ -353,32 +373,23 @@ export default class Deck {
     }
     this.viewState = props.initialViewState;
 
-    if (!props.gl) {
-      // Note: LayerManager creation deferred until gl context available
+    // See if we already have a device
+    if (props.device) {
+      this.device = props.device;
+    } else if (props.gl) {
+      this.device = WebGLDevice.attach(props.gl);
+    } else {
+      // device will be created asynchronously by the animation loop when that is initialized
+    }
+
+    // Create a canvas if no device is available
+    if (!this.device) {
       if (typeof document !== 'undefined') {
         this.canvas = this._createCanvas(props);
       }
     }
-    this.animationLoop = this._createAnimationLoop(props);
 
-    this.stats = new Stats({id: 'deck.gl'});
-    this.metrics = {
-      fps: 0,
-      setPropsTime: 0,
-      updateAttributesTime: 0,
-      framesRedrawn: 0,
-      pickTime: 0,
-      pickCount: 0,
-      gpuTime: 0,
-      gpuTimePerFrame: 0,
-      cpuTime: 0,
-      cpuTimePerFrame: 0,
-      bufferMemory: 0,
-      textureMemory: 0,
-      renderbufferMemory: 0,
-      gpuMemory: 0
-    };
-    this._metricsCounter = 0;
+    this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
 
@@ -392,8 +403,10 @@ export default class Deck {
 
   /** Stop rendering and dispose all resources */
   finalize() {
-    this.animationLoop.destroy();
     this._lastPointerDownInfo = null;
+
+    this.animationLoop?.destroy();
+    this.animationLoop = null;
 
     this.layerManager?.finalize();
     this.layerManager = null;
@@ -760,16 +773,17 @@ export default class Deck {
       // height,
       useDevicePixels,
       autoResizeViewport: false,
-      gl,
-      onCreateContext: opts =>
-        createGLContext({
+      device: this.device,
+      onCreateDevice: props =>
+        luma.createDevice({
           ...glOptions,
-          ...opts,
+          ...props,
           canvas: this.canvas,
           debug,
+          // @ts-expect-error Note can use device.lost
           onContextLost: () => this._onContextLost()
         }),
-      onInitialize: context => this._setGLContext(context.gl),
+      onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
       // onBeforeRender,
@@ -883,9 +897,8 @@ export default class Deck {
     }
   }
 
-  /** @deprecated */
-  private _setGLContext(gl: WebGLRenderingContext) {
-    this.device = WebGLDevice.attach(gl);
+  private _setDevice(device: Device) {
+    this.device = device;
 
     if (this.layerManager) {
       return;
@@ -893,10 +906,12 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      debugger
-      this.canvas = gl.canvas;
+      // @ts-expect-error
+      this.canvas = device.canvasContext.canvas;
       // @ts-expect-error - Currently luma.gl v9 does not expose these options
-      instrumentGLContext(gl, {enable: true, copyState: true});
+      // All WebGLDevice contexts are instrumented, but it seems the device
+      // should have a method to start state tracking even if not enabled?
+      instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
     this.tooltip = new Tooltip(this.canvas);
@@ -910,14 +925,17 @@ export default class Deck {
     });
 
     this.props.onDeviceInitialized(this.device);
-    this.props.onWebGLInitialized(gl);
+    if (this.device instanceof WebGLDevice) {
+      // Legacy callback - warn?
+      this.props.onWebGLInitialized(this.device.gl);
+    }
 
     // timeline for transitions
     const timeline = new Timeline();
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || gl.canvas, {
+    this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,
       recognizerOptions: this.props.eventRecognizerOptions,
       events: {
@@ -982,7 +1000,7 @@ export default class Deck {
   ) {
     const {device, gl} = this.layerManager?.context;
 
-    setParameters(gl, this.props.parameters);
+    setParameters(device, this.props.parameters);
 
     this.props.onBeforeRender({device, gl});
 

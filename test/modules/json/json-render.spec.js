@@ -21,4 +21,3 @@ test('JSONConverter#render', t => {
     ...deckProps
   });
 });
-

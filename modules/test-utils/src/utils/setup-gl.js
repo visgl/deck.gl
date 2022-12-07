@@ -17,4 +17,3 @@ export const gl = createTestContext({
 // // console.log('Context', globalThis.glContext);
 
 globalThis.glContext = globalThis.glContext || gl;
-

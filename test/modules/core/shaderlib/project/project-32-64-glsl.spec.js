@@ -262,7 +262,8 @@ test.skip('project32&64#vs', t => {
       testCase.tests.forEach(c => {
         const expected = (usefp64 && c.output64) || c.output;
         // TODO - luma v9 - switch to device.info.gpu ?
-        const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => device.info.vendor.indexOf(gpu) >= 0);
+        const skipOnGPU =
+          c.skipGPUs && c.skipGPUs.some(gpu => device.info.vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(device) && !skipOnGPU) {
           // Reduced precision tolerencewhen using 64 bit project module.

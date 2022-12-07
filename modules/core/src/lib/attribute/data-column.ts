@@ -146,9 +146,10 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
-
       bufferType =
-        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32)
+          ? GL.UNSIGNED_INT
+          : GL.UNSIGNED_SHORT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }
