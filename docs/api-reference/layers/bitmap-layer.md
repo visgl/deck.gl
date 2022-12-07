@@ -146,7 +146,7 @@ The desaturation of the bitmap. Between `[0, 1]`. `0` being the original color a
 
 - Default `[0, 0, 0, 0]`
 
-The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in the `[0, 255]` range.
+The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in the `[0, 255]` range. Equivalent to overlaying the image over a background in this color.
 
 ##### `tintColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
