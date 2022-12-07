@@ -7,6 +7,19 @@ import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';
 const isObject = value => value && typeof value === 'object';
 
 export default class JSONConfiguration {
+    typeKey = TYPE_KEY;
+    functionKey = FUNCTION_KEY;
+    log = console; // eslint-disable-line
+    classes = {};
+    reactComponents = {};
+    enumerations = {};
+    constants = {};
+    functions = {};
+  // TODO - this needs to be simpler, function conversion should be built in
+    convertFunction = parseExpressionString;
+    preProcessClassProps = (Class, props) => props;
+    postProcessConvertedJson = json => json;
+
   constructor(...configurations) {
     // Initialize config with default values
     this.typeKey = TYPE_KEY;
