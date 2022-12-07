@@ -2,6 +2,8 @@ import {lerp} from '@math.gl/core';
 import Transition from './transition';
 
 export default class CPUInterpolationTransition extends Transition {
+  _value;
+
   get value() {
     return this._value;
   }

@@ -53,6 +53,9 @@ function distance(value1, value2) {
 }
 
 export default class CPUSpringTransition extends Transition {
+  _prevValue;
+  _currValue;
+
   get value() {
     return this._currValue;
   }
