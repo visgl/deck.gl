@@ -30,33 +30,23 @@ export function getDeckInstance({
     return map.__deck;
   }
 
+  // Only initialize certain props once per context
   const customRender = deck?.props._customRender;
-  const useDevicePixels =
-    deck && 'useDevicePixels' in deck.props ? deck.props.useDevicePixels : true;
 
-  const deckProps: DeckProps = {
-    useDevicePixels,
-    _customRender: () => {
-      map.triggerRepaint();
-      // customRender may be subscribed by DeckGL React component to update child props
-      // make sure it is still called
-      // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
-      // Rerender will be triggered by MapboxLayer's render()
-      customRender?.('');
-    },
-    // TODO: import these defaults from a single source of truth
-    parameters: {
-      depthMask: true,
-      depthTest: true,
-      blend: true,
-      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthFunc: gl.LEQUAL,
-      blendEquation: gl.FUNC_ADD,
-      ...(deck && deck.props.parameters)
-    },
-    views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
-  };
+  const deckProps = getDeckProps({
+    gl,
+    currProps: {
+      ...deck?.props,
+      _customRender: () => {
+        map.triggerRepaint();
+        // customRender may be subscribed by DeckGL React component to update child props
+        // make sure it is still called
+        // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
+        // Rerender will be triggered by MapboxLayer's render()
+        customRender?.('');
+      }
+    }
+  });
 
   let deckInstance: Deck;
 
@@ -95,6 +85,29 @@ export function getDeckInstance({
   });
 
   return deckInstance;
+}
+
+export function getDeckProps({gl, currProps}: {gl: WebGLRenderingContext; currProps: DeckProps}) {
+  const useDevicePixels = 'useDevicePixels' in currProps ? currProps.useDevicePixels : true;
+
+  const nextProps: DeckProps = {
+    ...currProps,
+    useDevicePixels,
+    // TODO: import these defaults from a single source of truth
+    parameters: {
+      depthMask: true,
+      depthTest: true,
+      blend: true,
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: gl.LEQUAL,
+      blendEquation: gl.FUNC_ADD,
+      ...currProps.parameters
+    },
+    views: currProps.views || [new MapView({id: 'mapbox'})]
+  };
+
+  return nextProps;
 }
 
 export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {

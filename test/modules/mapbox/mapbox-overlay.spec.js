@@ -2,10 +2,10 @@ import test from 'tape-promise/tape';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import GL from '@luma.gl/constants';
 
 import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
+import {DEFAULT_PARAMETERS} from './fixtures';
 
 test('MapboxOverlay#overlaid', t => {
   const map = new MockMapboxMap({
@@ -33,8 +33,13 @@ test('MapboxOverlay#overlaid', t => {
     }),
     'View state is set correctly'
   );
+  t.false('viewState' in overlay._props, 'Overlay viewState is not set');
 
-  t.equals(overlay._deck.props.useDevicePixels, true, 'useDevicePixels is set correctly');
+  t.true(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly');
+  t.false('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set');
+
+  t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+  t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
   overlay.setProps({
     layers: [new ScatterplotLayer()]
@@ -57,6 +62,75 @@ test('MapboxOverlay#overlaid', t => {
       'View state is updated'
     );
 
+    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+
+    map.removeControl(overlay);
+
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+
+    t.end();
+  });
+});
+
+test('MapboxOverlay#overlaidNoIntitalLayers', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({});
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  t.ok(deck, 'Deck instance is created');
+
+  t.ok(
+    objectEqual(deck.props.viewState, {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 14,
+      bearing: 0,
+      pitch: 0,
+      padding: {left: 0, right: 0, top: 0, bottom: 0},
+      repeat: true
+    }),
+    'View state is set correctly'
+  );
+
+  t.true(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly');
+  t.false('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set');
+
+  t.is(deck.props.layers.length, 0, 'Layers are empty');
+  t.false('layers' in overlay._props, 'Overlay layers arent set');
+
+  t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+  t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+
+  overlay.setProps({
+    layers: [new ScatterplotLayer()]
+  });
+
+  map.setCenter({lng: 0.45, lat: 51.47});
+  map.setZoom(4);
+  map.triggerRepaint();
+  map.on('render', () => {
+    t.ok(
+      objectEqual(deck.props.viewState, {
+        longitude: 0.45,
+        latitude: 51.47,
+        zoom: 4,
+        bearing: 0,
+        pitch: 0,
+        padding: {left: 0, right: 0, top: 0, bottom: 0},
+        repeat: true
+      }),
+      'View state is updated'
+    );
+
+    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
+
     map.removeControl(overlay);
 
     t.notOk(overlay._deck, 'Deck instance is finalized');
@@ -74,8 +148,8 @@ test('MapboxOverlay#interleaved', t => {
     interleaved: true,
     layers: [new ScatterplotLayer({id: 'poi'})],
     parameters: {
-      depthMask: false, // User defined parameters should override defaults.
-      cull: true // Expected to merge in.
+      depthMask: false,
+      cull: true
     },
     useDevicePixels: 1
   });
@@ -95,23 +169,26 @@ test('MapboxOverlay#interleaved', t => {
       repeat: true
     };
     t.ok(objectEqual(overlay._deck.props.viewState, VIEW_STATE), 'View state is set correcly');
-    t.ok(objectEqual(overlay._props.viewState, VIEW_STATE), 'View state is in sync');
+    t.false('viewState' in overlay._props, 'Overlay viewState arent set');
 
-    const PARAMETERS = {
-      depthMask: false,
-      depthTest: true,
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthFunc: GL.LEQUAL,
-      blendEquation: GL.FUNC_ADD,
-      cull: true
-    };
-    t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
-    t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
+    t.ok(
+      objectEqual(overlay._deck.props.parameters, {
+        ...DEFAULT_PARAMETERS,
+        depthMask: false,
+        cull: true
+      }),
+      'Parameters are set correctly'
+    );
+    t.ok(
+      objectEqual(overlay._props.parameters, {
+        depthMask: false, // User defined parameters should override defaults.
+        cull: true // Expected to merge in.
+      }),
+      'Overlay parameters are intact'
+    );
 
-    t.equals(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
-    t.equals(overlay._props.useDevicePixels, 1, 'useDevicePixels are in sync');
+    t.is(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
+    t.is(overlay._props.useDevicePixels, 1, 'useDevicePixels are intact');
 
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
 
@@ -142,36 +219,35 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
   t.ok(overlay._deck, 'Deck instance is created');
 
   map.on('render', () => {
-    t.equals(overlay._deck.props.layers.length, 0, 'Layers are empty');
-    t.equals(overlay._props.layers.length, 0, 'Layers are in sync');
+    t.is(overlay._deck.props.layers.length, 0, 'Layers are empty');
+    t.false('layers' in overlay._props, 'Overlay layers arent set');
 
-    const PARAMETERS = {
-      depthMask: true,
-      depthTest: true,
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthFunc: GL.LEQUAL,
-      blendEquation: GL.FUNC_ADD
-    };
-    t.ok(objectEqual(overlay._deck.props.parameters, PARAMETERS), 'Parameters are set correctly');
-    t.ok(objectEqual(overlay._props.parameters, PARAMETERS), 'Parameters are in sync');
+    t.ok(
+      objectEqual(overlay._deck.props.parameters, DEFAULT_PARAMETERS),
+      'Parameters are set correctly'
+    );
+    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
-    t.equals(overlay._deck.props.useDevicePixels, false, 'useDevicePixels is set correctly');
-    t.equals(overlay._props.useDevicePixels, false, 'useDevicePixels are in sync');
+    t.true(overlay._deck.props.useDevicePixels === false, 'useDevicePixels is set correctly');
+    t.true(overlay._props.useDevicePixels === false, 'useDevicePixels are intact');
 
     overlay.setProps({
-      layers: [new ScatterplotLayer({id: 'cities'})]
+      layers: [new ScatterplotLayer({id: 'cities'})],
+      parameters: {
+        depthMask: false
+      }
     });
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
-      objectEqual(overlay._deck.props.parameters, PARAMETERS),
-      'Parameters are set correctly after first layer'
+      objectEqual(overlay._deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
+      'Parameters are updated correctly'
     );
     t.ok(
-      objectEqual(overlay._props.parameters, PARAMETERS),
-      'Parameters are still in sync after first layer'
+      objectEqual(overlay._props.parameters, {
+        depthMask: false
+      }),
+      'Overlay parameters are updated correctly'
     );
 
     map.removeControl(overlay);
