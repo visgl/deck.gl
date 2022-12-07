@@ -36,7 +36,6 @@ import {WebGLDevice} from '@luma.gl/webgl';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
-  createGLContext,
   instrumentGLContext,
   setParameters,
   Timeline,
@@ -759,7 +758,7 @@ export default class Deck {
     const {
       // width,
       // height,
-      gl,
+      deviceProps,
       glOptions,
       debug,
       onError,
@@ -777,6 +776,7 @@ export default class Deck {
       onCreateDevice: props =>
         luma.createDevice({
           ...glOptions,
+          ...deviceProps,
           ...props,
           canvas: this.canvas,
           debug,

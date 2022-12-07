@@ -192,7 +192,7 @@ export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
 
     // TODO shouldn't happen, this is an async prop...
     if (typeof image === 'string') {
-      return;
+      throw new Error('string');
     }
 
     const {width, height} = image;

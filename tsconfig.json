@@ -53,7 +53,8 @@
     }
   },
   "include": [
-    "modules"
+    "modules",
+    "test/modules"
   ],
   "exclude": [
   ]
