@@ -1,4 +1,3 @@
-
 import {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
 import {Model, Texture2D, Framebuffer, isWebGL2} from '@luma.gl/core';
@@ -53,7 +52,7 @@ void main() {
 export function supportsFloatTarget(device: Device): boolean {
   // @ts-expect-error
   const gl = device.gl;
-  
+
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
   return Boolean(
     gl.getExtension('EXT_float_blend') &&
@@ -87,11 +86,7 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(
-  device: Device,
-  shaderOptions: any,
-  useFloatTarget: boolean
-): Model {
+export function getModel(device: Device, shaderOptions: any, useFloatTarget: boolean): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;

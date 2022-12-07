@@ -42,7 +42,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
   initializeState() {
     super.initializeState();
 
-    const [drawingBufferWidth, drawingBufferHeight] = this.context.device.canvasContext.getDra
+    const [drawingBufferWidth, drawingBufferHeight] = this.context.device.canvasContext.getDra;
 
     const textureOpts = {
       type: GL.FLOAT,
@@ -170,7 +170,10 @@ export default class WBOITLayer extends SolidPolygonLayer {
       fs: oitBlendFs,
       drawMode: GL.TRIANGLE_STRIP,
       attributes: {
-        positions: [new Buffer(this.context.device, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])), {size: 2}]
+        positions: [
+          new Buffer(this.context.device, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])),
+          {size: 2}
+        ]
       },
       vertexCount: 4,
       uniforms: {

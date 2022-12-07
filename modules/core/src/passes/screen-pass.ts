@@ -31,7 +31,8 @@ export default class ScreenPass extends Pass {
   }
 
   render(params: ScreenPassRenderOptions): void {
-    const [drawingBufferWidth, drawingBufferHeight] = this.device.canvasContext.getDrawingBufferSize()
+    const [drawingBufferWidth, drawingBufferHeight] =
+      this.device.canvasContext.getDrawingBufferSize();
     setParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
 
     // TODO change to device when luma.gl is fixed
