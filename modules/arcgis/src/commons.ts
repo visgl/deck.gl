@@ -6,7 +6,8 @@ import {Deck} from '@deck.gl/core';
 import {Model, Buffer, Framebuffer, instrumentGLContext, withParameters} from '@luma.gl/core';
 
 export function initializeResources(device: Device) {
-  instrumentGLContext(device);
+  // @ts-expect-error
+  instrumentGLContext(device.gl);
 
   this.buffer = new Buffer(device, new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
 
@@ -30,6 +31,7 @@ export function initializeResources(device: Device) {
       }
     `,
     attributes: {
+      // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
     vertexCount: 4,
@@ -94,6 +96,7 @@ export function render({gl, width, height, viewState}) {
       viewport: [0, 0, width, height]
     },
     () => {
+      // eslint-disable-next-line camelcase
       this.model.setUniforms({u_texture: this.deckFbo}).draw();
     }
   );

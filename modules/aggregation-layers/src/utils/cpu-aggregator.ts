@@ -21,7 +21,8 @@ import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
 import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
-function nop() {}
+// @eslint-disable-next-line @typescript-eslint/no-empty-function
+function noop() {}
 
 const dimensionSteps = ['getBins', 'getDomain', 'getScaleFunc'];
 const defaultDimensions = [
@@ -122,27 +123,30 @@ const defaultDimensions = [
 ];
 const defaultGetCellSize = props => props.cellSize;
 export default class CPUAggregator {
-  constructor(opts) {
-    this.state = {
-      layerData: {},
-      dimensions: {
-        // color: {
-        //   getValue: null,
-        //   domain: null,
-        //   sortedBins: null,
-        //   scaleFunc: nop
-        // },
-        // elevation: {
-        //   getValue: null,
-        //   domain: null,
-        //   sortedBins: null,
-        //   scaleFunc: nop
-        // }
-      }
-    };
-    this.changeFlags = {};
-    this.dimensionUpdaters = {};
+  state = {
+    layerData: {},
+    dimensions: {
+      // color: {
+      //   getValue: null,
+      //   domain: null,
+      //   sortedBins: null,
+      //   scaleFunc: noop
+      // },
+      // elevation: {
+      //   getValue: null,
+      //   domain: null,
+      //   sortedBins: null,
+      //   scaleFunc: noop
+      // }
+    }
+  };
+  changeFlags = {};
+  dimensionUpdaters = {};
 
+  _getCellSize;
+  _getAggregator;
+
+  constructor(opts) {
     this._getCellSize = opts.getCellSize || defaultGetCellSize;
     this._getAggregator = opts.getAggregator;
     this._addDimension(opts.dimensions || defaultDimensions);
@@ -259,7 +263,7 @@ export default class CPUAggregator {
         getValue: null,
         domain: null,
         sortedBins: null,
-        scaleFunc: nop
+        scaleFunc: noop
       };
     });
   }
@@ -484,7 +488,7 @@ export default class CPUAggregator {
 
   getAccessor(dimensionKey) {
     if (!this.dimensionUpdaters.hasOwnProperty(dimensionKey)) {
-      return nop;
+      return noop;
     }
     return this.dimensionUpdaters[dimensionKey].attributeAccessor;
   }

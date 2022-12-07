@@ -72,25 +72,34 @@ const config = deepMerge(defaultConfig, {
         '@typescript-eslint/no-unsafe-return': 0,
         '@typescript-eslint/no-unsafe-call': 0,
         '@typescript-eslint/no-empty-interface': 0,
-        '@typescript-eslint/restrict-plus-operands': 0
+        '@typescript-eslint/restrict-plus-operands': 0,
+        '@typescript-eslint/no-empty-function': 0,
+        '@typescript-eslint/unbound-method': 1
       }
-    }
+    },
     // tests are run with aliases set up in node and webpack.
     // This means lint will not find the imported files and generate false warnings
-    // {
-    //   // scripts use devDependencies
-    //   files: ['**/test/**/*.js', '**/scripts/**/*.js', '*.config.js', '*.config.local.js'],
-    //   rules: {
-    //     'import/no-unresolved': 0,
-    //     'import/no-extraneous-dependencies': 0
-    //   }
-    // },
-    // {
-    //   files: ['examples/**/*.js'],
-    //   rules: {
-    //     'import/no-unresolved': 0
-    //   }
-    // }
+    {
+      // scripts use devDependencies
+      files: [
+        '**/test/**/*.ts',
+        '**/test/**/*.js',
+        '**/scripts/**/*.js',
+        '*.config.js',
+        '*.config.local.js'
+      ],
+      rules: {
+        'import/no-unresolved': 0,
+        'import/no-extraneous-dependencies': 0,
+        '@typescript-eslint/no-empty-function': 0
+      }
+    },
+    {
+      files: ['examples/**/*.js'],
+      rules: {
+        'import/no-unresolved': 0
+      }
+    }
   ],
 
   settings: {
