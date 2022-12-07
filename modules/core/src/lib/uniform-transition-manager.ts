@@ -9,8 +9,10 @@ const TRANSITION_TYPES = {
 };
 
 export default class UniformTransitionManager {
+  transitions = new Map();
+  timeline;
+
   constructor(timeline) {
-    this.transitions = new Map();
     this.timeline = timeline;
   }
 

@@ -1,6 +1,6 @@
 /* global document */
 const state = {
-  onIninitialize: _ => _,
+  onInitialize: _ => _,
   onFinalize: _ => _,
   onMessage: null
 };
@@ -19,10 +19,13 @@ export default class Transport {
     // this._flushQueuedConnections();
   }
 
+  name: string;
+  _messageQueue = [];
+  userData = {};
+  _destroyed: boolean = false;
+
   constructor(name = 'Transport') {
     this.name = name;
-    this._messageQueue = [];
-    this.userData = {};
   }
 
   /**
