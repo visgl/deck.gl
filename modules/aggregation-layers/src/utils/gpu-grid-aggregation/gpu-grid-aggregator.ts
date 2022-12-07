@@ -164,7 +164,8 @@ export default class GPUGridAggregator {
     this.device = device;
 
     // gl_InstanceID usage in min/max calculation shaders
-    this._hasGPUSupport = this.device.info.type === 'webgl2' &&
+    this._hasGPUSupport =
+      this.device.info.type === 'webgl2' &&
       hasFeatures(this.device, [
         FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
         FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture

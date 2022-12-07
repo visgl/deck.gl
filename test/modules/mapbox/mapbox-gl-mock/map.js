@@ -100,7 +100,7 @@ export default class Map extends Evented {
     this.style.addLayer(layer, beforeId);
 
     if (layer.type === 'custom') {
-      layer.onAdd(this, device);
+      layer.onAdd(this, gl);
     }
   }
   moveLayer(layerId, beforeId) {

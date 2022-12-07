@@ -74,8 +74,8 @@ export default class LayerManager {
   private _debug: boolean = false;
 
   /**
-   * @param device 
-   * @param param1 
+   * @param device
+   * @param param1
    */
   // eslint-disable-next-line
   constructor(device: Device, props: LayerManagerProps) {
