@@ -262,7 +262,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT = {}> extends Laye
       scenegraphData = props.scenegraph;
     }
 
-    const options = {layer: this, devicePixelRatio, device: this.context.device};
+    const options = {layer: this, device: this.context.device};
     const scenegraph = props.getScene(scenegraphData, options);
     const animator = props.getAnimator(scenegraphData, options);
 

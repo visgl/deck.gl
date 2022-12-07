@@ -36,7 +36,6 @@ import {WebGLDevice} from '@luma.gl/webgl';
 import GL from '@luma.gl/constants';
 import {
   AnimationLoop,
-  createGLContext,
   instrumentGLContext,
   setParameters,
   Timeline,
@@ -759,7 +758,7 @@ export default class Deck {
     const {
       // width,
       // height,
-      gl,
+      deviceProps,
       glOptions,
       debug,
       onError,
@@ -777,6 +776,7 @@ export default class Deck {
       onCreateDevice: props =>
         luma.createDevice({
           ...glOptions,
+          ...deviceProps,
           ...props,
           canvas: this.canvas,
           debug,
@@ -906,8 +906,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      // @ts-expect-error
-      this.canvas = device.canvasContext.canvas;
+      this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
       // @ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
       // should have a method to start state tracking even if not enabled?

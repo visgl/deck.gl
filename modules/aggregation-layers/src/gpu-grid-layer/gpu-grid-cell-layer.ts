@@ -24,7 +24,6 @@ import {
   project32,
   gouraudLighting,
   picking,
-  LayerContext,
   LayerProps,
   DefaultProps
 } from '@deck.gl/core';

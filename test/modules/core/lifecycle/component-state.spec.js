@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
-import {device, gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const EMPTY_ARRAY = Object.freeze([]);
 
