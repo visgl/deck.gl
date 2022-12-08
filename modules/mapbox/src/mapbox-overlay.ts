@@ -50,15 +50,7 @@ export default class MapboxOverlay implements IControl {
     Object.assign(this._props, props);
 
     if (this._deck) {
-      this._deck.setProps(
-        this._interleaved
-          ? getDeckProps({
-              // @ts-ignore non-public map property
-              gl: this._map.painter.context.gl,
-              currProps: this._props
-            })
-          : this._props
-      );
+      this._deck.setProps(this._interleaved ? getDeckProps(this._props) : this._props);
     }
   }
 
