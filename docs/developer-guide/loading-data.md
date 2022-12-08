@@ -52,6 +52,8 @@ deck.gl uses [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/
 The image is decoded into an [ImageBitmap](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap) if the browser supports it (Firefox, Chrome, Edge) for better performance. You can override the default [options](https://loaders.gl/modules/images/docs/api-reference/image-loader#magebitmap-options) for the `createImageBitmap` API as follows:
 
 ```js
+import {IconLayer} from 'deck.gl';
+
 new IconLayer({
   iconAtlas: '/path/to/image.png',
   loadOptions: {
