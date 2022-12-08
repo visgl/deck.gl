@@ -51,11 +51,13 @@ export default class MapboxOverlay implements IControl {
 
     if (this._deck) {
       this._deck.setProps(
-        getDeckProps({
-          // @ts-ignore non-public map property
-          gl: this._map.painter.context.gl,
-          currProps: this._props
-        })
+        this._interleaved
+          ? getDeckProps({
+              // @ts-ignore non-public map property
+              gl: this._map.painter.context.gl,
+              currProps: this._props
+            })
+          : this._props
       );
     }
   }
@@ -77,15 +79,10 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
-    this._deck = getDeckInstance({
-      map,
-      // @ts-ignore non-public map property
-      gl: map.painter.context.gl,
-      deck: new Deck({
-        ...this._props,
-        parent: container,
-        viewState: getViewState(map)
-      })
+    this._deck = new Deck({
+      ...this._props,
+      parent: container,
+      viewState: getViewState(map)
     });
 
     map.on('resize', this._updateContainerSize);

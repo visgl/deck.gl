@@ -38,7 +38,7 @@ test('MapboxOverlay#overlaid', t => {
   t.true(deck.props.useDevicePixels === true, 'useDevicePixels is set correctly');
   t.false('useDevicePixels' in overlay._props, 'Overlay useDevicePixels is not set');
 
-  t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+  t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
   t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
   overlay.setProps({
@@ -61,9 +61,6 @@ test('MapboxOverlay#overlaid', t => {
       }),
       'View state is updated'
     );
-
-    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
-    t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
     map.removeControl(overlay);
 
@@ -104,7 +101,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   t.is(deck.props.layers.length, 0, 'Layers are empty');
   t.false('layers' in overlay._props, 'Overlay layers arent set');
 
-  t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+  t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
   t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
   overlay.setProps({
@@ -128,7 +125,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
       'View state is updated'
     );
 
-    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
+    t.ok(objectEqual(deck.props.parameters, {}), 'Parameters are empty');
     t.false('parameters' in overlay._props, 'Overlay parameters arent set');
 
     map.removeControl(overlay);
