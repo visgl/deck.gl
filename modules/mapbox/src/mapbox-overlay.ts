@@ -1,5 +1,5 @@
 import {Deck, assert} from '@deck.gl/core';
-import {getViewState, getDeckInstance, getDeckProps} from './deck-utils';
+import {getViewState, getDeckInstance, getInterleavedProps} from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -50,7 +50,7 @@ export default class MapboxOverlay implements IControl {
     Object.assign(this._props, props);
 
     if (this._deck) {
-      this._deck.setProps(this._interleaved ? getDeckProps(this._props) : this._props);
+      this._deck.setProps(this._interleaved ? getInterleavedProps(this._props) : this._props);
     }
   }
 

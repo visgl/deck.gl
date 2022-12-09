@@ -34,7 +34,7 @@ export function getDeckInstance({
   // Only initialize certain props once per context
   const customRender = deck?.props._customRender;
 
-  const deckProps = getDeckProps({
+  const deckProps = getInterleavedProps({
     ...deck?.props,
     _customRender: () => {
       map.triggerRepaint();
@@ -85,7 +85,7 @@ export function getDeckInstance({
   return deckInstance;
 }
 
-export function getDeckProps(currProps: DeckProps) {
+export function getInterleavedProps(currProps: DeckProps) {
   const useDevicePixels = 'useDevicePixels' in currProps ? currProps.useDevicePixels : true;
 
   const nextProps: DeckProps = {
