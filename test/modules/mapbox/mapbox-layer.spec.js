@@ -7,6 +7,7 @@ import {gl} from '@deck.gl/test-utils';
 import {equals} from '@math.gl/core';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
+import {DEFAULT_PARAMETERS} from './fixtures';
 
 class TestScatterplotLayer extends ScatterplotLayer {
   draw(params) {
@@ -53,6 +54,7 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
     );
     t.deepEqual(deck.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
     t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
+    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
 
     t.ok(
       objectEqual(deck.props.viewState, {
@@ -112,7 +114,10 @@ test('MapboxLayer#external Deck', t => {
         getRadius: 10,
         getFillColor: [255, 0, 0]
       })
-    ]
+    ],
+    parameters: {
+      depthTest: false
+    }
   });
 
   const layer = new MapboxLayer({id: 'scatterplot-layer-0', deck});
@@ -127,6 +132,10 @@ test('MapboxLayer#external Deck', t => {
     t.is(layer.deck, deck, 'Used external Deck instance');
     t.ok(deck.userData.mapboxVersion, 'Mapbox version is parsed');
     t.ok(deck.props.views[0].id === 'mapbox', 'mapbox view exists');
+    t.ok(
+      objectEqual(deck.props.parameters, {...DEFAULT_PARAMETERS, depthTest: false}),
+      'Parameters are set correctly'
+    );
 
     map.fire('render');
     t.pass('Map render does not throw');
@@ -192,6 +201,8 @@ test('MapboxLayer#external Deck multiple views supplied', t => {
 
     const layerDefaultView = new MapboxLayer({id: 'scatterplot-map', deck});
     map.addLayer(layerDefaultView);
+    t.is(layerDefaultView.deck, deck, 'Used external Deck instance');
+    t.ok(objectEqual(deck.props.parameters, DEFAULT_PARAMETERS), 'Parameters are set correctly');
 
     map.on('render', () => {
       t.deepEqual(
