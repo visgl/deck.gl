@@ -4,6 +4,7 @@ import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
+import GL from '@luma.gl/constants';
 
 type UserData = {
   isExternal: boolean;
@@ -30,10 +31,11 @@ export function getDeckInstance({
     return map.__deck;
   }
 
+  // Only initialize certain props once per context
   const customRender = deck?.props._customRender;
 
-  const deckProps: DeckProps = {
-    useDevicePixels: true,
+  const deckProps = getInterleavedProps({
+    ...deck?.props,
     _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props
@@ -41,19 +43,8 @@ export function getDeckInstance({
       // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
       // Rerender will be triggered by MapboxLayer's render()
       customRender?.('');
-    },
-    // TODO: import these defaults from a single source of truth
-    parameters: {
-      depthMask: true,
-      depthTest: true,
-      blend: true,
-      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthFunc: gl.LEQUAL,
-      blendEquation: gl.FUNC_ADD
-    },
-    views: (deck && deck.props.views) || [new MapView({id: 'mapbox'})]
-  };
+    }
+  });
 
   let deckInstance: Deck;
 
@@ -92,6 +83,29 @@ export function getDeckInstance({
   });
 
   return deckInstance;
+}
+
+export function getInterleavedProps(currProps: DeckProps) {
+  const useDevicePixels = 'useDevicePixels' in currProps ? currProps.useDevicePixels : true;
+
+  const nextProps: DeckProps = {
+    ...currProps,
+    useDevicePixels,
+    // TODO: import these defaults from a single source of truth
+    parameters: {
+      depthMask: true,
+      depthTest: true,
+      blend: true,
+      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      polygonOffsetFill: true,
+      depthFunc: GL.LEQUAL,
+      blendEquation: GL.FUNC_ADD,
+      ...currProps.parameters
+    },
+    views: currProps.views || [new MapView({id: 'mapbox'})]
+  };
+
+  return nextProps;
 }
 
 export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {
