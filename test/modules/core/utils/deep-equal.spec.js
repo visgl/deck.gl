@@ -37,7 +37,7 @@ const TEST_CASES = [
   }
 ];
 
-test.only('utils#deepEqual', t => {
+test('utils#deepEqual', t => {
   TEST_CASES.forEach(testCase => {
     const result = deepEqual(testCase.a, testCase.b, testCase.recurse);
     t.is(result, testCase.output, `Should ${testCase.output ? '' : 'not '}be equal`);
