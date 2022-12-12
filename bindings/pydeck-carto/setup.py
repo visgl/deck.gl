@@ -19,11 +19,11 @@ setup(
     packages=find_packages(exclude=["examples", "tests"]),
     python_requires=">=3.7",
     install_requires=[
-        "pydeck>=0.8.0b4",
-        "carto-auth>=0.1.0b5",
+        "pydeck>=0.8.0",
+        "carto-auth>=0.1.0",
     ],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Framework :: Jupyter",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",

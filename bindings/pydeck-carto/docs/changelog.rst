@@ -1,10 +1,15 @@
 CHANGELOG
 =========
 
-0.1.0
------
+Releases and associated GitHub PRs for pydeck-carto are documented here.
 
-* Support for authentication
-* Support for styling functions
-* Support for notify error
-* Support for rendering CartoLayer
+0.1 Releases
+------------
+
+0.1.0 - Nov 04 2022
+^^^^^^^^^^^^^^^^^^^
+- Add register_carto_layer function: integration with pydeck (CartoLayer).
+- Add get_layer_credentials function: integration with carto-auth.
+- Add layer enums: MapType, CartoConnection, GeoColumnType.
+- Add styling functions: color_bins, color_categories, color continuous.
+- Add implicit on_data_error notifier

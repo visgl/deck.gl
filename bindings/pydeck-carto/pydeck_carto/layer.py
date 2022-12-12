@@ -82,9 +82,10 @@ def get_layer_credentials(carto_auth) -> dict:
     The return object has the following structure:
     ``{"apiVersion": "v3", "apiBaseUrl": "...", "accessToken": "...",}``
     """
+    api_base_url = carto_auth.get_api_base_url()
     access_token = carto_auth.get_access_token()
     return {
         "apiVersion": "v3",
-        "apiBaseUrl": carto_auth._api_base_url,
+        "apiBaseUrl": api_base_url,
         "accessToken": access_token,
     }
