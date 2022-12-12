@@ -146,6 +146,12 @@ const inject = {
     #endif
   `,
 
+  'vs:#main-end': `
+    if (dataFilter_value == 0.0) {
+      gl_Position = vec4(-2, -2, -2, 1);
+    }
+  `,
+
   'vs:DECKGL_FILTER_SIZE': `
     if (filter_transformSize) {
       size = size * dataFilter_value;
