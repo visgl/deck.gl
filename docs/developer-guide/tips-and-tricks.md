@@ -62,7 +62,7 @@ The `Deck` class supports the following experimental props to aggressively reduc
 - [_pickable](/docs/api-reference/core/deck.md#_pickable)
 - [_typedArrayManagerProps](/docs/api-reference/core/deck.md#_typedArrayManagerProps)
 
-The app can sacrefice certain features and/or runtime performance in exchange for a smaller memory footprint:
+The app can sacrifice certain features and/or runtime performance in exchange for a smaller memory footprint:
 
 ```js
 new Deck({
