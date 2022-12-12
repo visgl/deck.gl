@@ -81,7 +81,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
     return this.propsInTransition;
   }
 
-  // Process the vewiport change, either ignore or trigger a new transition.
+  // Process the viewport change, either ignore or trigger a new transition.
   // Return true if a new transition is triggered, false otherwise.
   processViewStateChange(nextProps: TransitionProps) {
     let transitionTriggered = false;
