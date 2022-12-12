@@ -14,7 +14,7 @@ help:
 	@echo "pre-commit - run pre-commit hook for pydeck"
 
 init:
-	source $(BIN)/activate; \
+	. $(BIN)/activate; \
 	yarn bootstrap; \
 	$(BIN)pip install -r requirements/requirements.txt; \
 	$(BIN)pip install -r requirements/requirements-dev.txt; \
