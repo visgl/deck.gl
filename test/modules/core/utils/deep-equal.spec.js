@@ -16,12 +16,18 @@ const TEST_CASES = [
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     output: false
+  },
+  {
+    a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    recurse: true,
+    output: true
   }
 ];
 
-test('utils#deepEqual', t => {
+test.only('utils#deepEqual', t => {
   TEST_CASES.forEach(testCase => {
-    const result = deepEqual(testCase.a, testCase.b);
+    const result = deepEqual(testCase.a, testCase.b, testCase.recurse);
     t.is(result, testCase.output, `Should ${testCase.output ? '' : 'not '}be equal`);
   });
 

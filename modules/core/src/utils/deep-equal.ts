@@ -1,5 +1,5 @@
 // Partial deep equal (only recursive on arrays)
-export function deepEqual(a: any, b: any): boolean {
+export function deepEqual(a: any, b: any, recurse: boolean = false): boolean {
   if (a === b) {
     return true;
   }
@@ -9,9 +9,8 @@ export function deepEqual(a: any, b: any): boolean {
   for (const key in a) {
     const aValue = a[key];
     const bValue = b[key];
-    const equals =
-      aValue === bValue ||
-      (Array.isArray(aValue) && Array.isArray(bValue) && deepEqual(aValue, bValue));
+    recurse = recurse || (Array.isArray(aValue) && Array.isArray(bValue));
+    const equals = aValue === bValue || (recurse && deepEqual(aValue, bValue));
     if (!equals) {
       return false;
     }
