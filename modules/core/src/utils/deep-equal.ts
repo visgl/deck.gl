@@ -6,7 +6,7 @@ export function deepEqual(a: any, b: any, recursive: boolean = false): boolean {
   if (!a || !b) {
     return false;
   }
-  const keys = Array.isArray(a) ? a : [...new Set([...Object.keys(a), ...Object.keys(b)])];
+  const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])];
   for (const key of keys) {
     const aValue = a[key];
     const bValue = b[key];
