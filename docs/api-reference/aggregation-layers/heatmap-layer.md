@@ -5,7 +5,7 @@ import {HeatmapLayerDemo} from 'website-components/doc-demos/aggregation-layers'
 
 # HeatmapLayer
 
-`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use)) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
+`HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
 
 ```js
 import DeckGL from '@deck.gl/react';
