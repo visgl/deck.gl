@@ -73,6 +73,7 @@ type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
   optional?: boolean;
   compare?: boolean;
+  deep?: boolean;
 };
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
@@ -145,7 +146,7 @@ const TYPE_DEFINITIONS = {
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? deepEqual(value1, value2) : value1 === value2;
+      return propType.compare ? deepEqual(value1, value2, propType.deep) : value1 === value2;
     }
   },
   function: {
