@@ -21,6 +21,7 @@
 import test from 'tape-catch';
 import {
   Layer,
+  LayerExtension,
   AttributeManager,
   COORDINATE_SYSTEM,
   MapView,
@@ -107,6 +108,13 @@ class SubLayer3 extends Layer {
 
 SubLayer3.layerName = 'SubLayer2';
 
+class Extension extends LayerExtension {}
+Extension.extensionName = 'LayerExtension';
+Extension.defaultProps = {
+  extEnabled: true,
+  getExtValue: {type: 'accessor', value: 1}
+};
+
 test('Layer#constructor', t => {
   for (const tc of LAYER_CONSTRUCT_TEST_CASES) {
     const layer = Array.isArray(tc.props) ? new Layer(...tc.props) : new Layer(tc.props);
@@ -165,7 +173,7 @@ test('SubLayer3#constructor (no layerName, no defaultProps)', t => {
 
 test('Layer#getNumInstances', t => {
   for (const dataVariant of dataVariants) {
-    const layer = new Layer(Object.assign({}, LAYER_PROPS, {data: dataVariant.data}));
+    const layer = new Layer(LAYER_PROPS, {data: dataVariant.data});
     t.equal(layer.getNumInstances(), dataVariant.size);
   }
   t.end();
@@ -176,31 +184,31 @@ test('Layer#validateProps', t => {
   layer.validateProps();
   t.pass('Layer props are valid');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: 1}));
+  layer = new SubLayer(LAYER_PROPS, {sizeScale: 1});
   t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {opacity: 'transparent'}));
+  layer = new SubLayer(LAYER_PROPS, {opacity: 'transparent'});
   t.throws(() => layer.validateProps(), /opacity/, 'throws on invalid numberic prop');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {opacity: 2}));
+  layer = new SubLayer(LAYER_PROPS, {opacity: 2});
   t.throws(() => layer.validateProps(), /opacity/, 'throws on numberic prop out of range');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: [255, 0, 0]}));
+  layer = new SubLayer(LAYER_PROPS, {getColor: [255, 0, 0]});
   layer.validateProps();
   t.pass('Layer props are valid');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: d => d.color}));
+  layer = new SubLayer(LAYER_PROPS, {getColor: d => d.color});
   layer.validateProps();
   t.pass('Layer props are valid');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: 3}));
+  layer = new SubLayer(LAYER_PROPS, {getColor: 3});
   t.throws(() => layer.validateProps(), /getColor/, 'throws on invalid accessor prop');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: null}));
+  layer = new SubLayer(LAYER_PROPS, {sizeScale: null});
   layer.validateProps();
   t.pass('Layer props are valid');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: [1, 10]}));
+  layer = new SubLayer(LAYER_PROPS, {sizeScale: [1, 10]});
   t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
 
   t.end();
@@ -211,64 +219,81 @@ test('Layer#diffProps', t => {
   let layer = new SubLayer(LAYER_PROPS);
   t.doesNotThrow(() => testInitializeLayer({layer, onError: t.notOk}), 'Layer initialized OK');
 
-  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
+  layer._diffProps(new SubLayer(LAYER_PROPS).props, layer.props);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]})).props,
-    layer.props
-  );
+  layer._diffProps(new SubLayer(LAYER_PROPS, {data: dataVariants[0]}).props, layer.props);
   t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  layer._diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
+  layer._diffProps(new SubLayer(LAYER_PROPS, {size: 0}).props, layer.props);
   t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}})).props,
-    layer.props
-  );
+  layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 100}}).props, layer.props);
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');
   layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}})).props,
+    new SubLayer(LAYER_PROPS, {updateTriggers: {time: {version: 0}}}).props,
     layer.props
   );
   t.ok(spy.called, 'updateTriggers fired');
   spy.restore();
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
   testInitializeLayer({layer, onError: t.notOk});
-  layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}})).props,
-    layer.props
-  );
+  layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}}).props, layer.props);
   t.false(layer.getChangeFlags().updateTriggersChanged, 'updateTriggers not fired');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
+  testInitializeLayer({layer, onError: t.notOk});
+  layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: 1}}).props, layer.props);
+  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+
+  layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
+  testInitializeLayer({layer, onError: t.notOk});
+  layer._diffProps(new SubLayer(LAYER_PROPS, {updateTriggers: {time: null}}).props, layer.props);
+  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+
+  layer = new SubLayer(LAYER_PROPS, {updateTriggers: {time: 0}});
   testInitializeLayer({layer, onError: t.notOk});
   layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 1}})).props,
+    new SubLayer(LAYER_PROPS, {updateTriggers: {time: undefined}}).props,
     layer.props
   );
   t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
-  testInitializeLayer({layer, onError: t.notOk});
-  layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: null}})).props,
-    layer.props
-  );
-  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+  t.end();
+});
 
-  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+test('Layer#diffProps#extensions', t => {
+  let layer = new SubLayer(LAYER_PROPS);
   testInitializeLayer({layer, onError: t.notOk});
+
   layer._diffProps(
-    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: undefined}})).props,
+    new SubLayer(LAYER_PROPS, {getExtValue: _ => 1, extensions: [new Extension()]}).props,
     layer.props
   );
-  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+  t.true(layer.getChangeFlags().extensionsChanged, 'extensionsChanged');
+  layer.finalizeState();
+
+  layer = new SubLayer(LAYER_PROPS, {getExtValue: _ => 1, extensions: [new Extension()]});
+  testInitializeLayer({layer, onError: t.notOk});
+
+  layer._diffProps(
+    new SubLayer(LAYER_PROPS, {randomProp: _ => 2, extensions: [new Extension()]}).props,
+    layer.props
+  );
+  t.true(layer.getChangeFlags().propsChanged, 'undefined prop changed');
+  layer._clearChangeFlags();
+
+  layer._diffProps(
+    new SubLayer(LAYER_PROPS, {getExtValue: _ => 2, extensions: [new Extension()]}).props,
+    layer.props
+  );
+  t.false(layer.getChangeFlags().somethingChanged, 'extension accessor change ignored');
+
+  layer.finalizeState();
 
   t.end();
 });

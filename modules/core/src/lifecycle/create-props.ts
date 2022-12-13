@@ -3,6 +3,8 @@ import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
 import {
   COMPONENT_SYMBOL,
+  PROP_TYPES_SYMBOL,
+  DEPRECATED_PROPS_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
   ASYNC_DEFAULTS_SYMBOL
@@ -15,10 +17,9 @@ export function createProps<T>(
   component: Component<T>,
   propObjects: Partial<T>[]
 ): StatefulComponentProps<T> {
-  // Get default prop object (a prototype chain for now)
-  const propsPrototype = getPropsPrototype(component.constructor);
-
-  // Create a new prop object with default props object in prototype chain
+  // Create a new prop object with empty default props object
+  let propsPrototype = getPropsPrototype(component.constructor);
+  // The true default props object will be found later
   const propsInstance = Object.create(propsPrototype);
 
   // Props need a back pointer to the owning component
@@ -40,28 +41,51 @@ export function createProps<T>(
     }
   }
 
+  // Get default prop object (a prototype chain for now)
+  // We do it after merging to access the resolved extensions array
+  // This is somewhat hacky - deprecations in extension props are not handled after the merge
+  if (propsInstance.extensions?.length > 0) {
+    propsPrototype = getPropsPrototype(component.constructor, propsInstance.extensions);
+    Object.setPrototypeOf(propsInstance, propsPrototype);
+  }
+
   // Props must be immutable
   Object.freeze(propsInstance);
 
   return propsInstance;
 }
 
+const MergedDefaultPropsCacheKey = '_mergedDefaultProps';
+
 // Return precalculated defaultProps and propType objects if available
 // build them if needed
-function getPropsPrototype(componentClass) {
-  const defaultProps = getOwnProperty(componentClass, '_mergedDefaultProps');
+function getPropsPrototype(componentClass, extensions?: any[]) {
+  // A string that uniquely identifies the extensions involved
+  let cacheKey = MergedDefaultPropsCacheKey;
+  if (extensions) {
+    for (const extension of extensions) {
+      const ExtensionClass = extension.constructor;
+      if (ExtensionClass) {
+        cacheKey += `:${ExtensionClass.extensionName || ExtensionClass.name}`;
+      }
+    }
+  }
+
+  const defaultProps = getOwnProperty(componentClass, cacheKey);
   if (!defaultProps) {
-    createPropsPrototypeAndTypes(componentClass);
-    return componentClass._mergedDefaultProps;
+    return (componentClass[cacheKey] = createPropsPrototypeAndTypes(componentClass, extensions));
   }
   return defaultProps;
 }
 
 // Build defaultProps and propType objects by walking component prototype chain
-function createPropsPrototypeAndTypes(componentClass) {
+function createPropsPrototypeAndTypes(
+  componentClass,
+  extensions?: any[]
+): Record<string, any> | null {
   const parent = componentClass.prototype;
   if (!parent) {
-    return;
+    return null;
   }
 
   const parentClass = Object.getPrototypeOf(componentClass);
@@ -71,42 +95,57 @@ function createPropsPrototypeAndTypes(componentClass) {
   const componentDefaultProps = getOwnProperty(componentClass, 'defaultProps') || {};
   const componentPropDefs = parsePropTypes(componentDefaultProps);
 
+  // Merged default props object
+  let defaultProps: any = {...parentDefaultProps, ...componentPropDefs.defaultProps};
+  // Merged prop types object
+  const propTypes = {...parentDefaultProps?.[PROP_TYPES_SYMBOL], ...componentPropDefs.propTypes};
+  // Merged deprecation list
+  const deprecatedProps = {
+    ...parentDefaultProps?.[DEPRECATED_PROPS_SYMBOL],
+    ...componentPropDefs.deprecatedProps
+  };
+
+  if (extensions?.length) {
+    for (const extension of extensions) {
+      const extensionDefaultProps = getPropsPrototype(extension.constructor);
+      if (extensionDefaultProps) {
+        Object.assign(defaultProps, extensionDefaultProps);
+        Object.assign(propTypes, extensionDefaultProps[PROP_TYPES_SYMBOL]);
+        // createProps does not handle deprecated props in extension for now
+        // Object.assign(propTypes, extensionDefaultProps[DEPRECATED_PROPS_SYMBOL]);
+      }
+    }
+  }
+
   // Create any necessary property descriptors and create the default prop object
   // Assign merged default props
-  const defaultProps = createPropsPrototype(
-    componentPropDefs.defaultProps,
-    parentDefaultProps,
-    componentClass
-  );
+  defaultProps = createPropsPrototype(defaultProps, componentClass);
 
-  // Create a merged type object
-  const propTypes = {...parentClass._propTypes, ...componentPropDefs.propTypes};
   // Add getters/setters for async props
   addAsyncPropsToPropPrototype(defaultProps, propTypes);
 
-  // Create a map for prop whose default value is a callback
-  const deprecatedProps = {
-    ...parentClass._deprecatedProps,
-    ...componentPropDefs.deprecatedProps
-  };
   // Add setters for deprecated props
   addDeprecatedPropsToPropPrototype(defaultProps, deprecatedProps);
 
   // Store the precalculated props
-  componentClass._mergedDefaultProps = defaultProps;
-  componentClass._propTypes = propTypes;
-  componentClass._deprecatedProps = deprecatedProps;
+  defaultProps[PROP_TYPES_SYMBOL] = propTypes;
+  defaultProps[DEPRECATED_PROPS_SYMBOL] = deprecatedProps;
+
+  // Backwards compatibility
+  // TODO: remove access of hidden property from the rest of the code base
+  if (!hasOwnProperty(componentClass, '_propTypes')) {
+    componentClass._propTypes = propTypes;
+  }
+  return defaultProps;
 }
 
 // Builds a pre-merged default props object that component props can inherit from
-function createPropsPrototype(props, parentProps, componentClass) {
+function createPropsPrototype(props, componentClass) {
   const defaultProps = Object.create(null);
-
-  Object.assign(defaultProps, parentProps, props);
+  Object.assign(defaultProps, props);
 
   // Avoid freezing `id` prop
   const id = getComponentName(componentClass);
-  delete props.id;
 
   Object.defineProperties(defaultProps, {
     // `id` is treated specially because layer might need to override it
