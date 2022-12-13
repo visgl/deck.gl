@@ -95,15 +95,24 @@ function createPropsPrototypeAndTypes(
   const componentDefaultProps = getOwnProperty(componentClass, 'defaultProps') || {};
   const componentPropDefs = parsePropTypes(componentDefaultProps);
 
-  // Merged default props object
-  let defaultProps: any = {...parentDefaultProps, ...componentPropDefs.defaultProps};
-  // Merged prop types object
-  const propTypes = {...parentDefaultProps?.[PROP_TYPES_SYMBOL], ...componentPropDefs.propTypes};
-  // Merged deprecation list
-  const deprecatedProps = {
-    ...parentDefaultProps?.[DEPRECATED_PROPS_SYMBOL],
-    ...componentPropDefs.deprecatedProps
-  };
+  // Merged default props object. Order: parent, self, extensions
+  const defaultProps: any = Object.assign(
+    Object.create(null),
+    parentDefaultProps,
+    componentPropDefs.defaultProps
+  );
+  // Merged prop type definitions. Order: parent, self, extensions
+  const propTypes = Object.assign(
+    Object.create(null),
+    parentDefaultProps?.[PROP_TYPES_SYMBOL],
+    componentPropDefs.propTypes
+  );
+  // Merged deprecation list. Order: parent, self, extensions
+  const deprecatedProps = Object.assign(
+    Object.create(null),
+    parentDefaultProps?.[DEPRECATED_PROPS_SYMBOL],
+    componentPropDefs.deprecatedProps
+  );
 
   if (extensions?.length) {
     for (const extension of extensions) {
@@ -119,7 +128,7 @@ function createPropsPrototypeAndTypes(
 
   // Create any necessary property descriptors and create the default prop object
   // Assign merged default props
-  defaultProps = createPropsPrototype(defaultProps, componentClass);
+  createPropsPrototype(defaultProps, componentClass);
 
   // Add getters/setters for async props
   addAsyncPropsToPropPrototype(defaultProps, propTypes);
@@ -140,10 +149,7 @@ function createPropsPrototypeAndTypes(
 }
 
 // Builds a pre-merged default props object that component props can inherit from
-function createPropsPrototype(props, componentClass) {
-  const defaultProps = Object.create(null);
-  Object.assign(defaultProps, props);
-
+function createPropsPrototype(defaultProps, componentClass) {
   // Avoid freezing `id` prop
   const id = getComponentName(componentClass);
 
@@ -154,8 +160,6 @@ function createPropsPrototype(props, componentClass) {
       value: id
     }
   });
-
-  return defaultProps;
 }
 
 function addDeprecatedPropsToPropPrototype(defaultProps, deprecatedProps) {
