@@ -28,12 +28,6 @@ const TEST_CASES = [
     b: {map: {latitude: 37.78, zoom: 8}},
     recurse: true,
     output: false
-  },
-  {
-    a: {map: {latitude: 37.78, zoom: 8}},
-    b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
-    recurse: true,
-    output: false
   }
 ];
 
