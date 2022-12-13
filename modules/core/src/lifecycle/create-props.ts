@@ -17,8 +17,18 @@ export function createProps<T>(
   component: Component<T>,
   propObjects: Partial<T>[]
 ): StatefulComponentProps<T> {
+  // Resolve extension value
+  let extensions: any[] | undefined;
+  for (let i = propObjects.length - 1; i >= 0; i--) {
+    const props = propObjects[i];
+    if ('extensions' in props) {
+      // @ts-expect-error TS(2339) extensions not defined
+      extensions = props.extensions;
+    }
+  }
+
   // Create a new prop object with empty default props object
-  let propsPrototype = getPropsPrototype(component.constructor);
+  const propsPrototype = getPropsPrototype(component.constructor, extensions);
   // The true default props object will be found later
   const propsInstance = Object.create(propsPrototype);
 
@@ -39,14 +49,6 @@ export function createProps<T>(
     for (const key in props) {
       propsInstance[key] = props[key];
     }
-  }
-
-  // Get default prop object (a prototype chain for now)
-  // We do it after merging to access the resolved extensions array
-  // This is somewhat hacky - deprecations in extension props are not handled after the merge
-  if (propsInstance.extensions?.length > 0) {
-    propsPrototype = getPropsPrototype(component.constructor, propsInstance.extensions);
-    Object.setPrototypeOf(propsInstance, propsPrototype);
   }
 
   // Props must be immutable
@@ -73,7 +75,10 @@ function getPropsPrototype(componentClass, extensions?: any[]) {
 
   const defaultProps = getOwnProperty(componentClass, cacheKey);
   if (!defaultProps) {
-    return (componentClass[cacheKey] = createPropsPrototypeAndTypes(componentClass, extensions));
+    return (componentClass[cacheKey] = createPropsPrototypeAndTypes(
+      componentClass,
+      extensions || []
+    ));
   }
   return defaultProps;
 }
@@ -81,7 +86,7 @@ function getPropsPrototype(componentClass, extensions?: any[]) {
 // Build defaultProps and propType objects by walking component prototype chain
 function createPropsPrototypeAndTypes(
   componentClass,
-  extensions?: any[]
+  extensions: any[]
 ): Record<string, any> | null {
   const parent = componentClass.prototype;
   if (!parent) {
@@ -114,15 +119,12 @@ function createPropsPrototypeAndTypes(
     componentPropDefs.deprecatedProps
   );
 
-  if (extensions?.length) {
-    for (const extension of extensions) {
-      const extensionDefaultProps = getPropsPrototype(extension.constructor);
-      if (extensionDefaultProps) {
-        Object.assign(defaultProps, extensionDefaultProps);
-        Object.assign(propTypes, extensionDefaultProps[PROP_TYPES_SYMBOL]);
-        // createProps does not handle deprecated props in extension for now
-        // Object.assign(propTypes, extensionDefaultProps[DEPRECATED_PROPS_SYMBOL]);
-      }
+  for (const extension of extensions) {
+    const extensionDefaultProps = getPropsPrototype(extension.constructor);
+    if (extensionDefaultProps) {
+      Object.assign(defaultProps, extensionDefaultProps);
+      Object.assign(propTypes, extensionDefaultProps[PROP_TYPES_SYMBOL]);
+      Object.assign(deprecatedProps, extensionDefaultProps[DEPRECATED_PROPS_SYMBOL]);
     }
   }
 
@@ -142,7 +144,7 @@ function createPropsPrototypeAndTypes(
 
   // Backwards compatibility
   // TODO: remove access of hidden property from the rest of the code base
-  if (!hasOwnProperty(componentClass, '_propTypes')) {
+  if (extensions.length === 0 && !hasOwnProperty(componentClass, '_propTypes')) {
     componentClass._propTypes = propTypes;
   }
   return defaultProps;

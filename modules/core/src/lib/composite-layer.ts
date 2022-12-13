@@ -208,7 +208,6 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
     const sublayerId = sublayerProps.id || 'sublayer';
 
     if (overridingSublayerProps) {
-      // @ts-ignore (TS2339) hidden property
       const propTypes = this.props[PROP_TYPES_SYMBOL];
       const subLayerPropTypes = sublayerProps.type ? sublayerProps.type._propTypes : {};
       for (const key in overridingSublayerProps) {

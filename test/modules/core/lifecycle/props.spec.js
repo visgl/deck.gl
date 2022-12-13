@@ -219,7 +219,9 @@ test('createProps', t => {
   class ExtB extends ExtA {}
   ExtB.extensionName = 'ExtB';
   ExtB.defaultProps = {
-    extValue: 1
+    extValue: 1,
+    extRange: [0, 1],
+    extRange0: {deprecatedFor: 'extRange'}
   };
 
   let mergedProps = createProps(new B(), [{data: [0, 1]}]);
@@ -243,11 +245,13 @@ test('createProps', t => {
 
   mergedProps = createProps(new B(), [
     {
+      extRange0: [1, 100],
       extensions: [new ExtB()]
     }
   ]);
   t.equal(mergedProps.extValue, 1, 'extension default props merged');
   t.equal(mergedProps.extEnabled, true, 'base extension default props merged');
+  t.deepEqual(mergedProps.extRange, [1, 100], 'user props merged');
   t.ok(mergedProps[PROP_TYPES_SYMBOL].extValue, 'prop types defined');
 
   mergedProps = createProps(new B(), [{}]);
