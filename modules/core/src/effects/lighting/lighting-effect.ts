@@ -5,6 +5,7 @@ import {PointLight} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
+import {deepEqual} from '../../utils/deep-equal';
 
 import type Layer from '../../lib/layer';
 import type {Effect, PreRenderOptions} from '../../lib/effect';
@@ -24,23 +25,33 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
 
+type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
+
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect implements Effect {
   id = 'lighting-effect';
-  props = null;
+  props!: LightingEffectProps;
   shadowColor: number[] = DEFAULT_SHADOW_COLOR;
 
-  private shadow: boolean;
-  private ambientLight: AmbientLight | null = null;
-  private directionalLights: DirectionalLight[] = [];
-  private pointLights: PointLight[] = [];
+  private shadow!: boolean;
+  private ambientLight!: AmbientLight | null;
+  private directionalLights!: DirectionalLight[];
+  private pointLights!: PointLight[];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
   private dummyShadowMap: Texture2D | null = null;
   private programManager?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
-  constructor(props: Record<string, PointLight | DirectionalLight | AmbientLight> = {}) {
+  constructor(props: LightingEffectProps = {}) {
+    this.setProps(props);
+  }
+
+  setProps(props: LightingEffectProps) {
+    this.ambientLight = null;
+    this.directionalLights = [];
+    this.pointLights = [];
+
     for (const key in props) {
       const lightSource = props[key];
 
@@ -62,6 +73,7 @@ export default class LightingEffect implements Effect {
     this._applyDefaultLights();
 
     this.shadow = this.directionalLights.some(light => light.shadow);
+    this.props = props;
   }
 
   preRender(
