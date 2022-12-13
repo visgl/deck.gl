@@ -1,4 +1,4 @@
-import {deepEqual, deepEqualOld} from '@deck.gl/core/utils/deep-equal';
+import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
 const obj = {a: 123};
 const array = [1, 2, 3, 4];
