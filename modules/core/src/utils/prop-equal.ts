@@ -10,13 +10,22 @@ export function propEqual(a: any, b: any, depth: number): boolean {
   if (a === b) {
     return true;
   }
-  if (!a || !b) {
+  if (
+    !a ||
+    !b ||
+    !(a.constructor === Array || a.constructor === Object) ||
+    !(b.constructor === Array || b.constructor === Object)
+  ) {
     return false;
   }
 
   for (const key in a) {
-    // Often will have shallow equality, so skip function invocation
-    if (a[key] !== b[key] && depth && !propEqual(a[key], b[key], depth - 1)) {
+    if (depth) {
+      // Often will have shallow equality, so skip function invocation
+      if (a[key] !== b[key] && !propEqual(a[key], b[key], depth - 1)) {
+        return false;
+      }
+    } else if (a[key] !== b[key]) {
       return false;
     }
   }

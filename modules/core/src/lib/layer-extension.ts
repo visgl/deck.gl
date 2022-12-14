@@ -47,7 +47,7 @@ export default abstract class LayerExtension<OptionsT = undefined> {
     }
 
     // Compare extensions shallowly
-    return this.constructor === extension.constructor && propEqual(this.opts, extension.opts, 0);
+    return this.constructor === extension.constructor && propEqual(this.opts, extension.opts, 1);
   }
 
   /** Only called if attached to a primitive layer */
