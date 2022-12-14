@@ -1,4 +1,4 @@
-import {deepEqual} from '../utils/deep-equal';
+import {propEqual} from '../utils/prop-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
 import MaskEffect from '../effects/mask/mask-effect';
 import type {Effect} from './effect';
@@ -19,7 +19,10 @@ export default class EffectManager {
 
   setProps(props) {
     if ('effects' in props) {
-      if (props.effects.length !== this.effects.length || !deepEqual(props.effects, this.effects)) {
+      // Compare effects against each other shallowly
+      if (
+        (props.effects.length !== this.effects.length || !propEqual(props.effects, this.effects), 1)
+      ) {
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
       }

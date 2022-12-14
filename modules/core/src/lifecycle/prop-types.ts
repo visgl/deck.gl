@@ -1,5 +1,5 @@
 import {createTexture, destroyTexture} from '../utils/texture';
-import {deepEqual} from '../utils/deep-equal';
+import {propEqual} from '../utils/prop-equal';
 
 import type Component from './component';
 import type {Color, Texture} from '../types/layer-props';
@@ -73,7 +73,7 @@ type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
   optional?: boolean;
   compare?: boolean;
-  deep?: boolean;
+  depth?: number;
 };
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
@@ -146,7 +146,7 @@ const TYPE_DEFINITIONS = {
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? deepEqual(value1, value2, propType.deep) : value1 === value2;
+      return propType.compare ? propEqual(value1, value2, propType.depth || 0) : value1 === value2;
     }
   },
   function: {
