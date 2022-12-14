@@ -1,27 +1,33 @@
 /**
- * Fast partial deep equal for Arrays/Objects.
+ * Fast partial deep equal for prop.
  *
- * @param a Array/Object
- * @param b Array/Object to compare against `a`
- * @param recursive If true, perform recursive comparison on Objects. Otherwise, only recursive on Arrays.
+ * @param a Prop
+ * @param b Prop to compare against `a`
+ * @param depth Depth to which to recurse in nested Objects/Arrays. Use 0 (default) for shallow comparison, -1 for infinite depth
  */
-export function deepEqual(a: any, b: any, recursive?: boolean): boolean {
+export function propEqual(a: any, b: any, depth: number): boolean {
   if (a === b) {
     return true;
   }
   if (!a || !b) {
     return false;
   }
+
   for (const key in a) {
-    const aValue = a[key];
-    const bValue = b[key];
-    const equals =
-      aValue === bValue ||
-      ((recursive || (Array.isArray(aValue) && Array.isArray(bValue))) &&
-        deepEqual(aValue, bValue, recursive));
-    if (!equals) {
+    // Often will have shallow equality, so skip function invocation
+    if (a[key] !== b[key] && depth && !propEqual(a[key], b[key], depth - 1)) {
       return false;
     }
   }
+
+  // Handle case where key in b is missing from a
+  if (Array.isArray(b)) {
+    if (b.length !== a.length) return false;
+  } else {
+    for (const key in b) {
+      if (!(key in a)) return false;
+    }
+  }
+
   return true;
 }
