@@ -26,7 +26,7 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import Tooltip from './tooltip';
 import log from '../utils/log';
-import {deepEqual} from '../utils/deep-equal';
+import {propEqual} from '../utils/prop-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import deckGlobal from './init';
 
@@ -427,7 +427,10 @@ export default class Deck {
     if ('onLayerClick' in props) {
       log.removed('onLayerClick', 'onClick')();
     }
-    if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
+    if (
+      props.initialViewState &&
+      !propEqual(this.props.initialViewState, props.initialViewState, 1)
+    ) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
     }

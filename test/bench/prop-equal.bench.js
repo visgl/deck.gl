@@ -13,7 +13,7 @@ const TESTS = [
 /* eslint-disable no-console, no-invalid-this */
 export default function propEqualBench(suite) {
   const s = suite.group('DEEP EQUAL COMPARISON');
-  for (const {name, a, b, recursive} of TESTS) {
+  for (const {name, a, b} of TESTS) {
     s.add(`propEqual shallow#${name}`, () => propEqual(a, b, 0));
     s.add(`propEqual deep#${name}`, () => propEqual(a, b, -1));
   }
