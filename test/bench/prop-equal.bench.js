@@ -1,4 +1,4 @@
-import {propEqual} from '@deck.gl/core/utils/deep-equal';
+import {propEqual} from '@deck.gl/core/utils/prop-equal';
 
 const obj = {a: 123, b: 44, c: 'asd', d: false, e: true};
 const array = [1, 2, 3, 4];
@@ -11,7 +11,7 @@ const TESTS = [
 ];
 
 /* eslint-disable no-console, no-invalid-this */
-export default function deepEqualBench(suite) {
+export default function propEqualBench(suite) {
   const s = suite.group('DEEP EQUAL COMPARISON');
   for (const {name, a, b, recursive} of TESTS) {
     s.add(`propEqual shallow#${name}`, () => propEqual(a, b, 0));

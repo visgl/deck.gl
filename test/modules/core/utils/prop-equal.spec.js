@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {deepEqual} from '@deck.gl/core/utils/deep-equal';
+import {propEqual} from '@deck.gl/core/utils/prop-equal';
 
 const TEST_CASES = [
   {
@@ -20,20 +20,20 @@ const TEST_CASES = [
   {
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
-    recurse: true,
+    depth: 1,
     output: true
   },
   {
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {latitude: 37.78, zoom: 8}},
-    recurse: true,
+    depth: -1,
     output: false
   }
 ];
 
-test('utils#deepEqual', t => {
+test('utils#propEqual', t => {
   TEST_CASES.forEach(testCase => {
-    const result = deepEqual(testCase.a, testCase.b, testCase.recurse);
+    const result = propEqual(testCase.a, testCase.b, testCase.depth);
     t.is(result, testCase.output, `Should ${testCase.output ? '' : 'not '}be equal`);
   });
 
