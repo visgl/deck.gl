@@ -21,7 +21,8 @@ export default class EffectManager {
     if ('effects' in props) {
       // Compare effects against each other shallowly
       if (
-        (props.effects.length !== this.effects.length || !propEqual(props.effects, this.effects), 1)
+        props.effects.length !== this.effects.length ||
+        !propEqual(props.effects, this.effects, 1)
       ) {
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
