@@ -1,5 +1,5 @@
 import {createTexture, destroyTexture} from '../utils/texture';
-import {propEqual} from '../utils/prop-equal';
+import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
 import type {Color, Texture} from '../types/layer-props';
@@ -146,7 +146,7 @@ const TYPE_DEFINITIONS = {
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? propEqual(value1, value2, propType.depth || 0) : value1 === value2;
+      return propType.compare ? deepEqual(value1, value2, propType.depth || 0) : value1 === value2;
     }
   },
   function: {

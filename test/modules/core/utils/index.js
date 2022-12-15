@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import './color.spec';
-import './prop-equal.spec';
+import './deep-equal.spec';
 import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';

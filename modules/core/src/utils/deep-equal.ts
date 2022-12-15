@@ -6,7 +6,7 @@
  * @param depth Depth to which to recurse in nested Objects/Arrays. Use 0 (default) for shallow comparison, -1 for infinite depth
  */
 /* eslint-disable complexity */
-export function propEqual(a: any, b: any, depth: number): boolean {
+export function deepEqual(a: any, b: any, depth: number): boolean {
   if (a === b) {
     return true;
   }
@@ -32,7 +32,7 @@ export function propEqual(a: any, b: any, depth: number): boolean {
   for (const key in a) {
     if (depth) {
       // Often will have shallow equality, so skip function invocation
-      if (a[key] !== b[key] && !propEqual(a[key], b[key], depth - 1)) {
+      if (a[key] !== b[key] && !deepEqual(a[key], b[key], depth - 1)) {
         return false;
       }
     } else if (a[key] !== b[key]) {

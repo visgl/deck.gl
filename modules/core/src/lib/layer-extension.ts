@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {propEqual} from '../utils/prop-equal';
+import {deepEqual} from '../utils/deep-equal';
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type {UpdateParameters} from './layer';
@@ -47,7 +47,7 @@ export default abstract class LayerExtension<OptionsT = undefined> {
     }
 
     // Compare extensions shallowly
-    return this.constructor === extension.constructor && propEqual(this.opts, extension.opts, 1);
+    return this.constructor === extension.constructor && deepEqual(this.opts, extension.opts, 1);
   }
 
   /** Only called if attached to a primitive layer */

@@ -1,6 +1,6 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, Position} from '../utils/positions';
-import {propEqual} from '../utils/prop-equal';
+import {deepEqual} from '../utils/deep-equal';
 import assert from '../utils/assert';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -118,7 +118,7 @@ export default abstract class View<
     }
 
     // To correctly compare padding use depth=2
-    return this.ViewportType === view.ViewportType && propEqual(this.props, view.props, 2);
+    return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props, 2);
   }
 
   /** Make viewport from canvas dimensions and view state */
