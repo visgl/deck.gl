@@ -13,8 +13,9 @@ export function propEqual(a: any, b: any, depth: number): boolean {
   if (
     !a ||
     !b ||
-    !(a.constructor === Array || a.constructor === Object) ||
-    !(b.constructor === Array || b.constructor === Object)
+    Array.isArray(a) !== Array.isArray(b) ||
+    typeof a !== 'object' ||
+    typeof b !== 'object'
   ) {
     return false;
   }
