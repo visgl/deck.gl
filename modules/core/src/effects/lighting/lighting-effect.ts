@@ -5,7 +5,6 @@ import {PointLight} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
-import {deepEqual} from '../../utils/deep-equal';
 
 import type Layer from '../../lib/layer';
 import type {Effect, PreRenderOptions} from '../../lib/effect';
