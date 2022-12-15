@@ -85,6 +85,30 @@ const TEST_CASES = [
     a: [1, 2, 3],
     b: [1, 2, 3, 4],
     output: false
+  },
+  {
+    a: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    b: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    depth: 2,
+    output: true
+  },
+  {
+    a: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    b: [
+      {threshold: [1000, 2000], color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    depth: 2,
+    output: false
   }
 ];
 
