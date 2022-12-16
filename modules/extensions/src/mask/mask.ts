@@ -1,5 +1,6 @@
 import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
+import MaskEffect from './mask-effect';
 
 import type {Layer} from '@deck.gl/core';
 
@@ -30,6 +31,10 @@ export type MaskExtensionProps = {
 export default class MaskExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'MaskExtension';
+
+  initializeState(this: Layer<MaskExtensionProps>) {
+    this.context.deck?._addDefaultEffect(new MaskEffect());
+  }
 
   getShaders(this: Layer<MaskExtensionProps>): any {
     // Infer by geometry if 'maskByInstance' prop isn't explictly set

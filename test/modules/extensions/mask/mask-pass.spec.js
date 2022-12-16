@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 
 import {Layer, LayerManager, OPERATION, Viewport} from '@deck.gl/core';
-import MaskPass from '@deck.gl/core/passes/mask-pass';
+import MaskPass from '@deck.gl/extensions/mask/mask-pass';
 import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {

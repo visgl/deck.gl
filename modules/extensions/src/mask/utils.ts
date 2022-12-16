@@ -1,10 +1,5 @@
-import log from '../../utils/log';
-import OrthographicView from '../../views/orthographic-view';
-import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {OrthographicView, WebMercatorViewport, log, Layer, Viewport} from '@deck.gl/core';
 import {fitBounds} from '@math.gl/web-mercator';
-
-import type Layer from '../../lib/layer';
-import type Viewport from '../../viewports/viewport';
 
 export type MaskBounds = [number, number, number, number];
 
