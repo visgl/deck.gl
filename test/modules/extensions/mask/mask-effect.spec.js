@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 import {MapView, LayerManager} from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
-import MaskEffect from '@deck.gl/core/effects/mask/mask-effect';
+import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
 

@@ -1,20 +1,26 @@
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
-import MaskEffect from '../effects/mask/mask-effect';
 import type {Effect} from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 
 export default class EffectManager {
   effects: Effect[];
-  _internalEffects: Effect[];
-  _needsRedraw: false | string;
+  private _resolvedEffects: Effect[] = [];
+  private _defaultEffects: Effect[] = [];
+  private _needsRedraw: false | string;
 
   constructor() {
     this.effects = [];
-    this._internalEffects = [];
     this._needsRedraw = 'Initial render';
-    this.setEffects();
+    this._setEffects([]);
+  }
+
+  addDefaultEffect(effect: Effect) {
+    if (!this._defaultEffects.find(e => e.constructor === effect.constructor)) {
+      this._defaultEffects.push(effect);
+      this._setEffects(this.effects);
+    }
   }
 
   setProps(props) {
@@ -25,7 +31,6 @@ export default class EffectManager {
         !deepEqual(props.effects, this.effects, 1)
       ) {
         this.setEffects(props.effects);
-        this._needsRedraw = 'effects changed';
       }
     }
   }
@@ -39,35 +44,51 @@ export default class EffectManager {
   }
 
   getEffects() {
-    return this._internalEffects;
+    return this._resolvedEffects;
+  }
+
+  private _setEffects(effects: Effect[]) {
+    const oldEffectsMap: Record<string, Effect> = {};
+    for (const effect of this.effects) {
+      oldEffectsMap[effect.id] = effect;
+    }
+
+    const nextEffects: Effect[] = [];
+    for (const effect of effects) {
+      const oldEffect = oldEffectsMap[effect.id];
+      if (oldEffect && oldEffect !== effect) {
+        if (oldEffect.setProps) {
+          oldEffect.setProps(effect.props);
+          nextEffects.push(oldEffect);
+        } else {
+          oldEffect.cleanup();
+          nextEffects.push(effect);
+        }
+      } else {
+        nextEffects.push(effect);
+      }
+      delete oldEffectsMap[effect.id];
+    }
+    for (const removedEffectId in oldEffectsMap) {
+      oldEffectsMap[removedEffectId].cleanup();
+    }
+    this.effects = nextEffects;
+
+    this._resolvedEffects = nextEffects.concat(this._defaultEffects);
+    // Special case for lighting: only add default instance if no LightingEffect is specified
+    if (!effects.some(effect => effect instanceof LightingEffect)) {
+      this._resolvedEffects.push(DEFAULT_LIGHTING_EFFECT);
+    }
+    this._needsRedraw = 'effects changed';
   }
 
   finalize() {
-    this.cleanup();
-  }
-
-  // Private
-  setEffects(effects: Effect[] = []) {
-    this.cleanup();
-    this.effects = effects;
-
-    this._internalEffects = effects.slice();
-    // Unique MaskEffect per EffectManager as GL context may be different
-    this._internalEffects.push(new MaskEffect());
-    if (!effects.some(effect => effect instanceof LightingEffect)) {
-      this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
-    }
-  }
-
-  cleanup() {
-    for (const effect of this.effects) {
+    for (const effect of this._resolvedEffects) {
       effect.cleanup();
     }
 
-    for (const effect of this._internalEffects) {
-      effect.cleanup();
-    }
     this.effects.length = 0;
-    this._internalEffects.length = 0;
+    this._resolvedEffects.length = 0;
+    this._defaultEffects.length = 0;
   }
 }

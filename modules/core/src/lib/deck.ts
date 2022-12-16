@@ -635,6 +635,13 @@ export default class Deck {
     }
   }
 
+  /** Experimental
+   * Register a default effect
+   */
+  _addDefaultEffect(effect: Effect) {
+    this.effectManager!.addDefaultEffect(effect);
+  }
+
   // Private Methods
 
   private _pick(

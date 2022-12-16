@@ -18,6 +18,10 @@ export default class PostProcessEffect implements Effect {
     this.module = module;
   }
 
+  setProps(props: any) {
+    this.props = props;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
