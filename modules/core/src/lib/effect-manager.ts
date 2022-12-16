@@ -30,7 +30,7 @@ export default class EffectManager {
         props.effects.length !== this.effects.length ||
         !deepEqual(props.effects, this.effects, 1)
       ) {
-        this.setEffects(props.effects);
+        this._setEffects(props.effects);
       }
     }
   }
