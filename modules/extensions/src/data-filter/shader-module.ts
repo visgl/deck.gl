@@ -148,7 +148,7 @@ const inject = {
 
   'vs:#main-end': `
     if (dataFilter_value == 0.0) {
-      gl_Position = vec4(-2, -2, -2, 1);
+      gl_Position = vec4(0.);
     }
   `,
 
