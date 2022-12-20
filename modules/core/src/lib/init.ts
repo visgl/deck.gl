@@ -25,8 +25,6 @@ import log from '../utils/log';
 import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
-const _global: any = globalThis;
-
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
 const version =
@@ -34,10 +32,10 @@ const version =
   typeof __VERSION__ !== 'undefined'
     ? // @ts-expect-error
       __VERSION__
-    : _global.DECK_VERSION || 'untranspiled source';
+    : globalThis.DECK_VERSION || 'untranspiled source';
 
 // Note: a `deck` object not created by deck.gl may exist in the global scope
-const existingVersion = _global.deck && _global.deck.VERSION;
+const existingVersion = globalThis.deck && globalThis.deck.VERSION;
 
 if (existingVersion && existingVersion !== version) {
   throw new Error(`deck.gl - multiple versions detected: ${existingVersion} vs ${version}`);
@@ -46,8 +44,8 @@ if (existingVersion && existingVersion !== version) {
 if (!existingVersion) {
   log.log(1, `deck.gl ${version}`)();
 
-  _global.deck = {
-    ..._global.deck,
+  globalThis.deck = {
+    ...globalThis.deck,
     VERSION: version,
     version,
     log,
@@ -62,4 +60,4 @@ if (!existingVersion) {
   ]);
 }
 
-export default _global.deck;
+export default globalThis.deck;

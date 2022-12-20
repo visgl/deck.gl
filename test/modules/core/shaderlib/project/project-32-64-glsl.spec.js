@@ -23,7 +23,7 @@ import GL from '@luma.gl/constants';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import {project, project32, log} from '@deck.gl/core';
+import {project, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
 import {config} from '@math.gl/core';
@@ -64,7 +64,9 @@ const OUT_BUFFER = new Buffer(gl, 16);
 const MAX_FRACTION_DIGITS = 20;
 // convert given array to a GLSL vec2/3/4 string
 function toGLSLVec(array) {
-  log.assert(Array.isArray(array) && array.length > 1 && array.length < 5);
+  if (!Array.isArray(array) || array.length < 2 || array.length > 4) {
+    throw new Error('Invalid vector array');
+  }
   let vecString = `vec${array.length}(`;
   array.forEach(value => {
     vecString += `${value.toFixed(MAX_FRACTION_DIGITS)}, `;

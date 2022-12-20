@@ -18,9 +18,6 @@ _global.HTMLVideoElement = dom.window.HTMLVideoElement;
 _global.requestAnimationFrame = cb => setTimeout(cb, 0);
 _global.cancelAnimationFrame = t => clearTimeout(t);
 
-// Polyfill AbortController
-import 'abortcontroller-polyfill';
-
 import {gl} from '@deck.gl/test-utils';
 // Create a dummy canvas for the headless gl context
 const canvas = globalThis.document.createElement('canvas');
