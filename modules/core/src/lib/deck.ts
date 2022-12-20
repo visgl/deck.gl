@@ -427,7 +427,10 @@ export default class Deck {
     if ('onLayerClick' in props) {
       log.removed('onLayerClick', 'onClick')();
     }
-    if (props.initialViewState && !deepEqual(this.props.initialViewState, props.initialViewState)) {
+    if (
+      props.initialViewState &&
+      !deepEqual(this.props.initialViewState, props.initialViewState, 1)
+    ) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
     }
@@ -630,6 +633,13 @@ export default class Deck {
     for (const id of resourceIds) {
       this.layerManager!.resourceManager.remove(id);
     }
+  }
+
+  /** Experimental
+   * Register a default effect
+   */
+  _addDefaultEffect(effect: Effect) {
+    this.effectManager!.addDefaultEffect(effect);
   }
 
   // Private Methods

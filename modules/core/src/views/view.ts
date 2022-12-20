@@ -117,7 +117,8 @@ export default abstract class View<
       return view.viewportInstance ? this.viewportInstance.equals(view.viewportInstance) : false;
     }
 
-    return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props);
+    // To correctly compare padding use depth=2
+    return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props, 2);
   }
 
   /** Make viewport from canvas dimensions and view state */

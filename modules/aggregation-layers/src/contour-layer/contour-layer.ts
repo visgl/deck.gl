@@ -50,7 +50,13 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
   aggregation: 'SUM',
 
   // contour lines
-  contours: [{threshold: DEFAULT_THRESHOLD}],
+  contours: {
+    type: 'object',
+    value: [{threshold: DEFAULT_THRESHOLD}],
+    optional: true,
+    compare: true,
+    depth: 2
+  },
 
   zOffset: 0.005
 };

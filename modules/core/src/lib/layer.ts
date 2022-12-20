@@ -157,7 +157,8 @@ const defaultProps: DefaultProps<LayerProps> = {
   positionFormat: 'XYZ',
   colorFormat: 'RGBA',
 
-  parameters: {type: 'object', value: {}, optional: true, compare: true},
+  parameters: {type: 'object', value: {}, optional: true, compare: true, depth: 1},
+  loadOptions: {type: 'object', value: null, optional: true, compare: true, depth: 3},
   transitions: null,
   extensions: [],
   loaders: {type: 'array', value: [], optional: true, compare: true},
