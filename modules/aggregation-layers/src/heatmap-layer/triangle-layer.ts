@@ -20,7 +20,8 @@
 
 import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {Model, Texture2D} from '@luma.gl/webgl-legacy';
+import {Geometry} from '@luma.gl/engine';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';

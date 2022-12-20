@@ -7,7 +7,7 @@ import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
 import type {Device} from '@luma.gl/api';
-import type {Buffer} from '@luma.gl/gltools';
+import type {Buffer} from '@luma.gl/webgl-legacy';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 

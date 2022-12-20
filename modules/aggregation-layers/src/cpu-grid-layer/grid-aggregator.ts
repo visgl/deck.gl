@@ -41,6 +41,7 @@ import {getGridOffset} from '../utils/grid-aggregation-utils';
  */
 export function pointToDensityGridDataCPU(props, aggregationParams) {
   const hashInfo = pointsToGridHashing(props, aggregationParams);
+  // @ts-expect-error
   const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {

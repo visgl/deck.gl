@@ -1,5 +1,5 @@
 import GL from '@luma.gl/constants';
-import {Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
 
 import {
   Accessor,
@@ -32,7 +32,6 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
-  // @ts-expect-error Disable async data loading (handling it in _loadTileSet)
   data: null,
   loader: Tiles3DLoader,
 
@@ -177,13 +176,13 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
 
     // TODO: deprecate `loader` in v9.0
     // @ts-ignore
-    let loader = this.props.loader || this.props.loaders;
-    if (Array.isArray(loader)) {
-      loader = loader[0];
-    }
+    const loaders = this.props.loader || this.props.loaders;
+    const loader = Array.isArray(loaders) ? loaders[0] : loaders;
 
     const options = {loadOptions: {...loadOptions}};
+    // @ts-expect-error preload
     if (loader.preload) {
+      // @ts-expect-error preload
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
 
       if (preloadOptions.headers) {

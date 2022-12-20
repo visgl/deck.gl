@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CubeGeometry} from '@luma.gl/core';
-import {UNIT} from '@deck.gl/core';
-import ColumnLayer, {ColumnLayerProps} from './column-layer';
-
 import type {DefaultProps} from '@deck.gl/core';
+import {UNIT} from '@deck.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
+import ColumnLayer, {ColumnLayerProps} from './column-layer';
 
 const defaultProps: DefaultProps<GridCellLayerProps> = {
   cellSize: {type: 'number', min: 0, value: 1000},

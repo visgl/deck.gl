@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/api';
-import {Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/core';
+import {Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/webgl-legacy';
 import GL from '@luma.gl/constants';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
@@ -30,7 +30,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/gltools';
+import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl-legacy';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';

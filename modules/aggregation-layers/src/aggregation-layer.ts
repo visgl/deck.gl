@@ -163,7 +163,7 @@ export default abstract class AggregationLayer<
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
+    return new AttributeManager(this.context.device, {
       id: this.props.id,
       stats: this.context.stats
     });

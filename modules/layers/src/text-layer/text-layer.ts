@@ -435,7 +435,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -537,7 +537,7 @@ export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
-          iconAtlas: texture,
+          iconAtlas: atlas,
           iconMapping: mapping,
 
           getPosition,

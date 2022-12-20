@@ -36,7 +36,7 @@ import {
   withParameters,
   FEATURES,
   hasFeatures
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 import {
   Accessor,
   AccessorFunction,
@@ -347,11 +347,12 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
-      this.isAttributeChanged() || // if any attribute is changed
-      this.isAggregationDirty(opts, {
+      (this.isAttributeChanged() && 'attribute changed') || // if any attribute is changed
+      (this.isAggregationDirty(opts, {
         compareAll: true,
         dimension: dimensions.data
-      });
+      }) &&
+        'aggregation is dirty');
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
     const {zoom} = this.state;
@@ -390,6 +391,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
+    // @ts-expect-error
     const textureSize = Math.min(weightsTextureSize, getParameters(device, GL.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(device, FLOAT_TARGET_FEATURES);
     const {format, type} = getTextureParams({device, floatTargetSupport});

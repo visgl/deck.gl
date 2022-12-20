@@ -266,7 +266,8 @@ export default class HexagonLayer<ExtraPropsT = {}> extends AggregationLayer<
     this.state = {
       cpuAggregator,
       aggregatorState: cpuAggregator.state,
-      vertices: null
+      vertices: null,
+      layerData: undefined
     };
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
@@ -287,6 +288,7 @@ export default class HexagonLayer<ExtraPropsT = {}> extends AggregationLayer<
       if (this.state.aggregatorState.layerData !== aggregatorState.layerData) {
         // if user provided custom aggregator and returns hexagonVertices,
         // Need to recalculate radius and angle based on vertices
+        // @ts-expect-error
         const {hexagonVertices} = aggregatorState.layerData || {};
         this.setState({
           vertices: hexagonVertices && this.convertLatLngToMeterOffset(hexagonVertices)

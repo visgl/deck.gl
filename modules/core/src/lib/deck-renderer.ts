@@ -1,5 +1,5 @@
 import type {Device} from '@luma.gl/api';
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 import debug from '../debug';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';

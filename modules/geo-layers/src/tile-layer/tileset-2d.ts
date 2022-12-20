@@ -306,7 +306,6 @@ export default class Tileset2D {
   /** Returns additional metadata to add to tile, bbox by default */
   getTileMetadata(index: TileIndex): Record<string, any> {
     const {tileSize} = this.opts;
-    // @ts-expect-error
     return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
@@ -331,7 +330,7 @@ export default class Tileset2D {
       tile.isSelected = false;
       tile.isVisible = false;
     }
-    // @ts-expect-error called only when _selectedTiles is already defined
+    // TODO ts-expect-error called only when _selectedTiles is already defined
     for (const tile of this._selectedTiles) {
       tile.isSelected = true;
       tile.isVisible = true;
@@ -411,7 +410,7 @@ export default class Tileset2D {
 
     const maxCacheSize =
       opts.maxCacheSize ||
-      // @ts-expect-error called only when selectedTiles is initialized
+      // TODO ts-expect-error called only when selectedTiles is initialized
       (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
     const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
 

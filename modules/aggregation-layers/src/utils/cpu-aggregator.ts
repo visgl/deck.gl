@@ -124,7 +124,9 @@ const defaultDimensions = [
 const defaultGetCellSize = props => props.cellSize;
 export default class CPUAggregator {
   state = {
-    layerData: {},
+    layerData: {
+      data: undefined
+    },
     dimensions: {
       // color: {
       //   getValue: null,
@@ -191,7 +193,7 @@ export default class CPUAggregator {
     });
   }
 
-  normalizeResult(result = {}) {
+  normalizeResult(result: {hexagons?; layerData?} = {}) {
     // support previous hexagonAggregator API
     if (result.hexagons) {
       return {data: result.hexagons, ...result};
@@ -298,7 +300,7 @@ export default class CPUAggregator {
     //     prop: 'elevationAggregation'
     //   }
     // }
-    return Object.values(dimensionStep.triggers).some(item => {
+    return Object.values(dimensionStep.triggers).some((item: any) => {
       if (item.updateTrigger) {
         // check based on updateTriggers change first
         // if data has changed, always update value

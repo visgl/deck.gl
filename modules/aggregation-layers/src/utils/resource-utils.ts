@@ -1,13 +1,22 @@
 import {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {Framebuffer, Texture2D} from '@luma.gl/core';
+import {Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
 
 const DEFAULT_PARAMETERS = {
   [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
   [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
 };
 
-export function getFloatTexture(device: Device, opts = {}) {
+type FloatTextureOptions = {
+  id: string;
+  width?: number;
+  height?: number;
+  data?: any;
+  unpackFlipY?: boolean;
+  parameters?: Record<GL, GL>;
+};
+
+export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
   const {
     width = 1,
     height = 1,
@@ -25,6 +34,7 @@ export function getFloatTexture(device: Device, opts = {}) {
     dataFormat: GL.RGBA,
     width,
     height,
+    // @ts-expect-error
     unpackFlipY
   });
   return texture;

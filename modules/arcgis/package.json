@@ -32,8 +32,9 @@
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/core": "9.0.0-alpha.11",
-    "@luma.gl/constants": "9.0.0-alpha.11"
+    "@luma.gl/core": "9.0.0-alpha.12",
+    "@luma.gl/webgl-legacy": "9.0.0-alpha.12",
+    "@luma.gl/constants": "9.0.0-alpha.12"
   },
   "dependencies": {
     "esri-loader": "^3.3.0"

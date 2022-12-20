@@ -2,8 +2,8 @@
 // the THREE.js EffectComposer and *Pass classes
 
 import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/core';
-import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
+import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/webgl-legacy';
 import Pass from './pass';
 
 import type {ShaderModule} from '../types/types';

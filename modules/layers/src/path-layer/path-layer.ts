@@ -20,7 +20,8 @@
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
