@@ -1,5 +1,6 @@
 dist/
 dist-es6/
+test/
 modules/*/typed
 node_modules/
 workers/

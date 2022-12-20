@@ -1,4 +1,4 @@
-const JSONUtils = require('./src');
+import * as JSONUtils from './src';
 
 const deck = globalThis.deck || {};
 
@@ -7,4 +7,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, JSONUtils);
+export default Object.assign(deck, JSONUtils);

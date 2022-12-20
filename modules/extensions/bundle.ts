@@ -1,4 +1,4 @@
-const Extensions = require('./src');
+import * as deckglExtensions from './src';
 
 const deck = globalThis.deck || {};
 
@@ -7,4 +7,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, Extensions);
+export default Object.assign(deck, deckglExtensions);

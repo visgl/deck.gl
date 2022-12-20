@@ -81,9 +81,11 @@ export default function layerBench(suite) {
     })
     .add(
       'initialize layers - composite',
-      () => {
-        // clean up
-        layerManager.setLayers([]);
+      {
+        initialize: () => {
+          // clean up
+          layerManager.setLayers([]);
+        }
       },
       () => {
         testIdx++;

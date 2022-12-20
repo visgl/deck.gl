@@ -1,4 +1,4 @@
-const GoogleMapsUtils = require('./src');
+import * as GoogleMapsUtils from './src';
 
 const deck = globalThis.deck || {};
 
@@ -7,4 +7,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, GoogleMapsUtils);
+export default Object.assign(deck, GoogleMapsUtils);

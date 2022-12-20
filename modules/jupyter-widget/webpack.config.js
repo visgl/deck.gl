@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const {getOcularConfig} = require('ocular-dev-tools');
 
 const ALIASES = getOcularConfig({
-  aliasMode: 'src',
   root: resolve(__dirname, '../..')
 }).aliases;
 
@@ -16,17 +15,17 @@ const rules = [
     // Compile ES2015 using babel
     test: /(\.js|\.ts|\.tsx)$/,
     loader: 'babel-loader',
-    include: /src/,
+    include: [/src/, /bundle/],
     options: {
       babelrc: false,
       presets: [
+        '@babel/preset-typescript',
         [
           '@babel/preset-env',
           {
             targets: ['>0.2%', 'not ie 11', 'not dead', 'not chrome 49']
           }
-        ],
-        '@babel/preset-typescript'
+        ]
       ],
       // all of the helpers will reference the module @babel/runtime to avoid duplication
       // across the compiled output.
