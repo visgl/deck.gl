@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Device} from '@luma.gl/api';
-import {Timeline} from '@luma.gl/core';
-import type {ProgramManager} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
+import type {ProgramManager} from '@luma.gl/webgl-legacy';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';

@@ -2,7 +2,7 @@ import Transition, {TransitionSettings as BaseTransitionSettings} from '../trans
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import type {IViewState} from './view-state';
 
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 import type {InteractionState} from './controller';
 
 const noop = () => {};
@@ -133,8 +133,8 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
 
   _isUpdateDueToCurrentTransition(props: TransitionProps): boolean {
     if (this.transition.inProgress && this.propsInTransition) {
-        // @ts-expect-error
-        return (this.transition.settings as TransitionSettings).interpolator.arePropsEqual(
+      // @ts-expect-error
+      return (this.transition.settings as TransitionSettings).interpolator.arePropsEqual(
         props,
         this.propsInTransition
       );
@@ -148,8 +148,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
       const transitionSettings = this.transition.settings as TransitionSettings;
       // Ignore update if it is requested to be ignored
       return (
-        transitionSettings.interruption ===
-          TRANSITION_EVENTS.IGNORE ||
+        transitionSettings.interruption === TRANSITION_EVENTS.IGNORE ||
         // Ignore update if it is due to current active transition.
         this._isUpdateDueToCurrentTransition(nextProps)
       );

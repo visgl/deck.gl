@@ -91,7 +91,13 @@ export function getValueFunc(aggregation, accessor, context) {
   }
 }
 
-function wrapAccessor(accessor, context = {}) {
+type AccessorContext = {
+  data?;
+  index?: number;
+  indices?: number[];
+};
+
+function wrapAccessor(accessor, context: AccessorContext = {}) {
   if (Number.isFinite(accessor)) {
     return accessor;
   }
@@ -101,7 +107,7 @@ function wrapAccessor(accessor, context = {}) {
   };
 }
 
-export function wrapGetValueFunc(getValue, context = {}) {
+export function wrapGetValueFunc(getValue, context: AccessorContext = {}) {
   return pts => {
     context.indices = pts.map(pt => pt.index);
     return getValue(

@@ -373,7 +373,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     const propName = 'dataInWGS84';
     const tileset: Tileset2D = this.state.tileset;
 
-    // @ts-expect-error selectedTiles are always initialized when tile is being processed
+    // TODO ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs

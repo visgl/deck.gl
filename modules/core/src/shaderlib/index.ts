@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/core';
+import {ProgramManager} from '@luma.gl/webgl-legacy';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
 import project from './project/project';

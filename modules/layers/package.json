@@ -31,9 +31,9 @@
   "dependencies": {
     "@loaders.gl/images": "^3.2.10",
     "@loaders.gl/schema": "^3.2.10",
-    "@luma.gl/api": "9.0.0-alpha.11",
-    "@luma.gl/constants": "9.0.0-alpha.11",
-    "@luma.gl/gltools": "9.0.0-alpha.11",
+    "@luma.gl/api": "9.0.0-alpha.12",
+    "@luma.gl/constants": "9.0.0-alpha.12",
+    "@luma.gl/gltools": "9.0.0-alpha.12",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^3.6.2",
     "@math.gl/polygon": "^3.6.2",
@@ -43,7 +43,7 @@
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "@loaders.gl/core": "^3.0.0",
-    "@luma.gl/core": "9.0.0-alpha.11"
+    "@luma.gl/core": "9.0.0-alpha.12"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

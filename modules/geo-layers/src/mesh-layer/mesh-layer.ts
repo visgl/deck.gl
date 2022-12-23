@@ -1,6 +1,7 @@
 import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
-import {Model, pbr} from '@luma.gl/core';
+import {Model} from '@luma.gl/webgl-legacy';
+import {pbr} from '@luma.gl/shadertools';
 import GL from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
@@ -140,7 +141,7 @@ export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshL
 
     this.state.materialParser?.delete();
 
-    return new GLTFMaterialParser(this.context.gl, {
+    return new GLTFMaterialParser(this.context.device, {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       material: {unlit, ...pbrMaterial},
       pbrDebug: false,

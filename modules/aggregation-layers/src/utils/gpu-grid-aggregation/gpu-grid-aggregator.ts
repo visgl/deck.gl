@@ -28,7 +28,7 @@ import {
   readPixelsToBuffer,
   withParameters,
   clear
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {log, project32, _mergeShaders as mergeShaders} from '@deck.gl/core';
 
@@ -66,11 +66,15 @@ const REQUIRED_FEATURES = [
   FEATURES.TEXTURE_FLOAT
 ];
 
+export type GPUGridAggregatorProps = {
+  id?: string;
+};
+
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({aggregationData, maxData, minData, maxMinData, pixelIndex}) {
     const index = pixelIndex * PIXEL_SIZE;
-    const results = {};
+    const results: {cellCount?; cellWeight?; maxCellWieght?; minCellWeight?; totalCount?} = {};
     if (aggregationData) {
       results.cellCount = aggregationData[index + 3];
       results.cellWeight = aggregationData[index];
@@ -148,6 +152,9 @@ export default class GPUGridAggregator {
     maxFramebuffers: {},
     equations: {},
 
+    shaderOptions: {},
+    modelDirty: false,
+
     // common resources to be deleted
     resources: {},
 
@@ -155,11 +162,16 @@ export default class GPUGridAggregator {
     results: {}
   };
 
+  id: string;
   device: Device;
   _hasGPUSupport: boolean;
 
-  constructor(device: Device, opts = {}) {
-    this.id = opts.id || 'gpu-grid-aggregator';
+  gridAggregationModel;
+  allAggregationModel;
+  meanTransform;
+
+  constructor(device: Device, props: GPUGridAggregatorProps = {}) {
+    this.id = props.id || 'gpu-grid-aggregator';
     this.device = device;
 
     // gl_InstanceID usage in min/max calculation shaders
@@ -217,8 +229,8 @@ export default class GPUGridAggregator {
   // Reads aggregation data into JS Array object
   // For WebGL1, data is available in JS Array objects already.
   // For WebGL2, data is read from Buffer objects and cached for subsequent queries.
-  getData(weightId) {
-    const data = {};
+  getData(weightId): {aggregationData?} {
+    const data: {aggregationData?} = {};
     const results = this.state.results;
     if (!results[weightId].aggregationData) {
       // cache the results if reading from the buffer (WebGL2 path)
@@ -517,7 +529,7 @@ export default class GPUGridAggregator {
         });
       }
       framebuffers[id].resize(framebufferSize);
-      equations[id] = EQUATION_MAP[operation] || EQUATION_MAP.SUM;
+      equations[id] = EQUATION_MAP[operation] || EQUATION_MAP[AGGREGATION_OPERATION.SUM];
       // For min/max framebuffers will use default size 1X1
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
@@ -666,6 +678,7 @@ function getAllAggregationModel(device: Device, instanceCount) {
     isInstanced: true,
     instanceCount,
     attributes: {
+      // @ts-expect-error
       position: [0, 0]
     }
   });

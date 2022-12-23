@@ -1,7 +1,7 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {Buffer, Transform, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/core';
+import {Buffer, Transform, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {
   padBuffer,
   getAttributeTypeFromSize,
@@ -14,12 +14,12 @@ import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/gltools';
+import type {Transform as LumaTransform} from '@luma.gl/webgl-legacy';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
   Texture2D as LumaTexture2D
-} from '@luma.gl/gltools';
+} from '@luma.gl/webgl-legacy';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 

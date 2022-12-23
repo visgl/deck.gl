@@ -20,7 +20,7 @@
 
 import type {Device} from '@luma.gl/api';
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import {isWebGL2} from '@luma.gl/core';
+import {isWebGL2} from '@luma.gl/webgl-legacy';
 import {pbr} from '@luma.gl/shadertools';
 import {
   ScenegraphNode,

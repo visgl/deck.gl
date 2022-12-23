@@ -34,7 +34,8 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
