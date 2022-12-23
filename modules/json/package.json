@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "d3-dsv": "^1.0.8",
-    "expression-eval": "^2.0.0"
+    "expression-eval": "^5.0.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0"

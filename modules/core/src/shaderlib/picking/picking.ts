@@ -1,4 +1,4 @@
-import {picking} from '@luma.gl/core';
+import {picking} from '@luma.gl/shadertools';
 import type {ShaderModule} from '../../types/types';
 
 type PickingModuleSettings = {

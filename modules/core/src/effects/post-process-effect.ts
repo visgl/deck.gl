@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/gltools';
-import {normalizeShaderModule} from '@luma.gl/core';
+import {normalizeShaderModule} from '@luma.gl/shadertools';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
 
 import ScreenPass from '../passes/screen-pass';
 

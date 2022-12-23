@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/core';
-import {Texture2D} from '@luma.gl/gltools';
+import {ProgramManager} from '@luma.gl/webgl-legacy';
+import {Texture2D} from '@luma.gl/webgl-legacy';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';

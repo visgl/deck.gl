@@ -1,8 +1,8 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {hasFeature, FEATURES, Buffer} from '@luma.gl/core';
-import type {Buffer as LumaBuffer} from '@luma.gl/gltools';
+import {hasFeature, FEATURES, Buffer} from '@luma.gl/webgl-legacy';
+import type {Buffer as LumaBuffer} from '@luma.gl/webgl-legacy';
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';

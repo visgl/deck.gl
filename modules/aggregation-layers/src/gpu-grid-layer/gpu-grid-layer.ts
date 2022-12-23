@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Buffer} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/webgl-legacy';
 import GL from '@luma.gl/constants';
 import {
   Accessor,

@@ -32,7 +32,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
     '@luma.gl/debug': `${ROOT_DIR}/../luma.gl/modules/debug/src`,
     '@luma.gl/engine': `${ROOT_DIR}/../luma.gl/modules/engine/src`,
     '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
-    '@luma.gl/gltools': `${ROOT_DIR}/../luma.gl/modules/gltools/src`,
+    '@luma.gl/webgl-legacy': `${ROOT_DIR}/../luma.gl/modules/gltools/src`,
     '@luma.gl/shadertools': `${ROOT_DIR}/../luma.gl/modules/shadertools/src`,
     '@luma.gl/experimental': `${ROOT_DIR}/../luma.gl/modules/experimental/src`
   };
@@ -42,7 +42,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
     '@luma.gl/engine': `${ROOT_DIR}/node_modules/@luma.gl/engine`,
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
-    '@luma.gl/gltools': `${ROOT_DIR}/node_modules/@luma.gl/gltools`,
+    '@luma.gl/webgl-legacy': `${ROOT_DIR}/node_modules/@luma.gl/gltools`,
     '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`,
     '@luma.gl/experimental': `${ROOT_DIR}/node_modules/@luma.gl/experimental`,
     // @luma.gl/experimental is not available in the root node_modules, must be imported

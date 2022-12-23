@@ -1,7 +1,7 @@
 import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
-import expressionEval from 'expression-eval';
+import {parse, eval as evaluate} from 'expression-eval';
 
 const cachedExpressionMap = {
   '-': object => object
@@ -18,8 +18,8 @@ export default function parseExpressionString(propValue, configuration) {
 
   let func;
   // Compile with expression-eval
-  const ast = expressionEval.parse(propValue);
-  if (!ast.right && !ast.left && ast.type === 'Identifier') {
+  const ast = parse(propValue);
+  if (ast.type === 'Identifier') {
     func = row => {
       return get(row, propValue);
     };
@@ -34,7 +34,7 @@ export default function parseExpressionString(propValue, configuration) {
     });
     // TODO Something like `expressionEval.eval(ast, {row});` would be useful for unpacking arrays
     func = row => {
-      return expressionEval.eval(ast, row);
+      return evaluate(ast, row);
     };
   }
 

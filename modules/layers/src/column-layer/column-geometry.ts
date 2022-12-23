@@ -1,5 +1,7 @@
 import {log, BinaryAttribute} from '@deck.gl/core';
-import {Geometry, uid} from '@luma.gl/core';
+import {uid} from '@luma.gl/api';
+import {Geometry} from '@luma.gl/engine';
+
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
 type ColumnGeometryProps = {
@@ -18,6 +20,7 @@ export default class ColumnGeometry extends Geometry {
       ...props,
       id,
       indices,
+      // @ts-expect-error
       attributes
     });
   }

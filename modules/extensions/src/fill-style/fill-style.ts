@@ -1,5 +1,5 @@
 import {LayerExtension} from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/core';
+import {Texture2D} from '@luma.gl/webgl-legacy';
 import GL from '@luma.gl/constants';
 
 import {patternShaders} from './shaders.glsl';

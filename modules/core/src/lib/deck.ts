@@ -34,13 +34,10 @@ import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
 import GL from '@luma.gl/constants';
-import {
-  AnimationLoop,
-  instrumentGLContext,
-  setParameters,
-  Timeline,
-  lumaStats
-} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
+import {lumaStats} from '@luma.gl/core';
+import {AnimationLoop, instrumentGLContext, setParameters} from '@luma.gl/webgl-legacy';
+
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
@@ -53,7 +50,7 @@ import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';

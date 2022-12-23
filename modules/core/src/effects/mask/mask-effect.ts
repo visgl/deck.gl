@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import {Texture2D} from '@luma.gl/core';
-// import {readPixelsToArray} from '@luma.gl/core';
+import {Texture2D} from '@luma.gl/webgl-legacy';
+// import {readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import MaskPass from '../../passes/mask-pass';
 import {OPERATION} from '../../lib/constants';

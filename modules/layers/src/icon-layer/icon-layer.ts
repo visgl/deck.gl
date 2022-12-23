@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -36,7 +37,7 @@ import type {
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/gltools';
+import {Texture2D} from '@luma.gl/webgl-legacy';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 

@@ -1,4 +1,4 @@
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 export type TransitionSettings = {
   duration: number;
@@ -15,7 +15,9 @@ export default class Transition {
 
   time: number = 0;
   // @ts-expect-error
-  settings: TransitionSettings & {fromValue, toValue, duration, easing, damping, stiffness} = {duration: 0};
+  settings: TransitionSettings & {fromValue; toValue; duration; easing; damping; stiffness} = {
+    duration: 0
+  };
 
   /**
    * @params timeline {Timeline}

@@ -1,7 +1,7 @@
 import {default as LayersPass} from './layers-pass';
 import type {Device} from '@luma.gl/api';
 import GL from '@luma.gl/constants';
-import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
+import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/webgl-legacy';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture2D;
