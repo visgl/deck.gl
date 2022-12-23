@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
 import {
+  GL,
   Model,
   Transform,
   FEATURES,

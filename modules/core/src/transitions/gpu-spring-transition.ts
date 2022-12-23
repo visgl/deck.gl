@@ -1,7 +1,13 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Buffer, Transform, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/webgl-legacy';
+import {
+  GL,
+  Buffer,
+  Transform,
+  Framebuffer,
+  Texture2D,
+  readPixelsToArray
+} from '@luma.gl/webgl-legacy';
 import {
   padBuffer,
   getAttributeTypeFromSize,

@@ -1,6 +1,5 @@
 import {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Model, Texture2D, Framebuffer} from '@luma.gl/webgl-legacy';
+import {GL, Model, Texture2D, Framebuffer} from '@luma.gl/webgl-legacy';
 
 const AGGREGATE_VS = `\
 #define SHADER_NAME data-filter-vertex-shader

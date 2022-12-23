@@ -27,10 +27,9 @@ import {
   LayerProps,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import {CubeGeometry} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {Model, Buffer} from '@luma.gl/webgl-legacy';
+import {GL, Model, Buffer} from '@luma.gl/webgl-legacy';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';

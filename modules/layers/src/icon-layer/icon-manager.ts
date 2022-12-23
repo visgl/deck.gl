@@ -1,7 +1,6 @@
 /* global document */
 import {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Texture2D, copyToTexture} from '@luma.gl/webgl-legacy';
+import {GL, Texture2D, copyToTexture} from '@luma.gl/webgl-legacy';
 import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';

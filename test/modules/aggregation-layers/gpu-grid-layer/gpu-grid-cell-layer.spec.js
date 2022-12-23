@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import {Buffer} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/webgl-legacy';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {setupSpysForWebGL1, restoreSpies} from './webgl1-spies-utils';

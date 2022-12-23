@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global setTimeout clearTimeout */
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {
   getBounds,
   boundsContain,

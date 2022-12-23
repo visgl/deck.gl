@@ -1,6 +1,6 @@
 /* global google */
 import {getParameters, setParameters, withParameters, GLParameters} from '@luma.gl/webgl-legacy';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {
   createDeckInstance,
   destroyDeckInstance,

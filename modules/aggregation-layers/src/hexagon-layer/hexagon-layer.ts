@@ -29,6 +29,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
+import {GL} from '@luma.gl/webgl-legacy';
 
 import {defaultColorRange} from '../utils/color-utils';
 
@@ -36,7 +37,6 @@ import {pointToHexbin} from './hexagon-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 
-import GL from '@luma.gl/constants';
 import {AggregateAccessor} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

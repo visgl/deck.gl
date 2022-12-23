@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 import {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
-import {Model, FEATURES, hasFeatures, Texture2D} from '@luma.gl/webgl-legacy';
+import {GL, Model, FEATURES, hasFeatures, Texture2D} from '@luma.gl/webgl-legacy';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';

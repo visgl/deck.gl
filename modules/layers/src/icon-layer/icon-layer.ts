@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/webgl-legacy';
 

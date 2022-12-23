@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, fp64LowPart, picking} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {GL, Model, Geometry} from '@luma.gl/webgl-legacy';
 
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';

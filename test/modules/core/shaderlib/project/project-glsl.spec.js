@@ -24,7 +24,8 @@ import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl'
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform, Buffer, fp64} from '@luma.gl/core';
+import {Transform, Buffer} from '@luma.gl/webgl-legacy';
+import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
 import {compileVertexShader} from '../shaderlib-test-utils';

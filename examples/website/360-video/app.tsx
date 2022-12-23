@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
 import {FirstPersonView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 
 // Video created by the NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons
 const VIDEO_URL =

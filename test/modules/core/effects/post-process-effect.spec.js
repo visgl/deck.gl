@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 
 const fs = `\

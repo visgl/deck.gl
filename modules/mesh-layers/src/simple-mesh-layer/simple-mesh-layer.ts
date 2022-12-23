@@ -32,9 +32,8 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
-import {Model, isWebGL2, Texture2D, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
+import {GL, Model, isWebGL2, Texture2D, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 

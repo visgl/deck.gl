@@ -20,10 +20,10 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
+import test from 'tape-promise/tape';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/core';
-import test from 'tape-promise/tape';
+import {Buffer} from '@luma.gl/webgl-legacy';
 import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 

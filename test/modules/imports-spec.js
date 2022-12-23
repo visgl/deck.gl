@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import '@luma.gl/core';
+import '@luma.gl/api';
 
 import DeckGL from 'deck.gl';
 import * as deck from 'deck.gl';

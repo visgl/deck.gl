@@ -1,15 +1,15 @@
 /* eslint-disable no-invalid-this */
 
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Deck} from '@deck.gl/core';
 import {
+  GL,
   Model,
   Buffer,
   Framebuffer,
   instrumentGLContext,
   withParameters
 } from '@luma.gl/webgl-legacy';
+import {Deck} from '@deck.gl/core';
 
 export function initializeResources(device: Device) {
   // @ts-expect-error

@@ -1,5 +1,5 @@
-import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/webgl-legacy';
 
 import {
   Accessor,

@@ -35,8 +35,7 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
+import {GL, Model, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
