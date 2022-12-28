@@ -285,6 +285,10 @@ test('AttributeManager.update - external logical buffers', t => {
   let attribute = attributeManager.getAttributes()['positions'];
   t.deepEqual(attribute.value, [1, 1, 2, 2], 'positions attribute has value');
 
+  t.is(attribute.getVertexOffset(0), 0, 'getVertexOffset returns correct result');
+  t.is(attribute.getVertexOffset(1), 2, 'getVertexOffset returns correct result');
+  t.is(attribute.getVertexOffset(2), 4, 'getVertexOffset returns correct result');
+
   attribute = attributeManager.getAttributes()['colors'];
   t.deepEqual(attribute.value, [255, 0, 0, 0, 255, 0], 'colors attribute has value');
   t.is(attribute.getAccessor().size, 3, 'colors attribute has correct size');
@@ -326,6 +330,10 @@ test('AttributeManager.update - external logical buffers - variable width', t =>
 
   let attribute = attributeManager.getAttributes()['positions'];
   t.deepEqual(attribute.value.slice(0, 6), [1, 1, 1, 1, 2, 2], 'positions attribute has value');
+
+  t.is(attribute.getVertexOffset(0), 0, 'getVertexOffset returns correct result');
+  t.is(attribute.getVertexOffset(1), 4, 'getVertexOffset returns correct result');
+  t.is(attribute.getVertexOffset(2), 6, 'getVertexOffset returns correct result');
 
   attribute = attributeManager.getAttributes()['colors'];
   t.deepEqual(

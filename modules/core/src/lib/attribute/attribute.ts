@@ -323,7 +323,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   getVertexOffset(row: number): number {
     const {startIndices} = this;
-    const vertexIndex = startIndices ? startIndices[row] : row;
+    const vertexIndex = startIndices
+      ? row < startIndices.length
+        ? startIndices[row]
+        : this.numInstances
+      : row;
     return vertexIndex * this.size;
   }
 
