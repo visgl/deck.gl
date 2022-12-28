@@ -12,4 +12,4 @@ cp node_modules/d3-time-format/dist/d3-time-format.js node_modules/d3-time-forma
 
 # Patch a bug in glsl-transpiler when running in strict mode.
 # TODO: wait for https://github.com/stackgl/glsl-transpiler/pull/52
-curl https://github.com/Pessimistress/glsl-transpiler/commit/3cc1f3ac3dda48a8b7baf15f46561eaead80fd7c.patch | git apply --reject --ignore-whitespace --directory node_modules/glsl-transpiler/
+curl https://raw.githubusercontent.com/Pessimistress/glsl-transpiler/3cc1f3ac3dda48a8b7baf15f46561eaead80fd7c/lib/descriptor.js > node_modules/glsl-transpiler/lib/descriptor.js
