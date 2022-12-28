@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.21] - Dev 28 2022
+
+- Fix disablePickingColor with externally supplied startIndices (#7543)
+- Update types for MapViewProps (#7519)
+- Improve filtered data rendering performance (#7510)
+
 #### deck.gl [8.8.20] - Nov 15 2022
 
 - CARTO: Include aggregation and geoColumn in POST (#7404)
