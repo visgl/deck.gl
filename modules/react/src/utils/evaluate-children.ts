@@ -4,7 +4,7 @@ import {cloneElement} from 'react';
 const MAP_STYLE = {position: 'absolute', zIndex: -1};
 
 export default function evaluateChildren(
-  children: React.ReactNode,
+  children: React.ReactNode | Function,
   childProps: any
 ): React.ReactNode {
   if (typeof children === 'function') {
