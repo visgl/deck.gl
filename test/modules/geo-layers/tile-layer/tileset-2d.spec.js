@@ -5,7 +5,7 @@ import Tileset2D, {
   STRATEGY_NEVER
 } from '@deck.gl/geo-layers/tile-layer/tileset-2d';
 import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
   bearing: 0,

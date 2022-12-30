@@ -39,9 +39,9 @@
     "@loaders.gl/tiles": "^3.2.10",
     "@luma.gl/experimental": "9.0.0-alpha.14",
     "@luma.gl/webgl-legacy": "9.0.0-alpha.14",
-    "@math.gl/core": "^3.6.2",
-    "@math.gl/culling": "^3.6.2",
-    "@math.gl/web-mercator": "^3.6.2",
+    "@math.gl/core": "4.0.0-alpha.1",
+    "@math.gl/culling": "4.0.0-alpha.1",
+    "@math.gl/web-mercator": "4.0.0-alpha.1",
     "@types/geojson": "^7946.0.8",
     "h3-js": "^3.7.0",
     "long": "^3.2.0"

@@ -37,8 +37,8 @@
     "@luma.gl/api": "9.0.0-alpha.14",
     "@luma.gl/engine": "9.0.0-alpha.14",
     "@luma.gl/webgl-legacy": "9.0.0-alpha.14",
-    "@math.gl/core": "^3.6.2",
-    "@math.gl/web-mercator": "^3.6.2",
+    "@math.gl/core": "4.0.0-alpha.1",
+    "@math.gl/web-mercator": "4.0.0-alpha.1",
     "gl-matrix": "^3.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
