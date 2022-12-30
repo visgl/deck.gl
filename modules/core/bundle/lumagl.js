@@ -14,13 +14,9 @@ export {
   TruncatedConeGeometry
 } from '@luma.gl/engine';
 
-export {
-  Model,
-  Transform,
-  ProgramManager
-} from '@luma.gl/webgl-legacy';
+export {Model, Transform, ProgramManager} from '@luma.gl/webgl-legacy';
 
-export { 
+export {
   // Context utilities
   instrumentGLContext,
   isWebGL2,

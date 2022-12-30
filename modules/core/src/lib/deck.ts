@@ -652,7 +652,7 @@ export default class Deck {
    * Register a default effect
    */
   _addDefaultEffect(effect: Effect) {
-    this.effectManager!.addDefaultEffect(effect);
+    this.effectManager.addDefaultEffect(effect);
   }
 
   // Private Methods
