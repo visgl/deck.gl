@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {Buffer} from '@luma.gl/webgl-legacy';
-import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 

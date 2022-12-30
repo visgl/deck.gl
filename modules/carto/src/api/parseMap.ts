@@ -1,4 +1,5 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
+import {_flatten as flatten, log} from '@deck.gl/core';
 import {
   AGGREGATION,
   getLayer,
@@ -13,7 +14,6 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import {_flatten as flatten, log} from '@deck.gl/core';
 import {assert} from '../utils';
 import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
 

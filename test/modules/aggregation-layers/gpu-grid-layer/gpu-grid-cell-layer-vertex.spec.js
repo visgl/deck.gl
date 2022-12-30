@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform, Buffer} from '@luma.gl/core';
+import {Transform, Buffer} from '@luma.gl/webgl-legacy';
 import {equals, config} from '@math.gl/core';
 
 test('gpu-grid-cell-layer-vertex#quantizeScale', t => {

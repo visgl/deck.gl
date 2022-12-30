@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {SimpleMeshLayer} from 'deck.gl';
-import {CylinderGeometry} from '@luma.gl/core';
+import {CylinderGeometry} from '@luma.gl/engine';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

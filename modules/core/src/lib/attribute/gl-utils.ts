@@ -1,4 +1,4 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import type {TypedArrayConstructor} from '../../types/types';
 
 /* eslint-disable complexity */

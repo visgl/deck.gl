@@ -1,6 +1,5 @@
 import {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
+import {GL, Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
 
 const DEFAULT_PARAMETERS = {
   [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,

@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
+import {GL, withParameters, setParameters} from '@luma.gl/webgl-legacy';
+
 import {COORDINATE_SYSTEM, OPERATION} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -27,8 +29,6 @@ import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug';
-import GL from '@luma.gl/constants';
-import {withParameters, setParameters} from '@luma.gl/webgl-legacy';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';

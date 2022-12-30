@@ -23,7 +23,7 @@ import test from 'tape-promise/tape';
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
-import {Buffer} from '@luma.gl/core';
+import {Buffer} from '@luma.gl/webgl-legacy';
 import {device} from '@deck.gl/test-utils';
 
 const SAMPLE_DATA = [

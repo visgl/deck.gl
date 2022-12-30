@@ -1,6 +1,5 @@
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
-import {Framebuffer, Texture2D, withParameters} from '@luma.gl/webgl-legacy';
+import {GL, Framebuffer, Texture2D, withParameters} from '@luma.gl/webgl-legacy';
 import {OPERATION, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {

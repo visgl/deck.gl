@@ -33,10 +33,8 @@ import deckGlobal from './init';
 import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
-import GL from '@luma.gl/constants';
 import {Timeline} from '@luma.gl/engine';
-import {lumaStats} from '@luma.gl/core';
-import {AnimationLoop, instrumentGLContext, setParameters} from '@luma.gl/webgl-legacy';
+import {GL, AnimationLoop, instrumentGLContext, setParameters} from '@luma.gl/webgl-legacy';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -1167,7 +1165,7 @@ export default class Deck {
     metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
     metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
-    const memoryStats = lumaStats.get('Memory Usage');
+    const memoryStats = luma.stats.get('Memory Usage');
     metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
     metrics.textureMemory = memoryStats.get('Texture Memory').count;
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;

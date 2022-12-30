@@ -2,7 +2,7 @@
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import test from 'tape-promise/tape';
-import {Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
 import {device} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = (function () {

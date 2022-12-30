@@ -34,7 +34,7 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/webgl-legacy';
 

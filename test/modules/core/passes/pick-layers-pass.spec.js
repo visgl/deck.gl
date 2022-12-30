@@ -2,9 +2,9 @@ import test from 'tape-promise/tape';
 
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
-import {Framebuffer} from '@luma.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 
 test('PickLayersPass#drawPickingBuffer', t => {
   const pickingFBO = new Framebuffer(device);

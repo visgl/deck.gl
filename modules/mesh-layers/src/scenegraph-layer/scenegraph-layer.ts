@@ -29,7 +29,7 @@ import {
   GLTFEnvironment,
   createGLTFObjects
 } from '@luma.gl/experimental';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 

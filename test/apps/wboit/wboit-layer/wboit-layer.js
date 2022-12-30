@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
-import {Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/core';
+import {GL, Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {SolidPolygonLayer} from '@deck.gl/layers';

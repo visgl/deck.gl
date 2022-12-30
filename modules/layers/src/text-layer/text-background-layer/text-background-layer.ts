@@ -1,7 +1,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';

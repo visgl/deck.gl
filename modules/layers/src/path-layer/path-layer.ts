@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';

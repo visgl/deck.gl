@@ -31,8 +31,8 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import type {Texture2D} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/webgl-legacy';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';

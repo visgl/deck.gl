@@ -1,7 +1,6 @@
 import type {Device} from '@luma.gl/api';
-import GL from '@luma.gl/constants';
 import {Timeline} from '@luma.gl/engine';
-import {Buffer, Transform} from '@luma.gl/webgl-legacy';
+import {GL, Buffer, Transform} from '@luma.gl/webgl-legacy';
 import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,

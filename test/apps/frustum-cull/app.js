@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {MapView, SimpleMeshLayer, LineLayer, WebMercatorViewport} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 
 import {getCulling, getFrustumBounds} from './frustum-utils';
 

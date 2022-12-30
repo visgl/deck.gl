@@ -1,7 +1,6 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
 import type {GLParameters} from '@luma.gl/webgl';
-import {withParameters} from '@luma.gl/webgl-legacy';
-import GL from '@luma.gl/constants';
+import {GL, withParameters} from '@luma.gl/webgl-legacy';
 import {OPERATION} from '../lib/constants';
 import log from '../utils/log';
 
