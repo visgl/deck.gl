@@ -19,7 +19,9 @@
 // THE SOFTWARE.
 
 import {transformParagraph} from '@deck.gl/layers/text-layer/utils';
-import {DEFAULT_CHAR_SET} from '@deck.gl/layers/text-layer/font-atlas-manager';
+import {DEFAULT_FONT_SETTINGS} from '@deck.gl/layers/text-layer/font-atlas-manager';
+
+const DEFAULT_CHAR_SET = DEFAULT_FONT_SETTINGS.characterSet;
 
 function generateText(len) {
   const word = [];

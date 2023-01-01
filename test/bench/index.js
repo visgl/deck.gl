@@ -55,4 +55,4 @@ createPropsBench(suite);
 textAutoWrappingBench(suite);
 
 // Run the suite
-suite.run();
+suite.calibrate().run();

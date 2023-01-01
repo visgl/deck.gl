@@ -56,7 +56,16 @@ test('BinSorter.init', t => {
     sortedBins: undefined
   };
 
-  t.deepEqual(sortedBins, expectedResult, 'should create correct sorted bins');
+  t.deepEqual(
+    sortedBins.aggregatedBins,
+    expectedResult.aggregatedBins,
+    'should create correct sorted bins'
+  );
+  t.deepEqual(sortedBins.binMap, expectedResult.binMap, 'should create correct bin map');
+  t.is(sortedBins.maxCount, expectedResult.maxCount, 'maxCount');
+  t.is(sortedBins.minValue, expectedResult.minValue, 'minValue');
+  t.is(sortedBins.maxValue, expectedResult.maxValue, 'maxValue');
+  t.is(sortedBins.totalCount, expectedResult.totalCount, 'totalCount');
   t.end();
 });
 

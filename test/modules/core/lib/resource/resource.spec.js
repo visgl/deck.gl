@@ -16,10 +16,11 @@ test('Resource#setData', async t => {
   t.deepEqual(resource.getData(), []);
 
   resource.setData('./test.json');
-  t.ok(resource.getData() instanceof Promise, 'data is being loaded');
+  const testData = resource.getData();
+  t.ok(testData instanceof Promise, 'data is being loaded');
   let errors = 0;
   try {
-    await resource.getData();
+    await testData;
   } catch (e) {
     errors++;
   }

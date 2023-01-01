@@ -1,4 +1,4 @@
-const deckGLLayers = require('./src');
+import * as deckGLLayers from './src';
 
 const deck = globalThis.deck || {};
 
@@ -7,4 +7,4 @@ if (!deck.LineLayer) {
   throw new Error('@deck.gl/layers is not found');
 }
 
-module.exports = Object.assign(deck, deckGLLayers);
+export default Object.assign(deck, deckGLLayers);

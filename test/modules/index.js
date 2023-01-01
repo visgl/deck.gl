@@ -31,5 +31,5 @@ import './google-maps';
 import './mapbox';
 import './json';
 import './react';
-import './jupyter-widget';
+// import './jupyter-widget';
 import './extensions';

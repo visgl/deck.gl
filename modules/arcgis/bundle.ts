@@ -1,4 +1,4 @@
-const ArcGISUtils = require('./src/load-modules');
+import * as ArcGISUtils from './src/load-modules';
 
 const deck = globalThis.deck || {};
 
@@ -7,4 +7,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, ArcGISUtils);
+export default Object.assign(deck, ArcGISUtils);
