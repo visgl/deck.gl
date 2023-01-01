@@ -24,7 +24,7 @@
       "@deck.gl/json": ["modules/json/src"],
       "@deck.gl/jupyter-widget": ["modules/jupyter-widget/src"],
       "@deck.gl/layers": ["modules/layers/src"],
-      "@deck.gl/main": ["modules/main/src"],
+      "deck.gl": ["modules/main/src"],
       "@deck.gl/mapbox": ["modules/mapbox/src"],
       "@deck.gl/mesh-layers": ["modules/mesh-layers/src"],
       "@deck.gl/react": ["modules/react/src"],

@@ -24,6 +24,10 @@ const config = {
     paths: ['modules', 'test'] // , 'examples',
   },
 
+  typescript: {
+    project: 'tsconfig.build.json'
+  },
+
   aliases: {
     'deck.gl-test': join(packageRoot, './test')
   },
