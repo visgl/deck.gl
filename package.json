@@ -60,7 +60,7 @@
     "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-preset-minify": "^0.5.0",
     "canvas": "^2.10.2",
-    "esbuild-plugin-babel": "^0.2.3",
+    "esbuild-plugin-babel": "git+https://github.com/Pessimistress/esbuild-plugin-babel.git#patch-1",
     "esbuild-plugin-external-global": "^1.0.1",
     "gl": "^6.0.0",
     "glsl-transpiler": "^1.8.6",

@@ -6654,10 +6654,9 @@ es6-promisify@^5.0.0:
   dependencies:
     es6-promise "^4.0.3"
 
-esbuild-plugin-babel@^0.2.3:
+"esbuild-plugin-babel@git+https://github.com/Pessimistress/esbuild-plugin-babel.git#patch-1":
   version "0.2.3"
-  resolved "https://registry.yarnpkg.com/esbuild-plugin-babel/-/esbuild-plugin-babel-0.2.3.tgz#e6bce2ad9b962bf725700b6d0c803eed21b9fff6"
-  integrity sha512-hGLL31n+GvBhkHUpPCt1sU4ynzOH7I1IUkKhera66jigi4mHFPL6dfJo44L6/1rfcZudXx+wGdf9VOifzDPqYQ==
+  resolved "git+https://github.com/Pessimistress/esbuild-plugin-babel.git#0c081a5436ae0e703d97eff28fe77edfc1e30e4a"
 
 esbuild-plugin-external-global@^1.0.1:
   version "1.0.1"
@@ -9914,7 +9913,7 @@ mapbox-gl@^1.0.0:
     tinyqueue "^2.0.0"
     vt-pbf "^3.1.1"
 
-mapbox-gl@^1.2.1:
+mapbox-gl@^1.13.2:
   version "1.13.2"
   resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.13.2.tgz#76639c44f141f8dff71b7d8f1504f2aed11f7517"
   integrity sha512-CPjtWygL+f7naL+sGHoC2JQR0DG7u+9ik6WdkjjVmz2uy0kBC2l+aKfdi3ZzUR7VKSQJ6Mc/CeCN+6iVNah+ww==
