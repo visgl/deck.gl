@@ -83,6 +83,7 @@ export function processDataBuffer({binary, convertedJson}) {
 
 // Filters circular references on JSON string conversion
 function filterJsonValue(key, value) {
+  // eslint-disable-next-line
   return value instanceof deckBundle.Layer ? value.id : value;
 }
 

@@ -40,7 +40,7 @@
     "@loaders.gl/core": "^3.2.10",
     "@loaders.gl/csv": "^3.2.10",
     "@luma.gl/constants": "^8.5.16",
-    "mapbox-gl": "^1.2.1"
+    "mapbox-gl": "^1.13.2"
   },
   "jupyterlab": {
     "extension": "src/plugin",

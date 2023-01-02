@@ -1,5 +1,5 @@
 /* global window*/
-const widgets = require('@jupyter-widgets/base');
+import * as widgets from '@jupyter-widgets/base';
 
 // Adapted from https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/f8c4f1d2c61374811423eb724b9eb11c6e2f10b1/%7B%7Bcookiecutter.github_project_name%7D%7D/src/__tests__/utils.ts#L106
 export class DummyManager extends widgets.ManagerBase {
