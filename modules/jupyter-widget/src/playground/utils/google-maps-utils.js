@@ -1,5 +1,5 @@
 /* global window */
-import deck from '../../deck-bundle';
+import * as deck from '../../deck-bundle';
 
 export function createGoogleMapsDeckOverlay({
   container,
