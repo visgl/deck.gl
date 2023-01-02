@@ -10,7 +10,7 @@ module.exports = getBabelConfig({
       [
         'remove-glsl-comments',
         {
-          patterns: ['**/*.glsl.js']
+          patterns: ['**/*.glsl.js', '**/*.glsl.ts']
         }
       ]
     ]

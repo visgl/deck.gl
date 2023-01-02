@@ -25,11 +25,10 @@
     "debug.min.js",
     "dist.min.js"
   ],
-  "sideEffects": false,
   "scripts": {
-    "build-debugger": "webpack ./bundle/debug.ts -p -o ./debug.min.js --config ../../scripts/bundle.config.js",
-    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
-    "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env.dev"
+    "build-debugger": "node ../../scripts/bundle.mjs ./bundle/debug.ts --output=./debug.min.js",
+    "build-bundle": "node ../../scripts/bundle.mjs ./bundle/index.ts",
+    "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies_comments": [
     "DEPRECATED: math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"

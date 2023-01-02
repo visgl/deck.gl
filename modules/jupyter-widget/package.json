@@ -23,10 +23,10 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "watch": "webpack --watch",
-    "build": "webpack -p",
+    "watch": "node ./build.mjs watch",
+    "build": "node ./build.mjs",
     "build:labextension": "npm pack",
-    "prepublishOnly": "webpack -p"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "8.9.0-alpha.5",
