@@ -36,7 +36,7 @@ const SHADER_HOOKS = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function createProgramManager(device: Device) {
+export function getProgramManager(device: Device) {
   const pipelineFactory = ProgramManager.getDefaultProgramManager(device);
 
   for (const shaderModule of DEFAULT_MODULES) {

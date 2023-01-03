@@ -31,7 +31,7 @@ const SAMPLE_PROPS = {
   getHexagon: d => d.hexagons[0]
 };
 
-// TODO - luma v9
+// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
 test.skip('H3HexagonLayer', t => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
@@ -54,7 +54,7 @@ test.skip('H3HexagonLayer', t => {
   t.end();
 });
 
-// TODO - luma v9
+// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
 test.skip('H3HexagonLayer#_shouldUseHighPrecision', t => {
   testLayer({
     Layer: H3HexagonLayer,
@@ -108,7 +108,7 @@ test.skip('H3HexagonLayer#_shouldUseHighPrecision', t => {
   t.end();
 });
 
-// TODO - luma v9
+// TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
 test.skip('H3HexagonLayer#viewportUpdate', t => {
   let vertices = null;
 

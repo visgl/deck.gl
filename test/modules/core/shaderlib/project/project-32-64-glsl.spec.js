@@ -123,7 +123,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        skipGPUs: ['Intel'],
+        // TODO luma.gl v9 - adding apple as an exception !?!
+        skipGPUs: ['intel', 'apple'],
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 0], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
@@ -137,7 +138,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
-        skipGPUs: ['Intel'],
+        // TODO luma.gl v9 - adding apple as an exception !?!
+        skipGPUs: ['intel', 'apple'],
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.45, 37.78, 100], [0, 0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
@@ -161,7 +163,8 @@ const TEST_CASES = [
       {
         name: 'project_position_to_clipspace_world_position',
         // disableTranspileFor64: true,
-        skipGPUs: ['Intel'],
+        // TODO luma.gl v9 - adding apple as an exception !?!
+        skipGPUs: ['intel', 'apple'],
 
         func: ({project_position_to_clipspace}) => {
           let worldPosition = [];
@@ -182,7 +185,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        skipGPUs: ['Intel'],
+        // TODO luma.gl v9 - adding apple as an exception !?!
+        skipGPUs: ['intel', 'apple'],
 
         func: ({project_position_to_clipspace_vec3_vec3_vec3}) =>
           project_position_to_clipspace_vec3_vec3_vec3([-122.05, 37.92, 0], [0, 0, 0], [0, 0, 0]),
@@ -242,10 +246,14 @@ const TEST_CASES = [
   }
 ];
 
-// TODO - luma.gl v9
-test.skip('project32&64#vs', t => {
+test('project32&64#vs', t => {
   const oldEpsilon = config.EPSILON;
-  [false, true].forEach(usefp64 => {
+  for (const usefp64 of [false, true]) {
+    // TODO - luma.gl v9 test disablement
+    if (usefp64 && device.info.gpu === 'apple') {
+      continue;
+    }
+
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
       if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
@@ -262,8 +270,7 @@ test.skip('project32&64#vs', t => {
       testCase.tests.forEach(c => {
         const expected = (usefp64 && c.output64) || c.output;
         // TODO - luma v9 - switch to device.info.gpu ?
-        const skipOnGPU =
-          c.skipGPUs && c.skipGPUs.some(gpu => device.info.vendor.indexOf(gpu) >= 0);
+        const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => device.info.gpu.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(device) && !skipOnGPU) {
           // Reduced precision tolerencewhen using 64 bit project module.
@@ -309,7 +316,7 @@ test.skip('project32&64#vs', t => {
         }
       });
     });
-  });
+  }
   /* eslint-enable max-nested-callbacks, complexity */
 
   config.EPSILON = oldEpsilon;

@@ -46,7 +46,7 @@ test('DeckPicker#getPickingRect', t => {
   t.end();
 });
 
-// TODO - luma v9
+// TODO - luma v9 disable - picking somehow broken
 /* eslint-disable max-statements */
 test.skip('DeckPicker#pick empty', t => {
   const deckPicker = new DeckPicker(device);

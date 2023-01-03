@@ -2,8 +2,14 @@
 /* eslint-disable no-console */
 import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
+
+// Make sure there is a device registered
+import {luma} from '@luma.gl/api';
+import {WebGLDevice} from '@luma.gl/webgl';
+luma.registerDevices([WebGLDevice]);
+
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import GLConstants from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl-legacy';
 
 import makeTooltip from './widget-tooltip';
 

@@ -314,7 +314,7 @@ const TEST_CASES = [
   }
 ];
 
-// TODO - luma.gl v9 likely GPU identification error
+// TODO - luma.gl v9 likely GPU identification error?
 test.skip('project#vs', t => {
   // TODO - resolve dependencies properly
   // luma's assembleShaders require WebGL context to work

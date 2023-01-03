@@ -29,7 +29,7 @@ import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 
 import Viewport from '../viewports/viewport';
-import {createProgramManager} from '../shaderlib';
+import {getProgramManager} from '../shaderlib';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
@@ -102,7 +102,7 @@ export default class LayerManager {
       gl: device?.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      pipelineFactory: (device && createProgramManager(device))!,
+      pipelineFactory: (device && getProgramManager(device))!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function

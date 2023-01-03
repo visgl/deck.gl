@@ -88,7 +88,7 @@ function testAggregationOperations(opts) {
   config.EPSILON = oldEpsilon;
 }
 
-// TODO - luma v9
+// TODO - luma v9 disabled test
 test.skip('Aggregation#ScreenSpace', t => {
   const data = generateRandomGridPoints(5000);
   const {weights} = fixture;
@@ -102,7 +102,7 @@ test.skip('Aggregation#ScreenSpace', t => {
   t.end();
 });
 
-// TODO - luma v9
+// TODO - luma v9 disabled test
 test.skip('Aggregation#WorldSpace', t => {
   const cellSize = 800; // meters
   const coordinateSystem = COORDINATE_SYSTEM.LNGLAT;

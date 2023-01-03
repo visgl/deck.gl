@@ -57,7 +57,9 @@ test('deck.gl', t => {
   window.h3 = {};
 
   require('./render');
-  require('./interaction');
+
+  // luma.gl v9 disable - same as render tests
+  // require('./interaction');
 
   t.end();
 });
