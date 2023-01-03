@@ -37,8 +37,8 @@
     "@loaders.gl/schema": "^3.2.10",
     "@loaders.gl/terrain": "^3.2.10",
     "@loaders.gl/tiles": "^3.2.10",
-    "@luma.gl/experimental": "9.0.0-alpha.14",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.14",
+    "@luma.gl/experimental": "9.0.0-alpha.15",
+    "@luma.gl/webgl-legacy": "9.0.0-alpha.15",
     "@math.gl/core": "4.0.0-alpha.1",
     "@math.gl/culling": "4.0.0-alpha.1",
     "@math.gl/web-mercator": "4.0.0-alpha.1",
@@ -52,7 +52,7 @@
     "@deck.gl/layers": "^8.0.0",
     "@deck.gl/mesh-layers": "^8.0.0",
     "@loaders.gl/core": "^3.0.0",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.14"
+    "@luma.gl/webgl-legacy": "9.0.0-alpha.15"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
