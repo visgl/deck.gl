@@ -1,4 +1,11 @@
 {
+  "ts-node": {
+    "include": [
+      "modules",
+      "test/modules",
+      "node_modules/@luma.gl"
+    ]
+  },
   "compilerOptions": {
     "target": "es2020",
     "jsx": "react",
@@ -54,7 +61,8 @@
   },
   "include": [
     "modules",
-    "test/modules"
+    "test/modules",
+    "node_modules/@luma.gl"
   ],
   "exclude": [
   ]
