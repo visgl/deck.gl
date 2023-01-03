@@ -9,5 +9,6 @@ Object.assign(globalThis.luma, LumaGL);
 Object.assign(globalThis.loaders, {registerLoaders, load, parse, fetchFile});
 
 export * from '../src';
+export {register as _registerLoggers} from '../src/debug';
 
 export {default as DeckGL} from './deckgl';

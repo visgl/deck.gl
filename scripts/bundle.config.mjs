@@ -88,7 +88,7 @@ const babelConfigDev = {
 export default function getBundleConfig(opts = {}) {
   const devMode = opts.env === 'dev';
 
-  const {input, output = devMode ? './dist/dist.dev.js' : './dist.min.js'} = opts;
+  const {input, output = devMode ? './dist/dist.dev.js' : './dist.min.js', globalName = 'deck'} = opts;
 
   return {
     entryPoints: [input],
@@ -96,7 +96,7 @@ export default function getBundleConfig(opts = {}) {
     bundle: true,
     minify: !devMode,
     format: 'iife',
-    globalName: 'deck',
+    globalName,
     alias: ALIASES,
     platform: 'browser',
     target: ['esnext'],
