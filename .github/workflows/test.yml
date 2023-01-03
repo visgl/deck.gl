@@ -17,7 +17,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '16.9'
+          node-version: '16.19'
 
       - name: Install dependencies
         run: |
