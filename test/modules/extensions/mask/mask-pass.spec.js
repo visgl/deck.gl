@@ -1,4 +1,5 @@
 import test from 'tape-promise/tape';
+import {device} from '@deck.gl/test-utils';
 
 import {Layer, LayerManager, OPERATION, Viewport} from '@deck.gl/core';
 import MaskPass from '@deck.gl/extensions/mask/mask-pass';
