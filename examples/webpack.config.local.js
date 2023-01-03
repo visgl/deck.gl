@@ -73,7 +73,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma, linkToMath) {
       MATH_ALIASES[`@math.gl/${module}`] = `${ROOT_DIR}/../math.gl/modules/${module}/src`;
     }
   } else {
-    MATH_ALIASES['math.gl'] = resolve(LIB_DIR, './node_modules/math.gl');
+    // MATH_ALIASES['math.gl'] = resolve(LIB_DIR, './node_modules/math.gl');
   }
 
   return {
