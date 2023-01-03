@@ -20,117 +20,129 @@
 
 import test from 'tape-promise/tape';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
-import LayerManager from '@deck.gl/core/lib/layer-manager';
-
-import {gl} from '@deck.gl/test-utils';
-import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
-import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
-
-const layerManager = new LayerManager(gl);
 
 class TestEffect {
-  constructor() {
-    this.id = 'effect';
-    this.props = null;
+  constructor(props = {}) {
+    this.id = props.id || 'effect';
+    this.props = props;
+    this.resources = null;
   }
 
-  preRender() {}
-  cleanup() {}
-}
-
-function getResourceCounts() {
-  /* global luma */
-  const resourceStats = luma.stats.get('Resource Counts');
-  return {
-    Texture2D: resourceStats.get('Texture2Ds Active').count,
-    Buffer: resourceStats.get('Buffers Active').count
-  };
-}
-
-const fs = `\
-  vec4 testEffect_sampleColor(sampler2D texture, vec2 texSize, vec2 texCoord) {
-    return vec4(1.0, 0.0, 0.0, 0.0);
+  setProps(props) {
+    this.props = props;
   }
-  `;
 
-const uniforms = {};
+  preRender() {
+    this.resources = this.resources || {
+      name: 'Some WebGL resource expensive to create'
+    };
+  }
 
-const testModule = {
-  name: 'testEffect',
-  uniforms,
-  fs,
-  passes: [{sampler: true}]
-};
+  cleanup() {
+    this.resources = null;
+  }
+}
+
+class TestEffect2 {
+  constructor(props = {}) {
+    this.id = props.id || 'effect';
+    this.props = props;
+    this.resources = null;
+  }
+
+  preRender() {
+    this.resources = this.resources || {
+      name: 'Some WebGL resource expensive to create'
+    };
+  }
+
+  cleanup() {
+    this.resources = null;
+  }
+}
 
 test('EffectManager#constructor', t => {
-  const effectManager = new EffectManager({gl, layerManager});
+  const effectManager = new EffectManager();
   t.ok(effectManager, 'Effect Manager created');
   t.end();
 });
 
-test('EffectManager#set and get Effects', t => {
-  const effectManager = new EffectManager({gl, layerManager});
-  const effect1 = new TestEffect();
-  const effect2 = new TestEffect();
-  effectManager.setEffects([effect1, effect2]);
+test('EffectManager#set and get effects', t => {
+  const effectManager = new EffectManager();
+  const effect1 = new TestEffect({id: 'effect1'});
+  const effect2 = new TestEffect({id: 'effect2'});
+  effectManager.setProps({effects: [effect1, effect2]});
+  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
   let effects = effectManager.getEffects();
-  t.equal(effects.length, 4, 'Effect set and get successfully');
+  // 2 user effects + default lighting
+  t.equal(effects.length, 3, 'Effect set and get successfully');
 
   effectManager.setProps({effects: [effect1]});
+  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
   effects = effectManager.getEffects();
-  t.equal(effects.length, 3, 'Effect set and get successfully');
+  // 1 user effect + default lighting
+  t.equal(effects.length, 2, 'Effect set and get successfully');
+
+  effectManager.setProps({effects: [effect1]});
+  t.notOk(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects not changed');
+
+  effectManager.addDefaultEffect(new TestEffect2());
+  t.equal(effectManager.needsRedraw({clearRedrawFlags: true}), 'effects changed');
+  effects = effectManager.getEffects();
+  // 1 user effect + default lighting + testEffect2
+  t.is(effects.length, 3, 'Added new default effect');
+
   t.end();
 });
 
-test('EffectManager#cleanup resource', t => {
-  const effect = new PostProcessEffect(testModule);
-  const effectManager = new EffectManager({gl, layerManager});
-  effectManager.setEffects([effect]);
-  const resBegin = getResourceCounts();
-  effect.preRender(gl);
-  effectManager.setEffects([]);
-  const resEnd = getResourceCounts();
+test('EffectManager#update effects', t => {
+  const effectManager = new EffectManager();
+  effectManager.setProps({effects: [new TestEffect({gain: 0.5})]});
+  let effect = effectManager.getEffects()[0];
+  t.equal(effect.props.gain, 0.5, 'Effect prop as expected');
+  effect.preRender();
+  const resources = effect.resources;
 
-  t.deepEqual(resBegin, resEnd, 'All resources are cleaned up');
+  effectManager.setProps({effects: [new TestEffect({gain: 1})]});
+  effect = effectManager.getEffects()[0];
+  t.equal(effect.props.gain, 1, 'Effect prop as expected');
+  effect.preRender();
+  t.is(effect.resources, resources, 'Resources did not get regenerated (props update)');
+
+  effectManager.setProps({effects: [new TestEffect({id: 'alt-effect', gain: 0})]});
+  t.notOk(effect.resources, 'Old effect is cleaned up');
+  effect = effectManager.getEffects()[0];
+  t.equal(effect.props.gain, 0, 'Effect prop as expected');
+  effect.preRender();
+  t.not(effect.resources, resources, 'Resources are regenerated (new effect)');
+
+  t.end();
+});
+
+test('EffectManager#update effects', t => {
+  const effectManager = new EffectManager();
+  effectManager.setProps({effects: [new TestEffect2({gain: 0.5})]});
+  let effect = effectManager.getEffects()[0];
+  t.equal(effect.props.gain, 0.5, 'Effect prop as expected');
+  effect.preRender();
+  const resources = effect.resources;
+
+  effectManager.setProps({effects: [new TestEffect2({gain: 1})]});
+  effect = effectManager.getEffects()[0];
+  t.equal(effect.props.gain, 1, 'Effect prop as expected');
+  effect.preRender();
+  t.not(effect.resources, resources, 'Resources are regenerated (props update not implemented)');
+
   t.end();
 });
 
 test('EffectManager#finalize', t => {
-  const effect = new PostProcessEffect(testModule);
-  const effectManager = new EffectManager({gl, layerManager});
-  effectManager.setEffects([effect]);
-  const resBegin = getResourceCounts();
-  effect.preRender(gl);
+  const effect = new TestEffect();
+  const effectManager = new EffectManager();
+  effectManager.setProps({effects: [effect]});
+  effect.preRender();
   effectManager.finalize();
-  const resEnd = getResourceCounts();
 
-  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized');
-  t.end();
-});
-
-test('EffectManager#setProps', t => {
-  const effect = new LightingEffect();
-  const effectManager = new EffectManager({gl, layerManager});
-  effectManager.setProps({effects: [effect]});
-
-  t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');
-  t.equal(effectManager.getEffects().length, 2, 'Effect Manager should not need default lighting');
-  t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager should need redraw');
-
-  effectManager.setProps({effects: [effect]});
-  t.equal(
-    effectManager.needsRedraw({clearRedrawFlags: true}),
-    'effects changed',
-    'Effect Manager should need redraw'
-  );
-  t.equal(
-    effectManager.needsRedraw({clearRedrawFlags: true}),
-    false,
-    'Effect Manager should not need redraw'
-  );
-
-  effectManager.setProps({effects: []});
-  t.equal(effectManager.getEffects().length, 2, 'Effect Manager should apply default lighting');
-
+  t.notOk(effect.resources, 'Effect manager is finalized');
   t.end();
 });

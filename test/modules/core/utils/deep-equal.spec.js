@@ -1,28 +1,121 @@
 import test from 'tape-promise/tape';
 import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
+const obj = {longitude: -70, latitude: 40.7, zoom: 12};
 const TEST_CASES = [
   {
-    a: {longitude: -70, latitude: 40.7, zoom: 12},
-    b: {longitude: -70, latitude: 40.7, zoom: 12},
+    a: obj,
+    b: obj,
     output: true
   },
   {
-    a: {longitude: -70, latitude: 40.7, zoom: 12, position: [0, 0, 0]},
-    b: {longitude: -70, latitude: 40.7, zoom: 12, position: [0, 0, 0]},
+    a: {x: obj},
+    b: {x: obj},
+    output: true
+  },
+  {
+    a: {x: obj},
+    b: {x: {...obj}},
+    output: false
+  },
+  {
+    a: {x: obj},
+    b: {x: {...obj}},
+    depth: 1,
     output: true
   },
   {
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    b: {map: {}},
+    depth: 1,
+    output: false
+  },
+  {
+    a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    depth: 1,
+    output: true
+  },
+  {
+    a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    b: {map: {latitude: 37.78, zoom: 8}},
+    depth: -1,
+    output: false
+  },
+  {
+    a: {map: {latitude: 37.78, zoom: 8}},
+    b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
+    depth: -1,
+    output: false
+  },
+  {
+    a: {x: {y: {z: 1}}},
+    b: {x: {y: {z: 1}}},
+    depth: 1,
+    output: false
+  },
+  {
+    a: {x: {y: {z: 1}}},
+    b: {x: {y: {z: 1}}},
+    depth: 2,
+    output: true
+  },
+  {
+    a: {x: {y: {z: 1}}},
+    b: {x: {y: {z: 2}}},
+    depth: 2,
+    output: false
+  },
+  {
+    a: [1, 2, 3, 4],
+    b: [1, 2, 3, 4],
+    output: true
+  },
+  {
+    a: [1, 2, 3, 4],
+    b: [1, 2, 3, 5],
+    output: false
+  },
+  {
+    a: [1, 2, 3, 4],
+    b: [1, 2, 3],
+    output: false
+  },
+  {
+    a: [1, 2, 3],
+    b: [1, 2, 3, 4],
+    output: false
+  },
+  {
+    a: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    b: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    depth: 2,
+    output: true
+  },
+  {
+    a: [
+      {threshold: 1, color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    b: [
+      {threshold: [1000, 2000], color: [50, 50, 50]},
+      {threshold: 2, color: [100, 100, 100]}
+    ],
+    depth: 2,
     output: false
   }
 ];
 
 test('utils#deepEqual', t => {
-  TEST_CASES.forEach(testCase => {
-    const result = deepEqual(testCase.a, testCase.b);
-    t.is(result, testCase.output, `Should ${testCase.output ? '' : 'not '}be equal`);
+  TEST_CASES.forEach(({a, b, depth, output}) => {
+    const result = deepEqual(a, b, depth);
+    t.is(result, output, `should ${output ? '' : 'not '}be equal`);
   });
 
   t.end();

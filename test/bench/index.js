@@ -23,6 +23,7 @@ import {Bench} from '@probe.gl/bench';
 
 import layerBench from './layer.bench';
 import coreLayersBench from './core-layers.bench';
+import deepEqualBench from './deep-equal.bench';
 import viewportBench from './viewport.bench';
 import colorBench from './color.bench';
 import pickLayersBench from './pick-layers.bench';
@@ -40,6 +41,7 @@ const suite = new Bench({minIterations: 10});
 // add tests
 layerBench(suite);
 coreLayersBench(suite);
+deepEqualBench(suite);
 viewportBench(suite);
 colorBench(suite);
 utilsBench(suite);
@@ -53,4 +55,4 @@ createPropsBench(suite);
 textAutoWrappingBench(suite);
 
 // Run the suite
-suite.run();
+suite.calibrate().run();

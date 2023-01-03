@@ -1,16 +1,17 @@
+import {
+  Layer,
+  Viewport,
+  Effect,
+  PreRenderOptions,
+  OPERATION,
+  CoordinateSystem,
+  log
+} from '@deck.gl/core';
 import {Texture2D} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
-import MaskPass from '../../passes/mask-pass';
-import {OPERATION} from '../../lib/constants';
-import {getMaskBounds, getMaskViewport} from './utils';
-import log from '../../utils/log';
-
-import type {Effect, PreRenderOptions} from '../../lib/effect';
-import type Layer from '../../lib/layer';
-import type Viewport from '../../viewports/viewport';
-import type {MaskBounds} from './utils';
-import type {CoordinateSystem} from '../../lib/constants';
+import MaskPass from './mask-pass';
+import {getMaskBounds, getMaskViewport, MaskBounds} from './utils';
 
 type Mask = {
   /** The channel index */

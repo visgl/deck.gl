@@ -463,7 +463,7 @@ export default [
         iconSizeUnits: 'pixels',
         getIconSize: 10,
         getIcon: d => (d.properties.state.length % 2 ? 'marker' : 'marker-warning'),
-        iconAlphaCutoff: 1.0 // icon edge is not sharp anymore
+        iconAlphaCutoff: 0.99 // icon edge is not sharp anymore
       })
     ],
     goldenImage: './test/render/golden-images/geojson-icon-alpha-cutoff.png'

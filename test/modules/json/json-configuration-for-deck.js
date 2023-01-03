@@ -1,5 +1,6 @@
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
 import GLConstants from '@luma.gl/constants';
+import * as deckglLayers from '@deck.gl/layers';
 
 export const log = console; // eslint-disable-line
 
@@ -10,7 +11,7 @@ export function calculateRadius({base, exponent}) {
 export default {
   log,
   // a map of all layers that should be exposes as JSONLayers
-  classes: Object.assign({MapView, FirstPersonView}, require('@deck.gl/layers')),
+  classes: Object.assign({MapView, FirstPersonView}, deckglLayers),
   // Functions that should be executed by JSON converter
   functions: Object.assign({calculateRadius}),
   // Enumerations that should be available to JSON parser

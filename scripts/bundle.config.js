@@ -1,13 +1,29 @@
+const fs = require('fs');
 const {resolve} = require('path');
 const webpack = require('webpack');
-const {getOcularConfig} = require('ocular-dev-tools');
-const ALIASES = getOcularConfig({
-  aliasMode: 'src',
-  root: resolve(__dirname, '..')
-}).aliases;
+
+const ALIASES = getAliases();
 
 const PACKAGE_ROOT = resolve('.');
 const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
+
+function getAliases() {
+  const submodules = {};
+  const parentPath = resolve(__dirname, '../modules');
+
+  fs.readdirSync(parentPath).forEach((item) => {
+    const itemPath = resolve(parentPath, item);
+    try {
+      const packageInfoText = fs.readFileSync(resolve(itemPath, 'package.json'), 'utf-8');
+      const packageInfo = JSON.parse(packageInfoText);
+      submodules[packageInfo.name] = resolve(itemPath, 'src');
+    } catch {
+      // ignore
+    }
+  });
+
+  return submodules;
+}
 
 /**
  * peerDependencies are excluded using `externals`

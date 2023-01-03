@@ -133,14 +133,17 @@ test('Tileset2D#maxCacheSize', t => {
   tileset.update(
     new WebMercatorViewport(
       Object.assign({}, testViewState, {
+        width: 300,
+        height: 100,
         longitude: -100,
         latitude: 80
       })
     )
   );
-
-  t.equal(tileset._cache.size, 1, 'cache is resized');
+  t.equal(tileset._cache.size, 2, 'cache is resized');
+  t.notOk(tileset._cache.get('1171-1566-12'), 'old tile is deleted from cache');
   t.ok(tileset._cache.get('910-459-12'), 'expected tile is in cache');
+  t.ok(tileset._cache.get('909-459-12'), 'expected tile is in cache');
 
   t.end();
 });

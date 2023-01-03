@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-const {_enableDOMLogging} = require('@probe.gl/test-utils');
+import {_enableDOMLogging} from '@probe.gl/test-utils';
 _enableDOMLogging(true);
-require('./index');
+
+import './index';

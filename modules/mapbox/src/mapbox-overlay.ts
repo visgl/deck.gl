@@ -1,5 +1,5 @@
 import {Deck, assert} from '@deck.gl/core';
-import {getViewState} from './deck-utils';
+import {getViewState, getDeckInstance, getInterleavedProps} from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -50,7 +50,7 @@ export default class MapboxOverlay implements IControl {
     Object.assign(this._props, props);
 
     if (this._deck) {
-      this._deck.setProps(this._props);
+      this._deck.setProps(this._interleaved ? getInterleavedProps(this._props) : this._props);
     }
   }
 
@@ -89,10 +89,15 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
-    this._deck = new Deck({
-      ...this._props,
+    this._deck = getDeckInstance({
+      map,
       // @ts-ignore non-public map property
-      gl: map.painter.context.gl
+      gl: map.painter.context.gl,
+      deck: new Deck({
+        ...this._props,
+        // @ts-ignore non-public map property
+        gl: map.painter.context.gl
+      })
     });
 
     map.on('styledata', this._handleStyleChange);

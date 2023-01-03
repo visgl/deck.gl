@@ -21,9 +21,10 @@
 /* eslint-disable no-unused-vars */
 import test from 'tape-promise/tape';
 import {createElement, createRef} from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
+import {act} from 'react-dom/test-utils';
 
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from 'deck.gl';
 
 import {gl} from '@deck.gl/test-utils';
 
@@ -42,36 +43,39 @@ const getMockContext = () => (globalThis.__JSDOM__ ? gl : null);
 test('DeckGL#mount/unmount', t => {
   const ref = createRef();
   const container = document.createElement('div');
-  ReactDOM.render(
-    createElement(DeckGL, {
-      initialViewState: TEST_VIEW_STATE,
-      ref,
-      width: 100,
-      height: 100,
-      gl: getMockContext(),
-      onLoad: () => {
-        const {deck} = ref.current;
-        t.ok(deck, 'DeckGL is initialized');
-        t.is(deck.getViewports()[0].longitude, TEST_VIEW_STATE.longitude, 'View state is set');
+  const root = createRoot(container);
 
-        ReactDOM.unmountComponentAtNode(container);
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100,
+        gl: getMockContext(),
+        onLoad: () => {
+          const {deck} = ref.current;
+          t.ok(deck, 'DeckGL is initialized');
+          t.is(deck.getViewports()[0].longitude, TEST_VIEW_STATE.longitude, 'View state is set');
 
-        t.notOk(deck.animationLoop, 'Deck is finalized');
+          act(() => {
+            root.render(null);
+          });
 
-        t.end();
-      }
-    }),
-    container,
-    () => {
-      t.ok(ref.current, 'DeckGL overlay is rendered.');
-    }
-  );
+          t.notOk(deck.animationLoop, 'Deck is finalized');
+
+          t.end();
+        }
+      })
+    );
+  });
+  t.ok(ref.current, 'DeckGL overlay is rendered.');
 });
 
 test('DeckGL#render', t => {
   const container = document.createElement('div');
-
-  ReactDOM.render(
+  const root = createRoot(container);
+  root.render(
     createElement(
       DeckGL,
       {
@@ -83,12 +87,11 @@ test('DeckGL#render', t => {
           const child = container.querySelector('.child');
           t.ok(child, 'Child is rendered');
 
-          ReactDOM.unmountComponentAtNode(container);
+          root.render(null);
           t.end();
         }
       },
       [createElement('div', {key: 0, className: 'child'}, 'Child')]
-    ),
-    container
+    )
   );
 });

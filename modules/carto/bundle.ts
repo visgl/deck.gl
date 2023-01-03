@@ -1,4 +1,4 @@
-const CartoUtils = require('./src');
+import * as CartoUtils from './src';
 
 const deck = globalThis.deck || {};
 
@@ -11,4 +11,4 @@ if (!deck.LineLayer) {
 // More info: https://github.com/ajduberstein/pydeck_custom_layer
 globalThis.CartoLayerLibrary = CartoUtils;
 
-module.exports = Object.assign(deck, {carto: CartoUtils});
+export default Object.assign(deck, {carto: CartoUtils});
