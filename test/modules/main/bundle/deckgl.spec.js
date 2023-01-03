@@ -19,10 +19,10 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import deckgl from 'deck.gl/../bundle';
+import * as deckgl from 'deck.gl/../bundle';
 
 test('standalone#imports', t => {
-  t.ok(deckgl.version, 'version is exported');
+  t.ok(deckgl.VERSION, 'version is exported');
   t.ok(deckgl.DeckGL, 'DeckGL class is exported');
   t.ok(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported');
   t.ok(deckgl.Layer, 'Layer class is exported');

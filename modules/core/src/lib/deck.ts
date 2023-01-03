@@ -28,7 +28,7 @@ import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
-import deckGlobal from './init';
+import {VERSION} from './init';
 
 import {getBrowser} from '@probe.gl/env';
 import GL from '@luma.gl/constants';
@@ -279,7 +279,7 @@ export default class Deck {
   static defaultProps = defaultProps;
   // This is used to defeat tree shaking of init.js
   // https://github.com/visgl/deck.gl/issues/3213
-  static VERSION = deckGlobal.VERSION;
+  static VERSION = VERSION;
 
   readonly props: Required<DeckProps>;
   readonly width: number = 0;

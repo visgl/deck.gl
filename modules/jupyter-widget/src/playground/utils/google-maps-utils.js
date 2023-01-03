@@ -1,4 +1,5 @@
 /* global window */
+/* eslint-disable import/namespace */
 import * as deck from '../../deck-bundle';
 
 export function createGoogleMapsDeckOverlay({

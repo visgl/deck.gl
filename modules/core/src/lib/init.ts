@@ -25,39 +25,45 @@ import log from '../utils/log';
 import {register} from '../debug';
 import jsonLoader from '../utils/json-loader';
 
-// Version detection using babel plugin
-// Fallback for tests and SSR since global variable is defined by Webpack.
-const version =
-  // @ts-expect-error __VERSION__ is replaced during transpilation
-  typeof __VERSION__ !== 'undefined'
-    ? // @ts-expect-error
-      __VERSION__
-    : globalThis.DECK_VERSION || 'untranspiled source';
-
-// Note: a `deck` object not created by deck.gl may exist in the global scope
-const existingVersion = globalThis.deck && globalThis.deck.VERSION;
-
-if (existingVersion && existingVersion !== version) {
-  throw new Error(`deck.gl - multiple versions detected: ${existingVersion} vs ${version}`);
+declare global {
+  const __VERSION__: string;
 }
 
-if (!existingVersion) {
-  log.log(1, `deck.gl ${version}`)();
+function checkVersion() {
+  // Version detection using babel plugin
+  // Fallback for tests and SSR since global variable is defined by Webpack.
+  const version =
+    typeof __VERSION__ !== 'undefined'
+      ? __VERSION__
+      : globalThis.DECK_VERSION || 'untranspiled source';
 
-  globalThis.deck = {
-    ...globalThis.deck,
-    VERSION: version,
-    version,
-    log,
-    // experimental
-    _registerLoggers: register
-  };
+  // Note: a `deck` object not created by deck.gl may exist in the global scope
+  const existingVersion = globalThis.deck && globalThis.deck.VERSION;
 
-  registerLoaders([
-    jsonLoader,
-    // @ts-expect-error non-standard Loader format
-    [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
-  ]);
+  if (existingVersion && existingVersion !== version) {
+    throw new Error(`deck.gl - multiple versions detected: ${existingVersion} vs ${version}`);
+  }
+
+  if (!existingVersion) {
+    log.log(1, `deck.gl ${version}`)();
+
+    globalThis.deck = {
+      ...globalThis.deck,
+      VERSION: version,
+      version,
+      log,
+      // experimental
+      _registerLoggers: register
+    };
+
+    registerLoaders([
+      jsonLoader,
+      // @ts-expect-error non-standard Loader format
+      [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
+    ]);
+  }
+
+  return version;
 }
 
-export default globalThis.deck;
+export const VERSION = checkVersion();

@@ -25,6 +25,7 @@
     "debug.min.js",
     "dist.min.js"
   ],
+  "sideEffects": false,
   "scripts": {
     "build-debugger": "node ../../scripts/bundle.mjs ./bundle/debug.ts --output=./debug.min.js",
     "build-bundle": "node ../../scripts/bundle.mjs ./bundle/index.ts",
