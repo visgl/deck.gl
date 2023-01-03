@@ -25,7 +25,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build-bundle": "node ../../scripts/bundle.mjs ./bundle/index.ts",
+    "build-bundle": "ocular-bundle ./bundle/index.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {

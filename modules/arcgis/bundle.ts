@@ -1,3 +1,3 @@
-export * from '../layers/bundle/peer-dependency';
+export * from '../core/bundle/peer-dependency';
 
 export * from './src/load-modules';

@@ -24,6 +24,17 @@ const config = {
     paths: ['modules', 'test'] // , 'examples',
   },
 
+  bundle: {
+    globalName: 'deck',
+    externals: ['h3-js'],
+    target: ["supports webgl", "not dead"],
+    globals: {
+      '@deck.gl/*': 'globalThis.deck',
+      '@luma.gl/core': 'globalThis.luma',
+      'h3-js': 'globalThis.h3 || {}'
+    }
+  },
+
   typescript: {
     project: 'tsconfig.build.json'
   },
