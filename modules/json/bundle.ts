@@ -1,10 +1,3 @@
-import * as JSONUtils from './src';
+export * from '../core/bundle/peer-dependency';
 
-const deck = globalThis.deck || {};
-
-// Check if peer dependencies are included
-if (!deck.Layer) {
-  throw new Error('@deck.gl/core is not found');
-}
-
-export default Object.assign(deck, JSONUtils);
+export * from './src';

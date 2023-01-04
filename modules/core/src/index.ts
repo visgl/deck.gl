@@ -19,11 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-// Intialize globals, check version
-import './lib/init';
-
-// Import shaderlib to make sure shader modules are initialized
-import './shaderlib';
+export {VERSION} from './lib/init';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';

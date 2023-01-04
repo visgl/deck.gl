@@ -13,7 +13,8 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 
 import {addSupportComponents} from '../lib/components/index';
 
-import deck from '../deck-bundle';
+/* eslint-disable import/namespace */
+import * as deck from '../deck-bundle';
 
 const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
 const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';

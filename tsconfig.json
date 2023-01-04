@@ -20,7 +20,7 @@
       "@deck.gl/core": ["modules/core/src"],
       "@deck.gl/extensions": ["modules/extensions/src"],
       "@deck.gl/geo-layers": ["modules/geo-layers/src"],
-      "@deck.gl/google": ["modules/google/src"],
+      "@deck.gl/google-maps": ["modules/google-maps/src"],
       "@deck.gl/json": ["modules/json/src"],
       "@deck.gl/jupyter-widget": ["modules/jupyter-widget/src"],
       "@deck.gl/layers": ["modules/layers/src"],

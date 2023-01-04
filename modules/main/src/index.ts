@@ -25,6 +25,7 @@
 
 export {
   // CONSTANTS
+  VERSION,
   COORDINATE_SYSTEM,
   OPERATION,
   UNIT,
