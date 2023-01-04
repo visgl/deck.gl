@@ -145,12 +145,12 @@ type _SimpleMeshLayerProps<DataT> = {
    * setting _instanced to false interpreted mesh positions as lnglat deltas.
    * @default true
    */
-  _instanced?: true; // TODO - formalize API
+  _instanced?: boolean; // TODO - formalize API
   /**
    * Whether to render the mesh in wireframe mode.
    * @default false
    */
-  wireframe?: false;
+  wireframe?: boolean;
   /**
    * Material props for lighting effect.
    *
