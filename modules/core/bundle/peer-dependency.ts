@@ -1,4 +1,6 @@
-// / This file should be included in another bundle if @deck.gl/core is expected as a peer dependency
+/**
+ * This file should be included in another bundle if @deck.gl/core is expected as a peer dependency
+ */
 
 // Check if @deck.gl/core is present
 import {Layer} from '@deck.gl/core';

@@ -27,7 +27,7 @@ const config = {
   bundle: {
     globalName: 'deck',
     externals: ['h3-js'],
-    target: ["supports webgl", "not dead"],
+    target: ['supports webgl', 'not dead'],
     globals: {
       '@deck.gl/*': 'globalThis.deck',
       '@luma.gl/core': 'globalThis.luma',
