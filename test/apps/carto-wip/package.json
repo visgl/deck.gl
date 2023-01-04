@@ -1,14 +1,12 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
     "deck.gl": "^8.4.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^3.1.11"
+    "vite": "^4.0.0"
   }
 }

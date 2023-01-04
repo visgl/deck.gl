@@ -66,17 +66,11 @@
     "ocular-dev-tools": "2.0.0-alpha.7",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
-    "raw-loader": "^0.5.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-map-gl": "^5.1.0",
     "s2-geometry": "^1.2.10",
-    "tape-catch": "^1.0.6",
-    "ts-loader": "^8.0.0",
-    "webpack": "^4.28.4",
-    "webpack-bundle-analyzer": "^3.0.3",
-    "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14"
+    "tape-catch": "^1.0.6"
   },
   "pre-commit": [
     "test-fast",

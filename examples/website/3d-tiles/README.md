@@ -12,7 +12,7 @@ To download the Cesium 3D tileset, you need a Cesium ion access token, and set i
 npm install
 # or
 yarn
-# bundle and serve the app with webpack
+# bundle and serve the app with vite
 npm start
 ```
 

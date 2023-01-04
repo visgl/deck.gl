@@ -1,11 +1,7 @@
 {
-  "name": "pure-js",
-  "version": "0.0.0",
-  "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "NODE_ENV=production webpack --env.prod"
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "^8.4.0",
@@ -13,11 +9,6 @@
     "@deck.gl/layers": "^8.4.0"
   },
   "devDependencies": {
-    "buble": "^0.19.3",
-    "buble-loader": "^0.5.0",
-    "file-loader": "^1.1.11",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

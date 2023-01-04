@@ -1,11 +1,12 @@
 {
-  "name": "pure-js-esri-arcgis",
+  "name": "deckgl-example-pure-js-esri-arcgis",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "webpack -p"
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "tsc && vite build"
   },
   "dependencies": {
     "@arcgis/core": "^4.21.0",
@@ -14,8 +15,6 @@
     "@deck.gl/layers": "^8.8.0"
   },
   "devDependencies": {
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "vite": "^4.0.0"
   }
 }

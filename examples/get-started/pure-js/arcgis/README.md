@@ -1,12 +1,8 @@
-<div align="center">
-   <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
-</div>
-
 ## Example: Use deck.gl with Esri ArcGIS API for JavaScript
 
 This sample shows how to use the `@deck.gl/arcgis` module to add a deck.gl layer to an [ArcGIS JavaScript](https://developers.arcgis.com/javascript/) app.
-Uses [Webpack](https://github.com/webpack/webpack) and the [ArcGIS Webpack plugin](https://github.com/Esri/arcgis-webpack-plugin)
-to bundle files and serves it with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
+
+Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 
 ## Usage
 
