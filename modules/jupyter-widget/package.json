@@ -24,7 +24,7 @@
   "sideEffects": false,
   "scripts": {
     "watch": "npm run build -- --watch",
-    "build": "ocular-bundle ./src/index.js --output=./dist/index.js --sourcemap --format=umd --externals=@jupyter-widgets/base",
+    "build": "ocular-bundle ./src/index.js --output=./dist/index.js --globalName= --sourcemap --format=umd --externals=@jupyter-widgets/base",
     "build:labextension": "npm pack",
     "prepublishOnly": "npm run build"
   },
