@@ -27,7 +27,7 @@ export default {
   'website/3D Tiles (Tile3DLayer, Cairo/vricon)': tile3DCairo,
   'website/3D Tiles (Tile3DLayer, New York)': tile3DNY,
   'website/CartoLayer': carto,
-  // // GET STARTED EXAMPLES AS JSON PAYLOADS
+  // GET STARTED EXAMPLES AS JSON PAYLOADS
   'get-started/US map (GeoJsonLayer)': usMap,
   'get-started/Dot Text (Scatterplot/TextLayer)': dotText
 };

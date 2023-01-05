@@ -283,5 +283,5 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
 fetch(DATA_URL)
   .then(response => response.json())
   .then(({features}) => {
-    render(<App data={features} />, container);
+    render(<App data={features} />, document.getElementById('app'));
   });

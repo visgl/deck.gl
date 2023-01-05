@@ -76,4 +76,4 @@ export default function App() {
   );
 }
 
-render(<App />, container);
+render(<App />, document.getElementById('app'));

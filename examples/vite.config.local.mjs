@@ -20,10 +20,15 @@ export default defineConfig(async () => {
     },
     define: {
       'process.env.GoogleMapsAPIKey': JSON.stringify(process.env.GoogleMapsAPIKey),
+      'process.env.GoogleMapsMapId': JSON.stringify(process.env.GoogleMapsMapId),
       'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken)
     },
-    server: {open: true},
-    optimizeDeps: {esbuildOptions: {target: 'es2020'}},
-    build: {target: 'es2020'}
+    server: {
+      open: true,
+      port: 8080
+    },
+    optimizeDeps: {
+      esbuildOptions: {target: 'es2020'}
+    }
   };
 });
