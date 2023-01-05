@@ -15,7 +15,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-export const deck = new Deck({
+new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -59,7 +59,3 @@ export const deck = new Deck({
     })
   ]
 });
-
-// For automated test cases
-/* global document */
-document.body.style.margin = '0px';
