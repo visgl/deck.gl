@@ -1,6 +1,7 @@
 import test from 'tape-promise/tape';
 import {createProps} from '@deck.gl/core/lifecycle/create-props';
 import {compareProps} from '@deck.gl/core/lifecycle/props';
+import {PROP_TYPES_SYMBOL} from '@deck.gl/core/lifecycle/constants';
 import {Vector2} from '@math.gl/core';
 
 const SAME = 'equal';
@@ -197,6 +198,7 @@ test('compareProps#tests', t => {
 
 test('createProps', t => {
   class A {}
+  A.componentName = 'A';
   A.defaultProps = {
     a: 1,
     data: [],
@@ -205,7 +207,22 @@ test('createProps', t => {
   };
 
   class B extends A {}
+  B.componentName = 'B';
   B.defaultProps = {b: 2};
+
+  class ExtA {}
+  ExtA.extensionName = 'ExtA';
+  ExtA.defaultProps = {
+    extEnabled: true
+  };
+
+  class ExtB extends ExtA {}
+  ExtB.extensionName = 'ExtB';
+  ExtB.defaultProps = {
+    extValue: 1,
+    extRange: [0, 1],
+    extRange0: {deprecatedFor: 'extRange'}
+  };
 
   let mergedProps = createProps(new B(), [{data: [0, 1]}]);
 
@@ -213,10 +230,32 @@ test('createProps', t => {
   t.equal(mergedProps.b, 2, 'sub class props merged');
   t.deepEqual(mergedProps.data, [0, 1], 'user props merged');
   t.equal(mergedProps.c, 0, 'default prop value used');
+  t.ok(mergedProps[PROP_TYPES_SYMBOL].a, 'prop types defined');
 
   mergedProps = createProps(new B(), [{c0: 4}]);
+  t.equal(mergedProps.c, 4, 'user props merged');
 
-  t.deepEqual(mergedProps.c, 4, 'user props merged');
+  mergedProps = createProps(new B(), [
+    {
+      extensions: [new ExtA()]
+    }
+  ]);
+  t.equal(mergedProps.extEnabled, true, 'extension default props merged');
+  t.ok(mergedProps[PROP_TYPES_SYMBOL].extEnabled, 'prop types defined');
+
+  mergedProps = createProps(new B(), [
+    {
+      extRange0: [1, 100],
+      extensions: [new ExtB()]
+    }
+  ]);
+  t.equal(mergedProps.extValue, 1, 'extension default props merged');
+  t.equal(mergedProps.extEnabled, true, 'base extension default props merged');
+  t.deepEqual(mergedProps.extRange, [1, 100], 'user props merged');
+  t.ok(mergedProps[PROP_TYPES_SYMBOL].extValue, 'prop types defined');
+
+  mergedProps = createProps(new B(), [{}]);
+  t.notOk(mergedProps.extEnabled, 'default props without extensions not affected');
 
   t.end();
 });

@@ -14,6 +14,8 @@ export type Lifecycle = typeof LIFECYCLE[keyof typeof LIFECYCLE];
 // but are copied with Object.assign ¯\_(ツ)_/¯
 // Supported everywhere except IE11, can be polyfilled with core-js
 export const COMPONENT_SYMBOL: unique symbol = Symbol.for('component');
+export const PROP_TYPES_SYMBOL: unique symbol = Symbol.for('propTypes');
+export const DEPRECATED_PROPS_SYMBOL: unique symbol = Symbol.for('deprecatedProps');
 export const ASYNC_DEFAULTS_SYMBOL: unique symbol = Symbol.for('asyncPropDefaults');
 export const ASYNC_ORIGINAL_SYMBOL: unique symbol = Symbol.for('asyncPropOriginal');
 export const ASYNC_RESOLVED_SYMBOL: unique symbol = Symbol.for('asyncPropResolved');
