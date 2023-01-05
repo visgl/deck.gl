@@ -614,53 +614,184 @@ test('Layer#updateModules', async t => {
     Layer: LayerWithModel,
     testCases: [
       {
+        title: 'Default props',
+
         props: {
           data: null,
           modelId: 0
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.getUniforms();
           t.deepEqual(
             modelUniforms.picking_uHighlightColor,
             [0, 0, HALF_BYTE, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
-          t.notOk(
+          t.is(
             modelUniforms.picking_uSelectedColorValid,
-            'model selectedColor uniform is populated'
+            0,
+            'model selectedColor uniform is disabled'
+          );
+
+          // Simulate mouse hover
+          layer.updateAutoHighlight({
+            picked: true,
+            color: [3, 0, 0]
+          });
+
+          modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            0,
+            'model selectedColor uniform is disabled (autoHighlight: false)'
           );
         }
       },
       {
+        title: 'only highlightedObjectIndex',
+
         updateProps: {
-          highlightColor: [255, 0, 0, 128]
+          highlightColor: [255, 0, 0, 128],
+          highlightedObjectIndex: 1
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.getUniforms();
           t.deepEqual(
             modelUniforms.picking_uHighlightColor,
             [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [2, 0, 0],
+            'model selectedColor uniform is set from highlightedObjectIndex'
+          );
+
+          // Simulate mouse hover
+          layer.updateAutoHighlight({
+            picked: true,
+            color: [3, 0, 0]
+          });
+
+          modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [2, 0, 0],
+            'model selectedColor uniform is set from highlightedObjectIndex'
+          );
         }
       },
       {
+        title: 'autoHighlight & highlightedObjectIndex',
+
         updateProps: {
           autoHighlight: true,
           highlightedObjectIndex: 1
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.getUniforms();
-          t.ok(
+          let modelUniforms = layer.state.model.getUniforms();
+          t.is(
             modelUniforms.picking_uSelectedColorValid,
-            'model selectedColor uniform is populated'
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [2, 0, 0],
+            'model selectedColor uniform is set from highlightedObjectIndex'
+          );
+
+          // Simulate mouse hover
+          layer.updateAutoHighlight({
+            picked: true,
+            color: [3, 0, 0]
+          });
+
+          modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [2, 0, 0],
+            'model selectedColor uniform is set from highlightedObjectIndex'
           );
         }
       },
       {
+        title: 'only autoHighlight',
+
+        updateProps: {
+          autoHighlight: true,
+          highlightedObjectIndex: null
+        },
+
+        onAfterUpdate: ({layer}) => {
+          let modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            0,
+            'model selectedColor uniform is unset (highlightedObjectIndex changed)'
+          );
+
+          // Simulate mouse hover
+          layer.updateAutoHighlight({
+            picked: true,
+            color: [3, 0, 0]
+          });
+
+          modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [3, 0, 0],
+            'model selectedColor uniform is set from hovered object index'
+          );
+        }
+      },
+      {
+        title: 'Other props update',
+
+        updateProps: {
+          data: []
+        },
+
+        onAfterUpdate: ({layer}) => {
+          const modelUniforms = layer.state.model.getUniforms();
+          t.is(
+            modelUniforms.picking_uSelectedColorValid,
+            1,
+            'model selectedColor uniform is enabled'
+          );
+          t.deepEqual(
+            modelUniforms.picking_uSelectedColor,
+            [3, 0, 0],
+            'model selectedColor uniform is set from hovered object index'
+          );
+        }
+      },
+      {
+        title: 'Model regeneration',
+
         updateProps: {
           modelId: 1
         },
@@ -672,9 +803,10 @@ test('Layer#updateModules', async t => {
             [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
-          t.ok(
+          t.is(
             modelUniforms.picking_uSelectedColorValid,
-            'model selectedColor uniform is populated'
+            0,
+            'model selectedColor uniform is disabled (model reset)'
           );
         }
       }
