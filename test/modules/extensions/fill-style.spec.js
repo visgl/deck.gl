@@ -27,11 +27,12 @@ test('FillStyleExtension#PolygonLayer', t => {
         extensions: [new FillStyleExtension({pattern: true})]
       },
       onAfterUpdate: ({layer, subLayers}) => {
-        t.notOk(layer.state.patternMapping, 'should not be enabled in composite layer');
+        t.notOk(layer.state.emptyTexture, 'should not be enabled in composite layer');
 
         const strokeLayer = subLayers.find(l => l.id.includes('stroke'));
         const fillLayer = subLayers.find(l => l.id.includes('fill'));
 
+        t.ok(fillLayer.state.emptyTexture, 'should be enabled in composite layer');
         let uniforms = fillLayer.getModels()[0].getUniforms();
         t.ok(uniforms.fill_patternMask, 'has fill_patternMask uniform');
         t.deepEqual(
@@ -46,7 +47,7 @@ test('FillStyleExtension#PolygonLayer', t => {
         );
 
         uniforms = strokeLayer.getModels()[0].getUniforms();
-        t.notOk(strokeLayer.state.patternMapping, 'should not be enabled in PathLayer');
+        t.notOk(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer');
         t.notOk('fill_patternMask' in uniforms, 'should not be enabled in PathLayer');
       }
     }
