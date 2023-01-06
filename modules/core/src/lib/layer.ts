@@ -1168,7 +1168,8 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
-      if (Number.isInteger(highlightedObjectIndex)) {
+      // Do not reset unless the value has changed.
+      if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
         parameters.pickingSelectedColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
