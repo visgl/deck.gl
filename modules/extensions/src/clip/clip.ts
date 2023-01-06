@@ -125,8 +125,8 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<ClipExtensionProps>, {uniforms}: any): void {
-    const {clipBounds = defaultProps.clipBounds} = this.props;
+  draw(this: Layer<Required<ClipExtensionProps>>, {uniforms}: any): void {
+    const {clipBounds} = this.props;
     if (this.state.clipByInstance) {
       uniforms.clip_bounds = clipBounds;
     } else {
