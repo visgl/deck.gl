@@ -70,11 +70,6 @@ export default class BrushingExtension extends LayerExtension {
         brushingTargets: {
           size: 2,
           accessor: 'getBrushingTarget',
-          // Hack: extension's defaultProps is not merged with the layer's defaultProps,
-          // So we can't use the standard accessor when the prop is undefined
-          // TODO - move to an option
-          // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.props.getBrushingTarget ? undefined : extension.useConstantTargetPositions,
           shaderAttributes: {
             brushingTargets: {
               divisor: 0
@@ -110,11 +105,5 @@ export default class BrushingExtension extends LayerExtension {
         pointerleave: this.state.onMouseMove
       });
     }
-  }
-
-  useConstantTargetPositions(attribute) {
-    attribute.constant = true;
-    attribute.value = new Float32Array(2);
-    return;
   }
 }
