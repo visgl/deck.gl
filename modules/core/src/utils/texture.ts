@@ -1,8 +1,6 @@
 import {Texture2D} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 
-import type Layer from '../lib/layer';
-
 const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
   [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
@@ -13,12 +11,11 @@ const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
 // Track the textures that are created by us. They need to be released when they are no longer used.
 const internalTextures: Record<string, Texture2D> = {};
 
-export function createTexture(layer: Layer, image: any): Texture2D | null {
-  const gl = layer.context && layer.context.gl;
-  if (!gl || !image) {
-    return null;
-  }
-
+export function createTexture(
+  gl: WebGLRenderingContext,
+  image: any,
+  parameters: Record<number, number>
+): Texture2D | null {
   // image could be one of:
   //  - Texture2D
   //  - Browser object: Image, ImageData, ImageData, HTMLCanvasElement, HTMLVideoElement, ImageBitmap
@@ -30,7 +27,7 @@ export function createTexture(layer: Layer, image: any): Texture2D | null {
     image = {data: image};
   }
 
-  let specialTextureParameters: Record<string, any> | null = null;
+  let specialTextureParameters: Record<number, number> | null = null;
   if (image.compressed) {
     specialTextureParameters = {
       [GL.TEXTURE_MIN_FILTER]: image.data.length > 1 ? GL.LINEAR_MIPMAP_NEAREST : GL.LINEAR
@@ -42,8 +39,7 @@ export function createTexture(layer: Layer, image: any): Texture2D | null {
     parameters: {
       ...DEFAULT_TEXTURE_PARAMETERS,
       ...specialTextureParameters,
-      // @ts-expect-error textureParameter may not be defined
-      ...layer.props.textureParameters
+      ...parameters
     }
   });
   // Track this texture

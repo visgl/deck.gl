@@ -1,5 +1,6 @@
 import {LayerExtension} from '@deck.gl/core';
 import {Texture2D} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 
 import {patternShaders} from './shaders.glsl';
 
@@ -14,7 +15,14 @@ import type {
 
 const defaultProps = {
   fillPatternEnabled: true,
-  fillPatternAtlas: {type: 'image', value: null, async: true},
+  fillPatternAtlas: {
+    type: 'image',
+    value: null,
+    async: true,
+    parameters: {
+      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
+    }
+  },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,
   getFillPattern: {type: 'accessor', value: d => d.pattern},

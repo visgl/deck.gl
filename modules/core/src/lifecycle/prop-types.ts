@@ -3,6 +3,7 @@ import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
 import type {Color, Texture} from '../types/layer-props';
+import type Layer from '../lib/layer';
 
 type BasePropType<ValueT> = {
   value: ValueT;
@@ -68,6 +69,7 @@ type DataPropType<T = any> = BasePropType<T> & {
 };
 type ImagePropType = BasePropType<Texture | null> & {
   type: 'image';
+  parameters?: Record<number, number>;
 };
 type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
@@ -165,7 +167,14 @@ const TYPE_DEFINITIONS = {
   },
   image: {
     transform: (value, propType: ImagePropType, component) => {
-      return createTexture(component, value);
+      const context = (component as Layer).context;
+      if (!context || !context.gl) {
+        return null;
+      }
+      return createTexture(context.gl, value, {
+        ...propType.parameters,
+        ...component.props.textureParameters
+      });
     },
     release: value => {
       destroyTexture(value);
