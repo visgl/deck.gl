@@ -99,10 +99,9 @@ function getPatternUniforms(
     };
   }
   if ('viewport' in opts) {
-    const {viewport, fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const {project_uCoordinateOrigin} = uniforms as ProjectUniforms;
+    const {fillPatternMask = true, fillPatternEnabled = true} = opts;
+    const {project_uCommonOrigin: coordinateOriginCommon} = uniforms as ProjectUniforms;
 
-    const coordinateOriginCommon = viewport.projectPosition(project_uCoordinateOrigin);
     const coordinateOriginCommon64Low = [
       fp64LowPart(coordinateOriginCommon[0]),
       fp64LowPart(coordinateOriginCommon[1])
