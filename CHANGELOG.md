@@ -19,7 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
-#### deck.gl [8.8.21] - Dev 28 2022
+#### deck.gl [8.8.22] - Jan 7 2023
+
+- Fix FillStyleExtension (#7568)
+- Fix SimpleMeshLayerProps.wireframe and SimpleMeshLayerProps._instanced type (#7556)
+- Improve logic to update auto highlight module settings (#7562)
+
+#### deck.gl [8.8.21] - Dec 28 2022
 
 - Fix disablePickingColor with externally supplied startIndices (#7543)
 - Update types for MapViewProps (#7519)
