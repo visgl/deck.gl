@@ -9,7 +9,7 @@ import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWMxMzcyYy0zZjJkLTQwODctODNlNi01MDRkZmMzMjIxOWIiLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.1FNiClUyk00YH_nWfSGpiQAjR5V2OvREDq1PJ5QMjWQ';
-const TILESET_URL = `https://assets.cesium.com/${ION_ASSET_ID}/tileset.json`;
+const TILESET_URL = `https://assets.ion.cesium.com/${ION_ASSET_ID}/tileset.json`;
 
 const INITIAL_VIEW_STATE = {
   latitude: 40,
