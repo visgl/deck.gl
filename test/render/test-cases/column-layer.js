@@ -160,5 +160,30 @@ export default [
       vertices: polygonCCW,
       getElevation: h => h.value * 5000
     }
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-flat-stroke-coverage'
+    },
+    {
+      extruded: false,
+      stroked: true,
+      lineWidthUnits: 'pixels',
+      getLineWidth: 4,
+      getLineColor: [255, 255, 255],
+      getCoverage: h => Math.min(1, Math.sqrt(5 * h.value))
+    },
+    {pitch: 0}
+  ),
+  genColumnLayerTestCase(
+    {
+      name: 'column-lnglat-extruded-coverage'
+    },
+    {
+      extruded: true,
+      stroked: false,
+      getCoverage: h => Math.min(1, Math.sqrt(5 * h.value)),
+      getElevation: h => h.value * 5000
+    }
   )
 ];

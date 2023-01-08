@@ -181,7 +181,7 @@ export default [
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
-      zoom: -0.5
+      zoom: -0.2
     },
     layers: [
       new PathLayer({
@@ -214,7 +214,7 @@ export default [
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
-      zoom: -0.5
+      zoom: -0.2
     },
     layers: [
       new PathLayer({

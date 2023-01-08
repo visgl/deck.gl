@@ -50,7 +50,6 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   radius: {type: 'number', min: 0, value: 1000},
   angle: {type: 'number', value: 0},
   offset: {type: 'array', value: [0, 0]},
-  coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
   radiusUnits: 'meters',
   lineWidthUnits: 'meters',
@@ -67,9 +66,11 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
+  getCoverage: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
   material: true,
-  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
+  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']},
+  coverage: {deprecatedFor: ['getCoverage']}
 };
 
 /** All properties supported by ColumnLayer. */
@@ -108,8 +109,7 @@ type _ColumnLayerProps<DataT> = {
   offset?: [number, number];
 
   /**
-   * Radius multiplier, between 0 - 1
-   * @default 1
+   * @deprecated Use getCoverage instead
    */
   coverage?: number;
 
@@ -212,6 +212,13 @@ type _ColumnLayerProps<DataT> = {
   getLineColor?: Accessor<DataT, Color>;
 
   /**
+   * The coverage of the column, in the range 0-1
+   *
+   * @default 1
+   */
+  getCoverage?: Accessor<DataT, number>;
+
+  /**
    * The elevation of each cell in meters.
    * @default 1000
    */
@@ -264,6 +271,11 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
+      },
+      instanceCoverage: {
+        size: 1,
+        transition: true,
+        accessor: 'getCoverage'
       },
       instanceElevations: {
         size: 1,
@@ -376,7 +388,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       stroked,
       wireframe,
       offset,
-      coverage,
       radius,
       angle
     } = this.props;
@@ -388,7 +399,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT = {}> extends Layer<
       offset,
       extruded,
       stroked,
-      coverage,
       elevationScale,
       edgeDistance,
       radiusUnits: UNIT[radiusUnits],

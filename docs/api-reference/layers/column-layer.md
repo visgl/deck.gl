@@ -108,12 +108,12 @@ Replace the default geometry (regular polygon that fits inside the unit circle) 
 
 Disk offset from the position, relative to the radius. By default, the disk is centered at each position.
 
-##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `coverage` (Number, optional) **DEPRECATED** ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
 Radius multiplier, between 0 - 1. The radius of the disk is calculated by
-`coverage * radius`
+`coverage * radius`. This prop is deprecated in version 8.9.0, use `getCoverage` instead.
 
 ##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -221,6 +221,16 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the outline color for all columns.
 * If a function is provided, it is called on each object to retrieve its outline color.
 * If not provided, it falls back to `getColor`.
+
+##### `getCoverage` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+Radius multiplier, between 0 - 1. The radius of the disk is calculated by `radius * getCoverage(d)`.
+
+* If a number is provided, it is used as the coverage for all objects.
+* If a function is provided, it is called on each object to retrieve its coverage.
+
 
 ##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
