@@ -2,7 +2,7 @@ import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 import MaskEffect from './mask-effect';
 
-import type {CompositeLayer, Layer} from '@deck.gl/core';
+import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
   maskId: '',
@@ -34,14 +34,6 @@ export default class MaskExtension extends LayerExtension {
 
   initializeState(this: Layer<MaskExtensionProps>) {
     this.context.deck?._addDefaultEffect(new MaskEffect());
-  }
-
-  getSubLayerProps(this: CompositeLayer<MaskExtensionProps>, extension: this): any {
-    const newProps = super.getSubLayerProps.call(this, extension);
-    if ('maskByInstance' in this.props) {
-      newProps.maskByInstance = this.props.maskByInstance;
-    }
-    return newProps;
   }
 
   getShaders(this: Layer<MaskExtensionProps>): any {
