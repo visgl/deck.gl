@@ -15,8 +15,15 @@ import type {
 
 const defaultProps = {
   fillPatternEnabled: true,
-  fillPatternAtlas: null,
-  fillPatternMapping: null,
+  fillPatternAtlas: {
+    type: 'image',
+    value: null,
+    async: true,
+    parameters: {
+      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
+    }
+  },
+  fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
@@ -29,7 +36,7 @@ export type FillStyleExtensionProps<DataT = any> = {
    */
   fillPatternEnabled?: boolean;
   /** Sprite image url or texture that packs all your patterns into one layout. */
-  fillPatternAtlas?: Texture;
+  fillPatternAtlas?: string | Texture;
   /** Pattern names mapped to pattern definitions, or a url that points to a JSON file. */
   fillPatternMapping?:
     | string
@@ -69,15 +76,6 @@ type FillStyleExtensionOptions = {
    * @default false
    */
   pattern: boolean;
-};
-
-const DEFAULT_TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-  // GL.LINEAR is the default value but explicitly set it here
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  // for texture boundary artifact
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
 };
 
 /** Adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`. */
@@ -170,11 +168,8 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    if (props.fillPatternAtlas && props.fillPatternAtlas !== oldProps.fillPatternAtlas) {
-      extension.loadPatternAtlas.call(this);
-    }
     if (props.fillPatternMapping && props.fillPatternMapping !== oldProps.fillPatternMapping) {
-      extension.loadPatternMapping.call(this);
+      this.getAttributeManager()!.invalidate('getFillPattern');
     }
   }
 
@@ -183,9 +178,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    const {patternTexture} = this.state;
+    const {fillPatternAtlas} = this.props;
     this.setModuleParameters({
-      fillPatternTexture: patternTexture || this.state.emptyTexture
+      fillPatternTexture: fillPatternAtlas || this.state.emptyTexture
     });
   }
 
@@ -195,42 +190,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     emptyTexture?.delete();
   }
 
-  async loadPatternAtlas(this: Layer<FillStyleExtensionProps>) {
-    const {fillPatternAtlas, fetch} = this.props;
-    this.state.patternTexture?.delete();
-    this.setState({patternTexture: null});
-    let image = fillPatternAtlas;
-    if (typeof image === 'string') {
-      image = await fetch(image, {propName: 'fillPatternAtlas', layer: this});
-    }
-    const patternTexture =
-      image instanceof Texture2D
-        ? image
-        : new Texture2D(this.context.gl, {
-            data: image,
-            parameters: DEFAULT_TEXTURE_PARAMETERS
-          });
-    this.setState({patternTexture});
-  }
-
-  async loadPatternMapping(this: Layer<FillStyleExtensionProps>) {
-    const {fillPatternMapping, fetch} = this.props;
-    this.setState({patternMapping: null});
-    let patternMapping = fillPatternMapping;
-    if (typeof patternMapping === 'string') {
-      patternMapping = await fetch(patternMapping, {
-        propName: 'fillPatternMapping',
-        layer: this
-      });
-    }
-    this.setState({patternMapping});
-    this.getAttributeManager()!.invalidate('getFillPattern');
-    this.setNeedsUpdate();
-  }
-
   getPatternFrame(this: Layer<FillStyleExtensionProps>, name: string) {
-    const {patternMapping} = this.state;
-    const def = patternMapping && patternMapping[name];
+    const {fillPatternMapping} = this.getCurrentLayer()!.props;
+    const def = fillPatternMapping && fillPatternMapping[name];
     return def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
   }
 }
