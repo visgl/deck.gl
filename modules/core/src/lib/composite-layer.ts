@@ -27,6 +27,7 @@ import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
 import {ConstructorOf} from '../types/types';
+import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
@@ -207,8 +208,7 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
     const sublayerId = sublayerProps.id || 'sublayer';
 
     if (overridingSublayerProps) {
-      // @ts-ignore (TS2339) hidden property
-      const propTypes = this.constructor._propTypes;
+      const propTypes = this.props[PROP_TYPES_SYMBOL];
       const subLayerPropTypes = sublayerProps.type ? sublayerProps.type._propTypes : {};
       for (const key in overridingSublayerProps) {
         const propType = subLayerPropTypes[key] || propTypes[key];

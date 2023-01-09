@@ -1,10 +1,10 @@
 {
-  "name": "pure-js-harp.gl",
+  "name": "deckgl-example-pure-js-harp.gl",
   "version": "0.0.0",
+  "private": true,
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build": "webpack -p"
   },
   "dependencies": {

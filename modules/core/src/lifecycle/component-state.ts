@@ -19,7 +19,12 @@
 // THE SOFTWARE.
 
 import {isAsyncIterable} from '../utils/iterable-utils';
-import {ASYNC_ORIGINAL_SYMBOL, ASYNC_RESOLVED_SYMBOL, ASYNC_DEFAULTS_SYMBOL} from './constants';
+import {
+  PROP_TYPES_SYMBOL,
+  ASYNC_ORIGINAL_SYMBOL,
+  ASYNC_RESOLVED_SYMBOL,
+  ASYNC_DEFAULTS_SYMBOL
+} from './constants';
 import type Component from './component';
 import {PropType} from './prop-types';
 
@@ -305,8 +310,7 @@ export default class ComponentState<ComponentT extends Component> {
   private _createAsyncPropData(propName: string, defaultValue: any) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
-      // @ts-expect-error
-      const propTypes = this.component && this.component.constructor._propTypes;
+      const propTypes = this.component && this.component.props[PROP_TYPES_SYMBOL];
       // assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
         type: propTypes && propTypes[propName],

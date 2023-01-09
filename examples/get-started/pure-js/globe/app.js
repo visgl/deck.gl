@@ -13,7 +13,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
-export const deck = new Deck({
+new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
@@ -71,8 +71,3 @@ export const deck = new Deck({
     })
   ]
 });
-
-// For automated test cases
-/* global document */
-document.body.style.margin = '0px';
-document.body.style.background = '#111';

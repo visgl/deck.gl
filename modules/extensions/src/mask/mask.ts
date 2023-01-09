@@ -59,9 +59,9 @@ export default class MaskExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<MaskExtensionProps>, {uniforms, context, moduleParameters}: any) {
+  draw(this: Layer<Required<MaskExtensionProps>>, {uniforms, context, moduleParameters}: any) {
     uniforms.mask_maskByInstance = this.state.maskByInstance;
-    const {maskId = '', maskInverted = false} = this.props;
+    const {maskId, maskInverted} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {

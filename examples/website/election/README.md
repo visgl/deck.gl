@@ -19,7 +19,7 @@ Or set the `GOOGLE_MAPS_API_KEY` variable in `app.js`.
 npm install
 # or
 yarn
-# bundle and serve the app with webpack
+# bundle and serve the app with vite
 npm start
 ```
 
