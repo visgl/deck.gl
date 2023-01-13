@@ -1,6 +1,13 @@
 // deck.gl, MIT license
 
-export type {TileLoadProps, Bounds, ZRange, GeoBoundingBox, NonGeoBoundingBox, TileBoundingBox} from './types';
+export type {
+  TileLoadProps,
+  Bounds,
+  ZRange,
+  GeoBoundingBox,
+  NonGeoBoundingBox,
+  TileBoundingBox
+} from './types';
 
 export type {Tileset2DProps, RefinementStrategy} from './tileset-2d';
 export {Tileset2D, STRATEGY_DEFAULT} from './tileset-2d';

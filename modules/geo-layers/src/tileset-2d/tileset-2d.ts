@@ -53,7 +53,7 @@ const STRATEGIES = {
 
 export type Tileset2DProps<DataT = any> = {
   /** `getTileData` is called to retrieve the data of each tile. */
-  getTileData: ((props: TileLoadProps) => Promise<DataT> | DataT);
+  getTileData: (props: TileLoadProps) => Promise<DataT> | DataT;
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
@@ -98,7 +98,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   minZoom: null,
   maxCacheSize: null,
   maxCacheByteSize: null,
-  refinementStrategy:  'best-available',
+  refinementStrategy: 'best-available',
   zRange: null,
   maxRequests: 6,
   zoomOffset: 0,
