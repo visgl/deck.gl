@@ -356,7 +356,7 @@ test('Tileset2D#traversal', async t => {
   ];
 
   const tileMap = tileset._cache;
-  const strategies = [STRATEGY_DEFAULT, STRATEGY_REPLACE, STRATEGY_NEVER];
+  const strategies = ['best-available', 'no-overlap', 'never'];
   tileset._viewport = new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 0});
 
   // Tiles that should be loaded
@@ -458,7 +458,7 @@ function validateVisibility(strategy, selectedTiles, tiles) {
         if (loadedTiles.length > 0 && visibleTiles.length === 0) {
           return `One of ${loadedTiles} should be visible`;
         }
-        if (strategy === STRATEGY_REPLACE && visibleTiles.length > 1) {
+        if (strategy === 'no-overlap' && visibleTiles.length > 1) {
           return `Overlapping tiles: ${visibleTiles}`;
         }
       }
