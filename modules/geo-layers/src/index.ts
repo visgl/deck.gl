@@ -49,6 +49,7 @@ export type {GeoCellLayerProps as _GeoCellLayerProps} from './geo-cell-layer/Geo
 
 export type {GeoBoundingBox, NonGeoBoundingBox} from './tileset-2d';
 export type {TileLoadProps as _TileLoadProps} from './tileset-2d';
+export type {TraversalParameters} from './tileset-2d';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tileset-2d';
 export {Tileset2D as _Tileset2D} from './tileset-2d';

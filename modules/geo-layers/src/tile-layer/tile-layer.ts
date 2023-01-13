@@ -13,15 +13,17 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d';
-import {
-  Tileset2D,
-  Tile2DHeader,
+import {urlType} from './url-type';
+
+import type {
+  Tileset2DProps,
+  TileLoadProps,
   RefinementStrategy,
-  STRATEGY_DEFAULT,
-  Tileset2DProps
+  RefinementStrategyFunction,
+  ZRange,
 } from '../tileset-2d';
-import {urlType, getURLFromTemplate} from '../tileset-2d';
+import {Tileset2D, Tile2DHeader} from '../tileset-2d';
+import {getURLFromTemplate} from '../tileset-2d';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -41,7 +43,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   minZoom: 0,
   maxCacheSize: null,
   maxCacheByteSize: null,
-  refinementStrategy: STRATEGY_DEFAULT,
+  refinementStrategy: 'best-available',
   zRange: null,
   maxRequests: 6,
   zoomOffset: 0
@@ -115,7 +117,7 @@ type _TileLayerProps<DataT> = {
    *
    * @default 'best-available'
    */
-  refinementStrategy?: RefinementStrategy;
+  refinementStrategy?: RefinementStrategy | RefinementStrategyFunction;
 
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;

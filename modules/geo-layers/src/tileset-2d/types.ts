@@ -8,13 +8,3 @@ export type NonGeoBoundingBox = {left: number; top: number; right: number; botto
 export type TileBoundingBox = NonGeoBoundingBox | GeoBoundingBox;
 
 export type TileIndex = {x: number; y: number; z: number};
-
-export type TileLoadProps = {
-  index: TileIndex;
-  id: string;
-  bbox: TileBoundingBox;
-  url?: string | null;
-  signal?: AbortSignal;
-  userData?: Record<string, any>;
-  zoom?: number;
-};

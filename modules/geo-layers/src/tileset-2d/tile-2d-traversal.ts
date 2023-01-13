@@ -1,54 +1,77 @@
-import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+// deck.gl, MIT license
 
 import {
   CullingVolume,
-  Plane,
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/culling';
-import {lngLatToWorld} from '@math.gl/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
-import {osmTile2lngLat} from './utils';
+import {tileIndexToLngLat} from './tile-index';
 
+/** Parameters for required for selecting tile indices for a viewport (aka "traversal") */
+export type TraversalParameters = {
+  cameraPosition: number[];
+  scale: number;
+  height: number;
+  project: ((xyz: number[]) => number[]) | null;
+  cullingVolume: CullingVolume;
+  elevationBounds: ZRange;
+  minZ: number;
+  maxZ: number;
+  bounds?: Bounds;
+  /** repeated maps */
+  repeatedWorldMaps: boolean;
+  /** number of worlds from the center. For repeated maps */
+  offset: number;
+};
+
+/** Tile size in (flat) projected pixels */
 const TILE_SIZE = 512;
-// number of world copies to check
+
+/** Max number of world copies to check */
 const MAX_MAPS = 3;
-// for calculating bounding volume of a tile in a non-web-mercator viewport
+
+/** 4 corners and center - for calculating bounding volume of a tile in a non-web-mercator viewport */
 const REF_POINTS_5 = [
   [0.5, 0.5],
   [0, 0],
   [0, 1],
   [1, 0],
   [1, 1]
-]; // 4 corners and center
+];
+
+/** 4 corners, center and 4 mid points - for calculating bounding volume of a tile in a non-web-mercator viewport */
 const REF_POINTS_9 = REF_POINTS_5.concat([
   [0, 0.5],
   [0.5, 0],
   [1, 0.5],
   [0.5, 1]
-]); // 4 corners, center and 4 mid points
+]);
+
+/** 2 additional points on equator for top tile - for calculating bounding volume of a tile in a non-web-mercator viewport */
 const REF_POINTS_11 = REF_POINTS_9.concat([
   [0.25, 0.5],
   [0.75, 0.5]
-]); // 2 additional points on equator for top tile
+]); //
 
+/** Represents a tile index in the hierarchy */
 class OSMNode {
   x: number;
   y: number;
   z: number;
 
-  private childVisible?: boolean;
-  private selected?: boolean;
-
+  private childVisible: boolean = false;
+  private selected: boolean = false;
   private _children?: OSMNode[];
 
-  constructor(x, y, z) {
+  constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
-  get children() {
+  /** Return the children of this node */
+  get children(): OSMNode[] {
     if (!this._children) {
       const x = this.x * 2;
       const y = this.y * 2;
@@ -63,18 +86,21 @@ class OSMNode {
     return this._children;
   }
 
+  /** Apply new traversal parameters */
   // eslint-disable-next-line complexity
-  update(params: {
-    viewport: Viewport;
-    project: ((xyz: number[]) => number[]) | null;
-    cullingVolume: CullingVolume;
-    elevationBounds: ZRange;
-    minZ: number;
-    maxZ: number;
-    bounds?: Bounds;
-    offset: number;
-  }) {
-    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, bounds, offset, project} = params;
+  update(params: TraversalParameters) {
+    const {
+      cameraPosition,
+      scale,
+      height,
+      cullingVolume,
+      elevationBounds,
+      minZ,
+      maxZ,
+      bounds,
+      offset,
+      project
+    } = params;
     const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
 
     // First, check if this tile is visible
@@ -93,8 +119,7 @@ class OSMNode {
       if (z < maxZ && z >= minZ) {
         // Adjust LOD
         // If the tile is far enough from the camera, accept a lower zoom level
-        const distance =
-          (boundingVolume.distanceTo(viewport.cameraPosition) * viewport.scale) / viewport.height;
+        const distance = (boundingVolume.distanceTo(cameraPosition) * scale) / height;
         z += Math.floor(Math.log2(distance));
       }
       if (z >= maxZ) {
@@ -113,6 +138,7 @@ class OSMNode {
     return true;
   }
 
+  /** Get all the "visible" nodes, including sub-nodes */
   getSelected(result: OSMNode[] = []): OSMNode[] {
     if (this.selected) {
       result.push(this);
@@ -125,6 +151,7 @@ class OSMNode {
     return result;
   }
 
+  /** Is this tile inside the given bounds */
   insideBounds([minX, minY, maxX, maxY]: Bounds): boolean {
     const scale = Math.pow(2, this.z);
     const extent = TILE_SIZE / scale;
@@ -137,6 +164,7 @@ class OSMNode {
     );
   }
 
+  /** Get the bounding volume of the current tile */
   getBoundingVolume(
     zRange: ZRange,
     worldOffset: number,
@@ -151,7 +179,7 @@ class OSMNode {
       // Convert from tile-relative coordinates to common space
       const refPointPositions: number[][] = [];
       for (const p of refPoints) {
-        const lngLat: number[] = osmTile2lngLat(this.x + p[0], this.y + p[1], this.z);
+        const lngLat: number[] = tileIndexToLngLat(this.x + p[0], this.y + p[1], this.z);
         lngLat[2] = zRange[0];
         refPointPositions.push(project(lngLat));
 
@@ -179,71 +207,25 @@ class OSMNode {
   }
 }
 
-// eslint-disable-next-line complexity
-export function getOSMTileIndices(
-  viewport: Viewport,
-  maxZ: number,
-  zRange: ZRange | undefined,
-  bounds?: Bounds
-): TileIndex[] {
-  const project: ((xyz: number[]) => number[]) | null =
-    viewport instanceof _GlobeViewport && viewport.resolution
-      ? // eslint-disable-next-line @typescript-eslint/unbound-method
-        viewport.projectPosition
-      : null;
-
-  // Get the culling volume of the current camera
-  const planes: Plane[] = Object.values(viewport.getFrustumPlanes()).map(
-    ({normal, distance}) => new Plane(normal.clone().negate(), distance)
-  );
-  const cullingVolume = new CullingVolume(planes);
-
-  // Project zRange from meters to common space
-  const unitsPerMeter = viewport.distanceScales.unitsPerMeter[2];
-  const elevationMin = (zRange && zRange[0] * unitsPerMeter) || 0;
-  const elevationMax = (zRange && zRange[1] * unitsPerMeter) || 0;
-
-  // Always load at the current zoom level if pitch is small
-  const minZ = viewport instanceof WebMercatorViewport && viewport.pitch <= 60 ? maxZ : 0;
-
-  // Map extent to OSM position
-  if (bounds) {
-    const [minLng, minLat, maxLng, maxLat] = bounds;
-    const topLeft = lngLatToWorld([minLng, maxLat]);
-    const bottomRight = lngLatToWorld([maxLng, minLat]);
-    bounds = [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
-  }
+/** Get a list of tile indices that are visible from the given viewport */
+export function getOSMTileIndices(traversalParameters: TraversalParameters): TileIndex[] {
+  const {repeatedWorldMaps} = traversalParameters;
 
   const root = new OSMNode(0, 0, 0);
-  const traversalParams = {
-    viewport,
-    project,
-    cullingVolume,
-    elevationBounds: [elevationMin, elevationMax] as ZRange,
-    minZ,
-    maxZ,
-    bounds,
-    // num. of worlds from the center. For repeated maps
-    offset: 0
-  };
 
-  root.update(traversalParams);
+  root.update(traversalParameters);
 
-  if (
-    viewport instanceof WebMercatorViewport &&
-    viewport.subViewports &&
-    viewport.subViewports.length > 1
-  ) {
+  if (repeatedWorldMaps) {
     // Check worlds in repeated maps
-    traversalParams.offset = -1;
-    while (root.update(traversalParams)) {
-      if (--traversalParams.offset < -MAX_MAPS) {
+    traversalParameters.offset = -1;
+    while (root.update(traversalParameters)) {
+      if (--traversalParameters.offset < -MAX_MAPS) {
         break;
       }
     }
-    traversalParams.offset = 1;
-    while (root.update(traversalParams)) {
-      if (++traversalParams.offset > MAX_MAPS) {
+    traversalParameters.offset = 1;
+    while (root.update(traversalParameters)) {
+      if (++traversalParameters.offset > MAX_MAPS) {
         break;
       }
     }

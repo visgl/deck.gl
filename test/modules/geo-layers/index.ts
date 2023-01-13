@@ -45,15 +45,16 @@ test('Top-level imports', t => {
   t.end();
 });
 
-import './tile-layer';
 import './quadkey-layer.spec';
 import './s2-layer.spec';
 import './trips-layer.spec';
 import './great-circle-layer.spec';
 import './h3-layers.spec';
-import './tile-3d-layer';
+import './tile-3d-layer.spec';
 import './terrain-layer.spec';
 import './mvt-layer.spec';
 import './geohash-layer.spec';
+import './tile-layer.spec';
+import './tile-3d-layer.spec';
 
 import './tileset-2d';

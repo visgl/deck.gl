@@ -1,7 +1,19 @@
 /* eslint-env browser */
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
+import {TileBoundingBox, TileIndex} from './types';
 
+/** Properties passed to getData() */
+export type TileLoadProps = {
+  index: TileIndex;
+  id: string;
+  bbox: TileBoundingBox;
+  url?: string | null;
+  signal?: AbortSignal;
+  userData?: Record<string, any>;
+  zoom?: number;
+};
+
+/** Parameters to _loadData() */
 export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
   getData: (props: TileLoadProps) => Promise<DataT>;

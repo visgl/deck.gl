@@ -1,18 +1,21 @@
+// deck.gl, MIT license
+
 import {Viewport} from '@deck.gl/core';
 
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {Matrix4, equals} from '@math.gl/core';
 
+import type {TileLoadProps} from './tile-2d-header';
 import {Tile2DHeader} from './tile-2d-header';
 
 import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
 import {Bounds, TileIndex, ZRange} from './types';
-import {TileLoadProps} from './types';
 import {memoize} from './memoize';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
 const TILE_STATE_VISIBLE = 2;
+
 /*
    show cached parent tile if children are loading
    +-----------+       +-----+            +-----+-----+
@@ -32,28 +35,18 @@ const TILE_STATE_VISIBLE = 2;
    |       |           |
  */
 
-export const STRATEGY_NEVER = 'never';
-export const STRATEGY_REPLACE = 'no-overlap';
-export const STRATEGY_DEFAULT = 'best-available';
-
-export type RefinementStrategyFunction = (tiles: Tile2DHeader[]) => void;
+/** Predefined tile refinement strategies (which tiles show while children load) */
 export type RefinementStrategy =
   | 'never'
   | 'no-overlap'
-  | 'best-available'
-  | RefinementStrategyFunction;
+  | 'best-available';
 
-const DEFAULT_CACHE_SCALE = 5;
-
-const STRATEGIES = {
-  [STRATEGY_DEFAULT]: updateTileStateDefault,
-  [STRATEGY_REPLACE]: updateTileStateReplace,
-  [STRATEGY_NEVER]: () => {}
-};
+/** User defined tile visibility selection */
+export type RefinementStrategyFunction = (tiles: Tile2DHeader[]) => void;
 
 export type Tileset2DProps<DataT = any> = {
   /** `getTileData` is called to retrieve the data of each tile. */
-  getTileData: (props: TileLoadProps) => Promise<DataT> | DataT;
+  getTileData: ((props: TileLoadProps) => Promise<DataT> | DataT);
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
@@ -82,12 +75,17 @@ export type Tileset2DProps<DataT = any> = {
   onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile failed to load. */
   onTileError?: (err: any, tile: Tile2DHeader<DataT>) => void;
-
-  // onTileLoad: (tile: Tile2DHeader) => void;
-  // onTileUnload: (tile: Tile2DHeader) => void;
-  // onTileError: (error: any, tile: Tile2DHeader) => void;
   /** Called when all tiles in the current viewport are loaded. */
-  // sonViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
+  // onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
+};
+
+/** Controls the amount of tiles that are cached */
+const DEFAULT_CACHE_SCALE = 5;
+
+const REFINEMENT_STRATEGIES: Record<RefinementStrategy, RefinementStrategyFunction>  = {
+  'best-available': updateTileStateDefault,
+  'no-overlap': updateTileStateReplace,
+  'never': () => {}
 };
 
 export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileData'> = {
@@ -103,11 +101,10 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   maxRequests: 6,
   zoomOffset: 0,
 
-  // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
-  // onViewportLoad: ((tiles: Tile2DHeader<DataT>[]) => void) | null,
   onTileLoad: () => {},
   onTileUnload: () => {},
   onTileError: () => {}
+  // onViewportLoad: () => {}
 };
 
 /**
@@ -277,6 +274,7 @@ export class Tileset2D {
     return this._frameNumber;
   }
 
+  /** Check if a tile is visible */
   isTileVisible(
     tile: Tile2DHeader,
     cullRect?: {x: number; y: number; width: number; height: number}
@@ -364,7 +362,7 @@ export class Tileset2D {
 
   // Returns true if any tile's visibility changed
   private updateTileStates() {
-    const refinementStrategy = this.opts.refinementStrategy || STRATEGY_DEFAULT;
+    const refinementStrategy = this.opts.refinementStrategy || 'best-available';
 
     const visibilities = new Array(this._cache.size);
     let i = 0;
@@ -384,7 +382,7 @@ export class Tileset2D {
     // Strategy-specific state logic
     (typeof refinementStrategy === 'function'
       ? refinementStrategy
-      : STRATEGIES[refinementStrategy])(Array.from(this._cache.values()));
+      : REFINEMENT_STRATEGIES[refinementStrategy])(Array.from(this._cache.values()));
 
     i = 0;
     // Check if any visibility has changed
