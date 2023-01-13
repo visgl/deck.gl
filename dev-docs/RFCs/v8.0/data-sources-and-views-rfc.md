@@ -1,5 +1,9 @@
 # Data Sources and Data Views
 
+* **Authors**: Ib Green
+* **Date**: January 2023
+* **Status**: **Draft**
+
 # Summary
 
 This RFC proposes defining a system of data sources and data views that will let us separate out complex big data loading logic from deck.gl layers, refine the APIs, and make this logic available to applications for use in analytics and data processing.
