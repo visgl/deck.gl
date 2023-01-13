@@ -1,11 +1,14 @@
-import Tile2DHeader from './tile-2d-header';
-import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
+import {Viewport} from '@deck.gl/core';
+
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {Matrix4, equals} from '@math.gl/core';
-import {Viewport} from '@deck.gl/core';
+
+import {Tile2DHeader} from './tile-2d-header';
+
+import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
 import {Bounds, TileIndex, ZRange} from './types';
-import {TileLayerProps} from './tile-layer';
-import {_memoize as memoize} from '@deck.gl/core';
+import {TileLoadProps} from './types';
+import {memoize} from './memoize';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
@@ -35,9 +38,9 @@ export const STRATEGY_DEFAULT = 'best-available';
 
 export type RefinementStrategyFunction = (tiles: Tile2DHeader[]) => void;
 export type RefinementStrategy =
-  | typeof STRATEGY_NEVER
-  | typeof STRATEGY_REPLACE
-  | typeof STRATEGY_DEFAULT
+  | 'never'
+  | 'no-overlap'
+  | 'best-available'
   | RefinementStrategyFunction;
 
 const DEFAULT_CACHE_SCALE = 5;
@@ -48,30 +51,71 @@ const STRATEGIES = {
   [STRATEGY_NEVER]: () => {}
 };
 
-export type Tileset2DProps = Pick<
-  Required<TileLayerProps>,
-  | 'tileSize'
-  | 'maxCacheSize'
-  | 'maxCacheByteSize'
-  | 'refinementStrategy'
-  | 'extent'
-  | 'maxZoom'
-  | 'minZoom'
-  | 'maxRequests'
-  | 'zoomOffset'
-> & {
-  getTileData: NonNullable<TileLayerProps['getTileData']>;
-  onTileLoad: (tile: Tile2DHeader) => void;
-  onTileUnload: (tile: Tile2DHeader) => void;
-  onTileError: (error: any, tile: Tile2DHeader) => void;
+export type Tileset2DProps<DataT = any> = {
+  /** `getTileData` is called to retrieve the data of each tile. */
+  getTileData: ((props: TileLoadProps) => Promise<DataT> | DataT);
+
+  /** The bounding box of the layer's data. */
+  extent?: number[] | null;
+  /** The pixel dimension of the tiles, usually a power of 2. */
+  tileSize?: number;
+  /** The max zoom level of the layer's data. @default null */
+  maxZoom?: number | null;
+  /** The min zoom level of the layer's data. @default 0 */
+  minZoom?: number | null;
+  /** The maximum number of tiles that can be cached. */
+  maxCacheSize?: number | null;
+  /** The maximum memory used for caching tiles. @default null */
+  maxCacheByteSize?: number | null;
+  /** How the tile layer refines the visibility of tiles. @default 'best-available' */
+  refinementStrategy?: RefinementStrategy;
+  /** Range of minimum and maximum heights in the tile. */
+  zRange?: ZRange | null;
+  /** The maximum number of concurrent getTileData calls. @default 6 */
+  maxRequests?: number;
+  /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
+  zoomOffset?: number;
+
+  /** Called when a tile successfully loads. */
+  onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
+  /** Called when a tile is cleared from cache. */
+  onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
+  /** Called when a tile failed to load. */
+  onTileError?: (err: any, tile: Tile2DHeader<DataT>) => void;
+
+  // onTileLoad: (tile: Tile2DHeader) => void;
+  // onTileUnload: (tile: Tile2DHeader) => void;
+  // onTileError: (error: any, tile: Tile2DHeader) => void;
+  /** Called when all tiles in the current viewport are loaded. */
+  // sonViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
+};
+
+export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileData'> = {
+  extent: null,
+  tileSize: 512,
+
+  maxZoom: null,
+  minZoom: null,
+  maxCacheSize: null,
+  maxCacheByteSize: null,
+  refinementStrategy:  'best-available',
+  zRange: null,
+  maxRequests: 6,
+  zoomOffset: 0,
+
+  // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
+  // onViewportLoad: ((tiles: Tile2DHeader<DataT>[]) => void) | null,
+  onTileLoad: () => {},
+  onTileUnload: () => {},
+  onTileError: () => {}
 };
 
 /**
  * Manages loading and purging of tile data. This class caches recently visited tiles
  * and only creates new tiles if they are present.
  */
-export default class Tileset2D {
-  private opts: Tileset2DProps;
+export class Tileset2D {
+  private opts: Required<Tileset2DProps>;
   private _requestScheduler: RequestScheduler;
   private _cache: Map<string, Tile2DHeader>;
   private _dirty: boolean;
@@ -95,10 +139,10 @@ export default class Tileset2D {
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
   constructor(opts: Tileset2DProps) {
-    this.opts = opts;
+    this.opts = {...DEFAULT_TILESET2D_PROPS, ...opts};
 
     this.onTileLoad = tile => {
-      this.opts.onTileLoad(tile);
+      this.opts.onTileLoad?.(tile);
       if (this.opts.maxCacheByteSize) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
@@ -107,7 +151,7 @@ export default class Tileset2D {
 
     this._requestScheduler = new RequestScheduler({
       maxRequests: opts.maxRequests,
-      throttleRequests: opts.maxRequests > 0
+      throttleRequests: Boolean(opts.maxRequests && opts.maxRequests > 0)
     });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
@@ -358,7 +402,7 @@ export default class Tileset2D {
   private _getCullBounds = memoize(getCullBounds);
 
   private _pruneRequests(): void {
-    const {maxRequests} = this.opts;
+    const {maxRequests = 0} = this.opts;
 
     const abortCandidates: Tile2DHeader[] = [];
     let ongoingRequestCount = 0;
@@ -423,7 +467,7 @@ export default class Tileset2D {
           // delete tile
           this._cacheByteSize -= opts.maxCacheByteSize ? tile.byteLength : 0;
           _cache.delete(id);
-          this.opts.onTileUnload(tile);
+          this.opts.onTileUnload?.(tile);
         }
         if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
           break;

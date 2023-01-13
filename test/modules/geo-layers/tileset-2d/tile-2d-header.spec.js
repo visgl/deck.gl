@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import Tile2DHeader from '@deck.gl/geo-layers/tile-layer/tile-2d-header';
+import {_Tile2DHeader  as Tile2DHeader} from '@deck.gl/geo-layers';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 
 test('Tile2DHeader', async t => {

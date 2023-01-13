@@ -1,11 +1,13 @@
 import test from 'tape-promise/tape';
-import Tileset2D, {
+import {
+  Tileset2D,
   STRATEGY_REPLACE,
   STRATEGY_DEFAULT,
   STRATEGY_NEVER
-} from '@deck.gl/geo-layers/tile-layer/tileset-2d';
-import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
+} from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from 'math.gl';
+
+import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
 
 const testViewState = {
   bearing: 0,

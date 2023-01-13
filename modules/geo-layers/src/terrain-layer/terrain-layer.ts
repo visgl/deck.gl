@@ -35,9 +35,8 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
-import Tile2DHeader from '../tile-layer/tile-2d-header';
-import {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tile-layer/types';
-import {urlType, getURLFromTemplate} from '../tile-layer/utils';
+import type {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tileset-2d';
+import {Tile2DHeader, urlType, getURLFromTemplate} from '../tileset-2d';
 
 const DUMMY_DATA = [1];
 

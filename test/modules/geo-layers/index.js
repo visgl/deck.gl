@@ -55,3 +55,5 @@ import './tile-3d-layer';
 import './terrain-layer.spec';
 import './mvt-layer.spec';
 import './geohash-layer.spec';
+
+import './tileset-2d';

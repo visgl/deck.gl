@@ -10,22 +10,29 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
+import {ClipExtension} from '@deck.gl/extensions';
+
 import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
-import {ClipExtension} from '@deck.gl/extensions';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
-import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
-import Tileset2D, {Tileset2DProps} from '../tile-layer/tileset-2d';
-import {getURLFromTemplate, isGeoBoundingBox, isURLTemplate} from '../tile-layer/utils';
-import {GeoBoundingBox, TileLoadProps} from '../tile-layer/types';
-import Tile2DHeader from '../tile-layer/tile-2d-header';
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
+
+import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
+
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
+import {
+  Tileset2D,
+  Tile2DHeader,
+  getURLFromTemplate,
+  isGeoBoundingBox,
+  isURLTemplate
+} from '../tileset-2d';
 
 const WORLD_SIZE = 512;
 
@@ -285,7 +292,7 @@ export default class MVTLayer<DataT extends Feature = Feature, ExtraProps = {}> 
     if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(
         info.object,
-        info.tile!.bbox as GeoBoundingBox,
+        info.tile!.bbox as GeoBoundingBox, // eslint-disable-line
         this.context.viewport
       );
     }
