@@ -1,10 +1,5 @@
 import test from 'tape-promise/tape';
-import {
-  Tileset2D,
-  STRATEGY_REPLACE,
-  STRATEGY_DEFAULT,
-  STRATEGY_NEVER
-} from '@deck.gl/geo-layers/tileset-2d';
+import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 import {Matrix4} from 'math.gl';
 
 import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
@@ -417,7 +412,7 @@ test('Tileset2D#traversal', async t => {
 function validateVisibility(strategy, selectedTiles, tiles) {
   /* eslint-disable default-case */
   switch (strategy) {
-    case STRATEGY_NEVER: {
+    case 'never': {
       // isVisible should match isSelected
       for (const [id, tile] of tiles) {
         const isSelected = selectedTiles.includes(tile);
@@ -430,15 +425,17 @@ function validateVisibility(strategy, selectedTiles, tiles) {
       }
       break;
     }
-    case STRATEGY_DEFAULT:
+
+    case 'best-available':
       // The best content (at the requested z) should always be visible
       for (const tile of selectedTiles) {
         if (tile.isLoaded && !tile.isVisible) {
           return `${tile.id} is selected and should be visible`;
         }
       }
+
     // Fall through
-    case STRATEGY_REPLACE: {
+    case 'no-overlap': {
       // Sample four points each selected tile just inside the corners
       const samplePoints = selectedTiles.flatMap(({bbox}) => [
         [bbox.west + 1, bbox.north - 1],
