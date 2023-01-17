@@ -67,6 +67,7 @@ export class Tile2DHeader<DataT = any> {
   get byteLength(): number {
     const result = this.content ? (this.content as any).byteLength : 0;
     if (!Number.isFinite(result)) {
+      // eslint-disable-next-line no-console
       console.error('byteLength not defined in tile data');
     }
     return result;

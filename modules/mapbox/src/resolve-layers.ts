@@ -7,6 +7,7 @@ import type {Map} from 'mapbox-gl';
 const UNDEFINED_BEFORE_ID = '__UNDEFINED__';
 
 /** Insert Deck layers into the mapbox Map according to the user-defined order */
+// eslint-disable-next-line complexity, max-statements
 export function resolveLayers(
   map?: Map,
   deck?: Deck,

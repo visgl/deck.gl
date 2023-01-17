@@ -173,6 +173,7 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
+  // eslint-disable-next-line complexity
   update({
     data,
     numInstances,
