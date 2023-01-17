@@ -1,5 +1,5 @@
-/* eslint-disable complexity */
 import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+
 import {
   CullingVolume,
   Plane,
@@ -63,6 +63,7 @@ class OSMNode {
     return this._children;
   }
 
+  // eslint-disable-next-line complexity
   update(params: {
     viewport: Viewport;
     project: ((xyz: number[]) => number[]) | null;

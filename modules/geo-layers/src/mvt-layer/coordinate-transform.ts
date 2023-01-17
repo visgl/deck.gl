@@ -1,6 +1,6 @@
 import {Viewport} from '@deck.gl/core';
 import {lerp} from '@math.gl/core';
-import {GeoBoundingBox} from '../tile-layer/types';
+import {GeoBoundingBox} from '../tileset-2d';
 
 const availableTransformations = {
   Point,

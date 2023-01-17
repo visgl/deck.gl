@@ -1,5 +1,4 @@
 /* eslint-env browser */
-import {Layer, log} from '@deck.gl/core';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 
@@ -10,7 +9,7 @@ export type TileLoadDataProps<DataT = any> = {
   onError: (error: any, tile: Tile2DHeader<DataT>) => void;
 };
 
-export default class Tile2DHeader<DataT = any> {
+export class Tile2DHeader<DataT = any> {
   index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
@@ -18,7 +17,7 @@ export default class Tile2DHeader<DataT = any> {
   children: Tile2DHeader[] | null;
   content: DataT | null;
   state?: number;
-  layers?: Layer[] | null;
+  layers?: any[] | null; // Layer[] | null
 
   id!: string; // assigned _always_ with result of `getTileId`
   bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
@@ -68,7 +67,7 @@ export default class Tile2DHeader<DataT = any> {
   get byteLength(): number {
     const result = this.content ? (this.content as any).byteLength : 0;
     if (!Number.isFinite(result)) {
-      log.error('byteLength not defined in tile data')();
+      console.error('byteLength not defined in tile data');
     }
     return result;
   }

@@ -12,11 +12,16 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
-import Tile2DHeader from './tile-2d-header';
 
-import Tileset2D, {RefinementStrategy, STRATEGY_DEFAULT, Tileset2DProps} from './tileset-2d';
-import {TileLoadProps, ZRange} from './types';
-import {urlType, getURLFromTemplate} from './utils';
+import type {TileLoadProps, ZRange} from '../tileset-2d';
+import {
+  Tileset2D,
+  Tile2DHeader,
+  RefinementStrategy,
+  STRATEGY_DEFAULT,
+  Tileset2DProps
+} from '../tileset-2d';
+import {urlType, getURLFromTemplate} from '../tileset-2d';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -77,7 +82,7 @@ type _TileLayerProps<DataT> = {
   onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
 
   /** Called when a tile failed to load. */
-  onTileError?: (err: any) => void;
+  onTileError?: (err: any, tile?) => void;
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
