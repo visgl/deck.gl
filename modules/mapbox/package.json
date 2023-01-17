@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@types/mapbox-gl": "^2.6.3"
-    
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0"
