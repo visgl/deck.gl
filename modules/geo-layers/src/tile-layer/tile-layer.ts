@@ -225,7 +225,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
       maxZoom,
       minZoom,
       tileSize,
-      refinementStrategy,
+      refinementStrategy: refinementStrategy as RefinementStrategy,
       extent,
       maxRequests,
       zoomOffset,
@@ -240,7 +240,8 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   private _updateTileset(): void {
     const tileset = this.state.tileset as Tileset2D;
     const {zRange, modelMatrix} = this.props;
-    const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
+    const traversalParameters = getTraversalParametersFromViewport(this.context.viewport, zRange);
+    const frameNumber = tileset.update({...traversalParameters, modelMatrix});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;

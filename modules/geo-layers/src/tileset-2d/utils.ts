@@ -209,8 +209,8 @@ export function getTileIndices({
   viewport: Viewport;
   maxZoom?: number;
   minZoom?: number;
-  zRange: ZRange; //  | undefined;
-  extent: Bounds;
+  zRange?: ZRange;
+  extent?: Bounds;
   tileSize?: number;
   modelMatrix?: Matrix4;
   modelMatrixInverse?: Matrix4;
@@ -239,7 +239,7 @@ export function getTileIndices({
     bounds: extent
   };
   return viewport.isGeospatial
-    ? getOSMTileIndices()
+    ? getOSMTileIndices(traversalParameters)
     : getIdentityTileIndices(
         viewport,
         z,

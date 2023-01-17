@@ -16,6 +16,7 @@ import {getTileIndices, getCullBounds} from './utils';
 
 import {memoize} from './utils/memoize';
 import {NumericArray} from '@math.gl/core/dist';
+import {TraversalParameters} from './tile-2d-traversal';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
@@ -82,6 +83,17 @@ export type Tileset2DProps<DataT = any> = {
   onTileError?: (err: any, tile: Tile2DHeader<DataT>) => void;
   /** Called when all tiles in the current viewport are loaded. */
   // onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
+};
+
+export type GetTileIndicesOptions = {
+  viewport: Viewport;
+  maxZoom?: number;
+  minZoom?: number;
+  zRange: ZRange;
+  tileSize?: number;
+  modelMatrix?: Matrix4;
+  modelMatrixInverse?: Matrix4;
+  zoomOffset?: number;
 };
 
 /** Controls the amount of tiles that are cached */
@@ -227,6 +239,7 @@ export class Tileset2D {
    * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    */
   update(
+    traversalParameters: TraversalParameters,
     viewport: Viewport,
     {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4 | NumericArray} = {}
   ): number {
@@ -316,16 +329,7 @@ export class Tileset2D {
     zRange,
     modelMatrix,
     modelMatrixInverse
-  }: {
-    viewport: Viewport;
-    maxZoom?: number;
-    minZoom?: number;
-    zRange: ZRange | undefined;
-    tileSize?: number;
-    modelMatrix?: Matrix4;
-    modelMatrixInverse?: Matrix4;
-    zoomOffset?: number;
-  }): TileIndex[] {
+  }: GetTileIndicesOptions): TileIndex[] {
     const {tileSize, extent, zoomOffset} = this.opts;
     return getTileIndices({
       viewport,
