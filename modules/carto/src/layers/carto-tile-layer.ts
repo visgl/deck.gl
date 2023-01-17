@@ -87,7 +87,7 @@ export default class CartoTileLayer<
       return null;
     }
 
-    const tileBbox = props.tile.bbox as any;
+    const tileBbox = props.tile.bbox ;
     const {west, south, east, north} = tileBbox;
 
     const subLayerProps = {

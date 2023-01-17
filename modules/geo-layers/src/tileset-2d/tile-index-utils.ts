@@ -1,5 +1,7 @@
 // deck.gl, MIT license
-import { TileBoundingBox } from './types';
+import {TileBoundingBox} from './bounding-box-utils';
+
+export type TileIndex = {x: number; y: number; z: number};
 
 const TILE_SIZE = 512;
 
@@ -25,10 +27,10 @@ export function tileIndexToXY(x: number, y: number, z: number, tileSize: number 
 
 /**
  * Calculates the 2D bounding bos of a tile a tile from its (x,y,z) tile index
- * @param isGeospatial 
  * @param x 
  * @param y 
  * @param z 
+ * @param isGeospatial 
  * @param tileSize 
  * @returns 
  */

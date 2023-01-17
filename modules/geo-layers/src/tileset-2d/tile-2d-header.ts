@@ -1,6 +1,7 @@
 /* eslint-env browser */
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {TileBoundingBox, TileIndex} from './types';
+import type {TileBoundingBox} from './bounding-box-utils';
+import type {TileIndex} from './tile-index-utils';
 
 /** Properties passed to getData() */
 export type TileLoadProps = {

@@ -6,6 +6,8 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import {Bounds, ZRange, TraversalParameters} from '../tileset-2d';
 
+const TILE_SIZE = 512;
+
 /** 
  * Glue code between deck.gl Viewports and the abstract Tileset2D API 
  */

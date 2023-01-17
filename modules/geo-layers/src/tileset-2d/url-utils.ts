@@ -1,6 +1,6 @@
 // deck.gl, MIT license
 
-import {TileIndex} from './types';
+import {TileIndex} from './tile-index-utils';
 
 /**
  * Returns true if s is a valid URL template
@@ -8,7 +8,6 @@ import {TileIndex} from './types';
 export function isURLTemplate(s: string): boolean {
   return /(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/.test(s);
 }
-
 
 /** 
  * Create a loadable URL to a tile from a URL template and a tile index 

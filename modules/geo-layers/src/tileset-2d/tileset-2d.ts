@@ -8,9 +8,14 @@ import {Matrix4, equals} from '@math.gl/core';
 import type {TileLoadProps} from './tile-2d-header';
 import {Tile2DHeader} from './tile-2d-header';
 
-import {getTileIndices, tileToBoundingBox, getCullBounds} from './utils';
-import {Bounds, TileIndex, ZRange} from './types';
-import {memoize} from './memoize';
+import type {Bounds, ZRange} from './bounding-box-utils';
+
+import type {TileIndex} from './tile-index-utils';
+import {tileIndexToBoundingBox} from './tile-index-utils';
+import {getTileIndices, getCullBounds} from './utils';
+
+import {memoize} from './utils/memoize';
+import {NumericArray} from '@math.gl/core/dist';
 
 // bit masks
 const TILE_STATE_VISITED = 1;
@@ -61,7 +66,7 @@ export type Tileset2DProps<DataT = any> = {
   /** The maximum memory used for caching tiles. @default null */
   maxCacheByteSize?: number | null;
   /** How the tile layer refines the visibility of tiles. @default 'best-available' */
-  refinementStrategy?: RefinementStrategy;
+  refinementStrategy?: RefinementStrategy | null;
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
@@ -223,7 +228,7 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4} = {}
+    {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4 | NumericArray} = {}
   ): number {
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
@@ -349,7 +354,7 @@ export class Tileset2D {
   getTileMetadata(index: TileIndex): Record<string, any> {
     const {tileSize} = this.opts;
     // @ts-expect-error
-    return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
+    return {bbox: tileIndexToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
   }
 
   /** Returns index of the parent tile */

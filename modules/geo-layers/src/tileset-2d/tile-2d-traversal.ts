@@ -5,8 +5,10 @@ import {
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/culling';
-import {Bounds, TileIndex, ZRange} from './types';
-import {tileIndexToLngLat} from './tile-index';
+
+import type {Bounds, ZRange} from './bounding-box-utils';
+import type {TileIndex} from './tile-index-utils';
+import {tileIndexToLngLat} from './tile-index-utils';
 
 /** Parameters for required for selecting tile indices for a viewport (aka "traversal") */
 export type TraversalParameters = {

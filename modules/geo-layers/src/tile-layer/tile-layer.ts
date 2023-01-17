@@ -25,6 +25,8 @@ import type {
 import {Tileset2D, Tile2DHeader} from '../tileset-2d';
 import {getURLFromTemplate} from '../tileset-2d';
 
+import {getTraversalParametersFromViewport} from './viewport-utils';
+
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
@@ -236,7 +238,7 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   }
 
   private _updateTileset(): void {
-    const {tileset} = this.state;
+    const tileset = this.state.tileset as Tileset2D;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
