@@ -1,20 +1,49 @@
 import maplibregl from 'maplibre-gl';
 import {Deck} from '@deck.gl/core';
-import {fetchMap} from '@deck.gl/carto';
+import {CartoLayer, setDefaultCredentials, BASEMAP, MAP_TYPES} from '@deck.gl/carto';
 
-const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
+setDefaultCredentials({
+  apiBaseUrl: '/cartoapi',
+  // apiBaseUrl: 'https://gcp-us-east1-11.dev.api.carto.com',
+  accessToken: 'XXX'
+});
 
-// Get map info from CARTO and update deck
-fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  const deck = new Deck({canvas: 'deck-canvas', controller: true, initialViewState, layers});
+let map;
+// Add basemap for context.
+map = new maplibregl.Map({container: 'map', style: BASEMAP.VOYAGER, interactive: false});
 
-  // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
-  const map = new maplibregl.Map({container: 'map', style: MAP_STYLE, interactive: false});
-  deck.setProps({
+new Deck({
+  canvas: 'deck-canvas',
+
+  initialViewState: {latitude: 55.5, longitude: 12, zoom: 7},
+  controller: true,
+
+  ...(map && {
+    mapStyle: BASEMAP.VOYAGER,
     onViewStateChange: ({viewState}) => {
       const {longitude, latitude, ...rest} = viewState;
       map.jumpTo({center: [longitude, latitude], ...rest});
     }
-  });
+  }),
+
+  layers: [
+    new CartoLayer({
+      connection: 'deb-bigquery',
+      type: MAP_TYPES.RASTER,
+      data: 'cartodb-data-engineering-team.jarroyo_raster.hillshade1x1_quadbin_2',
+      formatTiles: 'binary',
+      tileSize: 64,
+      getFillColor: ({properties}) => {
+        const {band_1} = properties;
+        return [band_1, 0, -100 * band_1, band_1 ? 255 : 0];
+      },
+      opacity: map ? 0.5 : 1
+      // coverage: 0.8
+      // stroked: true
+      // extruded: true,
+      // getElevation: ({properties}) => {
+      //   return 100 * properties.band_1;
+      // }
+    })
+  ]
 });

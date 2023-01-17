@@ -1,7 +1,8 @@
 import {registerLoaders} from '@loaders.gl/core';
 import {DefaultProps, UpdateParameters} from '@deck.gl/core';
+import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
-registerLoaders([CartoSpatialTileLoader]);
+registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
 import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
@@ -35,6 +36,13 @@ export default class SpatialIndexTileLayer<
     if (props.aggregationResLevel !== oldProps.aggregationResLevel) {
       // Tileset cache is invalid when resLevel changes
       this.setState({tileset: null});
+    }
+
+    const stats = document.getElementById('stats');
+    if (this.state.tileset && stats) {
+      const visible = this.state.tileset.tiles.filter(t => t.isVisible && t.content);
+      const count = visible.reduce((acc, tile) => acc + 256 * 256, 0);
+      stats.innerHTML = `Cells: ${count}`;
     }
 
     super.updateState(params);

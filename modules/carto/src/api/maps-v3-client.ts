@@ -373,37 +373,66 @@ async function _fetchDataUrl({
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
-  const metadata = await mapInstantiation({
-    type,
-    source,
-    connection,
-    credentials: localCreds,
-    geoColumn,
-    columns,
-    clientId,
-    headers,
-    aggregationExp,
-    aggregationResLevel,
-    queryParameters
-  });
+  let metadata: MapInstantiation;
   let url: string | null = null;
   let mapFormat: Format | undefined;
 
-  if (format) {
-    mapFormat = format;
-    url = getUrlFromMetadata(metadata, format);
-    assert(url, `Format ${format} not available`);
-  } else {
-    // guess map format
-    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
-    for (const f of prioritizedFormats) {
-      url = getUrlFromMetadata(metadata, f);
-      if (url) {
-        mapFormat = f;
-        break;
+  if (type !== 'raster') {
+    metadata = await mapInstantiation({
+      type,
+      source,
+      connection,
+      credentials: localCreds,
+      geoColumn,
+      columns,
+      clientId,
+      headers,
+      aggregationExp,
+      aggregationResLevel,
+      queryParameters
+    });
+    if (format) {
+      mapFormat = format;
+      url = getUrlFromMetadata(metadata, format);
+      assert(url, `Format ${format} not available`);
+    } else {
+      // guess map format
+      const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+      for (const f of prioritizedFormats) {
+        url = getUrlFromMetadata(metadata, f);
+        if (url) {
+          mapFormat = f;
+          break;
+        }
       }
+      assert(url && mapFormat, 'Unsupported data formats received from backend.');
     }
-    assert(url && mapFormat, 'Unsupported data formats received from backend.');
+  } else {
+    // @ts-ignore
+    metadata = {}; // dummy metadata
+    // TODO remove once raster map instantiation working on server
+    mapFormat = format!;
+    const baseUrl = `${localCreds.mapsUrl}/${connection}/${type}`;
+    const parameters = getParameters({
+      type,
+      source,
+      geoColumn,
+      columns,
+      clientId,
+      aggregationResLevel,
+      aggregationExp,
+      queryParameters
+    });
+    const encodedParameters = Object.entries(parameters).map(([key, value]) => {
+      if (typeof value !== 'string') {
+        value = JSON.stringify(value);
+      }
+      return encodeParameter(key, value);
+    });
+    url = `${baseUrl}?${encodedParameters.join('&')}`;
+
+    // TODO remove when server fixed
+    url += '&format=tilejson';
   }
 
   if (format === FORMATS.TILEJSON && formatTiles) {
