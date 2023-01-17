@@ -1,7 +1,10 @@
 import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {TraversalParameters, getOSMTileIndices} from './tile-2d-traversal';
-import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
+import type {TileIndex} from './tile-index-utils';
+import {transformBox, Bounds, ZRange} from './bounding-box-utils';
+
+import {getTraversalParametersFromViewport} from '../tile-layer/viewport-utils';
 
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
@@ -58,24 +61,25 @@ export function getTileIndices({
     transformedExtent = transformBox(extent, modelMatrix);
   }
 
-  const traversalParameters: TraversalParameters = {
-    // z, 
-    elevationBounds: zRange,
+  const traversalParameters = getTraversalParametersFromViewport(
+    viewport,
+    0, // maxZ???
+    zRange,
     extent
-  };
+  );
 
   let tileIndices;
   if (isGeospatial) {
-    tileIndices = getOSMTileIndices(traversalParameters)
+    tileIndices = getOSMTileIndices(traversalParameters);
   } else {
-    const bounds = getBoundingBox(viewport, null, extent)
+    const bounds = getBoundingBox(viewport, null, extent);
     tileIndices = getIdentityTileIndices(
-        bounds,
-        z,
-        tileSize,
-        transformedExtent || DEFAULT_EXTENT,
-        modelMatrixInverse
-      );
+      bounds,
+      z,
+      tileSize,
+      transformedExtent || DEFAULT_EXTENT,
+      modelMatrixInverse
+    );
   }
   return tileIndices;
 }
@@ -191,39 +195,6 @@ function getIdentityTileIndices(
     }
   }
   return indices;
-}
-
-export function isGeoBoundingBox(v: any): v is GeoBoundingBox {
-  return (
-    Number.isFinite(v.west) &&
-    Number.isFinite(v.north) &&
-    Number.isFinite(v.east) &&
-    Number.isFinite(v.south)
-  );
-}
-
-function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
-  const transformedCoords = [
-    // top-left
-    modelMatrix.transformAsPoint([bbox[0], bbox[1]]),
-    // top-right
-    modelMatrix.transformAsPoint([bbox[2], bbox[1]]),
-    // bottom-left
-    modelMatrix.transformAsPoint([bbox[0], bbox[3]]),
-    // bottom-right
-    modelMatrix.transformAsPoint([bbox[2], bbox[3]])
-  ];
-  const transformedBox: Bounds = [
-    // Minimum x coord
-    Math.min(...transformedCoords.map(i => i[0])),
-    // Minimum y coord
-    Math.min(...transformedCoords.map(i => i[1])),
-    // Max x coord
-    Math.max(...transformedCoords.map(i => i[0])),
-    // Max y coord
-    Math.max(...transformedCoords.map(i => i[1]))
-  ];
-  return transformedBox;
 }
 
 function getScale(z: number, tileSize: number): number {

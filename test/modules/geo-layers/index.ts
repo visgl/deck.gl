@@ -57,4 +57,6 @@ import './geohash-layer.spec';
 import './tile-layer.spec';
 import './tile-3d-layer.spec';
 
+import './tile-layer-utils/url-type.spec';
+
 import './tileset-2d';

@@ -9,7 +9,12 @@ const TILE_SIZE = 512;
  * Calculates the long/lat of a tile from its (x,y,z) tile index
  * @link https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
  */
-export function tileIndexToLngLat(x: number, y: number, z: number, tileSize = TILE_SIZE): [number, number] {
+export function tileIndexToLngLat(
+  x: number,
+  y: number,
+  z: number,
+  tileSize = TILE_SIZE
+): [number, number] {
   const scale = getScale(z, tileSize);
   const lng = (x / scale) * 360 - 180;
   const n = Math.PI - (2 * Math.PI * y) / scale;
@@ -20,19 +25,24 @@ export function tileIndexToLngLat(x: number, y: number, z: number, tileSize = TI
 /**
  * Calculates the x,y position of a tile from its (x,y,z) tile index
  */
-export function tileIndexToXY(x: number, y: number, z: number, tileSize: number = TILE_SIZE): [number, number] {
+export function tileIndexToXY(
+  x: number,
+  y: number,
+  z: number,
+  tileSize: number = TILE_SIZE
+): [number, number] {
   const scale = getScale(z, tileSize);
   return [(x / scale) * TILE_SIZE, (y / scale) * TILE_SIZE];
 }
 
 /**
  * Calculates the 2D bounding bos of a tile a tile from its (x,y,z) tile index
- * @param x 
- * @param y 
- * @param z 
- * @param isGeospatial 
- * @param tileSize 
- * @returns 
+ * @param x
+ * @param y
+ * @param z
+ * @param isGeospatial
+ * @param tileSize
+ * @returns
  */
 export function tileIndexToBoundingBox(
   x: number,
@@ -55,4 +65,3 @@ export function tileIndexToBoundingBox(
 export function getScale(z: number, tileSize: number): number {
   return (Math.pow(2, z) * TILE_SIZE) / tileSize;
 }
-

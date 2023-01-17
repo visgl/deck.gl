@@ -115,7 +115,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.data && props.data !== oldProps.data) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this._loadTileset(props.data); 
+      this._loadTileset(props.data);
     }
 
     if (changeFlags.viewportChanged) {

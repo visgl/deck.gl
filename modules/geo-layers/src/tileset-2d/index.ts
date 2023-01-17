@@ -16,9 +16,7 @@ export type {
   TileBoundingBox
 } from './bounding-box-utils';
 
-export {
-  isGeoBoundingBox
-} from './bounding-box-utils';
+export {isGeoBoundingBox} from './bounding-box-utils';
 
 export {
   tileIndexToBoundingBox,
@@ -26,11 +24,6 @@ export {
   tileIndexToBoundingBox as tileToBoundingBox
 } from './tile-index-utils';
 
-export {
-  getTileIndices,
-} from './utils';
+export {getTileIndices} from './get-tile-indices';
 
-export {
-  isURLTemplate,
-  getURLFromTemplate
-} from './url-utils';
+export {isURLTemplate, getURLFromTemplate} from './url-utils';

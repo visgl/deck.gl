@@ -20,7 +20,7 @@ import type {
   TileLoadProps,
   RefinementStrategy,
   RefinementStrategyFunction,
-  ZRange,
+  ZRange
 } from '../tileset-2d';
 import {Tileset2D, Tile2DHeader} from '../tileset-2d';
 import {getURLFromTemplate} from '../tileset-2d';
@@ -240,8 +240,8 @@ export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeL
   private _updateTileset(): void {
     const tileset = this.state.tileset as Tileset2D;
     const {zRange, modelMatrix} = this.props;
-    const traversalParameters = getTraversalParametersFromViewport(this.context.viewport, zRange);
-    const frameNumber = tileset.update({...traversalParameters, modelMatrix});
+    // const traversalParameters = getTraversalParametersFromViewport(this.context.viewport, zRange);
+    const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;

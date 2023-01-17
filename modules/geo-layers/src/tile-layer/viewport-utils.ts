@@ -8,8 +8,8 @@ import {Bounds, ZRange, TraversalParameters} from '../tileset-2d';
 
 const TILE_SIZE = 512;
 
-/** 
- * Glue code between deck.gl Viewports and the abstract Tileset2D API 
+/**
+ * Glue code between deck.gl Viewports and the abstract Tileset2D API
  */
 export function getTraversalParametersFromViewport(
   viewport: Viewport,
@@ -18,10 +18,10 @@ export function getTraversalParametersFromViewport(
   bounds?: Bounds
 ): TraversalParameters {
   const project: ((xyz: number[]) => number[]) | null =
-  viewport instanceof _GlobeViewport && viewport.resolution
-    ? // eslint-disable-next-line @typescript-eslint/unbound-method
-      viewport.projectPosition
-    : null;
+    viewport instanceof _GlobeViewport && viewport.resolution
+      ? // eslint-disable-next-line @typescript-eslint/unbound-method
+        viewport.projectPosition
+      : null;
 
   // Get the culling volume of the current camera
   const planes: Plane[] = Object.values(viewport.getFrustumPlanes()).map(
@@ -46,10 +46,10 @@ export function getTraversalParametersFromViewport(
     bounds = [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
   }
 
-  const repeatedWorldMaps = Boolean( 
+  const repeatedWorldMaps = Boolean(
     viewport instanceof WebMercatorViewport &&
-    viewport.subViewports &&
-    viewport.subViewports.length > 1
+      viewport.subViewports &&
+      viewport.subViewports.length > 1
   );
 
   return {

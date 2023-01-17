@@ -12,7 +12,6 @@ export type TileBoundingBox = NonGeoBoundingBox | GeoBoundingBox;
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
 
-
 export function isGeoBoundingBox(v: any): v is GeoBoundingBox {
   return (
     Number.isFinite(v.west) &&
@@ -45,4 +44,3 @@ export function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   ];
   return transformedBox;
 }
-

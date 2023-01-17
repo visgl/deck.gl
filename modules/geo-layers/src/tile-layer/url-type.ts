@@ -1,5 +1,5 @@
-/** 
- * A prop type for URL templates 
+/**
+ * A prop type for URL templates
  */
 export const urlType = {
   type: 'url',

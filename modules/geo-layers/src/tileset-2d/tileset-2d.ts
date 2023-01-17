@@ -12,7 +12,7 @@ import type {Bounds, ZRange} from './bounding-box-utils';
 
 import type {TileIndex} from './tile-index-utils';
 import {tileIndexToBoundingBox} from './tile-index-utils';
-import {getTileIndices, getCullBounds} from './utils';
+import {getTileIndices, getCullBounds} from './get-tile-indices';
 
 import {memoize} from './utils/memoize';
 import {NumericArray} from '@math.gl/core/dist';
@@ -42,17 +42,14 @@ const TILE_STATE_VISIBLE = 2;
  */
 
 /** Predefined tile refinement strategies (which tiles show while children load) */
-export type RefinementStrategy =
-  | 'never'
-  | 'no-overlap'
-  | 'best-available';
+export type RefinementStrategy = 'never' | 'no-overlap' | 'best-available';
 
 /** User defined tile visibility selection */
 export type RefinementStrategyFunction = (tiles: Tile2DHeader[]) => void;
 
 export type Tileset2DProps<DataT = any> = {
   /** `getTileData` is called to retrieve the data of each tile. */
-  getTileData: ((props: TileLoadProps) => Promise<DataT> | DataT);
+  getTileData: (props: TileLoadProps) => Promise<DataT> | DataT;
 
   /** The bounding box of the layer's data. */
   extent?: number[] | null;
@@ -89,7 +86,7 @@ export type GetTileIndicesOptions = {
   viewport: Viewport;
   maxZoom?: number;
   minZoom?: number;
-  zRange: ZRange;
+  zRange?: ZRange;
   tileSize?: number;
   modelMatrix?: Matrix4;
   modelMatrixInverse?: Matrix4;
@@ -99,10 +96,10 @@ export type GetTileIndicesOptions = {
 /** Controls the amount of tiles that are cached */
 const DEFAULT_CACHE_SCALE = 5;
 
-const REFINEMENT_STRATEGIES: Record<RefinementStrategy, RefinementStrategyFunction>  = {
+const REFINEMENT_STRATEGIES: Record<RefinementStrategy, RefinementStrategyFunction> = {
   'best-available': updateTileStateDefault,
   'no-overlap': updateTileStateReplace,
-  'never': () => {}
+  never: () => {}
 };
 
 export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileData'> = {
@@ -239,11 +236,11 @@ export class Tileset2D {
    * Update the cache with the given viewport and model matrix and triggers callback onUpdate.
    */
   update(
-    traversalParameters: TraversalParameters,
+    // traversalParameters: TraversalParameters,
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4 | NumericArray} = {}
+    {zRange, modelMatrix}: {zRange?: ZRange | null; modelMatrix?: NumericArray | null} = {}
   ): number {
-    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (
       !this._viewport ||
@@ -256,12 +253,12 @@ export class Tileset2D {
         this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
-      this._zRange = zRange;
+      this._zRange = zRange!;
       const tileIndices = this.getTileIndices({
         viewport,
         maxZoom: this._maxZoom,
         minZoom: this._minZoom,
-        zRange,
+        zRange: this._zRange,
         modelMatrix: this._modelMatrix,
         modelMatrixInverse: this._modelMatrixInverse
       });
@@ -333,11 +330,12 @@ export class Tileset2D {
     const {tileSize, extent, zoomOffset} = this.opts;
     return getTileIndices({
       viewport,
+      isGeospatial: viewport.isGeospatial,
       maxZoom,
       minZoom,
       zRange,
       tileSize,
-      extent: extent as Bounds | undefined,
+      extent: extent as Bounds,
       modelMatrix,
       modelMatrixInverse,
       zoomOffset

@@ -2,7 +2,6 @@ import test from 'tape-promise/tape';
 import {
   getTileIndices,
   tileToBoundingBox,
-  urlType,
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from '@math.gl/core';

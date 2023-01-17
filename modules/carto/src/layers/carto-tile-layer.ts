@@ -10,7 +10,8 @@ import {
   TileLayer,
   _getURLFromTemplate,
   _Tile2DHeader,
-  _TileLoadProps as TileLoadProps
+  _TileLoadProps as TileLoadProps,
+  GeoBoundingBox
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
@@ -87,8 +88,8 @@ export default class CartoTileLayer<
       return null;
     }
 
-    const tileBbox = props.tile.bbox ;
-    const {west, south, east, north} = tileBbox;
+    const tileBbox = props.tile.bbox;
+    const {west, south, east, north} = tileBbox as GeoBoundingBox;
 
     const subLayerProps = {
       ...props,

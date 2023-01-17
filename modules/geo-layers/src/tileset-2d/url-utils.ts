@@ -9,8 +9,8 @@ export function isURLTemplate(s: string): boolean {
   return /(?=.*{z})(?=.*{x})(?=.*({y}|{-y}))/.test(s);
 }
 
-/** 
- * Create a loadable URL to a tile from a URL template and a tile index 
+/**
+ * Create a loadable URL to a tile from a URL template and a tile index
  */
 export function getURLFromTemplate(
   template: string | string[],
@@ -42,10 +42,9 @@ export function getURLFromTemplate(
   return url;
 }
 
-/** 
- * Generate a hash for a string 
+/**
+ * Generate a hash for a string
  */
 function stringHash(s: string): number {
   return Math.abs(s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0));
 }
-
