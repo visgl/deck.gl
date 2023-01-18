@@ -1,5 +1,6 @@
 import {getLoggers} from '../src/debug/loggers';
 
+/* global deck */
 declare global {
   const deck: any;
 }

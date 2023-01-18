@@ -2,6 +2,8 @@
  * This file should be included in another bundle if @deck.gl/layers is expected as a peer dependency
  */
 
+/* eslint-disable */ // import/no-extraneous-dependencies
+
 // Check if @deck.gl/core is present
 import {GeoJsonLayer} from '@deck.gl/layers';
 

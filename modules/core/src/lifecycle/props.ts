@@ -1,5 +1,4 @@
 import {PROP_TYPES_SYMBOL} from './constants';
-import {PropType} from './prop-types';
 
 export function validateProps(props) {
   const propTypes = props[PROP_TYPES_SYMBOL];
