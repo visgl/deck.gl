@@ -1,23 +1,27 @@
-import { Deck, assert } from '@deck.gl/core';
-import { getViewState, getDeckInstance, getInterleavedProps } from './deck-utils';
+import { Deck, assert } from "@deck.gl/core";
+import {
+  getViewState,
+  getDeckInstance,
+  getInterleavedProps,
+} from "./deck-utils";
 
-import type { Map, IControl, MapMouseEvent } from 'mapbox-gl';
-import type { MjolnirGestureEvent, MjolnirPointerEvent } from 'mjolnir.js';
-import type { DeckProps } from '@deck.gl/core';
+import type { Map, IControl, MapMouseEvent } from "mapbox-gl";
+import type { MjolnirGestureEvent, MjolnirPointerEvent } from "mjolnir.js";
+import type { DeckProps } from "@deck.gl/core";
 
-import { resolveLayers } from './resolve-layers';
+import { resolveLayers } from "./resolve-layers";
 
 export type MapboxOverlayProps = Omit<
   DeckProps,
-  | 'width'
-  | 'height'
-  | 'gl'
-  | 'parent'
-  | 'canvas'
-  | '_customRender'
-  | 'viewState'
-  | 'initialViewState'
-  | 'controller'
+  | "width"
+  | "height"
+  | "gl"
+  | "parent"
+  | "canvas"
+  | "_customRender"
+  | "viewState"
+  | "initialViewState"
+  | "controller"
 > & {
   interleaved?: boolean;
 };
@@ -33,9 +37,7 @@ export default class MapboxOverlay implements IControl {
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
 
-  constructor(
-    props: MapboxOverlayProps
-  ) {
+  constructor(props: MapboxOverlayProps) {
     const { interleaved = false, ...otherProps } = props;
     this._interleaved = interleaved;
     this._props = otherProps;
@@ -50,39 +52,43 @@ export default class MapboxOverlay implements IControl {
     Object.assign(this._props, props);
 
     if (this._deck) {
-      this._deck.setProps(this._interleaved ? getInterleavedProps(this._props) : this._props);
+      this._deck.setProps(
+        this._interleaved ? getInterleavedProps(this._props) : this._props
+      );
     }
   }
 
   /** Called when the control is added to a map */
   onAdd(map: Map): HTMLDivElement {
     this._map = map;
-    return this._interleaved ? this._onAddInterleaved(map) : this._onAddOverlaid(map);
+    return this._interleaved
+      ? this._onAddInterleaved(map)
+      : this._onAddOverlaid(map);
   }
 
   private _onAddOverlaid(map: Map): HTMLDivElement {
     /* global document */
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     Object.assign(container.style, {
-      position: 'absolute',
+      position: "absolute",
       left: 0,
       top: 0,
-      pointerEvents: 'none'
+      pointerEvents: "none",
     });
     this._container = container;
 
     this._deck = new Deck({
       ...this._props,
       parent: container,
-      viewState: getViewState(map)
+      viewState: getViewState(map),
     });
 
-    map.on('resize', this._updateContainerSize);
-    map.on('render', this._updateViewState);
-    map.on('mousemove', this._handleMouseEvent);
-    map.on('mouseout', this._handleMouseEvent);
-    map.on('click', this._handleMouseEvent);
-    map.on('dblclick', this._handleMouseEvent);
+    map.on("resize", this._updateContainerSize);
+    map.on("render", this._updateViewState);
+    map.on("mousemove", this._handleMouseEvent);
+    map.on("mouseout", this._handleMouseEvent);
+    map.on("click", this._handleMouseEvent);
+    map.on("dblclick", this._handleMouseEvent);
 
     this._updateContainerSize();
     return container;
@@ -96,14 +102,14 @@ export default class MapboxOverlay implements IControl {
       deck: new Deck({
         ...this._props,
         // @ts-ignore non-public map property
-        gl: map.painter.context.gl
-      })
+        gl: map.painter.context.gl,
+      }),
     });
 
-    map.on('styledata', this._handleStyleChange);
+    map.on("styledata", this._handleStyleChange);
     resolveLayers(map, this._deck, [], this._props.layers);
 
-    return document.createElement('div');
+    return document.createElement("div");
   }
 
   /** Called when the control is removed from a map */
@@ -125,39 +131,43 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onRemoveOverlaid(map: Map): void {
-    map.off('resize', this._updateContainerSize);
-    map.off('render', this._updateViewState);
-    map.off('mousemove', this._handleMouseEvent);
-    map.off('mouseout', this._handleMouseEvent);
-    map.off('click', this._handleMouseEvent);
-    map.off('dblclick', this._handleMouseEvent);
+    map.off("resize", this._updateContainerSize);
+    map.off("render", this._updateViewState);
+    map.off("mousemove", this._handleMouseEvent);
+    map.off("mouseout", this._handleMouseEvent);
+    map.off("click", this._handleMouseEvent);
+    map.off("dblclick", this._handleMouseEvent);
   }
 
   private _onRemoveInterleaved(map: Map): void {
-    map.off('styledata', this._handleStyleChange);
+    map.off("styledata", this._handleStyleChange);
     resolveLayers(map, this._deck, this._props.layers, []);
   }
 
   getDefaultPosition() {
-    return 'top-left';
+    return "top-left";
   }
 
   /** Forwards the Deck.pickObject method */
-  pickObject(params: Parameters<Deck['pickObject']>[0]): ReturnType<Deck['pickObject']> {
+  pickObject(
+    params: Parameters<Deck["pickObject"]>[0]
+  ): ReturnType<Deck["pickObject"]> {
     assert(this._deck);
     return this._deck.pickObject(params);
   }
 
   /** Forwards the Deck.pickMultipleObjects method */
   pickMultipleObjects(
-    params: Parameters<Deck['pickMultipleObjects']>[0]
-  ): ReturnType<Deck['pickMultipleObjects']> {
+    params: Parameters<Deck["pickMultipleObjects"]>[0]
+  ): ReturnType<Deck["pickMultipleObjects"]> {
     assert(this._deck);
     return this._deck.pickMultipleObjects(params);
   }
 
   /** Forwards the Deck.pickObjects method */
-  pickObjects(params: Parameters<Deck['pickObjects']>[0]): ReturnType<Deck['pickObjects']> {
+  pickObjects(
+    params: Parameters<Deck["pickObjects"]>[0]
+  ): ReturnType<Deck["pickObjects"]> {
     assert(this._deck);
     return this._deck.pickObjects(params);
   }
@@ -170,7 +180,12 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
-    resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    resolveLayers(
+      this._map,
+      this._deck,
+      this._props.layers,
+      this._props.layers
+    );
   };
 
   private _updateContainerSize = () => {
@@ -178,7 +193,7 @@ export default class MapboxOverlay implements IControl {
       const { clientWidth, clientHeight } = this._map.getContainer();
       Object.assign(this._container.style, {
         width: `${clientWidth}px`,
-        height: `${clientHeight}px`
+        height: `${clientHeight}px`,
       });
     }
   };
@@ -207,30 +222,30 @@ export default class MapboxOverlay implements IControl {
     } = {
       type: event.type,
       offsetCenter: event.point,
-      srcEvent: event
+      srcEvent: event,
     };
 
     switch (event.type) {
-      case 'click':
+      case "click":
         mockEvent.tapCount = 1;
         // Hack: because we do not listen to pointer down, perform picking now
         deck._onPointerDown(mockEvent as MjolnirGestureEvent);
         deck._onEvent(mockEvent as MjolnirGestureEvent);
         break;
 
-      case 'dblclick':
-        mockEvent.type = 'click';
+      case "dblclick":
+        mockEvent.type = "click";
         mockEvent.tapCount = 2;
         deck._onEvent(mockEvent as MjolnirGestureEvent);
         break;
 
-      case 'mousemove':
-        mockEvent.type = 'pointermove';
+      case "mousemove":
+        mockEvent.type = "pointermove";
         deck._onPointerMove(mockEvent as MjolnirPointerEvent);
         break;
 
-      case 'mouseout':
-        mockEvent.type = 'pointerleave';
+      case "mouseout":
+        mockEvent.type = "pointerleave";
         deck._onPointerMove(mockEvent as MjolnirPointerEvent);
         break;
 
