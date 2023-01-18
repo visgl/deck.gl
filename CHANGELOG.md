@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.23] - Jan 18 2023
+
+- CARTO: avoid lines between adjacent cells in QuadbinLayer (#7475)
+
 #### deck.gl [8.8.22] - Jan 7 2023
 
 - Fix FillStyleExtension (#7568)
