@@ -1,11 +1,11 @@
-import {Deck, assert} from '@deck.gl/core';
-import {getViewState, getDeckInstance, getInterleavedProps} from './deck-utils';
+import { Deck, assert } from '@deck.gl/core';
+import { getViewState, getDeckInstance, getInterleavedProps } from './deck-utils';
 
-import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
-import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {DeckProps} from '@deck.gl/core';
+import type { Map, IControl, MapMouseEvent } from 'mapbox-gl';
+import type { MjolnirGestureEvent, MjolnirPointerEvent } from 'mjolnir.js';
+import type { DeckProps } from '@deck.gl/core';
 
-import {resolveLayers} from './resolve-layers';
+import { resolveLayers } from './resolve-layers';
 
 export type MapboxOverlayProps = Omit<
   DeckProps,
@@ -18,7 +18,9 @@ export type MapboxOverlayProps = Omit<
   | 'viewState'
   | 'initialViewState'
   | 'controller'
->;
+> & {
+  interleaved?: boolean;
+};
 
 /**
  * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
@@ -32,11 +34,9 @@ export default class MapboxOverlay implements IControl {
   private _interleaved: boolean;
 
   constructor(
-    props: MapboxOverlayProps & {
-      interleaved?: boolean;
-    }
+    props: MapboxOverlayProps
   ) {
-    const {interleaved = false, ...otherProps} = props;
+    const { interleaved = false, ...otherProps } = props;
     this._interleaved = interleaved;
     this._props = otherProps;
   }
@@ -175,7 +175,7 @@ export default class MapboxOverlay implements IControl {
 
   private _updateContainerSize = () => {
     if (this._map && this._container) {
-      const {clientWidth, clientHeight} = this._map.getContainer();
+      const { clientWidth, clientHeight } = this._map.getContainer();
       Object.assign(this._container.style, {
         width: `${clientWidth}px`,
         height: `${clientHeight}px`
@@ -187,7 +187,7 @@ export default class MapboxOverlay implements IControl {
     const deck = this._deck;
     if (deck) {
       // @ts-ignore (2345) map is always defined if deck is
-      deck.setProps({viewState: getViewState(this._map)});
+      deck.setProps({ viewState: getViewState(this._map) });
       // Redraw immediately if view state has changed
       deck.redraw();
     }
@@ -201,7 +201,7 @@ export default class MapboxOverlay implements IControl {
 
     const mockEvent: {
       type: string;
-      offsetCenter: {x: number; y: number};
+      offsetCenter: { x: number; y: number };
       srcEvent: MapMouseEvent;
       tapCount?: number;
     } = {
