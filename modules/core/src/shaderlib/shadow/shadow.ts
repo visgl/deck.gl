@@ -179,6 +179,8 @@ function getViewProjectionMatrices({
 }
 
 /* eslint-disable camelcase */
+
+// eslint-disable-next-line complexity
 function createShadowUniforms(
   opts: ShadowModuleSettings,
   context: ProjectUniforms

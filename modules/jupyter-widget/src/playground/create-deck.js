@@ -17,7 +17,7 @@ import {addSupportComponents} from '../lib/components/index';
 import * as deck from '../deck-bundle';
 
 const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
-const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) != '_';
+const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) !== '_';
 
 function extractElements(library = {}, filter) {
   // Extracts exported elements as a dictionary from a library

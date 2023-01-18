@@ -1,7 +1,6 @@
 /* global document */
 import GL from '@luma.gl/constants';
 import {Texture2D, copyToTexture} from '@luma.gl/core';
-import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
