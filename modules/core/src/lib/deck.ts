@@ -84,7 +84,7 @@ export type DeckMetrics = {
   gpuMemory: number;
 };
 
-type CursorState = {
+export type CursorState = {
   /** Whether the cursor is over a pickable object */
   isHovering: boolean;
   /** Whether the cursor is down */
