@@ -152,8 +152,8 @@ export default abstract class CompositeLayer<PropsT = {}> extends Layer<
     return accessor;
   }
 
-  // eslint-disable-next-line complexity
   /** Returns sub layer props for a specific sublayer */
+  // eslint-disable-next-line complexity
   protected getSubLayerProps(
     sublayerProps: {
       id?: string;

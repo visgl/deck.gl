@@ -179,6 +179,7 @@ class OSMNode {
   }
 }
 
+// eslint-disable-next-line complexity
 export function getOSMTileIndices(
   viewport: Viewport,
   maxZ: number,

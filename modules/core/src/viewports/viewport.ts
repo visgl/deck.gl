@@ -178,6 +178,7 @@ export default class Viewport {
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
+  // eslint-disable-next-line complexity
   constructor(opts: ViewportOptions = {}) {
     // @ts-ignore
     this.id = opts.id || this.constructor.displayName || 'viewport';
