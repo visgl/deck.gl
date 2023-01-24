@@ -435,7 +435,9 @@ export function getSizeAccessor(
 ) {
   const scale = scaleType ? SCALE_FUNCS[scaleType as any]() : identity;
   if (scaleType) {
-    scale.domain(calculateDomain(data, name, scaleType));
+    if (aggregation !== 'count') {
+      scale.domain(calculateDomain(data, name, scaleType));
+    }
     scale.range(range);
   }
 
