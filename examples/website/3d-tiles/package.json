@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "deck.gl": "^8.8.0",
-    "@loaders.gl/3d-tiles": "^3.2.10",
+    "@loaders.gl/3d-tiles": "^3.3.0-alpha.10",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-map-gl": "^5.0.0"
