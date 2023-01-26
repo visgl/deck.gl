@@ -597,6 +597,9 @@ Create a copy of this layer, optionally change some prop values.
 Arguments:
 - `overrideProps` (Object, optional) - layer props to update.
 
+Remarks:
+- When using React, instead of calling `layer.clone(...)` you should construct a new layer instance on every render. Instead of the above, use `const updatedLayer = new ScatterPlotlayer({...props, ...overrideProps})` each time (both initialization and re-rendering).
+
 ##### `setState`
 
 Used to update the layers [`state`](/docs/api-reference/core/layer.md#state) object. Calling this method will also cause the layer to rerender.
