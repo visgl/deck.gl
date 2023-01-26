@@ -598,7 +598,11 @@ Arguments:
 - `overrideProps` (Object, optional) - layer props to update.
 
 Remarks:
-- When using React, instead of calling `layer.clone(...)` you should construct a new layer instance on every render. Instead of the above, use `const updatedLayer = new ScatterPlotlayer({...props, ...overrideProps})` each time (both initialization and re-rendering).
+- When using React, instead of calling `layer.clone(...)` you should construct a new layer instance on every render. Instead of the above, use the following each time (both initialization and re-rendering):
+
+    ```typescript
+    const updatedLayer = new ScatterPlotlayer({...props, ...overrideProps})
+    ```
 
 ##### `setState`
 
