@@ -95,8 +95,9 @@ type _SimpleMeshLayerProps<DataT> = {
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
   textureParameters?: Record<number, number> | null;
 
-  /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
+  /** Anchor position accessor. */
+  getColor?: Accessor<DataT, Color>;
   /** Color value or accessor.
    * If `mesh` does not contain vertex colors, use this color to render each object.
    * If `mesh` contains vertex colors, then the two colors are mixed together.
@@ -104,60 +105,58 @@ type _SimpleMeshLayerProps<DataT> = {
    * If `texture` is assigned, then both colors will be ignored.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getOrientation?: Accessor<DataT, [number, number, number]>;
   /**
    * Orientation in [pitch, yaw, roll] in degrees.
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, [number, number, number]>;
+  getScale?: Accessor<DataT, [number, number, number]>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, [number, number, number]>;
+  getTranslation?: Accessor<DataT, [number, number, number]>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
-   */
-  getTranslation?: Accessor<DataT, [number, number, number]>;
-  /**
-   * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
-   */
-  getTransformMatrix?: Accessor<DataT, number[]>;
-  /**
-   * Multiplier to scale each geometry by.
-   * @default 1
-   */
-  sizeScale?: number;
-  /**
-   * @deprecated Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute).
-   * If set to `false` vertex colors will be ignored.
-   * This prop will be removed and set to always true in the next major release.
-   * @default false
-   */
-  _useMeshColors?: boolean;
-
-  /**
-   * (Experimental) If rendering only one instance of the mesh, set this to false to treat mesh positions
-   * as deltas of the world coordinates of the anchor.
-   * E.g. in LNGLAT coordinates, mesh positions are interpreted as meter offsets by default.
-   * setting _instanced to false interpreted mesh positions as lnglat deltas.
-   * @default true
-   */
-  _instanced?: boolean; // TODO - formalize API
+  */
+ getTransformMatrix?: Accessor<DataT, number[]>;
+ /**
+  * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
+  */
+ sizeScale?: number;
+ /**
+  * Multiplier to scale each geometry by.
+  * @default 1
+  */
+ _useMeshColors?: boolean;
+ /**
+  * @deprecated Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute).
+  * If set to `false` vertex colors will be ignored.
+  * This prop will be removed and set to always true in the next major release.
+  * @default false
+  */
+ _instanced?: boolean; // TODO - formalize API
+ /**
+  * (Experimental) If rendering only one instance of the mesh, set this to false to treat mesh positions
+  * as deltas of the world coordinates of the anchor.
+  * E.g. in LNGLAT coordinates, mesh positions are interpreted as meter offsets by default.
+  * setting _instanced to false interpreted mesh positions as lnglat deltas.
+  * @default true
+  */
+  wireframe?: boolean;
   /**
    * Whether to render the mesh in wireframe mode.
    * @default false
    */
-  wireframe?: boolean;
+  material?: Material;
   /**
    * Material props for lighting effect.
    *
    * @default true
    * @see https://deck.gl/docs/developer-guide/using-lighting#constructing-a-material-instance
    */
-  material?: Material;
 };
 
 export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
@@ -166,19 +165,19 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
+  _useMeshColors: {type: 'boolean', value: false},
   // Whether the color attribute in a mesh will be used
   // This prop will be removed and set to true in next major release
-  _useMeshColors: {type: 'boolean', value: false},
 
+  _instanced: true,
   // _instanced is a hack to use world position instead of meter offsets in mesh
   // TODO - formalize API
-  _instanced: true,
+  wireframe: false,
   // NOTE(Tarek): Quick and dirty wireframe. Just draws
   // the same mesh with LINE_STRIPS. Won't follow edges
   // of the original mesh.
-  wireframe: false,
-  // Optional material for 'lighting' shader module
   material: true,
+  // Optional material for 'lighting' shader module
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
