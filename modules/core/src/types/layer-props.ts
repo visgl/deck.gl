@@ -122,9 +122,9 @@ export type LayerProps<DataType = any> = {
    */
   updateTriggers?: Record<string, any>;
   /**
-   * The purpose of the layer
+   * The purpose of the layer. `+` separated list of OPERATION enums
    */
-  operation?: 'draw' | 'mask';
+  operation?: string;
   /**
    * If the layer should be rendered. Default true.
    */

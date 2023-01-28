@@ -61,6 +61,7 @@ test('DeckPicker#pick empty', t => {
     layers: [],
     views: [view],
     viewports: [viewport],
+    effects: [],
     onViewportActive: layerManager.activateViewport,
     x: 1,
     y: 1

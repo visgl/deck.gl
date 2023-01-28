@@ -57,7 +57,7 @@ export default class MaskPass extends LayersPass {
   }
 
   shouldDrawLayer(layer) {
-    return layer.props.operation === OPERATION.MASK;
+    return layer.props.operation.includes(OPERATION.MASK);
   }
 
   delete() {

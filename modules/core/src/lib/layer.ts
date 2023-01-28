@@ -304,7 +304,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
   /** Returns true if the layer is visible in the picking pass */
   isPickable(): boolean {
-    return this.props.pickable && this.props.visible;
+    const {operation} = this.props;
+    return (
+      this.props.visible &&
+      ((this.props.pickable && operation.includes(OPERATION.DRAW)) ||
+        operation.includes(OPERATION.TERRAIN))
+    );
   }
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
@@ -1202,7 +1207,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     let redraw: string | false = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
-    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
@@ -1211,6 +1215,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       : false;
     redraw = redraw || attributeManagerNeedsRedraw;
 
+    for (const extension of this.props.extensions) {
+      const extensionNeedsRedraw = extension.getNeedsRedraw.call(this, opts);
+      redraw = redraw || extensionNeedsRedraw;
+    }
+
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
     return redraw;
   }
 

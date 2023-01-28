@@ -63,23 +63,15 @@ export default class PickLayersPass extends LayersPass {
     cullRect,
     effects,
     pass = 'picking',
-    pickZ
+    pickZ,
+    moduleParameters
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
     const gl = this.gl;
     this.pickZ = pickZ;
-
-    // Track encoded layer indices
-    const encodedColors = pickZ
-      ? null
-      : {
-          byLayer: new Map(),
-          byAlpha: []
-        };
-    // Temporarily store it on the instance so that it can be accessed by this.getLayerParameters
-    this._colors = encodedColors;
+    const encodedColors = this._resetColorEncoder(pickZ);
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
@@ -113,7 +105,8 @@ export default class PickLayersPass extends LayersPass {
           onViewportActive,
           cullRect,
           effects: effects?.filter(e => e.useInPicking),
-          pass
+          pass,
+          moduleParameters
         })
     );
 
@@ -124,7 +117,7 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected shouldDrawLayer(layer: Layer): boolean {
-    return layer.props.pickable && layer.props.operation === OPERATION.DRAW;
+    return layer.isPickable();
   }
 
   protected getModuleParameters() {
@@ -140,7 +133,7 @@ export default class PickLayersPass extends LayersPass {
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
     const pickParameters = {...layer.props.parameters};
 
-    if (!this._colors) {
+    if (!this._colors || layer.props.operation.includes(OPERATION.TERRAIN)) {
       pickParameters.blend = false;
     } else {
       Object.assign(pickParameters, PICKING_PARAMETERS);
@@ -149,6 +142,18 @@ export default class PickLayersPass extends LayersPass {
     }
 
     return pickParameters;
+  }
+
+  protected _resetColorEncoder(pickZ: boolean) {
+    // Track encoded layer indices
+    this._colors = pickZ
+      ? null
+      : {
+          byLayer: new Map(),
+          byAlpha: []
+        };
+    // Temporarily store it on the instance so that it can be accessed by this.getLayerParameters
+    return this._colors;
   }
 }
 

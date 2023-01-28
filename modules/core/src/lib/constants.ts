@@ -112,5 +112,6 @@ export const EVENTS = {
  */
 export const OPERATION = {
   DRAW: 'draw',
-  MASK: 'mask'
+  MASK: 'mask',
+  TERRAIN: 'terrain'
 } as const;
