@@ -52,9 +52,10 @@ if (int(terrain_mode) == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   position = project_common_position_to_clipspace(p);
 }
 if (int(terrain_mode) == TERRAIN_MODE_USE_HEIGHT_MAP) {
-  vec4 p = geometry.position;
-  p.z = 0.0;
-  vec4 clipPos = project_common_position_to_clipspace(p);
+  vec3 anchor = geometry.worldPosition;
+  anchor.z = 0.0;
+  vec3 anchorCommon = project_position(anchor);
+  vec4 clipPos = project_common_position_to_clipspace(vec4(anchorCommon, 1.0));
   vec2 texCoords = clipPos.xy / clipPos.w / 2.0 + 0.5;
   float terrainZ = texture2D(terrain_map, texCoords).r;
   geometry.position.z += terrainZ;

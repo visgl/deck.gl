@@ -5,7 +5,7 @@ import shaderModule from './shader-module';
 import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
-  fittingMode: undefined
+  terrainFittingMode: undefined
 };
 
 export type TerrainExtensionProps = {
@@ -13,7 +13,7 @@ export type TerrainExtensionProps = {
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
    * If not specified, it is automatically deduced from the layer.
    */
-  fittingMode?: 'offset' | 'drape';
+  terrainFittingMode?: 'offset' | 'drape';
 };
 
 type TerrainExtensionState = {
@@ -29,17 +29,17 @@ export default class TerrainExtension extends LayerExtension {
   static extensionName = 'TerrainExtension';
 
   getShaders(this: Layer<TerrainExtensionProps>): any {
-    let {fittingMode} = this.props;
+    let {terrainFittingMode} = this.props;
 
-    // Infer by geometry if 'fittingMode' option isn't explictly set
-    if (!fittingMode) {
+    // Infer by geometry if the fitting mode isn't explictly set
+    if (!terrainFittingMode) {
       // @ts-ignore `extruded` may not exist in props
       const is3d = this.props.extruded as boolean;
       const isInstanced = 'instancePositions' in this.getAttributeManager()!.attributes;
-      fittingMode = is3d || isInstanced ? 'offset' : 'drape';
+      terrainFittingMode = is3d || isInstanced ? 'offset' : 'drape';
     }
 
-    (this.state as TerrainExtensionState).terrainFittingMode = fittingMode;
+    (this.state as TerrainExtensionState).terrainFittingMode = terrainFittingMode;
 
     return {
       modules: [shaderModule]
