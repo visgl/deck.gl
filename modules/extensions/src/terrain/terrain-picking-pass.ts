@@ -25,7 +25,7 @@ export default class TerrainCoverPass extends PickLayersPass {
     const result: Layer[] = [];
     this.drawIndices = {};
     this._resetColorEncoder(opts.pickZ);
-    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts, false);
+    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts, true);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       if (!layer.isComposite && drawParamsByIndex[i].shouldDrawLayer) {
@@ -38,24 +38,31 @@ export default class TerrainCoverPass extends PickLayersPass {
   }
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPickingPassRenderOptions>) {
+    const layers = terrainCover.filterLayers(opts.layers!);
+    if (layers.length === 0) return;
+
     // console.log('Updating terrain cover for picking ' + terrainCover.id)
     const target = terrainCover.pickingTexture;
     const viewport = terrainCover.renderViewport;
 
     if (!target || !viewport) {
-      return null;
+      return;
     }
 
     target.resize(viewport);
 
-    // @ts-expect-error opts is typed losely (some fields are required)
-    return this.render({
+    this.render({
       ...opts,
       pickingFBO: target,
-      pass: `terrain-cover-${terrainCover.id}`,
+      pass: `terrain-cover-picking-${terrainCover.id}`,
+      layers,
+      effects: [],
       viewports: [viewport],
-      cullRect: viewport,
-      deviceRect: viewport
+      // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
+      // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
+      cullRect: undefined,
+      deviceRect: viewport,
+      pickZ: opts.pickZ || false
     });
   }
 

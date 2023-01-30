@@ -1,5 +1,5 @@
 import {Texture2D, ProgramManager, Framebuffer} from '@luma.gl/core';
-import {OPERATION} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 
 import shaderModule from './shader-module';
 import TerrainCover from './terrain-cover';
@@ -35,6 +35,14 @@ export default class TerrainEffect implements Effect {
     this.terrainPass = new TerrainPass(gl, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(gl, {id: 'terrain-picking'});
 
+    if (!this.heightMap) {
+      try {
+        this.heightMap = createRenderTarget(gl, {id: 'height-map', float: true});
+      } catch {
+        log.warn('Terrain offset mode is not supported by this browser')();
+      }
+    }
+
     ProgramManager.getDefaultProgramManager(gl).addDefaultModule(shaderModule);
   }
 
@@ -44,28 +52,24 @@ export default class TerrainEffect implements Effect {
       this.initialize(gl);
       for (const layer of opts.layers) {
         // Force the terrain layer (and its descendents) to rebuild their models with the new shader
-        if (layer.props.operation.includes(OPERATION.TERRAIN)) {
+        if (layer.props.operation.includes('terrain')) {
           layer.setChangeFlags({extensionsChanged: true});
         }
       }
     }
 
     const {viewports, pass} = opts;
-    const isPicking = pass.includes('picking');
+    const isPicking = pass.startsWith('picking');
     this.isPicking = isPicking;
-    // Disable this effect when rendering into height map or terrain cover
-    const renderOpts: TerrainPickingPassRenderOptions = {
-      ...(opts as TerrainPickingPassRenderOptions),
-      effects: []
-    };
+
     // TODO - support multiple views?
     const viewport = viewports[0];
     const layers = (isPicking ? this.terrainPickingPass : this.terrainPass).getRenderableLayers(
       viewport,
-      renderOpts
+      opts as TerrainPickingPassRenderOptions
     );
 
-    const terrainLayers = layers.filter(l => l.props.operation.includes(OPERATION.TERRAIN));
+    const terrainLayers = layers.filter(l => l.props.operation.includes('terrain'));
     if (terrainLayers.length === 0) {
       return;
     }
@@ -73,14 +77,13 @@ export default class TerrainEffect implements Effect {
     if (!isPicking) {
       const offsetLayers = layers.filter(l => l.state.terrainFittingMode === 'offset');
       if (offsetLayers.length > 0) {
-        this._renderHeightMap(gl, terrainLayers, viewport, renderOpts);
+        this._renderHeightMap(gl, terrainLayers, viewport, opts);
       }
     }
 
     const drapeLayers = layers.filter(l => l.state.terrainFittingMode === 'drape');
-    if (drapeLayers.length > 0) {
-      this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, renderOpts);
-    }
+    this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
+
     if (!isPicking) {
       this._pruneTerrainCovers();
     }
@@ -105,7 +108,7 @@ export default class TerrainEffect implements Effect {
       terrainCover: terrainCoverTexture,
       terrainCoverBounds: terrainCover?.commonBounds,
       useTerrainHeightMap: terrainFittingMode === 'offset',
-      terrainSkipRender: terrainFittingMode === 'drape'
+      terrainSkipRender: terrainFittingMode === 'drape' || !layer.props.operation.includes('draw')
     };
   }
 
@@ -134,11 +137,8 @@ export default class TerrainEffect implements Effect {
     opts: PreRenderOptions
   ) {
     if (!this.heightMap) {
-      try {
-        this.heightMap = createRenderTarget(gl, {id: 'height-map', float: true});
-      } catch {
-        throw new Error('Terrain is not supported by this browser');
-      }
+      // Not supported
+      return;
     }
 
     this.heightMap.resize(viewport);
@@ -163,6 +163,15 @@ export default class TerrainEffect implements Effect {
     viewport: Viewport,
     opts: PreRenderOptions
   ) {
+    if (drapeLayers.length === 0) {
+      // No rerender needed, just disable the texture in the existing terrain covers
+      for (const layer of terrainLayers) {
+        const terrainCover = this.terrainCovers.get(layer.id);
+        terrainCover?.shouldUpdate({layers: drapeLayers});
+      }
+      return;
+    }
+
     // Mark a terrain cover as dirty if one of the drape layers needs redraw
     const layerNeedsRedraw: Record<string, boolean> = {};
     for (const layer of drapeLayers) {
@@ -178,14 +187,12 @@ export default class TerrainEffect implements Effect {
     const renderPass = this.isPicking ? this.terrainPickingPass : this.terrainPass;
     for (const layer of terrainLayers) {
       let terrainCover = this.terrainCovers.get(layer.id);
-      if (terrainCover) {
-        terrainCover.owner = layer;
-      } else {
+      if (!terrainCover) {
         terrainCover = new TerrainCover(layer);
         this.terrainCovers.set(layer.id, terrainCover);
       }
       try {
-        const isDirty = terrainCover.shouldUpdate({viewport, layers: drapeLayers});
+        const isDirty = terrainCover.shouldUpdate({owner: layer, viewport, layers: drapeLayers});
         if (this.isPicking || terrainCover.isDirty || isDirty) {
           renderPass.renderTerrainCover(terrainCover, {
             ...opts,

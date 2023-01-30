@@ -1,4 +1,4 @@
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import TerrainEffect from './terrain-effect';
 import shaderModule from './shader-module';
 
@@ -29,18 +29,6 @@ export default class TerrainExtension extends LayerExtension {
   static extensionName = 'TerrainExtension';
 
   getShaders(this: Layer<TerrainExtensionProps>): any {
-    let {terrainFittingMode} = this.props;
-
-    // Infer by geometry if the fitting mode isn't explictly set
-    if (!terrainFittingMode) {
-      // @ts-ignore `extruded` may not exist in props
-      const is3d = this.props.extruded as boolean;
-      const isInstanced = 'instancePositions' in this.getAttributeManager()!.attributes;
-      terrainFittingMode = is3d || isInstanced ? 'offset' : 'drape';
-    }
-
-    (this.state as TerrainExtensionState).terrainFittingMode = terrainFittingMode;
-
     return {
       modules: [shaderModule]
     };
@@ -48,6 +36,33 @@ export default class TerrainExtension extends LayerExtension {
 
   initializeState(this: Layer<TerrainExtensionProps>) {
     this.context.deck?._addDefaultEffect(new TerrainEffect());
+  }
+
+  updateState(
+    this: Layer<TerrainExtensionProps>,
+    params: UpdateParameters<Layer<TerrainExtensionProps>>
+  ) {
+    const {props, oldProps} = params;
+
+    if (
+      this.state.terrainFittingMode &&
+      props.terrainFittingMode === oldProps.terrainFittingMode &&
+      // @ts-ignore `extruded` may not exist in props
+      props.extruded === oldProps.extruded
+    ) {
+      return;
+    }
+
+    let {terrainFittingMode} = props;
+    if (!terrainFittingMode) {
+      // props.extruded is used as an indication that the layer is 2.5D
+      // @ts-ignore `extruded` may not exist in props
+      const is3d = this.props.extruded as boolean;
+      const attributes = this.getAttributeManager()?.attributes;
+      const hasAnchor = attributes && 'instancePositions' in attributes;
+      terrainFittingMode = is3d || hasAnchor ? 'offset' : 'drape';
+    }
+    this.setState({terrainFittingMode});
   }
 
   getNeedsRedraw(this: Layer<{}>): boolean {

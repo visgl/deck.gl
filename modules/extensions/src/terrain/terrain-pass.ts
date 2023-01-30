@@ -12,7 +12,7 @@ export default class TerrainCoverPass extends LayersPass {
   getRenderableLayers(viewport: Viewport, opts: TerrainPassRenderOptions): Layer[] {
     const {layers} = opts;
     const result: Layer[] = [];
-    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts, false);
+    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts, true);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       if (!layer.isComposite && drawParamsByIndex[i].shouldDrawLayer) {
@@ -34,28 +34,31 @@ export default class TerrainCoverPass extends LayersPass {
         blendEquation: GL.MAX,
         depthTest: false
       },
-      () => this.render({...opts, target})
+      () => this.render({...opts, target, effects: []})
     );
   }
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPassRenderOptions>) {
+    const layers = terrainCover.filterLayers(opts.layers!);
+    if (layers.length === 0) return;
+
     // console.log('Updating terrain cover ' + terrainCover.id)
     const target = terrainCover.renderTexture;
     const viewport = terrainCover.renderViewport;
 
     if (!target || !viewport) {
-      return null;
+      return;
     }
 
     target.resize(viewport);
 
-    // @ts-expect-error opts is typed losely (some fields are required)
-    return this.render({
+    this.render({
       ...opts,
       target,
       pass: `terrain-cover-${terrainCover.id}`,
-      viewports: [viewport],
-      cullRect: viewport
+      layers,
+      effects: [],
+      viewports: [viewport]
     });
   }
 }

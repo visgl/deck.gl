@@ -3,6 +3,7 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 import type {Texture2D} from '@luma.gl/core';
 
 export type TerrainModuleSettings = {
+  pickingActive?: boolean;
   heightMap: Texture2D | null;
   dummyHeightMap: Texture2D;
   terrainCover: Texture2D | null;
@@ -14,19 +15,21 @@ export type TerrainModuleSettings = {
 
 /** A model can have one of the following modes */
 const TERRAIN_MODE = {
-  UNKNOWN: 0,
+  NONE: 0,
   /** A terrain layer rendering encoded ground elevation into the height map */
   WRITE_HEIGHT_MAP: 1,
   /** An offset layer reading encoded ground elevation from the height map */
   USE_HEIGHT_MAP: 2,
-  /** A terrain layer rendering to screen, using the cover fbo as texture */
+  /** A terrain layer rendering to screen, using the cover fbo overlaid with its own texture */
   USE_COVER: 3,
+  /** A terrain layer rendering to screen, using the cover fbo as texture */
+  USE_COVER_ONLY: 4,
   /** Draped layer is rendered into a texture, and never to screen */
-  SKIP: 4
+  SKIP: 5
 };
 
 const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
-  .map(key => `const int TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]};`)
+  .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('');
 
 export default {
@@ -39,19 +42,19 @@ varying vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
     'vs:#main-start': `
-if (int(terrain_mode) == TERRAIN_MODE_SKIP) {
+if (terrain_mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
     'vs:DECKGL_FILTER_GL_POSITION': `
 commonPos = geometry.position.xyz;
-if (int(terrain_mode) == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec4 p = geometry.position;
   p.z = 0.0;
   position = project_common_position_to_clipspace(p);
 }
-if (int(terrain_mode) == TERRAIN_MODE_USE_HEIGHT_MAP) {
+if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
@@ -70,16 +73,16 @@ varying vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
     'fs:#main-start': `
-if (int(terrain_mode) == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   gl_FragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
     'fs:DECKGL_FILTER_COLOR': `
-if (int(terrain_mode) == TERRAIN_MODE_USE_COVER) {
+if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain_coverBounds.xy) / terrain_coverBounds.zw;
   vec4 pixel = texture2D(terrain_map, texCoords);
-  if (picking_uActive) {
+  if (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
     float blendedAlpha = pixel.a + color.a * (1.0 - pixel.a);
@@ -103,7 +106,7 @@ if (int(terrain_mode) == TERRAIN_MODE_USE_COVER) {
         terrainSkipRender
       } = opts;
 
-      let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.UNKNOWN;
+      let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
       let sampler: Texture2D = dummyHeightMap;
       if (drawToTerrainHeightMap) {
@@ -112,7 +115,10 @@ if (int(terrain_mode) == TERRAIN_MODE_USE_COVER) {
         mode = TERRAIN_MODE.USE_HEIGHT_MAP;
         sampler = heightMap;
       } else if (terrainCover) {
-        mode = TERRAIN_MODE.USE_COVER;
+        mode =
+          terrainSkipRender || opts.pickingActive
+            ? TERRAIN_MODE.USE_COVER_ONLY
+            : TERRAIN_MODE.USE_COVER;
         sampler = terrainCover;
       }
 

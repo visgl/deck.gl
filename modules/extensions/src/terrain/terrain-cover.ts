@@ -10,6 +10,13 @@ const unitNonGeospatialViewport = new OrthographicViewport({width: 1, height: 1}
 
 const MAX_SIZE = 2048;
 
+// TODO - import from loaders when Tileset2D is split out
+type GeoBoundingBox = {west: number; north: number; east: number; south: number};
+type NonGeoBoundingBox = {left: number; top: number; right: number; bottom: number};
+type Tile2DHeader = {
+  bbox: GeoBoundingBox | NonGeoBoundingBox;
+};
+
 /** Class to manage draped texture for each terrain layer */
 export default class TerrainCover {
   private fbo?: Framebuffer;
@@ -17,6 +24,7 @@ export default class TerrainCover {
   private zoom: number = 0;
   private bounds: [number[], number[]] | null = null;
   private layers: string[] = [];
+  private tile: Tile2DHeader | null;
 
   isDirty: boolean = true;
   owner: Layer;
@@ -25,6 +33,7 @@ export default class TerrainCover {
 
   constructor(owner: Layer) {
     this.owner = owner;
+    this.tile = getTile(owner);
   }
 
   get id() {
@@ -37,26 +46,30 @@ export default class TerrainCover {
   }
 
   shouldUpdate({
+    owner = this.owner,
     viewport,
     layers,
     layerNeedsRedraw
   }: {
+    owner?: Layer;
     viewport?: Viewport;
     layers?: Layer[];
     layerNeedsRedraw?: Record<string, boolean>;
   }): boolean {
-    const owner = this.owner.getCurrentLayer();
-    if (!owner) {
-      return false;
-    }
-
     let sizeChanged = false;
     if (viewport) {
       const newBounds = owner.getBounds();
-      if (this.bounds !== newBounds) {
+      if (
+        // The terrain layer's bounds has changed
+        this.bounds !== newBounds ||
+        // If the terrain layer is not bound to a tile, increase texture size based on zoom
+        (!this.tile && Math.abs(viewport.zoom - this.zoom) >= 1)
+      ) {
         sizeChanged = true;
         // console.log('bounds changed', this.bounds, '>>', newBounds);
         this.bounds = newBounds;
+        // console.log('zoom changed', this.zoom, '>>', Math.ceil(viewport.zoom));
+        this.zoom = Math.ceil(viewport.zoom);
       }
 
       if (newBounds) {
@@ -67,12 +80,6 @@ export default class TerrainCover {
         this.commonBounds = null;
       }
 
-      if (viewport.zoom - this.zoom > 2) {
-        sizeChanged = true;
-        // console.log('zoom changed', this.zoom, '>>', Math.ceil(viewport.zoom));
-        this.zoom = Math.ceil(viewport.zoom);
-      }
-
       if (sizeChanged) {
         this.renderViewport = getRenderViewport(owner, this.zoom, viewport.isGeospatial);
       }
@@ -81,7 +88,7 @@ export default class TerrainCover {
     // Compare viewport, layers and bounds with the last version. Only rerender if necesary.
     let layersChanged = false;
     if (layers) {
-      layers = getIntersectingLayers(owner, layers);
+      layers = getIntersectingLayers(this.tile, layers);
 
       if (layers.length !== this.layers.length) {
         layersChanged = true;
@@ -132,6 +139,10 @@ export default class TerrainCover {
       this.pickingFbo = createRenderTarget(this.owner.context.gl, {id: `${this.id}-picking`});
     }
     return this.pickingFbo;
+  }
+
+  filterLayers(layers: Layer[]) {
+    return layers.filter(({id}) => this.layers.includes(id));
   }
 
   delete() {
@@ -189,13 +200,10 @@ function getRenderViewport(layer: Layer, zoom: number, isGeospatial: boolean): V
  * Remove layers that do not overlap with the current terrain cover.
  * This implementation only has effect when a TileLayer is overlaid on top of a TileLayer
  */
-function getIntersectingLayers(owner: Layer, layers: Layer[]): Layer[] {
-  // @ts-expect-error tile may not exist
-  const sourceTile = owner.props.tile;
+function getIntersectingLayers(sourceTile: Tile2DHeader | null, layers: Layer[]): Layer[] {
   if (sourceTile) {
     return layers.filter(layer => {
-      // @ts-expect-error tile may not exist
-      const tile = layer.props.tile;
+      const tile = getTile(layer);
       if (tile) {
         return intersect(sourceTile.bbox, tile.bbox);
       }
@@ -205,11 +213,27 @@ function getIntersectingLayers(owner: Layer, layers: Layer[]): Layer[] {
   return layers;
 }
 
-function intersect(b1: any, b2: any): boolean {
-  if ('west' in b1) {
+/** If layer is the descendent of a TileLayer, return the corresponding tile. */
+function getTile(layer: Layer | null): Tile2DHeader | null {
+  while (layer) {
+    // @ts-expect-error tile may not exist
+    const {tile} = layer.props;
+    if (tile) {
+      return tile;
+    }
+    layer = layer.parent;
+  }
+  return null;
+}
+
+function intersect(
+  b1: GeoBoundingBox | NonGeoBoundingBox,
+  b2: GeoBoundingBox | NonGeoBoundingBox
+): boolean {
+  if ('west' in b1 && 'west' in b2) {
     return b1.west < b2.east && b2.west < b1.east && b1.south < b2.north && b2.south < b1.north;
   }
-  if ('left' in b1) {
+  if ('left' in b1 && 'left' in b2) {
     return b1.left < b2.right && b2.left < b1.right && b1.top < b2.bottom && b2.top < b1.bottom;
   }
   return false;
