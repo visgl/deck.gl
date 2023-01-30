@@ -1,12 +1,4 @@
-import {
-  Layer,
-  Viewport,
-  Effect,
-  PreRenderOptions,
-  OPERATION,
-  CoordinateSystem,
-  log
-} from '@deck.gl/core';
+import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
 import {Texture2D} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
@@ -47,7 +39,7 @@ export default class MaskEffect implements Effect {
 
   preRender(
     gl: WebGLRenderingContext,
-    {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
+    {layers, layerFilter, viewports, onViewportActive, views, pass}: PreRenderOptions
   ): void {
     if (!this.dummyMaskMap) {
       this.dummyMaskMap = new Texture2D(gl, {
@@ -56,7 +48,12 @@ export default class MaskEffect implements Effect {
       });
     }
 
-    const maskLayers = layers.filter(l => l.props.visible && l.props.operation === OPERATION.MASK);
+    if (pass.startsWith('picking')) {
+      // Do not update on picking pass
+      return;
+    }
+
+    const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
       this.masks = null;
       this.channels.length = 0;

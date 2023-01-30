@@ -85,6 +85,10 @@ export default abstract class LayerExtension<OptionsT = undefined> {
 
   updateState(this: Layer, params: UpdateParameters<Layer>, extension: this): void {}
 
+  getNeedsRedraw(this: Layer, opts: {clearRedrawFlags: boolean}): boolean {
+    return false;
+  }
+
   draw(this: Layer, params: any, extension: this): void {}
 
   finalizeState(this: Layer, context: LayerContext, extension: this): void {}
