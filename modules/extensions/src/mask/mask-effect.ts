@@ -48,7 +48,7 @@ export default class MaskEffect implements Effect {
       });
     }
 
-    if (pass.includes('picking')) {
+    if (pass.startsWith('picking')) {
       // Do not update on picking pass
       return;
     }
