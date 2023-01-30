@@ -178,7 +178,9 @@ export default class DeckPicker {
     if (this._pickable === false) {
       return null;
     }
-    const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
+    const pickableLayers = layers.filter(
+      layer => this.pickLayersPass.shouldDrawLayer(layer) && !layer.isComposite
+    );
     return pickableLayers.length ? pickableLayers : null;
   }
 

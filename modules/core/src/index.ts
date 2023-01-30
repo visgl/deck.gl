@@ -114,6 +114,7 @@ export type {
   AccessorFunction,
   LayerData,
   Unit,
+  Operation,
   Position,
   Color,
   Texture,

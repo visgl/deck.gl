@@ -118,8 +118,8 @@ export default class LayersPass extends Pass {
   protected _getDrawLayerParams(
     viewport: Viewport,
     {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions,
-    /** Internal flag, false if only used to determine whether each layer should be drawn */
-    full: boolean = true
+    /** Internal flag, true if only used to determine whether each layer should be drawn */
+    evaluateShouldDrawOnly: boolean = false
   ): DrawLayerParameters[] {
     const drawLayerParams: DrawLayerParameters[] = [];
     const indexResolver = layerIndexResolver(this._lastRenderIndex + 1);
@@ -145,7 +145,7 @@ export default class LayersPass extends Pass {
         shouldDrawLayer
       };
 
-      if (shouldDrawLayer && full) {
+      if (shouldDrawLayer && !evaluateShouldDrawOnly) {
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
         // It can be the same as another layer
@@ -239,7 +239,7 @@ export default class LayersPass extends Pass {
   /* eslint-enable max-depth, max-statements */
 
   /* Methods for subclass overrides */
-  protected shouldDrawLayer(layer: Layer): boolean {
+  shouldDrawLayer(layer: Layer): boolean {
     return true;
   }
 
@@ -399,9 +399,9 @@ function getGLViewport(
   ];
 }
 
-function clearGLCanvas(gl: WebGLRenderingContext, target?: Framebuffer) {
-  const width = target ? target.width : gl.drawingBufferWidth;
-  const height = target ? target.height : gl.drawingBufferHeight;
+function clearGLCanvas(gl: WebGLRenderingContext, targetFramebuffer?: Framebuffer) {
+  const width = targetFramebuffer ? targetFramebuffer.width : gl.drawingBufferWidth;
+  const height = targetFramebuffer ? targetFramebuffer.height : gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
   setParameters(gl, {viewport: [0, 0, width, height]});
   gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);

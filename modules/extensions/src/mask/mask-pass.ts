@@ -1,5 +1,5 @@
 import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
-import {OPERATION, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
   /** The channel to render into, 0:red, 1:green, 2:blue, 3:alpha */
@@ -57,7 +57,7 @@ export default class MaskPass extends LayersPass {
   }
 
   shouldDrawLayer(layer) {
-    return layer.props.operation.includes(OPERATION.MASK);
+    return layer.props.operation.includes('mask');
   }
 
   delete() {

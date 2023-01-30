@@ -108,7 +108,7 @@ export const EVENTS = {
 } as const;
 
 /**
- * The rendering operation to perform with a layer, used in the `operation` prop
+ * @deprecated Use string constants directly
  */
 export const OPERATION = {
   DRAW: 'draw',

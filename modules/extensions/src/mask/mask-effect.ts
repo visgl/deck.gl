@@ -1,12 +1,4 @@
-import {
-  Layer,
-  Viewport,
-  Effect,
-  PreRenderOptions,
-  OPERATION,
-  CoordinateSystem,
-  log
-} from '@deck.gl/core';
+import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
 import {Texture2D} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
@@ -61,9 +53,7 @@ export default class MaskEffect implements Effect {
       return;
     }
 
-    const maskLayers = layers.filter(
-      l => l.props.visible && l.props.operation.includes(OPERATION.MASK)
-    );
+    const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
       this.masks = null;
       this.channels.length = 0;
