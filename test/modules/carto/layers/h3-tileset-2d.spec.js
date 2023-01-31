@@ -1,6 +1,7 @@
 import test from 'tape-promise/tape';
 import H3Tileset2D from '@deck.gl/carto/layers/h3-tileset-2d';
 import {WebMercatorViewport} from '@deck.gl/core';
+import {equals} from '@math.gl/core';
 
 test('H3Tileset2D', async t => {
   const tileset = new H3Tileset2D({});
@@ -28,16 +29,15 @@ test('H3Tileset2D', async t => {
     'indices in viewport'
   );
   t.equal(tileset.getTileId({i: '82754ffffffffff'}), '82754ffffffffff', 'tile id');
-  t.deepEqual(
-    tileset.getTileMetadata({i: '82754ffffffffff'}),
-    {
-      bbox: {
-        west: -0.8199508788179312,
-        south: -1.855492618547643,
-        east: 1.9211969045935835,
-        north: 0.9361637645983679
-      }
-    },
+  const {bbox} = tileset.getTileMetadata({i: '82754ffffffffff'});
+  const expectedBbox = {
+    west: -0.8199508788179312,
+    south: -1.855492618547643,
+    east: 1.9211969045935835,
+    north: 0.9361637645983679
+  };
+  t.ok(
+    Object.keys(bbox).every(name => equals(bbox[name], expectedBbox[name])),
     'tile metadata'
   );
   t.equal(tileset.getTileZoom({i: '82754ffffffffff'}), 2, 'tile zoom');

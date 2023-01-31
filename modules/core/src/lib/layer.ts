@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {COORDINATE_SYSTEM, OPERATION} from './constants';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -142,7 +142,7 @@ const defaultProps: DefaultProps<LayerProps> = {
   visible: true,
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 1},
-  operation: OPERATION.DRAW,
+  operation: 'draw',
 
   onHover: {type: 'function', value: null, compare: false, optional: true},
   onClick: {type: 'function', value: null, compare: false, optional: true},
@@ -302,7 +302,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     return this.props.wrapLongitude;
   }
 
-  /** Returns true if the layer is visible in the picking pass */
+  /** @deprecated Returns true if the layer is visible in the picking pass */
   isPickable(): boolean {
     return this.props.pickable && this.props.visible;
   }
@@ -1202,7 +1202,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     let redraw: string | false = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
-    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
@@ -1211,6 +1210,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       : false;
     redraw = redraw || attributeManagerNeedsRedraw;
 
+    for (const extension of this.props.extensions) {
+      const extensionNeedsRedraw = extension.getNeedsRedraw.call(this, opts);
+      redraw = redraw || extensionNeedsRedraw;
+    }
+
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
     return redraw;
   }
 
