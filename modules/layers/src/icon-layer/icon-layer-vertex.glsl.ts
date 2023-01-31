@@ -80,6 +80,7 @@ void main(void) {
 
   if (billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
@@ -88,8 +89,8 @@ void main(void) {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     DECKGL_FILTER_SIZE(offset_common, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position); 
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   }
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,

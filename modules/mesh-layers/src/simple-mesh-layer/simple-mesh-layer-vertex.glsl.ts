@@ -43,6 +43,7 @@ void main(void) {
     // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
     // call project_normal before setting position to avoid rotation
     normals_commonspace = project_normal(instanceModelMatrix * normals);
+    geometry.worldPosition += pos;
     gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64Low, vec3(0.0), position_commonspace);
     geometry.position = position_commonspace;
   }
