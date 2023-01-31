@@ -818,7 +818,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     });
     /* eslint-enable accessor-pairs */
 
-    this.internalState.layer = this;
     this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
@@ -857,7 +856,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
 
     // Move internalState
     this.internalState = internalState as LayerState<this>;
-    this.internalState.layer = this;
 
     // Move state
     this.state = state;

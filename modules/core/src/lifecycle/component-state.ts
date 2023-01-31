@@ -20,6 +20,7 @@
 
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {
+  COMPONENT_SYMBOL,
   PROP_TYPES_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
@@ -31,7 +32,7 @@ import {PropType} from './prop-types';
 const EMPTY_PROPS = Object.freeze({});
 
 type AsyncPropState = {
-  type: PropType;
+  type: PropType | null;
   lastValue: any;
   resolvedValue: any;
   pendingLoadCount: number;
@@ -39,7 +40,8 @@ type AsyncPropState = {
 };
 
 export default class ComponentState<ComponentT extends Component> {
-  component: ComponentT;
+  /** The component that this state instance belongs to. `null` if this state has been finalized. */
+  component: ComponentT | null;
   onAsyncPropUpdated: (propName: string, value: any) => void;
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;
@@ -66,6 +68,9 @@ export default class ComponentState<ComponentT extends Component> {
         );
       }
     }
+    this.asyncProps = {};
+    this.component = null;
+    this.resetOldProps();
   }
 
   /* Layer-facing props API */
@@ -76,7 +81,7 @@ export default class ComponentState<ComponentT extends Component> {
 
   resetOldProps() {
     this.oldAsyncProps = null;
-    this.oldProps = this.component.props;
+    this.oldProps = this.component ? this.component.props : null;
   }
 
   // Checks if a prop is overridden
@@ -115,6 +120,8 @@ export default class ComponentState<ComponentT extends Component> {
   // Updates all async/overridden props (when new props come in)
   // Checks if urls have changed, starts loading, or removes override
   setAsyncProps(props: ComponentT['props']) {
+    this.component = (props[COMPONENT_SYMBOL] as ComponentT) || this.component;
+
     // NOTE: prop param and default values are only support for testing
     const resolvedValues = props[ASYNC_RESOLVED_SYMBOL] || {};
     const originalValues = props[ASYNC_ORIGINAL_SYMBOL] || props;
@@ -240,6 +247,10 @@ export default class ComponentState<ComponentT extends Component> {
       const loadCount = asyncProp.pendingLoadCount;
       promise
         .then(data => {
+          if (!this.component) {
+            // This component state has been finalized
+            return;
+          }
           data = this._postProcessValue(asyncProp, data);
           this._setAsyncPropValue(propName, data, loadCount);
           this._onResolve(propName, data);
@@ -271,6 +282,11 @@ export default class ComponentState<ComponentT extends Component> {
     let count = 0;
 
     for await (const chunk of iterable) {
+      if (!this.component) {
+        // This component state has been finalized
+        return;
+      }
+
       // @ts-expect-error (2339) dataTransform is not decared in base component props
       const {dataTransform} = this.component.props;
       if (dataTransform) {
@@ -293,9 +309,9 @@ export default class ComponentState<ComponentT extends Component> {
   }
 
   // Give the app a chance to post process the loaded data
-  private _postProcessValue(asyncProp, value: any) {
+  private _postProcessValue(asyncProp: AsyncPropState, value: any) {
     const propType = asyncProp.type;
-    if (propType) {
+    if (propType && this.component) {
       if (propType.release) {
         propType.release(asyncProp.resolvedValue, propType, this.component);
       }
