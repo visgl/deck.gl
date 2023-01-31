@@ -1,8 +1,8 @@
-import {GeoJsonLayer, ColumnLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainExtension} from '@deck.gl/extensions';
 
-import {points, choropleths} from 'deck.gl-test/data';
+import {points, choropleths, iconAtlas as iconMapping} from 'deck.gl-test/data';
 
 const ELEVATION_DATA = './test/data/terrain-tiles/{z}/{x}/{y}.png';
 const TEXTURE = './test/data/raster-tiles/{z}/{x}/{y}.png';
@@ -81,13 +81,14 @@ export default [
         getFillColor: (_, {index}) => [(index % 3) * 60 + 60, (index % 2) * 64 + 128, 200],
         extensions: [new TerrainExtension()]
       }),
-      new ColumnLayer({
+      new IconLayer({
         data: points,
-        radius: 100,
-        extruded: true,
+        iconAtlas: './test/data/icon-atlas.png',
+        iconMapping,
+        sizeScale: 12,
         getPosition: d => d.COORDINATES,
-        getElevation: d => d.SPACES * 100,
-        getColor: [0, 128, 255, 200],
+        getIcon: d => 'marker-warning',
+        getSize: d => (d.PLACEMENT === 'SW' ? 0 : 2),
         extensions: [new TerrainExtension()]
       })
     ],
