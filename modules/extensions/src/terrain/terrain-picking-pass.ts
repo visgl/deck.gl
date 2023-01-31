@@ -4,14 +4,14 @@ import {
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
-import type {default as TerrainCover} from './terrain-cover';
+import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
 };
 
 /** Renders textures used by the TerrainEffect picking pass */
-export default class TerrainCoverPass extends PickLayersPass {
+export class TerrainPickingPass extends PickLayersPass {
   /** Save layer index for use when drawing to terrain cover.
    * When a terrain cover's picking buffer is rendered,
    * we need to make sure each layer receives a consistent index (encoded in the alpha channel)
@@ -42,7 +42,7 @@ export default class TerrainCoverPass extends PickLayersPass {
     if (layers.length === 0) return;
 
     // console.log('Updating terrain cover for picking ' + terrainCover.id)
-    const target = terrainCover.pickingTexture;
+    const target = terrainCover.getPickingFramebuffer();
     const viewport = terrainCover.renderViewport;
 
     if (!target || !viewport) {

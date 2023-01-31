@@ -1,6 +1,6 @@
 import {withParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
-import type {default as TerrainCover} from './terrain-cover';
+import type {TerrainCover} from './terrain-cover';
 import type {Framebuffer} from '@luma.gl/core';
 
 import GL from '@luma.gl/constants';
@@ -8,7 +8,7 @@ import GL from '@luma.gl/constants';
 export type TerrainPassRenderOptions = LayersPassRenderOptions;
 
 /** Renders textures used by the TerrainEffect render pass */
-export default class TerrainCoverPass extends LayersPass {
+export class TerrainPass extends LayersPass {
   getRenderableLayers(viewport: Viewport, opts: TerrainPassRenderOptions): Layer[] {
     const {layers} = opts;
     const result: Layer[] = [];
@@ -43,7 +43,7 @@ export default class TerrainCoverPass extends LayersPass {
     if (layers.length === 0) return;
 
     // console.log('Updating terrain cover ' + terrainCover.id)
-    const target = terrainCover.renderTexture;
+    const target = terrainCover.getRenderFramebuffer();
     const viewport = terrainCover.renderViewport;
 
     if (!target || !viewport) {

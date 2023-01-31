@@ -1,17 +1,16 @@
 import {Texture2D, ProgramManager, Framebuffer} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
-import shaderModule from './shader-module';
-import TerrainCover from './terrain-cover';
-import TerrainPass from './terrain-pass';
-import TerrainPickingPass, {TerrainPickingPassRenderOptions} from './terrain-picking-pass';
+import {terrainModule, TerrainModuleSettings} from './shader-module';
+import {TerrainCover} from './terrain-cover';
+import {TerrainPass} from './terrain-pass';
+import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
 import {createRenderTarget} from './utils';
 
-import type {TerrainModuleSettings} from './shader-module';
 import type {Effect, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
 /** Class to manage terrain effect */
-export default class TerrainEffect implements Effect {
+export class TerrainEffect implements Effect {
   id = 'terrain-effect';
   props = null;
   useInPicking = true;
@@ -43,7 +42,7 @@ export default class TerrainEffect implements Effect {
       }
     }
 
-    ProgramManager.getDefaultProgramManager(gl).addDefaultModule(shaderModule);
+    ProgramManager.getDefaultProgramManager(gl).addDefaultModule(terrainModule);
   }
 
   preRender(gl: WebGLRenderingContext, opts: PreRenderOptions): void {
@@ -93,9 +92,9 @@ export default class TerrainEffect implements Effect {
     if (!terrainCover) {
       terrainCoverTexture = null;
     } else if (this.isPicking) {
-      terrainCoverTexture = terrainCover.pickingTexture;
+      terrainCoverTexture = terrainCover.getPickingFramebuffer();
     } else {
-      terrainCoverTexture = terrainCover.renderTexture;
+      terrainCoverTexture = terrainCover.getRenderFramebuffer();
     }
 
     return {
@@ -203,7 +202,7 @@ export default class TerrainEffect implements Effect {
     }
     try {
       const isDirty = terrainCover.shouldUpdate({
-        owner: terrainLayer,
+        targetLayer: terrainLayer,
         viewport,
         layers: drapeLayers
       });

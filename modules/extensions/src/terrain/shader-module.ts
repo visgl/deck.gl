@@ -2,6 +2,7 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/core';
 
+/** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
   pickingActive?: boolean;
   heightMap: Texture2D | null;
@@ -30,9 +31,9 @@ const TERRAIN_MODE = {
 
 const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
-  .join('');
+  .join('\n');
 
-export default {
+export const terrainModule = {
   name: 'terrain',
   inject: {
     'vs:#decl': `

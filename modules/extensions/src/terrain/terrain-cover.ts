@@ -18,46 +18,46 @@ type Tile2DHeader = {
 };
 
 /** Class to manage draped texture for each terrain layer */
-export default class TerrainCover {
+export class TerrainCover {
   private fbo?: Framebuffer;
   private pickingFbo?: Framebuffer;
   private zoom: number = 0;
   private bounds: [number[], number[]] | null = null;
   private layers: string[] = [];
   private tile: Tile2DHeader | null;
+  private targetLayer: Layer;
 
   isDirty: boolean = true;
-  owner: Layer;
   renderViewport: Viewport | null = null;
   commonBounds: [number[], number[]] | null = null;
 
-  constructor(owner: Layer) {
-    this.owner = owner;
-    this.tile = getTile(owner);
+  constructor(targetLayer: Layer) {
+    this.targetLayer = targetLayer;
+    this.tile = getTile(targetLayer);
   }
 
   get id() {
-    return this.owner.id;
+    return this.targetLayer.id;
   }
 
   get isActive(): boolean {
-    const owner = this.owner.getCurrentLayer();
-    return owner !== null && !owner.lifecycle.startsWith('Finalized');
+    const targetLayer = this.targetLayer.getCurrentLayer();
+    return targetLayer !== null && !targetLayer.lifecycle.startsWith('Finalized');
   }
 
   shouldUpdate({
-    owner,
+    targetLayer,
     viewport,
     layers,
     layerNeedsRedraw
   }: {
-    owner?: Layer;
+    targetLayer?: Layer;
     viewport?: Viewport;
     layers?: Layer[];
     layerNeedsRedraw?: Record<string, boolean>;
   }): boolean {
-    if (owner) {
-      this.owner = owner;
+    if (targetLayer) {
+      this.targetLayer = targetLayer;
     }
     const sizeChanged = viewport ? this._updateViewport(viewport) : false;
 
@@ -79,7 +79,7 @@ export default class TerrainCover {
   /** Compare layers with the last version. Only rerender if necessary. */
   private _updateLayers(layers: Layer[]): boolean {
     let needsRedraw = false;
-    layers = getIntersectingLayers(this.tile, layers);
+    layers = this.tile ? getIntersectingLayers(this.tile, layers) : layers;
 
     if (layers.length !== this.layers.length) {
       needsRedraw = true;
@@ -102,9 +102,9 @@ export default class TerrainCover {
 
   /** Compare viewport and terrain bounds with the last version. Only rerender if necesary. */
   private _updateViewport(viewport: Viewport): boolean {
-    const owner = this.owner;
+    const targetLayer = this.targetLayer;
     let needsRedraw = false;
-    const newBounds = owner.getBounds();
+    const newBounds = targetLayer.getBounds();
     if (
       // The terrain layer's bounds has changed
       this.bounds !== newBounds ||
@@ -119,35 +119,35 @@ export default class TerrainCover {
     }
 
     if (newBounds) {
-      const leftBottomCommon = owner.projectPosition(newBounds[0], {viewport});
-      const topRightCommon = owner.projectPosition(newBounds[1], {viewport});
+      const leftBottomCommon = targetLayer.projectPosition(newBounds[0], {viewport});
+      const topRightCommon = targetLayer.projectPosition(newBounds[1], {viewport});
       this.commonBounds = [leftBottomCommon, topRightCommon];
     } else {
       this.commonBounds = null;
     }
 
     if (needsRedraw) {
-      this.renderViewport = getRenderViewport(owner, this.zoom, viewport.isGeospatial);
+      this.renderViewport = getRenderViewport(targetLayer, this.zoom, viewport.isGeospatial);
     }
     return needsRedraw;
   }
 
-  get renderTexture(): Framebuffer | null {
+  getRenderFramebuffer(): Framebuffer | null {
     if (!this.renderViewport || this.layers.length === 0) {
       return null;
     }
     if (!this.fbo) {
-      this.fbo = createRenderTarget(this.owner.context.gl, {id: this.id});
+      this.fbo = createRenderTarget(this.targetLayer.context.gl, {id: this.id});
     }
     return this.fbo;
   }
 
-  get pickingTexture(): Framebuffer | null {
+  getPickingFramebuffer(): Framebuffer | null {
     if (!this.renderViewport || this.layers.length === 0) {
       return null;
     }
     if (!this.pickingFbo) {
-      this.pickingFbo = createRenderTarget(this.owner.context.gl, {id: `${this.id}-picking`});
+      this.pickingFbo = createRenderTarget(this.targetLayer.context.gl, {id: `${this.id}-picking`});
     }
     return this.pickingFbo;
   }
@@ -169,8 +169,8 @@ export default class TerrainCover {
   }
 }
 
+/** Construct a viewport that just covers the target layer's bounds */
 function getRenderViewport(layer: Layer, zoom: number, isGeospatial: boolean): Viewport | null {
-  // Construct a viewport that just covers the owner layer's bounds
   const bounds = layer.getBounds();
   if (!bounds) {
     return null;
@@ -211,28 +211,25 @@ function getRenderViewport(layer: Layer, zoom: number, isGeospatial: boolean): V
  * Remove layers that do not overlap with the current terrain cover.
  * This implementation only has effect when a TileLayer is overlaid on top of a TileLayer
  */
-function getIntersectingLayers(sourceTile: Tile2DHeader | null, layers: Layer[]): Layer[] {
-  if (sourceTile) {
-    return layers.filter(layer => {
-      const tile = getTile(layer);
-      if (tile) {
-        return intersect(sourceTile.bbox, tile.bbox);
-      }
-      return true;
-    });
-  }
-  return layers;
+function getIntersectingLayers(sourceTile: Tile2DHeader, layers: Layer[]): Layer[] {
+  return layers.filter(layer => {
+    const tile = getTile(layer);
+    if (tile) {
+      return intersect(sourceTile.bbox, tile.bbox);
+    }
+    return true;
+  });
 }
 
 /** If layer is the descendent of a TileLayer, return the corresponding tile. */
-function getTile(layer: Layer | null): Tile2DHeader | null {
+function getTile(layer: Layer): Tile2DHeader | null {
   while (layer) {
     // @ts-expect-error tile may not exist
     const {tile} = layer.props;
     if (tile) {
       return tile;
     }
-    layer = layer.parent;
+    layer = layer.parent as Layer;
   }
   return null;
 }
