@@ -46,7 +46,7 @@ export default class TerrainCover {
   }
 
   shouldUpdate({
-    owner = this.owner,
+    owner,
     viewport,
     layers,
     layerNeedsRedraw
@@ -56,57 +56,12 @@ export default class TerrainCover {
     layers?: Layer[];
     layerNeedsRedraw?: Record<string, boolean>;
   }): boolean {
-    let sizeChanged = false;
-    if (viewport) {
-      const newBounds = owner.getBounds();
-      if (
-        // The terrain layer's bounds has changed
-        this.bounds !== newBounds ||
-        // If the terrain layer is not bound to a tile, increase texture size based on zoom
-        (!this.tile && Math.abs(viewport.zoom - this.zoom) >= 1)
-      ) {
-        sizeChanged = true;
-        // console.log('bounds changed', this.bounds, '>>', newBounds);
-        this.bounds = newBounds;
-        // console.log('zoom changed', this.zoom, '>>', Math.ceil(viewport.zoom));
-        this.zoom = Math.ceil(viewport.zoom);
-      }
-
-      if (newBounds) {
-        const leftBottomCommon = owner.projectPosition(newBounds[0], {viewport});
-        const topRightCommon = owner.projectPosition(newBounds[1], {viewport});
-        this.commonBounds = [leftBottomCommon, topRightCommon];
-      } else {
-        this.commonBounds = null;
-      }
-
-      if (sizeChanged) {
-        this.renderViewport = getRenderViewport(owner, this.zoom, viewport.isGeospatial);
-      }
+    if (owner) {
+      this.owner = owner;
     }
+    const sizeChanged = viewport ? this._updateViewport(viewport) : false;
 
-    // Compare viewport, layers and bounds with the last version. Only rerender if necesary.
-    let layersChanged = false;
-    if (layers) {
-      layers = getIntersectingLayers(this.tile, layers);
-
-      if (layers.length !== this.layers.length) {
-        layersChanged = true;
-        // console.log('layers count changed', this.layers.length, '>>', layers.length);
-      } else {
-        for (let i = 0; i < layers.length; i++) {
-          const id = layers[i].id;
-          if (id !== this.layers[i]) {
-            layersChanged = true;
-            // console.log('layer added/removed', id);
-            break;
-          }
-        }
-      }
-      if (layersChanged) {
-        this.layers = layers.map(layer => layer.id);
-      }
-    }
+    let layersChanged = layers ? this._updateLayers(layers) : false;
 
     if (layerNeedsRedraw) {
       for (const id of this.layers) {
@@ -119,6 +74,62 @@ export default class TerrainCover {
     }
 
     return layersChanged || sizeChanged;
+  }
+
+  /** Compare layers with the last version. Only rerender if necessary. */
+  private _updateLayers(layers: Layer[]): boolean {
+    let needsRedraw = false;
+    layers = getIntersectingLayers(this.tile, layers);
+
+    if (layers.length !== this.layers.length) {
+      needsRedraw = true;
+      // console.log('layers count changed', this.layers.length, '>>', layers.length);
+    } else {
+      for (let i = 0; i < layers.length; i++) {
+        const id = layers[i].id;
+        if (id !== this.layers[i]) {
+          needsRedraw = true;
+          // console.log('layer added/removed', id);
+          break;
+        }
+      }
+    }
+    if (needsRedraw) {
+      this.layers = layers.map(layer => layer.id);
+    }
+    return needsRedraw;
+  }
+
+  /** Compare viewport and terrain bounds with the last version. Only rerender if necesary. */
+  private _updateViewport(viewport: Viewport): boolean {
+    const owner = this.owner;
+    let needsRedraw = false;
+    const newBounds = owner.getBounds();
+    if (
+      // The terrain layer's bounds has changed
+      this.bounds !== newBounds ||
+      // If the terrain layer is not bound to a tile, increase texture size based on zoom
+      (!this.tile && Math.abs(viewport.zoom - this.zoom) >= 1)
+    ) {
+      needsRedraw = true;
+      // console.log('bounds changed', this.bounds, '>>', newBounds);
+      this.bounds = newBounds;
+      // console.log('zoom changed', this.zoom, '>>', Math.ceil(viewport.zoom));
+      this.zoom = Math.ceil(viewport.zoom);
+    }
+
+    if (newBounds) {
+      const leftBottomCommon = owner.projectPosition(newBounds[0], {viewport});
+      const topRightCommon = owner.projectPosition(newBounds[1], {viewport});
+      this.commonBounds = [leftBottomCommon, topRightCommon];
+    } else {
+      this.commonBounds = null;
+    }
+
+    if (needsRedraw) {
+      this.renderViewport = getRenderViewport(owner, this.zoom, viewport.isGeospatial);
+    }
+    return needsRedraw;
   }
 
   get renderTexture(): Framebuffer | null {

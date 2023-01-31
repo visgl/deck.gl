@@ -122,6 +122,8 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         sampler = terrainCover;
       }
 
+      /* eslint-disable camelcase */
+
       return {
         terrain_mode: mode,
         terrain_map: sampler,

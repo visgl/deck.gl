@@ -83,10 +83,6 @@ export default class TerrainEffect implements Effect {
 
     const drapeLayers = layers.filter(l => l.state.terrainFittingMode === 'drape');
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
-
-    if (!isPicking) {
-      this._pruneTerrainCovers();
-    }
   }
 
   getModuleParameters(layer: Layer): TerrainModuleSettings {
@@ -184,30 +180,47 @@ export default class TerrainEffect implements Effect {
       terrainCover.isDirty = terrainCover.isDirty || terrainCover.shouldUpdate({layerNeedsRedraw});
     }
 
-    const renderPass = this.isPicking ? this.terrainPickingPass : this.terrainPass;
     for (const layer of terrainLayers) {
-      let terrainCover = this.terrainCovers.get(layer.id);
-      if (!terrainCover) {
-        terrainCover = new TerrainCover(layer);
-        this.terrainCovers.set(layer.id, terrainCover);
+      this._updateTerrainCover(layer, drapeLayers, viewport, opts);
+    }
+
+    if (!this.isPicking) {
+      this._pruneTerrainCovers();
+    }
+  }
+
+  private _updateTerrainCover(
+    terrainLayer: Layer,
+    drapeLayers: Layer[],
+    viewport: Viewport,
+    opts: PreRenderOptions
+  ) {
+    const renderPass = this.isPicking ? this.terrainPickingPass : this.terrainPass;
+    let terrainCover = this.terrainCovers.get(terrainLayer.id);
+    if (!terrainCover) {
+      terrainCover = new TerrainCover(terrainLayer);
+      this.terrainCovers.set(terrainLayer.id, terrainCover);
+    }
+    try {
+      const isDirty = terrainCover.shouldUpdate({
+        owner: terrainLayer,
+        viewport,
+        layers: drapeLayers
+      });
+      if (this.isPicking || terrainCover.isDirty || isDirty) {
+        renderPass.renderTerrainCover(terrainCover, {
+          ...opts,
+          layers: drapeLayers,
+          moduleParameters: {
+            dummyHeightMap: this.dummyHeightMap,
+            terrainSkipRender: false,
+            devicePixelRatio: 1
+          }
+        });
+        terrainCover.isDirty = false;
       }
-      try {
-        const isDirty = terrainCover.shouldUpdate({owner: layer, viewport, layers: drapeLayers});
-        if (this.isPicking || terrainCover.isDirty || isDirty) {
-          renderPass.renderTerrainCover(terrainCover, {
-            ...opts,
-            layers: drapeLayers,
-            moduleParameters: {
-              dummyHeightMap: this.dummyHeightMap,
-              terrainSkipRender: false,
-              devicePixelRatio: 1
-            }
-          });
-          terrainCover.isDirty = false;
-        }
-      } catch (err) {
-        layer.raiseError(err as Error, `Error rendering terrain cover ${terrainCover.id}`);
-      }
+    } catch (err) {
+      terrainLayer.raiseError(err as Error, `Error rendering terrain cover ${terrainCover.id}`);
     }
   }
 
