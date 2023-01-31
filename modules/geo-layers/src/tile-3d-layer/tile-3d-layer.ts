@@ -114,6 +114,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.data && props.data !== oldProps.data) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._loadTileset(props.data);
     }
 
@@ -235,6 +236,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
     if (!timeline || !viewportsNumber || !tileset3d) {
       return;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     tileset3d.selectTiles(Object.values(viewports)).then(frameNumber => {
       const tilesetChanged = this.state.frameNumber !== frameNumber;
       if (tilesetChanged) {

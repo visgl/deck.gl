@@ -178,12 +178,14 @@ export default class DeckPicker {
     if (this._pickable === false) {
       return null;
     }
-    const pickableLayers = layers.filter(layer => layer.isPickable() && !layer.isComposite);
+    const pickableLayers = layers.filter(
+      layer => this.pickLayersPass.shouldDrawLayer(layer) && !layer.isComposite
+    );
     return pickableLayers.length ? pickableLayers : null;
   }
 
-  // eslint-disable-next-line max-statements,complexity
   /** Pick the closest object at the given coordinate */
+  // eslint-disable-next-line max-statements,complexity
   _pickClosestObject({
     layers,
     views,
@@ -481,8 +483,7 @@ export default class DeckPicker {
     decodePickingColor: PickingColorDecoder | null;
   } {
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
-
-    const {decodePickingColor} = this.pickLayersPass.render({
+    const opts = {
       layers,
       layerFilter: this.layerFilter,
       views,
@@ -494,7 +495,15 @@ export default class DeckPicker {
       effects,
       pass,
       pickZ
-    });
+    };
+
+    for (const effect of effects) {
+      if (effect.useInPicking) {
+        effect.preRender(this.gl, opts);
+      }
+    }
+
+    const {decodePickingColor} = this.pickLayersPass.render(opts);
 
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels

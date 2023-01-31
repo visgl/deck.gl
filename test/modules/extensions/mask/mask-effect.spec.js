@@ -40,6 +40,7 @@ test('MaskEffect#cleanup', t => {
   layerManager.updateLayers();
 
   maskEffect.preRender(gl, {
+    pass: 'screen',
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport]
@@ -79,6 +80,7 @@ test('MaskEffect#update', t => {
     layerManager.updateLayers();
 
     maskEffect.preRender(gl, {
+      pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       viewports: [testViewport]
@@ -146,6 +148,7 @@ test('MaskEffect#coordinates', t => {
     layerManager.updateLayers();
 
     maskEffect.preRender(gl, {
+      pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       viewports: [testViewport]

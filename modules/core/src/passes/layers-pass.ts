@@ -15,7 +15,7 @@ export type LayersPassRenderOptions = {
   pass: string;
   layers: Layer[];
   viewports: Viewport[];
-  onViewportActive: (viewport: Viewport) => void;
+  onViewportActive?: (viewport: Viewport) => void;
   cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
@@ -73,7 +73,7 @@ export default class LayersPass extends Pass {
 
     const gl = this.gl;
     if (clearCanvas) {
-      clearGLCanvas(gl);
+      clearGLCanvas(gl, target);
     }
 
     if (clearStack) {
@@ -86,7 +86,7 @@ export default class LayersPass extends Pass {
       const view = views && views[viewport.id];
 
       // Update context to point to this viewport
-      onViewportActive(viewport);
+      onViewportActive?.(viewport);
 
       const drawLayerParams = this._getDrawLayerParams(viewport, options);
 
@@ -112,12 +112,14 @@ export default class LayersPass extends Pass {
     return renderStats;
   }
 
-  // Resolve the parameters needed to draw each layer
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
   // this is only done once for the parent viewport
-  private _getDrawLayerParams(
+  /* Resolve the parameters needed to draw each layer */
+  protected _getDrawLayerParams(
     viewport: Viewport,
-    {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions
+    {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions,
+    /** Internal flag, true if only used to determine whether each layer should be drawn */
+    evaluateShouldDrawOnly: boolean = false
   ): DrawLayerParameters[] {
     const drawLayerParams: DrawLayerParameters[] = [];
     const indexResolver = layerIndexResolver(this._lastRenderIndex + 1);
@@ -143,7 +145,7 @@ export default class LayersPass extends Pass {
         shouldDrawLayer
       };
 
-      if (shouldDrawLayer) {
+      if (shouldDrawLayer && !evaluateShouldDrawOnly) {
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
         // It can be the same as another layer
@@ -237,7 +239,7 @@ export default class LayersPass extends Pass {
   /* eslint-enable max-depth, max-statements */
 
   /* Methods for subclass overrides */
-  protected shouldDrawLayer(layer: Layer): boolean {
+  shouldDrawLayer(layer: Layer): boolean {
     return true;
   }
 
@@ -397,9 +399,9 @@ function getGLViewport(
   ];
 }
 
-function clearGLCanvas(gl: WebGLRenderingContext) {
-  const width = gl.drawingBufferWidth;
-  const height = gl.drawingBufferHeight;
+function clearGLCanvas(gl: WebGLRenderingContext, targetFramebuffer?: Framebuffer) {
+  const width = targetFramebuffer ? targetFramebuffer.width : gl.drawingBufferWidth;
+  const height = targetFramebuffer ? targetFramebuffer.height : gl.drawingBufferHeight;
   // clear depth and color buffers, restoring transparency
   setParameters(gl, {viewport: [0, 0, width, height]});
   gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);

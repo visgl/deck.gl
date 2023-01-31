@@ -94,7 +94,7 @@ export function separateGeojsonFeatures(
 
     if (!geometry) {
       // geometry can be null per specification
-      continue;
+      continue; // eslint-disable-line no-continue
     }
 
     if (geometry.type === 'GeometryCollection') {
