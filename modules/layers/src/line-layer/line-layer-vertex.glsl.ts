@@ -110,8 +110,8 @@ void main(void) {
     getExtrusionOffset(target.xy - source.xy, positions.y, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+  DECKGL_FILTER_GL_POSITION(p, geometry);
   gl_Position = p + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Color
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
