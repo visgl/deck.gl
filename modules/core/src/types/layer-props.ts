@@ -1,4 +1,4 @@
-import type {CoordinateSystem} from '../lib/constants';
+import type {CoordinateSystem, OPERATION} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
@@ -8,6 +8,8 @@ import type {MjolnirEvent} from 'mjolnir.js';
 import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib';
+
+type ValuesOf<T extends {}> = T[keyof T];
 
 export type LayerData<T> =
   | Iterable<T>
@@ -61,9 +63,6 @@ export type Material = LightingModuleSettings['material'];
  * See https://deck.gl/docs/developer-guide/coordinate-systems#dimensions
  */
 export type Unit = 'meters' | 'common' | 'pixels';
-
-/** Rendering operation of the layer. */
-export type Operation = 'draw' | 'mask' | 'terrain';
 
 export type Texture =
   | Texture2D
@@ -125,9 +124,9 @@ export type LayerProps<DataType = any> = {
    */
   updateTriggers?: Record<string, any>;
   /**
-   * Rendering operation of the layer. `+` separated list of names.
+   * The purpose of the layer
    */
-  operation?: Operation | `${Operation}+${Operation}`;
+  operation?: ValuesOf<typeof OPERATION>;
   /**
    * If the layer should be rendered. Default true.
    */

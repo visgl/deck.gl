@@ -28,7 +28,9 @@ type Channel = {
 export default class MaskEffect implements Effect {
   id = 'mask-effect';
   props = null;
+  useInCollide = true;
   useInPicking = true;
+  didRender = false;
 
   private dummyMaskMap?: Texture2D;
   private channels: (Channel | null)[] = [];
@@ -47,6 +49,7 @@ export default class MaskEffect implements Effect {
         height: 1
       });
     }
+    this.didRender = false;
 
     if (pass.startsWith('picking')) {
       // Do not update on picking pass
@@ -174,6 +177,8 @@ export default class MaskEffect implements Effect {
             devicePixelRatio: 1
           }
         });
+
+        this.didRender = true;
       }
     }
 

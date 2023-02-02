@@ -638,8 +638,8 @@ export default class Deck {
   /** Experimental
    * Register a default effect
    */
-  _addDefaultEffect(effect: Effect) {
-    this.effectManager!.addDefaultEffect(effect);
+  _addDefaultEffect(effect: Effect, slot: number) {
+    this.effectManager!.addDefaultEffect(effect, slot);
   }
 
   // Private Methods

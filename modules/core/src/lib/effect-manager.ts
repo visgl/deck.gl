@@ -1,3 +1,4 @@
+import assert from '../utils/assert';
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
 import type {Effect} from './effect';
@@ -16,9 +17,10 @@ export default class EffectManager {
     this._setEffects([]);
   }
 
-  addDefaultEffect(effect: Effect) {
-    if (!this._defaultEffects.find(e => e.constructor === effect.constructor)) {
-      this._defaultEffects.push(effect);
+  addDefaultEffect(effect: Effect, slot: number) {
+    if (!this._defaultEffects.filter(Boolean).find(e => e.constructor === effect.constructor)) {
+      assert(!this._defaultEffects[slot], 'Tried to insert default effect into occupied slot');
+      this._defaultEffects[slot] = effect;
       this._setEffects(this.effects);
     }
   }
@@ -74,7 +76,7 @@ export default class EffectManager {
     }
     this.effects = nextEffects;
 
-    this._resolvedEffects = nextEffects.concat(this._defaultEffects);
+    this._resolvedEffects = nextEffects.concat(this._defaultEffects.filter(Boolean));
     // Special case for lighting: only add default instance if no LightingEffect is specified
     if (!effects.some(effect => effect instanceof LightingEffect)) {
       this._resolvedEffects.push(DEFAULT_LIGHTING_EFFECT);

@@ -1,8 +1,7 @@
-import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
+import EffectOrder from '../effect-order';
 import mask from './shader-module';
 import MaskEffect from './mask-effect';
-
-import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
   maskId: '',
@@ -33,7 +32,7 @@ export default class MaskExtension extends LayerExtension {
   static extensionName = 'MaskExtension';
 
   initializeState(this: Layer<MaskExtensionProps>) {
-    this.context.deck?._addDefaultEffect(new MaskEffect());
+    this.context.deck?._addDefaultEffect(new MaskEffect(), EffectOrder.MaskEffect);
   }
 
   getShaders(this: Layer<MaskExtensionProps>): any {

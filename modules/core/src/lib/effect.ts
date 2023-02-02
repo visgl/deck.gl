@@ -11,7 +11,9 @@ export type PostRenderOptions = LayersPassRenderOptions & {
 export interface Effect {
   id: string;
   props: any;
+  useInCollide?: boolean;
   useInPicking?: boolean;
+  didRender?: boolean;
 
   preRender: (gl: WebGLRenderingContext, opts: PreRenderOptions) => void;
   postRender?: (gl: WebGLRenderingContext, opts: PostRenderOptions) => Framebuffer;
