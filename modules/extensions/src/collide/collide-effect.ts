@@ -164,6 +164,8 @@ export default class CollideEffect implements Effect {
           id: collideGroup,
           dummyCollideMap: this.dummyCollideMap
         });
+      }
+      if (!this.channels[collideGroup]) {
         this.channels[collideGroup] = channelMap[collideGroup];
       }
     }
