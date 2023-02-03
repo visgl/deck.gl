@@ -28,7 +28,6 @@ type Channel = {
 export default class MaskEffect implements Effect {
   id = 'mask-effect';
   props = null;
-  useInCollide = true;
   useInPicking = true;
   didRender = false;
 

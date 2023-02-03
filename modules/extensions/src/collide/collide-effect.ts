@@ -2,6 +2,7 @@ import {Texture2D, cssToDeviceRatio} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollidePass from './collide-pass';
+import MaskEffect from '../mask/mask-effect';
 
 type CollideExtensionProps = {
   collideTestProps?: {};
@@ -48,7 +49,8 @@ export default class CollideEffect implements Effect {
       return;
     }
 
-    const effects = allEffects?.filter(({useInCollide}) => useInCollide);
+    // Detect if mask has rendered. TODO: better dependency system for Effects
+    const effects = allEffects?.filter(e => e.constructor === MaskEffect);
     const otherEffectRendered = Boolean(
       effects && effects.filter(({didRender}) => didRender).length
     );

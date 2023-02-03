@@ -11,7 +11,6 @@ export type PostRenderOptions = LayersPassRenderOptions & {
 export interface Effect {
   id: string;
   props: any;
-  useInCollide?: boolean;
   useInPicking?: boolean;
   didRender?: boolean;
 
