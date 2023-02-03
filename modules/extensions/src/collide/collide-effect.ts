@@ -1,4 +1,4 @@
-import {Texture2D, cssToDeviceRatio} from '@luma.gl/core';
+import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
@@ -27,6 +27,7 @@ export default class CollideEffect implements Effect {
 
   private channels: Record<string, RenderInfo> = {};
   private collidePasses: Record<string, CollidePass> = {};
+  private collideFBOs: Record<string, Framebuffer> = {};
   private dummyCollideMap?: Texture2D;
   private lastViewport?: Viewport;
 
@@ -62,9 +63,10 @@ export default class CollideEffect implements Effect {
 
     // Resize framebuffers to match canvas
     for (const collideGroup in channels) {
+      const collideFBO = this.collideFBOs[collideGroup];
       const collidePass = this.collidePasses[collideGroup];
       const renderInfo = channels[collideGroup];
-      collidePass.fbo.resize({
+      collideFBO.resize({
         width: gl.canvas.width / DOWNSCALE,
         height: gl.canvas.height / DOWNSCALE
       });
@@ -97,7 +99,8 @@ export default class CollideEffect implements Effect {
       viewportChanged: boolean;
     }
   ) {
-    const oldRenderInfo = this.channels[renderInfo.collideGroup];
+    const {collideGroup} = renderInfo;
+    const oldRenderInfo = this.channels[collideGroup];
     if (!oldRenderInfo) {
       return;
     }
@@ -110,15 +113,16 @@ export default class CollideEffect implements Effect {
       // If a sublayer's bounds have been updated
       renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i]));
 
-    this.channels[renderInfo.collideGroup] = renderInfo;
+    this.channels[collideGroup] = renderInfo;
 
     if (renderInfoUpdated || viewportChanged) {
       this.lastViewport = viewport;
-      const collidePass = this.collidePasses[renderInfo.collideGroup];
+      const collideFBO = this.collideFBOs[collideGroup];
+      const collidePass = this.collidePasses[collideGroup];
 
       // Rerender collide FBO
       // @ts-ignore (2532) This method is only called from preRender where collidePass is defined
-      collidePass.render({
+      collidePass.renderCollideMap(collideFBO, {
         pass: 'collide',
         layers: renderInfo.layers,
         effects,
@@ -127,7 +131,7 @@ export default class CollideEffect implements Effect {
         onViewportActive,
         views,
         moduleParameters: {
-          devicePixelRatio: cssToDeviceRatio(collidePass.gl) / DOWNSCALE
+          devicePixelRatio: cssToDeviceRatio(collideFBO.gl) / DOWNSCALE
         }
       });
     }
@@ -160,31 +164,24 @@ export default class CollideEffect implements Effect {
     // Create any new passes and remove any old ones
     for (const collideGroup of Object.keys(channelMap)) {
       if (!this.collidePasses[collideGroup]) {
-        this.collidePasses[collideGroup] = new CollidePass(gl, {
-          id: collideGroup,
-          dummyCollideMap: this.dummyCollideMap
-        });
+        this.createPass(gl, collideGroup);
       }
       if (!this.channels[collideGroup]) {
         this.channels[collideGroup] = channelMap[collideGroup];
       }
     }
-    for (const [collideGroup, collidePass] of Object.entries(this.collidePasses)) {
+    for (const collideGroup of Object.keys(this.collidePasses)) {
       if (!channelMap[collideGroup]) {
-        collidePass.delete();
-        delete this.collidePasses[collideGroup];
+        this.destroyPass(collideGroup);
       }
     }
 
     return channelMap;
   }
 
-  getModuleParameters(): {collideMaps: Record<string, Texture2D>; dummyCollideMap: Texture2D} {
-    const collideMaps = {};
-    for (const collideGroup in this.collidePasses) {
-      collideMaps[collideGroup] = this.collidePasses[collideGroup].collideMap;
-    }
-    return {collideMaps, dummyCollideMap: this.dummyCollideMap};
+  getModuleParameters(): {collideFBOs: Record<string, Framebuffer>; dummyCollideMap: Texture2D} {
+    const {collideFBOs, dummyCollideMap} = this;
+    return {collideFBOs, dummyCollideMap};
   }
 
   cleanup(): void {
@@ -193,17 +190,56 @@ export default class CollideEffect implements Effect {
       this.dummyCollideMap = undefined;
     }
     this.channels = {};
-    for (const collidePass of Object.values(this.collidePasses)) {
-      collidePass.delete();
+    for (const collideGroup of Object.keys(this.collidePasses)) {
+      this.destroyPass(collideGroup);
     }
     this.collidePasses = {};
     this.lastViewport = undefined;
   }
 
+  createPass(gl: WebGLRenderingContext, collideGroup: string) {
+    this.collidePasses[collideGroup] = new CollidePass(gl, {
+      id: collideGroup,
+      dummyCollideMap: this.dummyCollideMap
+    });
+
+    const {width, height} = gl.canvas;
+    const collideMap = new Texture2D(gl, {
+      width,
+      height,
+      parameters: {
+        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+      }
+    });
+
+    const depthBuffer = new Renderbuffer(gl, {format: gl.DEPTH_COMPONENT16, width, height});
+    this.collideFBOs[collideGroup] = new Framebuffer(gl, {
+      id: `Collide-${collideGroup}`,
+      width,
+      height,
+      attachments: {
+        [gl.COLOR_ATTACHMENT0]: collideMap,
+        [gl.DEPTH_ATTACHMENT]: depthBuffer
+      }
+    });
+  }
+
+  destroyPass(collideGroup: string) {
+    delete this.collidePasses[collideGroup];
+    const fbo = this.collideFBOs[collideGroup];
+    for (const attachment of Object.values(fbo.attachments as Texture2D[])) {
+      attachment.delete();
+    }
+    fbo.delete();
+    delete this.collideFBOs[collideGroup];
+  }
+
   // Debug show FBO contents on screen
-  // _debug(collidePass) {
+  // _debug(collideMap) {
   //   const minimap = true;
-  //   const collideMap = collidePass.collideMap;
   //   const color = readPixelsToArray(collideMap);
   //   let canvas = document.getElementById('fbo-canvas') as HTMLCanvasElement;
   //   const canvasHeight = (minimap ? 2 : 1) * collideMap.height;
