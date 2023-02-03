@@ -40,6 +40,10 @@ export default class CollideExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'CollideExtension';
 
+  isEnabled(layer: Layer<CollideExtensionProps>): boolean {
+    return layer.getAttributeManager() !== null;
+  }
+
   getShaders(this: Layer<CollideExtensionProps>): any {
     return {modules: [collide]};
   }
@@ -68,32 +72,21 @@ export default class CollideExtension extends LayerExtension {
   }
 
   initializeState(this: Layer<CollideExtensionProps>, context: LayerContext, extension: this) {
-    this.context.deck?._addDefaultEffect(new CollideEffect(), EffectOrder.CollideEffect);
-  }
-
-  updateState(
-    this: Layer<CollideExtensionProps>,
-    params: UpdateParameters<Layer<CollideExtensionProps>>,
-    extension: this
-  ) {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return;
-    const hasAttribute = attributeManager.getAttributes()['collidePriorities'];
-
-    if (Boolean(this.props.getCollidePriority) && !hasAttribute) {
-      attributeManager.add({
-        collidePriorities: {
-          size: 1,
-          accessor: 'getCollidePriority',
-          shaderAttributes: {
-            collidePriorities: {divisor: 0},
-            instanceCollidePriorities: {divisor: 1}
-          }
-        }
-      });
-    } else if (!Boolean(this.props.getCollidePriority) && hasAttribute) {
-      attributeManager.remove(['collidePriorities']);
+    if (!extension.isEnabled(this)) {
+      return;
     }
+    this.context.deck?._addDefaultEffect(new CollideEffect(), EffectOrder.CollideEffect);
+    const attributeManager = this.getAttributeManager();
+    attributeManager!.add({
+      collidePriorities: {
+        size: 1,
+        accessor: 'getCollidePriority',
+        shaderAttributes: {
+          collidePriorities: {divisor: 0},
+          instanceCollidePriorities: {divisor: 1}
+        }
+      }
+    });
   }
 
   needsPickingBuffer() {

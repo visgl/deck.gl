@@ -19,7 +19,7 @@ export default class EffectManager {
 
   addDefaultEffect(effect: Effect, slot: number) {
     if (!this._defaultEffects.filter(Boolean).find(e => e.constructor === effect.constructor)) {
-      if (!this._defaultEffects[slot]) {
+      if (this._defaultEffects[slot]) {
         log.warn('Tried to insert default effect into occupied slot')();
       }
       this._defaultEffects[slot] = effect;
