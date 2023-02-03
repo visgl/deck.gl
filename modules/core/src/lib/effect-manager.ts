@@ -1,4 +1,4 @@
-import assert from '../utils/assert';
+import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
 import type {Effect} from './effect';
@@ -19,7 +19,9 @@ export default class EffectManager {
 
   addDefaultEffect(effect: Effect, slot: number) {
     if (!this._defaultEffects.filter(Boolean).find(e => e.constructor === effect.constructor)) {
-      assert(!this._defaultEffects[slot], 'Tried to insert default effect into occupied slot');
+      if (!this._defaultEffects[slot]) {
+        log.warn('Tried to insert default effect into occupied slot')();
+      }
       this._defaultEffects[slot] = effect;
       this._setEffects(this.effects);
     }
