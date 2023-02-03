@@ -1,5 +1,6 @@
 import {Texture2D, cssToDeviceRatio} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/core';
+import {equals} from '@math.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollidePass from './collide-pass';
 import MaskEffect from '../mask/mask-effect';
@@ -109,8 +110,8 @@ export default class CollideEffect implements Effect {
       renderInfo === oldRenderInfo ||
       // If sublayers have changed
       oldRenderInfo.layers.length !== renderInfo.layers.length ||
-      // If a sublayer's positions have been updated, the cached bounds will change shallowly
-      renderInfo.layerBounds.some((b, i) => b !== oldRenderInfo.layerBounds[i]);
+      // If a sublayer's bounds have been updated
+      renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i]));
 
     this.channels[renderInfo.collideGroup] = renderInfo;
 
