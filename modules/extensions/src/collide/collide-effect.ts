@@ -79,6 +79,12 @@ export default class CollideEffect implements Effect {
         viewportChanged
       });
     }
+
+    // // @ts-ignore
+    // if (window.debug && Object.keys(channels)[0]) {
+    //   const collideFBO = this.collideFBOs[Object.keys(channels)[0]];
+    //   this._debug(collideFBO);
+    // }
   }
 
   private _render(
@@ -131,6 +137,8 @@ export default class CollideEffect implements Effect {
         onViewportActive,
         views,
         moduleParameters: {
+          // To avoid feedback loop forming between Framebuffer and active Texture.
+          dummyCollideMap: this.dummyCollideMap,
           devicePixelRatio: cssToDeviceRatio(collideFBO.gl) / DOWNSCALE
         }
       });
@@ -198,10 +206,7 @@ export default class CollideEffect implements Effect {
   }
 
   createPass(gl: WebGLRenderingContext, collideGroup: string) {
-    this.collidePasses[collideGroup] = new CollidePass(gl, {
-      id: collideGroup,
-      dummyCollideMap: this.dummyCollideMap
-    });
+    this.collidePasses[collideGroup] = new CollidePass(gl, {id: collideGroup});
 
     const {width, height} = gl.canvas;
     const collideMap = new Texture2D(gl, {

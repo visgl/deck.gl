@@ -4,14 +4,6 @@ import {OPERATION, _LayersPass as LayersPass, LayersPassRenderOptions} from '@de
 type CollidePassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollidePass extends LayersPass {
-  dummyCollideMap: Texture2D;
-
-  constructor(gl, props: {id: string; dummyCollideMap: Texture2D}) {
-    super(gl, props);
-
-    this.dummyCollideMap = props.dummyCollideMap;
-  }
-
   renderCollideMap(target: Framebuffer, options: CollidePassRenderOptions) {
     const gl = this.gl;
 
@@ -43,8 +35,6 @@ export default class CollidePass extends LayersPass {
     // Draw picking colors into collide FBO
     return {
       drawToCollideMap: true,
-      // To avoid feedback loop forming between Framebuffer and active Texture.
-      dummyCollideMap: this.dummyCollideMap,
       pickingActive: 1,
       pickingAttribute: false,
       lightSources: {}
