@@ -14,8 +14,9 @@ import CollideEffect from './collide-effect';
 
 const defaultProps = {
   getCollidePriority: {type: 'accessor', value: 0},
-  collideTestProps: {},
-  collideGroup: {type: 'string', value: null}
+  collideEnabled: true,
+  collideGroup: {type: 'string', value: 'default'},
+  collideTestProps: {}
 };
 
 export type CollideExtensionProps<DataT = any> = {
@@ -25,14 +26,20 @@ export type CollideExtensionProps<DataT = any> = {
   getCollidePriority?: Accessor<DataT, number>;
 
   /**
+   * Enable/disable collisions. If collisions are disabled, all objects are rendered.
+   * @default true
+   */
+  collideEnabled?: boolean;
+
+  /**
+   * Collision group this layer belongs to. If it is not set, the 'default' collision group is used
+   */
+  collideGroup?: string;
+
+  /**
    * Props to override when rendering collision map
    */
   collideTestProps?: {};
-
-  /**
-   * Collision group this layer belongs to. If it is not set, collision detection is disabled
-   */
-  collideGroup?: string;
 };
 
 /** Allows layers to hide overlapping objects. */
@@ -50,11 +57,11 @@ export default class CollideExtension extends LayerExtension {
 
   /* eslint-disable camelcase */
   draw(this: Layer<CollideExtensionProps>, {uniforms, context, moduleParameters}: any) {
-    const {collideGroup} = this.props;
+    const {collideEnabled, collideGroup} = this.props;
     const {drawToCollideMap, collideMaps = {}} = moduleParameters;
     const collideGroups = Object.keys(collideMaps);
-    const collideEnabled = collideGroup && collideGroups.includes(collideGroup);
-    uniforms.collide_enabled = Boolean(collideEnabled);
+    const enabled = collideEnabled && collideGroup && collideGroups.includes(collideGroup);
+    uniforms.collide_enabled = enabled;
 
     if (drawToCollideMap) {
       uniforms.collide_sort = Boolean(this.props.getCollidePriority);
@@ -65,7 +72,7 @@ export default class CollideExtension extends LayerExtension {
       this.props = this.clone(this.props.collideTestProps).props;
     } else {
       uniforms.collide_sort = false;
-      uniforms.collide_texture = collideEnabled
+      uniforms.collide_texture = enabled
         ? moduleParameters.collideMaps[collideGroup]
         : moduleParameters.dummyCollideMap;
     }

@@ -123,7 +123,8 @@ export default function App() {
         parameters: {depthTest: false},
 
         extensions: [new CollideExtension(), new MaskExtension()],
-        collideGroup: collideEnabled && 'def',
+        collideEnabled,
+        collideGroup: 'def',
         getCollidePriority: 0,
         collideTestProps: {
           sizeScale: 2 // Enlarge text to increase hit area
@@ -139,7 +140,8 @@ export default function App() {
         ...props,
 
         extensions: [new CollideExtension(), new MaskExtension()],
-        collideGroup: collideEnabled && 'def',
+        collideEnabled,
+        collideGroup: 'def',
         getCollidePriority: d => d.properties.scalerank,
         collideTestProps: {
           pointAntialiasing: false, // Does this matter for collisions?
@@ -161,7 +163,8 @@ export default function App() {
 
         extensions: [new CollideExtension(), new MaskExtension()],
         getCollidePriority: d => -d.properties.scalerank,
-        collideGroup: collideEnabled && 'labels',
+        collideEnabled,
+        collideGroup: 'labels',
         collideTestProps: {
           sizeScale: 2 // Enlarge text to increase hit area
         },
