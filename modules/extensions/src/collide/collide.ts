@@ -95,4 +95,8 @@ export default class CollideExtension extends LayerExtension {
       attributeManager.remove(['collidePriorities']);
     }
   }
+
+  needsPickingBuffer() {
+    return true;
+  }
 }

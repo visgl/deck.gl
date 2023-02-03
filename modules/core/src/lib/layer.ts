@@ -470,11 +470,11 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     const neededPickingBuffer =
       Number.isInteger(oldProps.highlightedObjectIndex) ||
       oldProps.pickable ||
-      // @ts-ignore
-      oldProps.collideGroup;
+      oldProps.extensions?.some(e => e.needsPickingBuffer());
     const needPickingBuffer =
-      // @ts-ignore
-      Number.isInteger(props.highlightedObjectIndex) || props.pickable || props.collideGroup;
+      Number.isInteger(props.highlightedObjectIndex) ||
+      props.pickable ||
+      props.extensions?.some(e => e.needsPickingBuffer());
     if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
       const {pickingColors, instancePickingColors} = attributeManager.attributes;
       const pickingColorsAttribute = pickingColors || instancePickingColors;

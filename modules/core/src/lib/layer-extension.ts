@@ -89,6 +89,11 @@ export default abstract class LayerExtension<OptionsT = undefined> {
     return false;
   }
 
+  /** (Internal) Indicate if this extension needs picking buffer */
+  needsPickingBuffer(this: Layer): boolean {
+    return false;
+  }
+
   draw(this: Layer, params: any, extension: this): void {}
 
   finalizeState(this: Layer, context: LayerContext, extension: this): void {}
