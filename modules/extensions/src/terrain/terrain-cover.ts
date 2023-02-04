@@ -39,9 +39,9 @@ export class TerrainCover {
     return this.targetLayer.id;
   }
 
+  /** returns true if the target layer is still in use (i.e. not finalized) */
   get isActive(): boolean {
-    const targetLayer = this.targetLayer.getCurrentLayer();
-    return targetLayer !== null && !targetLayer.lifecycle.startsWith('Finalized');
+    return Boolean(this.targetLayer.getCurrentLayer());
   }
 
   shouldUpdate({
