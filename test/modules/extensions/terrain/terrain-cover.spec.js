@@ -8,16 +8,22 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {LifecycleTester} from '../utils';
 
-test('TerrainCover#viewport diffing#geo', async t => {
+test('TerrainCover#viewport diffing#geo#not tiled', async t => {
   const lifecycle = new LifecycleTester();
-  let viewport = new WebMercatorViewport({width: 400, height: 300, zoom: 0});
+  let viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
   let targetLayer = new ScatterplotLayer();
 
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   const tc = new TerrainCover(targetLayer);
   t.notOk(tc.shouldUpdate({viewport}), 'Should not need update');
-  t.notOk(tc.commonBounds, 'Empty targetLayer does not have bounds');
+  t.notOk(tc.bounds, 'Empty targetLayer does not have bounds');
   t.notOk(tc.renderTexture, 'Render texture should be empty');
   t.notOk(tc.pickingTexture, 'Picking texture should be empty');
 
@@ -31,23 +37,95 @@ test('TerrainCover#viewport diffing#geo', async t => {
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
-  t.deepEqual(
-    tc.commonBounds,
-    [
-      [128, 192, 0],
-      [256, 256, 0]
-    ],
-    'Common bounds'
-  );
+  t.deepEqual(tc.bounds, [128, 192, 256, 256], 'Cartesian bounds');
   t.ok(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport');
-  t.is(tc.renderViewport.zoom, 0, 'Render viewport zoom');
+  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
 
-  viewport = new WebMercatorViewport({width: 400, height: 300, zoom: 0.5});
+  viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0.1
+  });
   t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
 
-  viewport = new WebMercatorViewport({width: 400, height: 300, zoom: 2});
+  viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 5
+  });
+  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - zoom');
+  t.is(tc.renderViewport.zoom, 6, 'Render viewport zoom');
+
+  viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -80,
+    latitude: 0,
+    zoom: 5
+  });
+  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update - bounds');
+
+  tc.delete();
+  lifecycle.finalize();
+  t.end();
+});
+
+test('TerrainCover#viewport diffing#geo#tiled', async t => {
+  const lifecycle = new LifecycleTester();
+  let viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
+  let targetLayer = new ScatterplotLayer({
+    tile: {}
+  });
+
+  await lifecycle.update({viewport, layers: [targetLayer]});
+
+  const tc = new TerrainCover(targetLayer);
+  t.notOk(tc.shouldUpdate({viewport}), 'Should not need update');
+  t.notOk(tc.bounds, 'Empty targetLayer does not have bounds');
+  t.notOk(tc.renderTexture, 'Render texture should be empty');
+  t.notOk(tc.pickingTexture, 'Picking texture should be empty');
+
+  targetLayer = new ScatterplotLayer({
+    data: [
+      [-90, -40.97989806962013],
+      [0, 0]
+    ],
+    getPosition: d => d
+  });
+  await lifecycle.update({viewport, layers: [targetLayer]});
+
   t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
-  t.is(tc.renderViewport.zoom, 2, 'Render viewport zoom');
+  t.deepEqual(tc.bounds, [128, 192, 256, 256], 'Cartesian bounds');
+  t.ok(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport');
+  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
+
+  viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 5
+  });
+  t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
+
+  viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -80,
+    latitude: 0,
+    zoom: 5
+  });
+  t.notOk(tc.shouldUpdate({targetLayer, viewport}), 'Should not need update');
 
   tc.delete();
   lifecycle.finalize();
@@ -69,16 +147,9 @@ test('TerrainCover#viewport diffing#non-geo', async t => {
 
   const tc = new TerrainCover(targetLayer);
   t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
-  t.deepEqual(
-    tc.commonBounds,
-    [
-      [-90, -40, 0],
-      [0, 20, 0]
-    ],
-    'Common bounds'
-  );
+  t.deepEqual(tc.bounds, [-90, -40, 0, 20], 'Common bounds');
   t.ok(tc.renderViewport instanceof OrthographicViewport, 'Render viewport');
-  t.is(tc.renderViewport.zoom, 0, 'Render viewport zoom');
+  t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');
 
   tc.delete();
   lifecycle.finalize();
@@ -194,6 +265,13 @@ test('TerrainCover#layers diffing#geo', async t => {
   t.ok(drapeLayers.length >= 5, 'Found drape layers');
   t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
   t.deepEqual(tc.layers, ['overlay-0-1-2-points-circle', 'scatterplot'], 'Correctly culled layers');
+
+  await lifecycle.update({layers: [terrainSource, scatterplotLayer, overlay]});
+  drapeLayers = lifecycle.layers.filter(
+    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
+  );
+  t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
+  t.deepEqual(tc.layers, ['scatterplot', 'overlay-0-1-2-points-circle'], 'Correctly culled layers');
 
   tc.delete();
   lifecycle.finalize();

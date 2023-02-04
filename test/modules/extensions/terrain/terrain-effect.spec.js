@@ -76,12 +76,12 @@ test('TerrainEffect', async t => {
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let uniforms = meshLayer.state.model.getUniforms();
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
-  t.is(uniforms.terrain_map?.width, 512, 'Terrain cover used as sampler');
+  t.is(uniforms.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   uniforms = scatterplotLayer.state.model.getUniforms();
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
-  t.is(uniforms.terrain_map?.width, terrainEffect.heightMap?.width, 'Height map used as sampler');
+  t.is(uniforms.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   uniforms = pathLayer.state.model.getUniforms();
@@ -92,7 +92,7 @@ test('TerrainEffect', async t => {
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  t.is(renderTerrainCover.callCount, 0, 'Terrain covers do not require redraw');
+  t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
   renderTerrainCover.reset();
 
   uniforms = meshLayer.state.model.getUniforms();
@@ -169,12 +169,12 @@ test('TerrainEffect#without draw operation', async t => {
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
   let uniforms = meshLayer.state.model.getUniforms();
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
-  t.is(uniforms.terrain_map?.width, 512, 'Terrain cover used as sampler');
+  t.is(uniforms.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
   uniforms = scatterplotLayer.state.model.getUniforms();
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
-  t.is(uniforms.terrain_map?.width, terrainEffect.heightMap?.width, 'Height map used as sampler');
+  t.is(uniforms.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
   uniforms = pathLayer.state.model.getUniforms();
@@ -185,7 +185,7 @@ test('TerrainEffect#without draw operation', async t => {
   await lifecycle.update({
     layers: [terrainLayer]
   });
-  t.is(renderTerrainCover.callCount, 0, 'Terrain covers do not require redraw');
+  t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
   renderTerrainCover.reset();
 
   uniforms = meshLayer.state.model.getUniforms();
