@@ -43,7 +43,7 @@ export class HeightMap {
       });
     if (layersChanged) {
       this.layersBounds = layers.map(layer => layer.getBounds());
-      this.layersBoundsCommon = joinLayerBounds(layers, viewport.isGeospatial);
+      this.layersBoundsCommon = joinLayerBounds(layers, viewport);
     }
     const viewportChanged = this.renderViewport !== viewport;
 

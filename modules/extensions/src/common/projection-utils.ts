@@ -11,9 +11,16 @@ export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
  * Compute the union of bounds from multiple layers
  * Returns bounds in CARTESIAN coordinates
  */
-export function joinLayerBounds(layers: Layer[], isGeospatial: boolean): Bounds | null {
+export function joinLayerBounds(
+  /** The layers to combine */
+  layers: Layer[],
+  /** A Viewport instance that is used to determine the type of the view */
+  viewport: Viewport
+): Bounds | null {
   // Each layer may be in a different coordinate system. Convert them to the common space of refViewport.
-  const refViewport: Viewport = isGeospatial ? unitGeospatialViewport : unitNonGeospatialViewport;
+  const refViewport: Viewport = viewport.isGeospatial
+    ? unitGeospatialViewport
+    : unitNonGeospatialViewport;
 
   // Join the bounds of layer data
   const bounds: Bounds = [Infinity, Infinity, -Infinity, -Infinity];
@@ -48,10 +55,18 @@ export function makeViewport(opts: {
   height?: number;
   /** Target zoom. If not specified, will be deduced from width and height */
   zoom?: number;
-  /** Whether the returned viewport should be geospatial */
-  isGeospatial: boolean;
-}): Viewport {
-  const {bounds, isGeospatial} = opts;
+  /** Border around the viewport in pixels */
+  border?: number;
+  /** A viewport used to determine the output type */
+  viewport: Viewport;
+}): Viewport | null {
+  const {bounds, viewport, border = 0} = opts;
+  const {isGeospatial} = viewport;
+
+  if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
+    return null;
+  }
+
   const refViewport: Viewport = isGeospatial ? unitGeospatialViewport : unitNonGeospatialViewport;
 
   const centerWorld = refViewport.unprojectPosition([
@@ -60,7 +75,8 @@ export function makeViewport(opts: {
     0
   ]);
 
-  let {width = MAX_VIEWPORT_SIZE, height = MAX_VIEWPORT_SIZE, zoom} = opts;
+  const maxSize = MAX_VIEWPORT_SIZE - border * 2;
+  let {width = maxSize, height = maxSize, zoom} = opts;
   if (zoom === undefined) {
     // Use width and height to determine zoom
     const scale = Math.min(width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
@@ -70,8 +86,8 @@ export function makeViewport(opts: {
     const scale = 2 ** zoom;
     width = Math.round(Math.abs(bounds[2] - bounds[0]) * scale);
     height = Math.round(Math.abs(bounds[3] - bounds[1]) * scale);
-    if (width > MAX_VIEWPORT_SIZE || height > MAX_VIEWPORT_SIZE) {
-      const r = MAX_VIEWPORT_SIZE / Math.max(width, height);
+    if (width > maxSize || height > maxSize) {
+      const r = maxSize / Math.max(width, height);
       width = Math.round(width * r);
       height = Math.round(height * r);
       zoom += Math.log2(r);
@@ -80,6 +96,8 @@ export function makeViewport(opts: {
 
   return isGeospatial
     ? new WebMercatorViewport({
+        x: border,
+        y: border,
         width,
         height,
         longitude: centerWorld[0],
@@ -87,7 +105,15 @@ export function makeViewport(opts: {
         zoom,
         orthographic: true
       })
-    : new OrthographicViewport({width, height, target: centerWorld, zoom, flipY: false});
+    : new OrthographicViewport({
+        x: border,
+        y: border,
+        width,
+        height,
+        target: centerWorld,
+        zoom,
+        flipY: false
+      });
 }
 
 /** Returns viewport bounds in CARTESIAN coordinates */

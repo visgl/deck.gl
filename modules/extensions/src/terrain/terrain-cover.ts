@@ -108,7 +108,7 @@ export class TerrainCover {
       // console.log('bounds changed', this.bounds, '>>', newBounds);
       shouldRedraw = true;
       this.targetBounds = targetLayer.getBounds();
-      this.targetBoundsCommon = joinLayerBounds([targetLayer], viewport.isGeospatial);
+      this.targetBoundsCommon = joinLayerBounds([targetLayer], viewport);
     }
 
     if (!this.targetBoundsCommon) {
@@ -133,7 +133,7 @@ export class TerrainCover {
       this.renderViewport = makeViewport({
         bounds: this.bounds,
         zoom: newZoom,
-        isGeospatial: viewport.isGeospatial
+        viewport
       });
     }
 
