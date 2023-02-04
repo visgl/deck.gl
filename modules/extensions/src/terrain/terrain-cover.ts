@@ -1,14 +1,9 @@
 import {Framebuffer} from '@luma.gl/core';
 
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
-
-const unitGeospatialViewport = new WebMercatorViewport({width: 1, height: 1});
-const unitNonGeospatialViewport = new OrthographicViewport({width: 1, height: 1});
-
-const MAX_SIZE = 2048;
+import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../common/projection-utils';
 
 // TODO - import from loaders when Tileset2D is split out
 type GeoBoundingBox = {west: number; north: number; east: number; south: number};
@@ -19,17 +14,21 @@ type Tile2DHeader = {
 
 /** Class to manage draped texture for each terrain layer */
 export class TerrainCover {
+  isDirty: boolean = true;
+  /** Viewport used to draw into the texture */
+  renderViewport: Viewport | null = null;
+  /** Bounds of the terrain cover texture, in cartesian space */
+  bounds: Bounds | null = null;
+
   private fbo?: Framebuffer;
   private pickingFbo?: Framebuffer;
-  private zoom: number = 0;
-  private bounds: [number[], number[]] | null = null;
   private layers: string[] = [];
   private tile: Tile2DHeader | null;
   private targetLayer: Layer;
-
-  isDirty: boolean = true;
-  renderViewport: Viewport | null = null;
-  commonBounds: [number[], number[]] | null = null;
+  /** Cached version of targetLayer.getBounds() */
+  private targetBounds: [number[], number[]] | null = null;
+  /** targetBounds in cartesian space */
+  private targetBoundsCommon: Bounds | null = null;
 
   constructor(targetLayer: Layer) {
     this.targetLayer = targetLayer;
@@ -103,33 +102,42 @@ export class TerrainCover {
   /** Compare viewport and terrain bounds with the last version. Only rerender if necesary. */
   private _updateViewport(viewport: Viewport): boolean {
     const targetLayer = this.targetLayer;
-    let needsRedraw = false;
-    const newBounds = targetLayer.getBounds();
-    if (
-      // The terrain layer's bounds has changed
-      this.bounds !== newBounds ||
-      // If the terrain layer is not bound to a tile, increase texture size based on zoom
-      (!this.tile && Math.abs(viewport.zoom - this.zoom) >= 1)
-    ) {
-      needsRedraw = true;
+    let shouldRedraw = false;
+
+    if (this.targetBounds !== targetLayer.getBounds()) {
       // console.log('bounds changed', this.bounds, '>>', newBounds);
-      this.bounds = newBounds;
-      // console.log('zoom changed', this.zoom, '>>', Math.ceil(viewport.zoom));
-      this.zoom = Math.ceil(viewport.zoom);
+      shouldRedraw = true;
+      this.targetBounds = targetLayer.getBounds();
+      this.targetBoundsCommon = joinLayerBounds([targetLayer], viewport.isGeospatial);
     }
 
-    if (newBounds) {
-      const leftBottomCommon = targetLayer.projectPosition(newBounds[0], {viewport});
-      const topRightCommon = targetLayer.projectPosition(newBounds[1], {viewport});
-      this.commonBounds = [leftBottomCommon, topRightCommon];
+    if (!this.targetBoundsCommon) {
+      return false;
+    }
+
+    const newZoom = Math.ceil(viewport.zoom + 0.5);
+    // If the terrain layer is bound to a tile, always render a texture that cover the whole tile.
+    // Otherwise, use the smaller of layer bounds and the viewport bounds.
+    if (this.tile) {
+      this.bounds = this.targetBoundsCommon;
     } else {
-      this.commonBounds = null;
+      const oldZoom = this.renderViewport?.zoom;
+      shouldRedraw = shouldRedraw || newZoom !== oldZoom;
+      const newBounds = getRenderBounds(this.targetBoundsCommon, viewport);
+      const oldBounds = this.bounds;
+      shouldRedraw = shouldRedraw || !oldBounds || newBounds.some((x, i) => x !== oldBounds[i]);
+      this.bounds = newBounds;
     }
 
-    if (needsRedraw) {
-      this.renderViewport = getRenderViewport(targetLayer, this.zoom, viewport.isGeospatial);
+    if (shouldRedraw) {
+      this.renderViewport = makeViewport({
+        bounds: this.bounds,
+        zoom: newZoom,
+        isGeospatial: viewport.isGeospatial
+      });
     }
-    return needsRedraw;
+
+    return shouldRedraw;
   }
 
   getRenderFramebuffer(): Framebuffer | null {
@@ -167,44 +175,6 @@ export class TerrainCover {
       pickingFbo.delete();
     }
   }
-}
-
-/** Construct a viewport that just covers the target layer's bounds */
-function getRenderViewport(layer: Layer, zoom: number, isGeospatial: boolean): Viewport | null {
-  const bounds = layer.getBounds();
-  if (!bounds) {
-    return null;
-  }
-
-  const refViewport: Viewport = isGeospatial ? unitGeospatialViewport : unitNonGeospatialViewport;
-  const leftBottomCommon = layer.projectPosition(bounds[0], {viewport: refViewport});
-  const topRightCommon = layer.projectPosition(bounds[1], {viewport: refViewport});
-
-  const center = refViewport.unprojectPosition([
-    (leftBottomCommon[0] + topRightCommon[0]) / 2,
-    (leftBottomCommon[1] + topRightCommon[1]) / 2,
-    0
-  ]);
-
-  const scale = 2 ** zoom;
-  let width = Math.round(Math.abs(topRightCommon[0] - leftBottomCommon[0]) * scale);
-  let height = Math.round(Math.abs(topRightCommon[1] - leftBottomCommon[1]) * scale);
-  if (width > MAX_SIZE || height > MAX_SIZE) {
-    const r = MAX_SIZE / Math.max(width, height);
-    width = Math.round(width * r);
-    height = Math.round(height * r);
-  }
-
-  return isGeospatial
-    ? new WebMercatorViewport({
-        width,
-        height,
-        longitude: center[0],
-        latitude: center[1],
-        zoom,
-        orthographic: true
-      })
-    : new OrthographicViewport({width, height, target: center, zoom, flipY: false});
 }
 
 /**

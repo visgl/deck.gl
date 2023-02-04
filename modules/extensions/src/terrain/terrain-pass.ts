@@ -1,7 +1,7 @@
 import {withParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+import {HeightMap} from './height-map';
 import type {TerrainCover} from './terrain-cover';
-import type {Framebuffer} from '@luma.gl/core';
 
 import GL from '@luma.gl/constants';
 
@@ -23,8 +23,17 @@ export class TerrainPass extends LayersPass {
     return result;
   }
 
-  renderHeightMap(target: Framebuffer, opts: TerrainPassRenderOptions) {
+  renderHeightMap(heightMap: HeightMap, opts: Partial<TerrainPassRenderOptions>) {
     // console.log('Updating height map')
+    const target = heightMap.getRenderFramebuffer();
+    const viewport = heightMap.renderViewport;
+
+    if (!target || !viewport) {
+      return;
+    }
+
+    target.resize(viewport);
+
     withParameters(
       this.gl,
       {
@@ -34,7 +43,15 @@ export class TerrainPass extends LayersPass {
         blendEquation: GL.MAX,
         depthTest: false
       },
-      () => this.render({...opts, target, effects: []})
+      () =>
+        this.render({
+          ...opts,
+          target,
+          pass: 'terrain-height-map',
+          layers: opts.layers!,
+          viewports: [viewport],
+          effects: []
+        })
     );
   }
 
@@ -52,13 +69,21 @@ export class TerrainPass extends LayersPass {
 
     target.resize(viewport);
 
-    this.render({
-      ...opts,
-      target,
-      pass: `terrain-cover-${terrainCover.id}`,
-      layers,
-      effects: [],
-      viewports: [viewport]
-    });
+    withParameters(
+      this.gl,
+      {
+        // blend: true,
+        // blendFunc: [GL.ONE, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+      },
+      () =>
+        this.render({
+          ...opts,
+          target,
+          pass: `terrain-cover-${terrainCover.id}`,
+          layers,
+          effects: [],
+          viewports: [viewport]
+        })
+    );
   }
 }

@@ -3,11 +3,11 @@
 
 > This extension is experimental, which means it does not provide the compatibility and stability that one would typically expect from other features. Use with caution and report any issues that you find on GitHub.
 
-The `TerrainExtension` renders otherwise 2D data along a 3D surface. For example, a GeoJSON of city streets and building footprints can be overlaid on top of a [elevation model](https://en.wikipedia.org/wiki/Digital_elevation_model). It is useful when viewing a mixture of 2D and 3D data sources. The re-position of geometries is performed on the GPU.
+The `TerrainExtension` renders otherwise 2D data along a 3D surface. For example, a GeoJSON of city streets and building footprints can be overlaid on top of a [elevation model](https://en.wikipedia.org/wiki/Digital_elevation_model). It is useful when viewing a mixture of 2D and 3D data sources. The re-positioning of geometries is performed on the GPU.
 
 To use this extension, first define a terrain source with the prop `operation: 'terrain'` or `operation: 'terrain+draw'`. A terrain source provides the 3D surface to fit other data on to.
 
-For each layer that should be fit to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
+For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
 <!-- TODO: Codepen demo -->
 <div style="position:relative;height:450px"></div>
@@ -84,7 +84,7 @@ When added to a layer via the `extensions` prop, the `TerrainExtension` adds the
 
 ##### `terrainFittingMode` ('offset' | 'drape')
 
-How data should be fit to the terrain surface. If not specified, will be automatically determined from the layer type.
+How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 
 - `offset`: each object is translated vertically by the elevation at its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot). This is the desired behavior for layers that render 3D objects.
 - `drape`: each object is overlaid as a texture over the terrain surface. All altitude and extrusion in the layer will be ignored.

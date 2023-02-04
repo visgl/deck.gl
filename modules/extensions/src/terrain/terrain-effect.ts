@@ -1,11 +1,11 @@
-import {Texture2D, ProgramManager, Framebuffer} from '@luma.gl/core';
+import {Texture2D, ProgramManager} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
 import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
-import {createRenderTarget} from './utils';
+import {HeightMap} from './height-map';
 
 import type {Effect, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
@@ -20,7 +20,7 @@ export class TerrainEffect implements Effect {
   /** An empty texture as placeholder */
   private dummyHeightMap: Texture2D;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
-  private heightMap?: Framebuffer;
+  private heightMap?: HeightMap;
   private terrainPass!: TerrainPass;
   private terrainPickingPass!: TerrainPickingPass;
   /** One texture for each primitive terrain layer, into which the draped layers render */
@@ -34,12 +34,10 @@ export class TerrainEffect implements Effect {
     this.terrainPass = new TerrainPass(gl, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(gl, {id: 'terrain-picking'});
 
-    if (!this.heightMap) {
-      try {
-        this.heightMap = createRenderTarget(gl, {id: 'height-map', float: true});
-      } catch {
-        log.warn('Terrain offset mode is not supported by this browser')();
-      }
+    if (HeightMap.isSupported(gl)) {
+      this.heightMap = new HeightMap(gl);
+    } else {
+      log.warn('Terrain offset mode is not supported by this browser')();
     }
 
     ProgramManager.getDefaultProgramManager(gl).addDefaultModule(terrainModule);
@@ -76,7 +74,7 @@ export class TerrainEffect implements Effect {
     if (!isPicking) {
       const offsetLayers = layers.filter(l => l.state.terrainFittingMode === 'offset');
       if (offsetLayers.length > 0) {
-        this._renderHeightMap(gl, terrainLayers, viewport, opts);
+        this._updateHeightMap(terrainLayers, viewport, opts);
       }
     }
 
@@ -98,10 +96,11 @@ export class TerrainEffect implements Effect {
     }
 
     return {
-      heightMap: this.heightMap?.color,
+      heightMap: this.heightMap?.getRenderFramebuffer(),
+      heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap,
       terrainCover: terrainCoverTexture,
-      terrainCoverBounds: terrainCover?.commonBounds,
+      terrainCoverBounds: terrainCover?.bounds,
       useTerrainHeightMap: terrainFittingMode === 'offset',
       terrainSkipRender: terrainFittingMode === 'drape' || !layer.props.operation.includes('draw')
     };
@@ -114,7 +113,6 @@ export class TerrainEffect implements Effect {
     }
 
     if (this.heightMap) {
-      this.heightMap.color.delete();
       this.heightMap.delete();
       this.heightMap = undefined;
     }
@@ -125,26 +123,22 @@ export class TerrainEffect implements Effect {
     this.terrainCovers.clear();
   }
 
-  private _renderHeightMap(
-    gl: WebGLRenderingContext,
-    terrainLayers: Layer[],
-    viewport: Viewport,
-    opts: PreRenderOptions
-  ) {
+  private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {
     if (!this.heightMap) {
       // Not supported
       return;
     }
 
-    this.heightMap.resize(viewport);
+    const shouldUpdate = this.heightMap.shouldUpdate({layers: terrainLayers, viewport});
+    if (!shouldUpdate) {
+      return;
+    }
 
     this.terrainPass.renderHeightMap(this.heightMap, {
       ...opts,
-      pass: 'terrain-height-map',
-      viewports: [viewport],
       layers: terrainLayers,
       moduleParameters: {
-        heightMap: this.heightMap.color,
+        heightMapBounds: this.heightMap.bounds,
         dummyHeightMap: this.dummyHeightMap,
         devicePixelRatio: 1,
         drawToTerrainHeightMap: true

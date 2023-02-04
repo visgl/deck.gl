@@ -8,20 +8,15 @@ export function createRenderTarget(
     float?: boolean;
   }
 ) {
-  const {float = false} = opts;
-
-  if (float && !Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
-    throw new Error();
-  }
-
   return new Framebuffer(gl, {
     id: opts.id,
     attachments: {
       [gl.COLOR_ATTACHMENT0]: new Texture2D(gl, {
-        ...(float && {
+        ...(opts.float && {
           format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
           type: GL.FLOAT
         }),
+        mipmaps: false,
         parameters: {
           [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
           [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,

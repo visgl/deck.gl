@@ -1,14 +1,17 @@
+import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/core';
+import type {Bounds} from '../common/projection-utils';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
   pickingActive?: boolean;
   heightMap: Texture2D | null;
+  heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture2D;
   terrainCover: Texture2D | null;
-  terrainCoverBounds?: [number[], number[]] | null;
+  terrainCoverBounds?: Bounds | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
   terrainSkipRender?: boolean;
@@ -35,10 +38,12 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
 
 export const terrainModule = {
   name: 'terrain',
+  dependencies: [project],
   inject: {
     'vs:#decl': `
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
+uniform vec4 terrain_bounds;
 varying vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
@@ -51,16 +56,14 @@ if (terrain_mode == TERRAIN_MODE_SKIP) {
     'vs:DECKGL_FILTER_GL_POSITION': `
 commonPos = geometry.position.xyz;
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec4 p = geometry.position;
-  p.z = 0.0;
-  position = project_common_position_to_clipspace(p);
+  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
+  position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
 }
 if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
-  vec4 clipPos = project_common_position_to_clipspace(vec4(anchorCommon, 1.0));
-  vec2 texCoords = clipPos.xy / clipPos.w / 2.0 + 0.5;
+  vec2 texCoords = (anchorCommon.xy - terrain_bounds.xy) / terrain_bounds.zw;
   float terrainZ = texture2D(terrain_map, texCoords).r;
   geometry.position.z += terrainZ;
   position = project_common_position_to_clipspace(geometry.position);
@@ -69,7 +72,7 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
     'fs:#decl': `
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
-uniform vec4 terrain_coverBounds;
+uniform vec4 terrain_bounds;
 varying vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
@@ -81,60 +84,64 @@ if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
     `,
     'fs:DECKGL_FILTER_COLOR': `
 if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (commonPos.xy - terrain_coverBounds.xy) / terrain_coverBounds.zw;
+  vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
   vec4 pixel = texture2D(terrain_map, texCoords);
   if (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
-    float blendedAlpha = pixel.a + color.a * (1.0 - pixel.a);
-    float blendRatio = pixel.a / blendedAlpha;
-    vec3 blendedRGB = mix(color.rgb, pixel.rgb, blendRatio);
-    color = vec4(blendedRGB, blendedAlpha);
+    // pixel is premultiplied
+    color = pixel + color * (1.0 - pixel.a);
   }
   return;
 }
     `
   },
-  getUniforms: (opts = {}) => {
+  getUniforms: (opts = {}, uniforms) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
         heightMap,
+        heightMapBounds,
         dummyHeightMap,
         terrainCover,
         terrainCoverBounds,
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
+      const {project_uCommonOrigin} = uniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
       let sampler: Texture2D = dummyHeightMap;
+      // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
+      let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
         mode = TERRAIN_MODE.WRITE_HEIGHT_MAP;
+        bounds = heightMapBounds!;
       } else if (useTerrainHeightMap && heightMap) {
         mode = TERRAIN_MODE.USE_HEIGHT_MAP;
         sampler = heightMap;
+        bounds = heightMapBounds!;
       } else if (terrainCover) {
         mode =
           terrainSkipRender || opts.pickingActive
             ? TERRAIN_MODE.USE_COVER_ONLY
             : TERRAIN_MODE.USE_COVER;
         sampler = terrainCover;
+        bounds = terrainCoverBounds!;
       }
 
       /* eslint-disable camelcase */
-
       return {
         terrain_mode: mode,
         terrain_map: sampler,
-        // Bounds of the terrain cover in common space, as [minX, minY, width, height]
-        terrain_coverBounds: terrainCoverBounds
+        // Convert bounds to the common space, as [minX, minY, width, height]
+        terrain_bounds: bounds
           ? [
-              terrainCoverBounds[0][0],
-              terrainCoverBounds[0][1],
-              terrainCoverBounds[1][0] - terrainCoverBounds[0][0],
-              terrainCoverBounds[1][1] - terrainCoverBounds[0][1]
+              bounds[0] - project_uCommonOrigin[0],
+              bounds[1] - project_uCommonOrigin[1],
+              bounds[2] - bounds[0],
+              bounds[3] - bounds[1]
             ]
           : [0, 0, 0, 0]
       };
