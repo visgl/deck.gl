@@ -31,11 +31,17 @@ import {PropType} from './prop-types';
 
 const EMPTY_PROPS = Object.freeze({});
 
+/** Internal state of an async prop */
 type AsyncPropState = {
+  /** The prop type definition from component.defaultProps, if exists */
   type: PropType | null;
+  /** Supplied prop value (can be url/promise, not visible to the component) */
   lastValue: any;
+  /** Resolved prop value (valid data, can be "shown" to the component) */
   resolvedValue: any;
+  /** How many loads have been issued */
   pendingLoadCount: number;
+  /** Latest resolved load, (earlier loads will be ignored) */
   resolvedLoadCount: number;
 };
 
@@ -330,10 +336,10 @@ export default class ComponentState<ComponentT extends Component> {
       // assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
         type: propTypes && propTypes[propName],
-        lastValue: null, // Supplied prop value (can be url/promise, not visible to layer)
-        resolvedValue: defaultValue, // Resolved prop value (valid data, can be "shown" to layer)
-        pendingLoadCount: 0, // How many loads have been issued
-        resolvedLoadCount: 0 // Latest resolved load, (earlier loads will be ignored)
+        lastValue: null,
+        resolvedValue: defaultValue,
+        pendingLoadCount: 0,
+        resolvedLoadCount: 0
       };
     }
   }

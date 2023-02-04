@@ -356,7 +356,7 @@ test('CompositeLayer#isLoaded', t => {
     }
   });
 
-  const finalize = testInitializeLayer({layer, finalize: false});
+  const {finalize} = testInitializeLayer({layer, finalize: false});
 
   t.notOk(layer.isLoaded, 'is loading data');
 });
