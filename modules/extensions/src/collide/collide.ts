@@ -20,7 +20,7 @@ export type CollideExtensionProps<DataT = any> = {
    * Enable/disable collisions. If collisions are disabled, all objects are rendered.
    * @default true
    */
-  collideEnabled?: boolean;
+  collideEnabled: boolean;
 
   /**
    * Collision group this layer belongs to. If it is not set, the 'default' collision group is used
@@ -87,7 +87,7 @@ export default class CollideExtension extends LayerExtension {
     });
   }
 
-  needsPickingBuffer() {
-    return true;
+  needsPickingBuffer(this: Layer, props: Layer<CollideExtensionProps>['props']): boolean {
+    return props.collideEnabled;
   }
 }

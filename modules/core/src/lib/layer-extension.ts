@@ -90,7 +90,7 @@ export default abstract class LayerExtension<OptionsT = undefined> {
   }
 
   /** (Internal) Indicate if this extension needs picking buffer */
-  needsPickingBuffer(this: Layer): boolean {
+  needsPickingBuffer(this: Layer, props: Layer['props']): boolean {
     return false;
   }
 
