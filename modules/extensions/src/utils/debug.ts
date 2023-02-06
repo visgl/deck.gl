@@ -1,6 +1,9 @@
+/* global document */
+
 import {Framebuffer, readPixelsToArray} from '@luma.gl/core';
 
 /** Debug utility to draw FBO contents onto screen */
+// eslint-disable-next-line
 export const debugFBO = function (
   fbo: Framebuffer,
   {minimap, opaque}: {minimap?: boolean; opaque?: boolean} = {}
@@ -22,7 +25,7 @@ export const debugFBO = function (
   if (canvas.width !== fbo.width || canvas.height !== canvasHeight) {
     canvas.width = fbo.width;
     canvas.height = canvasHeight;
-    canvas.style.width = `400px`;
+    canvas.style.width = '400px';
   }
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.createImageData(canvas.width, canvas.height);

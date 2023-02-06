@@ -1,5 +1,5 @@
-import {Framebuffer, Renderbuffer, Texture2D, withParameters} from '@luma.gl/core';
-import {OPERATION, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+import {Framebuffer, withParameters} from '@luma.gl/core';
+import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type CollidePassRenderOptions = LayersPassRenderOptions & {};
 

@@ -1,6 +1,5 @@
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
-import type {Texture2D} from '@luma.gl/webgl';
 
 const vs = `
 #ifdef NON_INSTANCED_MODEL

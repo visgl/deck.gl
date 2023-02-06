@@ -64,7 +64,6 @@ export default class CollideEffect implements Effect {
     // Resize framebuffers to match canvas
     for (const collideGroup in channels) {
       const collideFBO = this.collideFBOs[collideGroup];
-      const collidePass = this.collidePasses[collideGroup];
       const renderInfo = channels[collideGroup];
       collideFBO.resize({
         width: gl.canvas.width / DOWNSCALE,

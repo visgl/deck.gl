@@ -1,13 +1,4 @@
-import {
-  Accessor,
-  COORDINATE_SYSTEM,
-  Layer,
-  LayerContext,
-  LayerExtension,
-  log,
-  OPERATION,
-  UpdateParameters
-} from '@deck.gl/core';
+import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
 import EffectOrder from '../effect-order';
 import collide from './shader-module';
 import CollideEffect from './collide-effect';
