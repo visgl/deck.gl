@@ -483,6 +483,7 @@ export default class DeckPicker {
     decodePickingColor: PickingColorDecoder | null;
   } {
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
+    const preRenderStats: Record<string, any> = {};
     const opts = {
       layers,
       layerFilter: this.layerFilter,
@@ -494,12 +495,13 @@ export default class DeckPicker {
       cullRect,
       effects,
       pass,
-      pickZ
+      pickZ,
+      preRenderStats
     };
 
     for (const effect of effects) {
       if (effect.useInPicking) {
-        effect.preRender(this.gl, opts);
+        preRenderStats[effect.id] = effect.preRender(this.gl, opts);
       }
     }
 

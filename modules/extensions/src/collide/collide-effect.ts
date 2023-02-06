@@ -2,7 +2,7 @@ import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/c
 import {equals} from '@math.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollidePass from './collide-pass';
-import MaskEffect from '../mask/mask-effect';
+import MaskEffect, {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
 
 type CollideExtensionProps = {
@@ -33,10 +33,24 @@ export default class CollideEffect implements Effect {
 
   preRender(
     gl: WebGLRenderingContext,
-    {effects: allEffects, layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
+    {
+      effects: allEffects,
+      layers,
+      layerFilter,
+      viewports,
+      onViewportActive,
+      views,
+      pass,
+      preRenderStats
+    }: PreRenderOptions
   ): void {
     if (!this.dummyCollideMap) {
       this.dummyCollideMap = new Texture2D(gl, {width: 1, height: 1});
+    }
+
+    if (pass.startsWith('picking')) {
+      // Do not update on picking pass
+      return;
     }
 
     const collideLayers = layers.filter(
@@ -50,16 +64,14 @@ export default class CollideEffect implements Effect {
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
     const effects = allEffects?.filter(e => e.constructor === MaskEffect);
-    const otherEffectRendered = Boolean(
-      effects && effects.filter(({didRender}) => didRender).length
-    );
+    const maskEffectRendered = (preRenderStats['mask-effect'] as MaskPreRenderStats).didRender;
 
     // Collect layers to render
     const channels = this._groupByCollideGroup(gl, collideLayers);
 
     const viewport = viewports[0];
     const viewportChanged =
-      !this.lastViewport || !this.lastViewport.equals(viewport) || otherEffectRendered;
+      !this.lastViewport || !this.lastViewport.equals(viewport) || maskEffectRendered;
 
     // Resize framebuffers to match canvas
     for (const collideGroup in channels) {
@@ -236,6 +248,4 @@ export default class CollideEffect implements Effect {
     fbo.delete();
     delete this.collideFBOs[collideGroup];
   }
-
-  // Debug show FBO contents on screen
 }

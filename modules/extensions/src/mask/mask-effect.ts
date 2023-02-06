@@ -24,12 +24,15 @@ type Channel = {
   coordinateSystem: CoordinateSystem;
 };
 
+export type MaskPreRenderStats = {
+  didRender: boolean;
+};
+
 // Class to manage mask effect
 export default class MaskEffect implements Effect {
   id = 'mask-effect';
   props = null;
   useInPicking = true;
-  didRender = false;
 
   private dummyMaskMap?: Texture2D;
   private channels: (Channel | null)[] = [];
@@ -41,25 +44,25 @@ export default class MaskEffect implements Effect {
   preRender(
     gl: WebGLRenderingContext,
     {layers, layerFilter, viewports, onViewportActive, views, pass}: PreRenderOptions
-  ): void {
+  ): MaskPreRenderStats {
+    let didRender = false;
     if (!this.dummyMaskMap) {
       this.dummyMaskMap = new Texture2D(gl, {
         width: 1,
         height: 1
       });
     }
-    this.didRender = false;
 
     if (pass.startsWith('picking')) {
       // Do not update on picking pass
-      return;
+      return {didRender};
     }
 
     const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
       this.masks = null;
       this.channels.length = 0;
-      return;
+      return {didRender};
     }
     this.masks = {};
 
@@ -75,7 +78,7 @@ export default class MaskEffect implements Effect {
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
     for (const maskId in channelMap) {
-      this._renderChannel(channelMap[maskId], {
+      didRender ||= this._renderChannel(channelMap[maskId], {
         layerFilter,
         onViewportActive,
         views,
@@ -85,6 +88,7 @@ export default class MaskEffect implements Effect {
     }
 
     // debugFBO(this.maskMap, {opaque: true});
+    return {didRender};
   }
 
   private _renderChannel(
@@ -102,10 +106,11 @@ export default class MaskEffect implements Effect {
       viewport: Viewport;
       viewportChanged: boolean;
     }
-  ) {
+  ): boolean {
+    let didRender = false;
     const oldChannelInfo = this.channels[channelInfo.index];
     if (!oldChannelInfo) {
-      return;
+      return didRender;
     }
 
     const maskChanged =
@@ -153,7 +158,7 @@ export default class MaskEffect implements Effect {
           }
         });
 
-        this.didRender = true;
+        didRender = true;
       }
     }
 
@@ -164,6 +169,8 @@ export default class MaskEffect implements Effect {
       coordinateOrigin: channelInfo.coordinateOrigin,
       coordinateSystem: channelInfo.coordinateSystem
     };
+
+    return didRender;
   }
 
   /**

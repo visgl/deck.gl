@@ -81,8 +81,9 @@ export default class DeckRenderer {
   _preRender(effects, opts) {
     let lastPostProcessEffect = null;
 
+    const preRenderStats = {};
     for (const effect of effects) {
-      effect.preRender(this.gl, opts);
+      preRenderStats[effect.id] = effect.preRender(this.gl, {...opts, preRenderStats});
       if (effect.postRender) {
         lastPostProcessEffect = effect;
       }
