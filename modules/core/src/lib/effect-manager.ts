@@ -8,7 +8,8 @@ const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 export default class EffectManager {
   effects: Effect[];
   private _resolvedEffects: Effect[] = [];
-  private _defaultEffects: Effect[] = [];
+  // TODO better Effect API, may be cleaner to add `order` to `Effect` class
+  private _defaultEffects: {effect: Effect; order: number}[] = [];
   private _needsRedraw: false | string;
 
   constructor() {
@@ -17,12 +18,12 @@ export default class EffectManager {
     this._setEffects([]);
   }
 
-  addDefaultEffect(effect: Effect, slot: number) {
-    if (!this._defaultEffects.filter(Boolean).find(e => e.constructor === effect.constructor)) {
-      if (this._defaultEffects[slot]) {
-        log.warn('Tried to insert default effect into occupied slot')();
+  addDefaultEffect(effect: Effect, order: number) {
+    if (!this._defaultEffects.find(e => e.effect.constructor === effect.constructor)) {
+      if (this._defaultEffects.find(e => e.order === order)) {
+        log.warn('Two default effects have same order')();
       }
-      this._defaultEffects[slot] = effect;
+      this._defaultEffects.push({effect, order});
       this._setEffects(this.effects);
     }
   }
@@ -78,7 +79,7 @@ export default class EffectManager {
     }
     this.effects = nextEffects;
 
-    this._resolvedEffects = nextEffects.concat(this._defaultEffects.filter(Boolean));
+    this._resolvedEffects = nextEffects.concat(this._defaultEffects.map(e => e.effect));
     // Special case for lighting: only add default instance if no LightingEffect is specified
     if (!effects.some(effect => effect instanceof LightingEffect)) {
       this._resolvedEffects.push(DEFAULT_LIGHTING_EFFECT);
