@@ -1,4 +1,3 @@
-import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
 import type {Effect} from './effect';
@@ -8,7 +7,7 @@ const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 export default class EffectManager {
   effects: Effect[];
   private _resolvedEffects: Effect[] = [];
-  // TODO better Effect API, may be cleaner to add `order` to `Effect` class
+  /** Effect instances and order preference pairs, sorted by order */
   private _defaultEffects: {effect: Effect; order: number}[] = [];
   private _needsRedraw: false | string;
 
@@ -18,12 +17,24 @@ export default class EffectManager {
     this._setEffects([]);
   }
 
-  addDefaultEffect(effect: Effect, order: number) {
-    if (!this._defaultEffects.find(e => e.effect.constructor === effect.constructor)) {
-      if (this._defaultEffects.find(e => e.order === order)) {
-        log.warn('Two default effects have same order')();
+  // TODO - better Effect API, may be cleaner to add `order` to `Effect` class
+  /**
+   * Register a new default effect, i.e. an effect present regardless of user supplied props.effects
+   */
+  addDefaultEffect(
+    /** Effect instance. The same effect can only be added once. */
+    effect: Effect,
+    /** Used to sort effects. In case of conflict, effects will be used in the order of registration. */
+    order: number = Infinity
+  ) {
+    const defaultEffects = this._defaultEffects;
+    if (!defaultEffects.find(e => e.effect.constructor === effect.constructor)) {
+      const index = defaultEffects.findIndex(e => e.order > order);
+      if (index < 0) {
+        defaultEffects.push({effect, order});
+      } else {
+        defaultEffects.splice(index, 0, {effect, order});
       }
-      this._defaultEffects.push({effect, order});
       this._setEffects(this.effects);
     }
   }

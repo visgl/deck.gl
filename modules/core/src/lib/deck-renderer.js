@@ -48,6 +48,7 @@ export default class DeckRenderer {
     opts.layerFilter = opts.layerFilter || this.layerFilter;
     opts.effects = opts.effects || [];
     opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
+    opts.preRenderStats = {};
 
     this._preRender(opts.effects, opts);
 
@@ -81,9 +82,8 @@ export default class DeckRenderer {
   _preRender(effects, opts) {
     let lastPostProcessEffect = null;
 
-    const preRenderStats = {};
     for (const effect of effects) {
-      preRenderStats[effect.id] = effect.preRender(this.gl, {...opts, preRenderStats});
+      opts.preRenderStats[effect.id] = effect.preRender(this.gl, opts);
       if (effect.postRender) {
         lastPostProcessEffect = effect;
       }
