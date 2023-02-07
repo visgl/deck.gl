@@ -26,16 +26,46 @@ function makePromise() {
   return Object.assign(promise, resolvers);
 }
 
-// const setAsyncProps = ComponentState.prototype.setAsyncProps;
-// ComponentState.prototype.setAsyncProps = function setAsyncPropsTest(props) {
-//   props._asyncPropResolvedValues = props._asyncPropResolvedValues || {};
-//   props._asyncPropOriginalValues = props._asyncPropOriginalValues || props;
-//   props._asyncPropDefaultlValues = props._asyncPropDefaultValues || {data: []};
-//   setAsyncProps.call(this, props);
-// }
+function delay(milliseconds) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
 
 test('ComponentState#imports', t => {
   t.ok(ComponentState, 'ComponentState import ok');
+  t.end();
+});
+
+test('ComponentState#finalize', async t => {
+  const component = new TestComponent();
+  component.internalState = new ComponentState(component);
+  const state = component.internalState;
+  t.is(state.component, component, 'state.component is present');
+
+  const updateCallbackCalled = {};
+  state.onAsyncPropUpdated = propName => {
+    updateCallbackCalled[propName] = true;
+  };
+
+  const loadPromiseA = makePromise();
+  const loadPromiseB = makePromise();
+  state.setAsyncProps({
+    data: loadPromiseA,
+    image: loadPromiseB
+  });
+  loadPromiseA.resolve([]);
+  await delay(0);
+  t.ok(updateCallbackCalled['data'], 'onAsyncPropUpdated callback is called for data');
+  t.notOk(state.isAsyncPropLoading('A'), 'A is loaded');
+
+  state.finalize();
+  loadPromiseB.resolve([]);
+  await delay(0);
+  t.notOk(updateCallbackCalled['image'], 'onAsyncPropUpdated callback is not called for image');
+
+  t.notOk(state.component, 'state.component is dereferenced');
+
   t.end();
 });
 
@@ -57,92 +87,86 @@ test('ComponentState#synchronous async props', t => {
   t.end();
 });
 
-test('ComponentState#asynchronous async props', t => {
-  const state = new ComponentState();
+test('ComponentState#asynchronous async props', async t => {
+  const component = new Component();
+  component.internalState = new ComponentState(component);
+  const state = component.internalState;
   t.ok(state, 'ComponentState construction ok');
 
   const loadPromise1 = makePromise();
   const loadPromise2 = makePromise();
   const loadPromise3 = makePromise();
 
-  Promise.resolve()
-    .then(_ => {
-      t.equals(
-        state.hasAsyncProp('data'),
-        false,
-        'ComponentState.hasAsyncProp returned correct value'
-      );
-      state.setAsyncProps({data: loadPromise1});
-      t.equals(
-        state.hasAsyncProp('data'),
-        true,
-        'ComponentState.hasAsyncProp returned correct value'
-      );
-      state.setAsyncProps({data: loadPromise1});
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        true,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-      loadPromise1.resolve([1]);
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        true,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-    })
-    .then(_ => {
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        false,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-      t.deepEquals(
-        state.getAsyncProp('data'),
-        [1],
-        'ComponentState.getAsyncProp returned correct value'
-      );
-      state.setAsyncProps({data: loadPromise2});
-      state.setAsyncProps({data: loadPromise3});
-      loadPromise3.resolve([3]);
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        true,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-      t.deepEquals(
-        state.getAsyncProp('data'),
-        [1],
-        'ComponentState.getAsyncProp returned correct value'
-      );
-    })
-    .then(_ => {
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        false,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-      t.deepEquals(
-        state.getAsyncProp('data'),
-        [3],
-        'ComponentState.getAsyncProp returned correct value'
-      );
-      loadPromise2.resolve([2]);
-    })
-    .then(_ => {
-      t.equals(
-        state.isAsyncPropLoading('data'),
-        false,
-        'ComponentState.isAsyncPropLoading returned correct value'
-      );
-      t.deepEquals(
-        state.getAsyncProp('data'),
-        [3],
-        'ComponentState.getAsyncProp returned correct value'
-      );
-    })
-    .then(_ => t.end())
-    .catch(_ => t.end());
+  t.equals(state.hasAsyncProp('data'), false, 'ComponentState.hasAsyncProp returned correct value');
+  state.setAsyncProps({data: loadPromise1});
+  t.equals(state.hasAsyncProp('data'), true, 'ComponentState.hasAsyncProp returned correct value');
+  state.setAsyncProps({data: loadPromise1});
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    true,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+  loadPromise1.resolve([1]);
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    true,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+
+  await delay(0);
+
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    false,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+  t.deepEquals(
+    state.getAsyncProp('data'),
+    [1],
+    'ComponentState.getAsyncProp returned correct value'
+  );
+  state.setAsyncProps({data: loadPromise2});
+  state.setAsyncProps({data: loadPromise3});
+  loadPromise3.resolve([3]);
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    true,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+  t.deepEquals(
+    state.getAsyncProp('data'),
+    [1],
+    'ComponentState.getAsyncProp returned correct value'
+  );
+
+  await delay(0);
+
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    false,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+  t.deepEquals(
+    state.getAsyncProp('data'),
+    [3],
+    'ComponentState.getAsyncProp returned correct value'
+  );
+  loadPromise2.resolve([2]);
+
+  await delay(0);
+
+  t.equals(
+    state.isAsyncPropLoading('data'),
+    false,
+    'ComponentState.isAsyncPropLoading returned correct value'
+  );
+  t.deepEquals(
+    state.getAsyncProp('data'),
+    [3],
+    'ComponentState.getAsyncProp returned correct value'
+  );
+
+  t.end();
 });
 
 test('ComponentState#async props with transform', t => {
