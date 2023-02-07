@@ -26,8 +26,10 @@ export default class CollidePass extends LayersPass {
   }
 
   shouldDrawLayer(layer) {
-    return Boolean(
-      layer.props.extensions.find(e => e.constructor.extensionName === 'CollideExtension')
+    return (
+      Boolean(
+        layer.props.extensions.find(e => e.constructor.extensionName === 'CollideExtension')
+      ) && layer.props.collideEnabled
     );
   }
 
