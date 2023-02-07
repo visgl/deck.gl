@@ -78,13 +78,14 @@ export default class MaskEffect implements Effect {
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
     for (const maskId in channelMap) {
-      didRender ||= this._renderChannel(channelMap[maskId], {
+      const result = this._renderChannel(channelMap[maskId], {
         layerFilter,
         onViewportActive,
         views,
         viewport,
         viewportChanged
       });
+      didRender ||= result;
     }
 
     // debugFBO(this.maskMap, {opaque: true});
