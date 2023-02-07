@@ -64,7 +64,7 @@ export default class CollideEffect implements Effect {
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
     const effects = allEffects?.filter(e => e.constructor === MaskEffect);
-    const maskEffectRendered = (preRenderStats['mask-effect'] as MaskPreRenderStats).didRender;
+    const maskEffectRendered = (preRenderStats['mask-effect'] as MaskPreRenderStats)?.didRender;
 
     // Collect layers to render
     const channels = this._groupByCollideGroup(gl, collideLayers);
