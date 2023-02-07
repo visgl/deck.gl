@@ -49,8 +49,8 @@ void main(void) {
   DECKGL_FILTER_SIZE(offset, geometry);
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
-  gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
 
   // Apply lighting
   vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);

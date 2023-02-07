@@ -9,7 +9,7 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^3.2.10",
+    "@loaders.gl/obj": "^3.3.0-alpha.10",
     "@math.gl/core": "^3.6.0",
     "deck.gl": "^8.8.0",
     "react": "^16.3.0",

@@ -62,6 +62,9 @@ export type Material = LightingModuleSettings['material'];
  */
 export type Unit = 'meters' | 'common' | 'pixels';
 
+/** Rendering operation of the layer. */
+export type Operation = 'draw' | 'mask' | 'terrain';
+
 export type Texture =
   | Texture2D
   | Texture2DProps
@@ -122,9 +125,9 @@ export type LayerProps<DataType = any> = {
    */
   updateTriggers?: Record<string, any>;
   /**
-   * The purpose of the layer
+   * Rendering operation of the layer. `+` separated list of names.
    */
-  operation?: 'draw' | 'mask';
+  operation?: Operation | `${Operation}+${Operation}`;
   /**
    * If the layer should be rendered. Default true.
    */

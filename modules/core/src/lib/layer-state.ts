@@ -58,32 +58,35 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     this.usesPickingColorCache = false;
   }
 
-  get layer(): LayerT {
+  get layer(): LayerT | null {
     return this.component;
-  }
-
-  set layer(layer: LayerT) {
-    this.component = layer;
   }
 
   /* Override base Component methods with Layer-specific handling */
 
   protected _fetch(propName, url: string) {
-    const fetch = this.component.props.fetch;
+    const layer = this.layer;
+    const fetch = layer?.props.fetch;
     if (fetch) {
-      return fetch(url, {propName, layer: this.layer});
+      return fetch(url, {propName, layer});
     }
     return super._fetch(propName, url);
   }
 
   protected _onResolve(propName: string, value: any) {
-    const onDataLoad = this.component.props.onDataLoad;
-    if (propName === 'data' && onDataLoad) {
-      onDataLoad(value, {propName, layer: this.layer});
+    const layer = this.layer;
+    if (layer) {
+      const onDataLoad = layer.props.onDataLoad;
+      if (propName === 'data' && onDataLoad) {
+        onDataLoad(value, {propName, layer});
+      }
     }
   }
 
   protected _onError(propName: string, error: Error) {
-    this.layer.raiseError(error, `loading ${propName} of ${this.layer}`);
+    const layer = this.layer;
+    if (layer) {
+      layer.raiseError(error, `loading ${propName} of ${this.layer}`);
+    }
   }
 }

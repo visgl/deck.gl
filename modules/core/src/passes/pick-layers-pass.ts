@@ -1,7 +1,6 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
-import {OPERATION} from '../lib/constants';
 import log from '../utils/log';
 
 import type {Framebuffer} from '@luma.gl/core';
@@ -35,7 +34,7 @@ export type PickingColorDecoder = (pickedColor: number[] | Uint8Array) =>
 
 export default class PickLayersPass extends LayersPass {
   private pickZ?: boolean;
-  private _colors: {
+  private _colorEncoderState: {
     byLayer: Map<Layer, EncodedPickingColors>;
     byAlpha: EncodedPickingColors[];
   } | null = null;
@@ -63,23 +62,15 @@ export default class PickLayersPass extends LayersPass {
     cullRect,
     effects,
     pass = 'picking',
-    pickZ
+    pickZ,
+    moduleParameters
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
     const gl = this.gl;
     this.pickZ = pickZ;
-
-    // Track encoded layer indices
-    const encodedColors = pickZ
-      ? null
-      : {
-          byLayer: new Map(),
-          byAlpha: []
-        };
-    // Temporarily store it on the instance so that it can be accessed by this.getLayerParameters
-    this._colors = encodedColors;
+    const colorEncoderState = this._resetColorEncoder(pickZ);
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
@@ -113,18 +104,20 @@ export default class PickLayersPass extends LayersPass {
           onViewportActive,
           cullRect,
           effects: effects?.filter(e => e.useInPicking),
-          pass
+          pass,
+          moduleParameters
         })
     );
 
     // Clear the temp field
-    this._colors = null;
-    const decodePickingColor = encodedColors && decodeColor.bind(null, encodedColors);
+    this._colorEncoderState = null;
+    const decodePickingColor = colorEncoderState && decodeColor.bind(null, colorEncoderState);
     return {decodePickingColor, stats: renderStatus};
   }
 
-  protected shouldDrawLayer(layer: Layer): boolean {
-    return layer.props.pickable && layer.props.operation === OPERATION.DRAW;
+  shouldDrawLayer(layer: Layer): boolean {
+    const {pickable, operation} = layer.props;
+    return (pickable && operation.includes('draw')) || operation.includes('terrain');
   }
 
   protected getModuleParameters() {
@@ -140,15 +133,27 @@ export default class PickLayersPass extends LayersPass {
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
     const pickParameters = {...layer.props.parameters};
 
-    if (!this._colors) {
+    if (!this._colorEncoderState || layer.props.operation.includes('terrain')) {
       pickParameters.blend = false;
     } else {
       Object.assign(pickParameters, PICKING_PARAMETERS);
       pickParameters.blend = true;
-      pickParameters.blendColor = encodeColor(this._colors, layer, viewport);
+      pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
     }
 
     return pickParameters;
+  }
+
+  protected _resetColorEncoder(pickZ: boolean) {
+    // Track encoded layer indices
+    this._colorEncoderState = pickZ
+      ? null
+      : {
+          byLayer: new Map<Layer, EncodedPickingColors>(),
+          byAlpha: []
+        };
+    // Temporarily store it on the instance so that it can be accessed by this.getLayerParameters
+    return this._colorEncoderState;
   }
 }
 

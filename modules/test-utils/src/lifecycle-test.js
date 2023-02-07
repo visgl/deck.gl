@@ -47,6 +47,11 @@ function initializeLayerManager({layer, viewport = testViewport, onError = defau
 
 export function testInitializeLayer(opts) {
   const layerManager = initializeLayerManager(opts);
+  if (opts.finalize === false) {
+    return {
+      finalize: () => layerManager.finalize()
+    };
+  }
   layerManager.finalize();
   return null;
 }
@@ -56,6 +61,11 @@ export async function testInitializeLayerAsync(opts) {
   const deckRenderer = new DeckRenderer(gl);
   while (!opts.layer.isLoaded) {
     await update({layerManager, deckRenderer});
+  }
+  if (opts.finalize === false) {
+    return {
+      finalize: () => layerManager.finalize()
+    };
   }
   layerManager.finalize();
   return null;

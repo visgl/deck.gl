@@ -351,11 +351,12 @@ test('CompositeLayer#isLoaded', t => {
     data: Promise.resolve([]),
     onDataLoad: () => {
       t.ok(layer.isLoaded, 'data is loaded');
+      finalize();
       t.end();
     }
   });
 
-  testInitializeLayer({layer});
+  const {finalize} = testInitializeLayer({layer, finalize: false});
 
   t.notOk(layer.isLoaded, 'is loading data');
 });

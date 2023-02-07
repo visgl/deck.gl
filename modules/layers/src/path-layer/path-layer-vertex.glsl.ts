@@ -62,7 +62,7 @@ float flipIfTrue(bool flag) {
 }
 
 // calculate line join positions
-vec3 lineJoin(
+vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width
 ) {
@@ -160,7 +160,7 @@ vec3 lineJoin(
   if (needsRotation) {
     offset = rotationMatrix * offset;
   }
-  return currPoint + offset;
+  return offset;
 }
 
 // In clipspace extrusion, if a line extends behind the camera, clip it to avoid visual artifacts
@@ -206,14 +206,15 @@ void main() {
     width = vec3(widthPixels, 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
 
-    vec3 pos = lineJoin(
+    vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(width.xy)
     );
 
-    gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
+    DECKGL_FILTER_GL_POSITION(currPositionScreen, geometry);
+    gl_Position = vec4(currPositionScreen.xyz + offset * currPositionScreen.w, currPositionScreen.w);
   } else {
     // Extrude in commonspace
     prevPosition = project_position(prevPosition, prevPosition64Low);
@@ -223,13 +224,11 @@ void main() {
     width = vec3(project_pixel_size(widthPixels), 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
 
-    vec4 pos = vec4(
-      lineJoin(prevPosition, currPosition, nextPosition, width.xy),
-      1.0);
-    geometry.position = pos;
-    gl_Position = project_common_position_to_clipspace(pos);
+    vec3 offset = getLineJoinOffset(prevPosition, currPosition, nextPosition, width.xy);
+    geometry.position = vec4(currPosition + offset, 1.0);
+    gl_Position = project_common_position_to_clipspace(geometry.position);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   }
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;
