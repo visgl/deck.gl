@@ -3,6 +3,7 @@ import {MapView, LayerManager} from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {CollideExtension} from '@deck.gl/extensions';
+import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollideEffect from '@deck.gl/extensions/collide/collide-effect';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
@@ -26,6 +27,12 @@ const TEST_LAYER = new SolidPolygonLayer({
   collideGroup: 'COLLIDE_GROUP'
 });
 
+const PRERENDEROPTIONS = {
+  pass: 'screen',
+  preRenderStats: {},
+  viewports: [testViewport]
+};
+
 test('CollideEffect#constructor', t => {
   const collideEffect = new CollideEffect();
   t.ok(collideEffect, 'Collide effect created');
@@ -46,10 +53,11 @@ test('CollideEffect#cleanup', t => {
   collideEffect.preRender(gl, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
-    viewports: [testViewport]
+    ...PRERENDEROPTIONS
   });
 
   t.ok(collideEffect.collidePasses['COLLIDE_GROUP'], 'CollidePass is created');
+  t.ok(collideEffect.collideFBOs['COLLIDE_GROUP'], 'Collide FBO is created');
   t.ok(collideEffect.dummyCollideMap, 'Dummy collide map is created');
   t.ok(collideEffect.channels['COLLIDE_GROUP'], 'Channel is created');
   t.equal(collideEffect.lastViewport, testViewport, 'Last viewport is saved');
@@ -57,6 +65,7 @@ test('CollideEffect#cleanup', t => {
   collideEffect.cleanup();
 
   t.deepEqual(collideEffect.collidePasses, {}, 'Collide passes are removed');
+  t.deepEqual(collideEffect.collideFBOs, {}, 'Collide FBOs is removed');
   t.notOk(collideEffect.dummyCollideMap, 'Dummy collide map is deleted');
   t.deepEqual(collideEffect.channels, {}, 'Channels are removed');
   t.notOk(collideEffect.lastViewport, 'Last viewport is deleted');
@@ -83,26 +92,26 @@ test('CollideEffect#update', t => {
     collideEffect.preRender(gl, {
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
-      viewports: [testViewport]
+      ...PRERENDEROPTIONS
     });
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
   let parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideMaps).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideMaps['COLLIDE_GROUP'], 'collide map is in parameters');
+  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
+  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'Add second collide layer');
   parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideMaps).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideMaps['COLLIDE_GROUP'], 'collide map is in parameters');
+  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
+  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers([TEST_LAYER_2], 'Remove first layer');
   parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideMaps).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideMaps['COLLIDE_GROUP'], 'collide map is in parameters');
+  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
+  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers(
@@ -110,9 +119,9 @@ test('CollideEffect#update', t => {
     'Add layer with different collide group'
   );
   parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideMaps).length, 2, 'two collide maps in parameters');
-  t.ok(parameters.collideMaps['COLLIDE_GROUP'], 'collide map is in parameters');
-  t.ok(parameters.collideMaps['COLLIDE_GROUP_2'], 'collide map is in parameters');
+  t.equal(Object.keys(parameters.collideFBOs).length, 2, 'two collide maps in parameters');
+  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
+  t.ok(parameters.collideFBOs['COLLIDE_GROUP_2'], 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   collideEffect.cleanup();
@@ -133,7 +142,7 @@ test('CollideEffect#render', t => {
     collideEffect.preRender(gl, {
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
-      viewports: [testViewport],
+      ...PRERENDEROPTIONS,
       ...opts
     });
   };
@@ -155,17 +164,19 @@ test('CollideEffect#render', t => {
   preRenderWithLayers([TEST_LAYER], 'change viewport', {viewports: [testViewport2]});
   t.equal(spy.callCount, 3, 'Should render when viewport changes');
 
-  preRenderWithLayers([TEST_LAYER], 'another effect rendered', {
+  preRenderWithLayers([TEST_LAYER], 'mask effect rendered', {
     viewports: [testViewport2],
-    effects: [{useInCollide: true, didRender: true}]
+    effects: [new MaskEffect()],
+    preRenderStats: {'mask-effect': {didRender: true}}
   });
-  t.equal(spy.callCount, 4, 'Should render when another effect renders');
+  t.equal(spy.callCount, 4, 'Should render when mask effect renders');
 
-  preRenderWithLayers([TEST_LAYER], 'another effect not rendered', {
+  preRenderWithLayers([TEST_LAYER], 'mask effect not rendered', {
     viewports: [testViewport2],
-    effects: [{useInCollide: true, didRender: false}]
+    effects: [new MaskEffect()],
+    preRenderStats: {'mask-effect': {didRender: false}}
   });
-  t.equal(spy.callCount, 4, 'Should not render when another effect does not render');
+  t.equal(spy.callCount, 4, 'Should not render when mask effect does not render');
 
   collideEffect.cleanup();
   t.end();
