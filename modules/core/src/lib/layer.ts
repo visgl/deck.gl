@@ -466,21 +466,29 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       }
     }
 
-    const {props, oldProps} = params;
-    const neededPickingBuffer =
-      Number.isInteger(oldProps.highlightedObjectIndex) || oldProps.pickable;
-    const needPickingBuffer = Number.isInteger(props.highlightedObjectIndex) || props.pickable;
-    if (neededPickingBuffer !== needPickingBuffer && attributeManager) {
-      const {pickingColors, instancePickingColors} = attributeManager.attributes;
-      const pickingColorsAttribute = pickingColors || instancePickingColors;
-      if (pickingColorsAttribute) {
-        if (needPickingBuffer && pickingColorsAttribute.constant) {
-          pickingColorsAttribute.constant = false;
-          attributeManager.invalidate(pickingColorsAttribute.id);
-        }
-        if (!pickingColorsAttribute.value && !needPickingBuffer) {
-          pickingColorsAttribute.constant = true;
-          pickingColorsAttribute.value = [0, 0, 0];
+    // Enable/disable picking buffer
+    if (attributeManager) {
+      const {props} = params;
+      const hasPickingBuffer = this.internalState!.hasPickingBuffer;
+      const needsPickingBuffer =
+        Number.isInteger(props.highlightedObjectIndex) ||
+        props.pickable ||
+        props.extensions.some(e => e.getNeedsPickingBuffer.call(this, e));
+
+      // Only generate picking buffer if needed
+      if (hasPickingBuffer !== needsPickingBuffer) {
+        this.internalState!.hasPickingBuffer = needsPickingBuffer;
+        const {pickingColors, instancePickingColors} = attributeManager.attributes;
+        const pickingColorsAttribute = pickingColors || instancePickingColors;
+        if (pickingColorsAttribute) {
+          if (needsPickingBuffer && pickingColorsAttribute.constant) {
+            pickingColorsAttribute.constant = false;
+            attributeManager.invalidate(pickingColorsAttribute.id);
+          }
+          if (!pickingColorsAttribute.value && !needsPickingBuffer) {
+            pickingColorsAttribute.constant = true;
+            pickingColorsAttribute.value = [0, 0, 0];
+          }
         }
       }
     }

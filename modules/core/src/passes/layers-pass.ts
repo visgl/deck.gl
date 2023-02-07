@@ -24,6 +24,7 @@ export type LayersPassRenderOptions = {
   clearCanvas?: boolean;
   layerFilter?: (context: FilterContext) => boolean;
   moduleParameters?: any;
+  preRenderStats?: Record<string, any>;
 };
 
 type DrawLayerParameters = {

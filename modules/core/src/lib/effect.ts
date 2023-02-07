@@ -13,7 +13,7 @@ export interface Effect {
   props: any;
   useInPicking?: boolean;
 
-  preRender: (gl: WebGLRenderingContext, opts: PreRenderOptions) => void;
+  preRender: (gl: WebGLRenderingContext, opts: PreRenderOptions) => any;
   postRender?: (gl: WebGLRenderingContext, opts: PostRenderOptions) => Framebuffer;
   getModuleParameters?: (layer: Layer) => any;
 

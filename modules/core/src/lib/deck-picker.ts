@@ -494,12 +494,13 @@ export default class DeckPicker {
       cullRect,
       effects,
       pass,
-      pickZ
+      pickZ,
+      preRenderStats: {}
     };
 
     for (const effect of effects) {
       if (effect.useInPicking) {
-        effect.preRender(this.gl, opts);
+        opts.preRenderStats[effect.id] = effect.preRender(this.gl, opts);
       }
     }
 
