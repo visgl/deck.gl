@@ -33,6 +33,7 @@ export default class MaskEffect implements Effect {
   id = 'mask-effect';
   props = null;
   useInPicking = true;
+  order = 0;
 
   private dummyMaskMap?: Texture2D;
   private channels: (Channel | null)[] = [];

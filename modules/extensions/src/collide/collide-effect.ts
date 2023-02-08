@@ -24,6 +24,7 @@ export default class CollideEffect implements Effect {
   id = 'collide-effect';
   props = null;
   useInPicking = true;
+  order = 1;
 
   private channels: Record<string, RenderInfo> = {};
   private collidePasses: Record<string, CollidePass> = {};
@@ -41,7 +42,7 @@ export default class CollideEffect implements Effect {
       onViewportActive,
       views,
       pass,
-      preRenderStats
+      preRenderStats = {}
     }: PreRenderOptions
   ): void {
     if (!this.dummyCollideMap) {

@@ -1,5 +1,4 @@
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import EffectOrder from '../effect-order';
 import collide from './shader-module';
 import CollideEffect from './collide-effect';
 
@@ -73,7 +72,7 @@ export default class CollideExtension extends LayerExtension {
     if (!extension.isEnabled(this)) {
       return;
     }
-    this.context.deck?._addDefaultEffect(new CollideEffect(), EffectOrder.CollideEffect);
+    this.context.deck?._addDefaultEffect(new CollideEffect());
     const attributeManager = this.getAttributeManager();
     attributeManager!.add({
       collidePriorities: {
