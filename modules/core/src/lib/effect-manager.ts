@@ -4,11 +4,18 @@ import type {Effect} from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 
+/** Sort two effects. Returns 0 if equal, negative if e1 < e2, positive if e1 > e2 */
+function compareEffects(e1: Effect, e2: Effect): number {
+  const o1 = e1.order ?? Infinity;
+  const o2 = e2.order ?? Infinity;
+  return o1 - o2;
+}
+
 export default class EffectManager {
   effects: Effect[];
   private _resolvedEffects: Effect[] = [];
   /** Effect instances and order preference pairs, sorted by order */
-  private _defaultEffects: {effect: Effect; order: number}[] = [];
+  private _defaultEffects: Effect[] = [];
   private _needsRedraw: false | string;
 
   constructor() {
@@ -17,23 +24,17 @@ export default class EffectManager {
     this._setEffects([]);
   }
 
-  // TODO - better Effect API, may be cleaner to add `order` to `Effect` class
   /**
-   * Register a new default effect, i.e. an effect present regardless of user supplied props.effects
+   * Register a new default effect, i.e. an effect presents regardless of user supplied props.effects
    */
-  addDefaultEffect(
-    /** Effect instance. The same effect can only be added once. */
-    effect: Effect,
-    /** Used to sort effects. In case of conflict, effects will be used in the order of registration. */
-    order: number = Infinity
-  ) {
+  addDefaultEffect(effect: Effect) {
     const defaultEffects = this._defaultEffects;
-    if (!defaultEffects.find(e => e.effect.constructor === effect.constructor)) {
-      const index = defaultEffects.findIndex(e => e.order > order);
+    if (!defaultEffects.find(e => e.id === effect.id)) {
+      const index = defaultEffects.findIndex(e => compareEffects(e, effect) > 0);
       if (index < 0) {
-        defaultEffects.push({effect, order});
+        defaultEffects.push(effect);
       } else {
-        defaultEffects.splice(index, 0, {effect, order});
+        defaultEffects.splice(index, 0, effect);
       }
       this._setEffects(this.effects);
     }
@@ -90,7 +91,7 @@ export default class EffectManager {
     }
     this.effects = nextEffects;
 
-    this._resolvedEffects = nextEffects.concat(this._defaultEffects.map(e => e.effect));
+    this._resolvedEffects = nextEffects.concat(this._defaultEffects);
     // Special case for lighting: only add default instance if no LightingEffect is specified
     if (!effects.some(effect => effect instanceof LightingEffect)) {
       this._resolvedEffects.push(DEFAULT_LIGHTING_EFFECT);
