@@ -114,6 +114,7 @@ export type {
   LayerProps,
   CompositeLayerProps,
   Accessor,
+  AccessorContext,
   AccessorFunction,
   LayerData,
   Unit,
