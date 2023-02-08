@@ -638,8 +638,8 @@ export default class Deck {
   /** Experimental
    * Register a default effect. Effects will be sorted by order, those with a low order will be rendered first
    */
-  _addDefaultEffect(effect: Effect, order?: number) {
-    this.effectManager!.addDefaultEffect(effect, order);
+  _addDefaultEffect(effect: Effect) {
+    this.effectManager!.addDefaultEffect(effect);
   }
 
   // Private Methods

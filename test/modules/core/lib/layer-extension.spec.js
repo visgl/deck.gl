@@ -7,6 +7,7 @@ class MockExtension extends LayerExtension {
   getShaders() {
     return {modules: [{name: 'empty-module', vs: ''}]};
   }
+
   initializeState(context, extension) {
     extension.opts.assert(this instanceof Layer, 'initializeState: Self is layer instance');
     extension.opts.assert(context.gl, 'initializeState: context received');
@@ -23,17 +24,20 @@ class MockExtension extends LayerExtension {
 
     MockExtension.initializeCalled++;
   }
+
   updateState(updateParams, extension) {
     extension.opts.assert(this instanceof Layer, 'updateState: Self is layer instance');
     extension.opts.assert(updateParams.changeFlags, 'updateState: changeFlags received');
 
     MockExtension.updateCalled++;
   }
+
   finalizeState(extension) {
     extension.opts.assert(this instanceof Layer, 'finalizeState: Self is layer instance');
 
     MockExtension.finalizeCalled++;
   }
+
   getNeedsPickingBuffer() {
     return this.props.ext_pickable;
   }
