@@ -130,7 +130,7 @@ function getBoundingBox(viewport: Viewport, zRange: number[] | null, extent: Bou
 /** Get culling bounds in world space */
 export function getCullBounds({
   viewport,
-  z,
+  z = 0,
   cullRect
 }: {
   /** Current viewport */
@@ -139,13 +139,25 @@ export function getCullBounds({
   z: ZRange | number | undefined;
   /** Culling rectangle in screen space */
   cullRect: {x: number; y: number; width: number; height: number};
-}): [number, number, number, number] {
-  const x = cullRect.x - viewport.x;
-  const y = cullRect.y - viewport.y;
-  const {width, height} = cullRect;
+}): [number, number, number, number][] {
+  const subViewports = viewport.subViewports || [viewport];
+  return subViewports.map(v => getCullBoundsInViewport(v, z, cullRect));
+}
 
+function getCullBoundsInViewport(
+  /** Current viewport */
+  viewport: Viewport,
+  /** At altitude */
+  z: ZRange | number,
+  /** Culling rectangle in screen space */
+  cullRect: {x: number; y: number; width: number; height: number}
+): [number, number, number, number] {
   if (!Array.isArray(z)) {
-    const unprojectOption = {targetZ: z || 0};
+    const x = cullRect.x - viewport.x;
+    const y = cullRect.y - viewport.y;
+    const {width, height} = cullRect;
+
+    const unprojectOption = {targetZ: z};
 
     const topLeft = viewport.unproject([x, y], unprojectOption);
     const topRight = viewport.unproject([x + width, y], unprojectOption);
@@ -160,8 +172,8 @@ export function getCullBounds({
     ];
   }
 
-  const bounds0 = getCullBounds({viewport, z: z[0], cullRect});
-  const bounds1 = getCullBounds({viewport, z: z[1], cullRect});
+  const bounds0 = getCullBoundsInViewport(viewport, z[0], cullRect);
+  const bounds1 = getCullBoundsInViewport(viewport, z[1], cullRect);
 
   return [
     Math.min(bounds0[0], bounds1[0]),
