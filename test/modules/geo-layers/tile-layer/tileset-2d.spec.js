@@ -412,6 +412,109 @@ test('Tileset2D#traversal', async t => {
   t.end();
 });
 
+test('Tileset2D#isTileVisible', async t => {
+  const cullRect = {x: 50, y: 48, width: 100, height: 1};
+
+  const testCases = [
+    {
+      title: 'tile visibility for render',
+      viewport: new WebMercatorViewport({
+        width: 200,
+        height: 100,
+        longitude: 0,
+        latitude: 0,
+        zoom: 3
+      }),
+      checks: [{id: '3-3-3', result: true}]
+    },
+    {
+      title: 'culling',
+      viewport: new WebMercatorViewport({
+        width: 200,
+        height: 100,
+        longitude: -170,
+        latitude: 0,
+        zoom: 3
+      }),
+      checks: [
+        {id: '3-3-3', result: false},
+        {id: '0-3-3', result: true},
+        {id: '0-3-3', cullRect, result: true},
+        {id: '0-4-3', result: true},
+        {id: '0-4-3', cullRect, result: false}
+      ]
+    },
+    {
+      title: 'visibility across the 180 meridian',
+      viewport: new WebMercatorViewport({
+        width: 200,
+        height: 100,
+        longitude: -179.9,
+        latitude: 0,
+        zoom: 3,
+        repeat: true
+      }),
+      checks: [
+        {id: '0-3-3', result: true},
+        {id: '0-3-3', cullRect, result: true},
+        {id: '0-4-3', result: true},
+        {id: '0-4-3', cullRect, result: false},
+        {id: '7-3-3', result: true},
+        {id: '7-3-3', cullRect, result: true},
+        {id: '7-4-3', result: true},
+        {id: '7-4-3', cullRect, result: false}
+      ]
+    },
+    {
+      title: 'culling with zRange',
+      viewport: new WebMercatorViewport({
+        width: 200,
+        height: 100,
+        longitude: -179.9,
+        latitude: 0,
+        pitch: 60,
+        zoom: 3,
+        repeat: true
+      }),
+      zRange: [0, 100000],
+      checks: [
+        {id: '0-3-3', cullRect, result: true},
+        {id: '0-4-3', cullRect, result: true},
+        {id: '7-3-3', cullRect, result: true},
+        {id: '7-4-3', cullRect, result: true}
+      ]
+    }
+  ];
+
+  let viewport, options;
+  const updateTileset = () => tileset.update(viewport, options);
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: updateTileset,
+    onTileError: updateTileset
+  });
+
+  for (const testCase of testCases) {
+    t.comment(testCase.title);
+    viewport = testCase.viewport;
+    options = {zRange: testCase.zRange};
+
+    updateTileset();
+    await sleep(10);
+
+    for (const {id, cullRect, result} of testCase.checks) {
+      const tile = tileset._cache.get(id);
+      t.is(
+        tileset.isTileVisible(tile, cullRect),
+        result,
+        `isTileVisible ${cullRect ? 'with cullRect ' : ''}returns correct value for ${id}`
+      );
+    }
+  }
+
+  t.end();
+});
+
 function validateVisibility(strategy, selectedTiles, tiles) {
   /* eslint-disable default-case */
   switch (strategy) {

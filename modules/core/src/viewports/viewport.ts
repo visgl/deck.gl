@@ -210,6 +210,10 @@ export default class Viewport {
     this.unprojectFlat = this.unprojectFlat.bind(this);
   }
 
+  get subViewports(): Viewport[] | null {
+    return null;
+  }
+
   get metersPerPixel(): number {
     return this.distanceScales.metersPerUnit[2] / this.scale;
   }
