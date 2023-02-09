@@ -86,7 +86,7 @@ export default class CollideExtension extends LayerExtension {
     });
   }
 
-  needsPickingBuffer(this: Layer, props: Layer<CollideExtensionProps>['props']): boolean {
-    return props.collideEnabled;
+  getNeedsPickingBuffer(this: Layer<CollideExtensionProps>): boolean {
+    return this.props.collideEnabled;
   }
 }
