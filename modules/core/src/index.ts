@@ -91,6 +91,7 @@ export {default as Tesselator} from './utils/tesselator'; // Export? move to lum
 // Experimental utilities
 export {fillArray as _fillArray, flatten as _flatten} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 export {count as _count} from './utils/count';
+export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
