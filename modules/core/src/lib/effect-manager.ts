@@ -4,9 +4,17 @@ import type {Effect} from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 
+/** Sort two effects. Returns 0 if equal, negative if e1 < e2, positive if e1 > e2 */
+function compareEffects(e1: Effect, e2: Effect): number {
+  const o1 = e1.order ?? Infinity;
+  const o2 = e2.order ?? Infinity;
+  return o1 - o2;
+}
+
 export default class EffectManager {
   effects: Effect[];
   private _resolvedEffects: Effect[] = [];
+  /** Effect instances and order preference pairs, sorted by order */
   private _defaultEffects: Effect[] = [];
   private _needsRedraw: false | string;
 
@@ -16,9 +24,18 @@ export default class EffectManager {
     this._setEffects([]);
   }
 
+  /**
+   * Register a new default effect, i.e. an effect presents regardless of user supplied props.effects
+   */
   addDefaultEffect(effect: Effect) {
-    if (!this._defaultEffects.find(e => e.constructor === effect.constructor)) {
-      this._defaultEffects.push(effect);
+    const defaultEffects = this._defaultEffects;
+    if (!defaultEffects.find(e => e.id === effect.id)) {
+      const index = defaultEffects.findIndex(e => compareEffects(e, effect) > 0);
+      if (index < 0) {
+        defaultEffects.push(effect);
+      } else {
+        defaultEffects.splice(index, 0, effect);
+      }
       this._setEffects(this.effects);
     }
   }
