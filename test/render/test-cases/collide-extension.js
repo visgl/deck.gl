@@ -2,6 +2,8 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {CollideExtension, MaskExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 
+const getYear = d => d.YR_INSTALLED || 1997;
+
 export default [
   {
     name: 'simple',
@@ -10,6 +12,18 @@ export default [
   {
     name: '2x-radius',
     props: {collideTestProps: {radiusScale: 2}}
+  },
+  {
+    name: 'disabled',
+    props: {collideEnabled: false}
+  },
+  {
+    name: 'ascending',
+    props: {getCollidePriority: d => getYear(d) - 2000}
+  },
+  {
+    name: 'descending',
+    props: {getCollidePriority: d => 2000 - getYear(d)}
   }
 ].map(({name, props}) => ({
   name: `collide-effect-${name}`,
@@ -28,7 +42,7 @@ export default [
       getPosition: d => d.COORDINATES,
       getRadius: 10,
       getFillColor: d => {
-        const value = (255 * (2014 - (d.YR_INSTALLED || 1997))) / 21; // range 1997-2014
+        const value = (255 * (2014 - getYear(d))) / 21; // range 1997-2014
         return [value, 0, 255 - value];
       },
       radiusUnits: 'pixels',
