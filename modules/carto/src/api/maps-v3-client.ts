@@ -589,7 +589,8 @@ export async function fetchMap({
     if (geojsonDatasetIds.includes(dataset.id)) {
       const {config} = geojsonLayers.find(({config}) => config.dataId === dataset.id);
       dataset.format = 'geojson';
-      if (config.columns.geojson) {
+      // Support for very old maps. geoColumn was not stored in the past
+      if (!dataset.geoColumn && config.columns.geojson) {
         dataset.geoColumn = config.columns.geojson;
       }
     }
