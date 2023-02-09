@@ -7,6 +7,7 @@ class MockExtension extends LayerExtension {
   getShaders() {
     return {modules: [{name: 'empty-module', vs: ''}]};
   }
+
   initializeState(context, extension) {
     extension.opts.assert(this instanceof Layer, 'initializeState: Self is layer instance');
     extension.opts.assert(context.gl, 'initializeState: context received');
@@ -23,22 +24,29 @@ class MockExtension extends LayerExtension {
 
     MockExtension.initializeCalled++;
   }
+
   updateState(updateParams, extension) {
     extension.opts.assert(this instanceof Layer, 'updateState: Self is layer instance');
     extension.opts.assert(updateParams.changeFlags, 'updateState: changeFlags received');
 
     MockExtension.updateCalled++;
   }
+
   finalizeState(extension) {
     extension.opts.assert(this instanceof Layer, 'finalizeState: Self is layer instance');
 
     MockExtension.finalizeCalled++;
   }
+
+  getNeedsPickingBuffer() {
+    return this.props.ext_pickable;
+  }
 }
 
 MockExtension.defaultProps = {
   ext_getValue: {type: 'accessor', value: 0},
-  ext_enabled: false
+  ext_enabled: false,
+  ext_pickable: false
 };
 
 MockExtension.resetStats = () => {
@@ -60,24 +68,40 @@ test('LayerExtension', t => {
       {
         props: {
           id: 'test-layer',
-          data: [],
+          data: [0, 1, 2],
           ext_getValue: 0,
           extensions: [extension0]
         },
-        onAfterUpdate: () => {
+        onAfterUpdate: ({layer}) => {
           t.is(MockExtension.initializeCalled, 1, 'initializeState called');
           t.is(MockExtension.updateCalled, 1, 'updateState called');
           t.is(MockExtension.finalizeCalled, 0, 'finalizeState called');
+
+          const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+          t.ok(instancePickingColors.state.constant, 'picking buffer is disabled');
         }
       },
       {
         updateProps: {
           extensions: [extension1]
         },
-        onAfterUpdate: () => {
+        onAfterUpdate: ({layer}) => {
           t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
           t.is(MockExtension.updateCalled, 1, 'updateState not called');
           t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+        }
+      },
+      {
+        updateProps: {
+          ext_pickable: true
+        },
+        onAfterUpdate: ({layer}) => {
+          t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
+          t.is(MockExtension.updateCalled, 2, 'updateState not called');
+          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+
+          const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+          t.notOk(instancePickingColors.state.constant, 'picking buffer is enabled');
         }
       },
       {
@@ -86,7 +110,7 @@ test('LayerExtension', t => {
         },
         onAfterUpdate: () => {
           t.is(MockExtension.initializeCalled, 1, 'initializeState not called');
-          t.is(MockExtension.updateCalled, 2, 'updateState called');
+          t.is(MockExtension.updateCalled, 3, 'updateState called');
           t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
         }
       }

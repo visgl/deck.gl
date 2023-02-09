@@ -24,6 +24,8 @@ export type LayersPassRenderOptions = {
   clearCanvas?: boolean;
   layerFilter?: (context: FilterContext) => boolean;
   moduleParameters?: any;
+  /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
+  preRenderStats?: Record<string, any>;
 };
 
 type DrawLayerParameters = {

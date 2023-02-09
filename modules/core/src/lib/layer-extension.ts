@@ -89,6 +89,10 @@ export default abstract class LayerExtension<OptionsT = undefined> {
     return false;
   }
 
+  getNeedsPickingBuffer(this: Layer, extension: this): boolean {
+    return false;
+  }
+
   draw(this: Layer, params: any, extension: this): void {}
 
   finalizeState(this: Layer, context: LayerContext, extension: this): void {}
