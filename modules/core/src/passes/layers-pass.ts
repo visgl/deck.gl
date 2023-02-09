@@ -93,7 +93,6 @@ export default class LayersPass extends Pass {
       const drawLayerParams = this._getDrawLayerParams(viewport, options);
 
       // render this viewport
-      // @ts-expect-error
       const subViewports = viewport.subViewports || [viewport];
       for (const subViewport of subViewports) {
         const stats = this._drawLayersInViewport(
