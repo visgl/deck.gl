@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.24] - Feb 10 2023
+
+- fixed MapboxOverlay props typing (#7585)
+- Fix tile culling in repeating WebMercatorViewport (#7634)
+- Export type AccessorContext from core (#7621)
+
 #### deck.gl [8.8.23] - Jan 18 2023
 
 - CARTO: avoid lines between adjacent cells in QuadbinLayer (#7475)
