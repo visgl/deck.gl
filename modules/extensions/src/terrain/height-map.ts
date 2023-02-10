@@ -18,6 +18,7 @@ export class HeightMap {
   private layersBounds: ([number[], number[]] | null)[] = [];
   /** The union of layersBounds in cartesian space */
   private layersBoundsCommon: Bounds | null = null;
+  private lastViewport: Viewport | null = null;
 
   static isSupported(gl: WebGLRenderingContext): boolean {
     return Framebuffer.isSupported(gl, {colorBufferFloat: true});
@@ -60,7 +61,7 @@ export class HeightMap {
       this.layersBoundsCommon = joinLayerBounds(layers, viewport);
     }
 
-    const viewportChanged = !this.renderViewport || !viewport.equals(this.renderViewport);
+    const viewportChanged = !this.lastViewport || !viewport.equals(this.lastViewport);
 
     if (!this.layersBoundsCommon) {
       this.renderViewport = null;
@@ -69,6 +70,7 @@ export class HeightMap {
       const halfWidth = (bounds[2] - bounds[0]) / 2;
       const halfHeight = (bounds[3] - bounds[1]) / 2;
       this.bounds = bounds;
+      this.lastViewport = viewport;
       this.renderViewport = makeViewport({
         // It's not important whether the geometry is visible in this viewport, because
         // vertices will not use the standard project_to_clipspace in the DRAW_TO_HEIGHT_MAP shader

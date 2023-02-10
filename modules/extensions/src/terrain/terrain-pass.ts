@@ -56,9 +56,6 @@ export class TerrainPass extends LayersPass {
   }
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPassRenderOptions>) {
-    const layers = terrainCover.filterLayers(opts.layers!);
-    if (layers.length === 0) return;
-
     // console.log('Updating terrain cover ' + terrainCover.id)
     const target = terrainCover.getRenderFramebuffer();
     const viewport = terrainCover.renderViewport;
@@ -67,6 +64,7 @@ export class TerrainPass extends LayersPass {
       return;
     }
 
+    const layers = terrainCover.filterLayers(opts.layers!);
     target.resize(viewport);
 
     withParameters(

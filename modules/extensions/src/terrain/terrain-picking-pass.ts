@@ -39,13 +39,6 @@ export class TerrainPickingPass extends PickLayersPass {
   }
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPickingPassRenderOptions>) {
-    const layers = terrainCover.filterLayers(opts.layers!);
-    const terrainLayer = terrainCover.targetLayer;
-    if (terrainLayer.props.pickable) {
-      layers.unshift(terrainLayer);
-    }
-    if (layers.length === 0) return;
-
     // console.log('Updating terrain cover for picking ' + terrainCover.id)
     const target = terrainCover.getPickingFramebuffer();
     const viewport = terrainCover.renderViewport;
@@ -54,6 +47,11 @@ export class TerrainPickingPass extends PickLayersPass {
       return;
     }
 
+    const layers = terrainCover.filterLayers(opts.layers!);
+    const terrainLayer = terrainCover.targetLayer;
+    if (terrainLayer.props.pickable) {
+      layers.unshift(terrainLayer);
+    }
     target.resize(viewport);
 
     withParameters(

@@ -152,7 +152,7 @@ export class TerrainCover {
   }
 
   getPickingFramebuffer(): Framebuffer | null {
-    if (!this.renderViewport) {
+    if (!this.renderViewport || (this.layers.length === 0 && !this.targetLayer.props.pickable)) {
       return null;
     }
     if (!this.pickingFbo) {

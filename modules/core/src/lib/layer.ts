@@ -280,11 +280,6 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
   /** Sets the redraw flag for this layer, will trigger a redraw next animation frame */
   setNeedsRedraw(): void {
     if (this.internalState) {
-      if (!this.internalState.needsRedraw) {
-        for (const extension of this.props.extensions) {
-          extension.onNeedsRedraw.call(this, extension);
-        }
-      }
       this.internalState.needsRedraw = true;
     }
   }
@@ -1220,6 +1215,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       ? attributeManager.getNeedsRedraw(opts)
       : false;
     redraw = redraw || attributeManagerNeedsRedraw;
+
+    if (redraw) {
+      for (const extension of this.props.extensions) {
+        extension.onNeedsRedraw.call(this, extension);
+      }
+    }
 
     this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
     return redraw;

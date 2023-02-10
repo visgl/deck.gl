@@ -3,6 +3,7 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/core';
 import type {Bounds} from '../common/projection-utils';
+import type { TerrainCover } from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
@@ -10,8 +11,7 @@ export type TerrainModuleSettings = {
   heightMap: Texture2D | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture2D;
-  terrainCover: Texture2D | null;
-  terrainCoverBounds?: Bounds | null;
+  terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
   terrainSkipRender?: boolean;
@@ -106,7 +106,6 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         heightMapBounds,
         dummyHeightMap,
         terrainCover,
-        terrainCoverBounds,
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
@@ -125,12 +124,21 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         sampler = heightMap;
         bounds = heightMapBounds!;
       } else if (terrainCover) {
-        mode =
-          terrainSkipRender || opts.pickingActive
+        // This is a terrain layer
+        const isPicking = opts.pickingActive;
+        sampler = isPicking ? terrainCover.getPickingFramebuffer() : terrainCover.getRenderFramebuffer();
+        if (isPicking) {
+          // Never render the layer itself in picking pass
+          mode = TERRAIN_MODE.SKIP;
+        }
+        if (sampler) {
+          mode = mode === TERRAIN_MODE.SKIP
             ? TERRAIN_MODE.USE_COVER_ONLY
             : TERRAIN_MODE.USE_COVER;
-        sampler = terrainCover;
-        bounds = terrainCoverBounds!;
+          bounds = terrainCover.bounds;
+        } else {
+          sampler = dummyHeightMap;
+        }
       }
 
       /* eslint-disable camelcase */

@@ -15,7 +15,7 @@ export class TerrainEffect implements Effect {
   props = null;
   useInPicking = true;
 
-  /** true if inside a picking pass */
+  /** true if picking in the current pass */
   private isPicking: boolean = false;
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
@@ -94,24 +94,13 @@ export class TerrainEffect implements Effect {
   }
 
   getModuleParameters(layer: Layer): TerrainModuleSettings {
-    const terrainCover = this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null;
     const {terrainFittingMode} = layer.state;
-
-    let terrainCoverTexture: Texture2D | null;
-    if (!terrainCover) {
-      terrainCoverTexture = null;
-    } else if (this.isPicking) {
-      terrainCoverTexture = terrainCover.getPickingFramebuffer();
-    } else {
-      terrainCoverTexture = terrainCover.getRenderFramebuffer();
-    }
 
     return {
       heightMap: this.heightMap?.getRenderFramebuffer(),
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap,
-      terrainCover: terrainCoverTexture,
-      terrainCoverBounds: terrainCover?.bounds,
+      terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
       useTerrainHeightMap: terrainFittingMode === 'offset',
       terrainSkipRender: terrainFittingMode === 'drape' || !layer.props.operation.includes('draw')
     };
