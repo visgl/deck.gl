@@ -943,7 +943,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
-      extension.finalizeState.call(this, extension);
+      extension.finalizeState.call(this, this.context, extension);
     }
   }
 
