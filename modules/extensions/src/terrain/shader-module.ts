@@ -3,7 +3,7 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/core';
 import type {Bounds} from '../common/projection-utils';
-import type { TerrainCover } from './terrain-cover';
+import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
@@ -126,15 +126,15 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       } else if (terrainCover) {
         // This is a terrain layer
         const isPicking = opts.pickingActive;
-        sampler = isPicking ? terrainCover.getPickingFramebuffer() : terrainCover.getRenderFramebuffer();
+        sampler = isPicking
+          ? terrainCover.getPickingFramebuffer()
+          : terrainCover.getRenderFramebuffer();
         if (isPicking) {
           // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;
         }
         if (sampler) {
-          mode = mode === TERRAIN_MODE.SKIP
-            ? TERRAIN_MODE.USE_COVER_ONLY
-            : TERRAIN_MODE.USE_COVER;
+          mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
           sampler = dummyHeightMap;

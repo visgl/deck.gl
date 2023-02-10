@@ -76,12 +76,12 @@ export function makeViewport(opts: {
   ]);
 
   const maxSize = MAX_VIEWPORT_SIZE - border * 2;
-  let {width = maxSize, height = maxSize, zoom} = opts;
+  let {width, height, zoom} = opts;
   if (zoom === undefined) {
     // Use width and height to determine zoom
-    const scale = Math.min(width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]));
+    const scale = Math.min(width! / (bounds[2] - bounds[0]), height! / (bounds[3] - bounds[1]));
     zoom = Math.min(Math.log2(scale), 20);
-  } else {
+  } else if (!width || !height) {
     // Use zoom to determine width and height
     const scale = 2 ** zoom;
     width = Math.round(Math.abs(bounds[2] - bounds[0]) * scale);

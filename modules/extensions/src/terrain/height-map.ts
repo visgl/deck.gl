@@ -4,6 +4,8 @@ import {createRenderTarget} from './utils';
 
 import type {Viewport, Layer} from '@deck.gl/core';
 
+const MAP_MAX_SIZE = 2048;
+
 export class HeightMap {
   /** Viewport used to draw into the texture */
   renderViewport: Viewport | null = null;
@@ -67,24 +69,32 @@ export class HeightMap {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
       const bounds = getRenderBounds(this.layersBoundsCommon, viewport);
-      const halfWidth = (bounds[2] - bounds[0]) / 2;
-      const halfHeight = (bounds[3] - bounds[1]) / 2;
       this.bounds = bounds;
       this.lastViewport = viewport;
-      this.renderViewport = makeViewport({
-        // It's not important whether the geometry is visible in this viewport, because
-        // vertices will not use the standard project_to_clipspace in the DRAW_TO_HEIGHT_MAP shader
-        // However the viewport must have the same center and zoom as the screen viewport
-        // So that projection uniforms used for calculating z are the same
-        bounds: [
-          viewport.center[0] - halfWidth,
-          viewport.center[1] - halfHeight,
-          viewport.center[0] + halfWidth,
-          viewport.center[1] + halfHeight
-        ],
-        zoom: viewport.zoom,
-        viewport
-      });
+
+      const scale = viewport.scale;
+      const pixelWidth = (bounds[2] - bounds[0]) * scale;
+      const pixelHeight = (bounds[3] - bounds[1]) * scale;
+
+      this.renderViewport =
+        pixelWidth > 0 || pixelHeight > 0
+          ? makeViewport({
+              // It's not important whether the geometry is visible in this viewport, because
+              // vertices will not use the standard project_to_clipspace in the DRAW_TO_HEIGHT_MAP shader
+              // However the viewport must have the same center and zoom as the screen viewport
+              // So that projection uniforms used for calculating z are the same
+              bounds: [
+                viewport.center[0] - 1,
+                viewport.center[1] - 1,
+                viewport.center[0] + 1,
+                viewport.center[1] + 1
+              ],
+              zoom: viewport.zoom,
+              width: Math.min(pixelWidth, MAP_MAX_SIZE),
+              height: Math.min(pixelHeight, MAP_MAX_SIZE),
+              viewport
+            })
+          : null;
       return true;
     }
     return false;
