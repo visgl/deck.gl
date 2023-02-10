@@ -72,8 +72,7 @@ export class TerrainPass extends LayersPass {
     withParameters(
       this.gl,
       {
-        // blend: true,
-        // blendFunc: [GL.ONE, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        depthTest: false
       },
       () =>
         this.render({

@@ -17,6 +17,8 @@ export class TerrainEffect implements Effect {
 
   /** true if inside a picking pass */
   private isPicking: boolean = false;
+  /** true if should use in the current pass */
+  private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
   private dummyHeightMap: Texture2D;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
@@ -29,7 +31,8 @@ export class TerrainEffect implements Effect {
   initialize(gl: WebGLRenderingContext) {
     this.dummyHeightMap = new Texture2D(gl, {
       width: 1,
-      height: 1
+      height: 1,
+      data: new Uint8Array([0, 0, 0, 0])
     });
     this.terrainPass = new TerrainPass(gl, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(gl, {id: 'terrain-picking'});
@@ -55,9 +58,17 @@ export class TerrainEffect implements Effect {
       }
     }
 
+    // @ts-expect-error pickZ only defined in picking pass
+    if (opts.pickZ) {
+      // Do not update if picking attributes
+      this.isDrapingEnabled = false;
+      return;
+    }
+
     const {viewports, pass} = opts;
     const isPicking = pass.startsWith('picking');
     this.isPicking = isPicking;
+    this.isDrapingEnabled = true;
 
     // TODO - support multiple views?
     const viewport = viewports[0];
@@ -83,7 +94,7 @@ export class TerrainEffect implements Effect {
   }
 
   getModuleParameters(layer: Layer): TerrainModuleSettings {
-    const terrainCover = this.terrainCovers.get(layer.id);
+    const terrainCover = this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null;
     const {terrainFittingMode} = layer.state;
 
     let terrainCoverTexture: Texture2D | null;
@@ -152,15 +163,6 @@ export class TerrainEffect implements Effect {
     viewport: Viewport,
     opts: PreRenderOptions
   ) {
-    if (drapeLayers.length === 0) {
-      // No rerender needed, just disable the texture in the existing terrain covers
-      for (const layer of terrainLayers) {
-        const terrainCover = this.terrainCovers.get(layer.id);
-        terrainCover?.shouldUpdate({layers: drapeLayers});
-      }
-      return;
-    }
-
     // Mark a terrain cover as dirty if one of the drape layers needs redraw
     const layerNeedsRedraw: Record<string, boolean> = {};
     for (const layer of drapeLayers) {

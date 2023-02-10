@@ -85,9 +85,7 @@ export default abstract class LayerExtension<OptionsT = undefined> {
 
   updateState(this: Layer, params: UpdateParameters<Layer>, extension: this): void {}
 
-  getNeedsRedraw(this: Layer, opts: {clearRedrawFlags: boolean}): boolean {
-    return false;
-  }
+  onNeedsRedraw(this: Layer, extension: this): void {}
 
   getNeedsPickingBuffer(this: Layer, extension: this): boolean {
     return false;

@@ -65,15 +65,10 @@ export default class TerrainExtension extends LayerExtension {
     this.setState({terrainFittingMode});
   }
 
-  getNeedsRedraw(this: Layer<{}>): boolean {
+  onNeedsRedraw(this: Layer<{}>): void {
     const state = this.state as TerrainExtensionState;
-    if (state.terrainFittingMode === 'drape' && !state.terrainCoverNeedsRedraw) {
-      // Save needs redraw flag from the layer
-      // This flag will be checked during TerrainEffect.preRender
-      const needsRedraw =
-        this.internalState!.needsRedraw || this.getAttributeManager()!.needsRedraw;
-      state.terrainCoverNeedsRedraw = Boolean(needsRedraw);
+    if (state.terrainFittingMode === 'drape') {
+      state.terrainCoverNeedsRedraw = true;
     }
-    return false;
   }
 }

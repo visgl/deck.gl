@@ -15,6 +15,8 @@ type Tile2DHeader = {
 /** Class to manage draped texture for each terrain layer */
 export class TerrainCover {
   isDirty: boolean = true;
+  /** The terrain layer that this instance belongs to */
+  targetLayer: Layer;
   /** Viewport used to draw into the texture */
   renderViewport: Viewport | null = null;
   /** Bounds of the terrain cover texture, in cartesian space */
@@ -24,7 +26,6 @@ export class TerrainCover {
   private pickingFbo?: Framebuffer;
   private layers: string[] = [];
   private tile: Tile2DHeader | null;
-  private targetLayer: Layer;
   /** Cached version of targetLayer.getBounds() */
   private targetBounds: [number[], number[]] | null = null;
   /** targetBounds in cartesian space */
@@ -151,7 +152,7 @@ export class TerrainCover {
   }
 
   getPickingFramebuffer(): Framebuffer | null {
-    if (!this.renderViewport || this.layers.length === 0) {
+    if (!this.renderViewport) {
       return null;
     }
     if (!this.pickingFbo) {

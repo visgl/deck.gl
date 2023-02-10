@@ -4,6 +4,7 @@ import {
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
+import {withParameters} from '@luma.gl/core';
 import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
@@ -39,6 +40,10 @@ export class TerrainPickingPass extends PickLayersPass {
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPickingPassRenderOptions>) {
     const layers = terrainCover.filterLayers(opts.layers!);
+    const terrainLayer = terrainCover.targetLayer;
+    if (terrainLayer.props.pickable) {
+      layers.unshift(terrainLayer);
+    }
     if (layers.length === 0) return;
 
     // console.log('Updating terrain cover for picking ' + terrainCover.id)
@@ -51,25 +56,34 @@ export class TerrainPickingPass extends PickLayersPass {
 
     target.resize(viewport);
 
-    this.render({
-      ...opts,
-      pickingFBO: target,
-      pass: `terrain-cover-picking-${terrainCover.id}`,
-      layers,
-      effects: [],
-      viewports: [viewport],
-      // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
-      // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
-      cullRect: undefined,
-      deviceRect: viewport,
-      pickZ: opts.pickZ || false
-    });
+    withParameters(
+      this.gl,
+      {
+        depthTest: false
+      },
+      () =>
+        this.render({
+          ...opts,
+          pickingFBO: target,
+          pass: `terrain-cover-picking-${terrainCover.id}`,
+          layers,
+          effects: [],
+          viewports: [viewport],
+          // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
+          // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
+          cullRect: undefined,
+          deviceRect: viewport,
+          pickZ: false
+        })
+    );
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
     if (this.drawIndices[layer.id]) {
       layerIndex = this.drawIndices[layer.id];
     }
-    return super.getLayerParameters(layer, layerIndex, viewport);
+    const parameters = super.getLayerParameters(layer, layerIndex, viewport);
+    parameters.blend = true;
+    return parameters;
   }
 }

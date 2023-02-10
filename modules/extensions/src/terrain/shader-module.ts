@@ -64,9 +64,11 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
   vec2 texCoords = (anchorCommon.xy - terrain_bounds.xy) / terrain_bounds.zw;
-  float terrainZ = texture2D(terrain_map, texCoords).r;
-  geometry.position.z += terrainZ;
-  position = project_common_position_to_clipspace(geometry.position);
+  if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
+    float terrainZ = texture2D(terrain_map, texCoords).r;
+    geometry.position.z += terrainZ;
+    position = project_common_position_to_clipspace(geometry.position);
+  }
 }
     `,
     'fs:#decl': `
