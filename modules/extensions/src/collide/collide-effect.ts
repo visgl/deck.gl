@@ -199,9 +199,13 @@ export default class CollideEffect implements Effect {
     return channelMap;
   }
 
-  getModuleParameters(): {collideFBOs: Record<string, Framebuffer>; dummyCollideMap: Texture2D} {
+  getModuleParameters(layer: Layer): {
+    collideFBO: Framebuffer;
+    dummyCollideMap: Texture2D;
+  } {
+    const {collideGroup} = (layer as Layer<CollideExtensionProps>).props;
     const {collideFBOs, dummyCollideMap} = this;
-    return {collideFBOs, dummyCollideMap};
+    return {collideFBO: collideFBOs[collideGroup], dummyCollideMap};
   }
 
   cleanup(): void {
