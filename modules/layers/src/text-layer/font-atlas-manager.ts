@@ -203,7 +203,7 @@ export default class FontAtlasManager {
       canvas = document.createElement('canvas');
       canvas.width = MAX_CANVAS_WIDTH;
     }
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d', {willReadFrequently: true})!;
 
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
