@@ -1,5 +1,6 @@
 import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
+import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollidePass from './collide-pass';
 import MaskEffect, {MaskPreRenderStats} from '../mask/mask-effect';
@@ -119,23 +120,24 @@ export default class CollideEffect implements Effect {
       return;
     }
 
-    const renderInfoUpdated =
+    const needsRender =
+      viewportChanged ||
       // If render info is new
       renderInfo === oldRenderInfo ||
       // If sublayers have changed
-      oldRenderInfo.layers.length !== renderInfo.layers.length ||
+      !deepEqual(oldRenderInfo.layers, renderInfo.layers, 0) ||
       // If a sublayer's bounds have been updated
       renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i]));
 
     this.channels[collideGroup] = renderInfo;
 
-    if (renderInfoUpdated || viewportChanged) {
+    if (needsRender) {
       this.lastViewport = viewport;
       const collideFBO = this.collideFBOs[collideGroup];
       const collidePass = this.collidePasses[collideGroup];
 
       // Rerender collide FBO
-      // @ts-ignore (2532) This method is only called from preRender where collidePass is defined
+      // This method is only called from preRender where collidePass is defined
       collidePass.renderCollideMap(collideFBO, {
         pass: 'collide',
         layers: renderInfo.layers,
