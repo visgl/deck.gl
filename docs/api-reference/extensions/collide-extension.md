@@ -68,13 +68,35 @@ Enable/disable collisions. If collisions are disabled, all objects are rendered.
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collideGroup` will be considered together when calculating collisions.
 
+For example, here the icon and text features will avoid colliding with each other, but permits collisions with the scatterplot features.
+
+```js
+const layers = [
+  new ScatterplotLayer({
+    ...,
+    extensions: [new CollideExtension()],
+    collideGroup: 'visualization'
+  }),
+  new IconLayer({
+    ...,
+    extensions: [new CollideExtension()],
+    collideGroup: 'legend'
+  }),
+  new TextLayer({
+    ...,
+    extensions: [new CollideExtension()],
+    collideGroup: 'legend'
+  })
+];
+  ```
+
 ##### `collideTestProps` (Object, optional)
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
 ```js
 collideTestProps: {radiusScale: 2}
-`
+```
 
 ##### `getCollidePriority` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
