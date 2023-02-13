@@ -1,10 +1,10 @@
 import test from 'tape-promise/tape';
-import {HeightMap} from '@deck.gl/extensions/terrain/height-map';
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
+import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
+import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LifecycleTester} from '../utils';
 
-test('HeightMap#diffing', async t => {
+test('HeightMapBuilder#diffing', async t => {
   const lifecycle = new LifecycleTester();
   let viewport = new WebMercatorViewport({
     width: 400,
@@ -17,7 +17,7 @@ test('HeightMap#diffing', async t => {
 
   await lifecycle.update({viewport, layers: [terrainLayer]});
 
-  const heightMap = new HeightMap(terrainLayer.context.gl);
+  const heightMap = new HeightMapBuilder(terrainLayer.context.gl);
 
   t.notOk(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),
