@@ -37,7 +37,7 @@ test('CollideEffect#constructor', t => {
   const collideEffect = new CollideEffect();
   t.ok(collideEffect, 'Collide effect created');
   t.ok(collideEffect.useInPicking, 'Collide effect enabled for picking render');
-  t.deepEqual(collideEffect.collidePasses, {}, 'Collide effect created with no passes');
+  t.deepEqual(collideEffect.collideFBOs, {}, 'Collide effect created with no passes');
   t.deepEqual(collideEffect.channels, [], 'Collide effect created with no channels');
   collideEffect.cleanup();
   t.end();
@@ -56,7 +56,7 @@ test('CollideEffect#cleanup', t => {
     ...PRERENDEROPTIONS
   });
 
-  t.ok(collideEffect.collidePasses['COLLIDE_GROUP'], 'CollidePass is created');
+  t.ok(collideEffect.collidePass, 'CollidePass is created');
   t.ok(collideEffect.collideFBOs['COLLIDE_GROUP'], 'Collide FBO is created');
   t.ok(collideEffect.dummyCollideMap, 'Dummy collide map is created');
   t.ok(collideEffect.channels['COLLIDE_GROUP'], 'Channel is created');
@@ -64,7 +64,6 @@ test('CollideEffect#cleanup', t => {
 
   collideEffect.cleanup();
 
-  t.deepEqual(collideEffect.collidePasses, {}, 'Collide passes are removed');
   t.deepEqual(collideEffect.collideFBOs, {}, 'Collide FBOs is removed');
   t.notOk(collideEffect.dummyCollideMap, 'Dummy collide map is deleted');
   t.deepEqual(collideEffect.channels, {}, 'Channels are removed');
@@ -148,7 +147,7 @@ test('CollideEffect#render', t => {
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
-  const collidePass = collideEffect.collidePasses['COLLIDE_GROUP'];
+  const collidePass = collideEffect.collidePass;
   t.ok(collidePass, 'collide pass created');
   const spy = makeSpy(collidePass, 'render');
 
