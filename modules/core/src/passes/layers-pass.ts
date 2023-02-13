@@ -24,6 +24,8 @@ export type LayersPassRenderOptions = {
   clearCanvas?: boolean;
   layerFilter?: (context: FilterContext) => boolean;
   moduleParameters?: any;
+  /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
+  preRenderStats?: Record<string, any>;
 };
 
 type DrawLayerParameters = {
@@ -91,7 +93,6 @@ export default class LayersPass extends Pass {
       const drawLayerParams = this._getDrawLayerParams(viewport, options);
 
       // render this viewport
-      // @ts-expect-error
       const subViewports = viewport.subViewports || [viewport];
       for (const subViewport of subViewports) {
         const stats = this._drawLayersInViewport(
