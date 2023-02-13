@@ -28,7 +28,7 @@ export default class CollideEffect implements Effect {
   order = 1;
 
   private channels: Record<string, RenderInfo> = {};
-  private collidePasses: Record<string, CollidePass> = {};
+  private collidePass?: CollidePass;
   private collideFBOs: Record<string, Framebuffer> = {};
   private dummyCollideMap?: Texture2D;
   private lastViewport?: Viewport;
@@ -62,6 +62,10 @@ export default class CollideEffect implements Effect {
     if (collideLayers.length === 0) {
       this.channels = {};
       return;
+    }
+
+    if (!this.collidePass) {
+      this.collidePass = new CollidePass(gl, {id: 'default-collide'});
     }
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
@@ -134,11 +138,9 @@ export default class CollideEffect implements Effect {
     if (needsRender) {
       this.lastViewport = viewport;
       const collideFBO = this.collideFBOs[collideGroup];
-      const collidePass = this.collidePasses[collideGroup];
 
       // Rerender collide FBO
-      // This method is only called from preRender where collidePass is defined
-      collidePass.renderCollideMap(collideFBO, {
+      this.collidePass!.renderCollideMap(collideFBO, {
         pass: 'collide',
         layers: renderInfo.layers,
         effects,
@@ -181,16 +183,16 @@ export default class CollideEffect implements Effect {
 
     // Create any new passes and remove any old ones
     for (const collideGroup of Object.keys(channelMap)) {
-      if (!this.collidePasses[collideGroup]) {
-        this.createPass(gl, collideGroup);
+      if (!this.collideFBOs[collideGroup]) {
+        this.createFBO(gl, collideGroup);
       }
       if (!this.channels[collideGroup]) {
         this.channels[collideGroup] = channelMap[collideGroup];
       }
     }
-    for (const collideGroup of Object.keys(this.collidePasses)) {
+    for (const collideGroup of Object.keys(this.collideFBOs)) {
       if (!channelMap[collideGroup]) {
-        this.destroyPass(collideGroup);
+        this.destroyFBO(collideGroup);
       }
     }
 
@@ -208,16 +210,14 @@ export default class CollideEffect implements Effect {
       this.dummyCollideMap = undefined;
     }
     this.channels = {};
-    for (const collideGroup of Object.keys(this.collidePasses)) {
-      this.destroyPass(collideGroup);
+    for (const collideGroup of Object.keys(this.collideFBOs)) {
+      this.destroyFBO(collideGroup);
     }
-    this.collidePasses = {};
+    this.collideFBOs = {};
     this.lastViewport = undefined;
   }
 
-  createPass(gl: WebGLRenderingContext, collideGroup: string) {
-    this.collidePasses[collideGroup] = new CollidePass(gl, {id: collideGroup});
-
+  createFBO(gl: WebGLRenderingContext, collideGroup: string) {
     const {width, height} = gl.canvas;
     const collideMap = new Texture2D(gl, {
       width,
@@ -242,8 +242,7 @@ export default class CollideEffect implements Effect {
     });
   }
 
-  destroyPass(collideGroup: string) {
-    delete this.collidePasses[collideGroup];
+  destroyFBO(collideGroup: string) {
     const fbo = this.collideFBOs[collideGroup];
     for (const attachment of Object.values(fbo.attachments as Texture2D[])) {
       attachment.delete();
