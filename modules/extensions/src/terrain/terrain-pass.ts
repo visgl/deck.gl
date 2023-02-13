@@ -1,6 +1,6 @@
 import {withParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
-import {HeightMap} from './height-map-builder';
+import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
 
 import GL from '@luma.gl/constants';
@@ -23,7 +23,7 @@ export class TerrainPass extends LayersPass {
     return result;
   }
 
-  renderHeightMap(heightMap: HeightMap, opts: Partial<TerrainPassRenderOptions>) {
+  renderHeightMap(heightMap: HeightMapBuilder, opts: Partial<TerrainPassRenderOptions>) {
     // console.log('Updating height map')
     const target = heightMap.getRenderFramebuffer();
     const viewport = heightMap.renderViewport;
