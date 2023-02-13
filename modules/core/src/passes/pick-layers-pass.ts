@@ -132,13 +132,17 @@ export default class PickLayersPass extends LayersPass {
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
     const pickParameters = {...layer.props.parameters};
+    const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState || layer.props.operation.includes('terrain')) {
+    if (!this._colorEncoderState) {
       pickParameters.blend = false;
-    } else {
+    } else if (pickable && operation.includes('draw')) {
       Object.assign(pickParameters, PICKING_PARAMETERS);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+    }
+    if (operation.includes('terrain')) {
+      pickParameters.blend = false;
     }
 
     return pickParameters;

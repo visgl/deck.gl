@@ -32,7 +32,7 @@ class MockExtension extends LayerExtension {
     MockExtension.updateCalled++;
   }
 
-  finalizeState(extension) {
+  finalizeState(context, extension) {
     extension.opts.assert(this instanceof Layer, 'finalizeState: Self is layer instance');
 
     MockExtension.finalizeCalled++;
