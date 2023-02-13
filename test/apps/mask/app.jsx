@@ -3,7 +3,6 @@ import React, {useState, useMemo, useCallback} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
-import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
@@ -145,12 +144,12 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
     targets && [
       new GeoJsonLayer({
         id: 'mask',
-        operation: OPERATION.MASK,
+        operation: 'mask',
         data: selectedCounty || []
       }),
       new SolidPolygonLayer({
         id: 'mask2',
-        operation: OPERATION.MASK,
+        operation: 'mask',
         data: selectedCounty2Polygons,
         getPolygon: d => d
       }),

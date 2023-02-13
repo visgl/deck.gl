@@ -18,7 +18,7 @@ export type TerrainModuleSettings = {
 };
 
 /** A model can have one of the following modes */
-const TERRAIN_MODE = {
+export const TERRAIN_MODE = {
   NONE: 0,
   /** A terrain layer rendering encoded ground elevation into the height map */
   WRITE_HEIGHT_MAP: 1,
