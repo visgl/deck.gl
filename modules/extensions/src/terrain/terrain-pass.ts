@@ -1,6 +1,6 @@
 import {withParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
-import {HeightMap} from './height-map';
+import {HeightMap} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
 
 import GL from '@luma.gl/constants';

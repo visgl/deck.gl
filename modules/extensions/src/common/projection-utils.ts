@@ -1,9 +1,6 @@
 import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
-const unitGeospatialViewport = new WebMercatorViewport({width: 1, height: 1});
-const unitNonGeospatialViewport = new OrthographicViewport({width: 1, height: 1, flipY: false});
-
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
 
@@ -17,18 +14,13 @@ export function joinLayerBounds(
   /** A Viewport instance that is used to determine the type of the view */
   viewport: Viewport
 ): Bounds | null {
-  // Each layer may be in a different coordinate system. Convert them to the common space of refViewport.
-  const refViewport: Viewport = viewport.isGeospatial
-    ? unitGeospatialViewport
-    : unitNonGeospatialViewport;
-
   // Join the bounds of layer data
   const bounds: Bounds = [Infinity, Infinity, -Infinity, -Infinity];
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport: refViewport});
-      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport: refViewport});
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
+      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);
@@ -67,9 +59,7 @@ export function makeViewport(opts: {
     return null;
   }
 
-  const refViewport: Viewport = isGeospatial ? unitGeospatialViewport : unitNonGeospatialViewport;
-
-  const centerWorld = refViewport.unprojectPosition([
+  const centerWorld = viewport.unprojectPosition([
     (bounds[0] + bounds[2]) / 2,
     (bounds[1] + bounds[3]) / 2,
     0
@@ -94,6 +84,8 @@ export function makeViewport(opts: {
     }
   }
 
+  // TODO - find a more generic way to construct this viewport
+  // Geospatial viewports may not be web-mercator
   return isGeospatial
     ? new WebMercatorViewport({
         x: border,

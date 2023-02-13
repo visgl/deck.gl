@@ -12,7 +12,13 @@ type Tile2DHeader = {
   bbox: GeoBoundingBox | NonGeoBoundingBox;
 };
 
-/** Class to manage draped texture for each terrain layer */
+/**
+ * Manages the lifecycle of the terrain cover (draped textures over a terrain mesh).
+ * One terrain cover is created for each unique terrain layer (primitive layer with operation:terrain).
+ * It is updated when the terrain source layer's mesh changes or when any of the terrainFittingMode:drape
+ * layers requires redraw.
+ * During the draw call of a terrain layer, the drape texture is overlaid on top of the layer's own color.
+ */
 export class TerrainCover {
   isDirty: boolean = true;
   /** The terrain layer that this instance belongs to */

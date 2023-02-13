@@ -6,14 +6,21 @@ import type {Viewport, Layer} from '@deck.gl/core';
 
 const MAP_MAX_SIZE = 2048;
 
-export class HeightMap {
+/**
+ * Manages the lifecycle of the height map (a framebuffer that encodes elevation).
+ * One instance of height map is is shared across all layers. It is updated when the viewport changes
+ * or when some terrain source layer's data changes.
+ * During the draw call of any terrainFittingMode:offset layers,
+ * the vertex shader reads from this framebuffer to retrieve its z offset.
+ */
+export class HeightMapBuilder {
   /** Viewport used to draw into the texture */
   renderViewport: Viewport | null = null;
   /** Bounds of the height map texture, in cartesian space */
   bounds: Bounds | null = null;
 
-  private fbo?: Framebuffer;
-  private gl: WebGLRenderingContext;
+  protected fbo?: Framebuffer;
+  protected gl: WebGLRenderingContext;
   /** Last rendered layers */
   private layers: Layer[] = [];
   /** Last layer.getBounds() */
@@ -30,6 +37,9 @@ export class HeightMap {
     this.gl = gl;
   }
 
+  /** Returns the height map framebuffer for read/write access.
+   * Returns null when the texture is invalid.
+   */
   getRenderFramebuffer(): Framebuffer | null {
     if (!this.renderViewport) {
       return null;
@@ -40,6 +50,7 @@ export class HeightMap {
     return this.fbo;
   }
 
+  /** Called every render cycle to check if the framebuffer needs update */
   shouldUpdate({layers, viewport}: {layers: Layer[]; viewport: Viewport}): boolean {
     const layersChanged =
       layers.length !== this.layers.length ||

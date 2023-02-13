@@ -19,19 +19,19 @@ export class TerrainPickingPass extends PickLayersPass {
    * so that a picked color can be decoded back to the correct layer.
    * Updated in getRenderableLayers which is called in TerrainEffect.preRender
    */
-  drawIndices: Record<string, number> = {};
+  drawParameters: Record<string, any> = {};
 
   getRenderableLayers(viewport: Viewport, opts: TerrainPickingPassRenderOptions): Layer[] {
     const {layers} = opts;
     const result: Layer[] = [];
-    this.drawIndices = {};
+    this.drawParameters = {};
     this._resetColorEncoder(opts.pickZ);
-    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts, true);
+    const drawParamsByIndex = this._getDrawLayerParams(viewport, opts);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       if (!layer.isComposite && drawParamsByIndex[i].shouldDrawLayer) {
         result.push(layer);
-        this.drawIndices[layer.id] = i;
+        this.drawParameters[layer.id] = drawParamsByIndex[i].layerParameters;
       }
     }
 
@@ -77,8 +77,8 @@ export class TerrainPickingPass extends PickLayersPass {
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    if (this.drawIndices[layer.id]) {
-      layerIndex = this.drawIndices[layer.id];
+    if (this.drawParameters[layer.id]) {
+      return this.drawParameters[layer.id];
     }
     const parameters = super.getLayerParameters(layer, layerIndex, viewport);
     parameters.blend = true;

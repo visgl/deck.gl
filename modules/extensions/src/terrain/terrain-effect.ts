@@ -5,7 +5,7 @@ import {terrainModule, TerrainModuleSettings} from './shader-module';
 import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
-import {HeightMap} from './height-map';
+import {HeightMapBuilder} from './height-map-builder';
 
 import type {Effect, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
@@ -22,7 +22,7 @@ export class TerrainEffect implements Effect {
   /** An empty texture as placeholder */
   private dummyHeightMap: Texture2D;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
-  private heightMap?: HeightMap;
+  private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
   private terrainPickingPass!: TerrainPickingPass;
   /** One texture for each primitive terrain layer, into which the draped layers render */
@@ -37,8 +37,8 @@ export class TerrainEffect implements Effect {
     this.terrainPass = new TerrainPass(gl, {id: 'terrain'});
     this.terrainPickingPass = new TerrainPickingPass(gl, {id: 'terrain-picking'});
 
-    if (HeightMap.isSupported(gl)) {
-      this.heightMap = new HeightMap(gl);
+    if (HeightMapBuilder.isSupported(gl)) {
+      this.heightMap = new HeightMapBuilder(gl);
     } else {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
