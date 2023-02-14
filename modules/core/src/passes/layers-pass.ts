@@ -212,6 +212,12 @@ export default class LayersPass extends Pass {
       if (shouldDrawLayer && layer.props.pickable) {
         renderStatus.pickableCount++;
       }
+
+      // Hack
+      if (layer.postEffect) {
+        layer.postEffect();
+      }
+
       if (layer.isComposite) {
         renderStatus.compositeCount++;
       } else if (shouldDrawLayer) {

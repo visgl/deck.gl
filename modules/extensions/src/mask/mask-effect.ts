@@ -33,6 +33,7 @@ export default class MaskEffect implements Effect {
   private dummyMaskMap?: Texture2D;
   private channels: (Channel | null)[] = [];
   private masks: Record<string, Mask> | null = null;
+  private maskRenderCount: number = 0;
   private maskPass?: MaskPass;
   private maskMap?: Texture2D;
   private lastViewport?: Viewport;
@@ -84,21 +85,22 @@ export default class MaskEffect implements Effect {
 
     // // Debug show FBO contents on screen
     // const color = readPixelsToArray(this.maskMap);
-    // let canvas = document.getElementById('fbo-canvas');
+    // let canvas = document.getElementById('fbo-canvas') as HTMLCanvasElement;
     // if (!canvas) {
     //   canvas = document.createElement('canvas');
     //   canvas.id = 'fbo-canvas';
     //   canvas.width = this.maskMap.width;
     //   canvas.height = this.maskMap.height;
-    //   canvas.style.zIndex = 100;
+    //   canvas.style.zIndex = '100';
     //   canvas.style.position = 'absolute';
-    //   canvas.style.right = 0;
+    //   canvas.style.right = '0';
+    //   canvas.style.top = '0';
     //   canvas.style.border = 'blue 1px solid';
     //   canvas.style.width = '256px';
     //   canvas.style.transform = 'scaleY(-1)';
     //   document.body.appendChild(canvas);
     // }
-    // const ctx = canvas.getContext('2d');
+    // const ctx = canvas.getContext('2d')!;
     // const imageData = ctx.createImageData(this.maskMap.width, this.maskMap.height);
     // for (let i = 0; i < color.length; i += 4) {
     //   imageData.data[i + 0] = color[i + 0];
@@ -174,6 +176,7 @@ export default class MaskEffect implements Effect {
             devicePixelRatio: 1
           }
         });
+        this.maskRenderCount++;
       }
     }
 
@@ -239,10 +242,12 @@ export default class MaskEffect implements Effect {
 
   getModuleParameters(): {
     maskMap: Texture2D;
+    maskRenderCount: number;
     maskChannels: Record<string, Mask> | null;
   } {
     return {
       maskMap: this.masks ? this.maskMap : this.dummyMaskMap,
+      maskRenderCount: this.maskRenderCount,
       maskChannels: this.masks
     };
   }

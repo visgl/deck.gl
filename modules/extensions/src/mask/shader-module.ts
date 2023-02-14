@@ -61,7 +61,6 @@ varying vec2 mask_texCoords;
 
     // Debug: show extent of render target
     // gl_FragColor = vec4(mask_texCoords, 0.0, 1.0);
-    gl_FragColor = texture2D(mask_texture, mask_texCoords);
 
     if (!mask) discard;
   }

@@ -53,7 +53,7 @@ export default abstract class AggregationLayer<
   updateState(opts: UpdateParameters<this>) {
     super.updateState(opts);
     const {changeFlags} = opts;
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || changeFlags.propsChanged) {
       const shaders = this.getShaders({});
       if (shaders && shaders.defines) {
         shaders.defines.NON_INSTANCED_MODEL = 1;
@@ -86,6 +86,16 @@ export default abstract class AggregationLayer<
       pickingActive: 0,
       devicePixelRatio: cssToDeviceRatio(gl)
     });
+
+    // @ts-ignore
+    const effects = this.context.deck?.effectManager?.getEffects();
+    // HACK needed to get maskChannels & maskMap
+    if (effects) {
+      for (const effect of effects) {
+        Object.assign(moduleSettings, effect.getModuleParameters?.(this));
+      }
+    }
+
     return moduleSettings;
   }
 

@@ -196,6 +196,7 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
   state!: AggregationLayer['state'] & {
     supported: boolean;
     colorDomain?: number[];
+    maskRenderCount: number;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture2D;
     zoom?: number;
@@ -232,6 +233,15 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     }
     super.updateState(opts);
     this._updateHeatmapState(opts);
+  }
+
+  postEffect() {
+    const {maskRenderCount} = this.getModuleSettings();
+    const maskChanged = maskRenderCount !== this.state.maskRenderCount;
+    if (maskChanged) {
+      this.setState({maskRenderCount});
+      this._debouncedUpdateWeightmap();
+    }
   }
 
   _updateHeatmapState(opts: UpdateParameters<this>) {
@@ -596,12 +606,34 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
-    const uniforms = {
+    const uniforms: any = {
       radiusPixels,
       commonBounds,
       textureWidth: textureSize,
       weightsScale
     };
+
+    // Process extensions for transform
+    const moduleSettings = this.getModuleSettings();
+    const parameters = {
+      blend: true,
+      depthTest: false,
+      blendFunc: [GL.ONE, GL.ONE],
+      blendEquation: GL.FUNC_ADD
+    };
+    const opts = {moduleParameters: moduleSettings, uniforms, parameters, context: this.context};
+    for (const extension of this.props.extensions) {
+      extension.draw.call(this, opts, extension);
+    }
+
+    // Only instance-based masking affects the weights transform
+    // TODO: do we want to do this? On one hand it makes sense,
+    // but can result in starnge colors as the maxWeightValue is
+    // calculated on the unmasked dataset
+    if (uniforms.mask_enabled) {
+      uniforms.mask_enabled = uniforms.mask_maskByInstance;
+    }
+
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
@@ -611,15 +643,10 @@ export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends Aggrega
     withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
       weightsTransform.run({
         uniforms,
-        parameters: {
-          blend: true,
-          depthTest: false,
-          blendFunc: [GL.ONE, GL.ONE],
-          blendEquation: GL.FUNC_ADD
-        },
+        parameters,
         clearRenderTarget: true,
         attributes: this.getAttributes(),
-        moduleSettings: this.getModuleSettings()
+        moduleSettings
       });
     });
     this._updateMaxWeightValue();

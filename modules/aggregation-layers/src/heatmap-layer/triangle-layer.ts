@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, UpdateParameters} from '@luma.gl/core';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
@@ -39,7 +39,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   static layerName = 'TriangleLayer';
 
   getShaders() {
-    return {vs, fs, modules: [project32]};
+    return super.getShaders({vs, fs, modules: [project32]});
   }
 
   initializeState({gl}: LayerContext): void {
@@ -51,6 +51,16 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     this.setState({
       model: this._getModel(gl)
     });
+  }
+
+  updateState(opts: UpdateParameters<this>) {
+    super.updateState(opts);
+    const {changeFlags} = opts;
+    if (changeFlags.extensionsChanged || changeFlags.propsChanged) {
+      this.setState({
+        model: this._getModel(opts.context.gl)
+      });
+    }
   }
 
   _getModel(gl: WebGLRenderingContext): Model {
@@ -71,6 +81,11 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
     const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
       this.props;
+
+    if (uniforms.mask_enabled) {
+      // Instance based masking happens in weightsTransform
+      uniforms.mask_enabled = !uniforms.mask_maskByInstance;
+    }
 
     model
       .setUniforms({
