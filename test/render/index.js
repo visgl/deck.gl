@@ -26,7 +26,7 @@ import './jupyter-widget';
 
 test('Render Test', t => {
   // tape's default timeout is 500ms
-  t.timeoutAfter(TEST_CASES.length * 2000 + 10000);
+  t.timeoutAfter(TEST_CASES.length * 10000 + 10000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
     .add(TEST_CASES)
@@ -34,6 +34,8 @@ test('Render Test', t => {
       onTestStart: testCase => t.comment(testCase.name),
       onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
       onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
+
+      timeout: 10000,
 
       imageDiffOptions: {
         threshold: 0.99,

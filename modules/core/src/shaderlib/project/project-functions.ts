@@ -14,6 +14,8 @@ import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';
 
+const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
+
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
 // LNG_LAT mode only use the linear scale.
@@ -143,6 +145,12 @@ export function projectPosition(
     fromCoordinateSystem?: CoordinateSystem;
     /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
     fromCoordinateOrigin?: [number, number, number];
+    /** Whether to apply offset mode automatically as does the project shader module.
+     * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
+     * to improve precision in the vertex shader due to the fp32 float limitation.
+     * Use `autoOffset:false` if the returned position should not be dependent on the current viewport.
+     * Default `true` */
+    autoOffset?: boolean;
   }
 ): [number, number, number] {
   const {
@@ -153,12 +161,13 @@ export function projectPosition(
     fromCoordinateSystem,
     fromCoordinateOrigin
   } = normalizeParameters(params);
+  const {autoOffset = true} = params;
 
-  const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
-    viewport,
-    coordinateSystem,
-    coordinateOrigin
-  );
+  const {
+    geospatialOrigin = DEFAULT_COORDINATE_ORIGIN,
+    shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    offsetMode = false
+  } = autoOffset ? getOffsetOrigin(viewport, coordinateSystem, coordinateOrigin) : {};
 
   const worldPosition = getWorldPosition(position, {
     viewport,
