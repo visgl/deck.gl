@@ -85,7 +85,7 @@ export type Texture =
 export type LayerDataProp<DataType = any> =
   | LayerData<DataType>
   | string
-  | AsyncIterable<DataType>
+  | AsyncIterable<DataType[]>
   | Promise<LayerData<DataType>>;
 
 /**
