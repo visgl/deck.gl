@@ -96,28 +96,28 @@ test('CollideEffect#update', t => {
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
-  let parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
+  let parameters = collideEffect.getModuleParameters(TEST_LAYER);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'Add second collide layer');
-  parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers([TEST_LAYER_2], 'Remove first layer');
-  parameters = collideEffect.getModuleParameters();
-  t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
-  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers(
     [TEST_LAYER_2, TEST_LAYER_DIFFERENT_GROUP],
     'Add layer with different collide group'
   );
-  parameters = collideEffect.getModuleParameters();
+  parameters = collideEffect.getModuleParameters(TEST_LAYER);
   t.equal(Object.keys(parameters.collideFBOs).length, 2, 'two collide maps in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP_2'], 'collide map is in parameters');
