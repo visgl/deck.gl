@@ -37,39 +37,26 @@ export default class CollideExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'CollideExtension';
 
-  isEnabled(layer: Layer<CollideExtensionProps>): boolean {
-    return layer.getAttributeManager() !== null;
-  }
-
   getShaders(this: Layer<CollideExtensionProps>): any {
     return {modules: [collide]};
   }
 
   /* eslint-disable camelcase */
   draw(this: Layer<CollideExtensionProps>, {uniforms, context, moduleParameters}: any) {
-    const {collideEnabled, collideGroup} = this.props;
-    const {drawToCollideMap, collideFBOs = {}} = moduleParameters;
-    const collideGroups = Object.keys(collideFBOs);
-    const enabled = collideEnabled && collideGroup && collideGroups.includes(collideGroup);
+    const {collideEnabled} = this.props;
+    const {collideFBO, drawToCollideMap} = moduleParameters;
+    const enabled = collideEnabled && Boolean(collideFBO);
     uniforms.collide_enabled = enabled;
 
     if (drawToCollideMap) {
-      uniforms.collide_sort = Boolean(this.props.getCollidePriority);
-      uniforms.collide_texture = moduleParameters.dummyCollideMap;
-
       // Override any props with those defined in collideTestProps
       // @ts-ignore
       this.props = this.clone(this.props.collideTestProps).props;
-    } else {
-      uniforms.collide_sort = false;
-      uniforms.collide_texture = enabled
-        ? moduleParameters.collideFBOs[collideGroup]
-        : moduleParameters.dummyCollideMap;
     }
   }
 
   initializeState(this: Layer<CollideExtensionProps>, context: LayerContext, extension: this) {
-    if (!extension.isEnabled(this)) {
+    if (this.getAttributeManager() === null) {
       return;
     }
     this.context.deck?._addDefaultEffect(new CollideEffect());

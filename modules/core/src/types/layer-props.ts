@@ -1,5 +1,6 @@
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
+import type LayerExtension from '../lib/layer-extension';
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
@@ -175,7 +176,7 @@ export type LayerProps<DataType = any> = {
   /**
    * Add additional functionalities to this layer.
    */
-  extensions?: any[];
+  extensions?: LayerExtension[];
   /**
    * Add support for additional data formats.
    */

@@ -249,6 +249,12 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       fromCoordinateSystem?: CoordinateSystem;
       /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
       fromCoordinateOrigin?: [number, number, number];
+      /** Whether to apply offset mode automatically as does the project shader module.
+       * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
+       * to improve precision in the vertex shader due to the fp32 float limitation.
+       * Use `autoOffset:false` if the returned position should not be dependent on the current viewport.
+       * Default `true` */
+      autoOffset?: boolean;
     }
   ): [number, number, number] {
     assert(this.internalState);
@@ -943,7 +949,7 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
     this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
-      extension.finalizeState.call(this, extension);
+      extension.finalizeState.call(this, this.context, extension);
     }
   }
 
@@ -1216,9 +1222,10 @@ export default abstract class Layer<PropsT = {}> extends Component<PropsT & Requ
       : false;
     redraw = redraw || attributeManagerNeedsRedraw;
 
-    for (const extension of this.props.extensions) {
-      const extensionNeedsRedraw = extension.getNeedsRedraw.call(this, opts);
-      redraw = redraw || extensionNeedsRedraw;
+    if (redraw) {
+      for (const extension of this.props.extensions) {
+        extension.onNeedsRedraw.call(this, extension);
+      }
     }
 
     this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;

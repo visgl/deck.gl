@@ -6,6 +6,7 @@ export {default as FillStyleExtension} from './fill-style/fill-style';
 export {default as ClipExtension} from './clip/clip';
 export {default as CollideExtension} from './collide/collide';
 export {default as MaskExtension} from './mask/mask';
+export {default as TerrainExtension} from './terrain/terrain';
 
 // Shader module
 export {default as project64} from './fp64/project64';
@@ -18,3 +19,4 @@ export type {FillStyleExtensionProps} from './fill-style/fill-style';
 export type {ClipExtensionProps} from './clip/clip';
 export type {CollideExtensionProps} from './collide/collide';
 export type {MaskExtensionProps} from './mask/mask';
+export type {TerrainExtensionProps} from './terrain/terrain';

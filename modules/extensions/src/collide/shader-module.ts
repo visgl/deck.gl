@@ -1,3 +1,4 @@
+import {Framebuffer, Texture2D} from '@luma.gl/core';
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
@@ -80,9 +81,33 @@ const inject = {
   `
 };
 
+type CollideModuleSettings = {
+  collideFBO?: Framebuffer;
+  drawToCollideMap?: boolean;
+  dummyCollideMap?: Texture2D;
+};
+
+/* eslint-disable camelcase */
+type CollideUniforms = {collide_sort?: boolean; collide_texture?: Framebuffer | Texture2D};
+
+const getCollideUniforms = (
+  opts: CollideModuleSettings | {},
+  uniforms: Record<string, any>
+): CollideUniforms => {
+  if (!opts || !('dummyCollideMap' in opts)) {
+    return {};
+  }
+  const {collideFBO, drawToCollideMap, dummyCollideMap} = opts;
+  return {
+    collide_sort: Boolean(drawToCollideMap),
+    collide_texture: !drawToCollideMap && collideFBO ? collideFBO : dummyCollideMap
+  };
+};
+
 export default {
   name: 'collide',
   dependencies: [project],
   vs,
-  inject
+  inject,
+  getUniforms: getCollideUniforms
 } as ShaderModule;

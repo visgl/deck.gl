@@ -12,9 +12,7 @@ test('CollideExtension', t => {
     collideGroup: 'COLLIDE_GROUP',
 
     // simulate CollideEffect parameters
-    collideFBOs: {
-      COLLIDE_GROUP: 'COLLIDE_TEXTURE'
-    },
+    collideFBO: 'COLLIDE_TEXTURE',
     drawToCollideMap: false,
     dummyCollideMap: 'DUMMY_TEXTURE'
   };
@@ -33,7 +31,7 @@ test('CollideExtension', t => {
     },
     {
       updateProps: {
-        collideGroup: 'NONEXISTENT'
+        collideFBO: null
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].getUniforms();
@@ -44,17 +42,13 @@ test('CollideExtension', t => {
     },
     {
       updateProps: {
-        collideGroup: 'COLLIDE_GROUP',
+        collideFBO: 'COLLIDE_TEXTURE',
         drawToCollideMap: true
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].getUniforms();
         t.ok(uniforms.collide_enabled, 'collide_enabled in uniforms');
-        t.equal(
-          uniforms.collide_sort,
-          false,
-          'collide_sort is disabled when getCollidePriority not set'
-        );
+        t.equal(uniforms.collide_sort, true, 'collide_sort enabled when drawing');
         t.equal(
           uniforms.collide_texture,
           'DUMMY_TEXTURE',
@@ -70,18 +64,6 @@ test('CollideExtension', t => {
         const uniforms = layer.getModels()[0].getUniforms();
         t.ok(uniforms.collide_enabled, 'collide_enabled in uniforms');
         t.ok(uniforms.collide_sort, 'collide_sort enabled when getCollidePriority set');
-      }
-    },
-    {
-      props,
-      onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
-        t.ok(uniforms.collide_enabled, 'collide_enabled in uniforms');
-        t.equal(
-          uniforms.collide_sort,
-          false,
-          'collide_sort is disabled when getCollidePriority not set'
-        );
       }
     }
   ];

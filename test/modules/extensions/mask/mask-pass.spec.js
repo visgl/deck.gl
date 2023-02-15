@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 
-import {Layer, LayerManager, OPERATION, Viewport} from '@deck.gl/core';
+import {Layer, LayerManager, Viewport} from '@deck.gl/core';
 import MaskPass from '@deck.gl/extensions/mask/mask-pass';
 import {gl} from '@deck.gl/test-utils';
 
@@ -11,20 +11,20 @@ class TestLayer extends Layer {
 test('MaskPass#shouldDrawLayer', t => {
   const layers = [
     new TestLayer({
-      id: 'test-default' // operation: OPERATION.DRAW is default for Layer
+      id: 'test-default' // operation: 'draw' is default for Layer
     }),
     new TestLayer({
       id: 'test-explicit-draw',
-      operation: OPERATION.DRAW
+      operation: 'draw'
     }),
     new TestLayer({
       id: 'test-mask-but-hidden',
-      operation: OPERATION.MASK,
+      operation: 'mask',
       visible: false
     }),
     new TestLayer({
       id: 'test-mask',
-      operation: OPERATION.MASK
+      operation: 'mask'
     })
   ];
 

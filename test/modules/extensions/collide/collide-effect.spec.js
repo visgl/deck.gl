@@ -37,7 +37,11 @@ test('CollideEffect#constructor', t => {
   const collideEffect = new CollideEffect();
   t.ok(collideEffect, 'Collide effect created');
   t.ok(collideEffect.useInPicking, 'Collide effect enabled for picking render');
+<<<<<<< HEAD
   t.deepEqual(collideEffect.collidePasses, {}, 'Collide effect created with no passes');
+=======
+  t.deepEqual(collideEffect.collideFBOs, {}, 'Collide effect created with no passes');
+>>>>>>> master
   t.deepEqual(collideEffect.channels, [], 'Collide effect created with no channels');
   collideEffect.cleanup();
   t.end();
@@ -56,7 +60,11 @@ test('CollideEffect#cleanup', t => {
     ...PRERENDEROPTIONS
   });
 
+<<<<<<< HEAD
   t.ok(collideEffect.collidePasses['COLLIDE_GROUP'], 'CollidePass is created');
+=======
+  t.ok(collideEffect.collidePass, 'CollidePass is created');
+>>>>>>> master
   t.ok(collideEffect.collideFBOs['COLLIDE_GROUP'], 'Collide FBO is created');
   t.ok(collideEffect.dummyCollideMap, 'Dummy collide map is created');
   t.ok(collideEffect.channels['COLLIDE_GROUP'], 'Channel is created');
@@ -64,7 +72,10 @@ test('CollideEffect#cleanup', t => {
 
   collideEffect.cleanup();
 
+<<<<<<< HEAD
   t.deepEqual(collideEffect.collidePasses, {}, 'Collide passes are removed');
+=======
+>>>>>>> master
   t.deepEqual(collideEffect.collideFBOs, {}, 'Collide FBOs is removed');
   t.notOk(collideEffect.dummyCollideMap, 'Dummy collide map is deleted');
   t.deepEqual(collideEffect.channels, {}, 'Channels are removed');
@@ -97,6 +108,7 @@ test('CollideEffect#update', t => {
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
+<<<<<<< HEAD
   let parameters = collideEffect.getModuleParameters();
   t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
@@ -112,16 +124,41 @@ test('CollideEffect#update', t => {
   parameters = collideEffect.getModuleParameters();
   t.equal(Object.keys(parameters.collideFBOs).length, 1, 'single collide map in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
+=======
+  let parameters = collideEffect.getModuleParameters(TEST_LAYER);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+
+  preRenderWithLayers([TEST_LAYER, TEST_LAYER_2], 'Add second collide layer');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+
+  preRenderWithLayers([TEST_LAYER_2], 'Remove first layer');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+>>>>>>> master
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   preRenderWithLayers(
     [TEST_LAYER_2, TEST_LAYER_DIFFERENT_GROUP],
     'Add layer with different collide group'
   );
+<<<<<<< HEAD
   parameters = collideEffect.getModuleParameters();
   t.equal(Object.keys(parameters.collideFBOs).length, 2, 'two collide maps in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
   t.ok(parameters.collideFBOs['COLLIDE_GROUP_2'], 'collide map is in parameters');
+=======
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_DIFFERENT_GROUP);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+>>>>>>> master
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   collideEffect.cleanup();
@@ -148,7 +185,11 @@ test('CollideEffect#render', t => {
   };
 
   preRenderWithLayers([TEST_LAYER], 'Initial render');
+<<<<<<< HEAD
   const collidePass = collideEffect.collidePasses['COLLIDE_GROUP'];
+=======
+  const collidePass = collideEffect.collidePass;
+>>>>>>> master
   t.ok(collidePass, 'collide pass created');
   const spy = makeSpy(collidePass, 'render');
 

@@ -21,6 +21,7 @@ import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 import geohashLayerTests from './geohash-layer';
+import terrainLayerTests from './terrain-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
 import scenegraphLayerTests from './scenegraph-layer';
@@ -55,6 +56,7 @@ export default [].concat(
   scenegraphLayerTests,
   viewsTests,
   effectsTests,
-  collideExtensionTests,
-  transitionTests
+  transitionTests,
+  terrainLayerTests,
+  collideExtensionTests
 );

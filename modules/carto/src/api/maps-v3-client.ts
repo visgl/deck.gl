@@ -30,7 +30,7 @@ import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
 
-const MAX_GET_LENGTH = 2048;
+const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 const V3_MINOR_VERSION = '3.1';
 
@@ -589,7 +589,10 @@ export async function fetchMap({
     if (geojsonDatasetIds.includes(dataset.id)) {
       const {config} = geojsonLayers.find(({config}) => config.dataId === dataset.id);
       dataset.format = 'geojson';
-      dataset.geoColumn = config.columns.geojson;
+      // Support for very old maps. geoColumn was not stored in the past
+      if (!dataset.geoColumn && config.columns.geojson) {
+        dataset.geoColumn = config.columns.geojson;
+      }
     }
   });
 
