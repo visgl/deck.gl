@@ -30,7 +30,7 @@ import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
 
-const MAX_GET_LENGTH = 2048;
+const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
 const V3_MINOR_VERSION = '3.1';
 
