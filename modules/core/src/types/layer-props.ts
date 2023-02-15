@@ -76,11 +76,11 @@ export type Texture =
   | ImageBitmap;
 
 /**
- * Default type of `data` property
- *
- * If it's a `string` it's interpreted as URL which passed to `fetch`.
- * If it's a `LayerData` it is expected it's already resolved.
- * If it's promise or async iterable resolves it asynchronously.
+ * Default type of `data` property. Can be either
+ * `LayerData` - the required data type is supplied
+ * `string` it's interpreted as URL which is fetched and parsed (if a matching loader is found). The loader is  expected to return the compatible layer data type.
+ * A `Promise` is expected to resolve to `LayerData` type.
+ * An `AsyncIterable` is expected to deliver chunks of data.
  */
 export type LayerDataProp<DataType = any> =
   | LayerData<DataType>
