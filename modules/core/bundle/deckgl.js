@@ -56,7 +56,7 @@ export default class DeckGL extends Deck {
 
     const viewState = props.viewState || props.initialViewState;
     const isMap = Number.isFinite(viewState && viewState.latitude);
-    const {map = window.mapboxgl} = props;
+    const {map = window.mapboxgl || window.maplibregl} = props;
 
     super({canvas: deckCanvas, ...props});
 
