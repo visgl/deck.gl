@@ -11,7 +11,9 @@ import jupyterTransport from './lib/jupyter-transport';
 import JupyterTransportModel from './lib/jupyter-transport-model';
 import JupyterTransportView from './lib/jupyter-transport-view';
 
-import * as deckBundle from './deck-bundle';
+import * as deckExports from './deck-bundle';
+import * as lumaExports from '@deck.gl/core/scripting/lumagl';
+import * as loadersExports from '@deck.gl/core/scripting/loadersgl';
 
 // Some static assets may be required by the custom widget javascript. The base
 // url for the notebook is not known at build time and is therefore computed dynamically.
@@ -27,7 +29,15 @@ initPlayground();
 
 // Expose deck
 globalThis.deck = globalThis.deck || {};
-Object.assign(globalThis.deck, deckBundle);
+Object.assign(globalThis.deck, deckExports);
+
+// Expose luma
+globalThis.luma = globalThis.luma || {};
+Object.assign(globalThis.luma, lumaExports);
+
+// Expose loaders
+globalThis.loaders = globalThis.loaders || {};
+Object.assign(globalThis.loaders, loadersExports);
 
 export {
   // Transports
