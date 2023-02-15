@@ -62,7 +62,12 @@ export type _GeoJsonLayerProps<DataT extends Feature = Feature> = {
    *   * An URL or Promise that resolves to the above formats.
    *   * loaders.gl's flat GeoJSON format.
    */
-  data: LayerDataProp<Feature> | Feature | Geometry | FeatureCollection | GeometryCollection;
+  data?:
+    | LayerDataProp<DataT>
+    | Feature
+    | Geometry
+    | FeatureCollection
+    | Promise<Feature | Geometry | FeatureCollection>;
 
   /**
    * How to render Point and MultiPoint features in the data.
@@ -339,9 +344,17 @@ type GeoJsonPickingInfo = PickingInfo & {
 export default class GeoJsonLayer<
   DataT extends Feature = Feature,
   ExtraProps = {}
-> extends CompositeLayer<Required<GeoJsonLayerProps<DataT>> & ExtraProps> {
+> extends CompositeLayer<Required<_GeoJsonLayerProps<DataT>> & ExtraProps> {
   static layerName = 'GeoJsonLayer';
   static defaultProps = defaultProps as any;
+
+  constructor(...props: Partial<GeoJsonLayerProps>[]) {
+    super(
+      ...(props as Array<
+        CompositeLayerProps<DataT> & Required<_GeoJsonLayerProps<DataT>> & ExtraProps
+      >)
+    );
+  }
 
   initializeState(): void {
     this.state = {
