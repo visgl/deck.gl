@@ -37,10 +37,6 @@ export default class CollideExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'CollideExtension';
 
-  isEnabled(layer: Layer<CollideExtensionProps>): boolean {
-    return layer.getAttributeManager() !== null;
-  }
-
   getShaders(this: Layer<CollideExtensionProps>): any {
     return {modules: [collide]};
   }
@@ -60,7 +56,7 @@ export default class CollideExtension extends LayerExtension {
   }
 
   initializeState(this: Layer<CollideExtensionProps>, context: LayerContext, extension: this) {
-    if (!extension.isEnabled(this)) {
+    if (this.getAttributeManager() === null) {
       return;
     }
     this.context.deck?._addDefaultEffect(new CollideEffect());

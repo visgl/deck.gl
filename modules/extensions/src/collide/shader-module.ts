@@ -87,16 +87,17 @@ type CollideModuleSettings = {
   dummyCollideMap?: Texture2D;
 };
 
+/* eslint-disable camelcase */
 type CollideUniforms = {collide_sort?: boolean; collide_texture?: Framebuffer | Texture2D};
 
-const getCollideUniforms = (opts, uniforms: Record<string, any>): CollideUniforms => {
-  if (!opts) {
+const getCollideUniforms = (
+  opts: CollideModuleSettings | {},
+  uniforms: Record<string, any>
+): CollideUniforms => {
+  if (!opts || !('dummyCollideMap' in opts)) {
     return {};
   }
   const {collideFBO, drawToCollideMap, dummyCollideMap} = opts;
-  if (!dummyCollideMap) {
-    return {};
-  }
   return {
     collide_sort: Boolean(drawToCollideMap),
     collide_texture: !drawToCollideMap && collideFBO ? collideFBO : dummyCollideMap
