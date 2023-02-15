@@ -1,4 +1,7 @@
-// Cherry-pick luma core exports that are relevant to deck
+/**
+ * Re-exported luma.gl API in the pre-built bundle
+ * Cherry-pick luma core exports that are relevant to deck
+ */
 export {
   // Core classes
   Model,
