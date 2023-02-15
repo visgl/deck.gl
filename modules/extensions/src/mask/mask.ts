@@ -1,8 +1,6 @@
-import {COORDINATE_SYSTEM, LayerExtension, log} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
 import mask from './shader-module';
 import MaskEffect from './mask-effect';
-
-import type {Layer} from '@deck.gl/core';
 
 const defaultProps = {
   maskId: '',

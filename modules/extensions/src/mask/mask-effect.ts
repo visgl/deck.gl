@@ -1,9 +1,9 @@
 import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
 import {Texture2D} from '@luma.gl/core';
-// import {readPixelsToArray} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
 import {getMaskBounds, getMaskViewport, MaskBounds} from './utils';
+// import {debugFBO} from '../utils/debug';
 
 type Mask = {
   /** The channel index */
@@ -24,11 +24,16 @@ type Channel = {
   coordinateSystem: CoordinateSystem;
 };
 
+export type MaskPreRenderStats = {
+  didRender: boolean;
+};
+
 // Class to manage mask effect
 export default class MaskEffect implements Effect {
   id = 'mask-effect';
   props = null;
   useInPicking = true;
+  order = 0;
 
   private dummyMaskMap?: Texture2D;
   private channels: (Channel | null)[] = [];
@@ -40,7 +45,8 @@ export default class MaskEffect implements Effect {
   preRender(
     gl: WebGLRenderingContext,
     {layers, layerFilter, viewports, onViewportActive, views, pass}: PreRenderOptions
-  ): void {
+  ): MaskPreRenderStats {
+    let didRender = false;
     if (!this.dummyMaskMap) {
       this.dummyMaskMap = new Texture2D(gl, {
         width: 1,
@@ -50,14 +56,14 @@ export default class MaskEffect implements Effect {
 
     if (pass.startsWith('picking')) {
       // Do not update on picking pass
-      return;
+      return {didRender};
     }
 
     const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
       this.masks = null;
       this.channels.length = 0;
-      return;
+      return {didRender};
     }
     this.masks = {};
 
@@ -73,40 +79,18 @@ export default class MaskEffect implements Effect {
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
     for (const maskId in channelMap) {
-      this._renderChannel(channelMap[maskId], {
+      const result = this._renderChannel(channelMap[maskId], {
         layerFilter,
         onViewportActive,
         views,
         viewport,
         viewportChanged
       });
+      didRender ||= result;
     }
 
-    // // Debug show FBO contents on screen
-    // const color = readPixelsToArray(this.maskMap);
-    // let canvas = document.getElementById('fbo-canvas');
-    // if (!canvas) {
-    //   canvas = document.createElement('canvas');
-    //   canvas.id = 'fbo-canvas';
-    //   canvas.width = this.maskMap.width;
-    //   canvas.height = this.maskMap.height;
-    //   canvas.style.zIndex = 100;
-    //   canvas.style.position = 'absolute';
-    //   canvas.style.right = 0;
-    //   canvas.style.border = 'blue 1px solid';
-    //   canvas.style.width = '256px';
-    //   canvas.style.transform = 'scaleY(-1)';
-    //   document.body.appendChild(canvas);
-    // }
-    // const ctx = canvas.getContext('2d');
-    // const imageData = ctx.createImageData(this.maskMap.width, this.maskMap.height);
-    // for (let i = 0; i < color.length; i += 4) {
-    //   imageData.data[i + 0] = color[i + 0];
-    //   imageData.data[i + 1] = color[i + 1];
-    //   imageData.data[i + 2] = color[i + 2];
-    //   imageData.data[i + 3] = color[i + 3] + 128;
-    // }
-    // ctx.putImageData(imageData, 0, 0);
+    // debugFBO(this.maskMap, {opaque: true});
+    return {didRender};
   }
 
   private _renderChannel(
@@ -124,10 +108,11 @@ export default class MaskEffect implements Effect {
       viewport: Viewport;
       viewportChanged: boolean;
     }
-  ) {
+  ): boolean {
+    let didRender = false;
     const oldChannelInfo = this.channels[channelInfo.index];
     if (!oldChannelInfo) {
-      return;
+      return didRender;
     }
 
     const maskChanged =
@@ -174,6 +159,8 @@ export default class MaskEffect implements Effect {
             devicePixelRatio: 1
           }
         });
+
+        didRender = true;
       }
     }
 
@@ -184,6 +171,8 @@ export default class MaskEffect implements Effect {
       coordinateOrigin: channelInfo.coordinateOrigin,
       coordinateSystem: channelInfo.coordinateSystem
     };
+
+    return didRender;
   }
 
   /**
