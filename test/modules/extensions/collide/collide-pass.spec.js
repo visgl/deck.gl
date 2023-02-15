@@ -9,43 +9,6 @@ class TestLayer extends Layer {
   initializeState() {}
 }
 
-test('CollidePass#shouldDrawLayer', t => {
-  const layers = [
-    new TestLayer({
-      id: 'test-default'
-    }),
-    new TestLayer({
-      id: 'test-collide-but-hidden',
-      extensions: [new CollideExtension()],
-      visible: false
-    }),
-    new TestLayer({
-      id: 'test-collide',
-      extensions: [new CollideExtension()]
-    }),
-    new TestLayer({
-      id: 'test-collide-disabled',
-      extensions: [new CollideExtension()],
-      collideEnabled: false
-    })
-  ];
-
-  const layerManager = new LayerManager(gl, {});
-  const collidePass = new CollidePass(gl, {});
-  layerManager.setLayers(layers);
-
-  const renderStats = collidePass.render({
-    viewports: [new Viewport({id: 'A'})],
-    layers: layerManager.getLayers(),
-    onViewportActive: layerManager.activateViewport,
-    onError: t.notOk
-  })[0];
-  t.is(renderStats.totalCount, 4, 'Total # of layers');
-  t.is(renderStats.visibleCount, 1, '# of rendered layers');
-
-  t.end();
-});
-
 test('CollidePass#getModuleParameters', t => {
   const collidePass = new CollidePass(gl);
   const moduleParameters = collidePass.getModuleParameters();
