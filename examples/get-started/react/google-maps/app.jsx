@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useMemo} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {Wrapper, Status} from '@googlemaps/react-wrapper';
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
@@ -93,4 +93,5 @@ function Root() {
 }
 
 /* global document */
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

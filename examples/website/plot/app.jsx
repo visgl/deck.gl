@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {OrbitView} from '@deck.gl/core';
 import PlotLayer from './plot-layer';
@@ -61,5 +61,5 @@ export default function App({resolution = 200, showAxis = true, equation = EQUAT
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

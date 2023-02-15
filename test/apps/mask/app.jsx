@@ -1,7 +1,8 @@
 /* global fetch */
 import React, {useState, useMemo, useCallback} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
@@ -251,7 +252,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
       >
-        <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+        <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
       <div style={{position: 'absolute', background: 'white', padding: 10, userSelect: 'none'}}>
         <label>
@@ -282,5 +283,5 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
 fetch(DATA_URL)
   .then(response => response.json())
   .then(({features}) => {
-    render(<App data={features} />, document.getElementById('app'));
+    createRoot(document.getElementById('app')).render(<App data={features} />);
   });

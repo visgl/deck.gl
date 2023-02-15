@@ -7,8 +7,8 @@
     "@deck.gl/core": "^8.4.0",
     "@deck.gl/react": "^8.4.0",
     "@deck.gl/json": "^8.4.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

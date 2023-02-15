@@ -1,8 +1,8 @@
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
-
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
@@ -228,7 +228,7 @@ export default function App({
       getTooltip={getTooltip}
     >
       <MapView id="main">
-        <StaticMap reuseMaps mapStyle={mapStyle} />
+        <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} />
         <SearchBar data={data} onChange={onSelectStation} />
       </MapView>
       {showMinimap && (
@@ -241,9 +241,10 @@ export default function App({
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   load(DATA_URL.STATIONS, CSVLoader, {csv: {delimiter: '\t', skipEmptyLines: true}}).then(data => {
-    render(<App data={data} />, container);
+    root.render(<App data={data} />);
   });
 }

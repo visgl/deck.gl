@@ -1,7 +1,7 @@
 /* global document */
 /* eslint-disable no-console */
 import React, {Component} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, PolygonLayer} from 'deck.gl';
 
 import DataGenerator from './data-generator';
@@ -134,4 +134,5 @@ class Root extends Component {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

@@ -1,6 +1,7 @@
 import React, {useState, useMemo} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
@@ -152,7 +153,7 @@ export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle =
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
 
       {renderTooltip({incidents, fatalities, year, hoverInfo})}
     </DeckGL>
@@ -160,7 +161,8 @@ export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle =
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   const formatRow = d => ({
     ...d,
@@ -170,7 +172,7 @@ export function renderToDOM(container) {
 
   csv(DATA_URL.ACCIDENTS, formatRow, (error, response) => {
     if (!error) {
-      render(<App accidents={response} year={response[0].year} />, container);
+      root.render(<App accidents={response} year={response[0].year} />);
     }
   });
 }

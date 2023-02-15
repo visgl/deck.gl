@@ -1,8 +1,10 @@
 /* global window */
 import React, {Component} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL, {MapView, SimpleMeshLayer, LineLayer, WebMercatorViewport} from 'deck.gl';
-import {StaticMap} from 'react-map-gl';
+
 import {SphereGeometry} from '@luma.gl/core';
 
 import {getCulling, getFrustumBounds} from './frustum-utils';
@@ -100,7 +102,7 @@ class Root extends Component {
         onViewStateChange={this._onViewStateChange}
       >
         <MapView id="main">
-          <StaticMap key="map" mapStyle="mapbox://styles/mapbox/light-v9" />
+          <Map key="map" mapLib={maplibregl} mapStyle="mapbox://styles/mapbox/light-v9" />
         </MapView>
         <MapView id="minimap">
           <div style={MINIMAP_STYLE} />
@@ -112,4 +114,5 @@ class Root extends Component {
 }
 
 /* global document */
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

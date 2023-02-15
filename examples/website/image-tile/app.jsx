@@ -1,6 +1,6 @@
 /* global fetch, DOMParser */
 import React, {useState, useEffect} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 import DeckGL, {OrthographicView, COORDINATE_SYSTEM} from 'deck.gl';
 import {TileLayer} from '@deck.gl/geo-layers';
@@ -96,5 +96,5 @@ export default function App({autoHighlight = true, onTilesLoad}) {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }
