@@ -21,6 +21,35 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-beta.1] - Feb 15 2023
+
+- Better support for maplibre in scripting interface (#7642)
+- CollideExtension (#7375)
+- Add willReadFrequently flag to atlas creation (#7637)
+- TerrainExtension (3/3) (#7608)
+- TerrainExtension (2/3) (#7605)
+- Preparation for CollideExtension (#7625)
+- ComponentState should dereference component on finalize (#7612)
+- chore: bump loaders.gl to 3.3.0-alpha.10 (#7599)
+- Move FILTER_GL_POSITION hook (#7610)
+- TerrainExtension (1/3) (#7604)
+- chore: Reduce eslint warnings (#7583)
+- chore(geo-layers): Breakout Tileset2D (#7578)
+- FillStyleExtension leverages new default props behavior (#7569)
+- Bump loader-utils from 1.2.3 to 1.4.2 (#7561)
+- Update extension classes to leverage new default props behavior (#7563)
+- Handle defaultProps of extensions (#7513)
+- [chore] use vite to bundle examples (#7559)
+- Switch bundler to esbuild (#7546)
+- Update test harness (#7523)
+- Compare loadOptions deeply (#7507)
+- EffectManager improvements (#7515)
+- Update TileLayer documentation (#7476)
+- Use default loader to load icons (#7465)
+- Fix BitmapLayer translucency (#7441)
+- Add maskInverted prop to MaskExtension (#7440)
+- Add missing props to ClipExtension and MaskExtension (#7413)
+- Chore: Fix TS warnings (#7366)
 
 #### deck.gl [8.9.0-alpha.5] - Oct 20 2022
 
@@ -33,7 +62,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - CARTO: fetchMap disable depthTest for point layers (#7332)
 - Fix pydeck render in Google Colab (#7325)
 - Minor fix in widget-tooltip: reset value on every iteration (#7329)
-- Update MapboxOverlay docs (#7320)
 - Fix altitude projection dependence on geometry.worldPosition (#7318)
 - [pydeck-carto] fixed example for H3 strokes (#7306)
 
@@ -44,10 +72,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 #### deck.gl [8.9.0-alpha.3] - Sep 27 2022
 - CARTO: Pass access token in load options (#7287)
 - Improve makeTooltip template in jupyter-widget (#7278)
-- Add configuration attribute in pydeck. Fix css_background_color (#7255)
 - Carto: fetchMap support for custom markers (#7250)
 - Text-Layer: Improve SDF Font Rendering (Text Outlines) (#7212)
-- Add styling functions in pydeck (#7249)
 - CARTO: Support fields when parsing CartoVectorTiles (#7248)
 - CARTO: Tidy up binary loaders (#7194)
 - CARTO: CartoTileLayer picking coordinates correct (#7242)
