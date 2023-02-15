@@ -1,6 +1,6 @@
 /* global document */
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 class Root extends Component {
   constructor(props) {
@@ -25,12 +25,12 @@ class Root extends Component {
 
 // ---- Main ---- //
 
-const container = document.createElement('div');
-document.body.appendChild(container);
+const container = document.body.appendChild(document.createElement('div'));
+const root = createRoot(container);
 
 const render = () => {
   const App = require('./app').default;
-  ReactDOM.render(<Root AppComponent={App} />, container);
+  root.render(<Root AppComponent={App} />);
 };
 
 render();

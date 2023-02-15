@@ -1,6 +1,7 @@
 import React, {useState, useCallback} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
 import {CartoLayer, setDefaultCredentials, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
@@ -109,11 +110,11 @@ export default function App({
       onLoad={rotateCamera}
       onViewStateChange={v => updateViewState(v.viewState)}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 import DeckGL from '@deck.gl/react';
 import {FirstPersonView, COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -95,5 +95,5 @@ export default function App() {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

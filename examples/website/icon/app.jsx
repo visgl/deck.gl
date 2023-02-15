@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
@@ -108,7 +109,7 @@ export default function App({
       onViewStateChange={hideTooltip}
       onClick={expandTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
 
       {renderTooltip(hoverInfo)}
     </DeckGL>
@@ -116,5 +117,5 @@ export default function App({
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

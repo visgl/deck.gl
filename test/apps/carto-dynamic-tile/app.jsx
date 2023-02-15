@@ -1,7 +1,7 @@
 /* global document */
 /* eslint-disable no-console */
 import React, {useState} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {CartoLayer, FORMATS, MAP_TYPES} from '@deck.gl/carto';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -186,4 +186,5 @@ function ObjectSelect({title, obj, value, onSelect}) {
   );
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

@@ -1,7 +1,8 @@
 /* global fetch */
 import React, {useState, useMemo} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
@@ -109,17 +110,18 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   fetch(DATA_URL)
     .then(response => response.json())
     .then(({features}) => {
-      render(<App data={features} />, container);
+      root.render(<App data={features} />);
     });
 }

@@ -1,7 +1,7 @@
 /* global document */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {MVTLayer} from '@deck.gl/geo-layers';
 
@@ -90,4 +90,5 @@ class Root extends PureComponent {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

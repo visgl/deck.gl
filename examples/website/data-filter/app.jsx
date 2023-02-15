@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {render} from 'react-dom';
-
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -118,7 +118,7 @@ export default function App({data, mapStyle = MAP_STYLE}) {
         controller={true}
         getTooltip={getTooltip}
       >
-        <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+        <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
 
       {timeRange && (
@@ -136,7 +136,8 @@ export default function App({data, mapStyle = MAP_STYLE}) {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
   csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(row => ({
@@ -146,7 +147,7 @@ export function renderToDOM(container) {
         depth: Number(row.Depth),
         magnitude: Number(row.Magnitude)
       }));
-      render(<App data={data} />, container);
+      root.render(<App data={data} />);
     }
   });
 }

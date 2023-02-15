@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
 import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
@@ -114,11 +115,11 @@ export default function App({data = DATA_URL, mapStyle = MAP_STYLE}) {
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

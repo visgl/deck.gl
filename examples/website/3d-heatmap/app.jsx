@@ -1,6 +1,7 @@
 import React from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibre from 'maplibre-gl';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
@@ -109,18 +110,19 @@ export default function App({
       controller={true}
       getTooltip={getTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(d => [Number(d.lng), Number(d.lat)]);
-      render(<App data={data} />, container);
+      root.render(<App data={data} />);
     }
   });
 }

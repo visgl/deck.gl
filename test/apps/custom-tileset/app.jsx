@@ -1,7 +1,7 @@
 /* global document */
 /* eslint-disable no-console */
 import React, {useState} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import {BASEMAP} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
@@ -81,4 +81,5 @@ function Root() {
   );
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

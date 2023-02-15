@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
@@ -39,4 +39,5 @@ export default class App extends Component {
 }
 
 /* global document */
-render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<App />);

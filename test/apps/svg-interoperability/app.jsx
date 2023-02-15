@@ -1,7 +1,7 @@
 /* global document, window,*/
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
@@ -228,7 +228,5 @@ class Root extends PureComponent {
   }
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-
-render(<Root />, root);
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

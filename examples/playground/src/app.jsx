@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl';
 import DeckWithMapboxMaps from './deck-with-mapbox-maps';
 import DeckWithGoogleMaps from './deck-with-google-maps';
 
@@ -169,7 +169,7 @@ export class App extends Component {
           id="json-deck"
           {...jsonProps}
           initialViewState={initialViewState}
-          Map={StaticMap}
+          Map={Map}
         />
       );
     }
@@ -209,5 +209,5 @@ export class App extends Component {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

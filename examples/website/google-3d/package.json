@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --open",
     "start-local": "vite --config ../../vite.config.local.mjs",
-    "build": "tsc && vite build"
+    "build": "vite build"
   },
   "dependencies": {
     "@turf/rhumb-bearing": "^6.5.0",
