@@ -18,7 +18,9 @@ export type MapboxOverlayProps = Omit<
   | 'viewState'
   | 'initialViewState'
   | 'controller'
->;
+> & {
+  interleaved?: boolean;
+};
 
 /**
  * Implements Mapbox [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) interface
@@ -31,11 +33,7 @@ export default class MapboxOverlay implements IControl {
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
 
-  constructor(
-    props: MapboxOverlayProps & {
-      interleaved?: boolean;
-    }
-  ) {
+  constructor(props: MapboxOverlayProps) {
     const {interleaved = false, ...otherProps} = props;
     this._interleaved = interleaved;
     this._props = otherProps;

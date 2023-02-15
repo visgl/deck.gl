@@ -1,5 +1,12 @@
 [
   {
+    "name": "I3S Explorer",
+    "url": "https://i3s.actionengine.com/",
+    "image": "/images/examples/arcgis.jpg",
+    "links": {},
+    "description": "Visualization and Debug Tool for I3S 3D geographic data"
+  },
+  {
     "name": "Vizgen Single-Cell MERFISH Spatial Visualizer",
     "url": "https://vizgen.com/applications/#visual",
     "image": "/images/showcase/vizgen_single_cell_spatial.jpg",

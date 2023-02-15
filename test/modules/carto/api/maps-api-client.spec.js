@@ -522,7 +522,7 @@ test('fetchLayerData#post', async t => {
   const accessToken = 'XXX';
   const headers = {'Custom-Header': 'Custom-Header-Value'};
 
-  const source = `SELECT *, '${Array(2048).join('x')}' as r FROM cartobq.testtables.points_10k`;
+  const source = `SELECT *, '${Array(8192).join('x')}' as r FROM cartobq.testtables.points_10k`;
   const aggregationExp = 'avg(value) as value';
   const aggregationResLevel = 4;
   const geoColumn = 'customGeom';
