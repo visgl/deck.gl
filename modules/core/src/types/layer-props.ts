@@ -76,6 +76,19 @@ export type Texture =
   | ImageBitmap;
 
 /**
+ * Default type of `data` property
+ *
+ * If it's a `string` it's interpreted as URL which passed to `fetch`.
+ * If it's a `LayerData` it is expected it's already resolved.
+ * If it's promise or async iterable resolves it asynchronously.
+ */
+export type LayerDataProp<DataType = any> =
+  | LayerData<DataType>
+  | string
+  | AsyncIterable<DataType>
+  | Promise<LayerData<DataType>>;
+
+/**
  * Base Layer prop types
  */
 export type LayerProps<DataType = any> = {
@@ -86,7 +99,7 @@ export type LayerProps<DataType = any> = {
   /**
    * The data to visualize.
    */
-  data?: LayerData<DataType> | string | AsyncIterable<DataType> | Promise<LayerData<DataType>>;
+  data?: LayerDataProp<DataType>;
   /**
    * Callback to determine if two data values are equal.
    */

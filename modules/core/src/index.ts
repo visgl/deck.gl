@@ -114,6 +114,7 @@ export type {
   AccessorContext,
   AccessorFunction,
   LayerData,
+  LayerDataProp,
   Unit,
   Operation,
   Position,

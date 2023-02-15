@@ -29,11 +29,12 @@ import {
   Material,
   UpdateParameters,
   _ConstructorOf,
-  DefaultProps
+  DefaultProps,
+  LayerDataProp
 } from '@deck.gl/core';
 
 import type {BinaryFeatures} from '@loaders.gl/schema';
-import type {Feature} from 'geojson';
+import type {Feature, FeatureCollection, Geometry, GeometryCollection} from 'geojson';
 
 import {replaceInRange} from '../utils';
 import {BinaryFeatureTypes, binaryToFeatureForAccesor} from './geojson-binary';
@@ -50,10 +51,19 @@ import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojso
 
 /** All properties supported by GeoJsonLayer */
 export type GeoJsonLayerProps<DataT extends Feature = Feature> = _GeoJsonLayerProps<DataT> &
-  CompositeLayerProps<DataT>;
+  Omit<CompositeLayerProps<DataT>, 'data'>;
 
 /** Properties added by GeoJsonLayer */
 export type _GeoJsonLayerProps<DataT extends Feature = Feature> = {
+  /**
+   * The GeoJSONLayer accepts any of the following formats passed to the data prop:
+   *   * A valid GeoJSON `FeatureCollection`, `Feature`, `Geometry` or `GeometryCollection` object.
+   *   * An array of GeoJSON Feature objects.
+   *   * An URL or Promise that resolves to the above formats.
+   *   * loaders.gl's flat GeoJSON format.
+   */
+  data: LayerDataProp<Feature> | Feature | Geometry | FeatureCollection | GeometryCollection;
+
   /**
    * How to render Point and MultiPoint features in the data.
    *
@@ -331,7 +341,7 @@ export default class GeoJsonLayer<
   ExtraProps = {}
 > extends CompositeLayer<Required<GeoJsonLayerProps<DataT>> & ExtraProps> {
   static layerName = 'GeoJsonLayer';
-  static defaultProps = defaultProps;
+  static defaultProps = defaultProps as any;
 
   initializeState(): void {
     this.state = {
