@@ -2,7 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
-import maplibre from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
@@ -125,7 +125,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
       controller={true}
       getTooltip={getTooltip}
     >
-      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

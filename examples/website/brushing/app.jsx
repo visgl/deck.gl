@@ -2,7 +2,7 @@
 import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
-import maplibre from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
@@ -180,7 +180,7 @@ export default function App({
       controller={true}
       getTooltip={getTooltip}
     >
-      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

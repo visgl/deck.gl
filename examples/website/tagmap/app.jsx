@@ -2,7 +2,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
-import maplibre from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {TextLayer} from '@deck.gl/layers';
 import TagmapLayer from './tagmap-layer';
@@ -56,7 +56,7 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={{dragRotate: false}}
     >
-      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
-import maplibre from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
@@ -55,7 +55,7 @@ export default function App({
 
   return (
     <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
-      <Map reuseMaps mapLib={maplibre} mapStyle={mapStyle} preventStyleDiffing />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing />
     </DeckGL>
   );
 }
