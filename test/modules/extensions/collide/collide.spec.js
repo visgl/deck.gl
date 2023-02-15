@@ -31,7 +31,7 @@ test('CollideExtension', t => {
     },
     {
       updateProps: {
-        collideGroup: 'NONEXISTENT'
+        collideFBO: null
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = layer.getModels()[0].getUniforms();
@@ -42,7 +42,7 @@ test('CollideExtension', t => {
     },
     {
       updateProps: {
-        collideGroup: 'COLLIDE_GROUP',
+        collideFBO: 'COLLIDE_TEXTURE',
         drawToCollideMap: true
       },
       onAfterUpdate: ({layer}) => {

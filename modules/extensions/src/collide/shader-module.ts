@@ -99,7 +99,7 @@ const getCollideUniforms = (opts, uniforms: Record<string, any>): CollideUniform
   }
   return {
     collide_sort: Boolean(drawToCollideMap),
-    collide_texture: !drawToCollideMap ? collideFBO : dummyCollideMap
+    collide_texture: !drawToCollideMap && collideFBO ? collideFBO : dummyCollideMap
   };
 };
 

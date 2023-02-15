@@ -117,10 +117,11 @@ test('CollideEffect#update', t => {
     [TEST_LAYER_2, TEST_LAYER_DIFFERENT_GROUP],
     'Add layer with different collide group'
   );
-  parameters = collideEffect.getModuleParameters(TEST_LAYER);
-  t.equal(Object.keys(parameters.collideFBOs).length, 2, 'two collide maps in parameters');
-  t.ok(parameters.collideFBOs['COLLIDE_GROUP'], 'collide map is in parameters');
-  t.ok(parameters.collideFBOs['COLLIDE_GROUP_2'], 'collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_2);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
+  t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
+  parameters = collideEffect.getModuleParameters(TEST_LAYER_DIFFERENT_GROUP);
+  t.ok(parameters.collideFBO, 'collide map is in parameters');
   t.ok(parameters.dummyCollideMap, 'dummy collide map is in parameters');
 
   collideEffect.cleanup();
