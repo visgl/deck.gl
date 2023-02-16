@@ -250,12 +250,15 @@ If you choose to use auto packing, then `getIcon` should return an object which 
 the following properties.
 
 - `url` (String, required): url to fetch the icon
-- `height` (Number, required): height of icon
-- `width` (Number, required): width of icon
+- `height` (Number, required): max height of icon
+- `width` (Number, required): max width of icon
 - `id`: (String, optional): unique identifier of the icon, fall back to `url` if not specified
 - `anchorX`, `anchorY`, `mask` are the same as mentioned in `iconMapping`
 
-`IconLayer` use `id` (fallback to `url`) to dedupe icons. If for the same icon identifier, `getIcon` returns different `width` or `height`, `IconLayer` will only apply the first occurrence and ignore the rest of them.
+`IconLayer` uses `id` (fallback to `url`) to dedupe icons. For icons with the same id, even if their sizes differ, `IconLayer` will only define one icon according to the first occurrence and ignore the rest of them. Vice versa, for icons with different ids, even if `url`s are the same, the image will be fetched again to create a new definition with different size, anchor, etc.
+
+The image loaded from `url` is always resized to fit the box defined by `[width, height]` while preserving its aspect ratio.
+
 
 ##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
