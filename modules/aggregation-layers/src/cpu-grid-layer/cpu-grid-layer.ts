@@ -237,7 +237,7 @@ export type _CPUGridLayerProps<DataT> = {
 };
 
 /** Aggregate data into a grid-based heatmap. Aggregation is performed on CPU. */
-export default class CPUGridLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
+export default class CPUGridLayer<DataT = any, ExtraPropsT = unknown> extends AggregationLayer<
   ExtraPropsT & Required<_CPUGridLayerProps<DataT>>
 > {
   static layerName = 'CPUGridLayer';

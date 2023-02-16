@@ -56,7 +56,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   getLineWidth: {type: 'accessor', value: 1}
 };
 
-export default class TextBackgroundLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class TextBackgroundLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
   ExtraPropsT & Required<_TextBackgroundLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

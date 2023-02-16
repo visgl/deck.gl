@@ -9,7 +9,7 @@ const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
 };
 
 // Track the textures that are created by us. They need to be released when they are no longer used.
-const internalTextures: Record<string, Texture2D> = {};
+const internalTextures: Record<string, boolean> = {};
 
 export function createTexture(
   gl: WebGLRenderingContext,

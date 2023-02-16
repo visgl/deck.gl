@@ -76,7 +76,7 @@ type _Tile3DLayerProps<DataT> = {
 };
 
 /** Render 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) */
-export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class Tile3DLayer<DataT = any, ExtraPropsT = unknown> extends CompositeLayer<
   ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {
   static defaultProps = defaultProps as any;

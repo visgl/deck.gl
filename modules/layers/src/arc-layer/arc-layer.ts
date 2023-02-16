@@ -137,7 +137,7 @@ type _ArcLayerProps<DataT> = {
 };
 
 /** Render raised arcs joining pairs of source and target coordinates. */
-export default class ArcLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class ArcLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
   ExtraPropsT & Required<_ArcLayerProps<DataT>>
 > {
   static layerName = 'ArcLayer';

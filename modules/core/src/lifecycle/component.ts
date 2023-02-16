@@ -19,7 +19,7 @@ export type StatefulComponentProps<PropsT> = PropsT & {
   [ASYNC_RESOLVED_SYMBOL]: Partial<PropsT>;
 };
 
-export default class Component<PropsT = {}> {
+export default class Component<PropsT = unknown> {
   static componentName: string = 'Component';
   static defaultProps: Readonly<{}> = {};
 

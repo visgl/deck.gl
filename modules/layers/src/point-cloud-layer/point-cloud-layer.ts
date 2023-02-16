@@ -127,7 +127,7 @@ type _PointCloudLayerProps<DataT> = {
 };
 
 /** Render a point cloud with 3D positions, normals and colors. */
-export default class PointCloudLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class PointCloudLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
   ExtraPropsT & Required<_PointCloudLayerProps<DataT>>
 > {
   static layerName = 'PointCloudLayer';

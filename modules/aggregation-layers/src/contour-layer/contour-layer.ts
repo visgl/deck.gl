@@ -145,7 +145,7 @@ export type _ContourLayerProps<DataT> = {
 };
 
 /** Aggregate data into iso-lines or iso-bands for a given threshold and cell size. */
-export default class ContourLayer<DataT = any, ExtraPropsT = {}> extends GridAggregationLayer<
+export default class ContourLayer<DataT = any, ExtraPropsT = unknown> extends GridAggregationLayer<
   ExtraPropsT & Required<_ContourLayerProps<DataT>>
 > {
   static layerName = 'ContourLayer';

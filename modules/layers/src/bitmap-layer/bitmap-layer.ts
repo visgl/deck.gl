@@ -110,7 +110,7 @@ type _BitmapLayerProps = {
 };
 
 /** Render a bitmap at specified boundaries. */
-export default class BitmapLayer<ExtraPropsT = {}> extends Layer<
+export default class BitmapLayer<ExtraPropsT = unknown> extends Layer<
   ExtraPropsT & Required<_BitmapLayerProps>
 > {
   static layerName = 'BitmapLayer';

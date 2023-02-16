@@ -169,7 +169,7 @@ export type _GPUGridLayerProps<DataT> = {
 };
 
 /** Aggregate data into a grid-based heatmap. Aggregation is performed on GPU (WebGL2 only). */
-export default class GPUGridLayer<DataT = any, ExtraPropsT = {}> extends GridAggregationLayer<
+export default class GPUGridLayer<DataT = any, ExtraPropsT = unknown> extends GridAggregationLayer<
   ExtraPropsT & Required<_GPUGridLayerProps<DataT>>
 > {
   static layerName = 'GPUGridLayer';

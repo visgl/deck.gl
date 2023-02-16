@@ -187,7 +187,7 @@ type _HeatmapLayerProps<DataT> = {
 };
 
 /** Visualizes the spatial distribution of data. */
-export default class HeatmapLayer<DataT = any, ExtraPropsT = {}> extends AggregationLayer<
+export default class HeatmapLayer<DataT = any, ExtraPropsT = unknown> extends AggregationLayer<
   ExtraPropsT & Required<_HeatmapLayerProps<DataT>>
 > {
   static layerName = 'HeatmapLayer';
