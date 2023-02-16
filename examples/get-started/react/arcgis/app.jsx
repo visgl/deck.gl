@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 import {Map} from '@esri/react-arcgis';
 import {loadArcGISModules} from '@deck.gl/arcgis';
@@ -81,4 +81,4 @@ function App() {
 }
 
 /* global document */
-ReactDOM.render(<App />, document.getElementById('root'));
+createRoot(document.getElementById('root')).render(<App />);

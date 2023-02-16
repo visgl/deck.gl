@@ -1,7 +1,8 @@
 /* global document */
 import React, {Component} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 
 import DeckGL, {
   COORDINATE_SYSTEM,
@@ -121,10 +122,11 @@ class Root extends Component {
 
   _renderMap({width, height, viewState}) {
     return (
-      <StaticMap
+      <Map
         {...viewState}
         width={width}
         height={height}
+        mapLib={maplibregl}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
       />
     );
@@ -150,4 +152,5 @@ class Root extends Component {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

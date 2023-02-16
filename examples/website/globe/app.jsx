@@ -1,7 +1,7 @@
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
 
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 import DeckGL from '@deck.gl/react';
 import {
@@ -129,7 +129,8 @@ export default function App({data}) {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   async function loadData(dates) {
     const data = [];
@@ -137,7 +138,7 @@ export function renderToDOM(container) {
       const url = `${DATA_URL}/${date}.csv`;
       const flights = await load(url, CSVLoader, {csv: {skipEmptyLines: true}});
       data.push({flights, date});
-      render(<App data={data} />, container);
+      root.render(<App data={data} />);
     }
   }
 

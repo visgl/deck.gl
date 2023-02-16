@@ -1,7 +1,7 @@
 import React from 'react';
 import {useMemo} from 'react';
 
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -170,12 +170,13 @@ export default function App({data, groupBy = 'Country'}) {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  const root = createRoot(container);
+  root.render(<App />);
 
   /* global fetch */
   fetch(DATA_URL)
     .then(resp => resp.json())
     .then(data => {
-      render(<App data={data} />, container);
+      root.render(<App data={data} />);
     });
 }

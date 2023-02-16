@@ -1,6 +1,6 @@
 /* global fetch */
 import React, {useState, useMemo} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -76,4 +76,5 @@ export default function App() {
   );
 }
 
-render(<App />, document.getElementById('app'));
+const container = document.getElementById('app');
+createRoot(container).render(<App />);

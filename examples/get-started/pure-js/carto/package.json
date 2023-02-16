@@ -9,12 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^8.8.0",
-    "@deck.gl/layers": "^8.8.0",
-    "@deck.gl/geo-layers": "^8.8.0",
-    "@deck.gl/mesh-layers": "^8.8.0",
-    "@deck.gl/carto": "^8.8.0",
-    "mapbox-gl": "^1.13.0"
+    "deck.gl": "^8.8.0",
+    "maplibre-gl": "^2.4.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

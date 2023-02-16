@@ -1,7 +1,7 @@
 /* global window, document */
 /* eslint-disable no-console */
 import React, {Component} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
@@ -85,4 +85,5 @@ class Root extends Component {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

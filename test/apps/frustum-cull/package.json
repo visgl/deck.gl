@@ -4,9 +4,10 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2"
+    "maplibre-gl": "^2.4.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

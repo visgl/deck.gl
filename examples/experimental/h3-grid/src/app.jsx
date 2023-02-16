@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 
 import H3GridLayer from './h3-grid-layer';
 import {getMinZoom} from './h3-utils';
@@ -74,7 +75,7 @@ export default function App() {
         onViewStateChange={onViewStateChange}
         getTooltip={info => info.object}
       >
-        <StaticMap mapStyle={MAP_STYLE} />
+        <Map mapLib={maplibregl} mapStyle={MAP_STYLE} />
       </DeckGL>
       <div style={CONTROL_PANEL_STYLE}>
         <div>Resolution: {resolution}</div>
@@ -93,4 +94,5 @@ export default function App() {
 
 /* global document */
 document.body.style.overflow = 'hidden';
-render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<App />);

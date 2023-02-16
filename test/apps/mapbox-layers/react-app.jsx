@@ -1,8 +1,8 @@
 /* global document */
 import React, {useState, useRef, useCallback} from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';
 
@@ -93,7 +93,7 @@ function App() {
       layerFilter={layerFilter}
     >
       {glContext && (
-        <StaticMap
+        <Map
           ref={mapRef}
           gl={glContext}
           mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
@@ -105,4 +105,5 @@ function App() {
   );
 }
 
-render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<App />);

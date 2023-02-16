@@ -1,6 +1,7 @@
 import React from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
@@ -40,11 +41,11 @@ export default function App({
 
   return (
     <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

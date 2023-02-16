@@ -1,6 +1,7 @@
 /* global document */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import App from './app';
 
-ReactDOM.render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<App />);

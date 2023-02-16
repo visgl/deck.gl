@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -63,4 +63,5 @@ function Root() {
 }
 
 /* global document */
-render(<Root />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);

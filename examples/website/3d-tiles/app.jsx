@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
@@ -54,11 +55,11 @@ export default function App({
 
   return (
     <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing />
     </DeckGL>
   );
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  createRoot(container).render(<App />);
 }

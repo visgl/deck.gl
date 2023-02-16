@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import BezierGraphLayer from './bezier-graph-layer';
@@ -25,4 +25,5 @@ export default function App({data = SAMPLE_GRAPH}) {
 }
 
 /* global document */
-render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.getElementById('app');
+createRoot(container).render(<App />);

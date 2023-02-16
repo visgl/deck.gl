@@ -6,13 +6,12 @@
   "scripts": {
     "start": "vite --open",
     "start-local": "vite --config ../../vite.config.local.mjs",
-    "build": "tsc && vite build"
+    "build": "vite build"
   },
   "dependencies": {
     "deck.gl": "^8.8.0",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

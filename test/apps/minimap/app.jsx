@@ -1,7 +1,8 @@
 /* global window */
 import React, {Component} from 'react';
-import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {View, MapView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -152,14 +153,16 @@ export class App extends Component {
         views={VIEWS}
         onViewStateChange={this._onViewStateChange}
       >
-        <StaticMap
+        <Map
           reuseMaps
+          mapLib={maplibregl}
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
           preventStyleDiffing={true}
         />
         <View id="minimap">
-          <StaticMap
+          <Map
             reuseMaps
+            mapLib={maplibregl}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
             preventStyleDiffing={true}
           />
@@ -170,4 +173,5 @@ export class App extends Component {
 }
 
 /* global document */
-render(<App />, document.body.appendChild(document.createElement('div')));
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<App />);

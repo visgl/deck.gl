@@ -1,4 +1,4 @@
-import mapboxgl from 'mapbox-gl';
+import maplibregl from 'maplibre-gl';
 import {Deck} from '@deck.gl/core';
 import {fetchMap} from '@deck.gl/carto';
 
@@ -10,7 +10,7 @@ fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
 
   // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
   const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
-  const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
+  const map = new maplibregl.Map({container: 'map', style: MAP_STYLE, interactive: false});
   deck.setProps({
     onViewStateChange: ({viewState}) => {
       const {longitude, latitude, ...rest} = viewState;
