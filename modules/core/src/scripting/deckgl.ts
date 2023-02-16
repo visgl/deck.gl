@@ -1,8 +1,11 @@
 /* global window, document */
-/* eslint-disable max-statements */
+/* eslint-disable max-statements, import/no-extraneous-dependencies */
+
+// react-map-gl is NOT a dependency of this package
+// This class is only supposed to be used via the pre-built bundle
 import Mapbox from 'react-map-gl/dist/esm/mapbox/mapbox';
 
-import {Deck} from '../src';
+import Deck, {DeckProps} from '../lib/deck';
 
 const CANVAS_STYLE = {
   position: 'absolute',
@@ -41,12 +44,24 @@ function createCanvas(props) {
   return {container, mapCanvas, deckCanvas};
 }
 
+type DeckGLProps = DeckProps & {
+  /** DOM element to add deck.gl canvas to */
+  container?: Element;
+  /** base map library, mapboxgl or maplibregl */
+  map?: object;
+};
+
 /**
- * @params container (Element) - DOM element to add deck.gl canvas to
- * @params map (Object) - map API. Set to falsy to disable
+ * This is the scripting interface with additional logic to sync Deck with a mapbox-compatible base map
+ * This class is intentionally NOT exported by package root (index.ts) to keep the core module
+ * base map provider neutral.
+ * Only exposed via the pre-built deck.gl bundle
  */
 export default class DeckGL extends Deck {
-  constructor(props = {}) {
+  /** Base map instance */
+  private _map: any;
+
+  constructor(props: DeckGLProps) {
     if (typeof document === 'undefined') {
       // Not browser
       throw Error('Deck can only be used in the browser');
@@ -56,10 +71,11 @@ export default class DeckGL extends Deck {
 
     const viewState = props.viewState || props.initialViewState;
     const isMap = Number.isFinite(viewState && viewState.latitude);
-    const {map = window.mapboxgl || window.maplibregl} = props;
+    const {map = globalThis.mapboxgl || globalThis.maplibregl} = props;
 
     super({canvas: deckCanvas, ...props});
 
+    // @ts-expect-error map lib is not typed
     if (map && map.Map) {
       // Default create mapbox map
       this._map =
@@ -73,19 +89,6 @@ export default class DeckGL extends Deck {
     } else {
       this._map = map;
     }
-
-    // Update base map
-    this._onBeforeRender = params => {
-      this.onBeforeRender(params);
-      if (this._map) {
-        const viewport = this.getViewports()[0];
-        this._map.setProps({
-          width: viewport.width,
-          height: viewport.height,
-          viewState: viewport
-        });
-      }
-    };
   }
 
   getMapboxMap() {
@@ -101,22 +104,23 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
-    // Replace user callback with our own
-    // `setProps` is first called in parent class constructor
-    // During which this._onBeforeRender is not defined
-    // It is called a second time in _onRendererInitialized with all current props
-    if (
-      'onBeforeRender' in props &&
-      this._onBeforeRender &&
-      props.onBeforeRender !== this._onBeforeRender
-    ) {
-      this.onBeforeRender = props.onBeforeRender;
-      props.onBeforeRender = this._onBeforeRender;
-    }
     if ('mapStyle' in props && this._map) {
       this._map._map.setStyle(props.mapStyle);
     }
 
     super.setProps(props);
+  }
+
+  _drawLayers(redrawReason: string, options: any) {
+    // Update the base map
+    if (this._map) {
+      const viewport = this.getViewports()[0];
+      this._map.setProps({
+        width: viewport.width,
+        height: viewport.height,
+        viewState: viewport
+      });
+    }
+    super._drawLayers(redrawReason, options);
   }
 }
