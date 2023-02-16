@@ -60,7 +60,7 @@ export function getDeckInstance({
     });
     // If using the WebGLContext created by deck (React use case), we use deck's viewState to drive the map.
     // Otherwise (pure JS use case), we use the map's viewState to drive deck.
-    map.on('move', () => onMapMove(deckInstance, map));
+    map.on('move', () => deckInstance.isInitialized && onMapMove(deckInstance, map));
   }
 
   if (deck) {
