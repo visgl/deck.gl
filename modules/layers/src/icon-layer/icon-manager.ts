@@ -74,22 +74,30 @@ function nextPowOfTwo(number: number): number {
 function resizeImage(
   ctx: CanvasRenderingContext2D,
   imageData: HTMLImageElement | ImageBitmap,
-  width: number,
-  height: number
-): HTMLImageElement | HTMLCanvasElement | ImageBitmap {
-  if (width === imageData.width && height === imageData.height) {
-    return imageData;
+  maxWidth: number,
+  maxHeight: number
+): {
+  data: HTMLImageElement | HTMLCanvasElement | ImageBitmap;
+  width: number;
+  height: number;
+} {
+  const resizeRatio = Math.min(maxWidth / imageData.width, maxHeight / imageData.height);
+  const width = Math.floor(imageData.width * resizeRatio);
+  const height = Math.floor(imageData.height * resizeRatio);
+
+  if (resizeRatio === 1) {
+    // No resizing required
+    return {data: imageData, width, height};
   }
 
   ctx.canvas.height = height;
   ctx.canvas.width = width;
 
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, width, height);
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, imageData.width, imageData.height, 0, 0, width, height);
-
-  return ctx.canvas;
+  return {data: ctx.canvas, width, height};
 }
 
 function getIconId(icon: UnpackedIcon): string {
@@ -426,17 +434,21 @@ export default class IconManager {
       load(icon.url, this._loadOptions)
         .then(imageData => {
           const id = getIconId(icon);
-          const {x, y, width, height} = this._mapping[id];
 
-          const data = resizeImage(ctx, imageData, width, height);
+          const iconDef = this._mapping[id];
+          const {x, y, width: maxWidth, height: maxHeight} = iconDef;
+
+          const {data, width, height} = resizeImage(ctx, imageData, maxWidth, maxHeight);
 
           this._texture.setSubImageData({
             data,
-            x,
-            y,
+            x: x + (maxWidth - width) / 2,
+            y: y + (maxHeight - height) / 2,
             width,
             height
           });
+          iconDef.width = width;
+          iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
           this._texture.generateMipmap();
