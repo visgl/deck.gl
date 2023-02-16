@@ -1,4 +1,4 @@
-import * as deckBundle from '../deck-bundle';
+import {Layer} from '@deck.gl/core';
 
 import {Transport} from '@deck.gl/json';
 
@@ -84,7 +84,7 @@ export function processDataBuffer({binary, convertedJson}) {
 // Filters circular references on JSON string conversion
 function filterJsonValue(key, value) {
   // eslint-disable-next-line
-  return value instanceof deckBundle.Layer ? value.id : value;
+  return value instanceof Layer ? value.id : value;
 }
 
 // Handles a general event
