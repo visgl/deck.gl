@@ -3,7 +3,7 @@ import {Framebuffer} from '@luma.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
-import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../common/projection-utils';
+import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
 
 // TODO - import from loaders when Tileset2D is split out
 type GeoBoundingBox = {west: number; north: number; east: number; south: number};
