@@ -9406,10 +9406,10 @@ octokit-pagination-methods@^1.1.0:
   resolved "https://registry.yarnpkg.com/octokit-pagination-methods/-/octokit-pagination-methods-1.1.0.tgz#cf472edc9d551055f9ef73f6e42b4dbb4c80bea4"
   integrity sha512-fZ4qZdQ2nxJvtcasX7Ghl+WlWS/d9IgnBIwFZXVNNZUmzpno91SX5bc5vuxiuKoCtK78XxGGNuSCrDC7xYB3OQ==
 
-ocular-dev-tools@2.0.0-alpha.7:
-  version "2.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.7.tgz#108859a5d5863fb0d76fbdbaeddbea469e442347"
-  integrity sha512-JsEm3O6y1b8Ot7r7uw+WWADzcbMgmpS46xg/b6jNTPYcojCo3XfDN4YvsQaBecmfAWA/FXA3XL0+19MF3F9RNw==
+ocular-dev-tools@2.0.0-alpha.8:
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.8.tgz#07782d7cb9d8fd312ee55f3f3f94d486c721c903"
+  integrity sha512-NlM7EqY4nCU7WgVdgSBXgp05a1SKCsJSuzHUKxieRN6+R1SQdkn6L+Fo+THNWCaMS8jtBstzoSfL73xmateHtQ==
   dependencies:
     "@babel/cli" "^7.14.5"
     "@babel/core" "^7.14.5"

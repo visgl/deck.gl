@@ -2,7 +2,7 @@
  * Pulls together all deck.gl dependencies used
  * in @deck.gl/jupyter-widget
  */
-export * from '../../core/bundle';
+export * from '@deck.gl/core';
 export * from '@deck.gl/layers';
 export * from '@deck.gl/aggregation-layers';
 export * from '@deck.gl/geo-layers';

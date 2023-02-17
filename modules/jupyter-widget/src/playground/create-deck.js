@@ -14,7 +14,10 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {addSupportComponents} from '../lib/components/index';
 
 /* eslint-disable import/namespace */
-import * as deck from '../deck-bundle';
+import * as deckExports from '../deck-bundle';
+import {COORDINATE_SYSTEM, log, WebMercatorViewport} from '@deck.gl/core';
+import {JSONConverter} from '@deck.gl/json';
+import DeckGL from '@deck.gl/core/scripting/deckgl';
 
 const classesFilter = x => x.charAt(0) === x.charAt(0).toUpperCase();
 const functionsFilter = x => x.charAt(0) === x.charAt(0).toLowerCase() && x.charAt(0) !== '_';
@@ -31,17 +34,17 @@ function extractElements(library = {}, filter) {
 
 // Handle JSONConverter and loaders configuration
 const jsonConverterConfiguration = {
-  classes: extractElements(deck, classesFilter),
+  classes: extractElements(deckExports, classesFilter),
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM: deck.COORDINATE_SYSTEM,
+    COORDINATE_SYSTEM,
     GL: GLConstants
   }
 };
 
 registerLoaders([CSVLoader]);
 
-const jsonConverter = new deck.JSONConverter({
+const jsonConverter = new JSONConverter({
   configuration: jsonConverterConfiguration
 });
 
@@ -123,7 +126,7 @@ function createStandaloneFromProvider({
         onHover: info => handleEvent('deck-hover-event', info),
         onResize: size => handleEvent('deck-resize-event', size),
         onViewStateChange: ({viewState, interactionState, oldViewState}) => {
-          const viewport = new deck.WebMercatorViewport(viewState);
+          const viewport = new WebMercatorViewport(viewState);
           viewState.nw = viewport.unproject([0, 0]);
           viewState.se = viewport.unproject([viewport.width, viewport.height]);
           handleEvent('deck-view-state-change-event', viewState);
@@ -142,8 +145,8 @@ function createStandaloneFromProvider({
 
   switch (mapProvider) {
     case 'mapbox':
-      deck.log.info('Using Mapbox base maps')();
-      return new deck.DeckGL({
+      log.info('Using Mapbox base maps')();
+      return new DeckGL({
         ...sharedProps,
         ...props,
         map: mapboxgl,
@@ -151,22 +154,22 @@ function createStandaloneFromProvider({
         onLoad: modifyMapboxElements
       });
     case 'carto':
-      deck.log.info('Using Carto base maps')();
-      return new deck.DeckGL({
+      log.info('Using Carto base maps')();
+      return new DeckGL({
         map: mapboxgl,
         ...sharedProps,
         ...props
       });
     case 'google_maps':
-      deck.log.info('Using Google Maps base maps')();
+      log.info('Using Google Maps base maps')();
       return createGoogleMapsDeckOverlay({
         ...sharedProps,
         ...props,
         googleMapsKey
       });
     default:
-      deck.log.info('No recognized map provider specified')();
-      return new deck.DeckGL({
+      log.info('No recognized map provider specified')();
+      return new DeckGL({
         ...sharedProps,
         ...props,
         map: null,

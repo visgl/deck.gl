@@ -2,6 +2,7 @@ import test from 'tape-promise/tape';
 
 import {JupyterTransportModel} from '@deck.gl/jupyter-widget';
 import {createTestModel} from './mock-widget-base';
+import {VERSION} from '@deck.gl/core';
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
@@ -20,9 +21,9 @@ function getDeckModel(state) {
 
 test('jupyter-widget getters should be properly configured', t => {
   t.equal(JupyterTransportModel.model_module, '@deck.gl/jupyter-widget');
-  t.equal(JupyterTransportModel.model_module_version, 'untranspiled source');
+  t.equal(JupyterTransportModel.model_module_version, VERSION);
   t.equal(JupyterTransportModel.view_module, '@deck.gl/jupyter-widget');
-  t.equal(JupyterTransportModel.view_module_version, 'untranspiled source');
+  t.equal(JupyterTransportModel.view_module_version, VERSION);
   t.equal(JupyterTransportModel.model_name, 'JupyterTransportModel');
   t.equal(JupyterTransportModel.view_name, 'JupyterTransportView');
   t.end();

@@ -1,6 +1,8 @@
 import test from 'tape';
 import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
 import {gl} from '@deck.gl/test-utils';
+import {isBrowser} from '@probe.gl/env';
+import {loadImage} from 'canvas';
 
 const DATA = [
   {
@@ -240,4 +242,57 @@ test('IconManager#events', t => {
     width: 64,
     height: 64
   }));
+});
+
+test('IconManager#resize', t => {
+  // 16x16
+  const testImage =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAACXBIWXMAAD2EAAA9hAHVrK90AAAAjElEQVQYlXWPMQrCQBBFn7NJI9oobraz1kqv4zk9h4iCEDsLq4gBR4LgGi3WNRhxmj88Zv6f6Sz5LuEPSNMWsLYFnHs3SRBjMY8I+iPoCpMKCiUBHUwFGFPvNKwcynkPuK40ml5ygFyblAzvyZoUcec1M7etAbMAhrfN3R+FKk6UJ+C5Nx+PcFKQn29fOzIjztSX8AwAAAAASUVORK5CYII=';
+  let updateCount = 0;
+  const onUpdate = () => {
+    updateCount++;
+    if (updateCount > 3) {
+      t.is(iconManager.getIconMapping({id: 'no-resize'}).width, 16, 'no-resize');
+      t.is(iconManager.getIconMapping({id: 'down-size'}).width, 12, 'down-size');
+      t.is(
+        iconManager.getIconMapping({id: 'preserve-aspect-ratio'}).width,
+        24,
+        'preserve-aspect-ratio'
+      );
+      t.end();
+    }
+  };
+
+  const onError = evt => {
+    t.fail(evt.error.message);
+    t.end();
+  };
+
+  const iconManager = new IconManager(gl, {onUpdate, onError});
+
+  // Under node the canvas context is polyfilled with the `canvas` module
+  // `loadImage` from `canvas` will return an Image instance that is compatible with the context methods
+  const nodeImageLoader = {
+    id: 'node-image',
+    name: 'node-image',
+    mimeTypes: ['image/png'],
+    extensions: [],
+    parse: () => loadImage(testImage)
+  };
+
+  iconManager.setProps({
+    autoPacking: true,
+    loadOptions: isBrowser() ? {} : [nodeImageLoader]
+  });
+  iconManager.packIcons(
+    [
+      {id: 'no-resize', width: 16, height: 16},
+      {id: 'down-size', width: 12, height: 12},
+      {id: 'preserve-aspect-ratio', width: 32, height: 24}
+    ],
+    d => ({
+      ...d,
+      url: testImage
+    })
+  );
 });
