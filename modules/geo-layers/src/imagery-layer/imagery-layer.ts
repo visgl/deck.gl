@@ -193,18 +193,16 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   // HELPERS
 
   private _nextRequestId: number = 0;
-  private _timeoutId: number | null = null;
+  private _timeoutId: any;
 
   /** Global counter for issuing unique request ids */
-  getRequestId() {
+  getRequestId(): number {
     return this._nextRequestId++;
   }
 
   /** Runs an action in the future, cancels it if the new action is issued before it executes */
   debounce(fn: Function, ms = 500): void {
-    if (typeof this._timeoutId === 'number') {
-      clearTimeout(this._timeoutId);
-    }
+    clearTimeout(this._timeoutId);
     this._timeoutId = setTimeout(() => fn(), ms);
   }
 }
