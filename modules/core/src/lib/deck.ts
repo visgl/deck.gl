@@ -990,7 +990,6 @@ export default class Deck {
       onViewportActive: this.layerManager!.activateViewport,
       views: this.viewManager!.getViews(),
       pass: 'screen',
-      redrawReason,
       effects: this.effectManager!.getEffects(),
       ...renderOptions
     });

@@ -39,8 +39,8 @@ export default class PickLayersPass extends LayersPass {
     byAlpha: EncodedPickingColors[];
   } | null = null;
 
-  render(props: PickLayersPassRenderOptions) {
-    if (props.pickingFBO) {
+  render(props: LayersPassRenderOptions | PickLayersPassRenderOptions) {
+    if ('pickingFBO' in props) {
       // When drawing into an off-screen buffer, use the alpha channel to encode layer index
       return this._drawPickingBuffer(props);
     }
@@ -105,6 +105,7 @@ export default class PickLayersPass extends LayersPass {
           cullRect,
           effects: effects?.filter(e => e.useInPicking),
           pass,
+          isPicking: true,
           moduleParameters
         })
     );
