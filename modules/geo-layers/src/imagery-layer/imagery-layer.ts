@@ -107,7 +107,7 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   }
 
   async getFeatureInfoText(x: number, y: number): Promise<unknown> {
-    const viewport = this._getViewport();
+    const {viewport} = this.context;
     if (viewport) {
       const bounds = viewport.getBounds();
       const {width, height} = viewport;
@@ -158,7 +158,7 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   /** Load an image */
   async loadImage(reason: string): Promise<void> {
     // TODO - need to handle multiple viewports
-    const viewport = this._getViewport();
+    const {viewport} = this.context;
     if (!viewport) {
       return;
     }
@@ -177,14 +177,6 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
       this.context.onError?.(error as Error, this);
       this.getCurrentLayer()?.props.onImageLoadError(requestId, error as Error);
     }    
-  }
-
-  _getViewport() {
-    const viewports = this.context.deck?.getViewports() || [];
-    if (viewports.length <= 0) {
-      return null;
-    }
-    return viewports[0];
   }
 
   // HELPERS
