@@ -42,7 +42,7 @@ export default class CollideEffect implements Effect {
       viewports,
       onViewportActive,
       views,
-      pass,
+      isPicking,
       preRenderStats = {}
     }: PreRenderOptions
   ): void {
@@ -50,7 +50,7 @@ export default class CollideEffect implements Effect {
       this.dummyCollideMap = new Texture2D(gl, {width: 1, height: 1});
     }
 
-    if (pass.startsWith('picking')) {
+    if (isPicking) {
       // Do not update on picking pass
       return;
     }
@@ -142,6 +142,7 @@ export default class CollideEffect implements Effect {
       // Rerender collide FBO
       this.collidePass!.renderCollideMap(collideFBO, {
         pass: 'collide',
+        isPicking: true,
         layers: renderInfo.layers,
         effects,
         layerFilter,

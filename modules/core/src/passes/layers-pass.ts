@@ -12,6 +12,7 @@ export type Rect = {x: number; y: number; width: number; height: number};
 
 export type LayersPassRenderOptions = {
   target?: Framebuffer;
+  isPicking?: boolean;
   pass: string;
   layers: Layer[];
   viewports: Viewport[];
@@ -22,7 +23,7 @@ export type LayersPassRenderOptions = {
   /** If true, recalculates render index (z) from 0. Set to false if a stack of layers are rendered in multiple passes. */
   clearStack?: boolean;
   clearCanvas?: boolean;
-  layerFilter?: (context: FilterContext) => boolean;
+  layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
@@ -118,7 +119,15 @@ export default class LayersPass extends Pass {
   /* Resolve the parameters needed to draw each layer */
   protected _getDrawLayerParams(
     viewport: Viewport,
-    {layers, pass, layerFilter, cullRect, effects, moduleParameters}: LayersPassRenderOptions,
+    {
+      layers,
+      pass,
+      isPicking = false,
+      layerFilter,
+      cullRect,
+      effects,
+      moduleParameters
+    }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
     evaluateShouldDrawOnly: boolean = false
   ): DrawLayerParameters[] {
@@ -127,7 +136,7 @@ export default class LayersPass extends Pass {
     const drawContext: FilterContext = {
       layer: layers[0],
       viewport,
-      isPicking: pass.startsWith('picking'),
+      isPicking,
       renderPass: pass,
       cullRect
     };
@@ -256,7 +265,7 @@ export default class LayersPass extends Pass {
   private _shouldDrawLayer(
     layer: Layer,
     drawContext: FilterContext,
-    layerFilter: ((params: FilterContext) => boolean) | undefined,
+    layerFilter: ((params: FilterContext) => boolean) | undefined | null,
     layerFilterCache: Record<string, boolean>
   ) {
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);

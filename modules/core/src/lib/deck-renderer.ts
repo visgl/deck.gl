@@ -3,10 +3,25 @@ import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {Framebuffer} from '@luma.gl/core';
 
+import type {DeckProps} from './deck';
+import type {Effect} from './effect';
+import type {LayersPassRenderOptions} from '../passes/layers-pass';
+
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 export default class DeckRenderer {
-  constructor(gl) {
+  gl: WebGLRenderingContext;
+  layerFilter: DeckProps['layerFilter'];
+  drawPickingColors: boolean;
+  drawLayersPass: DrawLayersPass;
+  pickLayersPass: PickLayersPass;
+
+  private renderCount: number;
+  private _needsRedraw: string | false;
+  private renderBuffers: Framebuffer[];
+  private lastPostProcessEffect: string | null;
+
+  constructor(gl: WebGLRenderingContext) {
     this.gl = gl;
     this.layerFilter = null;
     this.drawPickingColors = false;
@@ -18,7 +33,7 @@ export default class DeckRenderer {
     this.lastPostProcessEffect = null;
   }
 
-  setProps(props) {
+  setProps(props: Required<DeckProps>) {
     if ('layerFilter' in props && this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
@@ -30,39 +45,36 @@ export default class DeckRenderer {
     }
   }
 
-  /*
-    target,
-    layers,
-    viewports,
-    onViewportActive,
-    views,
-    redrawReason,
-    clearCanvas,
-    effects,
-    pass,
-    stats
-  */
-  renderLayers(opts) {
+  renderLayers(opts: Partial<LayersPassRenderOptions>) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
-    opts.layerFilter = opts.layerFilter || this.layerFilter;
-    opts.effects = opts.effects || [];
-    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
-    opts.preRenderStats = {};
+    const renderOpts: LayersPassRenderOptions = {
+      layerFilter: this.layerFilter,
+      layers: [],
+      viewports: [],
+      target: Framebuffer.getDefaultFramebuffer(this.gl),
+      pass: 'screen',
+      isPicking: this.drawPickingColors,
+      ...opts
+    };
 
-    this._preRender(opts.effects, opts);
+    if (renderOpts.effects) {
+      this._preRender(renderOpts.effects, renderOpts);
+    }
 
-    const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : opts.target;
-    const renderStats = layerPass.render({...opts, target: outputBuffer});
+    const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+    const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
-    this._postRender(opts.effects, opts);
+    if (renderOpts.effects) {
+      this._postRender(renderOpts.effects, renderOpts);
+    }
 
     this.renderCount++;
 
     debug(TRACE_RENDER_LAYERS, this, renderStats, opts);
   }
 
-  needsRedraw(opts = {clearRedrawFlags: false}) {
+  needsRedraw(opts: {clearRedrawFlags: boolean} = {clearRedrawFlags: false}): string | false {
     const redraw = this._needsRedraw;
     if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
@@ -78,24 +90,23 @@ export default class DeckRenderer {
     renderBuffers.length = 0;
   }
 
-  // Private
-  _preRender(effects, opts) {
-    let lastPostProcessEffect = null;
+  private _preRender(effects: Effect[], opts: LayersPassRenderOptions) {
+    this.lastPostProcessEffect = null;
+    opts.preRenderStats = opts.preRenderStats || {};
 
     for (const effect of effects) {
       opts.preRenderStats[effect.id] = effect.preRender(this.gl, opts);
       if (effect.postRender) {
-        lastPostProcessEffect = effect;
+        this.lastPostProcessEffect = effect.id;
       }
     }
 
-    if (lastPostProcessEffect) {
+    if (this.lastPostProcessEffect) {
       this._resizeRenderBuffers();
     }
-    this.lastPostProcessEffect = lastPostProcessEffect;
   }
 
-  _resizeRenderBuffers() {
+  private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     if (renderBuffers.length === 0) {
       renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
@@ -105,16 +116,17 @@ export default class DeckRenderer {
     }
   }
 
-  _postRender(effects, opts) {
+  private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
     const {renderBuffers} = this;
     const params = {
+      ...opts,
       inputBuffer: renderBuffers[0],
       swapBuffer: renderBuffers[1],
       target: null
     };
     for (const effect of effects) {
       if (effect.postRender) {
-        if (effect === this.lastPostProcessEffect) {
+        if (effect.id === this.lastPostProcessEffect) {
           params.target = opts.target;
           effect.postRender(this.gl, params);
           break;
