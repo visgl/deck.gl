@@ -10,7 +10,8 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  Viewport
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {ImageSourceMetadata, ImageType, ImageServiceType} from '@loaders.gl/wms';
@@ -77,17 +78,19 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
 
       // Check if data source has changed
       if (dataChanged) {
-        this.state.imageSource = this._createImageSource(this.props);
+        this.setState({
+          imageSource: this._createImageSource(this.props);
+        });
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this._loadMetadata();
-        this.debounce(() => this.loadImage('image source changed'), 0);
+        this.debounce(() => this.loadImage(this.context.viewport, 'image source changed'), 0);
       }
 
       // Some sublayer props may have changed
     }
 
     if (changeFlags.viewportChanged) {
-      this.debounce(() => this.loadImage('viewport changed'));
+      this.debounce(() => this.loadImage(this.context.viewport, 'viewport changed'));
     }
   }
 
@@ -162,12 +165,7 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   }
 
   /** Load an image */
-  async loadImage(reason: string): Promise<void> {
-    // TODO - need to handle multiple viewports
-    const {viewport} = this.context;
-    if (!viewport) {
-      return;
-    }
+  async loadImage(viewport: Viewport, reason: string): Promise<void> {
     const bounds = viewport.getBounds();
     const {width, height} = viewport;
 
@@ -181,9 +179,9 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
         bbox: bounds,
         layers: this.props.layers
       });
-      Object.assign(this.state, {image, bounds, width, height});
-      this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
-      this.setNeedsRedraw();
+      this.getCurrentLayer()?.props.onImageLoadComplete(requestId);\
+      // Not type safe...
+      this.setState({image, bounds, width, height});
     } catch (error) {
       this.context.onError?.(error as Error, this);
       this.getCurrentLayer()?.props.onImageLoadError(requestId, error as Error);

@@ -24,7 +24,7 @@ import {
   GreatCircleLayer,
   H3HexagonLayer,
   H3ClusterLayer,
-  ImageryLayer,
+  _ImageryLayer as ImageryLayer,
   QuadkeyLayer,
   S2Layer,
   TileLayer,
