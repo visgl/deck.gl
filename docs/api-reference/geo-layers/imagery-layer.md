@@ -8,7 +8,9 @@
 
 The `ImageryLayer` is a composite layer that connects with an image service that can render map images optimized for the current view. Instead of loading a detailed map image covering the entire globe, an image is rendered.
 
-To use this layer, an *image source* must be specified. Image sources are typically specified by supplying a URL to the `ImageryLayer` `data` property. See the section on image sources below for mor information.
+In contrast to the [`TileLayer`](/docs/api-reference/geo-layers/tile-layer.md) which loads many small image tiles, the `_ImageryLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+
+To use this layer, an *image source* must be specified. Image sources are specified by supplying a URL to the `ImageryLayer` `data` property. See the section on image sources below for mor information.
 
 > Caveats: 
 > - The `ImageryLayer` currently does not work well with multiple views.
@@ -44,7 +46,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
 ```typescript
-import {ImageryLayer} from '@deck.gl/geo-layers';
+import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
 new ImageryLayer({});
 ```
 
@@ -64,32 +66,29 @@ new deck.ImageryLayer({});
 
 ## Image Sources
 
-The `ImageryLayer` knows how to URLs for some well-known geospatial services such as WMS, however it is also possible to specify a custom URL template. 
+The `ImageryLayer` can accept URLs to geospatial image services such as WMS, however it is also possible to specify a custom URL template. 
 
 ### Layers
 
-Many image servers such as WMS can render multiple layers. In fact .
+Image servers such as WMS can render different layers. Typically as list of layers **must** be specified, otherwise requests for map images will fail.
 
-### Image Request Parameters
+### Image Service Metadata
 
-- `bounds`
+Image services like WMS can often provide metadata (aka capabilities) about the service, listing attribution information, available layers and additional capabilities. The `ImageryLayer` will automatically attempt to query metadata for known service types. Template URLs are specific to image requests and to not support metadata queries.
+
+### Interactivity
+
+WMS services sometimes provide a mechanism to query a specific pixel. This is supported through a method on the `ImageryLayer`
+
+## Image Request Parameters
+
+- `east`
+- `north`
+- `west`
+- `south`
 - `width`
-- `height
+- `height`
 
-At each integer zoom level (`z`), the XY plane in the view space is divided into square tiles of the same size, each uniquely identified by their `x` and `y` index. When `z` increases by 1, the view space is scaled by 2, meaning that one tile at `z` covers the same area as four tiles at `z+1`.
-
-The `ImageryLayer` is optimized for use with geospatial views, such as the [MapView](/docs/api-reference/core/map-view.md).
-
-> The `ImageryLayer` has not yet been tested with non-geospatial views such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md).
-
-
-### Service Metadata
-
-Many map image services provide an end-point for querying 
-
-### Service Interactivity
-
-Some map image services support performing queries around a certain pixel.
 
 ## Properties
 
@@ -99,23 +98,23 @@ Inherits all properties from [base `Layer`](/docs/api-reference/core/layer.md).
 
 ##### `data` (string, optional)
 
-- Default: ``
-
 A base URL to a well-known service type, or a full URL template from which the map images should be loaded.
 
-If `props.serviceType` is `'template'`: a URL template. Substrings `{east}` `{north}` `{east}` `{west}` `{south}`, `{width}` and `{height}` if present, will be replaced with a viewports actual bounds and size. `{layers}` will be replaced with content of props.layers.
+If `props.serviceType` is set to `'template'`, data is expected to be a URL template. Substrings `{east}` `{north}` `{east}` `{west}` `{south}`, `{width}` and `{height}` will be replaced with a viewports actual bounds and size. `{layers}` will be replaced with content of props.layers.
 
 ##### `serviceType` (string, optional)
 
-- Default: `wms`
+- Default: `'auto'`
 
-Specifies the type of service at the URL supplied in `props.data`. Either `'wms'` or `'template'`.
+Specifies the type of service at the URL supplied in `props.data`. Currently accepts either `'wms'` or `'template'`. The default `'auto'` setting will try to autodetect service from the URL.
 
 ##### `layers` (string\[\], optional)
 
-- Default: `[]`
+- Default: `[]` \*
 
-Specifies names of layers that should be visualized from the image service. Note that WMS services will not display anything unless valid layer names are provided.
+Specifies names of layers that should be visualized from the image service. 
+
+> Note that WMS services will typically not display anything unless at least on valid layer name is provided.
 
 
 ### Callbacks
@@ -131,15 +130,17 @@ Specifies names of layers that should be visualized from the image service. Note
 
 `onMetadataLoadComplete` called when a tile successfully loads.
 
-- Default: `() => {}`
+- Default: `(metadata) => {}`
 
 Receives arguments:
 
-- `tile` (Object) - the [tile](#tile) that has been loaded.
+- `metadata` (Object) - The metadata for the image services has been loaded. 
+
+Note that metadata will not be loaded when `props.serviceType` is set to `'template`.
 
 ##### `onMetadataLoadError` (Function, optional)
 
-`onMetadataLoadError` called when a tile failed to load.
+`onMetadataLoadError` called when metadata failed to load.
 
 - Default: `console.error`
 
@@ -147,30 +148,35 @@ Receives arguments:
 
 - `error` (`Error`)
 
-##### `onMetadataLoadStart` (Function, optional)
+##### `onImageLoadStart` (Function, optional)
 
-`onMetadataLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
+`onImageLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
 
 - Default: `data => null`
 
-##### `onMetadataLoadComplete` (Function, optional)
+Receives arguments:
 
-`onMetadataLoadComplete` called when a tile successfully loads.
+- `requestId` (`number`) - Allows tracking of specific requests
+
+##### `onImageLoadComplete` (Function, optional)
+
+`onImageLoadComplete` called when an image successfully loads.
 
 - Default: `() => {}`
 
 Receives arguments:
 
-- `tile` (Object) - the [tile](#tile) that has been loaded.
+- `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onMetadataLoadError` (Function, optional)
+##### `onImageLoadError` (Function, optional)
 
-`onMetadataLoadError` called when a tile failed to load.
+`onImageLoadError` called when a tile failed to load.
 
 - Default: `console.error`
 
 Receives arguments:
 
+- `requestId` (`number`) - Allows tracking of specific requests
 - `error` (`Error`)
 
 
