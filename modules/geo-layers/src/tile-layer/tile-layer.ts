@@ -315,15 +315,20 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
+    const sourceTile = (sourceLayer as any).props.tile;
     if (info.picked) {
-      (info as any).tile = (sourceLayer as any).props.tile;
+      (info as any).tile = sourceTile;
     }
+    (info as any).sourceTile = sourceTile;
     return info;
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
-    if (info.sourceLayer) {
-      info.sourceLayer.updateAutoHighlight(info);
+    const sourceTile = (info as any).sourceTile as Tile2DHeader;
+    if (sourceTile && sourceTile.layers) {
+      for (const layer of sourceTile.layers) {
+        layer.updateAutoHighlight(info);
+      }
     }
   }
 

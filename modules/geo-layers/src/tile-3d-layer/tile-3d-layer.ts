@@ -148,14 +148,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   getPickingInfo({info, sourceLayer}: GetPickingInfoParams) {
-    const {layerMap} = this.state;
-    const layerId = sourceLayer && sourceLayer.id;
-    if (layerId) {
-      // layerId: this.id-[scenegraph|pointcloud]-tileId
-      const substr = layerId.substring(this.id.length + 1);
-      const tileId = substr.substring(substr.indexOf('-') + 1);
-      info.object = layerMap[tileId] && layerMap[tileId].tile;
+    const sourceTile = sourceLayer && (sourceLayer.props as any).tile;
+    if (info.picked) {
+      info.object = sourceTile;
     }
+    (info as any).sourceTile = sourceTile;
 
     return info;
   }
@@ -168,8 +165,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
-    if (info.sourceLayer) {
-      info.sourceLayer.updateAutoHighlight(info);
+    const sourceTile = (info as any).sourceTile;
+    const layerCache = this.state.layerMap[sourceTile?.id];
+    if (layerCache && layerCache.layer) {
+      layerCache.layer.updateAutoHighlight(info);
     }
   }
 
