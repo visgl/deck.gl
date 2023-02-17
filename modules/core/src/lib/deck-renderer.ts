@@ -3,15 +3,19 @@ import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {Framebuffer} from '@luma.gl/core';
 
-import type {DeckProps} from './deck';
+import type Layer from './layer';
+import type Viewport from '../viewports/viewport';
+import type View from '../views/view';
 import type {Effect} from './effect';
-import type {LayersPassRenderOptions} from '../passes/layers-pass';
+import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
+type LayerFilter = ((context: FilterContext) => boolean) | null;
+
 export default class DeckRenderer {
   gl: WebGLRenderingContext;
-  layerFilter: DeckProps['layerFilter'];
+  layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
   pickLayersPass: PickLayersPass;
@@ -33,26 +37,34 @@ export default class DeckRenderer {
     this.lastPostProcessEffect = null;
   }
 
-  setProps(props: Required<DeckProps>) {
-    if ('layerFilter' in props && this.layerFilter !== props.layerFilter) {
+  setProps(props: {layerFilter: LayerFilter; drawPickingColors: boolean}) {
+    if (this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
     }
 
-    if ('drawPickingColors' in props && this.drawPickingColors !== props.drawPickingColors) {
+    if (this.drawPickingColors !== props.drawPickingColors) {
       this.drawPickingColors = props.drawPickingColors;
       this._needsRedraw = 'drawPickingColors changed';
     }
   }
 
-  renderLayers(opts: Partial<LayersPassRenderOptions>) {
+  renderLayers(opts: {
+    pass: string;
+    layers: Layer[];
+    viewports: Viewport[];
+    views: {[viewId: string]: View};
+    onViewportActive: (viewport: Viewport) => void;
+    effects: Effect[];
+    target?: Framebuffer;
+    layerFilter?: LayerFilter;
+    clearStack?: boolean;
+    clearCanvas?: boolean;
+  }) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
-      layers: [],
-      viewports: [],
-      pass: 'screen',
       isPicking: this.drawPickingColors,
       ...opts,
       target: opts.target || Framebuffer.getDefaultFramebuffer(this.gl)
