@@ -12,8 +12,7 @@ import {scaleLinear} from 'd3-scale';
 
 import {csv} from 'd3-request';
 
-// Sample data: All cities with a population > 1000 or seats of adm div
-// https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en
+// Sample data
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/text-layer/cities-1000.csv';
 
 const INITIAL_VIEW_STATE = {
