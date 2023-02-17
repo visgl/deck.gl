@@ -52,10 +52,10 @@ export default class DeckRenderer {
       layerFilter: this.layerFilter,
       layers: [],
       viewports: [],
-      target: Framebuffer.getDefaultFramebuffer(this.gl),
       pass: 'screen',
       isPicking: this.drawPickingColors,
-      ...opts
+      ...opts,
+      target: opts.target || Framebuffer.getDefaultFramebuffer(this.gl)
     };
 
     if (renderOpts.effects) {
