@@ -246,7 +246,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
 };
 
 /** A composite layer that renders filled, stroked and/or extruded polygons. */
-export default class PolygonLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
   Required<_PolygonLayerProps<DataT>> & ExtraProps
 > {
   static layerName = 'PolygonLayer';

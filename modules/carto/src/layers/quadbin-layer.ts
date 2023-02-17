@@ -22,7 +22,7 @@ type _QuadbinLayerProps<DataT> = {
   getQuadbin?: AccessorFunction<DataT, bigint>;
 };
 
-export default class QuadbinLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class QuadbinLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<_QuadbinLayerProps<DataT>> & ExtraProps
 > {

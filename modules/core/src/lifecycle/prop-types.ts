@@ -35,8 +35,8 @@ type DefaultProp<T> =
   | AccessorPropType<T>
   | FunctionPropType<T>;
 
-export type DefaultProps<T extends Record<string, any>> = {
-  [propName in keyof T]?: DefaultProp<Required<T>[propName]>;
+export type DefaultProps<PropsT extends {} = {}> = {
+  [propName in keyof PropsT]?: DefaultProp<Required<PropsT>[propName]>;
 };
 
 type BooleanPropType = BasePropType<boolean> & {

@@ -132,7 +132,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
 };
 
 /** Render raster icons at given coordinates. */
-export default class IconLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_IconLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

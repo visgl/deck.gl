@@ -328,7 +328,7 @@ type GeoJsonPickingInfo = PickingInfo & {
 /** Render GeoJSON formatted data as polygons, lines and points (circles, icons and/or texts). */
 export default class GeoJsonLayer<
   DataT extends Feature = Feature,
-  ExtraProps = {}
+  ExtraProps extends {} = {}
 > extends CompositeLayer<Required<GeoJsonLayerProps<DataT>> & ExtraProps> {
   static layerName = 'GeoJsonLayer';
   static defaultProps = defaultProps;

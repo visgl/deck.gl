@@ -111,11 +111,11 @@ export type LayerProps<DataType = any> = {
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch?: <PropsT>(
+  fetch?: <LayerT extends Layer>(
     url: string,
     context: {
       propName: string;
-      layer: Layer<PropsT>;
+      layer: LayerT;
       loaders?: Loader[];
       loadOptions?: any;
       signal?: AbortSignal;
@@ -207,9 +207,9 @@ export type LayerProps<DataType = any> = {
    * Called when remote data is fetched and parsed.
    */
   onDataLoad?:
-    | (<PropsT>(
+    | (<LayerT extends Layer>(
         data: LayerData<DataType>,
-        context: {propName: string; layer: Layer<PropsT>}
+        context: {propName: string; layer: LayerT}
       ) => void)
     | null;
   /**

@@ -145,7 +145,10 @@ type _H3HexagonLayerProps<DataT> = {
 /**
  * Render hexagons from the [H3](https://h3geo.org/) geospatial indexing system.
  */
-export default class H3HexagonLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class H3HexagonLayer<
+  DataT = any,
+  ExtraPropsT extends {} = {}
+> extends CompositeLayer<
   ExtraPropsT & Required<_H3HexagonLayerProps<DataT> & Required<PolygonLayerProps<DataT>>>
 > {
   static defaultProps = defaultProps;

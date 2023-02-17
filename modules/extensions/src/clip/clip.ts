@@ -97,7 +97,7 @@ varying vec2 clip_commonPosition;
 
 /** Adds support for clipping rendered layers by rectangular bounds. */
 export default class ClipExtension extends LayerExtension {
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
   static extensionName = 'ClipExtension';
 
   getShaders(this: Layer<ClipExtensionProps>) {

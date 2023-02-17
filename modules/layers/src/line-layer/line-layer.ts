@@ -108,7 +108,7 @@ type _LineLayerProps<DataT> = {
 /**
  * A layer that renders straight lines joining pairs of source and target coordinates.
  */
-export default class LineLayer<DataT = any, ExtraProps = {}> extends Layer<
+export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends Layer<
   ExtraProps & Required<_LineLayerProps<DataT>>
 > {
   static layerName = 'LineLayer';

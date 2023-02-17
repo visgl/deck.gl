@@ -26,7 +26,7 @@ import {urlType, getURLFromTemplate} from '../tileset-2d';
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
-  dataComparator: urlType.equals,
+  dataComparator: urlType.equal,
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props), compare: false},
   getTileData: {type: 'function', optional: true, value: null, compare: false},
   // TODO - change to onViewportLoad to align with Tile3DLayer
@@ -146,10 +146,10 @@ export type TiledPickingInfo<DataT = any> = PickingInfo & {
  *
  * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
  */
-export default class TileLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TileLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
 
   initializeState() {
