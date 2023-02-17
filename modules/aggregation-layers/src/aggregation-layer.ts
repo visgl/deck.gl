@@ -31,7 +31,7 @@ import {filterProps} from './utils/prop-utils';
 export type AggregationLayerProps<DataT = any> = CompositeLayerProps<DataT>;
 
 export default abstract class AggregationLayer<
-  ExtraPropsT = unknown
+  ExtraPropsT extends {} = {}
 > extends CompositeLayer<ExtraPropsT> {
   static layerName = 'AggregationLayer';
 

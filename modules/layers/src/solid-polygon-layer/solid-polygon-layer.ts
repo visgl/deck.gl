@@ -132,7 +132,7 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-export default class SolidPolygonLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
+export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_SolidPolygonLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

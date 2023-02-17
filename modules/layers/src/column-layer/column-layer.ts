@@ -226,7 +226,7 @@ type _ColumnLayerProps<DataT> = {
 };
 
 /** Render extruded cylinders (tessellated regular polygons) at given coordinates. */
-export default class ColumnLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
+export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_ColumnLayerProps<DataT>>
 > {
   static layerName = 'ColumnLayer';

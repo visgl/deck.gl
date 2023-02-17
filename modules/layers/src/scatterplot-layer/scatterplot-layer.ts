@@ -172,7 +172,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
 };
 
 /** Render circles at given coordinates. */
-export default class ScatterplotLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
+export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

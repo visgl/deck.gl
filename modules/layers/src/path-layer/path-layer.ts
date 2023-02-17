@@ -136,7 +136,7 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 /** Render lists of coordinate points as extruded polylines with mitering. */
-export default class PathLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
+export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_PathLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

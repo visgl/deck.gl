@@ -185,7 +185,7 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
-export default abstract class Layer<PropsT = unknown> extends Component<
+export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
 > {
   static defaultProps = defaultProps;

@@ -35,7 +35,7 @@ type _GridLayerProps<DataT> = _CPUGridLayerProps<DataT> &
   };
 
 /** Aggregate data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. */
-export default class GridLayer<DataT = any, ExtraPropsT = unknown> extends CompositeLayer<
+export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_GridLayerProps<DataT>>
 > {
   static layerName = 'GridLayer';

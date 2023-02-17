@@ -29,7 +29,7 @@ import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 export type GridAggregationLayerProps<DataT = any> = AggregationLayerProps<DataT>;
 
 export default abstract class GridAggregationLayer<
-  ExtraPropsT = unknown
+  ExtraPropsT extends {} = {}
 > extends AggregationLayer<ExtraPropsT> {
   static layerName = 'GridAggregationLayer';
 

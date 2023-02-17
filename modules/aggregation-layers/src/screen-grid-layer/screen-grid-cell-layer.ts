@@ -47,7 +47,7 @@ export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
   maxTexture: Texture2D;
 };
 
-export default class ScreenGridCellLayer<DataT = any, ExtraPropsT = unknown> extends Layer<
+export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_ScreenGridCellLayerProps<DataT>>
 > {
   static layerName = 'ScreenGridCellLayer';

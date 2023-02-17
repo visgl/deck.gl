@@ -49,7 +49,7 @@ const defaultProps: DefaultProps<MultiIconLayerProps> = {
   outlineColor: {type: 'color', value: [0, 0, 0, 255]}
 };
 
-export default class MultiIconLayer<DataT, ExtraPropsT = unknown> extends IconLayer<
+export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends IconLayer<
   DataT,
   ExtraPropsT & Required<_MultiIconLayerProps<DataT>>
 > {

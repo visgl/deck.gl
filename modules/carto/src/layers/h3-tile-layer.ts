@@ -38,7 +38,7 @@ type _H3TileLayerProps<DataT> = H3HexagonLayerProps<DataT> & {
   aggregationResLevel?: number;
 };
 
-export default class H3TileLayer<DataT = any, ExtraPropsT = unknown> extends CompositeLayer<
+export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_H3TileLayerProps<DataT>>
 > {
   static layerName = 'H3TileLayer';
