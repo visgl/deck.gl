@@ -33,9 +33,10 @@ type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
   aggregationResLevel?: number;
 };
 
-export default class QuadbinTileLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
-  ExtraProps & Required<_QuadbinTileLayerProps<DataT>>
-> {
+export default class QuadbinTileLayer<
+  DataT = any,
+  ExtraProps extends {} = {}
+> extends CompositeLayer<ExtraProps & Required<_QuadbinTileLayerProps<DataT>>> {
   static layerName = 'QuadbinTileLayer';
   static defaultProps = defaultProps;
 

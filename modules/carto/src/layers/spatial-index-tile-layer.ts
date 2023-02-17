@@ -29,10 +29,10 @@ type _SpatialIndexTileLayerProps<DataT = any> = {
   aggregationResLevel?: number;
 };
 
-export default class SpatialIndexTileLayer<DataT = any, ExtraProps = {}> extends TileLayer<
-  DataT,
-  ExtraProps & Required<_SpatialIndexTileLayerProps<DataT>>
-> {
+export default class SpatialIndexTileLayer<
+  DataT = any,
+  ExtraProps extends {} = {}
+> extends TileLayer<DataT, ExtraProps & Required<_SpatialIndexTileLayerProps<DataT>>> {
   static layerName = 'SpatialIndexTileLayer';
   static defaultProps = defaultProps;
 

@@ -36,7 +36,7 @@ import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tileset-2d';
-import {Tile2DHeader, urlType, getURLFromTemplate} from '../tileset-2d';
+import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d';
 
 const DUMMY_DATA = [1];
 
@@ -63,7 +63,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
     }
   },
   // Supply url to local terrain worker bundle. Only required if running offline and cannot access CDN.
-  workerUrl: {type: 'string', value: null},
+  workerUrl: '',
   // Same as SimpleMeshLayer wireframe
   wireframe: false,
   material: true,
@@ -71,10 +71,8 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   loaders: [TerrainWorkerLoader]
 };
 
-type URLTemplate = string | string[];
-
 // Turns array of templates into a single string to work around shallow change
-function urlTemplateToUpdateTrigger(template: URLTemplate | null): string {
+function urlTemplateToUpdateTrigger(template: URLTemplate): string {
   if (Array.isArray(template)) {
     return template.join(';');
   }
@@ -103,7 +101,7 @@ type _TerrainLayerProps = {
   elevationData: URLTemplate;
 
   /** Image url to use as texture. **/
-  texture?: URLTemplate | null;
+  texture?: URLTemplate;
 
   /** Martini error tolerance in meters, smaller number -> more detailed mesh. **/
   meshMaxError?: number;
@@ -122,6 +120,11 @@ type _TerrainLayerProps = {
 
   /** Material props for lighting effect. **/
   material?: Material;
+
+  /**
+   * @deprecated Use `loadOptions.terrain.workerUrl` instead
+   */
+  workerUrl?: string;
 };
 
 /** Render mesh surfaces from height map images. */

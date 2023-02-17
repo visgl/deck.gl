@@ -79,7 +79,7 @@ type _Tile3DLayerProps<DataT> = {
 export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
   static layerName = 'Tile3DLayer';
 
   state!: {

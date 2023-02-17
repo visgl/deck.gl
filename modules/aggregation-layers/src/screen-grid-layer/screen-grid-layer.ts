@@ -139,9 +139,10 @@ export type _ScreenGridLayerProps<DataT> = {
 };
 
 /** Aggregates data into histogram bins and renders them as a grid. */
-export default class ScreenGridLayer<DataT = any, ExtraProps = {}> extends GridAggregationLayer<
-  ExtraProps & Required<_ScreenGridLayerProps<DataT>>
-> {
+export default class ScreenGridLayer<
+  DataT = any,
+  ExtraProps extends {} = {}
+> extends GridAggregationLayer<ExtraProps & Required<_ScreenGridLayerProps<DataT>>> {
   static layerName = 'ScreenGridLayer';
   static defaultProps = defaultProps;
 

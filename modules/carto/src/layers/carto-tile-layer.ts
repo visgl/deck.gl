@@ -42,7 +42,7 @@ type _CartoTileLayerProps = {
 
 export default class CartoTileLayer<
   DataT extends Feature = Feature,
-  ExtraProps = {}
+  ExtraProps extends {} = {}
 > extends MVTLayer<DataT, Required<_CartoTileLayerProps> & ExtraProps> {
   static layerName = 'CartoTileLayer';
   static defaultProps = defaultProps;

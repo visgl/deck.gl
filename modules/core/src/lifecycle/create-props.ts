@@ -13,10 +13,10 @@ import {StatefulComponentProps} from './component';
 import type Component from './component';
 
 // Create a property object
-export function createProps<T>(
-  component: Component<T>,
-  propObjects: Partial<T>[]
-): StatefulComponentProps<T> {
+export function createProps<PropsT extends {}>(
+  component: Component<PropsT>,
+  propObjects: Partial<PropsT>[]
+): StatefulComponentProps<PropsT> {
   // Resolve extension value
   let extensions: any[] | undefined;
   for (let i = propObjects.length - 1; i >= 0; i--) {

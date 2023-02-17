@@ -188,7 +188,7 @@ export type UpdateParameters<LayerT extends Layer> = {
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
 > {
-  static defaultProps = defaultProps;
+  static defaultProps: DefaultProps = defaultProps;
   static layerName: string = 'Layer';
 
   internalState: LayerState<this> | null = null;
