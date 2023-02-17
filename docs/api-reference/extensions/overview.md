@@ -10,11 +10,13 @@ This module contains the following extensions:
 
 - [BrushingExtension](./brushing-extension.md)
 - [ClipExtension](./clip-extension.md)
+- [CollideExtension](./collide-extension.md)
 - [DataFilterExtension](./data-filter-extension.md)
 - [FillStyleExtension](./fill-style-extension.md)
 - [Fp64Extension](./fp64-extension.md)
 - [MaskExtension](./mask-extension.md)
 - [PathStyleExtension](./path-style-extension.md)
+- [TerrainExtension](./terrain-extension.md)
 
 For instructions on authoring your own layer extensions, visit [developer guide](../../developer-guide/custom-layers/layer-extensions.md).
 
