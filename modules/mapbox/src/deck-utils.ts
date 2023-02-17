@@ -286,7 +286,7 @@ function afterRender(deck: Deck, map: Map): void {
   (deck.userData as UserData).currentViewport = null;
 }
 
-function onMapMove(deck: Deck, map: Map): void {
+export function onMapMove(deck: Deck, map: Map): void {
   deck.setProps({
     viewState: getViewState(map)
   });
