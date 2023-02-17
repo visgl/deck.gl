@@ -1,5 +1,5 @@
 import {Deck, assert} from '@deck.gl/core';
-import {getViewState, getDeckInstance, getInterleavedProps, onMapMove} from './deck-utils';
+import {getViewState, getDeckInstance, getInterleavedProps} from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent} from 'mapbox-gl';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -98,7 +98,6 @@ export default class MapboxOverlay implements IControl {
       })
     });
 
-    map.on('move', this._handleMapMove);
     map.on('styledata', this._handleStyleChange);
     resolveLayers(map, this._deck, [], this._props.layers);
 
@@ -133,7 +132,6 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _onRemoveInterleaved(map: Map): void {
-    map.off('move', this._handleMapMove);
     map.off('styledata', this._handleStyleChange);
     resolveLayers(map, this._deck, this._props.layers, []);
   }
@@ -237,15 +235,5 @@ export default class MapboxOverlay implements IControl {
       default:
         return;
     }
-  };
-
-  private _handleMapMove = () => {
-    const deck = this._deck;
-    const map = this._map;
-    if (!deck || !map) {
-      return;
-    }
-
-    onMapMove(deck, map);
   };
 }
