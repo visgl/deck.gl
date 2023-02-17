@@ -25,12 +25,6 @@ export type ImageryLayerProps = CompositeLayerProps<string | ImageSource> & {
   onImageLoadError: (requestId: unknown, error: Error) => void;
 };
 
-type ImageryLayerState = {
-  imageSource: ImageSource;
-  image: ImageType;
-  metadata: ImageSourceMetadata;
-};
-
 const defaultProps: ImageryLayerProps = {
   id: 'imagery-layer',
   data: undefined!,
@@ -51,16 +45,24 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   static layerName = 'ImageryLayer';
   static defaultProps: DefaultProps<ImageryLayerProps> = defaultProps;
 
+  state!: {
+    imageSource: ImageSource;
+    image: ImageType;
+    metadata: ImageSourceMetadata;
+    bounds: [number, number, number, number];
+    width: number;
+    height: number;
+  };
+
   /** Lets deck.gl know that we want viewport change events */
-  /*override*/ shouldUpdateState(): boolean {
+  override shouldUpdateState(): boolean {
     return true;
   }
 
-  /*override*/ initializeState(): void {
+  override initializeState(): void {
   }
   
-  /*override*/ updateState({changeFlags, props, oldProps}: UpdateParameters<this>): void {
-    const state = this.state as ImageryLayerState;
+  override updateState({changeFlags, props, oldProps}: UpdateParameters<this>): void {
 
     if (changeFlags.propsChanged) {
       const dataChanged =
@@ -72,29 +74,28 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
 
       // Check if data source has changed
       if (dataChanged) {
-        state.imageSource = this._createImageSource(this.props);
+        this.state.imageSource = this._createImageSource(this.props);
         this._loadMetadata();
-        debounce(() => this.loadImage('image source changed'), 0);
+        this.debounce(() => this.loadImage('image source changed'), 0);
       }
 
       // Some sublayer props may have changed
     }
     
     if (changeFlags.viewportChanged) {
-      debounce(() => this.loadImage('viewport changed'));
+      this.debounce(() => this.loadImage('viewport changed'));
     }
 
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
   }
   
-  /*override*/ finalizeState(): void {
+  override finalizeState(): void {
     // TODO - we could cancel outstanding requests
   }
   
-  /*override*/ renderLayers(): Layer {
+  override renderLayers(): Layer {
     // TODO - which bitmap layer is rendered should depend on the current viewport
     // Currently Studio only uses one viewport
-    const state = this.state as ImageryLayerState;
     const {imageSource} = this.state;
     const {bounds, image, width, height} = this.state;
 
@@ -106,13 +107,11 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   }
 
   async getFeatureInfoText(x: number, y: number): Promise<unknown> {
-    const state = this.state as ImageryLayerState;
     const viewport = this._getViewport();
     if (viewport) {
       const bounds = viewport.getBounds();
       const {width, height} = viewport;
-      // @ts-expect-error
-      const featureInfo = await state.imageSource.getFeatureInfoText?.({
+      const featureInfo = await this.state.imageSource.getFeatureInfoText?.({
         layers: this.props.layers,
         // todo image width may get out of sync with viewport width
         width,
@@ -146,12 +145,11 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   /** Run a getMetadata on the image service */
   async _loadMetadata(): Promise<void> {
     this.props.onMetadataLoadStart();
-    const state = this.state as ImageryLayerState;
     try {
-      state.metadata = await state.imageSource.getMetadata();
+      this.state.metadata = await this.state.imageSource.getMetadata();
       // technically we should get the latest layer after an async operation in case props have changed
       // Although the response might no longer be expected
-      this.getCurrentLayer()?.props.onMetadataLoadComplete(state.metadata);
+      this.getCurrentLayer()?.props.onMetadataLoadComplete(this.state.metadata);
     } catch (error) {
       this.getCurrentLayer()?.props.onMetadataLoadError(error as Error);
     }
@@ -167,13 +165,11 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
     const bounds = viewport.getBounds();
     const {width, height} = viewport;
 
-    const state = this.state as ImageryLayerState;
-
-    let requestId = getRequestId();
+    let requestId = this.getRequestId();
 
     try {
       this.props.onImageLoadStart(requestId);
-      const image = await state.imageSource.getImage({width, height, bbox: bounds, layers: this.props.layers});
+      const image = await this.state.imageSource.getImage({width, height, bbox: bounds, layers: this.props.layers});
       Object.assign(this.state, {image, bounds, width, height});
       this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
       this.setNeedsRedraw();
@@ -188,24 +184,24 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
     if (viewports.length <= 0) {
       return null;
     }
-
     return viewports[0];
   }
-}
 
-// HELPERS
+  // HELPERS
 
-let nextRequestId: number = 0;
+  private _nextRequestId: number = 0;
+  private _timeoutId: number | null = null;
 
-/** Global counter for issuing unique request ids */
-function getRequestId() {
-  return nextRequestId++;
-}
-
-let timeoutId;
-
-/** Runs an action in the future, cancels it if the new action is issued before it executes */
-function debounce(fn: Function, ms = 500): void {
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(() => fn(), ms);
+  /** Global counter for issuing unique request ids */
+  getRequestId() {
+    return this._nextRequestId++;
+  }
+  
+  /** Runs an action in the future, cancels it if the new action is issued before it executes */
+  debounce(fn: Function, ms = 500): void {
+    if (typeof this._timeoutId === 'number') {
+      clearTimeout(this._timeoutId);
+    }
+    this._timeoutId = setTimeout(() => fn(), ms);
+  }
 }
