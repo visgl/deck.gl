@@ -177,7 +177,7 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
         bbox: bounds,
         layers: this.props.layers
       });
-      this.getCurrentLayer()?.props.onImageLoadComplete(requestId);\
+      this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
       // Not type safe...
       this.setState({image, bounds, width, height});
     } catch (error) {
