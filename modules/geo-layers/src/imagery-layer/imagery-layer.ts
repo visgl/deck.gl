@@ -78,7 +78,7 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
 
       // Check if data source has changed
       if (dataChanged) {
-        this.state.imageSource = this._createImageSource(this.props);
+        this.state.imageSource = this._createImageSource(props);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this._loadMetadata();
         this.debounce(() => this.loadImage(this.context.viewport, 'image source changed'), 0);

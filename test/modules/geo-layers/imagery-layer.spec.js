@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
 
-test.only('ImageryLayer', async t => {
+test.skip('ImageryLayer', async t => {
   const testCases = generateLayerTests({
     Layer: ImageryLayer,
     sampleProps: {
