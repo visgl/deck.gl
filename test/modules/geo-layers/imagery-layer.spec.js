@@ -27,7 +27,7 @@ test.only('ImageryLayer', async t => {
     Layer: ImageryLayer,
     sampleProps: {
       data: 'https://ows.terrestris.de/osm/service',
-      serviceType: 'wsm',
+      serviceType: 'wms',
       layers: ['OSM-WMS']
     },
     assert: t.ok,
