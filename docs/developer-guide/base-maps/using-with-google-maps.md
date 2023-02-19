@@ -6,9 +6,9 @@
 
 ![deck.gl as a Google Maps overlay](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg)
 
-Deck.gl has interleaved and overlaid support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance and apply it to a map using the Maps JavaScript API.
+Deck.gl has interleaved and overlaid support for Google Maps with the [@deck.gl/google-maps](../../api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance and apply it to a map using the Maps JavaScript API.
 
-See Google Maps documentation](/docs/api-reference/google-maps/overview.md) page for a full list of features.
+See Google Maps documentation](../../api-reference/google-maps/overview.md) page for a full list of features.
 
 ## Google Maps Platform API key
 

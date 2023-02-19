@@ -1,10 +1,10 @@
 # CompositeLayer Class
 
-The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/core/layer.md), that customizes various [layer lifecycle methods](/docs/developer-guide/custom-layers/layer-lifecycle.md) to help create sublayers and handle events from those layers.
+The `CompositeLayer` class is a subclass of the [Layer Class](./layer.md), that customizes various [layer lifecycle methods](../../developer-guide/custom-layers/layer-lifecycle.md) to help create sublayers and handle events from those layers.
 
 If you intend to implement a layer that generates other layers, you should extend this class.
 
-For more information consult the [Composite Layers](/docs/developer-guide/custom-layers/composite-layers.md) article.
+For more information consult the [Composite Layers](../../developer-guide/custom-layers/composite-layers.md) article.
 
 
 ## Usage
@@ -36,9 +36,9 @@ Parameters:
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](./layer.md) properties.
 
-##### `_subLayerProps` (Object) **EXPERIMENTAL**
+##### `_subLayerProps` (Object) **EXPERIMENTAL** {#_sublayerprops}
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
@@ -83,26 +83,26 @@ new GeoJsonLayer({
 
 ## Members
 
-##### `isComposite`
+##### `isComposite` {#iscomposite}
 
 Always `true`.
 
-##### `isLoaded`
+##### `isLoaded` {#isloaded}
 
 `true` if all asynchronous assets are loaded, and all sublayers are also loaded.
 
-##### `parent`
+##### `parent` {#parent}
 
-A `Layer` instance if this layer is rendered by a [CompositeLayer](/docs/api-reference/core/composite-layer.md)
+A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-layer.md)
 
 
 ## Methods
 
-##### `draw`
+##### `draw` {#draw}
 
 A composite layer does not render directly into the WebGL context. The `draw` method inherited from the base class is therefore never called.
 
-##### `renderLayers`
+##### `renderLayers` {#renderlayers}
 
 Allows a layer to "render" or insert one or more deck.gl layers after itself.
 Called after a layer has been updated.
@@ -116,7 +116,7 @@ The default implementation of `renderLayers` returns `null`.
 `renderLayers` can return a nested arrays with `null` values. deck.gl will automatically flatten and filter the array. See usage above.
 
 
-##### `filterSubLayer`
+##### `filterSubLayer` {#filtersublayer}
 
 Allows a layer to dynamically show/hide sub layers based on the render context.
 
@@ -125,7 +125,7 @@ Receives arguments:
 - `layer` (Layer) - the sub layer to be drawn
 - `viewport` (Viewport) - the current viewport
 - `isPicking` (Boolean) - whether this is a picking pass
-- `renderPass` (String) - the name of the current render pass. See [layerFilter](/docs/api-reference/core/deck.md#layerfilter) for possible values.
+- `renderPass` (String) - the name of the current render pass. See [layerFilter](./deck.md#layerfilter) for possible values.
 
 Returns:
 
@@ -191,7 +191,7 @@ class LODLayer extends CompositeLayer {
 }
 ```
 
-##### `getPickingInfo`
+##### `getPickingInfo` {#getpickinginfo}
 
 Called when a sublayer is being hovered or clicked, after the `getPickingInfo`
 of the sublayer has been called.
@@ -207,14 +207,14 @@ Parameters:
     - `x` (Number) - Mouse position x relative to the viewport.
     - `y` (Number) - Mouse position y relative to the viewport.
     - `coordinate` ([Number, Number]) - Mouse position in world coordinates. Only applies if the
-      [`coordinateSystem`](/docs/api-reference/core/layer.md#coordinatesystem)
+      [`coordinateSystem`](./layer.md#coordinatesystem)
       prop is set to `COORDINATE_SYSTEM.LNGLAT`.
     - `color` (Number[4]) - The color of the pixel that is being picked. It represents a
       "picking color" that is encoded by
-      [`layer.encodePickingColor()`](/docs/api-reference/core/layer.md#encodepickingcolor).
+      [`layer.encodePickingColor()`](./layer.md#encodepickingcolor).
     - `index` (Number) - The index of the object that is being picked. It is the returned
       value of
-      [`layer.decodePickingColor()`](/docs/api-reference/core/layer.md#decodepickingcolor).
+      [`layer.decodePickingColor()`](./layer.md#decodepickingcolor).
     - `picked` (Boolean) - `true` if `index` is not `-1`.
   + `pickParams.mode` (String) - One of `hover` and `click`
   + `pickParams.sourceLayer` (Layer) - the sublayer instance where this event originates from.
@@ -227,7 +227,7 @@ Returns:
 The default implementation returns `pickParams.info` without any change.
 
 
-##### `getSubLayerProps`
+##### `getSubLayerProps` {#getsublayerprops}
 
 This utility method helps create sublayers that properly inherit a composite layer's basic props. For example, it creates a unique id for the sublayer, and makes sure the sublayer's `coordinateSystem` is set to be the same as the parent.
 
@@ -260,7 +260,7 @@ Returns a properties object used to generate a sublayer, with the following keys
 * Any overriding props specified in `_subLayerProps`.
 
 
-##### `shouldRenderSubLayer`
+##### `shouldRenderSubLayer` {#shouldrendersublayer}
 
 Called to determine if a sublayer should be rendered.
 A composite layer can override this method to change the default behavior.
@@ -273,7 +273,7 @@ Parameters:
 Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if `data` is not empty.
 
 
-##### `getSubLayerClass`
+##### `getSubLayerClass` {#getsublayerclass}
 
 Called to retrieve the constructor of a sublayer.
 A composite layer can override this method to change the default behavior.
@@ -287,9 +287,9 @@ Returns:
 
 Constructor for this sublayer. The base class implementation checks if `type` is specified for the sublayer in `_subLayerProps`, otherwise returns the default.
 
-##### `getSubLayerRow`
+##### `getSubLayerRow` {#getsublayerrow}
 
-Used by [adapter layers](/docs/developer-guide/custom-layers/composite-layers.md#transforming-data)) to decorate transformed data with a reference to the original object.
+Used by [adapter layers](../../developer-guide/custom-layers/composite-layers.md#transforming-data)) to decorate transformed data with a reference to the original object.
 
 Parameters:
 
@@ -302,9 +302,9 @@ Returns:
 The `row` object, decorated with a reference.
 
 
-##### `getSubLayerAccessor`
+##### `getSubLayerAccessor` {#getsublayeraccessor}
 
-Used by [adapter layers](/docs/developer-guide/custom-layers/composite-layers.md#transforming-data)) to allow user-provided accessors to read the original objects from transformed data.
+Used by [adapter layers](../../developer-guide/custom-layers/composite-layers.md#transforming-data)) to allow user-provided accessors to read the original objects from transformed data.
 
 Parameters:
 

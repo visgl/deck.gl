@@ -1,10 +1,10 @@
-import {GreatCircleLayerDemo} from 'website-components/doc-demos/geo-layers';
+# GreatCircleLayer
+
+import {GreatCircleLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <GreatCircleLayerDemo />
 
-# GreatCircleLayer
-
-The `GreatCircleLayer` is a variation of the [ArcLayer](/docs/api-reference/layers/arc-layer.md). It renders flat arcs along the great circle joining pairs of source and target points,
+The `GreatCircleLayer` is a variation of the [ArcLayer](../layers/arc-layer.md). It renders flat arcs along the great circle joining pairs of source and target points,
 specified as latitude/longitude coordinates.
 
 > Starting v8.2, using this layer is identical to using the `ArcLayer` with props `greatCircle: true` and `getHeight: 0`.
@@ -89,7 +89,7 @@ new deck.GreatCircleLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [ArcLayer](/docs/api-reference/layers/arc-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [ArcLayer](../layers/arc-layer.md) properties.
 
 ## Source
 

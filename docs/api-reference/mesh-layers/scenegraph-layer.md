@@ -1,12 +1,8 @@
-import {ScenegraphLayerDemo} from 'website-components/doc-demos/mesh-layers';
+# ScenegraphLayer
+
+import {ScenegraphLayerDemo} from '@site/src/doc-demos/mesh-layers';
 
 <ScenegraphLayerDemo />
-
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# ScenegraphLayer
 
 The `ScenegraphLayer` renders a number of instances of a complete glTF scenegraph.
 
@@ -73,12 +69,12 @@ new deck.ScenegraphLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
 
 ### Mesh
 
-##### `scenegraph` (URL|Object|Promise)
+##### `scenegraph` (URL|Object|Promise) {#scenegraph}
 
 The geometry to render for each data object.
 Can be a URL of an object. You need to provide the `fetch` function to load the object.
@@ -86,22 +82,22 @@ Can also be a luma.gl [ScenegraphNode](https://github.com/visgl/luma.gl/blob/8.5
 The layer calls _delete()_ on _scenegraph_ when a new one is provided or the layer is finalized.
 
 
-##### `loadOptions` (Object, optional)
+##### `loadOptions` (Object, optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [GLTFLoader](https://loaders.gl/modules/gltf/docs/api-reference/gltf-loader) if the `scenegraph` prop is an URL
 
 
 ### Render Options
 
-##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default `1`.
 
 Multiplier to scale each geometry by.
 
-##### `_animations` (Object, optional)
+##### `_animations` (Object, optional) {#_animations}
 
 - Default `undefined`. (No animations are running).
 
@@ -115,21 +111,21 @@ Each value is an object with:
 - `startTime` (Number) start time, default `0`.
 Animations are parsed automatically from `glTF` files.
 
-##### `getScene` (Function, optional)
+##### `getScene` (Function, optional) {#getscene}
 
 - Default: `scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph)`
 
 If you have multiple scenes you can select the scene you want to use.
 Only triggers when scenegraph property changes.
 
-##### `getAnimator` (Function, optional)
+##### `getAnimator` (Function, optional) {#getanimator}
 
 - Default: `scenegraph => scenegraph && scenegraph.animator`
 
 Return `null` to disable animation or provide your custom animator.
 Only triggers when scenegraph property changes.
 
-##### `_lighting` (String, optional)
+##### `_lighting` (String, optional) {#_lighting}
 
 - Default: `flat`
 
@@ -138,9 +134,9 @@ Only triggers when scenegraph property changes.
 - `pbr` Uses `glTF` PBR model. Works well with `glTF` models.
 
 Only read when scenegraph property changes.
-Uses [global light configuration](/docs/developer-guide/using-lighting.md) from deck.
+Uses [global light configuration](../../developer-guide/using-lighting.md) from deck.
 
-##### `_imageBasedLightingEnvironment` (Function or GLTFEnvironment, optional)
+##### `_imageBasedLightingEnvironment` (Function or GLTFEnvironment, optional) {#_imagebasedlightingenvironment}
 
 - Default: `null`
 
@@ -153,14 +149,14 @@ Only read when scenegraph property changes.
 ### Data Accessors
 
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -169,7 +165,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getOrientation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getOrientation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getorientation}
 
 - Default: `[0, 0, 0]`
 
@@ -178,7 +174,7 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
 
-##### `getScale` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getScale` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getscale}
 
 - Default: `[1, 1, 1]`
 
@@ -187,7 +183,7 @@ Scaling factor on the mesh along each axis.
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
 
-##### `getTranslation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getTranslation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettranslation}
 
 - Default: `[0, 0, 0]`
 
@@ -196,7 +192,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-##### `getTransformMatrix` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getTransformMatrix` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettransformmatrix}
 
 - Default: `null`
 
@@ -206,13 +202,13 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
-##### `sizeMinPixels` (Number, optional)
+##### `sizeMinPixels` (Number, optional) {#sizeminpixels}
 
 * Default: `0`
 
 The minimum size in pixels for one unit of the scene.
 
-##### `sizeMaxPixels` (Number, optional)
+##### `sizeMaxPixels` (Number, optional) {#sizemaxpixels}
 
 * Default: `Number.MAX_SAFE_INTEGER`
 

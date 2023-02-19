@@ -1,8 +1,8 @@
 # DeckGL (Scripting Interface)
 
-`DeckGL` extends the core [Deck](/docs/api-reference/core/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). 
+`DeckGL` extends the core [Deck](./deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). 
 
-Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-standalone.md) article.
+Make sure to read the [Using deck.gl Scripting API](../../get-started/using-standalone.md) article.
 
 
 ## Usage
@@ -30,15 +30,15 @@ new deck.DeckGL({
 
 ## Properties
 
-All [Deck](/docs/api-reference/core/deck.md) class properties, with these additional props that can be passed to the constructor:
+All [Deck](./deck.md) class properties, with these additional props that can be passed to the constructor:
 
-##### `container` (DOMElement | String, optional)
+##### `container` (DOMElement | String, optional) {#container}
 
 Default: `document.body`
 
 The container in which deck.gl should append its canvas. Can be either a HTMLDivElement or the element id. The deck.gl canvas is resized to fill the container.
 
-##### `map` (Object, optional)
+##### `map` (Object, optional) {#map}
 
 Default: `window.mapboxgl || window.maplibregl`
 
@@ -73,20 +73,20 @@ new deck.DeckGL({
 });
 ```
 
-##### `mapStyle` (Object | String)
+##### `mapStyle` (Object | String) {#mapstyle}
 
 The style JSON or URL for the Mapbox map.
 
-##### `mapboxApiAccessToken` (String)
+##### `mapboxApiAccessToken` (String) {#mapboxapiaccesstoken}
 
 The API access token to use Mapbox tiles. See [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api) documentation for how to use Mapbox.
 
 
 ## Methods
 
-All [Deck](/docs/api-reference/core/deck.md) class methods, with these additional methods:
+All [Deck](./deck.md) class methods, with these additional methods:
 
-##### `getMapboxMap`
+##### `getMapboxMap` {#getmapboxmap}
 
 Returns the mapbox-gl or maplibre-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instance if a base map is present.
 

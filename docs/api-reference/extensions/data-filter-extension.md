@@ -5,9 +5,9 @@ The `DataFilterExtension` adds GPU-based data filtering functionalities to layer
 
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl DataFilterExtension" src="https://codepen.io/vis-gl/embed/oNYbBMO?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl DataFilterExtension" src="https://codepen.io/vis-gl/embed/oNYbBMO?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/oNYbBMO'>deck.gl DataFilterExtension</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -79,7 +79,7 @@ new DataFilterExtension({filterSize, fp64});
 
 When added to a layer via the `extensions` prop, the `DataFilterExtension` adds the following properties to the layer:
 
-##### `getFilterValue` ([Function](/docs/developer-guide/using-layers.md#accessors))
+##### `getFilterValue` ([Function](../../developer-guide/using-layers.md#accessors)) {#getfiltervalue}
 
 Called to retrieve the value for each object that it will be filtered by. Returns either a number (if `filterSize: 1`) or an array.
 
@@ -119,7 +119,7 @@ new ScatterplotLayer({
 Note that all filtered values are uploaded as 32-bit floating numbers, so certain values e.g. raw unix epoch time may not be accurately represented. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
 
-##### `filterRange` (Array)
+##### `filterRange` (Array) {#filterrange}
 
 The bounds which defines whether an object should be rendered. If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
 
@@ -129,7 +129,7 @@ Format:
 * If `filterSize` is `2` to `4`: `[[min0, max0], [min1, max1], ...]` for each filtered property, respectively.
 
 
-##### `filterSoftRange` (Array, optional)
+##### `filterSoftRange` (Array, optional) {#filtersoftrange}
 
 * Default: `null`
 
@@ -154,32 +154,32 @@ Format:
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
 
-##### `filterTransformSize` (Boolean, optional)
+##### `filterTransformSize` (Boolean, optional) {#filtertransformsize}
 
 * Default: `true`
 
 When an object is "faded", manipulate its size so that it appears smaller or thinner. Only works if `filterSoftRange` is specified.
 
 
-##### `filterTransformColor` (Boolean, optional)
+##### `filterTransformColor` (Boolean, optional) {#filtertransformcolor}
 
 * Default: `true`
 
 When an object is "faded", manipulate its opacity so that it appears more translucent. Only works if `filterSoftRange` is specified.
 
 
-##### `filterEnabled` (Boolean, optional)
+##### `filterEnabled` (Boolean, optional) {#filterenabled}
 
 * Default: `true`
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
 
-##### `onFilteredItemsChange` (Function, optional)
+##### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
 Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
 
 - `event` (Object)
-  + `id` (String) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](/docs/api-reference/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
+  + `id` (String) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
   + `count` (Number) - the number of data objects that pass the filter.
 
 ## Remarks

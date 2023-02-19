@@ -1,6 +1,6 @@
 # generateLayerTests
 
-This utility generates a series of test cases to be used with [testLayer](/docs/api-reference/test-utils/test-layer.md) that checks the conformance of a layer class.
+This utility generates a series of test cases to be used with [testLayer](../test-utils/test-layer.md) that checks the conformance of a layer class.
 
 ## Example
 
@@ -42,5 +42,5 @@ generateLayerTests({Layer, sampleProps, assert, onError});
 * `assert` (Function, optional) - callback when checking a condition. Receives two arguments:
   - `condition` - a value that is expected to be truthy
   - `comment` (String) - information about the check
-* `onBeforeUpdate` - custom callback to be added to each [test case](/docs/api-reference/test-utils/test-layer.md).
-* `onAfterUpdate` - custom callback to be added to each [test case](/docs/api-reference/test-utils/test-layer.md).
+* `onBeforeUpdate` - custom callback to be added to each [test case](../test-utils/test-layer.md).
+* `onAfterUpdate` - custom callback to be added to each [test case](../test-utils/test-layer.md).

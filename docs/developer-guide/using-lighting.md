@@ -4,7 +4,7 @@ A deck.gl lighting effect is a visual approximation of environment illumination 
 
 To enable lighting in deck.gl, it is required that both the lighting effect and material instances are properly instantiated.
 
-<iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl LightingEffect Demo" src="https://codepen.io/vis-gl/embed/ZZwrZz/?height=450&theme-id=light&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+<iframe height="450" style={{width:'100%;'}} scrolling="no" title="deck.gl LightingEffect Demo" src="https://codepen.io/vis-gl/embed/ZZwrZz/?height=450&theme-id=light&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
   See the Pen <a href='https://codepen.io/vis-gl/pen/ZZwrZz/'>deck.gl LightingEffect Demo</a> by vis.gl
   (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
 </iframe>
@@ -13,7 +13,7 @@ To enable lighting in deck.gl, it is required that both the lighting effect and 
 
 ## Constructing A Lighting Effect Instance
 
-A [LightingEffect](/docs/api-reference/core/lighting-effect.md) can be instantiated with a `lights` object:
+A [LightingEffect](../api-reference/core/lighting-effect.md) can be instantiated with a `lights` object:
 
 ```js
 import {AmbientLight, PointLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
@@ -42,11 +42,11 @@ const lightingEffect = new LightingEffect({ambientLight, pointLight, directional
 
 The `lights` has all the light sources that the lighting effect uses to build the visualization. Users typically specify the following types of light sources:
 
-* [AmbientLight](/docs/api-reference/core/ambient-light.md)
-* [PointLight](/docs/api-reference/core/point-light.md)
-* [DirectionalLight](/docs/api-reference/core/directional-light.md)
-* [CameraLight](/docs/api-reference/core/camera-light.md)
-* [SunLight](/docs/api-reference/core/sun-light.md)
+* [AmbientLight](../api-reference/core/ambient-light.md)
+* [PointLight](../api-reference/core/point-light.md)
+* [DirectionalLight](../api-reference/core/directional-light.md)
+* [CameraLight](../api-reference/core/camera-light.md)
+* [SunLight](../api-reference/core/sun-light.md)
 
 
 ## Constructing A Material Instance
@@ -76,7 +76,7 @@ new GeoJsonLayer({
   material
 });
 ```
-Refer to each layer's [documentation](/docs/api-reference/geo-layers/README.md) to see if the material prop is supported.
+Refer to each layer's [documentation](../api-reference/layers/README.md) to see if the material prop is supported.
 
 ## Using Effects
 

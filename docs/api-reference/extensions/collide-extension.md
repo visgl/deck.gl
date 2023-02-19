@@ -6,7 +6,7 @@ The `CollideExtension` allows layers to hide features which overlap with other f
 To use this extension on a layer, add the `CollideExtension` to the layer's `extensions` prop.
 
 <!-- TODO: Codepen demo -->
-<div style="position:relative;height:450px"></div>
+<div style={{position:'relative',height:450}}></div>
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -60,11 +60,11 @@ new CollideExtension();
 
 When added to a layer via the `extensions` prop, the `CollideExtension` adds the following properties to the layer:
 
-##### `collideEnabled` (Boolean, optional)
+##### `collideEnabled` (Boolean, optional) {#collideenabled}
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
-##### `collideGroup` (string, optional)
+##### `collideGroup` (string, optional) {#collidegroup}
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collideGroup` will be considered together when calculating collisions.
 
@@ -90,7 +90,7 @@ const layers = [
 ];
   ```
 
-##### `collideTestProps` (Object, optional)
+##### `collideTestProps` (Object, optional) {#collidetestprops}
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
@@ -98,7 +98,7 @@ Props to override when computing collisions. A common use case is to increase th
 collideTestProps: {radiusScale: 2}
 ```
 
-##### `getCollidePriority` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getCollidePriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollidepriority}
 
 The collision priority of each object. Features with higher values are shown preferentially.
 The priority is a number in the range -1000 -> 1000, values outside will be clamped. 

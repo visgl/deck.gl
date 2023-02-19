@@ -59,8 +59,8 @@ If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element
 
 The `Deck` class supports the following experimental props to aggressively reduce memory usage on memory-restricted devices:
 
-- [_pickable](/docs/api-reference/core/deck.md#_pickable)
-- [_typedArrayManagerProps](/docs/api-reference/core/deck.md#_typedArrayManagerProps)
+- [_pickable](../api-reference/core/deck.md#_pickable)
+- [_typedArrayManagerProps](../api-reference/core/deck.md#_typedArrayManagerProps)
 
 The app can sacrifice certain features and/or runtime performance in exchange for a smaller memory footprint:
 

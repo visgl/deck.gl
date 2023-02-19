@@ -1,9 +1,8 @@
-import {ContourLayerDemo} from 'website-components/doc-demos/aggregation-layers';
+# ContourLayer
+
+import {ContourLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <ContourLayerDemo />
-
-
-# ContourLayer
 
 The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
@@ -36,7 +35,7 @@ function App({data, viewState}) {
 
   return <DeckGL viewState={viewState}
     layers={[layer]}
-    getTooltip={({object}) => object && } />;
+    getTooltip={({object}) => object && object.name} />;
 }
 ```
 
@@ -73,17 +72,17 @@ new deck.ContourLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters
 
-##### `gpuAggregation` (bool, optional)
+##### `gpuAggregation` (bool, optional) {#gpuaggregation}
 
 * Default: true
 
@@ -91,7 +90,7 @@ When set to true and browser supports GPU aggregation, aggregation is performed 
 
 NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
-##### `aggregation` (String, optional)
+##### `aggregation` (String, optional) {#aggregation}
 
 * Default: 'SUM'
 
@@ -103,7 +102,7 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 * MAX : Grid cell contains maximum of all weights that fall into it.
 
 
-##### `contours` (Array, optional)
+##### `contours` (Array, optional) {#contours}
 
 * Default: `[{threshold: 1}]`
 
@@ -122,7 +121,7 @@ Array of objects with following keys
 
 NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
 
-##### `zOffset` (Number, optional)
+##### `zOffset` (Number, optional) {#zoffset}
 
 * Default: `0.005`
 
@@ -130,13 +129,13 @@ A very small z offset that is added for each vertex of a contour (Isoline or Iso
 
 ### Data Accessors
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getWeight` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 
@@ -150,8 +149,8 @@ The weight of each object.
 
 The `ContourLayer` renders the following sublayers:
 
-* `lines` - For Isolines, rendered by [LineLayer](/docs/api-reference/layers/line-layer.md)
-* `bands` - For Isobands, rendered by [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md)
+* `lines` - For Isolines, rendered by [LineLayer](../layers/line-layer.md)
+* `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 
 ## Source

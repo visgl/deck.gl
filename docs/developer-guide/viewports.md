@@ -1,6 +1,6 @@
 # Viewports
 
-> If you are new to deck.gl's `View` and `Viewport` classes it is suggested that you start by reading up on [`Views`](/docs/developer-guide/views.md) before learning about `Viewports`. Most applications start by using `View` classes.
+> If you are new to deck.gl's `View` and `Viewport` classes it is suggested that you start by reading up on [`Views`](./views.md) before learning about `Viewports`. Most applications start by using `View` classes.
 
 
 ## Viewports
@@ -20,8 +20,8 @@ In addition to generating WebGL uniforms, the `Viewport` class also offers JavaS
 
 | Viewport Class        | Description |
 | ---                   | ---         |
-| [`Viewport`](/docs/api-reference/core/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
-| [`WebMercatorViewport`](/docs/api-reference/core/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
+| [`Viewport`](../api-reference/core/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
+| [`WebMercatorViewport`](../api-reference/core/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
 
 
 ## About Geospatial Positioning

@@ -1,12 +1,8 @@
-import {TileLayerDemo} from 'website-components/doc-demos/geo-layers';
+# TileLayer
+
+import {TileLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <TileLayerDemo />
-
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# TileLayer
 
 The `TileLayer` is a composite layer that makes it possible to visualize very large datasets. Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
 
@@ -80,7 +76,7 @@ new deck.TileLayer({});
 
 At each integer zoom level (`z`), the XY plane in the view space is divided into square tiles of the same size, each uniquely identified by their `x` and `y` index. When `z` increases by 1, the view space is scaled by 2, meaning that one tile at `z` covers the same area as four tiles at `z+1`.
 
-When the `TileLayer` is used with a geospatial view such as the [MapView](/docs/api-reference/core/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
+When the `TileLayer` is used with a geospatial view such as the [MapView](../core/map-view.md), x, y, and z are determined from [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
 
 When the `TileLayer` is used with a non-geospatial view such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md), `x` and `y` increment from the world origin, and each tile's width and height match that defined by the `tileSize` prop. For example, the tile `x: 0, y: 0` occupies the square between `[0, 0]` and `[tileSize, tileSize]`.
 
@@ -89,13 +85,13 @@ If you need to offset the `z` level at which the tiles are fetched in order to f
 
 ## Properties
 
-Inherits all properties from [base `Layer`](/docs/api-reference/core/layer.md).
+Inherits all properties from [base `Layer`](../core/layer.md).
 
-If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) properties to style features.
+If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/geojson-layer.md) properties to style features.
 
 ### Data Options
 
-##### `data` (String|Array, optional)
+##### `data` (String|Array, optional) {#data}
 
 - Default: `[]`
 
@@ -106,7 +102,7 @@ If the value is a string: a URL template. Substrings `{x}` `{y}` and `{z}`, if p
 If the value is an array: multiple URL templates. Each endpoint must return the same content for the same tile index. This can be used to work around [domain sharding](https://developer.mozilla.org/en-US/docs/Glossary/Domain_sharding), allowing browsers to download more resources simultaneously. Requests made are balanced among the endpoints, based on the tile index.
 
 
-##### `getTileData` (Function, optional)
+##### `getTileData` (Function, optional) {#gettiledata}
 
 - Default: `tile => load(tile.url)`
 
@@ -134,13 +130,13 @@ if (signal.aborted) {
 // Expensive computation on returned data
 ```
 
-##### `TilesetClass` (class, optional)
+##### `TilesetClass` (class, optional) {#tilesetclass}
 
 - Default: `Tileset2D`
 
 Tileset class that `TileLayer` uses for tile indexing. Extend [Tileset2D](#tileset2d) to implement a custom indexing scheme.
 
-##### `tileSize` (Number, optional)
+##### `tileSize` (Number, optional) {#tilesize}
 
 The pixel dimension of the tiles, usually a power of 2.
 
@@ -150,32 +146,32 @@ For non-geospatial viewports, the tile size should correspond to the true pixel 
 
 - Default: `512`
 
-##### `zoomOffset` (Number, optional)
+##### `zoomOffset` (Number, optional) {#zoomoffset}
 
 This offset changes the zoom level at which the tiles are fetched.  Needs to be an integer.
 
 - Default: `0`
 
-##### `maxZoom` (Number|Null, optional)
+##### `maxZoom` (Number|Null, optional) {#maxzoom}
 
 The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`), tiles from this level will be displayed.
 
 - Default: `null`
 
-##### `minZoom` (Number, optional)
+##### `minZoom` (Number, optional) {#minzoom}
 
 The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests.
 
 - Default: 0
 
-##### `extent` (Array, optional)
+##### `extent` (Array, optional) {#extent}
 
 The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
 
 - Default: `null`
 
 
-##### `maxCacheSize` (Number, optional)
+##### `maxCacheSize` (Number, optional) {#maxcachesize}
 
 The maximum number of tiles that can be cached. The tile cache keeps loaded tiles in memory even if they are no longer visible. It reduces the need to re-download the same data over and over again when the user pan/zooms around the map, providing a smoother experience.
 
@@ -184,14 +180,14 @@ If not supplied, the `maxCacheSize` is calculated as `5` times the number of til
 - Default: `null`
 
 
-##### `maxCacheByteSize` (Number, optional)
+##### `maxCacheByteSize` (Number, optional) {#maxcachebytesize}
 
 The maximum memory used for caching tiles. If this limit is supplied, `getTileData` must return an object that contains a `byteLength` field.
 
 - Default: `null`
 
 
-##### `refinementStrategy` (String|Function, optional)
+##### `refinementStrategy` (String|Function, optional) {#refinementstrategy}
 
 How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
 
@@ -210,7 +206,7 @@ Apps may define a custom `refinementStrategy` by supplying its own callback func
 
 When called, the function receives an array of [Tile](#tile) instances representing every tile that is currently in the cache. It is an opportunity to manipulate `tile.isVisible` before sub layers are rendered. `isVisible` is initially set to the value of `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
-##### `maxRequests` (Number, optional)
+##### `maxRequests` (Number, optional) {#maxrequests}
 
 The maximum number of concurrent `getTileData` calls.
 
@@ -226,7 +222,7 @@ If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in th
 
 ### Render Options
 
-##### `renderSubLayers` (Function, optional)
+##### `renderSubLayers` (Function, optional) {#rendersublayers}
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
 
@@ -241,7 +237,7 @@ Note that the following sub layer props are overridden by `TileLayer` internally
 - `visible` (toggled based on tile visibility)
 - `highlightedObjectIndex` (set based on the parent layer's highlight state)
 
-##### `zRange` (Array, optional)
+##### `zRange` (Array, optional) {#zrange}
 
 An array representing the height range of the content in the tiles, as `[minZ, maxZ]`. This is designed to support tiles with 2.5D content, such as buildings or terrains. At high pitch angles, such a tile may "extrude into" the viewport even if its 2D bounding box is out of view. Therefore, it is necesary to provide additional information for the layer to behave correctly. The value of this prop is used for two purposes: 1) to determine the necesary tiles to load and/or render; 2) to determine the possible intersecting tiles during picking.
 
@@ -249,7 +245,7 @@ This prop currently only has effect when used with a geospatial view.
 
 - Default: `null` (interpreted as `[0, 0]`)
 
-##### `modelMatrix` (Matrix4, optional)
+##### `modelMatrix` (Matrix4, optional) {#modelmatrix}
 
 Affects both rendering and tile fetching to produce a transformed tile layer.  Note that this can result in tiles being fetched outside the `extent` prop, for example if the `modelMatrix` defines a rotation.
 
@@ -257,7 +253,7 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 ### Callbacks
 
-##### `onViewportLoad` (Function, optional)
+##### `onViewportLoad` (Function, optional) {#onviewportload}
 
 `onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. An array of loaded [Tile](#tile) instances are passed as argument to this function
 
@@ -265,7 +261,7 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 - Default: `data => null`
 
 
-##### `onTileLoad` (Function, optional)
+##### `onTileLoad` (Function, optional) {#ontileload}
 
 `onTileLoad` called when a tile successfully loads.
 
@@ -275,7 +271,7 @@ Receives arguments:
 
 - `tile` (Object) - the [tile](#tile) that has been loaded.
 
-##### `onTileError` (Function, optional)
+##### `onTileError` (Function, optional) {#ontileerror}
 
 `onTileError` called when a tile failed to load.
 
@@ -285,7 +281,7 @@ Receives arguments:
 
 - `error` (`Error`)
 
-##### `onTileUnload` (Function, optional)
+##### `onTileUnload` (Function, optional) {#ontileunload}
 
 `onTileUnload` called when a tile is cleared from cache.
 

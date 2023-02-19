@@ -1,13 +1,13 @@
 
 # PathStyleExtension
 
-The `PathStyleExtension` adds selected features to the [PathLayer](/docs/api-reference/layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) and [GeoJsonLayer](/docs/api-reference/layers/geojson-layer.md).
+The `PathStyleExtension` adds selected features to the [PathLayer](../layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md).
 
 > Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl PathStyleExtension" src="https://codepen.io/vis-gl/embed/dyOMaoX?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl PathStyleExtension" src="https://codepen.io/vis-gl/embed/dyOMaoX?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/dyOMaoX'>deck.gl PathStyleExtension</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -72,7 +72,7 @@ new PathStyleExtension({dash});
 When added to a layer via the `extensions` prop, the `PathStyleExtension` adds the following properties to the layer:
 
 
-##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array)
+##### `getDashArray` ([Function](../../developer-guide/using-layers.md#accessors)|Array) {#getdasharray}
 
 Must be specified if the `dash` option is enabled.
 
@@ -83,14 +83,14 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 * If this accessor is not specified, all paths are drawn as solid lines.
 
 
-##### `dashJustified` (Boolean, optional)
+##### `dashJustified` (Boolean, optional) {#dashjustified}
 
 * Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends. Overrides the effect of `highPrecisionDash`.
 
 
-##### `getOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number)
+##### `getOffset` ([Function](../../developer-guide/using-layers.md#accessors)|Number) {#getoffset}
 
 Must be specified if the `offset` option is enabled.
 
@@ -100,7 +100,7 @@ The offset to draw each path with, relative to the width of the path. Negative o
 * If a function is provided, it is called on each path to retrieve its offset.
 
 
-##### `dashGapPickable` (Boolean, optional)
+##### `dashGapPickable` (Boolean, optional) {#dashgappickable}
 
 * Default `false`
 

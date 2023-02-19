@@ -1,16 +1,12 @@
-import {S2LayerDemo} from 'website-components/doc-demos/geo-layers';
+# S2Layer
+
+import {S2LayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <S2LayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# S2Layer
-
 The `S2Layer` renders filled and/or stroked polygons based on the [S2](http://s2geometry.io/) geospatial indexing system.
 
-`S2Layer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`S2Layer` is a [CompositeLayer](../core/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -84,11 +80,11 @@ new deck.S2Layer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getS2Token` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getS2Token` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
 
 Called for each data object to retrieve the identifier of the S2 cell. May return one of the following:
 
@@ -105,7 +101,7 @@ Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details
 
 The `S2Layer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) rendering all S2 cells.
+* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all S2 cells.
 
 
 ## Source

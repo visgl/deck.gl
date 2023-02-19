@@ -2,7 +2,7 @@
 
 The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, extrusions, etc., and renders them on a map.
 
-deck.gl provides an extensive [layer catalog](/docs/api-reference/layers/README.md) and is designed to compose many layers together to form complex visuals.
+deck.gl provides an extensive [layer catalog](../api-reference/layers/README.md) and is designed to compose many layers together to form complex visuals.
 
 
 ## Constructing a Layer Instance
@@ -31,7 +31,7 @@ The `properties` are settings that the layer uses to build the visualization. Us
 
 ### Layer ID
 
-The `id` prop is the unique identifier of this layer among all layers. Constructing a new layer instance in its own does not have any performance impact, as deck.gl only does the expensive calculations when a layer is **created** (an id appearing for the first time) or **updated** (different props are passed in for the same id). Read more about this in [layer lifecycle](/docs/developer-guide/custom-layers/layer-lifecycle.md).
+The `id` prop is the unique identifier of this layer among all layers. Constructing a new layer instance in its own does not have any performance impact, as deck.gl only does the expensive calculations when a layer is **created** (an id appearing for the first time) or **updated** (different props are passed in for the same id). Read more about this in [layer lifecycle](./custom-layers/layer-lifecycle.md).
 
 It is recommend that this prop is set explicitly to avoid collision.
 
@@ -39,7 +39,7 @@ It is recommend that this prop is set explicitly to avoid collision.
 
 The `data` prop specifies data source of this layer's visualization. The value is expected to be a collection (typically a JavaScript array) of data objects with similar structure, such as rows in a table. deck.gl layers are able to handle millions of data objects very efficiently.
 
-The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to a JSON array. See [data prop](/docs/api-reference/core/layer.md#data) documentation for details.
+The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to a JSON array. See [data prop](../api-reference/core/layer.md#data) documentation for details.
 
 ### Accessors
 
@@ -62,7 +62,7 @@ Some accessors also support constant values instead of functions. When a constan
 
 ### Other Layer Props
 
-The rest of the props are typically numeric or boolean values that apply to the whole layer. These include props that define the render options (opacity, extrusion of the PolygonLayer, font family of the TextLayer, etc.), [coordinate system](/docs/developer-guide/coordinate-systems.md), and [interactivity](/docs/developer-guide/interactivity.md).
+The rest of the props are typically numeric or boolean values that apply to the whole layer. These include props that define the render options (opacity, extrusion of the PolygonLayer, font family of the TextLayer, etc.), [coordinate system](./coordinate-systems.md), and [interactivity](./interactivity.md).
 
 
 ## Rendering Layers
@@ -119,7 +119,7 @@ The application does not have to be aware about this, as long as it keeps render
 
 The constant creation and disposal of layer instances may seem wasteful, however the creation and recycling of JavaScript objects is quite efficient in modern JavaScript environments, and this is very similar to how React works where every render cycle generates a new tree of ReactElement instances, so the model is proven.
 
-For more details on layer creation, update and destruction, read about [Layer Lifecycle](/docs/developer-guide/custom-layers/layer-lifecycle.md).
+For more details on layer creation, update and destruction, read about [Layer Lifecycle](./custom-layers/layer-lifecycle.md).
 
 
 ### Why Doesn't My Layer Update with New Props?
@@ -163,6 +163,6 @@ function render() {
 
 There is no way for deck.gl to know what the programmer intended just by looking at or comparing the functions that are supplied to a `Layer`s accessor props. Because recalculating attributes can be potentially expensive, deck.gl by default ignores shallow changes in accessor props. This is designed to provide the best performance to the most common use cases without compromising convenience.
 
-Instead, the [`updateTriggers`](/docs/api-reference/core/layer.md#updatetriggers) property gives you fine grained control, enabling you to tell deck.gl exactly which attributes need to change, and when.
+Instead, the [`updateTriggers`](../api-reference/core/layer.md#updatetriggers) property gives you fine grained control, enabling you to tell deck.gl exactly which attributes need to change, and when.
 
-Read more about this behavior in [Performance Optimization](/docs/developer-guide/performance.md).
+Read more about this behavior in [Performance Optimization](./performance.md).
