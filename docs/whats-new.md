@@ -2,6 +2,14 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v8.9
+
+Release date: TBD, target Feb, 2023
+
+### `@deck.gl/geo-layers`
+
+- A new experimental [`_ImageryLayer`](/docs/api-reference/geo-layers/imagery-layer.md) simplifies connection to WMS and similar map image services. In contrast to the `TileLayer` which loads many small image tiles, the `_ImageryLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+
 ## deck.gl v8.8
 
 Release date: June, 2022
