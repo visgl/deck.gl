@@ -3,7 +3,7 @@ import {readableInteger} from '../utils/format-utils';
 import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/point-cloud/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class PointCloudDemo extends Component {
   static title = '3D Indoor Scan';

@@ -1,9 +1,10 @@
 import React from 'react';
-import {Home} from 'gatsby-theme-ocular/components';
-import {withPrefix} from 'gatsby';
+import {Home} from '../components';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styled from 'styled-components';
+import Layout from '@theme/Layout';
 
-import HeroExample from './examples/home-demo';
+import HeroExample from '../examples/home-demo';
 
 const FeatureImage = styled.div`
 position: absolute;
@@ -13,7 +14,7 @@ top: 0;
 right: 0;
 z-index: -1;
 border-top: solid 200px transparent;
-background-image: url(${withPrefix('/images/maps.jpg')});
+background-image: url('${props => props.src}')
 background-size: contain;
 background-repeat: no-repeat;
 background-position: right top;
@@ -30,12 +31,12 @@ width: 70%;
 font-size: 14px;
 
 h2 {
-  font: ${props => props.theme.typography.font700};
+  font: bold 32px/48px;
   margin: 24px 0 16px;
   position: relative;
 }
 h3 {
-  font: ${props => props.theme.typography.font450};
+  font: bold 16px/24px;
   margin: 16px 0 0;
   position: relative;
 }
@@ -47,7 +48,7 @@ h3 > img {
 }
 hr {
   border: none;
-  background: ${props => props.theme.colors.mono400};
+  background: #E1E8F0;
   height: 1px;
   margin: 24px 0 0;
   width: 32px;
@@ -60,12 +61,14 @@ hr {
 }
 `;
 
-export default class IndexPage extends React.Component {
-  render() {
-    return (
-      <Home HeroExample={HeroExample} theme="light">
+export default function IndexPage() {
+  const baseUrl = useBaseUrl('/');
+
+  return (
+    <Layout title="Home" description="deck.gl">
+      <Home HeroExample={HeroExample}>
         <div style={{position: 'relative'}}>
-          <FeatureImage />
+          <FeatureImage src={`${baseUrl}images/maps.jpg`}  />
           <TextContainer>
             <h2>
               deck.gl is a WebGL-powered framework for visual exploratory
@@ -74,19 +77,19 @@ export default class IndexPage extends React.Component {
             <hr className="short" />
 
             <h3>
-              <img src={withPrefix('/images/icon-layers.svg')} />
+              <img src={`${baseUrl}images/icon-layers.svg`} />
               A Layered Approach to Data Visualization
             </h3>
             <p>
             deck.gl allows complex visualizations to be constructed by
             composing existing layers, and makes it easy to package and
             share new visualizations as reusable layers. We already offer
-            a <a href={withPrefix('/docs/api-reference/layers')}>catalog of proven layers</a> and
+            a <a href={`${baseUrl}docs/api-reference/layers`}>catalog of proven layers</a> and
             we have many more in the works.
             </p>
 
             <h3>
-              <img src={withPrefix('/images/icon-high-precision.svg')} />
+              <img src={`${baseUrl}images/icon-high-precision.svg`} />
               High-Precision Computations in the GPU
             </h3>
             <p>
@@ -96,7 +99,7 @@ export default class IndexPage extends React.Component {
             </p>
 
             <h3>
-              <img src={withPrefix('/images/icon-react.svg')} />
+              <img src={`${baseUrl}images/icon-react.svg`} />
               React Friendly
             </h3>
             <p>
@@ -106,7 +109,7 @@ export default class IndexPage extends React.Component {
             </p>
 
             <h3>
-              <img src={withPrefix('/images/icon-basemap.webp')} />
+              <img src={`${baseUrl}images/icon-basemap.webp`} />
               Integration with Base Map Providers
             </h3>
             <p>
@@ -119,6 +122,6 @@ export default class IndexPage extends React.Component {
           </TextContainer>
         </div>
       </Home>
-    );
-  }
+    </Layout>
+  );
 }

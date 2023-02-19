@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/map-tile/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class MapTileDemo extends Component {
   static title = 'Raster Map Tiles';

@@ -4,7 +4,7 @@ import {GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/image-tile/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const ImageTileDemoContainer = styled.div`
   position: absolute;

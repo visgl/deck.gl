@@ -3,7 +3,7 @@ import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {COLOR_SCALE} from 'website-examples/geojson/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class GeoJsonDemo extends Component {
   static title = 'Vancouver Property Value';

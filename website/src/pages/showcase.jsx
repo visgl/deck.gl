@@ -1,13 +1,16 @@
 import React from 'react';
-import {withPrefix} from 'gatsby';
+import Layout from '@theme/Layout';
 import styled from 'styled-components';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import {joinPath} from '../utils/data-utils';
 
-import items from '../showcase.json';
+import items from '../../showcase.json';
 
 const ShowcaseContainer = styled.div`
 padding: 60px 12px;
 max-width: 800px;
 margin: 0 auto;
+font-size: 14px;
 
 @media screen and (max-width: 600px) {
   padding: 12px;
@@ -89,10 +92,10 @@ margin-left: -4px;
 
 a {
   text-decoration: none;
-  color: ${props => props.theme.colors.primary};
+  color: val(--ifm-color-black);
 }
 h2 {
-  color: ${props => props.theme.colors.black} !important;
+  color: #111 !important;
 }
 > div {
   position: absolute;
@@ -123,34 +126,38 @@ function renderLink(label, url, index) {
 }
 
 export default function Showcase() {
+  const baseUrl = useBaseUrl('/');
+
   return (
-    <ShowcaseContainer>
-      <p><i>
-        Would you like us to feature your project?
-        <a href="https://github.com/visgl/deck.gl/issues"> Let us know!</a>
-      </i></p>
+    <Layout title="Showcase" description="Projects built with deck.gl">
+      <ShowcaseContainer>
+        <p><i>
+          Would you like us to feature your project?
+          <a href="https://github.com/visgl/deck.gl/issues"> Let us know!</a>
+        </i></p>
 
-      {items.map(({name, url, image, links, description}) => (
-        <div key={name}>
-          <Thumbnail>
-            <div data-title={name} >
-              <a href={url}>
-                <img src={withPrefix(image)} />
-              </a>
-            </div>
-          </Thumbnail>
+        {items.map(({name, url, image, links, description}) => (
+          <div key={name}>
+            <Thumbnail>
+              <div data-title={name} >
+                <a href={url}>
+                  <img src={joinPath(baseUrl, image)} />
+                </a>
+              </div>
+            </Thumbnail>
 
-          <ProjectInfo>
-            <div>
-              <a href={url} target="_blank" rel="noopener noreferrer"><h2>{name}</h2></a>
-              <p>
-                {Object.keys(links).map((label, i) => renderLink(label, links[label], i))}
-              </p>
-              <p>{description}</p>
-            </div>
-          </ProjectInfo>
-        </div>
-      ))}
-    </ShowcaseContainer>
+            <ProjectInfo>
+              <div>
+                <a href={url} target="_blank" rel="noopener noreferrer"><h2>{name}</h2></a>
+                <p>
+                  {Object.keys(links).map((label, i) => renderLink(label, links[label], i))}
+                </p>
+                <p>{description}</p>
+              </div>
+            </ProjectInfo>
+          </div>
+        ))}
+      </ShowcaseContainer>
+    </Layout>
   );
 };

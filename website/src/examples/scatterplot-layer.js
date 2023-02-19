@@ -3,7 +3,7 @@ import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/scatterplot/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class ScatterPlotDemo extends Component {
   static title = 'Every Person in New York City';

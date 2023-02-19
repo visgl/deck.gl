@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import InfoPanel from '../components/info-panel';
-import {loadData} from '../utils/data-utils';
-import {normalizeParam} from '../utils/format-utils';
-import {MAPBOX_STYLES} from '../constants/defaults';
+import InfoPanel from '../info-panel';
+import {loadData, joinPath} from '../../utils/data-utils';
+import {normalizeParam} from '../../utils/format-utils';
+import {MAPBOX_STYLES} from '../../constants/defaults';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 const DemoContainer = styled.div`
-position: relative;
-overflow: hidden !important;
-height: 100%;
-transition: height 600ms ease-in;
-
 .tooltip, .deck-tooltip {
   position: absolute;
   padding: 4px 12px;
@@ -31,12 +27,12 @@ bottom: 20px;
 color: #fff;
 mix-blend-mode: difference;
 
-@media screen and (max-width: ${props => props.theme.breakpoints.medium}px) {
+@media screen and (max-width: 480px) {
   display: none;
 }
 `;
 
-export default function(DemoComponent, {isInteractive = true, style} = {}) {
+export default function makeExample(DemoComponent, {isInteractive = true, style} = {}) {
   const {parameters = {}, mapStyle} = DemoComponent;
   const defaultParams = Object.keys(parameters)
     .reduce((acc, name) => {
@@ -50,6 +46,7 @@ export default function(DemoComponent, {isInteractive = true, style} = {}) {
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
+    const baseUrl = useBaseUrl('/');
 
     const useParam = useCallback(parameters => {
       const newParams = Object.keys(parameters)
@@ -77,7 +74,7 @@ export default function(DemoComponent, {isInteractive = true, style} = {}) {
       }
 
       source.forEach(({url, worker}, index) => {
-        loadData(url, worker, (resultData, resultMeta) => {
+        loadData(joinPath(baseUrl, url), joinPath(baseUrl, worker), (resultData, resultMeta) => {
           if (isArray) {
             setData(d => {
               const newData = d.slice();
