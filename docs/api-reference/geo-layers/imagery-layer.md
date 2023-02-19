@@ -70,7 +70,7 @@ Note that additional features, such as metadata loading, is only supported for k
 
 ### Layers
 
-Image servers such as WMS can render different layers. Typically as list of layers **must** be specified, otherwise requests for map images will fail. For WMS services, this is controlled by `props.layer`. For other services, layers (if required by that service) can be specified in the template URL, either as a parameter or as a hard-coded part of the template string. 
+Image servers such as WMS can render different layers. Typically as list of layers **must** be specified, otherwise requests for map images will fail. For WMS services, this is controlled by `props.layers`. For other services, layers (if required by that service) can be specified in the template URL, either as a parameter or as a hard-coded part of the template string. 
 
 ### Image Service Metadata
 
@@ -85,7 +85,22 @@ Template URLs only cover image requests and there is no support for providing a 
 
 ### Interactivity
 
-WMS services sometimes provide a mechanism to query a specific pixel. This is supported through a `getFeatreuInfo()` method on the `ImageryLayer`
+WMS services sometimes provide a mechanism to query a specific pixel. This is supported through the `getFeatureInfoText()` method on the `ImageryLayer`
+
+## Methods
+
+##### `getFeatureInfoText()` 
+
+This is a method on the layer that can be called to retrieve additional information from the image service about the map near the specified pixel.
+
+Arguments:
+
+- `x` (number) - The x component of the pixel in the image
+- `y` (number) - The y component of the pixel in the image
+
+Returns
+
+- `Promise<string>` - Resolves to a string containing additional information about the map around the provided pixel
 
 
 ## Properties
@@ -106,7 +121,7 @@ If `props.serviceType` is set to `'template'`, data is expected to be a URL temp
 - `{south}`
 - `{width}`
 - `{height}`
-- `{layers}` - replaced with a string built from the content of `props.layers`. The array of layer name strings in `props.layers` will be joined by commas (`.`) into a single string.
+- `{layers}` - replaced with a string built from the content of `props.layers`. The array of layer name strings in `props.layers` will be joined by commas (`,`) into a single string.
 
 
 ##### `serviceType` (string, optional)
