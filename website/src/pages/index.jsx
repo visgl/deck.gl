@@ -14,7 +14,7 @@ top: 0;
 right: 0;
 z-index: -1;
 border-top: solid 200px transparent;
-background-image: url('${props => props.src}')
+background-image: url(${props => props.src});
 background-size: contain;
 background-repeat: no-repeat;
 background-position: right top;
