@@ -112,7 +112,7 @@ const config = {
         title: 'deck.gl',
         logo: {
           alt: 'vis.gl Logo',
-          src: 'images/visgl-logo.png',
+          src: 'images/visgl-logo-dark.png',
         },
         items: [
           {
