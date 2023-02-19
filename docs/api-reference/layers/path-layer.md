@@ -1,8 +1,8 @@
-import {PathLayerDemo} from 'website-components/doc-demos/layers';
+# PathLayer
+
+import {PathLayerDemo} from '@site/src/doc-demos/layers';
 
 <PathLayerDemo />
-
-# PathLayer
 
 The `PathLayer` renders lists of coordinate points as extruded polylines with mitering.
 
@@ -69,63 +69,63 @@ new deck.PathLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `widthUnits` (String, optional)
+##### `widthUnits` (String, optional) {#widthunits}
 
 * Default: `'meters'`
 
-The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
+The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `widthScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `widthScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthscale}
 
 * Default: `1`
 
 The path width multiplier that multiplied to all paths.
 
-##### `widthMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `widthMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthminpixels}
 
 * Default: `0`
 
 The minimum path width in pixels. This prop can be used to prevent the path from getting too thin when zoomed out.
 
-##### `widthMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `widthMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthmaxpixels}
 
 * Default: Number.MAX_SAFE_INTEGER
 
 The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 
-##### `capRounded` (Boolean, optional)
+##### `capRounded` (Boolean, optional) {#caprounded}
 
 * Default: `false`
 
 Type of caps. If `true`, draw round caps. Otherwise draw square caps.
 
 
-##### `jointRounded` (Boolean, optional)
+##### `jointRounded` (Boolean, optional) {#jointrounded}
 
 * Default: `false`
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
-##### `billboard` (Boolean, optional)
+##### `billboard` (Boolean, optional) {#billboard}
 
 * Default: `false`
 
 If `true`, extrude the path in screen space (width always faces the camera).
 If `false`, the width always faces up.
 
-##### `miterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `miterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#miterlimit}
 
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `jointRounded` is `false`.
 
-##### `_pathType` (Object, optional)
+##### `_pathType` (Object, optional) {#_pathtype}
 
 * Default: `null`
 
@@ -139,7 +139,7 @@ When normalization is disabled, paths must be specified in the format of flat ar
 
 ### Data Accessors
 
-##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPath` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpath}
 
 * Default: `object => object.path`
 
@@ -158,7 +158,7 @@ new PathLayer({
 })
 ```
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default `[0, 0, 0, 255]`
 
@@ -167,7 +167,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getWidth` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
 
 * Default: `1`
 
@@ -179,7 +179,7 @@ The width of each path, in units specified by `widthUnits` (default meters).
 
 ## Use binary attributes
 
-This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `PathLayer`.
+This section is about the special requirements when [supplying attributes directly](../../developer-guide/performance.md#supply-attributes-directly) to a `PathLayer`.
 
 Because each path has a different number of vertices, when `data.attributes.getPath` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each path. For example, if there are 3 paths of 2, 3, and 4 vertices each, `startIndices` should be `[0, 2, 5, 9]`.
 

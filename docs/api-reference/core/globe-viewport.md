@@ -4,7 +4,7 @@ The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, and 
 
 ## Usage
 
-A `GlobeViewport` instance is created under the hood by a [GlobeView](/docs/api-reference/core/globe-view.md).
+A `GlobeViewport` instance is created under the hood by a [GlobeView](./globe-view.md).
 
 ```js
 import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
@@ -52,13 +52,13 @@ Remarks:
 * `width` and `height` are forced to 1 if supplied as 0, to avoid division by zero. This is intended to reduce the burden of apps to check values before instantiating a `Viewport`.
 *  Per cartographic tradition, longitudes and latitudes are specified as degrees.
 
-Inherits all [Viewport methods](/docs/api-reference/core/viewport.md#methods).
+Inherits all [Viewport methods](./viewport.md#methods).
 
 ## Methods
 
-Inherits all methods from [Viewport](/docs/api-reference/core/viewport.md).
+Inherits all methods from [Viewport](./viewport.md).
 
-##### `project`
+##### `project` {#project}
 
 Projects world coordinates to pixel coordinates on screen.
 
@@ -75,7 +75,7 @@ Returns:
   + If input is `[longitude, latitude: altitude]`: returns `[x, y, z]`.
 
 
-##### `unproject`
+##### `unproject` {#unproject}
 
 Unproject pixel coordinates on screen into world coordinates.
 

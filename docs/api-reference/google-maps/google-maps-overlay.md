@@ -4,7 +4,7 @@ This class implements the [OverlayView](https://developers.google.com/maps/docum
 
 ## Vector/Raster maps
 
-As detailed in the [overview](/docs/api-reference/google-maps/overview.md), the overlay supports both Vector and Raster Google map rendering. Depending on the Google Map configuration, the correct deck.gl overlay rendering method will be chosen at runtime.
+As detailed in the [overview](./overview.md), the overlay supports both Vector and Raster Google map rendering. Depending on the Google Map configuration, the correct deck.gl overlay rendering method will be chosen at runtime.
 
 ## Usage
 
@@ -38,7 +38,7 @@ As detailed in the [overview](/docs/api-reference/google-maps/overview.md), the 
 const overlay = new GoogleMapsOverlay(props)
 ```
 
-`props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/core/deck.md) props are supported:
+`props` are forwarded to a `Deck` instance. The following [Deck](../core/deck.md) props are supported:
 
 - `style`
 - `layers`
@@ -53,7 +53,7 @@ const overlay = new GoogleMapsOverlay(props)
 
 ## Methods
 
-##### `setMap`
+##### `setMap` {#setmap}
 
 ```js
 overlay.setMap(map);
@@ -61,7 +61,7 @@ overlay.setMap(map);
 
 Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL context; use `finalize()` if the overlay should be permanently removed.
 
-##### `setProps`
+##### `setProps` {#setprops}
 
 ```js
 overlay.setProps(props);
@@ -69,19 +69,19 @@ overlay.setProps(props);
 
 Update (partial) props.
 
-##### `pickObject`
+##### `pickObject` {#pickobject}
 
-Equivalent of [deck.pickObject](/docs/api-reference/core/deck.md).
+Equivalent of [deck.pickObject](../core/deck.md).
 
-##### `pickObjects`
+##### `pickObjects` {#pickobjects}
 
-Equivalent of [deck.pickObjects](/docs/api-reference/core/deck.md).
+Equivalent of [deck.pickObjects](../core/deck.md).
 
-##### `pickMultipleObjects`
+##### `pickMultipleObjects` {#pickmultipleobjects}
 
-Equivalent of [deck.pickMultipleObjects](/docs/api-reference/core/deck.md).
+Equivalent of [deck.pickMultipleObjects](../core/deck.md).
 
-##### `finalize`
+##### `finalize` {#finalize}
 
 ```js
 overlay.finalize();

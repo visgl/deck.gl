@@ -1,12 +1,8 @@
-import {TerrainLayerDemo} from 'website-components/doc-demos/geo-layers';
+# TerrainLayer
+
+import {TerrainLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <TerrainLayerDemo />
-
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# TerrainLayer
 
 The `TerrainLayer` reconstructs mesh surfaces from height map images, e.g. [Mapzen Terrain Tiles](https://github.com/tilezen/joerd/blob/master/docs/formats.md), which encodes elevation into R,G,B values.
 
@@ -65,13 +61,13 @@ new deck.TerrainLayer({});
 
 ## Properties
 
-When in Tiled Mode, inherits from all [TileLayer](/docs/api-reference/core/tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](/docs/api-reference/core/simple-mesh-layer.md).
+When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md).
 
 
 
 ### Data Options
 
-##### `elevationData` (String|Array, required)
+##### `elevationData` (String|Array, required) {#elevationdata}
 
 Image URL that encodes height data.
 
@@ -80,20 +76,20 @@ Image URL that encodes height data.
 - If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
 
 
-##### `texture` (String|Null, optional)
+##### `texture` (String|Null, optional) {#texture}
 
 Image URL to use as the surface texture. Same schema as `elevationData`.
 
 - Default: `null`
 
 
-##### `meshMaxError` (Number, optional)
+##### `meshMaxError` (Number, optional) {#meshmaxerror}
 
 Martini error tolerance in meters, smaller number results in more detailed mesh..
 
 - Default: `4.0`
 
-##### `elevationDecoder` (Object)
+##### `elevationDecoder` (Object) {#elevationdecoder}
 
 Parameters used to convert a pixel to elevation in meters.
 An object containing the following fields:
@@ -134,7 +130,7 @@ The default value of `elevationDecoder` decodes a grayscale image:
 ```
 
 
-##### `bounds` (Array, optional)
+##### `bounds` (Array, optional) {#bounds}
 
 Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`.
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
@@ -145,31 +141,31 @@ Must be supplied when using non-tiled elevation data.
 - Default: `null`
 
 
-##### `loadOptions` (Object, optional)
+##### `loadOptions` (Object, optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [TerrainLoader](https://loaders.gl/modules/terrain/docs/api-reference/terrain-loader)
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `texture` prop is supplied
 
-Note that by default, the `TerrainLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
+Note that by default, the `TerrainLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](../../developer-guide/loading-data.md#loaders-and-web-workers).
 
 
 ### Render Options
 
-##### `color` (Color, optional)
+##### `color` (Color, optional) {#color}
 
 Color to use if `texture` is unavailable. Forwarded to `SimpleMeshLayer`'s `getColor` prop.
 
 - Default: `[255, 255, 255]`
 
-##### `wireframe` (Boolean, optional)
+##### `wireframe` (Boolean, optional) {#wireframe}
 
 Forwarded to `SimpleMeshLayer`'s `wireframe` prop.
 
 - Default: `false`
 
-##### `material` (Object, optional)
+##### `material` (Object, optional) {#material}
 
 Forwarded to `SimpleMeshLayer`'s `material` prop.
 
@@ -180,8 +176,8 @@ Forwarded to `SimpleMeshLayer`'s `material` prop.
 
 The `TerrainLayer` renders the following sublayers:
 
-* `tiles` - a [TileLayer](/docs/api-reference/geo-layers/tile-layer.md). Only rendered if `elevationData` is a URL template.
-* `mesh` - a [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) rendering the terrain mesh.
+* `tiles` - a [TileLayer](./tile-layer.md). Only rendered if `elevationData` is a URL template.
+* `mesh` - a [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md) rendering the terrain mesh.
 
 
 

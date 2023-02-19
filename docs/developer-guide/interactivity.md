@@ -26,7 +26,7 @@ You can also selectively enable/disable certain controller features:
   controller: {doubleClickZoom: false, touchRotate: true}
 ```
 
-See [Controller](/docs/api-reference/core/controller.md) for all options.
+See [Controller](../api-reference/core/controller.md) for all options.
 
 
 ### Reset Camera Position
@@ -60,12 +60,12 @@ function goToNYC() {
 }
 ```
 
-To add a transition animation, see [view state transitions](/docs/developer-guide/view-state-transitions.md).
+To add a transition animation, see [view state transitions](./view-state-transitions.md).
 
 
 ### Add Constraints to View State
 
-An application can optionally supply the [onViewStateChange](/docs/api-reference/core/deck.md#onviewstatechange) callback and manipulate the view state before it is used. The following example constrains the map in a bounding box:
+An application can optionally supply the [onViewStateChange](../api-reference/core/deck.md#onviewstatechange) callback and manipulate the view state before it is used. The following example constrains the map in a bounding box:
 
 ```js
 import {Deck} from '@deck.gl/core';
@@ -124,8 +124,8 @@ function App() {
 
 ### Advanced View Controls
 
-- Alternative views such as OrbitView, FirstPersonView, and using multiple views such as VR, minimap: [Views and Projections](/docs/developer-guide/views.md)
-- Implement a custom controller: [Controller](/docs/api-reference/core/controller.md)
+- Alternative views such as OrbitView, FirstPersonView, and using multiple views such as VR, minimap: [Views and Projections](./views.md)
+- Implement a custom controller: [Controller](../api-reference/core/controller.md)
 
 
 ## Picking
@@ -134,11 +134,11 @@ deck.gl includes a powerful picking engine that enables the application to preci
 
 ### What can be Picked?
 
-The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](/docs/api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](/docs/api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
+The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](../api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](../api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
 
 ### Enabling Picking
 
-Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](/docs/api-reference/core/layer.md#pickable) prop to `true`. This value is `false` by default.
+Picking can be enabled or disabled on a layer-by-layer basis. To enable picking on a layer, set its [`pickable`](../api-reference/core/layer.md#pickable) prop to `true`. This value is `false` by default.
 
 ### The Picking Info Object
 
@@ -202,7 +202,7 @@ It receives a picking info object and returns the content of the tooltip. To cus
   }
 ```
 
-For a range of options, see [getTooltip](/docs/api-reference/core/deck.md#gettooltip) documentation.
+For a range of options, see [getTooltip](../api-reference/core/deck.md#gettooltip) documentation.
 
 #### Using React
 
@@ -246,7 +246,7 @@ function App() {
 
 ### Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`Deck.pickObject`](/docs/api-reference/core/deck.md) and [`Deck.pickObjects`](/docs/api-reference/core/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`Deck.pickObject`](../api-reference/core/deck.md) and [`Deck.pickObjects`](../api-reference/core/deck.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
 `pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
@@ -280,7 +280,7 @@ Also note that by directly calling `queryObject`, integrating deck.gl into an ex
 If you are using the core layers, all has been taken care of.
 
 If you are implementing a custom layer, read more about
-[how picking is implemented](/docs/developer-guide/custom-layers/picking.md).
+[how picking is implemented](./custom-layers/picking.md).
 
 
 ## Built-in Events
@@ -299,7 +299,7 @@ A event handler function is called with two parameters: `info` that contains the
 
 There are two ways to subscribe to the built-in picking event handling:
 
-* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/core/layer.md#interaction-properties):
+* Specify callbacks for each pickable layer by passing [event handler props](../api-reference/core/layer.md#interaction-properties):
 
 ```js
 const layer = new ScatterplotLayer({
@@ -310,7 +310,7 @@ const layer = new ScatterplotLayer({
 });
 ```
 
-* Specify callbacks for all pickable layers by setting [event handler props](/docs/api-reference/react/deckgl.md#event-callbacks) of the `DeckGL` canvas:
+* Specify callbacks for all pickable layers by setting [event handler props](../api-reference/react/deckgl.md#event-callbacks) of the `DeckGL` canvas:
 
 ```js
 <DeckGL

@@ -1,12 +1,12 @@
-import {TextLayerDemo} from 'website-components/doc-demos/layers';
+# TextLayer
+
+import {TextLayerDemo} from '@site/src/doc-demos/layers';
 
 <TextLayerDemo />
 
-# TextLayer
-
 The `TextLayer` renders text labels at given coordinates.
 
-TextLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md) that wraps around the [IconLayer](/docs/api-reference/layers/icon-layer.md). It automatically creates an atlas texture from the specified font settings and `characterSet`.
+TextLayer is a [CompositeLayer](../core/composite-layer.md) that wraps around the [IconLayer](./icon-layer.md). It automatically creates an atlas texture from the specified font settings and `characterSet`.
 
 
 ```js
@@ -70,47 +70,47 @@ new deck.TextLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [CompositeLayer](/docs/api-reference/core/composite-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
 ### Rendering Options
 
-##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 * Default: 1
 
 Text size multiplier.
 
-##### `sizeUnits` (String, optional)
+##### `sizeUnits` (String, optional) {#sizeunits}
 
 * Default: `pixels`
 
-The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
+The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizeminpixels}
 
 * Default: `0`
 
 The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
 
-##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizemaxpixels}
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
 
-##### `billboard` (Boolean, optional)
+##### `billboard` (Boolean, optional) {#billboard}
 
 - Default: `true`
 
 If `true`, the text always faces camera. Otherwise the text faces up (z).
 
-##### `background` (Boolean, optional)
+##### `background` (Boolean, optional) {#background}
 
 - Default `false`
 
 Whether to render background for the text blocks.
 
-##### `backgroundPadding` (Array, optional)
+##### `backgroundPadding` (Array, optional) {#backgroundpadding}
 
 - Default `[0, 0, 0, 0]`
 
@@ -119,7 +119,7 @@ The padding of the background, an array of either 2 or 4 numbers.
 + If an array of 2 is supplied, it is interpreted as `[padding_x, padding_y]` in pixels.
 + If an array of 4 is supplied, it is interpreted as `[padding_left, padding_top, padding_right, padding_bottom]` in pixels.
 
-##### `fontFamily` (String, optional)
+##### `fontFamily` (String, optional) {#fontfamily}
 
 * Default: `'Monaco, monospace'`
 
@@ -127,7 +127,7 @@ Specifies a prioritized list of one or more font family names and/or generic fam
 
 See the [remarks](#remarks) section below for tips on using web fonts.
 
-##### `characterSet` (Array | Set | String, optional)
+##### `characterSet` (Array | Set | String, optional) {#characterset}
 
 * Default: ASCII characters 32-128
 
@@ -138,19 +138,19 @@ Specifies a list of characters to include in the font.
 
 Note that there is a limit to the number of unique characters supported by a single layer. The maximum number subjects to `fontSettings.fontSize` and the [MAX_TEXTURE_SIZE](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#understand_system_limits) of the device/browser.
 
-##### `fontWeight` (Number | String, optional)
+##### `fontWeight` (Number | String, optional) {#fontweight}
 
 * Default: `normal`.
 
 css `font-weight`.
 
-##### `lineHeight` (Number, optional)
+##### `lineHeight` (Number, optional) {#lineheight}
 
 * Default: `1.0`.
 
 A unitless number that will be multiplied with the current font size to set the line height.
 
-##### `fontSettings` (Object, optional)
+##### `fontSettings` (Object, optional) {#fontsettings}
 
 Advance options for fine tuning the appearance and performance of the generated shared `fontAtlas`.
 
@@ -163,25 +163,25 @@ Options:
 * `cutoff` (Number): How much of the radius (relative) is used for the inside part the glyph. Default is `0.25`. Bigger `cutoff` makes character thinner. Smaller `cutoff` makes character look thicker. Only applies when `sdf: true`.
 * `smoothing` (Number): How much smoothing to apply to the text edges. Default `0.1`. Only applies when `sdf: true`.
 
-##### `wordBreak` (String, optional)
+##### `wordBreak` (String, optional) {#wordbreak}
 
 * Default: `break-word`
 
 Available options are `break-all` and `break-word`. A valid `maxWidth` has to be provided to use `wordBreak`.
 
-##### `maxWidth` (Number, optional)
+##### `maxWidth` (Number, optional) {#maxwidth}
 
 * Default: `-1`
 
 `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
 
-##### `outlineWidth` (Number, optional)
+##### `outlineWidth` (Number, optional) {#outlinewidth}
 
 * Default: `0`
 
 Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
 
-##### `outlineColor` (Array, optional)
+##### `outlineColor` (Array, optional) {#outlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -190,20 +190,20 @@ Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number 
 
 ### Data Accessors
 
-##### `getText` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getText` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#gettext}
 
 * Default: `x => x.text`
 
 Method called to retrieve the content of each text label.
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `x => x.position`
 
 Method called to retrieve the location of each text label.
 
 
-##### `getSize` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSize` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
 
 * Default: `32`
 
@@ -213,7 +213,7 @@ The font size of each text label, in units specified by `sizeUnits` (default pix
 * If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -223,7 +223,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If a function is provided, it is called on each object to retrieve its color.
 
 
-##### `getAngle` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getAngle` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
 
 * Default: `0`
 
@@ -233,7 +233,7 @@ The rotating angle of each text label, in degrees.
 * If a function is provided, it is called on each object to retrieve its angle.
 
 
-##### `getTextAnchor` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
+##### `getTextAnchor` ([Function](../../developer-guide/using-layers.md#accessors)|String, optional) {#gettextanchor}
 
 * Default: `'middle'`
 
@@ -243,7 +243,7 @@ The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 * If a function is provided, it is called on each object to retrieve its text anchor.
 
 
-##### `getAlignmentBaseline` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
+##### `getAlignmentBaseline` ([Function](../../developer-guide/using-layers.md#accessors)|String, optional) {#getalignmentbaseline}
 
 * Default: `'center'`
 
@@ -253,7 +253,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
-##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPixelOffset` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 * Default: `[0, 0]`
 
@@ -263,7 +263,7 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If a function is provided, it is called on each object to retrieve its offset.
 
 
-##### `getBackgroundColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getBackgroundColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getbackgroundcolor}
 
 * Default: `[255, 255, 255, 255]`
 
@@ -274,7 +274,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the background color for all objects.
 * If a function is provided, it is called on each object to retrieve its background color.
 
-##### `getBorderColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getBorderColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getbordercolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -286,7 +286,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If a function is provided, it is called on each object to retrieve its border color.
 
 
-##### `getBorderWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getBorderWidth` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getborderwidth}
 
 * Default: `0`
 
@@ -306,7 +306,7 @@ The TextLayer renders the following sublayers:
 
 ## Use binary attributes
 
-This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to a `TextLayer`.
+This section is about the special requirements when [supplying attributes directly](../../developer-guide/performance.md#supply-attributes-directly) to a `TextLayer`.
 
 Because each text string has a different number of characters, when `data.attributes.getText` is supplied, the layer also requires an array `data.startIndices` that describes the character index at the start of each text object. For example, if there are 3 text objects of 2, 3, and 4 characters each, `startIndices` should be `[0, 2, 5, 9]`.
 

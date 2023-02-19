@@ -1,18 +1,14 @@
-import {GPUGridLayerDemo} from 'website-components/doc-demos/aggregation-layers';
+# GPUGridLayer (WebGL2)
+
+import {GPUGridLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <GPUGridLayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# GPUGridLayer (WebGL2)
-
 The `GPUGridLayer` aggregates data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. This layer performs aggregation on GPU hence not supported in non WebGL2 browsers.
 
-`GPUGridLayer` is one of the sublayers for [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/api-reference/aggregation-layers/grid-layer.md) is recommended.
+`GPUGridLayer` is one of the sublayers for [GridLayer](./grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](./grid-layer.md) is recommended.
 
-`GPUGridLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`GPUGridLayer` is a [CompositeLayer](../core/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -46,7 +42,7 @@ function App({data, viewState}) {
 
 **Note:** GPU Aggregation is faster only when using large data sets (data size is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
 
-**Note:** This layer is similar to [CPUGridLayer](/docs/api-reference/aggregation-layers/cpu-grid-layer.md) but performs aggregation on GPU. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
+**Note:** This layer is similar to [CPUGridLayer](./cpu-grid-layer.md) but performs aggregation on GPU. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
 
 
 ## Installation
@@ -81,17 +77,17 @@ new deck._GPUGridLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [CompositeLayer](/docs/api-reference/core/composite-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters. Must be greater than `0`.
 
-##### `colorDomain` (Array, optional)
+##### `colorDomain` (Array, optional) {#colordomain}
 
 * Default: `[min(colorWeight), max(colorWeight)]`
 
@@ -100,7 +96,7 @@ You can control how the colors of cells are mapped to weights by passing in an a
 This is useful when you want to render different data input with the same color mapping for comparison.
 
 
-##### `colorRange` (Array, optional)
+##### `colorRange` (Array, optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -108,14 +104,14 @@ Specified as an array of colors [color1, color2, ...]. Each color is an array of
 
 `colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
-##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Cell size multiplier, clamped between 0 - 1. The displayed size of cell is calculated by `coverage * cellSize`.
 Note: coverage does not affect how objects are binned.
 
-##### `elevationDomain` (Array, optional)
+##### `elevationDomain` (Array, optional) {#elevationdomain}
 
 * Default: `[0, max(elevationWeight)]`
 
@@ -123,35 +119,35 @@ Elevation scale input domain, default is set to between 0 and the max of aggrega
 You can control how the elevations of cells are mapped to weights by passing in an arbitrary elevation domain.
 This is useful when you want to render different data input with the same elevation scale for comparison.
 
-##### `elevationRange` (Array, optional)
+##### `elevationRange` (Array, optional) {#elevationrange}
 
 * Default: `[0, 1000]`
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
 Cell elevation multiplier.
 This is a handy property to scale the height of all cells without updating the data.
 
-##### `extruded` (Boolean, optional)
+##### `extruded` (Boolean, optional) {#extruded}
 
 * Default: `true`
 
 Whether to enable cell elevation. If set to false, all cell will be flat.
 
-##### `material` (Object, optional)
+##### `material` (Object, optional) {#material}
 
 * Default: `true`
 
-This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
+Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
 
 
-##### `colorAggregation` (String, optional)
+##### `colorAggregation` (String, optional) {#coloraggregation}
 
 * Default: 'SUM'
 
@@ -159,7 +155,7 @@ Defines the operation used to aggregate all data object weights to calculate a c
 
 `getColorWeight` and `colorAggregation` together determine the elevation value of each cell.
 
-##### `elevationAggregation` (String, optional)
+##### `elevationAggregation` (String, optional) {#elevationaggregation}
 
 * Default: 'SUM'
 
@@ -170,14 +166,14 @@ Defines the operation used to aggregate all data object weights to calculate a c
 
 ### Data Accessors
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
 
-##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
 
 * Default: `1`
 
@@ -187,7 +183,7 @@ The weight of a data object used to calculate the color value for a cell.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
 
 * Default: `1`
 

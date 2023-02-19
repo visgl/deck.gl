@@ -1,6 +1,6 @@
 # MapboxOverlay
 
-`MapboxOverlay` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](/docs/get-started/using-with-map.md) rendering modes.
+`MapboxOverlay` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](../../get-started/using-with-map.md) rendering modes.
 
 ## Example
 
@@ -124,7 +124,7 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 new MapboxOverlay(props);
 ```
 
-`MapboxOverlay` accepts the same props as the [Deck](/docs/api-reference/core/deck.md) class, with the following exceptions:
+`MapboxOverlay` accepts the same props as the [Deck](../core/deck.md) class, with the following exceptions:
 
 - `views` - multi-view support is limited. There is only one `MapView` that can synchronize with the base map. See the [using with multi-views](#multi-view-usage) section for details.
 - `parent` / `canvas` / `gl` - context creation is managed internally.
@@ -155,19 +155,19 @@ overlay.setProps({
 })
 ```
 
-Updates (partial) props of the underlying `Deck` instance. See [Deck.setProps](/docs/api-reference/core/deck.md#setprops).
+Updates (partial) props of the underlying `Deck` instance. See [Deck.setProps](../core/deck.md#setprops).
 
 ##### pickObject
 
-See [Deck.pickObject](/docs/api-reference/core/deck.md#pickobject).
+See [Deck.pickObject](../core/deck.md#pickobject).
 
 ##### pickObjects
 
-See [Deck.pickObjects](/docs/api-reference/core/deck.md#pickobjects).
+See [Deck.pickObjects](../core/deck.md#pickobjects).
 
 ##### pickMultipleObjects
 
-See [Deck.pickMultipleObjects](/docs/api-reference/core/deck.md#pickmultipleobjects).
+See [Deck.pickMultipleObjects](../core/deck.md#pickmultipleobjects).
 
 ##### finalize
 

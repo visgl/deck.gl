@@ -47,6 +47,6 @@ loadArcGISModules(modules, loadScriptOptions);
 
 Returns: a promise that resolves to an object with the following fields:
 
-- [DeckLayer](/docs/api-reference/arcgis/deck-layer.md)
-- [DeckRenderer](/docs/api-reference/core/deck-renderer.md)
+- [DeckLayer](./deck-layer.md)
+- [DeckRenderer](./deck-renderer.md)
 - `modules` (Array) - if the `modules` argument was specified, will represent an array of the resolved objects

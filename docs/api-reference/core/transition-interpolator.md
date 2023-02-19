@@ -1,6 +1,6 @@
 # TransitionInterpolator
 
-Base interpolator class that provides common functionality required to interpolate between two [View States](/docs/developer-guide/views.md). This class is not intended to be used directly. See [View State Transitions](/docs/developer-guide/view-state-transitions.md) for backgrounds.
+Base interpolator class that provides common functionality required to interpolate between two [View States](../../developer-guide/views.md). This class is not intended to be used directly. See [View State Transitions](../../developer-guide/view-state-transitions.md) for backgrounds.
 
 ## Example
 
@@ -71,7 +71,7 @@ Parameters:
 
 ## Interface
 
-##### `getDuration`
+##### `getDuration` {#getduration}
 
 This method can be optionally implemented by a subclass. If implemented, the user can specify `transitionDuration: 'auto'` when using this interpolator, and the duration will be dynamically computed using this method.
 
@@ -84,7 +84,7 @@ Returns:
 
 - A number in milliseconds representing the target duration of the transition. If `0`, transition is disabled.
 
-##### `initializeProps`
+##### `initializeProps` {#initializeprops}
 
 Called when a transition is about to be triggered. This can be used to preprocess values for use in every transition frame by `interpolateProps`.
 
@@ -102,7 +102,7 @@ The default implementation takes all values of the `extract` prop names from the
 If some `required` prop names are missing from the view state, an error will be thrown.
 
 
-##### `interpolateProps`
+##### `interpolateProps` {#interpolateprops}
 
 This method must be implemented by a subclasses.
 

@@ -58,7 +58,7 @@ import {JSONConverter} from '@deck.gl/json';
 
 ## Schema
 
-The valid combinations are defined by the [documented API](/docs/api-reference/json/conversion-reference.md).
+The valid combinations are defined by the [documented API](./conversion-reference.md).
 
 ## Error Handling
 

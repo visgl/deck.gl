@@ -1,12 +1,8 @@
-import {MVTLayerDemo} from 'website-components/doc-demos/geo-layers';
+# MVTLayer
+
+import {MVTLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <MVTLayerDemo />
-
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# MVTLayer
 
 The `MVTLayer` is a derived `TileLayer` that makes it possible to visualize very large datasets through MVTs ([Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/)). Behaving like `TileLayer`, it will only load, decode and render MVTs containing features that are visible within the current viewport.
 
@@ -77,12 +73,12 @@ new deck.MVTLayer({});
 
 ## Properties
 
-Inherits all properties from [`TileLayer`](/docs/api-reference/geo-layers/tile-layer.md) and [base `Layer`](/docs/api-reference/core/layer.md), with exceptions indicated below.
+Inherits all properties from [`TileLayer`](./tile-layer.md) and [base `Layer`](../core/layer.md), with exceptions indicated below.
 
-If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](/docs/api-reference/layers/geojson-layer.md) properties to style features.
+If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/geojson-layer.md) properties to style features.
 
 
-##### `data` (String | Array | JSON)
+##### `data` (String | Array | JSON) {#data}
 
 Required. It defines the remote data for the MVT layer.
 
@@ -96,13 +92,13 @@ See `TileLayer`'s `data` prop documentation for the URL template syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 
-##### `uniqueIdProperty` (String)
+##### `uniqueIdProperty` (String) {#uniqueidproperty}
 
 Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
 
 An string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `highlightedFeatureId` (Number | String)
+##### `highlightedFeatureId` (Number | String) {#highlightedfeatureid}
 
 * Default: `null`
 
@@ -111,15 +107,15 @@ Optional. When provided, a feature with ID corresponding to the supplied value w
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 
 
-##### `loadOptions` (Object, optional)
+##### `loadOptions` (Object, optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [MVTLoader](https://loaders.gl/modules/mvt/docs/api-reference/mvt-loader)
 
-Note that by default, the `MVTLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](/docs/developer-guide/loading-data.md#loaders-and-web-workers).
+Note that by default, the `MVTLoader` parses data using web workers, with code loaded from a [CDN](https://unpkg.com). To change this behavior, see [loaders and workers](../../developer-guide/loading-data.md#loaders-and-web-workers).
 
-##### `binary` (Boolean, optional)
+##### `binary` (Boolean, optional) {#binary}
 
 * Default: `true`
 
@@ -131,7 +127,7 @@ Remarks:
 
 ### Callbacks
 
-##### `onDataLoad` (Function, optional)
+##### `onDataLoad` (Function, optional) {#ondataload}
 
 Called if `data` is a TileJSON URL when it is successfully fetched
 
@@ -141,7 +137,7 @@ Receives arguments:
 
 ## Methods
 
-##### `getRenderedFeatures` (Function)
+##### `getRenderedFeatures` (Function) {#getrenderedfeatures}
 
 Get the rendered features in the current viewport.
 
@@ -164,9 +160,9 @@ Remarks:
 
 ## Tile
 
-Aside from all members of the [Tile](/docs/api-reference/geo-layers/tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
+Aside from all members of the [Tile](./tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
 
-##### `dataInWGS84` (Array)
+##### `dataInWGS84` (Array) {#datainwgs84}
 
 A list of features in world coordinates (WGS84).
 

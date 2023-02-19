@@ -1,12 +1,8 @@
-import {SimpleMeshLayerDemo} from 'website-components/doc-demos/mesh-layers';
+# SimpleMeshLayer
+
+import {SimpleMeshLayerDemo} from '@site/src/doc-demos/mesh-layers';
 
 <SimpleMeshLayerDemo />
-
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# SimpleMeshLayer
 
 The `SimpleMeshLayer` renders a number of instances of an arbitrary 3D geometry. For example, it can be used to visualize a fleet of 3d cars each with a position and an orientation over the map.
 
@@ -90,11 +86,11 @@ new deck.SimpleMeshLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Mesh
 
-##### `mesh` (String|Geometry|Object)
+##### `mesh` (String|Geometry|Object) {#mesh}
 
 The geometry to render for each data object. One of:
 
@@ -106,7 +102,7 @@ The geometry to render for each data object. One of:
   + `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional)
+##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#texture}
 
 - Default `null`.
 
@@ -123,7 +119,7 @@ The image data will be converted to a [Texture2D](https://github.com/visgl/luma.
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 
 
-##### `textureParameters` (Object)
+##### `textureParameters` (Object) {#textureparameters}
 
 Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
 
@@ -141,26 +137,26 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Render Options
 
-##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default `1`.
 
 Multiplier to scale each geometry by.
 
-##### `wireframe` (Boolean, optional)
+##### `wireframe` (Boolean, optional) {#wireframe}
 
 - Default: `false`
 
 Whether to render the mesh in wireframe mode.
 
-##### `material` (Object, optional)
+##### `material` (Object, optional) {#material}
 
 * Default: `true`
 
-This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
+Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
-##### `_useMeshColors` (Boolean, optional)
+##### `_useMeshColors` (Boolean, optional) {#_usemeshcolors}
 
 - Default: `false`
 
@@ -172,14 +168,14 @@ Remarks:
 ### Data Accessors
 
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -190,7 +186,7 @@ The color is in the format of `[r, g, b, [a]]`. Each channel is a number between
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getOrientation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getOrientation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getorientation}
 
 - Default: `[0, 0, 0]`
 
@@ -199,7 +195,7 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
 
-##### `getScale` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getScale` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getscale}
 
 - Default: `[1, 1, 1]`
 
@@ -208,7 +204,7 @@ Scaling factor on the mesh along each axis.
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
 
-##### `getTranslation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getTranslation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettranslation}
 
 - Default: `[0, 0, 0]`
 
@@ -217,7 +213,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-##### `getTransformMatrix` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
+##### `getTransformMatrix` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettransformmatrix}
 
 - Default: `null`
 

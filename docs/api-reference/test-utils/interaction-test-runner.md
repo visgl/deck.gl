@@ -11,7 +11,7 @@ This class is intended to be used with `BrowserTestDriver` from `@probe.gl/test-
 
 ## Example
 
-See [SnapshotTestRunner](/docs/api-reference/test-utils/snapshot-test-runner.md) for Node side set up instructions.
+See [SnapshotTestRunner](../test-utils/snapshot-test-runner.md) for Node side set up instructions.
 
 In your script that is run on the browser:
 
@@ -56,7 +56,7 @@ new TestRender({
 new InteractionTestRunner(deckProps)
 ```
 
-Create a InteractionTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/core/deck.md) constructor.
+Create a InteractionTestRunner instance. The `deckProps` argument is passed to the [Deck](../core/deck.md) constructor.
 
 ### add(testCase: Array|Object)
 

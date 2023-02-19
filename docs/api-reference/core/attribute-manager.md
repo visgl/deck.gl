@@ -11,12 +11,12 @@ Summary:
 * auto updates attributes with registered updater functions
 * allows overriding with application supplied buffers
 
-For more information consult the [Attribute Management](/docs/developer-guide/custom-layers/attribute-management.md) article.
+For more information consult the [Attribute Management](../../developer-guide/custom-layers/attribute-management.md) article.
 
 
 ## Static Methods
 
-##### `setDefaultLogFunctions`
+##### `setDefaultLogFunctions` {#setdefaultlogfunctions}
 
 Sets log functions to help trace or time attribute updates.
 Default logging uses the deck.gl logger.
@@ -44,7 +44,7 @@ Parameters:
 
 ## Methods
 
-##### `add`
+##### `add` {#add}
 
 Adds attribute descriptions to the AttributeManager that describe
 the attributes that should be auto-calculated.
@@ -72,7 +72,7 @@ Takes a single parameter as a map of attribute descriptor objects:
       (a.k.a. indices). Default to `false`.
     * `accessor` (String | Array of strings | Function) - accessor name(s) that will
       trigger an update of this attribute when changed. Used with
-      [`updateTriggers`](/docs/api-reference/core/layer.md#updatetriggers).
+      [`updateTriggers`](./layer.md#updatetriggers).
     * `transform` (Function, optional) - callback to process the result returned by `accessor`.
     * `update` (Function, optional) - the function to be called when data changes. If not supplied, the attribute will be auto-filled with `accessor`.
     * `defaultValue` (Number | Array of numbers, optional) - Default `[0, 0, 0, 0]`.
@@ -88,12 +88,12 @@ Takes a single parameter as a map of attribute descriptor objects:
     * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
       (a.k.a. divisor). Default to `0`.
 
-##### `addInstanced`
+##### `addInstanced` {#addinstanced}
 
 Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
 
 
-##### `remove`
+##### `remove` {#remove}
 
 Removes defined attributes.
 
@@ -102,7 +102,7 @@ Parameters:
 * `attributeNames` (Array) - Array of attribute names to be removed
 
 
-##### `invalidate`
+##### `invalidate` {#invalidate}
 
 Mark an attribute as need update.
 
@@ -112,7 +112,7 @@ Parameters:
 * `dataRange` (Object, optional) - A partial range of the attribute to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attribute for all data.
 
 
-##### `invalidateAll`
+##### `invalidateAll` {#invalidateall}
 
 Mark all attributes as need update.
 
@@ -121,7 +121,7 @@ Parameters:
 * `dataRange` (Object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
 
 
-##### `update`
+##### `update` {#update}
 
 Ensure all attribute buffers are updated from props or data.
 
