@@ -277,6 +277,7 @@ export class Tileset2D {
     return this._frameNumber;
   }
 
+  // eslint-disable-next-line complexity
   isTileVisible(
     tile: Tile2DHeader,
     cullRect?: {x: number; y: number; width: number; height: number}

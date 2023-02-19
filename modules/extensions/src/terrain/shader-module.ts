@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
@@ -98,6 +100,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 }
     `
   },
+  // eslint-disable-next-line complexity
   getUniforms: (opts = {}, uniforms) => {
     if ('dummyHeightMap' in opts) {
       const {

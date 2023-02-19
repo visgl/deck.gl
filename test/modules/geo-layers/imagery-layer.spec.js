@@ -19,41 +19,20 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
+import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
+import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
 
-import {
-  GreatCircleLayer,
-  H3HexagonLayer,
-  H3ClusterLayer,
-  QuadkeyLayer,
-  S2Layer,
-  TileLayer,
-  TripsLayer,
-  TerrainLayer,
-  GeohashLayer
-} from '@deck.gl/geo-layers';
-
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(QuadkeyLayer, 'QuadkeyLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
-  t.ok(TerrainLayer, 'TerrainLayer symbol imported');
-  t.ok(GeohashLayer, 'GeohashLayer symbol imported');
+test.skip('ImageryLayer', async t => {
+  const testCases = generateLayerTests({
+    Layer: ImageryLayer,
+    sampleProps: {
+      data: 'https://ows.terrestris.de/osm/service',
+      serviceType: 'wms',
+      layers: ['OSM-WMS']
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+  await testLayerAsync({Layer: ImageryLayer, testCases, onError: t.notOk});
   t.end();
 });
-
-import './tile-layer';
-import './quadkey-layer.spec';
-import './s2-layer.spec';
-import './trips-layer.spec';
-import './great-circle-layer.spec';
-import './h3-layers.spec';
-import './tile-3d-layer';
-import './terrain-layer.spec';
-import './mvt-layer.spec';
-import './geohash-layer.spec';
-
-import './tileset-2d';
