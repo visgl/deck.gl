@@ -28,19 +28,23 @@ export type ImageryLayerProps = CompositeLayerProps<string | ImageSource> & {
   onImageLoadError: (requestId: unknown, error: Error) => void;
 };
 
-const defaultProps: ImageryLayerProps = {
+const defaultProps: DefaultProps<ImageryLayerProps> = {
   id: 'imagery-layer',
-  data: undefined!,
+  data: '',
   serviceType: 'auto',
-  layers: undefined!,
-  onMetadataLoadStart: () => {},
-  onMetadataLoadComplete: () => {},
+  layers: {type: 'array', compare: true, value: []},
+  onMetadataLoadStart: {type: 'function', compare: false, value: () => {}},
+  onMetadataLoadComplete: {type: 'function', compare: false, value: () => {}},
   // eslint-disable-next-line
-  onMetadataLoadError: (error: Error) => console.error(error),
-  onImageLoadStart: () => {},
-  onImageLoadComplete: () => {},
+  onMetadataLoadError: {type: 'function', compare: false, value: console.error},
+  onImageLoadStart: {type: 'function', compare: false, value: () => {}},
+  onImageLoadComplete: {type: 'function', compare: false, value: () => {}},
   // eslint-disable-next-line
-  onImageLoadError: (requestId: unknown, error: Error) => console.error(error, requestId)
+  onImageLoadError: {
+    type: 'function',
+    compare: false,
+    value: (requestId: unknown, error: Error) => console.error(error, requestId)
+  }
 };
 
 /**
@@ -48,7 +52,7 @@ const defaultProps: ImageryLayerProps = {
  */
 export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   static layerName = 'ImageryLayer';
-  static defaultProps: DefaultProps<ImageryLayerProps> = defaultProps;
+  static defaultProps: DefaultProps = defaultProps;
 
   state!: {
     imageSource: ImageSource;
@@ -57,6 +61,9 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
     bounds: [number, number, number, number];
     width: number;
     height: number;
+
+    _nextRequestId: number;
+    _timeoutId: any;
   };
 
   /** Lets deck.gl know that we want viewport change events */
@@ -66,9 +73,12 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
 
   override initializeState(): void {
     // intentionally empty, initialization is done in updateState
+    this.state._nextRequestId = 0;
   }
 
   override updateState({changeFlags, props, oldProps}: UpdateParameters<this>): void {
+    const {viewport} = this.context;
+
     if (changeFlags.propsChanged) {
       const dataChanged =
         changeFlags.dataChanged ||
@@ -81,14 +91,14 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
         this.state.imageSource = this._createImageSource(props);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this._loadMetadata();
-        this.debounce(() => this.loadImage(this.context.viewport, 'image source changed'), 0);
+        this.debounce(() => this.loadImage(viewport, 'image source changed'), 0);
       }
 
       // Some sublayer props may have changed
     }
 
     if (changeFlags.viewportChanged) {
-      this.debounce(() => this.loadImage(this.context.viewport, 'viewport changed'));
+      this.debounce(() => this.loadImage(viewport, 'viewport changed'));
     }
   }
 
@@ -181,24 +191,21 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
       // Not type safe...
       this.setState({image, bounds, width, height});
     } catch (error) {
-      this.context.onError?.(error as Error, this);
+      this.raiseError(error as Error, 'Load image');
       this.getCurrentLayer()?.props.onImageLoadError(requestId, error as Error);
     }
   }
 
   // HELPERS
 
-  private _nextRequestId: number = 0;
-  private _timeoutId: any;
-
   /** Global counter for issuing unique request ids */
-  getRequestId(): number {
-    return this._nextRequestId++;
+  private getRequestId(): number {
+    return this.state._nextRequestId++;
   }
 
   /** Runs an action in the future, cancels it if the new action is issued before it executes */
-  debounce(fn: Function, ms = 500): void {
-    clearTimeout(this._timeoutId);
-    this._timeoutId = setTimeout(() => fn(), ms);
+  private debounce(fn: Function, ms = 500): void {
+    clearTimeout(this.state._timeoutId);
+    this.state._timeoutId = setTimeout(() => fn(), ms);
   }
 }
