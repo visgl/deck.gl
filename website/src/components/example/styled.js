@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import {isMobile} from '../common';
 
 export const ExampleHeader = styled.div`
-  font: bold 20px/28px;
-  color: #485668;
+  font: bold 20px/28px var(--ifm-font-family-base);
+  color: var(--ifm-color-gray-800);
   margin: 0 20px;
   border-bottom: 1px solid 20px;
   display: inline-block;
@@ -31,11 +31,11 @@ export const ExampleCard = styled.a`
   position: relative;
   img {
     transition-property: filter;
-    transition-duration: 0.4s;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: var(--ifm-transition-slow);
+    transition-timing-function: var(--ifm-transition-timing-default);
   }
   &:hover {
-    box-shadow: 0 4px 16px hsla(0, 0%, 0%, 0.16);
+    box-shadow: var(--ifm-global-shadow-md);
   }
   &:hover img {
     filter: contrast(0.2);
@@ -54,8 +54,7 @@ export const ExampleTitle = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
-  color: #FFFFFF;
-  font: normal 14px/20px;
+  color: var(--ifm-color-white);
   font-size: 1.5em;
   text-align: center;
   line-height: initial;
@@ -63,11 +62,11 @@ export const ExampleTitle = styled.div`
   height: 90%;
   top: 5%;
   left: 5%;
-  border: solid 1px #FFFFFF;
+  border: solid 1px var(--ifm-color-white);
   opacity: 0;
   transition-property: opacity;
-  transition-duration: 0.4s;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: var(--ifm-transition-slow);
+  transition-timing-function: var(--ifm-transition-timing-default);
   &:hover {
     opacity: 1;
   }

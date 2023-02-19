@@ -21,7 +21,7 @@ label {
   margin-bottom: 2px;
 }
 input, a, button {
-  background: #fff;
+  background: var(--ifm-color-white);
   font-size: 0.9em;
   text-transform: none;
   text-overflow: ellipsis;
@@ -38,15 +38,15 @@ button {
   color: initial;
 }
 button:disabled {
-  color: #aaa;
+  color: var(--ifm-color-gray-500);
   cursor: default;
-  background: #eee;
+  background: var(--ifm-color-gray-300);
 }
 input {
-  border: solid 1px #ccc;
+  border: solid 1px var(--ifm-color-gray-500);
 
   &:disabled {
-    background: #fff;
+    background: var(--ifm-color-gray-300);
   }
   &[type="checkbox"] {
     height: auto;

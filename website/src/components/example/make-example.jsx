@@ -11,7 +11,7 @@ const DemoContainer = styled.div`
   position: absolute;
   padding: 4px 12px;
   background: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  color: var(--ifm-color-white);
   max-width: 300px;
   font-size: 12px;
   z-index: 9;
@@ -24,8 +24,9 @@ const MapTip = styled.div`
 position: absolute;
 right: 12px;
 bottom: 20px;
-color: #fff;
+color: var(--ifm-color-white);
 mix-blend-mode: difference;
+font-size: 14px;
 
 @media screen and (max-width: 480px) {
   display: none;
@@ -74,7 +75,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
       }
 
       source.forEach(({url, worker}, index) => {
-        loadData(joinPath(baseUrl, url), joinPath(baseUrl, worker), (resultData, resultMeta) => {
+        loadData(joinPath(baseUrl, url), worker && joinPath(baseUrl, worker), (resultData, resultMeta) => {
           if (isArray) {
             setData(d => {
               const newData = d.slice();

@@ -4,8 +4,8 @@ import {isMobile} from '../common';
 export const Banner = styled.section`
   position: relative;
   height: 30rem;
-  background: #E1E8F0;
-  color: #2B3848;
+  background: var(--ifm-color-gray-400);
+  color: var(--ifm-color-gray-900);
   z-index: 0;
   ${isMobile} {
     height: 80vh;
@@ -41,7 +41,7 @@ export const HeroExampleContainer = styled.div`
 
 export const Section = styled.section`
   &:nth-child(2n + 1) {
-    background: #e8e8e8;
+    background: var(--ifm-color-gray-300);
   }
 `;
 
@@ -67,22 +67,22 @@ export const GetStartedLink = styled.a`
   display: inline-block;
   text-decoration: none;
   transition: background-color 250ms ease-in, color 250ms ease-in;
-  border: solid 2px #00ADE6;
-  color: #2B3848;
+  border: solid 2px var(--ifm-color-primary);
+  color: var(--ifm-color-gray-900);
   border-image: linear-gradient(
     to right,
-    #6F8196 0%,
-    #E1E8F0 100%
+    var(--ifm-color-gray-700) 0%,
+    var(--ifm-color-gray-400) 100%
   );
   border-image-slice: 2;
   &:visited {
-    color: #2B3848;
+    color: var(--ifm-color-gray-900);
   }
   &:active {
-    color: #FFFFFF;
+    color: var(--ifm-color-white);
   }
   &:hover {
-    color: #FFFFFF;
-    background-color: #00ADE6;
+    color: var(--ifm-color-white);
+    background-color: var(--ifm-color-primary);
   }
 `;

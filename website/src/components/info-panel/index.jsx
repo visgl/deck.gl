@@ -20,7 +20,7 @@ hr {
 a {
   text-decoration: none;
   display: inline;
-  color: #00ADE6;
+  color: var(--ifm-color-primary);
 }
 p {
   margin-bottom: 16px;
@@ -43,7 +43,7 @@ p {
 }
 hr {
   border: none;
-  background: #E1E8F0;
+  background: var(--ifm-color-gray-400);
   height: 1px;
 }
 .layout {

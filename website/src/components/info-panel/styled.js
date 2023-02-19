@@ -2,13 +2,13 @@ import styled from 'styled-components';
 import {isMobile} from '../common';
 
 export const PanelContainer = styled.div`
-  font: normal 14px/20px;
+  font-size: 14px;
   position: absolute;
   top: 0;
   right: 0;
   width: 344px;
-  background: #FFFFFF;
-  box-shadow: 0 1px 4px hsla(0, 0%, 0%, 0.16);
+  background: var(--ifm-color-white);
+  box-shadow: var(--ifm-global-shadow-lw);
   margin: 24px;
   padding: 10px 24px;
   max-height: 96%;
@@ -33,8 +33,8 @@ export const PanelExpander = styled.div`
   text-align: center;
   line-height: 16px;
   border-radius: 50%;
-  background: ${(props) => (props.$expanded ? 'none' : '#2B3848')};
-  color: ${(props) => (props.$expanded ? '#19202C' : '#FFFFFF')};
+  background: ${(props) => (props.$expanded ? 'none' : 'var(--ifm-color-gray-900)')};
+  color: ${(props) => (props.$expanded ? 'var(--ifm-color-black)' : 'var(--ifm-color-white)')};
   ${isMobile} {
     display: block;
   }
@@ -44,7 +44,7 @@ export const PanelTitle = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font: bold 16px/24px;
+  font: bold 1.25em var(--ifm-font-family-base);
   margin: 8px 0;
   ${isMobile} {
     cursor: pointer;
@@ -60,7 +60,7 @@ export const PanelContent = styled.div`
     display: inline-block;
     width: 40%;
     margin-right: 10%;
-    color: #485668;
+    color: var(--ifm-color-gray-800);
     margin-top: 2px;
     margin-bottom: 2px;
   }
@@ -68,8 +68,8 @@ export const PanelContent = styled.div`
   div > a,
   div > button,
   div > select {
-    background: #FFFFFF;
-    font: normal 11px/16px;
+    background: var(--ifm-color-white);
+    font: normal 11px/16px var(--ifm-font-family-base);
     line-height: 20px;
     text-transform: none;
     text-overflow: ellipsis;
@@ -84,21 +84,21 @@ export const PanelContent = styled.div`
     color: initial;
   }
   div > button:disabled {
-    color: #ECF2F7;
+    color: var(--ifm-color-gray-300);
     cursor: default;
-    background: #ECF2F7;
+    background: var(--ifm-color-gray-300);
   }
   div > input {
-    border: solid 1px hsla(0, 0%, 0%, 0.12);
+    border: solid 1px var(--ifm-color-gray-300);
     &:disabled {
-      background: #FFFFFF;
+      background: var(--ifm-color-white);
     }
     &[type='checkbox'] {
       height: auto;
     }
   }
   p {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     white-space: initial;
   }
   ${isMobile} {
@@ -110,8 +110,8 @@ export const SourceLink = styled.a`
   display: block;
   text-align: right;
   margin-top: 8px;
-  font: bold 12px/20px;
-  color: #485668;
+  font: bold 12px/20px var(--ifm-font-family-base);
+  color: var(--ifm-color-gray-800);
   ${isMobile} {
     display: ${(props) => (props.$expanded ? 'block' : 'none')};
   }
