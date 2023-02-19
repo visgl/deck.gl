@@ -1,21 +1,17 @@
 <p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
+  <img src="https://img.shields.io/badge/from-v8.9-green.svg?style=flat-square" alt="from v8.9" />
 </p>
 
 # ImageryLayer (Experimental)
 
-> From v8.9
+> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other layers, detailed in the [limitations](#limitations) section. Use with caution and report any issues that you find on GitHub.
+
 
 The `ImageryLayer` is a composite layer that connects with an image service that can render map images optimized for the current view. Instead of loading a detailed map image covering the entire globe, an image is rendered.
 
-In contrast to the [`TileLayer`](/docs/api-reference/geo-layers/tile-layer.md) which loads many small image tiles, the `_ImageryLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+In contrast to the [TileLayer](./tile-layer.md) which loads many small image tiles, the `ImageryLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
 
 To use this layer, an *image source* must be specified. Image sources are specified by supplying a URL to the `ImageryLayer` `data` property. See the section on image sources below for mor information.
-
-> Caveats: 
-> - The `ImageryLayer` currently does not work well with multiple views.
-> - The `ImageryLayer` currently does not work well with perspective views.
-> - The `ImageryLayer` has not been adapted to work with non-geospatial views such as the [OrthographicView](/docs/api-reference/core/orthographic-view.md) or the [OrbitView](/docs/api-reference/core/orbit-view.md).
 
 
 ```typescript
@@ -25,7 +21,7 @@ import {ImageryLayer} from '@deck.gl/geo-layers';
 
 function App({viewState}) {
   const layer = new ImageryLayer({
-    data: `https://ows.terrestris.de/osm/service`,
+    data: 'https://ows.terrestris.de/osm/service',
     serviceType: 'wms',
     layers: ['OSM-WMS']
   });
@@ -61,7 +57,7 @@ To use pre-bundled scripts:
 ```
 
 ```typescript
-new deck.ImageryLayer({});
+new deck._ImageryLayer({});
 ```
 
 ## Image Sources
@@ -80,27 +76,27 @@ Image services like WMS can often provide metadata (aka capabilities) about the 
 
 WMS services sometimes provide a mechanism to query a specific pixel. This is supported through a method on the `ImageryLayer`
 
-## Image Request Parameters
-
-- `east`
-- `north`
-- `west`
-- `south`
-- `width`
-- `height`
-
 
 ## Properties
 
-Inherits all properties from [base `Layer`](/docs/api-reference/core/layer.md).
+Inherits all properties from [base `Layer`](../core/layer.md).
 
 ### Data Options
 
-##### `data` (string, optional)
+##### `data` (string)
 
 A base URL to a well-known service type, or a full URL template from which the map images should be loaded.
 
-If `props.serviceType` is set to `'template'`, data is expected to be a URL template. Substrings `{east}` `{north}` `{east}` `{west}` `{south}`, `{width}` and `{height}` will be replaced with a viewports actual bounds and size. `{layers}` will be replaced with content of props.layers.
+If `props.serviceType` is set to `'template'`, data is expected to be a URL template. The template may contain the following substrings, which will be replaced with a viewport's actual bounds and size at request time:
+
+- `{east}`
+- `{north}`
+- `{west}`
+- `{south}`
+- `{width}`
+- `{height}`
+- `{layers}` - replaced with the content of `props.layers`
+
 
 ##### `serviceType` (string, optional)
 
@@ -110,11 +106,11 @@ Specifies the type of service at the URL supplied in `props.data`. Currently acc
 
 ##### `layers` (string\[\], optional)
 
-- Default: `[]` \*
+- Default: `[]`
 
 Specifies names of layers that should be visualized from the image service. 
 
-> Note that WMS services will typically not display anything unless at least on valid layer name is provided.
+> Note that WMS services will typically not display anything unless at least one valid layer name is provided.
 
 
 ### Callbacks
@@ -128,9 +124,9 @@ Specifies names of layers that should be visualized from the image service.
 
 ##### `onMetadataLoadComplete` (Function, optional)
 
-`onMetadataLoadComplete` called when a tile successfully loads.
+`onMetadataLoadComplete` called when the metadata of the image source successfully loads.
 
-- Default: `(metadata) => {}`
+- Default: `metadata => {}`
 
 Receives arguments:
 
@@ -170,7 +166,7 @@ Receives arguments:
 
 ##### `onImageLoadError` (Function, optional)
 
-`onImageLoadError` called when a tile failed to load.
+`onImageLoadError` called when an image failed to load.
 
 - Default: `console.error`
 
@@ -179,6 +175,11 @@ Receives arguments:
 - `requestId` (`number`) - Allows tracking of specific requests
 - `error` (`Error`)
 
+## Limitations
+
+- Each instance of the `ImageryLayer` only supports being rendered in one view. See [rendering layers in multiple views](../../developer-guide/views.md#rendering-layers-in-multiple-views) for a workaround.
+- This layer currently does not work well with perspective views (i.e. `pitch>0`).
+- This layer does not work with non-geospatial views such as the [OrthographicView](../core/orthographic-view.md) or the [OrbitView](../core/orbit-view.md).
 
 ## Source
 
