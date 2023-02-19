@@ -62,19 +62,30 @@ new deck._ImageryLayer({});
 
 ## Image Sources
 
-The `ImageryLayer` can accept URLs to geospatial image services such as WMS, however it is also possible to specify a custom URL template. 
+The `ImageryLayer` needs a URL to an image source from which it can start loading map images. The `ImageryLayer` knows how to build URLs for geospatial image services such as WMS. 
+
+However, it is also possible to connect the ImageryLayer to any other REST based service that can render map images from a set of web mercator bounds and a given pixel resolution (perhaps an ArcGIS image server) by specify a custom URL template.
+
+Note that additional features, such as metadata loading, is only supported for known image services, which currently only includes WMS.
 
 ### Layers
 
-Image servers such as WMS can render different layers. Typically as list of layers **must** be specified, otherwise requests for map images will fail.
+Image servers such as WMS can render different layers. Typically as list of layers **must** be specified, otherwise requests for map images will fail. For WMS services, this is controlled by `props.layer`. For other services, layers (if required by that service) can be specified in the template URL, either as a parameter or as a hard-coded part of the template string. 
 
 ### Image Service Metadata
 
-Image services like WMS can often provide metadata (aka capabilities) about the service, listing attribution information, available layers and additional capabilities. The `ImageryLayer` will automatically attempt to query metadata for known service types. Template URLs are specific to image requests and to not support metadata queries.
+Image services like WMS can often provide metadata (aka capabilities) about the service, listing;
+- attribution information, 
+- available layers
+- additional capabilities (pixel/neighborhood queries, legend generation etc). 
+
+The `ImageryLayer` will automatically attempt to query metadata for known service types (currently WMS). 
+
+Template URLs only cover image requests and there is no support for providing a custom URL for the metadata queries. This needs to be handled by the application for non-WMS services.
 
 ### Interactivity
 
-WMS services sometimes provide a mechanism to query a specific pixel. This is supported through a method on the `ImageryLayer`
+WMS services sometimes provide a mechanism to query a specific pixel. This is supported through a `getFeatreuInfo()` method on the `ImageryLayer`
 
 
 ## Properties
@@ -95,7 +106,7 @@ If `props.serviceType` is set to `'template'`, data is expected to be a URL temp
 - `{south}`
 - `{width}`
 - `{height}`
-- `{layers}` - replaced with the content of `props.layers`
+- `{layers}` - replaced with a string built from the content of `props.layers`. The array of layer name strings in `props.layers` will be joined by commas (`.`) into a single string.
 
 
 ##### `serviceType` (string, optional)
