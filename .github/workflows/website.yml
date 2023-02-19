@@ -40,7 +40,7 @@ jobs:
         run: |
           yarn bootstrap
           cd website
-          yarn install-deps
+          yarn
           yarn build
 
       - name: Deploy
@@ -49,5 +49,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: website/public
+          FOLDER: website/build
           CLEAN: true

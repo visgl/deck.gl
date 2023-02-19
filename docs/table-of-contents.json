@@ -102,6 +102,7 @@
           "api-reference/aggregation-layers/grid-layer",
           "api-reference/geo-layers/h3-cluster-layer",
           "api-reference/geo-layers/h3-hexagon-layer",
+          "api-reference/geo-layers/imagery-layer",
           "api-reference/aggregation-layers/heatmap-layer",
           "api-reference/aggregation-layers/hexagon-layer",
           "api-reference/layers/icon-layer",
@@ -244,11 +245,13 @@
           "api-reference/extensions/overview",
           "api-reference/extensions/brushing-extension",
           "api-reference/extensions/clip-extension",
+          "api-reference/extensions/collide-extension",
           "api-reference/extensions/data-filter-extension",
           "api-reference/extensions/fill-style-extension",
           "api-reference/extensions/fp64-extension",
           "api-reference/extensions/mask-extension",
-          "api-reference/extensions/path-style-extension"
+          "api-reference/extensions/path-style-extension",
+          "api-reference/extensions/terrain-extension"
         ]
       },
       {

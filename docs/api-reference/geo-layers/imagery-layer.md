@@ -89,7 +89,7 @@ WMS services sometimes provide a mechanism to query a specific pixel. This is su
 
 ## Methods
 
-##### `getFeatureInfoText()` 
+##### `getFeatureInfoText()` {#getfeatureinfotext}
 
 This is a method on the layer that can be called to retrieve additional information from the image service about the map near the specified pixel.
 
@@ -109,7 +109,7 @@ Inherits all properties from [base `Layer`](../core/layer.md).
 
 ### Data Options
 
-##### `data` (string)
+##### `data` (string) {#data}
 
 A base URL to a well-known service type, or a full URL template from which the map images should be loaded.
 
@@ -124,13 +124,13 @@ If `props.serviceType` is set to `'template'`, data is expected to be a URL temp
 - `{layers}` - replaced with a string built from the content of `props.layers`. The array of layer name strings in `props.layers` will be joined by commas (`,`) into a single string.
 
 
-##### `serviceType` (string, optional)
+##### `serviceType` (string, optional) {#servicetype}
 
 - Default: `'auto'`
 
 Specifies the type of service at the URL supplied in `props.data`. Currently accepts either `'wms'` or `'template'`. The default `'auto'` setting will try to autodetect service from the URL.
 
-##### `layers` (string\[\], optional)
+##### `layers` (string\[\], optional) {#layers}
 
 - Default: `[]`
 
@@ -141,14 +141,14 @@ Specifies names of layers that should be visualized from the image service.
 
 ### Callbacks
 
-##### `onMetadataLoadStart` (Function, optional)
+##### `onMetadataLoadStart` (Function, optional) {#onmetadataloadstart}
 
 `onMetadataLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
 
 - Default: `data => null`
 
 
-##### `onMetadataLoadComplete` (Function, optional)
+##### `onMetadataLoadComplete` (Function, optional) {#onmetadataloadcomplete}
 
 `onMetadataLoadComplete` called when the metadata of the image source successfully loads.
 
@@ -160,7 +160,7 @@ Receives arguments:
 
 Note that metadata will not be loaded when `props.serviceType` is set to `'template`.
 
-##### `onMetadataLoadError` (Function, optional)
+##### `onMetadataLoadError` (Function, optional) {#onmetadataloaderror}
 
 `onMetadataLoadError` called when metadata failed to load.
 
@@ -170,7 +170,7 @@ Receives arguments:
 
 - `error` (`Error`)
 
-##### `onImageLoadStart` (Function, optional)
+##### `onImageLoadStart` (Function, optional) {#onimageloadstart}
 
 `onImageLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
 
@@ -180,7 +180,7 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoadComplete` (Function, optional)
+##### `onImageLoadComplete` (Function, optional) {#onimageloadcomplete}
 
 `onImageLoadComplete` called when an image successfully loads.
 
@@ -190,7 +190,7 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoadError` (Function, optional)
+##### `onImageLoadError` (Function, optional) {#onimageloaderror}
 
 `onImageLoadError` called when an image failed to load.
 
