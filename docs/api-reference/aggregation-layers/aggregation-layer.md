@@ -7,7 +7,7 @@ All of the layers in `@deck.gl/aggregation-layers` module perform some sort of d
 
 `AggregationLayer` is subclassed form `CompositeLayer` and all layers in `@deck.gl/aggregation-layers` are subclassed from this Layer.
 
-## Integration with `AttributeManager` {#attributemanager}
+## Integration with `AttributeManager`
 
 This layer creates `AttributeManager` and makes it available for its subclasses. Any aggregation layer can add attributes to the `AttributeManager` and retrieve them using `getAttributes` method. This enables using `AttributeManager`'s features and optimization for using attributes. Also manual iteration of `data` prop can be removed and attributes can be directly set on GPU aggregation models or accessed directly for CPU aggregation.
 
