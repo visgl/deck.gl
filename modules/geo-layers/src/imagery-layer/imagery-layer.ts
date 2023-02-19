@@ -39,10 +39,10 @@ const defaultProps: DefaultProps<ImageryLayerProps> = {
   onMetadataLoadError: {type: 'function', compare: false, value: console.error},
   onImageLoadStart: {type: 'function', compare: false, value: () => {}},
   onImageLoadComplete: {type: 'function', compare: false, value: () => {}},
-  // eslint-disable-next-line
   onImageLoadError: {
     type: 'function',
     compare: false,
+    // eslint-disable-next-line
     value: (requestId: unknown, error: Error) => console.error(error, requestId)
   }
 };
