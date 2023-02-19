@@ -1,6 +1,6 @@
 /* eslint import/namespace: ['error', { allowComputed: true }] */
 /* global setTimeout, clearTimeout */
-import React, {useState, useRef, useCallback} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import {
   PanelContainer,
@@ -74,7 +74,7 @@ function InfoPanel({title, children, sourceLink}) {
 
   return (
     <PanelContainer>
-      <PanelTitle onClick={() => this.setState({isExpanded: !isExpanded})}>
+      <PanelTitle onClick={() => setIsExpanded(!isExpanded)}>
         <div>{title}</div>
         <PanelExpander $expanded={isExpanded}>{isExpanded ? '✕' : 'i'}</PanelExpander>
       </PanelTitle>
@@ -87,22 +87,6 @@ function InfoPanel({title, children, sourceLink}) {
 }
 
 export default function ExampleInfoPanel({title, sourceLink, params, meta, children, updateParam}) {
-  const [hasFocus, setHasFocus] = useState(false);
-  const blurTimer = useRef(null);
-
-  const onFocus = useCallback(() => {
-    clearTimeout(blurTimer.current);
-    setHasFocus(true);
-  }, []);
-
-  const onBlur = useCallback(() => {
-    // New focus is not yet available when blur event fires.
-    // Wait a bit and if no onfocus event is fired, remove focus
-    blurTimer.current = setTimeout(() => {
-      setHasFocus(false);
-    }, 1);
-  }, []);
-
   return (
     <InfoPanel title={title} sourceLink={sourceLink}>
       <InfoPanelContent>

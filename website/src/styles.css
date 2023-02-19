@@ -25,11 +25,9 @@
   --ifm-color-black: #19202C
   --code-font-size: 95%;
 }
-.theme-doc-sidebar-container {
-  min-height: 100vh;
-}
 .container {
   position: relative;
+  min-height: calc(100vh - 60px);
 }
 .markdown {
   position: relative;
