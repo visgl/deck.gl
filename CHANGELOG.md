@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.25] - Feb 20 2023
+
+- CARTO: Increase GET limit to 8192 (#7643)
+- CARTO: Only override geoColumn with valid value (#7630)
+
 #### deck.gl [8.8.24] - Feb 10 2023
 
 - fixed MapboxOverlay props typing (#7585)

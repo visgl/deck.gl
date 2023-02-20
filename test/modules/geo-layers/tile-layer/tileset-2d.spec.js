@@ -413,7 +413,7 @@ test('Tileset2D#traversal', async t => {
 });
 
 test('Tileset2D#isTileVisible', async t => {
-  const cullRect = {x: 50, y: 48, width: 100, height: 1};
+  const testCullRect = {x: 50, y: 48, width: 100, height: 1};
 
   const testCases = [
     {
@@ -439,9 +439,9 @@ test('Tileset2D#isTileVisible', async t => {
       checks: [
         {id: '3-3-3', result: false},
         {id: '0-3-3', result: true},
-        {id: '0-3-3', cullRect, result: true},
+        {id: '0-3-3', cullRect: testCullRect, result: true},
         {id: '0-4-3', result: true},
-        {id: '0-4-3', cullRect, result: false}
+        {id: '0-4-3', cullRect: testCullRect, result: false}
       ]
     },
     {
@@ -456,13 +456,13 @@ test('Tileset2D#isTileVisible', async t => {
       }),
       checks: [
         {id: '0-3-3', result: true},
-        {id: '0-3-3', cullRect, result: true},
+        {id: '0-3-3', cullRect: testCullRect, result: true},
         {id: '0-4-3', result: true},
-        {id: '0-4-3', cullRect, result: false},
+        {id: '0-4-3', cullRect: testCullRect, result: false},
         {id: '7-3-3', result: true},
-        {id: '7-3-3', cullRect, result: true},
+        {id: '7-3-3', cullRect: testCullRect, result: true},
         {id: '7-4-3', result: true},
-        {id: '7-4-3', cullRect, result: false}
+        {id: '7-4-3', cullRect: testCullRect, result: false}
       ]
     },
     {
@@ -478,15 +478,17 @@ test('Tileset2D#isTileVisible', async t => {
       }),
       zRange: [0, 100000],
       checks: [
-        {id: '0-3-3', cullRect, result: true},
-        {id: '0-4-3', cullRect, result: true},
-        {id: '7-3-3', cullRect, result: true},
-        {id: '7-4-3', cullRect, result: true}
+        {id: '0-3-3', cullRect: testCullRect, result: true},
+        {id: '0-4-3', cullRect: testCullRect, result: true},
+        {id: '7-3-3', cullRect: testCullRect, result: true},
+        {id: '7-4-3', cullRect: testCullRect, result: true}
       ]
     }
   ];
 
-  let viewport, options;
+  let options;
+  let viewport;
+  // eslint-disable-next-line
   const updateTileset = () => tileset.update(viewport, options);
   const tileset = new Tileset2D({
     getTileData,
