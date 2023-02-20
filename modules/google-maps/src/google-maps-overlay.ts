@@ -7,7 +7,7 @@ import {
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer
 } from './utils';
-import {Deck} from '@deck.gl/core';
+import {assert, Deck} from '@deck.gl/core';
 
 import type {DeckProps} from '@deck.gl/core';
 
@@ -87,19 +87,24 @@ export default class GoogleMapsOverlay {
     }
   }
 
-  /** Equivalent of `deck.pickObject`. */
-  pickObject(params) {
-    return this._deck && this._deck.pickObject(params);
+  /** Equivalent of `pickObject`. */
+  pickObject(params: Parameters<Deck['pickObject']>[0]): ReturnType<Deck['pickObject']> {
+    assert(this._deck);
+    return this._deck.pickObject(params);
   }
 
-  /** Equivalent of `deck.pickObjects`.  */
-  pickMultipleObjects(params) {
-    return this._deck && this._deck.pickMultipleObjects(params);
+  /** Equivalent of `pickMultipleObjects`. */
+  pickMultipleObjects(
+    params: Parameters<Deck['pickMultipleObjects']>[0]
+  ): ReturnType<Deck['pickMultipleObjects']> {
+    assert(this._deck);
+    return this._deck.pickMultipleObjects(params);
   }
 
-  /** Equivalent of `deck.pickMultipleObjects`. */
-  pickObjects(params) {
-    return this._deck && this._deck.pickObjects(params);
+  /** Equivalent of `pickObjects`. */
+  pickObjects(params: Parameters<Deck['pickObjects']>[0]): ReturnType<Deck['pickObjects']> {
+    assert(this._deck);
+    return this._deck.pickObjects(params);
   }
 
   /** Remove the overlay and release all underlying resources. */
