@@ -43,6 +43,11 @@ export default class GoogleMapsOverlay {
 
   /* Public API */
 
+  /** Equivalent of `deck.isInitialized`. */
+  get isInitialized(): boolean {
+    return Boolean(this._deck?.isInitialized);
+  }
+
   /** Add/remove the overlay from a map. */
   setMap(map: google.maps.Map | null): void {
     if (map === this._map) {

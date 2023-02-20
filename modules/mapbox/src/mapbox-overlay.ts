@@ -39,6 +39,11 @@ export default class MapboxOverlay implements IControl {
     this._props = otherProps;
   }
 
+  /** Equivalent of `deck.isInitialized`. */
+  get isInitialized(): boolean {
+    return Boolean(this._deck?.isInitialized);
+  }
+
   /** Update (partial) props of the underlying Deck instance. */
   setProps(props: MapboxOverlayProps): void {
     if (this._interleaved && props.layers) {
