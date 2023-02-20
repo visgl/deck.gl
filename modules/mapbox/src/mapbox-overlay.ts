@@ -193,7 +193,7 @@ export default class MapboxOverlay implements IControl {
 
   private _handleMouseEvent = (event: MapMouseEvent) => {
     const deck = this._deck;
-    if (!deck) {
+    if (!deck || !deck.isInitialized) {
       return;
     }
 
