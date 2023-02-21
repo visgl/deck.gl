@@ -475,7 +475,7 @@ lines: {
 
 #### Polygons
 
-Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies where each polygon starts inside the `positions` array. Because pygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array. A polygon that has an outer ring consisting of 60 vertices and a hole with 40 vertices is represented as:
+Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies where each polygon starts inside the `positions` array. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array. A polygon that has an outer ring consisting of 60 vertices and a hole with 40 vertices is represented as:
 
 ```js
 polygons: {
