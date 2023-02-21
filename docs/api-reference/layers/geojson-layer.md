@@ -487,7 +487,7 @@ polygons: {
 
 #### Global feature ids
 
-Because the `features` array in the GeoJSON con contain a mix of different geometry types, in order to represent this ordering each of the `points`, `lines` and `polygons` objects contains a `globalFeatureIds` array, which contains the per-vertex indices into the original GeoJSON `features' array.
+Because the `features` array in the GeoJSON can contain a mix of different geometry types, in order to represent this ordering each of the `points`, `lines` and `polygons` objects contains a `globalFeatureIds` array, which contains the per-vertex indices into the original GeoJSON `features' array.
 
 
 ### Overriding attibutes
