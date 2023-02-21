@@ -1,8 +1,12 @@
+# ImageryLayer (Experimental)
+
 <p class="badges">
   <img src="https://img.shields.io/badge/from-v8.9-green.svg?style=flat-square" alt="from v8.9" />
 </p>
 
-# ImageryLayer (Experimental)
+import {ImageryLayerDemo} from '@site/src/doc-demos/geo-layers';
+
+<ImageryLayerDemo />
 
 > This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other layers, detailed in the [limitations](#limitations) section. Use with caution and report any issues that you find on GitHub.
 

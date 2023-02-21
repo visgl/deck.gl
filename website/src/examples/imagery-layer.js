@@ -89,7 +89,6 @@ class WMSDemo extends Component {
 
   _onMetadataLoad = (meta) => {
     this.props.onStateChange(meta);
-    console.log(meta)
 
     const layers = parseLayers(meta.raw.Capability.Layer.Layer);
     this.setState({layers});
