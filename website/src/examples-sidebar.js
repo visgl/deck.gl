@@ -26,6 +26,7 @@ const sidebars = {
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
+        'imagery-layer',
         'line-layer',
         'point-cloud-layer',
         'scatterplot-layer',
