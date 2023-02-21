@@ -3,7 +3,7 @@ import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App, {inFlowColors, outFlowColors} from 'website-examples/brushing/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);

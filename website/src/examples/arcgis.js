@@ -2,7 +2,7 @@ import React, {Component, createRef} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
 import {renderToDOM} from 'website-examples/i3s/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class ArcGISDemo extends Component {
   static title = 'San Francisco 3D Buildings';

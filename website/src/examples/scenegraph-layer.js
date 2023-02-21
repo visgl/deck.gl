@@ -3,7 +3,7 @@ import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/scenegraph/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class ScenegraphDemo extends Component {
   static title = 'Realtime Flight Tracker';
