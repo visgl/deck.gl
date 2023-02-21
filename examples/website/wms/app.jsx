@@ -21,19 +21,16 @@ const CONTROLLER = {
 
 const SAMPLE_SERVICE = {
   serviceUrl: `https://ows.terrestris.de/osm/service`,
-  serviceType: 'wms',
   layers: ['OSM-WMS']
 };
 
 // const SAMPLE_SERVICE = {
 //   serviceUrl: 'https://geo.weather.gc.ca/geomet',
-//   serviceType: 'wms',
 //   layers: ['GDPS.ETA_TT'],
 // };
 
 export default function App({
   serviceUrl = SAMPLE_SERVICE.serviceUrl,
-  serviceType = SAMPLE_SERVICE.serviceType,
   layers = SAMPLE_SERVICE.layers,
   initialViewState = INITIAL_VIEW_STATE,
   onMetadataLoad = console.log

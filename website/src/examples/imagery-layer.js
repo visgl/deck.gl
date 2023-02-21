@@ -22,7 +22,6 @@ const DemoContainer = styled.div`
 const SERVICES = {
   'Terrestris (OpenStreetMap)': {
     serviceUrl: `https://ows.terrestris.de/osm/service`,
-    serviceType: 'wms',
     defaultLayers: ['OSM-WMS'],
     viewState: {
       longitude: -122.4,
@@ -32,7 +31,6 @@ const SERVICES = {
   },
   'Canadian Weather': {
     serviceUrl: 'https://geo.weather.gc.ca/geomet',
-    serviceType: 'wms',
     defaultLayers: ['GDPS.ETA_TT'],
     viewState: {
       longitude: -100,
@@ -90,7 +88,7 @@ class WMSDemo extends Component {
   _onMetadataLoad = (meta) => {
     this.props.onStateChange(meta);
 
-    const layers = parseLayers(meta.raw.Capability.Layer.Layer);
+    const layers = getLayerNames(meta.raw.Capability.Layer.Layer);
     this.setState({layers});
 
     this.props.useParam({
@@ -115,7 +113,6 @@ class WMSDemo extends Component {
       <DemoContainer>
         <App {...otherProps} 
           serviceUrl={service.serviceUrl}
-          serviceType={service.serviceType}
           initialViewState={service.viewState}
           layers={layers[params.layer.value] || service.defaultLayers}
           onMetadataLoad={this._onMetadataLoad}
@@ -127,13 +124,13 @@ class WMSDemo extends Component {
 
 export default makeExample(WMSDemo);
 
-function parseLayers(layers, output = {}) {
+function getLayerNames(layers, output = {}) {
   if (Array.isArray(layers)) {
     for (const l of layers) {
-      parseLayers(l, output);
+      getLayerNames(l, output);
     }
   } else if (layers.Layer) {
-    parseLayers(layers.Layer, output);
+    getLayerNames(layers.Layer, output);
   } else {
     output[layers.Title] = [layers.Name];
   }
