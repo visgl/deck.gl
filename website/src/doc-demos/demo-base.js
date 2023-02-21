@@ -1,6 +1,6 @@
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl';
 import styled from 'styled-components';
 
 import {MAPBOX_STYLES} from '../constants/defaults';
@@ -27,6 +27,8 @@ const TOOLTIP_STYLE = {
 const DemoPlaceholder = styled.div`
 height: 50vh;
 min-height: 200px;
+position: relative;
+margin-bottom: 24px;
 
 @media screen and (max-width: 768px) {
   height: 60vh;
@@ -60,7 +62,7 @@ font-weight: bold;
 font-size: 12px;
 
 &:hover {
-  color: ${props => props.theme.colors.primary};
+  color: var(--color-primary);
 }
 
 svg {
@@ -72,8 +74,7 @@ svg {
 
 function evalObject(source, globals, output) {
   return eval(`(function evalObject(globals){
-    const _global = typeof global === 'undefined' ? self : global;
-    Object.assign(_global, globals);
+    Object.assign(globalThis, globals);
     ${
       output ? `${source}
       return {${output.join(',')}};` : `return ${source};`
@@ -108,7 +109,7 @@ export function makeLayerDemo(config) {
             controller={true}
             layers={[layer]}
           >
-            {mapStyle && <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />}
+            {mapStyle && <Map reuseMaps mapLib={import('maplibre-gl')} mapStyle={mapStyle} preventStyleDiffing={true} />}
           </DeckGL>
         </DemoContainer>
         <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>

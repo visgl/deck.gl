@@ -42,6 +42,7 @@
     "@luma.gl/experimental": "^8.5.16",
     "@math.gl/core": "^3.6.2",
     "@math.gl/culling": "^3.6.2",
+    "@math.gl/proj4": "^3.6.3",
     "@math.gl/web-mercator": "^3.6.2",
     "@types/geojson": "^7946.0.8",
     "h3-js": "^3.7.0",

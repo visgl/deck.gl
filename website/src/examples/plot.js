@@ -4,7 +4,7 @@ import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/plot/app';
 import {_memoize as memoize} from '@deck.gl/core';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const evaluateEquation = memoize(({value}) => {
   try {

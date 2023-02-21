@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import InfoPanel from '../components/info-panel';
-import {loadData} from '../utils/data-utils';
-import {normalizeParam} from '../utils/format-utils';
-import {MAPBOX_STYLES} from '../constants/defaults';
+import InfoPanel from '../info-panel';
+import {loadData, joinPath} from '../../utils/data-utils';
+import {normalizeParam} from '../../utils/format-utils';
+import {MAPBOX_STYLES} from '../../constants/defaults';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 const DemoContainer = styled.div`
-position: relative;
-overflow: hidden !important;
-height: 100%;
-transition: height 600ms ease-in;
-
 .tooltip, .deck-tooltip {
   position: absolute;
   padding: 4px 12px;
   background: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  color: var(--ifm-color-white);
   max-width: 300px;
   font-size: 12px;
   z-index: 9;
@@ -28,15 +24,16 @@ const MapTip = styled.div`
 position: absolute;
 right: 12px;
 bottom: 20px;
-color: #fff;
+color: var(--ifm-color-white);
 mix-blend-mode: difference;
+font-size: 14px;
 
-@media screen and (max-width: ${props => props.theme.breakpoints.medium}px) {
+@media screen and (max-width: 480px) {
   display: none;
 }
 `;
 
-export default function(DemoComponent, {isInteractive = true, style} = {}) {
+export default function makeExample(DemoComponent, {isInteractive = true, style} = {}) {
   const {parameters = {}, mapStyle} = DemoComponent;
   const defaultParams = Object.keys(parameters)
     .reduce((acc, name) => {
@@ -50,6 +47,7 @@ export default function(DemoComponent, {isInteractive = true, style} = {}) {
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
+    const baseUrl = useBaseUrl('/');
 
     const useParam = useCallback(parameters => {
       const newParams = Object.keys(parameters)
@@ -77,7 +75,7 @@ export default function(DemoComponent, {isInteractive = true, style} = {}) {
       }
 
       source.forEach(({url, worker}, index) => {
-        loadData(url, worker, (resultData, resultMeta) => {
+        loadData(joinPath(baseUrl, url), worker && joinPath(baseUrl, worker), (resultData, resultMeta) => {
           if (isArray) {
             setData(d => {
               const newData = d.slice();

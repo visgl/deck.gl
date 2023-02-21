@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+import GLConstants from '@luma.gl/constants';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
@@ -46,7 +46,7 @@ export default {
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
-    GL,
+    GL: GLConstants,
     CARTO_MAP_TYPES
   },
 

@@ -4,7 +4,7 @@ import App from 'website-examples/trips/app'; // eslint-disable-line
 
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class HomeDemo extends Component {
   static data = [
