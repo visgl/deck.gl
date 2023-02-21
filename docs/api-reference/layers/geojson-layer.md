@@ -485,6 +485,8 @@ polygons: {
 }
 ```
 
+Note the subtle difference here to other columnar formats (like [GeoArrow](https://github.com/geoarrow/geoarrow/)) where the indices are nested, i.e. `polygonIndices` point into the `primitivePolygonIndices` array rather than directly into `positions`.
+
 #### Global feature ids
 
 Because the `features` array in the GeoJSON con contain a mix of different geometry types, in order to represent this ordering each of the `points`, `lines` and `polygons` objects contains a `globalFeatureIds` array, which contains the per-vertex indices into the original GeoJSON `features' array.

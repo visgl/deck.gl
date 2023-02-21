@@ -119,7 +119,7 @@ Note that by default, the `MVTLoader` parses data using web workers, with code l
 
 * Default: `true`
 
-Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance (2-3x faster on large datasets). It removes the need for serialization and deserialization of data transferred by the worker back to the main process. 
+Use tile data in [binary format](https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md) to improve performance (2-3x faster on large datasets). It removes the need for serialization and deserialization of data transferred by the worker back to the main process. [See here](../layers/geojson-layer.md#binary-format-details) for details on this format.
 
 Remarks: 
 
