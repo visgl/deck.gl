@@ -36,7 +36,7 @@ const colorScale = scaleLinear().domain([3, 4, 5, 6, 7]).range([
 
 export default function App({
   data,
-  collide = true,
+  noOverlap = true,
   fontSize = 32,
   mapStyle = MAP_STYLE
 }) {
@@ -58,6 +58,7 @@ export default function App({
       buffer: 8
     },
 
+    // TextLayer options
     getText: d => d.name,
     getPosition: d => [d.longitude, d.latitude],
     getColor: d => colorScale(Math.log10(d.population)),
@@ -67,7 +68,8 @@ export default function App({
     sizeMinPixels: sizeMinPixels,
     maxWidth: 64 * 12,
 
-    collideEnabled: collide,
+    // CollideExtension options
+    collideEnabled: noOverlap,
     getCollidePriority: d => Math.log10(d.population),
     collideTestProps: {
       sizeScale: fontSize * 2,
