@@ -28,7 +28,7 @@ uniform sampler2D iconsTexture;
 uniform float gamma;
 uniform bool sdf;
 uniform float alphaCutoff;
-uniform float buffer;
+uniform float sdfBuffer;
 uniform float outlineBuffer;
 uniform vec4 outlineColor;
 
@@ -46,7 +46,7 @@ void main(void) {
     // if enable sdf (signed distance fields)
     if (sdf) {
       float distance = alpha;
-      alpha = smoothstep(buffer - gamma, buffer + gamma, distance);
+      alpha = smoothstep(sdfBuffer - gamma, sdfBuffer + gamma, distance);
 
       if (outlineBuffer > 0.0) {
         float inFill = alpha;

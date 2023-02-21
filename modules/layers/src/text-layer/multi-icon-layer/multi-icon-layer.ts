@@ -110,7 +110,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       ...params.uniforms,
       // Refer the following doc about gamma and buffer
       // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
-      buffer: DEFAULT_BUFFER,
+      sdfBuffer: DEFAULT_BUFFER,
       outlineBuffer,
       gamma: smoothing,
       sdf: Boolean(sdf),
