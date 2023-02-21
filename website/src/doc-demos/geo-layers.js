@@ -214,8 +214,8 @@ export const MVTLayerDemo = makeLayerDemo({
 
 export const ImageryLayerDemo = makeLayerDemo({
   Layer: ImageryLayer,
+  isExperimental: true,
   getTooltip: '({bitmap}) => bitmap && `x:${bitmap.x}, y:${bitmap.y}`',
-  imports: {ImageryLayer},
   mapStyle: null,
   initialViewState: {
     longitude: -122.4,
