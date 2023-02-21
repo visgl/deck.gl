@@ -11,27 +11,36 @@ import {
   CompositeLayerProps,
   UpdateParameters,
   DefaultProps,
-  Viewport
+  Viewport,
+  COORDINATE_SYSTEM,
+  _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {ImageSourceMetadata, ImageType, ImageServiceType} from '@loaders.gl/wms';
 import {ImageSource, createImageSource} from '@loaders.gl/wms';
+import {Proj4Projection} from '@math.gl/proj4';
 
-export type ImageryLayerProps = CompositeLayerProps<string | ImageSource> & {
+/** All props supported by the TileLayer */
+export type ImageryLayerProps = CompositeLayerProps<any> & _ImageryLayerProps;
+
+/** Props added by the TileLayer */
+type _ImageryLayerProps = {
   serviceType?: ImageServiceType | 'auto';
-  layers: string[];
-  onMetadataLoadStart: () => void;
-  onMetadataLoadComplete: (metadata: ImageSourceMetadata) => void;
-  onMetadataLoadError: (error: Error) => void;
-  onImageLoadStart: (requestId: unknown) => void;
-  onImageLoadComplete: (requestId: unknown) => void;
-  onImageLoadError: (requestId: unknown, error: Error) => void;
+  layers?: string[];
+  srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
+  onMetadataLoadStart?: () => void;
+  onMetadataLoadComplete?: (metadata: ImageSourceMetadata) => void;
+  onMetadataLoadError?: (error: Error) => void;
+  onImageLoadStart?: (requestId: unknown) => void;
+  onImageLoadComplete?: (requestId: unknown) => void;
+  onImageLoadError?: (requestId: unknown, error: Error) => void;
 };
 
 const defaultProps: DefaultProps<ImageryLayerProps> = {
   id: 'imagery-layer',
   data: '',
   serviceType: 'auto',
+  srs: 'auto',
   layers: {type: 'array', compare: true, value: []},
   onMetadataLoadStart: {type: 'function', compare: false, value: () => {}},
   onMetadataLoadComplete: {type: 'function', compare: false, value: () => {}},
@@ -47,20 +56,29 @@ const defaultProps: DefaultProps<ImageryLayerProps> = {
   }
 };
 
+const projConverter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+
 /**
  * The layer is used in Hex Tile layer in order to properly discard invisible elements during animation
  */
-export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
+export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_ImageryLayerProps>
+> {
   static layerName = 'ImageryLayer';
   static defaultProps: DefaultProps = defaultProps;
 
   state!: {
     imageSource: ImageSource;
     image: ImageType;
-    metadata: ImageSourceMetadata;
     bounds: [number, number, number, number];
-    width: number;
-    height: number;
+    lastRequestParameters: {
+      bbox: [number, number, number, number];
+      layers: string[];
+      srs: 'EPSG:4326' | 'EPSG:3857';
+      width: number;
+      height: number;
+    };
+    lastRequestId: number;
 
     _nextRequestId: number;
     _timeoutId: any;
@@ -74,30 +92,21 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   override initializeState(): void {
     // intentionally empty, initialization is done in updateState
     this.state._nextRequestId = 0;
+    this.state.lastRequestId = -1;
   }
 
   override updateState({changeFlags, props, oldProps}: UpdateParameters<this>): void {
     const {viewport} = this.context;
 
-    if (changeFlags.propsChanged) {
-      const dataChanged =
-        changeFlags.dataChanged ||
-        props.serviceType !== oldProps.serviceType ||
-        (changeFlags.updateTriggersChanged &&
-          (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged));
-
-      // Check if data source has changed
-      if (dataChanged) {
-        this.state.imageSource = this._createImageSource(props);
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this._loadMetadata();
-        this.debounce(() => this.loadImage(viewport, 'image source changed'), 0);
-      }
-
-      // Some sublayer props may have changed
-    }
-
-    if (changeFlags.viewportChanged) {
+    // Check if data source has changed
+    if (changeFlags.dataChanged || props.serviceType !== oldProps.serviceType) {
+      this.state.imageSource = this._createImageSource(props);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this._loadMetadata();
+      this.debounce(() => this.loadImage(viewport, 'image source changed'), 0);
+    } else if (!deepEqual(props.layers, oldProps.layers, 1)) {
+      this.debounce(() => this.loadImage(viewport, 'layers changed'), 0);
+    } else if (changeFlags.viewportChanged) {
       this.debounce(() => this.loadImage(viewport, 'viewport changed'));
     }
   }
@@ -109,12 +118,16 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   override renderLayers(): Layer {
     // TODO - which bitmap layer is rendered should depend on the current viewport
     // Currently Studio only uses one viewport
-    const {bounds, image} = this.state;
+    const {bounds, image, lastRequestParameters} = this.state;
 
     return (
       image &&
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
+        _imageCoordinateSystem:
+          lastRequestParameters.srs === 'EPSG:4326'
+            ? COORDINATE_SYSTEM.LNGLAT
+            : COORDINATE_SYSTEM.CARTESIAN,
         bounds,
         image
       })
@@ -122,18 +135,12 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   }
 
   async getFeatureInfoText(x: number, y: number): Promise<string | null> {
-    const {viewport} = this.context;
-    if (viewport) {
-      const bounds = viewport.getBounds();
-      const {width, height} = viewport;
+    const {lastRequestParameters} = this.state;
+    if (lastRequestParameters) {
       // @ts-expect-error Undocumented method
       const featureInfo = await this.state.imageSource.getFeatureInfoText?.({
-        layers: this.props.layers,
-        // todo image width may get out of sync with viewport width
-        width,
-        height,
-        bbox: bounds,
-        query_layers: this.props.layers,
+        ...lastRequestParameters,
+        query_layers: lastRequestParameters.layers,
         x,
         y,
         info_format: 'application/vnd.ogc.gml'
@@ -162,11 +169,14 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
   /** Run a getMetadata on the image service */
   async _loadMetadata(): Promise<void> {
     this.props.onMetadataLoadStart();
+    const {imageSource} = this.state;
     try {
-      this.state.metadata = await this.state.imageSource.getMetadata();
-      // technically we should get the latest layer after an async operation in case props have changed
-      // Although the response might no longer be expected
-      this.getCurrentLayer()?.props.onMetadataLoadComplete(this.state.metadata);
+      const metadata = await imageSource.getMetadata();
+
+      // If a request takes a long time, it may no longer be expected
+      if (this.state.imageSource === imageSource) {
+        this.getCurrentLayer()?.props.onMetadataLoadComplete(metadata);
+      }
     } catch (error) {
       this.getCurrentLayer()?.props.onMetadataLoadError(error as Error);
     }
@@ -174,22 +184,50 @@ export class ImageryLayer extends CompositeLayer<ImageryLayerProps> {
 
   /** Load an image */
   async loadImage(viewport: Viewport, reason: string): Promise<void> {
+    const {layers, serviceType} = this.props;
+
+    // TODO - move to ImageSource?
+    if (serviceType === 'wms' && layers.length === 0) {
+      return;
+    }
+
     const bounds = viewport.getBounds();
     const {width, height} = viewport;
-
     const requestId = this.getRequestId();
+    let {srs} = this.props;
+    if (srs === 'auto') {
+      // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
+      srs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
+    }
+    const requestParams = {
+      width,
+      height,
+      bbox: bounds,
+      layers,
+      srs
+    };
+    if (srs === 'EPSG:3857') {
+      const [minX, minY] = projConverter.project([bounds[0], bounds[1]]);
+      const [maxX, maxY] = projConverter.project([bounds[2], bounds[3]]);
+      requestParams.bbox = [minX, minY, maxX, maxY];
+    }
 
     try {
       this.props.onImageLoadStart(requestId);
-      const image = await this.state.imageSource.getImage({
-        width,
-        height,
-        bbox: bounds,
-        layers: this.props.layers
-      });
-      this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
-      // Not type safe...
-      this.setState({image, bounds, width, height});
+
+      const image = await this.state.imageSource.getImage(requestParams);
+
+      // If a request takes a long time, later requests may have already loaded.
+      if (this.state.lastRequestId < requestId) {
+        this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
+        // Not type safe...
+        this.setState({
+          image,
+          bounds,
+          lastRequestParameters: requestParams,
+          lastRequestId: requestId
+        });
+      }
     } catch (error) {
       this.raiseError(error as Error, 'Load image');
       this.getCurrentLayer()?.props.onImageLoadError(requestId, error as Error);

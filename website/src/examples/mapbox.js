@@ -2,7 +2,7 @@ import React, {Component, createRef} from 'react';
 import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {renderToDOM} from 'website-examples/safegraph/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class MapboxDemo extends Component {
   static title = 'Who Is Visiting San Francisco?';

@@ -3,7 +3,7 @@ import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/globe/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class MultiViewDemo extends Component {
   static title = 'Air Traffic During the Global Pandemic';

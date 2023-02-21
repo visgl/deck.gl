@@ -4,7 +4,7 @@ import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/icon/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const IconDemoContainer = styled.div`
 .tooltip {
@@ -20,8 +20,8 @@ const IconDemoContainer = styled.div`
 .tooltip.interactive {
   border: solid 4px transparent;
   margin: -4px;
-  background: ${props => props.theme.colors.white};;
-  color: ${props => props.theme.colors.black};;
+  background: #FFFFFF;
+  color: #19202C;
   pointer-events: all;
   width: 240px;
   max-height: 320px;

@@ -77,7 +77,6 @@ export default function App({showBorder = false, onTilesLoad = null}) {
         showBorder &&
           new PathLayer({
             id: `${props.id}-border`,
-            visible: props.visible,
             data: [
               [
                 [west, north],

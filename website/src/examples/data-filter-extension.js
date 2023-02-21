@@ -3,7 +3,7 @@ import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/data-filter/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class DataFilterDemo extends Component {
   static title = '40 Years of Earthquakes';

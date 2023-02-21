@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {BANDS, LINES} from 'website-examples/contour/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
