@@ -3,7 +3,7 @@ import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {colorScale} from 'website-examples/ghcn/app';
 import {readableInteger} from '../utils/format-utils';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class OrthographicViewDemo extends Component {
   static title = 'World Weather Station Temperatures, 1880-2020';

@@ -3,7 +3,7 @@ import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App, {COLOR_SCALE} from 'website-examples/highway/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class HighwayDemo extends Component {
   static title = 'Highway Safety in the US';

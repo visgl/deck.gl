@@ -1,9 +1,8 @@
-import {withPrefix} from 'gatsby';
 
 export const MAPBOX_STYLES = {
-  LIGHT: withPrefix('/mapstyle/deck-light.json'),
+  LIGHT: 'https://deck.gl/mapstyle/deck-light.json',
   LIGHT_LABEL: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  DARK: withPrefix('/mapstyle/deck-dark.json'),
+  DARK: 'https://deck.gl/mapstyle/deck-dark.json',
   BLANK: {
     version: 8, 
     sources: {},
