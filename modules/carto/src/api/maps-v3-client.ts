@@ -131,6 +131,18 @@ type FetchLayerDataParams = {
   queryParameters?: QueryParameters;
 };
 
+type MapsAPIParameters = {
+  client: string;
+  v: string;
+  q?: string;
+  name?: string;
+  queryParameters?: QueryParameters;
+  geo_column?: string;
+  columns?: string;
+  aggregationExp?: string;
+  aggregationResLevel?: number;
+};
+
 /**
  * Build a URL with all required parameters
  */
@@ -143,34 +155,36 @@ function getParameters({
   aggregationExp,
   aggregationResLevel,
   queryParameters
-}: Omit<FetchLayerDataParams, 'connection' | 'credentials'>) {
-  const parameters = [encodeParameter('client', clientId || DEFAULT_CLIENT)];
-  parameters.push(encodeParameter('v', V3_MINOR_VERSION));
+}: Omit<FetchLayerDataParams, 'connection' | 'credentials'>): MapsAPIParameters {
+  const parameters: MapsAPIParameters = {
+    client: clientId || DEFAULT_CLIENT,
+    v: V3_MINOR_VERSION
+  };
 
   const sourceName = type === MAP_TYPES.QUERY ? 'q' : 'name';
-  parameters.push(encodeParameter(sourceName, source));
+  parameters[sourceName] = source;
 
   if (queryParameters) {
-    parameters.push(encodeParameter('queryParameters', JSON.stringify(queryParameters)));
+    parameters.queryParameters = queryParameters;
   }
 
   if (geoColumn) {
-    parameters.push(encodeParameter('geo_column', geoColumn));
+    parameters.geo_column = geoColumn;
   }
   if (columns) {
-    parameters.push(encodeParameter('columns', columns.join(',')));
+    parameters.columns = columns.join(',');
   }
   if (aggregationExp) {
-    parameters.push(encodeParameter('aggregationExp', aggregationExp));
+    parameters.aggregationExp = aggregationExp;
   } else if (isSpatialIndexGeoColumn(geoColumn)) {
     // Default aggregationExp required for spatial index layers
-    parameters.push(encodeParameter('aggregationExp', '1 AS value'));
+    parameters.aggregationExp = '1 AS value';
   }
   if (aggregationResLevel) {
-    parameters.push(encodeParameter('aggregationResLevel', aggregationResLevel));
+    parameters.aggregationResLevel = aggregationResLevel;
   }
 
-  return parameters.join('&');
+  return parameters;
 }
 
 function isSpatialIndexGeoColumn(geoColumn: string | undefined) {
@@ -192,7 +206,7 @@ export async function mapInstantiation({
   queryParameters
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const url = `${baseUrl}?${getParameters({
+  const parameters = getParameters({
     type,
     source,
     geoColumn,
@@ -201,7 +215,14 @@ export async function mapInstantiation({
     aggregationResLevel,
     aggregationExp,
     queryParameters
-  })}`;
+  });
+  const encodedParameters = Object.entries(parameters).map(([key, value]) => {
+    if (typeof value !== 'string') {
+      value = JSON.stringify(value);
+    }
+    return encodeParameter(key, value as string);
+  });
+  const url = `${baseUrl}?${encodedParameters.join('&')}`;
   const {accessToken} = credentials;
 
   const errorContext = {requestType: REQUEST_TYPES.INSTANTIATION, connection, type, source};
