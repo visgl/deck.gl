@@ -220,28 +220,19 @@ export async function mapInstantiation({
     if (typeof value !== 'string') {
       value = JSON.stringify(value);
     }
-    return encodeParameter(key, value as string);
+    return encodeParameter(key, value);
   });
   const url = `${baseUrl}?${encodedParameters.join('&')}`;
   const {accessToken} = credentials;
 
   const errorContext = {requestType: REQUEST_TYPES.INSTANTIATION, connection, type, source};
   if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
-    // need to be a POST request
-    const body = JSON.stringify({
-      q: source,
-      client: clientId || DEFAULT_CLIENT,
-      aggregationResLevel,
-      aggregationExp,
-      geoColumn,
-      queryParameters
-    });
     return await requestJson({
       method: 'POST',
       url: baseUrl,
       headers,
       accessToken,
-      body,
+      body: JSON.stringify(parameters),
       errorContext
     });
   }
