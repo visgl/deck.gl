@@ -1,18 +1,22 @@
-import React, {useRef} from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   longitude: -122.4,
   latitude: 37.74,
   zoom: 9,
-  minZoom: 1,
-  maxZoom: 20,
   pitch: 0,
   bearing: 0
+};
+
+const CONTROLLER = {
+  dragRotate: false,
+  touchRotate: false,
+  maxPitch: 85,
+  minZoom: 1,
+  maxZoom: 20
 };
 
 const SAMPLE_SERVICE = {
@@ -21,15 +25,20 @@ const SAMPLE_SERVICE = {
   layers: ['OSM-WMS']
 };
 
+// const SAMPLE_SERVICE = {
+//   serviceUrl: 'https://geo.weather.gc.ca/geomet',
+//   serviceType: 'wms',
+//   layers: ['GDPS.ETA_TT'],
+// };
+
 export default function App({
   serviceUrl = SAMPLE_SERVICE.serviceUrl,
   serviceType = SAMPLE_SERVICE.serviceType,
   layers = SAMPLE_SERVICE.layers,
-  mapStyle,
   initialViewState = INITIAL_VIEW_STATE,
   onMetadataLoad = console.log
 }) {
-  const infoBox = useRef();
+  const [selection, setSelection] = useState(null);
 
   const layer = new ImageryLayer({
     data: serviceUrl,
@@ -38,13 +47,14 @@ export default function App({
     pickable: true,
 
     onMetadataLoadComplete: onMetadataLoad,
+    onMetadataLoadError: console.error,
 
     onClick: async ({bitmap, layer}) => {
-      if (bitmap && infoBox.current) {
+      if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
         const featureInfo = await layer.getFeatureInfoText(x, y);
-        infoBox.current.innerText = featureInfo;
+        setSelection({x, y, featureInfo});
       }
     }
   });
@@ -54,11 +64,11 @@ export default function App({
       <DeckGL
         layers={[layer]}
         initialViewState={initialViewState}
-        controller={{maxPitch: 85}}
-      >
-        {mapStyle && <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} />}
-      </DeckGL>
-      <div className="selected-feature-info" ref={infoBox} />
+        controller={CONTROLLER}
+      />
+      {selection && <div className="selected-feature-info" style={{left: selection.x, top: selection.y}} onPointerLeave={() => setSelection(null)}>
+        {selection.featureInfo}
+      </div>}
     </>
   );
 }
