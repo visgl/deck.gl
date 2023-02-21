@@ -138,6 +138,14 @@ Specifies names of layers that should be visualized from the image service.
 
 > Note that WMS services will typically not display anything unless at least one valid layer name is provided.
 
+##### `srs` (string, optional)
+
+- Default: `'auto'`
+
+Spatial Reference System for map output, used to query image from the server. Can be one of `EPSG:4326'`, `'EPSG:3857'` or `'auto'`. 
+
+If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` otherwise. Note that a particular SRS may not be supported by your image server.
+
 
 ### Callbacks
 
