@@ -116,6 +116,7 @@ export default class MaskEffect implements Effect {
     }
 
     const maskChanged =
+      true ||
       // If a channel is new
       channelInfo === oldChannelInfo ||
       // If sublayers have changed
