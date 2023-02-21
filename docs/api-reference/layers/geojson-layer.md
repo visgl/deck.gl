@@ -354,6 +354,158 @@ The GeoJsonLayer renders the following sublayers:
 * `points-icon` - an [IconLayer](./icon-layer.md) rendering all the `Point` and `MultiPoint` features if `pointType` is `'icon'`.
 * `points-text` - a [TextLayer](./text-layer.md) rendering all the `Point` and `MultiPoint` features if `pointType` is `'text'`.
 
+## Using binary data
+
+This section is about the special requirements when [supplying attributes directly](../../developer-guide/performance.md#supply-attributes-directly) to a `GeoJsonLayer`.
+
+The most common way to supply binary data is to use the [flat GeoJSON format](https://loaders.gl/modules/gis/docs/api-reference/geojson-to-binary), this is done by default when using the [MVTLayer](../geo-layers/mvt-layer.md). 
+
+### Binary format details
+
+In general this format is not intended to be human readable, and rather than being edited by hand should be generated with [geojsonToBinary](https://loaders.gl/modules/gis/docs/api-reference/geojson-to-binary). The purpose of this section is to help explain how this format works.
+
+At the top level the data is grouped by geometry type, into points, lines and polygons:
+
+```js
+const data = {points: {...}, lines: {...}, polygons: {...}};
+```
+
+When the `GeoJsonLayer` detects this data structure it assumes it is dealing with binary data, rather than standard GeoJSON. Within each geometry type the data is laid out in a format that corresponds to the buffers that will be sent to the GPU. 
+
+#### Points
+
+For example, for the point data, the positions are encoded as a flat interleaved array with associated properties grouped by point:
+
+```js
+points: {
+  positions: {value: Float32Array([x0, y0, x1, y1, ...]), size: 2}, // Use size: 3 for xyz
+  properties: [{name: 'name0', address: 'address0'}, {name: 'name1', ...}, ...],
+  ...
+}
+```
+
+#### Numeric properties
+
+For performance numeric properties can be passed as flat arrays:
+
+```js
+points: {
+  ...,
+  numericProps: {
+    numericProperty1: {value: Float32Array([v0, v1, ...], size: 1}
+    numericProperty2: {value: Float32Array([v0, v1, ...], size: 1}
+  }
+```
+
+#### Feature ids
+
+In order to specify how the `positions` data should be interpreted an array of feature ids is included. Often in the case of points this is just a trivial incrementing list:
+
+```js
+points: {
+  featureIds: {value: Uint16Array([0, 1, 2, ...]), size: 1}
+}
+
+```
+
+These ids correspond to the values in the `positions` array and always start from 0, and increase, without any skipping any values.
+
+These are in general not equal to the `id`s present as top level fields on the GeoJSON source. Those are instead stored in the `fields` property in the same format as the `properties`. 
+
+#### Representing MultiPoints
+
+A MultiPoint is a feature which represents one logical unit, but compromises of a collection of point geometries. This is represented by association, where points within a MultiPoint will share the same `featureId`. Here `(x0, y0)` are a simple Point, while `(x1, y1)` and `(x2, y2)` belong to a MultiPoint.
+
+points: {
+  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2]), size: 2},
+  featureIds: {value: Uint16Array([0, 1, 1, ...]), size: 1}
+}
+
+#### Array lengths
+
+Due to MultiPoints, the length of `properties` and `fields` arrays will not always be the same length (multiplied by `positions.size`) as the `positions` array. The length will match the count of individual features. This is in contrast to the `featureId` and `numericProp` arrays, which will contain the same number of elements as the `positions` array (divided by `positions.size`).
+
+
+#### Example comparison
+
+```js
+geojson = {
+  type: 'FeatureCollection',
+  features: [{
+    id: 123,
+    type: 'Feature',
+    properties: {name: 'London', population: 10000000},
+    geometry: {coordinates: [1.23, 4.56], type: 'Point'}
+  },
+  ...
+  ]
+}
+
+binary = {
+  points: {
+    positions: {value: Float32Array([1,23, 4.56, ...]), size: 2},
+    properties: [{name: 'London'}, ...],
+    numericProps: {
+      population: {value: Float32Array([10000000, ...], size: 1}
+    }
+    featureIds: {value: Uint16Array([0, ...]), size: 1}
+    fields: [{id: 123}]
+  }
+}
+```
+
+#### Lines
+
+Lines are represented in a similar manner, with the addition of a `pathIndices` array, which contains a series of offsets into the `positions` array, specifying where each line begins. All the other parameters are as above, namely that `featureIds` and `numericProps` are stored per-vertex, while `properties` and `fields` are per-feature.
+
+Here is how lines are represented, the first four vertices belong to the first line, thus the value of the second path index is 4.
+
+```js
+lines: {
+  positions: {value: Float32Array([x0, y0, ..., x4, y4, ...]), size: 2},
+  properties: [{name: 'name0'}, {name: 'name1}, ...],
+  numericProps: {
+    population: {value: Float32Array([100, 100, 100, 100, 789, 789, ...], size: 1}
+  }
+  pathIndices: {value: Uint16Array([0, 4, ...]), size: 1}
+  featureIds: {value: Uint16Array([0, 0, 0, 0, 1, 1, ...]), size: 1}
+  fields: [{id: 123}, {id: 456}]
+}
+```
+
+#### Polygons
+
+Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies where each polygon starts inside the `positions` array. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array. A polygon that has an outer ring consisting of 60 vertices and a hole with 40 vertices is represented as:
+
+```js
+polygons: {
+  positions: {value: Float32Array([x0, y0, ...]), size: 2},
+  polygonIndices: {value: Uint16Array([0, 100, ...]), size: 1}
+  primitivePolygonIndices: {value: Uint16Array([0, 60, 100, ...]), size: 1}
+}
+```
+
+Note the subtle difference here to other columnar formats (like [GeoArrow](https://github.com/geoarrow/geoarrow/)) where the indices are nested, i.e. `polygonIndices` point into the `primitivePolygonIndices` array rather than directly into `positions`.
+
+#### Global feature ids
+
+Because the `features` array in the GeoJSON can contain a mix of different geometry types, in order to represent this ordering each of the `points`, `lines` and `polygons` objects contains a `globalFeatureIds` array, which contains the per-vertex indices into the original GeoJSON `features' array.
+
+
+### Overriding attibutes
+
+In order to pass [pass attributes directly](../../developer-guide/performance.md#supply-attributes-directly) directly to the sublayers, an optional `attributes` member can be added to the `points`, `lines` or `polygons`. For example to pass the `getWidth` attribute to the `PathLayer`:
+
+```js
+lines: {
+  ...,
+  attributes: {
+    getWidth: {value: new Float32Array([1, 2, 3, ....]), size: 1}
+  }
+}
+
+```
+
 
 ## Remarks
 
