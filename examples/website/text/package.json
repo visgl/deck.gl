@@ -15,8 +15,7 @@
     "maplibre-gl": "^2.4.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^7.0.0",
-    "tagmap.js": "^1.1.1"
+    "react-map-gl": "^7.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
