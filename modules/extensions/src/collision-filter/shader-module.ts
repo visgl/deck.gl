@@ -4,29 +4,29 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 const vs = `
 #ifdef NON_INSTANCED_MODEL
-attribute float collidePriorities;
+attribute float collisionPriorities;
 #else
-attribute float instanceCollidePriorities;
+attribute float instanceCollisionPriorities;
 #endif
 
-uniform sampler2D collide_texture;
-uniform bool collide_sort;
-uniform bool collide_enabled;
+uniform sampler2D collision_texture;
+uniform bool collision_sort;
+uniform bool collision_enabled;
 
-vec2 collide_getCoords(vec4 position) {
-  vec4 collide_clipspace = project_common_position_to_clipspace(position);
-  return (1.0 + collide_clipspace.xy / collide_clipspace.w) / 2.0;
+vec2 collision_getCoords(vec4 position) {
+  vec4 collision_clipspace = project_common_position_to_clipspace(position);
+  return (1.0 + collision_clipspace.xy / collision_clipspace.w) / 2.0;
 }
 
-float collide_match(vec2 tex, vec3 pickingColor) {
-  vec4 collide_pickingColor = texture2D(collide_texture, tex);
-  float delta = dot(abs(collide_pickingColor.rgb - pickingColor), vec3(1.0));
+float collision_match(vec2 tex, vec3 pickingColor) {
+  vec4 collision_pickingColor = texture2D(collision_texture, tex);
+  float delta = dot(abs(collision_pickingColor.rgb - pickingColor), vec3(1.0));
   float e = 0.001;
   return step(delta, e);
 }
 
-float collide_isVisible(vec2 texCoords, vec3 pickingColor) {
-  if (!collide_enabled) {
+float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
+  if (!collision_enabled) {
     return 1.0;
   }
 
@@ -42,7 +42,7 @@ float collide_isVisible(vec2 texCoords, vec3 pickingColor) {
   for(int i = -N; i <= N; i++) {
     delta.x = -step.x * floatN;
     for(int j = -N; j <= N; j++) {
-      accumulator += collide_match(texCoords + delta, pickingColor);
+      accumulator += collision_match(texCoords + delta, pickingColor);
       delta.x += step.x;
     }
     delta.y += step.y;
@@ -55,59 +55,59 @@ float collide_isVisible(vec2 texCoords, vec3 pickingColor) {
 
 const inject = {
   'vs:#decl': `
-  float collide_fade = 1.0;
+  float collision_fade = 1.0;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
-  if (collide_sort) {
+  if (collision_sort) {
     #ifdef NON_INSTANCED_MODEL
-    float collidePriority = collidePriorities;
+    float collisionPriority = collisionPriorities;
     #else
-    float collidePriority = instanceCollidePriorities;
+    float collisionPriority = instanceCollisionPriorities;
     #endif
-    position.z = -0.001 * collidePriority * position.w; // Support range -1000 -> 1000
+    position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 
-  if (collide_enabled) {
-    vec4 collide_common_position = project_position(vec4(geometry.worldPosition, 1.0));
-    vec2 collide_texCoords = collide_getCoords(collide_common_position);
-    collide_fade = collide_isVisible(collide_texCoords, geometry.pickingColor / 255.0);
-    if (collide_fade < 0.0001) {
+  if (collision_enabled) {
+    vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
+    vec2 collision_texCoords = collision_getCoords(collision_common_position);
+    collision_fade = collision_isVisible(collision_texCoords, geometry.pickingColor / 255.0);
+    if (collision_fade < 0.0001) {
       position = vec4(0.);
     }
   }
   `,
   'vs:DECKGL_FILTER_COLOR': `
-  color.a *= collide_fade;
+  color.a *= collision_fade;
   `
 };
 
-type CollideModuleSettings = {
-  collideFBO?: Framebuffer;
-  drawToCollideMap?: boolean;
-  dummyCollideMap?: Texture2D;
+type CollisionModuleSettings = {
+  collisionFBO?: Framebuffer;
+  drawToCollisionMap?: boolean;
+  dummyCollisionMap?: Texture2D;
 };
 
 /* eslint-disable camelcase */
-type CollideUniforms = {collide_sort?: boolean; collide_texture?: Framebuffer | Texture2D};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture2D};
 
-const getCollideUniforms = (
-  opts: CollideModuleSettings | {},
+const getCollisionUniforms = (
+  opts: CollisionModuleSettings | {},
   uniforms: Record<string, any>
-): CollideUniforms => {
-  if (!opts || !('dummyCollideMap' in opts)) {
+): CollisionUniforms => {
+  if (!opts || !('dummyCollisionMap' in opts)) {
     return {};
   }
-  const {collideFBO, drawToCollideMap, dummyCollideMap} = opts;
+  const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
-    collide_sort: Boolean(drawToCollideMap),
-    collide_texture: !drawToCollideMap && collideFBO ? collideFBO : dummyCollideMap
+    collision_sort: Boolean(drawToCollisionMap),
+    collision_texture: !drawToCollisionMap && collisionFBO ? collisionFBO : dummyCollisionMap
   };
 };
 
 export default {
-  name: 'collide',
+  name: 'collision',
   dependencies: [project],
   vs,
   inject,
-  getUniforms: getCollideUniforms
+  getUniforms: getCollisionUniforms
 } as ShaderModule;

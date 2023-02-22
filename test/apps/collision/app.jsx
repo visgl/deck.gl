@@ -5,7 +5,7 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {COORDINATE_SYSTEM, OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
-import {CollideExtension, MaskExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 import {parse} from '@loaders.gl/core';
 
@@ -37,7 +37,7 @@ const basemap = new GeoJsonLayer({
 
 /* eslint-disable react/no-deprecated */
 export default function App() {
-  const [collideEnabled, setCollideEnabled] = useState(true);
+  const [collisionEnabled, setCollisionEnabled] = useState(true);
   const [maskEnabled, setMaskEnabled] = useState(false);
   const [showCarto, setShowCarto] = useState(false);
   const [showPoints, setShowPoints] = useState(true);
@@ -122,11 +122,11 @@ export default function App() {
         getTextSize: 12,
         parameters: {depthTest: false},
 
-        extensions: [new CollideExtension(), new MaskExtension()],
-        collideEnabled,
-        collideGroup: 'def',
-        getCollidePriority: 0,
-        collideTestProps: {
+        extensions: [new CollisionFilterExtension(), new MaskExtension()],
+        collisionEnabled,
+        collisionGroup: 'def',
+        getCollisionPriority: 0,
+        collisionTestProps: {
           sizeScale: 2 // Enlarge text to increase hit area
         },
         ...maskProps
@@ -139,11 +139,11 @@ export default function App() {
         pointType: 'circle',
         ...props,
 
-        extensions: [new CollideExtension(), new MaskExtension()],
-        collideEnabled,
-        collideGroup: 'def',
-        getCollidePriority: d => d.properties.scalerank,
-        collideTestProps: {
+        extensions: [new CollisionFilterExtension(), new MaskExtension()],
+        collisionEnabled,
+        collisionGroup: 'def',
+        getCollisionPriority: d => d.properties.scalerank,
+        collisionTestProps: {
           pointAntialiasing: false, // Does this matter for collisions?
           radiusScale: 2 // Enlarge point to increase hit area
         },
@@ -151,7 +151,7 @@ export default function App() {
       }),
     showLabels &&
       new TextLayer({
-        id: 'collide-labels',
+        id: 'labels',
         data: AIR_PORTS,
         dataTransform: d => d.features,
 
@@ -161,11 +161,11 @@ export default function App() {
         getPosition: f => f.geometry.coordinates,
         ...props,
 
-        extensions: [new CollideExtension(), new MaskExtension()],
-        getCollidePriority: d => -d.properties.scalerank,
-        collideEnabled,
-        collideGroup: 'labels',
-        collideTestProps: {
+        extensions: [new CollisionFilterExtension(), new MaskExtension()],
+        getCollisionPriority: d => -d.properties.scalerank,
+        collisionEnabled,
+        collisionGroup: 'labels',
+        collisionTestProps: {
           sizeScale: 2 // Enlarge text to increase hit area
         },
         ...maskProps
@@ -181,8 +181,8 @@ export default function App() {
         <label>
           <input
             type="checkbox"
-            checked={collideEnabled}
-            onChange={() => setCollideEnabled(!collideEnabled)}
+            checked={collisionEnabled}
+            onChange={() => setCollisionEnabled(!collisionEnabled)}
           />
           Collisions
         </label>

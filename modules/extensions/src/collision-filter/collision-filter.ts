@@ -1,79 +1,83 @@
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import collide from './shader-module';
-import CollideEffect from './collide-effect';
+import collision from './shader-module';
+import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
-  getCollidePriority: {type: 'accessor', value: 0},
-  collideEnabled: true,
-  collideGroup: {type: 'string', value: 'default'},
-  collideTestProps: {}
+  getCollisionPriority: {type: 'accessor', value: 0},
+  collisionEnabled: true,
+  collisionGroup: {type: 'string', value: 'default'},
+  collisionTestProps: {}
 };
 
-export type CollideExtensionProps<DataT = any> = {
+export type CollisionFilterExtensionProps<DataT = any> = {
   /**
    * Accessor for collision priority. Must return a number in the range -1000 -> 1000. Features with higher values are shown preferentially.
    */
-  getCollidePriority?: Accessor<DataT, number>;
+  getCollisionPriority?: Accessor<DataT, number>;
 
   /**
    * Enable/disable collisions. If collisions are disabled, all objects are rendered.
    * @default true
    */
-  collideEnabled: boolean;
+  collisionEnabled: boolean;
 
   /**
    * Collision group this layer belongs to. If it is not set, the 'default' collision group is used
    */
-  collideGroup?: string;
+  collisionGroup?: string;
 
   /**
    * Props to override when rendering collision map
    */
-  collideTestProps?: {};
+  collisionTestProps?: {};
 };
 
 /** Allows layers to hide overlapping objects. */
-export default class CollideExtension extends LayerExtension {
+export default class CollisionFilterExtension extends LayerExtension {
   static defaultProps = defaultProps;
-  static extensionName = 'CollideExtension';
+  static extensionName = 'CollisionFilterExtension';
 
-  getShaders(this: Layer<CollideExtensionProps>): any {
-    return {modules: [collide]};
+  getShaders(this: Layer<CollisionFilterExtensionProps>): any {
+    return {modules: [collision]};
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<CollideExtensionProps>, {uniforms, context, moduleParameters}: any) {
-    const {collideEnabled} = this.props;
-    const {collideFBO, drawToCollideMap} = moduleParameters;
-    const enabled = collideEnabled && Boolean(collideFBO);
-    uniforms.collide_enabled = enabled;
+  draw(this: Layer<CollisionFilterExtensionProps>, {uniforms, context, moduleParameters}: any) {
+    const {collisionEnabled} = this.props;
+    const {collisionFBO, drawToCollisionMap} = moduleParameters;
+    const enabled = collisionEnabled && Boolean(collisionFBO);
+    uniforms.collision_enabled = enabled;
 
-    if (drawToCollideMap) {
-      // Override any props with those defined in collideTestProps
+    if (drawToCollisionMap) {
+      // Override any props with those defined in collisionTestProps
       // @ts-ignore
-      this.props = this.clone(this.props.collideTestProps).props;
+      this.props = this.clone(this.props.collisionTestProps).props;
     }
   }
 
-  initializeState(this: Layer<CollideExtensionProps>, context: LayerContext, extension: this) {
+  initializeState(
+    this: Layer<CollisionFilterExtensionProps>,
+    context: LayerContext,
+    extension: this
+  ) {
     if (this.getAttributeManager() === null) {
       return;
     }
-    this.context.deck?._addDefaultEffect(new CollideEffect());
+    this.context.deck?._addDefaultEffect(new CollisionFilterEffect());
     const attributeManager = this.getAttributeManager();
     attributeManager!.add({
-      collidePriorities: {
+      collisionPriorities: {
         size: 1,
-        accessor: 'getCollidePriority',
+        accessor: 'getCollisionPriority',
         shaderAttributes: {
-          collidePriorities: {divisor: 0},
-          instanceCollidePriorities: {divisor: 1}
+          collisionPriorities: {divisor: 0},
+          instanceCollisionPriorities: {divisor: 1}
         }
       }
     });
   }
 
-  getNeedsPickingBuffer(this: Layer<CollideExtensionProps>): boolean {
-    return this.props.collideEnabled;
+  getNeedsPickingBuffer(this: Layer<CollisionFilterExtensionProps>): boolean {
+    return this.props.collisionEnabled;
   }
 }

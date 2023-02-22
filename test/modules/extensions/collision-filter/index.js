@@ -1,3 +1,3 @@
-import './collide.spec';
-import './collide-effect.spec';
-import './collide-pass.spec';
+import './collision-filter.spec';
+import './collision-filter-effect.spec';
+import './collision-filter-pass.spec';

@@ -1,5 +1,5 @@
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {CollideExtension, MaskExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 
 const getYear = d => d.YR_INSTALLED || 1997;
@@ -11,22 +11,22 @@ export default [
   },
   {
     name: '2x-radius',
-    props: {collideTestProps: {radiusScale: 2}}
+    props: {collisionTestProps: {radiusScale: 2}}
   },
   {
     name: 'disabled',
-    props: {collideEnabled: false}
+    props: {collisionEnabled: false}
   },
   {
     name: 'ascending',
-    props: {getCollidePriority: d => getYear(d) - 2000}
+    props: {getCollisionPriority: d => getYear(d) - 2000}
   },
   {
     name: 'descending',
-    props: {getCollidePriority: d => 2000 - getYear(d)}
+    props: {getCollisionPriority: d => 2000 - getYear(d)}
   }
 ].map(({name, props}) => ({
-  name: `collide-effect-${name}`,
+  name: `collision-filter-effect-${name}`,
   viewState: {
     latitude: 37.751537058389985,
     longitude: -122.42694203247012,
@@ -38,7 +38,7 @@ export default [
     new ScatterplotLayer({
       id: name,
       data: points,
-      extensions: [new CollideExtension()],
+      extensions: [new CollisionFilterExtension()],
       getPosition: d => d.COORDINATES,
       getRadius: 10,
       getFillColor: d => {
@@ -52,5 +52,5 @@ export default [
   imageDiffOptions: {
     threshold: 0.985
   },
-  goldenImage: `./test/render/golden-images/collide-effect-${name}.png`
+  goldenImage: `./test/render/golden-images/collision-filter-effect-${name}.png`
 }));

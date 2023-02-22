@@ -1,10 +1,10 @@
 import {Framebuffer, withParameters} from '@luma.gl/core';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
-type CollidePassRenderOptions = LayersPassRenderOptions & {};
+type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
-export default class CollidePass extends LayersPass {
-  renderCollideMap(target: Framebuffer, options: CollidePassRenderOptions) {
+export default class CollisionFilterPass extends LayersPass {
+  renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const gl = this.gl;
 
     const padding = 1;
@@ -19,14 +19,14 @@ export default class CollidePass extends LayersPass {
         depthTest: true,
         depthRange: [0, 1]
       },
-      () => this.render({...options, target, pass: 'collide'})
+      () => this.render({...options, target, pass: 'collision'})
     );
   }
 
   getModuleParameters() {
-    // Draw picking colors into collide FBO
+    // Draw picking colors into collision FBO
     return {
-      drawToCollideMap: true,
+      drawToCollisionMap: true,
       pickingActive: 1,
       pickingAttribute: false,
       lightSources: {}

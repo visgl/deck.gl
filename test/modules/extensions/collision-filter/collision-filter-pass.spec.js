@@ -1,33 +1,37 @@
 import test from 'tape-promise/tape';
 
 import {Layer, LayerManager, Viewport} from '@deck.gl/core';
-import {CollideExtension} from '@deck.gl/extensions';
-import CollidePass from '@deck.gl/extensions/collide/collide-pass';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
+import CollisionFilterPass from '@deck.gl/extensions/collision-filter/collision-filter-pass';
 import gl from '@deck.gl/test-utils/utils/setup-gl';
 
 class TestLayer extends Layer {
   initializeState() {}
 }
 
-test('CollidePass#getModuleParameters', t => {
-  const collidePass = new CollidePass(gl);
-  const moduleParameters = collidePass.getModuleParameters();
+test('CollisionFilterPass#getModuleParameters', t => {
+  const collisionFilterPass = new CollisionFilterPass(gl);
+  const moduleParameters = collisionFilterPass.getModuleParameters();
 
   t.equal(
-    moduleParameters.drawToCollideMap,
+    moduleParameters.drawToCollisionMap,
     true,
-    `CollidePass has drawToCollideMap module parameter`
+    `CollisionFilterPass has drawToCollisionMap module parameter`
   );
-  t.equal(moduleParameters.pickingActive, 1, `CollidePass has pickingActive module parameter`);
+  t.equal(
+    moduleParameters.pickingActive,
+    1,
+    `CollisionFilterPass has pickingActive module parameter`
+  );
   t.equal(
     moduleParameters.pickingAttribute,
     false,
-    `CollidePass has pickingAttribute module parameter`
+    `CollisionFilterPass has pickingAttribute module parameter`
   );
   t.deepEqual(
     moduleParameters.lightSources,
     {},
-    `CollidePass has empty lightSources module parameter`
+    `CollisionFilterPass has empty lightSources module parameter`
   );
   t.end();
 });
