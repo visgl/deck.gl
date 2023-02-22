@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
+import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.4,
@@ -37,7 +37,7 @@ export default function App({
 }) {
   const [selection, setSelection] = useState(null);
 
-  const layer = new ImageryLayer({
+  const layer = new WMSLayer({
     data: serviceUrl,
     serviceType,
     layers,

@@ -21,10 +21,10 @@ import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {Proj4Projection} from '@math.gl/proj4';
 
 /** All props supported by the TileLayer */
-export type ImageryLayerProps = CompositeLayerProps<any> & _ImageryLayerProps;
+export type WMSLayerProps = CompositeLayerProps<any> & _WMSLayerProps;
 
 /** Props added by the TileLayer */
-type _ImageryLayerProps = {
+type _WMSLayerProps = {
   serviceType?: ImageServiceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
@@ -36,7 +36,7 @@ type _ImageryLayerProps = {
   onImageLoadError?: (requestId: unknown, error: Error) => void;
 };
 
-const defaultProps: DefaultProps<ImageryLayerProps> = {
+const defaultProps: DefaultProps<WMSLayerProps> = {
   id: 'imagery-layer',
   data: '',
   serviceType: 'auto',
@@ -61,10 +61,10 @@ const projConverter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
 /**
  * The layer is used in Hex Tile layer in order to properly discard invisible elements during animation
  */
-export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
-  ExtraPropsT & Required<_ImageryLayerProps>
+export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_WMSLayerProps>
 > {
-  static layerName = 'ImageryLayer';
+  static layerName = 'WMSLayer';
   static defaultProps: DefaultProps = defaultProps;
 
   state!: {
@@ -150,7 +150,7 @@ export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     return '';
   }
 
-  _createImageSource(props: ImageryLayerProps): ImageSource {
+  _createImageSource(props: WMSLayerProps): ImageSource {
     if (props.data instanceof ImageSource) {
       return props.data;
     }
