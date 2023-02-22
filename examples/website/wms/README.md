@@ -1,4 +1,4 @@
-This is a minimal standalone version of the ImageryLayer example
+This is a minimal standalone version of the WMSLayer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -19,4 +19,4 @@ npm start
 The demo WMS service is provided by [terrestris](https://www.terrestris.de/en/demos/) using data from [OpenStreetMap](https://openstreetmap.org).
 
 To set up your own image source, check out
-the [documentation of ImageryLayer](../../../docs/api-reference/geo-layers/imagery-layer.md).
+the [documentation of WMSLayer](../../../docs/api-reference/geo-layers/wms-layer.md).
