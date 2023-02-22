@@ -9,10 +9,11 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@arcgis/core": "^4.21.0",
-    "@esri/react-arcgis": "^5.1.0",
-    "esri-loader": "^3.3.0",
+    "@arcgis/core": "^4.25.0",
+    "@deck.gl/arcgis": "^8.8.25",
+    "@esri/react-arcgis": "^5.2.0",
     "deck.gl": "^8.8.0",
+    "esri-loader": "^2.14.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
