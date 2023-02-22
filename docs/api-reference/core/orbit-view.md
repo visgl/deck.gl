@@ -1,12 +1,12 @@
 # OrbitView
 
-The `OrbitView` class is a subclass of [View](/docs/api-reference/core/view.md) that creates a 3D camera that rotates around a target position. It is usually used for the examination of a 3D scene in non-geospatial use cases.
+The `OrbitView` class is a subclass of [View](./view.md) that creates a 3D camera that rotates around a target position. It is usually used for the examination of a 3D scene in non-geospatial use cases.
 
-It's recommended that you read the [Views and Projections guide](/docs/developer-guide/views.md) before using this class.
+It's recommended that you read the [Views and Projections guide](../../developer-guide/views.md) before using this class.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
-  <iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl OrbitView" src="https://codepen.io/vis-gl/embed/gOLprOZ?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl OrbitView" src="https://codepen.io/vis-gl/embed/gOLprOZ?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/gOLprOZ'>deck.gl OrbitView</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
   </iframe>
@@ -20,31 +20,31 @@ import {OrbitView} from '@deck.gl/core';
 const view = new OrbitView({id, ...});
 ```
 
-`OrbitView` takes the same parameters as the [View](/docs/api-reference/core/view.md) superclass constructor, plus the following:
+`OrbitView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `orbitAxis` (String, optional)
+##### `orbitAxis` (String, optional) {#orbitaxis}
 
 Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
 
-##### `projectionMatrix` (Array[16], optional)
+##### `projectionMatrix` (Array[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (Number, optional)
+##### `fovy` (Number, optional) {#fovy}
 
 Field of view covered by camera, in the perspective case. In degrees. Default `50`.
 
-##### `near` (Number, optional)
+##### `near` (Number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (Number, optional)
+##### `far` (Number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
-##### `orthographic` (Boolean)
+##### `orthographic` (Boolean) {#orthographic}
 
 Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 
@@ -71,7 +71,7 @@ By default, `OrbitView` uses the `OrbitController` to handle interactivity. To e
 const view = new OrbitView({id: '3d-scene', controller: true});
 ```
 
-Visit the [OrbitController](/docs/api-reference/core/orbit-controller.md) documentation for a full list of supported options.
+Visit the [OrbitController](./orbit-controller.md) documentation for a full list of supported options.
 
 ## Source
 

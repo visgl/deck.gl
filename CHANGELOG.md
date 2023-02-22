@@ -21,6 +21,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-beta.2] - Feb 17 2023
+
+- DeckRenderer to TypeScript (#7656)
+- Fix autoHighlight crash when TileLayer is used as a sub layer (#7650)
+- TypeScript: fix some TS erros (#7652)
+- chore: bump loaders.gl to 3.3.1 (#7658)
+- IconManager preserve aspect ratio when auto packing (#7651)
+- Move core bundle source into src directory (#7645)
+
 #### deck.gl [8.9.0-beta.1] - Feb 15 2023
 
 - Better support for maplibre in scripting interface (#7642)

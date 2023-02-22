@@ -1,8 +1,8 @@
-import {IconLayerDemo} from 'website-components/doc-demos/layers';
+# IconLayer
+
+import {IconLayerDemo} from '@site/src/doc-demos/layers';
 
 <IconLayerDemo />
-
-# IconLayer
 
 The `IconLayer` renders raster icons at given coordinates.
 
@@ -139,9 +139,9 @@ new deck.IconLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
-##### `iconAtlas` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional)
+##### `iconAtlas` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#iconatlas}
 
 A pre-packed image that contains all icons.
 
@@ -157,7 +157,7 @@ If you go with pre-packed strategy, this prop is required.
 
 If you choose to use auto packing, this prop should be left empty.
 
-##### `iconMapping` (Object|String, optional)
+##### `iconMapping` (Object|String, optional) {#iconmapping}
 
 Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. Each icon is defined with the following values:
 
@@ -176,51 +176,51 @@ If you go with pre-packed strategy, this prop is required.
 
 If you choose to use auto packing, this prop should be left empty.
 
-##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default: `1`
 
 Icon size multiplier.
 
-##### `sizeUnits` (String, optional)
+##### `sizeUnits` (String, optional) {#sizeunits}
 
 * Default: `pixels`
 
-The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
+The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizeminpixels}
 
 * Default: `0`
 
 The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
 
-##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizemaxpixels}
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
 
-##### `billboard` (Boolean, optional)
+##### `billboard` (Boolean, optional) {#billboard}
 
 - Default: `true`
 
 If `true`, the icon always faces camera. Otherwise the icon faces up (z).
 
-##### `alphaCutoff` (Number, optional)
+##### `alphaCutoff` (Number, optional) {#alphacutoff}
 
 - Default: `0.05`
 
 Discard pixels whose opacity is below this threshold. A discarded pixel would create a "hole" in the icon that is not considered part of the object. This is useful for customizing picking behavior, e.g. setting `alphaCutoff: 0, autoHighlight` will highlight an object whenever the cursor moves into its bounding box, instead of over the visible pixels.
 
 
-##### `loadOptions` (Object, optional)
+##### `loadOptions` (Object, optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `iconAtlas` prop is an URL, or if `getIcon` returns URLs for auto-packing
 
 
-##### `textureParameters` (Object)
+##### `textureParameters` (Object) {#textureparameters}
 
 Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
 
@@ -237,7 +237,7 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Data Accessors
 
-##### `getIcon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getIcon` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#geticon}
 
 - Default: `d => d.icon`
 
@@ -260,14 +260,14 @@ the following properties.
 The image loaded from `url` is always resized to fit the box defined by `[width, height]` while preserving its aspect ratio.
 
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `d => d.position`
 
 Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 
-##### `getSize` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSize` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
 
 - Default: `1`
 
@@ -277,7 +277,7 @@ The height of each object, in units specified by `sizeUnits` (default pixels).
 - If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -287,7 +287,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 - If a function is provided, it is called on each object to retrieve its color.
 - If `mask` = false, only the alpha component will be used to control the opacity of the icon.
 
-##### `getAngle` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getAngle` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
 
 - Default: `0`
 
@@ -296,7 +296,7 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPixelOffset` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 - Default: `[0, 0]`
 
@@ -307,7 +307,7 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 ### Callbacks
 
-##### `onIconError` (Function)
+##### `onIconError` (Function) {#oniconerror}
 
 * Default: `null`
 
@@ -323,7 +323,7 @@ Only used when using auto-packing. If the attempt to fetch an icon returned by `
 
 ## Use binary attributes
 
-This section is about the special requirements when [supplying attributes directly](/docs/developer-guide/performance.md#supply-attributes-directly) to an `IconLayer`.
+This section is about the special requirements when [supplying attributes directly](../../developer-guide/performance.md#supply-attributes-directly) to an `IconLayer`.
 
 If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
 

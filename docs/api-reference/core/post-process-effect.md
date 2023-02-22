@@ -2,8 +2,8 @@
 
 The `PostProcessEffect` applies screen space pixel manipulation effects to deck.gl layers.
 
-<div style="position:relative;height:450px"></div>
-<div style="position:absolute;transform:translateY(-450px);padding-left:inherit;padding-right:inherit;left:0;right:0">
+<div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
   <iframe height="450" width="100%" scrolling="no" title="deck.gl PostProcessEffect Demo" src="https://codepen.io/vis-gl/embed/YbRGvv/?height=450&theme-id=light&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
     See the Pen <a href='https://codepen.io/vis-gl/pen/YbRGvv/'>deck.gl PostProcessEffect Demo</a> by vis.gl
     (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/terrain/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 

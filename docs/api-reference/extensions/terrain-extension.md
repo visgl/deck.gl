@@ -10,7 +10,7 @@ To use this extension, first define a terrain source with the prop `operation: '
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
 <!-- TODO: Codepen demo -->
-<div style="position:relative;height:450px"></div>
+<div style={{position:'relative',height:450}}></div>
 
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -82,22 +82,22 @@ new TerrainExtension();
 
 When added to a layer via the `extensions` prop, the `TerrainExtension` adds the following properties to the layer:
 
-##### `terrainFittingMode` ('offset' | 'drape')
+##### `terrainFittingMode` ('offset' | 'drape') {#terrainfittingmode}
 
 How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 
 - `offset`: each object is translated vertically by the elevation at its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot). This is the desired behavior for layers that render 3D objects.
 - `drape`: each object is overlaid as a texture over the terrain surface. All altitude and extrusion in the layer will be ignored.
 
-<table style="border: 0;" align="center">
+<table style={{border:0}} align="center">
   <tbody>
     <tr>
       <td>
-        <img style="max-height:216px" src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-offset.jpg" />
+        <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-offset.jpg" />
         <p><i>terrainFittingMode: offset</i></p>
       </td>
       <td>
-        <img style="max-height:216px" src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-drape.jpg" />
+        <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-drape.jpg" />
         <p><i>terrainFittingMode: drape</i></p>
       </td>
     </tr>

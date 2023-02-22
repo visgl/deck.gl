@@ -4,7 +4,7 @@ import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'website-examples/trips/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class TripsDemo extends Component {
   static title = 'Yellow Cab Vs. Green Cab Trips in Manhattan';

@@ -1,16 +1,12 @@
-import {GeohashLayerDemo} from 'website-components/doc-demos/geo-layers';
+# GeohashLayer
+
+import {GeohashLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <GeohashLayerDemo/>
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# GeohashLayer
-
 The `GeohashLayer` renders filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system.
 
-`GeohashLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`GeohashLayer` is a [CompositeLayer](../core/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -84,11 +80,11 @@ new deck.GeohashLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getGeohash` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getGeohash` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getgeohash}
 
 Called for each data object to retrieve the geohash string identifier.
 
@@ -99,7 +95,7 @@ Called for each data object to retrieve the geohash string identifier.
 
 The `GeohashLayer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) rendering all geohash cells.
+* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all geohash cells.
 
 
 ## Source

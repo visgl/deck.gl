@@ -14,7 +14,7 @@ Some examples of when loaders are used:
 
 ## Customize Data Loading Behavior
 
-All layers support a [loadOptions](/docs/api-reference/core/layer.md#loadoptions) prop that can be used to customize loading and parsing.
+All layers support a [loadOptions](../api-reference/core/layer.md#loadoptions) prop that can be used to customize loading and parsing.
 
 ### Example: Fetch data with credentials
 
@@ -82,7 +82,7 @@ new IconLayer({
 
 ## Support Additional Formats
 
-All layers support a [loaders](/docs/api-reference/core/layer.md#loaders) prop that can be used to add [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) for parsing a specific input format.
+All layers support a [loaders](../api-reference/core/layer.md#loaders) prop that can be used to add [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) for parsing a specific input format.
 
 For example, the following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV/TSV files:
 
@@ -139,7 +139,7 @@ setInterval(() => {
 
 ## Loaders and Web Workers
 
-For the best performance, some specialized loaders parse data using web workers, for example `TerrainLoader` in the [TerrainLayer](/docs/api-reference/geo-layers/terrain-layer.md) and `MVTLoader` in the [MVTLayer](/docs/api-reference/geo-layers/mvt-layer.md). By default, the worker code is loaded from from the latest published NPM module on [unpkg.com](https://unpkg.com).
+For the best performance, some specialized loaders parse data using web workers, for example `TerrainLoader` in the [TerrainLayer](../api-reference/geo-layers/terrain-layer.md) and `MVTLoader` in the [MVTLayer](../api-reference/geo-layers/mvt-layer.md). By default, the worker code is loaded from from the latest published NPM module on [unpkg.com](https://unpkg.com).
 
 It might be desirable for some applications to serve the worker code itself without relying on the CDN. To do this, locate the worker bundle locally in `node_modules/@loaders.gl/<module>/dist/<name>-loader.worker.js` and serve it as a static asset with your server. Point the loader to use this alternative URL using `loadOptions.<name>.workerUrl`:
 
@@ -178,7 +178,7 @@ new BitmapLayer({
 })
 ```
 
-If you have a custom-formatted binary, consider the techniques in [using binary data](/docs/developer-guide/performance.md#use-binary-data).
+If you have a custom-formatted binary, consider the techniques in [using binary data](./performance.md#use-binary-data).
 
 The following examples only address the use cases where you need a loader/parser to interpret the incoming data.
 

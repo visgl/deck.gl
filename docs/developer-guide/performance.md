@@ -111,7 +111,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/core/layer.md#updatetriggers) to invalidate only the selected attributes:
+  In this case, it is more efficient to use [`updateTriggers`](../api-reference/core/layer.md#updatetriggers) to invalidate only the selected attributes:
 
   ```js
   // Good
@@ -214,7 +214,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  See [Layer properties](/docs/api-reference/core/layer.md#basic-properties) for details.
+  See [Layer properties](../api-reference/core/layer.md#basic-properties) for details.
 
 #### Favor layer visibility over addition and removal
 
@@ -247,7 +247,7 @@ Some good places to check for performance improvements are:
   }
   ```
 
-  The [`visible`](/docs/api-reference/core/layer.md#visible) prop is a cheap way to temporarily disable a layer:
+  The [`visible`](../api-reference/core/layer.md#visible) prop is a cheap way to temporarily disable a layer:
 
   ```js
   // Good
@@ -568,7 +568,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
   });
   ```
 
-  Note that instead of `getPosition`, we supply a `data.attributes.getPosition` object. This object defines the buffer from which `PointCloudLayer` should access its positions data. See the base `Layer` class' [data prop](/docs/api-reference/core/layer.md#basic-properties) for details.
+  Note that instead of `getPosition`, we supply a `data.attributes.getPosition` object. This object defines the buffer from which `PointCloudLayer` should access its positions data. See the base `Layer` class' [data prop](../api-reference/core/layer.md#basic-properties) for details.
 
   It is also possible to use interleaved or custom layout external buffers:
 

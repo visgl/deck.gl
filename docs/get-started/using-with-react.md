@@ -87,7 +87,7 @@ function App({data}) {
 
 ```
 
-For more detailed examples and options, see [using with Mapbox](/docs/developer-guide/base-maps/using-with-mapbox.md).
+For more detailed examples and options, see [using with Mapbox](../developer-guide/base-maps/using-with-mapbox.md).
 
 ## Using JSX with deck.gl Layers
 
@@ -105,7 +105,7 @@ function App() {
 }
 ```
 
-For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/react/deckgl.md).
+For more information on this syntax and its limitations, see [DeckGL API](../api-reference/react/deckgl.md).
 
 
 ## Using JSX with deck.gl views
@@ -136,7 +136,7 @@ function App() {
 }
 ```
 
-For more information on this syntax, see [DeckGL API](/docs/api-reference/react/deckgl.md).
+For more information on this syntax, see [DeckGL API](../api-reference/react/deckgl.md).
 
 
 ## Remarks
@@ -164,4 +164,4 @@ For more information on this syntax, see [DeckGL API](/docs/api-reference/react/
   unnecessary calculations using React and deck.gl lifecycle functions.
 
 
-See [full API doc](/docs/api-reference/react/deckgl.md) for the `DeckGL` component.
+See [full API doc](../api-reference/react/deckgl.md) for the `DeckGL` component.

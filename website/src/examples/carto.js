@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {GITHUB_TREE, MAPBOX_STYLES} from '../constants/defaults';
 import App from 'website-examples/carto-sql/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 const INDEXES = {
   'Total Spend': 'txn_amt',

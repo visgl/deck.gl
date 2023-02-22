@@ -2,7 +2,7 @@ import React, {Component, createRef} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
 import {renderToDOM} from 'website-examples/google-3d/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class GoogleMapsDemo extends Component {
   static title = 'Animated Truck Routes';

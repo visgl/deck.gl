@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/3d-tiles/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class Tiles3DDemo extends Component {
   static title = 'City of Melbourne 3D Point Cloud';

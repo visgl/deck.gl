@@ -44,7 +44,7 @@ export default class MaskEffect implements Effect {
 
   preRender(
     gl: WebGLRenderingContext,
-    {layers, layerFilter, viewports, onViewportActive, views, pass}: PreRenderOptions
+    {layers, layerFilter, viewports, onViewportActive, views, isPicking}: PreRenderOptions
   ): MaskPreRenderStats {
     let didRender = false;
     if (!this.dummyMaskMap) {
@@ -54,7 +54,7 @@ export default class MaskEffect implements Effect {
       });
     }
 
-    if (pass.startsWith('picking')) {
+    if (isPicking) {
       // Do not update on picking pass
       return {didRender};
     }

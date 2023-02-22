@@ -1,16 +1,12 @@
-import {H3HexagonLayerDemo} from 'website-components/doc-demos/geo-layers';
+# H3HexagonLayer
+
+import {H3HexagonLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <H3HexagonLayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# H3HexagonLayer
-
 The `H3HexagonLayer` renders hexagons from the [H3](https://h3geo.org/) geospatial indexing system.
 
-`H3HexagonLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`H3HexagonLayer` is a [CompositeLayer](../core/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -81,12 +77,12 @@ Note that `h3-js` must be included before `deck.gl`.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 
 ### Render Options
 
-##### `highPrecision` (Boolean, optional)
+##### `highPrecision` (Boolean, optional) {#highprecision}
 
 * Default: `'auto'`
 
@@ -104,7 +100,7 @@ Possible values:
 * `true`: Always use high-precision rendering.
 * `false`: Always use instanced rendering, regardless of the characteristics of the data.
 
-##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
@@ -113,7 +109,7 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 ### Data Accessors
 
-##### `getHexagon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getHexagon` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#gethexagon}
 
 * Default: `object => object.hexagon`
 
@@ -124,8 +120,8 @@ Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each obj
 
 The `H3HexagonLayer` renders the following sublayers:
 
-* `hexagon-cell-hifi` - On `highPrecision` mode, rendered by [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md)
-* `hexagon-cell` - On non `highPrecision` mode, rendered by [ColumnLayer](/docs/api-reference/layers/column-layer.md)
+* `hexagon-cell-hifi` - On `highPrecision` mode, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
+* `hexagon-cell` - On non `highPrecision` mode, rendered by [ColumnLayer](../layers/column-layer.md)
 
 
 

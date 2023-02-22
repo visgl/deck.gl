@@ -1,6 +1,6 @@
 # CameraLight (Experimental)
 
-CameraLight is a special [point light](/docs/api-reference/core/point-light.md) source which always emits from the camera position.
+CameraLight is a special [point light](./point-light.md) source which always emits from the camera position.
 
 <div align="center">
   <div>

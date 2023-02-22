@@ -1,8 +1,8 @@
-import {TripsLayerDemo} from 'website-components/doc-demos/geo-layers';
+# TripsLayer
+
+import {TripsLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <TripsLayerDemo />
-
-# Trips Layer
 
 The `TripsLayer` renders animated paths that represent vehicle trips.
 
@@ -74,11 +74,11 @@ new deck.TripsLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [PathLayer](/docs/api-reference/layers/path-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md) and [PathLayer](../layers/path-layer.md) properties, plus the following:
 
 ### Render Options
 
-##### `currentTime` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `currentTime` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#currenttime}
 
 - Default: `0`
 
@@ -86,7 +86,7 @@ The current time of the frame, i.e. the playhead of the animation.
 
 This value should be in the same units as the timestamps from `getPath`.
 
-##### `fadeTrail` (Boolean, optional)
+##### `fadeTrail` (Boolean, optional) {#fadetrail}
 
 - Default: `true`
 
@@ -94,7 +94,7 @@ Whether or not the path fades out.
 
 If `false`, `trailLength` has no effect.
 
-##### `trailLength` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `trailLength` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#traillength}
 
 - Default: `120`
 
@@ -104,16 +104,16 @@ This value should be in the same units as the timestamps from `getPath`.
 
 ### Data Accessors
 
-##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getPath` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getpath}
 
 - Default: `d => d.path`
 
 Called for each data object to retrieve paths.
 Returns an array of navigation points on a single path.
 
-See [PathLayer](/docs/api-reference/layers/path-layer.md) documentation for supported path formats.
+See [PathLayer](../layers/path-layer.md) documentation for supported path formats.
 
-##### `getTimestamps` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getTimestamps` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#gettimestamps}
 
 - Default: `d => d.timestamps`
 
@@ -121,7 +121,7 @@ Returns an array of timestamps, one for each navigation point in the geometry re
 
 Because timestamps are stored as 32-bit floating numbers, raw unix epoch time can not be used. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
-> **<span style="color:red">Legacy API, removing in a future major release:</span>**
+> **<span style={{color:'red'}}>Legacy API, removing in a future major release:</span>**
 >
 > If `getTimestamps` is not supplied, each navigation point in the path is interpreted as `[longitude, latitude, timestamp]`, and the paths will always be rendered flat against the ground.
 

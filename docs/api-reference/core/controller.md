@@ -2,7 +2,7 @@
 
 The base class for all viewport controllers.
 
-A controller class can be passed to either the `Deck` class's [controller](/docs/api-reference/core/deck.md#controller) prop or a `View` class's [controller](/docs/api-reference/core/view.md#controller) prop to specify viewport interactivity.
+A controller class can be passed to either the `Deck` class's [controller](./deck.md#controller) prop or a `View` class's [controller](./view.md#controller) prop to specify viewport interactivity.
 
 
 ## Options
@@ -70,7 +70,7 @@ The constructor takes two arguments:
 * `options` (Object) - options and view state props
 
 
-##### `handleEvent(event)`
+##### `handleEvent(event)` {#handleevent}
 
 Called by the event manager to handle pointer events. This method delegate to the following methods to handle the default events:
 
@@ -90,29 +90,29 @@ Called by the event manager to handle pointer events. This method delegate to th
 See [Event object documentation](https://uber-web.github.io/mjolnir.js/docs/api-reference/event).
 
 
-##### `setProps(props)`
+##### `setProps(props)` {#setprops}
 
 Called by the view when the view state updates. This method handles adding/removing event listeners based on user options.
 
-##### `updateViewport(newMapState, extraProps, interactionState)`
+##### `updateViewport(newMapState, extraProps, interactionState)` {#updateviewport}
 
 Called by the event handlers, this method updates internal state, and invokes `onViewStateChange` callback with a new map state.
 
-##### `getCenter(event)`
+##### `getCenter(event)` {#getcenter}
 
 Utility used by the event handlers, returns pointer position `[x, y]` from any event.
 
-##### `isFunctionKeyPressed(event)`
+##### `isFunctionKeyPressed(event)` {#isfunctionkeypressed}
 
 Utility used by the event handlers, returns `true` if ctrl/alt/meta key is pressed during any event.
 
-##### `isPointInBounds(pos, [event])`
+##### `isPointInBounds(pos, [event])` {#ispointinbounds}
 
 Utility used by the event handlers, returns `true` if a pointer position `[x, y]` is inside the current view.
 
 If `event` is provided, returns `false` if the event is already handled, and mark the event as handled if the point is in bounds. This can be used to make sure that certain events are only handled by one controller, when there are overlapping viewports.
 
-##### `isDragging()`
+##### `isDragging()` {#isdragging}
 
 Returns `true` if the user is dragging the view.
 

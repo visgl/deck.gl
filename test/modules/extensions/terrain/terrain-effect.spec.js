@@ -53,6 +53,7 @@ test('TerrainEffect', async t => {
   // preRender#picking
   lifecycle.render({
     pass: 'picking:hover',
+    isPicking: true,
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });
@@ -146,6 +147,7 @@ test('TerrainEffect#without draw operation', async t => {
   // preRender#picking
   lifecycle.render({
     pass: 'picking:hover',
+    isPicking: true,
     deviceRect: {x: 200, y: 150, width: 1, height: 1},
     cullRect: {x: 200, y: 150, width: 1, height: 1}
   });

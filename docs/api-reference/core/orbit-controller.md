@@ -1,10 +1,10 @@
 # OrbitController
 
-Inherits from [Base Controller](/docs/api-reference/core/controller.md).
+Inherits from [Base Controller](./controller.md).
 
-The `OrbitController` class can be passed to either the `Deck` class's [controller](/docs/api-reference/core/deck.md#controller) prop or a `View` class's [controller](/docs/api-reference/core/view.md#controller) prop to specify that viewport interaction should be enabled.
+The `OrbitController` class can be passed to either the `Deck` class's [controller](./deck.md#controller) prop or a `View` class's [controller](./view.md#controller) prop to specify that viewport interaction should be enabled.
 
-`OrbitController` is the default controller for [OrbitView](/docs/api-reference/core/orbit-view.md).
+`OrbitController` is the default controller for [OrbitView](./orbit-view.md).
 
 ## Usage
 
@@ -35,7 +35,7 @@ new Deck({
 
 ## Options
 
-Supports all [Controller options](/docs/api-reference/core/controller.md#options) with the following default behavior:
+Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 - `dragMode`: default `'rotate'` (drag to rotate, shift/ctrl + drag to pan)
 - `keyboard`: arrow keys to pan, arrow keys with shift/ctrl down to rotate, +/- to zoom
@@ -65,7 +65,7 @@ new Deck({
 })
 ```
 
-See the `Controller` class [documentation](/docs/api-reference/core/controller.md#methods) for the methods that you can use and/or override.
+See the `Controller` class [documentation](./controller.md#methods) for the methods that you can use and/or override.
 
 
 ## Source

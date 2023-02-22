@@ -31,7 +31,7 @@ yarn start-local
 If you consider opening a PR, here is some documentation to get you started:
 
 - vis.gl [developer process](https://www.github.com/visgl/tsc/tree/master/developer-process)
-- [deck.gl API design guidelines](/dev-docs/deckgl-api-guidelines.md)
+- [deck.gl API design guidelines](https://github.com/visgl/deck.gl/tree/master/dev-docs/deckgl-api-guidelines.md)
 
 ## Testing examples with modified deck.gl source
 

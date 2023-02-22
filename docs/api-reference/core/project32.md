@@ -1,6 +1,6 @@
 # project32 (Shader Module)
 
-The `project32` shader module is an extension of the [project](/docs/api-reference/core/project.md) shader module that adds some projection utilities.
+The `project32` shader module is an extension of the [project](./project.md) shader module that adds some projection utilities.
 
 ## GLSL Functions
 

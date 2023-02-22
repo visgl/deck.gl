@@ -1,8 +1,8 @@
-import {ScreenGridLayerDemo} from 'website-components/doc-demos/aggregation-layers';
+# ScreenGridLayer
+
+import {ScreenGridLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <ScreenGridLayerDemo />
-
-# ScreenGridLayer
 
 The `ScreenGridLayer` aggregates data into histogram bins and renders them as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to 1.
 
@@ -81,35 +81,35 @@ new deck.ScreenGridLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSizePixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `cellSizePixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsizepixels}
 
 * Default: `100`
 
 Unit width/height of the bins.
 
-##### `cellMarginPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `cellMarginPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellmarginpixels}
 
 * Default: `2`, gets clamped to [0, 5]
 
 Cell margin size in pixels.
 
-##### `minColor` (Number[4], optional) **DEPRECATED**
+##### `minColor` (Number[4], optional) **DEPRECATED** {#mincolor}
 
 * Default: `[0, 0, 0, 255]`
 
 Expressed as an rgba array, minimal color that could be rendered by a tile. This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `maxColor` (Number[4], optional) **DEPRECATED**
+##### `maxColor` (Number[4], optional) **DEPRECATED** {#maxcolor}
 
 * Default: `[0, 255, 0, 255]`
 
 Expressed as an rgba array, maximal color that could be rendered by a tile.  This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `colorDomain` (Array, optional)
+##### `colorDomain` (Array, optional) {#colordomain}
 
 * Default: `[1, max(weight)]`
 
@@ -117,7 +117,7 @@ Color scale input domain. The color scale maps continues numeric domain into
 discrete color range. If not provided, the layer will set `colorDomain` to [1, max-of-all-cell-weights], You can control how the color of cells mapped
 to value of its weight by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Array, optional)
+##### `colorRange` (Array, optional) {#colorrange}
 
 * Default: <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -126,7 +126,7 @@ Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an
 
 NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRange`, to use `colorDomain` and `colorRange` do not provide `minColor` and `maxColor`.
 
-##### `gpuAggregation` (bool, optional)
+##### `gpuAggregation` (bool, optional) {#gpuaggregation}
 
 * Default: true
 
@@ -134,7 +134,7 @@ When set to true and browser supports GPU aggregation, aggregation is performed 
 
 NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
-##### `aggregation` (String, optional)
+##### `aggregation` (String, optional) {#aggregation}
 
 * Default: 'SUM'
 
@@ -148,13 +148,13 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 
 ### Data Accessors
 
-##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getWeight` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 

@@ -54,7 +54,7 @@ Each prop in `defaultProps` may be an object in the following shape:
 
 - `type` (string, required)
 - `value` (any, required) - the default value if this prop is not supplied
-- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/core/layer.md) prop).
+- `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](../../api-reference/core/layer.md) prop).
 - `transform` (function, optional) - transforms an asynchronously loaded value and returns a new form. Receives the following arguments:
   + `value` - the new value of this prop
   + `propType` - this prop type definition
@@ -75,7 +75,7 @@ Each prop in `defaultProps` may be an object in the following shape:
 
 ### Built-in Types
 
-##### `boolean`
+##### `boolean` {#boolean}
 
 Any value.
 
@@ -91,7 +91,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `number`
+##### `number` {#number}
 
 A numeric value.
 
@@ -110,7 +110,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `color`
+##### `color` {#color}
 
 A RGBA color.
 
@@ -124,7 +124,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `image`
+##### `image` {#image}
 
 One of: URL string, [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
 
@@ -142,7 +142,7 @@ One of: URL string, [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-releas
 
 - Default `transform`: converts to a `Texture2D` object
 
-##### `array`
+##### `array` {#array}
 
 An array of objects.
 
@@ -161,7 +161,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `accessor`
+##### `accessor` {#accessor}
 
 An accessor used to update shader attributes.
 
@@ -175,7 +175,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `function`
+##### `function` {#function}
 
 A function.
 

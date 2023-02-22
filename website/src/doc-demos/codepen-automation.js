@@ -161,9 +161,11 @@ function printLayerProps(layer, propsSource) {
  * Open a layer example in Codepen
  */
 export function gotoLayerSource(config, layer) {
-  const {Layer, getTooltip, props, mapStyle = true, dependencies = [], imports, initialViewState} = config;
+  const {Layer, isExperimental, getTooltip, props, mapStyle = true, dependencies = [], imports, initialViewState} = config;
 
-  const symbols = ['DeckGL', Layer.layerName];
+  const layerName = isExperimental ? `_${Layer.layerName}` : Layer.layerName;
+
+  const symbols = ['DeckGL', layerName];
   const loaders = [];
   if (imports) {
     for (const key in imports) {
@@ -186,7 +188,7 @@ const {${symbols.join(', ')}} = deck;
 ${loaders.length ? `\
 const {${loaders.join(', ')}} = loaders;
 ` : ''}
-const layer = new ${Layer.layerName}({
+const layer = new ${layerName}({
   ${printLayerProps(layer, props)}
 });
 

@@ -1,16 +1,12 @@
-import {H3ClusterLayerDemo} from 'website-components/doc-demos/geo-layers';
+# H3ClusterLayer
+
+import {H3ClusterLayerDemo} from '@site/src/doc-demos/geo-layers';
 
 <H3ClusterLayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# H3ClusterLayer
-
 The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](https://h3geo.org/) geospatial indexing system.
 
-`H3ClusterLayer` is a [CompositeLayer](/docs/api-reference/core/composite-layer.md).
+`H3ClusterLayer` is a [CompositeLayer](../core/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -89,11 +85,11 @@ Note that `h3-js` must be included before `deck.gl`.
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md), [CompositeLayer](/docs/api-reference/core/composite-layer.md), and [PolygonLayer](/docs/api-reference/layers/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/composite-layer.md), and [PolygonLayer](../layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getHexagons` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+##### `getHexagons` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#gethexagons}
 
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://h3geo.org/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
 
@@ -102,7 +98,7 @@ Method called to retrieve the hexagon cluster from each object, as an array of [
 
 The `H3ClusterLayer` renders the following sublayers:
 
-* `cell` - a [PolygonLayer](/docs/api-reference/layers/column-layer.md) rendering all clusters.
+* `cell` - a [PolygonLayer](../layers/column-layer.md) rendering all clusters.
 
 
 ## Source
