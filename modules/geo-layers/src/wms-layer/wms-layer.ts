@@ -28,11 +28,10 @@ type _WMSLayerProps = {
   serviceType?: ImageServiceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
-  onMetadataLoadStart?: () => void;
-  onMetadataLoadComplete?: (metadata: ImageSourceMetadata) => void;
+  onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
   onMetadataLoadError?: (error: Error) => void;
   onImageLoadStart?: (requestId: unknown) => void;
-  onImageLoadComplete?: (requestId: unknown) => void;
+  onImageLoad?: (requestId: unknown) => void;
   onImageLoadError?: (requestId: unknown, error: Error) => void;
 };
 
@@ -42,12 +41,11 @@ const defaultProps: DefaultProps<WMSLayerProps> = {
   serviceType: 'auto',
   srs: 'auto',
   layers: {type: 'array', compare: true, value: []},
-  onMetadataLoadStart: {type: 'function', compare: false, value: () => {}},
-  onMetadataLoadComplete: {type: 'function', compare: false, value: () => {}},
+  onMetadataLoad: {type: 'function', compare: false, value: () => {}},
   // eslint-disable-next-line
   onMetadataLoadError: {type: 'function', compare: false, value: console.error},
   onImageLoadStart: {type: 'function', compare: false, value: () => {}},
-  onImageLoadComplete: {type: 'function', compare: false, value: () => {}},
+  onImageLoad: {type: 'function', compare: false, value: () => {}},
   onImageLoadError: {
     type: 'function',
     compare: false,
@@ -168,14 +166,13 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
   /** Run a getMetadata on the image service */
   async _loadMetadata(): Promise<void> {
-    this.props.onMetadataLoadStart();
     const {imageSource} = this.state;
     try {
       const metadata = await imageSource.getMetadata();
 
       // If a request takes a long time, it may no longer be expected
       if (this.state.imageSource === imageSource) {
-        this.getCurrentLayer()?.props.onMetadataLoadComplete(metadata);
+        this.getCurrentLayer()?.props.onMetadataLoad(metadata);
       }
     } catch (error) {
       this.getCurrentLayer()?.props.onMetadataLoadError(error as Error);
@@ -219,7 +216,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
       // If a request takes a long time, later requests may have already loaded.
       if (this.state.lastRequestId < requestId) {
-        this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
+        this.getCurrentLayer()?.props.onImageLoad(requestId);
         // Not type safe...
         this.setState({
           image,

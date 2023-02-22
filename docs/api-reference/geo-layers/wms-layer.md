@@ -153,16 +153,9 @@ If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` ot
 
 ### Callbacks
 
-##### `onMetadataLoadStart` (Function, optional) {#onmetadataloadstart}
+##### `onMetadataLoad` (Function, optional) {#onmetadataloadcomplete}
 
-`onMetadataLoadStart` is a function that is called when the `WMSLayer` starts loading metadata after a new image source has been specified.
-
-- Default: `data => null`
-
-
-##### `onMetadataLoadComplete` (Function, optional) {#onmetadataloadcomplete}
-
-`onMetadataLoadComplete` called when the metadata of the image source successfully loads.
+`onMetadataLoad` called when the metadata of the image source successfully loads.
 
 - Default: `metadata => {}`
 
@@ -192,9 +185,9 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoadComplete` (Function, optional) {#onimageloadcomplete}
+##### `onImageLoad` (Function, optional) {#onimageloadcomplete}
 
-`onImageLoadComplete` called when an image successfully loads.
+`onImageLoad` called when an image successfully loads.
 
 - Default: `() => {}`
 

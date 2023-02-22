@@ -43,7 +43,7 @@ export default function App({
     layers,
     pickable: true,
 
-    onMetadataLoadComplete: onMetadataLoad,
+    onMetadataLoad: onMetadataLoad,
     onMetadataLoadError: console.error,
 
     onClick: async ({bitmap, layer}) => {
