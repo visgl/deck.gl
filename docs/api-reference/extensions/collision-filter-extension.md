@@ -60,11 +60,11 @@ new CollisionFilterExtension();
 
 When added to a layer via the `extensions` prop, the `CollisionFilterExtension` adds the following properties to the layer:
 
-##### `collisionEnabled` (Boolean, optional) {#collideenabled}
+##### `collisionEnabled` (Boolean, optional) {#collisionenabled}
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
-##### `collisionGroup` (string, optional) {#collidegroup}
+##### `collisionGroup` (string, optional) {#collisiongroup}
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collisionGroup` will be considered together when calculating collisions.
 
@@ -90,7 +90,7 @@ const layers = [
 ];
   ```
 
-##### `collisionTestProps` (Object, optional) {#collidetestprops}
+##### `collisionTestProps` (Object, optional) {#collisiontestprops}
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
@@ -98,7 +98,7 @@ Props to override when computing collisions. A common use case is to increase th
 collisionTestProps: {radiusScale: 2}
 ```
 
-##### `getCollisionPriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollidepriority}
+##### `getCollisionPriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
 
 The collision priority of each object. Features with higher values are shown preferentially.
 The priority is a number in the range -1000 -> 1000, values outside will be clamped. 
@@ -115,4 +115,4 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 
 ## Source
 
-[modules/extensions/src/collide](https://github.com/visgl/deck.gl/tree/8.9-release/modules/extensions/src/collide)
+[modules/extensions/src/collision-filter](https://github.com/visgl/deck.gl/tree/8.9-release/modules/extensions/src/collision-filter)
