@@ -32,8 +32,8 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
 
-  // @ts-expect-error Disable async data loading (handling it in _loadTileSet)
-  data: null,
+  // Disable async data loading (handling it in _loadTileSet)
+  data: '',
   loader: Tiles3DLoader,
 
   onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
@@ -44,10 +44,11 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
 };
 
 /** All properties supported by Tile3DLayer */
-export type Tile3DLayerProps<DataT = any> = _Tile3DLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type Tile3DLayerProps<DataT = any> = _Tile3DLayerProps<DataT> & CompositeLayerProps;
 
 /** Props added by the Tile3DLayer */
 type _Tile3DLayerProps<DataT> = {
+  data: string;
   /** Color Accessor for point clouds. **/
   getPointColor?: Accessor<DataT, Color>;
 

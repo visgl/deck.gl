@@ -25,6 +25,7 @@ import {
   picking,
   UNIT,
   LayerProps,
+  LayerDataSource,
   UpdateParameters,
   Unit,
   AccessorFunction,
@@ -78,10 +79,11 @@ function normalizeData(data) {
 }
 
 /** All properties supported by PointCloudLayer. */
-export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps<DataT>;
+export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps;
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`.
    * @default 'pixels'

@@ -25,6 +25,7 @@ import {
   UNIT,
   UpdateParameters,
   LayerProps,
+  LayerDataSource,
   Unit,
   AccessorFunction,
   Position,
@@ -59,10 +60,11 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 };
 
 /** All properties supported by ArcLayer. */
-export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps<DataT>;
+export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps;
 
 /** Properties added by ArcLayer. */
 type _ArcLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * If `true`, create the arc along the shortest path on the earth surface.
    * @default false

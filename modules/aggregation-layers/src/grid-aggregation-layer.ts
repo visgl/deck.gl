@@ -26,14 +26,15 @@ import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 
-export type GridAggregationLayerProps<DataT = any> = AggregationLayerProps<DataT>;
+export type GridAggregationLayerProps<DataT> = AggregationLayerProps<DataT>;
 
 export default abstract class GridAggregationLayer<
+  DataT,
   ExtraPropsT extends {} = {}
-> extends AggregationLayer<ExtraPropsT> {
+> extends AggregationLayer<DataT, ExtraPropsT> {
   static layerName = 'GridAggregationLayer';
 
-  state!: AggregationLayer['state'] & {
+  state!: AggregationLayer<DataT>['state'] & {
     aggregationDataDirty?: any;
     aggregationWeightsDirty?: any;
     gpuAggregation?: any;

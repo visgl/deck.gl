@@ -7,6 +7,7 @@ import fs from './text-background-layer-fragment.glsl';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Accessor,
   Unit,
   Position,
@@ -16,6 +17,7 @@ import type {
 } from '@deck.gl/core';
 
 type _TextBackgroundLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   billboard?: boolean;
   sizeScale?: number;
   sizeUnits?: Unit;
@@ -34,8 +36,7 @@ type _TextBackgroundLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 };
 
-export type TextBackgroundLayerProps<DataT = any> = _TextBackgroundLayerProps<DataT> &
-  LayerProps<DataT>;
+export type TextBackgroundLayerProps<DataT = any> = _TextBackgroundLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   billboard: true,
