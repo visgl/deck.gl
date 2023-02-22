@@ -35,7 +35,7 @@ export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
 
 // Types
-export type {WMSLayerProps as _WMSLayerProps} from './wms-layer/wms-layer';
+export type {WMSLayerProps} from './wms-layer/wms-layer';
 export type {H3ClusterLayerProps} from './h3-layers/h3-cluster-layer';
 export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';

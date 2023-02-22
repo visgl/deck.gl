@@ -21,7 +21,7 @@ To use this layer, an *image source* must be specified. Image sources are specif
 ```typescript
 import DeckGL from '@deck.gl/react';
 import {BitmapLayer} from '@deck.gl/layers';
-import {WMSLayer} from '@deck.gl/geo-layers';
+import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 function App({viewState}) {
   const layer = new WMSLayer({
