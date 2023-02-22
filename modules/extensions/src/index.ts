@@ -19,4 +19,4 @@ export type {FillStyleExtensionProps} from './fill-style/fill-style';
 export type {ClipExtensionProps} from './clip/clip';
 export type {CollideExtensionProps} from './collide/collide';
 export type {MaskExtensionProps} from './mask/mask';
-export type {TerrainExtensionProps as _TerrainExtensionProps} from './terrain/terrain';
+export type {TerrainExtensionProps} from './terrain/terrain';
