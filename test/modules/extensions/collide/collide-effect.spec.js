@@ -20,7 +20,13 @@ const testViewport2 = new MapView().makeViewport({
   viewState: {longitude: -100, latitude: 37, zoom: 13}
 });
 
-const TEST_LAYER = new SolidPolygonLayer({
+class TestLayer extends SolidPolygonLayer {
+  get isLoaded() {
+    return this._isLoadedOverride === undefined ? super.isLoaded : this._isLoadedOverride;
+  }
+}
+
+const TEST_LAYER = new TestLayer({
   data: FIXTURES.polygons.slice(0, 3),
   getPolygon: f => f,
   extensions: [new CollideExtension()],
@@ -164,19 +170,23 @@ test('CollideEffect#render', t => {
   preRenderWithLayers([TEST_LAYER], 'change viewport', {viewports: [testViewport2]});
   t.equal(spy.callCount, 3, 'Should render when viewport changes');
 
+  TEST_LAYER._isLoadedOverride = false;
+  preRenderWithLayers([TEST_LAYER], 'isLoaded changed', {viewports: [testViewport2]});
+  t.equal(spy.callCount, 4, 'Should render when isLoaded changes');
+
   preRenderWithLayers([TEST_LAYER], 'mask effect rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: true}}
   });
-  t.equal(spy.callCount, 4, 'Should render when mask effect renders');
+  t.equal(spy.callCount, 5, 'Should render when mask effect renders');
 
   preRenderWithLayers([TEST_LAYER], 'mask effect not rendered', {
     viewports: [testViewport2],
     effects: [new MaskEffect()],
     preRenderStats: {'mask-effect': {didRender: false}}
   });
-  t.equal(spy.callCount, 4, 'Should not render when mask effect does not render');
+  t.equal(spy.callCount, 5, 'Should not render when mask effect does not render');
 
   collideEffect.cleanup();
   t.end();

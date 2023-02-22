@@ -18,6 +18,7 @@ type RenderInfo = {
   collideGroup: string;
   layers: Layer<CollideExtensionProps>[];
   layerBounds: ([number[], number[]] | null)[];
+  layerIsLoadedFlags: boolean[];
 };
 
 // Class to manage collide effect
@@ -131,7 +132,13 @@ export default class CollideEffect implements Effect {
       // If sublayers have changed
       !deepEqual(oldRenderInfo.layers, renderInfo.layers, 0) ||
       // If a sublayer's bounds have been updated
-      renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i]));
+      renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i])) ||
+      // If a sublayer's isLoaded state has been updated
+      renderInfo.layerIsLoadedFlags.some(
+        (b, i) => !equals(b, oldRenderInfo.layerIsLoadedFlags[i])
+      ) ||
+      // Some prop is in transition
+      renderInfo.layers.some(layer => layer.props.transitions);
 
     this.channels[collideGroup] = renderInfo;
 
@@ -171,15 +178,12 @@ export default class CollideEffect implements Effect {
       const {collideGroup} = layer.props;
       let channelInfo = channelMap[collideGroup];
       if (!channelInfo) {
-        channelInfo = {
-          collideGroup,
-          layers: [],
-          layerBounds: []
-        };
+        channelInfo = {collideGroup, layers: [], layerBounds: [], layerIsLoadedFlags: []};
         channelMap[collideGroup] = channelInfo;
       }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
+      channelInfo.layerIsLoadedFlags.push(layer.isLoaded);
     }
 
     // Create any new passes and remove any old ones
