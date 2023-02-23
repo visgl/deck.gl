@@ -30,13 +30,11 @@
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^2.0.0",
     "maplibre-gl": "^2.4.0",
-    "rbush": "^2.0.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
     "react-dom": "^18.0.0",
     "react-map-gl": "^7.0.0",
-    "styled-components": "^5.3.3",
-    "tagmap.js": "1.1.2"
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@docusaurus/core": "^2.2.0",
