@@ -10,7 +10,8 @@ import {TextLayer} from '@deck.gl/layers';
 import {CollideExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
-import {csv} from 'd3-request';
+import {CSVLoader} from '@loaders.gl/csv';
+import {load} from '@loaders.gl/core';
 
 // Sample data
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/text-layer/cities-1000.csv';
@@ -96,9 +97,7 @@ export function renderToDOM(container) {
   const root = createRoot(container);
   root.render(<App />);
 
-  csv(DATA_URL, (error, data) => {
-    if (!error) {
-      root.render(<App data={data} />);
-    }
+  load(DATA_URL, CSVLoader).then(data => {
+    root.render(<App data={data} />);
   });
 }
