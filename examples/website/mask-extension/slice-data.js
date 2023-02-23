@@ -1,4 +1,4 @@
-const GROUP_SIZE = 25000;
+const GROUP_SIZE = 2500;
 const SEC_PER_DAY = 60 * 60 * 24;
 
 // Divide data into smaller groups, and render one layer for each group.
@@ -29,9 +29,13 @@ export function sliceData(data) {
         };
         day.groups.push(group);
       }
-      group.flights.push(row);
-      group.startTime = Math.min(group.startTime, row.time1);
-      group.endTime = Math.max(group.endTime, row.time2);
+
+      // Limit to 10 hour flights for performance
+      if (row.time2 - row.time1 < 3600 * 10) {
+        group.flights.push(row);
+        group.startTime = Math.min(group.startTime, row.time1);
+        group.endTime = Math.max(group.endTime, row.time2);
+      }
     }
     return day.groups;
   });

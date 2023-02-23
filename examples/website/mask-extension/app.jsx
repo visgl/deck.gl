@@ -6,6 +6,7 @@ import maplibregl from 'maplibre-gl';
 
 import GL from '@luma.gl/constants';
 import DeckGL from '@deck.gl/react';
+import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MaskExtension} from '@deck.gl/extensions';
@@ -23,7 +24,40 @@ const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/ex
 const INITIAL_VIEW_STATE = {longitude: -40, latitude: 40, zoom: 2, maxZoom: 6};
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const TIME_WINDOW = 3600; // 1 hour
+const TRAIL_LENGTH = 600; // 10 minutes
+
+class GroupedLayer extends CompositeLayer {
+  renderLayers() {
+    if (!this.props.data) return null;
+    const {data, parameters, timeRange, widthScale, widthUnits} = this.props;
+    const visibleData = data.filter(
+      group => group.startTime < timeRange[1] && group.endTime > timeRange[0]
+    );
+    return visibleData.map(
+      (group, index) =>
+        new AnimatedArcLayer(
+          {
+            data: group.flights,
+            greatCircle: true,
+            visible: group.startTime < timeRange[1] && group.endTime > timeRange[0],
+            getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
+            getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
+            getSourceTimestamp: d => d.time1,
+            getTargetTimestamp: d => d.time2,
+            getHeight: 0,
+            getWidth: 1,
+            getSourceColor: [180, 232, 255],
+            getTargetColor: [180, 232, 255],
+            timeRange,
+            widthScale,
+            widthUnits,
+            parameters
+          },
+          this.getSubLayerProps()
+        )
+    );
+  }
+}
 
 /* eslint-disable react/no-deprecated */
 export default function App({data, mapStyle = MAP_STYLE, showFlights = true, timeWindow = 30}) {
@@ -33,22 +67,17 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
     setZoom(viewState.zoom);
   }, []);
 
-  const groups = useMemo(() => sliceData(data), [data]);
+  // Limit data for performance
+  const groups = useMemo(() => sliceData(data).slice(0, 10), [data]);
 
   const endTime = useMemo(() => {
     return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
   }, [groups]);
 
-  const maskRange = [currentTime, currentTime + timeWindow * 60];
-  const visRange = [currentTime + 0.8 * TIME_WINDOW, currentTime + TIME_WINDOW];
+  const maskRange = [currentTime - timeWindow * 60, currentTime];
+  const visRange = [currentTime - TRAIL_LENGTH, currentTime];
 
-  const formatLabel = useCallback(
-    t => {
-      const date = getDate(data, t);
-      return `${date.getHours()}:${(date.getMinutes() + '').padStart(2, '0')}`;
-    },
-    [data]
-  );
+  const formatLabel = useCallback(t => getDate(data, t).toUTCString(), [data]);
 
   const YELLOW = [255, 232, 180];
 
@@ -81,7 +110,7 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
     stroked: true,
 
     extensions: [new MaskExtension()],
-    maskId: 'mask-0'
+    maskId: 'flight-mask'
   });
 
   const lineWidth = Math.max(1, Math.min(5, 2 ** zoom / 6));
@@ -90,37 +119,20 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
   if (showFlights) {
     flightLayers.push(false);
   }
-  const dataLayers = groups.slice(0, 1).map((group, index) =>
-    flightLayers.map(masked => {
-      const timeRange = masked ? maskRange : visRange;
-      return new AnimatedArcLayer({
-        id: masked ? `mask-${index}` : `flights-${index}`,
-        data: group.flights,
-        greatCircle: true,
-        visible: group.startTime < timeRange[1] && group.endTime > timeRange[0],
-        getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-        getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-        getSourceTimestamp: d => d.time1,
-        getTargetTimestamp: d => d.time2,
-        getHeight: 0,
-        getWidth: 1,
-        widthScale: masked ? 50000 : lineWidth,
-        widthUnits: masked ? 'meters' : 'pixels',
-        timeRange,
-        getSourceColor: [180, 232, 255],
-        getTargetColor: [180, 232, 255],
-        operation: masked ? 'mask' : 'draw',
-
-        parameters: masked
-          ? {}
-          : {
-              depthTest: false,
-              blendFunc: [GL.SRC_ALPHA, GL.DST_ALPHA],
-              blendEquation: GL.FUNC_ADD
-            }
-      });
-    })
-  );
+  const dataLayers = [true, false].map(masked => {
+    const timeRange = masked ? maskRange : visRange;
+    return new GroupedLayer({
+      id: masked ? 'flight-mask' : 'flights-paths',
+      data: groups,
+      timeRange,
+      operation: masked ? 'mask' : 'draw',
+      widthScale: masked ? 50000 : lineWidth,
+      widthUnits: masked ? 'meters' : 'pixels',
+      parameters: masked
+        ? {}
+        : {depthTest: false, blendFunc: [GL.SRC_ALPHA, GL.DST_ALPHA], blendEquation: GL.FUNC_ADD}
+    });
+  });
 
   return (
     <>
@@ -137,7 +149,7 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
           min={0}
           max={endTime}
           value={currentTime}
-          animationSpeed={TIME_WINDOW * 0.001}
+          animationSpeed={3}
           formatLabel={formatLabel}
           onChange={setCurrentTime}
         />
