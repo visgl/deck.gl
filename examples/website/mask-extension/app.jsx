@@ -26,7 +26,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-styl
 const TIME_WINDOW = 3600; // 1 hour
 
 /* eslint-disable react/no-deprecated */
-export default function App({data, mapStyle = MAP_STYLE}) {
+export default function App({data, mapStyle = MAP_STYLE, showFlights = true, timeWindow = 30}) {
   const [currentTime, setCurrentTime] = useState(0);
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(({viewState}) => {
@@ -39,7 +39,7 @@ export default function App({data, mapStyle = MAP_STYLE}) {
     return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
   }, [groups]);
 
-  const maskRange = [currentTime, currentTime + TIME_WINDOW];
+  const maskRange = [currentTime, currentTime + timeWindow * 60];
   const visRange = [currentTime + 0.8 * TIME_WINDOW, currentTime + TIME_WINDOW];
 
   const formatLabel = useCallback(
@@ -86,8 +86,12 @@ export default function App({data, mapStyle = MAP_STYLE}) {
 
   const lineWidth = Math.max(1, Math.min(5, 2 ** zoom / 6));
 
+  const flightLayers = [true];
+  if (showFlights) {
+    flightLayers.push(false);
+  }
   const dataLayers = groups.slice(0, 1).map((group, index) =>
-    [true, false].map(masked => {
+    flightLayers.map(masked => {
       const timeRange = masked ? maskRange : visRange;
       return new AnimatedArcLayer({
         id: masked ? `mask-${index}` : `flights-${index}`,
@@ -156,18 +160,5 @@ export function renderToDOM(container) {
     }
   }
 
-  loadData([
-    '2020-01-14'
-    // '2020-02-11',
-    // '2020-03-10',
-    // '2020-04-14',
-    // '2020-05-12',
-    // '2020-06-09',
-    // '2020-07-14',
-    // '2020-08-11',
-    // '2020-09-08',
-    // '2020-10-13',
-    // '2020-11-10',
-    // '2020-12-08'
-  ]);
+  loadData(['2020-01-14']);
 }

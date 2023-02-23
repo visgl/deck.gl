@@ -34,7 +34,7 @@ const SliderInput = withStyles({
 })(Slider);
 
 export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // prettier-ignore
   useEffect(() => {
