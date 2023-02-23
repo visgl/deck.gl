@@ -6,6 +6,7 @@ import DeckGL from '@deck.gl/react';
 import { TerrainLayer } from '@deck.gl/geo-layers';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { _TerrainExtension } from '@deck.gl/extensions';
+import data from './data/data'
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -16,7 +17,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 12,
   pitch: 55,
   // maxZoom: 14,
-  bearing: 110,
+  bearing: 0,
   maxPitch: 89
 };
 
@@ -58,9 +59,9 @@ export default function App({
     }),
     new GeoJsonLayer({
       id: 'terrain-routes',
-      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/ski.geojson',
-      getLineColor: f => COLOR_SCHEME[f.properties.difficulty] || COLOR_SCHEME.other,
-      getFillColor: f => COLOR_SCHEME[f.properties.difficulty] || COLOR_SCHEME.other,
+      data,
+      getLineColor: () => COLOR_SCHEME.advanced,
+      getFillColor: () => COLOR_SCHEME.advanced,
       getLineWidth: 20,
       stroked: false,
       getPointRadius: 50,
