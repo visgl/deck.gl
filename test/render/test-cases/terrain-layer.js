@@ -1,6 +1,6 @@
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 import {points, choropleths, iconAtlas as iconMapping} from 'deck.gl-test/data';
 

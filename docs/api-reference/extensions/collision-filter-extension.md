@@ -1,21 +1,21 @@
 
-# CollideExtension
+# CollisionFilterExtension
 
-The `CollideExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame.
+The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame.
 
-To use this extension on a layer, add the `CollideExtension` to the layer's `extensions` prop.
+To use this extension on a layer, add the `CollisionFilterExtension` to the layer's `extensions` prop.
 
 <!-- TODO: Codepen demo -->
 <div style={{position:'relative',height:450}}></div>
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {CollideExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 
 const layer = new ScatterplotLayer({
   id: 'points',
   data: points,
-  extensions: [new CollideExtension()],
+  extensions: [new CollisionFilterExtension()],
   getPosition: d => d.COORDINATES,
   getRadius: 10,
   radiusUnits: 'pixels'
@@ -33,8 +33,8 @@ npm install @deck.gl/core @deck.gl/extensions
 ```
 
 ```js
-import {CollideExtension} from '@deck.gl/extensions';
-new CollideExtension();
+import {CollisionFilterExtension} from '@deck.gl/extensions';
+new CollisionFilterExtension();
 ```
 
 To use pre-bundled scripts:
@@ -47,26 +47,26 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.CollideExtension();
+new deck.CollisionFilterExtension();
 ```
 
 ## Constructor
 
 ```js
-new CollideExtension();
+new CollisionFilterExtension();
 ```
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, the `CollideExtension` adds the following properties to the layer:
+When added to a layer via the `extensions` prop, the `CollisionFilterExtension` adds the following properties to the layer:
 
-##### `collideEnabled` (Boolean, optional) {#collideenabled}
+##### `collisionEnabled` (Boolean, optional) {#collisionenabled}
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
-##### `collideGroup` (string, optional) {#collidegroup}
+##### `collisionGroup` (string, optional) {#collisiongroup}
 
-Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collideGroup` will be considered together when calculating collisions.
+Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collisionGroup` will be considered together when calculating collisions.
 
 For example, here the icon and text features will avoid colliding with each other, but permits collisions with the scatterplot features.
 
@@ -74,31 +74,31 @@ For example, here the icon and text features will avoid colliding with each othe
 const layers = [
   new ScatterplotLayer({
     ...,
-    extensions: [new CollideExtension()],
-    collideGroup: 'visualization'
+    extensions: [new CollisionFilterExtension()],
+    collisionGroup: 'visualization'
   }),
   new IconLayer({
     ...,
-    extensions: [new CollideExtension()],
-    collideGroup: 'legend'
+    extensions: [new CollisionFilterExtension()],
+    collisionGroup: 'legend'
   }),
   new TextLayer({
     ...,
-    extensions: [new CollideExtension()],
-    collideGroup: 'legend'
+    extensions: [new CollisionFilterExtension()],
+    collisionGroup: 'legend'
   })
 ];
   ```
 
-##### `collideTestProps` (Object, optional) {#collidetestprops}
+##### `collisionTestProps` (Object, optional) {#collisiontestprops}
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
 ```js
-collideTestProps: {radiusScale: 2}
+collisionTestProps: {radiusScale: 2}
 ```
 
-##### `getCollidePriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollidepriority}
+##### `getCollisionPriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
 
 The collision priority of each object. Features with higher values are shown preferentially.
 The priority is a number in the range -1000 -> 1000, values outside will be clamped. 
@@ -109,10 +109,10 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 
 ## Limitations
 
-- Accessors are not supported in `collideTestProps`
+- Accessors are not supported in `collisionTestProps`
 - Given that collisions is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
 - The collision is point-in-polygon, specifically is computed by comparing the anchor point of a feature with the rasterized screen-space areas of other features. While good for realtime applications, generally this will not give the same results as a full collision test would.
 
 ## Source
 
-[modules/extensions/src/collide](https://github.com/visgl/deck.gl/tree/8.9-release/modules/extensions/src/collide)
+[modules/extensions/src/collision-filter](https://github.com/visgl/deck.gl/tree/8.9-release/modules/extensions/src/collision-filter)

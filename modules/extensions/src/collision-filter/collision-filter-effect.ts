@@ -2,35 +2,35 @@ import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/c
 import {equals} from '@math.gl/core';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
-import CollidePass from './collide-pass';
+import CollisionFilterPass from './collision-filter-pass';
 import MaskEffect, {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
 
-type CollideExtensionProps = {
-  collideTestProps?: {};
-  collideGroup: string;
+type CollisionFilterExtensionProps = {
+  collisionTestProps?: {};
+  collisionGroup: string;
 };
 
-// Factor by which to downscale Collide FBO relative to canvas
+// Factor by which to downscale Collision FBO relative to canvas
 const DOWNSCALE = 2;
 
 type RenderInfo = {
-  collideGroup: string;
-  layers: Layer<CollideExtensionProps>[];
+  collisionGroup: string;
+  layers: Layer<CollisionFilterExtensionProps>[];
   layerBounds: ([number[], number[]] | null)[];
+  allLayersLoaded: boolean;
 };
 
-// Class to manage collide effect
-export default class CollideEffect implements Effect {
-  id = 'collide-effect';
+export default class CollisionFilterEffect implements Effect {
+  id = 'collision-filter-effect';
   props = null;
   useInPicking = true;
   order = 1;
 
   private channels: Record<string, RenderInfo> = {};
-  private collidePass?: CollidePass;
-  private collideFBOs: Record<string, Framebuffer> = {};
-  private dummyCollideMap?: Texture2D;
+  private collisionFilterPass?: CollisionFilterPass;
+  private collisionFBOs: Record<string, Framebuffer> = {};
+  private dummyCollisionMap?: Texture2D;
   private lastViewport?: Viewport;
 
   preRender(
@@ -46,8 +46,8 @@ export default class CollideEffect implements Effect {
       preRenderStats = {}
     }: PreRenderOptions
   ): void {
-    if (!this.dummyCollideMap) {
-      this.dummyCollideMap = new Texture2D(gl, {width: 1, height: 1});
+    if (!this.dummyCollisionMap) {
+      this.dummyCollisionMap = new Texture2D(gl, {width: 1, height: 1});
     }
 
     if (isPicking) {
@@ -55,17 +55,17 @@ export default class CollideEffect implements Effect {
       return;
     }
 
-    const collideLayers = layers.filter(
+    const collisionLayers = layers.filter(
       // @ts-ignore
-      ({props: {visible, collideEnabled}}) => visible && collideEnabled
-    ) as Layer<CollideExtensionProps>[];
-    if (collideLayers.length === 0) {
+      ({props: {visible, collisionEnabled}}) => visible && collisionEnabled
+    ) as Layer<CollisionFilterExtensionProps>[];
+    if (collisionLayers.length === 0) {
       this.channels = {};
       return;
     }
 
-    if (!this.collidePass) {
-      this.collidePass = new CollidePass(gl, {id: 'default-collide'});
+    if (!this.collisionFilterPass) {
+      this.collisionFilterPass = new CollisionFilterPass(gl, {id: 'default-collision-filter'});
     }
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
@@ -73,17 +73,17 @@ export default class CollideEffect implements Effect {
     const maskEffectRendered = (preRenderStats['mask-effect'] as MaskPreRenderStats)?.didRender;
 
     // Collect layers to render
-    const channels = this._groupByCollideGroup(gl, collideLayers);
+    const channels = this._groupByCollisionGroup(gl, collisionLayers);
 
     const viewport = viewports[0];
     const viewportChanged =
       !this.lastViewport || !this.lastViewport.equals(viewport) || maskEffectRendered;
 
     // Resize framebuffers to match canvas
-    for (const collideGroup in channels) {
-      const collideFBO = this.collideFBOs[collideGroup];
-      const renderInfo = channels[collideGroup];
-      collideFBO.resize({
+    for (const collisionGroup in channels) {
+      const collisionFBO = this.collisionFBOs[collisionGroup];
+      const renderInfo = channels[collisionGroup];
+      collisionFBO.resize({
         width: gl.canvas.width / DOWNSCALE,
         height: gl.canvas.height / DOWNSCALE
       });
@@ -97,7 +97,7 @@ export default class CollideEffect implements Effect {
       });
     }
 
-    // debugFBO(this.collideFBOs[Object.keys(channels)[0]], {minimap: true});
+    // debugFBO(this.collisionFBOs[Object.keys(channels)[0]], {minimap: true});
   }
 
   private _render(
@@ -118,8 +118,8 @@ export default class CollideEffect implements Effect {
       viewportChanged: boolean;
     }
   ) {
-    const {collideGroup} = renderInfo;
-    const oldRenderInfo = this.channels[collideGroup];
+    const {collisionGroup} = renderInfo;
+    const oldRenderInfo = this.channels[collisionGroup];
     if (!oldRenderInfo) {
       return;
     }
@@ -131,17 +131,21 @@ export default class CollideEffect implements Effect {
       // If sublayers have changed
       !deepEqual(oldRenderInfo.layers, renderInfo.layers, 0) ||
       // If a sublayer's bounds have been updated
-      renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i]));
+      renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i])) ||
+      // If a sublayer's isLoaded state has been updated
+      renderInfo.allLayersLoaded !== oldRenderInfo.allLayersLoaded ||
+      // Some prop is in transition
+      renderInfo.layers.some(layer => layer.props.transitions);
 
-    this.channels[collideGroup] = renderInfo;
+    this.channels[collisionGroup] = renderInfo;
 
     if (needsRender) {
       this.lastViewport = viewport;
-      const collideFBO = this.collideFBOs[collideGroup];
+      const collisionFBO = this.collisionFBOs[collisionGroup];
 
-      // Rerender collide FBO
-      this.collidePass!.renderCollideMap(collideFBO, {
-        pass: 'collide',
+      // Rerender collision FBO
+      this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
+        pass: 'collision-filter',
         isPicking: true,
         layers: renderInfo.layers,
         effects,
@@ -151,49 +155,48 @@ export default class CollideEffect implements Effect {
         views,
         moduleParameters: {
           // To avoid feedback loop forming between Framebuffer and active Texture.
-          dummyCollideMap: this.dummyCollideMap,
-          devicePixelRatio: cssToDeviceRatio(collideFBO.gl) / DOWNSCALE
+          dummyCollisionMap: this.dummyCollisionMap,
+          devicePixelRatio: cssToDeviceRatio(collisionFBO.gl) / DOWNSCALE
         }
       });
     }
   }
 
   /**
-   * Group layers by collideGroup
-   * Returns a map from collideGroup to render info
+   * Group layers by collisionGroup
+   * Returns a map from collisionGroup to render info
    */
-  private _groupByCollideGroup(
+  private _groupByCollisionGroup(
     gl: WebGLRenderingContext,
-    collideLayers: Layer<CollideExtensionProps>[]
+    collisionLayers: Layer<CollisionFilterExtensionProps>[]
   ): Record<string, RenderInfo> {
     const channelMap = {};
-    for (const layer of collideLayers) {
-      const {collideGroup} = layer.props;
-      let channelInfo = channelMap[collideGroup];
+    for (const layer of collisionLayers) {
+      const {collisionGroup} = layer.props;
+      let channelInfo = channelMap[collisionGroup];
       if (!channelInfo) {
-        channelInfo = {
-          collideGroup,
-          layers: [],
-          layerBounds: []
-        };
-        channelMap[collideGroup] = channelInfo;
+        channelInfo = {collisionGroup, layers: [], layerBounds: [], allLayersLoaded: true};
+        channelMap[collisionGroup] = channelInfo;
       }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
+      if (!layer.isLoaded) {
+        channelInfo.allLayersLoaded = false;
+      }
     }
 
     // Create any new passes and remove any old ones
-    for (const collideGroup of Object.keys(channelMap)) {
-      if (!this.collideFBOs[collideGroup]) {
-        this.createFBO(gl, collideGroup);
+    for (const collisionGroup of Object.keys(channelMap)) {
+      if (!this.collisionFBOs[collisionGroup]) {
+        this.createFBO(gl, collisionGroup);
       }
-      if (!this.channels[collideGroup]) {
-        this.channels[collideGroup] = channelMap[collideGroup];
+      if (!this.channels[collisionGroup]) {
+        this.channels[collisionGroup] = channelMap[collisionGroup];
       }
     }
-    for (const collideGroup of Object.keys(this.collideFBOs)) {
-      if (!channelMap[collideGroup]) {
-        this.destroyFBO(collideGroup);
+    for (const collisionGroup of Object.keys(this.collisionFBOs)) {
+      if (!channelMap[collisionGroup]) {
+        this.destroyFBO(collisionGroup);
       }
     }
 
@@ -201,30 +204,30 @@ export default class CollideEffect implements Effect {
   }
 
   getModuleParameters(layer: Layer): {
-    collideFBO: Framebuffer;
-    dummyCollideMap: Texture2D;
+    collisionFBO: Framebuffer;
+    dummyCollisionMap: Texture2D;
   } {
-    const {collideGroup} = (layer as Layer<CollideExtensionProps>).props;
-    const {collideFBOs, dummyCollideMap} = this;
-    return {collideFBO: collideFBOs[collideGroup], dummyCollideMap};
+    const {collisionGroup} = (layer as Layer<CollisionFilterExtensionProps>).props;
+    const {collisionFBOs, dummyCollisionMap} = this;
+    return {collisionFBO: collisionFBOs[collisionGroup], dummyCollisionMap};
   }
 
   cleanup(): void {
-    if (this.dummyCollideMap) {
-      this.dummyCollideMap.delete();
-      this.dummyCollideMap = undefined;
+    if (this.dummyCollisionMap) {
+      this.dummyCollisionMap.delete();
+      this.dummyCollisionMap = undefined;
     }
     this.channels = {};
-    for (const collideGroup of Object.keys(this.collideFBOs)) {
-      this.destroyFBO(collideGroup);
+    for (const collisionGroup of Object.keys(this.collisionFBOs)) {
+      this.destroyFBO(collisionGroup);
     }
-    this.collideFBOs = {};
+    this.collisionFBOs = {};
     this.lastViewport = undefined;
   }
 
-  createFBO(gl: WebGLRenderingContext, collideGroup: string) {
+  createFBO(gl: WebGLRenderingContext, collisionGroup: string) {
     const {width, height} = gl.canvas;
-    const collideMap = new Texture2D(gl, {
+    const collisionMap = new Texture2D(gl, {
       width,
       height,
       parameters: {
@@ -236,23 +239,23 @@ export default class CollideEffect implements Effect {
     });
 
     const depthBuffer = new Renderbuffer(gl, {format: gl.DEPTH_COMPONENT16, width, height});
-    this.collideFBOs[collideGroup] = new Framebuffer(gl, {
-      id: `Collide-${collideGroup}`,
+    this.collisionFBOs[collisionGroup] = new Framebuffer(gl, {
+      id: `Collision-${collisionGroup}`,
       width,
       height,
       attachments: {
-        [gl.COLOR_ATTACHMENT0]: collideMap,
+        [gl.COLOR_ATTACHMENT0]: collisionMap,
         [gl.DEPTH_ATTACHMENT]: depthBuffer
       }
     });
   }
 
-  destroyFBO(collideGroup: string) {
-    const fbo = this.collideFBOs[collideGroup];
+  destroyFBO(collisionGroup: string) {
+    const fbo = this.collisionFBOs[collisionGroup];
     for (const attachment of Object.values(fbo.attachments as Texture2D[])) {
       attachment.delete();
     }
     fbo.delete();
-    delete this.collideFBOs[collideGroup];
+    delete this.collisionFBOs[collisionGroup];
   }
 }

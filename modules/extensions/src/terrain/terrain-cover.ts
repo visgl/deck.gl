@@ -15,7 +15,7 @@ type Tile2DHeader = {
 /**
  * Manages the lifecycle of the terrain cover (draped textures over a terrain mesh).
  * One terrain cover is created for each unique terrain layer (primitive layer with operation:terrain).
- * It is updated when the terrain source layer's mesh changes or when any of the terrainFittingMode:drape
+ * It is updated when the terrain source layer's mesh changes or when any of the terrainDrawMode:drape
  * layers requires redraw.
  * During the draw call of a terrain layer, the drape texture is overlaid on top of the layer's own color.
  */

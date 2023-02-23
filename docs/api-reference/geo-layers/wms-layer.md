@@ -1,30 +1,30 @@
-# ImageryLayer (Experimental)
+# WMSLayer (Experimental)
 
 <p class="badges">
   <img src="https://img.shields.io/badge/from-v8.9-green.svg?style=flat-square" alt="from v8.9" />
 </p>
 
-import {ImageryLayerDemo} from '@site/src/doc-demos/geo-layers';
+import {WMSLayerDemo} from '@site/src/doc-demos/geo-layers';
 
-<ImageryLayerDemo />
+<WMSLayerDemo />
 
 > This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other layers, detailed in the [limitations](#limitations) section. Use with caution and report any issues that you find on GitHub.
 
 
-The `ImageryLayer` is a composite layer that connects with an image service that can render map images optimized for the current view. Instead of loading a detailed map image covering the entire globe, an image is rendered.
+The `WMSLayer` is a composite layer that connects with an image service that can render map images optimized for the current view. Instead of loading a detailed map image covering the entire globe, an image is rendered.
 
-In contrast to the [TileLayer](./tile-layer.md) which loads many small image tiles, the `ImageryLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+In contrast to the [TileLayer](./tile-layer.md) which loads many small image tiles, the `WMSLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
 
-To use this layer, an *image source* must be specified. Image sources are specified by supplying a URL to the `ImageryLayer` `data` property. See the section on image sources below for mor information.
+To use this layer, an *image source* must be specified. Image sources are specified by supplying a URL to the `WMSLayer` `data` property. See the section on image sources below for mor information.
 
 
 ```typescript
 import DeckGL from '@deck.gl/react';
 import {BitmapLayer} from '@deck.gl/layers';
-import {ImageryLayer} from '@deck.gl/geo-layers';
+import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 function App({viewState}) {
-  const layer = new ImageryLayer({
+  const layer = new WMSLayer({
     data: 'https://ows.terrestris.de/osm/service',
     serviceType: 'wms',
     layers: ['OSM-WMS']
@@ -46,8 +46,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
 ```typescript
-import {_ImageryLayer as ImageryLayer} from '@deck.gl/geo-layers';
-new ImageryLayer({});
+import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
+new WMSLayer({});
 ```
 
 To use pre-bundled scripts:
@@ -61,14 +61,14 @@ To use pre-bundled scripts:
 ```
 
 ```typescript
-new deck._ImageryLayer({});
+new deck._WMSLayer({});
 ```
 
 ## Image Sources
 
-The `ImageryLayer` needs a URL to an image source from which it can start loading map images. The `ImageryLayer` knows how to build URLs for geospatial image services such as WMS. 
+The `WMSLayer` needs a URL to an image source from which it can start loading map images. The `WMSLayer` knows how to build URLs for geospatial image services such as WMS. 
 
-However, it is also possible to connect the ImageryLayer to any other REST based service that can render map images from a set of web mercator bounds and a given pixel resolution (perhaps an ArcGIS image server) by specify a custom URL template.
+However, it is also possible to connect the WMSLayer to any other REST based service that can render map images from a set of web mercator bounds and a given pixel resolution (perhaps an ArcGIS image server) by specify a custom URL template.
 
 Note that additional features, such as metadata loading, is only supported for known image services, which currently only includes WMS.
 
@@ -83,13 +83,13 @@ Image services like WMS can often provide metadata (aka capabilities) about the 
 - available layers
 - additional capabilities (pixel/neighborhood queries, legend generation etc). 
 
-The `ImageryLayer` will automatically attempt to query metadata for known service types (currently WMS). 
+The `WMSLayer` will automatically attempt to query metadata for known service types (currently WMS). 
 
 Template URLs only cover image requests and there is no support for providing a custom URL for the metadata queries. This needs to be handled by the application for non-WMS services.
 
 ### Interactivity
 
-WMS services sometimes provide a mechanism to query a specific pixel. This is supported through the `getFeatureInfoText()` method on the `ImageryLayer`
+WMS services sometimes provide a mechanism to query a specific pixel. This is supported through the `getFeatureInfoText()` method on the `WMSLayer`
 
 ## Methods
 
@@ -153,16 +153,9 @@ If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` ot
 
 ### Callbacks
 
-##### `onMetadataLoadStart` (Function, optional) {#onmetadataloadstart}
+##### `onMetadataLoad` (Function, optional) {#onmetadataloadcomplete}
 
-`onMetadataLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
-
-- Default: `data => null`
-
-
-##### `onMetadataLoadComplete` (Function, optional) {#onmetadataloadcomplete}
-
-`onMetadataLoadComplete` called when the metadata of the image source successfully loads.
+`onMetadataLoad` called when the metadata of the image source successfully loads.
 
 - Default: `metadata => {}`
 
@@ -184,7 +177,7 @@ Receives arguments:
 
 ##### `onImageLoadStart` (Function, optional) {#onimageloadstart}
 
-`onImageLoadStart` is a function that is called when the `ImageryLayer` starts loading metadata after a new image source has been specified.
+`onImageLoadStart` is a function that is called when the `WMSLayer` starts loading metadata after a new image source has been specified.
 
 - Default: `data => null`
 
@@ -192,9 +185,9 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoadComplete` (Function, optional) {#onimageloadcomplete}
+##### `onImageLoad` (Function, optional) {#onimageloadcomplete}
 
-`onImageLoadComplete` called when an image successfully loads.
+`onImageLoad` called when an image successfully loads.
 
 - Default: `() => {}`
 
@@ -215,10 +208,10 @@ Receives arguments:
 
 ## Limitations
 
-- Each instance of the `ImageryLayer` only supports being rendered in one view. See [rendering layers in multiple views](../../developer-guide/views.md#rendering-layers-in-multiple-views) for a workaround.
+- Each instance of the `WMSLayer` only supports being rendered in one view. See [rendering layers in multiple views](../../developer-guide/views.md#rendering-layers-in-multiple-views) for a workaround.
 - This layer currently does not work well with perspective views (i.e. `pitch>0`).
 - This layer does not work with non-geospatial views such as the [OrthographicView](../core/orthographic-view.md) or the [OrbitView](../core/orbit-view.md).
 
 ## Source
 
-[modules/geo-layers/src/imagery-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/imagery-layer)
+[modules/geo-layers/src/wms-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/wms-layer)
