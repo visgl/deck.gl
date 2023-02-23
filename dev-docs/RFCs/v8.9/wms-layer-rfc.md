@@ -1,8 +1,8 @@
-# RFC: ImageryLayer and WMS support
+# RFC: WMSLayer
 
 - **Authors**: Ib Green
 - **Date**: Jan 12, 2023
-- **Status**: Implemented (as experimental export in deck.gl 8.9)
+- **Status**: Implemented (in deck.gl 8.9 as experimental export)
 
 Summary: This RFC Proposes a new generic deck.gl layer that reloads a single image covering the full screen, with the goal of having full built-in support for standard WMS services and their functional equivalents (e.g. ArcGIS ImageServer etc.)
 
@@ -15,9 +15,9 @@ Some services can generate on-demand images that covers an arbitrary specified v
 OpenLayers offers an [`ImageLayer` and a sample app](https://openlayers.org/en/latest/examples/wms-image.html)
 that handles the single-image WMS visualization scenario.
 
-### ImageryLayer High-Level Requirements
+### WMSLayer High-Level Requirements
 
-In some sense the `ImageryLayer` is the simplest possible dynamically loading layer. Just like the `TileLayer` and `Tile3DLayer` it loads new data when the viewport changes.
+In some sense the `WMSLayer` is the simplest possible dynamically loading layer. Just like the `TileLayer` and `Tile3DLayer` it loads new data when the viewport changes.
 
 ## WMS Services
 
@@ -40,7 +40,7 @@ However, for some image services, the results of tiling are sometimes not ideal:
 - The performance of running multiple (parallel) queries may not be good. Imagine a backend database that renders a query of a massive dataset server side. A tile layer could generated dozens of queries, causing heavy loads on the backend.
 - If the service is not aware that the image is being tiled, it may do different layout decisions. Duplicated labels is perhaps the major side-effect, as the image service makes efforts to include the same label in each image (tile).
 
-To provide the option of non-tiled rendering, a new layer, tentatively called the `ImageryLayer` is proposed.
+To provide the option of non-tiled rendering, a new layer, tentatively called the `WMSLayer` is proposed.
 
 ## Debounce
 
@@ -50,7 +50,7 @@ The right timeout is not clear. Perhaps make it configurable?
 
 ### Multiview & Caching
 
-The ImageryLayer should support multiple view. A question is whether there should be some reuse between views. The simplest solution is of course that each view issues and independent fetch.
+The WMSLayer should support multiple view. A question is whether there should be some reuse between views. The simplest solution is of course that each view issues and independent fetch.
 
 At minimum, the current images for all views must be cached, so that views can be quickly redrawn without requesting new images when a view is rerendered. It is not clear if more sophisticated caching is useful.
 
@@ -58,15 +58,15 @@ At minimum, the current images for all views must be cached, so that views can b
 
 WMS services can typically render a number of layers (roads, map features etc), and this is specified through the `&LAYER=...,...` URL parameter.
 
-There must be a way to provide parameters to the underlying (WMS) URL that can be freely mixed with WMS request parameters generated automatically by the `ImageryLayer`s Viewport monitoring.
+There must be a way to provide parameters to the underlying (WMS) URL that can be freely mixed with WMS request parameters generated automatically by the `WMSLayer`s Viewport monitoring.
 
 ## Naming
 
 | Name               | Status           | Comment                                                                                                                                              |
 | ------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ImageryLayer`     | currently chosen | Does not capture the dynamic loading aspect of the layer. There are other image related use cases that could also lay claim to this name.            |
-| `WMSLayer`         | rejected         | While a lot of users will use this layer for WMS services, we do not want to make this layer WMS specific, as it is easy to generalize.              |
-| `ViewportLayer`    | A superclass?    | Superclass handling multi view load and caching (Tileset2D-style helper class). ImageryLayer would be a trivial sublass that renders `BitmapLayer`s? |
+| `WMSLayer`     | currently chosen |     While the layer supports non-WMS image services, highlighting WMS support was preferred by the API Auditors.        |
+| `ImageryLayer`         | rejected         | Does not capture the dynamic loading aspect of the layer. There are other image related use cases that could also lay claim to this name.              |
+| `ViewportLayer`    | A superclass?    | Superclass handling multi view load and caching (Tileset2D-style helper class). WMSLayer would be a trivial sublass that renders `BitmapLayer`s? |
 | `SingleImageLayer` | Rejected         |                                                                                                                                                      |
 | `SingleTileLayer`  | Rejected         |                                                                                                                                                      |
 | `GeoImageLayer`    | Rejected         |                                                                                                                                                      |
@@ -83,7 +83,7 @@ Support for the full WMS protocol has been added in loaders.gl 3.3.0 in a new mo
 
 ### DataSource ideas
 
-The loaders.gl support generalizes ImageSources such as WMS into an interface. Under the hood, the `ImageryLayer` will build such an image source. 
+The loaders.gl support generalizes ImageSources such as WMS into an interface. Under the hood, the `WMSLayer` will build such an image source. 
 
 ```typescript
 interface ImageSource {
@@ -159,7 +159,7 @@ and probably best placed in loaders.gl.
 
 ## Appendix: Potential Future Improvements
 
-The loaders.gl support generalizes ImageSources such as WMS into an interface. Under the hood, the `ImageryLayer` will build such an image source. As loaders.gl 3.4 matures this functionality, we can expose ImageSource interface in the `ImageryLayer`
+The loaders.gl support generalizes ImageSources such as WMS into an interface. Under the hood, the `WMSLayer` will build such an image source. As loaders.gl 3.4 matures this functionality, we can expose ImageSource interface in the `WMSLayer`
 
 ### Mosaicing and Client-Side Tiling ideas
 

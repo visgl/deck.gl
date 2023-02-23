@@ -15,7 +15,7 @@ For each layer that should be fitted to the terrain surface, add the `TerrainExt
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const layers = [
   new TerrainLayer({
@@ -55,7 +55,7 @@ npm install @deck.gl/core @deck.gl/extensions
 ```
 
 ```js
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 new TerrainExtension();
 ```
 
@@ -69,7 +69,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.TerrainExtension();
+new deck._TerrainExtension();
 ```
 
 ## Constructor
@@ -82,7 +82,7 @@ new TerrainExtension();
 
 When added to a layer via the `extensions` prop, the `TerrainExtension` adds the following properties to the layer:
 
-##### `terrainFittingMode` ('offset' | 'drape') {#terrainfittingmode}
+##### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
 
 How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 
@@ -94,11 +94,11 @@ How data should be fitted to the terrain surface. If not specified, will be auto
     <tr>
       <td>
         <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-offset.jpg" />
-        <p><i>terrainFittingMode: offset</i></p>
+        <p><i>terrainDrawMode: offset</i></p>
       </td>
       <td>
         <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-drape.jpg" />
-        <p><i>terrainFittingMode: drape</i></p>
+        <p><i>terrainDrawMode: drape</i></p>
       </td>
     </tr>
   </tbody>

@@ -105,7 +105,7 @@
           "api-reference/aggregation-layers/heatmap-layer",
           "api-reference/aggregation-layers/hexagon-layer",
           "api-reference/layers/icon-layer",
-          "api-reference/geo-layers/imagery-layer",
+          "api-reference/geo-layers/wms-layer",
           "api-reference/layers/line-layer",
           "api-reference/geo-layers/mvt-layer",
           "api-reference/layers/path-layer",

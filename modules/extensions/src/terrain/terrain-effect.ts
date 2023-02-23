@@ -82,26 +82,26 @@ export class TerrainEffect implements Effect {
     }
 
     if (!isPicking) {
-      const offsetLayers = layers.filter(l => l.state.terrainFittingMode === 'offset');
+      const offsetLayers = layers.filter(l => l.state.terrainDrawMode === 'offset');
       if (offsetLayers.length > 0) {
         this._updateHeightMap(terrainLayers, viewport, opts);
       }
     }
 
-    const drapeLayers = layers.filter(l => l.state.terrainFittingMode === 'drape');
+    const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
   getModuleParameters(layer: Layer): TerrainModuleSettings {
-    const {terrainFittingMode} = layer.state;
+    const {terrainDrawMode} = layer.state;
 
     return {
       heightMap: this.heightMap?.getRenderFramebuffer(),
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap,
       terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
-      useTerrainHeightMap: terrainFittingMode === 'offset',
-      terrainSkipRender: terrainFittingMode === 'drape' || !layer.props.operation.includes('draw')
+      useTerrainHeightMap: terrainDrawMode === 'offset',
+      terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
     };
   }
 

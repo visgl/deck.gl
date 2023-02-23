@@ -6,7 +6,7 @@ export {default as FillStyleExtension} from './fill-style/fill-style';
 export {default as ClipExtension} from './clip/clip';
 export {default as CollisionFilterExtension} from './collision-filter/collision-filter';
 export {default as MaskExtension} from './mask/mask';
-export {default as TerrainExtension} from './terrain/terrain';
+export {default as _TerrainExtension} from './terrain/terrain';
 
 // Shader module
 export {default as project64} from './fp64/project64';

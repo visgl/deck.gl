@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
@@ -24,13 +24,13 @@ test('TerrainExtension', t => {
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
         t.is(
-          scatterplotLayer.state.terrainFittingMode,
+          scatterplotLayer.state.terrainDrawMode,
           'offset',
           'ScatterplotLayer has correct fitting mode'
         );
-        t.is(pathLayer.state.terrainFittingMode, 'drape', 'PathLayer has correct fitting mode');
+        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
         t.is(
-          solidPolygonLayer.state.terrainFittingMode,
+          solidPolygonLayer.state.terrainDrawMode,
           'drape',
           'SolidPolygonLayer has correct fitting mode'
         );
@@ -59,13 +59,13 @@ test('TerrainExtension', t => {
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
         t.is(
-          scatterplotLayer.state.terrainFittingMode,
+          scatterplotLayer.state.terrainDrawMode,
           'offset',
           'ScatterplotLayer has correct fitting mode'
         );
-        t.is(pathLayer.state.terrainFittingMode, 'drape', 'PathLayer has correct fitting mode');
+        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
         t.is(
-          solidPolygonLayer.state.terrainFittingMode,
+          solidPolygonLayer.state.terrainDrawMode,
           'offset',
           'SolidPolygonLayer has correct fitting mode'
         );
@@ -82,18 +82,18 @@ test('TerrainExtension', t => {
     },
     {
       updateProps: {
-        terrainFittingMode: 'drape'
+        terrainDrawMode: 'drape'
       },
       onAfterUpdate: ({layer, subLayers}) => {
         const {scatterplotLayer, pathLayer, solidPolygonLayer} = extractSubLayers(subLayers);
         t.is(
-          scatterplotLayer.state.terrainFittingMode,
+          scatterplotLayer.state.terrainDrawMode,
           'drape',
           'ScatterplotLayer has correct fitting mode'
         );
-        t.is(pathLayer.state.terrainFittingMode, 'drape', 'PathLayer has correct fitting mode');
+        t.is(pathLayer.state.terrainDrawMode, 'drape', 'PathLayer has correct fitting mode');
         t.is(
-          solidPolygonLayer.state.terrainFittingMode,
+          solidPolygonLayer.state.terrainDrawMode,
           'drape',
           'SolidPolygonLayer has correct fitting mode'
         );
