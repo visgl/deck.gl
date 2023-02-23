@@ -7,7 +7,7 @@ import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
-import {CollideExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {scaleLinear} from 'd3-scale';
 
 import {CSVLoader} from '@loaders.gl/csv';
@@ -70,14 +70,14 @@ export default function App({
     maxWidth: 64 * 12,
 
     // CollideExtension options
-    collideEnabled: noOverlap,
-    getCollidePriority: d => Math.log10(d.population),
-    collideTestProps: {
+    collisionEnabled: noOverlap,
+    getCollisionPriority: d => Math.log10(d.population),
+    collisionTestProps: {
       sizeScale: fontSize * 2,
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2,
     },
-    extensions: [new CollideExtension()],
+    extensions: [new CollisionFilterExtension()],
   });
 
   return (
