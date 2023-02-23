@@ -60,14 +60,19 @@ class GroupedLayer extends CompositeLayer {
 }
 
 /* eslint-disable react/no-deprecated */
-export default function App({data, mapStyle = MAP_STYLE, showFlights = true, timeWindow = 30}) {
+export default function App({
+  data,
+  mapStyle = MAP_STYLE,
+  showFlights = true,
+  timeWindow = 30,
+  animationSpeed = 3
+}) {
   const [currentTime, setCurrentTime] = useState(0);
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(({viewState}) => {
     setZoom(viewState.zoom);
   }, []);
 
-  // Limit data for performance
   const groups = useMemo(() => sliceData(data), [data]);
 
   const endTime = useMemo(() => {
@@ -119,7 +124,7 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
   if (showFlights) {
     flightLayers.push(false);
   }
-  const dataLayers = [true, false].map(masked => {
+  const dataLayers = flightLayers.map(masked => {
     const timeRange = masked ? maskRange : visRange;
     return new GroupedLayer({
       id: masked ? 'flight-mask' : 'flights-paths',
@@ -149,7 +154,7 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
           min={0}
           max={endTime}
           value={currentTime}
-          animationSpeed={3}
+          animationSpeed={animationSpeed}
           formatLabel={formatLabel}
           onChange={setCurrentTime}
         />

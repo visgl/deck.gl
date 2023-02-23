@@ -24,6 +24,14 @@ class MaskExtensionDemo extends Component {
       step: 5,
       min: 5,
       max: 300
+    },
+    animationSpeed: {
+      displayName: 'Animation speed',
+      type: 'range',
+      value: 3,
+      step: 1,
+      min: 1,
+      max: 100
     }
   };
 
@@ -50,6 +58,7 @@ class MaskExtensionDemo extends Component {
         {...otherProps}
         showFlights={params.showFlights.value}
         timeWindow={params.timeWindow.value}
+        animationSpeed={params.animationSpeed.value}
       />
     );
   }
