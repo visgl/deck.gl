@@ -28,7 +28,7 @@ import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
-import collideExtensionTests from './collide-extension';
+import collisionFilterExtensionTests from './collision-filter-extension';
 import transitionTests from './transitions';
 
 export default [].concat(
@@ -58,5 +58,5 @@ export default [].concat(
   effectsTests,
   transitionTests,
   terrainLayerTests,
-  collideExtensionTests
+  collisionFilterExtensionTests
 );
