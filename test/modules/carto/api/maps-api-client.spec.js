@@ -556,8 +556,11 @@ test('fetchLayerData#post', async t => {
       const body = JSON.parse(options.body);
       t.is(body.q, source, 'should have query in body');
       t.is(body.client, 'deck-gl-carto', 'should have client in body');
-      for (const prop in props) {
-        t.deepEqual(body[prop], props[prop], `should have ${prop} in body`);
+      t.is(body.v, '3.1', 'should have v=3.1 in body');
+      for (const p in props) {
+        // Special case for geoColumn
+        const prop = p === 'geoColumn' ? 'geo_column' : p;
+        t.deepEqual(body[prop], props[p], `should have ${prop} in body`);
       }
 
       return Promise.resolve({

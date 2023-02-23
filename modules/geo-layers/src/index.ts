@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-export {ImageryLayer as _ImageryLayer} from './imagery-layer/imagery-layer';
+export {WMSLayer as _WMSLayer} from './wms-layer/wms-layer';
 export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
 export {default as S2Layer} from './s2-layer/s2-layer';
 export {default as QuadkeyLayer} from './quadkey-layer/quadkey-layer';
@@ -35,7 +35,7 @@ export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
 
 // Types
-export type {ImageryLayerProps as _ImageryLayerProps} from './imagery-layer/imagery-layer';
+export type {WMSLayerProps} from './wms-layer/wms-layer';
 export type {H3ClusterLayerProps} from './h3-layers/h3-cluster-layer';
 export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
