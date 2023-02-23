@@ -56,15 +56,6 @@ export default function App({data, mapStyle = MAP_STYLE}) {
   const backgroundLayers = useMemo(
     () => [
       new GeoJsonLayer({
-        id: 'earth-land',
-        data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson',
-        // Styles
-        stroked: false,
-        filled: true,
-        opacity: 0.1,
-        getFillColor: [30, 80, 120]
-      }),
-      new GeoJsonLayer({
         id: 'points-small',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_populated_places_simple.geojson',
 
@@ -112,8 +103,8 @@ export default function App({data, mapStyle = MAP_STYLE}) {
         widthScale: masked ? 50000 : lineWidth,
         widthUnits: masked ? 'meters' : 'pixels',
         timeRange,
-        getSourceColor: [255, 255, 255, 255],
-        getTargetColor: [255, 255, 255, 255],
+        getSourceColor: [180, 232, 255],
+        getTargetColor: [180, 232, 255],
         operation: masked ? 'mask' : 'draw',
 
         parameters: masked

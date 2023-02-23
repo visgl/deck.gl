@@ -16,16 +16,19 @@ const PositionContainer = styled('div')({
   alignItems: 'center'
 });
 
+const COLOR = '#f5f1d8';
+
 const SliderInput = withStyles({
   root: {
     marginLeft: 12,
-    width: '40%'
+    width: '40%',
+    color: COLOR
   },
   valueLabel: {
     '& span': {
       whiteSpace: 'nowrap',
       background: 'none',
-      color: '#fff'
+      color: COLOR
     }
   }
 })(Slider);
@@ -51,8 +54,8 @@ export default function RangeInput({min, max, value, animationSpeed, onChange, f
   });
 
   return (
-    <PositionContainer>
-      <Button color="primary" onClick={() => setIsPlaying(!isPlaying)}>
+    <PositionContainer style={{color: COLOR}}>
+      <Button color="inherit" onClick={() => setIsPlaying(!isPlaying)}>
         {isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
       </Button>
       <SliderInput
