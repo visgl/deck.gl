@@ -1,7 +1,8 @@
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
-
 import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 
 import GL from '@luma.gl/constants';
 import DeckGL from '@deck.gl/react';
@@ -34,6 +35,8 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 6
 };
 
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
 const TIME_WINDOW = 3600; // 1 hour
 
 const ambientLight = new AmbientLight({
@@ -49,7 +52,7 @@ const sunLight = new SunLight({
 const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
 /* eslint-disable react/no-deprecated */
-export default function App({data}) {
+export default function App({data, mapStyle = MAP_STYLE}) {
   const [currentTime, setCurrentTime] = useState(0);
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(({viewState}) => {
@@ -155,7 +158,9 @@ export default function App({data}) {
         onViewStateChange={onViewStateChange}
         controller={true}
         layers={[dataLayers, highlightLayer, backgroundLayers]}
-      />
+      >
+        <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      </DeckGL>
       {endTime && (
         <RangeInput
           min={0}
