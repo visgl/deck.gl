@@ -53,7 +53,7 @@ class GroupedLayer extends CompositeLayer {
             widthUnits,
             parameters
           },
-          this.getSubLayerProps()
+          this.getSubLayerProps({id: `arc-layer-${index}`})
         )
     );
   }
@@ -68,7 +68,7 @@ export default function App({data, mapStyle = MAP_STYLE, showFlights = true, tim
   }, []);
 
   // Limit data for performance
-  const groups = useMemo(() => sliceData(data).slice(0, 10), [data]);
+  const groups = useMemo(() => sliceData(data), [data]);
 
   const endTime = useMemo(() => {
     return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
