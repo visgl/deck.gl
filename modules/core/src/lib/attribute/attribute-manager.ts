@@ -27,7 +27,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Stat} from 'probe.gl';
+import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
 const TRACE_INVALIDATE = 'attributeManager.invalidate';
@@ -68,7 +68,7 @@ export default class AttributeManager {
   needsRedraw: string | boolean;
   userData: any;
 
-  private stats?: Stat;
+  private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
 
   constructor(
@@ -79,7 +79,7 @@ export default class AttributeManager {
       timeline
     }: {
       id?: string;
-      stats?: Stat;
+      stats?: Stats;
       timeline?: Timeline;
     } = {}
   ) {
