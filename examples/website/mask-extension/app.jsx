@@ -6,13 +6,6 @@ import maplibregl from 'maplibre-gl';
 
 import GL from '@luma.gl/constants';
 import DeckGL from '@deck.gl/react';
-import {
-  COORDINATE_SYSTEM,
-  _GlobeView as GlobeView,
-  LightingEffect,
-  AmbientLight,
-  _SunLight as SunLight
-} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MaskExtension} from '@deck.gl/extensions';
@@ -27,29 +20,10 @@ import RangeInput from './range-input';
 
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
-
-const INITIAL_VIEW_STATE = {
-  longitude: 0,
-  latitude: 20,
-  zoom: 3,
-  maxZoom: 6
-};
-
+const INITIAL_VIEW_STATE = {longitude: -40, latitude: 40, zoom: 2, maxZoom: 6};
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 const TIME_WINDOW = 3600; // 1 hour
-
-const ambientLight = new AmbientLight({
-  color: [255, 255, 255],
-  intensity: 0.5
-});
-const sunLight = new SunLight({
-  color: [255, 255, 255],
-  intensity: 2.0,
-  timestamp: 0
-});
-// create lighting effect with light sources
-const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
 /* eslint-disable react/no-deprecated */
 export default function App({data, mapStyle = MAP_STYLE}) {
@@ -68,11 +42,13 @@ export default function App({data, mapStyle = MAP_STYLE}) {
   const maskRange = [currentTime, currentTime + TIME_WINDOW];
   const visRange = [currentTime + 0.8 * TIME_WINDOW, currentTime + TIME_WINDOW];
 
-  const formatLabel = useCallback(t => getDate(data, t).toUTCString(), [data]);
-
-  if (data) {
-    sunLight.timestamp = getDate(data, currentTime).getTime();
-  }
+  const formatLabel = useCallback(
+    t => {
+      const date = getDate(data, t);
+      return `${date.getHours()}:${(date.getMinutes() + '').padStart(2, '0')}`;
+    },
+    [data]
+  );
 
   const YELLOW = [255, 232, 180];
 
