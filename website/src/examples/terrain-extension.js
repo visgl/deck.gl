@@ -50,7 +50,7 @@ const LOCATIONS = {
 class TerrainExtensionDemo extends Component {
   static title = 'Terrain extension';
 
-  static code = `${GITHUB_TREE}/examples/website/terrain-routes`;
+  static code = `${GITHUB_TREE}/examples/website/terrain-extension`;
 
   static parameters = {
     location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Stage 5'},
