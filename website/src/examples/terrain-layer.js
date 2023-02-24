@@ -70,6 +70,7 @@ class TerrainDemo extends Component {
       <div>
         <p>Reconstructed 3D terrain from mapbox's Elevation service.</p>
         <p>Data sources:
+          <div><a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour of France cycling routes</a></div>
           <div>Mapbox <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">Terrain-RGB</a> and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
           <div><a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a></div>
           <div><a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></div>

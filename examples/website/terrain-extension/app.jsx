@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 
 import { TerrainLayer } from '@deck.gl/geo-layers';
-import { GeoJsonLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 import { _TerrainExtension } from '@deck.gl/extensions';
 import data from './data/data'
 
@@ -49,6 +49,7 @@ function getTooltip({object}) {
 export default function App({
   initialViewState = INITIAL_VIEW_STATE
 }) {
+  const labels = data.features.filter(f => f.geometry.type === 'Point');
   const layers = [
     new TerrainLayer({
       id: 'terrain',
@@ -74,6 +75,18 @@ export default function App({
       pickable: true,
       autoHighlight: true,
       highlightColor: [255, 200, 0],
+      extensions: [new _TerrainExtension()],
+    }),
+    new TextLayer({
+      id: 'terrain-labels',
+      data: labels,
+      getText: d => d.properties.location,
+      getPosition: d => d.geometry.coordinates,
+      getColor: [255, 255, 255],
+      getSize: 12,
+      getAngle: 0,
+      getPixelOffset: [0, -25],
+      getAlignmentBaseline: 'top',    
       extensions: [new _TerrainExtension()],
     })
   ];
