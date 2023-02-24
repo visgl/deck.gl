@@ -6,7 +6,7 @@ import {OrthographicView} from '@deck.gl/core';
 
 import { LineLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 
-import { CollideExtension } from '@deck.gl/extensions';
+import { CollisionFilterExtension } from '@deck.gl/extensions';
 
 const ICON_MISSING = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iLTQtNCA4IDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSByPSI0IiBmaWxsPSIjY2NjIi8+PHRleHQgeT0iLjUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiNmZmYiPj88L3RleHQ+PC9zdmc+';
 
@@ -70,7 +70,7 @@ export default function App({
       collideTestProps: {
         sizeScale: 2
       },
-      extensions: [new CollideExtension()]
+      extensions: [new CollisionFilterExtension()]
     }),
     new TextLayer({
       id: 'labels',
@@ -81,7 +81,7 @@ export default function App({
       getAlignmentBaseline: 'top',
       getPixelOffset: node => [0, getIconSize(node) / 2],
       background: true,
-      extensions: [new CollideExtension()]
+      extensions: [new CollisionFilterExtension()]
     })
   ];
 

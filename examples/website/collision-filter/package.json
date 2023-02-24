@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-examples-collide",
+  "name": "deckgl-examples-collision-filter",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "8.9.0-beta.2",
+    "deck.gl": "8.9.0-beta.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
