@@ -12,11 +12,11 @@ import data from './data/data'
 const MAPBOX_TOKEN = "pk.eyJ1IjoiZnBhbG1lcjEyMyIsImEiOiJjbDJnN2twcXcwMTE0M2RvajRpdmpmYWR2In0.AgiFPb5SLSn9RwzsC-ZtvQ"; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  longitude: 6.42028,
-  latitude: 44.91842,
+  latitude: 43.09822,
+  longitude: -0.6194,
   zoom: 10,
   pitch: 55,
-  // maxZoom: 14,
+  maxZoom: 13.5,
   bearing: 0,
   maxPitch: 89
 };
@@ -33,16 +33,20 @@ const ELEVATION_DECODER = {
   offset: -10000
 };
 
-const COLOR_SCHEME = {
-  easy: [20, 200, 0],
-  intermediate: [0, 80, 240],
-  advanced: [235, 40, 0],
-  other: [100, 100, 100]
-};
+const COLOR_SCHEME = [242, 183, 1]; // yellow
+
+function getTooltip({object}) {
+  return (
+    object && {
+      html: `\
+  <div><b>Stage</b></div>
+  <div>${object.properties.name}</div>
+  `
+    }
+  );
+}
 
 export default function App({
-  texture = SURFACE_IMAGE,
-  wireframe = false,
   initialViewState = INITIAL_VIEW_STATE
 }) {
   const layers = [
@@ -52,29 +56,29 @@ export default function App({
       strategy: 'no-overlap',
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,
-      texture,
-      wireframe,
+      texture: SURFACE_IMAGE,
+      wireframe: false,
       color: [255, 255, 255],
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
       id: 'terrain-routes',
       data,
-      getLineColor: () => COLOR_SCHEME.advanced,
-      getFillColor: () => COLOR_SCHEME.advanced,
+      getLineColor: () => COLOR_SCHEME,
+      getFillColor: () => COLOR_SCHEME,
       getLineWidth: 20,
       stroked: false,
-      getPointRadius: 50,
+      getPointRadius: 75,
       lineWidthMinPixels: 2,
       pointType: 'circle',
       pickable: true,
       autoHighlight: true,
       highlightColor: [255, 200, 0],
-      extensions: [new _TerrainExtension()]
+      extensions: [new _TerrainExtension()],
     })
   ];
 
-  return <DeckGL initialViewState={initialViewState} controller={true} layers={layers} />;
+  return <DeckGL initialViewState={initialViewState} controller={true} layers={layers} getTooltip={getTooltip} />;
 }
 
 export function renderToDOM(container) {
