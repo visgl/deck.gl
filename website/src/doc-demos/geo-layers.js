@@ -7,7 +7,7 @@ import {
   TripsLayer,
   TerrainLayer,
   MVTLayer,
-  _ImageryLayer as ImageryLayer,
+  _WMSLayer as WMSLayer,
   H3HexagonLayer,
   H3ClusterLayer,
   QuadkeyLayer,
@@ -212,8 +212,8 @@ export const MVTLayerDemo = makeLayerDemo({
   }`
 });
 
-export const ImageryLayerDemo = makeLayerDemo({
-  Layer: ImageryLayer,
+export const WMSLayerDemo = makeLayerDemo({
+  Layer: WMSLayer,
   isExperimental: true,
   getTooltip: '({bitmap}) => bitmap && `x:${bitmap.x}, y:${bitmap.y}`',
   mapStyle: null,

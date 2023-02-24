@@ -1,7 +1,5 @@
 This is a standalone version of the TextLayer example on [deck.gl](http://deck.gl) website.
 
-![tagmap](https://raw.githubusercontent.com/rivulet-zhang/rivulet-zhang.github.io/master/dataRepo/static/tagmap.png)
-
 ### Usage
 
 Copy the content of this folder to your project. 
@@ -17,7 +15,9 @@ npm start
 
 ### Data format
 
-Sample data can be found [here](https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json), showing [Twitter](https://developer.twitter.com/) hashtags with geolocations.
+Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/text-layer), showing all cities with a population > 1000 or seats of administration.
+
+The dataset is created by [GeoNames](https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en) under the CC BY 4.0 license. Accessed on February 9, 2023.
 
 To use your own data, check out
 the [documentation of TextLayer](../../../docs/api-reference/layers/text-layer.md).

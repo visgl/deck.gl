@@ -21,33 +21,31 @@ import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {Proj4Projection} from '@math.gl/proj4';
 
 /** All props supported by the TileLayer */
-export type ImageryLayerProps = CompositeLayerProps<any> & _ImageryLayerProps;
+export type WMSLayerProps = CompositeLayerProps<any> & _WMSLayerProps;
 
 /** Props added by the TileLayer */
-type _ImageryLayerProps = {
+type _WMSLayerProps = {
   serviceType?: ImageServiceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
-  onMetadataLoadStart?: () => void;
-  onMetadataLoadComplete?: (metadata: ImageSourceMetadata) => void;
+  onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
   onMetadataLoadError?: (error: Error) => void;
   onImageLoadStart?: (requestId: unknown) => void;
-  onImageLoadComplete?: (requestId: unknown) => void;
+  onImageLoad?: (requestId: unknown) => void;
   onImageLoadError?: (requestId: unknown, error: Error) => void;
 };
 
-const defaultProps: DefaultProps<ImageryLayerProps> = {
+const defaultProps: DefaultProps<WMSLayerProps> = {
   id: 'imagery-layer',
   data: '',
   serviceType: 'auto',
   srs: 'auto',
   layers: {type: 'array', compare: true, value: []},
-  onMetadataLoadStart: {type: 'function', compare: false, value: () => {}},
-  onMetadataLoadComplete: {type: 'function', compare: false, value: () => {}},
+  onMetadataLoad: {type: 'function', compare: false, value: () => {}},
   // eslint-disable-next-line
   onMetadataLoadError: {type: 'function', compare: false, value: console.error},
   onImageLoadStart: {type: 'function', compare: false, value: () => {}},
-  onImageLoadComplete: {type: 'function', compare: false, value: () => {}},
+  onImageLoad: {type: 'function', compare: false, value: () => {}},
   onImageLoadError: {
     type: 'function',
     compare: false,
@@ -61,10 +59,10 @@ const projConverter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
 /**
  * The layer is used in Hex Tile layer in order to properly discard invisible elements during animation
  */
-export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
-  ExtraPropsT & Required<_ImageryLayerProps>
+export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_WMSLayerProps>
 > {
-  static layerName = 'ImageryLayer';
+  static layerName = 'WMSLayer';
   static defaultProps: DefaultProps = defaultProps;
 
   state!: {
@@ -150,7 +148,7 @@ export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     return '';
   }
 
-  _createImageSource(props: ImageryLayerProps): ImageSource {
+  _createImageSource(props: WMSLayerProps): ImageSource {
     if (props.data instanceof ImageSource) {
       return props.data;
     }
@@ -168,14 +166,13 @@ export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
   /** Run a getMetadata on the image service */
   async _loadMetadata(): Promise<void> {
-    this.props.onMetadataLoadStart();
     const {imageSource} = this.state;
     try {
       const metadata = await imageSource.getMetadata();
 
       // If a request takes a long time, it may no longer be expected
       if (this.state.imageSource === imageSource) {
-        this.getCurrentLayer()?.props.onMetadataLoadComplete(metadata);
+        this.getCurrentLayer()?.props.onMetadataLoad(metadata);
       }
     } catch (error) {
       this.getCurrentLayer()?.props.onMetadataLoadError(error as Error);
@@ -219,7 +216,7 @@ export class ImageryLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
       // If a request takes a long time, later requests may have already loaded.
       if (this.state.lastRequestId < requestId) {
-        this.getCurrentLayer()?.props.onImageLoadComplete(requestId);
+        this.getCurrentLayer()?.props.onImageLoad(requestId);
         // Not type safe...
         this.setState({
           image,
