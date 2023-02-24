@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App from 'website-examples/terrain-routes/app';
+import App from 'website-examples/terrain-extension/app';
 
 import {makeExample} from '../components';
 
