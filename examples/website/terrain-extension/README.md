@@ -1,4 +1,4 @@
-This is a standalone version of the TerrainLayer example with a GeoJSON layer on [deck.gl](http://deck.gl) website.
+This is a standalone version of the TerrainExtension with a TerrainLayer with a GeoJSON layer on [deck.gl](http://deck.gl) website.
 
 ### Usage
 

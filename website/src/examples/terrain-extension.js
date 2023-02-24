@@ -47,8 +47,8 @@ const LOCATIONS = {
   }
 };
 
-class TerrainRoutesDemo extends Component {
-  static title = 'Terrain with routes';
+class TerrainExtensionDemo extends Component {
+  static title = 'Terrain extension';
 
   static code = `${GITHUB_TREE}/examples/website/terrain-routes`;
 
@@ -88,4 +88,4 @@ class TerrainRoutesDemo extends Component {
   }
 }
 
-export default makeExample(TerrainRoutesDemo);
+export default makeExample(TerrainExtensionDemo);
