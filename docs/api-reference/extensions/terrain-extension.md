@@ -9,13 +9,19 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
-<!-- TODO: Codepen demo -->
 <div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width: '100%'}} scrolling="no" title="deck.gl TerrainExtension" src="https://codepen.io/vis-gl/embed/VwGLLeR?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/VwGLLeR'>deck.gl TerrainExtension</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+</div>
+
 
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const layers = [
   new TerrainLayer({
@@ -55,7 +61,7 @@ npm install @deck.gl/core @deck.gl/extensions
 ```
 
 ```js
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 new TerrainExtension();
 ```
 
@@ -69,7 +75,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.TerrainExtension();
+new deck._TerrainExtension();
 ```
 
 ## Constructor
@@ -82,7 +88,7 @@ new TerrainExtension();
 
 When added to a layer via the `extensions` prop, the `TerrainExtension` adds the following properties to the layer:
 
-##### `terrainFittingMode` ('offset' | 'drape') {#terrainfittingmode}
+##### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
 
 How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 
@@ -94,11 +100,11 @@ How data should be fitted to the terrain surface. If not specified, will be auto
     <tr>
       <td>
         <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-offset.jpg" />
-        <p><i>terrainFittingMode: offset</i></p>
+        <p><i>terrainDrawMode: offset</i></p>
       </td>
       <td>
         <img style={{maxHeight:216}} src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-drape.jpg" />
-        <p><i>terrainFittingMode: drape</i></p>
+        <p><i>terrainDrawMode: drape</i></p>
       </td>
     </tr>
   </tbody>

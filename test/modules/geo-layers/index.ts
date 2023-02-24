@@ -24,7 +24,7 @@ import {
   GreatCircleLayer,
   H3HexagonLayer,
   H3ClusterLayer,
-  _ImageryLayer as ImageryLayer,
+  _WMSLayer as WMSLayer,
   QuadkeyLayer,
   S2Layer,
   TileLayer,
@@ -40,7 +40,7 @@ test('Top-level imports', t => {
   t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
   t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
   t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(ImageryLayer, 'ImageryLayer symbol imported');
+  t.ok(WMSLayer, 'WMSLayer symbol imported');
   t.ok(TripsLayer, 'TripsLayer symbol imported');
   t.ok(TerrainLayer, 'TerrainLayer symbol imported');
   t.ok(GeohashLayer, 'GeohashLayer symbol imported');
@@ -48,7 +48,7 @@ test('Top-level imports', t => {
 });
 
 import './tile-layer';
-import './imagery-layer.spec';
+import './wms-layer.spec';
 import './quadkey-layer.spec';
 import './s2-layer.spec';
 import './trips-layer.spec';

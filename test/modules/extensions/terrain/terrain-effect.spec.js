@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {WebMercatorViewport} from '@deck.gl/core';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
 import {TERRAIN_MODE} from '@deck.gl/extensions/terrain/shader-module';
 import {GeoJsonLayer} from '@deck.gl/layers';
