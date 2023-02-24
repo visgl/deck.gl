@@ -52,6 +52,9 @@ A [Viewport](../api-reference/core/viewport.md) instance is the camera itself. I
 
 Whenever `viewState` updates, the view creates a new viewport under the hood. Typically, the deck.gl user does not need to work with viewports directly. In certain use cases, the JavaScript functions offered by a `Viewport` instance can be handy for projecting and unprojecting coordinates.
 
+> If you are using the Deck canvas as an [overlay on a base map rendered by another library](../get-started/using-with-map), you may need to update the viewport using the API provided by that library rather than by deck.gl.
+
+
 ```js
 import {Deck, MapView} from '@deck.gl/core';
 
