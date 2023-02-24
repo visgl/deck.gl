@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App from 'website-examples/terrain-routing/app';
+import App from 'website-examples/terrain-routes/app';
 
 import {makeExample} from '../components';
 
@@ -47,13 +47,13 @@ const LOCATIONS = {
   }
 };
 
-class TerrainRoutingDemo extends Component {
-  static title = 'Terrains Routing';
+class TerrainRoutesDemo extends Component {
+  static title = 'Terrain with routes';
 
-  static code = `${GITHUB_TREE}/examples/website/terrain`;
+  static code = `${GITHUB_TREE}/examples/website/terrain-routes`;
 
   static parameters = {
-    location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Mt. St Helens'},
+    location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Stage 5'},
   };
 
   static mapStyle = MAPBOX_STYLES.BLANK;
@@ -63,7 +63,7 @@ class TerrainRoutingDemo extends Component {
       <div>
         <p>Reconstructed 3D terrain with routes from mapbox's Elevation service.</p>
         <p>Data sources:
-          <div>Mapbox <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">Terrain-RGB</a> and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
+          <div>Mapbox <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
         </p>
       </div>
     );
@@ -88,4 +88,4 @@ class TerrainRoutingDemo extends Component {
   }
 }
 
-export default makeExample(TerrainRoutingDemo);
+export default makeExample(TerrainRoutesDemo);

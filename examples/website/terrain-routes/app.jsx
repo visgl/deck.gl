@@ -9,7 +9,7 @@ import { _TerrainExtension } from '@deck.gl/extensions';
 import data from './data/data'
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = "pk.eyJ1IjoiZnBhbG1lcjEyMyIsImEiOiJjbDJnN2twcXcwMTE0M2RvajRpdmpmYWR2In0.AgiFPb5SLSn9RwzsC-ZtvQ"; // eslint-disable-line
+const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 
 const INITIAL_VIEW_STATE = {
   latitude: 43.09822,
