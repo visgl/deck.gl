@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.26] - Feb 24 2023
+
+- Fix type error (#7684)
+
 #### deck.gl [8.8.25] - Feb 20 2023
 
 - CARTO: Increase GET limit to 8192 (#7643)
