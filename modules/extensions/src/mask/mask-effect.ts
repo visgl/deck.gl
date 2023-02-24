@@ -125,7 +125,17 @@ export default class MaskEffect implements Effect {
       // If a channel is new
       channelInfo === oldChannelInfo ||
       // If sublayers have changed
-      oldChannelInfo.layers.length !== channelInfo.layers.length ||
+      channelInfo.layers.length !== oldChannelInfo.layers.length ||
+      channelInfo.layers.some(
+        (layer, i) =>
+          // Layer instance is updated
+          // Layer props might have changed
+          // Undetermined props could have an effect on the output geometry of a mask layer,
+          // for example getRadius+updateTriggers, radiusScale, modelMatrix
+          layer !== oldChannelInfo.layers[i] ||
+          // Some prop is in transition
+          layer.props.transitions
+      ) ||
       // If a sublayer's positions have been updated, the cached bounds will change shallowly
       channelInfo.layerBounds.some((b, i) => b !== oldChannelInfo.layerBounds[i]);
 
