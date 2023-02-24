@@ -42,7 +42,7 @@ const LOCATIONS = {
   },
   'Stage 20': {
     latitude: 47.8761,
-    longitude: 6.99999,
+    longitude: 6.99990,
     zoom: 10
   }
 };
