@@ -1,5 +1,7 @@
 This is a standalone version of the TerrainExtension with a TerrainLayer with a GeoJSON layer on [deck.gl](http://deck.gl) website.
 
+The example is showing a GeoJSONLayer with Tour de France cycling routes over a TerrainLayer.
+
 ### Usage
 
 Copy the content of this folder to your project. 
@@ -27,3 +29,5 @@ Mapbox's [terrain API](https://docs.mapbox.com/help/troubleshooting/access-eleva
 
 To use other data sources, check out
 the [documentation of TerrainLayer](../../../docs/api-reference/geo-layers/terrain-layer.md).
+
+Data source for routes was prepared and processed using Tour de France GPX data freely available to download from https://www.cyclingstage.com/tour-de-france-2023-gpx/. 
