@@ -132,3 +132,11 @@ export function toDoublePrecisionArray(
 
   return scratchArray.subarray(0, count * size * 2);
 }
+
+type LayerBounds = [number[], number[]];
+export function mergeBounds(bounds1: LayerBounds, bounds2: LayerBounds): LayerBounds {
+  return [
+    [Math.min(bounds1[0][0], bounds2[0][0]), Math.min(bounds1[0][1], bounds2[0][1])],
+    [Math.max(bounds1[1][0], bounds2[1][0]), Math.max(bounds1[1][1], bounds2[1][1])]
+  ];
+}
