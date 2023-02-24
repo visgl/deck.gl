@@ -25,8 +25,8 @@ const LOCATIONS = {
     longitude: 5.38004,
     zoom: 9
   },
-  "Stage 14": {
-    latitude: 45.75779, 
+  'Stage 14': {
+    latitude: 45.75779,
     longitude: 6.48885,
     zoom: 9
   },
@@ -42,18 +42,23 @@ const LOCATIONS = {
   },
   'Stage 20': {
     latitude: 47.8761,
-    longitude: 6.99990,
+    longitude: 6.9999,
     zoom: 10
   }
 };
 
 class TerrainExtensionDemo extends Component {
-  static title = 'Terrain extension with tour of France as routes and Mapbox Satellite';
+  static title = 'Tour de France routes';
 
   static code = `${GITHUB_TREE}/examples/website/terrain-extension`;
 
   static parameters = {
-    location: {displayName: 'Location', type: 'select', options: Object.keys(LOCATIONS), value: 'Stage 5'},
+    location: {
+      displayName: 'Location',
+      type: 'select',
+      options: Object.keys(LOCATIONS),
+      value: 'Stage 5'
+    }
   };
 
   static mapStyle = MAPBOX_STYLES.BLANK;
@@ -62,8 +67,11 @@ class TerrainExtensionDemo extends Component {
     return (
       <div>
         <p>Reconstructed 3D terrain with routes from mapbox's Elevation service.</p>
-        <p>Data sources:
-          <div>Mapbox <a href="https://www.mapbox.com/maps/satellite/">Satellite</a></div>
+        <p>
+          Data sources:
+          <div>
+            Mapbox <a href="https://www.mapbox.com/maps/satellite/">Satellite</a>
+          </div>
         </p>
       </div>
     );
@@ -78,11 +86,7 @@ class TerrainExtensionDemo extends Component {
 
     return (
       <div style={{background: '#111', height: '100%'}}>
-        <App
-          {...otherProps}
-          data={data}
-          initialViewState={initialViewState}
-        />
+        <App {...otherProps} data={data} initialViewState={initialViewState} />
       </div>
     );
   }

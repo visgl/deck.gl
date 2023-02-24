@@ -3,10 +3,10 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 
-import { TerrainLayer } from '@deck.gl/geo-layers';
-import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
-import { _TerrainExtension } from '@deck.gl/extensions';
-import data from './data/data'
+import {TerrainLayer} from '@deck.gl/geo-layers';
+import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
+import data from './data/data';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
@@ -46,9 +46,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({
-  initialViewState = INITIAL_VIEW_STATE
-}) {
+export default function App({initialViewState = INITIAL_VIEW_STATE}) {
   const labels = data.features.filter(f => f.geometry.type === 'Point');
   const layers = [
     new TerrainLayer({
@@ -75,7 +73,7 @@ export default function App({
       pickable: true,
       autoHighlight: true,
       highlightColor: [255, 200, 0],
-      extensions: [new _TerrainExtension()],
+      extensions: [new TerrainExtension()]
     }),
     new TextLayer({
       id: 'terrain-labels',
@@ -86,12 +84,20 @@ export default function App({
       getSize: 12,
       getAngle: 0,
       getPixelOffset: [0, -25],
-      getAlignmentBaseline: 'top',    
-      extensions: [new _TerrainExtension()],
+      getAlignmentBaseline: 'top',
+      extensions: [new TerrainExtension()],
+      parameters: {depthTest: false} // Avoid labels intersecting with terrain
     })
   ];
 
-  return <DeckGL initialViewState={initialViewState} controller={true} layers={layers} getTooltip={getTooltip} />;
+  return (
+    <DeckGL
+      initialViewState={initialViewState}
+      controller={true}
+      layers={layers}
+      getTooltip={getTooltip}
+    />
+  );
 }
 
 export function renderToDOM(container) {
