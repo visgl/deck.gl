@@ -39,7 +39,6 @@ export default function App({
 
   const layer = new WMSLayer({
     data: serviceUrl,
-    serviceType,
     layers,
     pickable: true,
 
