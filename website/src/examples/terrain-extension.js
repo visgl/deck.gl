@@ -48,7 +48,7 @@ const LOCATIONS = {
 };
 
 class TerrainExtensionDemo extends Component {
-  static title = 'Terrain extension';
+  static title = 'Terrain extension with tour of France as routes and Mapbox Satellite';
 
   static code = `${GITHUB_TREE}/examples/website/terrain-extension`;
 
