@@ -1,10 +1,10 @@
 # LayerManager Class (Internal)
 
-> The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
+> The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](../react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
 
 The `LayerManager` class manages a set of layers' lifecycle.
 
-For more information consult the [Using Standalone](/docs/get-started/using-standalone.md) article.
+For more information consult the [Using Standalone](../../get-started/using-standalone.md) article.
 
 
 ## Constructor
@@ -22,7 +22,7 @@ Parameters:
 
 ## Methods
 
-##### `needsRedraw`
+##### `needsRedraw` {#needsredraw}
 
 Checks if layers need to be redrawn.
 
@@ -38,7 +38,7 @@ Returns:
 
 * `true` if redraw is needed.
 
-##### `getLayers`
+##### `getLayers` {#getlayers}
 
 Returns an list of layers, optionally be filtered by a list of layer ids.
 
@@ -61,7 +61,7 @@ Notes:
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
 
-##### `setLayers`
+##### `setLayers` {#setlayers}
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 
@@ -72,7 +72,7 @@ layerManager.updateLayers({newLayers});
 * `newLayers` (Layer[]) - Array of layers
 
 
-##### `updateLayers`
+##### `updateLayers` {#updatelayers}
 
 Updates the current list of layers.
 

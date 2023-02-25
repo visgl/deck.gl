@@ -165,11 +165,11 @@ type _CartoLayerProps = {
   queryParameters?: QueryParameters;
 };
 
-export default class CartoLayer<ExtraProps = {}> extends CompositeLayer<
+export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLayer<
   Required<_CartoLayerProps> & ExtraProps
 > {
   static layerName = 'CartoLayer';
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
 
   initializeState(): void {
     this.state = {

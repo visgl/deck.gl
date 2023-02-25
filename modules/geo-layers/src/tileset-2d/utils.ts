@@ -6,14 +6,16 @@ import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './type
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
 
+export type URLTemplate = string | string[] | null;
+
 export const urlType = {
-  type: 'url',
-  value: null,
+  type: 'object' as const,
+  value: null as URLTemplate,
   validate: (value, propType) =>
     (propType.optional && value === null) ||
     typeof value === 'string' ||
     (Array.isArray(value) && value.every(url => typeof url === 'string')),
-  equals: (value1, value2) => {
+  equal: (value1, value2) => {
     if (value1 === value2) {
       return true;
     }
@@ -62,7 +64,7 @@ function stringHash(s: string): number {
 }
 
 export function getURLFromTemplate(
-  template: string | string[],
+  template: URLTemplate,
   tile: {
     index: TileIndex;
     id: string;

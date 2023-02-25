@@ -56,7 +56,7 @@ type _TripsLayerProps<DataT = any> = {
 };
 
 /** Render animated paths that represent vehicle trips. */
-export default class TripsLayer<DataT = any, ExtraProps = {}> extends PathLayer<
+export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends PathLayer<
   DataT,
   Required<_TripsLayerProps> & ExtraProps
 > {

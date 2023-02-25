@@ -40,7 +40,7 @@ type _S2LayerProps<DataT> = {
 };
 
 /** Render filled and/or stroked polygons based on the [S2](http://s2geometry.io/) geospatial indexing system. */
-export default class S2Layer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class S2Layer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<_S2LayerProps<DataT>> & ExtraProps
 > {

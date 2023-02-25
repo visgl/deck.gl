@@ -9,7 +9,7 @@ Our [get-started examples](https://github.com/visgl/deck.gl/tree/master/examples
 
 ` @deck.gl/core` is a submodule of deck.gl that contains no React dependency.
 
-The [Deck](/docs/api-reference/core/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
+The [Deck](../api-reference/core/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
 ```bash
 npm install @deck.gl/core @deck.gl/layers
@@ -55,7 +55,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
-The scripting API's [DeckGL](/docs/api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
+The scripting API's [DeckGL](../api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
 
 ```js
 new deck.DeckGL({

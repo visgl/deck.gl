@@ -1,8 +1,10 @@
+/* eslint-disable camelcase */
+
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture2D} from '@luma.gl/core';
-import type {Bounds} from '../common/projection-utils';
+import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
@@ -98,6 +100,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 }
     `
   },
+  // eslint-disable-next-line complexity
   getUniforms: (opts = {}, uniforms) => {
     if ('dummyHeightMap' in opts) {
       const {

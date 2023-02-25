@@ -40,7 +40,7 @@ type _GridCellLayerProps = {
   cellSize?: number;
 };
 
-export default class GridCellLayer<DataT = any, ExtraPropsT = {}> extends ColumnLayer<
+export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> extends ColumnLayer<
   DataT,
   ExtraPropsT & Required<_GridCellLayerProps>
 > {

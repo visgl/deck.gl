@@ -1,8 +1,8 @@
-import {BitmapLayerDemo} from 'website-components/doc-demos/layers';
+# BitmapLayer
+
+import {BitmapLayerDemo} from '@site/src/doc-demos/layers';
 
 <BitmapLayerDemo />
-
-# BitmapLayer
 
 The `BitmapLayer` renders a bitmap at specified boundaries.
 
@@ -55,7 +55,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object)
+##### `image` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object) {#image}
 
 - Default `null`.
 
@@ -69,7 +69,7 @@ The image to display.
 
 The image data will be converted to a [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object. See `textureParameters` prop for advanced customization.
 
-##### `bounds` (Array)
+##### `bounds` (Array) {#bounds}
 
 Supported formats:
 
@@ -79,13 +79,13 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
-##### `loadOptions` (Object, optional)
+##### `loadOptions` (Object, optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also accepts options for the following loaders:
+On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `image` prop is an URL
 
-##### `textureParameters` (Object)
+##### `textureParameters` (Object) {#textureparameters}
 
 Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
 
@@ -116,7 +116,7 @@ new BitmapLayer({
 
 This prop is only used when `image` initially loads or changes.
 
-##### `_imageCoordinateSystem` (Number, optional)
+##### `_imageCoordinateSystem` (Number, optional) {#_imagecoordinatesystem}
 
 > Note: this prop is experimental.
 
@@ -131,24 +131,24 @@ This prop allows you to explicitly inform the layer of the coordinate system of 
 
 This option only works with geospatial views and `bounds` that is orthogonal (`[left, bottom, right, top]`).
 
-See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for more information.
+See the article on [Coordinate Systems](../../developer-guide/coordinate-systems.md) for more information.
 
 
 ### Render Options
 
-##### `desaturate` (Number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `desaturate` (Number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#desaturate}
 
 - Default `0`
 
 The desaturation of the bitmap. Between `[0, 1]`. `0` being the original color and `1` being grayscale.
 
-##### `transparentColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `transparentColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#transparentcolor}
 
 - Default `[0, 0, 0, 0]`
 
 The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in the `[0, 255]` range. Equivalent to overlaying the image over a background in this color.
 
-##### `tintColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `tintColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#tintcolor}
 
 - Default `[255, 255, 255]`
 
@@ -156,7 +156,7 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 
 ## Pixel Picking
 
-(From v8.4) The [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
+(From v8.4) The [picking info](../../developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
 
 - `bitmap`
   + `pixel` ([number, number])  Integer coordinates into the bitmap

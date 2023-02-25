@@ -7,6 +7,7 @@ import {
   TripsLayer,
   TerrainLayer,
   MVTLayer,
+  _WMSLayer as WMSLayer,
   H3HexagonLayer,
   H3ClusterLayer,
   QuadkeyLayer,
@@ -208,5 +209,25 @@ export const MVTLayerDemo = makeLayerDemo({
       }
     },
     lineWidthMinPixels: 1
+  }`
+});
+
+export const WMSLayerDemo = makeLayerDemo({
+  Layer: WMSLayer,
+  isExperimental: true,
+  getTooltip: '({bitmap}) => bitmap && `x:${bitmap.x}, y:${bitmap.y}`',
+  mapStyle: null,
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 9,
+    minZoom: 1,
+    maxZoom: 20
+  },
+  props: `{
+    data: 'https://ows.terrestris.de/osm/service',
+    serviceType: 'wms',
+    layers: ['OSM-WMS'],
+    pickable: true
   }`
 });

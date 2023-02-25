@@ -48,8 +48,8 @@ Parameters:
 - `props` (Object)
   + `props.id` (String) - an unique id is required for each layer.
   + `props.type` (`Layer`, optional) - a class that extends deck.gl's base `Layer` class. Required if `deck` is not provided.
-  + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored. It's recommended that you use the [MapboxOverlay](/docs/api-reference/mapbox/mapbox-overlay.md) class where a `Deck` instance is automatically managed.
-  + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](/docs/api-reference/layers/README.md) for documentation and examples on how to create layers.
+  + `props.deck` (`Deck`, optional) - a `Deck` instance that controls the rendering of this layer. If provided, the layer will be looked up from its layer stack by `id` at render time, and all other props are ignored. It's recommended that you use the [MapboxOverlay](./mapbox-overlay.md) class where a `Deck` instance is automatically managed.
+  + Optional: any other prop needed by this type of layer. See deck.gl's [layer catalog](../layers/README.md) for documentation and examples on how to create layers.
 
 
 ## Methods

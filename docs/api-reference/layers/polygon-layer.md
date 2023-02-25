@@ -1,16 +1,12 @@
-import {PolygonLayerDemo} from 'website-components/doc-demos/layers';
+# PolygonLayer
+
+import {PolygonLayerDemo} from '@site/src/doc-demos/layers';
 
 <PolygonLayerDemo />
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
-</p>
-
-# PolygonLayer
-
 The `PolygonLayer` renders filled, stroked and/or extruded polygons.
 
-PolygonLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md) that wraps around the [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) and the [PathLayer](/docs/api-reference/layers/path-layer.md).
+PolygonLayer is a [CompositeLayer](../core/composite-layer.md) that wraps around the [SolidPolygonLayer](./solid-polygon-layer.md) and the [PathLayer](./path-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -91,25 +87,25 @@ new deck.PolygonLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [CompositeLayer](/docs/api-reference/core/composite-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
 ### Render Options
 
-##### `filled` (Boolean, optional)
+##### `filled` (Boolean, optional) {#filled}
 
 * Default: `true`
 
 Whether to draw a filled polygon (solid fill). Note that only
 the area between the outer polygon and any holes will be filled.
 
-##### `stroked` (Boolean, optional)
+##### `stroked` (Boolean, optional) {#stroked}
 
 * Default: `true`
 
 Whether to draw an outline around the polygon (solid fill). Note that
 both the outer polygon as well the outlines of any holes will be drawn.
 
-##### `extruded` (Boolean, optional)
+##### `extruded` (Boolean, optional) {#extruded}
 
 * Default: `false`
 
@@ -117,7 +113,7 @@ Whether to extrude the polygons (based on the elevations provided by the
 `getElevation` accessor. If set to false, all polygons will be flat, this
 generates less geometry and is faster than simply returning `0` from `getElevation`.
 
-##### `wireframe` (Boolean, optional)
+##### `wireframe` (Boolean, optional) {#wireframe}
 
 * Default: `false`
 
@@ -127,7 +123,7 @@ Whether to generate a line wireframe of the hexagon. The outline will have
 
 Requires the `extruded` prop to be true.
 
-##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -135,52 +131,52 @@ Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
 all elevation without updating the data.
 
-##### `lineWidthUnits` (String, optional)
+##### `lineWidthUnits` (String, optional) {#linewidthunits}
 
 * Default: `'meters'`
 
-The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](/docs/developer-guide/coordinate-systems.md#supported-units).
+The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `lineWidthScale` (Boolean, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `lineWidthScale` (Boolean, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
 
 * Default: `1`
 
 The line width multiplier that multiplied to all outlines of `Polygon` and `MultiPolygon`
 features if the `stroked` attribute is true.
 
-##### `lineWidthMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `lineWidthMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthminpixels}
 
 * Default: `0`
 
 The minimum line width in pixels.
 
-##### `lineWidthMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `lineWidthMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthmaxpixels}
 
 * Default: Number.MAX_SAFE_INTEGER
 
 The maximum line width in pixels.
 
-##### `lineJointRounded` (Boolean, optional)
+##### `lineJointRounded` (Boolean, optional) {#linejointrounded}
 
 * Default: `false`
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
-##### `lineMiterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `lineMiterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linemiterlimit}
 
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
-##### `material` (Object, optional)
+##### `material` (Object, optional) {#material}
 
 * Default: `true`
 
-This is an object that contains material props for [lighting effect](/docs/api-reference/core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](/docs/developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
+Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
-##### `_normalize` (Object, optional)
+##### `_normalize` (Object, optional) {#_normalize}
 
 * Default: `true`
 
@@ -190,7 +186,7 @@ If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disa
 
 When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical). The winding order of rings must be consistent with that defined by `_windingOrder`. See `getPolygon` below for details.
 
-##### `_windingOrder` (String, optional)
+##### `_windingOrder` (String, optional) {#_windingorder}
 
 * Default: `'CW'`
 
@@ -206,7 +202,7 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 ### Data Accessors
 
-##### `getPolygon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPolygon` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * default: `object => object.polygon`
 
@@ -248,7 +244,7 @@ If the optional third component `z` is supplied for a position, it specifies the
   <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
 </div>
 
-##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -257,7 +253,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -267,7 +263,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If a function is provided, it is called on each polygon to retrieve its outline color.
 
 
-##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
 * Default: `1`
 
@@ -276,7 +272,7 @@ The width of the outline of the polygon, in units specified by `lineWidthUnits` 
 * If a number is provided, it is used as the outline width for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline width.
 
-##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -295,8 +291,8 @@ Only applies if `extruded: true`.
 
 The PolygonLayer renders the following sublayers:
 
-* `fill` - a [SolidPolygonLayer](/docs/api-reference/layers/solid-polygon-layer.md) rendering the surface of all polygons.
-* `stroke` - a [PathLayer](/docs/api-reference/layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
+* `fill` - a [SolidPolygonLayer](./solid-polygon-layer.md) rendering the surface of all polygons.
+* `stroke` - a [PathLayer](./path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
 
 
 ## Remarks

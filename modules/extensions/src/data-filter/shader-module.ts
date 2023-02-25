@@ -1,4 +1,4 @@
-import {_ShaderModule as ShaderModule} from '@deck.gl/core/typed';
+import {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {DataFilterExtensionProps} from './data-filter';
 

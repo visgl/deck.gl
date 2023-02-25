@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/radio/app';
 
-import makeExample from '../components/example';
+import {makeExample} from '../components';
 
 class MultiViewDemo extends Component {
   static title = 'Radio Stations in the United States';

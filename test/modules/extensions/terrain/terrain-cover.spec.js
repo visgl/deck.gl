@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
-import {TerrainExtension} from '@deck.gl/extensions';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -176,12 +176,12 @@ test('TerrainCover#layers diffing#non-geo', async t => {
     getTileData: ({bbox}) => {
       return [{type: 'Feature', geometry: {type: 'Point', coordinates: [bbox.left, bbox.top]}}];
     },
-    terrainFittingMode: 'drape',
+    terrainDrawMode: 'drape',
     extensions: [new TerrainExtension()]
   });
   const scatterplotLayer = new ScatterplotLayer({
     id: 'scatterplot',
-    terrainFittingMode: 'drape',
+    terrainDrawMode: 'drape',
     extensions: [new TerrainExtension()]
   });
 
@@ -191,7 +191,7 @@ test('TerrainCover#layers diffing#non-geo', async t => {
   const targetLayer = lifecycle.layers.find(l => l.id === 'terrain-0-0-0');
   const tc = new TerrainCover(targetLayer);
   let drapeLayers = lifecycle.layers.filter(
-    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
+    l => !l.isComposite && l.state.terrainDrawMode === 'drape'
   );
   t.ok(drapeLayers.length >= 5, 'Found drape layers');
   t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
@@ -200,16 +200,12 @@ test('TerrainCover#layers diffing#non-geo', async t => {
   viewport = new OrthographicViewport({width: 800, height: 600, zoom: 0, target: [-400, -300]});
   await lifecycle.update({viewport});
 
-  drapeLayers = lifecycle.layers.filter(
-    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
-  );
+  drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
   t.ok(drapeLayers.length >= 9, 'Found drape layers');
   t.notOk(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should not need update');
 
   await lifecycle.update({layers: [terrainSource, overlay]});
-  drapeLayers = lifecycle.layers.filter(
-    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
-  );
+  drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
   t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
   t.deepEqual(tc.layers, ['overlay-0-0-0-points-circle'], 'Correctly culled layers');
 
@@ -239,12 +235,12 @@ test('TerrainCover#layers diffing#geo', async t => {
     getTileData: ({bbox}) => {
       return [{type: 'Feature', geometry: {type: 'Point', coordinates: [bbox.west, bbox.north]}}];
     },
-    terrainFittingMode: 'drape',
+    terrainDrawMode: 'drape',
     extensions: [new TerrainExtension()]
   });
   const scatterplotLayer = new ScatterplotLayer({
     id: 'scatterplot',
-    terrainFittingMode: 'drape',
+    terrainDrawMode: 'drape',
     extensions: [new TerrainExtension()]
   });
 
@@ -260,16 +256,14 @@ test('TerrainCover#layers diffing#geo', async t => {
   const targetLayer = lifecycle.layers.find(l => l.id === 'terrain-0-1-2');
   const tc = new TerrainCover(targetLayer);
   let drapeLayers = lifecycle.layers.filter(
-    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
+    l => !l.isComposite && l.state.terrainDrawMode === 'drape'
   );
   t.ok(drapeLayers.length >= 5, 'Found drape layers');
   t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
   t.deepEqual(tc.layers, ['overlay-0-1-2-points-circle', 'scatterplot'], 'Correctly culled layers');
 
   await lifecycle.update({layers: [terrainSource, scatterplotLayer, overlay]});
-  drapeLayers = lifecycle.layers.filter(
-    l => !l.isComposite && l.state.terrainFittingMode === 'drape'
-  );
+  drapeLayers = lifecycle.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
   t.ok(tc.shouldUpdate({targetLayer, layers: drapeLayers}), 'Should require update');
   t.deepEqual(tc.layers, ['scatterplot', 'overlay-0-1-2-points-circle'], 'Correctly culled layers');
 

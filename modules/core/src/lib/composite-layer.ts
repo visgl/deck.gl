@@ -31,7 +31,7 @@ import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
-export default abstract class CompositeLayer<PropsT = {}> extends Layer<
+export default abstract class CompositeLayer<PropsT extends {} = {}> extends Layer<
   PropsT & Required<CompositeLayerProps>
 > {
   static layerName: string = 'CompositeLayer';

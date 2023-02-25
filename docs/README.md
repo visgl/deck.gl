@@ -60,7 +60,7 @@ Deck.gl is designed to be highly customizable. All layers come with flexible API
 <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
 ```
 
-- [Get started](/docs/get-started/using-standalone.md#using-the-scripting-api)
+- [Get started](./get-started/using-standalone.md#using-the-scripting-api)
 - [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
 
 ### NPM Module
@@ -71,12 +71,12 @@ npm install deck.gl
 
 #### Pure JS
 
-- [Get started](/docs/get-started/using-standalone.md)
+- [Get started](./get-started/using-standalone.md)
 - [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)
 
 #### React
 
-- [Get started](/docs/get-started/using-with-react.md)
+- [Get started](./get-started/using-with-react.md)
 - [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react)
 
 ### Python

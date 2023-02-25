@@ -3,7 +3,7 @@
 The `Tile3DLayer` renders 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) ,
 which is supported by the [Tiles3DLoader](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader).
 
-Tile3DLayer is a [CompositeLayer](/docs/api-reference/core/composite-layer.md). Base on each tile type, it uses a [PointCloudLayer](/docs/api-reference/layers/point-cloud-layer.md), a [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) or [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) to render.
+Tile3DLayer is a [CompositeLayer](../core/composite-layer.md). Base on each tile type, it uses a [PointCloudLayer](../layers/point-cloud-layer.md), a [ScenegraphLayer](../mesh-layers/scenegraph-layer.md) or [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md) to render.
 
 References
 - [3D Tiles](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification).
@@ -98,19 +98,19 @@ new deck.Tile3DLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/core/layer.md) and [CompositeLayer](/docs/api-reference/core/composite-layer.md) properties.
+Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
 Along with other options as below,
 
 ### Render Options
 
-##### `opacity` (Number, Optional)
+##### `opacity` (Number, Optional) {#opacity}
 
 - Default `1.0`
 
-The opacity of the layer. The same as defined in [layer](/docs/api-reference/core/layer.md).
+The opacity of the layer. The same as defined in [layer](../core/layer.md).
 
-##### `pointSize` (Number, Optional)
+##### `pointSize` (Number, Optional) {#pointsize}
 
 - Default `1.0`
 
@@ -119,19 +119,19 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Data Properties
 
-##### `data` (String)
+##### `data` (String) {#data}
 
 - A URL to fetch tiles entry point of `3D Tiles` [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or `Indexed 3D Scene Layer` file [I3S](https://github.com/Esri/i3s-spec).
 
-##### `loader` (Object)
+##### `loader` (Object) {#loader}
 
 - Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader)
 
 A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
-##### `loadOptions` (Object, Optional)
+##### `loadOptions` (Object, Optional) {#loadoptions}
 
-On top of the [default options](/docs/api-reference/core/layer.md#loadoptions), also support the following keys:
+On top of the [default options](../core/layer.md#loadoptions), also support the following keys:
 
 - `[loader.id]` passing options to the loader defined by the `loader` prop.
 - `tileset`: Forward parameters to the [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1) instance after fetching the tileset metadata.
@@ -154,15 +154,15 @@ const layer = new Tile3DLayer({
 })
 ```
 
-##### `pickable` (Boolean, Optional)
+##### `pickable` (Boolean, Optional) {#pickable}
 
 - Default: false
 
-When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `info.object` will be a [Tile3DHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
+When [`picking`](../../developer-guide/custom-layers/picking.md) is enabled, `info.object` will be a [Tile3DHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
 
 ### Data Accessors
 
-##### `getPointColor` (Function|Array, Optional)
+##### `getPointColor` (Function|Array, Optional) {#getpointcolor}
 
 - Default `[0, 0, 0, 255]`
 
@@ -171,24 +171,24 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
 
 ### Callbacks
 
-##### `onTilesetLoad` (Function, optional)
+##### `onTilesetLoad` (Function, optional) {#ontilesetload}
 `onTilesetLoad` is a function that is called when Tileset JSON file is loaded. [Tileset](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) object is passed in the callback.
 
 - Default: `onTilesetLoad: (tileset) => {}`
 
-##### `onTileLoad` (Function, optional)
+##### `onTileLoad` (Function, optional) {#ontileload}
 
 `onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
-##### `onTileUnload` (Function, optional)
+##### `onTileUnload` (Function, optional) {#ontileunload}
 
 `onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
-##### `onTileError` (Function, optional)
+##### `onTileError` (Function, optional) {#ontileerror}
 
 `onTileError` is a function that is called when a tile failed to load.
 
@@ -196,7 +196,7 @@ When [`picking`](/docs/developer-guide/custom-layers/picking.md) is enabled, `in
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
-##### `_getMeshColor` (Function, optional)
+##### `_getMeshColor` (Function, optional) {#_getmeshcolor}
 `_getMeshColor` is a function which allows to change color of mesh based on properties of [tileHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
 It recieves `tileHeader` object as argument and return type is array of [r, g, b] values in the 0-255 range.
 This value is only applied when tile format is `mesh`.
@@ -208,12 +208,12 @@ Can be used only for I3S debugging purposes.
 
 The Tile3DLayer renders the following sublayers based on tile [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction):
 
-* `scenegraph` - a [ScenegraphLayer](/docs/api-reference/mesh-layers/scenegraph-layer.md) rendering all the tiles with Batched 3D Model format (`b3dm`) or Instanced 3D Model format (`i3dm`).
+* `scenegraph` - a [ScenegraphLayer](../mesh-layers/scenegraph-layer.md) rendering all the tiles with Batched 3D Model format (`b3dm`) or Instanced 3D Model format (`i3dm`).
   - `_lighting` is default to `pbr`.
-* `pointcloud` - a [PointCloudLayer](/docs/api-reference/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
-* `mesh` - a [SimpleMeshLayer](/docs/api-reference/mesh-layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
+* `pointcloud` - a [PointCloudLayer](../layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format (`pnts`).
+* `mesh` - a [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md) rendering all the tiles ESRI `MeshPyramids` data.
 
-Follow [CompositeLayer](/docs/api-reference/core/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
+Follow [CompositeLayer](../core/composite-layer.md#_subLayerProp) and example in this layer doc to see how to override sub layer props.
 
 ## Remarks
 

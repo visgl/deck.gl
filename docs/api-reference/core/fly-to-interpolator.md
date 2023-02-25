@@ -1,8 +1,8 @@
 # FlyToInterpolator
 
-Performs "fly to" style interpolation between two geospatial view states. Implements [TransitionInterpolator](/docs/api-reference/core/transition-interpolator.md).
+Performs "fly to" style interpolation between two geospatial view states. Implements [TransitionInterpolator](./transition-interpolator.md).
 
-See [View State Transitions](/docs/developer-guide/view-state-transitions.md) for usage examples.
+See [View State Transitions](../../developer-guide/view-state-transitions.md) for usage examples.
 
 
 ## Constructor

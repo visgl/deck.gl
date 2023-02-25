@@ -45,23 +45,23 @@ fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
 const map = await fetchMap({cartoMapId, credentials, autoRefresh, onNewData});
 ```
 
-##### `cartoMapId` (String)
+##### `cartoMapId` (String) {#cartomapid}
 
 Required. Identifier of map created in CARTO Builder.
 
-##### `credentials` (Object, optional)
+##### `credentials` (Object, optional) {#credentials}
 
-[CARTO Credentials](/docs/api-reference/carto/overview.md#carto-credentials) to use in API requests.
+[CARTO Credentials](./overview.md#carto-credentials) to use in API requests.
 
-##### `headers` (Object, optional)
+##### `headers` (Object, optional) {#headers}
 
 Custom headers to include in the map instantiation requests.
 
-##### `autoRefresh` (Number, optional)
+##### `autoRefresh` (Number, optional) {#autorefresh}
 
 Interval in seconds at which to autoRefresh the data. If provided, `onNewData` must also be provided.
 
-##### `onNewData` (Function, Optional)
+##### `onNewData` (Function, Optional) {#onnewdata}
 
 Callback function that will be invoked whenever data in layers is changed. If provided, `autoRefresh` must also be provided.
 
@@ -69,39 +69,39 @@ Callback function that will be invoked whenever data in layers is changed. If pr
 
 When invoked with a given `cartoMapId`, `fetchMap` will retrieve the information about the map from CARTO, generate appropriate layers and populate them with data. The properties of the `map` are as follows:
 
-##### `id` (String)
+##### `id` (String) {#id}
 
 The `cartoMapId`.
 
-##### `title` (String)
+##### `title` (String) {#title}
 
 The title given to the map in CARTO Builder.
 
-##### `description` (String)
+##### `description` (String) {#description}
 
 The description given to the map in CARTO Builder.
 
-##### `createdAt` (String)
+##### `createdAt` (String) {#createdat}
 
 When the map was created.
 
-##### `updatedAt` (String)
+##### `updatedAt` (String) {#updatedat}
 
 When the map was last updated.
 
-##### `initialViewState` (String)
+##### `initialViewState` (String) {#initialviewstate}
 
-The [view state](docs/developer-guide/views.md#view-state).
+The [view state]/docs/developer-guide/views.md#view-state).
 
-##### `mapStyle` (String)
+##### `mapStyle` (String) {#mapstyle}
 
-An identifier describing the [basemap](docs/api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
+An identifier describing the [basemap]/docs/api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
-##### `layers` (Array)
+##### `layers` (Array) {#layers}
 
-A collection of deck.gl [layers](docs/api-reference/layers.md).
+A collection of deck.gl [layers]/docs/api-reference/layers.md).
 
-##### `stopAutoRefresh` (Function)
+##### `stopAutoRefresh` (Function) {#stopautorefresh}
 
 A function to invoke to stop auto-refreshing. Only present if `autoRefresh` option was provided to `fetchMap`.
 

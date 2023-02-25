@@ -31,10 +31,10 @@ export type GreatCircleLayerProps<DataT = any> = ArcLayerProps<DataT>;
 // This layer has been merged into the core ArcLayer
 // Keeping for backward-compatibility
 /** @deprecated Use ArcLayer with `greatCircle: true` instead */
-export default class GreatCircleLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
+export default class GreatCircleLayer<DataT = any, ExtraProps extends {} = {}> extends ArcLayer<
   DataT,
   ExtraProps
 > {
   static layerName = 'GreatCircleLayer';
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
 }

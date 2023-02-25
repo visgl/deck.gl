@@ -1,24 +1,24 @@
 # Viewport
 
-> Read the article detailing deck.gl's [Views and Projections](/docs/developer-guide/views.md) system.
+> Read the article detailing deck.gl's [Views and Projections](../../developer-guide/views.md) system.
 
 A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities, which can project and unproject 3D coordinates to the screen.
 
 `Viewport` classes are focused on mathematical operations such as coordinate projection/unprojection, and calculation of `view` and `projection` matrices and other uniforms needed by the WebGL vertex shaders. The basic `Viewport` class is a generic geospatially enabled version of the typical 3D "camera" class you would find in most 3D/WebGL/OpenGL library.
 
-While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices, you typically do not directly create `Viewport` instances. Instead, `Viewport` classes are created using the [View](/docs/api-reference/core/view.md) class descriptors and the current `viewState`.
+While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices, you typically do not directly create `Viewport` instances. Instead, `Viewport` classes are created using the [View](./view.md) class descriptors and the current `viewState`.
 
 ## Overview of Viewport Classes
 
 | Viewport Class        | Description |
 | ---                   | ---         |
-| [`Viewport`](/docs/api-reference/core/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
-| [`WebMercatorViewport`](/docs/api-reference/core/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
+| [`Viewport`](./viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
+| [`WebMercatorViewport`](./web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
 
 
 ## Usage
 
-The `Viewport` class is normally not instantiated directly. The [`View`](/docs/api-reference/core/view.md) class is more commonly used by applications. deck.gl automatically creates `Viewport`s from `View`s and `viewState` when needed, using the `View.makeViewport` method.
+The `Viewport` class is normally not instantiated directly. The [`View`](./view.md) class is more commonly used by applications. deck.gl automatically creates `Viewport`s from `View`s and `viewState` when needed, using the `View.makeViewport` method.
 
 
 ## Constructor
@@ -62,7 +62,7 @@ If `projectionMatrix` is not supplied, an attempt is made to build from the rema
 
 ## Methods
 
-##### `equals`
+##### `equals` {#equals}
 
 Parameters:
 
@@ -73,7 +73,7 @@ Returns:
 * `true` if the given viewport is identical to the current one.
 
 
-##### `project`
+##### `project` {#project}
 
 Projects world coordinates to pixel coordinates on screen.
 
@@ -90,7 +90,7 @@ Returns:
   + If input is `[X, Y, Z]`: returns `[x, y, z]`.
 
 
-##### `unproject`
+##### `unproject` {#unproject}
 
 Unproject pixel coordinates on screen into world coordinates.
 
@@ -109,9 +109,9 @@ Returns:
   + If input is `[x, y, z]`: returns `[X, Y, Z]`.
 
 
-##### `projectPosition`
+##### `projectPosition` {#projectposition}
 
-Projects latitude, longitude (and altitude) to coordinates in the [common space](/docs/api-reference/core/project.md).
+Projects latitude, longitude (and altitude) to coordinates in the [common space](./project.md).
 
 Parameters:
 
@@ -122,9 +122,9 @@ Returns:
 * `[x, y, z]` in WebMercator coordinates.
 
 
-##### `unprojectPosition`
+##### `unprojectPosition` {#unprojectposition}
 
-Projects a coordinate from the [common space](/docs/api-reference/core/project.md) to latitude, longitude and altitude.
+Projects a coordinate from the [common space](./project.md) to latitude, longitude and altitude.
 
 Parameters:
 
@@ -135,7 +135,7 @@ Returns:
 * `[longitude, latitude, altitude]`
 
 
-##### `getBounds`
+##### `getBounds` {#getbounds}
 
 Extracts the axis-aligned bounding box of the current visible area.
 
@@ -146,10 +146,10 @@ Returns:
 * `[minX, minY, maxX, maxY]` that defines the smallest orthogonal bounds that encompasses the visible region.
 
 
-##### `getFrustumPlanes`
+##### `getFrustumPlanes` {#getfrustumplanes}
 
 Extract view frustum planes of the current camera. Each plane is defined by its normal `normal` and distance from
-the origin `distance` (such that point `x` is on the plane if `dot(normal, x) === distance`) in the [common space](/docs/api-reference/core/project.md).
+the origin `distance` (such that point `x` is on the plane if `dot(normal, x) === distance`) in the [common space](./project.md).
 
 Returns:
 

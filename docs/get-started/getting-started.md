@@ -55,7 +55,7 @@ and then running using:
 npm start
 ```
 
-If the example uses a mapbox base map you need a [Mapbox access token](/docs/get-started/using-with-map.md)
+If the example uses a mapbox base map you need a [Mapbox access token](./using-with-map.md)
 
 ```bash
 export MapboxAccessToken={Your Token Here} && npm start
@@ -82,7 +82,7 @@ A family of NPM modules are published as part of the deck.gl framework. The foll
     * `@deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
     * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   + `@deck.gl/json` - Declarative interface that supports specifying deck.gl layers and views using a JSON format.
-  + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](/docs/api-reference/mapbox/overview.md) API.
+  + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](../api-reference/mapbox/overview.md) API.
   + `@deck.gl/react` - React wrapper of deck.gl.
   + `@deck.gl/test-utils` - Testing utilities.
 

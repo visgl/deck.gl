@@ -76,10 +76,10 @@ type _Tile3DLayerProps<DataT> = {
 };
 
 /** Render 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) */
-export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_Tile3DLayerProps<DataT>>
 > {
-  static defaultProps = defaultProps as any;
+  static defaultProps = defaultProps;
   static layerName = 'Tile3DLayer';
 
   state!: {
@@ -148,14 +148,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   getPickingInfo({info, sourceLayer}: GetPickingInfoParams) {
-    const {layerMap} = this.state;
-    const layerId = sourceLayer && sourceLayer.id;
-    if (layerId) {
-      // layerId: this.id-[scenegraph|pointcloud]-tileId
-      const substr = layerId.substring(this.id.length + 1);
-      const tileId = substr.substring(substr.indexOf('-') + 1);
-      info.object = layerMap[tileId] && layerMap[tileId].tile;
+    const sourceTile = sourceLayer && (sourceLayer.props as any).tile;
+    if (info.picked) {
+      info.object = sourceTile;
     }
+    (info as any).sourceTile = sourceTile;
 
     return info;
   }
@@ -168,8 +165,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT = {}> extends Composit
   }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
-    if (info.sourceLayer) {
-      info.sourceLayer.updateAutoHighlight(info);
+    const sourceTile = (info as any).sourceTile;
+    const layerCache = this.state.layerMap[sourceTile?.id];
+    if (layerCache && layerCache.layer) {
+      layerCache.layer.updateAutoHighlight(info);
     }
   }
 

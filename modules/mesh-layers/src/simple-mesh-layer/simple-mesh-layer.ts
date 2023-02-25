@@ -194,7 +194,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
 };
 
 /** Render a number of instances of an arbitrary 3D geometry. */
-export default class SimpleMeshLayer<DataT = any, ExtraPropsT = {}> extends Layer<
+export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_SimpleMeshLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

@@ -22,7 +22,7 @@ type _H3ClusterLayerProps<DataT> = {
   getHexagons?: AccessorFunction<DataT, H3IndexInput[]>;
 };
 
-export default class H3ClusterLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<_H3ClusterLayerProps<DataT>> & ExtraProps
 > {

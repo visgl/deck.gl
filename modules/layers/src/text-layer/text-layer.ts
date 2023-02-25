@@ -233,7 +233,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
 };
 
 /** Render text labels at given coordinates. */
-export default class TextLayer<DataT = any, ExtraPropsT = {}> extends CompositeLayer<
+export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TextLayerProps<DataT>>
 > {
   static defaultProps = defaultProps;

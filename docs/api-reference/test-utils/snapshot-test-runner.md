@@ -79,7 +79,7 @@ new TestRender({width: 800, height: 600})
 new SnapshotTestRunner(deckProps)
 ```
 
-Create a SnapshotTestRunner instance. The `deckProps` argument is passed to the [Deck](/docs/api-reference/core/deck.md) constructor.
+Create a SnapshotTestRunner instance. The `deckProps` argument is passed to the [Deck](../core/deck.md) constructor.
 
 ### add(testCase: Array|Object)
 
@@ -98,7 +98,7 @@ Add one or a list of test cases. Each test case may contain the following fields
   - `done` (Function) - must be called when the test case is done rendering and ready for screen capture and comparison.
   
   The default `onAfterRender` calls `done` immediately, i.e. takes screenshot as soon as the canvas is rendered for the first time. If some resources are loaded asynchronously, you may need to provide an implementation of this callback to check whether all layers are fully loaded.
-* Any other props that [Deck.setProps](/docs/api-reference/core/deck.md) accepts.
+* Any other props that [Deck.setProps](../core/deck.md) accepts.
 
 ### run(options: Object)
 

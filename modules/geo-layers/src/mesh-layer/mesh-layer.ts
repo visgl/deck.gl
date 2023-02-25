@@ -42,7 +42,7 @@ type _MeshLayerProps<DataT> = {
   featureIds?: NumericArray | null;
 };
 
-export default class MeshLayer<DataT = any, ExtraProps = {}> extends SimpleMeshLayer<
+export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends SimpleMeshLayer<
   DataT,
   Required<_MeshLayerProps<DataT>> & ExtraProps
 > {

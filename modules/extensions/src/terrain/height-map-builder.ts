@@ -1,5 +1,5 @@
 import {Framebuffer} from '@luma.gl/core';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../common/projection-utils';
+import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
 import type {Viewport, Layer} from '@deck.gl/core';
@@ -10,7 +10,7 @@ const MAP_MAX_SIZE = 2048;
  * Manages the lifecycle of the height map (a framebuffer that encodes elevation).
  * One instance of height map is is shared across all layers. It is updated when the viewport changes
  * or when some terrain source layer's data changes.
- * During the draw call of any terrainFittingMode:offset layers,
+ * During the draw call of any terrainDrawMode:offset layers,
  * the vertex shader reads from this framebuffer to retrieve its z offset.
  */
 export class HeightMapBuilder {

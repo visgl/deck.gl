@@ -1,8 +1,8 @@
-import {AccessorFunction} from '@deck.gl/core';
+import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
-const defaultProps = {
+const defaultProps: DefaultProps<GeohashLayerProps> = {
   getGeohash: {type: 'accessor', value: d => d.geohash}
 };
 
@@ -19,12 +19,12 @@ type GeohashLayerProps<DataT = any> = {
 };
 
 /** Render filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system. */
-export default class GeohashLayer<DataT = any, ExtraProps = {}> extends GeoCellLayer<
+export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
   DataT,
   Required<GeohashLayerProps> & ExtraProps
 > {
   static layerName = 'GeohashLayer';
-  static defaultProps: any = defaultProps;
+  static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getGeohash} = this.props;

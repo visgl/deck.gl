@@ -3,7 +3,7 @@ import {Framebuffer} from '@luma.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
-import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../common/projection-utils';
+import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
 
 // TODO - import from loaders when Tileset2D is split out
 type GeoBoundingBox = {west: number; north: number; east: number; south: number};
@@ -15,7 +15,7 @@ type Tile2DHeader = {
 /**
  * Manages the lifecycle of the terrain cover (draped textures over a terrain mesh).
  * One terrain cover is created for each unique terrain layer (primitive layer with operation:terrain).
- * It is updated when the terrain source layer's mesh changes or when any of the terrainFittingMode:drape
+ * It is updated when the terrain source layer's mesh changes or when any of the terrainDrawMode:drape
  * layers requires redraw.
  * During the draw call of a terrain layer, the drape texture is overlaid on top of the layer's own color.
  */
