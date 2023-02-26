@@ -28,6 +28,7 @@ export function getDeckInstance({
 
   // Only initialize certain props once per context
   const customRender = deck?.props._customRender;
+  const onLoad = deck?.props.onLoad;
 
   const deckProps = getInterleavedProps({
     ...deck?.props,
@@ -44,8 +45,10 @@ export function getDeckInstance({
   let deckInstance: Deck;
 
   if (!deck || deck.props.gl === gl) {
-    // deck is using the WebGLContext created by mapbox
-    // block deck from setting the canvas size
+    // If deck isn't defined (Internal MapboxLayer use case),
+    // or if deck is defined and is using the WebGLContext created by mapbox (MapboxOverlay and External MapboxLayer use case),
+    // block deck from setting the canvas size, and use the map's viewState to drive deck.
+    // Otherwise, we use deck's viewState to drive the map.
     Object.assign(deckProps, {
       gl,
       width: null,
@@ -53,9 +56,14 @@ export function getDeckInstance({
       touchAction: 'unset',
       viewState: getViewState(map)
     });
-    // If using the WebGLContext created by deck (React use case), we use deck's viewState to drive the map.
-    // Otherwise (pure JS use case), we use the map's viewState to drive deck.
-    map.on('move', () => onMapMove(deckInstance, map));
+    if (deck?.isInitialized) {
+      watchMapMove(deck, map);
+    } else {
+      deckProps.onLoad = () => {
+        onLoad?.();
+        watchMapMove(deckInstance, map);
+      };
+    }
   }
 
   if (deck) {
@@ -78,6 +86,19 @@ export function getDeckInstance({
   });
 
   return deckInstance;
+}
+
+function watchMapMove(deck: Deck, map: Map & {__deck?: Deck | null}) {
+  const _handleMapMove = () => {
+    if (deck.isInitialized) {
+      // call view state methods
+      onMapMove(deck, map);
+    } else {
+      // deregister itself when deck is finalized
+      map.off('move', _handleMapMove);
+    }
+  };
+  map.on('move', _handleMapMove);
 }
 
 export function getInterleavedProps(currProps: DeckProps) {
