@@ -9,8 +9,8 @@ class MaskExtensionDemo extends Component {
   static title = 'Flights over cities';
 
   static data = {
-    url: `${DATA_URI}/air-traffic.txt`,
-    worker: '/workers/air-traffic-decoder.js'
+    url: `${DATA_URI}/air-traffic-sm.txt`,
+    worker: '/workers/air-traffic-sm-decoder.js'
   };
 
   static code = `${GITHUB_TREE}/examples/website/mask-extension`;
@@ -51,6 +51,7 @@ class MaskExtensionDemo extends Component {
 
   render() {
     const {data, params, ...otherProps} = this.props;
+
     // renders the mask extension demo app wrapped in necessary BaseUI and Styletron providers
     return (
       <App
