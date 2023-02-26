@@ -33,6 +33,7 @@ import type {
   LayerProps,
   Accessor,
   AccessorFunction,
+  AccessorContext,
   Unit,
   Position,
   Color,
@@ -365,19 +366,38 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  private transformParagraph(
+    object: DataT,
+    objectInfo: AccessorContext<DataT>
+  ): ReturnType<typeof transformParagraph> {
+    const {fontAtlasManager} = this.state;
+    const iconMapping = fontAtlasManager.mapping!;
+    const getText = this.state.getText!;
+    const {wordBreak, lineHeight, maxWidth} = this.props;
+
+    const paragraph = getText(object, objectInfo) || '';
+    return transformParagraph(
+      paragraph,
+      lineHeight,
+      wordBreak,
+      maxWidth * fontAtlasManager.props.fontSize,
+      iconMapping
+    );
+  }
+
   // Returns the x, y offsets of each character in a text string
   private getBoundingRect: AccessorFunction<DataT, [number, number, number, number]> = (
     object,
     objectInfo
   ) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
-
-    const paragraph = getText(object, objectInfo) || '';
-    const {
+    let {
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
+    const {fontSize} = this.state.fontAtlasManager.props;
+    width /= fontSize;
+    height /= fontSize;
+
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -394,17 +414,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   // Returns the x, y, w, h of each text object
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
 
-    const paragraph = getText(object, objectInfo) || '';
     const {
       x,
       y,
       rowWidth,
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -483,7 +500,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getAngle,
             getPixelOffset,
             billboard,
-            sizeScale: sizeScale / this.state.fontAtlasManager.props.fontSize,
+            sizeScale,
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,
