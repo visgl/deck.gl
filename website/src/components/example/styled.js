@@ -3,7 +3,7 @@ import {isMobile} from '../common';
 
 export const ExampleHeader = styled.div`
   font: bold 20px/28px var(--ifm-font-family-base);
-  color: var(--ifm-color-gray-800);
+  color: var(--ifm-color-content-secondary);
   margin: 0 20px;
   border-bottom: 1px solid 20px;
   display: inline-block;
