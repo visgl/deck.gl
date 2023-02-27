@@ -48,7 +48,7 @@ function getTooltip({object}) {
 
 export default function App({initialViewState = INITIAL_VIEW_STATE}) {
   const labels = data.features.filter(f => f.geometry.type === 'Point');
-  console.log('labels', data);
+
   const layers = [
     new TerrainLayer({
       id: 'terrain',
