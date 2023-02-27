@@ -455,9 +455,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     // Remove stale cache entries
-    for (const a of Object.keys(cachedBounds)) {
-      if (!attributes.includes(a)) {
-        delete cachedBounds[a];
+    for (const cachedAttributeName of Object.keys(cachedBounds)) {
+      if (!attributes.includes(cachedAttributeName)) {
+        delete cachedBounds[cachedAttributeName];
       }
     }
 
