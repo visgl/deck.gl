@@ -78,7 +78,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       extensions: [new TerrainExtension()]
     }),
     new TextLayer({
-      id: 'terrain-labels',
+      id: 'gpx-labels',
       data: labels,
       getText: d => d.properties.location,
       getPosition: d => d.geometry.coordinates,
