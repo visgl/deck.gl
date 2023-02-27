@@ -5,42 +5,42 @@ import App from 'website-examples/terrain-extension/app';
 import {makeExample} from '../components';
 
 const LOCATIONS = {
-  'Stage 5': {
+  'Day 5. Pau to Laruns': {
     latitude: 43.09822,
     longitude: -0.6194,
     zoom: 10
   },
-  'Stage 6': {
+  'Day 6. Tarbes to Cauterets': {
     latitude: 43.02905,
     longitude: 0.11472,
     zoom: 10
   },
-  'Stage 9': {
+  'Day 9. Saint-Leonard-de-Noblat to Puy de Dôme': {
     latitude: 45.82382,
     longitude: 2.2899,
     zoom: 8
   },
-  'Stage 13': {
+  'Day 13. Châtillon-sur to ChalaronneGrand Colombier': {
     latitude: 46.07586,
     longitude: 5.38004,
     zoom: 9
   },
-  'Stage 14': {
-    latitude: 45.75779,
-    longitude: 6.48885,
+  'Day 14. Annemasse to Morzine': {
+    latitude: 46.14632,
+    longitude: 6.45157,
     zoom: 9
   },
-  'Stage 15': {
+  'Day 15. Les Gets to Saint-Gervais Mont Blanc': {
     latitude: 45.90044,
     longitude: 6.49025,
     zoom: 9
   },
-  'Stage 17': {
+  'Day 17. Saint-Gervais Mont Blanc to Courchevel': {
     latitude: 45.89081,
     longitude: 6.66961,
     zoom: 9
   },
-  'Stage 20': {
+  'Day 20. Belfort to Le Markstein': {
     latitude: 47.8761,
     longitude: 6.9999,
     zoom: 10
@@ -54,10 +54,10 @@ class TerrainExtensionDemo extends Component {
 
   static parameters = {
     location: {
-      displayName: 'Location',
+      displayName: 'Route',
       type: 'select',
       options: Object.keys(LOCATIONS),
-      value: 'Stage 5'
+      value: 'Day 5. Pau to Laruns'
     }
   };
 
