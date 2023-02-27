@@ -30,7 +30,7 @@ import {
   Position,
   Accessor,
   Color,
-  DefaultProps,
+  DefaultProps
 } from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
