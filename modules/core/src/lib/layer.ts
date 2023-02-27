@@ -446,7 +446,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Detect if bounds of any requested attribute have changed
     let boundsChanged = false;
-    for (const a of attributes) {
+    for (const attribute of attributes) {
       const newBounds = attributeManager.attributes[a]?.getBounds();
       if (newBounds !== cachedBounds[a]) {
         boundsChanged = true;
