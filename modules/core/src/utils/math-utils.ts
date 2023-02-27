@@ -134,8 +134,10 @@ export function toDoublePrecisionArray(
 }
 
 type LayerBounds = [number[], number[]];
-export function mergeBounds(bounds1: LayerBounds | null, bounds2: LayerBounds | null): LayerBounds | null {
-}
+export function mergeBounds(
+  bounds1: LayerBounds | null,
+  bounds2: LayerBounds | null
+): LayerBounds | null {
   if (bounds1 === null && bounds2 === null) {
     return null;
   } else if (bounds1 === null) {
