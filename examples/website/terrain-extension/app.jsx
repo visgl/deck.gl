@@ -62,7 +62,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
-      id: 'terrain-routes',
+      id: 'gpx-routes',
       data,
       getLineColor: () => COLOR_SCHEME,
       getFillColor: () => COLOR_SCHEME,
