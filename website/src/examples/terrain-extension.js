@@ -66,11 +66,11 @@ class TerrainExtensionDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Reconstructed 3D terrain with routes from mapbox's Elevation service.</p>
+        <p>Reconstructed 3D terrain with official routes from Tour de France 2023.</p>
         <p>
-          Data sources:
+          Data sources: 
           <div>
-            Mapbox <a href="https://www.mapbox.com/maps/satellite/">Satellite</a>
+          Cycling Stage <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
           </div>
         </p>
       </div>
