@@ -441,7 +441,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   private _getBounds(attributes: string[]): [number[], number[]] | null {
     const attributeManager = this.getAttributeManager();
-    if (!attributeManager || this.internalState == null) return null;
+    if (!attributeManager || this.internalState === null) return null;
     const {cachedBounds} = this.internalState;
 
     // Detect if bounds of any requested attribute have changed
