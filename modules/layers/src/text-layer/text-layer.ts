@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_FONT_SETTINGS,
@@ -33,6 +33,7 @@ import type {
   LayerProps,
   Accessor,
   AccessorFunction,
+  AccessorContext,
   Unit,
   Position,
   Color,
@@ -120,12 +121,12 @@ type _TextLayerProps<DataT> = {
    * @default 'normal'
    */
   fontWeight?: FontSettings['fontWeight'];
-  /** A unitless number that will be multiplied with the current font size to set the line height.
+  /** A unitless number that will be multiplied with the current text size to set the line height.
    * @default 'normal'
    */
   lineHeight?: number;
   /**
-   * Width of outline around the text, relative to the font size. Only effective if `fontSettings.sdf` is `true`.
+   * Width of outline around the text, relative to the text size. Only effective if `fontSettings.sdf` is `true`.
    * @default 0
    */
   outlineWidth?: number;
@@ -144,7 +145,9 @@ type _TextLayerProps<DataT> = {
    */
   wordBreak?: 'break-word' | 'break-all';
   /**
-   * `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
+   * A unitless number that will be multiplied with the current text size to set the width limit of a string.
+   * If specified, when the text is longer than the width limit, it will be wrapped into multiple lines using
+   * the strategy of `wordBreak`.
    * @default -1
    */
   maxWidth?: number;
@@ -253,6 +256,11 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       styleVersion: 0,
       fontAtlasManager: new FontAtlasManager()
     };
+
+    // Breaking change in v8.9
+    if (this.props.maxWidth > 0) {
+      log.warn('v8.9 breaking change: TextLayer maxWidth is now relative to text size')();
+    }
   }
 
   // eslint-disable-next-line complexity
@@ -365,19 +373,54 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
-  // Returns the x, y offsets of each character in a text string
+  /** There are two size systems in this layer:
+
+    + Pixel size: user-specified text size, via getSize, sizeScale, sizeUnits etc.
+      The layer roughly matches the output of the layer to CSS pixels, e.g. getSize: 12, sizeScale: 2 
+      in layer props is roughly equivalent to font-size: 24px in CSS.
+    + Texture size: internally, character positions in a text blob are calculated using the sizes of iconMapping,
+      which depends on how large each character is drawn into the font atlas. This is controlled by
+      fontSettings.fontSize (default 64) and most users do not set it manually.
+      These numbers are intended to be used in the vertex shader and never to be exposed to the end user.
+    
+    All surfaces exposed to the user should either use the pixel size or a multiplier relative to the pixel size. */
+
+  /** Calculate the size and position of each character in a text string.
+   * Values are in texture size */
+  private transformParagraph(
+    object: DataT,
+    objectInfo: AccessorContext<DataT>
+  ): ReturnType<typeof transformParagraph> {
+    const {fontAtlasManager} = this.state;
+    const iconMapping = fontAtlasManager.mapping!;
+    const getText = this.state.getText!;
+    const {wordBreak, lineHeight, maxWidth} = this.props;
+
+    const paragraph = getText(object, objectInfo) || '';
+    return transformParagraph(
+      paragraph,
+      lineHeight,
+      wordBreak,
+      maxWidth * fontAtlasManager.props.fontSize,
+      iconMapping
+    );
+  }
+
+  /** Returns the x, y, width, height of each text string, relative to pixel size.
+   * Used to render the background.
+   */
   private getBoundingRect: AccessorFunction<DataT, [number, number, number, number]> = (
     object,
     objectInfo
   ) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
-
-    const paragraph = getText(object, objectInfo) || '';
-    const {
+    let {
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
+    const {fontSize} = this.state.fontAtlasManager.props;
+    width /= fontSize;
+    height /= fontSize;
+
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -392,19 +435,18 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
   };
 
-  // Returns the x, y, w, h of each text object
+  /** Returns the x, y offsets of each character in a text string, in texture size.
+   * Used to layout characters in the vertex shader.
+   */
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
-    const iconMapping = this.state.fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
-    const {wordBreak, maxWidth, lineHeight, getTextAnchor, getAlignmentBaseline} = this.props;
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
 
-    const paragraph = getText(object, objectInfo) || '';
     const {
       x,
       y,
       rowWidth,
       size: [width, height]
-    } = transformParagraph(paragraph, lineHeight, wordBreak, maxWidth, iconMapping);
+    } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
         typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
@@ -483,7 +525,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getAngle,
             getPixelOffset,
             billboard,
-            sizeScale: sizeScale / this.state.fontAtlasManager.props.fontSize,
+            sizeScale,
             sizeUnits,
             sizeMinPixels,
             sizeMaxPixels,

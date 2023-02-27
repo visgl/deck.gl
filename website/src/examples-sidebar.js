@@ -26,7 +26,6 @@ const sidebars = {
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
-        'imagery-layer',
         'line-layer',
         'point-cloud-layer',
         'scatterplot-layer',
@@ -37,7 +36,8 @@ const sidebars = {
         'tile-layer',
         'tile-layer-non-geospatial',
         'tile-3d-layer',
-        'trips-layer'
+        'trips-layer',
+        'wms-layer'
       ]
     },
     {
@@ -67,7 +67,8 @@ const sidebars = {
       "items": [
         'brushing-extension',
         'data-filter-extension',
-        'terrain-extension'
+        'terrain-extension',
+        'mask-extension'
       ]
     },
     {

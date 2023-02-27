@@ -9,8 +9,14 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
-<!-- TODO: Codepen demo -->
 <div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width: '100%'}} scrolling="no" title="deck.gl TerrainExtension" src="https://codepen.io/vis-gl/embed/VwGLLeR?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/VwGLLeR'>deck.gl TerrainExtension</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+</div>
+
 
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';

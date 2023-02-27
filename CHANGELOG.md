@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-beta.3] - Feb 23 2023
+
+- Consolidate common utils in extensions (#7654)
+- Rerender collision map when isLoaded flag changes (#7680)
+- chore(extensions): CollisionFilterExtension API Audit (#7675)
+- chore(geo-layers): WMSLayer API audit (#7677)
+- chore(extensions): TerrainExtension API Audit (#7678)
+- Fix ImageryLayer projection (#7670)
+- feat(geo-layers): ImageryLayer for WMS (includes RFC and initial docs) (#7575)
+
 #### deck.gl [8.9.0-beta.2] - Feb 17 2023
 
 - DeckRenderer to TypeScript (#7656)

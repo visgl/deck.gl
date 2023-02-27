@@ -1,5 +1,5 @@
 import {Framebuffer} from '@luma.gl/core';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../common/projection-utils';
+import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
 import type {Viewport, Layer} from '@deck.gl/core';
