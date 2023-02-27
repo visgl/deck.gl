@@ -4,7 +4,7 @@
 
 #### Breaking changes
 
-- `TextLayer`'s `maxWidth` is now relative to the font size. This change aims to make this prop more intuitive to use. If you have been using this prop in previous versions, divide its value by `64` (or `fontSettings.fontSize`).
+- `TextLayer`'s `maxWidth` is now relative to the text size. This change aims to make this prop more intuitive to use. If you have been using this prop in previous versions, divide its value by `64` (or `fontSettings.fontSize` if it's set manually).
 
 
 ## Upgrading from deck.gl v8.7 to v8.8

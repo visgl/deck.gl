@@ -173,7 +173,9 @@ Available options are `break-all` and `break-word`. A valid `maxWidth` has to be
 
 * Default: `-1`
 
-`maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` is multiplied with the text size to specify the width limit to break the text into multiple lines. For example, `maxWidth: 10.0` used with `getSize: 12` is roughly the equivalent of `max-width: 120px` in CSS.
+A unitless number that will be multiplied with the current text size to set the width limit of a string. If specified, when the text is longer than the width limit, it will be wrapped into multiple lines using the strategy of `wordBreak`.
+
+For example, `maxWidth: 10.0` used with `getSize: 12` is roughly the equivalent of `max-width: 120px` in CSS.
 
 ##### `outlineWidth` (Number, optional) {#outlinewidth}
 
