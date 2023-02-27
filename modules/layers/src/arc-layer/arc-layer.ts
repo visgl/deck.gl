@@ -31,7 +31,6 @@ import {
   Accessor,
   Color,
   DefaultProps,
-  _mergeBounds as mergeBounds
 } from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
@@ -149,12 +148,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   };
 
   getBounds(): [number[], number[]] | null {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    const {instanceSourcePositions, instanceTargetPositions} = attributeManager.attributes;
-    const sourceBounds = instanceSourcePositions.getBounds();
-    const targetBounds = instanceTargetPositions.getBounds();
-    return sourceBounds && targetBounds && mergeBounds(sourceBounds, targetBounds);
+    return super.getBounds(['instanceSourcePositions', 'instanceTargetPositions']);
   }
 
   getShaders() {

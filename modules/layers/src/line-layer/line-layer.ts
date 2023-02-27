@@ -29,8 +29,7 @@ import {
   Accessor,
   Color,
   UpdateParameters,
-  DefaultProps,
-  _mergeBounds as mergeBounds
+  DefaultProps
 } from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
@@ -116,12 +115,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   static defaultProps = defaultProps;
 
   getBounds(): [number[], number[]] | null {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    const {instanceSourcePositions, instanceTargetPositions} = attributeManager.attributes;
-    const sourceBounds = instanceSourcePositions.getBounds();
-    const targetBounds = instanceTargetPositions.getBounds();
-    return sourceBounds && targetBounds && mergeBounds(sourceBounds, targetBounds);
+    return super.getBounds(['instanceSourcePositions', 'instanceTargetPositions']);
   }
 
   getShaders() {

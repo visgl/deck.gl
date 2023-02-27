@@ -32,6 +32,7 @@ import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
+import {mergeBounds} from '../utils/math-utils';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
 
@@ -434,11 +435,39 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Default implementation
   // Sublayers chould override this method to provide an accurate calculation of the bounds
-  getBounds(): [number[], number[]] | null {
+  getBounds(attributes?: string[]): [number[], number[]] | null {
+    return this._getBounds(attributes || ['positions', 'instancePositions']);
+  }
+
+  private _getBounds(attributes: string[]): [number[], number[]] | null {
     const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    const {positions, instancePositions} = attributeManager.attributes;
-    return (positions || instancePositions)?.getBounds();
+    if (!attributeManager || this.internalState == null) return null;
+    const {cachedBounds} = this.internalState;
+
+    // Detect if bounds of any requested attribute have changed
+    let boundsChanged = false;
+    for (const a of attributes) {
+      const newBounds = attributeManager.attributes[a]?.getBounds();
+      if (newBounds !== cachedBounds[a]) {
+        boundsChanged = true;
+        cachedBounds[a] = newBounds;
+      }
+    }
+
+    // Remove stale cache entries
+    for (const a of Object.keys(cachedBounds)) {
+      if (!attributes.includes(a)) {
+        delete cachedBounds[a];
+      }
+    }
+
+    if (boundsChanged) {
+      this.internalState.mergedBounds = Object.values(cachedBounds).reduce(
+        (accumulatedBounds, bounds) => mergeBounds(accumulatedBounds, bounds)
+      );
+    }
+
+    return this.internalState.mergedBounds;
   }
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses

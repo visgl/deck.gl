@@ -47,6 +47,12 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   /** Populated during uniform transition to replace user-supplied values */
   propsInTransition?: LayerT['props'];
 
+  /** Used to detect changes in attribute bounds in _getBounds() **/
+  cachedBounds: Record<string, [number[], number[]] | null> = {};
+
+  /** Merged bounds from all attributes passed to _getBounds()  **/
+  mergedBounds: [number[], number[]] | null = null;
+
   constructor({
     attributeManager,
     layer
