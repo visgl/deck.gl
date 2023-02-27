@@ -9,9 +9,7 @@ import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import data from './data/data';
 
 // Set your mapbox token here
-// const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-console.log('REMOVE MAPBOX_TOKEN');
-const MAPBOX_TOKEN  = 'pk.eyJ1IjoiZnBhbG1lcjEyMyIsImEiOiJjbDJnN2twcXcwMTE0M2RvajRpdmpmYWR2In0.AgiFPb5SLSn9RwzsC-ZtvQ'
+const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 
 const INITIAL_VIEW_STATE = {
   latitude: 43.09822,
@@ -63,7 +61,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
-      id: 'gpx-routes',
+      id: 'terrain-routes',
       data,
       getLineColor: () => COLOR_SCHEME,
       getFillColor: () => COLOR_SCHEME,
