@@ -133,8 +133,9 @@ export function toDoublePrecisionArray(
   return scratchArray.subarray(0, count * size * 2);
 }
 
-type LayerBounds = [number[], number[]] | null;
-export function mergeBounds(bounds1: LayerBounds, bounds2: LayerBounds): LayerBounds {
+type LayerBounds = [number[], number[]];
+export function mergeBounds(bounds1: LayerBounds | null, bounds2: LayerBounds | null): LayerBounds | null {
+}
   if (bounds1 === null && bounds2 === null) {
     return null;
   } else if (bounds1 === null) {
