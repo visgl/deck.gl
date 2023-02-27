@@ -434,29 +434,30 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // Default implementation
-  // Sublayers chould override this method to provide an accurate calculation of the bounds
-  getBounds(attributes?: string[]): [number[], number[]] | null {
-    return this._getBounds(attributes || ['positions', 'instancePositions']);
+  // Sublayers should override this method to provide an accurate calculation of the bounds
+  getBounds(attributeNames?: string[]): [number[], number[]] | null {
+    return this._getBounds(attributeNames || ['positions', 'instancePositions']);
   }
 
-  private _getBounds(attributes: string[]): [number[], number[]] | null {
+  /** Computes the combined spatial bounds of the passed attributes */
+  private _getBounds(attributeNames: string[]): [number[], number[]] | null {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager || this.internalState === null) return null;
     const {cachedBounds} = this.internalState;
 
     // Detect if bounds of any requested attribute have changed
     let boundsChanged = false;
-    for (const attribute of attributes) {
-      const newBounds = attributeManager.attributes[a]?.getBounds();
-      if (newBounds !== cachedBounds[a]) {
+    for (const attributeName of attributeNames) {
+      const newBounds = attributeManager.attributes[attributeName]?.getBounds();
+      if (newBounds !== cachedBounds[attributeName]) {
         boundsChanged = true;
-        cachedBounds[a] = newBounds;
+        cachedBounds[attributeName] = newBounds;
       }
     }
 
     // Remove stale cache entries
     for (const cachedAttributeName of Object.keys(cachedBounds)) {
-      if (!attributes.includes(cachedAttributeName)) {
+      if (!attributeNames.includes(cachedAttributeName)) {
         delete cachedBounds[cachedAttributeName];
       }
     }
