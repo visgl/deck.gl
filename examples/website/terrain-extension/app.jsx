@@ -40,7 +40,7 @@ function getTooltip({object}) {
     object && {
       html: `\
   <div><b>Stage</b></div>
-  <div>${object.properties.name}</div>
+  <div>${object.properties.tooltip}</div>
   `
     }
   );
@@ -48,6 +48,7 @@ function getTooltip({object}) {
 
 export default function App({initialViewState = INITIAL_VIEW_STATE}) {
   const labels = data.features.filter(f => f.geometry.type === 'Point');
+  console.log('labels', data);
   const layers = [
     new TerrainLayer({
       id: 'terrain',
@@ -67,7 +68,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       getFillColor: () => COLOR_SCHEME,
       getLineWidth: 20,
       stroked: false,
-      getPointRadius: 75,
+      getPointRadius: d => d.properties.location.includes('Day') ? 0 : 75,
       lineWidthMinPixels: 2,
       pointType: 'circle',
       pickable: true,
@@ -80,10 +81,14 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       data: labels,
       getText: d => d.properties.location,
       getPosition: d => d.geometry.coordinates,
-      getColor: [255, 255, 255],
-      getSize: 12,
+      getColor: d => !d.properties.tooltip ? COLOR_SCHEME : [255, 255, 255],
+      getSize: d => !d.properties.tooltip ? 14 : 12,
       getAngle: 0,
       getPixelOffset: [0, -25],
+      outlineWidth: 10,
+      fontSettings:{
+        sdf: true,
+      },
       getAlignmentBaseline: 'top',
       extensions: [new TerrainExtension()],
       parameters: {depthTest: false} // Avoid labels intersecting with terrain
