@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import data from './data/data';
 
