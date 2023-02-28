@@ -132,7 +132,7 @@ The most performant way to transform the dimensions for each object is to use an
 
 The conversion between meter sizes and common sizes depend on the projection mode:
 
-- [MapView](../api-reference/core/map-view.md) and [FirstPersonView](../api-reference/core/first-person-view.md): 512 common units equals `C / cos(phi)` where `C` is the circumference of earth, and `phi` is the latitude in radians.
+- [MapView](../api-reference/core/map-view.md) and [FirstPersonView](../api-reference/core/first-person-view.md): 512 common units equals `C * cos(phi)` where `C` is the circumference of earth, and `phi` is the latitude in radians.
 - [GlobeView](../api-reference/core/globe-view.md): 512 common units equals the diameter of the earth.
 - [OrbitView](../api-reference/core/orbit-view.md) and [OrthographicView](../api-reference/core/orthographic-view.md): 1 meter unit equals 1 common unit.
 
