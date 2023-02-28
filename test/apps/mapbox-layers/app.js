@@ -1,12 +1,10 @@
-import mapboxgl from 'mapbox-gl';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import {MapboxLayer} from '@deck.gl/mapbox';
 
 import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
 
-// Set your mapbox token here
-mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
-
-const map = new mapboxgl.Map({
+const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   center: [-74.012, 40.705],
