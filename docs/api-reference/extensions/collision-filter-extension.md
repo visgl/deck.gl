@@ -5,8 +5,14 @@ The `CollisionFilterExtension` allows layers to hide features which overlap with
 
 To use this extension on a layer, add the `CollisionFilterExtension` to the layer's `extensions` prop.
 
-<!-- TODO: Codepen demo -->
 <div style={{position:'relative',height:450}}></div>
+<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
+  <iframe height="450" style={{width: '100%'}} scrolling="no" title="deck.gl CollideExtension" src="https://codepen.io/vis-gl/embed/oNPXXzm?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/oNPXXzm'>deck.gl CollideExtension</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+</div>
+
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';

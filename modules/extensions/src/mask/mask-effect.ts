@@ -2,13 +2,13 @@ import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '
 import {Texture2D} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
-import {getMaskBounds, getMaskViewport, MaskBounds} from './utils';
+import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 // import {debugFBO} from '../utils/debug';
 
 type Mask = {
   /** The channel index */
   index: number;
-  bounds: MaskBounds;
+  bounds: Bounds;
   coordinateOrigin: [number, number, number];
   coordinateSystem: CoordinateSystem;
 };
@@ -17,9 +17,9 @@ type Channel = {
   id: string;
   index: number;
   layers: Layer[];
-  bounds: MaskBounds;
-  maskBounds: MaskBounds;
-  layerBounds: MaskBounds[];
+  bounds: Bounds | null;
+  maskBounds: Bounds;
+  layerBounds: Bounds[];
   coordinateOrigin: [number, number, number];
   coordinateSystem: CoordinateSystem;
 };
@@ -78,6 +78,11 @@ export default class MaskEffect implements Effect {
     const viewport = viewports[0];
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
+    if (viewport.resolution !== undefined) {
+      log.warn('MaskExtension is not supported in GlobeView')();
+      return {didRender};
+    }
+
     for (const maskId in channelMap) {
       const result = this._renderChannel(channelMap[maskId], {
         layerFilter,
@@ -119,7 +124,17 @@ export default class MaskEffect implements Effect {
       // If a channel is new
       channelInfo === oldChannelInfo ||
       // If sublayers have changed
-      oldChannelInfo.layers.length !== channelInfo.layers.length ||
+      channelInfo.layers.length !== oldChannelInfo.layers.length ||
+      channelInfo.layers.some(
+        (layer, i) =>
+          // Layer instance is updated
+          // Layer props might have changed
+          // Undetermined props could have an effect on the output geometry of a mask layer,
+          // for example getRadius+updateTriggers, radiusScale, modelMatrix
+          layer !== oldChannelInfo.layers[i] ||
+          // Some prop is in transition
+          layer.props.transitions
+      ) ||
       // If a sublayer's positions have been updated, the cached bounds will change shallowly
       channelInfo.layerBounds.some((b, i) => b !== oldChannelInfo.layerBounds[i]);
 
@@ -131,18 +146,22 @@ export default class MaskEffect implements Effect {
       // Recalculate mask bounds
       this.lastViewport = viewport;
 
-      channelInfo.bounds = getMaskBounds({layers: channelInfo.layers, viewport});
+      const layerBounds = joinLayerBounds(channelInfo.layers, viewport);
+      channelInfo.bounds = layerBounds && getRenderBounds(layerBounds, viewport);
 
       if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
         // Rerender mask FBO
         const {maskPass, maskMap} = this;
 
-        const maskViewport = getMaskViewport({
-          bounds: channelInfo.bounds,
-          viewport,
-          width: maskMap.width,
-          height: maskMap.height
-        });
+        const maskViewport =
+          layerBounds &&
+          makeViewport({
+            bounds: channelInfo.bounds!,
+            viewport,
+            width: maskMap.width,
+            height: maskMap.height,
+            border: 1
+          });
 
         channelInfo.maskBounds = maskViewport ? maskViewport.getBounds() : [0, 0, 1, 1];
 
