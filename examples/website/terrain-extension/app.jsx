@@ -33,22 +33,20 @@ const ELEVATION_DECODER = {
   offset: -10000
 };
 
-const COLOR_SCHEME = [242, 183, 1]; // yellow
+const COLOR_SCHEME = [255, 255, 0]; // yellow
 
 function getTooltip({object}) {
   return (
     object && {
       html: `\
-  <div><b>Stage</b></div>
-  <div>${object.properties.tooltip}</div>
+  <div style="margin-bottom: 0.5rem"><b>${object.properties.tooltip ? 'Stage' : 'Route'}</b></div>
+  <div>${object.properties.tooltip || object.properties.location}</div>
   `
     }
   );
 }
 
 export default function App({initialViewState = INITIAL_VIEW_STATE}) {
-  const labels = data.features.filter(f => f.geometry.type === 'Point');
-
   const layers = [
     new TerrainLayer({
       id: 'terrain',
@@ -64,34 +62,27 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
     new GeoJsonLayer({
       id: 'gpx-routes',
       data,
-      getLineColor: () => COLOR_SCHEME,
       getFillColor: () => COLOR_SCHEME,
-      getLineWidth: 20,
+      getLineColor: () => COLOR_SCHEME,
+      getLineWidth: 30,
       stroked: false,
-      getPointRadius: d => d.properties.location.includes('Day') ? 0 : 75,
       lineWidthMinPixels: 2,
-      pointType: 'circle',
       pickable: true,
-      autoHighlight: true,
-      highlightColor: [255, 200, 0],
-      extensions: [new TerrainExtension()]
-    }),
-    new TextLayer({
-      id: 'gpx-labels',
-      data: labels,
+      autoHighlight: false,
+      // text properties
+      pointType: 'text',
       getText: d => d.properties.location,
       getPosition: d => d.geometry.coordinates,
-      getColor: d => !d.properties.tooltip ? COLOR_SCHEME : [255, 255, 255],
-      getSize: d => !d.properties.tooltip ? 14 : 12,
-      getAngle: 0,
-      getPixelOffset: [0, -25],
-      outlineWidth: 10,
-      fontSettings:{
-        sdf: true,
+      getTextColor: d => (!d.properties.tooltip ? COLOR_SCHEME : [255, 255, 255]),
+      getTextSize: d => (!d.properties.tooltip ? 17 : 16),
+      getTextPixelOffset: [0, -45],
+      getTextAngle: 0,
+      textOutlineWidth: 5,
+      textFontSettings: {
+        sdf: true
       },
-      getAlignmentBaseline: 'top',
-      extensions: [new TerrainExtension()],
-      parameters: {depthTest: false} // Avoid labels intersecting with terrain
+      getTextAlignmentBaseline: 'top',
+      extensions: [new TerrainExtension()]
     })
   ];
 
