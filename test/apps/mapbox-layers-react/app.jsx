@@ -6,7 +6,7 @@ import {Map} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';
 
-import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
+import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer, deckTextLayer} from './layers';
 import {MapView, OrthographicView} from '@deck.gl/core';
 
 // Set your mapbox token here
@@ -72,13 +72,7 @@ function App() {
   const layers = [
     new ScatterplotLayer(deckPoiLayer),
     new ArcLayer(deckRouteLayer),
-    new TextLayer({
-      id: 'widget-title',
-      data: [{position: [0, 0], text: 'New York City'}],
-      getSize: 18,
-      background: true,
-      backgroundPadding: [4, 4]
-    })
+    new TextLayer(deckTextLayer)
   ];
 
   return (

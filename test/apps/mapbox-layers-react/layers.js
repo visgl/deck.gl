@@ -71,3 +71,11 @@ export const deckRouteLayer = {
   getTargetColor: [255, 0, 128],
   getWidth: 4
 };
+
+export const deckTextLayer = {
+  id: 'widget-title',
+  data: [{position: [0, 0], text: 'New York City'}],
+  getSize: 18,
+  background: true,
+  backgroundPadding: [4, 4]
+};
