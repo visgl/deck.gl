@@ -2,11 +2,11 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
-import data from './data/data';
+
+const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain/tour_de_france_2023_mountain_stages.json'; // eslint-disable-line
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
@@ -61,7 +61,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
     }),
     new GeoJsonLayer({
       id: 'gpx-routes',
-      data,
+      data: DATA_URL,
       getFillColor: COLOR_SCHEME,
       getLineColor: COLOR_SCHEME,
       getLineWidth: 30,
