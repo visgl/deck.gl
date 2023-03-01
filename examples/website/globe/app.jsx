@@ -18,8 +18,7 @@ import {SphereGeometry} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 
-import AnimatedArcLayer from './animated-arc-layer';
-import {sliceData, getDate} from './slice-data';
+import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 
 // Data source
@@ -33,6 +32,7 @@ const INITIAL_VIEW_STATE = {
 
 const TIME_WINDOW = 900; // 15 minutes
 const EARTH_RADIUS_METERS = 6.3e6;
+const SEC_PER_DAY = 60 * 60 * 24;
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -49,12 +49,6 @@ const lightingEffect = new LightingEffect({ambientLight, sunLight});
 /* eslint-disable react/no-deprecated */
 export default function App({data}) {
   const [currentTime, setCurrentTime] = useState(0);
-
-  const groups = useMemo(() => sliceData(data), [data]);
-
-  const endTime = useMemo(() => {
-    return groups.reduce((max, group) => Math.max(max, group.endTime), 0);
-  }, [groups]);
 
   const timeRange = [currentTime, currentTime + TIME_WINDOW];
 
@@ -87,22 +81,20 @@ export default function App({data}) {
     []
   );
 
-  const dataLayers = groups.map(
-    (group, index) =>
-      new AnimatedArcLayer({
-        id: `flights-${index}`,
-        data: group.flights,
-        visible: group.startTime < timeRange[1] && group.endTime > timeRange[0],
-        getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-        getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-        getSourceTimestamp: d => d.time1,
-        getTargetTimestamp: d => d.time2,
-        getHeight: 0.5,
-        getWidth: 1,
-        timeRange,
-        getSourceColor: [255, 0, 128],
-        getTargetColor: [0, 128, 255]
-      })
+  const dataLayers = data && data.map(({date, flights}) =>
+    new AnimatedArcLayer({
+      id: `flights-${date}`,
+      data: flights,
+      getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
+      getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
+      getSourceTimestamp: d => d.time1,
+      getTargetTimestamp: d => d.time2,
+      getHeight: 0.5,
+      getWidth: 1,
+      timeRange,
+      getSourceColor: [255, 0, 128],
+      getTargetColor: [0, 128, 255]
+    })
   );
 
   return (
@@ -114,10 +106,10 @@ export default function App({data}) {
         effects={[lightingEffect]}
         layers={[backgroundLayers, dataLayers]}
       />
-      {endTime && (
+      {data && (
         <RangeInput
           min={0}
-          max={endTime}
+          max={data.length * SEC_PER_DAY}
           value={currentTime}
           animationSpeed={TIME_WINDOW * 0.2}
           formatLabel={formatLabel}
@@ -126,6 +118,13 @@ export default function App({data}) {
       )}
     </>
   );
+}
+
+function getDate(data, t) {
+  const index = Math.min(data.length - 1, Math.floor(t / SEC_PER_DAY));
+  const date = data[index].date;
+  const timestamp = new Date(`${date}T00:00:00Z`).getTime() + (t % SEC_PER_DAY) * 1000;
+  return new Date(timestamp);
 }
 
 export function renderToDOM(container) {
@@ -137,6 +136,13 @@ export function renderToDOM(container) {
     for (const date of dates) {
       const url = `${DATA_URL}/${date}.csv`;
       const flights = await load(url, CSVLoader, {csv: {skipEmptyLines: true}});
+
+      // Join flight data from multiple dates into one continuous animation
+      const offset = SEC_PER_DAY * data.length;
+      for (const f of flights) {
+        f.time1 += offset;
+        f.time2 += offset;
+      }
       data.push({flights, date});
       root.render(<App data={data} />);
     }

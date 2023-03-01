@@ -37,7 +37,7 @@ class MultiViewDemo extends Component {
     const {params, data, ...otherProps} = this.props;
 
     return (
-      <div style={{width: '100%', height: '100%', background: '#111'}}>
+      <div style={{width: '100%', height: '100%', position: 'absolute', background: '#111'}}>
         <App {...otherProps} data={data} />
       </div>
     );
