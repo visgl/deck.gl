@@ -67,7 +67,8 @@ const sidebars = {
       "items": [
         'brushing-extension',
         'data-filter-extension',
-        'mask-extension'
+        'mask-extension',
+        'terrain-extension'
       ]
     },
     {
