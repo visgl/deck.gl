@@ -66,6 +66,7 @@ const sidebars = {
       "label": "Extensions",
       "items": [
         'brushing-extension',
+        'collision-filter-extension',
         'data-filter-extension'
       ]
     },
