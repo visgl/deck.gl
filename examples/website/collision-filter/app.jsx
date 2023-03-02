@@ -24,11 +24,10 @@ const INITIAL_VIEW_STATE = {
 };
 
 export const COLORS_STEPS = [
-  {threshold: 'High', color: COLOR_SEVERITY[0], strokeWidth: 2},
-  {threshold: 'Medium', color: COLOR_SEVERITY[1], strokeWidth: 2},
-  {threshold: 'Low', color: COLOR_SEVERITY[2], strokeWidth: 2}
+  {threshold: 'Fatal', color: COLOR_SEVERITY[0], strokeWidth: 2},
+  {threshold: 'Serious', color: COLOR_SEVERITY[1], strokeWidth: 2},
+  {threshold: 'Slight', color: COLOR_SEVERITY[2], strokeWidth: 2}
 ];
-
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   radiusScale = 1,
