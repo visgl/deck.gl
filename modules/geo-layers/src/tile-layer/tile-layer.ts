@@ -56,7 +56,7 @@ type _TileLayerProps<DataT> = {
   /**
    * Optionally implement a custom indexing scheme.
    */
-  TilesetClass: typeof Tileset2D;
+  TilesetClass?: typeof Tileset2D;
   /**
    * Renders one or an array of Layer instances.
    */
