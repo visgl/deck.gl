@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-examples-tagmap",
+  "name": "deckgl-examples-terrain-extension",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -9,13 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "d3-scale": "^2.0.0",
-    "deck.gl": "^8.8.0",
-    "maplibre-gl": "^2.4.0",
+    "deck.gl": "8.9.0-beta.3",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-map-gl": "^7.0.0",
-    "tagmap.js": "^1.1.1"
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

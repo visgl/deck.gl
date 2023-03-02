@@ -77,7 +77,7 @@ export type CPUGridLayerProps<DataT = any> = _CPUGridLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 /** Properties added by CPUGridLayer. */
-export type _CPUGridLayerProps<DataT> = {
+type _CPUGridLayerProps<DataT> = {
   /**
    * Size of each cell in meters.
    * @default 1000
@@ -240,7 +240,7 @@ export type _CPUGridLayerProps<DataT> = {
 export default class CPUGridLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
-> extends AggregationLayer<ExtraPropsT & Required<_CPUGridLayerProps<DataT>>> {
+> extends AggregationLayer<DataT, ExtraPropsT & Required<_CPUGridLayerProps<DataT>>> {
   static layerName = 'CPUGridLayer';
   static defaultProps = defaultProps;
 

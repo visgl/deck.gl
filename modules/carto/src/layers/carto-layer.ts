@@ -76,7 +76,7 @@ const defaultProps = {
 };
 
 /** All properties supported by CartoLayer. */
-export type CartoLayerProps<DataT = any> = _CartoLayerProps & CompositeLayerProps<DataT>;
+export type CartoLayerProps = _CartoLayerProps & CompositeLayerProps;
 
 /** Properties added by CartoLayer. */
 type _CartoLayerProps = {

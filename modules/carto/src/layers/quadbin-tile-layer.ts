@@ -26,10 +26,11 @@ const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
 
 /** All properties supported by QuadbinTileLayer. */
 export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
-  CompositeLayerProps<DataT>;
+  CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */
 type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
+  data: string;
   aggregationResLevel?: number;
 };
 

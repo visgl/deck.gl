@@ -142,11 +142,11 @@ export type _ScreenGridLayerProps<DataT> = {
 export default class ScreenGridLayer<
   DataT = any,
   ExtraProps extends {} = {}
-> extends GridAggregationLayer<ExtraProps & Required<_ScreenGridLayerProps<DataT>>> {
+> extends GridAggregationLayer<DataT, ExtraProps & Required<_ScreenGridLayerProps<DataT>>> {
   static layerName = 'ScreenGridLayer';
   static defaultProps = defaultProps;
 
-  state!: GridAggregationLayer['state'] & {
+  state!: GridAggregationLayer<DataT>['state'] & {
     supported: boolean;
     gpuGridAggregator?: any;
     gpuAggregation?: any;

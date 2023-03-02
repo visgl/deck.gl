@@ -27,6 +27,7 @@ import IconManager from './icon-manager';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Accessor,
   AccessorFunction,
   Position,
@@ -40,6 +41,7 @@ import type {
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
@@ -107,7 +109,7 @@ type _IconLayerProps<DataT> = {
   textureParameters?: Record<number, number> | null;
 };
 
-export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps<DataT>;
+export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 

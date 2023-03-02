@@ -378,7 +378,7 @@ const TextLayerExample = {
     maxWidth: {
       name: 'maxWidth',
       type: 'number',
-      max: 5000
+      max: 100
     },
     backgroundPadding: {type: 'compound', elements: ['padding']},
     padding: {
@@ -403,7 +403,7 @@ const TextLayerExample = {
     },
     autoHighlight: true,
     pickable: true,
-    maxWidth: 500,
+    maxWidth: 50,
     wordBreak: 'break-word',
     highlightColor: [0, 0, 128, 128],
     getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,

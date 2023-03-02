@@ -25,6 +25,7 @@ import {
   UNIT,
   UpdateParameters,
   LayerProps,
+  LayerDataSource,
   Unit,
   AccessorFunction,
   Position,
@@ -59,10 +60,11 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 };
 
 /** All properties supported by ArcLayer. */
-export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps<DataT>;
+export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps;
 
 /** Properties added by ArcLayer. */
 type _ArcLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * If `true`, create the arc along the shortest path on the earth surface.
    * @default false
@@ -146,6 +148,27 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   state!: Layer['state'] & {
     model?: Model;
   };
+
+  getBounds(): [number[], number[]] | null {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) return null;
+    const {instanceSourcePositions, instanceTargetPositions} = attributeManager.attributes;
+    const sourceBounds = instanceSourcePositions.getBounds();
+    const targetBounds = instanceTargetPositions.getBounds();
+    return (
+      sourceBounds &&
+      targetBounds && [
+        [
+          Math.min(sourceBounds[0][0], targetBounds[0][0]),
+          Math.min(sourceBounds[0][1], targetBounds[0][1])
+        ],
+        [
+          Math.max(sourceBounds[1][0], targetBounds[1][0]),
+          Math.max(sourceBounds[1][1], targetBounds[1][1])
+        ]
+      ]
+    );
+  }
 
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
