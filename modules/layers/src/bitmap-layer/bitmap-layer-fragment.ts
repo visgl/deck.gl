@@ -110,7 +110,7 @@ void main(void) {
   geometry.uv = uv;
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 
-  if (picking_uActive) {
+  if (picking_uActive && !picking_uAttribute) {
     // Since instance information is not used, we can use picking color for pixel index
     gl_FragColor.rgb = packUVsIntoRGB(uv);
   }
