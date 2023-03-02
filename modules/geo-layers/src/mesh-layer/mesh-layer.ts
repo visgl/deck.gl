@@ -27,10 +27,10 @@ const defaultProps: DefaultProps<MeshLayerProps> = {
 };
 
 /** All properties supported by MeshLayer. */
-export type MeshLayerProps<DataT = any> = _MeshLayerProps<DataT> & SimpleMeshLayerProps<DataT>;
+export type MeshLayerProps<DataT = any> = _MeshLayerProps & SimpleMeshLayerProps<DataT>;
 
 /** Properties added by MeshLayer. */
-type _MeshLayerProps<DataT> = {
+type _MeshLayerProps = {
   /**
    * PBR material object. _lighting must be pbr for this to work
    */
@@ -44,7 +44,7 @@ type _MeshLayerProps<DataT> = {
 
 export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends SimpleMeshLayer<
   DataT,
-  Required<_MeshLayerProps<DataT>> & ExtraProps
+  Required<_MeshLayerProps> & ExtraProps
 > {
   static layerName = 'MeshLayer';
   static defaultProps = defaultProps;

@@ -12,7 +12,6 @@ import {lerp} from '@math.gl/core';
 import {
   AccessorFunction,
   CompositeLayer,
-  CompositeLayerProps,
   createIterable,
   Layer,
   LayersList,
@@ -110,8 +109,7 @@ const defaultProps: DefaultProps<H3HexagonLayerProps> = {
 
 /** All properties supported by H3HexagonLayer */
 export type H3HexagonLayerProps<DataT = any> = _H3HexagonLayerProps<DataT> &
-  PolygonLayerProps<DataT> &
-  CompositeLayerProps<DataT>;
+  PolygonLayerProps<DataT>;
 
 /** Props added by the H3HexagonLayer */
 type _H3HexagonLayerProps<DataT> = {
@@ -148,9 +146,7 @@ type _H3HexagonLayerProps<DataT> = {
 export default class H3HexagonLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
-> extends CompositeLayer<
-  ExtraPropsT & Required<_H3HexagonLayerProps<DataT> & Required<PolygonLayerProps<DataT>>>
-> {
+> extends CompositeLayer<ExtraPropsT & Required<H3HexagonLayerProps<DataT>>> {
   static defaultProps = defaultProps;
   static layerName = 'H3HexagonLayer';
 

@@ -26,6 +26,7 @@ import {
   CompositeLayerProps,
   createIterable,
   Layer,
+  LayerDataSource,
   LayersList,
   log,
   Unit,
@@ -41,12 +42,13 @@ import {replaceInRange} from '../utils';
 /**
  * All properties supported by `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps<DataT>;
+export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps;
 
 /**
  * Properties added by `PolygonLayer`.
  */
 type _PolygonLayerProps<DataT = any> = {
+  data: LayerDataSource<DataT>;
   /**
    * Whether to draw an outline around the polygon (solid fill).
    *

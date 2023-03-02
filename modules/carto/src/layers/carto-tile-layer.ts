@@ -26,8 +26,7 @@ const defaultProps: DefaultProps<CartoTileLayerProps> = {
 };
 
 /** All properties supported by CartoTileLayer. */
-export type CartoTileLayerProps<DataT extends Feature = Feature> = _CartoTileLayerProps &
-  MVTLayerProps<DataT>;
+export type CartoTileLayerProps = _CartoTileLayerProps & MVTLayerProps;
 
 /** Properties added by CartoTileLayer. */
 type _CartoTileLayerProps = {
@@ -40,10 +39,9 @@ type _CartoTileLayerProps = {
   formatTiles?: TileFormat;
 };
 
-export default class CartoTileLayer<
-  DataT extends Feature = Feature,
-  ExtraProps extends {} = {}
-> extends MVTLayer<DataT, Required<_CartoTileLayerProps> & ExtraProps> {
+export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
+  Required<_CartoTileLayerProps> & ExtraProps
+> {
   static layerName = 'CartoTileLayer';
   static defaultProps = defaultProps;
 
@@ -106,7 +104,9 @@ export default class CartoTileLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
+      info.object = binaryToGeojson(data as BinaryFeatures, {
+        globalFeatureId: info.index
+      }) as Feature;
     }
 
     return info;
