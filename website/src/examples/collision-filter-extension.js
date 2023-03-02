@@ -21,7 +21,8 @@ class CollisionDemo extends Component {
     },
     priorityDesc: {
       displayName: 'Order by severity',
-      type: 'select', options: ['High', 'Low'], 
+      type: 'select',
+      options: ['High', 'Low'],
       value: 'High'
     },
     sizeScale: {
@@ -34,9 +35,10 @@ class CollisionDemo extends Component {
     },
     priorityLabelDesc: {
       displayName: 'Order by city rank',
-      type: 'select', options: ['Max', 'Min'], 
+      type: 'select',
+      options: ['Max', 'Min'],
       value: 'Max'
-    },
+    }
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -46,21 +48,34 @@ class CollisionDemo extends Component {
       <div>
         <p>Severity</p>
         <div className="layout">
-          {COLORS_STEPS.map((c, i) => <div className="legend" key={i}
-            style={{
-              background: `rgb(${c.color.join(',')})`,
-              width: `${100 / COLORS_STEPS.length}%`
-            }} />)}
+          {COLORS_STEPS.map((c, i) => (
+            <div
+              className="legend"
+              key={i}
+              style={{
+                background: `rgb(${c.color.join(',')})`,
+                width: `${100 / COLORS_STEPS.length}%`
+              }}
+            />
+          ))}
         </div>
         <p className="layout">
-        {COLORS_STEPS.map((c, i) => <div key={i} className="text-center"
-            style={{width: `${100 / COLORS_STEPS.length}%`}} >{c.threshold}</div>)}
+          {COLORS_STEPS.map((c, i) => (
+            <div key={i} className="text-center" style={{width: `${100 / COLORS_STEPS.length}%`}}>
+              {c.threshold}
+            </div>
+          ))}
         </p>
         <div className="stat">
           No. of accidents<b>{readableInteger(101070)}</b>
         </div>
         <p>
-          Data source: <a href="https://www.data.gov.uk/">data.gov.uk</a>
+          Data source of Road Accidents 2021:
+          <a href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">
+            Uk government
+          </a>
+          <br />
+          Data source of City labels: <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a>
         </p>
       </div>
     );
