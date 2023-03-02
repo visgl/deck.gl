@@ -4,8 +4,8 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import data from './data/data.json';
-import dataLabels from './data/labels.json';
+import data from './data/road_accidents.json';
+import dataLabels from './data/city_labels.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 
 const COLOR_SEVERITY = [
