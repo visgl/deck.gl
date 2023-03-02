@@ -40,7 +40,6 @@ uniform float desaturate;
 uniform vec4 transparentColor;
 uniform vec3 tintColor;
 uniform float opacity;
-uniform bool picking_uAttribute;
 
 uniform float coordinateConversion;
 uniform vec4 bounds;
