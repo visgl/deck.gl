@@ -11,7 +11,7 @@ export GoogleMapsAPIKey=<google_maps_api_key>
 export GoogleMapsMapId=<google_maps_map_id>
 ```
 
-Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.js`.
+Or set the `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAP_ID` variables in `app.jsx`.
 
 To install dependencies:
 
