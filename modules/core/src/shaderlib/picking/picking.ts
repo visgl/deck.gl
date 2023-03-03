@@ -21,6 +21,10 @@ export default {
     'vs:DECKGL_FILTER_COLOR': `
   picking_setPickingColor(geometry.pickingColor);
   `,
+    // TODO - this should be declared in the luma module
+    'fs:#decl': `
+uniform bool picking_uAttribute;
+  `,
     'fs:DECKGL_FILTER_COLOR': {
       order: 99,
       injection: `

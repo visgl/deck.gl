@@ -21,10 +21,11 @@ import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {Proj4Projection} from '@math.gl/proj4';
 
 /** All props supported by the TileLayer */
-export type WMSLayerProps = CompositeLayerProps<any> & _WMSLayerProps;
+export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
 
 /** Props added by the TileLayer */
 type _WMSLayerProps = {
+  data: string | ImageSource;
   serviceType?: ImageServiceType | 'auto';
   layers?: string[];
   srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';

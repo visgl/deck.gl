@@ -115,6 +115,7 @@ export type {
   AccessorContext,
   AccessorFunction,
   LayerData,
+  LayerDataSource,
   Unit,
   Operation,
   Position,

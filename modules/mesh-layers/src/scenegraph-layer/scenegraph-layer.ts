@@ -41,6 +41,7 @@ import type {
   UpdateParameters,
   LayerContext,
   LayerProps,
+  LayerDataSource,
   Position,
   Color,
   Accessor,
@@ -49,9 +50,10 @@ import type {
 
 const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
 
-export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & LayerProps<DataT>;
+export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & LayerProps;
 
 type _ScenegraphLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   // TODO - define in luma.gl
   /**
    * A url for a glTF model or scenegraph loaded via a [scenegraph loader](https://loaders.gl/docs/specifications/category-scenegraph)

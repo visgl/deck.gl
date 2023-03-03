@@ -190,11 +190,11 @@ type _HeatmapLayerProps<DataT> = {
 export default class HeatmapLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
-> extends AggregationLayer<ExtraPropsT & Required<_HeatmapLayerProps<DataT>>> {
+> extends AggregationLayer<DataT, ExtraPropsT & Required<_HeatmapLayerProps<DataT>>> {
   static layerName = 'HeatmapLayer';
   static defaultProps = defaultProps;
 
-  state!: AggregationLayer['state'] & {
+  state!: AggregationLayer<DataT>['state'] & {
     supported: boolean;
     colorDomain?: number[];
     isWeightMapDirty?: boolean;

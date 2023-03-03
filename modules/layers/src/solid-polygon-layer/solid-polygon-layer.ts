@@ -31,6 +31,7 @@ import fs from './solid-polygon-layer-fragment.glsl';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Color,
   Material,
   Accessor,
@@ -43,6 +44,7 @@ import type {
 import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** Whether to fill the polygons
    * @default true
    */
@@ -103,8 +105,7 @@ type _SolidPolygonLayerProps<DataT> = {
 };
 
 /** Render filled and/or extruded polygons. */
-export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> &
-  LayerProps<DataT>;
+export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
