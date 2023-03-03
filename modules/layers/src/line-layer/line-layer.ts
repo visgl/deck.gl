@@ -24,6 +24,7 @@ import {
   picking,
   UNIT,
   LayerProps,
+  LayerDataSource,
   Unit,
   Position,
   Accessor,
@@ -52,10 +53,11 @@ const defaultProps: DefaultProps<LineLayerProps> = {
 };
 
 /** All properties supported by LineLayer. */
-export type LineLayerProps<DataT = any> = _LineLayerProps<DataT> & LayerProps<DataT>;
+export type LineLayerProps<DataT = any> = _LineLayerProps<DataT> & LayerProps;
 
 /** Properties added by LineLayer. */
 type _LineLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`.
    * @default 'pixels'

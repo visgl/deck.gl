@@ -27,6 +27,7 @@ import fs from './scatterplot-layer-fragment.glsl';
 
 import type {
   LayerProps,
+  LayerDataSource,
   UpdateParameters,
   Accessor,
   Unit,
@@ -38,10 +39,11 @@ import type {
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 /** All props supported by the ScatterplotLayer */
-export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps<DataT>;
+export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps;
 
 /** Props added by the ScatterplotLayer */
 type _ScatterplotLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`.
    * @default 'meters'

@@ -31,6 +31,7 @@ import TextBackgroundLayer from './text-background-layer/text-background-layer';
 import type {FontSettings} from './font-atlas-manager';
 import type {
   LayerProps,
+  LayerDataSource,
   Accessor,
   AccessorFunction,
   AccessorContext,
@@ -60,6 +61,7 @@ const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 const DEFAULT_LINE_HEIGHT = 1.0;
 
 type _TextLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** If `true`, the text always faces camera. Otherwise the text faces up (z).
    * @default true
    */
@@ -195,7 +197,7 @@ type _TextLayerProps<DataT> = {
   backgroundColor?: Color;
 };
 
-export type TextLayerProps<DataT = any> = _TextLayerProps<DataT> & LayerProps<DataT>;
+export type TextLayerProps<DataT = any> = _TextLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<TextLayerProps> = {
   billboard: true,

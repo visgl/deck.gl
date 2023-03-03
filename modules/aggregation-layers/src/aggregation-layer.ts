@@ -21,6 +21,7 @@
 import {
   CompositeLayer,
   AttributeManager,
+  LayerDataSource,
   _compareProps as compareProps,
   UpdateParameters,
   CompositeLayerProps
@@ -28,11 +29,14 @@ import {
 import {cssToDeviceRatio} from '@luma.gl/core';
 import {filterProps} from './utils/prop-utils';
 
-export type AggregationLayerProps<DataT = any> = CompositeLayerProps<DataT>;
+export type AggregationLayerProps<DataT> = CompositeLayerProps & {
+  data: LayerDataSource<DataT>;
+};
 
 export default abstract class AggregationLayer<
+  DataT,
   ExtraPropsT extends {} = {}
-> extends CompositeLayer<ExtraPropsT> {
+> extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
 
   state!: CompositeLayer['state'] & {

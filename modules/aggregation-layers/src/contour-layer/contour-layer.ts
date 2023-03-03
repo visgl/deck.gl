@@ -148,7 +148,7 @@ export type _ContourLayerProps<DataT> = {
 export default class ContourLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
-> extends GridAggregationLayer<ExtraPropsT & Required<_ContourLayerProps<DataT>>> {
+> extends GridAggregationLayer<DataT, ExtraPropsT & Required<_ContourLayerProps<DataT>>> {
   static layerName = 'ContourLayer';
   static defaultProps = defaultProps;
 

@@ -76,9 +76,23 @@ export type Texture =
   | ImageBitmap;
 
 /**
+ * Typical types that can be supplied to the `data` property. Can be either:
+ * * An `Iterable` - a list of objects to visualize.
+ * * A non-iterable - an object with a `length` field.
+ * * A `Promise` whose resolved value will be used as the value of the `data` prop.
+ * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
+ * * `string` - a URL to load data from
+ */
+export type LayerDataSource<DataType> =
+  | LayerData<DataType>
+  | string
+  | AsyncIterable<DataType[]>
+  | Promise<LayerData<DataType>>;
+
+/**
  * Base Layer prop types
  */
-export type LayerProps<DataType = any> = {
+export type LayerProps = {
   /**
    * Unique identifier of the layer.
    */
@@ -86,36 +100,36 @@ export type LayerProps<DataType = any> = {
   /**
    * The data to visualize.
    */
-  data?: LayerData<DataType> | string | AsyncIterable<DataType> | Promise<LayerData<DataType>>;
+  data?: unknown;
   /**
    * Callback to determine if two data values are equal.
    */
   dataComparator?:
-    | ((newData: LayerData<DataType>, oldData?: LayerData<DataType>) => boolean)
+    | (<LayerDataT = LayerData<unknown>>(newData: LayerDataT, oldData?: LayerDataT) => boolean)
     | null;
   /**
    * Callback to determine the difference between two data values, in order to perform a partial update.
    */
   _dataDiff?:
-    | ((
-        newData: LayerData<DataType>,
-        oldData?: LayerData<DataType>
+    | (<LayerDataT = LayerData<unknown>>(
+        newData: LayerDataT,
+        oldData?: LayerDataT
       ) => {startRow: number; endRow?: number}[])
     | null;
   /**
    * Callback to manipulate remote data when it's fetched and parsed.
    */
   dataTransform?:
-    | ((data: LayerData<DataType>, previousData?: LayerData<DataType>) => LayerData<DataType>)
+    | (<LayerDataT = LayerData<unknown>>(data: unknown, previousData?: LayerDataT) => LayerDataT)
     | null;
   /**
    * Custom implementation to fetch and parse content from URLs.
    */
-  fetch?: <LayerT extends Layer>(
+  fetch?: (
     url: string,
     context: {
       propName: string;
-      layer: LayerT;
+      layer: Layer;
       loaders?: Loader[];
       loadOptions?: any;
       signal?: AbortSignal;
@@ -207,9 +221,9 @@ export type LayerProps<DataType = any> = {
    * Called when remote data is fetched and parsed.
    */
   onDataLoad?:
-    | (<LayerT extends Layer>(
-        data: LayerData<DataType>,
-        context: {propName: string; layer: LayerT}
+    | (<LayerDataT = LayerData<unknown>>(
+        data: LayerDataT,
+        context: {propName: string; layer: Layer}
       ) => void)
     | null;
   /**
@@ -244,7 +258,7 @@ export type LayerProps<DataType = any> = {
   startIndices?: NumericArray | null;
 };
 
-export type CompositeLayerProps<DataType = any> = LayerProps<DataType> & {
+export type CompositeLayerProps = LayerProps & {
   /** (Experimental) override sub layer props. Only works on a composite layer. */
   _subLayerProps?: {
     [subLayerId: string]: {
