@@ -91,13 +91,15 @@ module.exports = getESLintConfig({
           'import/no-extraneous-dependencies': 0,
           'no-process-env': 0
         }
+      },
+      {
+        files: ['examples/**/*.*', 'website/src/**/*.*'],
+        rules: {
+          // We want lint to pass without having to install the dependencies for examples or website
+          'import/no-unresolved': 0,
+          'import/named': 0
+        }
       }
-      // {
-      //   files: ['examples/**/*.js'],
-      //   rules: {
-      //     'import/no-unresolved': 0
-      //   }
-      // }
     ],
 
     settings: {
