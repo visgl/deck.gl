@@ -6,7 +6,6 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const webpack = require('webpack');
 const {resolve} = require('path');
 
-/* global process */
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'deck.gl',

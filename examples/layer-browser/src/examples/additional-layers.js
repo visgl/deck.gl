@@ -42,7 +42,7 @@ const GeohashLayerExample = {
     getElevation: f => 100 * f.value,
     pickable: true
   }
-}
+};
 
 const QuadkeyLayerExample = {
   layer: QuadkeyLayer,

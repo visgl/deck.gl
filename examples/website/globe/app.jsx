@@ -81,21 +81,24 @@ export default function App({data}) {
     []
   );
 
-  const dataLayers = data && data.map(({date, flights}) =>
-    new AnimatedArcLayer({
-      id: `flights-${date}`,
-      data: flights,
-      getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-      getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-      getSourceTimestamp: d => d.time1,
-      getTargetTimestamp: d => d.time2,
-      getHeight: 0.5,
-      getWidth: 1,
-      timeRange,
-      getSourceColor: [255, 0, 128],
-      getTargetColor: [0, 128, 255]
-    })
-  );
+  const dataLayers =
+    data &&
+    data.map(
+      ({date, flights}) =>
+        new AnimatedArcLayer({
+          id: `flights-${date}`,
+          data: flights,
+          getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
+          getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
+          getSourceTimestamp: d => d.time1,
+          getTargetTimestamp: d => d.time2,
+          getHeight: 0.5,
+          getWidth: 1,
+          timeRange,
+          getSourceColor: [255, 0, 128],
+          getTargetColor: [0, 128, 255]
+        })
+    );
 
   return (
     <>
