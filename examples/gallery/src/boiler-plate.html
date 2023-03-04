@@ -2,14 +2,13 @@
   <head>
     <title>Get Started with deck.gl and Mapbox</title>
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />    
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
   </head>
 
-  <body style="margin:0; width: 100vw; height: 100vh;"></body>
+  <body style="margin: 0; width: 100vw; height: 100vh"></body>
 
   <script type="text/javascript">
-
     const {DeckGL, ScatterplotLayer, TextLayer} = deck;
 
     new DeckGL({
@@ -23,23 +22,18 @@
       controller: true,
       layers: [
         new ScatterplotLayer({
-          data: [
-            {position: [-122.402, 37.79], color: [255, 0, 0], radius: 1000}
-          ],
+          data: [{position: [-122.402, 37.79], color: [255, 0, 0], radius: 1000}],
           getPosition: d => d.position,
           getFillColor: d => d.color,
           getRadius: d => d.radius,
           opacity: 0.3
         }),
         new TextLayer({
-          data: [
-            {position: [-122.402, 37.79], text: 'Hello World'}
-          ],
+          data: [{position: [-122.402, 37.79], text: 'Hello World'}],
           getPosition: d => d.position,
           getText: d => d.text
         })
       ]
     });
-
   </script>
 </html>

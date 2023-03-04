@@ -4,9 +4,9 @@
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' /> 
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -24,13 +24,11 @@
     </style>
   </head>
 
-  <body>
-  </body>
+  <body></body>
 
   <script type="text/javascript">
-    
     const {DeckGL, GeoJsonLayer, ArcLayer} = deck;
-    
+
     const inFlowColors = [
       [255, 255, 204],
       [199, 233, 180],
@@ -50,7 +48,7 @@
       [227, 26, 28],
       [177, 0, 38]
     ];
-    
+
     const deckgl = new DeckGL({
       mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
       initialViewState: {
@@ -65,24 +63,24 @@
       layers: [],
       getTooltip: ({object}) => object && object.properties.name
     });
-    
-    function getArcLayer(data, selectedFeature) {
 
+    function getArcLayer(data, selectedFeature) {
       const {flows, centroid} = selectedFeature.properties;
       const arcs = Object.keys(flows).map(toId => {
-      const f = data.features[toId];
-      return {
-        source: centroid,
-        target: f.properties.centroid,
-        value: flows[toId]
-      };
+        const f = data.features[toId];
+        return {
+          source: centroid,
+          target: f.properties.centroid,
+          value: flows[toId]
+        };
       });
 
-      const scale = d3.scaleQuantile()
+      const scale = d3
+        .scaleQuantile()
         .domain(arcs.map(a => Math.abs(a.value)))
         .range(inFlowColors.map((c, i) => i));
 
-        arcs.forEach(a => {
+      arcs.forEach(a => {
         a.gain = Math.sign(a.value);
         a.quantile = scale(Math.abs(a.value));
       });
@@ -99,8 +97,8 @@
     }
 
     function renderLayers(data, selectedFeature) {
-
-      selectedFeature = selectedFeature || data.features.find(f => f.properties.name === 'Los Angeles, CA');
+      selectedFeature =
+        selectedFeature || data.features.find(f => f.properties.name === 'Los Angeles, CA');
       const arcLayer = getArcLayer(data, selectedFeature);
       const countyLayer = new GeoJsonLayer({
         id: 'geojson',
@@ -113,12 +111,11 @@
         onClick: info => renderLayers(data, info.object)
       });
 
-      deckgl.setProps({ layers: [countyLayer, arcLayer] });
+      deckgl.setProps({layers: [countyLayer, arcLayer]});
     }
 
     fetch('https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json')
-    .then(res => res.json())
-    .then(data => renderLayers(data))
-
+      .then(res => res.json())
+      .then(data => renderLayers(data));
   </script>
 </html>

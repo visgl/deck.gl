@@ -3,9 +3,9 @@
     <title>deck.gl LineLayer Example</title>
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -28,7 +28,6 @@
   </body>
 
   <script type="text/javascript">
-
     const {DeckGL, LineLayer} = deck;
 
     new DeckGL({
@@ -62,6 +61,5 @@
       const r = z / 10000;
       return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
     }
-    
   </script>
 </html>

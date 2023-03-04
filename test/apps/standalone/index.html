@@ -1,16 +1,27 @@
 <html>
   <head>
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css" rel="stylesheet" />
     <style>
-      body {margin: 0; padding: 0;}
-      #geo, #non-geo {position: absolute; width: 50vw; height: 100vh;}
-      #non-geo {left: 50vw; top: 0;}
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #geo,
+      #non-geo {
+        position: absolute;
+        width: 50vw;
+        height: 100vh;
+      }
+      #non-geo {
+        left: 50vw;
+        top: 0;
+      }
     </style>
   </head>
   <body>
-    <div id="geo" ></div>
-    <div id="non-geo" ></div>
+    <div id="geo"></div>
+    <div id="non-geo"></div>
   </body>
-  <script type="module" src='index.js'></script>
+  <script type="module" src="index.js"></script>
 </html>

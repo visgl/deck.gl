@@ -10,5 +10,6 @@ dist.js
 mapbox-gl.js
 .cache
 .docusaurus
+**/*.html
 
 test/apps/

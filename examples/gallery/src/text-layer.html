@@ -3,9 +3,9 @@
     <title>deck.gl TextLayer Example</title>
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -41,24 +41,23 @@
   </head>
 
   <body>
-      <div id="tooltip"></div>
-      <div id="control-panel">
-        <div>
-          <label>Font Size</label>
-          <input id="getSize" type="range" min="0" max="100" step="1" value="16"></input>
-          <span id="getSize-value"></span>
-        </div>
-        <div>
-          <label>Opacity</label>
-          <input id="opacity" type="range" min="0" max="1" step="0.1" value="1"></input>
-          <span id="opacity-value"></span>
-        </div>
+    <div id="tooltip"></div>
+    <div id="control-panel">
+      <div>
+        <label>Font Size</label>
+        <input id="getSize" type="range" min="0" max="100" step="1" value="16" />
+        <span id="getSize-value"></span>
       </div>
+      <div>
+        <label>Opacity</label>
+        <input id="opacity" type="range" min="0" max="1" step="0.1" value="1" />
+        <span id="opacity-value"></span>
+      </div>
+    </div>
   </body>
 
   <script type="text/javascript">
-
-    const {DeckGL,TextLayer} = deck;
+    const {DeckGL, TextLayer} = deck;
 
     const deckgl = new DeckGL({
       mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
@@ -73,7 +72,7 @@
       controller: true,
       getTooltip: ({object}) => object && `${object.name}\n${object.address}`
     });
-    
+
     const OPTIONS = ['getSize', 'opacity'];
     OPTIONS.forEach(key => {
       document.getElementById(key).oninput = renderLayer;
@@ -96,14 +95,13 @@
         getPosition: d => d.coordinates,
         getText: d => d.name,
         getSize: 16,
-        getColor: [247,248,243],
+        getColor: [247, 248, 243],
         getTextAnchor: 'middle',
         getAlignmentBaseline: 'center',
         ...options
       });
-      
-      deckgl.setProps({ layers: [textLayer] });
+
+      deckgl.setProps({layers: [textLayer]});
     }
-    
   </script>
 </html>

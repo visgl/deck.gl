@@ -5,9 +5,9 @@
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -31,12 +31,19 @@
   </body>
 
   <script type="text/javascript">
+    const {
+      DeckGL,
+      OrthographicView,
+      IconLayer,
+      LineLayer,
+      ScatterplotLayer,
+      TextLayer,
+      COORDINATE_SYSTEM
+    } = deck;
 
-    const {DeckGL, OrthographicView, IconLayer, LineLayer, ScatterplotLayer, TextLayer, COORDINATE_SYSTEM} = deck;
-
-    const deckgl =  new DeckGL({
+    const deckgl = new DeckGL({
       views: new OrthographicView(),
-      initialViewState: { target: [0, 0, 0], zoom: 3 },
+      initialViewState: {target: [0, 0, 0], zoom: 3},
       controller: true,
       getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
     });
@@ -50,13 +57,13 @@
           width: 128,
           height: 128
         }),
-        getSize : d => d.r * 1.4,
+        getSize: d => d.r * 1.4,
         getPosition: d => [d.x, d.y],
         sizeUnits: 'common',
         pickable: true
       });
 
-      deckgl.setProps({ layers: [iconLayer] });
+      deckgl.setProps({layers: [iconLayer]});
     }
 
     async function getContributors() {
@@ -65,14 +72,18 @@
       let page = 1;
       let result = [];
       while (true) {
-        const {data} = await octokit.repos.getContributors({ owner: 'visgl', repo: 'deck.gl', per_page: perPage, page: page++});
+        const {data} = await octokit.repos.getContributors({
+          owner: 'visgl',
+          repo: 'deck.gl',
+          per_page: perPage,
+          page: page++
+        });
         result = result.concat(data);
         if (data.length < perPage) return result;
       }
     }
 
-    getContributors()
-    .then(data => {
+    getContributors().then(data => {
       const circles = data.map((d, i) => {
         return {
           login: d.login,
@@ -86,7 +97,6 @@
       d3.packSiblings(circles);
 
       renderLayers(circles);
-    })
-
+    });
   </script>
 </html>

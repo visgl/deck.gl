@@ -3,9 +3,9 @@
     <title>deck.gl ContourLayer Example</title>
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -32,8 +32,7 @@
       layers: [
         new ContourLayer({
           id: 'contourLayer',
-          data:
-            'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json',
+          data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json',
           getPosition: d => d,
           contours: [
             {threshold: 1, color: [255, 0, 0], strokeWidth: 4},

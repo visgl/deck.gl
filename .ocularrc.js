@@ -21,6 +21,7 @@ const useLocalLuma = false;
 
 const config = {
   lint: {
+    extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'html'],
     paths: ['modules', 'test', 'examples', 'website']
   },
 

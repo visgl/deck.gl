@@ -3,9 +3,9 @@
     <title>deck.gl GreatCircleLayer Example</title>
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -23,16 +23,14 @@
     </style>
   </head>
 
-  <body>
-  </body>
+  <body></body>
 
   <script type="text/javascript">
     const {DeckGL, GreatCircleLayer} = deck;
 
     const greatCircleLayer = new GreatCircleLayer({
       id: 'great-circle',
-      data:
-        'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
+      data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
       getSourcePosition: d => d.from.coordinates,
       getTargetPosition: d => d.to.coordinates,
       getSourceColor: [64, 255, 0],
@@ -49,7 +47,7 @@
         zoom: 1,
         maxZoom: 20,
         pitch: 30,
-        bearing: 0,
+        bearing: 0
       },
       controller: true,
       layers: [greatCircleLayer],

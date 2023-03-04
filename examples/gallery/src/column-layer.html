@@ -3,9 +3,9 @@
     <title>deck.gl ColumnLayer Example</title>
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         width: 100vw;
@@ -32,8 +32,7 @@
       layers: [
         new ColumnLayer({
           id: 'column',
-          data:
-            'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/hexagons.json',
+          data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/hexagons.json',
           diskResolution: 12,
           radius: 250,
           elevationScale: 5000,

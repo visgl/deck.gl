@@ -4,9 +4,9 @@
 
     <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
-    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style type="text/css">
       body {
         font-family: Helvetica, Arial, sans-serif;
@@ -40,24 +40,23 @@
     <div id="control-panel">
       <div>
         <label>Radius</label>
-        <input id="radius" type="range" min="1000" max="20000" step="1000" value="1000"></input>
+        <input id="radius" type="range" min="1000" max="20000" step="1000" value="1000" />
         <span id="radius-value"></span>
       </div>
       <div>
         <label>Coverage</label>
-        <input id="coverage" type="range" min="0" max="1" step="0.1" value="1"></input>
+        <input id="coverage" type="range" min="0" max="1" step="0.1" value="1" />
         <span id="coverage-value"></span>
       </div>
       <div>
         <label>Upper Percentile</label>
-        <input id="upperPercentile" type="range" min="90" max="100" step="1" value="100"></input>
+        <input id="upperPercentile" type="range" min="90" max="100" step="1" value="100" />
         <span id="upperPercentile-value"></span>
       </div>
     </div>
   </body>
 
   <script type="text/javascript">
-
     const {DeckGL, HexagonLayer} = deck;
 
     const deckgl = new DeckGL({
@@ -90,7 +89,7 @@
       document.getElementById(key).oninput = renderLayer;
     });
 
-    function renderLayer () {
+    function renderLayer() {
       const options = {};
       OPTIONS.forEach(key => {
         const value = document.getElementById(key).value;
@@ -114,11 +113,11 @@
       });
     }
 
-    d3.csv('https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv')
-      .then(response => {
+    d3.csv(
+      'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+    ).then(response => {
       data = response.map(d => [Number(d.lng), Number(d.lat)]);
       renderLayer();
     });
-
   </script>
 </html>
