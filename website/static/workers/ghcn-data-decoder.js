@@ -3,10 +3,10 @@ let result = [];
 const countries = {};
 let vertices = 0;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -27,7 +27,7 @@ onmessage = function(e) {
         vertices++;
       }
     }
-    
+
     result.push({
       id: parts[0].slice(0, 11),
       country: countries[parts[0].slice(0, 2)],
@@ -36,7 +36,6 @@ onmessage = function(e) {
       altitude: usePrecision(decodeNumber(parts[2], 90, 32) / 10 - 500, 1),
       meanTemp
     });
-
   });
 
   if (e.data.event === 'load') {

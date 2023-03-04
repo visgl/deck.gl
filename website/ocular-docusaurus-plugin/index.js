@@ -1,5 +1,4 @@
-const util = require('util');
-const path = require('path');
+// const util = require('util');
 
 /* Print full webpack error;
    edit node_modules/react-dev-utils/formatWebpackMessages.js
@@ -10,12 +9,15 @@ const path = require('path');
   ```
 */
 
-module.exports = function(context, opts = {
-  resolve: {modules: [], alias: {}},
-  debug: false,
-  module: {},
-  plugins: []
-}) {
+module.exports = function (
+  context,
+  opts = {
+    resolve: {modules: [], alias: {}},
+    debug: false,
+    module: {},
+    plugins: []
+  }
+) {
   return {
     name: 'ocular-docusaurus-plugin',
     configureWebpack(_config, isServer, utils) {
@@ -41,9 +43,9 @@ module.exports = function(context, opts = {
           module,
           plugins,
           node: {__dirname: true}
-        }
+        };
       }
       return {module, plugins};
-    },
+    }
   };
-}
+};

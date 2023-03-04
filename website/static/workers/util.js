@@ -10,7 +10,7 @@ function decodeNumberArr(str, b, shift, length) {
 function decodeNumber(str, b, shift) {
   let x = 0;
   let p = 1;
-  for (let i = str.length; i--;) {
+  for (let i = str.length; i--; ) {
     x += (str.charCodeAt(i) - shift) * p;
     p *= b;
   }
@@ -42,12 +42,11 @@ function decodePolyline(str, precision) {
     longitude_change,
     factor = Math.pow(10, precision || 5);
 
-    // Coordinates have variable length when encoded, so just keep
-    // track of whether we've hit the end of the string. In each
-    // loop iteration, a single coordinate is decoded.
+  // Coordinates have variable length when encoded, so just keep
+  // track of whether we've hit the end of the string. In each
+  // loop iteration, a single coordinate is decoded.
   while (index < str.length) {
-
-        // Reset shift, result, and byte
+    // Reset shift, result, and byte
     byte = null;
     shift = 0;
     result = 0;
@@ -58,7 +57,7 @@ function decodePolyline(str, precision) {
       shift += 5;
     } while (byte >= 0x20);
 
-    latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    latitude_change = result & 1 ? ~(result >> 1) : result >> 1;
 
     shift = result = 0;
 
@@ -68,7 +67,7 @@ function decodePolyline(str, precision) {
       shift += 5;
     } while (byte >= 0x20);
 
-    longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    longitude_change = result & 1 ? ~(result >> 1) : result >> 1;
 
     lat += latitude_change;
     lng += longitude_change;

@@ -25,7 +25,7 @@ class PointCloudDemo extends Component {
     );
   }
 
-  _onLoad = (meta) => {
+  _onLoad = meta => {
     this.props.onStateChange(meta);
   };
 

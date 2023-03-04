@@ -29,7 +29,8 @@ module.exports = getESLintConfig({
       'default-case': ['warn'],
       'no-eq-null': ['warn'],
       eqeqeq: ['warn'],
-      radix: 0
+      radix: 0,
+      'react/sort-comp': 0
       // 'accessor-pairs': ['error', {getWithoutSet: false, setWithoutGet: false}]
     },
 
@@ -87,15 +88,18 @@ module.exports = getESLintConfig({
         ],
         rules: {
           'import/no-unresolved': 0,
-          'import/no-extraneous-dependencies': 0
+          'import/no-extraneous-dependencies': 0,
+          'no-process-env': 0
+        }
+      },
+      {
+        files: ['examples/**/*.*', 'website/src/**/*.*'],
+        rules: {
+          // We want lint to pass without having to install the dependencies for examples or website
+          'import/no-unresolved': 0,
+          'import/named': 0
         }
       }
-      // {
-      //   files: ['examples/**/*.js'],
-      //   rules: {
-      //     'import/no-unresolved': 0
-      //   }
-      // }
     ],
 
     settings: {

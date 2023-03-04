@@ -3,10 +3,10 @@ let result = [];
 
 const ID_PATTERN = /(\w\w)(I|US|SR)(.*)/;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -18,8 +18,7 @@ onmessage = function(e) {
     const type = match[2];
     const id = match[3];
 
-    parts.slice(1).forEach(function(str) {
-
+    parts.slice(1).forEach(function (str) {
       const items = str.split('\t').map(x => decodeNumber(x, 90, 32));
 
       result.push({

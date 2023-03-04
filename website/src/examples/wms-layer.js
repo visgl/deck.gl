@@ -6,17 +6,17 @@ import styled from 'styled-components';
 import {makeExample} from '../components';
 
 const DemoContainer = styled.div`
-.selected-feature-info {
-  position: absolute;
-  z-index: 10;
-  font-size: 12px;
-  line-height: 1.25;
-  background: #fff;
-  box-shadow: 2px 2px 4px rgb(0 0 0 / 20%);
-  padding: 8px;
-  max-width: 320px;
-  white-space: pre-wrap;
-}
+  .selected-feature-info {
+    position: absolute;
+    z-index: 10;
+    font-size: 12px;
+    line-height: 1.25;
+    background: #fff;
+    box-shadow: 2px 2px 4px rgb(0 0 0 / 20%);
+    padding: 8px;
+    max-width: 320px;
+    white-space: pre-wrap;
+  }
 `;
 
 const SERVICES = {
@@ -47,22 +47,34 @@ class WMSDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/wms`;
 
   static parameters = {
-    service: {displayName: 'Service', type: 'select', options: Object.keys(SERVICES), value: Object.keys(SERVICES)[0]},
-    layer: {displayName: 'Layer', type: 'select', options: [], value: ''},
+    service: {
+      displayName: 'Service',
+      type: 'select',
+      options: Object.keys(SERVICES),
+      value: Object.keys(SERVICES)[0]
+    },
+    layer: {displayName: 'Layer', type: 'select', options: [], value: ''}
   };
 
   static renderInfo(meta) {
     if (!meta.title) {
-      return <div>
-        <p>Loading...</p>
-      </div>;
+      return (
+        <div>
+          <p>Loading...</p>
+        </div>
+      );
     }
-    const {title, raw: {Service}} = meta;
+    const {
+      title,
+      raw: {Service}
+    } = meta;
     return (
       <div>
         <p>{title}</p>
         <p>{Service.Abstract}</p>
-        <p><a title={Service.AccessConstraints}>Attributions</a></p>
+        <p>
+          <a title={Service.AccessConstraints}>Attributions</a>
+        </p>
       </div>
     );
   }
@@ -85,7 +97,7 @@ class WMSDemo extends Component {
     }
   }
 
-  _onMetadataLoad = (meta) => {
+  _onMetadataLoad = meta => {
     this.props.onStateChange(meta);
 
     const layers = getLayerNames(meta.raw.Capability.Layer.Layer);
@@ -111,7 +123,8 @@ class WMSDemo extends Component {
 
     return (
       <DemoContainer>
-        <App {...otherProps} 
+        <App
+          {...otherProps}
           serviceUrl={service.serviceUrl}
           initialViewState={service.viewState}
           layers={layers[params.layer.value] || service.defaultLayers}

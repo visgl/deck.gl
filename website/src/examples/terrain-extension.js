@@ -68,9 +68,10 @@ class TerrainExtensionDemo extends Component {
       <div>
         <p>Reconstructed 3D terrain with official routes from Tour de France 2023.</p>
         <p>
-          Data sources: 
+          Data sources:
           <div>
-          Cycling Stage <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
+            Cycling Stage{' '}
+            <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
           </div>
         </p>
       </div>

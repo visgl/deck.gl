@@ -17,7 +17,7 @@ class LineDemo extends Component {
       url: `${DATA_URI}/airports.json`
     }
   ];
-  
+
   static code = `${GITHUB_TREE}/examples/website/line`;
 
   static parameters = {

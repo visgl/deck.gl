@@ -26,8 +26,14 @@ class PlotDemo extends Component {
 
   static parameters = {
     equation: {displayName: 'Z = f(x, y)', type: 'text', value: 'sin(x ^ 2 + y ^ 2) * x / 3.14'},
-    resolution: {displayName: 'Resolution', type: 'range',
-      value: 200, step: 10, min: 10, max: 1000},
+    resolution: {
+      displayName: 'Resolution',
+      type: 'range',
+      value: 200,
+      step: 10,
+      min: 10,
+      max: 1000
+    },
     showAxis: {displayName: 'Grid', type: 'checkbox', value: true}
   };
 
@@ -59,7 +65,8 @@ class PlotDemo extends Component {
       <App
         equation={evaluatedEquation.valid ? evaluatedEquation.func : null}
         resolution={resolution.value}
-        showAxis={showAxis.value} />
+        showAxis={showAxis.value}
+      />
     );
   }
 }
