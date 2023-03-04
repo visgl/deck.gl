@@ -9,10 +9,7 @@ export function loadData(url, worker, onSuccess) {
       onSuccess(data, meta);
     });
 
-    req
-      .on('progress', dataParser.onProgress)
-      .on('load', dataParser.onLoad)
-      .get();
+    req.on('progress', dataParser.onProgress).on('load', dataParser.onLoad).get();
   } else if (/\.(json|geojson)$/.test(url)) {
     // load as json
     json(url, (error, response) => {

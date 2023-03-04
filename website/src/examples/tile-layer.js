@@ -1,3 +1,4 @@
+/* global requestAnimationFrame */
 import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/map-tile/app';
@@ -28,7 +29,7 @@ class MapTileDemo extends Component {
     );
   }
 
-  _onTilesLoad = (tiles) => {
+  _onTilesLoad = tiles => {
     // onViewportLoad is called during tileLayer.updateState
     // Updating React state here may trigger another round of layer updates and create a racing condition
     // TODO - Fix this in TileLayer
@@ -38,7 +39,9 @@ class MapTileDemo extends Component {
   render() {
     // eslint-disable-next-line no-unused-vars
     const {params, ...otherProps} = this.props;
-    return <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />;
+    return (
+      <App {...otherProps} showBorder={params.showBorder.value} onTilesLoad={this._onTilesLoad} />
+    );
   }
 }
 

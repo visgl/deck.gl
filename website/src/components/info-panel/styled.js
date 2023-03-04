@@ -33,8 +33,8 @@ export const PanelExpander = styled.div`
   text-align: center;
   line-height: 16px;
   border-radius: 50%;
-  background: ${(props) => (props.$expanded ? 'none' : 'var(--ifm-color-gray-900)')};
-  color: ${(props) => (props.$expanded ? 'var(--ifm-color-black)' : 'var(--ifm-color-white)')};
+  background: ${props => (props.$expanded ? 'none' : 'var(--ifm-color-gray-900)')};
+  color: ${props => (props.$expanded ? 'var(--ifm-color-black)' : 'var(--ifm-color-white)')};
   ${isMobile} {
     display: block;
   }
@@ -102,7 +102,7 @@ export const PanelContent = styled.div`
     white-space: initial;
   }
   ${isMobile} {
-    display: ${(props) => (props.$expanded ? 'block' : 'none')};
+    display: ${props => (props.$expanded ? 'block' : 'none')};
   }
 `;
 
@@ -113,6 +113,6 @@ export const SourceLink = styled.a`
   font: bold 12px/20px var(--ifm-font-family-base);
   color: var(--ifm-color-gray-800);
   ${isMobile} {
-    display: ${(props) => (props.$expanded ? 'block' : 'none')};
+    display: ${props => (props.$expanded ? 'block' : 'none')};
   }
 `;

@@ -29,7 +29,8 @@ module.exports = getESLintConfig({
       'default-case': ['warn'],
       'no-eq-null': ['warn'],
       eqeqeq: ['warn'],
-      radix: 0
+      radix: 0,
+      'react/sort-comp': 0
       // 'accessor-pairs': ['error', {getWithoutSet: false, setWithoutGet: false}]
     },
 

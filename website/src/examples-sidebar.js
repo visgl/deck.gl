@@ -11,14 +11,14 @@
 const sidebars = {
   examplesSidebar: [
     {
-      "type": "doc",
-      "label": "Overview",
-      "id": "index"
+      type: 'doc',
+      label: 'Overview',
+      id: 'index'
     },
     {
-      "type": "category",
-      "label": "Layers",
-      "items": [
+      type: 'category',
+      label: 'Layers',
+      items: [
         'arc-layer',
         'contour-layer',
         'geojson-layer-polygons',
@@ -41,40 +41,24 @@ const sidebars = {
       ]
     },
     {
-      "type": "category",
-      "label": "Integrations",
-      "items": [
-        'arcgis',
-        'carto',
-        'google-maps',
-        'mapbox'
-      ]
+      type: 'category',
+      label: 'Integrations',
+      items: ['arcgis', 'carto', 'google-maps', 'mapbox']
     },
     {
-      "type": "category",
-      "label": "Views",
-      "items": [
-        'multi-view',
-        'globe-view',
-        'plot',
-        'orthographic-view',
-        'first-person-view'
-      ]
+      type: 'category',
+      label: 'Views',
+      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view', 'first-person-view']
     },
     {
-      "type": "category",
-      "label": "Extensions",
-      "items": [
-        'brushing-extension',
-        'data-filter-extension',
-        'mask-extension',
-        'terrain-extension'
-      ]
+      type: 'category',
+      label: 'Extensions',
+      items: ['brushing-extension', 'data-filter-extension', 'mask-extension', 'terrain-extension']
     },
     {
-      "type": "category",
-      "label": "Declarative",
-      "items": [
+      type: 'category',
+      label: 'Declarative',
+      items: [
         {
           type: 'link',
           label: 'Playground',

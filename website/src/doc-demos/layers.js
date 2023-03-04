@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
   ArcLayer,

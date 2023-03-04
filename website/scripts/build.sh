@@ -2,6 +2,7 @@
 set -e
 
 node scripts/validate-token.js
+npm run write-heading-ids
 
 # staging or prod
 MODE=$1

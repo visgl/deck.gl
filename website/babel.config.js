@@ -10,6 +10,6 @@ module.exports = {
       }
     ],
     // Ensure consistently hashed component classNames between environments (a must for SSR)
-    "styled-components"
+    'styled-components'
   ]
 };
