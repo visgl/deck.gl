@@ -2,7 +2,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {MapboxLayer} from '@deck.gl/mapbox';
 
-import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
+import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from '../layers';
 
 const map = new maplibregl.Map({
   container: 'map',

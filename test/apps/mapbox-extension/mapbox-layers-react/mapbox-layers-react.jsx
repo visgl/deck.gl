@@ -1,15 +1,16 @@
 /* global document */
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
-import {Map, useControl} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
+import {Map} from 'react-map-gl';
 
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapboxLayer} from '@deck.gl/mapbox';
 
-import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer, deckTextLayer} from './layers';
+import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer, deckTextLayer} from '../layers';
 import {MapView, OrthographicView} from '@deck.gl/core';
+
+// Set your mapbox token here
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   mapbox: {
@@ -53,52 +54,48 @@ function getFirstTextLayerId(style) {
   return firstSymbolId;
 }
 
-function DeckGLOverlay(props) {
-  const overlay = useControl(() => new MapboxOverlay(props));
-  overlay.setProps(props);
-  return null;
-}
-
 function App() {
   // DeckGL and mapbox will both draw into this WebGL context
+  const [glContext, setGLContext] = useState();
+  const deckRef = useRef(null);
   const mapRef = useRef(null);
-  const [layers, setLayers] = useState([
-    new ScatterplotLayer(deckPoiLayer),
-    new ArcLayer(deckRouteLayer),
-    new TextLayer(deckTextLayer)
-  ]);
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current.getMap();
+    const deck = deckRef.current.deck;
 
     map.addLayer(mapboxBuildingLayer);
-    setLayers([
-      new ScatterplotLayer({
-        ...deckPoiLayer,
-        beforeId: getFirstTextLayerId(map.getStyle())
-      }),
-      new ArcLayer(deckRouteLayer),
-      new TextLayer(deckTextLayer)
-    ]);
+    map.addLayer(new MapboxLayer({id: 'deckgl-pois', deck}), getFirstTextLayerId(map.getStyle()));
+    map.addLayer(new MapboxLayer({id: 'deckgl-tour-route', deck}));
   }, []);
 
+  const layers = [
+    new ScatterplotLayer(deckPoiLayer),
+    new ArcLayer(deckRouteLayer),
+    new TextLayer(deckTextLayer)
+  ];
+
   return (
-    <Map
-      ref={mapRef}
-      initialViewState={INITIAL_VIEW_STATE.mapbox}
-      style={{position: 'absolute', width: '100%', height: '100%'}}
-      mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-      mapLib={maplibregl}
-      onLoad={onMapLoad}
+    <DeckGL
+      ref={deckRef}
+      layers={layers}
+      views={[mapboxView, widgetView]}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      onWebGLInitialized={setGLContext}
+      glOptions={{stencil: true}}
+      layerFilter={layerFilter}
     >
-      <DeckGLOverlay
-        interleaved
-        layers={layers}
-        views={[mapboxView, widgetView]}
-        glOptions={{stencil: true}}
-        layerFilter={layerFilter}
-      />
-    </Map>
+      {glContext && (
+        <Map
+          ref={mapRef}
+          gl={glContext}
+          mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+          onLoad={onMapLoad}
+        />
+      )}
+    </DeckGL>
   );
 }
 
