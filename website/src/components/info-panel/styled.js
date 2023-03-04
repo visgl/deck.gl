@@ -7,7 +7,7 @@ export const PanelContainer = styled.div`
   top: 0;
   right: 0;
   width: 344px;
-  background: var(--ifm-color-white);
+  background: var(--ifm-background-surface-color);
   box-shadow: var(--ifm-global-shadow-lw);
   margin: 24px;
   padding: 10px 24px;
@@ -60,7 +60,7 @@ export const PanelContent = styled.div`
     display: inline-block;
     width: 40%;
     margin-right: 10%;
-    color: var(--ifm-color-gray-800);
+    color: var(--ifm-color-content-secondary);
     margin-top: 2px;
     margin-bottom: 2px;
   }
@@ -111,7 +111,7 @@ export const SourceLink = styled.a`
   text-align: right;
   margin-top: 8px;
   font: bold 12px/20px var(--ifm-font-family-base);
-  color: var(--ifm-color-gray-800);
+  color: var(--ifm-color-content-secondary);
   ${isMobile} {
     display: ${(props) => (props.$expanded ? 'block' : 'none')};
   }

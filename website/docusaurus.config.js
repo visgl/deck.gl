@@ -113,6 +113,7 @@ const config = {
         logo: {
           alt: 'vis.gl Logo',
           src: 'images/visgl-logo-dark.png',
+          srcDark: 'images/visgl-logo-light.png',
         },
         items: [
           {

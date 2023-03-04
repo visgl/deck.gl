@@ -21,7 +21,7 @@ label {
   margin-bottom: 2px;
 }
 input, a, button {
-  background: var(--ifm-color-white);
+  background: var(--ifm-background-surface-color);
   font-size: 0.9em;
   text-transform: none;
   text-overflow: ellipsis;

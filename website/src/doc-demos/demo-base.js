@@ -2,7 +2,7 @@ import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {Map} from 'react-map-gl';
 import styled from 'styled-components';
-
+import { useColorMode } from '@docusaurus/theme-common'
 import {MAPBOX_STYLES} from '../constants/defaults';
 import {gotoLayerSource} from './codepen-automation';
 
@@ -54,7 +54,7 @@ position: absolute;
 top: 0;
 right: 0;
 padding: 8px;
-background: #fff;
+background: var(--ifm-background-surface-color);
 margin: 12px;
 box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 cursor: pointer;
@@ -62,7 +62,7 @@ font-weight: bold;
 font-size: 12px;
 
 &:hover {
-  color: var(--color-primary);
+  color: var(--ifm-color-primary);
 }
 
 svg {
@@ -83,21 +83,26 @@ function evalObject(source, globals, output) {
 }
 
 export function makeLayerDemo(config) {
-  const {Layer, getTooltip, props, mapStyle = MAPBOX_STYLES.LIGHT, initialViewState = INITIAL_VIEW_STATE, imports} = config;
+  const {Layer, getTooltip, props, mapStyle = true, initialViewState = INITIAL_VIEW_STATE, imports} = config;
   config.initialViewState = initialViewState;
 
-  function Demo() {
-    const _getTooltip = getTooltip && eval(getTooltip);
-    const styledGetTooltip = pickingInfo => {
-      const text = _getTooltip && _getTooltip(pickingInfo);
-      return text && {
-        text,
-        style: TOOLTIP_STYLE
-      };
+  const _getTooltip = getTooltip && eval(getTooltip);
+  const styledGetTooltip = pickingInfo => {
+    const text = _getTooltip && _getTooltip(pickingInfo);
+    return text && {
+      text,
+      style: TOOLTIP_STYLE
     };
+  };
 
-    const layerProps = evalObject(props, imports);
+  const layerProps = evalObject(props, imports);
+
+  function Demo() {
+    const { colorMode } = useColorMode();
+
     const layer = new Layer(layerProps);
+
+    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
 
     return (
       <DemoPlaceholder>
@@ -109,11 +114,11 @@ export function makeLayerDemo(config) {
             controller={true}
             layers={[layer]}
           >
-            {mapStyle && <Map reuseMaps mapLib={import('maplibre-gl')} mapStyle={mapStyle} preventStyleDiffing={true} />}
+            {mapStyle && <Map reuseMaps mapLib={import('maplibre-gl')} mapStyle={mapStyleSheet} preventStyleDiffing={true} />}
           </DeckGL>
         </DemoContainer>
         <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ><path d="M0 0h24v24H0V0z" fill="none"/><path fill="currentcolor" d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
           Edit on Codepen
         </DemoSourceLink>
       </DemoPlaceholder>
