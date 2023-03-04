@@ -221,6 +221,7 @@ export const TextLayerDemo = makeLayerDemo({
     sizeScale: 1,
     getPosition: d => d.coordinates,
     getText: d => d.name,
+    getColor: [255, 128, 0],
     getSize: 16,
     getAngle: 0,
     getTextAnchor: 'middle',

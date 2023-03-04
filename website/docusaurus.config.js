@@ -12,7 +12,7 @@ const config = {
   title: 'deck.gl',
   tagline: 'WebGL2-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
-  baseUrl: process.env.STAGING ? '/deck.gl/' : '/', // eslint-disable-line
+  baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: '/favicon.ico',
@@ -117,7 +117,8 @@ const config = {
         title: 'deck.gl',
         logo: {
           alt: 'vis.gl Logo',
-          src: 'images/visgl-logo-dark.png'
+          src: 'images/visgl-logo-dark.png',
+          srcDark: 'images/visgl-logo-light.png'
         },
         items: [
           {

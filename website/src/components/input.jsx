@@ -9,39 +9,43 @@ const InputContainer = styled.div`
     margin-bottom: 20px;
   }
 
-  > * {
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-  label {
-    display: inline-block;
-    width: 40%;
-    margin-right: 10%;
-    margin-top: 2px;
-    margin-bottom: 2px;
-  }
-  input,
-  a,
-  button {
-    background: var(--ifm-color-white);
-    font-size: 0.9em;
-    text-transform: none;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    display: inline-block;
-    padding: 0 4px;
-    margin: 0;
-    width: 50%;
-    height: 20px;
-    line-height: 1.833;
-    text-align: left;
-  }
-  button {
-    color: initial;
-  }
-  button:disabled {
-    color: var(--ifm-color-gray-500);
-    cursor: default;
+>* {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+label {
+  display: inline-block;
+  width: 40%;
+  margin-right: 10%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+input, a, button {
+  background: var(--ifm-background-surface-color);
+  font-size: 0.9em;
+  text-transform: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline-block;
+  padding: 0 4px;
+  margin: 0;
+  width: 50%;
+  height: 20px;
+  line-height: 1.833;
+  text-align: left;
+}
+button {
+  color: initial;
+}
+button:disabled {
+  color: var(--ifm-color-gray-500);
+  cursor: default;
+  background: var(--ifm-color-gray-300);
+}
+input {
+  border: solid 1px var(--ifm-color-gray-500);
+
+  &:disabled {
     background: var(--ifm-color-gray-300);
   }
   input {
