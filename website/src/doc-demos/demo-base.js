@@ -98,11 +98,11 @@ export function makeLayerDemo(config) {
   const layerProps = evalObject(props, imports);
 
   function Demo() {
-    const { isDarkTheme } = useColorMode();
+    const { colorMode } = useColorMode();
 
     const layer = new Layer(layerProps);
 
-    const mapStyleSheet = isDarkTheme ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
+    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
 
     return (
       <DemoPlaceholder>
