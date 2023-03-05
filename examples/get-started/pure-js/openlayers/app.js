@@ -51,7 +51,7 @@ const deck = new Deck({
 
 // Sync deck view with OL view
 const deckLayer = new Layer({
-  render: function ({size, viewState}) {
+  render({size, viewState}) {
     const [width, height] = size;
     const [longitude, latitude] = toLonLat(viewState.center);
     const zoom = viewState.zoom - 1;
@@ -64,7 +64,7 @@ const deckLayer = new Layer({
 
 // Create OL map with native OSM basemap and deck.gl overlay
 const view = new View({center: fromLonLat([0, 0]), zoom: 1});
-const map = new Map({
+new Map({
   target: 'map',
   view,
   layers: [new TileLayer({source: new OSM()}), deckLayer]

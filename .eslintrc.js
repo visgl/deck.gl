@@ -84,8 +84,12 @@ module.exports = getESLintConfig({
           '**/test/**/*.ts',
           '**/scripts/**/*.js',
           '*.config.js',
-          '*.config.local.js'
+          '*.config.local.js',
+          '*.config.local.mjs'
         ],
+        globals: {
+          process: true
+        },
         rules: {
           'import/no-unresolved': 0,
           'import/no-extraneous-dependencies': 0,
@@ -97,7 +101,8 @@ module.exports = getESLintConfig({
         rules: {
           // We want lint to pass without having to install the dependencies for examples or website
           'import/no-unresolved': 0,
-          'import/named': 0
+          'import/named': 0,
+          'no-new': 0
         }
       }
     ],
