@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {FlyToInterpolator} from '@deck.gl/core';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/terrain-extension/app';
 
@@ -85,6 +86,8 @@ class TerrainExtensionDemo extends Component {
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
     initialViewState.bearing = 10 * initialViewState.longitude;
+    initialViewState.transitionDuration = 3000;
+    initialViewState.transitionInterpolator = new FlyToInterpolator();
 
     return (
       <div style={{background: '#111', height: '100%'}}>
