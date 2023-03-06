@@ -1,6 +1,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
+import {FlyToInterpolator} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -88,7 +89,12 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
 
   return (
     <DeckGL
-      initialViewState={initialViewState}
+      style={{background: '#121713'}} // Make seams less visible
+      initialViewState={{
+        ...initialViewState,
+        transitionDuration: 3000,
+        transitionInterpolator: new FlyToInterpolator()
+      }}
       controller={true}
       layers={layers}
       getTooltip={getTooltip}

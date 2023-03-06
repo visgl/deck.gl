@@ -84,6 +84,7 @@ class TerrainExtensionDemo extends Component {
 
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
+    initialViewState.bearing = 10 * initialViewState.longitude;
 
     return (
       <div style={{background: '#111', height: '100%'}}>
