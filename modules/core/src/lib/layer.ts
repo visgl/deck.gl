@@ -32,7 +32,6 @@ import {withParameters, setParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
-import {mergeBounds} from '../utils/math-utils';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
 
