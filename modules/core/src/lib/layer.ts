@@ -436,39 +436,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // Default implementation
   // Sublayers should override this method to provide an accurate calculation of the bounds
   getBounds(attributeNames?: string[]): [number[], number[]] | null {
-    return this._getBounds(attributeNames || ['positions', 'instancePositions']);
-  }
-
-  /** Computes the combined spatial bounds of the passed attributes */
-  private _getBounds(attributeNames: string[]): [number[], number[]] | null {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager || this.internalState === null) return null;
-    const {cachedBounds} = this.internalState;
-
-    // Detect if bounds of any requested attribute have changed
-    let boundsChanged = false;
-    for (const attributeName of attributeNames) {
-      const newBounds = attributeManager.attributes[attributeName]?.getBounds();
-      if (newBounds !== cachedBounds[attributeName]) {
-        boundsChanged = true;
-        cachedBounds[attributeName] = newBounds;
-      }
-    }
-
-    // Remove stale cache entries
-    for (const cachedAttributeName of Object.keys(cachedBounds)) {
-      if (!attributeNames.includes(cachedAttributeName)) {
-        delete cachedBounds[cachedAttributeName];
-      }
-    }
-
-    if (boundsChanged) {
-      this.internalState.mergedBounds = Object.values(cachedBounds).reduce(
-        (accumulatedBounds, bounds) => mergeBounds(accumulatedBounds, bounds)
-      );
-    }
-
-    return this.internalState.mergedBounds;
+    return this.getAttributeManager()?.getBounds(
+      attributeNames || ['positions', 'instancePositions']
+    );
   }
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
