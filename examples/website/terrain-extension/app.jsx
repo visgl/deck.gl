@@ -88,7 +88,6 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
 
   return (
     <DeckGL
-      style={{background: '#121713'}} // Make seams less visible
       initialViewState={initialViewState}
       controller={true}
       layers={layers}
