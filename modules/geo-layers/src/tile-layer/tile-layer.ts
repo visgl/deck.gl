@@ -21,7 +21,7 @@ import {
   STRATEGY_DEFAULT,
   Tileset2DProps
 } from '../tileset-2d';
-import {urlType, getURLFromTemplate} from '../tileset-2d';
+import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -48,14 +48,15 @@ const defaultProps: DefaultProps<TileLayerProps> = {
 };
 
 /** All props supported by the TileLayer */
-export type TileLayerProps<DataT = any> = CompositeLayerProps<any> & _TileLayerProps<DataT>;
+export type TileLayerProps<DataT = any> = CompositeLayerProps & _TileLayerProps<DataT>;
 
 /** Props added by the TileLayer */
 type _TileLayerProps<DataT> = {
+  data: URLTemplate;
   /**
    * Optionally implement a custom indexing scheme.
    */
-  TilesetClass: typeof Tileset2D;
+  TilesetClass?: typeof Tileset2D;
   /**
    * Renders one or an array of Layer instances.
    */

@@ -41,7 +41,15 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
 
-import type {LayerProps, UpdateParameters, Accessor, Position, Color, Texture} from '@deck.gl/core';
+import type {
+  LayerProps,
+  LayerDataSource,
+  UpdateParameters,
+  Accessor,
+  Position,
+  Color,
+  Texture
+} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
@@ -91,6 +99,7 @@ type Mesh =
   | MeshAttributes;
 
 type _SimpleMeshLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | Texture | Promise<Texture>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
@@ -161,7 +170,7 @@ type _SimpleMeshLayerProps<DataT> = {
   material?: Material;
 };
 
-export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps<DataT>;
+export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},

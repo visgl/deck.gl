@@ -27,6 +27,7 @@ import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-la
 
 import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
 import {
+  urlType,
   Tileset2D,
   Tile2DHeader,
   getURLFromTemplate,
@@ -38,6 +39,7 @@ const WORLD_SIZE = 512;
 
 const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
+  data: urlType,
   onDataLoad: {type: 'function', value: null, optional: true, compare: false},
   uniqueIdProperty: '',
   highlightedFeatureId: null,
@@ -60,8 +62,8 @@ export type TileJson = {
 type ParsedMvtTile = Feature[] | BinaryFeatures;
 
 /** All props supported by the MVTLayer */
-export type MVTLayerProps<DataT extends Feature = Feature> = _MVTLayerProps &
-  GeoJsonLayerProps<DataT> &
+export type MVTLayerProps = _MVTLayerProps &
+  Omit<GeoJsonLayerProps, 'data'> &
   TileLayerProps<ParsedMvtTile>;
 
 /** Props added by the MVTLayer  */
@@ -93,10 +95,10 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-export default class MVTLayer<
-  DataT extends Feature = Feature,
-  ExtraProps extends {} = {}
-> extends TileLayer<ParsedMvtTile, Required<_MVTLayerProps> & ExtraProps> {
+export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
+  ParsedMvtTile,
+  Required<_MVTLayerProps> & ExtraProps
+> {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
@@ -287,7 +289,9 @@ export default class MVTLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {globalFeatureId: info.index}) as DataT;
+      info.object = binaryToGeojson(data as BinaryFeatures, {
+        globalFeatureId: info.index
+      }) as Feature;
     }
     if (info.object && !isWGS84) {
       info.object = transformTileCoordsToWGS84(
@@ -355,21 +359,21 @@ export default class MVTLayer<
   }
 
   /** Get the rendered features in the current viewport. */
-  getRenderedFeatures(maxFeatures: number | null = null): DataT[] {
+  getRenderedFeatures(maxFeatures: number | null = null): Feature[] {
     const features = this._pickObjects(maxFeatures);
     const featureCache = new Set();
-    const renderedFeatures: DataT[] = [];
+    const renderedFeatures: Feature[] = [];
 
     for (const f of features) {
       const featureId = getFeatureUniqueId(f.object, this.props.uniqueIdProperty);
 
       if (featureId === undefined) {
         // we have no id for the feature, we just add to the list
-        renderedFeatures.push(f.object as DataT);
+        renderedFeatures.push(f.object as Feature);
       } else if (!featureCache.has(featureId)) {
         // Add removing duplicates
         featureCache.add(featureId);
-        renderedFeatures.push(f.object as DataT);
+        renderedFeatures.push(f.object as Feature);
       }
     }
 

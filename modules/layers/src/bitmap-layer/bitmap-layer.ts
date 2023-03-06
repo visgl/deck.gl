@@ -63,6 +63,7 @@ export type BitmapBoundingBox =
 
 /** Properties added by BitmapLayer. */
 type _BitmapLayerProps = {
+  data: never;
   /**
    * The image to display.
    *

@@ -1,10 +1,10 @@
 importScripts('./util.js');
 let result = [];
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -27,7 +27,6 @@ onmessage = function(e) {
       longitude: decodeNumber(parts[1], 90, 32) / 1e5 - 180,
       latitude: decodeNumber(parts[2], 90, 32) / 1e5 - 90
     });
-
   });
 
   if (e.data.event === 'load') {

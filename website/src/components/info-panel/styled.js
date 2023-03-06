@@ -7,7 +7,7 @@ export const PanelContainer = styled.div`
   top: 0;
   right: 0;
   width: 344px;
-  background: var(--ifm-color-white);
+  background: var(--ifm-background-surface-color);
   box-shadow: var(--ifm-global-shadow-lw);
   margin: 24px;
   padding: 10px 24px;
@@ -33,8 +33,8 @@ export const PanelExpander = styled.div`
   text-align: center;
   line-height: 16px;
   border-radius: 50%;
-  background: ${(props) => (props.$expanded ? 'none' : 'var(--ifm-color-gray-900)')};
-  color: ${(props) => (props.$expanded ? 'var(--ifm-color-black)' : 'var(--ifm-color-white)')};
+  background: ${props => (props.$expanded ? 'none' : 'var(--ifm-color-gray-900)')};
+  color: ${props => (props.$expanded ? 'var(--ifm-color-black)' : 'var(--ifm-color-white)')};
   ${isMobile} {
     display: block;
   }
@@ -60,7 +60,7 @@ export const PanelContent = styled.div`
     display: inline-block;
     width: 40%;
     margin-right: 10%;
-    color: var(--ifm-color-gray-800);
+    color: var(--ifm-color-content-secondary);
     margin-top: 2px;
     margin-bottom: 2px;
   }
@@ -68,7 +68,6 @@ export const PanelContent = styled.div`
   div > a,
   div > button,
   div > select {
-    background: var(--ifm-color-white);
     font: normal 11px/16px var(--ifm-font-family-base);
     line-height: 20px;
     text-transform: none;
@@ -102,7 +101,7 @@ export const PanelContent = styled.div`
     white-space: initial;
   }
   ${isMobile} {
-    display: ${(props) => (props.$expanded ? 'block' : 'none')};
+    display: ${props => (props.$expanded ? 'block' : 'none')};
   }
 `;
 
@@ -111,8 +110,8 @@ export const SourceLink = styled.a`
   text-align: right;
   margin-top: 8px;
   font: bold 12px/20px var(--ifm-font-family-base);
-  color: var(--ifm-color-gray-800);
+  color: var(--ifm-color-content-secondary);
   ${isMobile} {
-    display: ${(props) => (props.$expanded ? 'block' : 'none')};
+    display: ${props => (props.$expanded ? 'block' : 'none')};
   }
 `;

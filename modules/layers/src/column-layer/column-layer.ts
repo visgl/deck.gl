@@ -26,6 +26,7 @@ import {
   picking,
   UNIT,
   LayerProps,
+  LayerDataSource,
   UpdateParameters,
   Unit,
   AccessorFunction,
@@ -73,10 +74,11 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
 };
 
 /** All properties supported by ColumnLayer. */
-export type ColumnLayerProps<DataT = any> = _ColumnLayerProps<DataT> & LayerProps<DataT>;
+export type ColumnLayerProps<DataT = any> = _ColumnLayerProps<DataT> & LayerProps;
 
 /** Properties added by ColumnLayer. */
 type _ColumnLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /**
    * The number of sides to render the disk as.
    * @default 20

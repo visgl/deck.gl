@@ -28,6 +28,7 @@ import fs from './path-layer-fragment.glsl';
 
 import type {
   LayerProps,
+  LayerDataSource,
   Color,
   Accessor,
   AccessorFunction,
@@ -40,6 +41,7 @@ import type {
 import type {PathGeometry} from './path';
 
 type _PathLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
    * @default 'meters'
    */
@@ -106,7 +108,7 @@ type _PathLayerProps<DataT> = {
   rounded?: boolean;
 };
 
-export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps<DataT>;
+export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 

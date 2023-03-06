@@ -172,7 +172,7 @@ export type _GPUGridLayerProps<DataT> = {
 export default class GPUGridLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
-> extends GridAggregationLayer<ExtraPropsT & Required<_GPUGridLayerProps<DataT>>> {
+> extends GridAggregationLayer<DataT, ExtraPropsT & Required<_GPUGridLayerProps<DataT>>> {
   static layerName = 'GPUGridLayer';
   static defaultProps = defaultProps;
 

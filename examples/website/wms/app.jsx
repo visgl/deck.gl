@@ -33,7 +33,8 @@ export default function App({
   serviceUrl = SAMPLE_SERVICE.serviceUrl,
   layers = SAMPLE_SERVICE.layers,
   initialViewState = INITIAL_VIEW_STATE,
-  onMetadataLoad = console.log
+  onMetadataLoad = console.log, // eslint-disable-line
+  onMetadataLoadError = console.error // eslint-disable-line
 }) {
   const [selection, setSelection] = useState(null);
 
@@ -42,10 +43,10 @@ export default function App({
     layers,
     pickable: true,
 
-    onMetadataLoad: onMetadataLoad,
-    onMetadataLoadError: console.error,
+    onMetadataLoad,
+    onMetadataLoadError,
 
-    onClick: async ({bitmap, layer}) => {
+    onClick: async ({bitmap}) => {
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
@@ -57,14 +58,16 @@ export default function App({
 
   return (
     <>
-      <DeckGL
-        layers={[layer]}
-        initialViewState={initialViewState}
-        controller={CONTROLLER}
-      />
-      {selection && <div className="selected-feature-info" style={{left: selection.x, top: selection.y}} onPointerLeave={() => setSelection(null)}>
-        {selection.featureInfo}
-      </div>}
+      <DeckGL layers={[layer]} initialViewState={initialViewState} controller={CONTROLLER} />
+      {selection && (
+        <div
+          className="selected-feature-info"
+          style={{left: selection.x, top: selection.y}}
+          onPointerLeave={() => setSelection(null)}
+        >
+          {selection.featureInfo}
+        </div>
+      )}
     </>
   );
 }
