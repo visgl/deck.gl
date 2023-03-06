@@ -68,7 +68,6 @@ export const PanelContent = styled.div`
   div > a,
   div > button,
   div > select {
-    background: var(--ifm-color-white);
     font: normal 11px/16px var(--ifm-font-family-base);
     line-height: 20px;
     text-transform: none;
