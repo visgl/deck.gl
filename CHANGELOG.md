@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.8
 
+#### deck.gl [8.8.27] - Mar 6 2023
+
+- Fix TileLayer prop type (#7710)
+- Fix BitmapLayer pick 3d (#7706)
+- fix(mapbox) only move viewState once deck is loaded and only until deck is finalized (#7649)
+- Fix autoHighlight crash when TileLayer is used as a sub layer (#7650)
+
 #### deck.gl [8.8.26] - Feb 24 2023
 
 - Fix type error (#7684)
