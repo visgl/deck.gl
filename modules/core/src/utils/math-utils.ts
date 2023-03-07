@@ -139,7 +139,7 @@ export function mergeBounds(boundsList: (LayerBounds | null)[]): LayerBounds | n
   let isMerged = false;
 
   for (const bounds of boundsList) {
-    if (bounds === null) continue;
+    if (!bounds) continue;
     if (!mergedBounds) {
       mergedBounds = bounds;
     } else {
@@ -149,6 +149,7 @@ export function mergeBounds(boundsList: (LayerBounds | null)[]): LayerBounds | n
           [mergedBounds[0][0], mergedBounds[0][1]],
           [mergedBounds[1][0], mergedBounds[1][1]]
         ];
+        isMerged = true;
       }
 
       mergedBounds[0][0] = Math.min(mergedBounds[0][0], bounds[0][0]);
