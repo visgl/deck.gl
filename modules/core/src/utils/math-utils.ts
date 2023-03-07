@@ -135,21 +135,28 @@ export function toDoublePrecisionArray(
 
 type LayerBounds = [number[], number[]];
 export function mergeBounds(boundsList: (LayerBounds | null)[]): LayerBounds | null {
-  if (boundsList.length > 2) {
-    return mergeBounds([boundsList[0], mergeBounds(boundsList.slice(1))]);
+  let mergedBounds: LayerBounds | null = null;
+  let isMerged = false;
+
+  for (const bounds of boundsList) {
+    if (bounds === null) continue;
+    if (!mergedBounds) {
+      mergedBounds = bounds;
+    } else {
+      if (!isMerged) {
+        // Copy to avoid mutating input bounds
+        mergedBounds = [
+          [mergedBounds[0][0], mergedBounds[0][1]],
+          [mergedBounds[1][0], mergedBounds[1][1]]
+        ];
+      }
+
+      mergedBounds[0][0] = Math.min(mergedBounds[0][0], bounds[0][0]);
+      mergedBounds[0][1] = Math.min(mergedBounds[0][1], bounds[0][1]);
+      mergedBounds[1][0] = Math.max(mergedBounds[1][0], bounds[1][0]);
+      mergedBounds[1][1] = Math.max(mergedBounds[1][1], bounds[1][1]);
+    }
   }
 
-  const [bounds1, bounds2] = boundsList;
-  if (bounds1 === null && bounds2 === null) {
-    return null;
-  } else if (bounds1 === null) {
-    return bounds2;
-  } else if (bounds2 === null) {
-    return bounds1;
-  }
-
-  return [
-    [Math.min(bounds1[0][0], bounds2[0][0]), Math.min(bounds1[0][1], bounds2[0][1])],
-    [Math.max(bounds1[1][0], bounds2[1][0]), Math.max(bounds1[1][1], bounds2[1][1])]
-  ];
+  return mergedBounds;
 }
