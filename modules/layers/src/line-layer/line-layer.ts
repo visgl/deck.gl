@@ -117,7 +117,10 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   static defaultProps = defaultProps;
 
   getBounds(): [number[], number[]] | null {
-    return super.getBounds(['instanceSourcePositions', 'instanceTargetPositions']);
+    return this.getAttributeManager()?.getBounds([
+      'instanceSourcePositions',
+      'instanceTargetPositions'
+    ]);
   }
 
   getShaders() {

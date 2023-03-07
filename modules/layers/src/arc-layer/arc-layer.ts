@@ -150,7 +150,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   };
 
   getBounds(): [number[], number[]] | null {
-    return super.getBounds(['instanceSourcePositions', 'instanceTargetPositions']);
+    return this.getAttributeManager()?.getBounds([
+      'instanceSourcePositions',
+      'instanceTargetPositions'
+    ]);
   }
 
   getShaders() {
