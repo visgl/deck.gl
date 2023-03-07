@@ -43,10 +43,7 @@ export default class EffectManager {
   setProps(props) {
     if ('effects' in props) {
       // Compare effects against each other shallowly
-      if (
-        props.effects.length !== this.effects.length ||
-        !deepEqual(props.effects, this.effects, 1)
-      ) {
+      if (!deepEqual(props.effects, this.effects, 1)) {
         this._setEffects(props.effects);
       }
     }

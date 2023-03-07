@@ -267,7 +267,7 @@ export default class ViewManager {
   private _setViewState(viewState: any): void {
     if (viewState) {
       // Only need single level of depth when comparing viewStates
-      const viewStateChanged = !deepEqual(viewState, this.viewState, 1);
+      const viewStateChanged = !deepEqual(viewState, this.viewState, 2);
 
       if (viewStateChanged) {
         this.setNeedsUpdate('viewState changed');

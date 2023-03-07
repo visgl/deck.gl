@@ -11,29 +11,37 @@ const TEST_CASES = [
   {
     a: {x: obj},
     b: {x: obj},
+    depth: 0,
+    output: false
+  },
+  {
+    a: {x: obj},
+    b: {x: obj},
+    depth: 1,
     output: true
   },
   {
     a: {x: obj},
     b: {x: {...obj}},
+    depth: 1,
     output: false
   },
   {
     a: {x: obj},
     b: {x: {...obj}},
-    depth: 1,
+    depth: 2,
     output: true
   },
   {
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {}},
-    depth: 1,
+    depth: 2,
     output: false
   },
   {
     a: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
     b: {map: {longitude: -122.45, latitude: 37.78, zoom: 8}},
-    depth: 1,
+    depth: 2,
     output: true
   },
   {
@@ -51,13 +59,13 @@ const TEST_CASES = [
   {
     a: {x: {y: {z: 1}}},
     b: {x: {y: {z: 1}}},
-    depth: 1,
+    depth: 2,
     output: false
   },
   {
     a: {x: {y: {z: 1}}},
     b: {x: {y: {z: 1}}},
-    depth: 2,
+    depth: 3,
     output: true
   },
   {
@@ -69,21 +77,25 @@ const TEST_CASES = [
   {
     a: [1, 2, 3, 4],
     b: [1, 2, 3, 4],
+    depth: 1,
     output: true
   },
   {
     a: [1, 2, 3, 4],
     b: [1, 2, 3, 5],
+    depth: 1,
     output: false
   },
   {
     a: [1, 2, 3, 4],
     b: [1, 2, 3],
+    depth: 1,
     output: false
   },
   {
     a: [1, 2, 3],
     b: [1, 2, 3, 4],
+    depth: 1,
     output: false
   },
   {
@@ -95,7 +107,7 @@ const TEST_CASES = [
       {threshold: 1, color: [50, 50, 50]},
       {threshold: 2, color: [100, 100, 100]}
     ],
-    depth: 2,
+    depth: 3,
     output: true
   },
   {
@@ -107,7 +119,7 @@ const TEST_CASES = [
       {threshold: [1000, 2000], color: [50, 50, 50]},
       {threshold: 2, color: [100, 100, 100]}
     ],
-    depth: 2,
+    depth: 3,
     output: false
   }
 ];
