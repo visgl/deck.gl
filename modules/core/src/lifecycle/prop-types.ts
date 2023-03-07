@@ -54,7 +54,16 @@ type ColorPropType = BasePropType<Color | null> & {
 type ArrayPropType<T = any[]> = BasePropType<T> & {
   type: 'array';
   optional?: boolean;
-  compare?: boolean;
+  /** Ignore change in the prop value.
+   * @default false
+   */
+  ignore?: boolean;
+  /** Deep-compare two prop values. Only used if `ignore: false`.
+   * When a number is supplied, used as the depth of depp-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
+   * When a boolean is supplied, `true` is equivalent to `1` (shallow compare all child fields)
+   * @default false
+   */
+  compare?: boolean | number;
 };
 type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
@@ -62,7 +71,12 @@ type AccessorPropType<T = any> = BasePropType<T> & {
 type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
   optional?: boolean;
+  /** @deprecated use `ignore` instead */
   compare?: boolean;
+  /** Ignore change in the prop value.
+   * @default true
+   */
+  ignore?: boolean;
 };
 type DataPropType<T = any> = BasePropType<T> & {
   type: 'data';
@@ -74,8 +88,16 @@ type ImagePropType = BasePropType<Texture | null> & {
 type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
   optional?: boolean;
-  compare?: boolean;
-  depth?: number;
+  /** Ignore change in the prop value.
+   * @default false
+   */
+  ignore?: boolean;
+  /** Deep-compare two prop values. Only used if `ignore: false`.
+   * When a number is supplied, used as the depth of depp-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
+   * When a boolean is supplied, `true` is equivalent to `1` (shallow compare all child fields)
+   * @default false
+   */
+  compare?: boolean | number;
 };
 type DeprecatedProp = {
   deprecatedFor?: string | string[];
@@ -123,7 +145,7 @@ const TYPE_DEFINITIONS = {
       );
     },
     equal(value1, value2, propType: ColorPropType) {
-      return arrayEqual(value1, value2);
+      return deepEqual(value1, value2, 1);
     }
   },
   accessor: {
@@ -135,7 +157,7 @@ const TYPE_DEFINITIONS = {
       if (typeof value2 === 'function') {
         return true;
       }
-      return arrayEqual(value1, value2);
+      return deepEqual(value1, value2, 1);
     }
   },
   array: {
@@ -143,12 +165,19 @@ const TYPE_DEFINITIONS = {
       return (propType.optional && !value) || isArray(value);
     },
     equal(value1, value2, propType: ArrayPropType) {
-      return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
+      const {compare} = propType;
+      const depth = Number.isInteger(compare as unknown) ? (compare as number) : compare ? 1 : 0;
+      return compare ? deepEqual(value1, value2, depth) : value1 === value2;
     }
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? deepEqual(value1, value2, propType.depth || 1) : value1 === value2;
+      if (propType.ignore) {
+        return true;
+      }
+      const {compare} = propType;
+      const depth = Number.isInteger(compare as unknown) ? (compare as number) : compare ? 1 : 0;
+      return compare ? deepEqual(value1, value2, depth) : value1 === value2;
     }
   },
   function: {
@@ -156,7 +185,9 @@ const TYPE_DEFINITIONS = {
       return (propType.optional && !value) || typeof value === 'function';
     },
     equal(value1, value2, propType: FunctionPropType) {
-      return !propType.compare || value1 === value2;
+      // Backward compatibility - {compare: true} and {ignore: false} are equivalent
+      const shouldIgnore = !propType.compare && propType.ignore !== false;
+      return shouldIgnore || value1 === value2;
     }
   },
   data: {
@@ -181,25 +212,6 @@ const TYPE_DEFINITIONS = {
     }
   }
 } as const;
-
-function arrayEqual(array1, array2) {
-  if (array1 === array2) {
-    return true;
-  }
-  if (!isArray(array1) || !isArray(array2)) {
-    return false;
-  }
-  const len = array1.length;
-  if (len !== array2.length) {
-    return false;
-  }
-  for (let i = 0; i < len; i++) {
-    if (array1[i] !== array2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
 
 export function parsePropTypes(propDefs: Record<string, PropTypeDef>): {
   propTypes: Record<string, PropType>;

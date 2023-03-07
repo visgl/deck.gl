@@ -130,7 +130,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
 
-  onIconError: {type: 'function', value: null, compare: false, optional: true}
+  onIconError: {type: 'function', value: null, optional: true}
 };
 
 /** Render raster icons at given coordinates. */

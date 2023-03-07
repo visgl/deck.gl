@@ -75,17 +75,16 @@ let pickingColorCache = new Uint8ClampedArray(0);
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
-  dataComparator: {type: 'function', value: null, compare: false, optional: true},
+  dataComparator: {type: 'function', value: null, optional: true},
   _dataDiff: {
     type: 'function',
     // @ts-ignore __diff is not defined on data
     value: data => data && data.__diff,
-    compare: false,
     optional: true
   },
-  dataTransform: {type: 'function', value: null, compare: false, optional: true},
-  onDataLoad: {type: 'function', value: null, compare: false, optional: true},
-  onError: {type: 'function', value: null, compare: false, optional: true},
+  dataTransform: {type: 'function', value: null, optional: true},
+  onDataLoad: {type: 'function', value: null, optional: true},
+  onError: {type: 'function', value: null, optional: true},
   fetch: {
     type: 'function',
     value: <LayerT extends Layer>(
@@ -134,8 +133,7 @@ const defaultProps: DefaultProps<LayerProps> = {
       }
 
       return load(url, loaders, loadOptions);
-    },
-    compare: false
+    }
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
 
@@ -144,11 +142,11 @@ const defaultProps: DefaultProps<LayerProps> = {
   opacity: {type: 'number', min: 0, max: 1, value: 1},
   operation: 'draw',
 
-  onHover: {type: 'function', value: null, compare: false, optional: true},
-  onClick: {type: 'function', value: null, compare: false, optional: true},
-  onDragStart: {type: 'function', value: null, compare: false, optional: true},
-  onDrag: {type: 'function', value: null, compare: false, optional: true},
-  onDragEnd: {type: 'function', value: null, compare: false, optional: true},
+  onHover: {type: 'function', value: null, optional: true},
+  onClick: {type: 'function', value: null, optional: true},
+  onDragStart: {type: 'function', value: null, optional: true},
+  onDrag: {type: 'function', value: null, optional: true},
+  onDragEnd: {type: 'function', value: null, optional: true},
 
   coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
@@ -157,19 +155,18 @@ const defaultProps: DefaultProps<LayerProps> = {
   positionFormat: 'XYZ',
   colorFormat: 'RGBA',
 
-  parameters: {type: 'object', value: {}, optional: true, compare: true, depth: 1},
-  loadOptions: {type: 'object', value: null, optional: true, compare: true, depth: 3},
+  parameters: {type: 'object', value: {}, optional: true, compare: 2},
+  loadOptions: {type: 'object', value: null, optional: true, ignore: true},
   transitions: null,
   extensions: [],
-  loaders: {type: 'array', value: [], optional: true, compare: true},
+  loaders: {type: 'array', value: [], optional: true, ignore: true},
 
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
   getPolygonOffset: {
     type: 'function',
-    value: ({layerIndex}) => [0, -layerIndex * 100],
-    compare: false
+    value: ({layerIndex}) => [0, -layerIndex * 100]
   },
 
   // Selection/Highlighting
