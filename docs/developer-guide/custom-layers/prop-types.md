@@ -203,7 +203,7 @@ A function.
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
   + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `true`.
 - Default `validate`: value is a function
-- Default `equal`: `true` if `compare: false`, otherwise strict equal
+- Default `equal`: `true` if `ignore: true`, otherwise strict equal
 
 ```js
 MyLayerClass.defaultProps = {

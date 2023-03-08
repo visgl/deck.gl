@@ -59,7 +59,7 @@ type ArrayPropType<T = any[]> = BasePropType<T> & {
    */
   ignore?: boolean;
   /** Deep-compare two prop values. Only used if `ignore: false`.
-   * When a number is supplied, used as the depth of depp-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
+   * When a number is supplied, used as the depth of deep-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
    * When a boolean is supplied, `true` is equivalent to `1` (shallow compare all child fields)
    * @default false
    */
@@ -93,7 +93,7 @@ type ObjectPropType<T = any> = BasePropType<T> & {
    */
   ignore?: boolean;
   /** Deep-compare two prop values. Only used if `ignore: false`.
-   * When a number is supplied, used as the depth of depp-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
+   * When a number is supplied, used as the depth of deep-comparison. 0 is equivalent to shallow comparison, -1 is infinite depth
    * When a boolean is supplied, `true` is equivalent to `1` (shallow compare all child fields)
    * @default false
    */
