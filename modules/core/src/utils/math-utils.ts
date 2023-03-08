@@ -132,3 +132,32 @@ export function toDoublePrecisionArray(
 
   return scratchArray.subarray(0, count * size * 2);
 }
+
+type LayerBounds = [number[], number[]];
+export function mergeBounds(boundsList: (LayerBounds | null)[]): LayerBounds | null {
+  let mergedBounds: LayerBounds | null = null;
+  let isMerged = false;
+
+  for (const bounds of boundsList) {
+    if (!bounds) continue;
+    if (!mergedBounds) {
+      mergedBounds = bounds;
+    } else {
+      if (!isMerged) {
+        // Copy to avoid mutating input bounds
+        mergedBounds = [
+          [mergedBounds[0][0], mergedBounds[0][1]],
+          [mergedBounds[1][0], mergedBounds[1][1]]
+        ];
+        isMerged = true;
+      }
+
+      mergedBounds[0][0] = Math.min(mergedBounds[0][0], bounds[0][0]);
+      mergedBounds[0][1] = Math.min(mergedBounds[0][1], bounds[0][1]);
+      mergedBounds[1][0] = Math.max(mergedBounds[1][0], bounds[1][0]);
+      mergedBounds[1][1] = Math.max(mergedBounds[1][1], bounds[1][1]);
+    }
+  }
+
+  return mergedBounds;
+}

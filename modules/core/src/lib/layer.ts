@@ -433,12 +433,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // Default implementation
-  // Sublayers chould override this method to provide an accurate calculation of the bounds
   getBounds(): [number[], number[]] | null {
-    const attributeManager = this.getAttributeManager();
-    if (!attributeManager) return null;
-    const {positions, instancePositions} = attributeManager.attributes;
-    return (positions || instancePositions)?.getBounds();
+    return this.getAttributeManager()?.getBounds(['positions', 'instancePositions']);
   }
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
