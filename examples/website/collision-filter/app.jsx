@@ -4,7 +4,6 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import points from './data/ne_10_roads_filtered_usa_10km_pts_california.json';
 import roads from './data/ne_10_roads_filtered_usa_california.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
@@ -17,6 +16,7 @@ export default function App({
   collisionEnabled = true,
   routeName = 'US-101',
 }) {
+  const points = roads.features.filter(d => d.geometry.type === 'Point' )
   const roadName = routeName.split('-');
   const filteredRoads =
     routeName === ALL_ROUTES
@@ -24,8 +24,8 @@ export default function App({
       : roads.features.filter(f => f.properties.number === roadName[1]);
   const filteredLabels =
     routeName === ALL_ROUTES
-      ? points.features
-      : points.features.filter(f => f.properties.number === roadName[1]);
+      ? points
+      : points.filter(f => f.properties.number === roadName[1]);
 
   const initialViewState = {
     longitude: -119.417931,
