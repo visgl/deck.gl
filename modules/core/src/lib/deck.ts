@@ -429,7 +429,8 @@ export default class Deck {
     }
     if (
       props.initialViewState &&
-      !deepEqual(this.props.initialViewState, props.initialViewState, 2)
+      // depth = 3 when comparing viewStates: viewId.position.0
+      !deepEqual(this.props.initialViewState, props.initialViewState, 3)
     ) {
       // Overwrite internal view state
       this.viewState = props.initialViewState;
