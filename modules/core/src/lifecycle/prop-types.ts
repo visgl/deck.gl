@@ -148,7 +148,7 @@ const TYPE_DEFINITIONS = {
   },
   object: {
     equal(value1, value2, propType: ObjectPropType) {
-      return propType.compare ? deepEqual(value1, value2, propType.depth || 0) : value1 === value2;
+      return propType.compare ? deepEqual(value1, value2, propType.depth || 1) : value1 === value2;
     }
   },
   function: {
