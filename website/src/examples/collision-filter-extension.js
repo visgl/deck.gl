@@ -6,24 +6,52 @@ import App, {COLORS_STEPS} from 'website-examples/collision-filter/app';
 import {makeExample} from '../components';
 
 class CollisionDemo extends Component {
-  static title = 'UK Road accidents by severity, 2021';
+  static title = 'California Collision Test';
 
   static code = `${GITHUB_TREE}/examples/website/collision-filter`;
 
   static parameters = {
-    radiusScale: {
-      displayName: 'Accident radius scale',
-      type: 'range',
-      value: 1.5,
-      step: 0.01,
-      min: 1,
-      max: 2
-    },
-    priorityDesc: {
-      displayName: 'Order by severity',
+    routeName: {
+      displayName: 'Route',
       type: 'select',
-      options: ['High', 'Low'],
-      value: 'High'
+      options: [
+        'All routes',
+        'US-101',
+        'US-199',
+        'US-395',
+        'US-50',
+        'US-6',
+        'US-95',
+        'US-97',
+        'US-156',
+        'I-5',
+        'I-8',
+        'US-170',
+        'I-710',
+        'I-210',
+        'I-BR80',
+        'I-10',
+        'I-105',
+        'I-110',
+        'I-15',
+        'I-205',
+        'I-215',
+        'I-238',
+        'I-280',
+        'I-380',
+        'I-40',
+        'I-405',
+        'I-505',
+        'I-580',
+        'I-605',
+        'I-680',
+        'I-780',
+        'I-80',
+        'I-805',
+        'I-880',
+        'I-980'
+      ],
+      value: 'All routes'
     },
     sizeScale: {
       displayName: 'Label size scale',
@@ -32,12 +60,6 @@ class CollisionDemo extends Component {
       step: 0.1,
       min: 1,
       max: 10
-    },
-    priorityLabelDesc: {
-      displayName: 'Order by city rank',
-      type: 'select',
-      options: ['Max', 'Min'],
-      value: 'Max'
     }
   };
 
@@ -46,8 +68,8 @@ class CollisionDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Severity</p>
-        <div className="layout">
+        <p>TEST COLLISION</p>
+        {/* <div className="layout">
           {COLORS_STEPS.map((c, i) => (
             <div
               className="legend"
@@ -71,10 +93,13 @@ class CollisionDemo extends Component {
         </div>
         <p>
           Data source of Road Accidents:
-          <a href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">Data Gov UK</a>
+          <a href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">
+            Data Gov UK
+          </a>
           <br />
-          Data source of City labels: <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a>
-        </p>
+          Data source of City labels:{' '}
+          <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a>
+        </p> */}
       </div>
     );
   }
@@ -85,10 +110,8 @@ class CollisionDemo extends Component {
     return (
       <App
         {...otherProps}
-        radiusScale={params.radiusScale.value}
-        priorityDesc={params.priorityDesc.value}
         sizeScale={params.sizeScale.value}
-        priorityLabelDesc={params.priorityLabelDesc.value}
+        routeName={params.routeName.value}
       />
     );
   }

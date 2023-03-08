@@ -4,94 +4,90 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import data from './data/road_accidents.json';
-import dataLabels from './data/city_labels.json';
+import points from './data/ne_10_roads_filtered_usa_10km_pts_california.json';
+import roads from './data/ne_10_roads_filtered_usa_california.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
+import * as turf from '@turf/turf';
 
-const COLOR_SEVERITY = [
-  [240, 59, 32], // Severity 1 - Red
-  [254, 224, 139], // Severity 2 - Orange
-  [26, 152, 80] // Severity 3 - Yellow
-];
+const ALL_ROUTES = 'All routes';
 
-const INITIAL_VIEW_STATE = {
-  longitude: -3.989668,
-  latitude: 54.726504,
-  zoom: 5,
-  maxZoom: 16,
-  pitch: 0,
-  bearing: 0
-};
-
-export const COLORS_STEPS = [
-  {threshold: 'Fatal', color: COLOR_SEVERITY[0], strokeWidth: 2},
-  {threshold: 'Serious', color: COLOR_SEVERITY[1], strokeWidth: 2},
-  {threshold: 'Slight', color: COLOR_SEVERITY[2], strokeWidth: 2}
-];
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-  radiusScale = 1,
-  priorityDesc = false,
-  sizeScale = 5,
-  priorityLabelDesc = 'Max'
+  sizeScale = 4,
+  priorityLabelDesc = 'Max',
+  routeName = 'US-101',
 }) {
-  const labels = dataLabels.features;
+  const roadName = routeName.split('-');
+  const filteredRoads =
+    routeName === ALL_ROUTES
+      ? roads
+      : roads.features.filter(f => f.properties.number === roadName[1]);
+  const filteredLabels =
+    routeName === ALL_ROUTES
+      ? points.features
+      : points.features.filter(f => f.properties.number === roadName[1]);
+
+  const initialViewState = {
+    longitude: -119.417931,
+    latitude: 36.778259,
+    zoom: 5,
+    maxZoom: 20,
+    pitch: 0,
+    bearing: 0
+  };
+
+  if (routeName !== ALL_ROUTES) {
+    const geom = Object.keys(filteredRoads).reduce(
+      (acc, key) => acc.concat(filteredRoads[key].geometry.coordinates),
+      []
+    );
+    // Join all geometries into a single MultiLineString
+    const multiLine = turf.multiLineString(geom);
+    // Calculate the centroid of the MultiLineString
+    const centroid = turf.center(multiLine);
+ 
+    initialViewState.longitude = centroid.geometry.coordinates[0];
+    initialViewState.latitude = centroid.geometry.coordinates[1];
+  }
+
   const layers = [
     new GeoJsonLayer({
       id: 'geojson',
-      data,
-      opacity: 0.8,
+      data: filteredRoads,
       stroked: false,
-      filled: true,
-      pointRadiusUnits: 'pixels',
-      pointType: 'circle',
-      getPointRadius: 5,
-      getFillColor: d =>
-        d.properties.accident_severity === 1
-          ? COLOR_SEVERITY[0]
-          : d.properties.accident_severity === 2
-          ? COLOR_SEVERITY[1]
-          : COLOR_SEVERITY[2],
-      pickable: true,
-      // CollisionFilterExtension props
-      collisionTestProps: {radiusScale},
-      getCollisionPriority: d =>
-        priorityDesc === 'Low' ? d.properties.accident_severity : -d.properties.accident_severity,
-      collisionGroup: 'visualization',
-      updateTriggers: {
-        getCollisionPriority: [priorityDesc]
+      filled: false,
+      lineWidthMinPixels: 3,
+      parameters: {
+        depthTest: false
       },
-      extensions: [new CollisionFilterExtension()]
+      getFillColor: [255, 160, 180],
+      getLineColor: [255, 160, 180],
+      getLineWidth: 10
     }),
     new TextLayer({
       id: 'text-layer',
-      data: labels,
+      data: filteredLabels,
       pickable: true,
       getPosition: d => d.geometry.coordinates,
-      getText: d => d.properties.NAME,
+      getText: d => `${d.properties.prefix}-${d.properties.number}`,
       getColor: [255, 255, 255, 255],
-      getSize: d => d.properties.RANK_MAX * 3,
-      getAngle: 0,
+      getSize: 15,
+      getAngle: d => d.properties.angle,
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'bottom',
-      outlineWidth: 2,
+      outlineWidth: 1,
       fontSettings: {
         sdf: true
       },
       // CollisionFilterExtension props
-      getCollisionPriority: d =>
-        priorityLabelDesc === 'Max' ? d.properties.RANK_MAX : -d.properties.RANK_MAX,
+      getCollisionPriority: d => d.properties.rank,
       collisionTestProps: {sizeScale},
-      collisionGroup: 'legend',
-      updateTriggers: {
-        getCollisionPriority: [priorityLabelDesc]
-      },
       extensions: [new CollisionFilterExtension()]
     })
   ];
 
   return (
-    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+    <DeckGL layers={layers} initialViewState={initialViewState} controller={true} pickingRadius={5}>
       <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
