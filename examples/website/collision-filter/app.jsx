@@ -14,7 +14,7 @@ const ALL_ROUTES = 'All routes';
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 4,
-  priorityLabelDesc = 'Max',
+  collisionEnabled = true,
   routeName = 'US-101',
 }) {
   const roadName = routeName.split('-');
@@ -80,6 +80,7 @@ export default function App({
         sdf: true
       },
       // CollisionFilterExtension props
+      collisionEnabled,
       getCollisionPriority: d => d.properties.rank,
       collisionTestProps: {sizeScale},
       extensions: [new CollisionFilterExtension()]

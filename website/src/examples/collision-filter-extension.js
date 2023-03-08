@@ -60,6 +60,11 @@ class CollisionDemo extends Component {
       step: 0.1,
       min: 1,
       max: 10
+    },
+    collisionEnabled: {
+      displayName: 'Collision enabled',
+      type: 'checkbox',
+      value: true
     }
   };
 
@@ -112,6 +117,7 @@ class CollisionDemo extends Component {
         {...otherProps}
         sizeScale={params.sizeScale.value}
         routeName={params.routeName.value}
+        collisionEnabled={params.collisionEnabled.value}
       />
     );
   }
