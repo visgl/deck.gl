@@ -97,12 +97,8 @@ class CollisionDemo extends Component {
           No. of accidents<b>{readableInteger(101070)}</b>
         </div>
         <p>
-          Data source of Road Accidents:
-          <a href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data">
-            Data Gov UK
-          </a>
           <br />
-          Data source of City labels:{' '}
+          Data source of roads layer:{' '}
           <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth</a>
         </p> */}
       </div>
