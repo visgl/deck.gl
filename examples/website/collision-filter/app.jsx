@@ -15,17 +15,19 @@ export default function App({
   sizeScale = 4,
   collisionEnabled = true,
   routeName = 'US-101',
+  pointDistance = 5,
 }) {
-  const points = roads.features.filter(d => d.geometry.type === 'Point' )
   const roadName = routeName.split('-');
   const filteredRoads =
     routeName === ALL_ROUTES
       ? roads
       : roads.features.filter(f => f.properties.number === roadName[1]);
-  const filteredLabels =
-    routeName === ALL_ROUTES
-      ? points
-      : points.filter(f => f.properties.number === roadName[1]);
+  // TODO: uncoment to get the labels from geojson
+  // const points = roads.features.filter(d => d.geometry.type === 'Point' )
+  // const filteredLabels =
+  //   routeName === ALL_ROUTES
+  //     ? points
+  //     : points.filter(f => f.properties.number === roadName[1]);
 
   const initialViewState = {
     longitude: -119.417931,
@@ -67,6 +69,39 @@ export default function App({
     return ((d.properties.angle + correctAngle) + 360) % 360
   }
 
+  const routes = roads.features.filter(d => d.geometry.type !== 'Point');
+  const _data =
+    routeName === 'All routes' ? routes : routes.filter(d => d.properties.number === roadName[1]);
+
+  // Add points along the lines
+  const filteredLabels = _data.map(d => {
+    const length = turf.lineDistance(d.geometry, 'miles');
+    const dist = Math.floor(length);
+
+    const result = {
+      type: 'FeatureCollection',
+      features: []
+    };
+
+    d.geometry.coordinates.forEach(c => {
+      let count = 0
+      for (let step = pointDistance; step < dist + pointDistance; step+=pointDistance) {
+        const feature = turf.along(turf.lineString(c), step, {units: 'miles'});
+        feature.properties = {
+          step,
+          label_rank_cpt: count,
+          prefix: d.properties.prefix,
+          number: d.properties.number
+        }
+        result.features.push(feature);
+        count = count < 6 ? count++ : 0;
+      }
+    });
+
+    return result;
+  });
+console.log(roadName[1],filteredLabels, routes)
+
   const layers = [
     new GeoJsonLayer({
       id: 'geojson',
@@ -83,7 +118,7 @@ export default function App({
     }),
     new TextLayer({
       id: 'text-layer',
-      data: filteredLabels,
+      data: filteredLabels[0].features,
       pickable: true,
       getPosition: d => d.geometry.coordinates,
       getText: d => `${d.properties.prefix}-${d.properties.number}`,
