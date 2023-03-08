@@ -86,7 +86,7 @@ export default function App({
       data: filteredLabels,
       pickable: true,
       getPosition: d => d.geometry.coordinates,
-      getText: d => `${d.properties.angle}`,//`${d.properties.prefix}-${d.properties.number}`,
+      getText: d => `${d.properties.prefix}-${d.properties.number}`,
       getColor: [255, 255, 255, 255],
       getSize: 15,
       getAngle,
