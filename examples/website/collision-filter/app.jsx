@@ -15,7 +15,7 @@ export default function App({
   sizeScale = 4,
   collisionEnabled = true,
   routeName = 'US-101',
-  pointDistance = 5,
+  pointDistance = 5
 }) {
   const roadName = routeName.split('-');
   const filteredRoads =
@@ -47,32 +47,34 @@ export default function App({
     const multiLine = turf.multiLineString(geom);
     // Calculate the centroid of the MultiLineString
     const centroid = turf.center(multiLine);
- 
+
     initialViewState.longitude = centroid.geometry.coordinates[0];
     initialViewState.latitude = centroid.geometry.coordinates[1];
   }
 
-  // TODO: fix the angle calculation
-  const getAngle = d => {
-    let correctAngle = 0;
+  // TODO: fix the angle calculation, uncomment the code below if you want to use the labels from geojson
+  // const getAngle = d => {
+  //   let correctAngle = 0;
 
-    if (d.properties.angle < 90) {
-      correctAngle = 90 - (d.properties.angle * 2);
-    
-    } else if (d.properties.angle < 320) {
-      const nInteger = Math.floor(d.properties.angle);
-      const unit = nInteger % 10;
-      const tens = (Math.floor(nInteger / 10) % 10) + 10;
-      correctAngle = tens + (unit * 2);
-    }
-    // TODO: complete the rest of the angles
-    return ((d.properties.angle + correctAngle) + 360) % 360
-  }
+  //   if (d.properties.angle < 90) {
+  //     correctAngle = 90 - d.properties.angle * 2;
+  //   } else if (d.properties.angle < 320) {
+  //     const nInteger = Math.floor(d.properties.angle);
+  //     const unit = nInteger % 10;
+  //     const tens = (Math.floor(nInteger / 10) % 10) + 10;
+  //     correctAngle = tens + unit * 2;
+  //   }
+  //   // TODO: complete the rest of the angles
+  //   return (d.properties.angle + correctAngle + 360) % 360;
+  // };
 
   const routes = roads.features.filter(d => d.geometry.type !== 'Point');
   const _data =
     routeName === 'All routes' ? routes : routes.filter(d => d.properties.number === roadName[1]);
-
+  // console.log(_data[0].geometry.coordinates)
+  // for (let i = 0; i < _data.length; i++) {
+  //   console.log(i)
+  // }
   // Add points along the lines
   const filteredLabels = _data.map(d => {
     const length = turf.lineDistance(d.geometry, 'miles');
@@ -84,23 +86,33 @@ export default function App({
     };
 
     d.geometry.coordinates.forEach(c => {
-      let count = 0
-      for (let step = pointDistance; step < dist + pointDistance; step+=pointDistance) {
-        const feature = turf.along(turf.lineString(c), step, {units: 'miles'});
+      let count = 0;
+      const lineString = turf.lineString(c);
+
+      for (let step = pointDistance; step < dist + pointDistance; step += pointDistance) {
+        const feature = turf.along(lineString, step, {units: 'miles'});
+        const angle = 0;
+
         feature.properties = {
           step,
+          // Rank the labels by step distance
           label_rank_cpt: count,
           prefix: d.properties.prefix,
-          number: d.properties.number
-        }
+          number: d.properties.number,
+          // TODO: Add angle calculation, extracts the point before and after the label point and calculate the angle
+          // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
+          angle
+        };
         result.features.push(feature);
-        count = count < 6 ? count++ : 0;
+        count++;
+        if (count > 5) {
+          count = 0;
+        }
       }
     });
 
     return result;
   });
-console.log(roadName[1],filteredLabels, routes)
 
   const layers = [
     new GeoJsonLayer({
@@ -124,7 +136,7 @@ console.log(roadName[1],filteredLabels, routes)
       getText: d => `${d.properties.prefix}-${d.properties.number}`,
       getColor: [255, 255, 255, 255],
       getSize: 15,
-      getAngle,
+      getAngle: d => d.properties.angle,
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'bottom',
       outlineWidth: 1,
