@@ -1,4 +1,4 @@
-/* global document */
+/* global document, process */
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';

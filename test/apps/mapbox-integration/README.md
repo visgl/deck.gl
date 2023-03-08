@@ -1,4 +1,4 @@
-Integrations with the @deck.gl/mapbox extension
+Examples of Maplibre/Mapbox integration using @deck.gl/mapbox
 
 # Usage
 

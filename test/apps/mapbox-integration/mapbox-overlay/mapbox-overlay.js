@@ -1,3 +1,4 @@
+/* global process */
 import mapboxgl from 'mapbox-gl';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
