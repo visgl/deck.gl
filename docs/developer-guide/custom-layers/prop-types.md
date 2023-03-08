@@ -114,7 +114,7 @@ MyLayerClass.defaultProps = {
 
 A RGBA color.
 
-- Default `validate`: value is an array of 3 or 4 elements
+- Default `validate`: value is an array of 3 or 4 numbers
 - Default `equal`: deep equal
 
 ```js
@@ -148,8 +148,9 @@ An array of objects.
 
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
-  + `compare` (boolean, optional) - compare deeply during prop comparison. Default `false`.
-- Default `validate`: value is an array of 3 or 4 elements
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
+  + `compare` (boolean|number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+- Default `validate`: value is an array
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
 
 ```js
@@ -158,6 +159,25 @@ MyLayerClass.defaultProps = {
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true}
   // inferred
   coordinateOrigin: [0, 0, 0]
+}
+```
+
+##### `object` {#array}
+
+An arbitrary object.
+
+- Options:
+  + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
+  + `compare` (boolean|number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+- Default `equal`: shallow equal if `compare: false`, otherwise deep equal
+
+```js
+MyLayerClass.defaultProps = {
+  // explicit
+  parameters: {type: 'object', value: {}, compare: 2}
+  // inferred
+  loadOptions: {}
 }
 ```
 
@@ -181,14 +201,14 @@ A function.
 
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
-  + `compare` (boolean, optional) - compare strictly during prop comparison. Default `true`.
+  + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `true`.
 - Default `validate`: value is a function
-- Default `equal`: `true` if `compare: false`, otherwise strict equal
+- Default `equal`: `true` if `ignore: true`, otherwise strict equal
 
 ```js
 MyLayerClass.defaultProps = {
   // explicit
-  sizeScale: {type: 'function', value: x => Math.sqrt(x), compare: false}
+  sizeScale: {type: 'function', value: x => Math.sqrt(x), ignore: false}
   // inferred
   sizeScale: x => Math.sqrt(x)
 }
