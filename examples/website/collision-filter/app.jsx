@@ -50,6 +50,23 @@ export default function App({
     initialViewState.latitude = centroid.geometry.coordinates[1];
   }
 
+  // TODO: fix the angle calculation
+  const getAngle = d => {
+    let correctAngle = 0;
+
+    if (d.properties.angle < 90) {
+      correctAngle = 90 - (d.properties.angle * 2);
+    
+    } else if (d.properties.angle < 320) {
+      const nInteger = Math.floor(d.properties.angle);
+      const unit = nInteger % 10;
+      const tens = (Math.floor(nInteger / 10) % 10) + 10;
+      correctAngle = tens + (unit * 2);
+    }
+    // TODO: complete the rest of the angles
+    return ((d.properties.angle + correctAngle) + 360) % 360
+  }
+
   const layers = [
     new GeoJsonLayer({
       id: 'geojson',
@@ -69,10 +86,10 @@ export default function App({
       data: filteredLabels,
       pickable: true,
       getPosition: d => d.geometry.coordinates,
-      getText: d => `${d.properties.prefix}-${d.properties.number}`,
+      getText: d => `${d.properties.angle}`,//`${d.properties.prefix}-${d.properties.number}`,
       getColor: [255, 255, 255, 255],
       getSize: 15,
-      getAngle: d => d.properties.angle,
+      getAngle,
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'bottom',
       outlineWidth: 1,
@@ -81,7 +98,7 @@ export default function App({
       },
       // CollisionFilterExtension props
       collisionEnabled,
-      getCollisionPriority: d => d.properties.rank,
+      getCollisionPriority: d => d.properties.label_rank_cpt,
       collisionTestProps: {sizeScale},
       extensions: [new CollisionFilterExtension()]
     })
