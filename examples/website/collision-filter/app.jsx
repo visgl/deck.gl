@@ -15,7 +15,7 @@ export default function App({
   sizeScale = 4,
   collisionEnabled = true,
   routeName = 'US-101',
-  pointDistance = 5
+  pointDistance = 1
 }) {
   const roadName = routeName.split('-');
   const filteredRoads =
@@ -71,10 +71,6 @@ export default function App({
   const routes = roads.features.filter(d => d.geometry.type !== 'Point');
   const _data =
     routeName === 'All routes' ? routes : routes.filter(d => d.properties.number === roadName[1]);
-  // console.log(_data[0].geometry.coordinates)
-  // for (let i = 0; i < _data.length; i++) {
-  //   console.log(i)
-  // }
   // Add points along the lines
   const filteredLabels = _data.map(d => {
     const length = turf.lineDistance(d.geometry, 'miles');
@@ -91,7 +87,19 @@ export default function App({
 
       for (let step = pointDistance; step < dist + pointDistance; step += pointDistance) {
         const feature = turf.along(lineString, step, {units: 'miles'});
-        const angle = 0;
+        // Need to add a small offset to the next point to get the correct angle
+        const nextFeature = turf.along(lineString, step + 0.2, {units: 'miles'});
+        let angle = 0;
+
+        const prev = turf.point(feature.geometry.coordinates);
+        const next = turf.point(nextFeature.geometry.coordinates);
+
+        // TODO: imrove the angle calculation, taken from: // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
+        const bearing = turf.bearing(prev, next);
+        angle = 90 - bearing;
+        if (Math.abs(angle) > 90) {
+          angle += 180;
+        }
 
         feature.properties = {
           step,
@@ -99,8 +107,6 @@ export default function App({
           label_rank_cpt: count,
           prefix: d.properties.prefix,
           number: d.properties.number,
-          // TODO: Add angle calculation, extracts the point before and after the label point and calculate the angle
-          // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
           angle
         };
         result.features.push(feature);
