@@ -12,9 +12,9 @@ const ALL_ROUTES = 'All routes';
 
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-  sizeScale = 4,
+  sizeScale = 2,
   collisionEnabled = true,
-  routeName = 'US-101',
+  routeName = ALL_ROUTES,
   pointDistance = 1
 }) {
   const roadName = routeName.split('-');
@@ -22,12 +22,6 @@ export default function App({
     routeName === ALL_ROUTES
       ? roads
       : roads.features.filter(f => f.properties.number === roadName[1]);
-  // TODO: uncoment to get the labels from geojson
-  // const points = roads.features.filter(d => d.geometry.type === 'Point' )
-  // const filteredLabels =
-  //   routeName === ALL_ROUTES
-  //     ? points
-  //     : points.filter(f => f.properties.number === roadName[1]);
 
   const initialViewState = {
     longitude: -119.417931,
@@ -52,26 +46,10 @@ export default function App({
     initialViewState.latitude = centroid.geometry.coordinates[1];
   }
 
-  // TODO: fix the angle calculation, uncomment the code below if you want to use the labels from geojson
-  // const getAngle = d => {
-  //   let correctAngle = 0;
-
-  //   if (d.properties.angle < 90) {
-  //     correctAngle = 90 - d.properties.angle * 2;
-  //   } else if (d.properties.angle < 320) {
-  //     const nInteger = Math.floor(d.properties.angle);
-  //     const unit = nInteger % 10;
-  //     const tens = (Math.floor(nInteger / 10) % 10) + 10;
-  //     correctAngle = tens + unit * 2;
-  //   }
-  //   // TODO: complete the rest of the angles
-  //   return (d.properties.angle + correctAngle + 360) % 360;
-  // };
-
   const routes = roads.features.filter(d => d.geometry.type !== 'Point');
   const _data =
-    routeName === 'All routes' ? routes : routes.filter(d => d.properties.number === roadName[1]);
-  // Add points along the lines
+    routeName === ALL_ROUTES ? routes : routes.filter(d => d.properties.number === roadName[1]);
+    // Add points along the lines
   const filteredLabels = _data.map(d => {
     const length = turf.lineDistance(d.geometry, 'miles');
     const dist = Math.floor(length);
@@ -120,6 +98,8 @@ export default function App({
     return result;
   });
 
+  const dataLabels = filteredLabels.reduce((acc, key) => acc.concat(key.features), []);
+
   const layers = [
     new GeoJsonLayer({
       id: 'geojson',
@@ -136,7 +116,7 @@ export default function App({
     }),
     new TextLayer({
       id: 'text-layer',
-      data: filteredLabels[0].features,
+      data: dataLabels,
       pickable: true,
       getPosition: d => d.geometry.coordinates,
       getText: d => `${d.properties.prefix}-${d.properties.number}`,
