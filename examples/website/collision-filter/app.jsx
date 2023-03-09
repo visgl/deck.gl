@@ -5,17 +5,14 @@ import maplibregl from 'maplibre-gl';
 import {WebMercatorViewport} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import roads from './data/ne_10_roads_filtered_usa_california.json';
+// import roads from './data/ne_10_roads_filtered_usa_california.json';
 // import roads from './data/ne_10_roads_filtered_usa.json';
+// import roads from './data/ne_10_roads_europe.json';
+import roads from './data/ne_10_roads_mexico.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
-const initialViewState = {
-  longitude: -119.417931,
-  latitude: 36.778259,
-  zoom: 5,
-  maxZoom: 20
-};
+const initialViewState = {longitude: -120, latitude: 36, zoom: 5, maxZoom: 15};
 
 function calculateLabels(data, pointSpacing) {
   const routes = data.features.filter(d => d.geometry.type !== 'Point');
@@ -38,10 +35,12 @@ function calculateLabels(data, pointSpacing) {
       const next = turf.point(nextFeature.geometry.coordinates).geometry.coordinates;
       if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
 
-      const {prefix, number} = d.properties;
+      const {prefix, number, name} = d.properties;
+      const label = prefix ? `${d.properties.prefix}-${d.properties.number}` : name;
+
       feature.properties = {
         priority,
-        prefix,
+        label,
         number,
         next
       };
@@ -76,7 +75,7 @@ export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 4,
   collisionEnabled = true,
-  pointSpacing = 10
+  pointSpacing = 5
 }) {
   const [viewport, setViewport] = useState(new WebMercatorViewport(initialViewState));
   const onViewStateChange = useCallback(({viewState}) => {
@@ -102,7 +101,7 @@ export default function App({
       id: 'text-layer',
       data: dataLabels,
       getPosition: d => d.geometry.coordinates,
-      getText: d => `${d.properties.prefix}-${d.properties.number}`,
+      getText: d => d.properties.label,
       getColor: [255, 255, 255, 255],
       getSize: 15,
       getAngle: d => {
