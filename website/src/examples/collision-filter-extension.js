@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
-import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App, {COLORS_STEPS} from 'website-examples/collision-filter/app';
+import App from 'website-examples/collision-filter/app';
 
 import {makeExample} from '../components';
 
@@ -31,14 +30,14 @@ class CollisionDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-      <p>Principals roads from Mexico country</p>
-      <p>
-        Data sources: 
-        <div>
-        <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth </a>
-        </div>
-      </p>
-    </div>
+        <p>Principals roads from Mexico country</p>
+        <p>
+          Data sources:
+          <div>
+            <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth </a>
+          </div>
+        </p>
+      </div>
     );
   }
 
