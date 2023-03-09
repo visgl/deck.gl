@@ -8,7 +8,8 @@ import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
-const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads_mexico.json'
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads_mexico.json';
 const LINE_COLOR = [0, 173, 230];
 
 const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
@@ -20,10 +21,7 @@ function calculateLabels(data, pointSpacing) {
   const filteredLabels = routes.map(d => {
     const lineLength = Math.floor(turf.lineDistance(d.geometry));
 
-    const result = {
-      type: 'FeatureCollection',
-      features: []
-    };
+    const result = [];
 
     function addPoint(lineString, dAlong, priority) {
       let offset = 1;
@@ -38,10 +36,8 @@ function calculateLabels(data, pointSpacing) {
       if (Math.abs(angle) > 90) angle += 180;
 
       const {prefix, number, name} = d.properties;
-      const label = prefix ? `${d.properties.prefix}-${d.properties.number}` : name;
-
-      feature.properties = { priority, label, number, angle };
-      result.features.push(feature);
+      const text = prefix ? `${d.properties.prefix}-${d.properties.number}` : name;
+      result.push({position: coordinates, text, priority, angle});
     }
 
     d.geometry.coordinates.forEach(c => {
@@ -65,7 +61,7 @@ function calculateLabels(data, pointSpacing) {
     return result;
   });
 
-  return filteredLabels.reduce((acc, key) => acc.concat(key.features), []);
+  return filteredLabels.reduce((acc, key) => acc.concat(key), []);
 }
 
 export default function App({
@@ -75,10 +71,11 @@ export default function App({
   collisionEnabled = true,
   pointSpacing = 5
 }) {
-  const [roads, setRoads] = useState({ type: 'FeatureCollection', features: [] });
+  const [roads, setRoads] = useState({type: 'FeatureCollection', features: []});
   useEffect(() => {
-    fetch(url).then(r => r.json()).then(roads => setRoads(roads));
-
+    fetch(url)
+      .then(r => r.json())
+      .then(roads => setRoads(roads));
   }, [url]);
 
   const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
@@ -101,15 +98,13 @@ export default function App({
     new TextLayer({
       id: 'text-layer',
       data: dataLabels,
-      getPosition: d => d.geometry.coordinates,
-      getText: d => d.properties.label,
       getColor: [0, 0, 0],
       getBackgroundColor: LINE_COLOR,
       getBorderColor: [10, 16, 29],
       getBorderWidth: 2,
       getSize: 18,
       billboard: false,
-      getAngle: d => d.properties.angle,
+      getAngle: d => d.angle,
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'center',
       background: true,
@@ -124,24 +119,18 @@ export default function App({
 
       // CollisionFilterExtension props
       collisionEnabled,
-      getCollisionPriority: d => d.properties.priority,
+      getCollisionPriority: d => d.priority,
       collisionTestProps: {sizeScale},
       extensions: [new CollisionFilterExtension()]
     })
   ];
 
   return (
-    <DeckGL
-      layers={layers}
-      initialViewState={initialViewState}
-      controller={true}
-      pickingRadius={5}
-    >
+    <DeckGL layers={layers} initialViewState={initialViewState} controller={true}>
       <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
-
 
 export function renderToDOM(container) {
   createRoot(container).render(<App />);
