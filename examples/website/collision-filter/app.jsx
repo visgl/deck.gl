@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
@@ -81,11 +81,6 @@ export default function App({
 
   }, [url]);
 
-  const [viewport, setViewport] = useState(new WebMercatorViewport(initialViewState));
-  const onViewStateChange = useCallback(({viewState}) => {
-    setViewport(new WebMercatorViewport(viewState));
-  }, []);
-
   const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
 
   const layers = [
@@ -131,11 +126,7 @@ export default function App({
       collisionEnabled,
       getCollisionPriority: d => d.properties.priority,
       collisionTestProps: {sizeScale},
-      extensions: [new CollisionFilterExtension()],
-
-      updateTriggers: {
-        getAngle: [viewport]
-      }
+      extensions: [new CollisionFilterExtension()]
     })
   ];
 
@@ -143,7 +134,6 @@ export default function App({
     <DeckGL
       layers={layers}
       initialViewState={initialViewState}
-      onViewStateChange={onViewStateChange}
       controller={true}
       pickingRadius={5}
     >
