@@ -1,16 +1,17 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import {WebMercatorViewport} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import roads from './data/ne_10_roads_mexico.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
-const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
+const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads_mexico.json'
 const LINE_COLOR = [0, 173, 230];
+
+const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
 
 function calculateLabels(data, pointSpacing) {
   const routes = data.features.filter(d => d.geometry.type !== 'Point');
@@ -70,11 +71,18 @@ function calculateLabels(data, pointSpacing) {
 }
 
 export default function App({
+  url = DATA_URL,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 10,
   collisionEnabled = true,
   pointSpacing = 5
 }) {
+  const [roads, setRoads] = useState({ type: 'FeatureCollection', features: [] });
+  useEffect(() => {
+    fetch(url).then(r => r.json()).then(roads => setRoads(roads));
+
+  }, [url]);
+
   const [viewport, setViewport] = useState(new WebMercatorViewport(initialViewState));
   const onViewStateChange = useCallback(({viewState}) => {
     setViewport(new WebMercatorViewport(viewState));
@@ -152,6 +160,7 @@ export default function App({
     </DeckGL>
   );
 }
+
 
 export function renderToDOM(container) {
   createRoot(container).render(<App />);
