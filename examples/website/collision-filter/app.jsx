@@ -10,7 +10,7 @@ import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
 const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
-const LINE_COLOR = [215, 130, 170];
+const LINE_COLOR = [0, 173, 230];
 
 function calculateLabels(data, pointSpacing) {
   const routes = data.features.filter(d => d.geometry.type !== 'Point');
@@ -84,9 +84,16 @@ export default function App({
 
   const layers = [
     new GeoJsonLayer({
-      id: 'geojson',
+      id: 'roads-outline',
       data: roads,
-      lineWidthMinPixels: 2,
+      lineWidthMinPixels: 4,
+      parameters: {depthTest: false},
+      getLineColor: [255, 255, 255]
+    }),
+    new GeoJsonLayer({
+      id: 'roads',
+      data: roads,
+      lineWidthMinPixels: 2.5,
       parameters: {depthTest: false},
       getLineColor: LINE_COLOR
     }),
@@ -95,11 +102,11 @@ export default function App({
       data: dataLabels,
       getPosition: d => d.geometry.coordinates,
       getText: d => d.properties.label,
-      getColor: [255, 255, 255],
+      getColor: [0, 0, 0],
       getBackgroundColor: LINE_COLOR,
-      getBorderColor: [255, 255, 255],
-      getBorderWidth: 1,
-      getSize: 15,
+      getBorderColor: [10, 16, 29],
+      getBorderWidth: 2,
+      getSize: 18,
       getAngle: d => {
         const p1 = viewport.project(d.geometry.coordinates);
         const p2 = viewport.project(d.properties.next);

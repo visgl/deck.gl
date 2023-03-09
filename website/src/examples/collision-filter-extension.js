@@ -12,15 +12,15 @@ class CollisionDemo extends Component {
 
   static parameters = {
     sizeScale: {
-      displayName: 'Label size scale',
+      displayName: 'Label spacing',
       type: 'range',
-      value: 5.3,
-      step: 0.1,
-      min: 1,
+      value: 5,
+      step: 1,
+      min: 2,
       max: 10
     },
     collisionEnabled: {
-      displayName: 'Collision enabled',
+      displayName: 'Avoid overlap',
       type: 'checkbox',
       value: true
     }
@@ -31,14 +31,14 @@ class CollisionDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-      <p>Principals roads from Mexico country</p>
-      <p>
-        Data sources: 
-        <div>
-        <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth </a>
-        </div>
-      </p>
-    </div>
+        <p>Principals roads from Mexico country</p>
+        <p>
+          Data sources:
+          <div>
+            <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth </a>
+          </div>
+        </p>
+      </div>
     );
   }
 
