@@ -1,8 +1,8 @@
+/* global fetch */
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
-import {WebMercatorViewport} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
@@ -35,8 +35,7 @@ function calculateLabels(data, pointSpacing) {
       let angle = 90 - turf.rhumbBearing(coordinates, next);
       if (Math.abs(angle) > 90) angle += 180;
 
-      const {prefix, number, name} = d.properties;
-      const text = prefix ? `${d.properties.prefix}-${d.properties.number}` : name;
+      const {name: text} = d.properties;
       result.push({position: coordinates, text, priority, angle});
     }
 
@@ -75,7 +74,7 @@ export default function App({
   useEffect(() => {
     fetch(url)
       .then(r => r.json())
-      .then(roads => setRoads(roads));
+      .then(data => setRoads(data));
   }, [url]);
 
   const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
