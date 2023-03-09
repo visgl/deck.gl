@@ -12,10 +12,10 @@ const ALL_ROUTES = 'All routes';
 
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-  sizeScale = 2,
+  sizeScale = 4,
   collisionEnabled = true,
   routeName = ALL_ROUTES,
-  pointDistance = 1
+  pointSpacing = 1
 }) {
   const roadName = routeName.split('-');
   const filteredRoads =
@@ -49,49 +49,52 @@ export default function App({
   const routes = roads.features.filter(d => d.geometry.type !== 'Point');
   const _data =
     routeName === ALL_ROUTES ? routes : routes.filter(d => d.properties.number === roadName[1]);
-    // Add points along the lines
+
+  // Add points along the lines
   const filteredLabels = _data.map(d => {
-    const length = turf.lineDistance(d.geometry, 'miles');
-    const dist = Math.floor(length);
+    const lineLength = Math.floor(turf.lineDistance(d.geometry, 'miles'));
 
     const result = {
       type: 'FeatureCollection',
       features: []
     };
 
+    function addPoint(lineString, dAlong, priority) {
+      const feature = turf.along(lineString, dAlong, {units: 'miles'});
+      // Need to add a small offset to the next point to get the correct angle
+      const nextFeature = turf.along(lineString, dAlong + 0.2, {units: 'miles'});
+      let angle = 0;
+
+      const prev = turf.point(feature.geometry.coordinates);
+      const next = turf.point(nextFeature.geometry.coordinates);
+
+      // TODO: imrove the angle calculation, taken from: // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
+      const bearing = turf.bearing(prev, next);
+      angle = 90 - bearing;
+      if (Math.abs(angle) > 90) {
+        angle += 180;
+      }
+
+      const {prefix, number} = d.properties;
+      feature.properties = {priority, prefix, number, angle};
+      result.features.push(feature);
+    }
+
     d.geometry.coordinates.forEach(c => {
-      let count = 0;
       const lineString = turf.lineString(c);
 
-      for (let step = pointDistance; step < dist + pointDistance; step += pointDistance) {
-        const feature = turf.along(lineString, step, {units: 'miles'});
-        // Need to add a small offset to the next point to get the correct angle
-        const nextFeature = turf.along(lineString, step + 0.2, {units: 'miles'});
-        let angle = 0;
-
-        const prev = turf.point(feature.geometry.coordinates);
-        const next = turf.point(nextFeature.geometry.coordinates);
-
-        // TODO: imrove the angle calculation, taken from: // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
-        const bearing = turf.bearing(prev, next);
-        angle = 90 - bearing;
-        if (Math.abs(angle) > 90) {
-          angle += 180;
+      // Add labels to minimize overlaps, pick odd values from each level
+      //        1       <- depth 1
+      //    1   2   3   <- depth 2
+      //  1 2 3 4 5 6 7 <- depth 3
+      let delta = 0.5 * lineLength; // Spacing between points at level
+      let depth = 1;
+      while (delta > pointSpacing) {
+        for (let i = 1; i < 2 ** depth; i += 2) {
+          addPoint(lineString, i * delta, 100 - depth); // Top levels have highest priority
         }
-
-        feature.properties = {
-          step,
-          // Rank the labels by step distance
-          label_rank_cpt: count,
-          prefix: d.properties.prefix,
-          number: d.properties.number,
-          angle
-        };
-        result.features.push(feature);
-        count++;
-        if (count > 5) {
-          count = 0;
-        }
+        depth++;
+        delta /= 2;
       }
     });
 
@@ -131,7 +134,7 @@ export default function App({
       },
       // CollisionFilterExtension props
       collisionEnabled,
-      getCollisionPriority: d => d.properties.label_rank_cpt,
+      getCollisionPriority: d => d.properties.priority,
       collisionTestProps: {sizeScale},
       extensions: [new CollisionFilterExtension()]
     })
