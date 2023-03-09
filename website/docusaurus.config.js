@@ -28,15 +28,15 @@ const config = {
           path: '../docs',
           sidebarPath: resolve('./src/docs-sidebar.js'),
           // Point to to the website directory in your repo.
-          editUrl: 'https://github.com/visgl/deck.gl/tree/master/website',
+          editUrl: 'https://github.com/visgl/deck.gl/tree/master/website'
         },
         theme: {
           customCss: [
             resolve('./src/styles.css'),
             resolve('./node_modules/maplibre-gl/dist/maplibre-gl.css')
-          ],
-        },
-      }),
+          ]
+        }
+      })
     ]
   ],
 
@@ -69,11 +69,15 @@ const config = {
             '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
             '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
             '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
-            '@loaders.gl': resolve('../node_modules/@loaders.gl'),
+            '@loaders.gl': resolve('../node_modules/@loaders.gl')
           }
         },
         plugins: [
-          new webpack.EnvironmentPlugin(['MapboxAccessToken', 'GoogleMapsAPIKey', 'GoogleMapsMapId']),
+          new webpack.EnvironmentPlugin([
+            'MapboxAccessToken',
+            'GoogleMapsAPIKey',
+            'GoogleMapsMapId'
+          ]),
           // These modules break server side bundling
           new webpack.IgnorePlugin({
             resourceRegExp: /asciify-image/
@@ -101,7 +105,7 @@ const config = {
         sidebarPath: resolve('./src/examples-sidebar.js'),
         breadcrumbs: false,
         docItemComponent: resolve('./src/components/example/doc-item-component.jsx')
-      },
+      }
     ]
   ],
 
@@ -113,22 +117,23 @@ const config = {
         logo: {
           alt: 'vis.gl Logo',
           src: 'images/visgl-logo-dark.png',
+          srcDark: 'images/visgl-logo-light.png'
         },
         items: [
           {
             to: '/examples',
             position: 'left',
-            label: 'Examples',
+            label: 'Examples'
           },
           {
             to: '/docs',
             position: 'left',
-            label: 'Docs',
+            label: 'Docs'
           },
           {
             to: '/showcase',
             position: 'left',
-            label: 'Showcase',
+            label: 'Showcase'
           },
           {
             to: 'https://medium.com/vis-gl',
@@ -138,9 +143,9 @@ const config = {
           {
             href: 'https://github.com/visgl/deck.gl',
             label: 'GitHub',
-            position: 'right',
-          },
-        ],
+            position: 'right'
+          }
+        ]
       },
       footer: {
         style: 'dark',
@@ -150,68 +155,68 @@ const config = {
             items: [
               {
                 label: 'API Reference',
-                to: '/docs/api-reference/core/deck',
+                to: '/docs/api-reference/core/deck'
               },
               {
                 label: 'Starter templates',
-                href: 'https://github.com/visgl/deck.gl/tree/master/examples/get-started',
+                href: 'https://github.com/visgl/deck.gl/tree/master/examples/get-started'
               },
               {
                 label: 'Playground',
-                href: '/playground',
+                href: '/playground'
               },
               {
                 label: 'Codepen demos',
-                href: 'https://codepen.io/vis-gl/',
-              },
-            ],
+                href: 'https://codepen.io/vis-gl/'
+              }
+            ]
           },
           {
             title: 'Other vis.gl Libraries',
             items: [
               {
                 label: 'luma.gl',
-                href: 'https://luma.gl',
+                href: 'https://luma.gl'
               },
               {
                 label: 'loaders.gl',
-                href: 'https://loaders.gl',
+                href: 'https://loaders.gl'
               },
               {
                 label: 'react-map-gl',
-                href: 'https://visgl.github.io/react-map-gl',
+                href: 'https://visgl.github.io/react-map-gl'
               },
               {
                 label: 'nebula.gl',
-                href: 'https://nebula.gl',
-              },
-            ],
+                href: 'https://nebula.gl'
+              }
+            ]
           },
           {
             title: 'More',
             items: [
               {
                 label: 'Slack workspace',
-                href: 'https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg',
+                href: 'https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg'
               },
               {
                 label: 'vis.gl blog on Medium',
-                href: 'https://medium.com/vis-gl',
+                href: 'https://medium.com/vis-gl'
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/visgl/deck.gl',
-              },
-            ],
-          },
+                href: 'https://github.com/visgl/deck.gl'
+              }
+            ]
+          }
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} OpenJS Foundation`,
+        copyright: `Copyright © ${new Date().getFullYear()} OpenJS Foundation`
       },
       prism: {
         theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
-      },
-    }),
+        darkTheme: darkCodeTheme
+      }
+    })
 };
 
 module.exports = config;

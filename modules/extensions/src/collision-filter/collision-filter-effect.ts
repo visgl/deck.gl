@@ -129,7 +129,7 @@ export default class CollisionFilterEffect implements Effect {
       // If render info is new
       renderInfo === oldRenderInfo ||
       // If sublayers have changed
-      !deepEqual(oldRenderInfo.layers, renderInfo.layers, 0) ||
+      !deepEqual(oldRenderInfo.layers, renderInfo.layers, 1) ||
       // If a sublayer's bounds have been updated
       renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i])) ||
       // If a sublayer's isLoaded state has been updated

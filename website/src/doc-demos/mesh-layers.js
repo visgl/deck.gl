@@ -1,6 +1,5 @@
-import {
-  ScenegraphLayer, SimpleMeshLayer
-} from '@deck.gl/mesh-layers';
+/* eslint-disable no-template-curly-in-string */
+import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {OBJLoader} from '@loaders.gl/obj';
 
 import {makeLayerDemo} from './demo-base';

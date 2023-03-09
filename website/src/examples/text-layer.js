@@ -17,8 +17,7 @@ class TextDemo extends Component {
 
   static parameters = {
     noOverlap: {displayName: 'Prevent overlap', type: 'checkbox', value: true},
-    fontSize: {displayName: 'Font Size',
-      type: 'range', value: 32, step: 1, min: 20, max: 80}
+    fontSize: {displayName: 'Font Size', type: 'range', value: 32, step: 1, min: 20, max: 80}
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -27,12 +26,16 @@ class TextDemo extends Component {
     return (
       <div>
         <p>World cities with population more than 1000</p>
-        <p>Data source:
-          <a href="https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en">GeoNames</a>
+        <p>
+          Data source:
+          <a href="https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en">
+            GeoNames
+          </a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of cities
-            <b>{ readableInteger(meta.count || 0) }</b>
+          <div className="stat col-1-2">
+            No. of cities
+            <b>{readableInteger(meta.count || 0)}</b>
           </div>
         </div>
       </div>
@@ -47,7 +50,8 @@ class TextDemo extends Component {
         {...this.props}
         data={data}
         noOverlap={params.noOverlap.value}
-        fontSize={params.fontSize.value} />
+        fontSize={params.fontSize.value}
+      />
     );
   }
 }

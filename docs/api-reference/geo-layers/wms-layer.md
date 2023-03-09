@@ -142,7 +142,7 @@ Specifies names of layers that should be visualized from the image service.
 
 > Note that WMS services will typically not display anything unless at least one valid layer name is provided.
 
-##### `srs` (string, optional)
+##### `srs` (string, optional) {#srs}
 
 - Default: `'auto'`
 
@@ -153,7 +153,7 @@ If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` ot
 
 ### Callbacks
 
-##### `onMetadataLoad` (Function, optional) {#onmetadataloadcomplete}
+##### `onMetadataLoad` (Function, optional) {#onmetadataload}
 
 `onMetadataLoad` called when the metadata of the image source successfully loads.
 
@@ -185,7 +185,7 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoad` (Function, optional) {#onimageloadcomplete}
+##### `onImageLoad` (Function, optional) {#onimageload}
 
 `onImageLoad` called when an image successfully loads.
 

@@ -12,7 +12,7 @@ To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.
 export MapboxAccessToken=<mapbox_access_token>	
 ```	
 
-Or set `MAPBOX_TOKEN` directly in `app.js`.
+Or set `MAPBOX_TOKEN` directly in `app.jsx`.
 
 ```bash
 # install dependencies

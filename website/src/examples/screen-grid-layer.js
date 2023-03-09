@@ -26,10 +26,19 @@ class ScreenGridDemo extends Component {
     return (
       <div>
         <p>Pickup locations form April to September 2014.</p>
-        <p>The layer aggregates data within the boundary of screen grid cells
-           and maps the aggregated values to a dynamic color scale</p>
-        <p>Data source: <a href="https://github.com/fivethirtyeight/uber-tlc-foil-response">Uber TLC FOIL Response</a></p>
-        <div className="stat">No. of Samples<b>{ readableInteger(meta.count || 0) }</b></div>
+        <p>
+          The layer aggregates data within the boundary of screen grid cells and maps the aggregated
+          values to a dynamic color scale
+        </p>
+        <p>
+          Data source:{' '}
+          <a href="https://github.com/fivethirtyeight/uber-tlc-foil-response">
+            Uber TLC FOIL Response
+          </a>
+        </p>
+        <div className="stat">
+          No. of Samples<b>{readableInteger(meta.count || 0)}</b>
+        </div>
       </div>
     );
   }
@@ -60,7 +69,12 @@ class ScreenGridDemo extends Component {
 
   _disableGPUAggregation = () => {
     this.props.useParam({
-      gpuAggregation: {displayName: 'GPU Acceleration (not supported)', type: 'checkbox', value: false, disabled: true},
+      gpuAggregation: {
+        displayName: 'GPU Acceleration (not supported)',
+        type: 'checkbox',
+        value: false,
+        disabled: true
+      },
       cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
     });
     this.setState({
@@ -80,7 +94,8 @@ class ScreenGridDemo extends Component {
         data={this.state.dataSample || data}
         cellSize={cellSize}
         gpuAggregation={gpuAggregation}
-        disableGPUAggregation={this._disableGPUAggregation} />
+        disableGPUAggregation={this._disableGPUAggregation}
+      />
     );
   }
 }

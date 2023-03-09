@@ -19,12 +19,14 @@ class ScenegraphDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Data source:
+        <p>
+          Data source:
           <a href="http://www.opensky-network.org">The OpenSky Network</a>
         </p>
         <div className="layout">
-          <div className="stat col-1-2">No. of Planes
-            <b>{ readableInteger(meta.count || 0) }</b>
+          <div className="stat col-1-2">
+            No. of Planes
+            <b>{readableInteger(meta.count || 0)}</b>
           </div>
         </div>
       </div>
@@ -33,10 +35,13 @@ class ScenegraphDemo extends Component {
 
   render() {
     const {params, ...otherProps} = this.props;
-    return <App {...otherProps}
-      sizeScale={params.sizeScale.value}
-      onDataLoad={count => this.props.onStateChange({count})}
-    />;
+    return (
+      <App
+        {...otherProps}
+        sizeScale={params.sizeScale.value}
+        onDataLoad={count => this.props.onStateChange({count})}
+      />
+    );
   }
 }
 

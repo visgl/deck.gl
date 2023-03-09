@@ -1,3 +1,4 @@
+/* global window */
 import React, {useEffect, useRef, useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
@@ -38,8 +39,8 @@ function MyMapComponent({center, zoom}) {
             pickable: true,
             autoHighlight: true,
             onClick: info =>
-              // eslint-disable-next-line
               info.object &&
+              // eslint-disable-next-line
               alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
           }),
           new ArcLayer({
@@ -67,10 +68,10 @@ function MyMapComponent({center, zoom}) {
   }, [map, center, zoom, overlay]);
 
   useEffect(() => {
-    const map = new window.google.maps.Map(ref.current, {
+    const mapInstance = new window.google.maps.Map(ref.current, {
       mapId: GOOGLE_MAP_ID
     });
-    setMap(map);
+    setMap(mapInstance);
   }, []);
   return (
     <>

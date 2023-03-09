@@ -12,7 +12,7 @@ class HeatmapDemo extends Component {
     url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
     worker: '/workers/screen-grid-data-decoder.js'
   };
-  
+
   static code = `${GITHUB_TREE}/examples/website/heatmap`;
 
   static parameters = {
@@ -28,7 +28,11 @@ class HeatmapDemo extends Component {
       <div>
         <p>Pickup locations form April to September 2014.</p>
         <div>
-          <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png" alt="color scale" style={{height: 8, width: '100%'}} />
+          <img
+            src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"
+            alt="color scale"
+            style={{height: 8, width: '100%'}}
+          />
         </div>
         <p className="layout">
           <span className="col-1-2">Fewer</span>

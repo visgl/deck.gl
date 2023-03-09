@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import {BitmapLayer} from '@deck.gl/layers';
 
 import {
@@ -30,7 +31,6 @@ export const GreatCircleLayerDemo = makeLayerDemo({
     pickable: true
   }`
 });
-
 
 export const GeohashLayerDemo = makeLayerDemo({
   Layer: GeohashLayer,

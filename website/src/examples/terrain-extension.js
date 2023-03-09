@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {FlyToInterpolator} from '@deck.gl/core';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/terrain-extension/app';
 
@@ -68,9 +69,10 @@ class TerrainExtensionDemo extends Component {
       <div>
         <p>Reconstructed 3D terrain with official routes from Tour de France 2023.</p>
         <p>
-          Data sources: 
+          Data sources:
           <div>
-          Cycling Stage <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
+            Cycling Stage{' '}
+            <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
           </div>
         </p>
       </div>
@@ -83,9 +85,12 @@ class TerrainExtensionDemo extends Component {
 
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
+    initialViewState.bearing = 10 * initialViewState.longitude;
+    initialViewState.transitionDuration = 3000;
+    initialViewState.transitionInterpolator = new FlyToInterpolator();
 
     return (
-      <div style={{background: '#111', height: '100%'}}>
+      <div style={{background: '#111', width: '100%', height: '100%', position: 'absolute'}}>
         <App {...otherProps} data={data} initialViewState={initialViewState} />
       </div>
     );

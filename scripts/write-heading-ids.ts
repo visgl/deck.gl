@@ -26,7 +26,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const docsDir: string = path.resolve(__dirname, '../../docs');
+const docsDir: string = path.resolve(__dirname, '../docs');
 /** Should match if the line is a header */
 const headerTest = /^(#+)\s+(?<headerContent>.*?)\s*(?<customId>\{#[\w\-]+\})?$/;
 /** Should match if the header describes an API */
@@ -38,30 +38,16 @@ main();
 /** Test that getCustomId handles different formats correctly */
 function test() {
   expect(
-    getCustomId(`The line width of each object, in units specified by widthUnits (default pixels). `)?.[2],
+    getCustomId(
+      `The line width of each object, in units specified by widthUnits (default pixels). `
+    )?.[2],
     undefined,
     'not header'
   );
-  expect(
-    getCustomId(`## Learning deck.gl`)?.[2],
-    undefined,
-    'does not contain code'
-  );
-  expect(
-    getCustomId(`## Changes to \`TileLayer\``)?.[2],
-    undefined,
-    'is not api'
-  );
-  expect(
-    getCustomId(`## \`pickObjects\``)?.[2],
-    '{#pickobjects}',
-    'single word api'
-  );
-  expect(
-    getCustomId(`## \`@deck.gl/extensions\``)?.[2],
-    undefined,
-    'Package name'
-  );
+  expect(getCustomId(`## Learning deck.gl`)?.[2], undefined, 'does not contain code');
+  expect(getCustomId(`## Changes to \`TileLayer\``)?.[2], undefined, 'is not api');
+  expect(getCustomId(`## \`pickObjects\``)?.[2], '{#pickobjects}', 'single word api');
+  expect(getCustomId(`## \`@deck.gl/extensions\``)?.[2], undefined, 'Package name');
   expect(
     getCustomId(`## \`strokeOpacity\` (Number)`)?.[2],
     '{#strokeopacity}',
@@ -78,7 +64,9 @@ function test() {
     'with call signature'
   );
   expect(
-    getCustomId(`##### \`getWidth\` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")`)?.[2],
+    getCustomId(
+      `##### \`getWidth\` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")`
+    )?.[2],
     '{#getwidth}',
     'with extra flag'
   );
@@ -120,7 +108,7 @@ async function processFile(path: string): Promise<void> {
       return customId.join(' ');
     }
     return line;
-  })
+  });
   if (changed) {
     console.log(path);
     await fs.writeFile(path, lines.join('\n'));
