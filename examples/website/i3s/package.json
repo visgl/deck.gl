@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@loaders.gl/i3s": "^3.3.1",
-    "deck.gl": "^8.8.0"
+    "deck.gl": "^8.9.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

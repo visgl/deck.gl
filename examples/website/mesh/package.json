@@ -11,7 +11,7 @@
   "dependencies": {
     "@loaders.gl/obj": "^3.3.1",
     "@math.gl/core": "^3.6.0",
-    "deck.gl": "^8.8.0",
+    "deck.gl": "^8.9.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

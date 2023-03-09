@@ -79,4 +79,4 @@ Visit the [MapController](./map-controller.md) documentation for a full list of 
 
 ## Source
 
-[modules/core/src/views/map-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/map-view.ts)
+[modules/core/src/views/map-view.ts](https://github.com/visgl/deck.gl/tree/8.9-release/modules/core/src/views/map-view.ts)

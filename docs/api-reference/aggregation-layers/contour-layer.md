@@ -155,4 +155,4 @@ The `ContourLayer` renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/contour-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)
+[modules/aggregation-layers/src/contour-layer](https://github.com/visgl/deck.gl/tree/8.9-release/modules/aggregation-layers/src/contour-layer)

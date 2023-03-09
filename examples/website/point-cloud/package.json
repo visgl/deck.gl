@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@loaders.gl/las": "^3.3.1",
-    "deck.gl": "^8.8.0",
+    "deck.gl": "^8.9.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
