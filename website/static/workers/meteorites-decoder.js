@@ -2,10 +2,10 @@ importScripts('./util.js');
 let coordinates;
 let result = [];
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
-  lines.forEach(function(line) {
+  lines.forEach(function (line) {
     if (!line) {
       return;
     }
@@ -25,8 +25,7 @@ onmessage = function(e) {
       coordinates: coordinates[decodeNumber(parts[2], 90, 32)],
       mass: decodeNumber(parts[3], 90, 32),
       year: decodeNumber(parts[4], 90, 32)
-    })
-
+    });
   });
 
   if (e.data.event === 'load') {

@@ -27,9 +27,12 @@ class ScatterPlotDemo extends Component {
     return (
       <div>
         <p>Each dot represents 10 people. Density per tract from 2015 census data</p>
-        <p>Data source: <a href="http://www.census.gov">US Census Bureau</a></p>
-        <div className="stat">No. of Instances
-          <b>{ readableInteger(meta.points || 0) }</b>
+        <p>
+          Data source: <a href="http://www.census.gov">US Census Bureau</a>
+        </p>
+        <div className="stat">
+          No. of Instances
+          <b>{readableInteger(meta.points || 0)}</b>
         </div>
       </div>
     );
@@ -44,7 +47,8 @@ class ScatterPlotDemo extends Component {
         data={data}
         maleColor={params.colorM.value}
         femaleColor={params.colorF.value}
-        radius={params.radius.value} />
+        radius={params.radius.value}
+      />
     );
   }
 }

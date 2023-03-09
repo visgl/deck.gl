@@ -1,7 +1,7 @@
 importScripts('./util.js');
 
 const flights = [];
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
 
   let time = 0;
@@ -21,8 +21,10 @@ onmessage = function(e) {
     flights.push({
       time1: time,
       time2,
-      lon1, lat1,
-      lon2, lat2
+      lon1,
+      lat1,
+      lon2,
+      lat2
     });
   }
 

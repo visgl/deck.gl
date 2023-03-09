@@ -2,12 +2,12 @@ import React, {useCallback} from 'react';
 import styled from 'styled-components';
 
 const InputContainer = styled.div`
-position: relative;
-width: 100%;
+  position: relative;
+  width: 100%;
 
-&:last-child {
-  margin-bottom: 20px;
-}
+  &:last-child {
+    margin-bottom: 20px;
+  }
 
 >* {
   vertical-align: middle;
@@ -21,7 +21,7 @@ label {
   margin-bottom: 2px;
 }
 input, a, button {
-  background: var(--ifm-color-white);
+  background: var(--ifm-background-surface-color);
   font-size: 0.9em;
   text-transform: none;
   text-overflow: ellipsis;
@@ -48,21 +48,27 @@ input {
   &:disabled {
     background: var(--ifm-color-gray-300);
   }
-  &[type="checkbox"] {
-    height: auto;
-  }
-}
+  input {
+    border: solid 1px var(--ifm-color-gray-500);
 
-.tooltip {
-  left: 50%;
-  top: 24px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms;
-}
-&:hover .tooltip {
-  opacity: 1;
-}
+    &:disabled {
+      background: var(--ifm-color-gray-300);
+    }
+    &[type='checkbox'] {
+      height: auto;
+    }
+  }
+
+  .tooltip {
+    left: 50%;
+    top: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms;
+  }
+  &:hover .tooltip {
+    opacity: 1;
+  }
 `;
 
 function RangeInput({name, min, max, step, displayName, displayValue, onChange}) {
@@ -90,10 +96,13 @@ function RangeInput({name, min, max, step, displayName, displayValue, onChange})
 }
 
 function Checkbox({name, value, displayName, displayValue, onChange}) {
-  const onInput = useCallback(evt => {
-    const newValue = evt.target.checked;
-    onChange(name, newValue);
-  }, [onChange]);
+  const onInput = useCallback(
+    evt => {
+      const newValue = evt.target.checked;
+      onChange(name, newValue);
+    },
+    [onChange]
+  );
 
   return (
     <InputContainer>
@@ -107,11 +116,14 @@ function Checkbox({name, value, displayName, displayValue, onChange}) {
 }
 
 export default function GenericInput(props) {
-  const {name, onChange, displayName, value, altType, altValue, displayValue, ...otherProps} = props;
+  const {name, onChange, displayName, altValue, displayValue, ...otherProps} = props;
 
-  const onInput = useCallback(evt => {
-    onChange(name, evt.target.value);
-  }, [onChange])
+  const onInput = useCallback(
+    evt => {
+      onChange(name, evt.target.value);
+    },
+    [onChange]
+  );
 
   const reset = useCallback(() => {
     onChange(name, altValue);
@@ -136,16 +148,22 @@ export default function GenericInput(props) {
       return (
         <div className="input">
           <label>{displayName}</label>
-          <button type="text" disabled={!editable} onClick={ reset }>{displayValue}</button>
+          <button type="text" disabled={!editable} onClick={reset}>
+            {displayValue}
+          </button>
         </div>
-     );
+      );
 
     case 'select':
       return (
         <div className="input">
           <label>{displayName}</label>
           <select onChange={onInput} value={displayValue}>
-            {props.options.map(((value, i) => <option key={i} value={value}>{value}</option>))}
+            {props.options.map((value, i) => (
+              <option key={i} value={value}>
+                {value}
+              </option>
+            ))}
           </select>
         </div>
       );
@@ -155,8 +173,8 @@ export default function GenericInput(props) {
 
     case 'range':
       return <RangeInput {...props} />;
-    
-    default: 
+
+    default:
       return (
         <InputContainer>
           <label>{displayName}</label>

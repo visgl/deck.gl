@@ -34,8 +34,8 @@ const defaultProps = {
   data: null,
   // (Enum (MAP_TYPES), required)
   type: null,
-  onDataLoad: {type: 'function', value: data => {}, compare: false},
-  onDataError: {type: 'function', value: null, compare: false, optional: true},
+  onDataLoad: {type: 'function', value: data => {}},
+  onDataError: {type: 'function', value: null, optional: true},
   uniqueIdProperty: 'cartodb_id',
 
   // override carto credentials for the layer, set to null to read from default

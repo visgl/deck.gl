@@ -23,12 +23,15 @@ export default class AnimatedArcGroupLayer extends CompositeLayer {
 
     return groups.map(
       (group, index) =>
-        new AnimatedArcLayer(this.props, this.getSubLayerProps({
-          id: index.toString(),
-          data: group.data,
-          visible: group.startTime < timeRange[1] && group.endTime > timeRange[0],
-          timeRange
-        }))
+        new AnimatedArcLayer(
+          this.props,
+          this.getSubLayerProps({
+            id: index.toString(),
+            data: group.data,
+            visible: group.startTime < timeRange[1] && group.endTime > timeRange[0],
+            timeRange
+          })
+        )
     );
   }
 }

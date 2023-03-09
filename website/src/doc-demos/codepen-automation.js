@@ -1,11 +1,21 @@
-
 const PROP_BLACK_LIST = ['dataComparator', 'fetch'];
-const BASE_LAYER_PROP_WHITE_LIST = ['autoHighlight', 'coordinateOrigin', 'coordinateSystem', 'highlightColor', 'modelMatrix', 'opacity', 'pickable', 'visible', 'wrapLongitude'];
+const BASE_LAYER_PROP_WHITE_LIST = [
+  'autoHighlight',
+  'coordinateOrigin',
+  'coordinateSystem',
+  'highlightColor',
+  'modelMatrix',
+  'opacity',
+  'pickable',
+  'visible',
+  'wrapLongitude'
+];
 const PROP_OVERRIDES = {
   loaders: [],
   coordinateSystem: 'COORDINATE_SYSTEM.LNGLAT',
   renderSubLayers: 'props => new GeoJsonLayer(props)',
-  characterSet: '" !\\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"'
+  characterSet:
+    '" !\\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"'
 };
 
 /*
@@ -20,14 +30,17 @@ function addIndent(text, spaces) {
   const lines = text.split('\n');
   if (spaces > 0) {
     const indent = ''.padStart(spaces, ' ');
-    return lines.map((line, i) => {
-      return i > 0 ? indent + line : line;
-    }).join('\n');
-  } else {
-    return lines.map((line, i) => {
-      return i > 0 ? line.slice(-spaces) : line;
-    }).join('\n');
+    return lines
+      .map((line, i) => {
+        return i > 0 ? indent + line : line;
+      })
+      .join('\n');
   }
+  return lines
+    .map((line, i) => {
+      return i > 0 ? line.slice(-spaces) : line;
+    })
+    .join('\n');
 }
 
 /*
@@ -41,7 +54,7 @@ function formatValue(value) {
   } else if (typeof value === 'function') {
     return value.toString();
   } else if (Array.isArray(value)) {
-    return `[${value.map(formatValue).join(', ')}]`
+    return `[${value.map(formatValue).join(', ')}]`;
   } else if (value === Number.MAX_SAFE_INTEGER) {
     return 'Number.MAX_SAFE_INTEGER';
   }
@@ -64,7 +77,7 @@ function parsePropSource(source) {
       key = m[2];
       result[key] = m[3];
     } else if (key) {
-      result[key] += '\n' + line;
+      result[key] += `\n${line}`;
     }
   }
   for (key in result) {
@@ -85,7 +98,7 @@ function printLayerProps(layer, propsSource) {
 
   const asyncOriginal = layer.props[Symbol.for('asyncPropOriginal')];
   const asyncResolved = layer.props[Symbol.for('asyncPropResolved')];
-  
+
   function addProp(propName, value, shouldComment, insertPosition) {
     if (!propNames[propName] && !PROP_BLACK_LIST.includes(propName)) {
       const line = `${shouldComment ? '// ' : ''}${propName}: ${value},`;
@@ -106,11 +119,18 @@ function printLayerProps(layer, propsSource) {
 
   while (Class.layerName) {
     if (Class.hasOwnProperty('defaultProps')) {
-      result.push('', `/* props ${isPrototype ? 'inherited from' : 'from'} ${Class.layerName} class */`, '');
+      result.push(
+        '',
+        `/* props ${isPrototype ? 'inherited from' : 'from'} ${Class.layerName} class */`,
+        ''
+      );
       const keys = Object.keys(Class.defaultProps).sort();
       for (const key of keys) {
         const propDef = Class.defaultProps[key];
-        const shouldComment = !(key in asyncOriginal) && !(key in asyncResolved) && !Object.hasOwnProperty.call(layer.props, key);
+        const shouldComment =
+          !(key in asyncOriginal) &&
+          !(key in asyncResolved) &&
+          !Object.hasOwnProperty.call(layer.props, key);
         let shouldSkip = false;
         let value;
 
@@ -123,9 +143,13 @@ function printLayerProps(layer, propsSource) {
           // Hide experimental props
           shouldSkip = shouldSkip || key.startsWith('_');
           // Hide accessors that are not exposed, e.g. `getPolygon` in `H3HexagonLayer`
-          shouldSkip = shouldSkip || (propDef && propDef.type === 'accessor' && typeof propDef.value === 'function');
+          shouldSkip =
+            shouldSkip ||
+            (propDef && propDef.type === 'accessor' && typeof propDef.value === 'function');
           // Hide some base layer props
-          shouldSkip = shouldSkip || (Class.layerName === 'Layer' && !BASE_LAYER_PROP_WHITE_LIST.includes(key));
+          shouldSkip =
+            shouldSkip ||
+            (Class.layerName === 'Layer' && !BASE_LAYER_PROP_WHITE_LIST.includes(key));
 
           value = asyncOriginal[key] || layer.props[key];
           if (typeof value === 'function') {
@@ -138,7 +162,7 @@ function printLayerProps(layer, propsSource) {
             value = formatValue(value);
           }
         }
-        
+
         if (!shouldSkip) {
           addProp(key, value, shouldComment);
         }
@@ -161,7 +185,16 @@ function printLayerProps(layer, propsSource) {
  * Open a layer example in Codepen
  */
 export function gotoLayerSource(config, layer) {
-  const {Layer, isExperimental, getTooltip, props, mapStyle = true, dependencies = [], imports, initialViewState} = config;
+  const {
+    Layer,
+    isExperimental,
+    getTooltip,
+    props,
+    mapStyle = true,
+    dependencies = [],
+    imports,
+    initialViewState
+  } = config;
 
   const layerName = isExperimental ? `_${Layer.layerName}` : Layer.layerName;
 
@@ -179,15 +212,20 @@ export function gotoLayerSource(config, layer) {
   }
 
   const initialViewStateSerialized = addIndent(
-    JSON.stringify(initialViewState, null, 2).replace(/"/g, ''),  // remove quotes
-    2);
+    JSON.stringify(initialViewState, null, 2).replace(/"/g, ''), // remove quotes
+    2
+  );
 
   // https://blog.codepen.io/documentation/prefill/
   const source = `\
 const {${symbols.join(', ')}} = deck;
-${loaders.length ? `\
+${
+  loaders.length
+    ? `\
 const {${loaders.join(', ')}} = loaders;
-` : ''}
+`
+    : ''
+}
 const layer = new ${layerName}({
   ${printLayerProps(layer, props)}
 });
@@ -200,7 +238,7 @@ new DeckGL({
   layers: [layer]
 });
   `;
-  
+
   gotoSource({
     dependencies: dependencies.concat(['https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js']),
     title: `deck.gl ${Layer.layerName}`,
@@ -208,11 +246,10 @@ new DeckGL({
   });
 }
 
+/* global document, window */
 function gotoSource({dependencies = [], title, source}) {
   const formData = {
-    js_external: dependencies.concat([
-      'https://unpkg.com/deck.gl@latest/dist.min.js'
-    ]).join(';'),
+    js_external: dependencies.concat(['https://unpkg.com/deck.gl@latest/dist.min.js']).join(';'),
     title,
     parent: 48721472,
     tags: ['webgl', 'data visualization'],

@@ -12,15 +12,19 @@ class FirstPersonViewDemo extends Component {
   static renderInfo() {
     return (
       <div>
-        <p>The 360 video was created by NASA Jet Propulsion Laboratory, Public domain, via 
-          <a href="https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm"> Wikimedia Commons</a>
+        <p>
+          The 360 video was created by NASA Jet Propulsion Laboratory, Public domain, via
+          <a href="https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm">
+            {' '}
+            Wikimedia Commons
+          </a>
         </p>
       </div>
     );
   }
 
   render() {
-    return <App {...this.props}/>;
+    return <App {...this.props} />;
   }
 }
 

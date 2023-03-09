@@ -36,11 +36,11 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   data: '',
   loader: Tiles3DLoader,
 
-  onTilesetLoad: {type: 'function', value: tileset3d => {}, compare: false},
-  onTileLoad: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileUnload: {type: 'function', value: tileHeader => {}, compare: false},
-  onTileError: {type: 'function', value: (tile, message, url) => {}, compare: false},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255], compare: false}
+  onTilesetLoad: {type: 'function', value: tileset3d => {}},
+  onTileLoad: {type: 'function', value: tileHeader => {}},
+  onTileUnload: {type: 'function', value: tileHeader => {}},
+  onTileError: {type: 'function', value: (tile, message, url) => {}},
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]}
 };
 
 /** All properties supported by Tile3DLayer */

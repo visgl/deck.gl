@@ -15,7 +15,8 @@ import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 
 // Data source
-const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe/2020-01-14.csv';
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe/2020-01-14.csv';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
 const INITIAL_VIEW_STATE = {
@@ -49,7 +50,7 @@ export default function App({
       new GeoJsonLayer({
         id: 'cities-highlight',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_populated_places_simple.geojson',
-      
+
         pointType: 'circle',
         pointRadiusUnits: 'common',
         pointRadiusScale: 0.3,
@@ -78,18 +79,20 @@ export default function App({
     getHeight: 0
   };
 
-  const flightPathsLayer = showFlights && new AnimatedArcLayer({
-    ...flightLayerProps,
-    id: 'flight-paths',
-    timeRange: [currentTime - 600, currentTime],  // 10 minutes
-    getWidth: 0.2,
-    widthMinPixels: 1,
-    widthMaxPixels: 4,
-    widthUnits: 'common',
-    getSourceColor: [180, 232, 255],
-    getTargetColor: [180, 232, 255],
-    parameters: {depthTest: false}
-  });
+  const flightPathsLayer =
+    showFlights &&
+    new AnimatedArcLayer({
+      ...flightLayerProps,
+      id: 'flight-paths',
+      timeRange: [currentTime - 600, currentTime], // 10 minutes
+      getWidth: 0.2,
+      widthMinPixels: 1,
+      widthMaxPixels: 4,
+      widthUnits: 'common',
+      getSourceColor: [180, 232, 255],
+      getTargetColor: [180, 232, 255],
+      parameters: {depthTest: false}
+    });
 
   const flightMaskLayer = new AnimatedArcLayer({
     ...flightLayerProps,
@@ -97,7 +100,7 @@ export default function App({
     timeRange: [currentTime - timeWindow * 60, currentTime],
     operation: 'mask',
     getWidth: 5000,
-    widthUnits: 'meters',
+    widthUnits: 'meters'
   });
 
   return (
@@ -134,8 +137,7 @@ export function renderToDOM(container) {
   const root = createRoot(container);
   root.render(<App />);
 
-  load(DATA_URL, CSVLoader)
-    .then(flights => {
-      root.render(<App data={flights} showFlights />);
-    });
+  load(DATA_URL, CSVLoader).then(flights => {
+    root.render(<App data={flights} showFlights />);
+  });
 }

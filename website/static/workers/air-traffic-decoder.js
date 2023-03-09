@@ -2,7 +2,7 @@ importScripts('./util.js');
 let count = 0;
 let dayIndex = 0;
 
-onmessage = function(e) {
+onmessage = function (e) {
   const lines = e.data.text.split('\n');
   const SEC_PER_DAY = 60 * 60 * 24;
 
@@ -29,8 +29,12 @@ onmessage = function(e) {
       flights.push({
         time1: time + timeOffset,
         time2: time2 + timeOffset,
-        lon1, lat1, alt1,
-        lon2, lat2, alt2
+        lon1,
+        lat1,
+        alt1,
+        lon2,
+        lat2,
+        alt2
       });
     }
 

@@ -46,14 +46,8 @@ Thus for development it is necessary to checkout a copy of such a dependency and
 
 When running an example using `yarn start-local` you can use local version of [luma.gl](https://github.com/visgl/luma.gl/) or [math.gl](https://github.com/uber-web/math.gl) by appending the `--env.local-luma` or `--env.local-math` option.
 
-### Specific module overrides
+It is possible to test against the local source of other dependency libraries by modifying [examples/vite.config.local.mjs](https://github.com/visgl/deck.gl/blob/master/examples/vite.config.local.mjs).
 
-To get the local build of deck.gl to pick up the local code rather than the modules from npm, there are two important config files:
-
-- [ocular-dev-tools.config.js](https://github.com/visgl/deck.gl/blob/master/ocular-dev-tools.config.js) - See [Ocular documentation for details](https://uber-web.github.io/docs/dev-tools)
-- [examples/webpack.config.local.js](https://github.com/visgl/deck.gl/blob/master/examples/webpack.config.local.js)
-
-_Note that the configuration in `examples/webpack.config.local.js` will potentially override the ocular configuration._
 
 ## Community Governance
 

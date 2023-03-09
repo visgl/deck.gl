@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import {
   ContourLayer,
   CPUGridLayer,
@@ -29,7 +30,7 @@ export const ContourLayerDemo = makeLayerDemo({
 });
 
 const GRID_LAYER_INFO = {
-  getTooltip: '({object}) => object && `${object.position.join(\', \')}\nCount: ${object.count}`',
+  getTooltip: "({object}) => object && `${object.position.join(', ')}\nCount: ${object.count}`",
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,
@@ -57,7 +58,8 @@ export const CPUGridLayerDemo = makeLayerDemo({
 
 export const HexagonLayerDemo = makeLayerDemo({
   Layer: HexagonLayer,
-  getTooltip: '({object}) => object && `${object.position.join(\', \')}\nCount: ${object.points.length}`',
+  getTooltip:
+    "({object}) => object && `${object.position.join(', ')}\nCount: ${object.points.length}`",
   props: `{
     data: '${DATA_URI}/sf-bike-parking.json',
     pickable: true,

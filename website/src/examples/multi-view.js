@@ -11,7 +11,7 @@ class MultiViewDemo extends Component {
     url: `${DATA_URI}/radio-stations.txt`,
     worker: '/workers/radio-data-decoder.js'
   };
-  
+
   static code = `${GITHUB_TREE}/examples/website/radio`;
 
   static parameters = {
@@ -35,13 +35,7 @@ class MultiViewDemo extends Component {
     const {params, data, ...otherProps} = this.props;
     const showMinimap = params.showMinimap.value;
 
-    return (
-      <App
-        {...otherProps}
-        data={data}
-        showMinimap={showMinimap}
-      />
-    );
+    return <App {...otherProps} data={data} showMinimap={showMinimap} />;
   }
 }
 

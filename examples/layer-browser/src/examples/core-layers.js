@@ -399,7 +399,7 @@ const TextLayerExample = {
       buffer: 16,
       radius: 12,
       cutoff: 0.25,
-      smoothing: 0.1,
+      smoothing: 0.1
     },
     autoHighlight: true,
     pickable: true,

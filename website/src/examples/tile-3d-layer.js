@@ -23,6 +23,7 @@ class Tiles3DDemo extends Component {
         <div style={{textAlign: 'center', borderStyle: 'groove'}}>
           {Boolean(attributions.length) && <b>Tileset Credentials</b>}
           {attributions.map(attribution => (
+            // eslint-disable-next-line react/no-danger
             <div key={attribution.html} dangerouslySetInnerHTML={{__html: attribution.html}} />
           ))}
         </div>
@@ -30,9 +31,9 @@ class Tiles3DDemo extends Component {
     );
   }
 
-  _updateAttributions = (attributions) => {
+  _updateAttributions = attributions => {
     this.props.onStateChange({attributions});
-  }
+  };
 
   render() {
     return <App {...this.props} updateAttributions={this._updateAttributions} />;

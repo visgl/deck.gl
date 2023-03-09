@@ -1,12 +1,6 @@
 import React from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import {
-  Banner,
-  BannerContainer,
-  HeroExampleContainer,
-  ProjectName,
-  GetStartedLink
-} from './styled';
+import {Banner, BannerContainer, HeroExampleContainer, ProjectName, GetStartedLink} from './styled';
 
 export default function renderPage({HeroExample, children}) {
   const {siteConfig} = useDocusaurusContext();
@@ -14,14 +8,12 @@ export default function renderPage({HeroExample, children}) {
   // Note: The Layout "wrapper" component adds header and footer etc
   return (
     <>
-      <Banner >
+      <Banner>
         <HeroExampleContainer>{HeroExample && <HeroExample />}</HeroExampleContainer>
         <BannerContainer>
           <ProjectName>{siteConfig.title}</ProjectName>
           <p>{siteConfig.tagline}</p>
-          <GetStartedLink href="./docs/get-started" >
-            GET STARTED
-          </GetStartedLink>
+          <GetStartedLink href="./docs/get-started">GET STARTED</GetStartedLink>
         </BannerContainer>
       </Banner>
       {children}
