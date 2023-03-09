@@ -30,7 +30,7 @@ class CollisionDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Principals roads from Mexico country</p>
+        <p>Principal roads from Mexico</p>
         <p>
           Data sources:
           <div>
