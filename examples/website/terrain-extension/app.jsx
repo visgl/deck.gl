@@ -1,4 +1,3 @@
-/* eslint-disable max-statements */
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
@@ -6,10 +5,11 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
-const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain/tour_de_france_2023_mountain_stages.json'; // eslint-disable-line
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain/tour_de_france_2023_mountain_stages.json'; // eslint-disable-line
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken;
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   latitude: 43.09822,
@@ -73,8 +73,8 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       pointType: 'text',
       getText: d => d.properties.location,
       getPosition: d => d.geometry.coordinates,
-      getTextColor: d => d.properties.tooltip ? [255, 255, 255] : COLOR_SCHEME,
-      getTextSize: d => d.properties.tooltip ? 16 : 17,
+      getTextColor: d => (d.properties.tooltip ? [255, 255, 255] : COLOR_SCHEME),
+      getTextSize: d => (d.properties.tooltip ? 16 : 17),
       getTextPixelOffset: [0, -45],
       getTextAngle: 0,
       textOutlineWidth: 5,

@@ -11,7 +11,7 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "ts-node scripts/write-heading-ids.ts"
+    "write-heading-ids": "ts-node ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
     "@loaders.gl/i3s": "^3.3.1",

@@ -14,7 +14,8 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
 
 // Sample data
-const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/text-layer/cities-1000.csv';
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/text-layer/cities-1000.csv';
 
 const INITIAL_VIEW_STATE = {
   latitude: 39.1,
@@ -27,20 +28,17 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const colorScale = scaleLinear().domain([3, 4, 5, 6, 7]).range([
-  [29, 145, 192],
-  [65, 182, 196],
-  [127, 205, 187],
-  [199, 233, 180],
-  [237, 248, 177]
-]);
+const colorScale = scaleLinear()
+  .domain([3, 4, 5, 6, 7])
+  .range([
+    [29, 145, 192],
+    [65, 182, 196],
+    [127, 205, 187],
+    [199, 233, 180],
+    [237, 248, 177]
+  ]);
 
-export default function App({
-  data,
-  noOverlap = true,
-  fontSize = 32,
-  mapStyle = MAP_STYLE
-}) {
+export default function App({data, noOverlap = true, fontSize = 32, mapStyle = MAP_STYLE}) {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
 
   const onViewStateChange = useCallback(({viewState}) => {
@@ -48,7 +46,7 @@ export default function App({
   }, []);
 
   const scale = 2 ** zoom;
-  const sizeMaxPixels = scale / 3 * fontSize;
+  const sizeMaxPixels = (scale / 3) * fontSize;
   const sizeMinPixels = Math.min(scale / 1000, 0.5) * fontSize;
 
   const textLayer = new TextLayer({
@@ -65,8 +63,8 @@ export default function App({
     getColor: d => colorScale(Math.log10(d.population)),
     getSize: d => Math.pow(d.population, 0.25) / 40,
     sizeScale: fontSize,
-    sizeMaxPixels: sizeMaxPixels,
-    sizeMinPixels: sizeMinPixels,
+    sizeMaxPixels,
+    sizeMinPixels,
     maxWidth: 64 * 12,
 
     // CollideExtension options
@@ -75,9 +73,9 @@ export default function App({
     collisionTestProps: {
       sizeScale: fontSize * 2,
       sizeMaxPixels: sizeMaxPixels * 2,
-      sizeMinPixels: sizeMinPixels * 2,
+      sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()],
+    extensions: [new CollisionFilterExtension()]
   });
 
   return (

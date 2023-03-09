@@ -54,8 +54,7 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
     type: 'object',
     value: [{threshold: DEFAULT_THRESHOLD}],
     optional: true,
-    compare: true,
-    depth: 2
+    compare: 3
   },
 
   zOffset: 0.005

@@ -10,35 +10,38 @@ export function deepEqual(a: any, b: any, depth: number): boolean {
   if (a === b) {
     return true;
   }
-  if (
-    !a ||
-    !b ||
-    Array.isArray(a) !== Array.isArray(b) ||
-    typeof a !== 'object' ||
-    typeof b !== 'object'
-  ) {
+  if (!depth || !a || !b) {
     return false;
   }
-
-  // Handle case where key in b is missing from a
-  if (Array.isArray(b)) {
-    if (b.length !== a.length) return false;
-  } else {
-    for (const key in b) {
-      if (!(key in a)) return false;
-    }
-  }
-
-  for (const key in a) {
-    if (depth) {
-      // Often will have shallow equality, so skip function invocation
-      if (a[key] !== b[key] && !deepEqual(a[key], b[key], depth - 1)) {
-        return false;
-      }
-    } else if (a[key] !== b[key]) {
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) {
       return false;
     }
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i], depth - 1)) {
+        return false;
+      }
+    }
+    return true;
   }
-
-  return true;
+  if (Array.isArray(b)) {
+    return false;
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) {
+      return false;
+    }
+    for (const key of aKeys) {
+      if (!b.hasOwnProperty(key)) {
+        return false;
+      }
+      if (!deepEqual(a[key], b[key], depth - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }

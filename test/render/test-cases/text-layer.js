@@ -179,7 +179,7 @@ export default OS === 'Mac'
             coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
             fontFamily: 'Arial',
             wordBreak: 'break-word',
-            maxWidth: 1000,
+            maxWidth: 16,
             getText: x => `${x.LOCATION_NAME} ${x.ADDRESS}`,
             getPosition: (_, {index}) => [0, (index - 2) * 2000],
             getColor: [255, 0, 0],

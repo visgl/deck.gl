@@ -22,6 +22,8 @@
 import Attribute, {AttributeOptions} from './attribute';
 import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
+import memoize from '../../utils/memoize';
+import {mergeBounds} from '../../utils/math-utils';
 import debug from '../../debug';
 import {NumericArray} from '../../types/types';
 
@@ -70,6 +72,7 @@ export default class AttributeManager {
 
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
+  private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
     gl: WebGLRenderingContext,
@@ -273,6 +276,14 @@ export default class AttributeManager {
    */
   getAttributes(): {[id: string]: Attribute} {
     return this.attributes;
+  }
+
+  /**
+   * Computes the spatial bounds of a given set of attributes
+   */
+  getBounds(attributeNames: string[]) {
+    const bounds = attributeNames.map(attributeName => this.attributes[attributeName]?.getBounds());
+    return this.mergeBoundsMemoized(bounds);
   }
 
   /**

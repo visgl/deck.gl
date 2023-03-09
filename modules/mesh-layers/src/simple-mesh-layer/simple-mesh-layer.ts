@@ -199,7 +199,9 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   getScale: {type: 'accessor', value: [1, 1, 1]},
   getTranslation: {type: 'accessor', value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []}
+  getTransformMatrix: {type: 'accessor', value: []},
+
+  textureParameters: {type: 'object', ignore: true}
 };
 
 /** Render a number of instances of an arbitrary 3D geometry. */

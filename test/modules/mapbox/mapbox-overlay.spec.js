@@ -252,3 +252,33 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
     t.end();
   });
 });
+
+test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [new ScatterplotLayer({id: 'poi'})]
+  });
+
+  map.addControl(overlay);
+
+  t.ok(overlay._deck, 'Deck instance is created');
+  t.false('move' in map._listeners, 'No move listeners initially');
+
+  map.on('render', () => {
+    t.true(map._listeners['move'].length === 1, 'One move listener attached by overlay');
+
+    overlay.finalize();
+    t.true(map._listeners['move'].length === 1, 'Listener attached after finalized until it fires');
+
+    map.setCenter({lng: 0, lat: 1});
+    t.true(map._listeners['move'].length === 0, 'Listener detached after it fired');
+
+    map.removeControl(overlay);
+    t.notOk(overlay._deck, 'Deck instance is finalized');
+    t.end();
+  });
+});

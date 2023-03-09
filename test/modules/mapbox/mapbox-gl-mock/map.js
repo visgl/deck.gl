@@ -37,24 +37,28 @@ export default class Map extends Evented {
   }
   setCenter(value) {
     this.transform.center = value;
+    this.fire(new Event('move'));
   }
   getZoom() {
     return this.transform.zoom;
   }
   setZoom(value) {
     this.transform.zoom = value;
+    this.fire(new Event('move'));
   }
   getBearing() {
     return this.transform.bearing;
   }
   setBearing(value) {
     this.transform.bearing = value;
+    this.fire(new Event('move'));
   }
   getPitch() {
     return this.transform.pitch;
   }
   setPitch(value) {
     this.transform.pitch = value;
+    this.fire(new Event('move'));
   }
   getPadding() {
     return this.transform.padding;
