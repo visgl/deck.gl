@@ -5,14 +5,12 @@ import maplibregl from 'maplibre-gl';
 import {WebMercatorViewport} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-// import roads from './data/ne_10_roads_filtered_usa_california.json';
-// import roads from './data/ne_10_roads_filtered_usa.json';
-// import roads from './data/ne_10_roads_europe.json';
 import roads from './data/ne_10_roads_mexico.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
-const initialViewState = {longitude: -120, latitude: 36, zoom: 5, maxZoom: 15};
+const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
+const LINE_COLOR = [215, 130, 170];
 
 function calculateLabels(data, pointSpacing) {
   const routes = data.features.filter(d => d.geometry.type !== 'Point');
@@ -73,7 +71,7 @@ function calculateLabels(data, pointSpacing) {
 
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-  sizeScale = 4,
+  sizeScale = 10,
   collisionEnabled = true,
   pointSpacing = 5
 }) {
@@ -88,21 +86,19 @@ export default function App({
     new GeoJsonLayer({
       id: 'geojson',
       data: roads,
-      stroked: true,
-      filled: true,
       lineWidthMinPixels: 2,
-      parameters: {
-        depthTest: false
-      },
-      getFillColor: [255, 255, 255],
-      getLineColor: [255, 160, 180]
+      parameters: {depthTest: false},
+      getLineColor: LINE_COLOR
     }),
     new TextLayer({
       id: 'text-layer',
       data: dataLabels,
       getPosition: d => d.geometry.coordinates,
       getText: d => d.properties.label,
-      getColor: [255, 255, 255, 255],
+      getColor: [255, 255, 255],
+      getBackgroundColor: LINE_COLOR,
+      getBorderColor: [255, 255, 255],
+      getBorderWidth: 1,
       getSize: 15,
       getAngle: d => {
         const p1 = viewport.project(d.geometry.coordinates);
@@ -114,11 +110,17 @@ export default function App({
         return angle;
       },
       getTextAnchor: 'middle',
-      getAlignmentBaseline: 'bottom',
-      outlineWidth: 1,
+      getAlignmentBaseline: 'center',
+      background: true,
+      backgroundPadding: [4, 1],
+      outlineWidth: 0,
+      outlineColor: [255, 255, 0],
       fontSettings: {
         sdf: true
       },
+      characterSet: '0123456789ABCD',
+      fontFamily: 'monospace',
+
       // CollisionFilterExtension props
       collisionEnabled,
       getCollisionPriority: d => d.properties.priority,
