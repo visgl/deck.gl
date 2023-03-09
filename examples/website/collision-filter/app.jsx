@@ -16,30 +16,29 @@ const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, ma
 
 function calculateLabels(data, pointSpacing) {
   const routes = data.features.filter(d => d.geometry.type !== 'Point');
+  const result = [];
+
+  function addPoint(lineLength, lineString, dAlong, name, priority) {
+    let offset = 1;
+    if (dAlong > 0.5 * lineLength) offset *= -1;
+    const feature = turf.along(lineString, dAlong);
+    const nextFeature = turf.along(lineString, dAlong + offset);
+    const {coordinates} = feature.geometry;
+    const next = nextFeature.geometry.coordinates;
+    if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
+
+    let angle = 90 - turf.rhumbBearing(coordinates, next);
+    if (Math.abs(angle) > 90) angle += 180;
+
+    result.push({position: coordinates, text: name, priority, angle});
+  }
 
   // Add points along the lines
-  const filteredLabels = routes.map(d => {
-    const lineLength = Math.floor(turf.lineDistance(d.geometry));
+  for (const feature of routes) {
+    const lineLength = Math.floor(turf.lineDistance(feature.geometry));
+    const {name} = feature.properties;
 
-    const result = [];
-
-    function addPoint(lineString, dAlong, priority) {
-      let offset = 1;
-      if (dAlong > 0.5 * lineLength) offset *= -1;
-      const feature = turf.along(lineString, dAlong);
-      const nextFeature = turf.along(lineString, dAlong + offset);
-      const {coordinates} = feature.geometry;
-      const next = nextFeature.geometry.coordinates;
-      if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
-
-      let angle = 90 - turf.rhumbBearing(coordinates, next);
-      if (Math.abs(angle) > 90) angle += 180;
-
-      const {name: text} = d.properties;
-      result.push({position: coordinates, text, priority, angle});
-    }
-
-    d.geometry.coordinates.forEach(c => {
+    feature.geometry.coordinates.forEach(c => {
       const lineString = turf.lineString(c);
 
       // Add labels to minimize overlaps, pick odd values from each level
@@ -50,17 +49,15 @@ function calculateLabels(data, pointSpacing) {
       let depth = 1;
       while (delta > pointSpacing) {
         for (let i = 1; i < 2 ** depth; i += 2) {
-          addPoint(lineString, i * delta, 100 - depth); // Top levels have highest priority
+          addPoint(lineLength, lineString, i * delta, name, 100 - depth); // Top levels have highest priority
         }
         depth++;
         delta /= 2;
       }
     });
+  }
 
-    return result;
-  });
-
-  return filteredLabels.reduce((acc, key) => acc.concat(key), []);
+  return result;
 }
 
 export default function App({
