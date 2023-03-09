@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
@@ -8,50 +8,20 @@ import roads from './data/ne_10_roads_filtered_usa_california.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
-const ALL_ROUTES = 'All routes';
+const initialViewState = {
+  longitude: -119.417931,
+  latitude: 36.778259,
+  zoom: 5,
+  maxZoom: 20,
+  pitch: 0,
+  bearing: 0
+};
 
-export default function App({
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-  sizeScale = 4,
-  collisionEnabled = true,
-  routeName = ALL_ROUTES,
-  pointSpacing = 1
-}) {
-  const roadName = routeName.split('-');
-  const filteredRoads =
-    routeName === ALL_ROUTES
-      ? roads
-      : roads.features.filter(f => f.properties.number === roadName[1]);
-
-  const initialViewState = {
-    longitude: -119.417931,
-    latitude: 36.778259,
-    zoom: 5,
-    maxZoom: 20,
-    pitch: 0,
-    bearing: 0
-  };
-
-  if (routeName !== ALL_ROUTES) {
-    const geom = Object.keys(filteredRoads).reduce(
-      (acc, key) => acc.concat(filteredRoads[key].geometry.coordinates),
-      []
-    );
-    // Join all geometries into a single MultiLineString
-    const multiLine = turf.multiLineString(geom);
-    // Calculate the centroid of the MultiLineString
-    const centroid = turf.center(multiLine);
-
-    initialViewState.longitude = centroid.geometry.coordinates[0];
-    initialViewState.latitude = centroid.geometry.coordinates[1];
-  }
-
-  const routes = roads.features.filter(d => d.geometry.type !== 'Point');
-  const _data =
-    routeName === ALL_ROUTES ? routes : routes.filter(d => d.properties.number === roadName[1]);
+function calculateLabels(data, pointSpacing) {
+  const routes = data.features.filter(d => d.geometry.type !== 'Point');
 
   // Add points along the lines
-  const filteredLabels = _data.map(d => {
+  const filteredLabels = routes.map(d => {
     const lineLength = Math.floor(turf.lineDistance(d.geometry, 'miles'));
 
     const result = {
@@ -76,7 +46,7 @@ export default function App({
       }
 
       const {prefix, number} = d.properties;
-      feature.properties = {priority, prefix, number, angle};
+      feature.properties = {priority, prefix, number, angle, prev, next};
       result.features.push(feature);
     }
 
@@ -101,12 +71,23 @@ export default function App({
     return result;
   });
 
-  const dataLabels = filteredLabels.reduce((acc, key) => acc.concat(key.features), []);
+  return filteredLabels.reduce((acc, key) => acc.concat(key.features), []);
+}
+
+export default function App({
+  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+  sizeScale = 4,
+  collisionEnabled = true,
+  pointSpacing = 1
+}) {
+  const onViewStateChange = useCallback(({viewState}) => {}, []);
+
+  const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
 
   const layers = [
     new GeoJsonLayer({
       id: 'geojson',
-      data: filteredRoads,
+      data: roads,
       stroked: false,
       filled: false,
       lineWidthMinPixels: 3,
@@ -141,7 +122,13 @@ export default function App({
   ];
 
   return (
-    <DeckGL layers={layers} initialViewState={initialViewState} controller={true} pickingRadius={5}>
+    <DeckGL
+      layers={layers}
+      initialViewState={initialViewState}
+      onViewStateChange={onViewStateChange}
+      controller={true}
+      pickingRadius={5}
+    >
       <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
