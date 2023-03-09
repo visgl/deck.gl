@@ -8,9 +8,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 importScripts('./util.js');
 var count = 0;
+var dayIndex = 0;
 
 onmessage = function onmessage(e) {
   var lines = e.data.text.split('\n');
+  var SEC_PER_DAY = 60 * 60 * 24;
 
   var _iterator = _createForOfIteratorHelper(lines),
       _step;
@@ -23,6 +25,7 @@ onmessage = function onmessage(e) {
         continue;
       }
 
+      var timeOffset = dayIndex * SEC_PER_DAY;
       var date = line.slice(0, 10);
       var flights = [];
       var i = 10;
@@ -38,8 +41,8 @@ onmessage = function onmessage(e) {
         var lat2 = decodeNumber(line.slice(i, i += 3), 90, 32) / 1e3 - 90;
         var alt2 = decodeNumber(line.slice(i, i += 1), 90, 32) * 100;
         flights.push({
-          time1: time,
-          time2: time2,
+          time1: time + timeOffset,
+          time2: time2 + timeOffset,
           lon1: lon1,
           lat1: lat1,
           alt1: alt1,
@@ -50,6 +53,7 @@ onmessage = function onmessage(e) {
       }
 
       count += flights.length;
+      dayIndex++;
       postMessage({
         action: 'add',
         data: [{
