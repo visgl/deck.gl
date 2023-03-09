@@ -71,7 +71,7 @@ input {
   }
 `;
 
-function RangeInput({name, min, max, displayName, displayValue, onChange}) {
+function RangeInput({name, min, max, step, displayName, displayValue, onChange}) {
   const onInput = useCallback(
     evt => {
       const {value} = evt.target;
@@ -93,7 +93,7 @@ function RangeInput({name, min, max, displayName, displayValue, onChange}) {
       <div className="tooltip">
         {displayName}: {String(displayValue)}
       </div>
-      <input type="range" min={min} max={max} value={displayValue} onChange={onInput} />
+      <input type="range" min={min} max={max} value={displayValue} step={step} onChange={onInput} />
     </InputContainer>
   );
 }
