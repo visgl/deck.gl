@@ -51,9 +51,9 @@ const sidebars = {
       items: ['multi-view', 'globe-view', 'plot', 'orthographic-view', 'first-person-view']
     },
     {
-      "type": "category",
-      "label": "Extensions",
-      "items": [
+      type: 'category',
+      label: 'Extensions',
+      items: [
         'brushing-extension',
         'collision-filter-extension',
         'data-filter-extension',

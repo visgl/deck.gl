@@ -72,17 +72,20 @@ input {
 `;
 
 function RangeInput({name, min, max, step, displayName, displayValue, onChange}) {
-  const onInput = useCallback(evt => {
-    const {value} = evt.target;
-    let newValue = Number(value);
-    if (min !== undefined) {
-      newValue = Math.max(min, newValue);
-    }
-    if (max !== undefined) {
-      newValue = Math.min(max, newValue);
-    }
-    onChange(name, newValue);
-  }, [min, max, onChange]);
+  const onInput = useCallback(
+    evt => {
+      const {value} = evt.target;
+      let newValue = Number(value);
+      if (min !== undefined) {
+        newValue = Math.max(min, newValue);
+      }
+      if (max !== undefined) {
+        newValue = Math.min(max, newValue);
+      }
+      onChange(name, newValue);
+    },
+    [min, max, onChange]
+  );
 
   return (
     <InputContainer>
