@@ -19,6 +19,21 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.0] - Mar 9 2023
+
+- New `CollisionFilterExtension`
+- New `TerrainExtension`
+- New `WMSLayer`
+- Maplibre basemap is now supported out-of-the-box by the scripting interface
+- `BitmapLayer` now mixes translucent pixels correctly
+- `TextLayer` handles text outlines better in sdf mode
+- `TextLayer`'s `maxWidth` is changed to use a more intuitive unit
+- `IconLayer` when used with auto packing preserves the aspect ratio of icons
+- `SolidPolygonLayer` and `GeoJsonLayer` add a `_full3d` prop that tesselate 3D polygons better
+- `@deck.gl/mapbox` synchronizes camera better when the base map contains terrain
+
+Visit [what's new](https://deck.gl/docs/whats-new) for a full list.
+
 ### deck.gl v8.9 Prereleases
 
 #### deck.gl [8.9.0-beta.4] - Mar 8 2023
