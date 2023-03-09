@@ -2,9 +2,11 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
+import {WebMercatorViewport} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import roads from './data/ne_10_roads_filtered_usa_california.json';
+// import roads from './data/ne_10_roads_filtered_usa.json';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as turf from '@turf/turf';
 
@@ -12,9 +14,7 @@ const initialViewState = {
   longitude: -119.417931,
   latitude: 36.778259,
   zoom: 5,
-  maxZoom: 20,
-  pitch: 0,
-  bearing: 0
+  maxZoom: 20
 };
 
 function calculateLabels(data, pointSpacing) {
@@ -22,7 +22,7 @@ function calculateLabels(data, pointSpacing) {
 
   // Add points along the lines
   const filteredLabels = routes.map(d => {
-    const lineLength = Math.floor(turf.lineDistance(d.geometry, 'miles'));
+    const lineLength = Math.floor(turf.lineDistance(d.geometry));
 
     const result = {
       type: 'FeatureCollection',
@@ -30,23 +30,21 @@ function calculateLabels(data, pointSpacing) {
     };
 
     function addPoint(lineString, dAlong, priority) {
-      const feature = turf.along(lineString, dAlong, {units: 'miles'});
-      // Need to add a small offset to the next point to get the correct angle
-      const nextFeature = turf.along(lineString, dAlong + 0.2, {units: 'miles'});
-      let angle = 0;
-
-      const prev = turf.point(feature.geometry.coordinates);
-      const next = turf.point(nextFeature.geometry.coordinates);
-
-      // TODO: imrove the angle calculation, taken from: // TODO: https://codepen.io/Pessimistress/pen/OJgmXba?editors=0010
-      const bearing = turf.bearing(prev, next);
-      angle = 90 - bearing;
-      if (Math.abs(angle) > 90) {
-        angle += 180;
-      }
+      let offset = 1;
+      if (dAlong > 0.5 * lineLength) offset *= -1;
+      const feature = turf.along(lineString, dAlong);
+      const nextFeature = turf.along(lineString, dAlong + offset);
+      const {coordinates} = feature.geometry;
+      const next = turf.point(nextFeature.geometry.coordinates).geometry.coordinates;
+      if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
 
       const {prefix, number} = d.properties;
-      feature.properties = {priority, prefix, number, angle, prev, next};
+      feature.properties = {
+        priority,
+        prefix,
+        number,
+        next
+      };
       result.features.push(feature);
     }
 
@@ -78,9 +76,12 @@ export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 4,
   collisionEnabled = true,
-  pointSpacing = 1
+  pointSpacing = 10
 }) {
-  const onViewStateChange = useCallback(({viewState}) => {}, []);
+  const [viewport, setViewport] = useState(new WebMercatorViewport(initialViewState));
+  const onViewStateChange = useCallback(({viewState}) => {
+    setViewport(new WebMercatorViewport(viewState));
+  }, []);
 
   const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
 
@@ -88,25 +89,31 @@ export default function App({
     new GeoJsonLayer({
       id: 'geojson',
       data: roads,
-      stroked: false,
-      filled: false,
-      lineWidthMinPixels: 3,
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
       parameters: {
         depthTest: false
       },
-      getFillColor: [255, 160, 180],
-      getLineColor: [255, 160, 180],
-      getLineWidth: 10
+      getFillColor: [255, 255, 255],
+      getLineColor: [255, 160, 180]
     }),
     new TextLayer({
       id: 'text-layer',
       data: dataLabels,
-      pickable: true,
       getPosition: d => d.geometry.coordinates,
       getText: d => `${d.properties.prefix}-${d.properties.number}`,
       getColor: [255, 255, 255, 255],
       getSize: 15,
-      getAngle: d => d.properties.angle,
+      getAngle: d => {
+        const p1 = viewport.project(d.geometry.coordinates);
+        const p2 = viewport.project(d.properties.next);
+        const deltaLng = p1[0] - p2[0];
+        const deltaLat = p1[1] - p2[1];
+        let angle = (180 * Math.atan2(deltaLng, deltaLat)) / Math.PI - 90;
+        if (Math.abs(angle) > 90) angle += 180;
+        return angle;
+      },
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'bottom',
       outlineWidth: 1,
@@ -117,7 +124,11 @@ export default function App({
       collisionEnabled,
       getCollisionPriority: d => d.properties.priority,
       collisionTestProps: {sizeScale},
-      extensions: [new CollisionFilterExtension()]
+      extensions: [new CollisionFilterExtension()],
+
+      updateTriggers: {
+        getAngle: [viewport]
+      }
     })
   ];
 
