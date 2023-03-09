@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
-import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App, {COLORS_STEPS} from 'website-examples/collision-filter/app';
+import App from 'website-examples/collision-filter/app';
 
 import {makeExample} from '../components';
 
