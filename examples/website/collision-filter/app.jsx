@@ -29,7 +29,7 @@ function calculateLabels(data, pointSpacing) {
       const feature = turf.along(lineString, dAlong);
       const nextFeature = turf.along(lineString, dAlong + offset);
       const {coordinates} = feature.geometry;
-      const next = turf.point(nextFeature.geometry.coordinates).geometry.coordinates;
+      const next = nextFeature.geometry.coordinates;
       if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
 
       let angle = 90 - turf.rhumbBearing(coordinates, next);
