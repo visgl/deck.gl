@@ -13,8 +13,9 @@ This module makes it easy to use deck.gl as native layers and controls in the Ma
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+<script src="https://unpkg.com/deck.gl@^8.9.0/dist.min.js"></script>
+<script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+<link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
 <script type="text/javascript">
   const {MapboxOverlay} = deck;
 </script>
@@ -29,6 +30,17 @@ npm install @deck.gl/mapbox
 ```js
 import {MapboxOverlay} from '@deck.gl/mapbox';
 ```
+
+## Examples
+
+[test/apps/mapbox-integration](https://github.com/visgl/deck.gl/tree/8.9-release/test/apps/mapbox-integration)
+
+| Source | API | Flavor | Base Map Library |
+| --- | --- | --- | --- |
+| `/mapbox-overlay` | [`MapboxOverlay`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/mapbox/mapbox-overlay.md) | pure-js | `mapbox-gl-js` |
+| `/mapbox-overlay-react` | [`MapboxOverlay`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/mapbox/mapbox-overlay.md) | react | `maplibre-gl-js`, `react-map-gl` |
+| `/mapbox-layers` | [`MapboxLayer`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/mapbox/mapbox-layer.md) | pure-js | `maplibre-gl-js` |
+| `/mapbox-layers-react` | [`MapboxLayer`](https://github.com/visgl/deck.gl/blob/master/docs/api-reference/mapbox/mapbox-layer.md) | react | `mapbox-gl-js`, `react-map-gl` |
 
 
 ## Use Cases
