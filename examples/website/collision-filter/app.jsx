@@ -34,15 +34,13 @@ function calculateLabels(data, pointSpacing) {
       const next = turf.point(nextFeature.geometry.coordinates).geometry.coordinates;
       if (coordinates[0] === next[0] && coordinates[1] === next[1]) return;
 
+      let angle = 90 - turf.rhumbBearing(coordinates, next);
+      if (Math.abs(angle) > 90) angle += 180;
+
       const {prefix, number, name} = d.properties;
       const label = prefix ? `${d.properties.prefix}-${d.properties.number}` : name;
 
-      feature.properties = {
-        priority,
-        label,
-        number,
-        next
-      };
+      feature.properties = { priority, label, number, angle };
       result.features.push(feature);
     }
 
@@ -115,15 +113,8 @@ export default function App({
       getBorderColor: [10, 16, 29],
       getBorderWidth: 2,
       getSize: 18,
-      getAngle: d => {
-        const p1 = viewport.project(d.geometry.coordinates);
-        const p2 = viewport.project(d.properties.next);
-        const deltaLng = p1[0] - p2[0];
-        const deltaLat = p1[1] - p2[1];
-        let angle = (180 * Math.atan2(deltaLng, deltaLat)) / Math.PI - 90;
-        if (Math.abs(angle) > 90) angle += 180;
-        return angle;
-      },
+      billboard: false,
+      getAngle: d => d.properties.angle,
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'center',
       background: true,
