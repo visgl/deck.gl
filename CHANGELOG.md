@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.1] - Mar 10 2023
+
+-  Fix bundle settings (#7741)
+
 #### deck.gl [8.9.0] - Mar 9 2023
 
 - New `CollisionFilterExtension`
