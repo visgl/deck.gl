@@ -62,8 +62,8 @@ In preparation for the 8.9 release, we made major upgrades to the tools that sup
 ### pydeck 0.8
 
 - Compatibility with JupyterLab 3 and Google Colab
-- Support `types.Function` in [JSON Converter](https://deck.gl/docs/api-reference/json/conversion-reference), `configuration` and `default_layer_attributes` in settings.
-- pydeck-carto: support `CartoLayer` and authentication using [carto-auth](https://github.com/CartoDB/carto-auth)
+- Support `types.Function` in [JSON Converter](https://deck.gl/docs/api-reference/json/conversion-reference), `configuration` and `default_layer_attributes` in settings
+- pydeck-carto: support `CartoLayer`, styling functions (`color_bins`, `color_categories`, `color continuous`), and authentication using [carto-auth](https://github.com/CartoDB/carto-auth)
 
 ## deck.gl v8.8
 
