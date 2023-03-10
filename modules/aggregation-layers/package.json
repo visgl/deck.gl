@@ -2,7 +2,7 @@
   "name": "@deck.gl/aggregation-layers",
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
-  "version": "8.9.0-beta.5",
+  "version": "8.9.0-beta.6",
   "publishConfig": {
     "access": "public"
   },
