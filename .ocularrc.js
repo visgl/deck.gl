@@ -32,6 +32,7 @@ const config = {
     globals: {
       '@deck.gl/*': 'globalThis.deck',
       '@luma.gl/core': 'globalThis.luma',
+      '@loaders.gl/core': 'globalThis.loaders',
       'h3-js': 'globalThis.h3 || {}'
     }
   },
