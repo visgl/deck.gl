@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.2] - Mar 13 2023
+
+- Replace proj4 with lightweight alternative (#7750)
+- Fix pre-built bundle errors (#7751)
+
 #### deck.gl [8.9.1] - Mar 10 2023
 
 -  Fix bundle settings (#7741)
