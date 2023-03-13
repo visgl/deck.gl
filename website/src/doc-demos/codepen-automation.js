@@ -89,6 +89,7 @@ function parsePropSource(source) {
 /*
  * Takes a layer instance and returns JS code that reproduces it
  */
+/* eslint-disable complexity, max-depth, max-statements */
 function printLayerProps(layer, propsSource) {
   const result = [];
   const propNames = {};
@@ -202,6 +203,7 @@ export function gotoLayerSource(config, layer) {
   const loaders = [];
   if (imports) {
     for (const key in imports) {
+      /* eslint-disable no-continue */
       if (key[0] >= 'a') continue;
       if (key.endsWith('Loader')) {
         loaders.push(key);

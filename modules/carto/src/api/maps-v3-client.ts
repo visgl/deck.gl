@@ -137,6 +137,7 @@ type MapsAPIParameters = {
   q?: string;
   name?: string;
   queryParameters?: QueryParameters;
+  /* eslint-disable-next-line camelcase */
   geo_column?: string;
   columns?: string;
   aggregationExp?: string;
@@ -169,6 +170,7 @@ function getParameters({
   }
 
   if (geoColumn) {
+    /* eslint-disable-next-line camelcase */
     parameters.geo_column = geoColumn;
   }
   if (columns) {
