@@ -52,6 +52,7 @@
     "@loaders.gl/csv": "^3.3.1",
     "@loaders.gl/polyfills": "^3.3.1",
     "@luma.gl/test-utils": "^8.5.16",
+    "@math.gl/proj4": "^3.6.3",
     "@probe.gl/bench": "^3.5.4",
     "@probe.gl/test-utils": "^3.5.4",
     "@types/react": "^18.0.0",
