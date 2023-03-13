@@ -33,6 +33,7 @@ export function createDeckInstance(
 
   const eventListeners = {
     click: null,
+    rightclick: null,
     dblclick: null,
     mousemove: null,
     mouseout: null
@@ -293,6 +294,8 @@ function handleMouseEvent(deck: Deck, type: string, event) {
 
   switch (type) {
     case 'click':
+    case 'rightclick':
+      mockEvent.type = 'click';
       mockEvent.tapCount = 1;
       // Hack: because we do not listen to pointer down, perform picking now
       deck._onPointerDown(mockEvent as MjolnirPointerEvent);
