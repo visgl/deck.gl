@@ -59,6 +59,11 @@ In preparation for the 8.9 release, we made major upgrades to the tools that sup
 - Website rewritten using [Docusaurus](https://docusaurus.io)
 - Tests are run with `tsnode` with ESM modules for node, and `vite` for the browser
 
+### pydeck 0.8
+
+- Compatibility with JupyterLab 3 and Google Colab
+- Support `types.Function` in [JSON Converter](https://deck.gl/docs/api-reference/json/conversion-reference), `configuration` and `default_layer_attributes` in settings
+- pydeck-carto: support `CartoLayer`, styling functions (`color_bins`, `color_categories`, `color continuous`), and authentication using [carto-auth](https://github.com/CartoDB/carto-auth)
 
 ## deck.gl v8.8
 
