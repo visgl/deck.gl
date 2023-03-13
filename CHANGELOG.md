@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-beta.5] - Mar 10 2023
+
+- Fix bundle settings (#7741)
+
 #### deck.gl [8.9.0-beta.4] - Mar 8 2023
 
 - Prop types API improvements (#7726)

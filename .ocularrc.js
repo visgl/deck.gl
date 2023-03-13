@@ -28,6 +28,7 @@ const config = {
     globalName: 'deck',
     externals: ['h3-js'],
     target: ['supports webgl', 'not dead'],
+    format: 'umd',
     globals: {
       '@deck.gl/*': 'globalThis.deck',
       '@luma.gl/core': 'globalThis.luma',
