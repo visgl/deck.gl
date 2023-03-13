@@ -16,7 +16,7 @@ const DemoContainer = styled.div`
 `;
 
 /** Passed to @docusaurus/plugin-content-docs to render the mdx content */
-export default function ({content, route}) {
+export default function DocItem({content, route}) {
   const MDXComponent = content;
   const indexPath = useBaseUrl('/examples');
 

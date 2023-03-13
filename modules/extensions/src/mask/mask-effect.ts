@@ -98,6 +98,7 @@ export default class MaskEffect implements Effect {
     return {didRender};
   }
 
+  /* eslint-disable-next-line complexity */
   private _renderChannel(
     channelInfo: Channel,
     {
