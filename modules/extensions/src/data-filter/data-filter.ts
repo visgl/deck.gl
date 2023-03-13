@@ -28,7 +28,7 @@ import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/cor
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
-  onFilteredItemsChange: {type: 'function', value: null, compare: false},
+  onFilteredItemsChange: {type: 'function', value: null, optional: true},
 
   filterEnabled: true,
   filterRange: [-1, 1],

@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.0-beta.5] - Mar 10 2023
+
+- Fix bundle settings (#7741)
+
+#### deck.gl [8.9.0-beta.4] - Mar 8 2023
+
+- Prop types API improvements (#7726)
+- deepEqual consistency (#7725)
+- Move getBounds calculation to AttributeManager (#7690)
+- Retype layer.props.data (#7682)
+- TextLayer scaling consistency (#7694)
+- Update mask when layer instance changes (#7692)
+
 #### deck.gl [8.9.0-beta.3] - Feb 23 2023
 
 - Consolidate common utils in extensions (#7654)

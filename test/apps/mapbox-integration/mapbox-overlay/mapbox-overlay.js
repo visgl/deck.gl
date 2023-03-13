@@ -1,7 +1,8 @@
+/* global process */
 import mapboxgl from 'mapbox-gl';
-import {MapboxLayer} from '@deck.gl/mapbox';
-
-import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
+import {MapboxOverlay} from '@deck.gl/mapbox';
+import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
+import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from '../layers';
 
 // Set your mapbox token here
 mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
@@ -15,10 +16,28 @@ const map = new mapboxgl.Map({
   pitch: 45
 });
 
+const overlay = new MapboxOverlay({
+  interleaved: true,
+  layers: [new ScatterplotLayer(deckPoiLayer), new ArcLayer(deckRouteLayer)]
+});
+
+map.addControl(overlay);
+
 map.on('load', () => {
   map.addLayer(mapboxBuildingLayer);
-  map.addLayer(new MapboxLayer(deckPoiLayer), getFirstTextLayerId(map.getStyle()));
-  map.addLayer(new MapboxLayer(deckRouteLayer));
+  overlay.setProps({
+    layers: [
+      new ScatterplotLayer({
+        ...deckPoiLayer,
+        beforeId: getFirstTextLayerId(map.getStyle())
+      }),
+      new ArcLayer(deckRouteLayer)
+    ]
+  });
+
+  // overlay.finalize();
+  map.setCenter({lng: -74.013, lat: 40.706});
+  // map.remove();
 });
 
 function getFirstTextLayerId(style) {

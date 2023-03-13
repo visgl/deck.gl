@@ -53,7 +53,13 @@ const sidebars = {
     {
       type: 'category',
       label: 'Extensions',
-      items: ['brushing-extension', 'data-filter-extension', 'mask-extension', 'terrain-extension']
+      items: [
+        'brushing-extension',
+        'collision-filter-extension',
+        'data-filter-extension',
+        'mask-extension',
+        'terrain-extension'
+      ]
     },
     {
       type: 'category',

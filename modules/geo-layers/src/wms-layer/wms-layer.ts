@@ -42,11 +42,11 @@ const defaultProps: DefaultProps<WMSLayerProps> = {
   serviceType: 'auto',
   srs: 'auto',
   layers: {type: 'array', compare: true, value: []},
-  onMetadataLoad: {type: 'function', compare: false, value: () => {}},
+  onMetadataLoad: {type: 'function', value: () => {}},
   // eslint-disable-next-line
-  onMetadataLoadError: {type: 'function', compare: false, value: console.error},
-  onImageLoadStart: {type: 'function', compare: false, value: () => {}},
-  onImageLoad: {type: 'function', compare: false, value: () => {}},
+  onMetadataLoadError: {type: 'function', value: console.error},
+  onImageLoadStart: {type: 'function', value: () => {}},
+  onImageLoad: {type: 'function', value: () => {}},
   onImageLoadError: {
     type: 'function',
     compare: false,

@@ -4,11 +4,66 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v8.9
 
-Release date: TBD, target Feb, 2023
+Release date: March 9, 2023
 
-### `@deck.gl/geo-layers`
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/collision-filter-extension.gif?raw=true" />
+        <p><i>CollisionFilterExtension</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/terrain-extension.gif?raw=true" />
+        <p><i>TerrainExtension</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/wms-layer.gif?raw=true" />
+        <p><i>WMSLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-- A new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simplifies connection to WMS and similar map image services. In contrast to the `TileLayer` which loads many small image tiles, the `WMSLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+### Extensions
+
+Two new extensions are added in the 8.9 release: `CollisionFilterExtension` and `TerrainExtension`.
+
+The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame. Visit the [documentation](./api-reference/extensions/collision-filter-extension.md) and [example](https://deck.gl/examples/text-layer) to get started.
+
+The experimental `TerrainExtension` renders otherwise 2D data along a 3D surface. For example, a GeoJSON of city streets and building footprints can be overlaid on top of a [elevation model](https://en.wikipedia.org/wiki/Digital_elevation_model). It is useful when viewing a mixture of 2D and 3D data sources. The re-positioning of geometries is performed on the GPU. Visit the [documentation](./api-reference/extensions/terrain-extension.md) and [example](https://deck.gl/examples/terrain-extension) to get started.
+
+In addition, `MaskExtension` now supports `FirstPersonView`, and supports a new `maskInverted` prop.
+
+### WMSLayer
+
+The new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simplifies connection to WMS and similar map image services. In contrast to the `TileLayer` which loads many small image tiles, the `WMSLayer` loads a single image that covers the entire viewport in one single request, and updates the image by performing additional requests when the viewport changes.
+
+### Other Enhancements
+
+- [Maplibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deck.md#map).
+- `BitmapLayer` now mixes translucent pixels correctly (Note: [breaking change](./upgrade-guide.md))
+- `TextLayer` handles text outlines better in sdf mode. Outlines are no longer clipped and responds to `outlineWidth` as expected.
+- `TextLayer`'s `maxWidth` is changed to use a more intuitive unit. See upgrade guide for details.
+- `IconLayer` when used with auto packing preserves the aspect ratio of icons.
+- `SolidPolygonLayer` and `GeoJsonLayer` add a `_full3d` prop that tesselate 3D polygons better.
+- `@deck.gl/mapbox` now synchronizes camera better when the base map contains terrain.
+- TypeScript: data prop now correctly typed for each layer class
+
+### Code base upgrades
+
+In preparation for the 8.9 release, we made major upgrades to the tools that support the development and publishing of deck.gl. This allows us to iterate faster and makes it easier for first-time users to get started.
+
+- All examples are bootstrapped with [vite](https://vitejs.dev)
+- Pre-bundled scripts built with [esbuild](https://esbuild.github.io)
+- Website rewritten using [Docusaurus](https://docusaurus.io)
+- Tests are run with `tsnode` with ESM modules for node, and `vite` for the browser
+
+### pydeck 0.8
+
+- Compatibility with JupyterLab 3 and Google Colab
+- Support `types.Function` in [JSON Converter](https://deck.gl/docs/api-reference/json/conversion-reference), `configuration` and `default_layer_attributes` in settings
+- pydeck-carto: support `CartoLayer`, styling functions (`color_bins`, `color_categories`, `color continuous`), and authentication using [carto-auth](https://github.com/CartoDB/carto-auth)
 
 ## deck.gl v8.8
 
