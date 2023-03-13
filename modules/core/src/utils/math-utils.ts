@@ -139,6 +139,7 @@ export function mergeBounds(boundsList: (LayerBounds | null)[]): LayerBounds | n
   let isMerged = false;
 
   for (const bounds of boundsList) {
+    /* eslint-disable-next-line no-continue */
     if (!bounds) continue;
     if (!mergedBounds) {
       mergedBounds = bounds;

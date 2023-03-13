@@ -21,18 +21,18 @@ const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {
 };
 
 /** All properties supported by SpatialIndexTileLayer. */
-export type SpatialIndexTileLayerProps<DataT = any> = _SpatialIndexTileLayerProps<DataT> &
+export type SpatialIndexTileLayerProps<DataT = any> = _SpatialIndexTileLayerProps &
   TileLayer<DataT>;
 
 /** Properties added by SpatialIndexTileLayer. */
-type _SpatialIndexTileLayerProps<DataT = any> = {
+type _SpatialIndexTileLayerProps = {
   aggregationResLevel?: number;
 };
 
 export default class SpatialIndexTileLayer<
   DataT = any,
   ExtraProps extends {} = {}
-> extends TileLayer<DataT, ExtraProps & Required<_SpatialIndexTileLayerProps<DataT>>> {
+> extends TileLayer<DataT, ExtraProps & Required<_SpatialIndexTileLayerProps>> {
   static layerName = 'SpatialIndexTileLayer';
   static defaultProps = defaultProps;
 

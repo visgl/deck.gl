@@ -18,7 +18,7 @@ import {
 import {BitmapLayer} from '@deck.gl/layers';
 import type {ImageSourceMetadata, ImageType, ImageServiceType} from '@loaders.gl/wms';
 import {ImageSource, createImageSource} from '@loaders.gl/wms';
-import {Proj4Projection} from '@math.gl/proj4';
+import {WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by the TileLayer */
 export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
@@ -54,8 +54,6 @@ const defaultProps: DefaultProps<WMSLayerProps> = {
     value: (requestId: unknown, error: Error) => console.error(error, requestId)
   }
 };
-
-const projConverter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
 
 /**
  * The layer is used in Hex Tile layer in order to properly discard invisible elements during animation
@@ -205,8 +203,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       srs
     };
     if (srs === 'EPSG:3857') {
-      const [minX, minY] = projConverter.project([bounds[0], bounds[1]]);
-      const [maxX, maxY] = projConverter.project([bounds[2], bounds[3]]);
+      const [minX, minY] = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
+      const [maxX, maxY] = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
       requestParams.bbox = [minX, minY, maxX, maxY];
     }
 
