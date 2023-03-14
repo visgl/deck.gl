@@ -26,7 +26,7 @@ export default class PostProcessEffect implements Effect {
   preRender(): void {}
 
   postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(gl, this.module, this.id, this.props);
+    const passes = this.passes || createPasses(gl, this.module, this.id);
     this.passes = passes;
 
     const {target} = params;
@@ -37,7 +37,7 @@ export default class PostProcessEffect implements Effect {
       if (target && index === this.passes.length - 1) {
         outputBuffer = target;
       }
-      this.passes[index].render({inputBuffer, outputBuffer});
+      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings: this.props});
       const switchBuffer = outputBuffer;
       outputBuffer = inputBuffer;
       inputBuffer = switchBuffer;
@@ -55,19 +55,13 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-function createPasses(
-  gl: WebGLRenderingContext,
-  module: ShaderModule,
-  id: string,
-  moduleSettings: any
-): ScreenPass[] {
+function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
   if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
       module,
-      fs,
-      moduleSettings
+      fs
     });
     return [pass];
   }
@@ -79,8 +73,7 @@ function createPasses(
     return new ScreenPass(gl, {
       id: idn,
       module,
-      fs,
-      moduleSettings
+      fs
     });
   });
 }
