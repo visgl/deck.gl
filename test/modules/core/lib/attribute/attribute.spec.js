@@ -307,7 +307,7 @@ test('Attribute#updateBuffer', t => {
       {id: 'B', value: 20, color: [128, 128, 128, 128]},
       {id: 'C', value: 7, color: [255, 255, 255]},
       {id: 'D', value: 0, color: [0, 0, 0, 128]},
-      {id: 'E', value: 0, color: undefined},
+      {id: 'E', value: 0, color: undefined}
     ],
     getColor: d => d.color,
     getValue: d => d.value
