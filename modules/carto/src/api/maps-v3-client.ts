@@ -575,6 +575,13 @@ export async function fetchMap({
     );
   }
 
+  // Fetch font needed for labels in background
+  const font = new FontFace(
+    'Inter',
+    'url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2)'
+  );
+  const fontPromise = font.load().then(f => document.fonts.add(f));
+
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
   const errorContext = {requestType: REQUEST_TYPES.PUBLIC_MAP, mapId: cartoMapId};
   const map = await requestJson<any>({url, headers, accessToken, errorContext});
@@ -615,8 +622,6 @@ export async function fetchMap({
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
-  return {
-    ...parseMap(map),
-    ...{stopAutoRefresh}
-  };
+  await fontPromise;
+  return {...parseMap(map), ...{stopAutoRefresh}};
 }
