@@ -29,7 +29,10 @@ async function createMap(cartoMapId) {
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
+  const {label} = mapStyle.visibleLayerGroups;
+  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}${
+    label ? '' : '-nolabels'
+  }-gl-style/style.json`;
   const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
   deck.setProps({
     controller: true,
