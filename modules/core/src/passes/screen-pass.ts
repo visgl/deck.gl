@@ -14,12 +14,12 @@ type ScreenPassProps = {
   module: ShaderModule;
   fs: string | null;
   id: string;
-  moduleSettings: any;
 };
 
 type ScreenPassRenderOptions = {
   inputBuffer: Framebuffer;
   outputBuffer: Framebuffer;
+  moduleSettings: any;
 };
 
 export default class ScreenPass extends Pass {
@@ -58,7 +58,7 @@ export default class ScreenPass extends Pass {
     const {inputBuffer} = options;
     clear(gl, {color: true});
     this.model.draw({
-      moduleSettings: this.props.moduleSettings,
+      moduleSettings: options.moduleSettings,
       uniforms: {
         texture: inputBuffer,
         texSize: [inputBuffer.width, inputBuffer.height]
