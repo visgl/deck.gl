@@ -162,7 +162,13 @@ export function getLayer(
         columns: {
           altitude: x => ({parameters: {depthTest: Boolean(x)}})
         },
-        visConfig: {outline: 'stroked'}
+        visConfig: {outline: 'stroked'},
+        defaultProps: {
+          fontFamily: 'Inter, sans',
+          fontSettings: {sdf: true},
+          fontWeight: 500,
+          outlineWidth: 4
+        }
       }
     },
     geojson: {
