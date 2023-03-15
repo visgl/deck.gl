@@ -231,7 +231,11 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
 
     const pitchRadians = pitch! * DEGREES_TO_RADIANS;
     const altitudePixels = 1.5 * height;
-    const scale = (altitudePixels * Math.sin(pitchRadians)) / cameraToCenterDistanceGround;
+    const scale =
+      pitchRadians < 0.001
+        ? // Pitch angle too small to deduce the look at point, assume elevation is 0
+          (altitudePixels * Math.cos(pitchRadians)) / cameraZ
+        : (altitudePixels * Math.sin(pitchRadians)) / cameraToCenterDistanceGround;
     viewState.zoom = Math.log2(scale);
 
     const cameraZFromSurface = (altitudePixels * Math.cos(pitchRadians)) / scale;
