@@ -218,7 +218,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   lineHeight: DEFAULT_LINE_HEIGHT,
   outlineWidth: {type: 'number', value: 0, min: 0},
   outlineColor: {type: 'color', value: DEFAULT_COLOR},
-  fontSettings: {type: 'object', value: {}, optional: true, compare: 1},
+  fontSettings: {type: 'object', value: {}, compare: 1},
 
   // auto wrapping options
   wordBreak: 'break-word',
