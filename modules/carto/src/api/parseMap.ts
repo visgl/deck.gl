@@ -275,6 +275,12 @@ function createChannelProps(
     } = secondaryLabel || {};
 
     result.pointType = 'text';
+    result.textCharacterSet = 'auto';
+    result.textFontFamily = 'Inter, sans';
+    result.textFontSettings = {sdf: true};
+    result.textfontWeight = 500;
+    result.textOutlineWidth = 4;
+
     result._subLayerProps = {
       'points-text': {
         type: PointLabelLayer,
