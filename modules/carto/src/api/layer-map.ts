@@ -162,13 +162,7 @@ export function getLayer(
         columns: {
           altitude: x => ({parameters: {depthTest: Boolean(x)}})
         },
-        visConfig: {outline: 'stroked'},
-        defaultProps: {
-          fontFamily: 'Inter, sans',
-          fontSettings: {sdf: true},
-          fontWeight: 500,
-          outlineWidth: 4
-        }
+        visConfig: {outline: 'stroked'}
       }
     },
     geojson: {
@@ -302,8 +296,22 @@ function calculateDomain(data, name, scaleType, scaleLength?) {
 
 function normalizeAccessor(accessor, data) {
   if (data.features || data.tilestats) {
-    return d => {
-      return accessor(d.properties || d.__source.object.properties);
+    return (object, info) => {
+      if (object) {
+        return accessor(object.properties || object.__source.object.properties);
+      } else {
+        const {data, index} = info;
+        const {properties, numericProps} = data;
+        const proxy = new Proxy(properties[index] || {}, {
+          get(target, property, receiver) {
+            if (property in numericProps) {
+              return numericProps[property as string].value[index];
+            }
+            return target[property as string];
+          }
+        });
+        return accessor(proxy);
+      }
     };
   }
   return accessor;
