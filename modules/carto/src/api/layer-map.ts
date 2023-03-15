@@ -296,8 +296,8 @@ function calculateDomain(data, name, scaleType, scaleLength?) {
 
 function normalizeAccessor(accessor, data) {
   if (data.features || data.tilestats) {
-    return ({properties}) => {
-      return accessor(properties);
+    return d => {
+      return accessor(d.properties || d.__source.object.properties);
     };
   }
   return accessor;
