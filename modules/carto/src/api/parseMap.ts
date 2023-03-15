@@ -15,8 +15,11 @@ import {
 } from './layer-map';
 import PointLabelLayer from '../layers/point-label-layer';
 import {_flatten as flatten, log} from '@deck.gl/core';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {MapDataset, MapLayerConfig, VisualChannels} from './types';
+
+const collisionFilterExtension = new CollisionFilterExtension();
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
@@ -253,18 +256,40 @@ function createChannelProps(
   if (textLabel && textLabel.length) {
     const [mainLabel, secondaryLabel] = textLabel;
 
-    const collisionEnabled = true;
+    const collisionEnabled = true; // TODO read from config
     const collisionGroup = id;
     result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
-    result.textSizeScale = mainLabel.size;
-
     const getSecondaryText = secondaryLabel.field && getTextAccessor(secondaryLabel.field, data);
+
+    ({
+      alignment: result.getTextAlignmentBaseline,
+      anchor: result.getTextAnchor,
+      color: result.getTextColor,
+      outlineColor: result.textOutlineColor,
+      size: result.textSizeScale
+    } = mainLabel);
+    const {
+      color: getSecondaryColor,
+      outlineColor: secondaryOutlineColor,
+      size: secondarySizeScale
+    } = secondaryLabel || {};
 
     result.pointType = 'text';
     result._subLayerProps = {
       'points-text': {
         type: PointLabelLayer,
-        getSecondaryText
+        extensions: [collisionFilterExtension],
+        collisionEnabled,
+        collisionGroup,
+        ...(result.getPointRadius && {getRadius: result.getPointRadius}),
+        radiusScale: visConfig.radius,
+
+        ...(secondaryLabel && {
+          getSecondaryText,
+          getSecondaryColor,
+          secondarySizeScale,
+          secondaryOutlineColor
+        })
       }
     };
   } else if (visConfig.customMarkers) {
