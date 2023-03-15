@@ -13,9 +13,10 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
+import PointLabelLayer from '../layers/point-label-layer';
 import {_flatten as flatten, log} from '@deck.gl/core';
 import {assert} from '../utils';
-import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
+import {MapDataset, MapLayerConfig, VisualChannels} from './types';
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
@@ -47,7 +48,7 @@ export function parseMap(json) {
           ...defaultProps,
           ...(!config.textLabel && createInteractionProps(interactionConfig)),
           ...styleProps,
-          ...createChannelProps(visualChannels, type, config, data), // Must come after style
+          ...createChannelProps(id, type, config, visualChannels, data), // Must come after style
           ...createParametersProp(layerBlending, styleProps.parameters || {}), // Must come after style
           ...createLoadOptions(token)
         });
@@ -67,21 +68,17 @@ function extractTextLayers(layers) {
         // Original layer without textLabel
         {id, config: configRest, ...rest},
 
-        // One layer per valid text label, with full opacity
-        ...textLabel
-          .filter(t => t.field)
-          .map(t => {
-            return {
-              id: `${id}-label-${t.field.name}`,
-              config: {
-                textLabel: t,
-                ...configRest,
-                label: `${config.label}-label-${t.field.name}`,
-                visConfig: {...configRest.visConfig, opacity: 1}
-              },
-              ...rest
-            };
-          })
+        // Layer with valid text label, with full opacity
+        textLabel.length && {
+          id: `${id}-label`,
+          config: {
+            textLabel: textLabel.filter(t => t.field),
+            ...configRest,
+            label: `${config.label}-label`,
+            visConfig: {...configRest.visConfig, opacity: 1}
+          },
+          ...rest
+        }
       ];
     })
   );
@@ -127,7 +124,7 @@ function mapProps(source, target, mapping) {
   }
 }
 
-function createStyleProps(config: MapTextSubLayerConfig, mapping) {
+function createStyleProps(config: MapLayerConfig, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
 
@@ -153,9 +150,10 @@ function createStyleProps(config: MapTextSubLayerConfig, mapping) {
 
 /* eslint-disable complexity, max-statements */
 function createChannelProps(
-  visualChannels: VisualChannels,
+  id: string,
   type: string,
-  config: MapTextSubLayerConfig,
+  config: MapLayerConfig,
+  visualChannels: VisualChannels,
   data
 ) {
   const {
@@ -175,7 +173,6 @@ function createChannelProps(
   }
   const {textLabel, visConfig} = config;
   const result: Record<string, any> = {};
-  const textLabelField = textLabel && textLabel.field;
 
   if (type === 'grid' || type === 'hexagon') {
     result.colorScaleType = colorScale;
@@ -253,11 +250,23 @@ function createChannelProps(
     );
   }
 
-  if (textLabelField) {
-    result.getText = getTextAccessor(textLabelField, data);
+  if (textLabel && textLabel.length) {
+    const [mainLabel, secondaryLabel] = textLabel;
+
+    const collisionEnabled = true;
+    const collisionGroup = id;
+    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
+    result.textSizeScale = mainLabel.size;
+
+    const getSecondaryText = secondaryLabel.field && getTextAccessor(secondaryLabel.field, data);
+
     result.pointType = 'text';
-    const radius = result.getPointRadius || visConfig.radius;
-    result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
+    result._subLayerProps = {
+      'points-text': {
+        type: PointLabelLayer,
+        getSecondaryText
+      }
+    };
   } else if (visConfig.customMarkers) {
     const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
     const {getPointRadius, getFillColor} = result;
