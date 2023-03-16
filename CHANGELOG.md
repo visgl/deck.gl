@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.3] - Mar 15 2023
+
+- Fix MapboxLayer crash when pitch=0 (#7760)
+- TextLayer.fontSettings propType compare depth 1 (#7757)
+- Fix PostProcessEffect prop update (#7756)
+- Pass through google rightclick event to onClick (#7728)
+
 #### deck.gl [8.9.2] - Mar 13 2023
 
 - Replace proj4 with lightweight alternative (#7750)
