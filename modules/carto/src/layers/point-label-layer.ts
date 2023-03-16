@@ -68,10 +68,6 @@ type _PointLabelLayerProps<DataT> = TextLayerProps<DataT> & {
   secondarySizeScale?: number;
 };
 
-// getSecondaryColor,
-// getSecondaryText,
-// secondaryOutlineColor,
-// secondarySizeScale
 export default class PointLabelLayer<
   DataT = any,
   ExtraProps extends {} = {}
