@@ -200,7 +200,8 @@ export default class PointLabelLayer<
       getSecondaryColor,
       getSecondaryText,
       secondaryOutlineColor,
-      secondarySizeScale
+      secondarySizeScale,
+      updateTriggers
     } = this.props;
     const getPixelOffset = this.calculatePixelOffset(false);
     const backgroundPadding = this.calculateBackgroundPadding(getPixelOffset);
@@ -215,6 +216,7 @@ export default class PointLabelLayer<
         this.renderTextLayer('secondary', {
           getText: getSecondaryText,
           getPixelOffset: this.calculatePixelOffset(true),
+          updateTriggers: {getText: updateTriggers.getSecondaryText},
 
           // Optional overrides
           ...(getSecondaryColor && {getColor: getSecondaryColor}),

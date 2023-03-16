@@ -258,8 +258,6 @@ function createChannelProps(
 
     const collisionEnabled = true; // TODO read from config
     const collisionGroup = id;
-    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
-    const getSecondaryText = secondaryLabel.field && getTextAccessor(secondaryLabel.field, data);
 
     ({
       alignment: result.getTextAlignmentBaseline,
@@ -270,9 +268,13 @@ function createChannelProps(
     } = mainLabel);
     const {
       color: getSecondaryColor,
+      field: secondaryField,
       outlineColor: secondaryOutlineColor,
       size: secondarySizeScale
     } = secondaryLabel || {};
+
+    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
+    const getSecondaryText = secondaryField && getTextAccessor(secondaryField, data);
 
     result.pointType = 'text';
     result.textCharacterSet = 'auto';
@@ -290,11 +292,12 @@ function createChannelProps(
         ...(result.getPointRadius && {getRadius: result.getPointRadius}),
         radiusScale: visConfig.radius,
 
-        ...(secondaryLabel && {
+        ...(secondaryField && {
           getSecondaryText,
           getSecondaryColor,
           secondarySizeScale,
-          secondaryOutlineColor
+          secondaryOutlineColor,
+          updateTriggers: {getSecondaryText: [secondaryField]}
         })
       }
     };
