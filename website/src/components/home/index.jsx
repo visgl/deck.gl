@@ -13,7 +13,7 @@ export default function renderPage({HeroExample, children}) {
         <BannerContainer>
           <ProjectName>{siteConfig.title}</ProjectName>
           <p>{siteConfig.tagline}</p>
-          <GetStartedLink href="./docs/get-started">GET STARTED</GetStartedLink>
+          <GetStartedLink href="./docs/get-started/getting-started">GET STARTED</GetStartedLink>
         </BannerContainer>
       </Banner>
       {children}
