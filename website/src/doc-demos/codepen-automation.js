@@ -240,7 +240,7 @@ new DeckGL({
   `;
 
   gotoSource({
-    dependencies: dependencies.concat(['https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js']),
+    dependencies: dependencies.concat(['https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js']),
     title: `deck.gl ${Layer.layerName}`,
     source
   });
