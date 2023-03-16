@@ -478,7 +478,7 @@ TextLayer.fontAtlasCacheLimit = 10;
 // ... rest of the application
 ```
 
-It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtals`.
+It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtlas`.
 
 ## Source
 
