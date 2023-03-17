@@ -607,6 +607,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this.getSubLayerProps({
           id: 'characters',
           updateTriggers: {
+            all: updateTriggers.getText,
             getIcon: updateTriggers.getText,
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
