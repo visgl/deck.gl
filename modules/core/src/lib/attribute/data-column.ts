@@ -509,7 +509,10 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       return out;
     }
     if (!value) {
-      out[start] = defaultValue[0];
+      let i = size;
+      while (--i >= 0) {
+        out[start + i] = defaultValue[i];
+      }
       return out;
     }
 
