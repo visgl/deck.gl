@@ -1,11 +1,6 @@
 import {readPackedFixed64} from './fast-pbf';
 import {Indices, IndexScheme} from './spatialjson-utils';
-import {
-  KeyValueProperties,
-  NumericProp,
-  NumericPropKeyValueReader,
-  PropertiesReader
-} from './carto-tile';
+import {NumericProp, NumericPropKeyValueReader, PropertiesReader} from './carto-tile';
 
 // Indices =====================================
 
@@ -22,7 +17,7 @@ export class IndicesReader {
 
 interface Cells {
   indices: Indices;
-  properties: KeyValueProperties[];
+  properties: Record<string, string>[];
   numericProps: Record<string, NumericProp>;
 }
 
