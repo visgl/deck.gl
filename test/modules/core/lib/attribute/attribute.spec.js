@@ -306,7 +306,8 @@ test('Attribute#updateBuffer', t => {
       {id: 'A', value: 10, color: [255, 0, 0]},
       {id: 'B', value: 20, color: [128, 128, 128, 128]},
       {id: 'C', value: 7, color: [255, 255, 255]},
-      {id: 'D', value: 0, color: [0, 0, 0, 128]}
+      {id: 'D', value: 0, color: [0, 0, 0, 128]},
+      {id: 'E', value: 0, color: undefined}
     ],
     getColor: d => d.color,
     getValue: d => d.value
@@ -315,7 +316,7 @@ test('Attribute#updateBuffer', t => {
   const TEST_PARAMS = [
     {
       title: 'standard',
-      numInstances: 4
+      numInstances: 5
     },
     {
       title: 'variable size',
@@ -350,7 +351,8 @@ test('Attribute#updateBuffer', t => {
         255, 0, 0, 255,
         128, 128, 128, 128,
         255, 255, 255, 255,
-        0, 0, 0, 128
+        0, 0, 0, 128, 
+        0, 0, 0, 255
       ],
       // prettier-ignore
       'variable size': [
