@@ -141,7 +141,7 @@ export default class PointLabelLayer<
     return backgroundPadding;
   }
 
-  renderTextLayer(id, props): EnhancedTextLayer {
+  renderTextLayer(id, {updateTriggers: updateTriggersOverride = {}, ...props}): EnhancedTextLayer {
     const {
       data,
 
@@ -152,6 +152,7 @@ export default class PointLabelLayer<
       outlineColor,
       outlineWidth,
       sizeScale,
+      radiusScale,
 
       getAlignmentBaseline,
       getColor,
@@ -179,7 +180,17 @@ export default class PointLabelLayer<
         getPosition,
         getTextAnchor,
 
-        updateTriggers
+        updateTriggers: {
+          ...updateTriggers,
+          ...updateTriggersOverride,
+          getPixelOffset: [
+            updateTriggers.getRadius,
+            updateTriggers.getTextAnchor,
+            updateTriggers.getAlignmentBaseline,
+            radiusScale,
+            sizeScale
+          ]
+        }
       }),
       {
         getSize: 1
