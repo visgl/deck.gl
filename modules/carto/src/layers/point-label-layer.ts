@@ -145,6 +145,7 @@ export default class PointLabelLayer<
     const {
       data,
 
+      characterSet,
       fontFamily,
       fontSettings,
       fontWeight,
@@ -165,6 +166,7 @@ export default class PointLabelLayer<
         id,
         data: data,
 
+        characterSet,
         fontFamily,
         fontSettings,
         fontWeight,
