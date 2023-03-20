@@ -86,12 +86,12 @@ export default class PointLabelLayer<
     const xMult = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
     const yMult = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
 
-    // Place secondary label under main label (spacing 1 / 3 main label font size)
-    const yOffset = secondary ? (1 + 1 / 3) * sizeScale : 0;
-
     // Padding based on font size (font size / 4)
     const xPadding = sizeScale / 4;
     const yPadding = sizeScale * (1 + 1 / 4);
+
+    // Place secondary label under main label (spacing 1 / 3 main label font size)
+    const yOffset = secondary ? (1 / 3) * sizeScale - 0.6 * (yMult - 1) * yPadding : 0;
 
     // Padding based on point radius (radius/ 4)
     const radiusPadding = 1 + 1 / 4;
@@ -219,6 +219,7 @@ export default class PointLabelLayer<
         backgroundPadding,
         getText,
         getPixelOffset,
+        getAlignmentBaseline: 'top',
         background: true // Only use background for primary label for faster collisions
       }),
       Boolean(getSecondaryText) &&
