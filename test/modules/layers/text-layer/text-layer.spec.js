@@ -54,6 +54,199 @@ test('TextLayer - sdf', t => {
   t.end();
 });
 
+test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
+  const getName = d => d.NAME;
+  const getEyeColor = d => d.EYE_COLOR;
+
+  const aliceCoordinates2d = [1, 2];
+  const aliceCoordinates3d = [...aliceCoordinates2d, 0];
+
+  const bobCoordinates2d = [3, 4];
+  const bobCoordinates3d = [...bobCoordinates2d, 0];
+
+  const emptyOffsets = [0, 0];
+  const emptyCoordinates3d = [0, 0, 0];
+
+  const testCases = [
+    {
+      props: {
+        data: [
+          {
+            NAME: 'Alice',
+            EYE_COLOR: 'blue',
+            COORDINATES: aliceCoordinates2d
+          },
+          {
+            NAME: 'Bob',
+            EYE_COLOR: 'brown',
+            COORDINATES: bobCoordinates2d
+          }
+        ],
+        getText: getName,
+        getPosition: d => d.COORDINATES,
+        updateTriggers: {
+          getText: [getName]
+        }
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instancePositions, instanceOffsets} = subLayer.getAttributeManager().getAttributes();
+
+        t.deepEqual(
+          instancePositions.state.startIndices,
+          [0, 'Alice'.length, ('Alice' + 'Bob').length],
+          'sublayer startIndices (pre-update)'
+        );
+
+        t.deepEqual(
+          instancePositions.value,
+          [
+            ...aliceCoordinates3d, // A
+            ...aliceCoordinates3d, // l
+            ...aliceCoordinates3d, // i
+            ...aliceCoordinates3d, // c
+            ...aliceCoordinates3d, // e
+
+            ...bobCoordinates3d, // B
+            ...bobCoordinates3d, // o
+            ...bobCoordinates3d, // b
+
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d
+          ],
+          'sublayer instancePositions (pre-update)'
+        );
+
+        t.deepEqual(
+          instanceOffsets.value,
+          [
+            -76,
+            0, // A
+            -38,
+            0, // l
+            0,
+            0, // i
+            38,
+            0, // c
+            76,
+            0, // e
+
+            -38,
+            0, // B
+            0,
+            0, // o
+            38,
+            0, // b
+
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets
+          ],
+          'sublayer instanceOffsets (pre-update)'
+        );
+      }
+    },
+    {
+      updateProps: {
+        getText: getEyeColor,
+        updateTriggers: {
+          getText: [getEyeColor]
+        }
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        const {instancePositions, instanceOffsets} = subLayer.getAttributeManager().getAttributes();
+
+        t.deepEqual(
+          instancePositions.state.startIndices,
+          [0, 'blue'.length, ('blue' + 'brown').length],
+          'sublayer startIndices (post-update)'
+        );
+
+        t.deepEqual(
+          instancePositions.value,
+          [
+            ...aliceCoordinates3d, // b
+            ...aliceCoordinates3d, // l
+            ...aliceCoordinates3d, // u
+            ...aliceCoordinates3d, // e
+
+            ...bobCoordinates3d, // b
+            ...bobCoordinates3d, // r
+            ...bobCoordinates3d, // o
+            ...bobCoordinates3d, // w
+            ...bobCoordinates3d, // n
+
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d,
+            ...emptyCoordinates3d
+          ],
+          'sublayer instancePositions (post-update)'
+        );
+
+        t.deepEqual(
+          instanceOffsets.value,
+          [
+            -57,
+            0, // b
+            -19,
+            0, // l
+            19,
+            0, // u
+            57,
+            0, // e
+
+            -76,
+            0, // b
+            -38,
+            0, // r
+            0,
+            0, // o
+            38,
+            0, // w
+            76,
+            0, // n
+
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets,
+            ...emptyOffsets
+          ],
+          'sublayer instanceOffsets (post-update)'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('TextLayer - special texts', t => {
   const testCases = [
     {
