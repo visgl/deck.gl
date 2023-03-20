@@ -80,7 +80,9 @@ export default class PointLabelLayer<
       getTextAnchor: anchor,
       getAlignmentBaseline: alignment,
       getRadius,
+      getSecondaryText,
       radiusScale,
+      secondarySizeScale,
       sizeScale
     } = this.props;
     const xMult = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
@@ -91,7 +93,15 @@ export default class PointLabelLayer<
     const yPadding = sizeScale * (1 + 1 / 4);
 
     // Place secondary label under main label (spacing 1 / 3 main label font size)
-    const yOffset = secondary ? (1 / 3) * sizeScale - 0.6 * (yMult - 1) * yPadding : 0;
+    const secondaryOffset = (1 / 3) * sizeScale - 0.6 * (yMult - 1) * yPadding;
+    let yOffset = secondary ? secondaryOffset : 0;
+
+    // Special case, position relative to secondary label
+    if (anchor === 'middle' && alignment === 'top' && getSecondaryText) {
+      yOffset -= secondaryOffset;
+      yOffset -= secondarySizeScale;
+      yOffset += sizeScale;
+    }
 
     // Padding based on point radius (radius/ 4)
     const radiusPadding = 1 + 1 / 4;
