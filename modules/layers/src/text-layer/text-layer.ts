@@ -609,7 +609,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           updateTriggers: {
             all: updateTriggers.getText,
             getIcon: updateTriggers.getText,
-            getPosition: updateTriggers.getPosition],
+            getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
