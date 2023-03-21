@@ -17,7 +17,7 @@ def has_jupyter_extra():
 
         DeckGLWidget()
         return True
-    except ImportError:
+    except (ImportError, NotImplementedError):
         return False
 
 
