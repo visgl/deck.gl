@@ -18,7 +18,7 @@ init:
 	yarn bootstrap; \
 	$(BIN)pip install -r requirements/requirements.txt; \
 	$(BIN)pip install -r requirements/requirements-dev.txt; \
-	python setup.py develop
+	$(BIN)pip install -e ".[jupyter]"
 
 fast-build:
 	cd ../../modules/jupyter-widget; webpack; cd -; \
