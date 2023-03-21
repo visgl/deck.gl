@@ -54,7 +54,7 @@ test('TextLayer - sdf', t => {
   t.end();
 });
 
-test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
+test('TextLayer - MultiIconLayer sublayer positions', t => {
   const getName = d => d.NAME;
   const getEyeColor = d => d.EYE_COLOR;
 
@@ -64,7 +64,6 @@ test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
   const bobCoordinates2d = [3, 4];
   const bobCoordinates3d = [...bobCoordinates2d, 0];
 
-  const emptyOffsets = [0, 0];
   const emptyCoordinates3d = [0, 0, 0];
 
   const testCases = [
@@ -89,7 +88,7 @@ test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
         }
       },
       onAfterUpdate: ({subLayer}) => {
-        const {instancePositions, instanceOffsets} = subLayer.getAttributeManager().getAttributes();
+        const {instancePositions} = subLayer.getAttributeManager().getAttributes();
 
         t.deepEqual(
           instancePositions.state.startIndices,
@@ -123,41 +122,6 @@ test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
           ],
           'sublayer instancePositions (pre-update)'
         );
-
-        t.deepEqual(
-          instanceOffsets.value,
-          [
-            -76,
-            0, // A
-            -38,
-            0, // l
-            0,
-            0, // i
-            38,
-            0, // c
-            76,
-            0, // e
-
-            -38,
-            0, // B
-            0,
-            0, // o
-            38,
-            0, // b
-
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets
-          ],
-          'sublayer instanceOffsets (pre-update)'
-        );
       }
     },
     {
@@ -168,7 +132,7 @@ test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
         }
       },
       onAfterUpdate: ({layer, subLayer}) => {
-        const {instancePositions, instanceOffsets} = subLayer.getAttributeManager().getAttributes();
+        const {instancePositions} = subLayer.getAttributeManager().getAttributes();
 
         t.deepEqual(
           instancePositions.state.startIndices,
@@ -201,42 +165,6 @@ test('TextLayer - MultiIconLayer sublayer positions and offsets', t => {
             ...emptyCoordinates3d
           ],
           'sublayer instancePositions (post-update)'
-        );
-
-        t.deepEqual(
-          instanceOffsets.value,
-          [
-            -57,
-            0, // b
-            -19,
-            0, // l
-            19,
-            0, // u
-            57,
-            0, // e
-
-            -76,
-            0, // b
-            -38,
-            0, // r
-            0,
-            0, // o
-            38,
-            0, // w
-            76,
-            0, // n
-
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets,
-            ...emptyOffsets
-          ],
-          'sublayer instanceOffsets (post-update)'
         );
       }
     }
