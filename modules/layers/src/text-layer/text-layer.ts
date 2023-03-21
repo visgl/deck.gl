@@ -608,14 +608,12 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           id: 'characters',
           updateTriggers: {
             all: updateTriggers.getText,
-            getIcon: updateTriggers.getText,
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getIconOffsets: {
-              getText: updateTriggers.getText,
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
               styleVersion
