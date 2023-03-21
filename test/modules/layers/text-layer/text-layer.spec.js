@@ -64,8 +64,6 @@ test('TextLayer - MultiIconLayer sublayer positions', t => {
   const bobCoordinates2d = [3, 4];
   const bobCoordinates3d = [...bobCoordinates2d, 0];
 
-  const emptyCoordinates3d = [0, 0, 0];
-
   const testCases = [
     {
       props: {
