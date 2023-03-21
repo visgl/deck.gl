@@ -229,13 +229,13 @@ export default class PointLabelLayer<
         backgroundPadding,
         getText,
         getPixelOffset,
-        getAlignmentBaseline: 'top',
         background: true // Only use background for primary label for faster collisions
       }),
       Boolean(getSecondaryText) &&
         this.renderTextLayer('secondary', {
           getText: getSecondaryText,
           getPixelOffset: this.calculatePixelOffset(true),
+          getAlignmentBaseline: 'top',
           updateTriggers: {getText: updateTriggers.getSecondaryText},
 
           // Optional overrides
