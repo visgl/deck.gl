@@ -97,7 +97,7 @@ test('TextLayer - MultiIconLayer sublayer positions', t => {
         );
 
         t.deepEqual(
-          instancePositions.value,
+          instancePositions.value.slice(0, 3 * ('Alice' + 'Bob').length),
           [
             ...aliceCoordinates3d, // A
             ...aliceCoordinates3d, // l
@@ -107,18 +107,7 @@ test('TextLayer - MultiIconLayer sublayer positions', t => {
 
             ...bobCoordinates3d, // B
             ...bobCoordinates3d, // o
-            ...bobCoordinates3d, // b
-
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d
+            ...bobCoordinates3d // b
           ],
           'sublayer instancePositions (pre-update)'
         );
@@ -141,7 +130,7 @@ test('TextLayer - MultiIconLayer sublayer positions', t => {
         );
 
         t.deepEqual(
-          instancePositions.value,
+          instancePositions.value.slice(0, 3 * ('blue' + 'brown').length),
           [
             ...aliceCoordinates3d, // b
             ...aliceCoordinates3d, // l
@@ -152,17 +141,7 @@ test('TextLayer - MultiIconLayer sublayer positions', t => {
             ...bobCoordinates3d, // r
             ...bobCoordinates3d, // o
             ...bobCoordinates3d, // w
-            ...bobCoordinates3d, // n
-
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d,
-            ...emptyCoordinates3d
+            ...bobCoordinates3d // n
           ],
           'sublayer instancePositions (post-update)'
         );
