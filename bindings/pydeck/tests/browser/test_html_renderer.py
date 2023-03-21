@@ -62,9 +62,3 @@ async def test_standalone_rendering(tmp_path):
     fname = str(tmp_path) + "/pydeck-gmaps.html"
     d.to_html(fname, offline=True, notebook_display=False)
     await go_to_page_and_screenshot("file://" + fname, fname, output_dir=tmp_path)
-
-
-@pytest.mark.skip(reason="Not yet implemented")
-@pytest.mark.asyncio
-async def test_notebook_iframe_rendering():
-    pass
