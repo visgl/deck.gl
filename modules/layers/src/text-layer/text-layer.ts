@@ -378,13 +378,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   /** There are two size systems in this layer:
 
     + Pixel size: user-specified text size, via getSize, sizeScale, sizeUnits etc.
-      The layer roughly matches the output of the layer to CSS pixels, e.g. getSize: 12, sizeScale: 2 
+      The layer roughly matches the output of the layer to CSS pixels, e.g. getSize: 12, sizeScale: 2
       in layer props is roughly equivalent to font-size: 24px in CSS.
     + Texture size: internally, character positions in a text blob are calculated using the sizes of iconMapping,
       which depends on how large each character is drawn into the font atlas. This is controlled by
       fontSettings.fontSize (default 64) and most users do not set it manually.
       These numbers are intended to be used in the vertex shader and never to be exposed to the end user.
-    
+
     All surfaces exposed to the user should either use the pixel size or a multiplier relative to the pixel size. */
 
   /** Calculate the size and position of each character in a text string.
@@ -607,14 +607,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this.getSubLayerProps({
           id: 'characters',
           updateTriggers: {
-            getIcon: updateTriggers.getText,
+            all: updateTriggers.getText,
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getIconOffsets: {
-              getText: updateTriggers.getText,
               getTextAnchor: updateTriggers.getTextAnchor,
               getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
               styleVersion
