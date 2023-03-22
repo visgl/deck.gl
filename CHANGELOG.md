@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.4] - Mar 22 2023
+
+- (fix) CollisionFilterExtension discard outside clip space (#7777)
+- Position `TextLayer` text correctly after updating `getText` (#7774)
+- Fix bug when using default value in attributes with size greater than 1 (#7762)
+
 #### deck.gl [8.9.3] - Mar 15 2023
 
 - Fix MapboxLayer crash when pitch=0 (#7760)
