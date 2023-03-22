@@ -7,9 +7,15 @@ on:
     - master
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test-node:
     runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v2.1.1
