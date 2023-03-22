@@ -92,8 +92,8 @@ export default class PointLabelLayer<
     const xPadding = sizeScale / 4;
     const yPadding = sizeScale * (1 + 1 / 4);
 
-    // Place secondary label under main label (spacing 1 / 3 main label font size)
-    const secondaryOffset = (1 / 3) * sizeScale - 0.6 * (yMult - 1) * yPadding;
+    // Place secondary label under main label (secondary label always 'top' baseline aligned)
+    const secondaryOffset = 0.6 * (1 - yMult) * sizeScale;
     let yOffset = secondary ? secondaryOffset : 0;
 
     // Special case, position relative to secondary label
