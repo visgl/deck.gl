@@ -54,6 +54,104 @@ test('TextLayer - sdf', t => {
   t.end();
 });
 
+test('TextLayer - MultiIconLayer sublayer positions', t => {
+  const getName = d => d.NAME;
+  const getEyeColor = d => d.EYE_COLOR;
+
+  const aliceCoordinates2d = [1, 2];
+  const aliceCoordinates3d = [...aliceCoordinates2d, 0];
+
+  const bobCoordinates2d = [3, 4];
+  const bobCoordinates3d = [...bobCoordinates2d, 0];
+
+  const testCases = [
+    {
+      props: {
+        data: [
+          {
+            NAME: 'Alice',
+            EYE_COLOR: 'blue',
+            COORDINATES: aliceCoordinates2d
+          },
+          {
+            NAME: 'Bob',
+            EYE_COLOR: 'brown',
+            COORDINATES: bobCoordinates2d
+          }
+        ],
+        getText: getName,
+        getPosition: d => d.COORDINATES,
+        updateTriggers: {
+          getText: [getName]
+        }
+      },
+      onAfterUpdate: ({subLayer}) => {
+        const {instancePositions} = subLayer.getAttributeManager().getAttributes();
+
+        t.deepEqual(
+          instancePositions.state.startIndices,
+          [0, 'Alice'.length, ('Alice' + 'Bob').length],
+          'sublayer startIndices (pre-update)'
+        );
+
+        t.deepEqual(
+          instancePositions.value.slice(0, 3 * ('Alice' + 'Bob').length),
+          [
+            ...aliceCoordinates3d, // A
+            ...aliceCoordinates3d, // l
+            ...aliceCoordinates3d, // i
+            ...aliceCoordinates3d, // c
+            ...aliceCoordinates3d, // e
+
+            ...bobCoordinates3d, // B
+            ...bobCoordinates3d, // o
+            ...bobCoordinates3d // b
+          ],
+          'sublayer instancePositions (pre-update)'
+        );
+      }
+    },
+    {
+      updateProps: {
+        getText: getEyeColor,
+        updateTriggers: {
+          getText: [getEyeColor]
+        }
+      },
+      onAfterUpdate: ({layer, subLayer}) => {
+        const {instancePositions} = subLayer.getAttributeManager().getAttributes();
+
+        t.deepEqual(
+          instancePositions.state.startIndices,
+          [0, 'blue'.length, ('blue' + 'brown').length],
+          'sublayer startIndices (post-update)'
+        );
+
+        t.deepEqual(
+          instancePositions.value.slice(0, 3 * ('blue' + 'brown').length),
+          [
+            ...aliceCoordinates3d, // b
+            ...aliceCoordinates3d, // l
+            ...aliceCoordinates3d, // u
+            ...aliceCoordinates3d, // e
+
+            ...bobCoordinates3d, // b
+            ...bobCoordinates3d, // r
+            ...bobCoordinates3d, // o
+            ...bobCoordinates3d, // w
+            ...bobCoordinates3d // n
+          ],
+          'sublayer instancePositions (post-update)'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('TextLayer - special texts', t => {
   const testCases = [
     {
