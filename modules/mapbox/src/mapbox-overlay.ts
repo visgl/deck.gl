@@ -32,7 +32,7 @@ export default class MapboxOverlay implements IControl {
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
-  private _lastMouseDownPoint?: {x: number; y: number};
+  private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false, ...otherProps} = props;
@@ -208,20 +208,36 @@ export default class MapboxOverlay implements IControl {
 
     const mockEvent: {
       type: string;
+      deltaX?: number;
+      deltaY?: number;
       offsetCenter: {x: number; y: number};
       srcEvent: MapMouseEvent;
       tapCount?: number;
     } = {
       type: event.type,
-      // drag* events do not contain a `point` field
-      offsetCenter: event.point || this._lastMouseDownPoint,
+      offsetCenter: event.point,
       srcEvent: event
     };
+
+    const lastDown = this._lastMouseDownPoint;
+    if (!event.point && lastDown) {
+      // drag* events do not contain a `point` field
+      mockEvent.deltaX = event.originalEvent.clientX - lastDown.clientX;
+      mockEvent.deltaY = event.originalEvent.clientY - lastDown.clientY;
+      mockEvent.offsetCenter = {
+        x: lastDown.x + mockEvent.deltaX,
+        y: lastDown.y + mockEvent.deltaY
+      };
+    }
 
     switch (mockEvent.type) {
       case 'mousedown':
         deck._onPointerDown(mockEvent as MjolnirGestureEvent);
-        this._lastMouseDownPoint = event.point;
+        this._lastMouseDownPoint = {
+          ...event.point,
+          clientX: event.originalEvent.clientX,
+          clientY: event.originalEvent.clientY
+        };
         break;
 
       case 'dragstart':
