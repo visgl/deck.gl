@@ -5,8 +5,7 @@ import {
   CompositeLayerProps,
   DefaultProps,
   Layer,
-  LayersList,
-  _ConstructorOf as ConstructorOf
+  LayersList
 } from '@deck.gl/core';
 import {
   TextLayer,
@@ -15,7 +14,7 @@ import {
 } from '@deck.gl/layers';
 
 // TODO remove prior to release
-const SHOW_TEXT_BORDER = true;
+const SHOW_TEXT_BORDER = false;
 
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
