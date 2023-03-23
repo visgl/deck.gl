@@ -308,6 +308,10 @@ function normalizeAccessor(accessor, data) {
               return numericProps[property as string].value[index];
             }
             return target[property as string];
+          },
+
+          has(target, property) {
+            return property in numericProps || property in target;
           }
         });
         return accessor(proxy);

@@ -5,14 +5,39 @@ import {
   CompositeLayerProps,
   DefaultProps,
   Layer,
-  LayersList
+  LayersList,
+  _ConstructorOf as ConstructorOf
 } from '@deck.gl/core';
-import {TextLayer, TextLayerProps} from '@deck.gl/layers';
+import {
+  TextLayer,
+  TextLayerProps,
+  _TextBackgroundLayer as TextBackgroundLayer
+} from '@deck.gl/layers';
 
 // TODO remove prior to release
-const SHOW_TEXT_BORDER = false;
+const SHOW_TEXT_BORDER = true;
 
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
+
+class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
+  getShaders() {
+    const shaders = super.getShaders();
+    let vs = shaders.vs;
+
+    // Modify shader so that the padding is offset by the pixel offset to ensure the padding
+    // always captures the anchor point. As padding is uniform we cannot pass it a per-label value
+    vs = vs.replaceAll('padding.', '_padding.');
+    vs = vs.replace(
+      'void main(void) {',
+      'void main(void) {\n  vec4 _padding = padding + instancePixelOffsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0);'
+    );
+
+    return {...shaders, vs};
+  }
+}
+
+// TextLayer which includes modified text-background-layer-vertex shader and only renders the
+// primary background layer in the collision pass
 class EnhancedTextLayer extends TextLayer {
   filterSubLayer({layer, renderPass}) {
     const background = layer.id.includes('primary-background');
@@ -108,7 +133,7 @@ export default class PointLabelLayer<
 
     return typeof getRadius === 'function'
       ? (d, info) => {
-          const r = (d ? getRadius(d, info) : 1) * radiusScale * radiusPadding;
+          const r = (info ? getRadius(d, info) : 1) * radiusScale * radiusPadding;
           return [xMult * (r + xPadding), yMult * (r + yPadding) + yOffset];
         }
       : [
@@ -117,7 +142,7 @@ export default class PointLabelLayer<
         ];
   }
 
-  calculateBackgroundPadding(getPixelOffset) {
+  calculateBackgroundPadding() {
     const {getTextAnchor: anchor, getAlignmentBaseline: alignment, sizeScale} = this.props;
 
     // Heuristics to avoid label overlap
@@ -140,13 +165,6 @@ export default class PointLabelLayer<
       backgroundPadding[LEFT] = 0.5 * paddingX;
       backgroundPadding[RIGHT] = 0.5 * paddingX;
     }
-
-    // For getRadius function, invoke without data, as there is no backgroundPadding accessor
-    const pixelOffset = Array.isArray(getPixelOffset) ? getPixelOffset : getPixelOffset();
-    backgroundPadding[LEFT] += pixelOffset[0];
-    backgroundPadding[RIGHT] -= pixelOffset[0];
-    backgroundPadding[TOP] += pixelOffset[1];
-    backgroundPadding[BOTTOM] -= pixelOffset[1];
 
     return backgroundPadding;
   }
@@ -203,7 +221,8 @@ export default class PointLabelLayer<
         }
       }),
       {
-        getSize: 1
+        getSize: 1,
+        _subLayerProps: {background: {type: EnhancedTextBackgroundLayer}}
       },
       // DEBUG
       SHOW_TEXT_BORDER
@@ -223,7 +242,7 @@ export default class PointLabelLayer<
       updateTriggers
     } = this.props;
     const getPixelOffset = this.calculatePixelOffset(false);
-    const backgroundPadding = this.calculateBackgroundPadding(getPixelOffset);
+    const backgroundPadding = this.calculateBackgroundPadding();
     const out = [
       this.renderTextLayer('primary', {
         backgroundPadding,

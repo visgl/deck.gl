@@ -289,8 +289,11 @@ function createChannelProps(
         extensions: [collisionFilterExtension],
         collisionEnabled,
         collisionGroup,
-        ...(result.getPointRadius && {getRadius: result.getPointRadius}),
-        radiusScale: visConfig.radius,
+
+        // getPointRadius already has radiusScale baked in, so only pass one or the other
+        ...(result.getPointRadius
+          ? {getRadius: result.getPointRadius}
+          : {radiusScale: visConfig.radius}),
 
         ...(secondaryField && {
           getSecondaryText,
