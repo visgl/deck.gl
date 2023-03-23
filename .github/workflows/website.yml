@@ -5,11 +5,17 @@ on:
     branches:
       - '*-release'
 
+permissions:
+  contents: read
+
 jobs:
   publish-website:
     runs-on: ubuntu-latest
 
     if: github.repository_owner == 'visgl'
+    
+    permissions:
+      contents: write
 
     env:
       MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
