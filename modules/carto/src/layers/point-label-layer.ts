@@ -243,14 +243,15 @@ export default class PointLabelLayer<
     const getPixelOffset = this.calculatePixelOffset(false);
     const backgroundPadding = this.calculateBackgroundPadding();
     const out = [
-      this.renderTextLayer('primary', {
+      // Text doesn't update via updateTrigger for some reason
+      this.renderTextLayer(`${updateTriggers.getText}-primary`, {
         backgroundPadding,
         getText,
         getPixelOffset,
         background: true // Only use background for primary label for faster collisions
       }),
       Boolean(getSecondaryText) &&
-        this.renderTextLayer('secondary', {
+        this.renderTextLayer(`${updateTriggers.getSecondaryText}-secondary`, {
           getText: getSecondaryText,
           getPixelOffset: this.calculatePixelOffset(true),
           getAlignmentBaseline: 'top',
