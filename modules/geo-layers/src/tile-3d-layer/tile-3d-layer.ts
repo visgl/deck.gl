@@ -26,6 +26,8 @@ import {MeshAttributes} from '@loaders.gl/schema';
 import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
+import {wrapTile} from './utils';
+
 const SINGLE_DATA = [0];
 
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
@@ -299,7 +301,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
-        tile: tileHeader,
+        tile: wrapTile(tileHeader),
         data,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: cartographicOrigin,
@@ -324,7 +326,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }),
       {
         id: `${this.id}-scenegraph-${tileHeader.id}`,
-        tile: tileHeader,
+        tile: wrapTile(tileHeader),
         data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
@@ -367,7 +369,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }),
       {
         id: `${this.id}-mesh-${tileHeader.id}`,
-        tile: tileHeader,
+        tile: wrapTile(tileHeader),
         mesh: geometry,
         data: SINGLE_DATA,
         getColor: _getMeshColor(tileHeader),

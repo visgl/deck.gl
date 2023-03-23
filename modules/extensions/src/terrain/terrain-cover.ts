@@ -111,7 +111,24 @@ export class TerrainCover {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
 
-    if (this.targetBounds !== targetLayer.getBounds()) {
+    if (this.tile) {
+      if (!this.targetBounds) {
+        shouldRedraw = true;
+        const geoBounds = this.tile.bbox;
+        this.targetBounds = 'west' in geoBounds
+          ? [[geoBounds.west, geoBounds.south], [geoBounds.east, geoBounds.north]]
+          : [[geoBounds.left, geoBounds.bottom], [geoBounds.right, geoBounds.top]];
+        
+        const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
+        const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
+        this.targetBoundsCommon = [
+          bottomLeftCommon[0],
+          bottomLeftCommon[1],
+          topRightCommon[0],
+          topRightCommon[1]
+        ];
+      }
+    } else if (this.targetBounds !== targetLayer.getBounds()) {
       // console.log('bounds changed', this.bounds, '>>', newBounds);
       shouldRedraw = true;
       this.targetBounds = targetLayer.getBounds();
