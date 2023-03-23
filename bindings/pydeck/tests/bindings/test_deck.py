@@ -1,3 +1,5 @@
+import pytest
+
 import json
 import pydeck
 
@@ -41,6 +43,7 @@ def test_json_output():
         assert json.loads(str(actual.to_json())) == json.loads(expected)
 
 
+@pytest.mark.skip("Skipping widget test, see #7783")
 def test_update():
     """Verify that calling `update` changes the Deck object"""
     deck = pydeck_examples.create_minimal_test_object()
@@ -53,6 +56,7 @@ def test_update():
     assert json.loads(str(deck)) == expected_results
 
 
+@pytest.mark.skip("Skipping widget test, see #7783")
 def test_show_jupyter():
     pydeck.io.html.render_for_colab = MagicMock()
     deck = pydeck_examples.create_minimal_test_object()
