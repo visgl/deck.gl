@@ -255,8 +255,6 @@ function createChannelProps(
 
   if (textLabel && textLabel.length) {
     const [mainLabel, secondaryLabel] = textLabel;
-
-    const collisionEnabled = true; // TODO read from config
     const collisionGroup = id;
 
     ({
@@ -287,7 +285,7 @@ function createChannelProps(
       'points-text': {
         type: PointLabelLayer,
         extensions: [collisionFilterExtension],
-        collisionEnabled,
+        collisionEnabled: true,
         collisionGroup,
 
         // getPointRadius already has radiusScale baked in, so only pass one or the other

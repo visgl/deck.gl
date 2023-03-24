@@ -13,9 +13,6 @@ import {
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
 
-// TODO remove prior to release
-const SHOW_TEXT_BORDER = false;
-
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
 class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
@@ -43,7 +40,7 @@ class EnhancedTextLayer extends TextLayer {
     if (renderPass === 'collision') {
       return background; // Only draw primary background layer in collision pass
     } else {
-      return !background || (SHOW_TEXT_BORDER && this.props.getBorderWidth); // Do not draw background layer in other passes
+      return !background; // Do not draw background layer in other passes
     }
   }
 }
@@ -223,10 +220,6 @@ export default class PointLabelLayer<
         getSize: 1,
         _subLayerProps: {background: {type: EnhancedTextBackgroundLayer}}
       },
-      // DEBUG
-      SHOW_TEXT_BORDER
-        ? {getBackgroundColor: [0, 0, 0, 0], getBorderColor: [255, 0, 0, 80], getBorderWidth: 1}
-        : {},
       props
     );
   }
