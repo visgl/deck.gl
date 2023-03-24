@@ -6,7 +6,6 @@ import {
   getColorValueAccessor,
   getSizeAccessor,
   getTextAccessor,
-  getTextPixelOffsetAccessor,
   OPACITY_MAP,
   opacityToAlpha,
   getIconUrlAccessor,

@@ -536,6 +536,7 @@ async function fillInTileStats(
   return await Promise.all(promises);
 }
 
+/* eslint-disable max-statements */
 export async function fetchMap({
   cartoMapId,
   clientId,
@@ -576,6 +577,7 @@ export async function fetchMap({
   }
 
   // Fetch font needed for labels in background
+  /* global FontFace, document */
   const font = new FontFace(
     'Inter',
     'url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2)'

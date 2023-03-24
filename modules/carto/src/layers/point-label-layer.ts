@@ -39,9 +39,9 @@ class EnhancedTextLayer extends TextLayer {
     const background = layer.id.includes('primary-background');
     if (renderPass === 'collision') {
       return background; // Only draw primary background layer in collision pass
-    } else {
-      return !background; // Do not draw background layer in other passes
     }
+
+    return !background; // Do not draw background layer in other passes
   }
 }
 
@@ -189,7 +189,7 @@ export default class PointLabelLayer<
     return new EnhancedTextLayer(
       this.getSubLayerProps({
         id,
-        data: data,
+        data,
 
         characterSet,
         fontFamily,
