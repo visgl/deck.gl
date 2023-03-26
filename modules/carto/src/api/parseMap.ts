@@ -35,7 +35,7 @@ export function parseMap(json) {
     initialViewState: mapState,
     mapStyle,
     token,
-    layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
+    layers: layers.map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
         const dataset: MapDataset | null = datasets.find(d => d.id === dataId);
@@ -252,56 +252,7 @@ function createChannelProps(
     );
   }
 
-  if (textLabel && textLabel.length) {
-    const [mainLabel, secondaryLabel] = textLabel;
-    const collisionGroup = id;
-
-    ({
-      alignment: result.getTextAlignmentBaseline,
-      anchor: result.getTextAnchor,
-      color: result.getTextColor,
-      outlineColor: result.textOutlineColor,
-      size: result.textSizeScale
-    } = mainLabel);
-    const {
-      color: getSecondaryColor,
-      field: secondaryField,
-      outlineColor: secondaryOutlineColor,
-      size: secondarySizeScale
-    } = secondaryLabel || {};
-
-    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
-    const getSecondaryText = secondaryField && getTextAccessor(secondaryField, data);
-
-    result.pointType = 'text';
-    result.textCharacterSet = 'auto';
-    result.textFontFamily = 'Inter, sans';
-    result.textFontSettings = {sdf: true};
-    result.textFontWeight = 500;
-    result.textOutlineWidth = 4;
-
-    result._subLayerProps = {
-      'points-text': {
-        type: PointLabelLayer,
-        extensions: [collisionFilterExtension],
-        collisionEnabled: true,
-        collisionGroup,
-
-        // getPointRadius already has radiusScale baked in, so only pass one or the other
-        ...(result.getPointRadius
-          ? {getRadius: result.getPointRadius}
-          : {radiusScale: visConfig.radius}),
-
-        ...(secondaryField && {
-          getSecondaryText,
-          getSecondaryColor,
-          secondarySizeScale,
-          secondaryOutlineColor,
-          updateTriggers: {getSecondaryText: [secondaryField]}
-        })
-      }
-    };
-  } else if (visConfig.customMarkers) {
+  if (visConfig.customMarkers) {
     const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
     const {getPointRadius, getFillColor} = result;
     const {customMarkersUrl, customMarkersRange, filled: useMaskedIcons} = visConfig;
@@ -341,6 +292,59 @@ function createChannelProps(
         getSizeAccessor(visualChannels.rotationField, undefined, null, undefined, data)
       );
     }
+  } else {
+    result.pointType = 'circle';
+  }
+
+  if (textLabel && textLabel.length && textLabel[0].field) {
+    const [mainLabel, secondaryLabel] = textLabel;
+    const collisionGroup = id;
+
+    ({
+      alignment: result.getTextAlignmentBaseline,
+      anchor: result.getTextAnchor,
+      color: result.getTextColor,
+      outlineColor: result.textOutlineColor,
+      size: result.textSizeScale
+    } = mainLabel);
+    const {
+      color: getSecondaryColor,
+      field: secondaryField,
+      outlineColor: secondaryOutlineColor,
+      size: secondarySizeScale
+    } = secondaryLabel || {};
+
+    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
+    const getSecondaryText = secondaryField && getTextAccessor(secondaryField, data);
+
+    result.pointType = `${result.pointType}+text`;
+    result.textCharacterSet = 'auto';
+    result.textFontFamily = 'Inter, sans';
+    result.textFontSettings = {sdf: true};
+    result.textFontWeight = 500;
+    result.textOutlineWidth = 4;
+
+    result._subLayerProps = {
+      'points-text': {
+        type: PointLabelLayer,
+        extensions: [collisionFilterExtension],
+        collisionEnabled: true,
+        collisionGroup,
+
+        // getPointRadius already has radiusScale baked in, so only pass one or the other
+        ...(result.getPointRadius
+          ? {getRadius: result.getPointRadius}
+          : {radiusScale: visConfig.radius}),
+
+        ...(secondaryField && {
+          getSecondaryText,
+          getSecondaryColor,
+          secondarySizeScale,
+          secondaryOutlineColor,
+          updateTriggers: {getSecondaryText: [secondaryField]}
+        })
+      }
+    };
   }
 
   return result;
