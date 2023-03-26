@@ -27,7 +27,6 @@ import {
   CustomMarkersRange,
   MapDataset,
   MapTextSubLayerConfig,
-  TextLabel,
   VisConfig,
   VisualChannelField,
   VisualChannels
