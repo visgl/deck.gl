@@ -62,30 +62,6 @@ export function parseMap(json) {
   };
 }
 
-function extractTextLayers(layers) {
-  return flatten(
-    layers.map(({id, config, ...rest}) => {
-      const {textLabel, ...configRest} = config;
-      return [
-        // Original layer without textLabel
-        {id, config: configRest, ...rest},
-
-        // Layer with valid text label, with full opacity
-        textLabel.length && {
-          id: `${id}-label`,
-          config: {
-            textLabel: textLabel.filter(t => t.field),
-            ...configRest,
-            label: `${config.label}-label`,
-            visConfig: {...configRest.visConfig, opacity: 1}
-          },
-          ...rest
-        }
-      ];
-    })
-  );
-}
-
 function createParametersProp(layerBlending, parameters: Record<string, any>) {
   if (layerBlending === 'additive') {
     parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
