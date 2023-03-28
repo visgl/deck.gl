@@ -32,6 +32,7 @@ export default class MapboxOverlay implements IControl {
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
+  private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
     const {interleaved = false, ...otherProps} = props;
@@ -77,6 +78,10 @@ export default class MapboxOverlay implements IControl {
 
     map.on('resize', this._updateContainerSize);
     map.on('render', this._updateViewState);
+    map.on('mousedown', this._handleMouseEvent);
+    map.on('dragstart', this._handleMouseEvent);
+    map.on('drag', this._handleMouseEvent);
+    map.on('dragend', this._handleMouseEvent);
     map.on('mousemove', this._handleMouseEvent);
     map.on('mouseout', this._handleMouseEvent);
     map.on('click', this._handleMouseEvent);
@@ -125,6 +130,10 @@ export default class MapboxOverlay implements IControl {
   private _onRemoveOverlaid(map: Map): void {
     map.off('resize', this._updateContainerSize);
     map.off('render', this._updateViewState);
+    map.off('mousedown', this._handleMouseEvent);
+    map.off('dragstart', this._handleMouseEvent);
+    map.off('drag', this._handleMouseEvent);
+    map.off('dragend', this._handleMouseEvent);
     map.off('mousemove', this._handleMouseEvent);
     map.off('mouseout', this._handleMouseEvent);
     map.off('click', this._handleMouseEvent);
@@ -199,6 +208,8 @@ export default class MapboxOverlay implements IControl {
 
     const mockEvent: {
       type: string;
+      deltaX?: number;
+      deltaY?: number;
       offsetCenter: {x: number; y: number};
       srcEvent: MapMouseEvent;
       tapCount?: number;
@@ -208,11 +219,44 @@ export default class MapboxOverlay implements IControl {
       srcEvent: event
     };
 
-    switch (event.type) {
+    const lastDown = this._lastMouseDownPoint;
+    if (!event.point && lastDown) {
+      // drag* events do not contain a `point` field
+      mockEvent.deltaX = event.originalEvent.clientX - lastDown.clientX;
+      mockEvent.deltaY = event.originalEvent.clientY - lastDown.clientY;
+      mockEvent.offsetCenter = {
+        x: lastDown.x + mockEvent.deltaX,
+        y: lastDown.y + mockEvent.deltaY
+      };
+    }
+
+    switch (mockEvent.type) {
+      case 'mousedown':
+        deck._onPointerDown(mockEvent as MjolnirGestureEvent);
+        this._lastMouseDownPoint = {
+          ...event.point,
+          clientX: event.originalEvent.clientX,
+          clientY: event.originalEvent.clientY
+        };
+        break;
+
+      case 'dragstart':
+        mockEvent.type = 'panstart';
+        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        break;
+
+      case 'drag':
+        mockEvent.type = 'panmove';
+        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        break;
+
+      case 'dragend':
+        mockEvent.type = 'panend';
+        deck._onEvent(mockEvent as MjolnirGestureEvent);
+        break;
+
       case 'click':
         mockEvent.tapCount = 1;
-        // Hack: because we do not listen to pointer down, perform picking now
-        deck._onPointerDown(mockEvent as MjolnirGestureEvent);
         deck._onEvent(mockEvent as MjolnirGestureEvent);
         break;
 
