@@ -576,14 +576,6 @@ export async function fetchMap({
     );
   }
 
-  // Fetch font needed for labels in background
-  /* global FontFace, document */
-  const font = new FontFace(
-    'Inter',
-    'url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2)'
-  );
-  const fontPromise = font.load().then(f => document.fonts.add(f));
-
   const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
   const errorContext = {requestType: REQUEST_TYPES.PUBLIC_MAP, mapId: cartoMapId};
   const map = await requestJson<any>({url, headers, accessToken, errorContext});
@@ -624,8 +616,22 @@ export async function fetchMap({
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
-  await fontPromise;
   const out = {...parseMap(map), ...{stopAutoRefresh}};
+
+  const textLayers = out.layers.filter(layer => {
+    const pointType = layer.props.pointType || '';
+    return pointType.includes('text');
+  });
+
+  /* global FontFace, document */
+  if (textLayers.length && window.FontFace && !document.fonts.check('12px Inter')) {
+    // Fetch font needed for labels
+    const font = new FontFace(
+      'Inter',
+      'url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2)'
+    );
+    await font.load().then(f => document.fonts.add(f));
+  }
 
   return out;
 }
