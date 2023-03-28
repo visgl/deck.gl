@@ -301,6 +301,7 @@ function createChannelProps(
     result.textOutlineWidth = 4;
 
     result._subLayerProps = {
+      ...result._subLayerProps,
       'points-text': {
         type: PointLabelLayer,
         extensions: [collisionFilterExtension],

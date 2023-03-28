@@ -139,7 +139,7 @@ export function getLayer(
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
   let basePropMap: any = sharedPropMap;
 
-  if (config.visConfig?.customMarkers && !config.textLabel) {
+  if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
   if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
