@@ -48,7 +48,7 @@ export function parseMap(json) {
           id,
           data,
           ...defaultProps,
-          ...(!config.textLabel && createInteractionProps(interactionConfig)),
+          ...createInteractionProps(interactionConfig),
           ...styleProps,
           ...createChannelProps(id, type, config, visualChannels, data), // Must come after style
           ...createParametersProp(layerBlending, styleProps.parameters || {}), // Must come after style
@@ -301,6 +301,7 @@ function createChannelProps(
     result.textOutlineWidth = 4;
 
     result._subLayerProps = {
+      ...result._subLayerProps,
       'points-text': {
         type: PointLabelLayer,
         extensions: [collisionFilterExtension],
