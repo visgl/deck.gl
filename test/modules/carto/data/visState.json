@@ -98,7 +98,8 @@
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
-          "parameters": {"depthTest": true}
+          "parameters": {"depthTest": true},
+          "pointType": "circle"
         }
       }
     ]
