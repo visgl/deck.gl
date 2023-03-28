@@ -130,8 +130,8 @@ test('parseMap#metadata', t => {
   t.end();
 });
 
-for (const {title, visState, layers} of [VISSTATE_DATA[2]]) {
-  test.only(`parseMap#visState ${title}`, t => {
+for (const {title, visState, layers} of VISSTATE_DATA) {
+  test(`parseMap#visState ${title}`, t => {
     const json = {
       ...METADATA,
       datasets: DATASETS,

@@ -775,8 +775,7 @@
           "getPointRadius": 10,
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
-          "pointType": "circle"
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       },
       {
@@ -806,8 +805,7 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "mvt",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
-          "pointType": "circle"
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
       }
     ]
@@ -1043,7 +1041,7 @@
     "visState": {
       "layers": [
         {
-          "id": "3btkipv",
+          "id": "kajdi11",
           "type": "tileset",
           "config": {
             "color": [18, 147, 154],
@@ -1131,9 +1129,9 @@
     },
     "layers": [
       {
-        "name": "CartoTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: 'kajdi11'})",
         "props": {
-          "id": "3btkipv",
+          "id": "kajdi11",
           "cartoLabel": "Layer 1",
           "data": "DATA_TILESET_GEOJSON",
           "lineMiterLimit": 2,
@@ -1155,7 +1153,8 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "geojson",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       }
     ]
@@ -1165,7 +1164,7 @@
     "visState": {
       "layers": [
         {
-          "id": "3btkipv",
+          "id": "91kajsh",
           "type": "tileset",
           "config": {
             "color": [18, 147, 154],
@@ -1253,9 +1252,9 @@
     },
     "layers": [
       {
-        "name": "CartoTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: '91kajsh'})",
         "props": {
-          "id": "3btkipv",
+          "id": "91kajsh",
           "cartoLabel": "Layer 1",
           "data": "DATA_TILESET_BINARY",
           "lineMiterLimit": 2,
@@ -1277,7 +1276,8 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "binary",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       }
     ]
