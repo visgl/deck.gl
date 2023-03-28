@@ -9,7 +9,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "ab2417x",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -79,9 +79,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'ab2417x'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "ab2417x",
           "cartoLabel": "Stores",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
@@ -121,6 +121,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": {"name": "city", "type": "string"},
                 "anchor": "end",
                 "offset": [0, 0],
@@ -129,6 +130,7 @@
               {
                 "size": 12,
                 "color": [121, 9, 77],
+                "outlineColor": [123, 0, 255],
                 "field": {"name": "state", "type": "string"},
                 "anchor": "start",
                 "offset": [0, 0],
@@ -214,7 +216,19 @@
           "getPointRadius": 20.2,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle+text",
+          "textCharacterSet": "auto",
+          "textFontFamily": "Inter, sans",
+          "textFontSettings": {"sdf": true},
+          "textFontWeight": 500,
+
+          "textOutlineColor": [0, 0, 0],
+          "textOutlineWidth": 4,
+          "textSizeScale": 18,
+          "getTextAlignmentBaseline": "top",
+          "getTextAnchor": "end",
+          "getTextColor": [255, 255, 255]
         }
       }
     ]
@@ -224,7 +238,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "tyxi12",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -237,6 +251,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": {"name": "city", "type": "string"},
                 "anchor": "end",
                 "offset": [0, 0],
@@ -305,9 +320,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'tyxi12'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "tyxi12",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusUnits": "pixels",
@@ -343,9 +358,9 @@
         }
       },
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
+        "name": "GeoJsonLayer({id: 'tyxi12-label-city'})",
         "props": {
-          "id": "vlu4f7d-label-city",
+          "id": "tyxi12-label-city",
 
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
@@ -377,7 +392,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "baksj12",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -458,9 +473,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'baksj12'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "baksj12",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusUnits": "pixels",
@@ -515,6 +530,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -577,6 +593,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -640,6 +657,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -812,6 +830,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -915,6 +934,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1036,6 +1056,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1157,6 +1178,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1278,6 +1300,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1419,6 +1442,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1564,6 +1588,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1703,6 +1728,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1767,6 +1793,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
