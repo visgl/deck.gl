@@ -222,7 +222,7 @@
           "textCharacterSet": "auto",
           "textFontFamily": "Inter, sans",
           "textFontSettings": {"sdf": true},
-          "textFontWeight": 500,
+          "textFontWeight": 600,
           "textOutlineColor": [0, 0, 0],
           "textOutlineWidth": 4,
           "textSizeScale": 18,
@@ -349,8 +349,23 @@
           "getIconSize": 20.2,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
-          "pointType": "icon",
+          "pointType": "icon+text",
+          "textCharacterSet": "auto",
+          "textFontFamily": "Inter, sans",
+          "textFontSettings": {"sdf": true},
+          "textFontWeight": 600,
+          "textOutlineColor": [0, 0, 0],
+          "textOutlineWidth": 4,
+          "textSizeScale": 18,
+          "getTextAlignmentBaseline": "top",
+          "getTextAnchor": "end",
+          "getTextColor": [255, 255, 255],
           "_subLayerProps": {
+            "points-text": {
+              "collisionEnabled": true,
+              "collisionGroup": "tyxi12",
+              "radiusScale": 20.2
+            },
             "points-icon": {
               "loadOptions": {
                 "image": {
