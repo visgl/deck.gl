@@ -747,7 +747,8 @@
           "getPointRadius": 35.8,
           "stroked": false,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       },
       {
@@ -774,7 +775,8 @@
           "getPointRadius": 10,
           "wireframe": false,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       },
       {
@@ -804,7 +806,8 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "mvt",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       }
     ]
