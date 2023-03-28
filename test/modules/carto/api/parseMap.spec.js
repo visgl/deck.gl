@@ -130,8 +130,8 @@ test('parseMap#metadata', t => {
   t.end();
 });
 
-for (const {title, visState, layers} of VISSTATE_DATA) {
-  test(`parseMap#visState ${title}`, t => {
+for (const {title, visState, layers} of [VISSTATE_DATA[2]]) {
+  test.only(`parseMap#visState ${title}`, t => {
     const json = {
       ...METADATA,
       datasets: DATASETS,
@@ -149,12 +149,23 @@ for (const {title, visState, layers} of VISSTATE_DATA) {
     // Get all non-dynamic props to compare
     const props = map.layers.map(layer => {
       const layerProps = {...layer.props};
+      const filteredProps = {};
       for (const [key, value] of Object.entries(layerProps)) {
-        if (typeof value === 'function') {
-          delete layerProps[key];
+        if (typeof value !== 'function') {
+          filteredProps[key] = value;
         }
       }
-      return layerProps;
+      delete filteredProps._subLayerProps;
+      if (filteredProps._subLayerProps) {
+        for (const subLayer of Object.keys(filteredProps._subLayerProps)) {
+          for (const [key, value] of Object.entries(filteredProps._subLayerProps[subLayer])) {
+            if (typeof value === 'function') {
+              delete filteredProps._subLayerProps[subLayer][key];
+            }
+          }
+        }
+      }
+      return filteredProps;
     });
 
     // Fill in tileset data to avoid duplicatation

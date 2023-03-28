@@ -35,7 +35,7 @@ export function parseMap(json) {
     initialViewState: mapState,
     mapStyle,
     token,
-    layers: layers.map(({id, type, config, visualChannels}) => {
+    layers: layers.reverse().map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
         const dataset: MapDataset | null = datasets.find(d => d.id === dataId);

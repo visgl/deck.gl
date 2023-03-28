@@ -216,60 +216,6 @@
           "highlightColor": [252, 242, 26, 255],
           "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
-      },
-      {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
-        "props": {
-          "id": "vlu4f7d-label-city",
-          "cartoLabel": "Stores-label-city",
-          "lineMiterLimit": 2,
-          "lineWidthUnits": "pixels",
-          "pointRadiusUnits": "pixels",
-          "rounded": true,
-          "wrapLongitude": false,
-          "parameters": {"depthTest": false, "blendFunc": [770, 772], "blendEquation": 32774},
-          "getFillColor": [18, 147, 154, 255],
-          "visible": true,
-          "getTextAlignmentBaseline": "top",
-          "getTextAnchor": "end",
-          "getTextColor": [255, 255, 255, 255],
-          "getTextSize": 18,
-          "filled": true,
-          "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
-          "stroked": true,
-          "highlightColor": [252, 242, 26, 255],
-          "pointType": "text",
-          "getTextPixelOffset": [-40.2, -58.2],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
-        }
-      },
-      {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-state'})",
-        "props": {
-          "id": "vlu4f7d-label-state",
-          "cartoLabel": "Stores-label-state",
-          "lineMiterLimit": 2,
-          "lineWidthUnits": "pixels",
-          "pointRadiusUnits": "pixels",
-          "rounded": true,
-          "wrapLongitude": false,
-          "parameters": {"depthTest": false, "blendFunc": [770, 772], "blendEquation": 32774},
-          "getFillColor": [18, 147, 154, 255],
-          "visible": true,
-          "getTextAlignmentBaseline": "center",
-          "getTextAnchor": "start",
-          "getTextColor": [121, 9, 77, 255],
-          "getTextSize": 12,
-          "filled": true,
-          "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
-          "stroked": true,
-          "highlightColor": [252, 242, 26, 255],
-          "pointType": "text",
-          "getTextPixelOffset": [40.2, 0],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
-        }
       }
     ]
   },

@@ -625,5 +625,7 @@ export async function fetchMap({
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
   await fontPromise;
-  return {...parseMap(map), ...{stopAutoRefresh}};
+  const out = {...parseMap(map), ...{stopAutoRefresh}};
+
+  return out;
 }

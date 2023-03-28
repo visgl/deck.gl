@@ -6,8 +6,8 @@ import mapboxgl from 'mapbox-gl';
 // const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 // fetchMap({cartoMapId}).then(map => new Deck(map));
 
-// const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
-const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
 setDefaultCredentials({apiBaseUrl});
 
 async function createMap(cartoMapId) {
