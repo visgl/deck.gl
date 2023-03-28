@@ -268,7 +268,7 @@ function createChannelProps(
         getSizeAccessor(visualChannels.rotationField, undefined, null, undefined, data)
       );
     }
-  } else {
+  } else if (type === 'point' || type === 'tileset') {
     result.pointType = 'circle';
   }
 
