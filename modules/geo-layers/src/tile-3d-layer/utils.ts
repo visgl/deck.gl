@@ -30,8 +30,8 @@ function getBbox(boundingVolume: OrientedBoundingBox): {west: number; north: num
       for (let z = 0; z < 2; z++) {
         const position = new Vector3(boundingVolume.center);
         position.add(x ? xAxis : xAxis.negate());
-        position.add(x ? yAxis : yAxis.negate());
-        position.add(x ? zAxis : zAxis.negate());
+        position.add(y ? yAxis : yAxis.negate());
+        position.add(z ? zAxis : zAxis.negate());
 
         const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(position, scratchPoint);
         minLng = Math.min(minLng, cartographicPosition[0]);
