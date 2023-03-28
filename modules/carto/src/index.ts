@@ -2,7 +2,7 @@ export {getDefaultCredentials, setDefaultCredentials} from './config';
 export {default as CartoLayer} from './layers/carto-layer';
 export {default as _CartoTileLayer} from './layers/carto-tile-layer';
 export {default as _H3TileLayer} from './layers/h3-tile-layer';
-export {default as _PointLabelLayer} from './layers/quadbin-tile-layer';
+export {default as _PointLabelLayer} from './layers/point-label-layer';
 export {default as _QuadbinTileLayer} from './layers/quadbin-tile-layer';
 export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
