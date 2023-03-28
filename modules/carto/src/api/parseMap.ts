@@ -297,7 +297,7 @@ function createChannelProps(
     result.textCharacterSet = 'auto';
     result.textFontFamily = 'Inter, sans';
     result.textFontSettings = {sdf: true};
-    result.textFontWeight = 500;
+    result.textFontWeight = 600;
     result.textOutlineWidth = 4;
 
     result._subLayerProps = {
