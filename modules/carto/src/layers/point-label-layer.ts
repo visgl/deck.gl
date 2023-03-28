@@ -248,7 +248,7 @@ export default class PointLabelLayer<
           getText: getSecondaryText,
           getPixelOffset: this.calculatePixelOffset(true),
           getAlignmentBaseline: 'top',
-          updateTriggers: {getText: updateTriggers.getSecondaryText},
+          // updateTriggers: {getText: updateTriggers.getSecondaryText},
 
           // Optional overrides
           ...(getSecondaryColor && {getColor: getSecondaryColor}),

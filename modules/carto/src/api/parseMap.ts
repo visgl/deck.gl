@@ -317,8 +317,7 @@ function createChannelProps(
           getSecondaryText,
           getSecondaryColor,
           secondarySizeScale,
-          secondaryOutlineColor,
-          updateTriggers: {getSecondaryText: [secondaryField]}
+          secondaryOutlineColor
         })
       }
     };

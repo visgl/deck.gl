@@ -155,9 +155,9 @@ for (const {title, visState, layers} of [VISSTATE_DATA[2]]) {
           filteredProps[key] = value;
         }
       }
-      delete filteredProps._subLayerProps;
       if (filteredProps._subLayerProps) {
         for (const subLayer of Object.keys(filteredProps._subLayerProps)) {
+          delete filteredProps._subLayerProps[subLayer].extensions;
           for (const [key, value] of Object.entries(filteredProps._subLayerProps[subLayer])) {
             if (typeof value === 'function') {
               delete filteredProps._subLayerProps[subLayer][key];
