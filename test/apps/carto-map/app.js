@@ -6,8 +6,8 @@ import mapboxgl from 'mapbox-gl';
 // const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';
 // fetchMap({cartoMapId}).then(map => new Deck(map));
 
-const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
-// const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
+// const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1-20.dev.api.carto.com';
 setDefaultCredentials({apiBaseUrl});
 
 async function createMap(cartoMapId) {
@@ -48,7 +48,13 @@ const examples = [
   // Tests require ded-20 (see apiBaseUrl above)
   'd8dc690f-ba79-4286-aa7a-5e7d58ff8dc0', // Label test
 
-  // Tests require standard apiBaseUrl
+  // Ana
+  'bdf3896d-3846-4355-856d-072b01d92dda', // Label Point tile layer > it is not working. The labels appear but not the points (point_tile_layer.log)
+  'c165e9a5-3ab7-4479-a13b-f7b6d82ec51e', // Label Point layer custom marker (point_layer_custom_marker.log)
+  '7d9f5763-71cc-49da-907e-a214664c0a5e', // Label Point tile layer custom marker (point_tile_layer_custom_marker.log)
+  'f0b59b2b-d4f3-4ce8-a761-94241aaa3dfd', // Label Point simple tileset > it is working, but the labels are not displayed very well when compared to the map in builder
+  '9972f15e-1066-482a-8ea1-139e19493357', // Label Point aggregated tileset
+
   // Spatial index layers
   '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
   '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
