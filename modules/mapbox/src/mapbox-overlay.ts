@@ -196,7 +196,9 @@ export default class MapboxOverlay implements IControl {
       // @ts-ignore (2345) map is always defined if deck is
       deck.setProps({viewState: getViewState(this._map)});
       // Redraw immediately if view state has changed
-      deck.redraw();
+      if (deck.isInitialized) {
+        deck.redraw();
+      }
     }
   };
 
