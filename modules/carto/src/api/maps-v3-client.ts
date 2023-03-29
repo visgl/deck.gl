@@ -623,7 +623,7 @@ export async function fetchMap({
     return pointType.includes('text');
   });
 
-  /* global FontFace, document */
+  /* global FontFace, window, document */
   if (textLayers.length && window.FontFace && !document.fonts.check('12px Inter')) {
     // Fetch font needed for labels
     const font = new FontFace(

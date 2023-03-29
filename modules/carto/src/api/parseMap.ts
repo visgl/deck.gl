@@ -13,7 +13,7 @@ import {
   getMaxMarkerSize
 } from './layer-map';
 import PointLabelLayer from '../layers/point-label-layer';
-import {_flatten as flatten, log} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {MapDataset, MapLayerConfig, VisualChannels} from './types';
