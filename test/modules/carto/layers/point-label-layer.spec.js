@@ -84,7 +84,6 @@ test('PointLabelLayer', t => {
         );
 
         const [textBackgroundLayer] = textLayer.getSubLayers();
-        debugger;
         t.deepEqual(textBackgroundLayer.props.padding, [12, 3, 0, 0], 'correct background padding');
       }
     }
