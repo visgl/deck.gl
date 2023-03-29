@@ -1,7 +1,7 @@
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {Tile, TileReader} from './carto-spatial-tile';
-import {parsePbf, unpackProperties} from './tile-loader-utils';
+import {parsePbf} from './tile-loader-utils';
 import {IndexScheme, binaryToSpatialjson, SpatialJson} from './spatialjson-utils';
 
 const CartoSpatialTileLoader: LoaderWithParser = {
@@ -31,10 +31,7 @@ function parseCartoSpatialTile(
 
   const {cells} = tile;
   const scheme = options?.cartoSpatialTile?.scheme;
-  const data = {
-    cells: {...cells, properties: unpackProperties(cells.properties)},
-    scheme
-  };
+  const data = {cells, scheme};
 
   return binaryToSpatialjson(data);
 }

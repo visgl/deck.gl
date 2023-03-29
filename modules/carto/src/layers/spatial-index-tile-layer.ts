@@ -72,6 +72,7 @@ export default class SpatialIndexTileLayer<
       // Tileset cache is invalid when resLevel changes
       this.setState({tileset: null});
     }
+
     super.updateState(params);
   }
 
@@ -109,10 +110,30 @@ export default class SpatialIndexTileLayer<
     const data = tile.content;
 
     const isFeatureIdPresent = isFeatureIdDefined(hoveredFeatureId);
-    if (!isFeatureIdPresent || !Array.isArray(data)) {
+    if (
+      !isFeatureIdPresent ||
+      !Array.isArray(data) ||
+      // Quick check for whether id is within tile. data.findIndex is expensive
+      !this._featureInTile(tile, hoveredFeatureId)
+    ) {
       return -1;
     }
 
     return data.findIndex(feature => feature.id === hoveredFeatureId);
+  }
+
+  _featureInTile(tile: Tile2DHeader, featureId: BigInt | number) {
+    const {getTileZoom, getParentIndex} = this.state.tileset;
+    const tileZoom = getTileZoom(tile.index);
+    // @ts-ignore
+    const KEY = tile.index.q ? 'q' : 'i';
+    let featureIndex = {[KEY]: featureId};
+    let featureZoom = getTileZoom(featureIndex);
+    while (!(featureZoom <= tileZoom)) {
+      featureIndex = getParentIndex(featureIndex);
+      featureZoom = getTileZoom(featureIndex);
+    }
+
+    return featureIndex[KEY] === tile.index[KEY];
   }
 }

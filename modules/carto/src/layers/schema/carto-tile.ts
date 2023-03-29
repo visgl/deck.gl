@@ -1,3 +1,5 @@
+import {readPackedDouble} from './fast-pbf';
+
 // KeyValueObject ========================================
 interface KeyValueObject {
   key: string;
@@ -16,16 +18,15 @@ class KeyValueObjectReader {
 
 // Properties ========================================
 
-export interface KeyValueProperties {
-  data: KeyValueObject[];
-}
-
 export class PropertiesReader {
   static read(pbf, end?: number) {
-    return pbf.readFields(PropertiesReader._readField, {data: []}, end);
+    return pbf.readFields(PropertiesReader._readField, {}, end);
   }
-  static _readField(this: void, tag: number, obj: KeyValueProperties, pbf) {
-    if (tag === 1) obj.data.push(KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos));
+  static _readField(this: void, tag: number, obj: Record<string, string>, pbf) {
+    if (tag === 1) {
+      const {key, value} = KeyValueObjectReader.read(pbf, pbf.readVarint() + pbf.pos);
+      obj[key] = value;
+    }
   }
 }
 
@@ -38,13 +39,11 @@ interface Doubles {
 
 class DoublesReader {
   static read(pbf, end?: number): Doubles {
-    // TODO perhaps we can do better and directly map from the source
-    // ArrayBuffer using ArrayBuffer.slice()
     const {value, size} = pbf.readFields(DoublesReader._readField, {value: [], size: 0}, end);
     return {value: new Float32Array(value), size};
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) pbf.readPackedDouble(obj.value);
+    if (tag === 1) readPackedDouble(pbf, obj);
     else if (tag === 2) obj.size = pbf.readVarint(true);
   }
 }
@@ -93,7 +92,7 @@ class NumericPropReader {
     return pbf.readFields(NumericPropReader._readField, {value: []}, end);
   }
   static _readField(this: void, tag: number, obj: NumericProp, pbf) {
-    if (tag === 1) pbf.readPackedDouble(obj.value);
+    if (tag === 1) readPackedDouble(pbf, obj);
   }
 }
 
@@ -119,7 +118,7 @@ interface Points {
   positions: Doubles;
   globalFeatureIds: Ints;
   featureIds: Ints;
-  properties: KeyValueProperties[];
+  properties: Record<string, string>[];
   numericProps: Record<string, NumericProp>;
   fields: Fields[];
 }
