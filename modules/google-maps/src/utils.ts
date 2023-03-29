@@ -286,6 +286,10 @@ function getEventPixel(event, deck: Deck): {x: number; y: number} {
 
 // Triggers picking on a mouse event
 function handleMouseEvent(deck: Deck, type: string, event) {
+  if (!deck.isInitialized) {
+    return;
+  }
+
   const mockEvent: Record<string, any> = {
     type,
     offsetCenter: getEventPixel(event, deck),
