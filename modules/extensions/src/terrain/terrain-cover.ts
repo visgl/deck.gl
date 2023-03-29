@@ -115,10 +115,17 @@ export class TerrainCover {
       if (!this.targetBounds) {
         shouldRedraw = true;
         const geoBounds = this.tile.bbox;
-        this.targetBounds = 'west' in geoBounds
-          ? [[geoBounds.west, geoBounds.south], [geoBounds.east, geoBounds.north]]
-          : [[geoBounds.left, geoBounds.bottom], [geoBounds.right, geoBounds.top]];
-        
+        this.targetBounds =
+          'west' in geoBounds
+            ? [
+                [geoBounds.west, geoBounds.south],
+                [geoBounds.east, geoBounds.north]
+              ]
+            : [
+                [geoBounds.left, geoBounds.bottom],
+                [geoBounds.right, geoBounds.top]
+              ];
+
         const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
         const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
         this.targetBoundsCommon = [

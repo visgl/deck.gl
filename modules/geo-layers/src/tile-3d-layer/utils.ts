@@ -14,7 +14,12 @@ export function wrapTile(tile: Tile3D): Tile3D {
   return unsealedTile;
 }
 
-function getBbox(boundingVolume: OrientedBoundingBox): {west: number; north: number; east: number; south: number} {
+function getBbox(boundingVolume: OrientedBoundingBox): {
+  west: number;
+  north: number;
+  east: number;
+  south: number;
+} {
   let minLng = Infinity;
   let maxLng = -Infinity;
   let minLat = Infinity;
@@ -33,7 +38,10 @@ function getBbox(boundingVolume: OrientedBoundingBox): {west: number; north: num
         position.add(y ? yAxis : yAxis.negate());
         position.add(z ? zAxis : zAxis.negate());
 
-        const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(position, scratchPoint);
+        const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(
+          position,
+          scratchPoint
+        );
         minLng = Math.min(minLng, cartographicPosition[0]);
         minLat = Math.min(minLat, cartographicPosition[1]);
         maxLng = Math.max(maxLng, cartographicPosition[0]);
