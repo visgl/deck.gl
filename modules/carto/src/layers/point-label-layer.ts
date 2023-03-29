@@ -16,6 +16,8 @@ import {
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
 class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
+  static layerName = 'EnhancedTextBackgroundLayer';
+
   getShaders() {
     const shaders = super.getShaders();
     let vs = shaders.vs;
@@ -35,6 +37,8 @@ class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
 // TextLayer which includes modified text-background-layer-vertex shader and only renders the
 // primary background layer in the collision pass
 class EnhancedTextLayer extends TextLayer {
+  static layerName = 'EnhancedTextLayer';
+
   filterSubLayer({layer, renderPass}) {
     const background = layer.id.includes('primary-background');
     if (renderPass === 'collision') {
