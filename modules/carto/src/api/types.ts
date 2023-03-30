@@ -77,6 +77,7 @@ export type TextLabel = {
   size: number;
   color?: number[];
   offset?: [number, number];
+  outlineColor?: number[];
 };
 
 export type MapLayerConfig = {

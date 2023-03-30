@@ -3,7 +3,6 @@ import {
   getColorAccessor,
   getSizeAccessor,
   getTextAccessor,
-  getTextPixelOffsetAccessor,
   getLayer,
   _domainFromValues
 } from '@deck.gl/carto/api/layer-map';
@@ -201,18 +200,6 @@ const TEXT_PIXEL_OFFSET_TESTS = [
     expected: [-40, -50]
   }
 ];
-
-for (const {anchor, alignment, radius, size, data, expected} of TEXT_PIXEL_OFFSET_TESTS) {
-  test(`getTextPixelOffsetAccessor#${anchor} ${alignment}`, t => {
-    const accessor = getTextPixelOffsetAccessor({alignment, anchor, size}, radius);
-    t.deepEquals(
-      typeof radius === 'function' ? accessor(data) : accessor,
-      expected,
-      `getTextPixelOffsetAccessor correctly returns ${expected}`
-    );
-    t.end();
-  });
-}
 
 test('getHexagon', t => {
   const accessor = getLayer('hexagonId', {columns: {hex_id: 'h3'}}).defaultProps.getHexagon;

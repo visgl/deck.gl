@@ -534,6 +534,7 @@ async function fillInTileStats(
   return await Promise.all(promises);
 }
 
+/* eslint-disable max-statements */
 export async function fetchMap({
   cartoMapId,
   clientId,
@@ -613,8 +614,22 @@ export async function fetchMap({
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, localCreds);
-  return {
-    ...parseMap(map),
-    ...{stopAutoRefresh}
-  };
+  const out = {...parseMap(map), ...{stopAutoRefresh}};
+
+  const textLayers = out.layers.filter(layer => {
+    const pointType = layer.props.pointType || '';
+    return pointType.includes('text');
+  });
+
+  /* global FontFace, window, document */
+  if (textLayers.length && window.FontFace && !document.fonts.check('12px Inter')) {
+    // Fetch font needed for labels
+    const font = new FontFace(
+      'Inter',
+      'url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2)'
+    );
+    await font.load().then(f => document.fonts.add(f));
+  }
+
+  return out;
 }
