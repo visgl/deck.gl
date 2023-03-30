@@ -23,7 +23,7 @@ import type CompositeLayer from './composite-layer';
 import type {UpdateParameters} from './layer';
 import type {LayerContext} from './layer-manager';
 
-export default abstract class LayerExtension<OptionsT = undefined> {
+export default abstract class LayerExtension<OptionsT = unknown> {
   static defaultProps = {};
   opts!: OptionsT;
 
