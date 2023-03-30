@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.6] - Mar 30 2023
+
+- (fix) MapboxOverlay: safeguard for redraw (#7803)
+- MapboxOverlay handles drag events when interleaved:false (#7792)
+- Fix bug with picking in overlay mouse handlers before deck is initialized (#7723)
+- Add minimum permissions to workflows (#7787)
+
 #### deck.gl [8.9.5] - Mar 30 2023
 
 - CARTO: PointLabelLayer (#7796)
