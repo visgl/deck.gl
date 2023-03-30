@@ -6,16 +6,19 @@ import {
   getColorValueAccessor,
   getSizeAccessor,
   getTextAccessor,
-  getTextPixelOffsetAccessor,
   OPACITY_MAP,
   opacityToAlpha,
   getIconUrlAccessor,
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import {_flatten as flatten, log} from '@deck.gl/core';
+import PointLabelLayer from '../layers/point-label-layer';
+import {log} from '@deck.gl/core';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
-import {MapDataset, MapTextSubLayerConfig, VisualChannels} from './types';
+import {MapDataset, MapLayerConfig, VisualChannels} from './types';
+
+const collisionFilterExtension = new CollisionFilterExtension();
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
@@ -32,7 +35,7 @@ export function parseMap(json) {
     initialViewState: mapState,
     mapStyle,
     token,
-    layers: extractTextLayers(layers.reverse()).map(({id, type, config, visualChannels}) => {
+    layers: layers.reverse().map(({id, type, config, visualChannels}) => {
       try {
         const {dataId} = config;
         const dataset: MapDataset | null = datasets.find(d => d.id === dataId);
@@ -45,9 +48,9 @@ export function parseMap(json) {
           id,
           data,
           ...defaultProps,
-          ...(!config.textLabel && createInteractionProps(interactionConfig)),
+          ...createInteractionProps(interactionConfig),
           ...styleProps,
-          ...createChannelProps(visualChannels, type, config, data), // Must come after style
+          ...createChannelProps(id, type, config, visualChannels, data), // Must come after style
           ...createParametersProp(layerBlending, styleProps.parameters || {}), // Must come after style
           ...createLoadOptions(token)
         });
@@ -57,34 +60,6 @@ export function parseMap(json) {
       }
     })
   };
-}
-
-function extractTextLayers(layers) {
-  return flatten(
-    layers.map(({id, config, ...rest}) => {
-      const {textLabel, ...configRest} = config;
-      return [
-        // Original layer without textLabel
-        {id, config: configRest, ...rest},
-
-        // One layer per valid text label, with full opacity
-        ...textLabel
-          .filter(t => t.field)
-          .map(t => {
-            return {
-              id: `${id}-label-${t.field.name}`,
-              config: {
-                textLabel: t,
-                ...configRest,
-                label: `${config.label}-label-${t.field.name}`,
-                visConfig: {...configRest.visConfig, opacity: 1}
-              },
-              ...rest
-            };
-          })
-      ];
-    })
-  );
 }
 
 function createParametersProp(layerBlending, parameters: Record<string, any>) {
@@ -127,7 +102,7 @@ function mapProps(source, target, mapping) {
   }
 }
 
-function createStyleProps(config: MapTextSubLayerConfig, mapping) {
+function createStyleProps(config: MapLayerConfig, mapping) {
   const result: Record<string, any> = {};
   mapProps(config, result, mapping);
 
@@ -153,9 +128,10 @@ function createStyleProps(config: MapTextSubLayerConfig, mapping) {
 
 /* eslint-disable complexity, max-statements */
 function createChannelProps(
-  visualChannels: VisualChannels,
+  id: string,
   type: string,
-  config: MapTextSubLayerConfig,
+  config: MapLayerConfig,
+  visualChannels: VisualChannels,
   data
 ) {
   const {
@@ -175,7 +151,6 @@ function createChannelProps(
   }
   const {textLabel, visConfig} = config;
   const result: Record<string, any> = {};
-  const textLabelField = textLabel && textLabel.field;
 
   if (type === 'grid' || type === 'hexagon') {
     result.colorScaleType = colorScale;
@@ -253,12 +228,7 @@ function createChannelProps(
     );
   }
 
-  if (textLabelField) {
-    result.getText = getTextAccessor(textLabelField, data);
-    result.pointType = 'text';
-    const radius = result.getPointRadius || visConfig.radius;
-    result.getTextPixelOffset = getTextPixelOffsetAccessor(textLabel, radius);
-  } else if (visConfig.customMarkers) {
+  if (visConfig.customMarkers) {
     const maxIconSize = getMaxMarkerSize(visConfig, visualChannels);
     const {getPointRadius, getFillColor} = result;
     const {customMarkersUrl, customMarkersRange, filled: useMaskedIcons} = visConfig;
@@ -298,6 +268,59 @@ function createChannelProps(
         getSizeAccessor(visualChannels.rotationField, undefined, null, undefined, data)
       );
     }
+  } else if (type === 'point' || type === 'tileset') {
+    result.pointType = 'circle';
+  }
+
+  if (textLabel && textLabel.length && textLabel[0].field) {
+    const [mainLabel, secondaryLabel] = textLabel;
+    const collisionGroup = id;
+
+    ({
+      alignment: result.getTextAlignmentBaseline,
+      anchor: result.getTextAnchor,
+      color: result.getTextColor,
+      outlineColor: result.textOutlineColor,
+      size: result.textSizeScale
+    } = mainLabel);
+    const {
+      color: getSecondaryColor,
+      field: secondaryField,
+      outlineColor: secondaryOutlineColor,
+      size: secondarySizeScale
+    } = secondaryLabel || {};
+
+    result.getText = mainLabel.field && getTextAccessor(mainLabel.field, data);
+    const getSecondaryText = secondaryField && getTextAccessor(secondaryField, data);
+
+    result.pointType = `${result.pointType}+text`;
+    result.textCharacterSet = 'auto';
+    result.textFontFamily = 'Inter, sans';
+    result.textFontSettings = {sdf: true};
+    result.textFontWeight = 600;
+    result.textOutlineWidth = 3;
+
+    result._subLayerProps = {
+      ...result._subLayerProps,
+      'points-text': {
+        type: PointLabelLayer,
+        extensions: [collisionFilterExtension],
+        collisionEnabled: true,
+        collisionGroup,
+
+        // getPointRadius already has radiusScale baked in, so only pass one or the other
+        ...(result.getPointRadius
+          ? {getRadius: result.getPointRadius}
+          : {radiusScale: visConfig.radius}),
+
+        ...(secondaryField && {
+          getSecondaryText,
+          getSecondaryColor,
+          secondarySizeScale,
+          secondaryOutlineColor
+        })
+      }
+    };
   }
 
   return result;

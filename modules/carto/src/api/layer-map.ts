@@ -27,7 +27,6 @@ import {
   CustomMarkersRange,
   MapDataset,
   MapTextSubLayerConfig,
-  TextLabel,
   VisConfig,
   VisualChannelField,
   VisualChannels
@@ -140,7 +139,7 @@ export function getLayer(
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
   let basePropMap: any = sharedPropMap;
 
-  if (config.visConfig?.customMarkers && !config.textLabel) {
+  if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
   if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
@@ -296,8 +295,26 @@ function calculateDomain(data, name, scaleType, scaleLength?) {
 
 function normalizeAccessor(accessor, data) {
   if (data.features || data.tilestats) {
-    return ({properties}) => {
-      return accessor(properties);
+    return (object, info) => {
+      if (object) {
+        return accessor(object.properties || object.__source.object.properties);
+      }
+
+      const {data, index} = info;
+      const {properties, numericProps} = data;
+      const proxy = new Proxy(properties[index] || {}, {
+        get(target, property, receiver) {
+          if (property in numericProps) {
+            return numericProps[property as string].value[index];
+          }
+          return target[property as string];
+        },
+
+        has(target, property) {
+          return property in numericProps || property in target;
+        }
+      });
+      return accessor(proxy);
     };
   }
   return accessor;
@@ -466,27 +483,6 @@ export function getTextAccessor({name, type}: VisualChannelField, data) {
     return format(properties[name]);
   };
   return normalizeAccessor(accessor, data);
-}
-
-export function getTextPixelOffsetAccessor(
-  {alignment, anchor, size}: TextLabel,
-  radius
-): Accessor<unknown, [number, number]> {
-  const padding = 20;
-  const signX = anchor === 'middle' ? 0 : anchor === 'start' ? 1 : -1;
-  const signY = alignment === 'center' ? 0 : alignment === 'bottom' ? 1 : -1;
-  const sizeOffset = alignment === 'center' ? 0 : size;
-
-  const calculateOffset = (r: number): [number, number] => [
-    signX * (r + padding),
-    signY * (r + padding + sizeOffset)
-  ];
-
-  return typeof radius === 'function'
-    ? d => {
-        return calculateOffset(radius(d));
-      }
-    : calculateOffset(radius);
 }
 
 export {domainFromValues as _domainFromValues};

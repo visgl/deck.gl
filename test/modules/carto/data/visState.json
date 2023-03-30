@@ -9,7 +9,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "ab2417x",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -79,9 +79,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'ab2417x'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "ab2417x",
           "cartoLabel": "Stores",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
@@ -98,7 +98,8 @@
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
           "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
-          "parameters": {"depthTest": true}
+          "parameters": {"depthTest": true},
+          "pointType": "circle"
         }
       }
     ]
@@ -121,6 +122,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": {"name": "city", "type": "string"},
                 "anchor": "end",
                 "offset": [0, 0],
@@ -129,6 +131,7 @@
               {
                 "size": 12,
                 "color": [121, 9, 77],
+                "outlineColor": [123, 0, 255],
                 "field": {"name": "state", "type": "string"},
                 "anchor": "start",
                 "offset": [0, 0],
@@ -214,61 +217,28 @@
           "getPointRadius": 20.2,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
-        }
-      },
-      {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
-        "props": {
-          "id": "vlu4f7d-label-city",
-          "cartoLabel": "Stores-label-city",
-          "lineMiterLimit": 2,
-          "lineWidthUnits": "pixels",
-          "pointRadiusUnits": "pixels",
-          "rounded": true,
-          "wrapLongitude": false,
-          "parameters": {"depthTest": false, "blendFunc": [770, 772], "blendEquation": 32774},
-          "getFillColor": [18, 147, 154, 255],
-          "visible": true,
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle+text",
+          "textCharacterSet": "auto",
+          "textFontFamily": "Inter, sans",
+          "textFontSettings": {"sdf": true},
+          "textFontWeight": 600,
+          "textOutlineColor": [0, 0, 0],
+          "textOutlineWidth": 3,
+          "textSizeScale": 18,
           "getTextAlignmentBaseline": "top",
           "getTextAnchor": "end",
-          "getTextColor": [255, 255, 255, 255],
-          "getTextSize": 18,
-          "filled": true,
-          "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
-          "stroked": true,
-          "highlightColor": [252, 242, 26, 255],
-          "pointType": "text",
-          "getTextPixelOffset": [-40.2, -58.2],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
-        }
-      },
-      {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-state'})",
-        "props": {
-          "id": "vlu4f7d-label-state",
-          "cartoLabel": "Stores-label-state",
-          "lineMiterLimit": 2,
-          "lineWidthUnits": "pixels",
-          "pointRadiusUnits": "pixels",
-          "rounded": true,
-          "wrapLongitude": false,
-          "parameters": {"depthTest": false, "blendFunc": [770, 772], "blendEquation": 32774},
-          "getFillColor": [18, 147, 154, 255],
-          "visible": true,
-          "getTextAlignmentBaseline": "center",
-          "getTextAnchor": "start",
-          "getTextColor": [121, 9, 77, 255],
-          "getTextSize": 12,
-          "filled": true,
-          "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
-          "stroked": true,
-          "highlightColor": [252, 242, 26, 255],
-          "pointType": "text",
-          "getTextPixelOffset": [40.2, 0],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "getTextColor": [255, 255, 255],
+          "_subLayerProps": {
+            "points-text": {
+              "collisionEnabled": true,
+              "collisionGroup": "vlu4f7d",
+              "radiusScale": 20.2,
+              "getSecondaryColor": [121, 9, 77],
+              "secondarySizeScale": 12,
+              "secondaryOutlineColor": [123, 0, 255]
+            }
+          }
         }
       }
     ]
@@ -278,7 +248,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "tyxi12",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -291,6 +261,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": {"name": "city", "type": "string"},
                 "anchor": "end",
                 "offset": [0, 0],
@@ -359,9 +330,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'tyxi12'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "tyxi12",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusUnits": "pixels",
@@ -378,8 +349,23 @@
           "getIconSize": 20.2,
           "stroked": true,
           "highlightColor": [252, 242, 26, 255],
-          "pointType": "icon",
+          "pointType": "icon+text",
+          "textCharacterSet": "auto",
+          "textFontFamily": "Inter, sans",
+          "textFontSettings": {"sdf": true},
+          "textFontWeight": 600,
+          "textOutlineColor": [0, 0, 0],
+          "textOutlineWidth": 3,
+          "textSizeScale": 18,
+          "getTextAlignmentBaseline": "top",
+          "getTextAnchor": "end",
+          "getTextColor": [255, 255, 255],
           "_subLayerProps": {
+            "points-text": {
+              "collisionEnabled": true,
+              "collisionGroup": "tyxi12",
+              "radiusScale": 20.2
+            },
             "points-icon": {
               "loadOptions": {
                 "image": {
@@ -395,34 +381,6 @@
           },
           "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
         }
-      },
-      {
-        "name": "GeoJsonLayer({id: 'vlu4f7d-label-city'})",
-        "props": {
-          "id": "vlu4f7d-label-city",
-
-          "lineMiterLimit": 2,
-          "lineWidthUnits": "pixels",
-          "pointRadiusUnits": "pixels",
-          "rounded": true,
-          "wrapLongitude": false,
-          "parameters": {"depthTest": false, "blendFunc": [770, 772], "blendEquation": 32774},
-          "getFillColor": [18, 147, 154, 255],
-          "visible": true,
-          "cartoLabel": "Stores-label-city",
-          "getTextAlignmentBaseline": "top",
-          "getTextAnchor": "end",
-          "getTextColor": [255, 255, 255, 255],
-          "getTextSize": 18,
-          "filled": true,
-          "getLineWidth": 4.5,
-          "getPointRadius": 20.2,
-          "stroked": true,
-          "highlightColor": [252, 242, 26, 255],
-          "pointType": "text",
-          "getTextPixelOffset": [-40.2, -58.2],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
-        }
       }
     ]
   },
@@ -431,7 +389,7 @@
     "visState": {
       "layers": [
         {
-          "id": "vlu4f7d",
+          "id": "baksj12",
           "type": "point",
           "config": {
             "color": [18, 147, 154],
@@ -512,9 +470,9 @@
     },
     "layers": [
       {
-        "name": "GeoJsonLayer({id: 'vlu4f7d'})",
+        "name": "GeoJsonLayer({id: 'baksj12'})",
         "props": {
-          "id": "vlu4f7d",
+          "id": "baksj12",
           "lineMiterLimit": 2,
           "lineWidthUnits": "pixels",
           "pointRadiusUnits": "pixels",
@@ -569,6 +527,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -631,6 +590,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -694,6 +654,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -786,7 +747,8 @@
           "getPointRadius": 35.8,
           "stroked": false,
           "highlightColor": [252, 242, 26, 255],
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       },
       {
@@ -866,6 +828,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -969,6 +932,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1077,7 +1041,7 @@
     "visState": {
       "layers": [
         {
-          "id": "3btkipv",
+          "id": "kajdi11",
           "type": "tileset",
           "config": {
             "color": [18, 147, 154],
@@ -1090,6 +1054,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1164,9 +1129,9 @@
     },
     "layers": [
       {
-        "name": "CartoTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: 'kajdi11'})",
         "props": {
-          "id": "3btkipv",
+          "id": "kajdi11",
           "cartoLabel": "Layer 1",
           "data": "DATA_TILESET_GEOJSON",
           "lineMiterLimit": 2,
@@ -1188,7 +1153,8 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "geojson",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       }
     ]
@@ -1198,7 +1164,7 @@
     "visState": {
       "layers": [
         {
-          "id": "3btkipv",
+          "id": "91kajsh",
           "type": "tileset",
           "config": {
             "color": [18, 147, 154],
@@ -1211,6 +1177,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1285,9 +1252,9 @@
     },
     "layers": [
       {
-        "name": "CartoTileLayer({id: '3btkipv'})",
+        "name": "CartoTileLayer({id: '91kajsh'})",
         "props": {
-          "id": "3btkipv",
+          "id": "91kajsh",
           "cartoLabel": "Layer 1",
           "data": "DATA_TILESET_BINARY",
           "lineMiterLimit": 2,
@@ -1309,7 +1276,8 @@
           "highlightColor": [252, 242, 26, 255],
           "uniqueIdProperty": "geoid",
           "formatTiles": "binary",
-          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}}
+          "loadOptions": {"fetch": {"headers": {"Authorization": "Bearer API_TOKEN"}}},
+          "pointType": "circle"
         }
       }
     ]
@@ -1332,6 +1300,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1473,6 +1442,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1618,6 +1588,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1757,6 +1728,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
@@ -1821,6 +1793,7 @@
               {
                 "size": 18,
                 "color": [255, 255, 255],
+                "outlineColor": [0, 0, 0],
                 "field": null,
                 "anchor": "start",
                 "offset": [0, 0],
