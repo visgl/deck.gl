@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.5] - Mar 30 2023
+
+- CARTO: PointLabelLayer (#7796)
+- CARTO: data loading performance improvements (#7798)
+
 #### deck.gl [8.9.4] - Mar 22 2023
 
 - (fix) CollisionFilterExtension discard outside clip space (#7777)
