@@ -84,27 +84,13 @@ test('TerrainCover#viewport diffing#geo#tiled', async t => {
     zoom: 0
   });
   let targetLayer = new ScatterplotLayer({
-    tile: {}
+    tile: {bbox: {west: -90, east: 0, south: -40.97989806962013, north: 0}}
   });
 
   await lifecycle.update({viewport, layers: [targetLayer]});
 
   const tc = new TerrainCover(targetLayer);
-  t.notOk(tc.shouldUpdate({viewport}), 'Should not need update');
-  t.notOk(tc.bounds, 'Empty targetLayer does not have bounds');
-  t.notOk(tc.renderTexture, 'Render texture should be empty');
-  t.notOk(tc.pickingTexture, 'Picking texture should be empty');
-
-  targetLayer = new ScatterplotLayer({
-    data: [
-      [-90, -40.97989806962013],
-      [0, 0]
-    ],
-    getPosition: d => d
-  });
-  await lifecycle.update({viewport, layers: [targetLayer]});
-
-  t.ok(tc.shouldUpdate({targetLayer, viewport}), 'Should require update');
+  t.ok(tc.shouldUpdate({viewport}), 'Should require update');
   t.deepEqual(tc.bounds, [128, 192, 256, 256], 'Cartesian bounds');
   t.ok(tc.renderViewport instanceof WebMercatorViewport, 'Render viewport');
   t.is(tc.renderViewport.zoom, 1, 'Render viewport zoom');

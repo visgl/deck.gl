@@ -111,7 +111,7 @@ export class TerrainCover {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
 
-    if (this.tile) {
+    if (this.tile && 'bbox' in this.tile) {
       if (!this.targetBounds) {
         shouldRedraw = true;
         const geoBounds = this.tile.bbox;
