@@ -25,6 +25,7 @@ import type {LayerContext} from './layer-manager';
 
 export default abstract class LayerExtension<OptionsT = unknown> {
   static defaultProps = {};
+  static extensionName = 'LayerExtension';
   opts!: OptionsT;
 
   constructor(opts?: OptionsT) {
