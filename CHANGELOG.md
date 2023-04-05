@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.7] - Apr 5 2023
+
+- Fix component name warning for layer extensions (#7813)
+- Rename extension files to align with class name (#7809)
+- Fix H3ClusterLayer accessors (#7812)
+- (fix)TypeScript: LayerExtension default type (#7808)
+
 #### deck.gl [8.9.6] - Mar 30 2023
 
 - (fix) MapboxOverlay: safeguard for redraw (#7803)
