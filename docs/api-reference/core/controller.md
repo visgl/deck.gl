@@ -35,39 +35,15 @@ The base Controller class supports the following options:
 import {Controller} from 'deck.gl';
 
 class MyController extends Controller {
-  constructor(options = {}) {
-    super(MyViewState, options);
+  constructor(props) {
+    super(props);
   }
 }
 ```
 
-The constructor takes two arguments:
+The constructor takes one argument:
 
-* `ViewState` - a class that implements the following methods:
-  - `getViewportProps()` - returns an object that describes the view state
-  - `getInteractiveState()` - returns an object that contains the internal state of the ongoing interaction
-  - `shortestPathFrom(viewState)` - returns an object that describes another view state that is closest to this view state. This is used by viewport transition when there are multiple equivalent ways to define a view state (e.g. `bearing: 240` and `bearing: -120`)
-  - methods that return a new ViewState with updated props:
-    + `panStart`
-    + `pan`
-    + `panEnd`
-    + `rotateStart`
-    + `rotate`
-    + `rotateEnd`
-    + `zoomStart`
-    + `zoom`
-    + `zoomEnd`
-    + `zoomIn`
-    + `zoomOut`
-    + `moveLeft`
-    + `moveRight`
-    + `moveUp`
-    + `moveDown`
-    + `rotateLeft`
-    + `rotateRight`
-    + `rotateUp`
-    + `rotateDown`
-* `options` (Object) - options and view state props
+* `props` (Object) - contains, among others, EventManager that deals with custom events subscribtion (see below)
 
 
 ##### `handleEvent(event)` {#handleevent}
@@ -123,8 +99,8 @@ Returns `true` if the user is dragging the view.
 import {Controller} from 'deck.gl';
 
 class MyController extends Controller{
-  constructor(options = {}) {
-    super(MyViewState, options);
+  constructor(props) {
+    super(props);
     this.events = ['pointermove'];
   }
 
