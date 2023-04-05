@@ -188,6 +188,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   static defaultProps: DefaultProps = defaultProps;
   static layerName: string = 'Layer';
 
+  static override get componentName() {
+    return Object.prototype.hasOwnProperty.call(this, 'layerName') ? this.layerName : '';
+  }
+
   internalState: LayerState<this> | null = null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
 
