@@ -57,9 +57,16 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
   }
 
   indexToBounds(): Partial<GeoCellLayer['props']> {
+    const {getElevation, getFillColor, getLineColor, getLineWidth} = this.props;
+
     return {
       data: this.state.polygons,
-      getPolygon: d => d.polygon
+      getPolygon: d => d.polygon,
+
+      getElevation: this.getSubLayerAccessor(getElevation),
+      getFillColor: this.getSubLayerAccessor(getFillColor),
+      getLineColor: this.getSubLayerAccessor(getLineColor),
+      getLineWidth: this.getSubLayerAccessor(getLineWidth)
     };
   }
 }
