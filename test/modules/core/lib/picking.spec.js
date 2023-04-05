@@ -69,7 +69,7 @@ class TestMVTLayer extends MVTLayer {
   }
 }
 
-TestMVTLayer.componentName = 'TestMVTLayer';
+TestMVTLayer.layerName = 'TestMVTLayer';
 
 const testMVTLayer = new TestMVTLayer({
   id: 'test-mvt-layer',
