@@ -28,7 +28,7 @@ test(`CartoTileLayer#picking`, async t => {
     }
   }
 
-  TestCartoTileLayer.componentName = 'TestCartoTileLayer';
+  TestCartoTileLayer.layerName = 'TestCartoTileLayer';
 
   await testPickingLayer({
     layer: new TestCartoTileLayer({
