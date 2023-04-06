@@ -25,6 +25,12 @@ import type {LayerContext} from './layer-manager';
 
 export default abstract class LayerExtension<OptionsT = unknown> {
   static defaultProps = {};
+  static extensionName = 'LayerExtension';
+
+  static get componentName() {
+    return Object.prototype.hasOwnProperty.call(this, 'extensionName') ? this.extensionName : '';
+  }
+
   opts!: OptionsT;
 
   constructor(opts?: OptionsT) {

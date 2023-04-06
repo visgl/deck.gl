@@ -366,3 +366,31 @@ test('H3ClusterLayer', t => {
 
   t.end();
 });
+
+/** Verify that accessors are properly wrapped to access the source object */
+test('H3ClusterLayer#accessor', t => {
+  const elevations = [];
+
+  testLayer({
+    Layer: H3ClusterLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: {
+          data,
+          getHexagons: d => d.hexagons,
+          getElevation: d => {
+            const elevation = d.size;
+            elevations.push(elevation);
+            return elevation;
+          }
+        },
+        onAfterUpdate: () => {
+          t.ok(elevations.every(Number.isFinite), 'Elevations populated');
+        }
+      }
+    ]
+  });
+
+  t.end();
+});

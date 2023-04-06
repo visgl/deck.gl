@@ -246,7 +246,7 @@ test('MVTLayer#autoHighlight', async t => {
     }
   }
 
-  TestMVTLayer.componentName = 'TestMVTLayer';
+  TestMVTLayer.layerName = 'TestMVTLayer';
 
   const onAfterUpdate = ({subLayers}) => {
     for (const layer of subLayers) {
@@ -304,7 +304,7 @@ for (const binary of [true, false]) {
       }
     }
 
-    TestMVTLayer.componentName = 'TestMVTLayer';
+    TestMVTLayer.layerName = 'TestMVTLayer';
 
     await testPickingLayer({
       layer: new TestMVTLayer({
@@ -429,7 +429,7 @@ test('MVTLayer#dataInWGS84', async t => {
     }
   }
 
-  TestMVTLayer.componentName = 'TestMVTLayer';
+  TestMVTLayer.layerName = 'TestMVTLayer';
 
   const viewport = new WebMercatorViewport({
     longitude: 0,
