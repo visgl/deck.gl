@@ -36,7 +36,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 import type {Feature, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
-import {BinaryFeatureTypes, binaryToFeatureForAccesor} from './geojson-binary';
+import {BinaryFeatureTypes, binaryToFeatureForAccesor, calculateGlobalToLocalFeatureIds} from './geojson-binary';
 import {
   POINT_LAYER,
   LINE_LAYER,
@@ -359,7 +359,10 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
   private _updateStateBinary({props, changeFlags}): void {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
-    this.setState({layerProps});
+
+    const globalToLocalFeatureIds = calculateGlobalToLocalFeatureIds(props.data);
+
+    this.setState({layerProps, globalToLocalFeatureIds});
   }
 
   private _updateStateJSON({props, changeFlags}): void {
