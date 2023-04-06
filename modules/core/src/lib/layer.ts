@@ -742,7 +742,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number): void {
-    this._disablePickingIndex(objectIndex);
+    // When rendered by a composite layer, the objectIndex may be indexed by all data in the composite layer, but this
+    // layer only renders a subset. So we allow the parent layer to translate the index into the correct one for this layer.
+    if (this.parent) {
+      const transformedIndex = this.parent._getSublayerPickingIndex(objectIndex);
+      this._disablePickingIndex(transformedIndex);
+    } else {
+      this._disablePickingIndex(objectIndex);
+    }
+  }
+
+  protected _getSublayerPickingIndex(objectIndex: number): number {
+    return objectIndex;
   }
 
   // TODO - simplify subclassing interface

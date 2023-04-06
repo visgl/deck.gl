@@ -356,6 +356,10 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     }
   }
 
+  protected _getSublayerPickingIndex(objectIndex: number): number {
+    return this.state.globalToLocalFeatureIds[objectIndex];
+  }
+
   private _updateStateBinary({props, changeFlags}): void {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);

@@ -297,13 +297,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           this._disablePickingIndex(i);
         }
       }
-    } else if (this.parent?.state.binary && this.parent?.state.globalToLocalFeatureIds) {
-      // If data comes from GeoJSON layer using binary, the index stored in picking color refers to the
-      // index of data in the parent GeoJSON layer and needs to be translated to an index in this layer.
-      const localIndex = this.parent.state.globalToLocalFeatureIds[objectIndex];
-      this._disablePickingIndex(localIndex);
     } else {
-      this._disablePickingIndex(objectIndex);
+      super.disablePickingIndex(objectIndex);
     }
   }
 
