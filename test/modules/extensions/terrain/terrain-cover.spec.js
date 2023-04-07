@@ -84,7 +84,12 @@ test('TerrainCover#viewport diffing#geo#tiled', async t => {
     zoom: 0
   });
   let targetLayer = new ScatterplotLayer({
-    tile: {bbox: {west: -90, east: 0, south: -40.97989806962013, north: 0}}
+    tile: {
+      boundingBox: [
+        [-90, -40.97989806962013],
+        [0, 0]
+      ]
+    }
   });
 
   await lifecycle.update({viewport, layers: [targetLayer]});

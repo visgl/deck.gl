@@ -5,11 +5,8 @@ import type {Layer, Viewport} from '@deck.gl/core';
 import {createRenderTarget} from './utils';
 import {joinLayerBounds, makeViewport, getRenderBounds, Bounds} from '../utils/projection-utils';
 
-// TODO - import from loaders when Tileset2D is split out
-type GeoBoundingBox = {west: number; north: number; east: number; south: number};
-type NonGeoBoundingBox = {left: number; top: number; right: number; bottom: number};
-type Tile2DHeader = {
-  bbox: GeoBoundingBox | NonGeoBoundingBox;
+type TileHeader = {
+  boundingBox: [min: number[], max: number[]];
 };
 
 /**
@@ -31,7 +28,7 @@ export class TerrainCover {
   private fbo?: Framebuffer;
   private pickingFbo?: Framebuffer;
   private layers: string[] = [];
-  private tile: Tile2DHeader | null;
+  private tile: TileHeader | null;
   /** Cached version of targetLayer.getBounds() */
   private targetBounds: [number[], number[]] | null = null;
   /** targetBounds in cartesian space */
@@ -111,20 +108,10 @@ export class TerrainCover {
     const targetLayer = this.targetLayer;
     let shouldRedraw = false;
 
-    if (this.tile && 'bbox' in this.tile) {
+    if (this.tile && 'boundingBox' in this.tile) {
       if (!this.targetBounds) {
         shouldRedraw = true;
-        const geoBounds = this.tile.bbox;
-        this.targetBounds =
-          'west' in geoBounds
-            ? [
-                [geoBounds.west, geoBounds.south],
-                [geoBounds.east, geoBounds.north]
-              ]
-            : [
-                [geoBounds.left, geoBounds.bottom],
-                [geoBounds.right, geoBounds.top]
-              ];
+        this.targetBounds = this.tile.boundingBox;
 
         const bottomLeftCommon = viewport.projectPosition(this.targetBounds[0]);
         const topRightCommon = viewport.projectPosition(this.targetBounds[1]);
@@ -212,18 +199,18 @@ export class TerrainCover {
  * Remove layers that do not overlap with the current terrain cover.
  * This implementation only has effect when a TileLayer is overlaid on top of a TileLayer
  */
-function getIntersectingLayers(sourceTile: Tile2DHeader, layers: Layer[]): Layer[] {
+function getIntersectingLayers(sourceTile: TileHeader, layers: Layer[]): Layer[] {
   return layers.filter(layer => {
     const tile = getTile(layer);
     if (tile) {
-      return intersect(sourceTile.bbox, tile.bbox);
+      return intersect(sourceTile.boundingBox, tile.boundingBox);
     }
     return true;
   });
 }
 
 /** If layer is the descendent of a TileLayer, return the corresponding tile. */
-function getTile(layer: Layer): Tile2DHeader | null {
+function getTile(layer: Layer): TileHeader | null {
   while (layer) {
     // @ts-expect-error tile may not exist
     const {tile} = layer.props;
@@ -235,15 +222,9 @@ function getTile(layer: Layer): Tile2DHeader | null {
   return null;
 }
 
-function intersect(
-  b1: GeoBoundingBox | NonGeoBoundingBox,
-  b2: GeoBoundingBox | NonGeoBoundingBox
-): boolean {
-  if ('west' in b1 && 'west' in b2) {
-    return b1.west < b2.east && b2.west < b1.east && b1.south < b2.north && b2.south < b1.north;
-  }
-  if ('left' in b1 && 'left' in b2) {
-    return b1.left < b2.right && b2.left < b1.right && b1.top < b2.bottom && b2.top < b1.bottom;
+function intersect(b1?: [number[], number[]], b2?: [number[], number[]]): boolean {
+  if (b1 && b2) {
+    return b1[0][0] < b2[1][0] && b2[0][0] < b1[1][0] && b1[0][1] < b2[1][1] && b2[0][1] < b1[1][1];
   }
   return false;
 }
