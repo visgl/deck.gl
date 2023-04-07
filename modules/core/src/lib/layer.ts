@@ -748,7 +748,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const transformedIndex = this.parent._getSublayerPickingIndex(objectIndex);
       if (Array.isArray(transformedIndex)) {
         for (const idx of transformedIndex) {
-        this._disablePickingIndex(idx);
+          this._disablePickingIndex(idx);
         }
       } else {
         this._disablePickingIndex(transformedIndex);

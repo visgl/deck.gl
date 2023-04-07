@@ -76,18 +76,18 @@ export function calculatePickingColors(
   return pickingColors;
 }
 
-// Returns an array where each index contains a global feature id and the corresponding value 
+// Returns an array where each index contains a global feature id and the corresponding value
 // is the feature id in the respective layer that feature will be rendered in
 export function calculateGlobalToLocalFeatureIds(geojsonBinary: BinaryFeatures) {
   const {points, lines, polygons} = geojsonBinary;
 
   const globalToLocalFeatureIds: Map<number, number[]> = new Map();
-  const addIds = (globalId: number ,localId: number) => {
+  const addIds = (globalId: number, localId: number) => {
     if (!globalToLocalFeatureIds.has(globalId)) {
       globalToLocalFeatureIds.set(globalId, []);
     }
     globalToLocalFeatureIds.get(globalId)!.push(localId);
-  }
+  };
 
   if (polygons) {
     for (let i = 0; i < polygons.polygonIndices.value.length - 1; i++) {
