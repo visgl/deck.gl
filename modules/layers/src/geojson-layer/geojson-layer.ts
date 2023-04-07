@@ -356,9 +356,9 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     }
   }
 
-  protected _getSublayerPickingIndex(objectIndex: number): number {
+  protected _getSublayerPickingIndex(objectIndex: number) {
     if (this.state.binary) {
-      return this.state.globalToLocalFeatureIds[objectIndex];
+      return this.state.globalToLocalFeatureIds.get(objectIndex);
     } else {
       return objectIndex;
     }

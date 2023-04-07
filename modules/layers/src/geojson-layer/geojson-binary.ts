@@ -81,25 +81,32 @@ export function calculatePickingColors(
 export function calculateGlobalToLocalFeatureIds(geojsonBinary: BinaryFeatures) {
   const {points, lines, polygons} = geojsonBinary;
 
-  const globalToLocalFeatureIds: number[] = [];
+  const globalToLocalFeatureIds: Map<number, number[]> = new Map();
+  const addIds = (globalId: number ,localId: number) => {
+    if (!globalToLocalFeatureIds.has(globalId)) {
+      globalToLocalFeatureIds.set(globalId, []);
+    }
+    globalToLocalFeatureIds.get(globalId)!.push(localId);
+  }
+
   if (polygons) {
     for (let i = 0; i < polygons.polygonIndices.value.length - 1; i++) {
       const startIdx = polygons.polygonIndices.value[i];
       const globalFeatureId = polygons.globalFeatureIds.value[startIdx];
-      globalToLocalFeatureIds[globalFeatureId] = i;
+      addIds(globalFeatureId, i);
     }
   }
   if (lines) {
     for (let i = 0; i < lines.pathIndices.value.length - 1; i++) {
       const startIdx = lines.pathIndices.value[i];
       const globalFeatureId = lines.globalFeatureIds.value[startIdx];
-      globalToLocalFeatureIds[globalFeatureId] = i;
+      addIds(globalFeatureId, i);
     }
   }
   if (points) {
     for (let i = 0; i < points.featureIds.value.length; i++) {
       const globalFeatureId = points.globalFeatureIds.value[points.featureIds.value[i]];
-      globalToLocalFeatureIds[globalFeatureId] = i;
+      addIds(globalFeatureId, i);
     }
   }
 

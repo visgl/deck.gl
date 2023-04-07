@@ -746,13 +746,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // layer only renders a subset. So we allow the parent layer to translate the index into the correct one for this layer.
     if (this.parent) {
       const transformedIndex = this.parent._getSublayerPickingIndex(objectIndex);
-      this._disablePickingIndex(transformedIndex);
+      if (Array.isArray(transformedIndex)) {
+        for (const idx of transformedIndex) {
+        this._disablePickingIndex(idx);
+        }
+      } else {
+        this._disablePickingIndex(transformedIndex);
+      }
     } else {
       this._disablePickingIndex(objectIndex);
     }
   }
 
-  protected _getSublayerPickingIndex(objectIndex: number): number {
+  protected _getSublayerPickingIndex(objectIndex: number): number | number[] {
     return objectIndex;
   }
 
