@@ -21,7 +21,7 @@
 import {project} from '@deck.gl/core';
 import type {Viewport, _ShaderModule as ShaderModule} from '@deck.gl/core';
 
-import type {BrushingExtensionProps} from './brushing';
+import type {BrushingExtensionProps} from './brushing-extension';
 
 type BrushingModuleSettings = {
   // From layer context
