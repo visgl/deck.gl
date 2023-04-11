@@ -79,8 +79,7 @@ export function getDeckInstance({
   } else {
     deckInstance = new Deck(deckProps);
     map.on('remove', () => {
-      deckInstance.finalize();
-      map.__deck = null;
+      removeDeckInstance(map);
     });
   }
 
@@ -105,6 +104,11 @@ function watchMapMove(deck: Deck, map: Map & {__deck?: Deck | null}) {
     }
   };
   map.on('move', _handleMapMove);
+}
+
+export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
+  map.__deck?.finalize();
+  map.__deck = null;
 }
 
 export function getInterleavedProps(currProps: DeckProps) {
