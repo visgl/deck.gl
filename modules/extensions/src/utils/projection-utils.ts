@@ -90,6 +90,7 @@ export function makeViewport(opts: {
   // Geospatial viewports may not be web-mercator
   return isGeospatial
     ? new WebMercatorViewport({
+        id: viewport.id,
         x: border,
         y: border,
         width,
@@ -100,6 +101,7 @@ export function makeViewport(opts: {
         orthographic: true
       })
     : new OrthographicViewport({
+        id: viewport.id,
         x: border,
         y: border,
         width,
