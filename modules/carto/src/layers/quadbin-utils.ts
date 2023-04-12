@@ -5,8 +5,7 @@ const TILE_SIZE = 512;
 
 export function quadbinToOffset(quadbin: bigint): [number, number, number] {
   const {x, y, z} = cellToTile(quadbin);
-  const mask = 1 << z;
-  const scale = TILE_SIZE / mask;
+  const scale = TILE_SIZE >> z;
   return [x * scale, TILE_SIZE - y * scale, scale];
 }
 

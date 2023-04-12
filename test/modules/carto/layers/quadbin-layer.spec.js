@@ -40,7 +40,7 @@ const TEST_DATA = [
     coverage: 0.99,
     expectedBounds: [
       [448, 64],
-      [511.36, 0.6399999999999864]
+      [511.36, 0.6400000000000006]
     ],
     expectedOffset: [448, 64, 64]
   }
