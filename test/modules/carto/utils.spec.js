@@ -1,7 +1,7 @@
 import test from 'tape-promise/tape';
 import {createBinaryProxy} from '@deck.gl/carto/utils';
 
-test.only('createBinaryProxy', async t => {
+test('createBinaryProxy', async t => {
   const binary = {
     numericProps: {temperature: {value: new Float32Array([18, 19, 20, 21]), size: 1}},
     properties: [{name: 'name0'}, {name: 'name1'}, {name: 'name2'}, {name: 'name3'}]
