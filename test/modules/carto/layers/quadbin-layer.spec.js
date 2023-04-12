@@ -1,7 +1,11 @@
 import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import QuadbinLayer from '@deck.gl/carto/layers/quadbin-layer';
-import {quadbinToWorldBounds, getQuadbinPolygon} from '@deck.gl/carto/layers/quadbin-utils';
+import {
+  quadbinToOffset,
+  quadbinToWorldBounds,
+  getQuadbinPolygon
+} from '@deck.gl/carto/layers/quadbin-utils';
 
 const TEST_DATA = [
   {
@@ -10,7 +14,8 @@ const TEST_DATA = [
     expectedBounds: [
       [0, 512],
       [256, 256]
-    ]
+    ],
+    expectedOffset: [0, 512, 256]
   },
   {
     quadbin: 5193776270265024511n, // quadkey '0'
@@ -18,7 +23,8 @@ const TEST_DATA = [
     expectedBounds: [
       [0, 512],
       [253.44, 258.56]
-    ]
+    ],
+    expectedOffset: [0, 512, 256]
   },
   {
     quadbin: 5206653750449537023n, // quadkey 0123
@@ -26,7 +32,8 @@ const TEST_DATA = [
     expectedBounds: [
       [160, 416],
       [191.68, 384.32]
-    ]
+    ],
+    expectedOffset: [160, 416, 32]
   },
   {
     quadbin: 5206161169240293375n, // quadkey 333
@@ -34,7 +41,8 @@ const TEST_DATA = [
     expectedBounds: [
       [448, 64],
       [511.36, 0.6399999999999864]
-    ]
+    ],
+    expectedOffset: [448, 64, 64]
   }
 ];
 
@@ -61,6 +69,15 @@ test('QuadbinLayer', t => {
   });
 
   testLayer({Layer: QuadbinLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('QuadbinLayer#quadbinToOffset', t => {
+  for (const {quadbin, expectedOffset} of TEST_DATA) {
+    const offset = quadbinToOffset(quadbin);
+    t.deepEquals(offset, expectedOffset, 'Quadbin offset calculated');
+  }
 
   t.end();
 });
