@@ -4,13 +4,7 @@ import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
-import {
-  TileLayer,
-  _getURLFromTemplate,
-  _Tile2DHeader as Tile2DHeader,
-  _TileLoadProps as TileLoadProps
-} from '@deck.gl/geo-layers';
-import {TILE_FORMATS} from '../api/maps-api-common';
+import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
