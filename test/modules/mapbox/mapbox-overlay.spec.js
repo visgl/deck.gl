@@ -201,6 +201,36 @@ test('MapboxOverlay#interleaved', t => {
   });
 });
 
+test('MapboxOverlay#interleaved#remove and add', t => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [new ScatterplotLayer({id: 'poi'})],
+    parameters: {
+      depthMask: false,
+      cull: true
+    },
+    useDevicePixels: 1
+  });
+
+  map.addControl(overlay);
+  let deck = overlay._deck;
+  t.ok(deck && deck.animationLoop, 'Deck instance is created');
+  map.removeControl(overlay);
+  t.notOk(deck.animationLoop, 'Deck instance is finalized');
+
+  map.addControl(overlay);
+  deck = overlay._deck;
+  t.ok(deck && deck.animationLoop, 'Deck instance is created');
+  map.removeControl(overlay);
+  t.notOk(deck.animationLoop, 'Deck instance is finalized');
+
+  t.end();
+});
+
 test('MapboxOverlay#interleavedNoInitialLayers', t => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
