@@ -71,9 +71,8 @@ export default class QuadbinTileLayer<
         maxZoom,
         loadOptions: {
           ...this.getLoadOptions(),
-          cartoSpatialTile: {
-            scheme: 'quadbin'
-          }
+          cartoSpatialTile: {scheme: 'quadbin'},
+          mimeType: 'application/vnd.carto-spatial-tile'
         }
       })
     ];
