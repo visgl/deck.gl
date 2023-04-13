@@ -21,8 +21,8 @@ import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import CartoTileLayer from '../layers/carto-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
-import {TILE_FORMATS} from './maps-api-common';
-import {assert} from '../utils';
+import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
+import {assert, createBinaryProxy} from '../utils';
 import {
   CustomMarkersRange,
   MapDataset,
@@ -200,8 +200,9 @@ export function getLayer(
 }
 
 export function layerFromTileDataset(
-  formatTiles: string | null = TILE_FORMATS.MVT,
-  scheme: string
+  formatTiles: TileFormat | null = TILE_FORMATS.MVT,
+  scheme: string,
+  type?: MapType
 ): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
   if (scheme === 'h3') {
     return H3TileLayer;
@@ -227,7 +228,7 @@ function getTileLayer(dataset: MapDataset, basePropMap) {
     }
   } = dataset;
   /* global URL */
-  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles');
+  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') as TileFormat;
 
   return {
     Layer: layerFromTileDataset(formatTiles, scheme),
@@ -301,19 +302,7 @@ function normalizeAccessor(accessor, data) {
       }
 
       const {data, index} = info;
-      const {properties, numericProps} = data;
-      const proxy = new Proxy(properties[index] || {}, {
-        get(target, property, receiver) {
-          if (property in numericProps) {
-            return numericProps[property as string].value[index];
-          }
-          return target[property as string];
-        },
-
-        has(target, property) {
-          return property in numericProps || property in target;
-        }
-      });
+      const proxy = createBinaryProxy(data, index);
       return accessor(proxy);
     };
   }
