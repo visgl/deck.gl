@@ -43,7 +43,12 @@ class MyController extends Controller {
 
 The constructor takes one argument:
 
-* `props` (Object) - contains, among others, EventManager that deals with custom events subscribtion (see below)
+* `props` (Object) - contains the following options: 
+  * `eventManager`- handles events subscriptions
+  * `makeViewPort (viewState)` - creates new `Viewport` based on provided `ViewState`, and current view's `width` and `height`
+  * `onStateChange` callback function
+  * `onViewStateChange` callback function
+  * `timeline` - an instance of `luma.gl` [animation timeline class](https://github.com/visgl/luma.gl/blob/d5bd93ef6bd0a0ff4af7880424286bda269e29a8/dev-docs/RFCs/v7.1/animation-timeline-rfc.md)
 
 
 ##### `handleEvent(event)` {#handleevent}
