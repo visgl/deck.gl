@@ -80,6 +80,11 @@ export class HeightMapBuilder {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
       const bounds = getRenderBounds(this.layersBoundsCommon, viewport);
+      if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
+        this.renderViewport = null;
+        return false;
+      }
+
       this.bounds = bounds;
       this.lastViewport = viewport;
 

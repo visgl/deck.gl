@@ -1,4 +1,4 @@
-import {readPackedFixed64} from './fast-pbf';
+import {readPackedTypedArray} from './fast-pbf';
 import {Indices, IndexScheme} from './spatialjson-utils';
 import {NumericProp, NumericPropKeyValueReader, PropertiesReader} from './carto-tile';
 
@@ -9,7 +9,7 @@ export class IndicesReader {
     return pbf.readFields(IndicesReader._readField, {value: []}, end);
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) readPackedFixed64(pbf, obj);
+    if (tag === 1) readPackedTypedArray(BigUint64Array, pbf, obj);
   }
 }
 

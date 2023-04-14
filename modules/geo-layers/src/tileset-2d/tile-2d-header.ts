@@ -20,9 +20,9 @@ export class Tile2DHeader<DataT = any> {
   layers?: any[] | null; // Layer[] | null
 
   id!: string; // assigned _always_ with result of `getTileId`
-  bbox!: TileBoundingBox; // assigned _always_ with result of `getTileMetadata`
   zoom!: number; // assigned _always_ with result of `getTileZoom`
   userData?: Record<string, any>; // _may be_ assigned with result of `getTileMetadata`
+  boundingBox!: [min: number[], max: number[]]; // assigned _always_ with bbox from `getTileMetadata`
 
   private _abortController: AbortController | null;
   private _loader: Promise<void> | undefined;
@@ -30,6 +30,7 @@ export class Tile2DHeader<DataT = any> {
   private _isLoaded: boolean;
   private _isCancelled: boolean;
   private _needsReload: boolean;
+  private _bbox!: TileBoundingBox;
 
   constructor(index: TileIndex) {
     this.index = index;
@@ -46,6 +47,30 @@ export class Tile2DHeader<DataT = any> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
+  }
+
+  /** @deprecated use `boundingBox` instead */
+  get bbox(): TileBoundingBox {
+    return this._bbox;
+  }
+
+  // TODO - remove in v9
+  set bbox(value: TileBoundingBox) {
+    // Only set once from `Tileset2D.getTileMetadata`
+    if (this._bbox) return;
+
+    this._bbox = value;
+    if ('west' in value) {
+      this.boundingBox = [
+        [value.west, value.south],
+        [value.east, value.north]
+      ];
+    } else {
+      this.boundingBox = [
+        [value.left, value.top],
+        [value.right, value.bottom]
+      ];
+    }
   }
 
   get data(): Promise<DataT | null> | DataT | null {
