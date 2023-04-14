@@ -76,10 +76,17 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       height: number;
     };
     lastRequestId: number;
-
     _nextRequestId: number;
+    /** TODO: Change any => setTimeout return type. Different between Node and browser... */
     _timeoutId: any;
+    loadCounter: number;
   };
+
+  /** Returns true if all async resources are loaded */
+  get isLoaded(): boolean {
+    // Track the explicit loading done by this layer
+    return Boolean(this.state) && this.state.loadCounter === 0 && super.isLoaded;
+  }
 
   /** Lets deck.gl know that we want viewport change events */
   override shouldUpdateState(): boolean {
@@ -90,6 +97,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     // intentionally empty, initialization is done in updateState
     this.state._nextRequestId = 0;
     this.state.lastRequestId = -1;
+    this.state.loadCounter = 0;
   }
 
   override updateState({changeFlags, props, oldProps}: UpdateParameters<this>): void {
@@ -167,6 +175,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   async _loadMetadata(): Promise<void> {
     const {imageSource} = this.state;
     try {
+      this.state.loadCounter++;
       const metadata = await imageSource.getMetadata();
 
       // If a request takes a long time, it may no longer be expected
@@ -175,6 +184,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       }
     } catch (error) {
       this.getCurrentLayer()?.props.onMetadataLoadError(error as Error);
+    } finally {
+      this.state.loadCounter--;
     }
   }
 
@@ -209,6 +220,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     try {
+      this.state.loadCounter++;
       this.props.onImageLoadStart(requestId);
 
       const image = await this.state.imageSource.getImage(requestParams);
@@ -227,6 +239,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     } catch (error) {
       this.raiseError(error as Error, 'Load image');
       this.getCurrentLayer()?.props.onImageLoadError(requestId, error as Error);
+    } finally {
+      this.state.loadCounter--;
     }
   }
 
