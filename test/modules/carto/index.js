@@ -4,6 +4,7 @@ import './api/parseMap.spec';
 import './api/maps-api-client.spec';
 import './carto-layer.spec';
 import './config.spec';
+import './utils.spec';
 import './layers/carto-tile-layer.spec';
 import './layers/carto-vector-tile.spec';
 import './layers/h3-tile-layer.spec';

@@ -1,4 +1,4 @@
-import {readPackedDouble} from './fast-pbf';
+import {readPackedTypedArray} from './fast-pbf';
 
 // KeyValueObject ========================================
 interface KeyValueObject {
@@ -43,7 +43,7 @@ class DoublesReader {
     return {value: new Float32Array(value), size};
   }
   static _readField(this: void, tag: number, obj, pbf) {
-    if (tag === 1) readPackedDouble(pbf, obj);
+    if (tag === 1) readPackedTypedArray(Float64Array, pbf, obj);
     else if (tag === 2) obj.size = pbf.readVarint(true);
   }
 }
@@ -92,7 +92,7 @@ class NumericPropReader {
     return pbf.readFields(NumericPropReader._readField, {value: []}, end);
   }
   static _readField(this: void, tag: number, obj: NumericProp, pbf) {
-    if (tag === 1) readPackedDouble(pbf, obj);
+    if (tag === 1) readPackedTypedArray(Float64Array, pbf, obj);
   }
 }
 
