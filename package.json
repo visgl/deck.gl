@@ -20,11 +20,11 @@
     "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test"
   },
   "resolutions": {
-    "@math.gl/core": "4.0.0-alpha.2",
-    "@math.gl/culling": "4.0.0-alpha.2",
-    "@math.gl/polygon": "4.0.0-alpha.2",
-    "@math.gl/proj4": "4.0.0-alpha.2",
-    "@math.gl/web-mercator": "4.0.0-alpha.2",
+    "@math.gl/core": "4.0.0-alpha.3",
+    "@math.gl/culling": "4.0.0-alpha.3",
+    "@math.gl/polygon": "4.0.0-alpha.3",
+    "@math.gl/proj4": "4.0.0-alpha.3",
+    "@math.gl/web-mercator": "4.0.0-alpha.3",
     "escaper": "3.0.6"
   },
   "scripts": {
@@ -57,7 +57,7 @@
     "@loaders.gl/csv": "^3.3.3",
     "@loaders.gl/polyfills": "^3.3.3",
     "@luma.gl/test-utils": "^8.5.16",
-    "@math.gl/proj4": "4.0.0-alpha.2",
+    "@math.gl/proj4": "4.0.0-alpha.3",
     "@probe.gl/bench": "^3.5.4",
     "@probe.gl/test-utils": "^3.5.4",
     "@types/react": "^18.0.0",

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@loaders.gl/obj": "^3.3.3",
-    "@math.gl/core": "4.0.0-alpha.2",
+    "@math.gl/core": "4.0.0-alpha.3",
     "deck.gl": "^8.8.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
