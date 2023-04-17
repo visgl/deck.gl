@@ -46,7 +46,8 @@ export default class RasterTileLayer<
 
   renderLayers(): Layer | null | LayersList {
     const {data, tileJSON} = this.state;
-    const maxZoom = parseInt(tileJSON?.maxresolution);
+    const minZoom = parseInt(tileJSON?.minzoom);
+    const maxZoom = parseInt(tileJSON?.maxzoom);
     return [
       new SpatialIndexTileLayer(this.props, {
         id: `raster-tile-layer-${this.props.id}`,
@@ -54,9 +55,8 @@ export default class RasterTileLayer<
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
-        // HACK while server broken
-        minZoom: 7,
-        maxZoom: 7
+        minZoom,
+        maxZoom
       })
     ];
   }
