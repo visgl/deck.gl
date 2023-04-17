@@ -493,7 +493,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, texture, mapping, props: fontSettings},
       styleVersion
     } = this.state;
 
@@ -515,7 +515,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       backgroundPadding,
       background,
       billboard,
-      fontSettings,
       outlineWidth,
       outlineColor,
       sizeScale,
