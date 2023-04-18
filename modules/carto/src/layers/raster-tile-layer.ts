@@ -3,13 +3,11 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  UpdateParameters,
-  DefaultProps
+  UpdateParameters
 } from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {hexToBigInt} from 'quadbin';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile.index.q;

@@ -20,7 +20,7 @@ export class BandReader {
     return pbf.readFields(BandReader._readField, {name: '', type: '', data: null}, end);
   }
 
-  static _readField(tag, obj, pbf) {
+  static _readField(this: void, tag, obj, pbf) {
     if (tag === 1) obj.name = pbf.readString();
     else if (tag === 2) obj.type = pbf.readString();
     else if (tag === 3) {
@@ -38,7 +38,7 @@ export class TileReader {
   static read(pbf, end) {
     return pbf.readFields(TileReader._readField, {blockWidth: 0, blockHeight: 0, bands: []}, end);
   }
-  static _readField(tag, obj, pbf) {
+  static _readField(this: void, tag, obj, pbf) {
     if (tag === 1) obj.blockWidth = pbf.readVarint();
     else if (tag === 2) obj.blockHeight = pbf.readVarint();
     else if (tag === 3) obj.bands.push(BandReader.read(pbf, pbf.readVarint() + pbf.pos));

@@ -65,12 +65,12 @@ class RasterColumnLayer extends ColumnLayer {
 }
 
 /** All properties supported by RasterLayer. */
-export type RasterLayerProps<DataT = any> = _RasterLayerProps<DataT> &
+export type RasterLayerProps<DataT = any> = _RasterLayerProps &
   ColumnLayerProps<DataT> &
   CompositeLayerProps;
 
 /** Properties added by RasterLayer. */
-type _RasterLayerProps<DataT> = {
+type _RasterLayerProps = {
   /**
    * Quadbin index of tile
    */

@@ -1,4 +1,3 @@
-import {hexToBigInt, getResolution} from 'quadbin';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {TileReader} from './carto-raster-tile';
@@ -34,7 +33,7 @@ function parseCartoRasterTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions)
   const {bands, blockHeight, blockWidth} = tile;
   const numericProps = {};
   for (let i = 0; i < bands.length; i++) {
-    const {name, type, data} = bands[i];
+    const {name, data} = bands[i];
     numericProps[name] = data;
   }
   return {blockWidth, blockHeight, cells: {numericProps, properties: []}};

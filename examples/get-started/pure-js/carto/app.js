@@ -7,9 +7,8 @@ setDefaultCredentials({
   accessToken: 'XXX'
 });
 
-let map;
 // Add basemap for context.
-map = new maplibregl.Map({container: 'map', style: BASEMAP.VOYAGER, interactive: false});
+const map = new maplibregl.Map({container: 'map', style: BASEMAP.VOYAGER, interactive: false});
 
 new Deck({
   canvas: 'deck-canvas',
