@@ -373,11 +373,7 @@ async function _fetchDataUrl({
     localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
   }
 
-  let metadata: MapInstantiation;
-  let url: string | null = null;
-  let mapFormat: Format | undefined;
-
-  metadata = await mapInstantiation({
+  const metadata = await mapInstantiation({
     type,
     source,
     connection,
@@ -390,6 +386,9 @@ async function _fetchDataUrl({
     aggregationResLevel,
     queryParameters
   });
+  let url: string | null = null;
+  let mapFormat: Format | undefined;
+
   if (format) {
     mapFormat = format;
     url = getUrlFromMetadata(metadata, format);

@@ -12,7 +12,9 @@ import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
 
 export const renderSubLayers = props => {
-  return new RasterLayer(props);
+  const tileIndex = props.tile.index.q;
+  if (!tileIndex) return null;
+  return new RasterLayer(props, {tileIndex});
 };
 
 /** All properties supported by RasterTileLayer. */

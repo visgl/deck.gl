@@ -70,9 +70,14 @@ export type RasterLayerProps<DataT = any> = _RasterLayerProps<DataT> &
   CompositeLayerProps;
 
 /** Properties added by RasterLayer. */
-type _RasterLayerProps<DataT> = {};
+type _RasterLayerProps<DataT> = {
+  /**
+   * Quadbin index of tile
+   */
+  tileIndex: bigint;
+};
 
-// Adapter layer arounc RasterColumnLayer that converts data & accessors into correct format
+// Adapter layer around RasterColumnLayer that converts data & accessors into correct format
 export default class RasterLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
   Required<RasterLayerProps<DataT>> & ExtraProps
 > {
@@ -81,17 +86,22 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
 
   renderLayers(): Layer | null | LayersList {
     // Rendering props underlying layer
-    const {data, getElevation, getFillColor, getLineColor, getLineWidth, updateTriggers} =
-      this.props;
-    // @ts-ignore
-    const {blockWidth, blockHeight} = data;
+    const {
+      data,
+      getElevation,
+      getFillColor,
+      getLineColor,
+      getLineWidth,
+      tileIndex,
+      updateTriggers
+    } = this.props;
+    const {blockWidth, blockHeight} = data as unknown as Raster;
     assert(
       blockWidth === blockHeight,
       `blockWidth (${blockWidth}) must equal blockHeight (${blockHeight})`
     );
 
-    // @ts-ignore
-    const [xOffset, yOffset, scale] = quadbinToOffset(this.props.tile.index.q);
+    const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
     const offset = [xOffset, yOffset, scale / blockWidth];
 
     // Filled Column Layer
@@ -109,7 +119,6 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       }),
       {
         data: {
-          // @ts-ignore
           data, // Pass through data for getSubLayerAccessor()
           length: blockWidth * blockHeight
         },
@@ -127,7 +136,6 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
     return (object, info) => {
       const {data, index} = info;
       const binaryData = (data as unknown as {data: Raster}).data;
-
       const proxy = createBinaryProxy(binaryData.cells, index);
       // @ts-ignore (TS2349) accessor is always function
       return accessor({properties: proxy}, info);

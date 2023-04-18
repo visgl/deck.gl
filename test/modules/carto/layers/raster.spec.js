@@ -6,7 +6,7 @@ import CartoRasterTileLoader from '@deck.gl/carto/layers/schema/carto-raster-til
 import binaryRasterTileData from '../data/binaryRasterTile.json'; // tile 487624ffffffffff
 const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
 
-test.only('Parse Carto Raster Tile', async t => {
+test('Parse Carto Raster Tile', async t => {
   const converted = CartoRasterTileLoader.parseSync(BINARY_RASTER_TILE, {});
   const {numericProps} = converted.cells;
 

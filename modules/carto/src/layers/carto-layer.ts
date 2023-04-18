@@ -295,12 +295,6 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
       return [MVTLayer, props];
     }
 
-    // HACK
-    data.tiles[0] = data.tiles[0].replace(
-      'https://gcp-us-east1-11.dev.api.carto.com',
-      'http://localhost:8080/cartoapi'
-    );
-
     /* global URL */
     const tileUrl = new URL(data.tiles[0]);
     props.formatTiles =

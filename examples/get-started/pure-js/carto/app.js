@@ -3,8 +3,7 @@ import {Deck} from '@deck.gl/core';
 import {CartoLayer, setDefaultCredentials, BASEMAP, MAP_TYPES} from '@deck.gl/carto';
 
 setDefaultCredentials({
-  apiBaseUrl: '/cartoapi',
-  // apiBaseUrl: 'https://gcp-us-east1-11.dev.api.carto.com',
+  apiBaseUrl: 'https://gcp-us-east1-11.dev.api.carto.com',
   accessToken: 'XXX'
 });
 

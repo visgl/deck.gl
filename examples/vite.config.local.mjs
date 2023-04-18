@@ -25,20 +25,7 @@ export default defineConfig(async () => {
     },
     server: {
       open: true,
-      port: 8080,
-      proxy: {
-        '/cartoapi': {
-          target: 'https://gcp-us-east1-11.dev.api.carto.com',
-          changeOrigin: true,
-          rewrite: path => path.replace(/^\/cartoapi/, ''),
-          // https://stackoverflow.com/questions/64677212/how-to-configure-proxy-in-vite
-          configure: proxy => {
-            proxy.on('proxyRes', proxyRes => {
-              proxyRes.headers['cache-control'] = 'public,max-age=100000,must-revalidate';
-            });
-          }
-        }
-      }
+      port: 8080
     },
     optimizeDeps: {
       esbuildOptions: {target: 'es2020'}

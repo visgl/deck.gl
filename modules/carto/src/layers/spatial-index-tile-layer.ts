@@ -38,13 +38,6 @@ export default class SpatialIndexTileLayer<
       this.setState({tileset: null});
     }
 
-    const stats = document.getElementById('stats');
-    if (this.state.tileset && stats) {
-      const visible = this.state.tileset.tiles.filter(t => t.isVisible && t.content);
-      const count = visible.reduce((acc, tile) => acc + 256 * 256, 0);
-      stats.innerHTML = `Cells: ${count}`;
-    }
-
     super.updateState(params);
   }
 
