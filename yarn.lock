@@ -2922,6 +2922,13 @@
   resolved "https://registry.yarnpkg.com/@mapbox/point-geometry/-/point-geometry-0.1.0.tgz#8a83f9335c7860effa2eeeca254332aa0aeed8f2"
   integrity sha1-ioP5M1x4YO/6Lu7KJUMyqgru2PI=
 
+"@mapbox/tile-cover@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@mapbox/tile-cover/-/tile-cover-3.0.1.tgz#ad0dbe69d02e4e9ff74bf228b3ee8fa533034210"
+  integrity sha512-R8aoFY/87HWBOL9E2eBqzOY2lpfWYXCcTNgBpIxAv67rqQeD4IfnHD0iPXg/Z1cqXrklegEYZCp/7ZR/RsWqBQ==
+  dependencies:
+    tilebelt "^1.0.1"
+
 "@mapbox/tiny-sdf@^1.1.0":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@mapbox/tiny-sdf/-/tiny-sdf-1.1.1.tgz#16a20c470741bfe9191deb336f46e194da4a91ff"
@@ -10350,10 +10357,12 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.3.tgz#3aeeffc91967ef6e35c0e488ef46fb296ab76aad"
   integrity sha512-qxXIEh4pCGfHICj1mAJQ2/2XVZkjCDTcEgfoSQxc/fYivUZxTkk7L3bDBJSoNrEzXI17oUO5Dp07ktqE5KzczA==
 
-quadbin@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/quadbin/-/quadbin-0.1.2.tgz#7af916bcdb4dbbbb2722b076906b9dab25bd6647"
-  integrity sha512-tARFTuto2M11HqBTiVAEkagfTlkf+8dHfqiSG+yEYNo7Na4pvsjBLAkrdysp+AUnqSg8ZwHPigtK7u4CmaIySw==
+quadbin@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/quadbin/-/quadbin-0.1.8.tgz#381b201d3c830d245ed98748264d77c61cc29d78"
+  integrity sha512-vepXGmk3A3yulL7HmUsGnz3njKLuAoiHLln5RbxOa3hqiX76r5AQxpguTs5cKU/4t6j74nO3++KGqK00gFeihQ==
+  dependencies:
+    "@mapbox/tile-cover" "3.0.1"
 
 querystring@0.2.0:
   version "0.2.0"
@@ -11923,6 +11932,11 @@ through@2.3.4:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.4.tgz#495e40e8d8a8eaebc7c275ea88c2b8fc14c56455"
   integrity sha1-SV5A6Nio6uvHwnXqiMK4/BTFZFU=
+
+tilebelt@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/tilebelt/-/tilebelt-1.0.1.tgz#3bbf7113b3fec468efb0d9148f4bb71ef126a21a"
+  integrity sha512-cxHzpa5JgsugY9NUVRH43gPaGJw/29LecAn4X7UGOP64+kB8pU4VQ3bIhSyfb5Mk4jDxwl3yk330L/EIhbJ5aw==
 
 tinyqueue@^2.0.0, tinyqueue@^2.0.3:
   version "2.0.3"

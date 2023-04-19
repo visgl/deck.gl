@@ -46,7 +46,7 @@
     "h3-js": "^3.7.0",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1",
-    "quadbin": "^0.1.2"
+    "quadbin": "^0.1.8"
   },
   "devDependencies": {
     "@loaders.gl/schema": "^3.3.3",
