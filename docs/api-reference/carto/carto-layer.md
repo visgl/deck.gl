@@ -81,8 +81,11 @@ function App({viewState}) {
   const layer = new CartoLayer({
     type: MAP_TYPES.RASTER,
     connection: 'bigquery',
-    data: 'cartobq.testtables.raster',
-    getFillColor: d => [d.properties.temperature, 0, 0]
+    data: 'cartobq.public_account.temperature_raster',
+    getFillColor: d => {
+      const {band_1} = d.properties;
+      return [10 * (band_1 - 20), 0, 300 - 5 * band_1];
+    }
   })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
