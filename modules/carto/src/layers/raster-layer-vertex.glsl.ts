@@ -1,5 +1,5 @@
-export default `#version 300 es
-
+export default `\
+#version 300 es
 #define SHADER_NAME raster-layer-vertex-shader
 
 in vec3 positions;
