@@ -95,6 +95,8 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       tileIndex,
       updateTriggers
     } = this.props;
+    if (!data || !tileIndex) return null;
+
     const {blockWidth, blockHeight} = data as unknown as Raster;
     assert(
       blockWidth === blockHeight,

@@ -10,7 +10,7 @@ import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 
 export const renderSubLayers = props => {
-  const tileIndex = props.tile.index.q;
+  const tileIndex = props.tile?.index?.q;
   if (!tileIndex) return null;
   return new RasterLayer(props, {tileIndex});
 };
