@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.8] - Apr 20 2023
+
+- CARTO: Implement raster rendering (#7843)
+- CARTO: Bump quadbin library to 0.1.8 (#7845)
+- CARTO: preparation for raster changes (#7829)
+
 #### deck.gl [8.9.7] - Apr 5 2023
 
 - Fix component name warning for layer extensions (#7813)
