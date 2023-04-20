@@ -1,9 +1,9 @@
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {bigIntToHex, cellToParent, cellToTile, getResolution, tileToCell, Quadbin} from 'quadbin';
+import {bigIntToHex, cellToParent, cellToTile, getResolution, tileToCell} from 'quadbin';
 
 // For calculations bigint representation is used, but
 // for constructing URL also provide the hexidecimal value
-type QuadbinTileIndex = {q: Quadbin; i?: string};
+type QuadbinTileIndex = {q: bigint; i?: string};
 
 export default class QuadbinTileset2D extends Tileset2D {
   // @ts-expect-error for spatial indices, TileSet2d should be parametrized by TileIndexT
