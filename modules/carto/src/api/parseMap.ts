@@ -217,7 +217,7 @@ function createChannelProps(
     );
   }
 
-  if (heightField) {
+  if (heightField && visConfig.enable3d) {
     result.getElevation = getSizeAccessor(
       heightField,
       // @ts-ignore

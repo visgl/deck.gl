@@ -17,7 +17,8 @@ export const DEFAULT_MAPS_URL_FORMAT = {
 export const MAP_TYPES = {
   QUERY: 'query',
   TABLE: 'table',
-  TILESET: 'tileset'
+  TILESET: 'tileset',
+  RASTER: 'raster'
 } as const;
 export type MapType = ValuesOf<typeof MAP_TYPES>;
 export const COLUMNS_SUPPORT: MapType[] = [MAP_TYPES.TABLE];
