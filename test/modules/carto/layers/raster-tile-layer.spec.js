@@ -11,7 +11,18 @@ const TILEJSON = {
   tiles: TILES
 };
 const TILE_INDEX = 5234261499580514303n;
+
 const BINARY_RASTER_TILE = new Uint8Array(binaryRasterTileData).buffer;
+
+test('RasterTileLayer', async t => {
+  const testCases = generateLayerTests({
+    Layer: RasterTileLayer,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+  await testLayerAsync({Layer: RasterTileLayer, testCases, onError: t.notOk});
+  t.end();
+});
 
 test('RasterTileLayer tilejson', async t => {
   const testCases = [
