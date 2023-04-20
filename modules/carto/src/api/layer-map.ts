@@ -21,6 +21,7 @@ import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
 import CartoTileLayer from '../layers/carto-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
+import RasterTileLayer from '../layers/raster-tile-layer';
 import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
 import {assert, createBinaryProxy} from '../utils';
 import {
@@ -204,13 +205,16 @@ export function layerFromTileDataset(
   scheme: string,
   type?: MapType
 ): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
+  if (type === 'raster') {
+    return RasterTileLayer;
+  }
   if (scheme === 'h3') {
     return H3TileLayer;
   }
   if (scheme === 'quadbin') {
     return QuadbinTileLayer;
   }
-  if (formatTiles === TILE_FORMATS.MVT) {
+  if (formatTiles === 'mvt') {
     return MVTLayer;
   }
 

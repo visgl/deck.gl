@@ -9,6 +9,7 @@ import './layers/carto-tile-layer.spec';
 import './layers/carto-vector-tile.spec';
 import './layers/h3-tile-layer.spec';
 import './layers/h3-tileset-2d.spec';
+import './layers/raster.spec';
 import './layers/spatialjson.spec';
 import './layers/point-label-layer.spec';
 import './layers/quadbin-layer.spec';

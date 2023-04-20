@@ -300,7 +300,7 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
     props.formatTiles =
       props.formatTiles || (tileUrl.searchParams.get('formatTiles') as TileFormat);
 
-    return [layerFromTileDataset(props.formatTiles, data.scheme), props];
+    return [layerFromTileDataset(props.formatTiles, data.scheme, props.type), props];
   }
 
   renderLayers(): Layer | null {

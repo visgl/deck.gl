@@ -69,6 +69,29 @@ function App({viewState}) {
 }
 ```
 
+### Raster data (experimental)
+
+The CARTO platform supports storing data in raster format. When the `CartoLayer` is created with type `MAP_TYPES.RASTER` data will be loaded as tiled raster data, and a layer derived from [`ColumnLayer`](../layers/column-layer.md) will be created and a subset of properties will be inherited.
+
+```js
+import DeckGL from '@deck.gl/react';
+import {CartoLayer, MAP_TYPES} from '@deck.gl/carto';
+
+function App({viewState}) {
+  const layer = new CartoLayer({
+    type: MAP_TYPES.RASTER,
+    connection: 'bigquery',
+    data: 'cartobq.public_account.temperature_raster',
+    getFillColor: d => {
+      const {band_1} = d.properties;
+      return [10 * (band_1 - 20), 0, 300 - 5 * band_1];
+    }
+  })
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+}
+```
+
 ## Installation
 
 To install the dependencies from NPM:
@@ -123,6 +146,7 @@ Required. Data type. Possible values are:
 - `MAP_TYPES.QUERY`, if `data` is a SQL query.
 - `MAP_TYPES.TILESET`, if `data` is a tileset name.
 - `MAP_TYPES.TABLE`, if `data` is a dataset name. Only supported with API v3.
+- `MAP_TYPES.RASTER`, if `data` is a raster name. Experimental, only supported with API v3.
 
 ##### `connection` (String, optional) {#connection}
 
