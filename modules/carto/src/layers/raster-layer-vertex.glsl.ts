@@ -32,7 +32,7 @@ void main(void) {
   vec2 common_position = offset.xy;
   float scale = offset.z;
 
-  float yIndex = -floor(float(gl_InstanceID) / 256.0);
+  float yIndex = - float(gl_InstanceID / 256);
   float xIndex = float(gl_InstanceID) + (yIndex * 256.0);
   common_position += scale * vec2(xIndex, yIndex);
 
