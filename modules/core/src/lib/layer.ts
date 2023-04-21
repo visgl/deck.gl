@@ -752,18 +752,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
 
     const colors = pickingColors || instancePickingColors;
-    const binaryData = this._getBinaryData();
-    const externalColorAttribute = binaryData?.attributes?.[colors.id];
+    const data = this.props.data as LayerData<any>;
+    if (!('attributes' in data)) {
+      this._disablePickingIndex(objectIndex);
+      return;
+    }
 
+    const externalColorAttribute = data.attributes?.[colors.id];
     if (
-      binaryData &&
       externalColorAttribute &&
       'value' in externalColorAttribute &&
       externalColorAttribute.value
     ) {
       const values = externalColorAttribute.value;
       const objectColor = this.encodePickingColor(objectIndex);
-      for (let index = 0; index < binaryData.length; index++) {
+      for (let index = 0; index < data.length; index++) {
         const i = colors.getVertexOffset(index);
         if (
           values[i] === objectColor[0] &&
@@ -1265,19 +1268,5 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore TS2531 this method can only be called internally with internalState assigned
     this._diffProps(this.props, this.internalState.getOldProps());
     this.setNeedsUpdate();
-  }
-
-  private _getBinaryData():
-    | {
-        length: number;
-        attributes?: Record<string, TypedArray | Buffer | BinaryAttribute>;
-      }
-    | undefined {
-    const data = this.props.data as LayerData<any>;
-    if ('length' in data) {
-      return data;
-    }
-
-    return undefined;
   }
 }
