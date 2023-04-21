@@ -768,6 +768,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           values[i + 2] === objectColor[2]
         ) {
           this._disablePickingIndex(index);
+          break;
         }
       }
     } else {
