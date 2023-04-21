@@ -48,7 +48,7 @@ import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
-import type {NumericArray, TypedArray} from '../types/types';
+import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
