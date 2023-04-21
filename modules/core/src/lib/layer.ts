@@ -747,16 +747,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
-
-    const colors = pickingColors || instancePickingColors;
     const data = this.props.data as LayerData<any>;
     if (!('attributes' in data)) {
       this._disablePickingIndex(objectIndex);
       return;
     }
 
-    const externalColorAttribute = data.attributes?.[colors.id];
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+    const externalColorAttribute = colors && data.attributes && data.attributes[colors.id];
     if (
       externalColorAttribute &&
       'value' in externalColorAttribute &&
