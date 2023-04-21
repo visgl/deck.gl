@@ -298,7 +298,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }
       }
     } else {
-      this._disablePickingIndex(objectIndex);
+      super.disablePickingIndex(objectIndex);
     }
   }
 
