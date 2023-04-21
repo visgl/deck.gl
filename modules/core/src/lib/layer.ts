@@ -52,7 +52,6 @@ import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
-import {BinaryAttribute} from './attribute/attribute';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
