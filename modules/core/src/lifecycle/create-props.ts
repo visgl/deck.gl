@@ -265,10 +265,9 @@ function getOwnProperty(object, prop) {
 }
 
 function getComponentName(componentClass) {
-  const componentName =
-    getOwnProperty(componentClass, 'layerName') || getOwnProperty(componentClass, 'componentName');
+  const componentName = componentClass.componentName;
   if (!componentName) {
-    log.once(0, `${componentClass.name}.componentName not specified`)();
+    log.warn(`${componentClass.name}.componentName not specified`)();
   }
   return componentName || componentClass.name;
 }

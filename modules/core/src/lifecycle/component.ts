@@ -10,7 +10,7 @@ import {createProps} from './create-props';
 
 let counter = 0;
 
-export type StatefulComponentProps<PropsT> = PropsT & {
+export type StatefulComponentProps<PropsT extends {}> = PropsT & {
   id: string;
   [COMPONENT_SYMBOL]: Component<PropsT>;
   [PROP_TYPES_SYMBOL]: Record<string, PropType>;
