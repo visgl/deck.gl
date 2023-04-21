@@ -50,8 +50,9 @@ import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
-import type {LayerProps} from '../types/layer-props';
+import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
+import type {BinaryAttribute} from './attribute/attribute';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -745,8 +746,34 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
-  disablePickingIndex(objectIndex: number): void {
-    this._disablePickingIndex(objectIndex);
+  disablePickingIndex(objectIndex: number) {
+    const data = this.props.data as LayerData<any>;
+    if (!('attributes' in data)) {
+      this._disablePickingIndex(objectIndex);
+      return;
+    }
+
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+    const externalColorAttribute =
+      colors && data.attributes && (data.attributes[colors.id] as BinaryAttribute);
+    if (externalColorAttribute && externalColorAttribute.value) {
+      const values = externalColorAttribute.value;
+      const objectColor = this.encodePickingColor(objectIndex);
+      for (let index = 0; index < data.length; index++) {
+        const i = colors.getVertexOffset(index);
+        if (
+          values[i] === objectColor[0] &&
+          values[i + 1] === objectColor[1] &&
+          values[i + 2] === objectColor[2]
+        ) {
+          this._disablePickingIndex(index);
+        }
+      }
+    } else {
+      this._disablePickingIndex(objectIndex);
+    }
   }
 
   // TODO - simplify subclassing interface

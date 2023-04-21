@@ -325,7 +325,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         }
       }
     } else {
-      this._disablePickingIndex(objectIndex);
+      super.disablePickingIndex(objectIndex);
     }
   }
 
