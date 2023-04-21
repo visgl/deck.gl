@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.9] - Apr 21 2023
+
+- TerrainExtension supports Tile3DLayer (#7795)
+
 #### deck.gl [8.9.8] - Apr 20 2023
 
 - CARTO: Implement raster rendering (#7843)
