@@ -746,21 +746,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const data = this.props.data as LayerData<any>;
     if (!('attributes' in data)) {
       this._disablePickingIndex(objectIndex);
       return;
     }
 
+    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
-    const externalColorAttribute = colors && data.attributes && data.attributes[colors.id];
-    if (
-      externalColorAttribute &&
-      'value' in externalColorAttribute &&
-      externalColorAttribute.value
-    ) {
+    const externalColorAttribute =
+      colors && data.attributes && (data.attributes[colors.id] as BinaryAttribute);
+    if (externalColorAttribute && externalColorAttribute.value) {
       const values = externalColorAttribute.value;
       const objectColor = this.encodePickingColor(objectIndex);
       for (let index = 0; index < data.length; index++) {
