@@ -89,7 +89,12 @@ async function requestJson<T = unknown>({
   errorContext
 }: RequestParams): Promise<T> {
   const response = await request({method, url, headers, accessToken, body, errorContext});
-  const json = await response.json();
+  let json;
+  try {
+    json = await response.json();
+  } catch (error) {
+    json = {error: ''};
+  }
 
   if (!response.ok) {
     throw new CartoAPIError(json.error, errorContext, response);

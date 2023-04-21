@@ -3,13 +3,17 @@ import {cellToTile} from 'quadbin';
 
 const TILE_SIZE = 512;
 
-export function quadbinToWorldBounds(quadbin: bigint, coverage: number): [number[], number[]] {
+export function quadbinToOffset(quadbin: bigint): [number, number, number] {
   const {x, y, z} = cellToTile(quadbin);
-  const mask = 1 << z;
-  const scale = mask / TILE_SIZE;
+  const scale = TILE_SIZE / (1 << z);
+  return [x * scale, TILE_SIZE - y * scale, scale];
+}
+
+export function quadbinToWorldBounds(quadbin: bigint, coverage: number): [number[], number[]] {
+  const [xOffset, yOffset, scale] = quadbinToOffset(quadbin);
   return [
-    [x / scale, TILE_SIZE - y / scale],
-    [(x + coverage) / scale, TILE_SIZE - (y + coverage) / scale]
+    [xOffset, yOffset],
+    [xOffset + coverage * scale, yOffset - coverage * scale]
   ];
 }
 
