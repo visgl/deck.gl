@@ -8,7 +8,17 @@ const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
-  tiles: ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary']
+  tiles: ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary'],
+  tilestats: {
+    layers: [
+      {
+        attributes: [
+          {attribute: 'population', type: 'integer'},
+          {attribute: 'category', type: 'string'}
+        ]
+      }
+    ]
+  }
 };
 
 export const GEOJSON_RESPONSE = {
@@ -23,6 +33,16 @@ export const GEOJSON_RESPONSE = {
       }
     }
   ]
+};
+
+export const TILESTATS_RESPONSE = {
+  attribute: 'population',
+  avg: 10,
+  min: 1,
+  max: 20,
+  quantiles: [],
+  sum: 100,
+  type: 'Number'
 };
 
 export const MAPS_API_V1_RESPONSE = {
@@ -57,7 +77,8 @@ function mockFetchMapsV2() {
 
 export function mockFetchMapsV3() {
   const fetch = globalThis.fetch;
-  globalThis.fetch = (url, {headers}) => {
+  globalThis.fetch = (url, {headers, method}) => {
+    console.log('method', method, url);
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
@@ -73,6 +94,9 @@ export function mockFetchMapsV3() {
               url: ['https://xyz.com?format=tilejson&cache=12345678']
             }
           };
+        }
+        if (url.indexOf('stats') !== -1) {
+          return TILESTATS_RESPONSE;
         }
         if (url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
