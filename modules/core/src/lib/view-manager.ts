@@ -311,11 +311,11 @@ export default class ViewManager {
   private _updateController(
     view: View,
     viewState: any,
-    viewport: Viewport,
+    viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {
     const controllerProps = view.controller;
-    if (controllerProps) {
+    if (controllerProps && viewport) {
       const resolvedProps = {
         ...viewState,
         ...controllerProps,
@@ -369,7 +369,9 @@ export default class ViewManager {
       // Update the controller
       this.controllers[view.id] = this._updateController(view, viewState, viewport, oldController);
 
-      this._viewports.unshift(viewport);
+      if (viewport) {
+        this._viewports.unshift(viewport);
+      }
     }
 
     // Remove unused controllers

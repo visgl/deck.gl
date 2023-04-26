@@ -23,6 +23,13 @@ import {gl} from '@deck.gl/test-utils';
 const canvas = globalThis.document.createElement('canvas');
 canvas.width = gl.drawingBufferWidth;
 canvas.height = gl.drawingBufferHeight;
+// Deck class uses client width/height to calculate viewport sizes
+Object.defineProperty(canvas, 'clientWidth', {
+  value: canvas.width
+});
+Object.defineProperty(canvas, 'clientHeight', {
+  value: canvas.height
+});
 gl.canvas = canvas;
 
 import './modules';
