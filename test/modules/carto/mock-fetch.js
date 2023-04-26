@@ -77,8 +77,7 @@ function mockFetchMapsV2() {
 
 export function mockFetchMapsV3() {
   const fetch = globalThis.fetch;
-  globalThis.fetch = (url, {headers, method}) => {
-    console.log('method', method, url);
+  globalThis.fetch = (url, {headers}) => {
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
