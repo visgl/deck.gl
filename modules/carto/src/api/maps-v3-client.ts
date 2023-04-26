@@ -474,15 +474,31 @@ async function _fetchTilestats(
   const {connectionName: connection, source, type} = dataset;
 
   const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
-  let url = `${statsUrl}/${connection}/`;
+  let baseUrl = `${statsUrl}/${connection}/`;
   if (type === MAP_TYPES.QUERY) {
-    url += `${attribute}?${encodeParameter('q', source)}`;
+    baseUrl += attribute;
   } else {
     // MAP_TYPE.TABLE
-    url += `${source}/${attribute}`;
+    baseUrl += `${source}/${attribute}`;
   }
+
   const errorContext = {requestType: REQUEST_TYPES.TILE_STATS, connection, type, source};
-  const stats = await requestData({url, format: FORMATS.JSON, accessToken, errorContext});
+  let url = baseUrl;
+  if (type === MAP_TYPES.QUERY) {
+    url += `?${encodeParameter('q', source)}`;
+  }
+  let stats;
+  if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
+    stats = await requestJson({
+      method: 'POST',
+      url: baseUrl,
+      accessToken,
+      body: JSON.stringify({q: source}),
+      errorContext
+    });
+  } else {
+    stats = await requestJson({url, accessToken, errorContext});
+  }
 
   // Replace tilestats for attribute with value from API
   const {attributes} = dataset.data.tilestats.layers[0];
