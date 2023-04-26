@@ -16,6 +16,7 @@ import {
   GEOJSON_RESPONSE,
   MAPS_API_V1_RESPONSE,
   TILEJSON_RESPONSE,
+  TILESTATS_RESPONSE,
   mockFetchMapsV3
 } from '../mock-fetch';
 import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
@@ -685,6 +686,64 @@ test('fetchMap#datasets', async t => {
     t.deepEquals(table.data, GEOJSON_RESPONSE, 'Table has filled in data');
     t.deepEquals(tileset.data, TILEJSON_RESPONSE, 'Tileset has filled in data');
     t.deepEquals(query.data, GEOJSON_RESPONSE, 'Query has filled in data');
+  } catch (e) {
+    t.error(e, 'should not throw');
+  }
+
+  setDefaultCredentials({});
+  globalThis.fetch = fetch;
+
+  t.end();
+});
+
+test('fetchMap#tilestats', async t => {
+  const cartoMapId = 'abcd-1234';
+  const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
+  const token = 'public_token';
+
+  const connectionName = 'test_connection';
+  const source = 'test_source';
+  const query = {id: 'DATA_ID', type: MAP_TYPES.QUERY, format: 'tilejson', connectionName, source};
+  const keplerMapConfig = {
+    version: 'v1',
+    config: {
+      mapState: 'INITIAL_VIEW_STATE',
+      mapStyle: 'MAP_STYLE',
+      visState: {
+        layers: [
+          {
+            type: 'tileset',
+            config: {dataId: 'DATA_ID', visConfig: {}},
+            visualChannels: {
+              testField: {name: 'population', type: 'integer'}
+            }
+          }
+        ]
+      }
+    }
+  };
+
+  const mapResponse = {id: cartoMapId, datasets: [query], keplerMapConfig, token};
+  setDefaultCredentials({apiVersion: API_VERSIONS.V3, apiBaseUrl: 'http://carto-api'});
+
+  const globalThis = typeof global !== 'undefined' ? global : window;
+  const fetch = globalThis.fetch;
+
+  globalThis.fetch = (url, options) => {
+    if (url === mapUrl) {
+      t.pass('should call to the right instantiation url');
+      mockFetchMapsV3();
+      return Promise.resolve({json: () => mapResponse, ok: true});
+    }
+
+    t.fail(`Invalid URL request : ${url}`);
+    return null;
+  };
+
+  try {
+    await fetchMap({cartoMapId});
+    const {attributes} = query.data.tilestats.layers[0];
+    t.deepEquals(attributes[0], TILESTATS_RESPONSE, 'Tile stats filled in for population field');
   } catch (e) {
     t.error(e, 'should not throw');
   }
