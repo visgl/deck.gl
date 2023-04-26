@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.10] - Apr 25 2023
+
+- Fix depth picking from GeoJSON layer for binary features (#7817)
+- fix(geo-layers): Implement WMSLayer.isLoaded (#7830)
+
 #### deck.gl [8.9.9] - Apr 21 2023
 
 - TerrainExtension supports Tile3DLayer (#7795)
