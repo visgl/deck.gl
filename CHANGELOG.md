@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.11] - Apr 26 2023
+
+- CARTO: support long queries for stats requests via POST (#7855)
+
 #### deck.gl [8.9.10] - Apr 25 2023
 
 - Fix depth picking from GeoJSON layer for binary features (#7817)
