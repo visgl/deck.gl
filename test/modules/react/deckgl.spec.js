@@ -43,6 +43,7 @@ const getMockContext = () => (globalThis.__JSDOM__ ? gl : null);
 test('DeckGL#mount/unmount', t => {
   const ref = createRef();
   const container = document.createElement('div');
+  document.body.append(container);
   const root = createRoot(container);
 
   act(() => {
@@ -56,7 +57,8 @@ test('DeckGL#mount/unmount', t => {
         onLoad: () => {
           const {deck} = ref.current;
           t.ok(deck, 'DeckGL is initialized');
-          t.is(deck.getViewports()[0].longitude, TEST_VIEW_STATE.longitude, 'View state is set');
+          const viewport = deck.getViewports()[0];
+          t.is(viewport && viewport.longitude, TEST_VIEW_STATE.longitude, 'View state is set');
 
           act(() => {
             root.render(null);
@@ -64,6 +66,7 @@ test('DeckGL#mount/unmount', t => {
 
           t.notOk(deck.animationLoop, 'Deck is finalized');
 
+          container.remove();
           t.end();
         }
       })
@@ -74,6 +77,7 @@ test('DeckGL#mount/unmount', t => {
 
 test('DeckGL#render', t => {
   const container = document.createElement('div');
+  document.body.append(container);
   const root = createRoot(container);
   root.render(
     createElement(
@@ -88,6 +92,7 @@ test('DeckGL#render', t => {
           t.ok(child, 'Child is rendered');
 
           root.render(null);
+          container.remove();
           t.end();
         }
       },
