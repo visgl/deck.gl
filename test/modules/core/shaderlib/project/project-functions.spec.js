@@ -63,6 +63,8 @@ const TEST_CASES = [
     position: [-10, 10, 10],
     params: {
       viewport: new OrthographicView().makeViewport({
+        width: 1,
+        height: 1,
         viewState: {
           target: [3.1416, 2.7183, 0],
           zoom: 4

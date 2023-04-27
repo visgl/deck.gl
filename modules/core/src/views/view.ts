@@ -131,6 +131,9 @@ export default abstract class View<
 
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
+    if (!viewportDimensions.height || !viewportDimensions.width) {
+      return null;
+    }
     return new this.ViewportType({...viewState, ...this.props, ...viewportDimensions});
   }
 
