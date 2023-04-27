@@ -185,8 +185,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
   }
 
   finalizeState(this: Layer<FillStyleExtensionProps>) {
-    const {patternTexture, emptyTexture} = this.state;
-    patternTexture?.delete();
+    const {emptyTexture} = this.state;
     emptyTexture?.delete();
   }
 
