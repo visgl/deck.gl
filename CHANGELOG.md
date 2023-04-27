@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.12] - Apr 27 2023
+
+- fix(core): premature release of texture prop (#7860)
+- Handle hidden canvas (#7856)
+
 #### deck.gl [8.9.11] - Apr 26 2023
 
 - CARTO: support long queries for stats requests via POST (#7855)
