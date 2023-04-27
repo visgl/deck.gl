@@ -202,13 +202,13 @@ const TYPE_DEFINITIONS = {
       if (!context || !context.gl) {
         return null;
       }
-      return createTexture(context.gl, value, {
+      return createTexture(component.id, context.gl, value, {
         ...propType.parameters,
         ...component.props.textureParameters
       });
     },
-    release: value => {
-      destroyTexture(value);
+    release: (value, propType: ImagePropType, component) => {
+      destroyTexture(component.id, value);
     }
   }
 } as const;

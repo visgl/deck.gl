@@ -9,9 +9,10 @@ const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
 };
 
 // Track the textures that are created by us. They need to be released when they are no longer used.
-const internalTextures: Record<string, boolean> = {};
+const internalTextures: Record<string, string> = {};
 
 export function createTexture(
+  owner: string,
   gl: WebGLRenderingContext,
   image: any,
   parameters: Record<number, number>
@@ -43,15 +44,16 @@ export function createTexture(
     }
   });
   // Track this texture
-  internalTextures[texture.id] = true;
+  internalTextures[texture.id] = owner;
   return texture;
 }
 
-export function destroyTexture(texture: Texture2D) {
+export function destroyTexture(owner: string, texture: Texture2D) {
   if (!texture || !(texture instanceof Texture2D)) {
     return;
   }
-  if (internalTextures[texture.id]) {
+  // Only delete the texture if requested by the same layer that created it
+  if (internalTextures[texture.id] === owner) {
     texture.delete();
     delete internalTextures[texture.id];
   }

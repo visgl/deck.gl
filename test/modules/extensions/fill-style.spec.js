@@ -50,6 +50,15 @@ test('FillStyleExtension#PolygonLayer', t => {
         t.notOk(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer');
         t.notOk('fill_patternMask' in uniforms, 'should not be enabled in PathLayer');
       }
+    },
+    {
+      title: `Finalizing a sublayer should not affect the parent layer's loaded props`,
+      updateProps: {
+        data: []
+      },
+      onAfterUpdate: ({layer}) => {
+        t.ok(layer.props.fillPatternAtlas.handle, 'fillPatternAtlas texture is not deleted');
+      }
     }
   ];
 
