@@ -35,9 +35,9 @@
   },
   "dependencies": {
     "@loaders.gl/gltf": "^3.3.3",
-    "@luma.gl/constants": "^8.5.16",
-    "@luma.gl/experimental": "^8.5.16",
-    "@luma.gl/shadertools": "^8.5.16"
+    "@luma.gl/constants": "^8.5.20",
+    "@luma.gl/experimental": "^8.5.20",
+    "@luma.gl/shadertools": "^8.5.20"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
