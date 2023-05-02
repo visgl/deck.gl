@@ -25,12 +25,11 @@ import {
   AGGREGATION_OPERATION,
   getValueFunc
 } from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
-import GL from '@luma.gl/constants';
 import {Layer} from 'deck.gl';
 import {testLayer, gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
 import {equals} from '@math.gl/core';
-import {Buffer} from '@luma.gl/core';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
 
 const BASE_LAYER_ID = 'composite-layer-id';
 const PROPS = {

@@ -2,7 +2,7 @@ import Transition, {TransitionSettings as BaseTransitionSettings} from '../trans
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import type {IViewState} from './view-state';
 
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 import type {InteractionState} from './controller';
 
 const noop = () => {};

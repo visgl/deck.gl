@@ -2,7 +2,7 @@ import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer} from '@luma.gl/webgl-legacy';
 
 export interface TransitionSettings {
   type: string;

@@ -1,4 +1,4 @@
-import {Transform} from '@luma.gl/core';
+import {Transform} from '@luma.gl/webgl-legacy';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';

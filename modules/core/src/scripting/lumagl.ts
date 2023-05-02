@@ -7,7 +7,6 @@ export {
   Model,
   Transform,
   ProgramManager,
-  Timeline,
   // Context utilities
   instrumentGLContext,
   isWebGL2,
@@ -32,7 +31,12 @@ export {
   TextureCube,
   // WebGL2 classes
   Texture3D,
-  TransformFeedback,
+  TransformFeedback
+} from '@luma.gl/webgl-legacy';
+
+export {
+  Timeline,
+
   // Geometries
   Geometry,
   ConeGeometry,
@@ -42,4 +46,5 @@ export {
   PlaneGeometry,
   SphereGeometry,
   TruncatedConeGeometry
-} from '@luma.gl/core';
+} from '@luma.gl/engine';
+

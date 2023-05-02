@@ -1,7 +1,6 @@
 import DataColumn from '@deck.gl/core/lib/attribute/data-column';
 import ShaderAttribute from '@deck.gl/core/lib/attribute/shader-attribute';
-import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/core';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
 import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 

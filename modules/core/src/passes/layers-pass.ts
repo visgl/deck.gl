@@ -1,8 +1,6 @@
-import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {GL, clear, setParameters, withParameters, cssToDeviceRatio, Framebuffer} from '@luma.gl/webgl-legacy';
 
-import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';

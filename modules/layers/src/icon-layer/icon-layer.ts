@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, Texture2D} from '@luma.gl/webgl-legacy';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -230,7 +230,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     iconManager.setProps({
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
-      iconAtlas,
+      iconAtlas: iconAtlas as Texture2D,
       iconMapping: prePacked ? (iconMapping as IconMapping) : null,
       textureParameters
     });
@@ -274,7 +274,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model
+      this.state.model!
         .setUniforms(uniforms)
         .setUniforms({
           iconsTexture,

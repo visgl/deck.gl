@@ -1,8 +1,8 @@
 import ScreenPass from '../passes/screen-pass';
-import {normalizeShaderModule} from '@luma.gl/core';
+import {normalizeShaderModule} from '@luma.gl/shadertools';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {Framebuffer} from '@luma.gl/webgl';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
 import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
@@ -57,7 +57,7 @@ export default class PostProcessEffect implements Effect {
 
 function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
   if (!module.passes) {
-    const fs = getFragmentShaderForRenderPass(module);
+    const fs = getFragmentShaderForRenderPass(module) as string;
     const pass = new ScreenPass(gl, {
       id,
       module,
@@ -67,7 +67,7 @@ function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: strin
   }
 
   return module.passes.map((pass, index) => {
-    const fs = getFragmentShaderForRenderPass(module, pass);
+    const fs = getFragmentShaderForRenderPass(module, pass) as string;
     const idn = `${id}-${index}`;
 
     return new ScreenPass(gl, {

@@ -32,9 +32,8 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
-import {hasFeature, FEATURES} from '@luma.gl/webgl';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, Texture2D, isWebGL2, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -316,7 +315,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     if (props.texture !== oldProps.texture) {
-      this.setTexture(props.texture);
+      this.setTexture(props.texture as Texture2D);
     }
 
     if (this.state.model) {

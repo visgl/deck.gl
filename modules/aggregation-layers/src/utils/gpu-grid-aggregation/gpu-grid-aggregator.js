@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
 import {
+  GL,
   Model,
   Transform,
   FEATURES,
@@ -27,7 +27,7 @@ import {
   isWebGL2,
   readPixelsToBuffer,
   withParameters
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {log, project32, _mergeShaders as mergeShaders} from '@deck.gl/core';
 

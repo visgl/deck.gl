@@ -1,7 +1,7 @@
 /* eslint-disable no-invalid-this */
 
 import {Deck} from '@deck.gl/core';
-import {Model, Buffer, Framebuffer, instrumentGLContext, withParameters} from '@luma.gl/core';
+import {Model, Buffer, Framebuffer, instrumentGLContext, withParameters} from '@luma.gl/webgl-legacy';
 
 export function initializeResources(gl) {
   instrumentGLContext(gl);

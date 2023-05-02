@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {ProgramManager} from '@luma.gl/core';
-import {gouraudLighting, phongLighting} from '@luma.gl/core';
+import {ProgramManager} from '@luma.gl/webgl-legacy';
+import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
 import project from './project/project';
 import project32 from './project32/project32';
 import shadow from './shadow/shadow';
@@ -34,7 +34,7 @@ const SHADER_HOOKS = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function createProgramManager(gl) {
+export function createProgramManager(gl: WebGLRenderingContext) {
   const programManager = ProgramManager.getDefaultProgramManager(gl);
 
   for (const shaderModule of DEFAULT_MODULES) {

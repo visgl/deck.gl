@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* global setTimeout clearTimeout */
-import GL from '@luma.gl/constants';
 import {
   getBounds,
   boundsContain,
@@ -29,14 +28,14 @@ import {
   getTextureParams
 } from './heatmap-layer-utils';
 import {
+  GL,
   Buffer,
   Texture2D,
   Transform,
-  getParameters,
   withParameters,
   FEATURES,
   hasFeatures
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 import {
   Accessor,
   AccessorFunction,
@@ -393,7 +392,7 @@ export default class HeatmapLayer<
     const {gl} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
+    const textureSize = Math.min(weightsTextureSize, gl.getParameter(gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FLOAT_TARGET_FEATURES);
     const {format, type} = getTextureParams({gl, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -547,12 +546,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.subData(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
@@ -626,7 +625,7 @@ export default class HeatmapLayer<
     this._updateMaxWeightValue();
 
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
-    weightsTexture.setParameters({
+    weightsTexture!.setParameters({
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
       [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
     });

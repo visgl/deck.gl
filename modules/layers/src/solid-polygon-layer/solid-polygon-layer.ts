@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeatures, FEATURES} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, hasFeatures, FEATURES} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -419,11 +419,11 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
   }
 
-  protected _getModels(gl: WebGLRenderingContext): Model {
+  protected _getModels(gl: WebGLRenderingContext): {models: Model[]; topModel?: Model; sideModel?: Model} {
     const {id, filled, extruded} = this.props;
 
-    let topModel;
-    let sideModel;
+    let topModel: Model | undefined;
+    let sideModel: Model | undefined;
 
     if (filled) {
       const shaders = this.getShaders('top');
@@ -467,7 +467,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
 
     return {
-      models: [sideModel, topModel].filter(Boolean),
+      models: [sideModel, topModel].filter(Boolean) as Model[],
       topModel,
       sideModel
     };

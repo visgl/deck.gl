@@ -1,5 +1,5 @@
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
-import GLConstants from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl-legacy';
 import * as deckglLayers from '@deck.gl/layers';
 
 export const log = console; // eslint-disable-line

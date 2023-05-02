@@ -1,4 +1,4 @@
-import {Texture2D, ProgramManager} from '@luma.gl/core';
+import {Texture2D, ProgramManager} from '@luma.gl/webgl-legacy';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
@@ -39,7 +39,7 @@ export default class LightingEffect implements Effect {
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
   private dummyShadowMap: Texture2D | null = null;
-  private programManager?: ProgramManager;
+  private programManager: ProgramManager | null = null;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
@@ -127,7 +127,7 @@ export default class LightingEffect implements Effect {
         pointLights: PointLight[];
       };
       shadowMaps?: Texture2D[];
-      dummyShadowMap?: Texture2D;
+      dummyShadowMap?: Texture2D | null;
       shadowColor?: number[];
       shadowMatrices?: Matrix4[];
     } = this.shadow
@@ -186,7 +186,7 @@ export default class LightingEffect implements Effect {
     for (let i = 0; i < this.directionalLights.length; i++) {
       const shadowPass = new ShadowPass(gl);
       this.shadowPasses[i] = shadowPass;
-      this.shadowMaps[i] = shadowPass.shadowMap;
+      this.shadowMaps[i] = shadowPass.shadowMap!;
     }
   }
 

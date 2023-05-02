@@ -21,8 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars, no-console */
 /* global console */
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
-import GL from '@luma.gl/constants';
-import {Buffer, isWebGL2} from '@luma.gl/core';
+import {GL, Buffer, isWebGL2} from '@luma.gl/webgl-legacy';
 import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';

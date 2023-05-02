@@ -21,8 +21,7 @@
 import {LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
-import {readPixelsToArray, clear} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, readPixelsToArray, clear} from '@luma.gl/webgl-legacy';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 

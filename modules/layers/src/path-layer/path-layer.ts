@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
@@ -314,7 +314,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMaxPixels
     } = this.props;
 
-    this.state.model
+    this.state.model!
       .setUniforms(uniforms)
       .setUniforms({
         jointType: Number(jointRounded),

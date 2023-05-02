@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CubeGeometry} from '@luma.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
 import {UNIT} from '@deck.gl/core';
 import ColumnLayer, {ColumnLayerProps} from './column-layer';
 

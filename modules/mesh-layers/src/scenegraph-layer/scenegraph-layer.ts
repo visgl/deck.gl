@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import {isWebGL2} from '@luma.gl/core';
+import {GL, isWebGL2} from '@luma.gl/webgl-legacy';
 import {pbr} from '@luma.gl/shadertools';
 import {
   ScenegraphNode,
@@ -28,7 +28,6 @@ import {
   GLTFEnvironment,
   createGLTFObjects
 } from '@luma.gl/experimental';
-import GL from '@luma.gl/constants';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 

@@ -4,7 +4,7 @@ import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 
 type UserData = {
   isExternal: boolean;

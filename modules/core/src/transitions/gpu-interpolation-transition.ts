@@ -1,5 +1,5 @@
-import GL from '@luma.gl/constants';
-import {Buffer, Transform} from '@luma.gl/core';
+import {GL, Buffer, Transform} from '@luma.gl/webgl-legacy';
+import { Timeline } from '@luma.gl/engine';
 import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
@@ -11,8 +11,6 @@ import {
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
-import type {Timeline, Transform as LumaTransform} from '@luma.gl/engine';
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
@@ -26,8 +24,8 @@ export default class GPUInterpolationTransition implements GPUTransition {
   private transition: Transition;
   private currentStartIndices: NumericArray | null;
   private currentLength: number;
-  private transform: LumaTransform;
-  private buffers: LumaBuffer[];
+  private transform: Transform;
+  private buffers: Buffer[];
 
   constructor({
     gl,
@@ -111,6 +109,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
         aFrom: buffers[0],
+        // @ts-expect-error TODO - this looks like a real type mismatch!!!
         aTo: getSourceBufferAttribute(gl, attribute)
       },
       feedbackBuffers: {
@@ -159,7 +158,7 @@ void main(void) {
 }
 `;
 
-function getTransform(gl: WebGLRenderingContext, attribute: Attribute): LumaTransform {
+function getTransform(gl: WebGLRenderingContext, attribute: Attribute): Transform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(gl, {
     vs,

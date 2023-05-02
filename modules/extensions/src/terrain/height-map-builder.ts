@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 

@@ -1,4 +1,4 @@
-import {Framebuffer, Texture2D} from '@luma.gl/core';
+import {Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 

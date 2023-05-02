@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import GL from '@luma.gl/constants';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
@@ -28,7 +27,7 @@ import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
 import {config} from '@math.gl/core';
 import {gl} from '@deck.gl/test-utils';
-import {Transform, Buffer, fp64} from '@luma.gl/core';
+import {GL, Transform, Buffer, fp64} from '@luma.gl/webgl-legacy';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
 // import {clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';

@@ -1,4 +1,4 @@
-import {Framebuffer, withParameters} from '@luma.gl/core';
+import {Framebuffer, withParameters} from '@luma.gl/webgl-legacy';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};

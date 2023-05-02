@@ -1,4 +1,4 @@
-import {Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
 
 function makeEvents(events, opts = {}) {
   return events.map((type, i) => makeEvent(type, opts, i));

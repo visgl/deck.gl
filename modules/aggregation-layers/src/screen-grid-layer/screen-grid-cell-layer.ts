@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry, FEATURES, hasFeatures, Texture2D, DefaultProps} from '@luma.gl/core';
-import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, FEATURES, hasFeatures, Texture2D} from '@luma.gl/webgl-legacy';
+import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -31,8 +31,8 @@ const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
 const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
-  cellSizePixels: {value: 100, min: 1},
-  cellMarginPixels: {value: 2, min: 0, max: 5},
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange

@@ -23,7 +23,7 @@
 import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
-import {isWebGL2} from '@luma.gl/core';
+import {isWebGL2} from '@luma.gl/webgl-legacy';
 
 const {fixture, generateRandomGridPoints, buildAttributes} = GridAggregationData;
 const aggregator = new GPUGridAggregator(gl);

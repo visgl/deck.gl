@@ -1,5 +1,4 @@
-import {Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, Texture2D} from '@luma.gl/webgl-legacy';
 
 const DEFAULT_TEXTURE_PARAMETERS: Record<number, number> = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,

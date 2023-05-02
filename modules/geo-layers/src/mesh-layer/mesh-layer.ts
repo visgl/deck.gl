@@ -1,7 +1,7 @@
 import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
-import {Model, pbr} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, Model} from '@luma.gl/webgl-legacy';
+import {pbr} from '@luma.gl/shadertools';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';

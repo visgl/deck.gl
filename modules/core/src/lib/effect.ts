@@ -1,6 +1,6 @@
 import type Layer from './layer';
 import type {LayersPassRenderOptions} from '../passes/layers-pass';
-import type {Framebuffer} from '@luma.gl/webgl';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
 
 export type PreRenderOptions = LayersPassRenderOptions;
 export type PostRenderOptions = LayersPassRenderOptions & {

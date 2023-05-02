@@ -1,5 +1,6 @@
 import {log, BinaryAttribute} from '@deck.gl/core';
-import {Geometry, uid} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {uid} from '@luma.gl/api';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
 type ColumnGeometryProps = {

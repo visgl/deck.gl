@@ -2,7 +2,8 @@
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import test from 'tape-promise/tape';
-import {isWebGL2, Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
+import {isWebGL2} from '@luma.gl/webgl-legacy';
 import {gl} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = (function () {

@@ -5,12 +5,12 @@ import {
   Renderbuffer,
   withParameters,
   cssToDeviceRatio
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 
 export default class ShadowPass extends LayersPass {
-  shadowMap: Texture2D;
-  depthBuffer: Renderbuffer;
-  fbo: Framebuffer;
+  shadowMap: Texture2D | null;
+  depthBuffer: Renderbuffer | null;
+  fbo: Framebuffer | null;
 
   constructor(
     gl: WebGLRenderingContext,
@@ -51,7 +51,7 @@ export default class ShadowPass extends LayersPass {
   }
 
   render(params) {
-    const target = this.fbo;
+    const target = this.fbo!;
 
     withParameters(
       this.gl,

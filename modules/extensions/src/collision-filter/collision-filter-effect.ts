@@ -1,4 +1,4 @@
-import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/core';
+import {Framebuffer, Renderbuffer, Texture2D, cssToDeviceRatio} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';

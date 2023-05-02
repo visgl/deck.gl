@@ -19,14 +19,14 @@
 // THE SOFTWARE.
 
 import {
+  GL,
   Framebuffer,
   Texture2D,
   isWebGL2,
   readPixelsToArray,
   cssToDeviceRatio,
   cssToDevicePixels
-} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+} from '@luma.gl/webgl-legacy';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -36,7 +36,6 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
@@ -72,8 +71,8 @@ type PickOperationContext = {
 /** Manages picking in a Deck context */
 export default class DeckPicker {
   gl: WebGLRenderingContext;
-  pickingFBO?: LumaFramebuffer;
-  depthFBO?: LumaFramebuffer;
+  pickingFBO?: Framebuffer;
+  depthFBO?: Framebuffer;
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
 
@@ -224,7 +223,7 @@ export default class DeckPicker {
     ];
 
     const deviceRadius = Math.round(radius * pixelRatio);
-    const {width, height} = this.pickingFBO as LumaFramebuffer;
+    const {width, height} = this.pickingFBO as Framebuffer;
     const deviceRect = this._getPickingRect({
       deviceX: devicePixel[0],
       deviceY: devicePixel[1],
@@ -512,7 +511,7 @@ export default class DeckPicker {
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
     const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    readPixelsToArray(pickingFBO, {
+    readPixelsToArray(pickingFBO!, {
       sourceX: x,
       sourceY: y,
       sourceWidth: width,

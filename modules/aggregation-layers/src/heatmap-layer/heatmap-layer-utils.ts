@@ -1,5 +1,4 @@
-import GL from '@luma.gl/constants';
-import {isWebGL2} from '@luma.gl/core';
+import {GL, isWebGL2} from '@luma.gl/webgl-legacy';
 
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)

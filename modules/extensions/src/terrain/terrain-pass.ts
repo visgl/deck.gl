@@ -1,9 +1,7 @@
-import {withParameters} from '@luma.gl/core';
+import {GL, withParameters} from '@luma.gl/webgl-legacy';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
-
-import GL from '@luma.gl/constants';
 
 export type TerrainPassRenderOptions = LayersPassRenderOptions;
 

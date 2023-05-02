@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 
 import type {Layer, Viewport} from '@deck.gl/core';
 

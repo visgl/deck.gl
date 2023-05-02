@@ -43,5 +43,6 @@
     "test"
   ],
   "exclude": [
+    "node_modules"
   ]
 }

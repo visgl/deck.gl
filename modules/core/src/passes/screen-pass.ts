@@ -4,15 +4,14 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import type {Framebuffer} from '@luma.gl/core';
-import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/core';
+import {Framebuffer, ClipSpace, setParameters, withParameters, clear} from '@luma.gl/webgl-legacy';
 import Pass from './pass';
 
 import type {ShaderModule} from '../types/types';
 
 type ScreenPassProps = {
   module: ShaderModule;
-  fs: string | null;
+  fs?: string;
   id: string;
 };
 
@@ -23,7 +22,7 @@ type ScreenPassRenderOptions = {
 };
 
 export default class ScreenPass extends Pass {
-  model: ClipSpace;
+  model: ClipSpace | null;
 
   constructor(gl: WebGLRenderingContext, props: ScreenPassProps) {
     super(gl, props);
@@ -42,7 +41,7 @@ export default class ScreenPass extends Pass {
   }
 
   delete() {
-    this.model.delete();
+    this.model?.delete();
     this.model = null;
   }
 
@@ -57,7 +56,7 @@ export default class ScreenPass extends Pass {
   protected _renderPass(gl: WebGLRenderingContext, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(gl, {color: true});
-    this.model.draw({
+    this.model!.draw({
       moduleSettings: options.moduleSettings,
       uniforms: {
         texture: inputBuffer,

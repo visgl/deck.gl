@@ -32,8 +32,8 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';

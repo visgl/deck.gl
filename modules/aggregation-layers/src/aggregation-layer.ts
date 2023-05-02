@@ -26,7 +26,7 @@ import {
   UpdateParameters,
   CompositeLayerProps
 } from '@deck.gl/core';
-import {cssToDeviceRatio} from '@luma.gl/core';
+import {cssToDeviceRatio} from '@luma.gl/webgl-legacy';
 import {filterProps} from './utils/prop-utils';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {

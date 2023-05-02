@@ -1,6 +1,5 @@
 /* global google */
-import {getParameters, setParameters, withParameters} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, GLParameters, setParameters, withParameters} from '@luma.gl/webgl-legacy';
 import {
   createDeckInstance,
   destroyDeckInstance,
@@ -12,7 +11,7 @@ import {Deck} from '@deck.gl/core';
 import type {DeckProps} from '@deck.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
-const GL_STATE = {
+const GL_STATE: GLParameters = {
   depthMask: true,
   depthTest: true,
   blend: true,
@@ -166,10 +165,10 @@ export default class GoogleMapsOverlay {
     // in withParameters so we don't modify the GL state
     // @ts-ignore accessing protected member
     const {animationLoop} = deck;
-    animationLoop._renderFrame = () => {
+    animationLoop!._renderFrame = (props) => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       withParameters(gl, {}, () => {
-        animationLoop.onRender();
+        animationLoop!.onRender(props);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
@@ -232,7 +231,7 @@ export default class GoogleMapsOverlay {
     if (deck.isInitialized) {
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
-      const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
+      const _framebuffer = gl.getParameter(GL.FRAMEBUFFER_BINDING);
       deck.setProps({_framebuffer});
 
       // Camera changed, will trigger a map repaint right after this

@@ -1,4 +1,4 @@
-import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
+import {Framebuffer, Texture2D, withParameters} from '@luma.gl/webgl-legacy';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {

@@ -27,7 +27,7 @@ import {ConstructorOf} from '../types/types';
 import type Viewport from '../viewports/viewport';
 
 import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0

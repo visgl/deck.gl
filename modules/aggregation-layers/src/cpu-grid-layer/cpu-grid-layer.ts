@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {GridCellLayer} from '@deck.gl/layers';
 import {Accessor, AccessorFunction, Color, Position, Material, DefaultProps} from '@deck.gl/core';
 

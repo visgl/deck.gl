@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-promise/tape';
-import {Buffer, Texture2D} from '@luma.gl/core';
+import {Buffer, Texture2D} from '@luma.gl/webgl-legacy';
 import {gl} from '@deck.gl/test-utils';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 

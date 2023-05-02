@@ -1,4 +1,4 @@
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 export type TransitionSettings = {
   duration: number;
@@ -50,7 +50,7 @@ export default class Transition {
    */
   end() {
     if (this._inProgress) {
-      this._timeline.removeChannel(this._handle);
+      this._timeline.removeChannel(this._handle!);
       this._handle = null;
       this._inProgress = false;
       this.settings.onEnd?.(this);
@@ -63,7 +63,7 @@ export default class Transition {
   cancel() {
     if (this._inProgress) {
       this.settings.onInterrupt?.(this);
-      this._timeline.removeChannel(this._handle);
+      this._timeline.removeChannel(this._handle!);
       this._handle = null;
       this._inProgress = false;
     }

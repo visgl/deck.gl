@@ -34,8 +34,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -237,7 +237,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
       this.props;
 
-    this.state.model
+    this.state.model!
       .setUniforms(uniforms)
       .setUniforms({
         greatCircle,

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Timeline} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
@@ -32,7 +32,7 @@ import {createProgramManager} from '../shaderlib';
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
-import type {ProgramManager} from '@luma.gl/engine';
+import type {ProgramManager} from '@luma.gl/webgl-legacy';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';

@@ -3,7 +3,7 @@ import test from 'tape-promise/tape';
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
 import {picking, project32} from '@deck.gl/core';
-import {Transform, Buffer} from '@luma.gl/core';
+import {Transform, Buffer} from '@luma.gl/webgl-legacy';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
 test('path-layer-vertex#flipIfTrue', t => {

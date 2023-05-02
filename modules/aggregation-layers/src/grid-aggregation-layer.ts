@@ -20,9 +20,8 @@
 
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {Buffer} from '@luma.gl/core';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
 import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
 

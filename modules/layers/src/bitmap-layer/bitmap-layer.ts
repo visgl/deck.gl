@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
 import {
   Layer,
   project32,
@@ -34,7 +33,8 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/core';
+import {GL, Model} from '@luma.gl/webgl-legacy';
+import { Geometry } from '@luma.gl/engine';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -173,7 +173,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
-      this.state.model.setVertexCount(mesh.vertexCount);
+      this.state.model!.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
@@ -254,10 +254,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   protected _getModel(gl: WebGLRenderingContext): Model {
-    if (!gl) {
-      return null;
-    }
-
     /*
       0,0 --- 1,0
        |       |

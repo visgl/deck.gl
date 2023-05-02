@@ -1,6 +1,5 @@
 /* global document */
-import GL from '@luma.gl/constants';
-import {Texture2D, copyToTexture} from '@luma.gl/core';
+import {GL, Texture2D, copyToTexture} from '@luma.gl/webgl-legacy';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -440,7 +439,7 @@ export default class IconManager {
 
           const {data, width, height} = resizeImage(ctx, imageData, maxWidth, maxHeight);
 
-          this._texture.setSubImageData({
+          this._texture!.setSubImageData({
             data,
             x: x + (maxWidth - width) / 2,
             y: y + (maxHeight - height) / 2,
@@ -451,7 +450,7 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          this._texture.generateMipmap();
+          this._texture!.generateMipmap();
 
           this.onUpdate();
         })

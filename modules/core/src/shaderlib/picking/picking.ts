@@ -1,4 +1,4 @@
-import {picking} from '@luma.gl/core';
+import {picking} from '@luma.gl/shadertools';
 import type {ShaderModule} from '../../types/types';
 
 type PickingModuleSettings = {
@@ -36,5 +36,5 @@ uniform bool picking_uAttribute;
     `
     }
   },
-  ...picking
+  ...(picking as ShaderModule<PickingModuleSettings>)
 } as ShaderModule<PickingModuleSettings>;

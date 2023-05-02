@@ -31,15 +31,16 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {getBrowser} from '@probe.gl/env';
-import GL from '@luma.gl/constants';
+import {luma} from '@luma.gl/api';
+import { Timeline } from '@luma.gl/engine';
 import {
+  GL,
+  Framebuffer,
   AnimationLoop,
   createGLContext,
   instrumentGLContext,
-  setParameters,
-  Timeline,
-  lumaStats
-} from '@luma.gl/core';
+  setParameters
+} from '@luma.gl/webgl-legacy';
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
@@ -52,7 +53,6 @@ import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {Framebuffer} from '@luma.gl/core';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -197,7 +197,7 @@ export type DeckProps = {
    * If this callback is set to `null`, errors are silently ignored.
    * @default `console.error`
    */
-  onError?: ((error: Error, layer?: Layer) => void) | null;
+  onError?: ((error: Error, layer?: Layer) => void);
   /** Called when the pointer moves over the canvas. */
   onHover?: ((info: PickingInfo, event: MjolnirPointerEvent) => void) | null;
   /** Called when clicking on the canvas. */
@@ -225,7 +225,7 @@ export type DeckProps = {
   drawPickingColors?: boolean;
 };
 
-const defaultProps = {
+const defaultProps: Required<DeckProps> = {
   id: '',
   width: '100%',
   height: '100%',
@@ -296,7 +296,7 @@ export default class Deck {
   protected eventManager: EventManager | null = null;
   protected tooltip: Tooltip | null = null;
   protected metrics: DeckMetrics;
-  protected animationLoop: AnimationLoop;
+  protected animationLoop: AnimationLoop | null = null;
   protected stats: Stats;
 
   /** Internal view state if no callback is supplied */
@@ -443,7 +443,7 @@ export default class Deck {
     this._setCanvasSize(this.props);
 
     // We need to overwrite CSS style width and height with actual, numeric values
-    const resolvedProps: Required<DeckProps> & {
+    const resolvedProps: Omit<Required<DeckProps>, 'glOptions'> & {
       width: number;
       height: number;
       views: View[];
@@ -457,7 +457,7 @@ export default class Deck {
     });
 
     // Update the animation loop
-    this.animationLoop.setProps(resolvedProps);
+    this.animationLoop!.setProps(resolvedProps);
 
     // If initialized, update sub manager props
     if (this.layerManager) {
@@ -755,16 +755,13 @@ export default class Deck {
       glOptions,
       debug,
       onError,
-      onBeforeRender,
-      onAfterRender,
       useDevicePixels
     } = props;
 
     return new AnimationLoop({
-      width,
-      height,
       useDevicePixels,
       autoResizeViewport: false,
+      // @ts-ignore null cannot be assigned to gl
       gl,
       onCreateContext: opts =>
         createGLContext({
@@ -773,11 +770,9 @@ export default class Deck {
           canvas: this.canvas,
           debug,
           onContextLost: () => this._onContextLost()
-        }),
+        }) as WebGLRenderingContext,
       onInitialize: context => this._setGLContext(context.gl),
       onRender: this._onRenderFrame.bind(this),
-      onBeforeRender,
-      onAfterRender,
       onError
     });
   }
@@ -894,8 +889,8 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = gl.canvas;
-      instrumentGLContext(gl, {enable: true, copyState: true});
+      this.canvas = gl.canvas as HTMLCanvasElement;
+      instrumentGLContext(gl);
     }
 
     this.tooltip = new Tooltip(this.canvas);
@@ -913,9 +908,9 @@ export default class Deck {
     // timeline for transitions
     const timeline = new Timeline();
     timeline.play();
-    this.animationLoop.attachTimeline(timeline);
+    this.animationLoop!.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || gl.canvas, {
+    this.eventManager = new EventManager(this.props.parent || gl.canvas as HTMLElement, {
       touchAction: this.props.touchAction,
       recognizerOptions: this.props.eventRecognizerOptions,
       events: {
@@ -1117,7 +1112,7 @@ export default class Deck {
     stats.get('frameRate').timeStart();
 
     // Get individual stats from luma.gl so reset works
-    const animationLoopStats = this.animationLoop.stats;
+    const animationLoopStats = this.animationLoop!.stats;
     stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
     stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
   }
@@ -1140,7 +1135,7 @@ export default class Deck {
     metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
     metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
-    const memoryStats = lumaStats.get('Memory Usage');
+    const memoryStats = luma.stats.get('Memory Usage');
     metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
     metrics.textureMemory = memoryStats.get('Texture Memory').count;
     metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
