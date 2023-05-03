@@ -10,7 +10,7 @@ class HeatmapDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/google-3d-tiles`;
 
   static parameters = {
-    intensity: {displayName: 'Intensity', type: 'range', value: 1, step: 0.1, min: 0, max: 5}
+    opacity: {displayName: 'Opacity', type: 'range', value: 0.2, step: 0.01, min: 0, max: 0.5}
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -39,9 +39,9 @@ class HeatmapDemo extends Component {
 
   render() {
     const {params} = this.props;
-    const intensity = params.intensity.value;
+    const opacity = params.opacity.value;
 
-    return <App {...this.props} intensity={intensity} />;
+    return <App {...this.props} opacity={opacity} />;
   }
 }
 

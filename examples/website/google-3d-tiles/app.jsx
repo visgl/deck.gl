@@ -2,7 +2,9 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const ROOT_TILE = 'CggzMDYwNDE2MxIFZWFydGgYsQciBmdyb3VuZDoFZ2VvaWRABg'; // Prague
@@ -18,7 +20,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 60
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const BUILDING_DATA =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/alasarr/google-3d-tiles/examples/google-3d-tiles/buildings.geojson';
 
 const DataCredit = styled.div`
   position: absolute;
@@ -28,7 +31,7 @@ const DataCredit = styled.div`
   font-size: 10px;
 `;
 
-export default function App({data = TILESET_URL, intensity = 1}) {
+export default function App({data = TILESET_URL, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
 
   const layers = [
@@ -51,6 +54,22 @@ export default function App({data = TILESET_URL, intensity = 1}) {
         };
       },
       operation: 'terrain+draw'
+    }),
+    new GeoJsonLayer({
+      id: 'buildings',
+      data: BUILDING_DATA,
+      stroked: false,
+      filled: true,
+      getFillColor: ({properties}) => {
+        const {tpp} = properties;
+        // quantiles break
+        if (tpp < 0.6249) return [254, 246, 181];
+        else if (tpp < 0.678) return [255, 194, 133];
+        else if (tpp < 0.8594) return [250, 138, 118];
+        return [225, 83, 131];
+      },
+      opacity,
+      extensions: [new TerrainExtension()]
     })
   ];
 
