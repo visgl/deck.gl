@@ -36,10 +36,10 @@ const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', '
 
 export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
   const orbit = useCallback(previousTransition => {
-    setViewState(viewState => {
+    setInitialViewState(viewState => {
       return {
         ...viewState,
         bearing: viewState.bearing + 30,
@@ -60,11 +60,11 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
         tileset3d._queryParams = {key: GOOGLE_MAPS_API_KEY};
 
         tileset3d.options.onTraversalComplete = selectedTiles => {
-          const credits = new Set();
+          const uniqueCredits = new Set();
           selectedTiles.forEach(tile => {
             const {copyright} = tile.content.gltf.asset;
-            copyright.split(';').forEach(credits.add, credits);
-            setCredits([...credits].join('; '));
+            copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
+            setCredits([...uniqueCredits].join('; '));
           });
           return selectedTiles;
         };
@@ -95,11 +95,11 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
     <div>
       <DeckGL
         style={{backgroundColor: '#061714'}}
-        initialViewState={viewState}
+        initialViewState={initialViewState}
         onLoad={orbit}
         controller={{touchRotate: true, inertia: 250}}
         layers={layers}
-      ></DeckGL>
+      />
       <DataCredit>{credits}</DataCredit>
     </div>
   );
