@@ -19,7 +19,7 @@ class HeatmapDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Photorealistic 3D Tiles</p>
+        <p>Draping colored building outlines of Google Photorealistic 3D Tiles</p>
         <div>
           <img
             src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"
@@ -31,6 +31,7 @@ class HeatmapDemo extends Component {
           <span className="col-1-2">Close</span>
           <span className="col-1-2 text-right">Far</span>
         </p>
+        <p>Buildings are colored according to the distance to the nearest tree</p>
         <p>
           Data source: <a href="https://todo">TODO</a>
         </p>
