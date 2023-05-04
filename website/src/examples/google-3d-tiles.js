@@ -10,6 +10,7 @@ class HeatmapDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/google-3d-tiles`;
 
   static parameters = {
+    filter: {displayName: 'Filter', type: 'range', value: 0, step: 0.01, min: 0, max: 1},
     opacity: {displayName: 'Opacity', type: 'range', value: 0.2, step: 0.01, min: 0, max: 0.5}
   };
 
@@ -39,9 +40,10 @@ class HeatmapDemo extends Component {
 
   render() {
     const {params} = this.props;
+    const filter = params.filter.value;
     const opacity = params.opacity.value;
 
-    return <App {...this.props} opacity={opacity} />;
+    return <App {...this.props} filter={filter} opacity={opacity} />;
   }
 }
 

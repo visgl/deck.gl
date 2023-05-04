@@ -5,7 +5,7 @@ import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
+import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const ROOT_TILE = 'CggzMDYwNDE2MxIFZWFydGgYsQciBmdyb3VuZDoFZ2VvaWRABg'; // Prague
@@ -34,7 +34,7 @@ const DataCredit = styled.div`
 
 const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
 
-export default function App({data = TILESET_URL, opacity = 0.2}) {
+export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
 
@@ -74,6 +74,7 @@ export default function App({data = TILESET_URL, opacity = 0.2}) {
     new GeoJsonLayer({
       id: 'buildings',
       data: BUILDING_DATA,
+      extensions: [new DataFilterExtension({filterSize: 1}), new TerrainExtension()],
       stroked: false,
       filled: true,
       getFillColor: ({properties}) => {
@@ -85,7 +86,8 @@ export default function App({data = TILESET_URL, opacity = 0.2}) {
         return [225, 83, 131];
       },
       opacity,
-      extensions: [new TerrainExtension()]
+      getFilterValue: f => f.properties.tpp,
+      filterRange: [filter, 1]
     })
   ];
 
