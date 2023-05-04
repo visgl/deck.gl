@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import styled from 'styled-components';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
+import {LinearInterpolator} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -31,8 +32,23 @@ const DataCredit = styled.div`
   font-size: 10px;
 `;
 
+const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
+
 export default function App({data = TILESET_URL, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+
+  const orbit = useCallback(previousTransition => {
+    setViewState(viewState => {
+      return {
+        ...viewState,
+        bearing: viewState.bearing + 30,
+        transitionDuration: 10000,
+        transitionInterpolator,
+        onTransitionEnd: orbit
+      };
+    });
+  }, []);
 
   const layers = [
     new Tile3DLayer({
@@ -77,8 +93,9 @@ export default function App({data = TILESET_URL, opacity = 0.2}) {
     <div>
       <DeckGL
         style={{backgroundColor: '#061714'}}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
+        initialViewState={viewState}
+        onLoad={orbit}
+        controller={{touchRotate: true, inertia: 250}}
         layers={layers}
       ></DeckGL>
       <DataCredit>{credits}</DataCredit>
