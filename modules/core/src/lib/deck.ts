@@ -764,6 +764,7 @@ export default class Deck {
       width,
       height,
       useDevicePixels,
+      autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       gl,
       onCreateContext: opts =>
