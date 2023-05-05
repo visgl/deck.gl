@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.13] - May 4 2023
+
+- Upgrade loaders dependencies (#7872)
+- Fix MapboxOverlay scale issue when device pixel ratio changes (#7867)
+
 #### deck.gl [8.9.12] - Apr 27 2023
 
 - fix(core): premature release of texture prop (#7860)
