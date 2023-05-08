@@ -10,7 +10,7 @@ class HeatmapDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/google-3d-tiles`;
 
   static parameters = {
-    filter: {displayName: 'Filter', type: 'range', value: 0, step: 0.01, min: 0, max: 1},
+    filter: {displayName: 'Filter', type: 'range', value: 0, step: 1, min: 0, max: 400},
     opacity: {displayName: 'Opacity', type: 'range', value: 0.2, step: 0.01, min: 0, max: 0.5}
   };
 

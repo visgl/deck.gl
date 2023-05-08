@@ -1,5 +1,5 @@
 import React, {useCallback, useState} from 'react';
-import styled from 'styled-components';
+import {styled} from '@material-ui/core/styles';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
@@ -21,16 +21,16 @@ const INITIAL_VIEW_STATE = {
   pitch: 60
 };
 
-const BUILDING_DATA =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/alasarr/google-3d-tiles/examples/google-3d-tiles/buildings.geojson';
+// FOR DEV ONLY, will upload to deck.gl-data as geojson
+import BUILDING_DATA from './data/data.js';
 
-const DataCredit = styled.div`
-  position: absolute;
-  left: 8px;
-  bottom: 4px;
-  color: var(--ifm-color-white);
-  font-size: 10px;
-`;
+const DataCredit = styled('div')({
+  position: 'absolute',
+  left: '8px',
+  bottom: '4px',
+  color: 'white',
+  fontSize: '10px'
+});
 
 const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
 
@@ -78,16 +78,23 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
       stroked: false,
       filled: true,
       getFillColor: ({properties}) => {
-        const {tpp} = properties;
-        // quantiles break
-        if (tpp < 0.6249) return [254, 246, 181];
-        else if (tpp < 0.678) return [255, 194, 133];
-        else if (tpp < 0.8594) return [250, 138, 118];
-        return [225, 83, 131];
+        const d = properties.distance_to_nearest_tree;
+        const colors = [
+          [254, 235, 226],
+          [251, 180, 185],
+          [247, 104, 161],
+          [197, 27, 138],
+          [122, 1, 119]
+        ];
+        if (d < 50) return colors[0];
+        else if (d < 100) return colors[1];
+        else if (d < 200) return colors[2];
+        else if (d < 300) return colors[3];
+        return colors[4];
       },
       opacity,
-      getFilterValue: f => f.properties.tpp,
-      filterRange: [filter, 1]
+      getFilterValue: f => f.properties.distance_to_nearest_tree,
+      filterRange: [filter, 500]
     })
   ];
 
