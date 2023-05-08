@@ -8,7 +8,6 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
-const ROOT_TILE = 'CggzMDYwNDE2MxIFZWFydGgYsQciBmdyb3VuZDoFZ2VvaWRABg'; // Prague
 const TILESET_URL = 'https://tile.googleapis.com/v1/3dtiles/root.json';
 
 export const COLORS = [
