@@ -9,7 +9,7 @@ import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const ROOT_TILE = 'CggzMDYwNDE2MxIFZWFydGgYsQciBmdyb3VuZDoFZ2VvaWRABg'; // Prague
-const TILESET_URL = `https://www.googleapis.com/tile/v1/tiles3d/tilesets/${ROOT_TILE}.json?key=${GOOGLE_MAPS_API_KEY}`;
+const TILESET_URL = 'https://tile.googleapis.com/v1/3dtiles/root.json';
 
 export const COLORS = [
   [254, 235, 226],
@@ -62,11 +62,7 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
-      // THE FOLLOWING FUNCTION WILL BE REMOVED IN THE NEXT RELEASE (next week)
       onTilesetLoad: tileset3d => {
-        // Required until https://github.com/visgl/loaders.gl/pull/2252 resolved
-        tileset3d._queryParams = {key: GOOGLE_MAPS_API_KEY};
-
         tileset3d.options.onTraversalComplete = selectedTiles => {
           const uniqueCredits = new Set();
           selectedTiles.forEach(tile => {
@@ -76,6 +72,9 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
           });
           return selectedTiles;
         };
+      },
+      loadOptions: {
+        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}
       },
       operation: 'terrain+draw'
     }),
