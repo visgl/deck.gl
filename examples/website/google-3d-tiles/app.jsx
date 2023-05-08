@@ -11,6 +11,14 @@ const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const ROOT_TILE = 'CggzMDYwNDE2MxIFZWFydGgYsQciBmdyb3VuZDoFZ2VvaWRABg'; // Prague
 const TILESET_URL = `https://www.googleapis.com/tile/v1/tiles3d/tilesets/${ROOT_TILE}.json?key=${GOOGLE_MAPS_API_KEY}`;
 
+export const COLORS = [
+  [254, 235, 226],
+  [251, 180, 185],
+  [247, 104, 161],
+  [197, 27, 138],
+  [122, 1, 119]
+];
+
 const INITIAL_VIEW_STATE = {
   latitude: 50.089,
   longitude: 14.42,
@@ -79,18 +87,11 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
       filled: true,
       getFillColor: ({properties}) => {
         const d = properties.distance_to_nearest_tree;
-        const colors = [
-          [254, 235, 226],
-          [251, 180, 185],
-          [247, 104, 161],
-          [197, 27, 138],
-          [122, 1, 119]
-        ];
-        if (d < 50) return colors[0];
-        else if (d < 100) return colors[1];
-        else if (d < 200) return colors[2];
-        else if (d < 300) return colors[3];
-        return colors[4];
+        if (d < 50) return COLORS[0];
+        else if (d < 100) return COLORS[1];
+        else if (d < 200) return COLORS[2];
+        else if (d < 300) return COLORS[3];
+        return COLORS[4];
       },
       opacity,
       getFilterValue: f => f.properties.distance_to_nearest_tree,

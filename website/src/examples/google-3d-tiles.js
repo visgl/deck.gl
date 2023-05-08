@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App from 'website-examples/google-3d-tiles/app';
+import App, {COLORS} from 'website-examples/google-3d-tiles/app';
 
 import {makeExample} from '../components';
 
-class HeatmapDemo extends Component {
+class Google3dTilesDemo extends Component {
   static title = 'Photorealistic 3D Tiles';
 
   static code = `${GITHUB_TREE}/examples/website/google-3d-tiles`;
@@ -20,21 +20,36 @@ class HeatmapDemo extends Component {
     return (
       <div>
         <p>Draping colored building outlines of Google Photorealistic 3D Tiles</p>
-        <div>
-          <img
-            src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"
-            alt="color scale"
-            style={{height: 8, width: '100%'}}
-          />
+        <div className="layout">
+          {COLORS.map((color, i) => {
+            return (
+              <div
+                className="legend"
+                key={i}
+                style={{
+                  background: `rgb(${color.join(',')})`,
+                  width: `${100 / COLORS.length}%`
+                }}
+              />
+            );
+          })}
         </div>
         <p className="layout">
           <span className="col-1-2">Close</span>
           <span className="col-1-2 text-right">Far</span>
         </p>
         <p>Buildings are colored according to the distance to the nearest tree</p>
-        <p>
-          Data source: <a href="https://todo">TODO</a>
-        </p>
+        <p>Data sources:</p>
+        <ul>
+          <li>
+            <a href="https://land.copernicus.eu/pan-european/high-resolution-layers/forests/tree-cover-density">
+              Tree Cover Density
+            </a>
+          </li>
+          <li>
+            <a href="https://wiki.openstreetmap.org/wiki/BigQuery_dataset">Building footprints</a>
+          </li>
+        </ul>
       </div>
     );
   }
@@ -48,4 +63,4 @@ class HeatmapDemo extends Component {
   }
 }
 
-export default makeExample(HeatmapDemo);
+export default makeExample(Google3dTilesDemo);
