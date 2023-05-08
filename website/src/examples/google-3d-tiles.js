@@ -19,7 +19,10 @@ class Google3dTilesDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Draping colored building outlines of Google Photorealistic 3D Tiles</p>
+        <p>Colored building outlines draped over Google Photorealistic 3D Tiles.</p>
+        <p>
+          See <a href="https://3dtiles.carto.com">full interactive Story Map</a>
+        </p>
         <div className="layout">
           {COLORS.map((color, i) => {
             return (
@@ -48,6 +51,11 @@ class Google3dTilesDemo extends Component {
           </li>
           <li>
             <a href="https://wiki.openstreetmap.org/wiki/BigQuery_dataset">Building footprints</a>
+          </li>
+          <li>
+            <a href="https://developers.google.com/maps/documentation/javascript/overview">
+              Map Tiles API
+            </a>
           </li>
         </ul>
       </div>
