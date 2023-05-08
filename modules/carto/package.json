@@ -32,11 +32,11 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/gis": "^3.3.3",
-    "@loaders.gl/loader-utils": "^3.3.3",
-    "@loaders.gl/mvt": "^3.3.3",
-    "@loaders.gl/tiles": "^3.3.3",
-    "@luma.gl/constants": "^8.5.16",
+    "@loaders.gl/gis": "^3.3.4",
+    "@loaders.gl/loader-utils": "^3.3.4",
+    "@loaders.gl/mvt": "^3.3.4",
+    "@loaders.gl/tiles": "^3.3.4",
+    "@luma.gl/constants": "^8.5.20",
     "@math.gl/web-mercator": "^3.6.2",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
@@ -49,7 +49,7 @@
     "quadbin": "^0.1.9"
   },
   "devDependencies": {
-    "@loaders.gl/schema": "^3.3.3",
+    "@loaders.gl/schema": "^3.3.4",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^1.4.2",
     "@types/d3-scale": "^3.0.0"

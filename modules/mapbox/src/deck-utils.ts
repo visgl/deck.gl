@@ -112,11 +112,8 @@ export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
 }
 
 export function getInterleavedProps(currProps: DeckProps) {
-  const useDevicePixels = 'useDevicePixels' in currProps ? currProps.useDevicePixels : true;
-
   const nextProps: DeckProps = {
     ...currProps,
-    useDevicePixels,
     // TODO: import these defaults from a single source of truth
     parameters: {
       depthMask: true,
