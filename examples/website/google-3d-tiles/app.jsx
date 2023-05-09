@@ -28,8 +28,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 60
 };
 
-// FOR DEV ONLY, will upload to deck.gl-data as geojson
-import BUILDING_DATA from './data/data.js';
+const BUILDING_DATA =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
 
 const DataCredit = styled('div')({
   position: 'absolute',
