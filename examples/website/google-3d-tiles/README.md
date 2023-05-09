@@ -1,4 +1,4 @@
-This is a minimal standalone version of the Google 3D Tiles integration example
+This is a minimal standalone version of the Photorealistic 3D Tiles integration example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage

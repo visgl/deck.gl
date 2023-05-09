@@ -53,7 +53,7 @@ class Google3dTilesDemo extends Component {
             <a href="https://wiki.openstreetmap.org/wiki/BigQuery_dataset">Building footprints</a>
           </li>
           <li>
-            <a href="https://developers.google.com/maps/documentation/javascript/overview">
+            <a href="https://developers.google.com/maps/documentation/tile/3d-tiles-overview">
               Map Tiles API
             </a>
           </li>
