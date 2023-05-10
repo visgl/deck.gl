@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
@@ -33,11 +33,8 @@ const INITIAL_VIEW_STATE = {
 const BUILDING_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
 
-const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
-
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
-  const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
   const layers = [
     new Tile3DLayer({
@@ -76,7 +73,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
     <div>
       <DeckGL
         style={{backgroundColor: '#061714'}}
-        initialViewState={initialViewState}
+        initialViewState={INITIAL_VIEW_STATE}
         controller={{touchRotate: true, inertia: 250}}
         layers={layers}
       />
