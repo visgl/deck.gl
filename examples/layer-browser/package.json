@@ -9,8 +9,8 @@
   "dependencies": {
     "@loaders.gl/ply": "^3.3.3",
     "@loaders.gl/gltf": "^3.3.3",
-    "@luma.gl/experimental": "9.0.0-alpha.15",
-    "@luma.gl/debug": "9.0.0-alpha.15",
+    "@luma.gl/experimental": "9.0.0-alpha.20",
+    "@luma.gl/debug": "9.0.0-alpha.20",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",

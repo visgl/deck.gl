@@ -30,13 +30,13 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/shadertools": "9.0.0-alpha.17"
+    "@luma.gl/shadertools": "9.0.0-alpha.20"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/api": "^9.0.0-alpha",
-    "@luma.gl/engine": "^9.0.0-alpha",
-    "@luma.gl/webgl-legacy": "^9.0.0-alpha",
+    "@luma.gl/api": "9.0.0-alpha.20",
+    "@luma.gl/engine": "9.0.0-alpha.20",
+    "@luma.gl/webgl-legacy": "9.0.0-alpha.20",
     "@math.gl/core": "^3.6.2",
     "@math.gl/web-mercator": "^3.6.2",
     "gl-matrix": "^3.0.0"
