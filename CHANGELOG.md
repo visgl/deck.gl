@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.14] - May 10 2023
+
+- Bump loaders to 3.3.5 (#7876)
+- Disable transition render tests (#7877)
+
 #### deck.gl [8.9.13] - May 4 2023
 
 - Upgrade loaders dependencies (#7872)
