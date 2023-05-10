@@ -9,13 +9,14 @@ from .view import View
 from .view_state import ViewState
 from .base_map_provider import BaseMapProvider
 from .map_styles import DARK, get_from_map_identifier
+from ipywidgets import DOMWidget
 
 
 def has_jupyter_extra():
     try:
         from ..widget import DeckGLWidget
 
-        DeckGLWidget()
+        DeckGLWidget(DOMWidget)
         return True
     except (ImportError, NotImplementedError):
         return False
