@@ -1,5 +1,4 @@
 import React, {useCallback, useState} from 'react';
-import {styled} from '@material-ui/core/styles';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
