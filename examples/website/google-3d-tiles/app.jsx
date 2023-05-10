@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from 'react';
+import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
@@ -16,6 +17,8 @@ export const COLORS = [
   [197, 27, 138],
   [122, 1, 119]
 ];
+
+const colorScale = scaleLinear().clamp(true).domain([0, 50, 100, 200, 300]).range(COLORS);
 
 const INITIAL_VIEW_STATE = {
   latitude: 50.089,
@@ -62,14 +65,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       extensions: [new DataFilterExtension({filterSize: 1}), new TerrainExtension()],
       stroked: false,
       filled: true,
-      getFillColor: ({properties}) => {
-        const d = properties.distance_to_nearest_tree;
-        if (d < 50) return COLORS[0];
-        else if (d < 100) return COLORS[1];
-        else if (d < 200) return COLORS[2];
-        else if (d < 300) return COLORS[3];
-        return COLORS[4];
-      },
+      getFillColor: ({properties}) => colorScale(properties.distance_to_nearest_tree),
       opacity,
       getFilterValue: f => f.properties.distance_to_nearest_tree,
       filterRange: [distance, 500]
