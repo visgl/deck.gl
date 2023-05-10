@@ -32,7 +32,7 @@ const BUILDING_DATA =
 
 const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
 
-export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
+export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
   const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
@@ -46,8 +46,8 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
           selectedTiles.forEach(tile => {
             const {copyright} = tile.content.gltf.asset;
             copyright.split(';').forEach(uniqueCredits.add, uniqueCredits);
-            setCredits([...uniqueCredits].join('; '));
           });
+          setCredits([...uniqueCredits].join('; '));
           return selectedTiles;
         };
       },
@@ -72,7 +72,7 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
       },
       opacity,
       getFilterValue: f => f.properties.distance_to_nearest_tree,
-      filterRange: [filter, 500]
+      filterRange: [distance, 500]
     })
   ];
 
