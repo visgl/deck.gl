@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {LinearInterpolator} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
