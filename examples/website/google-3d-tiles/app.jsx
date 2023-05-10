@@ -31,31 +31,11 @@ const INITIAL_VIEW_STATE = {
 const BUILDING_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
 
-const DataCredit = styled('div')({
-  position: 'absolute',
-  left: '8px',
-  bottom: '4px',
-  color: 'white',
-  fontSize: '10px'
-});
-
 const transitionInterpolator = new LinearInterpolator(['bearing', 'longitude', 'latitude']);
 
 export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
   const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
-
-  const orbit = useCallback(previousTransition => {
-    setInitialViewState(viewState => {
-      return {
-        ...viewState,
-        bearing: viewState.bearing + 30,
-        transitionDuration: 10000,
-        transitionInterpolator,
-        onTransitionEnd: orbit
-      };
-    });
-  }, []);
 
   const layers = [
     new Tile3DLayer({
@@ -102,11 +82,14 @@ export default function App({data = TILESET_URL, filter = 0, opacity = 0.2}) {
       <DeckGL
         style={{backgroundColor: '#061714'}}
         initialViewState={initialViewState}
-        onLoad={orbit}
         controller={{touchRotate: true, inertia: 250}}
         layers={layers}
       />
-      <DataCredit>{credits}</DataCredit>
+      <div
+        style={{position: 'absolute', left: '8px', bottom: '4px', color: 'white', fontSize: '10px'}}
+      >
+        {credits}
+      </div>
     </div>
   );
 }
