@@ -1,16 +1,18 @@
 /* global requestAnimationFrame */
-import type {GroupNode, ModelNode} from '@luma.gl/experimental';
+import {GroupNode, ModelNode} from '@luma.gl/experimental';
 
 export async function waitForGLTFAssets(gltfObjects: {scenes: GroupNode[]}): Promise<void> {
   const remaining: any[] = [];
 
   gltfObjects.scenes.forEach(scene => {
-    scene.traverse((model: ModelNode) => {
-      Object.values(model.model.getUniforms()).forEach((uniform: any) => {
-        if (uniform.loaded === false) {
-          remaining.push(uniform);
-        }
-      });
+    scene.traverse((node) => {
+      if (node instanceof ModelNode) {
+        Object.values(node.model.getUniforms()).forEach((uniform: any) => {
+          if (uniform.loaded === false) {
+            remaining.push(uniform);
+          }
+        });
+      }
     });
   });
 

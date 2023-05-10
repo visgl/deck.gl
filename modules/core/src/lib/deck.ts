@@ -889,7 +889,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = gl.canvas as HTMLCanvasElement;
+      this.canvas = gl.canvas ;
       instrumentGLContext(gl);
     }
 

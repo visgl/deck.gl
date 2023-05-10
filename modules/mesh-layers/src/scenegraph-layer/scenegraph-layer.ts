@@ -20,13 +20,15 @@
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import {GL, isWebGL2} from '@luma.gl/webgl-legacy';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {pbr} from '@luma.gl/shadertools';
 import {
   ScenegraphNode,
   GroupNode,
   GLTFAnimator,
   GLTFEnvironment,
-  createGLTFObjects
+  createGLTFObjects,
+  ModelNode
 } from '@luma.gl/experimental';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
@@ -249,7 +251,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     } else if (props.scenegraph && !props.scenegraph.gltf) {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
+      const gltfObjects = createGLTFObjects(WebGLDevice.attach(gl), gltf, this._getModelOptions());
       scenegraphData = {gltf, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw()); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -280,8 +282,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (this.state.attributesAvailable) {
       // attributeManager is always defined for primitive layers
       const allAttributes = this.getAttributeManager()!.getAttributes();
-      scenegraph.traverse(model => {
-        this._setModelAttributes(model.model, allAttributes);
+      scenegraph.traverse(node => {
+        if (node instanceof ModelNode) {
+          this._setModelAttributes(node.model, allAttributes);
+        }
       });
     }
   }
@@ -366,8 +370,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
-    this.state.scenegraph.traverse(model => {
-      this._setModelAttributes(model.model, changedAttributes);
+    this.state.scenegraph.traverse(node => {
+      if (node instanceof ModelNode) {
+        this._setModelAttributes(node.model, changedAttributes);
+      }
     });
   }
 
@@ -382,23 +388,25 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {viewport} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
     const numInstances = this.getNumInstances();
-    this.state.scenegraph.traverse((model, {worldMatrix}) => {
-      model.model.setInstanceCount(numInstances);
-      model.updateModuleSettings(moduleParameters);
-      model.draw({
-        parameters,
-        uniforms: {
-          sizeScale,
-          opacity,
-          sizeMinPixels,
-          sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-          sceneModelMatrix: worldMatrix,
-          // Needed for PBR (TODO: find better way to get it)
-          // eslint-disable-next-line camelcase
-          u_Camera: model.model.getUniforms().project_uCameraPosition
-        }
-      });
+    this.state.scenegraph.traverse((node, {worldMatrix}) => {
+      if (node instanceof ModelNode) {
+        node.model.setInstanceCount(numInstances);
+        node.updateModuleSettings(moduleParameters);
+        node.draw({
+          parameters,
+          uniforms: {
+            sizeScale,
+            opacity,
+            sizeMinPixels,
+            sizeMaxPixels,
+            composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+            sceneModelMatrix: worldMatrix,
+            // Needed for PBR (TODO: find better way to get it)
+            // eslint-disable-next-line camelcase
+            u_Camera: node.model.getUniforms().project_uCameraPosition
+          }
+        });
+      }
     });
   }
 }

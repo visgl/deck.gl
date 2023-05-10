@@ -34,6 +34,8 @@ import {
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {GL, Model, Texture2D, isWebGL2, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
+import {GLTFMaterialParser} from '@luma.gl/experimental';
+
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -51,7 +53,6 @@ import type {
 } from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {getMeshBoundingBox} from '@loaders.gl/schema';
 
 function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {

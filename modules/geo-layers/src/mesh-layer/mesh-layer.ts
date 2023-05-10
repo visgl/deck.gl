@@ -1,6 +1,7 @@
 import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {GL, Model} from '@luma.gl/webgl-legacy';
+import {WebGLDevice} from '@luma.gl/webgl';
 import {pbr} from '@luma.gl/shadertools';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
@@ -140,11 +141,11 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
     this.state.materialParser?.delete();
 
-    return new GLTFMaterialParser(this.context.gl, {
+    return new GLTFMaterialParser(WebGLDevice.attach(this.context.gl), {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       material: {unlit, ...pbrMaterial},
       pbrDebug: false,
-      imageBasedLightingEnvironment: null,
+      imageBasedLightingEnvironment: undefined,
       lights: true,
       useTangents: false
     });
