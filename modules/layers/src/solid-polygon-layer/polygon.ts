@@ -386,7 +386,7 @@ export function getSurfaceIndices(
       if (!preproject) {
         positions = positions.slice();
       }
-      permutePositions(positions, 1, 2, 0);
+      permutePositions(positions, 2, 0, 1);
     }
   }
 
