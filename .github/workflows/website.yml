@@ -23,12 +23,12 @@ jobs:
       GoogleMapsMapId: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
 
     steps:
-      - uses: actions/checkout@v2.1.1
+      - uses: actions/checkout@86f86b36ef15e6570752e7175f451a512eac206b # v2.1.1
         with:
           token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
         with:
           node-version: '16.x'
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Deploy
         if: ${{ endsWith(github.ref, steps.get-version.outputs.latest) }}
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@132898c54c57c7cc6b80eb3a89968de8fc283505 # 3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
