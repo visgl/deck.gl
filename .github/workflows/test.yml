@@ -18,10 +18,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v2.1.1
+      - uses: actions/checkout@86f86b36ef15e6570752e7175f451a512eac206b # v2.1.1
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
         with:
           node-version: '16.x'
 
@@ -36,7 +36,7 @@ jobs:
           xvfb-run -s "-ac -screen 0 1280x1024x16" yarn test ci
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -47,10 +47,10 @@ jobs:
         python-version: [3.8]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@75f3110429a8c05be0e1bf360334e4cced2b63fa # v2.3.3
         with:
           python-version: ${{ matrix.python-version }}
 
