@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.15] - May 13 2023
+
+- Fix polygon tesselation on yz plane (#7883)
+
 #### deck.gl [8.9.14] - May 10 2023
 
 - Bump loaders to 3.3.5 (#7876)
