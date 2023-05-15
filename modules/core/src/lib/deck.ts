@@ -743,6 +743,8 @@ export default class Deck {
       // @ts-expect-error private assign to read-only property
       this.height = newHeight;
       this.viewManager?.setProps({width: newWidth, height: newHeight});
+      // Make sure that any new layer gets initialized with the current viewport
+      this.layerManager?.activateViewport(this.getViewports()[0]);
       this.props.onResize({width: newWidth, height: newHeight});
     }
   }
