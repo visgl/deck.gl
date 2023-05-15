@@ -156,10 +156,6 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   }
 
   _createImageSource(props: WMSLayerProps): ImageSource {
-    if (props.data instanceof ImageSource) {
-      return props.data;
-    }
-
     if (typeof props.data === 'string') {
       return createImageSource({
         url: props.data,
@@ -168,7 +164,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       });
     }
 
-    throw new Error('invalid image source in props.data');
+    return props.data;
   }
 
   /** Run a getMetadata on the image service */
