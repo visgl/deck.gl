@@ -734,9 +734,9 @@ export default class Deck {
     if (!canvas) {
       return;
     }
-    // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
-    const newWidth = canvas.clientWidth || canvas.width;
-    const newHeight = canvas.clientHeight || canvas.height;
+    // Fallback to width/height when clientWidth/clientHeight are undefined (OffscreenCanvas).
+    const newWidth = canvas.clientWidth ?? canvas.width;
+    const newHeight = canvas.clientHeight ?? canvas.height;
     if (newWidth !== this.width || newHeight !== this.height) {
       // @ts-expect-error private assign to read-only property
       this.width = newWidth;
@@ -764,6 +764,7 @@ export default class Deck {
       width,
       height,
       useDevicePixels,
+      autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       gl,
       onCreateContext: opts =>

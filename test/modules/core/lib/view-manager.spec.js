@@ -231,6 +231,32 @@ test('ViewManager#update view props', t => {
   t.end();
 });
 
+/* eslint-disable max-statements */
+test('ViewManager#zero-size', t => {
+  const mainView = new MapView({id: 'main', controller: true});
+
+  const viewManager = new ViewManager({
+    views: [mainView],
+    viewState: {
+      longitude: -122,
+      latitude: 38,
+      zoom: 12
+    },
+    width: 100,
+    height: 100
+  });
+
+  t.ok(viewManager.controllers.main, 'main controller is created');
+  t.is(viewManager.getViewports().length, 1, 'viewport is created');
+
+  viewManager.setProps({width: 0, height: 0});
+
+  t.notOk(viewManager.controllers.main, 'no valid controllers');
+  t.is(viewManager.getViewports().length, 0, 'no valid viewports');
+
+  t.end();
+});
+
 function mockControllerEvent(type, x, y, details) {
   return {
     type,

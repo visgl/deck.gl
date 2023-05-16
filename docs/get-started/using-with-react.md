@@ -139,6 +139,32 @@ function App() {
 For more information on this syntax, see [DeckGL API](../api-reference/react/deckgl.md).
 
 
+## Using deck.gl with SSR
+
+Frameworks such as `Next.js` and `Gatsby` leverage Server Side Rendering to improve page loading performance. Some of deck.gl's upstream dependencies, such as `d3`, have opted to become [ES modules](https://nodejs.org/api/packages.html) and no longer support `require()` from the default Node entry point. This will cause SSR to fail. Possible mitigations are:
+
+- If the framework provides such a config, you may be able to replace the offending commonjs entry point (e.g. `@deck.gl/layers`) with the corresponding ESM entry point (`@deck.gl/layers/dist/esm`).
+- Otherwise, isolate the deck.gl imports and exclude them from SSR. Since deck.gl renders into a WebGL context, it wouldn't benefit from SSR to begin with. Below is a minimal sample for `Next.js`:
+
+```jsx title="/src/components/map.js"
+import DeckGL, {TextLayer} from 'deck.gl';
+
+export default function Map() {
+  return <DeckGL ... />
+}
+```
+
+```jsx title="/src/pages/app.js"
+import dynamic from 'next/dynamic';
+const Map = dynamic(() => import('../components/map'), {ssr: false});
+
+export default function App() {
+  return <Map />;
+}
+```
+
+More examples are discussed in [this issue](https://github.com/visgl/deck.gl/issues/7735).
+
 ## Remarks
 
 * The `DeckGL` component is typically rendered as a child of a
