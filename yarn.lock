@@ -2397,111 +2397,111 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@loaders.gl/3d-tiles@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/3d-tiles/-/3d-tiles-3.4.0-alpha.5.tgz#3219adbff580108ae9fa2aa55228104444cda5de"
-  integrity sha512-08hugQJkpbKENBakX/mkoTJHPJibECBD1Aqb6oHJlDLyThLMY+v+5MafXj2TrXi67curNAteQMA/mETXnoGESA==
+"@loaders.gl/3d-tiles@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/3d-tiles/-/3d-tiles-3.4.0.tgz#f9deec66710c08cef986ee5c17f48b3cd189cc54"
+  integrity sha512-LszVEkFknDWsl/93qQkqkDBIg3cf02N8Yo8escUiNuxIgr2dU3hZ/QOBaHpy3p8JrY7410fieEtVVGeXUs5e6Q==
   dependencies:
-    "@loaders.gl/draco" "3.4.0-alpha.5"
-    "@loaders.gl/gltf" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/math" "3.4.0-alpha.5"
-    "@loaders.gl/tiles" "3.4.0-alpha.5"
+    "@loaders.gl/draco" "3.4.0"
+    "@loaders.gl/gltf" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/math" "3.4.0"
+    "@loaders.gl/tiles" "3.4.0"
     "@math.gl/core" "^3.5.1"
     "@math.gl/geospatial" "^3.5.1"
     long "^5.2.1"
 
-"@loaders.gl/core@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-3.4.0-alpha.5.tgz#806af9ab0e9b3be1daeebc822d04d23496e4d4cc"
-  integrity sha512-H7uoCoqr9lMbIoxHV4KKu0bDMqSnP9eCZfxPlHvErWEDUgSiQZ5nqPoKCfrlMNYVweprg2/4pm9xGXl5V8unzA==
+"@loaders.gl/core@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-3.4.0.tgz#30dbb97680f36bd066a8b3a0857a2dd534cb13cb"
+  integrity sha512-Zxg2ECGT94jX0e3XJ1Alj5j/0wXMIK2+O0derEm8QOAy2hiwjefE2QsbgyDfC2eI1t//c7r9m/4079mzh/6qyA==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/worker-utils" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/worker-utils" "3.4.0"
     "@probe.gl/log" "^4.0.1"
 
-"@loaders.gl/csv@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-3.4.0-alpha.5.tgz#682eaee66f7d82395ec0ffafe9856a34eb9ac8b1"
-  integrity sha512-2d/8dD7+dHs/EE7ALLy7dxBEEwjtvB6dkWid+5DHhKsuNu2mJCGU2RCg/tGqrO2UfNc5xVRHg+sCsOHIqzPJoQ==
+"@loaders.gl/csv@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-3.4.0.tgz#852670b043d3e1dc6ef82444795492587a2e308c"
+  integrity sha512-IEv1nCryb+ZfKVvZ+gB+wMngnmfjNqq2yY7qyFjEKu4gnCFshD+lCOeBxPZB6doquU1Iot6qK947P5McZ+sUgA==
   dependencies:
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
 
-"@loaders.gl/draco@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/draco/-/draco-3.4.0-alpha.5.tgz#abc4692b697a826c310f786b1b46e66f07f89577"
-  integrity sha512-AzsIDFVPcuzJnDvP9j0fOIoDXkIirNpWrgJ+E3UrLvbDm9Y772AA9lRFtstA/AInXCyoTnzwKpUXzZbAITQQnw==
+"@loaders.gl/draco@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/draco/-/draco-3.4.0.tgz#cda9cfeeab7d3aab230e002265fe3c944e5b5018"
+  integrity sha512-HPVqhEri1TZUQpOViaLYHDpz8buWG1VXiBz9GzMuID+Bc1eaNjU/UdTWzOWDMu6KQDGmQnMxbT6DAJmiI7sNiA==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
-    "@loaders.gl/worker-utils" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
+    "@loaders.gl/worker-utils" "3.4.0"
     draco3d "1.5.5"
 
-"@loaders.gl/gis@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-3.4.0-alpha.5.tgz#92d4efa24b1a5c9df942aa19bf5b01b48bf424cf"
-  integrity sha512-D3lajB2/DUY0vJQHTO39mM3+CbwmtgHH0Gi4/tvwlLZaFCmKuslp39/EvrIR6RkNpIUy+M7K+NMYpbD4/zcYWg==
+"@loaders.gl/gis@3.4.0", "@loaders.gl/gis@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-3.4.0.tgz#5a88dba354c3cdeea412116640eb115f3ec83f05"
+  integrity sha512-VJpAB7dJmVdKEPVh8Dy90K9w/aRIoBxx4yv7ZmdjazPoNl3S1P1iHR6lMlXuPj1FBFzKS+gZrWkhhqvIQG7Plg==
   dependencies:
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
     "@mapbox/vector-tile" "^1.3.1"
     "@math.gl/polygon" "^3.5.1"
     pbf "^3.2.1"
 
-"@loaders.gl/gltf@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-3.4.0-alpha.5.tgz#7f89b8b3a2ad7404aed32c078a17c5c58eb7c03d"
-  integrity sha512-3hsTAo9Umt/sMgQ0CdJQ2IKhGWXrII68oLXVP53s53yjY+SFVEUtmyFfh5e93FQXTG2CEqrhmdiHwxVz3zElnA==
+"@loaders.gl/gltf@3.4.0", "@loaders.gl/gltf@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-3.4.0.tgz#8cc377c0e78d7af1ac0ca9f12a66cd1ae84de5fa"
+  integrity sha512-YqJOiR6vu0BnOvvifIGgLUaAsyw7e1BrTJL/XTJ9bECSlabB4ZZ5bGtic3fgKPiBhRIZDq/7+uvonNAwUvMbYA==
   dependencies:
-    "@loaders.gl/draco" "3.4.0-alpha.5"
-    "@loaders.gl/images" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/textures" "3.4.0-alpha.5"
+    "@loaders.gl/draco" "3.4.0"
+    "@loaders.gl/images" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/textures" "3.4.0"
     "@math.gl/core" "^3.5.1"
 
-"@loaders.gl/images@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-3.4.0-alpha.5.tgz#75a3c851a7da17c272e4fe6a5dbc643d90a4b9b7"
-  integrity sha512-EDjWJI96SsIrHSCnf49E1Cb0E5lydmoh55hcE6W4CkNhyOxDQLVMRIv4CzL7+pZLVsvOAGl+4TT5CHzaFgGRcw==
+"@loaders.gl/images@3.4.0", "@loaders.gl/images@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-3.4.0.tgz#bcd1eb0b762339def7649885f2705ef274ae421b"
+  integrity sha512-cDQitjdmvfFGacpo69GY57f6F7z7NDdA/qXRapjwmCsjeVIPxSbcgEiwqRQj/1GEbz7X6BFvZSRoxlcnGl6XfQ==
   dependencies:
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
 
-"@loaders.gl/loader-utils@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.4.0-alpha.5.tgz#397f3e0abb866951aa6a61effd95e3a13b7a7ffb"
-  integrity sha512-xYGLu8VXrZsv3ealTHxo6T7hAtwtO7IzOde5a4W+Zb8Fqm0jgXVjG8mEw47nyz79dEUiylh7hQpGbvc1IKcZTw==
+"@loaders.gl/loader-utils@3.4.0", "@loaders.gl/loader-utils@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.4.0.tgz#d4aa43a1acd64faf8b2a1c766efdbe40ef231f37"
+  integrity sha512-GSZoYVBh4dejNlu8OPzTrhSZ9R7euIq4kC2mgBzCG7x+ogBinu59HH1L84/UmCfzRQ1xJhFOguSCO5cBsh5s4Q==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/worker-utils" "3.4.0-alpha.5"
+    "@loaders.gl/worker-utils" "3.4.0"
     "@probe.gl/stats" "^4.0.1"
 
-"@loaders.gl/math@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/math/-/math-3.4.0-alpha.5.tgz#ca08f96489df618b49ba39e4aaf2a018a08979f6"
-  integrity sha512-qj40kHl0i7pKVAWcLLt0FMm112OE/H7Df5cTUsy/C7DyZgT9mHYhHsORsTiBZmE22uzSC+l/ovzUZpapuCo1qw==
+"@loaders.gl/math@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/math/-/math-3.4.0.tgz#9e3042ddcd16416ce149d9a90f293acfc7b0108d"
+  integrity sha512-1VvfPfk+Ieq/dep8oJSQKOWfCZoVeuGYGaVJ2PG66vZ5vhJmFOfQz9P/oGJIdaaUhVukPaWUXKdA1EV2FRwKlg==
   dependencies:
-    "@loaders.gl/images" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
+    "@loaders.gl/images" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
     "@math.gl/core" "^3.5.1"
 
-"@loaders.gl/mvt@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-3.4.0-alpha.5.tgz#a5a27590e8cbedea3aee48336be0590ed56ad171"
-  integrity sha512-Lh9Hmg8VMDRzIWxiPQ/ICnCnagsKGVkmzGHHfVHFL0mr3RpsbAMMQrpSGaNkn2s7DIwXlN2QbacDq8kiVtDZDg==
+"@loaders.gl/mvt@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-3.4.0.tgz#65cf797c5b8d85d5c767961f9cb4586a90fd8920"
+  integrity sha512-/VDAH2WvV9jwZAZ8B+vvLFTPjDGbY/G1//Y7WMxdtNNIMsTNBo/K7qbD6D/gWy7MKa9uTAed83ZvN4DSPuFUIA==
   dependencies:
-    "@loaders.gl/gis" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
+    "@loaders.gl/gis" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
     "@math.gl/polygon" "^3.5.1"
     pbf "^3.2.1"
 
-"@loaders.gl/polyfills@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-3.4.0-alpha.5.tgz#2d2e5042fd255c4bb731f376aa6afe659cdc897e"
-  integrity sha512-5gIs1j16tU/+w6ZaNpoRIjtlBwAfzsP711YCC1ehUH2+wRtxr03AMqYiZPclUhGblsno8/UfoHcwDYLnD+ETZA==
+"@loaders.gl/polyfills@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-3.4.0.tgz#4fc6e2b949b758b00ad9ef5d80d57e8221c6faf6"
+  integrity sha512-MP++I5y6Ra1VKbrif76lhai/IgnUVUnHh6gG0lPJ6QoWXUw3gBULxPunbeberUFvh0olCmagKw5+P+JZ8khhtQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@xmldom/xmldom" "^0.7.5"
@@ -2513,78 +2513,78 @@
     through "^2.3.8"
     web-streams-polyfill "^3.0.0"
 
-"@loaders.gl/schema@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.4.0-alpha.5.tgz#298e42219ddf479296d3a93bbaf489886a97c991"
-  integrity sha512-5kYDp7Ag4ALu0ppOl8a/k8kkbhhYdgq0C8OITahtgwCv6MBCL4C1j6/MeI9mha8ruAgv33KqjGJ1LT5RwDRezQ==
+"@loaders.gl/schema@3.4.0", "@loaders.gl/schema@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.4.0.tgz#238b6ca1f60b466bc18ef4286e463e0761a85059"
+  integrity sha512-OUNZUXPtuUNhczglZr+Eff/5YcuvnRChPWuz9n+nJX5hxbdnvomsFOO1Up1ErneBw2wsLgt25SYLbcPbRxw9tw==
   dependencies:
     "@types/geojson" "^7946.0.7"
 
-"@loaders.gl/terrain@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/terrain/-/terrain-3.4.0-alpha.5.tgz#957c0e54313dec1b010d4fa60583c5ed35f00304"
-  integrity sha512-meNPARHOohlkEys2zCedfw5L2sfxXC3vIOQ3T9BGHjbMzZUnN/1WBqtGUuVB+A3xTS+olI7Hj5AYaFwIRS0R5w==
+"@loaders.gl/terrain@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/terrain/-/terrain-3.4.0.tgz#a5e1f843a660645b1fa7a4e32b6adbfe33abad63"
+  integrity sha512-xsotBDEdFCqGrXsDoz3GuiZedCeIVtqyJVEMWSZ1v5KUeiByiZW3wt0hL7V8GG38lv3IZb5teDU2MUtMBHs3Tg==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/images" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
+    "@loaders.gl/images" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
     "@mapbox/martini" "^0.2.0"
 
-"@loaders.gl/textures@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/textures/-/textures-3.4.0-alpha.5.tgz#fe770323f6e6d72d72c567fffba24ecdedb6a211"
-  integrity sha512-eCdpMj+8JI+JpK3AJQ1RhXpGbymxTIRgFhmerZ3Dy+T0qMMoycciINgeI15VsFQb836HK+oosIfGNkvHPfpONw==
+"@loaders.gl/textures@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/textures/-/textures-3.4.0.tgz#579a502999aba2e79fee4cf1319cda1fada0d5d7"
+  integrity sha512-3L/MbPJ+llTyAG8zWM3vh8Wf0fAsdm3vnR73jW6bznboyHEvZpPGhXSya9q0+KfmumPUSmDzQArG7oilTt+H5w==
   dependencies:
-    "@loaders.gl/images" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
-    "@loaders.gl/worker-utils" "3.4.0-alpha.5"
+    "@loaders.gl/images" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
+    "@loaders.gl/worker-utils" "3.4.0"
     ktx-parse "^0.0.4"
     texture-compressor "^1.0.2"
 
-"@loaders.gl/tiles@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-3.4.0-alpha.5.tgz#8f8a3881411f4c7c60e650b6e4898899a6070934"
-  integrity sha512-e6ABgOvvvWgHZDpaC9N6/t/y4Hc7j3uGNMY2x1x+sUUT0qbBj/o1Re978vcWEuhtiA0M5M3qsqpH02LlZnXs8A==
+"@loaders.gl/tiles@3.4.0", "@loaders.gl/tiles@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-3.4.0.tgz#3434d7c3d0d940ff9002b601fc71308e30ab402d"
+  integrity sha512-4h1Zww9zviGqqt7J9CqHgMIH7KFIO4SmF5oMx0FXij8uS/UBXVA37Gch7CenV5Av52ZFza/ZuWQuxVjeycxFIA==
   dependencies:
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/math" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/math" "3.4.0"
     "@math.gl/core" "^3.5.1"
     "@math.gl/culling" "^3.5.1"
     "@math.gl/geospatial" "^3.5.1"
     "@math.gl/web-mercator" "^3.5.1"
     "@probe.gl/stats" "^4.0.1"
 
-"@loaders.gl/wms@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/wms/-/wms-3.4.0-alpha.5.tgz#f36bf5cf6bd4abc308b7a4a58b4cdfd611c8fc90"
-  integrity sha512-lTBb9giTQuHKn7aws1UlxK5uIa5Hd+iBVar65df/R62ORAYbHl9z/7Y9oyuzhfDHXkmAfvBto6vJq2hW3N8Zkw==
+"@loaders.gl/wms@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/wms/-/wms-3.4.0.tgz#3db9983ee886b15867c44f504bfa942f3ac83a34"
+  integrity sha512-4cf4EKWz6El0jIRFZ++G/nXOGneE5KrOTSx32IooiTymGfjsCynKckucRbLfmWZGMwvdDRUYvabHvFtobMxRGw==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/images" "3.4.0-alpha.5"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
-    "@loaders.gl/xml" "3.4.0-alpha.5"
+    "@loaders.gl/images" "3.4.0"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
+    "@loaders.gl/xml" "3.4.0"
     "@turf/rewind" "^5.1.5"
     deep-strict-equal "^0.2.0"
     lerc "^4.0.1"
 
-"@loaders.gl/worker-utils@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.4.0-alpha.5.tgz#44d030596251346b902f9bcd90a74847a3823a5e"
-  integrity sha512-S6BDotyPiEbf1c6+7t8Jg/DAB0rl5/T+C0wzVB1WwiUSM3E6HIz10gVRibNhorUL3PWk3aA7ibeQRbdu/MJ1qA==
+"@loaders.gl/worker-utils@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-3.4.0.tgz#55bca3d8d504176962098560d824f547c021aafb"
+  integrity sha512-xSopQni1V1qSGCvng71WzN5SQWOYL14wMAR3voGrNcThla/A+eJa0+0G8P2C4ilkEOem+jxigs0NSVlh7dfiJw==
   dependencies:
     "@babel/runtime" "^7.3.1"
 
-"@loaders.gl/xml@3.4.0-alpha.5":
-  version "3.4.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/xml/-/xml-3.4.0-alpha.5.tgz#8807c683a95733fea3d8786b8180813550d975fc"
-  integrity sha512-vNVC9KRXeTWcdScPjInHUZ4c7GYMfTfG0NwSBqE6zgDpvHTRcmKD6cxzX1k5ZVLrjEVXJGteIuDL5bY/Gja7/Q==
+"@loaders.gl/xml@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/xml/-/xml-3.4.0.tgz#c4a95fdd19e4e2a4692eb9dd9b8c057a3ff2401b"
+  integrity sha512-l4vIpVTNX/64YpiT6Dl68w/vaiwaQCLS6L/Mt2L0Sv077M2SK5SZupl0aLM2VMx6y9ftWlNyJnpr0W+DTr1uxg==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    "@loaders.gl/loader-utils" "3.4.0-alpha.5"
-    "@loaders.gl/schema" "3.4.0-alpha.5"
+    "@loaders.gl/loader-utils" "3.4.0"
+    "@loaders.gl/schema" "3.4.0"
     fast-xml-parser "^4.1.3"
 
 "@luma.gl/constants@8.5.20", "@luma.gl/constants@^8.5.16", "@luma.gl/constants@^8.5.20":
