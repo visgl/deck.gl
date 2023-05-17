@@ -51,7 +51,7 @@ export default class GoogleMapsOverlay {
 
     const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     if (this._map) {
-      if (!map && this._map.getRenderingType() === VECTOR) {
+      if (!map && this._map.getRenderingType() === VECTOR && this.props.interleaved) {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
       }
       this._overlay?.setMap(null);
