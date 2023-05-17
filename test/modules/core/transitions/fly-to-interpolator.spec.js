@@ -129,7 +129,7 @@ test('ViewportFlyToInterpolator#initializeProps', t => {
   t.end();
 });
 
-test.only('ViewportFlyToInterpolator#interpolateProps', t => {
+test('ViewportFlyToInterpolator#interpolateProps', t => {
   const interpolator = new FlyToInterpolator();
 
   TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
