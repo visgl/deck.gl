@@ -30,6 +30,9 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
 
+attribute float filterCategories;
+uniform float filter_category;
+
 varying float dataFilter_value;
 
 float dataFilter_reduceValue(float value) {
@@ -77,6 +80,7 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     return {};
   }
   const {
+    filterCategoryList = [],
     filterRange = [-1, 1],
     filterEnabled = true,
     filterTransformSize = true,
@@ -98,6 +102,7 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
           filter_softMax: filterSoftRange.map(r => r[1]),
           filter_max: filterRange.map(r => r[1])
         }),
+    filter_category: filterCategoryList[0], // HACK just pass first category for now
     filter_enabled: filterEnabled,
     filter_useSoftMargin: Boolean(opts.filterSoftRange),
     filter_transformSize: filterEnabled && filterTransformSize,
@@ -144,6 +149,11 @@ const inject = {
     #else
       dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
     #endif
+
+    if (filterCategories != filter_category) {
+      dataFilter_value = 0.0;
+    }
+
   `,
 
   'vs:#main-end': `

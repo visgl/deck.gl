@@ -19,7 +19,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 11
 };
 
-const SIDES = {3: true, 4: false, 5: true, 6: false, 7: false};
+const SIDES = {3: true, 4: false, 5: true, 6: false, 7: false, 8: false, 9: false, 10: false, 11: false, 12: false, 100: false};
 
 class Root extends Component {
   constructor(props) {
@@ -52,7 +52,7 @@ class Root extends Component {
       [-cos * 5000 + 1000, cos * 5000 - 1000], // x
       [-sin * 5000 + 1000, sin * 5000 - 1000] // y
     ];
-    const filterCategories = Object.entries(this.state.sides)
+    const filterCategoryList = Object.entries(this.state.sides)
       .filter(([k, v]) => v)
       .map(([k, v]) => Number(k));
 
@@ -69,12 +69,12 @@ class Root extends Component {
         getFilterValue: f => f.properties.centroid,
         getFilterCategory: f => f.properties.sides,
 
-        onFilteredItemsChange: console.log, // eslint-disable-line
+        // onFilteredItemsChange: console.log, // eslint-disable-line
 
         // Filter
         filterRange,
         filterSoftRange,
-        filterCategories,
+        filterCategoryList,
 
         extensions: [dataFilterExtension]
       })

@@ -28,11 +28,13 @@ import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/cor
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
+  getFilterCategory: {type: 'accessor', value: 0},
   onFilteredItemsChange: {type: 'function', value: null, optional: true},
 
   filterEnabled: true,
   filterRange: [-1, 1],
   filterSoftRange: null,
+  filterCategoryList: [],
   filterTransformSize: true,
   filterTransformColor: true
 };
@@ -43,6 +45,11 @@ export type DataFilterExtensionProps<DataT = any> = {
    * Returns either a number (if `filterSize: 1`) or an array of numbers.
    */
   getFilterValue?: Accessor<DataT, number | number[]>;
+  /**
+   * Accessor to retrieve the category for each object that it will be filtered by.
+   * Returns either a number (if `filterSize: 1`) or an array of numbers.
+   */
+  getFilterCategory?: Accessor<DataT, number | number[]>;
   /**
    * Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
    * @default true
@@ -70,6 +77,11 @@ export type DataFilterExtensionProps<DataT = any> = {
    * @default true
    */
   filterTransformColor?: boolean;
+  /**
+   * The categories which define whether an object should be rendered.
+   * @default []
+   */
+  filterCategoryList: [number, number] | [number, number][];
   /**
    * Only called if the `countItems` option is enabled.
    */
@@ -151,6 +163,20 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
               divisor: 1
             }
           }
+        },
+        filterCategories: {
+          size: 1, // HARDCODE to 1 for now
+          // type: GL.UNSIGNED_INT,
+          type: GL.FLOAT, // HACK use float for now
+          accessor: 'getFilterCategory',
+          shaderAttributes: {
+            filterCategories: {
+              divisor: 0
+            },
+            instanceFilterCategories: {
+              divisor: 1
+            }
+          }
         }
       });
     }
@@ -201,9 +227,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
         attributeManager!.attributes.filterValues.needsUpdate() ||
+        attributeManager!.attributes.filterCategories.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
-        props.filterSoftRange !== oldProps.filterSoftRange;
+        props.filterSoftRange !== oldProps.filterSoftRange ||
+        props.filterCategoryList !== oldProps.filterCategoryList;
       if (filterNeedsUpdate) {
         this.setState({filterNeedsUpdate});
       }
@@ -215,7 +243,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     const {onFilteredItemsChange} = this.props;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
-        attributes: {filterValues, filterIndices}
+        attributes: {filterValues, filterCategories, filterIndices}
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
@@ -226,6 +254,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
           ...filterValues.getShaderAttributes(),
+          ...filterCategories.getShaderAttributes(),
           ...(filterIndices && filterIndices.getShaderAttributes())
         })
         .draw({
