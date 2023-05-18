@@ -32,7 +32,7 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
 
 // Would be better to pass as uint, but for this need to move all shaders to WebGL2
 attribute float filterCategories;
-uniform float filter_category;
+uniform int filter_category;
 
 varying float dataFilter_value;
 
@@ -150,10 +150,11 @@ const inject = {
       dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
     #endif
 
-    if (filterCategories != filter_category) {
+    int shifted = filter_category / int(pow(2.0, filterCategories));
+    float bit = mod(float(shifted), 2.0);
+    if(bit == 0.0) {
       dataFilter_value = 0.0;
     }
-
   `,
 
   'vs:#main-end': `

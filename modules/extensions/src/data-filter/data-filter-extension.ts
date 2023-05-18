@@ -277,9 +277,13 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
 
     // TODO Just pass first category in for now
-    params.uniforms.filter_category = extension._getCategoryKey.bind(this)(
-      this.props.filterCategoryList[0]
-    );
+    let mask = 0;
+    for (const category of this.props.filterCategoryList) {
+      const key = extension._getCategoryKey.bind(this)(category);
+      mask += 1 << key;
+    }
+    params.uniforms.filter_category = mask;
+    // console.log(mask, mask.toString(2));
   }
 
   finalizeState(this: Layer<DataFilterExtensionProps>) {
