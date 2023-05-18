@@ -30,7 +30,6 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
 
-// Would be better to pass as uint, but for this need to move all shaders to WebGL2
 attribute float filterCategories;
 uniform int filter_category;
 
@@ -81,7 +80,6 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     return {};
   }
   const {
-    filterCategoryList = [],
     filterRange = [-1, 1],
     filterEnabled = true,
     filterTransformSize = true,
@@ -151,8 +149,7 @@ const inject = {
     #endif
 
     int shifted = filter_category / int(pow(2.0, filterCategories));
-    float bit = mod(float(shifted), 2.0);
-    if(bit == 0.0) {
+    if(mod(float(shifted), 2.0) == 0.0) {
       dataFilter_value = 0.0;
     }
   `,
