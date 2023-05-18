@@ -19,17 +19,19 @@ const INITIAL_VIEW_STATE = {
   zoom: 11
 };
 
+const SIDES = {3: true, 4: false, 5: true, 6: false, 7: false};
+
 class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 0};
+    this.state = {time: 1000, sides: SIDES};
 
     this._animate = this._animate.bind(this);
   }
 
   componentDidMount() {
-    this._animate();
+    // this._animate();
   }
 
   _animate() {
@@ -76,13 +78,44 @@ class Root extends Component {
 
   render() {
     return (
-      <DeckGL
-        controller={true}
-        initialViewState={INITIAL_VIEW_STATE}
-        layers={this._renderLayers()}
-      />
+      <div>
+        <DeckGL
+          controller={true}
+          initialViewState={INITIAL_VIEW_STATE}
+          layers={this._renderLayers()}
+        />
+        <MultiSelect obj={SIDES} onChange={obj => this.setState({sides: obj})} />
+      </div>
     );
   }
+}
+
+function MultiSelect({obj, onChange}) {
+  return (
+    <div style={{position: 'relative', padding: 4, margin: 2, width: 200}}>
+      {Object.entries(obj).map(([key, value]) => (
+        <Checkbox
+          key={key}
+          label={key}
+          value={value}
+          onChange={e => {
+            obj[key] = e.target.checked;
+            onChange(obj);
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Checkbox({label, value, onChange}) {
+  return (
+    <label>
+      {label}:
+      <input type="checkbox" checked={value} onChange={onChange} />
+      <br />
+    </label>
+  );
 }
 
 const container = document.body.appendChild(document.createElement('div'));

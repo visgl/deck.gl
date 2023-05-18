@@ -54,7 +54,7 @@ function getPolygonFeature(centroid, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Polygon', coordinates: [vertices]},
-    properties: {centroid, color: getColor(centroid)}
+    properties: {centroid, color: getColor(centroid), sides}
   };
 }
 
