@@ -204,6 +204,7 @@ export class WebGLOverlayView {
   constructor() {
     this.map = null;
     this._container = document.createElement('div');
+    this._draws = 0;
   }
 
   setMap(map) {
@@ -216,5 +217,9 @@ export class WebGLOverlayView {
     return {
       getDiv: () => this._container
     };
+  }
+
+  requestRedraw() {
+    this._draws++;
   }
 }

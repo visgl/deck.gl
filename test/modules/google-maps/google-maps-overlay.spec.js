@@ -121,6 +121,15 @@ for (const interleaved of [true, false]) {
     t.ok(overlay._overlay.onContextRestored, 'onContextRestored lifecycle function is registered');
     t.ok(overlay._overlay.onDraw, 'onDraw lifecycle function is registered');
     t.ok(overlay._overlay.onRemove, 'onRemove lifecycle function is registered');
+
+    t.notOk(overlay._overlay._draws, 'Map not yet drawn');
+    overlay.setMap(null);
+    if (interleaved) {
+      t.ok(overlay._overlay._draws, 'Redraw requested when map removed');
+    } else {
+      t.notOk(overlay._overlay._draws, 'Redraw not requested when map removed');
+    }
+
     overlay.finalize();
 
     t.end();
