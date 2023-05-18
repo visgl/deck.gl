@@ -19,19 +19,11 @@ const INITIAL_VIEW_STATE = {
   zoom: 11
 };
 
-const SIDES = {
-  3: true,
-  4: false,
-  5: true,
-  6: false,
-  7: false,
-  8: false,
-  9: false,
-  10: false,
-  11: false,
-  12: false,
-  100: false
-};
+const uniqueSides = new Set(DATA.map(({properties}) => properties.sides));
+const SIDES = {};
+for (const s of uniqueSides) {
+  SIDES[s] = Math.random() < 0.3;
+}
 
 class Root extends Component {
   constructor(props) {
@@ -66,7 +58,7 @@ class Root extends Component {
     ];
     const filterCategoryList = Object.entries(this.state.sides)
       .filter(([k, v]) => v)
-      .map(([k, v]) => Number(k));
+      .map(([k, v]) => k);
 
     return [
       new GeoJsonLayer({

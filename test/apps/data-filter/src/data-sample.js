@@ -37,7 +37,7 @@ function getPointFeature(coordinates, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Point', coordinates},
-    properties: {centroid: coordinates, color: getColor(coordinates), radius, sides: 100}
+    properties: {centroid: coordinates, color: getColor(coordinates), radius, sides: 'circle'}
   };
 }
 
