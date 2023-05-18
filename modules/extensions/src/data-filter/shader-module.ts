@@ -30,6 +30,7 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
 
+// Would be better to pass as uint, but for this need to move all shaders to WebGL2
 attribute float filterCategories;
 uniform float filter_category;
 
@@ -102,7 +103,6 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
           filter_softMax: filterSoftRange.map(r => r[1]),
           filter_max: filterRange.map(r => r[1])
         }),
-    filter_category: filterCategoryList[0], // HACK just pass first category for now
     filter_enabled: filterEnabled,
     filter_useSoftMargin: Boolean(opts.filterSoftRange),
     filter_transformSize: filterEnabled && filterTransformSize,

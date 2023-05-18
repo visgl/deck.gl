@@ -149,6 +149,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
+
     if (attributeManager) {
       attributeManager.add({
         filterValues: {
@@ -169,6 +170,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           // type: GL.UNSIGNED_INT,
           type: GL.FLOAT, // HACK use float for now
           accessor: 'getFilterCategory',
+          transform: extension._getCategoryKey,
           shaderAttributes: {
             filterCategories: {
               divisor: 0
@@ -273,6 +275,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
       this.state.filterNeedsUpdate = false;
     }
+
+    // TODO Just pass first category in for now
+    params.uniforms.filter_category = extension._getCategoryKey.bind(this)(
+      this.props.filterCategoryList[0]
+    );
   }
 
   finalizeState(this: Layer<DataFilterExtensionProps>) {
@@ -282,5 +289,17 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       filterFBO.delete();
       filterModel.delete();
     }
+  }
+
+  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category) {
+    if (!this.state.categoryMap) {
+      this.setState({categoryMap: {}});
+    }
+    const {categoryMap} = this.state;
+    if (!(category in categoryMap)) {
+      categoryMap[category] = Object.keys(categoryMap).length;
+      // console.log(`${this.constructor.layerName}: ${category} -> ${categoryMap[category]}`);
+    }
+    return categoryMap[category];
   }
 }

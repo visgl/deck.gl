@@ -19,7 +19,19 @@ const INITIAL_VIEW_STATE = {
   zoom: 11
 };
 
-const SIDES = {3: true, 4: false, 5: true, 6: false, 7: false, 8: false, 9: false, 10: false, 11: false, 12: false, 100: false};
+const SIDES = {
+  3: true,
+  4: false,
+  5: true,
+  6: false,
+  7: false,
+  8: false,
+  9: false,
+  10: false,
+  11: false,
+  12: false,
+  100: false
+};
 
 class Root extends Component {
   constructor(props) {
@@ -61,13 +73,16 @@ class Root extends Component {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
         data: DATA,
+        stroked: false,
 
         // Data accessors
         getFillColor: f => f.properties.color,
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
-        getFilterCategory: f => f.properties.sides,
+        getFilterCategory: f => {
+          return f.properties.sides;
+        },
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
 
