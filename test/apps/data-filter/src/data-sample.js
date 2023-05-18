@@ -31,7 +31,7 @@ export function featureGrid(N, bbox) {
     for (let y = 0; y < sizeY; y++) {
       const p = [bbox[0] + stepX * x, bbox[1] + stepY * y];
       features[index] =
-        Math.random() < 0.5 ? getPointFeature(p, radius) : getPolygonFeature(p, radius);
+        Math.random() < 0.1 ? getPointFeature(p, radius) : getPolygonFeature(p, radius);
       index++;
     }
   }
