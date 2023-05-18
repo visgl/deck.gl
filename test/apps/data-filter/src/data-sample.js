@@ -1,3 +1,17 @@
+export const SHAPE_NAMES = {
+  3: 'triangle',
+  4: 'square',
+  5: 'pentagon',
+  6: 'hexagon',
+  7: 'septagon',
+  8: 'octagon',
+  9: 'nonagon',
+  10: 'decagon',
+  11: 'hendecagon',
+  12: 'dodecagon',
+  100: 'circle'
+};
+
 // generate points in a grid
 export function featureGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
@@ -37,7 +51,12 @@ function getPointFeature(coordinates, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Point', coordinates},
-    properties: {centroid: coordinates, color: getColor(coordinates), radius, sides: 'circle'}
+    properties: {
+      centroid: coordinates,
+      color: getColor(coordinates),
+      radius,
+      label: SHAPE_NAMES[100]
+    }
   };
 }
 
@@ -54,8 +73,8 @@ function getPolygonFeature(centroid, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Polygon', coordinates: [vertices]},
-    properties: {centroid, color: getColor(centroid), sides}
+    properties: {centroid, color: getColor(centroid), label: SHAPE_NAMES[sides]}
   };
 }
 
-export default featureGrid(10000, [-1e4, -1e4, 1e4, 1e4]);
+export const DATA = featureGrid(10000, [-1e4, -1e4, 1e4, 1e4]);

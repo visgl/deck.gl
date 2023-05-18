@@ -5,7 +5,7 @@ import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
-import DATA from './data-sample';
+import {DATA, SHAPE_NAMES} from './data-sample';
 
 const dataFilterExtension = new DataFilterExtension({
   filterSize: 2,
@@ -13,23 +13,18 @@ const dataFilterExtension = new DataFilterExtension({
   countItems: true
 });
 
-const INITIAL_VIEW_STATE = {
-  longitude: -122.45,
-  latitude: 37.78,
-  zoom: 11
-};
+const INITIAL_VIEW_STATE = {longitude: -122.45, latitude: 37.78, zoom: 13};
 
-const uniqueSides = new Set(DATA.map(({properties}) => properties.sides));
-const SIDES = {};
-for (const s of uniqueSides) {
-  SIDES[s] = Math.random() < 0.3;
+const LABELS = {};
+for (const shape of Object.values(SHAPE_NAMES)) {
+  LABELS[shape] = Math.random() < 0.3;
 }
 
 class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 1000, sides: SIDES};
+    this.state = {time: 1000, labels: LABELS};
 
     this._animate = this._animate.bind(this);
   }
@@ -56,7 +51,7 @@ class Root extends Component {
       [-cos * 5000 + 1000, cos * 5000 - 1000], // x
       [-sin * 5000 + 1000, sin * 5000 - 1000] // y
     ];
-    const filterCategoryList = Object.entries(this.state.sides)
+    const filterCategoryList = Object.entries(this.state.labels)
       .filter(([k, v]) => v)
       .map(([k, v]) => k);
 
@@ -73,7 +68,7 @@ class Root extends Component {
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
         getFilterCategory: f => {
-          return f.properties.sides;
+          return f.properties.label;
         },
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
@@ -96,7 +91,7 @@ class Root extends Component {
           initialViewState={INITIAL_VIEW_STATE}
           layers={this._renderLayers()}
         />
-        <MultiSelect obj={SIDES} onChange={obj => this.setState({sides: obj})} />
+        <MultiSelect obj={LABELS} onChange={obj => this.setState({labels: obj})} />
       </div>
     );
   }
