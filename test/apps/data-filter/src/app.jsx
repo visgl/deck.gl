@@ -52,6 +52,9 @@ class Root extends Component {
       [-cos * 5000 + 1000, cos * 5000 - 1000], // x
       [-sin * 5000 + 1000, sin * 5000 - 1000] // y
     ];
+    const filterCategories = Object.entries(this.state.sides)
+      .filter(([k, v]) => v)
+      .map(([k, v]) => Number(k));
 
     return [
       new GeoJsonLayer({
@@ -64,12 +67,14 @@ class Root extends Component {
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
+        getFilterCategory: f => f.properties.sides,
 
         onFilteredItemsChange: console.log, // eslint-disable-line
 
         // Filter
         filterRange,
         filterSoftRange,
+        filterCategories,
 
         extensions: [dataFilterExtension]
       })
