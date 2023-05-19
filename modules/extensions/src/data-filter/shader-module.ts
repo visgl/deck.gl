@@ -13,13 +13,16 @@ uniform DATAFILTER_TYPE filter_max;
 uniform bool filter_useSoftMargin;
 uniform bool filter_enabled;
 uniform bool filter_transformSize;
+uniform int filter_category;
 
 #ifdef NON_INSTANCED_MODEL
   #define DATAFILTER_ATTRIB filterValues
   #define DATAFILTER_ATTRIB_64LOW filterValues64Low
+  #define DATACATEGORY_ATTRIB filterCategories
 #else
   #define DATAFILTER_ATTRIB instanceFilterValues
   #define DATAFILTER_ATTRIB_64LOW instanceFilterValues64Low
+  #define DATACATEGORY_ATTRIB instanceFilterCategories
 #endif
 
 attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
@@ -29,9 +32,7 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_min64High;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
-
-attribute float filterCategories;
-uniform int filter_category;
+attribute float DATACATEGORY_ATTRIB;
 
 varying float dataFilter_value;
 
@@ -148,7 +149,7 @@ const inject = {
       dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
     #endif
 
-    int shifted = filter_category / int(pow(2.0, filterCategories));
+    int shifted = filter_category / int(pow(2.0, DATACATEGORY_ATTRIB ));
     if(mod(float(shifted), 2.0) == 0.0) {
       dataFilter_value = 0.0;
     }

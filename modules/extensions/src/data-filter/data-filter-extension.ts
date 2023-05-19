@@ -167,8 +167,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         },
         filterCategories: {
           size: 1, // HARDCODE to 1 for now
-          // type: GL.UNSIGNED_INT,
-          type: GL.FLOAT, // HACK use float for now
+          type: GL.FLOAT,
           accessor: 'getFilterCategory',
           transform: extension._getCategoryKey,
           shaderAttributes: {

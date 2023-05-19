@@ -13,7 +13,7 @@ const dataFilterExtension = new DataFilterExtension({
   countItems: true
 });
 
-const INITIAL_VIEW_STATE = {longitude: -122.45, latitude: 37.78, zoom: 13};
+const INITIAL_VIEW_STATE = {longitude: -122.45, latitude: 37.78, zoom: 12};
 
 const LABELS = {};
 for (const shape of Object.values(SHAPE_NAMES)) {
@@ -60,16 +60,13 @@ class Root extends Component {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
         data: DATA,
-        stroked: false,
 
         // Data accessors
         getFillColor: f => f.properties.color,
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
-        getFilterCategory: f => {
-          return f.properties.label;
-        },
+        getFilterCategory: f => f.properties.label,
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
 
