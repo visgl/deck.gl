@@ -149,8 +149,10 @@ const inject = {
       dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
     #endif
 
-    int shifted = filter_categoryBitMask.x / int(pow(2.0, DATACATEGORY_ATTRIB ));
-    if(mod(float(shifted), 2.0) == 0.0) {
+    // Read nth bit of bitmask, with n = DATACATEGORY_ATTRIB
+    int dataFilter_channel = int(DATACATEGORY_ATTRIB / 32.0);
+    int dataFilter_shifted = filter_categoryBitMask[dataFilter_channel] / int(pow(2.0, mod(DATACATEGORY_ATTRIB, 32.0)));
+    if(mod(float(dataFilter_shifted), 2.0) == 0.0) {
       dataFilter_value = 0.0;
     }
   `,

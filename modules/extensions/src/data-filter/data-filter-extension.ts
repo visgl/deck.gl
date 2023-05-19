@@ -281,7 +281,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     for (const category of this.props.filterCategoryList) {
       const key = extension._getCategoryKey.bind(this)(category); // value 0-127
       const channel = Math.floor(key / 32);
-      categoryBitMask[channel] += Math.pow(2, key); // 1 << key fails for key > 30
+      categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
     }
     params.uniforms.filter_categoryBitMask = categoryBitMask;
   }
