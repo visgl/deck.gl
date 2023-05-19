@@ -48,7 +48,7 @@ float dataFilter_reduceValue(vec3 value) {
 float dataFilter_reduceValue(vec4 value) {
   return min(min(value.x, value.y), min(value.z, value.w));
 }
-void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
+void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax, float category) {
   if (filter_enabled) {
     if (filter_useSoftMargin) {
       dataFilter_value = dataFilter_reduceValue(
@@ -62,6 +62,13 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
     }
   } else {
     dataFilter_value = 1.0;
+  }
+
+  // Read nth bit of bitmask, with n = category
+  int dataFilter_channel = int(category / 32.0);
+  int dataFilter_shifted = filter_categoryBitMask[dataFilter_channel] / int(pow(2.0, mod(category, 32.0)));
+  if(mod(float(dataFilter_shifted), 2.0) == 0.0) {
+    dataFilter_value = 0.0;
   }
 }
 `;
@@ -143,18 +150,12 @@ const inject = {
     #ifdef DATAFILTER_DOUBLE
       dataFilter_setValue(
         DATAFILTER_ATTRIB - filter_min64High + DATAFILTER_ATTRIB_64LOW,
-        DATAFILTER_ATTRIB - filter_max64High + DATAFILTER_ATTRIB_64LOW
+        DATAFILTER_ATTRIB - filter_max64High + DATAFILTER_ATTRIB_64LOW,
+        DATACATEGORY_ATTRIB
       );
     #else
-      dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
+      dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB, DATACATEGORY_ATTRIB);
     #endif
-
-    // Read nth bit of bitmask, with n = DATACATEGORY_ATTRIB
-    int dataFilter_channel = int(DATACATEGORY_ATTRIB / 32.0);
-    int dataFilter_shifted = filter_categoryBitMask[dataFilter_channel] / int(pow(2.0, mod(DATACATEGORY_ATTRIB, 32.0)));
-    if(mod(float(dataFilter_shifted), 2.0) == 0.0) {
-      dataFilter_value = 0.0;
-    }
   `,
 
   'vs:#main-end': `
