@@ -13,7 +13,7 @@ uniform DATAFILTER_TYPE filter_max;
 uniform bool filter_useSoftMargin;
 uniform bool filter_enabled;
 uniform bool filter_transformSize;
-uniform int filter_category;
+uniform ivec4 filter_categoryBitMask;
 
 #ifdef NON_INSTANCED_MODEL
   #define DATAFILTER_ATTRIB filterValues
@@ -149,7 +149,7 @@ const inject = {
       dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
     #endif
 
-    int shifted = filter_category / int(pow(2.0, DATACATEGORY_ATTRIB ));
+    int shifted = filter_categoryBitMask.x / int(pow(2.0, DATACATEGORY_ATTRIB ));
     if(mod(float(shifted), 2.0) == 0.0) {
       dataFilter_value = 0.0;
     }

@@ -275,14 +275,15 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       this.state.filterNeedsUpdate = false;
     }
 
-    // TODO Just pass first category in for now
+    // Split 128 bit integer over 4 32 bit integers
+    const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
     let mask = 0;
     for (const category of this.props.filterCategoryList) {
-      const key = extension._getCategoryKey.bind(this)(category);
-      mask += 1 << key;
+      const key = extension._getCategoryKey.bind(this)(category); // value 0-127
+      const channel = Math.floor(key / 32);
+      categoryBitMask[channel] += Math.pow(2, key); // 1 << key fails for key > 30
     }
-    params.uniforms.filter_category = mask;
-    // console.log(mask, mask.toString(2));
+    params.uniforms.filter_categoryBitMask = categoryBitMask;
   }
 
   finalizeState(this: Layer<DataFilterExtensionProps>) {
