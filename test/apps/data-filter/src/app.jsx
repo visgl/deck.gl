@@ -8,6 +8,7 @@ import {DataFilterExtension} from '@deck.gl/extensions';
 import {DATA, SHAPE_NAMES} from './data-sample';
 
 const dataFilterExtension = new DataFilterExtension({
+  categorySize: 1, // ONLY works for 1 right now!
   filterSize: 2,
   softMargin: true,
   countItems: true

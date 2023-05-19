@@ -32,7 +32,7 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_min64High;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
-attribute float DATACATEGORY_ATTRIB;
+attribute DATACATEGORY_TYPE DATACATEGORY_ATTRIB;
 
 varying float dataFilter_value;
 
@@ -48,7 +48,7 @@ float dataFilter_reduceValue(vec3 value) {
 float dataFilter_reduceValue(vec4 value) {
   return min(min(value.x, value.y), min(value.z, value.w));
 }
-void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax, float category) {
+void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax, DATACATEGORY_TYPE category) {
   if (filter_enabled) {
     if (filter_useSoftMargin) {
       dataFilter_value = dataFilter_reduceValue(

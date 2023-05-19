@@ -95,6 +95,11 @@ export type DataFilterExtensionProps<DataT = any> = {
 
 type DataFilterExtensionOptions = {
   /**
+   * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object.
+   * @default 1
+   */
+  categorySize: number;
+  /**
    * The size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object.
    * @default 1
    */
@@ -124,23 +129,28 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   static extensionName = 'DataFilterExtension';
 
   constructor({
+    categorySize = 1,
     filterSize = 1,
     fp64 = false,
     countItems = false
   }: Partial<DataFilterExtensionOptions> = {}) {
+    if (!DATA_TYPE_FROM_SIZE[categorySize]) {
+      throw new Error('categorySize out of range');
+    }
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
-    super({filterSize, fp64, countItems});
+    super({categorySize, filterSize, fp64, countItems});
   }
 
   getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
-    const {filterSize, fp64} = extension.opts;
+    const {categorySize, filterSize, fp64} = extension.opts;
 
     return {
       modules: [fp64 ? shaderModule64 : shaderModule],
       defines: {
+        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize],
         DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize],
         DATAFILTER_DOUBLE: Boolean(fp64)
       }
@@ -166,7 +176,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           }
         },
         filterCategories: {
-          size: 1, // HARDCODE to 1 for now
+          size: extension.opts.categorySize,
           type: GL.FLOAT,
           accessor: 'getFilterCategory',
           transform: extension._getCategoryKey,
