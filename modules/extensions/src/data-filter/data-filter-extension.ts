@@ -318,6 +318,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
   }
 
+  // TODO should be per-channel
   _getCategoryKey(this: Layer<DataFilterExtensionProps>, category) {
     if (!this.state.categoryMap) {
       this.setState({categoryMap: {}});

@@ -55,7 +55,8 @@ function getPointFeature(coordinates, radius) {
       centroid: coordinates,
       color: getColor(coordinates),
       radius,
-      label: SHAPE_NAMES[100]
+      label: SHAPE_NAMES[100],
+      sides: 100
     }
   };
 }
@@ -73,7 +74,7 @@ function getPolygonFeature(centroid, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Polygon', coordinates: [vertices]},
-    properties: {centroid, color: getColor(centroid), label: SHAPE_NAMES[sides]}
+    properties: {centroid, color: getColor(centroid), label: SHAPE_NAMES[sides], sides}
   };
 }
 
