@@ -2556,7 +2556,7 @@
     "@math.gl/web-mercator" "^3.5.1"
     "@probe.gl/stats" "^4.0.1"
 
-"@loaders.gl/wms@^3.4.2":
+"@loaders.gl/wms@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/wms/-/wms-3.4.3.tgz#b764b5d905e2573c07e44aa35c83c12010c6436f"
   integrity sha512-eTeMsHw64GiMQxQQSsHE9jZDYh5Xj0n6wr7DWIKqGs9zAOpWkhiS/OhrKyS7Ek7F3ph3gV6RThp7WwDJ8KcIaA==

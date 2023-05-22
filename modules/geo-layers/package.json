@@ -37,7 +37,7 @@
     "@loaders.gl/schema": "^3.4.2",
     "@loaders.gl/terrain": "^3.4.2",
     "@loaders.gl/tiles": "^3.4.2",
-    "@loaders.gl/wms": "^3.4.2",
+    "@loaders.gl/wms": "^3.4.3",
     "@luma.gl/constants": "^8.5.20",
     "@luma.gl/experimental": "^8.5.20",
     "@math.gl/core": "^3.6.2",

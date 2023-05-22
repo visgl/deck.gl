@@ -28,19 +28,23 @@ type _WMSLayerProps = {
   data: string | ImageSource;
   serviceType?: ImageServiceType | 'auto';
   layers?: string[];
-  srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
+  crs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
   onMetadataLoadError?: (error: Error) => void;
   onImageLoadStart?: (requestId: unknown) => void;
   onImageLoad?: (requestId: unknown) => void;
   onImageLoadError?: (requestId: unknown, error: Error) => void;
+
+  /** @deprecated Use props.crs instead */
+  srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
 };
 
 const defaultProps: DefaultProps<WMSLayerProps> = {
   id: 'imagery-layer',
   data: '',
   serviceType: 'auto',
-  srs: 'auto',
+  crs: undefined, // 'auto' We assign the default manually to support the deprecated srs prop
+  srs: undefined,
   layers: {type: 'array', compare: true, value: []},
   onMetadataLoad: {type: 'function', value: () => {}},
   // eslint-disable-next-line
@@ -71,7 +75,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     lastRequestParameters: {
       bbox: [number, number, number, number];
       layers: string[];
-      srs: 'EPSG:4326' | 'EPSG:3857';
+      crs: 'EPSG:4326' | 'EPSG:3857';
       width: number;
       height: number;
     };
@@ -130,7 +134,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
         _imageCoordinateSystem:
-          lastRequestParameters.srs === 'EPSG:4326'
+          lastRequestParameters.crs === 'EPSG:4326'
             ? COORDINATE_SYSTEM.LNGLAT
             : COORDINATE_SYSTEM.CARTESIAN,
         bounds,
@@ -191,39 +195,43 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
   /** Load an image */
   async loadImage(viewport: Viewport, reason: string): Promise<void> {
-    const {layers, serviceType} = this.props;
-
-    // TODO - move to ImageSource?
-    if (serviceType === 'wms' && layers.length === 0) {
+    // Avoid issuing requests that will fail, look for missing props, zero size viewport etc
+    if (!this.canRequestImage(viewport, this.props)) {
       return;
     }
 
-    const bounds = viewport.getBounds();
-    const {width, height} = viewport;
-    const requestId = this.getRequestId();
-    let {srs} = this.props;
-    if (srs === 'auto') {
+    let {crs} = this.props;
+    const {srs, layers} = this.props;
+    crs = crs || srs || 'auto';
+    if (crs === 'auto') {
       // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
-      srs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
+      crs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
     }
-    const requestParams = {
+
+    const {width, height} = viewport;
+    let bounds = viewport.getBounds();
+
+    if (crs === 'EPSG:3857') {
+      const [minX, minY] = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
+      const [maxX, maxY] = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
+      bounds = [minX, minY, maxX, maxY];
+    }
+
+    const requestParameters = {
       width,
       height,
       bbox: bounds,
       layers,
-      srs
+      crs
     };
-    if (srs === 'EPSG:3857') {
-      const [minX, minY] = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
-      const [maxX, maxY] = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
-      requestParams.bbox = [minX, minY, maxX, maxY];
-    }
+
+    const requestId = this.getRequestId();
 
     try {
       this.state.loadCounter++;
       this.props.onImageLoadStart(requestId);
 
-      const image = await this.state.imageSource.getImage(requestParams);
+      const image = await this.state.imageSource.getImage(requestParameters);
 
       // If a request takes a long time, later requests may have already loaded.
       if (this.state.lastRequestId < requestId) {
@@ -232,7 +240,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
         this.setState({
           image,
           bounds,
-          lastRequestParameters: requestParams,
+          lastRequestParameters: requestParameters,
           lastRequestId: requestId
         });
       }
@@ -242,6 +250,26 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     } finally {
       this.state.loadCounter--;
     }
+  }
+
+  /** Checks if an image request would be successful */
+  protected canRequestImage(viewport: Viewport, props: WMSLayerProps): boolean {
+    // WMS services require at least one "data layer" to be specified
+    const {layers, serviceType} = this.props;
+    if (serviceType === 'wms' && layers.length === 0) {
+      return false;
+    }
+
+    // Bounds must not be 0,0,0,0
+    const bounds = viewport.getBounds();
+    const {width, height} = viewport;
+
+    const validSizeAndBounds =
+      width > 0 &&
+      height > 0 &&
+      !(bounds[0] === 0 && bounds[1] === 0 && bounds[2] === 0 && bounds[3] === 0);
+
+    return validSizeAndBounds;
   }
 
   // HELPERS

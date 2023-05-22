@@ -142,7 +142,7 @@ Specifies names of layers that should be visualized from the image service.
 
 > Note that WMS services will typically not display anything unless at least one valid layer name is provided.
 
-##### `srs` (string, optional) {#srs}
+##### `crs` (string, optional) {#crs}
 
 - Default: `'auto'`
 
