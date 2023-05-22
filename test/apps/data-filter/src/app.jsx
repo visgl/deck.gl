@@ -97,7 +97,15 @@ class Root extends Component {
 
 function MultiSelect({obj, onChange}) {
   return (
-    <div style={{position: 'relative', padding: 4, margin: 2, width: 200}}>
+    <div
+      style={{
+        position: 'relative',
+        background: 'rgba(255,255,255,0.5)',
+        padding: 10,
+        margin: 8,
+        width: 110
+      }}
+    >
       {Object.entries(obj).map(([key, value]) => (
         <Checkbox
           key={key}
