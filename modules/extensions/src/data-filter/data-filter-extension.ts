@@ -159,12 +159,13 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
+    const {categorySize, filterSize, fp64} = extension.opts;
 
     if (attributeManager) {
       attributeManager.add({
         filterValues: {
-          size: extension.opts.filterSize,
-          type: extension.opts.fp64 ? GL.DOUBLE : GL.FLOAT,
+          size: filterSize,
+          type: fp64 ? GL.DOUBLE : GL.FLOAT,
           accessor: 'getFilterValue',
           shaderAttributes: {
             filterValues: {
@@ -176,10 +177,14 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           }
         },
         filterCategories: {
-          size: extension.opts.categorySize,
+          size: categorySize,
           type: GL.FLOAT,
           accessor: 'getFilterCategory',
-          transform: extension._getCategoryKey,
+          transform:
+            categorySize === 1
+              ? extension._getCategoryKey
+              : // TODO independent keys
+                d => d.map(x => extension._getCategoryKey.bind(this)(x)),
           shaderAttributes: {
             filterCategories: {
               divisor: 0
@@ -286,12 +291,20 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
 
     // Split 128 bit integer over 4 32 bit integers
+    const {categorySize} = extension.opts;
+    const {filterCategoryList} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
-    let mask = 0;
-    for (const category of this.props.filterCategoryList) {
-      const key = extension._getCategoryKey.bind(this)(category); // value 0-127
-      const channel = Math.floor(key / 32);
-      categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
+    const categoryFilters = (
+      categorySize === 1 ? [filterCategoryList] : filterCategoryList
+    ) as any[][];
+    const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
+    for (let c = 0; c < categoryFilters.length; c++) {
+      const categoryFilter = categoryFilters[c];
+      for (const category of categoryFilter) {
+        const key = extension._getCategoryKey.bind(this)(category); // value 0-127
+        const channel = c * maxCategories + Math.floor(key / 32);
+        categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
+      }
     }
     params.uniforms.filter_categoryBitMask = categoryBitMask;
   }
