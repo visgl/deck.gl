@@ -67,14 +67,14 @@ class Root extends Component {
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
-        getFilterCategory: f => [f.properties.label, 0],
+        getFilterCategory: f => [f.properties.label, f.properties.label],
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
 
         // Filter
         filterRange,
         filterSoftRange,
-        filterCategoryList: [filterCategoryList, []],
+        filterCategoryList: [filterCategoryList, filterCategoryList],
 
         extensions: [dataFilterExtension]
       })
