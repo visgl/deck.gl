@@ -64,20 +64,28 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
     dataFilter_value = 1.0;
   }
 
-  // Read nth bit of bitmask, with n = category
-  // TODO don't just read two channels
-  ivec2 dataFilter_masks = ivec2(
-    filter_categoryBitMask[int(category.x / 32.0)],
-    filter_categoryBitMask[int(category.y / 32.0) + 2]
-  );
+  #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
+    int dataFilter_masks = filter_categoryBitMask[int(category / 32.0)];
+  #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
+    ivec2 dataFilter_masks = ivec2(
+      filter_categoryBitMask[int(category.x / 32.0)],
+      filter_categoryBitMask[int(category.y / 32.0) + 2]
+    );
+  #elif DATACATEGORY_CHANNELS == 3 // Three 32-bit masks
+    ivec3 dataFilter_masks = filter_categoryBitMask.xyz;
+  #else // Four 32-bit masks
+    ivec4 dataFilter_masks = filter_categoryBitMask;
+  #endif
 
   // Shift mask and extract relevant bits
   DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) / pow(DATACATEGORY_TYPE(2.0), mod(category, 32.0));
   dataFilter_bits = mod(floor(dataFilter_bits), 2.0);
 
-  if(any(equal(dataFilter_bits, DATAFILTER_TYPE(0.0)))) {
-    dataFilter_value = 0.0;
-  }
+  #if DATACATEGORY_CHANNELS == 1
+    if(dataFilter_bits == 0.0) dataFilter_value = 0.0;
+  #else
+    if(any(equal(dataFilter_bits, DATACATEGORY_TYPE(0.0)))) dataFilter_value = 0.0;
+  #endif
 }
 `;
 
