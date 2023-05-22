@@ -75,7 +75,7 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
   DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) / pow(DATACATEGORY_TYPE(2.0), mod(category, 32.0));
   dataFilter_bits = mod(floor(dataFilter_bits), 2.0);
 
-  if(dataFilter_bits.x * dataFilter_bits.y == 0.0) {
+  if(any(equal(dataFilter_bits, DATAFILTER_TYPE(0.0)))) {
     dataFilter_value = 0.0;
   }
 }
