@@ -53,15 +53,9 @@ class Root extends Component {
       [-cos * 5000 + 1000, cos * 5000 - 1000], // x
       [-sin * 5000 + 1000, sin * 5000 - 1000] // y
     ];
-    const filterCategoryList = Object.entries(this.state.labels)
-      .filter(([k, v]) => v)
-      .map(([k, v]) => k);
-    const oddEvenList = Object.entries(this.state.oddeven)
-      .filter(([k, v]) => v)
-      .map(([k, v]) => k);
-    const colorList = Object.entries(this.state.colors)
-      .filter(([k, v]) => v)
-      .map(([k, v]) => k);
+    const filterCategoryList = [this.state.labels, this.state.oddeven, this.state.colors].map(
+      trueKeys
+    );
 
     return [
       new GeoJsonLayer({
@@ -87,8 +81,7 @@ class Root extends Component {
         filterRange,
         filterSoftRange,
         // Filter by odd selected shape
-        filterCategoryList: [filterCategoryList, oddEvenList, colorList],
-        // filterCategoryList: filterCategoryList,
+        filterCategoryList,
 
         extensions: [dataFilterExtension]
       })
@@ -145,6 +138,12 @@ function Checkbox({label, value, onChange}) {
       <br />
     </label>
   );
+}
+
+function trueKeys(obj) {
+  return Object.entries(obj)
+    .filter(([k, v]) => v)
+    .map(([k, v]) => k);
 }
 
 const container = document.body.appendChild(document.createElement('div'));
