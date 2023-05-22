@@ -12,6 +12,12 @@ export const SHAPE_NAMES = {
   100: 'circle'
 };
 
+export const COLORS = {
+  red: [255, 0, 0],
+  green: [0, 255, 0],
+  blue: [0, 0, 255]
+};
+
 // generate points in a grid
 export function featureGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
@@ -39,12 +45,10 @@ export function featureGrid(N, bbox) {
   return features;
 }
 
-function getColor(p) {
-  const r = ((p[0] % 255) + 255) % 255;
-  const g = ((p[1] % 255) + 255) % 255;
-  const b = 128;
-
-  return [r, g, b];
+function getColor() {
+  const keys = Object.keys(COLORS);
+  const n = Math.floor(keys.length * Math.random());
+  return keys[n];
 }
 
 function getPointFeature(coordinates, radius) {
@@ -53,7 +57,7 @@ function getPointFeature(coordinates, radius) {
     geometry: {type: 'Point', coordinates},
     properties: {
       centroid: coordinates,
-      color: getColor(coordinates),
+      color: getColor(),
       radius,
       label: SHAPE_NAMES[100],
       sides: 100
@@ -74,7 +78,7 @@ function getPolygonFeature(centroid, radius) {
   return {
     type: 'Feature',
     geometry: {type: 'Polygon', coordinates: [vertices]},
-    properties: {centroid, color: getColor(centroid), label: SHAPE_NAMES[sides], sides}
+    properties: {centroid, color: getColor(), label: SHAPE_NAMES[sides], sides}
   };
 }
 

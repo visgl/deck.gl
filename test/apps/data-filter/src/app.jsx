@@ -5,10 +5,10 @@ import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
-import {DATA, SHAPE_NAMES} from './data-sample';
+import {DATA, COLORS, SHAPE_NAMES} from './data-sample';
 
 const dataFilterExtension = new DataFilterExtension({
-  categorySize: 2,
+  categorySize: 3,
   filterSize: 2,
   softMargin: true,
   countItems: true
@@ -26,7 +26,7 @@ class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 1000, labels: LABELS, oddeven: ODDEVEN};
+    this.state = {time: 1000, colors: COLORS, labels: LABELS, oddeven: ODDEVEN};
 
     this._animate = this._animate.bind(this);
   }
@@ -59,6 +59,9 @@ class Root extends Component {
     const oddEvenList = Object.entries(this.state.oddeven)
       .filter(([k, v]) => v)
       .map(([k, v]) => k);
+    const colorList = Object.entries(this.state.colors)
+      .filter(([k, v]) => v)
+      .map(([k, v]) => k);
 
     return [
       new GeoJsonLayer({
@@ -67,11 +70,16 @@ class Root extends Component {
         data: DATA,
 
         // Data accessors
-        getFillColor: f => f.properties.color,
+        getFillColor: f => COLORS[f.properties.color],
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
-        getFilterCategory: f => [f.properties.label, f.properties.sides % 2 ? 'odd' : 'even'],
+        getFilterCategory: ({properties}) => [
+          properties.label,
+          properties.sides % 2 ? 'odd' : 'even',
+          properties.color
+        ],
+        // getFilterCategory: f => f.properties.label,
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
 
@@ -79,7 +87,8 @@ class Root extends Component {
         filterRange,
         filterSoftRange,
         // Filter by odd selected shape
-        filterCategoryList: [filterCategoryList, oddEvenList],
+        filterCategoryList: [filterCategoryList, oddEvenList, colorList],
+        // filterCategoryList: filterCategoryList,
 
         extensions: [dataFilterExtension]
       })
@@ -96,6 +105,7 @@ class Root extends Component {
         />
         <MultiSelect obj={LABELS} onChange={obj => this.setState({labels: obj})} />
         <MultiSelect obj={ODDEVEN} onChange={obj => this.setState({oddeven: obj})} />
+        <MultiSelect obj={COLORS} onChange={obj => this.setState({colors: obj})} />
       </div>
     );
   }
