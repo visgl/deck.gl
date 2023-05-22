@@ -72,7 +72,7 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
   );
 
   // Shift mask and extract relevant bits
-  vec2 dataFilter_bits = vec2(dataFilter_masks) / pow(vec2(2.0), mod(category, vec2(32.0)));
+  DATACATEGORY_TYPE dataFilter_bits = DATACATEGORY_TYPE(dataFilter_masks) / pow(DATACATEGORY_TYPE(2.0), mod(category, 32.0));
   dataFilter_bits = mod(floor(dataFilter_bits), 2.0);
 
   if(dataFilter_bits.x * dataFilter_bits.y == 0.0) {
