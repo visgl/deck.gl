@@ -112,6 +112,7 @@ export function mockFetchMapsV3() {
       arrayBuffer: () => BINARY_TILE,
       text: () => null, // Required to get loaders.gl to use arrayBuffer()
       ok: true,
+      url,
       headers: new Headers(headers)
     });
   };
