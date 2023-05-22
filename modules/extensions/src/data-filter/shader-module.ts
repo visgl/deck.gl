@@ -66,16 +66,16 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
 
   // Read nth bit of bitmask, with n = category
   // TODO don't just read two channels
-  float n = category.x;
-  int dataFilter_channel = int(n / 32.0);
-  int dataFilter_shifted = filter_categoryBitMask[dataFilter_channel] / int(pow(2.0, mod(n, 32.0)));
-  float dataFilter_bit1 = mod(float(dataFilter_shifted), 2.0);
+  ivec2 dataFilter_masks = ivec2(
+    filter_categoryBitMask[int(category.x / 32.0)],
+    filter_categoryBitMask[int(category.y / 32.0) + 2]
+  );
 
-  n = category.y;
-  dataFilter_channel = int(n / 32.0) + 2;
-  dataFilter_shifted = filter_categoryBitMask[dataFilter_channel] / int(pow(2.0, mod(n, 32.0)));
-  float dataFilter_bit2 = mod(float(dataFilter_shifted), 2.0);
-  if(dataFilter_bit1 * dataFilter_bit2 == 0.0) {
+  // Shift mask and extract relevant bits
+  vec2 dataFilter_bits = vec2(dataFilter_masks) / pow(vec2(2.0), mod(category, vec2(32.0)));
+  dataFilter_bits = mod(floor(dataFilter_bits), 2.0);
+
+  if(dataFilter_bits.x * dataFilter_bits.y == 0.0) {
     dataFilter_value = 0.0;
   }
 }
