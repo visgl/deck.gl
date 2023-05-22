@@ -20,12 +20,13 @@ const LABELS = {};
 for (const shape of Object.values(SHAPE_NAMES)) {
   LABELS[shape] = Math.random() < 0.3;
 }
+const ODDEVEN = {odd: true, even: true};
 
 class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 1000, labels: LABELS};
+    this.state = {time: 1000, labels: LABELS, oddeven: ODDEVEN};
 
     this._animate = this._animate.bind(this);
   }
@@ -55,6 +56,9 @@ class Root extends Component {
     const filterCategoryList = Object.entries(this.state.labels)
       .filter(([k, v]) => v)
       .map(([k, v]) => k);
+    const oddEvenList = Object.entries(this.state.oddeven)
+      .filter(([k, v]) => v)
+      .map(([k, v]) => k);
 
     return [
       new GeoJsonLayer({
@@ -67,7 +71,7 @@ class Root extends Component {
         getLineWidth: 10,
         getRadius: f => f.properties.radius,
         getFilterValue: f => f.properties.centroid,
-        getFilterCategory: f => [f.properties.label, f.properties.sides % 2],
+        getFilterCategory: f => [f.properties.label, f.properties.sides % 2 ? 'odd' : 'even'],
 
         // onFilteredItemsChange: console.log, // eslint-disable-line
 
@@ -75,7 +79,7 @@ class Root extends Component {
         filterRange,
         filterSoftRange,
         // Filter by odd selected shape
-        filterCategoryList: [filterCategoryList, [1]],
+        filterCategoryList: [filterCategoryList, oddEvenList],
 
         extensions: [dataFilterExtension]
       })
@@ -91,6 +95,7 @@ class Root extends Component {
           layers={this._renderLayers()}
         />
         <MultiSelect obj={LABELS} onChange={obj => this.setState({labels: obj})} />
+        <MultiSelect obj={ODDEVEN} onChange={obj => this.setState({oddeven: obj})} />
       </div>
     );
   }
