@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.16] - May 22 2023
+
+- chore: bump to loaders.gl@3.4.0 (#7870)
+- Support position in FlyToInterpolator (#7900)
+- GoogleMapsOverlay: requestRedraw when removing interleaved overlay (#7902)
+- Fix initial viewport when view is not MapView (#7896)
+- (origin/8.9-release) fix(mapbox): crash when interleaved overlay is removed then added back (#7821)
+
 #### deck.gl [8.9.15] - May 13 2023
 
 - Fix polygon tesselation on yz plane (#7883)
