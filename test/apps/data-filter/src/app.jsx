@@ -22,11 +22,26 @@ for (const shape of Object.values(SHAPE_NAMES)) {
 }
 const ODDEVEN = {odd: true, even: true};
 
+const boxStyle = {
+  position: 'relative',
+  background: 'rgba(255, 255, 255, 0.9)',
+  padding: 10,
+  margin: 8,
+  width: 110
+};
+
 class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 1000, colors: COLORS, labels: LABELS, oddeven: ODDEVEN, sizes: SIZES};
+    this.state = {
+      counts: {},
+      time: 1000,
+      colors: COLORS,
+      labels: LABELS,
+      oddeven: ODDEVEN,
+      sizes: SIZES
+    };
 
     this._animate = this._animate.bind(this);
   }
@@ -81,7 +96,13 @@ class Root extends Component {
         ],
         // getFilterCategory: f => f.properties.label,
 
-        // onFilteredItemsChange: console.log, // eslint-disable-line
+        onFilteredItemsChange: e => {
+          const {counts} = this.state;
+          if (counts[e.id] !== e.count && !e.id.includes('stroke')) {
+            counts[e.id] = e.count;
+            this.setState({counts});
+          }
+        },
 
         // Filter
         filterRange,
@@ -106,6 +127,9 @@ class Root extends Component {
         <MultiSelect obj={ODDEVEN} onChange={obj => this.setState({oddeven: obj})} />
         <MultiSelect obj={COLORS} onChange={obj => this.setState({colors: obj})} />
         <MultiSelect obj={SIZES} onChange={obj => this.setState({sizes: obj})} />
+        <div style={boxStyle}>
+          Count {Object.values(this.state.counts).reduce((a, b) => a + b, 0)}
+        </div>
       </div>
     );
   }
@@ -113,15 +137,7 @@ class Root extends Component {
 
 function MultiSelect({obj, onChange}) {
   return (
-    <div
-      style={{
-        position: 'relative',
-        background: 'rgba(255, 255, 255, 0.9)',
-        padding: 10,
-        margin: 8,
-        width: 110
-      }}
-    >
+    <div style={boxStyle}>
       {Object.entries(obj).map(([key, value]) => (
         <Checkbox
           key={key}

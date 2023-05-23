@@ -278,6 +278,10 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
     const {filterFBO, filterModel, filterNeedsUpdate, categoryBitMaskNeedsUpdate} = this.state;
     const {onFilteredItemsChange} = this.props;
+
+    if (categoryBitMaskNeedsUpdate) {
+      extension._updateCategoryBitMask.call(this, params, extension);
+    }
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterCategories, filterIndices}
@@ -294,6 +298,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           ...filterCategories.getShaderAttributes(),
           ...(filterIndices && filterIndices.getShaderAttributes())
         })
+        .setUniforms(params.uniforms)
         .draw({
           framebuffer: filterFBO,
           parameters: {
@@ -309,10 +314,6 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       onFilteredItemsChange({id: this.id, count});
 
       this.state.filterNeedsUpdate = false;
-    }
-
-    if (categoryBitMaskNeedsUpdate) {
-      extension._updateCategoryBitMask.call(this, params, extension);
     }
   }
 
