@@ -9,7 +9,8 @@ const START_PROPS = {
   latitude: 37.78,
   pitch: 0,
   bearing: 0,
-  zoom: 12
+  zoom: 12,
+  position: [0, 0, 0]
 };
 
 const END_PROPS = {
@@ -19,7 +20,8 @@ const END_PROPS = {
   latitude: 40.7,
   pitch: 20,
   bearing: 0,
-  zoom: 11
+  zoom: 11,
+  position: [4, 40, 400]
 };
 
 /* eslint-disable max-len */
@@ -42,7 +44,8 @@ const TEST_CASES = [
         latitude: 37.78,
         zoom: 12,
         pitch: 0,
-        bearing: 0
+        bearing: 0,
+        position: [0, 0, 0]
       },
       end: {
         width: 800,
@@ -51,13 +54,35 @@ const TEST_CASES = [
         latitude: 40.7,
         zoom: 11,
         pitch: 20,
-        bearing: 0
+        bearing: 0,
+        position: [4, 40, 400]
       }
     },
     transition: {
-      0.25: {bearing: 0, pitch: 5, longitude: -122.4017, latitude: 37.78297, zoom: 7.518116},
-      0.5: {bearing: 0, pitch: 10, longitude: -106.3, latitude: 38.76683, zoom: 3.618313},
-      0.75: {bearing: 0, pitch: 15, longitude: -74.19253, latitude: 40.68864, zoom: 6.522422}
+      0.25: {
+        bearing: 0,
+        pitch: 5,
+        longitude: -122.4017,
+        latitude: 37.78297,
+        zoom: 7.518116,
+        position: [1, 10, 100]
+      },
+      0.5: {
+        bearing: 0,
+        pitch: 10,
+        longitude: -106.3,
+        latitude: 38.76683,
+        zoom: 3.618313,
+        position: [2, 20, 200]
+      },
+      0.75: {
+        bearing: 0,
+        pitch: 15,
+        longitude: -74.19253,
+        latitude: 40.68864,
+        zoom: 6.522422,
+        position: [3, 30, 300]
+      }
     }
   }
 ];
@@ -114,7 +139,11 @@ test('ViewportFlyToInterpolator#interpolateProps', t => {
         testCase.expect.end,
         Number(time)
       );
-      t.deepEqual(toLowPrecision(propsInTransition, 7), testCase.transition[time], time);
+      t.deepEqual(
+        toLowPrecision(propsInTransition, 7),
+        testCase.transition[time],
+        `${testCase.title} t = ${time} interpolated correctly`
+      );
     });
   });
 

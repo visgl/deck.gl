@@ -162,7 +162,7 @@ MyLayerClass.defaultProps = {
 }
 ```
 
-##### `object` {#array}
+##### `object` {#object}
 
 An arbitrary object.
 

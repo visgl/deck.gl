@@ -48,13 +48,17 @@ export default class GoogleMapsOverlay {
     if (map === this._map) {
       return;
     }
+
+    const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     if (this._map) {
+      if (!map && this._map.getRenderingType() === VECTOR && this.props.interleaved) {
+        (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
+      }
       this._overlay?.setMap(null);
       this._map = null;
     }
     if (map) {
       this._map = map;
-      const {UNINITIALIZED} = google.maps.RenderingType;
       const renderingType = map.getRenderingType();
       if (renderingType !== UNINITIALIZED) {
         this._createOverlay(map);
