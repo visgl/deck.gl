@@ -64,11 +64,7 @@ class WMSDemo extends Component {
         </div>
       );
     }
-    const {
-      title,
-      abstract,
-      accessConstraints
-    } = meta;
+    const {title, abstract, accessConstraints} = meta;
     return (
       <div>
         <p>{title}</p>
@@ -100,7 +96,6 @@ class WMSDemo extends Component {
 
   _onMetadataLoad = meta => {
     this.props.onStateChange(meta);
-    console.log(meta)
 
     const layers = getLayerNames(meta.layers);
     this.setState({layers});
