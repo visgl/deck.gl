@@ -326,8 +326,9 @@ export default class ViewManager {
         height: viewport.height
       };
 
-      // TODO - check if view / controller type has changed, and replace the controller
-      if (!controller) {
+      // Create controller if not already existing or if the type of the
+      // controller has changed.
+      if (!controller || controller.constructor !== view.ControllerType) {
         controller = this._createController(view, resolvedProps);
       }
       if (controller) {
