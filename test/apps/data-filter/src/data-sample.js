@@ -18,6 +18,12 @@ export const COLORS = {
   blue: [0, 0, 255]
 };
 
+export const SIZES = {
+  small: 0.5,
+  medium: 1,
+  large: 2
+};
+
 // generate points in a grid
 export function featureGrid(N, bbox) {
   const dLon = bbox[2] - bbox[0];
@@ -45,8 +51,8 @@ export function featureGrid(N, bbox) {
   return features;
 }
 
-function getColor() {
-  const keys = Object.keys(COLORS);
+function pickRandom(obj) {
+  const keys = Object.keys(obj);
   const n = Math.floor(keys.length * Math.random());
   return keys[n];
 }
@@ -57,7 +63,8 @@ function getPointFeature(coordinates, radius) {
     geometry: {type: 'Point', coordinates},
     properties: {
       centroid: coordinates,
-      color: getColor(),
+      color: pickRandom(COLORS),
+      size: pickRandom(SIZES),
       radius,
       label: SHAPE_NAMES[100],
       sides: 100
@@ -67,19 +74,24 @@ function getPointFeature(coordinates, radius) {
 
 function getPolygonFeature(centroid, radius) {
   const sides = Math.round(Math.random() * 9 + 3);
+  const size = pickRandom(SIZES);
 
   const vertices = [];
   for (let i = 0; i < sides; i++) {
     const angle = (i / sides) * 2 * Math.PI;
-    vertices.push([centroid[0] + Math.cos(angle) * radius, centroid[1] + Math.sin(angle) * radius]);
+    vertices.push([
+      centroid[0] + Math.cos(angle) * SIZES[size] * radius,
+      centroid[1] + Math.sin(angle) * SIZES[size] * radius
+    ]);
   }
   vertices.push(vertices[0]);
 
   return {
     type: 'Feature',
     geometry: {type: 'Polygon', coordinates: [vertices]},
-    properties: {centroid, color: getColor(), label: SHAPE_NAMES[sides], sides}
+    properties: {centroid, color: pickRandom(COLORS), size, label: SHAPE_NAMES[sides], sides}
   };
 }
 
+// export const DATA = featureGrid(1000000, [-1e5, -1e5, 1e5, 1e5]);
 export const DATA = featureGrid(10000, [-1e4, -1e4, 1e4, 1e4]);

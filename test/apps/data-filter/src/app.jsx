@@ -5,10 +5,10 @@ import {createRoot} from 'react-dom/client';
 import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
-import {DATA, COLORS, SHAPE_NAMES} from './data-sample';
+import {DATA, COLORS, SHAPE_NAMES, SIZES} from './data-sample';
 
 const dataFilterExtension = new DataFilterExtension({
-  categorySize: 3,
+  categorySize: 4,
   filterSize: 2,
   softMargin: true,
   countItems: true
@@ -26,7 +26,7 @@ class Root extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {time: 1000, colors: COLORS, labels: LABELS, oddeven: ODDEVEN};
+    this.state = {time: 1000, colors: COLORS, labels: LABELS, oddeven: ODDEVEN, sizes: SIZES};
 
     this._animate = this._animate.bind(this);
   }
@@ -46,16 +46,19 @@ class Root extends Component {
     const sin = Math.abs(Math.sin(t * Math.PI));
 
     const filterRange = [
-      [-cos * 5000, cos * 5000], // x
-      [-sin * 5000, sin * 5000] // y
+      [-cos * 50000, cos * 50000], // x
+      [-sin * 50000, sin * 50000] // y
     ];
     const filterSoftRange = [
-      [-cos * 5000 + 1000, cos * 5000 - 1000], // x
-      [-sin * 5000 + 1000, sin * 5000 - 1000] // y
+      [-cos * 50000 + 10000, cos * 50000 - 10000], // x
+      [-sin * 50000 + 10000, sin * 50000 - 10000] // y
     ];
-    const filterCategoryList = [this.state.labels, this.state.oddeven, this.state.colors].map(
-      trueKeys
-    );
+    const filterCategoryList = [
+      this.state.labels,
+      this.state.oddeven,
+      this.state.colors,
+      this.state.sizes
+    ].map(trueKeys);
 
     return [
       new GeoJsonLayer({
@@ -63,15 +66,18 @@ class Root extends Component {
         coordinateOrigin: [-122.45, 37.78],
         data: DATA,
 
+        //stroked: false, // Works, but performance isn't great
+
         // Data accessors
         getFillColor: f => COLORS[f.properties.color],
         getLineWidth: 10,
-        getRadius: f => f.properties.radius,
+        getRadius: f => SIZES[f.properties.size] * f.properties.radius,
         getFilterValue: f => f.properties.centroid,
         getFilterCategory: ({properties}) => [
           properties.label,
           properties.sides % 2 ? 'odd' : 'even',
-          properties.color
+          properties.color,
+          properties.size
         ],
         // getFilterCategory: f => f.properties.label,
 
@@ -99,6 +105,7 @@ class Root extends Component {
         <MultiSelect obj={LABELS} onChange={obj => this.setState({labels: obj})} />
         <MultiSelect obj={ODDEVEN} onChange={obj => this.setState({oddeven: obj})} />
         <MultiSelect obj={COLORS} onChange={obj => this.setState({colors: obj})} />
+        <MultiSelect obj={SIZES} onChange={obj => this.setState({sizes: obj})} />
       </div>
     );
   }
@@ -109,7 +116,7 @@ function MultiSelect({obj, onChange}) {
     <div
       style={{
         position: 'relative',
-        background: 'rgba(255,255,255,0.5)',
+        background: 'rgba(255, 255, 255, 0.9)',
         padding: 10,
         margin: 8,
         width: 110

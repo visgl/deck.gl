@@ -187,7 +187,7 @@ const inject = {
   `,
 
   'fs:DECKGL_FILTER_COLOR': `
-    if (dataFilter_value == 0.0) discard;
+    // if (dataFilter_value == 0.0) discard;
     if (filter_transformColor) {
       color.a *= dataFilter_value;
     }
