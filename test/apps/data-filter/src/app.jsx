@@ -71,7 +71,7 @@ class Root extends Component {
         // Data accessors
         getFillColor: f => COLORS[f.properties.color],
         getLineWidth: 10,
-        getRadius: f => SIZES[f.properties.size] * f.properties.radius,
+        getPointRadius: f => SIZES[f.properties.size] * f.properties.radius,
         getFilterValue: f => f.properties.centroid,
         getFilterCategory: ({properties}) => [
           properties.label,
