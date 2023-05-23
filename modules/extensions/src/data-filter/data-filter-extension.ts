@@ -183,9 +183,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           accessor: 'getFilterCategory',
           transform:
             categorySize === 1
-              ? extension._getCategoryKey.bind(this)
+              ? d => extension._getCategoryKey.call(this, d)
               : // TODO independent keys
-                d => d.map(x => extension._getCategoryKey.bind(this)(x)),
+                d => d.map(x => extension._getCategoryKey.call(this, x)),
           shaderAttributes: {
             filterCategories: {
               divisor: 0
@@ -320,7 +320,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       for (let c = 0; c < categoryFilters.length; c++) {
         const categoryFilter = categoryFilters[c];
         for (const category of categoryFilter) {
-          const key = extension._getCategoryKey.bind(this)(category); // value 0-127
+          const key = extension._getCategoryKey.call(this, category); // value 0-127
           const channel = c * (maxCategories / 32) + Math.floor(key / 32);
           categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
         }
