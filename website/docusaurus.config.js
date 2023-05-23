@@ -65,6 +65,7 @@ const config = {
             'react-dom': resolve('node_modules/react-dom'),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
+            '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
             '@loaders.gl/i3s': resolve('node_modules/@loaders.gl/i3s'),
             '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
             '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),

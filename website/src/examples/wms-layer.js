@@ -64,16 +64,13 @@ class WMSDemo extends Component {
         </div>
       );
     }
-    const {
-      title,
-      raw: {Service}
-    } = meta;
+    const {title, abstract, accessConstraints} = meta;
     return (
       <div>
         <p>{title}</p>
-        <p>{Service.Abstract}</p>
+        <p>{abstract}</p>
         <p>
-          <a title={Service.AccessConstraints}>Attributions</a>
+          <a title={accessConstraints}>Attributions</a>
         </p>
       </div>
     );
@@ -100,7 +97,7 @@ class WMSDemo extends Component {
   _onMetadataLoad = meta => {
     this.props.onStateChange(meta);
 
-    const layers = getLayerNames(meta.raw.Capability.Layer.Layer);
+    const layers = getLayerNames(meta.layers);
     this.setState({layers});
 
     this.props.useParam({
@@ -142,10 +139,10 @@ function getLayerNames(layers, output = {}) {
     for (const l of layers) {
       getLayerNames(l, output);
     }
-  } else if (layers.Layer) {
-    getLayerNames(layers.Layer, output);
+  } else if (layers.layers) {
+    getLayerNames(layers.layers, output);
   } else {
-    output[layers.Title] = [layers.Name];
+    output[layers.title] = [layers.name];
   }
   return output;
 }
