@@ -2,7 +2,8 @@
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import DeckGL, {OrthographicView, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
