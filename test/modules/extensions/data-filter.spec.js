@@ -110,7 +110,7 @@ test('DataFilterExtension#categories', t => {
         // 2
         t.deepEqual(
           uniforms.filter_categoryBitMask,
-          [2 ** 0, 0, 2 ** 3, 0],
+          [2 ** 0, 0, 2 ** 1, 0],
           'has correct uniforms'
         );
       }
@@ -123,7 +123,7 @@ test('DataFilterExtension#categories', t => {
         const {uniforms} = layer.state.model.program;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
-          [2 ** 2 + 2 ** 4, 0, 0, 0],
+          [2 ** 1 + 2 ** 2, 0, 0, 0],
           'has correct uniforms'
         );
       }
@@ -137,7 +137,7 @@ test('DataFilterExtension#categories', t => {
         const {uniforms} = layer.state.model.program;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
-          [2 ** 4, 0, 2 ** 5, 0],
+          [2 ** 2, 0, 2 ** 2, 0],
           'has correct uniforms'
         );
       }

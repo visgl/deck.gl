@@ -183,9 +183,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           accessor: 'getFilterCategory',
           transform:
             categorySize === 1
-              ? d => extension._getCategoryKey.call(this, d)
+              ? d => extension._getCategoryKey.call(this, d, 0)
               : // TODO independent keys
-                d => d.map(x => extension._getCategoryKey.call(this, x)),
+                d => d.map((x, i) => extension._getCategoryKey.call(this, x, i)),
           shaderAttributes: {
             filterCategories: {
               divisor: 0
@@ -233,17 +233,15 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       );
       this.setState({filterFBO, filterModel});
     }
-
-    if (attributeManager) {
-      this.setState({categoryMap: {}});
-    }
   }
 
   updateState(
     this: Layer<DataFilterExtensionProps>,
-    {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>
+    {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
+    extension: this
   ) {
     const attributeManager = this.getAttributeManager();
+    const {categorySize} = extension.opts;
     if (this.state.filterModel) {
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
@@ -257,9 +255,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         this.setState({filterNeedsUpdate});
       }
     }
-    if (this.state.categoryMap) {
+    if (attributeManager && categorySize) {
       const categoryBitMaskNeedsUpdate =
-        attributeManager!.attributes.filterCategories.needsUpdate() ||
+        attributeManager.attributes.filterCategories.needsUpdate() ||
         !deepEqual(props.filterCategoryList, oldProps.filterCategoryList, 2);
       if (categoryBitMaskNeedsUpdate) {
         this.setState({categoryBitMaskNeedsUpdate});
@@ -267,8 +265,12 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
       const resetCategories = changeFlags.dataChanged;
       if (resetCategories) {
-        this.setState({categoryMap: {}});
-        attributeManager!.attributes.filterCategories.setNeedsUpdate('categoryMap');
+        this.setState({
+          categoryMap: Array(categorySize)
+            .fill()
+            .map(() => ({}))
+        });
+        attributeManager.attributes.filterCategories.setNeedsUpdate('categoryMap');
       }
     }
   }
@@ -320,7 +322,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       for (let c = 0; c < categoryFilters.length; c++) {
         const categoryFilter = categoryFilters[c];
         for (const category of categoryFilter) {
-          const key = extension._getCategoryKey.call(this, category); // value 0-127
+          const key = extension._getCategoryKey.call(this, category, c); // value 0-127
           const channel = c * (maxCategories / 32) + Math.floor(key / 32);
           categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
         }
@@ -340,11 +342,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   }
 
   // TODO should be per-channel
-  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category) {
-    const {categoryMap} = this.state;
+  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: any, channel: number) {
+    const categoryMap = this.state.categoryMap[channel];
     if (!(category in categoryMap)) {
       categoryMap[category] = Object.keys(categoryMap).length;
-      // console.log(`${this.constructor.layerName}: ${category} -> ${categoryMap[category]}`);
+      // console.log( `${this.constructor.layerName}: ${category} -> [${channel}]${categoryMap[category]}`);
     }
     return categoryMap[category];
   }
