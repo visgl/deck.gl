@@ -75,6 +75,53 @@ test('DataFilterExtension', t => {
         t.deepEqual(uniforms.filter_min, [0, 0], 'has correct uniforms');
         t.deepEqual(uniforms.filter_softMax, [-2000, -92000], 'has correct uniforms');
       }
+    },
+    {
+      updateProps: {
+        extensions: [new DataFilterExtension({categorySize: 1})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_categoryBitMask, [0, 0, 0, 0], 'has correct uniforms');
+      }
+    },
+    {
+      updateProps: {
+        filterCategoryList: ['a', 'b', 'c']
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_categoryBitMask, [7, 0, 0, 0], 'has correct uniforms');
+      }
+    },
+    {
+      updateProps: {
+        extensions: [new DataFilterExtension({categorySize: 2})],
+        filterCategoryList: [['a', 'b', 'c'], [88]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_categoryBitMask, [7, 0, 8, 0], 'has correct uniforms');
+      }
+    },
+    {
+      updateProps: {
+        extensions: [new DataFilterExtension({categorySize: 4})],
+        filterCategoryList: [['a', 'b', 'c'], [88], [13567], [5493]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_categoryBitMask, [7, 8, 16, 32], 'has correct uniforms');
+      }
+    },
+    {
+      updateProps: {
+        getFilterCategory: d => ['d', 88, d.entry, d.exit]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(uniforms.filter_categoryBitMask, [7, 8, 16, 32], 'has correct uniforms');
+      }
     }
   ];
 
