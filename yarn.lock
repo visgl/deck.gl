@@ -2397,7 +2397,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@loaders.gl/3d-tiles@^3.4.2":
+"@loaders.gl/3d-tiles@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/3d-tiles/-/3d-tiles-3.4.3.tgz#c7282435a83ab6592202be676db7823a8dcca3a4"
   integrity sha512-1mscPyX4W4k5RCIOgAKFU/FMExy2+b7IbPanifaGH9vhbTqtMzUx0enPbmSJ6sSXkSx5MUF+vNL4O6mLZOCGag==
@@ -2411,7 +2411,7 @@
     "@math.gl/geospatial" "^3.5.1"
     long "^5.2.1"
 
-"@loaders.gl/core@^3.4.2":
+"@loaders.gl/core@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-3.4.3.tgz#78d5dbe760793db7895ea3edbdda4f0080834c25"
   integrity sha512-2p5RFjjqzNZYzIv3t1lVty+D1dQq9xdTFEI8yj8kC4ZtbS9kJdhkpvSnKxY08K7D06m4S9rmw9nrnb1l2aSIhg==
@@ -2421,7 +2421,7 @@
     "@loaders.gl/worker-utils" "3.4.3"
     "@probe.gl/log" "^4.0.1"
 
-"@loaders.gl/csv@^3.4.2":
+"@loaders.gl/csv@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-3.4.3.tgz#46bbd4d47317f4a5591a5fd257c359ade09dc6be"
   integrity sha512-SGlWBIsSWqcmmt6NMdNb2ovzcbAsyxOyD+0gfRtA7zHYYoYTWR0q8WC2nm0kVrEVhMInSCR96wz63J2Mcmd6Kw==
@@ -2440,7 +2440,7 @@
     "@loaders.gl/worker-utils" "3.4.3"
     draco3d "1.5.5"
 
-"@loaders.gl/gis@3.4.3", "@loaders.gl/gis@^3.4.2":
+"@loaders.gl/gis@3.4.3", "@loaders.gl/gis@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-3.4.3.tgz#700a04c96e7e67cff9bf293bd66ef5b0e7ccfe70"
   integrity sha512-/81/QkMbG/fTutNPeex6XVj5zx5Dn1OXw7H55SGpo/0SGrkYyGaKkKa11qIueZ54dm1HCPejpm+5/5hSwWSkKA==
@@ -2451,7 +2451,7 @@
     "@math.gl/polygon" "^3.5.1"
     pbf "^3.2.1"
 
-"@loaders.gl/gltf@3.4.3", "@loaders.gl/gltf@^3.4.2":
+"@loaders.gl/gltf@3.4.3", "@loaders.gl/gltf@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-3.4.3.tgz#1170ce34a4232d94ef877d0c078bc6467648a09a"
   integrity sha512-11yi5QS+y+Zi7zMrE366B0VbyWoqBw05gad13CTsrm8QpdHTkkBjQHCYdd0vbpATpQPz2/g1dsam0cn0ExsOKg==
@@ -2462,14 +2462,14 @@
     "@loaders.gl/textures" "3.4.3"
     "@math.gl/core" "^3.5.1"
 
-"@loaders.gl/images@3.4.3", "@loaders.gl/images@^3.4.2":
+"@loaders.gl/images@3.4.3", "@loaders.gl/images@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-3.4.3.tgz#97b7277af249da19382d26dbed700850d42035aa"
   integrity sha512-P4N25YMnIEs6nnzQHJzV1N/9iYWWWcbDilhaCtMxcgBSRi3EfEjQd4EtLELBd+Op2I4H99tfT59Whwaup5WZfw==
   dependencies:
     "@loaders.gl/loader-utils" "3.4.3"
 
-"@loaders.gl/loader-utils@3.4.3", "@loaders.gl/loader-utils@^3.4.2":
+"@loaders.gl/loader-utils@3.4.3", "@loaders.gl/loader-utils@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-3.4.3.tgz#ea37ff64193a93e1e44656b10159f69eb41a157c"
   integrity sha512-/LNCL/j2W44FaFUTfb69mZ+XxiDig8gcZbbB574o0K29DCnDi35fDFBYJOb4aVhvxGkxvb2mjRv9VYpTe800pg==
@@ -2487,7 +2487,7 @@
     "@loaders.gl/loader-utils" "3.4.3"
     "@math.gl/core" "^3.5.1"
 
-"@loaders.gl/mvt@^3.4.2":
+"@loaders.gl/mvt@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-3.4.3.tgz#ebcbb23332268e16cd6f504d7740197e429ba158"
   integrity sha512-2WGSzm+fIzYWzwLyMs0yjdLYZLIVjnyKSpf3C6GhTq+7sIWT/XBxu3XYsAcFJaPUm9Z4AbIHau/bRRP+d/nL6g==
@@ -2498,7 +2498,7 @@
     "@math.gl/polygon" "^3.5.1"
     pbf "^3.2.1"
 
-"@loaders.gl/polyfills@^3.4.2":
+"@loaders.gl/polyfills@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-3.4.3.tgz#af883bc996649e710a6ccf018a00900dc10d40cc"
   integrity sha512-N+HCJd0RSZMkm+4Xdqz7iYIVepE13oZKGTUJpCpGDQW8/HuoNZq9GJ4q/5ibrz83oXCpkXtBWYkyY0ySdhQ3VA==
@@ -2513,14 +2513,14 @@
     through "^2.3.8"
     web-streams-polyfill "^3.0.0"
 
-"@loaders.gl/schema@3.4.3", "@loaders.gl/schema@^3.4.2":
+"@loaders.gl/schema@3.4.3", "@loaders.gl/schema@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-3.4.3.tgz#4772dc17d1205a441576f466de45ab4c5f0ac111"
   integrity sha512-UWcmjXnfZQWpz1AwkbqBUZIknjQz5AMScHRMiTQEhr44xtyHgQGoaavc75WB2bJylQg6y4migzTyJ1HcjWNLVA==
   dependencies:
     "@types/geojson" "^7946.0.7"
 
-"@loaders.gl/terrain@^3.4.2":
+"@loaders.gl/terrain@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/terrain/-/terrain-3.4.3.tgz#4815d0448515940d7a7526cffcaa2eb5965dbad2"
   integrity sha512-9TSnru9nl/fANGjp71Kkvxq0lNK3YHeJfVWP8gcnNRFX9TkmoZ29+sNaNLLJojg5rAZR3UjCGcAbIsM8LNkZDA==
@@ -2543,7 +2543,7 @@
     ktx-parse "^0.0.4"
     texture-compressor "^1.0.2"
 
-"@loaders.gl/tiles@3.4.3", "@loaders.gl/tiles@^3.4.2":
+"@loaders.gl/tiles@3.4.3", "@loaders.gl/tiles@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-3.4.3.tgz#ffb3d6e5ca2c43551f4ee7d70b72a9c3eb79db97"
   integrity sha512-TJRdNjhW+YRYqz93t9VobGjqGKKmnOm0sJBPZahJOJw9Vnkw0vXvCyV2AIPflBe//uPYrZogFFjx2zv2MMD1gw==

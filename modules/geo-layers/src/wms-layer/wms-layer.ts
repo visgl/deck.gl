@@ -43,8 +43,8 @@ const defaultProps: DefaultProps<WMSLayerProps> = {
   id: 'imagery-layer',
   data: '',
   serviceType: 'auto',
-  crs: undefined, // 'auto' We assign the default manually to support the deprecated srs prop
-  srs: undefined,
+  crs: 'auto',
+  srs: 'auto',
   layers: {type: 'array', compare: true, value: []},
   onMetadataLoad: {type: 'function', value: () => {}},
   // eslint-disable-next-line
@@ -202,7 +202,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
     let {crs} = this.props;
     const {srs, layers} = this.props;
-    crs = crs || srs || 'auto';
+    // Handle deprecated srs field: if srs has been specified and crs has not, then use srs.
+    crs = crs === 'auto' && srs !== 'auto' ? srs : crs;
     if (crs === 'auto') {
       // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
       crs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
@@ -256,20 +257,12 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   protected canRequestImage(viewport: Viewport, props: WMSLayerProps): boolean {
     // WMS services require at least one "data layer" to be specified
     const {layers, serviceType} = this.props;
-    if (serviceType === 'wms' && layers.length === 0) {
-      return false;
-    }
+    const validLayers = serviceType === 'wms' && layers.length > 0;
 
-    // Bounds must not be 0,0,0,0
-    const bounds = viewport.getBounds();
     const {width, height} = viewport;
+    const validSize = width > 0 && height > 0;
 
-    const validSizeAndBounds =
-      width > 0 &&
-      height > 0 &&
-      !(bounds[0] === 0 && bounds[1] === 0 && bounds[2] === 0 && bounds[3] === 0);
-
-    return validSizeAndBounds;
+    return validLayers && validSize;
   }
 
   // HELPERS
