@@ -81,8 +81,8 @@ export default class Tooltip {
       Object.assign(el.style, displayInfo.style);
     }
     this.isVisible = true;
-    el.style.display = 'block';
-    el.style.transform = `translate(${x}px, ${y}px)`;
+    el.style.display = el.style.display || 'block';
+    el.style.transform = el.style.transform || `translate(${x}px, ${y}px)`;
   }
 
   remove(): void {
