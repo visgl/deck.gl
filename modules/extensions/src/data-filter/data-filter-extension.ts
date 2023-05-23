@@ -265,6 +265,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       if (categoriesNeedsUpdate) {
         this.setState({categoriesNeedsUpdate});
       }
+
+      const resetCategories = props.getFilterCategory !== oldProps.getFilterCategory;
+      if (resetCategories) {
+        // this.setState({categoryMap: {}});
+      }
     }
   }
 
