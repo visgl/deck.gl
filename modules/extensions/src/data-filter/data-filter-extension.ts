@@ -267,7 +267,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       if (resetCategories) {
         this.setState({
           categoryMap: Array(categorySize)
-            .fill()
+            .fill(0)
             .map(() => ({}))
         });
         attributeManager.attributes.filterCategories.setNeedsUpdate('categoryMap');
@@ -312,23 +312,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
 
     if (categoryBitMaskNeedsUpdate) {
-      const {categorySize} = extension.opts;
-      const {filterCategoryList} = this.props;
-      const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
-      const categoryFilters = (
-        categorySize === 1 ? [filterCategoryList] : filterCategoryList
-      ) as any[][];
-      const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
-      for (let c = 0; c < categoryFilters.length; c++) {
-        const categoryFilter = categoryFilters[c];
-        for (const category of categoryFilter) {
-          const key = extension._getCategoryKey.call(this, category, c); // value 0-127
-          const channel = c * (maxCategories / 32) + Math.floor(key / 32);
-          categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
-        }
-      }
-      params.uniforms.filter_categoryBitMask = categoryBitMask;
-      this.state.categoryBitMaskNeedsUpdate = false;
+      extension._updateCategoryBitMask.call(this, params, extension);
     }
   }
 
@@ -341,7 +325,27 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
   }
 
-  // TODO should be per-channel
+  _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
+    const {categorySize} = extension.opts;
+    const {filterCategoryList} = this.props;
+    const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
+    const categoryFilters = (
+      categorySize === 1 ? [filterCategoryList] : filterCategoryList
+    ) as any[][];
+    const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
+    for (let c = 0; c < categoryFilters.length; c++) {
+      const categoryFilter = categoryFilters[c];
+      for (const category of categoryFilter) {
+        const key = extension._getCategoryKey.call(this, category, c); // value 0-127
+        const channel = c * (maxCategories / 32) + Math.floor(key / 32);
+        categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
+      }
+    }
+    /* eslint-disable-next-line camelcase */
+    params.uniforms.filter_categoryBitMask = categoryBitMask;
+    this.state.categoryBitMaskNeedsUpdate = false;
+  }
+
   _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: any, channel: number) {
     const categoryMap = this.state.categoryMap[channel];
     if (!(category in categoryMap)) {
