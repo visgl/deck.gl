@@ -84,13 +84,14 @@ test('DataFilterExtension', t => {
 });
 
 test('DataFilterExtension#categories', t => {
+  const data = [
+    {position: [-122.453, 37.782], field1: 'a', field2: 7},
+    {position: [-122.454, 37.781], field1: 'b', field2: 8}
+  ];
   const testCases = [
     {
       props: {
-        data: [
-          {position: [-122.453, 37.782], field1: 'a', field2: 7},
-          {position: [-122.454, 37.781], field1: 'b', field2: 8}
-        ],
+        data,
         extensions: [new DataFilterExtension({categorySize: 2})],
         getPosition: d => d.position,
         getFilterCategory: d => [d.field1, d.field2]
@@ -129,13 +130,14 @@ test('DataFilterExtension#categories', t => {
     },
     {
       updateProps: {
+        data: [...data],
         filterCategoryList: [['d'], [5]]
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
-          [2 ** 5, 0, 2 ** 6, 0],
+          [2 ** 4, 0, 2 ** 5, 0],
           'has correct uniforms'
         );
       }

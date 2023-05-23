@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension} from '@deck.gl/core';
+import {_deepEqual as deepEqual, LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
 import {readPixelsToArray, clear} from '@luma.gl/core';
@@ -241,7 +241,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
   updateState(
     this: Layer<DataFilterExtensionProps>,
-    {props, oldProps}: UpdateParameters<Layer<DataFilterExtensionProps>>
+    {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>
   ) {
     const attributeManager = this.getAttributeManager();
     if (this.state.filterModel) {
@@ -258,23 +258,23 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       }
     }
     if (this.state.categoryMap) {
-      const categoriesNeedsUpdate =
+      const categoryBitMaskNeedsUpdate =
         attributeManager!.attributes.filterCategories.needsUpdate() ||
-        props.getFilterCategory !== oldProps.getFilterCategory ||
-        props.filterCategoryList !== oldProps.filterCategoryList;
-      if (categoriesNeedsUpdate) {
-        this.setState({categoriesNeedsUpdate});
+        !deepEqual(props.filterCategoryList, oldProps.filterCategoryList, 2);
+      if (categoryBitMaskNeedsUpdate) {
+        this.setState({categoryBitMaskNeedsUpdate});
       }
 
-      const resetCategories = props.getFilterCategory !== oldProps.getFilterCategory;
+      const resetCategories = changeFlags.dataChanged;
       if (resetCategories) {
-        // this.setState({categoryMap: {}});
+        this.setState({categoryMap: {}});
+        attributeManager!.attributes.filterCategories.setNeedsUpdate('categoryMap');
       }
     }
   }
 
   draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
-    const {filterFBO, filterModel, filterNeedsUpdate, categoriesNeedsUpdate} = this.state;
+    const {filterFBO, filterModel, filterNeedsUpdate, categoryBitMaskNeedsUpdate} = this.state;
     const {onFilteredItemsChange} = this.props;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
@@ -309,7 +309,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       this.state.filterNeedsUpdate = false;
     }
 
-    if (categoriesNeedsUpdate) {
+    if (categoryBitMaskNeedsUpdate) {
       const {categorySize} = extension.opts;
       const {filterCategoryList} = this.props;
       const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
@@ -326,7 +326,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         }
       }
       params.uniforms.filter_categoryBitMask = categoryBitMask;
-      this.state.categoriesNeedsUpdate = false;
+      this.state.categoryBitMaskNeedsUpdate = false;
     }
   }
 
