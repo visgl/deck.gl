@@ -26,7 +26,8 @@ function getTooltipFunc(pickedValue) {
     className: 'coolTooltip',
     html: `<strong>Number of points:</strong> ${pickedValue.object.elevationValue}`,
     style: {
-      backgroundColor: 'lemonchiffon'
+      backgroundColor: 'lemonchiffon',
+      transform: 'translate(10px, 20px)'
     }
   };
 }
@@ -42,6 +43,7 @@ test('Tooltip#setTooltip', t => {
   const tooltip = new Tooltip(canvas);
   tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
+  t.equals(tooltip.el.style.transform, 'translate(10px, 20px)');
   t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
   t.equals(tooltip.el.className, 'coolTooltip');
   t.equals(canvasContainer.querySelector('.coolTooltip').style.top, '0px');
@@ -57,6 +59,7 @@ test('Tooltip#setTooltipWithString', t => {
   tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
   t.equals(tooltip.el.className, 'deck-tooltip');
+  t.equals(tooltip.el.style.transform, `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`);
   remove();
   t.end();
 });
