@@ -68,12 +68,8 @@ class Root extends Component {
       [-cos * 50000 + 10000, cos * 50000 - 10000], // x
       [-sin * 50000 + 10000, sin * 50000 - 10000] // y
     ];
-    const filterCategoryList = [
-      this.state.labels,
-      this.state.oddeven,
-      this.state.colors,
-      this.state.sizes
-    ].map(trueKeys);
+    const {labels, oddeven, colors, sizes} = this.state;
+    const filterCategoryList = [labels, oddeven, colors, sizes].map(trueKeys);
 
     return [
       new GeoJsonLayer({
@@ -94,7 +90,6 @@ class Root extends Component {
           properties.color,
           properties.size
         ],
-        // getFilterCategory: f => f.properties.label,
 
         onFilteredItemsChange: e => {
           const {counts} = this.state;
@@ -107,7 +102,6 @@ class Root extends Component {
         // Filter
         filterRange,
         filterSoftRange,
-        // Filter by odd selected shape
         filterCategoryList,
 
         extensions: [dataFilterExtension]
