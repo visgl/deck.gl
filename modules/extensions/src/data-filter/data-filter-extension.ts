@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {_deepEqual as deepEqual, LayerExtension} from '@deck.gl/core';
+import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
 import {readPixelsToArray, clear} from '@luma.gl/core';
@@ -348,9 +348,13 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       const categoryFilter = categoryFilters[c];
       for (const category of categoryFilter) {
         // TODO how to handle out of bounds category?
-        const key = Math.min(extension._getCategoryKey.call(this, category, c), maxCategories - 1);
-        const channel = c * (maxCategories / 32) + Math.floor(key / 32);
-        categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
+        const key = extension._getCategoryKey.call(this, category, c);
+        if (key < maxCategories) {
+          const channel = c * (maxCategories / 32) + Math.floor(key / 32);
+          categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
+        } else {
+          log.warn(`Exceeded maximum number of categories (${maxCategories})`)();
+        }
       }
     }
     /* eslint-disable-next-line camelcase */
