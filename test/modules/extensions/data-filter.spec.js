@@ -107,7 +107,6 @@ test('DataFilterExtension#categories', t => {
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;
-        // 2
         t.deepEqual(
           uniforms.filter_categoryBitMask,
           [2 ** 0, 0, 2 ** 1, 0],

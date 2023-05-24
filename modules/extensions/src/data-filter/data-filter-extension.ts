@@ -240,15 +240,15 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
     extension: this
   ) {
-    [
-      ['categorySize', 'filterCategoryList'],
-      ['filterSize', 'filterRange'],
-      ['filterSize', 'filterSoftRange']
-    ].forEach(([option, prop]) => {
-      if (this.props[prop] && extension.opts[option] !== this.props[prop].length) {
-        throw new Error(`props.${prop} dimension must equal ${option}`);
-      }
-    });
+    //[
+    //  ['categorySize', 'filterCategoryList'],
+    //  ['filterSize', 'filterRange'],
+    //  ['filterSize', 'filterSoftRange']
+    //].forEach(([option, prop]) => {
+    //  if (this.props[prop] && extension.opts[option] !== this.props[prop].length) {
+    //    throw new Error(`props.${prop} dimension must equal ${option}`);
+    //  }
+    //});
 
     const attributeManager = this.getAttributeManager();
     const {categorySize} = extension.opts;
@@ -347,7 +347,8 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     for (let c = 0; c < categoryFilters.length; c++) {
       const categoryFilter = categoryFilters[c];
       for (const category of categoryFilter) {
-        const key = extension._getCategoryKey.call(this, category, c); // value 0-127
+        // TODO how to handle out of bounds category?
+        const key = Math.min(extension._getCategoryKey.call(this, category, c), maxCategories - 1);
         const channel = c * (maxCategories / 32) + Math.floor(key / 32);
         categoryBitMask[channel] += Math.pow(2, key % 32); // 1 << key fails for key > 30
       }
