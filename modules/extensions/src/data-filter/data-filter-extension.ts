@@ -347,7 +347,6 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     for (let c = 0; c < categoryFilters.length; c++) {
       const categoryFilter = categoryFilters[c];
       for (const category of categoryFilter) {
-        // TODO how to handle out of bounds category?
         const key = extension._getCategoryKey.call(this, category, c);
         if (key < maxCategories) {
           const channel = c * (maxCategories / 32) + Math.floor(key / 32);
@@ -366,7 +365,6 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     const categoryMap = this.state.categoryMap[channel];
     if (!(category in categoryMap)) {
       categoryMap[category] = Object.keys(categoryMap).length;
-      // console.log( `${this.constructor.layerName}: ${category} -> [${channel}]${categoryMap[category]}`);
     }
     return categoryMap[category];
   }
