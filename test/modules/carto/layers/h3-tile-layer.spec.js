@@ -1,4 +1,4 @@
-import {h3GetResolution, h3ToChildren} from 'h3-js';
+import {getResolution, cellToChildren} from 'h3-js';
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
 import {_H3TileLayer as H3TileLayer} from '@deck.gl/carto';
@@ -50,8 +50,8 @@ test('H3TileLayer autoHighlight', async t => {
       data: TILEJSON,
       getTileData(e) {
         // Generate 7 H3 indices to fill the tile
-        const resolution = h3GetResolution(e.index.i) + 1;
-        const out = h3ToChildren(e.index.i, resolution).map((id, n) => ({id, value: n}));
+        const resolution = getResolution(e.index.i) + 1;
+        const out = cellToChildren(e.index.i, resolution).map((id, n) => ({id, value: n}));
         return out;
       },
       autoHighlight: true,

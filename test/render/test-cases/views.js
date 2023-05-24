@@ -12,7 +12,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';
-import * as h3 from 'h3-js';
+import {getRes0Cells, cellToLatLng} from 'h3-js';
 
 const EARTH_RADIUS_METERS = 6.3e6;
 export default [
@@ -81,8 +81,8 @@ export default [
     },
     layers: [
       new ScatterplotLayer({
-        data: h3.getRes0Indexes(),
-        getPosition: d => h3.h3ToGeo(d).reverse(),
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
         radiusMinPixels: 4,
         getFillColor: [255, 0, 0]
       })

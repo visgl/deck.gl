@@ -1,11 +1,11 @@
 import {
-  h3ToGeoBoundary,
-  h3GetResolution,
-  h3ToGeo,
-  geoToH3,
-  h3IsPentagon,
-  h3Distance,
-  edgeLength,
+  cellToBoundary,
+  getResolution,
+  cellToLatLng,
+  latLngToCell,
+  isPentagon,
+  gridDistance,
+  getHexagonEdgeLengthAvg,
   H3Index
 } from 'h3-js';
 import {lerp} from '@math.gl/core';
@@ -41,13 +41,13 @@ export function normalizeLongitudes(vertices: number[][], refLng?: number): void
 
 // scale polygon vertices w.r.t center (hexId)
 export function scalePolygon(hexId: H3Index, vertices: number[][], factor: number): void {
-  const [lat, lng] = h3ToGeo(hexId);
+  const [lat, lng] = cellToLatLng(hexId);
   const actualCount = vertices.length;
 
   // normalize with respect to center
   normalizeLongitudes(vertices, lng);
 
-  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon),
+  // `cellToBoundary` returns same array object for first and last vertex (closed polygon),
   // if so skip scaling the last vertex
   const vertexCount = vertices[0] === vertices[actualCount - 1] ? actualCount - 1 : actualCount;
   for (let i = 0; i < vertexCount; i++) {
@@ -58,12 +58,12 @@ export function scalePolygon(hexId: H3Index, vertices: number[][], factor: numbe
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
   const hexagonId = getHexagon(object, objectInfo);
-  const [lat, lng] = h3ToGeo(hexagonId);
+  const [lat, lng] = cellToLatLng(hexagonId);
   return [lng, lat];
 }
 
 function h3ToPolygon(hexId: H3Index, coverage: number = 1): number[][] {
-  const vertices = h3ToGeoBoundary(hexId, true);
+  const vertices = cellToBoundary(hexId, true);
 
   if (coverage !== 1) {
     // scale and normalize vertices w.r.t to center
@@ -199,7 +199,7 @@ export default class H3HexagonLayer<
       objectInfo.index++;
       const hexId = this.props.getHexagon(object, objectInfo);
       // Take the resolution of the first hex
-      const hexResolution = h3GetResolution(hexId);
+      const hexResolution = getResolution(hexId);
       if (resolution < 0) {
         resolution = hexResolution;
         if (!this.props.highPrecision) break;
@@ -207,7 +207,7 @@ export default class H3HexagonLayer<
         hasMultipleRes = true;
         break;
       }
-      if (h3IsPentagon(hexId)) {
+      if (isPentagon(hexId)) {
         hasPentagon = true;
         break;
       }
@@ -215,7 +215,7 @@ export default class H3HexagonLayer<
 
     return {
       resolution,
-      edgeLengthKM: resolution >= 0 ? edgeLength(resolution, 'km') : 0,
+      edgeLengthKM: resolution >= 0 ? getHexagonEdgeLengthAvg(resolution, 'km') : 0,
       hasMultipleRes,
       hasPentagon
     };
@@ -245,13 +245,13 @@ export default class H3HexagonLayer<
       return;
     }
     const hex =
-      this.props.centerHexagon || geoToH3(viewport.latitude, viewport.longitude, resolution);
+      this.props.centerHexagon || latLngToCell(viewport.latitude, viewport.longitude, resolution);
     if (centerHex === hex) {
       return;
     }
     if (centerHex) {
-      const distance = h3Distance(centerHex, hex);
-      // h3Distance returns a negative number if the distance could not be computed
+      const distance = gridDistance(centerHex, hex);
+      // gridDistance returns a negative number if the distance could not be computed
       // due to the two indexes very far apart or on opposite sides of a pentagon.
       if (distance >= 0 && distance * edgeLengthKM < UPDATE_THRESHOLD_KM) {
         return;
@@ -261,7 +261,7 @@ export default class H3HexagonLayer<
     const {unitsPerMeter} = viewport.distanceScales;
 
     let vertices = h3ToPolygon(hex);
-    const [centerLat, centerLng] = h3ToGeo(hex);
+    const [centerLat, centerLng] = cellToLatLng(hex);
 
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
     vertices = vertices.map(p => {

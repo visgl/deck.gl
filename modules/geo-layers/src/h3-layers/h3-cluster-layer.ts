@@ -1,4 +1,4 @@
-import {h3SetToMultiPolygon, H3IndexInput} from 'h3-js';
+import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {default as H3HexagonLayer} from './h3-hexagon-layer';
@@ -45,7 +45,7 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
       for (const object of iterable) {
         objectInfo.index++;
         const hexagons = getHexagons(object, objectInfo);
-        const multiPolygon = h3SetToMultiPolygon(hexagons, true);
+        const multiPolygon = cellsToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
           polygons.push(this.getSubLayerRow({polygon}, object, objectInfo.index));

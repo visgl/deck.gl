@@ -61,7 +61,7 @@ new H3HexagonLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/h3-js@^3.0.0"></script>
+<script src="https://unpkg.com/h3-js@^4.0.0"></script>
 <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
