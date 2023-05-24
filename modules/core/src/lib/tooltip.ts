@@ -62,6 +62,9 @@ export default class Tooltip {
       return;
     }
 
+    el.style.display = 'block';
+    el.style.transform = `translate(${x}px, ${y}px)`;
+
     if (typeof displayInfo === 'string') {
       el.innerText = displayInfo;
     } else if (!displayInfo) {
@@ -81,8 +84,6 @@ export default class Tooltip {
       Object.assign(el.style, displayInfo.style);
     }
     this.isVisible = true;
-    el.style.display = el.style.display || 'block';
-    el.style.transform = el.style.transform || `translate(${x}px, ${y}px)`;
   }
 
   remove(): void {
