@@ -154,7 +154,9 @@ Format:
 * If `filterSize` is `1`: `[softMin, softMax]`
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
-##### `getFilterCategory` ([Function](../../developer-guide/using-layers.md#accessors)) {#getfiltercategory}
+##### `getFilterCategory` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
+
+* Default: `0`
 
 Called to retrieve the category for each object that it will be filtered by. Returns either a category as a number or string (if `categorySize: 1`) or an array.
 
@@ -191,7 +193,9 @@ new ScatterplotLayer({
 })
 ```
 
-##### `filterCategories` (Array) {#filtercategories}
+##### `filterCategories` (Array, optional) {#filtercategories}
+
+* Default: `[0]`
 
 The list of categories that should be rendered. If an object's filtered category is in the list, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
 
