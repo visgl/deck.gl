@@ -14,6 +14,22 @@ function getHexagonsInBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
   resolution: number
 ): string[] {
+  const longitudeSpan = Math.abs(east - west);
+  if (longitudeSpan > 180) {
+    // This is a known issue in h3-js: polygonToCells does not work correctly
+    // when longitude span is larger than 180 degrees.
+    const nSegments = Math.ceil(longitudeSpan / 180);
+    let h3Indices: string[] = [];
+    for (let s = 0; s < nSegments; s++) {
+      const segmentEast = east + s * 180;
+      const segmentWest = Math.min(segmentEast + 179.9999999, west);
+      h3Indices = h3Indices.concat(
+        getHexagonsInBoundingBox({west: segmentWest, north, east: segmentEast, south}, resolution)
+      );
+    }
+    return [...new Set(h3Indices)];
+  }
+
   // `polygonToCells()` fills based on hexagon center, which means tiles vanish
   // prematurely. Get more accurate coverage by oversampling
   const oversample = 2;

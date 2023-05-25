@@ -250,10 +250,15 @@ export default class H3HexagonLayer<
       return;
     }
     if (centerHex) {
-      const distance = gridDistance(centerHex, hex);
-      // gridDistance returns a negative number if the distance could not be computed
-      // due to the two indexes very far apart or on opposite sides of a pentagon.
-      if (distance >= 0 && distance * edgeLengthKM < UPDATE_THRESHOLD_KM) {
+      let distance: number;
+      try {
+        distance = gridDistance(centerHex, hex);
+      } catch (e) {
+        // gridDistance throws if the distance could not be computed
+        // due to the two indexes very far apart or on opposite sides of a pentagon.
+        return
+      }
+      if (distance * edgeLengthKM < UPDATE_THRESHOLD_KM) {
         return;
       }
     }

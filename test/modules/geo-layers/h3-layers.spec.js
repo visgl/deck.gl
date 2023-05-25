@@ -135,7 +135,7 @@ test('H3HexagonLayer#viewportUpdate', t => {
         }
       },
       {
-        // far viewport jump, h3Distance fails
+        // far viewport jump, gridDistance throws
         viewport: new WebMercatorViewport({longitude: -100, latitude: 65, zoom: 10}),
         onAfterUpdate({layer}) {
           t.not(vertices, layer.state.vertices, 'vertices are updated');
