@@ -18,11 +18,11 @@ uniform ivec4 filter_categoryBitMask;
 #ifdef NON_INSTANCED_MODEL
   #define DATAFILTER_ATTRIB filterValues
   #define DATAFILTER_ATTRIB_64LOW filterValues64Low
-  #define DATACATEGORY_ATTRIB filterCategories
+  #define DATACATEGORY_ATTRIB filterCategoryValues
 #else
   #define DATAFILTER_ATTRIB instanceFilterValues
   #define DATAFILTER_ATTRIB_64LOW instanceFilterValues64Low
-  #define DATACATEGORY_ATTRIB instanceFilterCategories
+  #define DATACATEGORY_ATTRIB instanceFilterCategoryValues
 #endif
 
 attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;

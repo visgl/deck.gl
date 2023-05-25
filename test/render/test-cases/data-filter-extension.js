@@ -21,7 +21,7 @@ export default [
     props: {
       extensions: [new DataFilterExtension({categorySize: 1})],
       getFilterCategory: d => d.index % 128,
-      filterCategoryList: [3, 4, 5, 127, 0]
+      filterCategories: [3, 4, 5, 127, 0]
     }
   },
   {
@@ -29,7 +29,7 @@ export default [
     props: {
       extensions: [new DataFilterExtension({categorySize: 2})],
       getFilterCategory: d => [d.index % 128, d.row],
-      filterCategoryList: [
+      filterCategories: [
         [3, 4, 5, 15, 50],
         [4, 5, 8, 16, 'missing']
       ]
@@ -40,7 +40,7 @@ export default [
     props: {
       extensions: [new DataFilterExtension({categorySize: 3})],
       getFilterCategory: d => [d.index % 128, d.column, d.row],
-      filterCategoryList: [[3], [1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
+      filterCategories: [[3], [1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
     }
   },
   {
@@ -48,7 +48,7 @@ export default [
     props: {
       extensions: [new DataFilterExtension({categorySize: 4})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
-      filterCategoryList: [[0], [0], [0], [0]]
+      filterCategories: [[0], [0], [0], [0]]
     }
   }
 ].map(({name, props}) => ({

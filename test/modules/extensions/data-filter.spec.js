@@ -103,7 +103,7 @@ test('DataFilterExtension#categories', t => {
     },
     {
       updateProps: {
-        filterCategoryList: [['a'], [8]]
+        filterCategories: [['a'], [8]]
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;
@@ -116,7 +116,7 @@ test('DataFilterExtension#categories', t => {
     },
     {
       updateProps: {
-        filterCategoryList: [['b', 'c'], []]
+        filterCategories: [['b', 'c'], []]
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;
@@ -130,7 +130,7 @@ test('DataFilterExtension#categories', t => {
     {
       updateProps: {
         data: [...data],
-        filterCategoryList: [['d'], [5]]
+        filterCategories: [['d'], [5]]
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;

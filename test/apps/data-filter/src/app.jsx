@@ -69,15 +69,13 @@ class Root extends Component {
       [-sin * 50000 + 10000, sin * 50000 - 10000] // y
     ];
     const {labels, oddeven, colors, sizes} = this.state;
-    const filterCategoryList = [labels, oddeven, colors, sizes].map(trueKeys);
+    const filterCategories = [labels, oddeven, colors, sizes].map(trueKeys);
 
     return [
       new GeoJsonLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
         data: DATA,
-
-        //stroked: false, // Works, but performance isn't great
 
         // Data accessors
         getFillColor: f => COLORS[f.properties.color],
@@ -102,7 +100,7 @@ class Root extends Component {
         // Filter
         filterRange,
         filterSoftRange,
-        filterCategoryList,
+        filterCategories,
 
         extensions: [dataFilterExtension]
       })

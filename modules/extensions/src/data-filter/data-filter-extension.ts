@@ -34,7 +34,7 @@ const defaultProps = {
   filterEnabled: true,
   filterRange: [-1, 1],
   filterSoftRange: null,
-  filterCategoryList: [0],
+  filterCategories: [0],
   filterTransformSize: true,
   filterTransformColor: true
 };
@@ -81,7 +81,7 @@ export type DataFilterExtensionProps<DataT = any> = {
    * The categories which define whether an object should be rendered.
    * @default []
    */
-  filterCategoryList: [number, number] | [number, number][];
+  filterCategories: [number, number] | [number, number][];
   /**
    * Only called if the `countItems` option is enabled.
    */
@@ -177,7 +177,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
             }
           }
         },
-        filterCategories: {
+        filterCategoryValues: {
           size: categorySize,
           type: GL.FLOAT,
           accessor: 'getFilterCategory',
@@ -187,10 +187,10 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
               : // TODO independent keys
                 d => d.map((x, i) => extension._getCategoryKey.call(this, x, i)),
           shaderAttributes: {
-            filterCategories: {
+            filterCategoryValues: {
               divisor: 0
             },
-            instanceFilterCategories: {
+            instanceFilterCategoryValues: {
               divisor: 1
             }
           }
@@ -240,35 +240,25 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
     extension: this
   ) {
-    //[
-    //  ['categorySize', 'filterCategoryList'],
-    //  ['filterSize', 'filterRange'],
-    //  ['filterSize', 'filterSoftRange']
-    //].forEach(([option, prop]) => {
-    //  if (this.props[prop] && extension.opts[option] !== this.props[prop].length) {
-    //    throw new Error(`props.${prop} dimension must equal ${option}`);
-    //  }
-    //});
-
     const attributeManager = this.getAttributeManager();
     const {categorySize} = extension.opts;
     if (this.state.filterModel) {
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
         attributeManager!.attributes.filterValues.needsUpdate() ||
-        attributeManager!.attributes.filterCategories.needsUpdate() ||
+        attributeManager!.attributes.filterCategoryValues.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange ||
-        props.filterCategoryList !== oldProps.filterCategoryList;
+        props.filterCategories !== oldProps.filterCategories;
       if (filterNeedsUpdate) {
         this.setState({filterNeedsUpdate});
       }
     }
     if (attributeManager && categorySize) {
       const categoryBitMaskNeedsUpdate =
-        attributeManager.attributes.filterCategories.needsUpdate() ||
-        !deepEqual(props.filterCategoryList, oldProps.filterCategoryList, 2);
+        attributeManager.attributes.filterCategoryValues.needsUpdate() ||
+        !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
       if (categoryBitMaskNeedsUpdate) {
         this.setState({categoryBitMaskNeedsUpdate});
       }
@@ -280,7 +270,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
             .fill(0)
             .map(() => ({}))
         });
-        attributeManager.attributes.filterCategories.setNeedsUpdate('categoryMap');
+        attributeManager.attributes.filterCategoryValues.setNeedsUpdate('categoryMap');
       }
     }
   }
@@ -294,7 +284,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     }
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
-        attributes: {filterValues, filterCategories, filterIndices}
+        attributes: {filterValues, filterCategoryValues, filterIndices}
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
@@ -305,7 +295,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
           ...filterValues.getShaderAttributes(),
-          ...filterCategories.getShaderAttributes(),
+          ...filterCategoryValues.getShaderAttributes(),
           ...(filterIndices && filterIndices.getShaderAttributes())
         })
         .setUniforms(params.uniforms)
@@ -338,11 +328,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
 
   _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
     const {categorySize} = extension.opts;
-    const {filterCategoryList} = this.props;
+    const {filterCategories} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
-    const categoryFilters = (
-      categorySize === 1 ? [filterCategoryList] : filterCategoryList
-    ) as any[][];
+    const categoryFilters = (categorySize === 1 ? [filterCategories] : filterCategories) as any[][];
     const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
     for (let c = 0; c < categoryFilters.length; c++) {
       const categoryFilter = categoryFilters[c];
