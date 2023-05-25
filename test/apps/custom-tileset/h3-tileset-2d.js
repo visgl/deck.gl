@@ -5,7 +5,6 @@ export function getHexagonsInBoundingBox({west, north, east, south}, resolution)
   if (resolution === 0) {
     return getRes0Cells();
   }
-
   if (east - west > 180) {
     // This is a known issue in h3-js: polygonToCells does not work correctly
     // when longitude span is larger than 180 degrees.
