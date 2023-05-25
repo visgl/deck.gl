@@ -93,5 +93,4 @@ function getPolygonFeature(centroid, radius) {
   };
 }
 
-// export const DATA = featureGrid(1000000, [-1e5, -1e5, 1e5, 1e5]);
 export const DATA = featureGrid(10000, [-1e4, -1e4, 1e4, 1e4]);

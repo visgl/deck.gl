@@ -16,6 +16,7 @@ const dataFilterExtension = new DataFilterExtension({
 
 const INITIAL_VIEW_STATE = {longitude: -122.45, latitude: 37.78, zoom: 12};
 
+const CONTROLS = {animate: false};
 const LABELS = {};
 for (const shape of Object.values(SHAPE_NAMES)) {
   LABELS[shape] = Math.random() < 0.3;
@@ -37,6 +38,7 @@ class Root extends Component {
     this.state = {
       counts: {},
       time: 1000,
+      controls: CONTROLS,
       colors: COLORS,
       labels: LABELS,
       oddeven: ODDEVEN,
@@ -47,12 +49,14 @@ class Root extends Component {
   }
 
   componentDidMount() {
-    // this._animate();
+    this._animate();
   }
 
   _animate() {
-    this.setState({time: Date.now()});
-    window.requestAnimationFrame(this._animate);
+    if (this.state.controls.animate) {
+      this.setState({time: Date.now()});
+      window.requestAnimationFrame(this._animate);
+    }
   }
 
   _renderLayers() {
@@ -61,13 +65,15 @@ class Root extends Component {
     const sin = Math.abs(Math.sin(t * Math.PI));
 
     const filterRange = [
-      [-cos * 50000, cos * 50000], // x
-      [-sin * 50000, sin * 50000] // y
+      [-cos * 5000, cos * 5000], // x
+      [-sin * 5000, sin * 5000] // y
     ];
     const filterSoftRange = [
-      [-cos * 50000 + 10000, cos * 50000 - 10000], // x
-      [-sin * 50000 + 10000, sin * 50000 - 10000] // y
+      [-cos * 5000 + 1000, cos * 5000 - 1000], // x
+      [-sin * 5000 + 1000, sin * 5000 - 1000] // y
     ];
+    window.requestAnimationFrame(this._animate);
+
     const {labels, oddeven, colors, sizes} = this.state;
     const filterCategories = [labels, oddeven, colors, sizes].map(trueKeys);
 
@@ -115,6 +121,7 @@ class Root extends Component {
           initialViewState={INITIAL_VIEW_STATE}
           layers={this._renderLayers()}
         />
+        <MultiSelect obj={CONTROLS} onChange={obj => this.setState({controls: obj})} />
         <MultiSelect obj={LABELS} onChange={obj => this.setState({labels: obj})} />
         <MultiSelect obj={ODDEVEN} onChange={obj => this.setState({oddeven: obj})} />
         <MultiSelect obj={COLORS} onChange={obj => this.setState({colors: obj})} />

@@ -184,8 +184,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           transform:
             categorySize === 1
               ? d => extension._getCategoryKey.call(this, d, 0)
-              : // TODO independent keys
-                d => d.map((x, i) => extension._getCategoryKey.call(this, x, i)),
+              : d => d.map((x, i) => extension._getCategoryKey.call(this, x, i)),
           shaderAttributes: {
             filterCategoryValues: {
               divisor: 0
