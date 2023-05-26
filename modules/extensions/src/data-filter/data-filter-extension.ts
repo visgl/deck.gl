@@ -245,7 +245,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
         attributeManager!.attributes.filterValues.needsUpdate() ||
-        attributeManager!.attributes.filterCategoryValues.needsUpdate() ||
+        attributeManager!.attributes.filterCategoryValues?.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange ||
@@ -254,7 +254,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         this.setState({filterNeedsUpdate});
       }
     }
-    if (attributeManager && categorySize) {
+    if (attributeManager?.attributes.filterCategoryValues) {
       const categoryBitMaskNeedsUpdate =
         attributeManager.attributes.filterCategoryValues.needsUpdate() ||
         !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
@@ -294,7 +294,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
           ...filterValues.getShaderAttributes(),
-          ...filterCategoryValues.getShaderAttributes(),
+          ...(filterCategoryValues && filterCategoryValues.getShaderAttributes()),
           ...(filterIndices && filterIndices.getShaderAttributes())
         })
         .setUniforms(params.uniforms)
