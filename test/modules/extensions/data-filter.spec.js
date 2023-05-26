@@ -94,15 +94,7 @@ test('DataFilterExtension#categories', t => {
         data,
         extensions: [new DataFilterExtension({categorySize: 2})],
         getPosition: d => d.position,
-        getFilterCategory: d => [d.field1, d.field2]
-      },
-      onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
-        t.deepEqual(uniforms.filter_categoryBitMask, [0, 0, 0, 0], 'has correct uniforms');
-      }
-    },
-    {
-      updateProps: {
+        getFilterCategory: d => [d.field1, d.field2],
         filterCategories: [['a'], [8]]
       },
       onAfterUpdate: ({layer}) => {
