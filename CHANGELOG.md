@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.17] - May 31 2023
+
+- CARTO: Handle DEFAULT-INITIAL-VIEWPORT in H3Tileset2D (#7924)
+- Docs: TileLayer.getTileMetadata return value (#7905)
+- Honor changing view controller type. (#7814)
+
 #### deck.gl [8.9.16] - May 22 2023
 
 - chore: bump to loaders.gl@3.4.0 (#7870)
