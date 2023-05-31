@@ -113,7 +113,7 @@ test('H3Tileset2D max zoom', async t => {
   t.end();
 });
 
-test.only('H3Tileset2D default viewport', async t => {
+test('H3Tileset2D default viewport', async t => {
   const tileset = new H3Tileset2D({});
   // See layer-manager.ts
   const viewport = new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'});
