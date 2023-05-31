@@ -75,6 +75,7 @@ export default class H3Tileset2D extends Tileset2D {
    */
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
+    if (viewport.latitude === undefined) return [];
     const [east, south, west, north] = viewport.getBounds();
 
     let z = getHexagonResolution(viewport);

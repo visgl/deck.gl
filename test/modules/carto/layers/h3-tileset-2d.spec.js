@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import H3Tileset2D from '@deck.gl/carto/layers/h3-tileset-2d';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {Viewport, WebMercatorViewport} from '@deck.gl/core';
 import {equals} from '@math.gl/core';
 
 test('H3Tileset2D', async t => {
@@ -110,5 +110,14 @@ test('H3Tileset2D max zoom', async t => {
   t.equal(indices.length, 16, 'without max zoom');
   indices = tileset.getTileIndices({viewport, maxZoom: 1});
   t.equal(indices.length, 7, 'max zoom added');
+  t.end();
+});
+
+test.only('H3Tileset2D default viewport', async t => {
+  const tileset = new H3Tileset2D({});
+  // See layer-manager.ts
+  const viewport = new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'});
+  let indices = tileset.getTileIndices({viewport});
+  t.equal(indices.length, 0, 'Empty initial viewport');
   t.end();
 });
