@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {MapView, Viewport} from 'deck.gl';
+import {OrbitController, OrbitView, MapController, MapView, Viewport} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
@@ -72,6 +72,36 @@ test('ViewManager#needsRedraw', t => {
 
   redrawReason = viewManager.needsRedraw({clearRedrawFlags: true});
   t.equals(typeof redrawReason, 'string', 'Viewport needs redrawing again');
+
+  t.end();
+});
+
+test('ViewManager#updateController', t => {
+  const viewManager = new ViewManager({});
+
+  const mapView = new MapView({id: 'test', height: '100%', controller: MapController});
+  viewManager.setProps({
+    views: [mapView],
+    viewState: INITIAL_VIEW_STATE,
+    width: 100,
+    height: 100
+  });
+
+  const mapController = viewManager.controllers['test'];
+  t.equals(mapController.constructor, MapController, 'Correct controller type');
+
+  // Replace the MapView with a new OrbitView, given the same id.
+  const orbitView = new OrbitView({id: 'test', height: '100%', controller: OrbitController});
+  viewManager.setProps({
+    views: [orbitView],
+    viewState: INITIAL_VIEW_STATE,
+    width: 100,
+    height: 100
+  });
+
+  // Verify that the new view has the correct controller.
+  const orbitController = viewManager.controllers['test'];
+  t.equals(orbitController.constructor, OrbitController, 'Correct controller type');
 
   t.end();
 });

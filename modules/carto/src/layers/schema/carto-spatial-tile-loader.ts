@@ -30,6 +30,7 @@ function parseCartoSpatialTile(
   const tile: Tile = parsePbf(arrayBuffer, TileReader);
 
   const {cells} = tile;
+  // @ts-expect-error
   const scheme = options?.cartoSpatialTile?.scheme;
   const data = {cells, scheme};
 
