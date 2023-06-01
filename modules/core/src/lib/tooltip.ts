@@ -78,11 +78,14 @@ export default class Tooltip {
       if (displayInfo.className) {
         el.className = displayInfo.className;
       }
-      Object.assign(el.style, displayInfo.style);
     }
     this.isVisible = true;
     el.style.display = 'block';
     el.style.transform = `translate(${x}px, ${y}px)`;
+
+    if (displayInfo && typeof displayInfo === 'object' && 'style' in displayInfo) {
+      Object.assign(el.style, displayInfo.style);
+    }
   }
 
   remove(): void {
