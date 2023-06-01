@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import {h3ToGeoBoundary, h3ToGeo, kRing, compact} from 'h3-js';
+import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
@@ -60,7 +60,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
     testCases: [
       {
         props: {
-          data: kRing('882830829bfffff', 4),
+          data: gridDisk('882830829bfffff', 4),
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
@@ -74,7 +74,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
       },
       {
         props: {
-          data: kRing('891c0000003ffff', 4),
+          data: gridDisk('891c0000003ffff', 4),
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
@@ -88,7 +88,7 @@ test('H3HexagonLayer#_shouldUseHighPrecision', t => {
       },
       {
         props: {
-          data: compact(kRing('882830829bfffff', 6)),
+          data: compactCells(gridDisk('882830829bfffff', 6)),
           getHexagon: d => d
         },
         onAfterUpdate({layer, subLayer}) {
@@ -135,7 +135,7 @@ test('H3HexagonLayer#viewportUpdate', t => {
         }
       },
       {
-        // far viewport jump, h3Distance fails
+        // far viewport jump, gridDistance throws
         viewport: new WebMercatorViewport({longitude: -100, latitude: 65, zoom: 10}),
         onAfterUpdate({layer}) {
           t.not(vertices, layer.state.vertices, 'vertices are updated');
@@ -230,14 +230,14 @@ test('H3HexagonLayer#scalePolygon', t => {
     {
       coverage: 0,
       verify: (vertices, hexId) => {
-        const [lat, lng] = h3ToGeo(hexId);
+        const [lat, lng] = cellToLatLng(hexId);
         return vertices.every(vertex => vertex[0] === lng || vertex[1] === lat);
       }
     },
     {
       coverage: 1,
       verify: (vertices, hexId) => {
-        const expectedVertices = h3ToGeoBoundary(hexId, true);
+        const expectedVertices = cellToBoundary(hexId, true);
         return vertices.every(
           (vertex, i) =>
             vertex[0] === expectedVertices[i][0] || vertex[1] === expectedVertices[i][1]
@@ -247,8 +247,8 @@ test('H3HexagonLayer#scalePolygon', t => {
     {
       coverage: 0.5,
       verify: (vertices, hexId) => {
-        const [lat, lng] = h3ToGeo(hexId);
-        const end = h3ToGeoBoundary(hexId, true);
+        const [lat, lng] = cellToLatLng(hexId);
+        const end = cellToBoundary(hexId, true);
 
         return vertices.every(
           (vertex, i) =>
@@ -260,7 +260,7 @@ test('H3HexagonLayer#scalePolygon', t => {
   const HEXID = '88283082e1fffff';
 
   for (const testCase of TEST_CASES) {
-    const vertices = h3ToGeoBoundary(HEXID, true);
+    const vertices = cellToBoundary(HEXID, true);
     scalePolygon(HEXID, vertices, testCase.coverage);
     t.deepEqual(vertices[0], vertices[vertices.length - 1], 'first and last vertices should match');
     t.ok(
@@ -329,7 +329,7 @@ test('H3HexagonLayer#normalizeLongitudes', t => {
   for (const testCase of TEST_CASES) {
     let {vertices, refLng} = testCase;
     const {expected, hexId} = testCase;
-    vertices = vertices || h3ToGeoBoundary(hexId, true);
+    vertices = vertices || cellToBoundary(hexId, true);
     normalizeLongitudes(vertices, refLng);
     if (expected) {
       t.deepEqual(

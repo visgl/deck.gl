@@ -82,7 +82,7 @@ export const S2LayerDemo = makeLayerDemo({
 
 export const H3HexagonLayerDemo = makeLayerDemo({
   Layer: H3HexagonLayer,
-  dependencies: ['https://unpkg.com/h3-js@3.7.2'],
+  dependencies: ['https://unpkg.com/h3-js@4.1.0'],
   getTooltip: '({object}) => object && `${object.hex} count: ${object.count}`',
   props: `{
     data: '${DATA_URI}/sf.h3cells.json',
@@ -99,7 +99,7 @@ export const H3HexagonLayerDemo = makeLayerDemo({
 
 export const H3ClusterLayerDemo = makeLayerDemo({
   Layer: H3ClusterLayer,
-  dependencies: ['https://unpkg.com/h3-js@3.7.2'],
+  dependencies: ['https://unpkg.com/h3-js@4.1.0'],
   getTooltip: '({object}) => object && `density: ${object.mean}`',
   props: `{
     data: '${DATA_URI}/sf.h3clusters.json',

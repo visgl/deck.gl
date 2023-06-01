@@ -44,7 +44,7 @@
     "@math.gl/culling": "^3.6.2",
     "@math.gl/web-mercator": "^3.6.2",
     "@types/geojson": "^7946.0.8",
-    "h3-js": "^3.7.0",
+    "h3-js": "^4.1.0",
     "long": "^3.2.0"
   },
   "peerDependencies": {
