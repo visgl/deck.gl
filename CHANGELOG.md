@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.18] - Jun 1 2023
+
+- Extend tooltip style.transform instead of overwriting it (#7911)
+- [react] detect map component without defaultProps (#7925)
+
 #### deck.gl [8.9.17] - May 31 2023
 
 - CARTO: Handle DEFAULT-INITIAL-VIEWPORT in H3Tileset2D (#7924)
