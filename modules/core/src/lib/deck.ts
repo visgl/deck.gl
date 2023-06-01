@@ -286,8 +286,8 @@ export default class Deck {
   readonly height: number = 0;
   // Allows attaching arbitrary data to the instance
   readonly userData: Record<string, any> = {};
-  readonly canvas: HTMLCanvasElement | null = null;
-  
+
+  protected canvas: HTMLCanvasElement | null = null;
   protected viewManager: ViewManager | null = null;
   protected layerManager: LayerManager | null = null;
   protected effectManager: EffectManager | null = null;
@@ -557,6 +557,11 @@ export default class Deck {
   getViewports(rect?: {x: number; y: number; width?: number; height?: number}): Viewport[] {
     assert(this.viewManager);
     return this.viewManager.getViewports(rect);
+  }
+
+  /** Get the current canvas element. */
+  getCanvas(): HTMLCanvasElement | null {
+    return this.canvas;
   }
 
   /** Query the object rendered on top at a given point */
