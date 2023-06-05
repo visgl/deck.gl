@@ -17,6 +17,14 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v8.10
+
+### deck.gl v8.10 Prereleases
+
+#### deck.gl [8.10.0-alpha.1] - Jun 5 2023
+
+- update h3-js to v4 (#7913)
+
 ## deck.gl v8.9
 
 ### deck.gl v8.9 Prereleases
