@@ -19,11 +19,11 @@ export class Tensor2DLayer extends BitmapLayer<{
   getPickingInfo(params: GetPickingInfoParams) {
     const info = super.getPickingInfo(params);
 
-    // @ts-expect-error
+    // @ts-expect-error bitmap is not defined on PickingInfo
     if (info.bitmap) {
-      // @ts-expect-error
       const {
         pixel: [x, y]
+        // @ts-expect-error
       } = info.bitmap;
       const {image} = this.props;
       // @ts-expect-error
@@ -58,13 +58,7 @@ export class Tensor2DLayer extends BitmapLayer<{
     let {uv} = this.props;
 
     if (typeof uv === 'number') {
-      /*
-        (minX0, maxY3) ---- (maxX2, maxY3)
-               |                  |
-               |                  |
-               |                  |
-        (minX0, minY1) ---- (maxX2, minY1)
-     */
+      // Same logic as rectangular `bounds` prop
       uv = [
         [uv[0], uv[1]],
         [uv[0], uv[3]],

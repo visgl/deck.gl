@@ -24,9 +24,7 @@ audioPlayer.onpause = () => (isPlaying = false);
 audioPlayer.onended = () => (isPlaying = false);
 
 const audioContext = new AudioContext();
-// Set up the AudioBufferSourceNode
 const sourceNode = audioContext.createMediaElementSource(audioPlayer);
-// Set up the audio analyser and the javascript node
 const analyserNode = audioContext.createAnalyser();
 // Chain the nodes together
 sourceNode.connect(analyserNode).connect(audioContext.destination);
@@ -61,8 +59,6 @@ function update() {
     byteBuffer = nextByteBuffer;
   }
 
-  const xZoom = Math.log2(deck.width / byteBuffer.length);
-
   const spectrogramLayer = new SpectrogramLayer({
     id: 'frequency-domain-data',
     data: byteBuffer,
@@ -73,11 +69,5 @@ function update() {
     colorScale: './colorscale.png'
   });
 
-  deck.setProps({
-    layers: [spectrogramLayer],
-    viewState: {
-      target: [0, 0, 0],
-      zoom: [xZoom, 0]
-    }
-  });
+  deck.setProps({layers: [spectrogramLayer]});
 }
