@@ -2,8 +2,10 @@ import React, {useState} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
+import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
@@ -32,6 +34,21 @@ const INITIAL_VIEW_STATE = {
 const BUILDING_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d-tiles/buildings.geojson';
 
+// Avoid seams by slightly enlarging 3D model
+class ScaledScenegraphLayer extends CompositeLayer {
+  static defaultProps = {
+    modelScale: 1.01
+  };
+
+  renderLayers() {
+    const modelMatrix = [...this.props.modelMatrix];
+    [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14].forEach(i => {
+      modelMatrix[i] *= this.props.modelScale;
+    });
+    return new ScenegraphLayer(this.props, this.getSubLayerProps({id: 'scaled'}), {modelMatrix});
+  }
+}
+
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
   const [credits, setCredits] = useState('');
 
@@ -39,6 +56,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
     new Tile3DLayer({
       id: 'google-3d-tiles',
       data: TILESET_URL,
+      _subLayerProps: {scenegraph: {type: ScaledScenegraphLayer}},
       onTilesetLoad: tileset3d => {
         tileset3d.options.onTraversalComplete = selectedTiles => {
           const uniqueCredits = new Set();
