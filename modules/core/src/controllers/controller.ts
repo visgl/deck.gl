@@ -329,7 +329,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     // Register/unregister events
     const isInteractive = Boolean(this.onViewStateChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
-    this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
+    // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
+    this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
