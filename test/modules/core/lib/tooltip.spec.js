@@ -1,24 +1,18 @@
 /* global document */
 import test from 'tape-promise/tape';
 
+import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import Tooltip from '@deck.gl/core/lib/tooltip';
 
 const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 
-/* Create a clean canvas and its container testing */
-function setupCanvasTest() {
-  const canvas = document.createElement('canvas');
-  const canvasContainer = document.createElement('div');
-  canvasContainer.className = 'canvas-parent';
-  canvasContainer.appendChild(canvas);
-  const remove = () => {
-    canvasContainer.remove();
-  };
-  return {
-    canvasContainer,
-    canvas,
-    remove
-  };
+/* Create a clean container for testing */
+function setupTest() {
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({parent: container});
+  const tooltip = new Tooltip({});
+  widgetManager.add(tooltip);
+  return {tooltip, widgetManager, container};
 }
 
 function getTooltipFunc(pickedValue) {
@@ -39,64 +33,70 @@ function getTooltipFuncDefault(pickedValue) {
 }
 
 test('Tooltip#setTooltip', t => {
-  const {canvas, canvasContainer, remove} = setupCanvasTest();
-  const tooltip = new Tooltip(canvas);
+  const {widgetManager, tooltip} = setupTest();
+
   tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
-  t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
-  t.equals(tooltip.el.style.transform, 'translate(10px, 20px)');
-  t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
-  t.equals(tooltip.el.className, 'coolTooltip');
-  t.equals(canvasContainer.querySelector('.coolTooltip').style.top, '0px');
-  remove();
+
+  const el = tooltip.element;
+  t.equals(el.style.backgroundColor, 'lemonchiffon');
+  t.equals(el.style.transform, 'translate(10px, 20px)');
+  t.equals(el.innerHTML, '<strong>Number of points:</strong> 10');
+  t.equals(el.className, 'coolTooltip');
+  t.equals(el.style.top, '0px');
+
+  widgetManager.finalize();
   t.end();
 });
 
 test('Tooltip#setTooltipWithString', t => {
-  const {canvas, remove} = setupCanvasTest();
-  const tooltip = new Tooltip(canvas);
+  const {widgetManager, tooltip} = setupTest();
 
   const pickedInfoFunc = info => `Number of points: ${info.object.elevationValue}`;
   tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
-  t.equals(tooltip.el.innerText, 'Number of points: 10');
-  t.equals(tooltip.el.className, 'deck-tooltip');
-  t.equals(tooltip.el.style.transform, `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`);
-  remove();
+  const el = tooltip.element;
+  t.equals(el.innerText, 'Number of points: 10');
+  t.equals(el.className, 'deck-tooltip');
+  t.equals(el.style.transform, `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`);
+
+  widgetManager.finalize();
   t.end();
 });
 
 test('Tooltip#setTooltipDefaults', t => {
-  const {canvas, remove} = setupCanvasTest();
-  const tooltip = new Tooltip(canvas);
+  const {widgetManager, tooltip} = setupTest();
 
   const tooltipResult = getTooltipFuncDefault(pickedInfo);
   tooltip.setTooltip(tooltipResult, pickedInfo.x, pickedInfo.y);
-  t.equals(tooltip.el.innerText, 'Number of points: 10');
-  t.equals(tooltip.el.className, 'deck-tooltip');
-  remove();
+  const el = tooltip.element;
+  t.equals(el.innerText, 'Number of points: 10');
+  t.equals(el.className, 'deck-tooltip');
+
+  widgetManager.finalize();
   t.end();
 });
 
 test('Tooltip#setTooltipNullCase', t => {
-  const {canvas, remove} = setupCanvasTest();
-  const tooltip = new Tooltip(canvas);
+  const {widgetManager, tooltip} = setupTest();
 
   tooltip.setTooltip(null, pickedInfo.x, pickedInfo.y);
-  t.equals(tooltip.el.style.display, 'none');
-  remove();
+  const el = tooltip.element;
+  t.equals(el.style.display, 'none');
+
+  widgetManager.finalize();
   t.end();
 });
 
 test('Tooltip#remove', t => {
-  const {canvasContainer, canvas, remove} = setupCanvasTest();
-  const tooltip = new Tooltip(canvas);
+  const {widgetManager, tooltip, container} = setupTest();
 
-  t.equals(canvasContainer.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
-  tooltip.remove();
+  t.equals(container.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
+  widgetManager.remove(tooltip);
   t.equals(
-    canvasContainer.querySelectorAll('.deck-tooltip').length,
+    container.querySelectorAll('.deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
-  remove();
+
+  widgetManager.finalize();
   t.end();
 });

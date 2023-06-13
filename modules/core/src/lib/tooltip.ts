@@ -17,6 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import {Widget} from './widget-manager';
+import type {PickingInfo} from './picking/pick-info';
+import type Viewport from '../viewports/viewport';
 
 /* global document */
 const defaultStyle: Partial<CSSStyleDeclaration> = {
@@ -41,23 +44,37 @@ export type TooltipContent =
       style?: Partial<CSSStyleDeclaration>;
     };
 
-export default class Tooltip {
-  private el: HTMLDivElement | null = null;
-
+export default class Tooltip extends Widget {
   isVisible: boolean = false;
+  lastViewport?: Viewport;
 
-  constructor(canvas: HTMLCanvasElement) {
-    const canvasParent = canvas.parentElement;
-    if (canvasParent) {
-      this.el = document.createElement('div');
-      this.el.className = 'deck-tooltip';
-      Object.assign(this.el.style, defaultStyle);
-      canvasParent.appendChild(this.el);
+  onAdd() {
+    const el = document.createElement('div');
+    el.className = 'deck-tooltip';
+    Object.assign(el.style, defaultStyle);
+    return el;
+  }
+
+  onViewportChange(viewport: Viewport) {
+    if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {
+      // Camera has moved, clear tooltip
+      this.setTooltip(null);
     }
   }
 
+  onHover(info: PickingInfo) {
+    const {deck} = this;
+    const getTooltip = deck && deck.props.getTooltip;
+    if (!getTooltip) {
+      return;
+    }
+    const displayInfo = getTooltip(info);
+    this.lastViewport = info.viewport;
+    this.setTooltip(displayInfo, info.x, info.y);
+  }
+
   setTooltip(displayInfo: TooltipContent, x?: number, y?: number): void {
-    const el = this.el;
+    const el = this.element;
     if (!el) {
       return;
     }
@@ -85,13 +102,6 @@ export default class Tooltip {
 
     if (displayInfo && typeof displayInfo === 'object' && 'style' in displayInfo) {
       Object.assign(el.style, displayInfo.style);
-    }
-  }
-
-  remove(): void {
-    if (this.el) {
-      this.el.remove();
-      this.el = null;
     }
   }
 }
