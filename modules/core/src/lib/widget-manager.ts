@@ -6,21 +6,24 @@ import type Layer from './layer';
 
 import {EVENTS} from './constants';
 
-export interface IWidget {
+export interface Widget<PropsT = any> {
   // / Populated by core when mounted
-  /** The Deck instance that the widget is attached to */
-  deck?: Deck;
-  /** The HTML element that the widget creates */
-  element?: HTMLDivElement | null;
-  /** The id of the view that the widget is attached to */
-  viewId?: string | null;
+  _element?: HTMLDivElement | null;
+  _viewId?: string | null;
 
   // / Lifecycle hooks
   /** Called when the widget is added to a Deck instance.
    * @returns an optional UI element that should be appended to the Deck container */
-  onAdd: () => HTMLDivElement | null;
+  onAdd: (params: {
+    /** The Deck instance that the widget is attached to */
+    deck: Deck;
+    /** The id of the view that the widget is attached to */
+    viewId: string | null;
+  }) => HTMLDivElement | null;
   /** Called when the widget is removed */
   onRemove: () => void;
+  /** Called to update widget options */
+  setProps?: (props: Partial<PropsT>) => void;
 
   // / Optional event hooks
   /** Called when the containing view is changed */
@@ -39,30 +42,6 @@ export interface IWidget {
   onDragEnd?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
 }
 
-export abstract class Widget<PropsT = {}> implements IWidget {
-  // / Populated by core when mounted
-  /** The Deck instance that the widget is attached to */
-  deck?: Deck;
-  /** The HTML element that the widget creates */
-  element?: HTMLDivElement | null;
-  /** The id of the view that the widget is attached to */
-  viewId?: string | null;
-
-  props: PropsT;
-
-  constructor(props: PropsT) {
-    this.props = props;
-  }
-
-  setProps(props: Partial<PropsT>) {
-    this.props = {...this.props, ...props};
-  }
-
-  abstract onAdd(): HTMLDivElement | null;
-
-  onRemove() {}
-}
-
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
   'top-right': {top: 0, right: 0},
@@ -79,7 +58,7 @@ export class WidgetManager {
   deck: Deck;
   parent?: HTMLElement | null;
   containers: {[id: string]: HTMLDivElement} = {};
-  widgets: IWidget[] = [];
+  widgets: Widget[] = [];
   lastViewports: {[id: string]: Viewport} = {};
 
   constructor({deck, parent}: {deck: Deck; parent?: HTMLElement | null}) {
@@ -97,7 +76,7 @@ export class WidgetManager {
   }
 
   add(
-    widget: IWidget,
+    widget: Widget,
     opts: {
       viewId?: string | null;
       placement?: WidgetPlacement;
@@ -109,17 +88,17 @@ export class WidgetManager {
     }
 
     const {placement = 'top-left', viewId = null} = opts;
-    widget.deck = this.deck;
-    widget.viewId = viewId;
-    widget.element = widget.onAdd();
+    const element = widget.onAdd({deck: this.deck, viewId});
 
-    if (widget.element) {
-      this._getContainer(viewId, placement).append(widget.element);
+    if (element) {
+      this._getContainer(viewId, placement).append(element);
     }
+    widget._viewId = viewId;
+    widget._element = element;
     this.widgets.push(widget);
   }
 
-  remove(widget: IWidget) {
+  remove(widget: Widget) {
     const i = this.widgets.indexOf(widget);
     if (i < 0) {
       // widget not found
@@ -128,11 +107,11 @@ export class WidgetManager {
     this.widgets.splice(i, 1);
     widget.onRemove();
 
-    widget.deck = undefined;
-    if (widget.element) {
-      widget.element.remove();
+    if (widget._element) {
+      widget._element.remove();
     }
-    widget.element = undefined;
+    widget._element = undefined;
+    widget._viewId = undefined;
   }
 
   /* global document */
@@ -187,7 +166,7 @@ export class WidgetManager {
     const {lastViewports} = this;
 
     for (const widget of this.widgets) {
-      const {viewId} = widget;
+      const viewId = widget._viewId;
       if (viewId) {
         // Attached to a specific view
         const viewport = viewportsById[viewId];
@@ -215,7 +194,7 @@ export class WidgetManager {
 
   onHover(info: PickingInfo, event: MjolnirPointerEvent) {
     for (const widget of this.widgets) {
-      const {viewId} = widget;
+      const viewId = widget._viewId;
       if (!viewId || viewId === info.viewport?.id) {
         widget.onHover?.(info, event);
       }
@@ -228,7 +207,7 @@ export class WidgetManager {
       return;
     }
     for (const widget of this.widgets) {
-      const {viewId} = widget;
+      const viewId = widget._viewId;
       if (!viewId || viewId === info.viewport?.id) {
         widget[eventOptions.handler]?.(info, event);
       }

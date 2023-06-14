@@ -14,22 +14,27 @@ A widget is expected to implement the `IWidget` interface. Here is a custom widg
 ```ts
 import {IWidget} from '@deck.gl/core';
 
-class LoadingIndicator extends IWidget {
+class LoadingIndicator implements IWidget {
   element?: HTMLDivElement;
   size: number;
 
   constructor(options: {
-    size: number
+    size: number;
   }) {
     this.size = options.size;
   }
 
   onAdd() {
-    const element = document.createElement('div');
-    element.className = 'spinner';
-    element.style.width = `${this.size}px`;
+    const el = document.createElement('div');
+    el.className = 'spinner';
+    el.style.width = `${this.size}px`;
     // TODO - create animation for .spinner in the CSS stylesheet
-    return element;
+    this.element = el;
+    return el;
+  }
+
+  onRemove() {
+    this.element = undefined;
   }
 
   onRedraw({layers}) {
@@ -41,7 +46,9 @@ class LoadingIndicator extends IWidget {
 deckgl.addWidget(new LoadingIndicator({size: 48}));
 ```
 
-## IWidget
+## IWidget Interface
+
+When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
 
 ### Methods
 
@@ -49,11 +56,21 @@ deckgl.addWidget(new LoadingIndicator({size: 48}));
 
 Required. Called when the widget is added to a Deck instance.
 
+Receives the following arguments:
+
+- `context` (Object)
+  + `deck` (Deck) - the Deck instance that this widget is being attached to.
+  + `viewId` (String | null) - the view id that this widget is being attached to.
+
 Returns an optional UI element that should be appended to the Deck container.
 
 ##### `onRemove`
 
 Required. Called when the widget is removed.
+
+##### `setProps`
+
+Optional. Called to update widget options.
 
 ##### `onViewportChange`
 
@@ -117,42 +134,3 @@ Receives arguments:
 
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
-
-
-## Widget
-
-The `Widget` base class provides some handy implementations, as a convenient starting point.
-
-### constructor
-
-Expects one arguments that defines any options for the instance.
-
-### Members
-
-The `Widget` class manages the following members.
-
-#####  `deck` (Deck)
-
-The [Deck](./deck.md) instance that this widget is attached to.
-
-##### `element` (HTMLDivElement | null)
-
-The HTML element that this widget creates.
-
-##### `viewId` (String | null)
-
-The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
-
-##### `props` (Object)
-
-Any options for the widget, as passed into the constructor and can be updated with `setProps`.
-
-### Methods
-
-##### `setProps`
-
-```js
-widget.setProps(partialProps);
-```
-
-Merges the incoming object with `this.props`.

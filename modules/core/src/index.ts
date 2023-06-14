@@ -81,9 +81,6 @@ export {default as TransitionInterpolator} from './transitions/transition-interp
 export {default as LinearInterpolator} from './transitions/linear-interpolator';
 export {default as FlyToInterpolator} from './transitions/fly-to-interpolator';
 
-// Widgets
-export {Widget} from './lib/widget-manager';
-
 // Layer utilities
 export {default as log} from './utils/log';
 export {default as assert} from './utils/assert';
@@ -134,4 +131,4 @@ export type {Effect, PreRenderOptions, PostRenderOptions} from './lib/effect';
 export type {PickingUniforms, ProjectUniforms} from './shaderlib';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
-export type {IWidget} from './lib/widget-manager';
+export type {Widget} from './lib/widget-manager';

@@ -24,7 +24,7 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import {WidgetManager, IWidget, WidgetPlacement} from './widget-manager';
+import {WidgetManager, Widget, WidgetPlacement} from './widget-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -615,7 +615,7 @@ export default class Deck {
   }
 
   addWidget(
-    widget: IWidget,
+    widget: Widget,
     opts?: {
       viewId?: string | null;
       placement?: WidgetPlacement;
@@ -624,7 +624,7 @@ export default class Deck {
     this.widgetManager?.add(widget, opts);
   }
 
-  removeWidget(widget: IWidget) {
+  removeWidget(widget: Widget) {
     this.widgetManager?.remove(widget);
   }
 
@@ -972,7 +972,7 @@ export default class Deck {
       deck: this,
       parent: this.canvas?.parentElement
     });
-    this.widgetManager.add(new Tooltip({}), {placement: 'fill'});
+    this.widgetManager.add(new Tooltip(), {placement: 'fill'});
 
     this.setProps(this.props);
 

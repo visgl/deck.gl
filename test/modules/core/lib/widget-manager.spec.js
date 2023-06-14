@@ -1,15 +1,19 @@
 /* global document */
 import test from 'tape-promise/tape';
 
-import {WidgetManager, Widget} from '@deck.gl/core/lib/widget-manager';
+import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-class TestWidget extends Widget {
+class TestWidget {
+  constructor({id}) {
+    this.id = id;
+  }
+
   onAdd() {
     this.isVisible = true;
 
     const el = document.createElement('div');
-    el.id = this.props.id;
+    el.id = this.id;
     return el;
   }
 
@@ -32,11 +36,10 @@ test('WidgetManager#add, remove', t => {
   const widgetA = new TestWidget({id: 'A'});
   widgetManager.add(widgetA);
   t.is(widgetManager.widgets.length, 1, 'widget is added');
-  t.is(widgetA.deck, mockDeckInstance, 'widget context is assigned');
-  t.is(widgetA.viewId, null, 'view id is assigned');
+  t.is(widgetA._viewId, null, 'view id is assigned');
   t.ok(widgetA.isVisible, 'widget.onAdd is called');
   t.ok(
-    widgetManager.containers['__root'].contains(widgetA.element),
+    widgetManager.containers['__root'].contains(widgetA._element),
     'widget UI is added to the container'
   );
   t.is(container.childElementCount, 1, 'widget container is added');
@@ -47,19 +50,18 @@ test('WidgetManager#add, remove', t => {
   const widgetB = new TestWidget({id: 'B'});
   widgetManager.add(widgetB, {viewId: 'map', placement: 'bottom-right'});
   t.is(widgetManager.widgets.length, 2, 'widget is added');
-  t.is(widgetB.deck, mockDeckInstance, 'widget context is assigned');
-  t.is(widgetB.viewId, 'map', 'view id is assigned');
+  t.is(widgetB._viewId, 'map', 'view id is assigned');
   t.ok(widgetB.isVisible, 'widget.onAdd is called');
   t.ok(
-    widgetManager.containers['map'].contains(widgetB.element),
+    widgetManager.containers['map'].contains(widgetB._element),
     'widget UI is added to the container'
   );
   t.is(container.childElementCount, 2, 'widget container is added');
 
-  const elementA = widgetA.element;
+  const elementA = widgetA._element;
   widgetManager.remove(widgetA);
   t.is(widgetManager.widgets.length, 1, 'widget is removed');
-  t.notOk(widgetA.deck, 'widget context is cleared');
+  t.notOk(widgetA._element, 'widget context is cleared');
   t.notOk(widgetA.isVisible, 'widget.onRemove is called');
   t.notOk(
     widgetManager.containers['__root'].contains(elementA),

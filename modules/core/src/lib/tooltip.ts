@@ -20,6 +20,7 @@
 import {Widget} from './widget-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
+import type Deck from './deck';
 
 /* global document */
 const defaultStyle: Partial<CSSStyleDeclaration> = {
@@ -44,15 +45,26 @@ export type TooltipContent =
       style?: Partial<CSSStyleDeclaration>;
     };
 
-export default class Tooltip extends Widget {
+export default class Tooltip implements Widget {
   isVisible: boolean = false;
+  deck?: Deck;
+  element?: HTMLDivElement;
   lastViewport?: Viewport;
 
-  onAdd() {
+  onAdd({deck}: {deck: Deck}) {
     const el = document.createElement('div');
     el.className = 'deck-tooltip';
     Object.assign(el.style, defaultStyle);
+
+    this.deck = deck;
+    this.element = el;
+
     return el;
+  }
+
+  onRemove() {
+    this.deck = undefined;
+    this.element = undefined;
   }
 
   onViewportChange(viewport: Viewport) {
