@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.19] - Jun 14 2023
+
+- Reset isDragging state if panning is disabled dynamically (#7940)
+
 #### deck.gl [8.9.18] - Jun 1 2023
 
 - Extend tooltip style.transform instead of overwriting it (#7911)
