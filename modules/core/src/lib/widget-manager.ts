@@ -58,9 +58,7 @@ export abstract class Widget<PropsT = {}> implements IWidget {
     this.props = {...this.props, ...props};
   }
 
-  onAdd(): HTMLDivElement | null {
-    return null;
-  }
+  abstract onAdd(): HTMLDivElement | null;
 
   onRemove() {}
 }

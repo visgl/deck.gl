@@ -67,6 +67,7 @@ export {
   // Internal classes
   LayerManager,
   DeckRenderer,
+  Widget,
   // Logging
   log,
   assert,
@@ -170,7 +171,8 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect
+  Effect,
+  IWidget
 } from '@deck.gl/core';
 
 export type {
