@@ -9,12 +9,12 @@ A widget is a UI component that can interact with deck.gl's cameras and layers. 
 
 You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
 
-A widget is expected to implement the `IWidget` interface. Here is a custom widget that shows a spinner while layers are loading:
+A widget is expected to implement the `Widget` interface. Here is a custom widget that shows a spinner while layers are loading:
 
 ```ts
-import {IWidget} from '@deck.gl/core';
+import {Widget} from '@deck.gl/core';
 
-class LoadingIndicator implements IWidget {
+class LoadingIndicator implements Widget {
   element?: HTMLDivElement;
   size: number;
 
@@ -46,7 +46,7 @@ class LoadingIndicator implements IWidget {
 deckgl.addWidget(new LoadingIndicator({size: 48}));
 ```
 
-## IWidget Interface
+## Widget Interface
 
 When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
 
