@@ -134,6 +134,47 @@ mockedV3Test('CartoLayer#v3', async t => {
   spy.restore();
 });
 
+mockedV3Test('CartoLayer#loadOptions', async t => {
+  const spy = makeSpy(MVTLayer.prototype, 'getTileData');
+  spy.returns([]);
+
+  const onAfterUpdate = ({layer, subLayer, subLayers}) => {
+    const {data} = layer.state;
+    if (!data) {
+      t.is(subLayers.length, 0, 'should no render subLayers');
+    } else {
+      t.is(subLayers.length, 1, 'should have only 1 sublayer');
+
+      const {loadOptions} = subLayer.props;
+      const {headers} = loadOptions.fetch;
+      t.is(headers.Authorization, 'Bearer XXX', 'Authorization header added');
+      t.is(loadOptions.custom, 'value', 'Custom loadOption added');
+      t.is(headers['Custom-Header'], 'Header-Value', 'Custom header added');
+    }
+  };
+
+  await testLayerAsync({
+    Layer: CartoLayer,
+    testCases: [
+      {
+        props: {
+          data: 'select * from table',
+          type: MAP_TYPES.QUERY,
+          connection: 'conn_name',
+          credentials: CREDENTIALS_V3,
+          loadOptions: {
+            custom: 'value',
+            fetch: {headers: {'Custom-Header': 'Header-Value'}}
+          }
+        },
+        onAfterUpdate
+      }
+    ]
+  });
+
+  spy.restore();
+});
+
 mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
   const layer = new CartoLayer();
 

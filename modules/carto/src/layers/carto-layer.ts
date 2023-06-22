@@ -311,11 +311,17 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
     if (!data) return null;
 
     const {credentials, updateTriggers} = this.props;
-    const loadOptions: any = {};
+    const loadOptions: any = this.getLoadOptions() || {};
     if (apiVersion === API_VERSIONS.V3) {
       const localConfig = {...getDefaultCredentials(), ...credentials} as CloudNativeCredentials;
       const {accessToken} = localConfig;
-      loadOptions.fetch = {headers: {Authorization: `Bearer ${accessToken}`}};
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {
+          ...loadOptions.fetch?.headers,
+          Authorization: `Bearer ${accessToken}`
+        }
+      };
     }
 
     const [layer, props] = this._getSubLayerAndProps();
