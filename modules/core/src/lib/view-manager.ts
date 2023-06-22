@@ -328,7 +328,7 @@ export default class ViewManager {
 
       // Create controller if not already existing or if the type of the
       // controller has changed.
-      if (!controller || controller.constructor !== view.ControllerType) {
+      if (!controller || controller.constructor !== controllerProps.type) {
         controller = this._createController(view, resolvedProps);
       }
       if (controller) {

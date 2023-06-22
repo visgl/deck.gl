@@ -53,7 +53,7 @@ export default abstract class View<
 > {
   id: string;
   abstract get ViewportType(): ConstructorOf<Viewport>;
-  abstract get ControllerType(): ConstructorOf<Controller<any>>;
+  protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
   private viewportInstance?: Viewport;
   private _x: Position;
