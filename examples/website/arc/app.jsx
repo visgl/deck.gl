@@ -78,7 +78,7 @@ function getTooltip({object}) {
 
 /* eslint-disable react/no-deprecated */
 export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
-  const [selectedCounty, selectCounty] = useState(null);
+  const [selectedCounty, setSelectedCounty] = useState(null);
 
   const arcs = useMemo(() => calculateArcs(data, selectedCounty), [data, selectedCounty]);
 
@@ -89,7 +89,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
       stroked: false,
       filled: true,
       getFillColor: [0, 0, 0, 0],
-      onClick: ({object}) => selectCounty(object),
+      onClick: ({object}) => setSelectedCounty(object),
       pickable: true
     }),
     new ArcLayer({
