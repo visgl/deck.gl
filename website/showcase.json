@@ -1,7 +1,7 @@
 [
   {
     "name": "I3S Explorer",
-    "url": "https://i3s.actionengine.com/",
+    "url": "https://i3s.loaders.gl/",
     "image": "/images/examples/arcgis.jpg",
     "links": {},
     "description": "Visualization and Debug Tool for I3S 3D geographic data"
