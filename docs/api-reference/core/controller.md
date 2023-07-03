@@ -126,7 +126,7 @@ Note that the following events are always toggled on/off by user options:
 * `scrollZoom` - `['wheel']`
 * `dragPan` and `dragRotate` - `['pan']`
 * `touchZoom` - `['pinch']`
-* `touchRotate` - `['pinch', 'tripan]`
+* `touchRotate` - `['pinch', 'tripan']`
 * `doubleClickZoom` - `['doubletap']`
 * `keyboard` - `['keydown']`
 
