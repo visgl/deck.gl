@@ -10,6 +10,7 @@
     "declarationMap": true,
     "noEmit": false,
     "emitDeclarationOnly": true,
+    "useDefineForClassFields": false,
     // Uncomment to debug
     // "listEmittedFiles": true
   }
