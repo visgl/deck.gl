@@ -32,7 +32,7 @@ function instantiateJavaScriptClass(Class, props, configuration) {
 }
 
 function instantiateReactComponent(Component, props, configuration) {
-  const {React} = configuration;
+  const {React} = configuration.classes;
   const {children = []} = props;
   delete props.children;
   if (configuration.preProcessClassProps) {
