@@ -547,6 +547,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** (Internal) Propagate an error event through the system */
   raiseError(error: Error, message: string): void {
     if (message) {
+      // Duplicating error message for backward compatibility, see #7986
+      // TODO - revisit in v9
       error = new Error(`${message}: ${error.message}`, {cause: error});
     }
     if (!this.props.onError?.(error)) {
