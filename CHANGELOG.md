@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.20] - Jul 7 2023
+
+- Fix ScenegraphLayer shader injection from extensions (#7987)
+- Fix TileLayer passing async props to sub layers (#7985)
+- Avoid rewriting error.message (#7986)
+- Use controller.type rather than ControllerType (#7962)
+- CARTO: merge loadOptions passed in prop (#7949)
+
 #### deck.gl [8.9.19] - Jun 14 2023
 
 - Reset isDragging state if panning is disabled dynamically (#7940)
