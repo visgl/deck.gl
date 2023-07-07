@@ -342,7 +342,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.id}`,
+          ...this.getSubLayerProps({
+            id: tile.id
+          }),
           data: tile.content,
           _offset: 0,
           tile
