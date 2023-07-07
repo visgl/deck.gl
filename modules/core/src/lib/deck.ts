@@ -259,7 +259,7 @@ const defaultProps = {
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
-  onError: (error: Error) => log.error(error.message)(),
+  onError: (error: Error) => log.error(error.message, error.cause)(),
   onHover: null,
   onClick: null,
   onDragStart: null,
