@@ -198,7 +198,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       modules.push(pbr);
     }
 
-    return {vs, fs, modules};
+    return super.getShaders({vs, fs, modules});
   }
 
   initializeState() {
