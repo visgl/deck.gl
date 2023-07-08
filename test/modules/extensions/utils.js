@@ -1,12 +1,12 @@
 import {LayerManager, DeckRenderer} from '@deck.gl/core';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 // Helper class to execute lifecycle methods
 // TODO - move to test-utils?
 export class LifecycleTester {
   constructor() {
-    this.layerManager = new LayerManager(gl, {});
-    this.deckRenderer = new DeckRenderer(gl);
+    this.layerManager = new LayerManager(device, {});
+    this.deckRenderer = new DeckRenderer(device);
     this.viewport = this.layerManager.context.viewport;
     this.effects = [];
     this.layerManager.setProps({
