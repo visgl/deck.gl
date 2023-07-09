@@ -84,7 +84,7 @@ attribute float instanceOffsets;
     'vs:#main-end': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   float offsetDir = sign(instanceOffsets);
-  vPathPosition.x = (vPathPosition.x - offsetDir) * offsetWidth + offsetDir;
+  vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
 `,
