@@ -35,6 +35,7 @@
     "@luma.gl/core": "^8.0.0"
   },
   "dependencies": {
+    "@babel/runtime": "^7.0.0",
     "esri-loader": "^3.3.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
