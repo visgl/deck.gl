@@ -47,7 +47,7 @@ float round(float x) {
       offset = solidLength / 2.0;
     }
 
-    float unitOffset = mod(clamp(vPathPosition.y, 0.0, vPathLength) + offset, unitLength);
+    float unitOffset = mod(vPathPosition.y + offset, unitLength);
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
       if (capType <= 0.5) {
@@ -81,10 +81,12 @@ attribute float instanceOffsets;
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
 `,
-    'vCornerOffset = offsetVec;': `
+    'vs:#main-end': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
-  vec2 offsetCenter = -instanceOffsets * (isCap ? perp : miterVec * miterSize) * 2.0;
-  vCornerOffset = vCornerOffset * offsetWidth - offsetCenter;
+  float offsetDir = sign(instanceOffsets);
+  vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
+  vPathPosition.y *= offsetWidth;
+  vPathLength *= offsetWidth;
 `,
     'fs:#main-start': `
   float isInside;
