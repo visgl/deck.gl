@@ -29,6 +29,9 @@
     "build-bundle": "ocular-bundle ./bundle.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0"
+  },
   "devDependencies": {
     "@types/google.maps": "^3.48.6"
   },

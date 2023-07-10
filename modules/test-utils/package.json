@@ -23,6 +23,9 @@
     "src",
     "typed"
   ],
+  "dependencies": {
+    "@babel/runtime": "^7.0.0"
+  },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "@luma.gl/test-utils": "^8.5.0",
