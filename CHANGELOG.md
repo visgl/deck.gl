@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.21] - Jul 10 2023
+
+- Fix AggregateAccessor type (#7989)
+- PathStyleExtension: fix dash + offset usage (#7990)
+- Add @babel/runtime to dependencies (#7991)
+
 #### deck.gl [8.9.20] - Jul 7 2023
 
 - Fix ScenegraphLayer shader injection from extensions (#7987)
