@@ -1,6 +1,6 @@
 import {Device} from '@luma.gl/api';
-import {Texture2D, ProgramManager} from '@luma.gl/webgl-legacy';
-import {log} from '@deck.gl/core';
+import {Texture2D} from '@luma.gl/webgl-legacy';
+import {log, getProgramManager} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
 import {TerrainCover} from './terrain-cover';
@@ -44,7 +44,7 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
-    ProgramManager.getDefaultProgramManager(device).addDefaultModule(terrainModule);
+    getProgramManager(device).addDefaultModule(terrainModule);
   }
 
   preRender(device: Device, opts: PreRenderOptions): void {
