@@ -67,7 +67,7 @@ import React from 'react';
 import TestComponent from '@/components/test';
 
 const configuration = {
-  classes: Object.assign({}, { React },
+  React,
   reactComponents: {
     TestComponent
   }
