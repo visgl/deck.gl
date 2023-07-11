@@ -614,20 +614,6 @@ export default class Deck {
     return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
-  addWidget(
-    widget: Widget,
-    opts?: {
-      viewId?: string | null;
-      placement?: WidgetPlacement;
-    }
-  ) {
-    this.widgetManager?.add(widget, opts);
-  }
-
-  removeWidget(widget: Widget) {
-    this.widgetManager?.remove(widget);
-  }
-
   /** Experimental
    * Add a global resource for sharing among layers
    */
@@ -970,7 +956,7 @@ export default class Deck {
 
     this.widgetManager = new WidgetManager({
       deck: this,
-      parent: this.canvas?.parentElement
+      parentElement: this.canvas?.parentElement
     });
     this.widgetManager.add(new Tooltip(), {placement: 'fill'});
 
@@ -1014,6 +1000,8 @@ export default class Deck {
     this.deckRenderer!.renderLayers(opts);
 
     if (opts.pass === 'screen') {
+      // This method could be called when drawing to picking buffer, texture etc.
+      // Only when drawing to screen, update all widgets (UI components)
       this.widgetManager!.onRedraw({
         viewports: opts.viewports,
         layers: opts.layers

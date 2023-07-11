@@ -7,11 +7,11 @@ import type Layer from './layer';
 import {EVENTS} from './constants';
 
 export interface Widget<PropsT = any> {
-  // / Populated by core when mounted
+  // Populated by core when mounted
   _element?: HTMLDivElement | null;
   _viewId?: string | null;
 
-  // / Lifecycle hooks
+  // Lifecycle hooks
   /** Called when the widget is added to a Deck instance.
    * @returns an optional UI element that should be appended to the Deck container */
   onAdd: (params: {
@@ -25,7 +25,7 @@ export interface Widget<PropsT = any> {
   /** Called to update widget options */
   setProps?: (props: Partial<PropsT>) => void;
 
-  // / Optional event hooks
+  // Optional event hooks
   /** Called when the containing view is changed */
   onViewportChange?: (viewport: Viewport) => void;
   /** Called when the containing view is redrawn */
@@ -56,14 +56,14 @@ const ROOT_CONTAINER_ID = '__root';
 
 export class WidgetManager {
   deck: Deck;
-  parent?: HTMLElement | null;
+  parentElement?: HTMLElement | null;
   containers: {[id: string]: HTMLDivElement} = {};
   widgets: Widget[] = [];
   lastViewports: {[id: string]: Viewport} = {};
 
-  constructor({deck, parent}: {deck: Deck; parent?: HTMLElement | null}) {
+  constructor({deck, parentElement}: {deck: Deck; parentElement?: HTMLElement | null}) {
     this.deck = deck;
-    this.parent = parent;
+    this.parentElement = parentElement;
   }
 
   finalize() {
@@ -123,7 +123,7 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
-      this.parent?.append(viewContainer);
+      this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }
     let container = viewContainer.querySelector(`.${placement}`) as HTMLDivElement;

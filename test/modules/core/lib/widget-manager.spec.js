@@ -29,7 +29,7 @@ const mockDeckInstance = {
 
 test('WidgetManager#add, remove', t => {
   const container = document.createElement('div');
-  const widgetManager = new WidgetManager({deck: mockDeckInstance, parent: container});
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
 
   t.is(widgetManager.widgets.length, 0, 'no widgets');
 
@@ -80,8 +80,8 @@ test('WidgetManager#add, remove', t => {
 });
 
 test('WidgetManager#onRedraw#without viewId', t => {
-  const parent = document.createElement('div');
-  const widgetManager = new WidgetManager({deck: mockDeckInstance, parent});
+  const parentElement = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
   widgetManager.add(widget);
@@ -171,8 +171,8 @@ test('WidgetManager#onRedraw#without viewId', t => {
 });
 
 test('WidgetManager#onRedraw#viewId', t => {
-  const parent = document.createElement('div');
-  const widgetManager = new WidgetManager({deck: mockDeckInstance, parent});
+  const parentElement = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
   widgetManager.add(widget, {placement: 'bottom-right', viewId: 'minimap'});
@@ -283,8 +283,8 @@ test('WidgetManager#onRedraw#viewId', t => {
 });
 
 test('WidgetManager#onHover, onEvent#without viewId', t => {
-  const parent = document.createElement('div');
-  const widgetManager = new WidgetManager({deck: mockDeckInstance, parent});
+  const parentElement = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
   widgetManager.add(widget);
@@ -318,8 +318,8 @@ test('WidgetManager#onHover, onEvent#without viewId', t => {
 });
 
 test('WidgetManager#onHover, onEvent#viewId', t => {
-  const parent = document.createElement('div');
-  const widgetManager = new WidgetManager({deck: mockDeckInstance, parent});
+  const parentElement = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
   widgetManager.add(widget, {viewId: 'map'});

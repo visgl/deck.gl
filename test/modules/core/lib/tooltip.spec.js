@@ -9,7 +9,7 @@ const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 /* Create a clean container for testing */
 function setupTest() {
   const container = document.createElement('div');
-  const widgetManager = new WidgetManager({parent: container});
+  const widgetManager = new WidgetManager({parentElement: container});
   const tooltip = new Tooltip();
   widgetManager.add(tooltip);
   return {tooltip, widgetManager, container};
