@@ -9,6 +9,7 @@ import {
 const TEST_DATA = [
   {
     quadkey: '0',
+    coverage: 0.99,
     expectedBounds: [
       [0, 512],
       [253.44, 258.56]
@@ -16,6 +17,7 @@ const TEST_DATA = [
   },
   {
     quadkey: '0123',
+    coverage: 0.99,
     expectedBounds: [
       [160, 416],
       [191.68, 384.32]
@@ -23,9 +25,34 @@ const TEST_DATA = [
   },
   {
     quadkey: '333',
+    coverage: 0.99,
     expectedBounds: [
       [448, 64],
       [511.36, 0.6399999999999864]
+    ]
+  },
+  {
+    quadkey: '0',
+    coverage: 1,
+    expectedBounds: [
+      [0, 512],
+      [256, 256]
+    ]
+  },
+  {
+    quadkey: '0123',
+    coverage: 1,
+    expectedBounds: [
+      [160, 416],
+      [192, 384]
+    ]
+  },
+  {
+    quadkey: '333',
+    coverage: 1,
+    expectedBounds: [
+      [448, 64],
+      [512, 0]
     ]
   }
 ];
@@ -58,8 +85,8 @@ test('QuadkeyLayer', t => {
 });
 
 test('QuadkeyLayer#quadkeyToWorldBounds', t => {
-  for (const {quadkey, expectedBounds} of TEST_DATA) {
-    const bounds = quadkeyToWorldBounds(quadkey);
+  for (const {quadkey, coverage, expectedBounds} of TEST_DATA) {
+    const bounds = quadkeyToWorldBounds(quadkey, coverage);
     t.deepEquals(bounds, expectedBounds, 'Quadkey bounds calculated');
   }
 
