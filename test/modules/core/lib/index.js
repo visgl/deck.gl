@@ -32,3 +32,4 @@ import './uniform-transition-manager.spec';
 import './effect-manager.spec';
 import './picking.spec';
 import './view-manager.spec';
+import './widget-manager.spec';
