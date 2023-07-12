@@ -17,6 +17,7 @@ export default class JSONConfiguration {
     this.enumerations = {};
     this.constants = {};
     this.functions = {};
+    this.React = null;
     // TODO - this needs to be simpler, function conversion should be built in
     this.convertFunction = parseExpressionString;
     this.preProcessClassProps = (Class, props) => props;
