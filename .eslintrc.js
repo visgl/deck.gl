@@ -15,6 +15,11 @@ module.exports = getESLintConfig({
       // node: true
     },
 
+    globals: {
+      Iterable: true,
+      AsyncIterable: true
+    },
+
     rules: {
       camelcase: 0,
       indent: 0,
