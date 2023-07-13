@@ -1,4 +1,5 @@
-export type AggregateAccessor<DataT = any> = {
+/** Type assigned to e.g. getColorValue/getElevationValue props in aggregation layers (e.g. CPUGridLayer, HexagonLayer)*/
+export type AggregateAccessor<DataT = any> = (args: {
   /** a list of objects whose positions fall inside this cell. */
   objects: DataT[];
   objectInfo: {
@@ -7,4 +8,4 @@ export type AggregateAccessor<DataT = any> = {
     /** the value of the `data` prop */
     data: any;
   };
-};
+}) => number;
