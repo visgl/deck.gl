@@ -37,7 +37,8 @@ export default class QuadkeyLayer<DataT = any, ExtraProps extends {} = {}> exten
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo), coverage)
+      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }
