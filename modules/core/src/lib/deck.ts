@@ -24,6 +24,7 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
+import {WidgetManager, Widget, WidgetPlacement} from './widget-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -294,7 +295,7 @@ export default class Deck {
   protected deckRenderer: DeckRenderer | null = null;
   protected deckPicker: DeckPicker | null = null;
   protected eventManager: EventManager | null = null;
-  protected tooltip: Tooltip | null = null;
+  protected widgetManager: WidgetManager | null = null;
   protected metrics: DeckMetrics;
   protected animationLoop: AnimationLoop;
   protected stats: Stats;
@@ -407,8 +408,8 @@ export default class Deck {
     this.eventManager?.destroy();
     this.eventManager = null;
 
-    this.tooltip?.remove();
-    this.tooltip = null;
+    this.widgetManager?.finalize();
+    this.widgetManager = null;
 
     if (!this.props.canvas && !this.props.gl && this.canvas) {
       // remove internally created canvas
@@ -868,14 +869,9 @@ export default class Deck {
         pickedInfo = info;
         handled = info.layer?.onHover(info, _pickRequest.event) || handled;
       }
-      if (!handled && this.props.onHover) {
-        this.props.onHover(pickedInfo, _pickRequest.event);
-      }
-
-      // Update tooltip
-      if (this.props.getTooltip && this.tooltip) {
-        const displayInfo = this.props.getTooltip(pickedInfo);
-        this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
+      if (!handled) {
+        this.props.onHover?.(pickedInfo, _pickRequest.event);
+        this.widgetManager!.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
@@ -900,8 +896,6 @@ export default class Deck {
       this.canvas = gl.canvas;
       instrumentGLContext(gl, {enable: true, copyState: true});
     }
-
-    this.tooltip = new Tooltip(this.canvas);
 
     setParameters(gl, {
       blend: true,
@@ -960,6 +954,12 @@ export default class Deck {
 
     this.deckPicker = new DeckPicker(gl);
 
+    this.widgetManager = new WidgetManager({
+      deck: this,
+      parentElement: this.canvas?.parentElement
+    });
+    this.widgetManager.add(new Tooltip(), {placement: 'fill'});
+
     this.setProps(this.props);
 
     this._updateCanvasSize();
@@ -987,7 +987,7 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    this.deckRenderer!.renderLayers({
+    const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
       viewports: this.viewManager!.getViewports(),
@@ -996,7 +996,17 @@ export default class Deck {
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
       ...renderOptions
-    });
+    };
+    this.deckRenderer!.renderLayers(opts);
+
+    if (opts.pass === 'screen') {
+      // This method could be called when drawing to picking buffer, texture etc.
+      // Only when drawing to screen, update all widgets (UI components)
+      this.widgetManager!.onRedraw({
+        viewports: opts.viewports,
+        layers: opts.layers
+      });
+    }
 
     this.props.onAfterRender({gl});
   }
@@ -1021,11 +1031,6 @@ export default class Deck {
     this._updateCanvasSize();
 
     this._updateCursor();
-
-    // If view state has changed, clear tooltip
-    if (this.tooltip!.isVisible && this.viewManager!.needsRedraw()) {
-      this.tooltip!.setTooltip(null);
-    }
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
@@ -1087,7 +1092,7 @@ export default class Deck {
         viewports: this.getViewports(pos)
       },
       this._lastPointerDownInfo
-    );
+    ) as PickingInfo;
 
     const {layer} = info;
     const layerHandler =
@@ -1098,8 +1103,9 @@ export default class Deck {
     if (layerHandler) {
       handled = layerHandler.call(layer, info, event);
     }
-    if (!handled && rootHandler) {
-      rootHandler(info, event);
+    if (!handled) {
+      rootHandler?.(info, event);
+      this.widgetManager!.onEvent(info, event);
     }
   };
 
