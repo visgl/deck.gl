@@ -56,6 +56,52 @@ Whenever the `JSONConverter` component finds the `@@type` field, it looks into t
 like that in the configuration object above. These classes can be layers, views, or other objects,
  provided the classes have been registered.
 
+## React components and using `@@type` (experimental)
+
+Conversion happens by default for react components. For example, when this configuration of classes is passed to a
+ `JSONConverter`–
+
+```js
+import React from 'react';
+
+import TestComponent from '@/components/test';
+
+const configuration = {
+  React,
+  reactComponents: {
+    TestComponent
+  }
+};
+```
+
+and used to resolve this JSON object–
+
+```json
+{
+  "@@type": "TestComponent",
+  // props for the component
+  "color": [0, 128, 255],
+  "anotherProp": 1
+}
+```
+
+it will replace it with a React component.
+
+```js
+{
+  $$typeof: Symbol(react.element),
+  key: null,
+  props: {
+    color: [0, 128, 255],
+    anotherProp: 1
+  },
+  // ...
+}
+```
+
+You can use it directly to render a react component.
+
+A warning will be raised if the named react component is not registered.
 
 ## Functions and using `@@function`
 
@@ -148,7 +194,7 @@ will replace the constants' value with the value provided in configuration decla
 
 ```js
 {
-  controller: MapController, // MapController class from '@deck.gl/core' 
+  controller: MapController, // MapController class from '@deck.gl/core'
   layers: [
     new ScatterplotLayer({
       data: ...,

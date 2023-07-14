@@ -170,7 +170,8 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect
+  Effect,
+  Widget
 } from '@deck.gl/core';
 
 export type {
