@@ -28,14 +28,17 @@ export default class QuadkeyLayer<DataT = any, ExtraProps extends {} = {}> exten
   static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
-    const {data, getQuadkey} = this.props;
+    const {data, extruded, getQuadkey} = this.props;
+    // To avoid z-fighting reduce polygon footprint when extruding
+    const coverage = extruded ? 0.99 : 1;
 
     return {
       data,
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }

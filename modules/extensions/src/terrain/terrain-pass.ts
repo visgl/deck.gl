@@ -70,6 +70,7 @@ export class TerrainPass extends LayersPass {
     withParameters(
       this.gl,
       {
+        clearColor: [0, 0, 0, 0],
         depthTest: false
       },
       () =>
