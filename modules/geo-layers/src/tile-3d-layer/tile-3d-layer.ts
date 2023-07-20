@@ -184,8 +184,12 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     const options = {loadOptions: {...loadOptions}};
+    let actualTilesetUrl = tilesetUrl;
     if (loader.preload) {
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
+      if (preloadOptions.url) {
+        actualTilesetUrl = preloadOptions.url;
+      }
 
       if (preloadOptions.headers) {
         options.loadOptions.fetch = {
@@ -195,7 +199,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
       Object.assign(options, preloadOptions);
     }
-    const tilesetJson = await load(tilesetUrl, loader, options.loadOptions);
+    const tilesetJson = await load(actualTilesetUrl, loader, options.loadOptions);
 
     const tileset3d = new Tileset3D(tilesetJson, {
       onTileLoad: this._onTileLoad.bind(this),
