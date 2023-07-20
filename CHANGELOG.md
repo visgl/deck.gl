@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.22] - Jul 20 2023
+
+- fix(geo-layers): Cesium tilesets loading (#8014)
+- [TerrainExtension] fix cover rendering with clear color (#8001)
+- MVTLayerProps: allow `higlightedFeatureId` to be number (#8006)
+- Remove hairline present on non-stroked QuadkeyLayer (#7995)
+- Update json-configuration.js to read React from configuration root (#7984)
+
 #### deck.gl [8.9.21] - Jul 10 2023
 
 - Fix AggregateAccessor type (#7989)
