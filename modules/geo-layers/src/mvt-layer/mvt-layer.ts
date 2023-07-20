@@ -75,7 +75,7 @@ export type _MVTLayerProps = {
   uniqueIdProperty?: string;
 
   /** A feature with ID corresponding to the supplied value will be highlighted. */
-  highlightedFeatureId?: string | null;
+  highlightedFeatureId?: string | number | null;
 
   /**
    * Use tile data in binary format.
