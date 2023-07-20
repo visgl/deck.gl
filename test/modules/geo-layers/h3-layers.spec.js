@@ -23,13 +23,135 @@ import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
 import {_count as count, WebMercatorViewport} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
-import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-hexagon-layer';
+import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-utils';
 import data from 'deck.gl-test/data/h3-sf.json';
 
 const SAMPLE_PROPS = {
   data,
   getHexagon: d => d.hexagons[0]
 };
+
+test('H3Utils#scalePolygon', t => {
+  const TEST_CASES = [
+    {
+      coverage: 0,
+      verify: (vertices, hexId) => {
+        const [lat, lng] = cellToLatLng(hexId);
+        return vertices.every(vertex => vertex[0] === lng || vertex[1] === lat);
+      }
+    },
+    {
+      coverage: 1,
+      verify: (vertices, hexId) => {
+        const expectedVertices = cellToBoundary(hexId, true);
+        return vertices.every(
+          (vertex, i) =>
+            vertex[0] === expectedVertices[i][0] || vertex[1] === expectedVertices[i][1]
+        );
+      }
+    },
+    {
+      coverage: 0.5,
+      verify: (vertices, hexId) => {
+        const [lat, lng] = cellToLatLng(hexId);
+        const end = cellToBoundary(hexId, true);
+
+        return vertices.every(
+          (vertex, i) =>
+            vertex[0] === 0.5 * (lng + end[i][0]) || vertex[1] === 0.5 * (lat + end[i][1])
+        );
+      }
+    }
+  ];
+  const HEXID = '88283082e1fffff';
+
+  for (const testCase of TEST_CASES) {
+    const vertices = cellToBoundary(HEXID, true);
+    scalePolygon(HEXID, vertices, testCase.coverage);
+    t.deepEqual(vertices[0], vertices[vertices.length - 1], 'first and last vertices should match');
+    t.ok(
+      testCase.verify(vertices, HEXID),
+      `vertices should match for coverage: ${testCase.coverage}`
+    );
+  }
+  t.end();
+});
+
+test('H3Utils#normalizeLongitudes', t => {
+  const TEST_CASES = [
+    {
+      vertices: [
+        [-180, 30],
+        [90, 76],
+        [180, -90],
+        [-110, -21]
+      ],
+      expected: [
+        [-180, 30],
+        [-270, 76],
+        [-180, -90],
+        [-110, -21]
+      ]
+    },
+    {
+      vertices: [
+        [-180, 30],
+        [90, 76],
+        [180, -90],
+        [-110, -21]
+      ],
+      expected: [
+        [180, 30],
+        [90, 76],
+        [180, -90],
+        [250, -21]
+      ],
+      refLng: 180
+    },
+    {
+      hexId: '88283082e1fffff'
+    },
+    {
+      hexId: '88283082e1fffff',
+      refLng: 1
+    },
+    {
+      hexId: '88283082e1fffff',
+      refLng: 98
+    },
+    {
+      hexId: '88283082e1fffff',
+      refLng: 170
+    },
+    {
+      hexId: '88283082e1fffff',
+      refLng: -70
+    },
+    {
+      hexId: '88283082e1fffff',
+      refLng: -150
+    }
+  ];
+  for (const testCase of TEST_CASES) {
+    let {vertices, refLng} = testCase;
+    const {expected, hexId} = testCase;
+    vertices = vertices || cellToBoundary(hexId, true);
+    normalizeLongitudes(vertices, refLng);
+    if (expected) {
+      t.deepEqual(
+        vertices,
+        expected,
+        `Vertices should get normailized for ${refLng ? refLng : 'first vertex'}`
+      );
+    }
+    refLng = refLng || vertices[0][0];
+    t.ok(
+      !vertices.find(vertex => refLng - vertex[0] > 180 || refLng - vertex[0] < -180),
+      `vertices should get normaized for ${refLng}`
+    );
+  }
+  t.end();
+});
 
 test('H3HexagonLayer', t => {
   const testCases = generateLayerTests({
@@ -222,128 +344,6 @@ test('H3HexagonLayer#mergeTriggers', t => {
       }
     ]
   });
-  t.end();
-});
-
-test('H3HexagonLayer#scalePolygon', t => {
-  const TEST_CASES = [
-    {
-      coverage: 0,
-      verify: (vertices, hexId) => {
-        const [lat, lng] = cellToLatLng(hexId);
-        return vertices.every(vertex => vertex[0] === lng || vertex[1] === lat);
-      }
-    },
-    {
-      coverage: 1,
-      verify: (vertices, hexId) => {
-        const expectedVertices = cellToBoundary(hexId, true);
-        return vertices.every(
-          (vertex, i) =>
-            vertex[0] === expectedVertices[i][0] || vertex[1] === expectedVertices[i][1]
-        );
-      }
-    },
-    {
-      coverage: 0.5,
-      verify: (vertices, hexId) => {
-        const [lat, lng] = cellToLatLng(hexId);
-        const end = cellToBoundary(hexId, true);
-
-        return vertices.every(
-          (vertex, i) =>
-            vertex[0] === 0.5 * (lng + end[i][0]) || vertex[1] === 0.5 * (lat + end[i][1])
-        );
-      }
-    }
-  ];
-  const HEXID = '88283082e1fffff';
-
-  for (const testCase of TEST_CASES) {
-    const vertices = cellToBoundary(HEXID, true);
-    scalePolygon(HEXID, vertices, testCase.coverage);
-    t.deepEqual(vertices[0], vertices[vertices.length - 1], 'first and last vertices should match');
-    t.ok(
-      testCase.verify(vertices, HEXID),
-      `vertices should match for coverage: ${testCase.coverage}`
-    );
-  }
-  t.end();
-});
-
-test('H3HexagonLayer#normalizeLongitudes', t => {
-  const TEST_CASES = [
-    {
-      vertices: [
-        [-180, 30],
-        [90, 76],
-        [180, -90],
-        [-110, -21]
-      ],
-      expected: [
-        [-180, 30],
-        [-270, 76],
-        [-180, -90],
-        [-110, -21]
-      ]
-    },
-    {
-      vertices: [
-        [-180, 30],
-        [90, 76],
-        [180, -90],
-        [-110, -21]
-      ],
-      expected: [
-        [180, 30],
-        [90, 76],
-        [180, -90],
-        [250, -21]
-      ],
-      refLng: 180
-    },
-    {
-      hexId: '88283082e1fffff'
-    },
-    {
-      hexId: '88283082e1fffff',
-      refLng: 1
-    },
-    {
-      hexId: '88283082e1fffff',
-      refLng: 98
-    },
-    {
-      hexId: '88283082e1fffff',
-      refLng: 170
-    },
-    {
-      hexId: '88283082e1fffff',
-      refLng: -70
-    },
-    {
-      hexId: '88283082e1fffff',
-      refLng: -150
-    }
-  ];
-  for (const testCase of TEST_CASES) {
-    let {vertices, refLng} = testCase;
-    const {expected, hexId} = testCase;
-    vertices = vertices || cellToBoundary(hexId, true);
-    normalizeLongitudes(vertices, refLng);
-    if (expected) {
-      t.deepEqual(
-        vertices,
-        expected,
-        `Vertices should get normailized for ${refLng ? refLng : 'first vertex'}`
-      );
-    }
-    refLng = refLng || vertices[0][0];
-    t.ok(
-      !vertices.find(vertex => refLng - vertex[0] > 180 || refLng - vertex[0] < -180),
-      `vertices should get normaized for ${refLng}`
-    );
-  }
   t.end();
 });
 

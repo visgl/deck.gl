@@ -133,5 +133,28 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
+  },
+  {
+    name: 'h3-cluster-layer-crossing-antimeridian',
+    viewState: {
+      latitude: 40,
+      longitude: -180,
+      zoom: 5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3ClusterLayer({
+        data: ['8432b61ffffffff'],
+        opacity: 0.8,
+        getHexagons: d => gridDisk(d, 5),
+        getLineWidth: 10_000,
+        lineWidthMinPixels: 1,
+        lineWidthMaxPixels: 5,
+        stroked: true,
+        filled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-cluster-crossing-antimeridan.png'
   }
 ];
