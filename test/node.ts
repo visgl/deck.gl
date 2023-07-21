@@ -19,6 +19,11 @@ _global.requestAnimationFrame = cb => setTimeout(cb, 0);
 _global.cancelAnimationFrame = t => clearTimeout(t);
 
 import {gl} from '@deck.gl/test-utils';
+import {mockCanvasApi} from './utils/mock-canvas-api';
+
+// Mock Canvas/Context2D calls
+mockCanvasApi(dom.window.HTMLCanvasElement);
+
 // Create a dummy canvas for the headless gl context
 const canvas = globalThis.document.createElement('canvas');
 canvas.width = gl.drawingBufferWidth;
