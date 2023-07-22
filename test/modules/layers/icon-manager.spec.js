@@ -1,8 +1,6 @@
 import test from 'tape';
 import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
 import {gl} from '@deck.gl/test-utils';
-import {isBrowser} from '@probe.gl/env';
-import {loadImage} from 'canvas';
 
 const DATA = [
   {
@@ -270,19 +268,8 @@ test('IconManager#resize', t => {
 
   const iconManager = new IconManager(gl, {onUpdate, onError});
 
-  // Under node the canvas context is polyfilled with the `canvas` module
-  // `loadImage` from `canvas` will return an Image instance that is compatible with the context methods
-  const nodeImageLoader = {
-    id: 'node-image',
-    name: 'node-image',
-    mimeTypes: ['image/png'],
-    extensions: [],
-    parse: () => loadImage(testImage)
-  };
-
   iconManager.setProps({
-    autoPacking: true,
-    loadOptions: isBrowser() ? {} : [nodeImageLoader]
+    autoPacking: true
   });
   iconManager.packIcons(
     [
