@@ -1,5 +1,6 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {FullscreenWidget} from '@deck.gl/widgets';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -57,5 +58,6 @@ new Deck({
       getTargetColor: [200, 0, 80],
       getWidth: 1
     })
-  ]
+  ],
+  _widgets: [new FullscreenWidget()]
 });
