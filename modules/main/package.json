@@ -39,7 +39,8 @@
     "@deck.gl/layers": "8.10.0-alpha.1",
     "@deck.gl/mapbox": "8.10.0-alpha.1",
     "@deck.gl/mesh-layers": "8.10.0-alpha.1",
-    "@deck.gl/react": "8.10.0-alpha.1"
+    "@deck.gl/react": "8.10.0-alpha.1",
+    "@deck.gl/widgets": "8.10.0-alpha.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
