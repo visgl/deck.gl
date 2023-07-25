@@ -179,6 +179,8 @@ export type DeckProps = {
   _pickable?: boolean;
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
+  /** (Experimental) An array of Widget instances to be added to the parent element. */
+  _widgets?: Widget[];
 
   /** Called once the WebGL context has been initiated. */
   onWebGLInitialized?: (gl: WebGLRenderingContext) => void;
@@ -252,6 +254,7 @@ const defaultProps = {
   _pickable: true,
   _typedArrayManagerProps: {},
   _customRender: null,
+  _widgets: [],
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -959,6 +962,9 @@ export default class Deck {
       parentElement: this.canvas?.parentElement
     });
     this.widgetManager.add(new Tooltip(), {placement: 'fill'});
+    this.props._widgets.forEach(widget => {
+      this.widgetManager?.add(widget);
+    });
 
     this.setProps(this.props);
 
