@@ -51,7 +51,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 <!-- optional if mapbox base map is needed -->
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet' />
-<!-- You would need to use basic CSS for mapbox-gl -->
+<!-- Allow the map to render in full screen  -->
 <style>
   body {
     width: 100vw;
@@ -67,8 +67,7 @@ It exposes two global objects `deck` and `luma`. Any exports from the deck.gl co
 The scripting API's [DeckGL](../api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
 
 ```js
-//For this example you would need to use mapbox in your code:
-//<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+//This example renders a scatterplot with DeckGL, on top of a basemap rendered with mapboxgl, using a map style JSON from Carto.
 new deck.DeckGL({
   mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
   initialViewState: {
