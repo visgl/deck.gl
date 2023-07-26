@@ -33,7 +33,7 @@ const deckgl = new Deck({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
       ],
-      getColor: d => d.color,
+      getFillColor: d => d.color,
       getRadius: d => d.radius
     })
   ]
@@ -81,7 +81,7 @@ new deck.DeckGL({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
       ],
-      getColor: d => d.color,
+      getFillColor: d => d.color,
       getRadius: d => d.radius
     })
   ]
