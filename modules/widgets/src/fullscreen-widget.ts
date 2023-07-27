@@ -1,7 +1,7 @@
 import type {Deck, Widget} from '@deck.gl/core';
 
 /* global document */
-const defaultStyle: Partial<CSSStyleDeclaration> = {
+const defaultStyle: Readonly<Partial<CSSStyleDeclaration>> = {
   pointerEvents: 'auto',
   color: '#a0a7b4',
   backgroundColor: '#29323c',
