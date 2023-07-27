@@ -41,7 +41,7 @@ class FullscreenWidget implements Widget {
   }
 
   async requestFullscreen() {
-    // @ts-ignore canvas is protected. Merge https://github.com/visgl/deck.gl/pull/7919?
+    // @ts-expect-error canvas is protected. Merge https://github.com/visgl/deck.gl/pull/7919?
     await this.deck?.canvas?.parentElement?.requestFullscreen({navigationUI: 'hide'});
     this.isFullscreen = true;
   }
