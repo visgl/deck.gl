@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
+#### deck.gl [8.10.0-alpha.2] - Jul 28 2023
+
+- add(modules) widget module (#8016)
+- Normalize h3 cluster polygons longitudes (#8010)
+- Add WidgetManager (#7947)
+
 #### deck.gl [8.10.0-alpha.1] - Jun 5 2023
 
 - update h3-js to v4 (#7913)
