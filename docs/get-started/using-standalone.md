@@ -33,7 +33,7 @@ const deckgl = new Deck({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
       ],
-      getColor: d => d.color,
+      getFillColor: d => d.color,
       getRadius: d => d.radius
     })
   ]
@@ -42,22 +42,32 @@ const deckgl = new Deck({
 
 ## Using the Scripting API
 
-deck.gl also offers a standalone bundled version of the library - a native JavaScript scripting interface like that of d3.js. You can now use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). This effort aims to make it easier for designers, creative coders and data scientists everywhere to leverage WebGL for interactive visualizations.
+deck.gl also offers a standalone bundled version of the library - a native JavaScript scripting interface like that of d3.js. You can now use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). This effort aims to make it easier for designers, creative coders and data scientists everywhere to leverage WebGL for interactive visualizations. The scripting API offers out-of-the-box integration with [Mapbox GL JS](https://mapbox.com). To add a base map to your visualization, you need to include the base map library and stylesheet:
 
 To use deck.gl in a scripting environment, include the standalone version in a `script` tag:
 
 ```html
 <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
 <!-- optional if mapbox base map is needed -->
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet' />
+<!-- Allow the map to render in full screen  -->
+<style>
+  body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+  }
+</style>
 ```
+
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
 The scripting API's [DeckGL](../api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
 
 ```js
+//This example renders a scatterplot with DeckGL, on top of a basemap rendered with mapboxgl, using a map style JSON from Carto.
 new deck.DeckGL({
   mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
   initialViewState: {
@@ -71,7 +81,7 @@ new deck.DeckGL({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
       ],
-      getColor: d => d.color,
+      getFillColor: d => d.color,
       getRadius: d => d.radius
     })
   ]
