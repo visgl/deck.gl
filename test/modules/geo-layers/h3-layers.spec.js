@@ -153,7 +153,6 @@ test('H3Utils#normalizeLongitudes', t => {
   t.end();
 });
 
-test('H3HexagonLayer', t => {
 // TODO - luma v9 - Tries to use GLSL 1.00 extensions with WebGL2 context.
 test.skip('H3HexagonLayer', t => {
   const testCases = generateLayerTests({

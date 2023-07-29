@@ -892,7 +892,7 @@ export default class Deck {
       }
       if (!handled) {
         this.props.onHover?.(pickedInfo, _pickRequest.event);
-        this.widgetManager!.onHover(pickedInfo, _pickRequest.event);
+        this.widgetManager.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
@@ -1032,7 +1032,7 @@ export default class Deck {
     if (opts.pass === 'screen') {
       // This method could be called when drawing to picking buffer, texture etc.
       // Only when drawing to screen, update all widgets (UI components)
-      this.widgetManager!.onRedraw({
+      this.widgetManager.onRedraw({
         viewports: opts.viewports,
         layers: opts.layers
       });
@@ -1135,7 +1135,7 @@ export default class Deck {
     }
     if (!handled) {
       rootHandler?.(info, event);
-      this.widgetManager!.onEvent(info, event);
+      this.widgetManager.onEvent(info, event);
     }
   };
 

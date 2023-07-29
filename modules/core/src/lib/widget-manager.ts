@@ -126,7 +126,7 @@ export class WidgetManager {
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }
-    let container = viewContainer.querySelector(`.${placement}`) as HTMLDivElement;
+    let container = viewContainer.querySelector<HTMLDivElement>(`.${placement}`);
     if (!container) {
       container = document.createElement('div');
       container.className = placement;

@@ -16,7 +16,7 @@ export default class JSONConfiguration {
   constants = {};
   functions = {};
   React = null;
-    // TODO - this needs to be simpler, function conversion should be built in
+  // TODO - this needs to be simpler, function conversion should be built in
   convertFunction = parseExpressionString;
   preProcessClassProps = (Class, props) => props;
   postProcessConvertedJson = json => json;
