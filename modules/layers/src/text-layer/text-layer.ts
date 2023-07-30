@@ -22,6 +22,7 @@ import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_FONT_SETTINGS,
+  PrepackedFontAtlas,
   setFontAtlasCacheLimit
 } from './font-atlas-manager';
 import {transformParagraph, getTextFromBuffer} from './utils';
@@ -110,6 +111,10 @@ type _TextLayerProps<DataT> = {
    * @default [0, 0, 0, 0]
    */
   backgroundPadding?: [number, number] | [number, number, number, number];
+  /**
+   * A prepacked font atlas that contains an image and character definitions. If provided, all other font settings are ignored.
+   */
+  fontAtlas?: string | PrepackedFontAtlas | null;
   /**
    * Specifies a list of characters to include in the font. If set to 'auto', will be automatically generated from the data set.
    * @default (ASCII characters 32-128)
@@ -212,6 +217,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
+  fontAtlas: {type: 'object', value: null, async: true},
   characterSet: {type: 'object', value: DEFAULT_FONT_SETTINGS.characterSet},
   fontFamily: DEFAULT_FONT_SETTINGS.fontFamily,
   fontWeight: DEFAULT_FONT_SETTINGS.fontWeight,
@@ -277,7 +283,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this._updateText();
     }
 
-    const fontChanged = this._updateFontAtlas();
+    const fontChanged = this._updateFontAtlas(params);
 
     const styleChanged =
       fontChanged ||
@@ -300,9 +306,17 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   /** Returns true if font has changed */
-  private _updateFontAtlas(): boolean {
-    const {fontSettings, fontFamily, fontWeight} = this.props;
+  private _updateFontAtlas({props, oldProps}: UpdateParameters<this>): boolean {
+    const {fontSettings, fontFamily, fontWeight, fontAtlas} = props;
     const {fontAtlasManager, characterSet} = this.state;
+
+    if (fontAtlas || this.internalState!.isAsyncPropLoading('fontAtlas')) {
+      if (fontAtlas && fontAtlas !== oldProps.fontAtlas) {
+        fontAtlasManager.setProps(fontAtlas as PrepackedFontAtlas);
+        return true;
+      }
+      return false;
+    }
 
     const fontProps = {
       ...fontSettings,
@@ -479,9 +493,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, texture, mapping, props: fontSettings},
       styleVersion
     } = this.state;
+
+    if (!texture) {
+      return null;
+    }
 
     const {
       data,
@@ -497,7 +515,6 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       backgroundPadding,
       background,
       billboard,
-      fontSettings,
       outlineWidth,
       outlineColor,
       sizeScale,

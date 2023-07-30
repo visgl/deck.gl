@@ -55,6 +55,12 @@ export type FontSettings = {
   smoothing?: number;
 };
 
+export type PrepackedFontAtlas = {
+  source: string;
+  mapping: CharacterMapping;
+  settings: FontSettings;
+};
+
 export const DEFAULT_FONT_SETTINGS: Required<FontSettings> = {
   fontFamily: 'Monaco, monospace',
   fontWeight: 'normal',
@@ -153,10 +159,10 @@ export default class FontAtlasManager {
   /** Cache key of the current font atlas */
   private _key?: string;
   /** The current font atlas */
-  private _atlas?: FontAtlas;
+  private _atlas?: FontAtlas | PrepackedFontAtlas;
 
-  get texture(): Texture | undefined {
-    return this._atlas;
+  get texture(): Texture | string | undefined {
+    return (this._atlas as PrepackedFontAtlas)?.source || (this._atlas as FontAtlas);
   }
 
   get mapping(): CharacterMapping | undefined {
@@ -168,7 +174,13 @@ export default class FontAtlasManager {
     return (fontSize * HEIGHT_SCALE + buffer * 2) / fontSize;
   }
 
-  setProps(props: FontSettings = {}) {
+  setProps(props: FontSettings | PrepackedFontAtlas = {}) {
+    if ('settings' in props) {
+      Object.assign(this.props, props.settings);
+      this._atlas = props;
+      return;
+    }
+
     Object.assign(this.props, props);
 
     // update cache key
