@@ -343,7 +343,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         const layers = this.renderSubLayers({
           ...this.props,
           ...this.getSubLayerProps({
-            id: tile.id
+            id: tile.id,
+            updateTriggers: this.props.updateTriggers
           }),
           data: tile.content,
           _offset: 0,
