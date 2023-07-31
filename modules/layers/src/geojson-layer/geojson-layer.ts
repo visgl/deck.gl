@@ -404,9 +404,9 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
   getPickingInfo(params): GeoJsonPickingInfo {
     const info = super.getPickingInfo(params) as GeoJsonPickingInfo;
     const {index, sourceLayer} = info;
-    info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
-    if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
-      info.index = (this.props.data as BinaryFeatures).points!.globalFeatureIds.value[index];
+    info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
+    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
+      info.index = (this.props.data as BinaryFeatures).points.globalFeatureIds.value[index];
     }
     return info;
   }

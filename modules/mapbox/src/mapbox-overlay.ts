@@ -203,6 +203,7 @@ export default class MapboxOverlay implements IControl {
     }
   };
 
+  // eslint-disable-next-line complexity
   private _handleMouseEvent = (event: MapMouseEvent) => {
     const deck = this._deck;
     if (!deck || !deck.isInitialized) {

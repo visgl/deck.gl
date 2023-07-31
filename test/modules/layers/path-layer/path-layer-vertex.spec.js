@@ -1,13 +1,13 @@
 import test from 'tape-promise/tape';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {picking, project32} from '@deck.gl/core';
-import {Transform, Buffer} from '@luma.gl/core';
+import {Transform, Buffer} from '@luma.gl/webgl-legacy';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
 test('path-layer-vertex#flipIfTrue', t => {
-  if (!Transform.isSupported(gl)) {
+  if (!Transform.isSupported(device)) {
     t.comment('Transform not supported skipping the test');
     t.end();
     return;
@@ -21,9 +21,9 @@ varying float result;
     'vs:#main-start': '  if (true) { result = flipIfTrue(bool(inFlag)); } else {\n',
     'vs:#main-end': '  }\n'
   };
-  const inFlag = new Buffer(gl, new Float32Array([0, 1]));
+  const inFlag = new Buffer(device, new Float32Array([0, 1]));
   const expectedResult = [1, -1];
-  const transform = new Transform(gl, {
+  const transform = new Transform(device, {
     sourceBuffers: {
       inFlag
     },

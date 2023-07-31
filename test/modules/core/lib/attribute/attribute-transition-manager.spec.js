@@ -2,11 +2,11 @@
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import test from 'tape-promise/tape';
-import {isWebGL2, Timeline} from '@luma.gl/core';
-import {gl} from '@deck.gl/test-utils';
+import {Timeline} from '@luma.gl/engine';
+import {device} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = (function () {
-  const indices = new Attribute(gl, {
+  const indices = new Attribute(device, {
     id: 'indices',
     isIndexed: true,
     size: 1,
@@ -14,7 +14,7 @@ const TEST_ATTRIBUTES = (function () {
   });
   indices.setData({value: new Float32Array([0, 1, 2, 1, 3, 2])});
 
-  const instancePositions = new Attribute(gl, {
+  const instancePositions = new Attribute(device, {
     id: 'instancePositions',
     size: 3,
     accessor: ['getPosition', 'getElevation'],
@@ -23,7 +23,7 @@ const TEST_ATTRIBUTES = (function () {
   });
   instancePositions.setData({value: new Float32Array(12)});
 
-  const instanceSizes = new Attribute(gl, {
+  const instanceSizes = new Attribute(device, {
     id: 'instanceSizes',
     size: 1,
     accessor: 'getSize',
@@ -36,11 +36,11 @@ const TEST_ATTRIBUTES = (function () {
 })();
 
 test('AttributeTransitionManager#constructor', t => {
-  let manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+  let manager = new AttributeTransitionManager(device, {id: 'attribute-transition'});
   t.ok(manager, 'AttributeTransitionManager is constructed');
   t.is(
     Boolean(manager.isSupported),
-    isWebGL2(gl),
+    device.info.type === 'webgl2',
     'AttributeTransitionManager checks WebGL support'
   );
 
@@ -57,10 +57,10 @@ test('AttributeTransitionManager#constructor', t => {
   t.end();
 });
 
-if (isWebGL2(gl)) {
+if (device.info.type === 'webgl2') {
   test('AttributeTransitionManager#update', t => {
     const timeline = new Timeline();
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
+    const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     attributes.indices.setNeedsRedraw('initial');
@@ -121,7 +121,7 @@ if (isWebGL2(gl)) {
 
   test('AttributeTransitionManager#transition', t => {
     const timeline = new Timeline();
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
+    const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     let startCounter = 0;
@@ -199,7 +199,7 @@ if (isWebGL2(gl)) {
   // AttributeTransitionManager should not fail in WebGL1
   test('AttributeTransitionManager#update, setCurrentTime', t => {
     const timeline = new Timeline();
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
+    const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     attributes.instanceSizes.setNeedsRedraw('initial');

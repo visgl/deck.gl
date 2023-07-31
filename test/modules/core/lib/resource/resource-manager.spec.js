@@ -1,14 +1,14 @@
 /* global setTimeout */
 import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import ResourceManager from '@deck.gl/core/lib/resource/resource-manager';
 
 test('ResourceManager#protocol', t => {
-  let dataManager = new ResourceManager({gl, onError: t.notOk});
+  let dataManager = new ResourceManager({device, onError: t.notOk});
   t.ok(dataManager.contains('resource://data-01'), 'checks protocol');
   t.notOk(dataManager.contains('deck://data-01'), 'checks protocol');
 
-  dataManager = new ResourceManager({gl, protocol: 'deck://', onError: t.notOk});
+  dataManager = new ResourceManager({device, protocol: 'deck://', onError: t.notOk});
   t.notOk(dataManager.contains('resource://data-01'), 'checks protocol');
   t.ok(dataManager.contains('deck://data-01'), 'checks protocol');
 
@@ -16,7 +16,7 @@ test('ResourceManager#protocol', t => {
 });
 
 test('ResourceManager#add,remove', t => {
-  const dataManager = new ResourceManager({gl, onError: t.notOk});
+  const dataManager = new ResourceManager({device, onError: t.notOk});
 
   t.notOk(dataManager.contains('data-01'), 'does not contain resource');
 
@@ -41,7 +41,7 @@ test('ResourceManager#add,remove', t => {
 
 // eslint-disable-next-line
 test('ResourceManager#subscribe, unsubscribe', t => {
-  const dataManager = new ResourceManager({gl, onError: t.notOk});
+  const dataManager = new ResourceManager({device, onError: t.notOk});
   let propA1Changed = 0;
   let propA2Changed = 0;
   let propBChanged = 0;

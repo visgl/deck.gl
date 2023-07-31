@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
-import {Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/core';
+import {GL, Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -42,10 +41,10 @@ export default class WBOITLayer extends SolidPolygonLayer {
   initializeState() {
     super.initializeState();
 
-    const {gl} = this.context;
+    const [drawingBufferWidth, drawingBufferHeight] = this.context.device.canvasContext.getDra;
 
     const textureOpts = {
-      type: gl.FLOAT,
+      type: GL.FLOAT,
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
       mipmaps: false,
@@ -107,14 +106,12 @@ export default class WBOITLayer extends SolidPolygonLayer {
   }
 
   draw(opts) {
-    const {gl} = this.context;
-
     this.state.accumulationFramebuffer.clear({color: [0, 0, 0, 1], depth: 1});
 
     withParameters(
-      gl,
+      this.context.device,
       {
-        blendFunc: [gl.ONE, gl.ONE, gl.ZERO, gl.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [GL.ONE, GL.ONE, GL.ZERO, GL.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthMask: false,
         cull: false,
@@ -134,9 +131,9 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
 
     withParameters(
-      gl,
+      this.context.device,
       {
-        blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [GL.ONE, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthTest: false,
         framebuffer: null
@@ -147,7 +144,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
 
     withParameters(
-      gl,
+      this.context.device,
       {
         blend: false,
         depthTest: false,
@@ -166,13 +163,16 @@ export default class WBOITLayer extends SolidPolygonLayer {
     );
   }
 
-  _getModels(gl) {
-    const oitModel = new Model(gl, {
+  _getModels() {
+    const oitModel = new Model(this.context.device, {
       vs: oitBlendVs,
       fs: oitBlendFs,
       drawMode: GL.TRIANGLE_STRIP,
       attributes: {
-        positions: [new Buffer(gl, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])), {size: 2}]
+        positions: [
+          new Buffer(this.context.device, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])),
+          {size: 2}
+        ]
       },
       vertexCount: 4,
       uniforms: {
@@ -183,7 +183,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
 
     this.setState({oitModel});
 
-    return super._getModels(gl);
+    return super._getModels();
   }
 }
 

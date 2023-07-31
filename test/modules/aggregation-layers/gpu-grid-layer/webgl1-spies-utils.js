@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {isWebGL2, fp64 as fp64ShaderModule} from '@luma.gl/core';
+import {fp64 as fp64ShaderModule} from '@luma.gl/shadertools';
 import {project32, gouraudLighting, picking} from '@deck.gl/core';
 import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
@@ -28,13 +28,13 @@ const VS = 'void main() {gl_Position = vec4(0);}';
 const FS = 'void main() {gl_FragColor = vec4(0);}';
 
 // Spiy methods to avoid usage of WebGL2 API when running under Node.
-export function setupSpysForWebGL1(gl) {
+export function setupSpysForWebGL1(device) {
   let getShadersSpy = null;
   let setupUniformBufferSpy = null;
   let bindUniformBuffersSpy = null;
   let unbindUniformBuffersSpy = null;
   let isSupportedSpy = null;
-  if (!isWebGL2(gl)) {
+  if (device.info.type !== 'webgl2') {
     isSupportedSpy = makeSpy(GPUGridAggregator, 'isSupported');
     getShadersSpy = makeSpy(GPUGridCellLayer.prototype, 'getShaders');
     setupUniformBufferSpy = makeSpy(GPUGridCellLayer.prototype, '_setupUniformBuffer');

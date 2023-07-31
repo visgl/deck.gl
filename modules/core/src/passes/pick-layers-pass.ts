@@ -1,13 +1,13 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import {withParameters} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import type {GLParameters} from '@luma.gl/webgl';
+import {GL, withParameters} from '@luma.gl/webgl-legacy';
+import type {Framebuffer} from '@luma.gl/webgl-legacy';
 import log from '../utils/log';
 
-import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS = {
+const PICKING_PARAMETERS: GLParameters = {
   blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
   blendEquation: GL.FUNC_ADD
 };
@@ -68,7 +68,6 @@ export default class PickLayersPass extends LayersPass {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
-    const gl = this.gl;
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
 
@@ -78,7 +77,7 @@ export default class PickLayersPass extends LayersPass {
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
     const renderStatus = withParameters(
-      gl,
+      this.device,
       {
         scissorTest: true,
         scissor: [x, y, width, height],

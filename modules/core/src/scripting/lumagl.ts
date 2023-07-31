@@ -4,10 +4,21 @@
  */
 export {
   // Core classes
-  Model,
-  Transform,
-  ProgramManager,
   Timeline,
+  // Geometries
+  Geometry,
+  ConeGeometry,
+  CubeGeometry,
+  CylinderGeometry,
+  IcoSphereGeometry,
+  PlaneGeometry,
+  SphereGeometry,
+  TruncatedConeGeometry
+} from '@luma.gl/engine';
+
+export {Model, Transform, ProgramManager} from '@luma.gl/webgl-legacy';
+
+export {
   // Context utilities
   instrumentGLContext,
   isWebGL2,
@@ -32,14 +43,5 @@ export {
   TextureCube,
   // WebGL2 classes
   Texture3D,
-  TransformFeedback,
-  // Geometries
-  Geometry,
-  ConeGeometry,
-  CubeGeometry,
-  CylinderGeometry,
-  IcoSphereGeometry,
-  PlaneGeometry,
-  SphereGeometry,
-  TruncatedConeGeometry
-} from '@luma.gl/core';
+  TransformFeedback
+} from '@luma.gl/webgl-legacy';

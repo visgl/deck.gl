@@ -11,17 +11,13 @@ test('JSONConverter#render', t => {
 
   const deckProps = jsonConverter.convert(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
-  const jsonDeck = new Deck(
-    Object.assign(
-      {
-        gl,
-        onAfterRender: () => {
-          t.ok(jsonDeck, 'JSONConverter rendered');
-          jsonDeck.finalize();
-          t.end();
-        }
-      },
-      deckProps
-    )
-  );
+  const jsonDeck = new Deck({
+    gl,
+    onAfterRender: () => {
+      t.ok(jsonDeck, 'JSONConverter rendered');
+      jsonDeck.finalize();
+      t.end();
+    },
+    ...deckProps
+  });
 });

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
 import {
@@ -245,7 +245,7 @@ export default class ContourLayer<
     const cellSizeChanged = oldProps.cellSize !== cellSize;
     let gpuAggregation = props.gpuAggregation;
     if (this.state.gpuAggregation !== props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.device)) {
         log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
         gpuAggregation = false;
       }

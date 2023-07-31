@@ -32,9 +32,8 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, isWebGL2} from '@luma.gl/core';
-import {hasFeature, FEATURES} from '@luma.gl/webgl';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, isWebGL2, Texture2D, hasFeature, FEATURES} from '@luma.gl/webgl-legacy';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -82,6 +81,7 @@ function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
   } else if ((data as MeshAttributes).positions || (data as MeshAttributes).POSITION) {
     validateGeometryAttributes(data, useMeshColors);
     return new Geometry({
+      // @ts-expect-error Type incompatiblity between luma.gl and loaders.gl
       attributes: data
     });
   }
@@ -101,7 +101,7 @@ type Mesh =
 type _SimpleMeshLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   mesh: string | Mesh | Promise<Mesh> | null;
-  texture?: string | Texture | Promise<Texture>;
+  texture?: string | Texture2D | Promise<Texture2D>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
   textureParameters?: Record<number, number> | null;
 
@@ -256,6 +256,8 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Otherwise, calculate bounding box from positions
       const {attributes} = getGeometry(mesh as Mesh, this.props._useMeshColors);
       attributes.POSITION = attributes.POSITION || attributes.positions;
+
+      //@ts-expect-error
       result = getMeshBoundingBox(attributes);
     }
 
@@ -315,7 +317,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.getAttributeManager()!.invalidateAll();
     }
 
-    if (props.texture !== oldProps.texture) {
+    if (props.texture !== oldProps.texture && props.texture instanceof Texture2D) {
       this.setTexture(props.texture);
     }
 

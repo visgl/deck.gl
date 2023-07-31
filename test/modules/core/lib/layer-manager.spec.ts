@@ -20,7 +20,7 @@
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-promise/tape';
 import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -31,8 +31,8 @@ TestLayer.layerName = 'TestLayer';
 class TestCompositeLayer extends CompositeLayer {
   renderLayers() {
     return [
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-1`}, this.getSubLayerProps())),
-      new TestLayer(Object.assign({id: `${this.props.id}-sublayer-2`}, this.getSubLayerProps()))
+      new TestLayer({id: `${this.props.id}-sublayer-1`, ...this.getSubLayerProps()}),
+      new TestLayer({id: `${this.props.id}-sublayer-2`, ...this.getSubLayerProps()})
     ];
   }
 }
@@ -47,7 +47,7 @@ const LAYERS = [
 test('LayerManager#constructor', t => {
   t.ok(LayerManager, 'LayerManager imported');
 
-  let layerManager = new LayerManager(gl);
+  let layerManager = new LayerManager(device);
   t.ok(layerManager, 'LayerManager created');
   layerManager.finalize();
   t.pass('LayerManager finalized');
@@ -61,7 +61,7 @@ test('LayerManager#constructor', t => {
 });
 
 test('LayerManager#getLayers', t => {
-  const layerManager = new LayerManager(gl);
+  const layerManager = new LayerManager(device);
   layerManager.setLayers(LAYERS);
   let layers = layerManager.getLayers();
   t.equal(layers.length, 4, 'LayerManager.getLayers()');
@@ -176,7 +176,7 @@ test('LayerManager#setLayers', t => {
     }
   ];
 
-  const layerManager = new LayerManager(gl);
+  const layerManager = new LayerManager(device);
 
   TEST_CASES.forEach(testCase => {
     t.comment(testCase.title);
@@ -220,7 +220,7 @@ test('LayerManager#error handling', t => {
     }
   }
 
-  const layerManager = new LayerManager(gl);
+  const layerManager = new LayerManager(device);
   layerManager.setProps({onError});
 
   layerManager.setLayers([

@@ -1,6 +1,7 @@
+import GL from '@luma.gl/constants';
 import {WebMercatorViewport} from 'deck.gl';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 const viewportProps = {
   longitude: -119.3,
@@ -19,10 +20,10 @@ export function buildAttributes(opts) {
 
   const numInstances = data.length;
 
-  const attributeManager = new AttributeManager(gl);
+  const attributeManager = new AttributeManager(device);
   const accessorProps = {};
   attributeManager.add({
-    positions: {size: 3, accessor: 'getPosition', type: gl.DOUBLE}
+    positions: {size: 3, accessor: 'getPosition', type: GL.DOUBLE}
   });
   accessorProps.getPosition = opts.getPosition || (x => x.position);
   for (const weightId in weights) {

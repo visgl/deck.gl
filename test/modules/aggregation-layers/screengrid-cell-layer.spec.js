@@ -19,16 +19,16 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-promise/tape';
-import {Buffer, Texture2D} from '@luma.gl/core';
-import {gl} from '@deck.gl/test-utils';
+import {Buffer, Texture2D} from '@luma.gl/webgl-legacy';
+import {device} from '@deck.gl/test-utils';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 
 import {testLayer} from '@deck.gl/test-utils';
 let cellScale;
 
 test('ScreenGridCellLayer#constructor', t => {
-  const SAMPLE_BUFFER = new Buffer(gl);
-  const SAMPLE_TEXTURE = new Texture2D(gl);
+  const SAMPLE_BUFFER = new Buffer(device);
+  const SAMPLE_TEXTURE = new Texture2D(device);
 
   testLayer({
     Layer: ScreenGridCellLayer,

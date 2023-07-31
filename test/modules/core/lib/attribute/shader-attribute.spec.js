@@ -1,12 +1,11 @@
+import test from 'tape-promise/tape';
 import DataColumn from '@deck.gl/core/lib/attribute/data-column';
 import ShaderAttribute from '@deck.gl/core/lib/attribute/shader-attribute';
-import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/core';
-import test from 'tape-promise/tape';
-import {gl} from '@deck.gl/test-utils';
+import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {device} from '@deck.gl/test-utils';
 
 test('ShaderAttribute#constructor', t => {
-  const dataColumn = new DataColumn(gl, {id: 'test-data', size: 3});
+  const dataColumn = new DataColumn(device, {id: 'test-data', size: 3});
 
   const shaderAttribute = new ShaderAttribute(dataColumn, {id: 'test-attribute', divisor: 0});
   t.ok(shaderAttribute, 'ShaderAttribute constructed');
@@ -15,14 +14,14 @@ test('ShaderAttribute#constructor', t => {
 });
 
 test('ShaderAttribute#getValue#constant', t => {
-  const dataColumn1 = new DataColumn(gl, {
+  const dataColumn1 = new DataColumn(device, {
     id: 'colors',
     type: GL.UNSIGNED_BYTE,
     defaultValue: [0, 0, 0, 255],
     size: 4,
     normalized: true
   });
-  const dataColumn2 = new DataColumn(gl, {id: 'matrices', size: 12});
+  const dataColumn2 = new DataColumn(device, {id: 'matrices', size: 12});
   const shaderAttribute1 = new ShaderAttribute(dataColumn1, {id: 'colors'});
   const shaderAttribute2 = new ShaderAttribute(dataColumn2, {
     id: 'matrices_col2',
@@ -45,8 +44,8 @@ test('ShaderAttribute#getValue#constant', t => {
 
 /* eslint-disable max-statements */
 test('ShaderAttribute#getValue#buffer', t => {
-  const dataColumn = new DataColumn(gl, {id: 'positions', size: 3});
-  const buffer = new Buffer(gl, {data: new Float32Array([1, 1, 1])});
+  const dataColumn = new DataColumn(device, {id: 'positions', size: 3});
+  const buffer = new Buffer(device, {data: new Float32Array([1, 1, 1])});
   const shaderAttribute1 = new ShaderAttribute(dataColumn, {divisor: 0});
   const shaderAttribute2 = new ShaderAttribute(dataColumn, {divisor: 1});
 

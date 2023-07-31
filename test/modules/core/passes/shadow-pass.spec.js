@@ -3,10 +3,10 @@ import test from 'tape-promise/tape';
 import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import ShadowPass from '@deck.gl/core/passes/shadow-pass';
 import * as FIXTURES from 'deck.gl-test/data';
-import gl from '@deck.gl/test-utils/utils/setup-gl';
+import {device} from '@deck.gl/test-utils';
 
 test('ShadowPass#constructor and delete', t => {
-  const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
 
   t.ok(shadowPass, `ShadowPass is constructed`);
   t.ok(shadowPass.shadowMap, `ShadowPass creates shadow map`);
@@ -34,11 +34,11 @@ test('ShadowPass#render', t => {
     getFillColor: (f, {index}) => [index, 0, 0]
   });
 
-  const layerManager = new LayerManager(gl, {viewport});
+  const layerManager = new LayerManager(device, {viewport});
 
   layerManager.setLayers([layer]);
 
-  const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
   shadowPass.render({
     viewports: [viewport],
     layers: layerManager.getLayers(),
@@ -61,7 +61,7 @@ test('ShadowPass#getModuleParameters', t => {
     getFillColor: (f, {index}) => [index, 0, 0]
   });
 
-  const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
   const moduleParameters = shadowPass.getModuleParameters(layer);
 
   t.equal(moduleParameters.drawToShadowMap, true, `ShadowPass has module parameters`);

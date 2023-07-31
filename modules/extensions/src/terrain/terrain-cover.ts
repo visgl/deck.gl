@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/webgl-legacy';
 
 import type {Layer, Viewport} from '@deck.gl/core';
 
@@ -163,7 +163,7 @@ export class TerrainCover {
       return null;
     }
     if (!this.fbo) {
-      this.fbo = createRenderTarget(this.targetLayer.context.gl, {id: this.id});
+      this.fbo = createRenderTarget(this.targetLayer.context.device, {id: this.id});
     }
     return this.fbo;
   }
@@ -173,7 +173,9 @@ export class TerrainCover {
       return null;
     }
     if (!this.pickingFbo) {
-      this.pickingFbo = createRenderTarget(this.targetLayer.context.gl, {id: `${this.id}-picking`});
+      this.pickingFbo = createRenderTarget(this.targetLayer.context.device, {
+        id: `${this.id}-picking`
+      });
     }
     return this.pickingFbo;
   }
@@ -217,7 +219,7 @@ function getTile(layer: Layer): TileHeader | null {
     if (tile) {
       return tile;
     }
-    layer = layer.parent as Layer;
+    layer = layer.parent;
   }
   return null;
 }

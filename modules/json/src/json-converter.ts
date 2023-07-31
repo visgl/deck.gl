@@ -18,19 +18,25 @@ import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
 
+export type JSONConverterProps = {
+  configuration: JSONConfiguration | Record<string, any>;
+  onJSONChange;
+};
+
 export default class JSONConverter {
+  log = console; // eslint-disable-line
+  configuration: JSONConfiguration;
+  onJSONChange = () => {};
+  json = null;
+  convertedJson = null;
+
   constructor(props) {
-    this.log = console; // eslint-disable-line
-    this.configuration = {};
-    this.onJSONChange = () => {};
-    this.json = null;
-    this.convertedJson = null;
     this.setProps(props);
   }
 
   finalize() {}
 
-  setProps(props) {
+  setProps(props: JSONConverterProps) {
     // HANDLE CONFIGURATION PROPS
     if ('configuration' in props) {
       // Accept object or `JSONConfiguration`

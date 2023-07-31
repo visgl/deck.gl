@@ -86,7 +86,7 @@ export function getOffsetOrigin(
     case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
       if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         // viewport center in world space
-        // @ts-expect-error when using LNGLAT coordinates, we expect the viewport to be geospatial, in which case geospatialOrigin is defined
+        // ts-expect-error when using LNGLAT coordinates, we expect the viewport to be geospatial, in which case geospatialOrigin is defined
         shaderCoordinateOrigin = geospatialOrigin;
       } else if (coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
         // viewport center in common space

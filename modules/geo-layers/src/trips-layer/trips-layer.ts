@@ -102,7 +102,7 @@ if(fadeTrail) {
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       timestamps: {
         size: 1,
         accessor: 'getTimestamps',

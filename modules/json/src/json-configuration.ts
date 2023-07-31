@@ -7,22 +7,21 @@ import {TYPE_KEY, FUNCTION_KEY} from './syntactic-sugar';
 const isObject = value => value && typeof value === 'object';
 
 export default class JSONConfiguration {
-  constructor(...configurations) {
-    // Initialize config with default values
-    this.typeKey = TYPE_KEY;
-    this.functionKey = FUNCTION_KEY;
-    this.log = console; // eslint-disable-line
-    this.classes = {};
-    this.reactComponents = {};
-    this.enumerations = {};
-    this.constants = {};
-    this.functions = {};
-    this.React = null;
-    // TODO - this needs to be simpler, function conversion should be built in
-    this.convertFunction = parseExpressionString;
-    this.preProcessClassProps = (Class, props) => props;
-    this.postProcessConvertedJson = json => json;
+  typeKey = TYPE_KEY;
+  functionKey = FUNCTION_KEY;
+  log = console; // eslint-disable-line
+  classes = {};
+  reactComponents = {};
+  enumerations = {};
+  constants = {};
+  functions = {};
+  React = null;
+  // TODO - this needs to be simpler, function conversion should be built in
+  convertFunction = parseExpressionString;
+  preProcessClassProps = (Class, props) => props;
+  postProcessConvertedJson = json => json;
 
+  constructor(...configurations) {
     for (const configuration of configurations) {
       this.merge(configuration);
     }

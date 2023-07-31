@@ -1,33 +1,32 @@
 /* global setTimeout */
+import {Device} from '@luma.gl/api';
 import Resource from './resource';
 import type {ResourceSubscriber} from './resource';
 
 export type ResourceManagerContext = {
-  gl: WebGLRenderingContext;
+  device: Device;
   resourceManager: ResourceManager;
+  /** @deprecated */
+  gl: WebGLRenderingContext;
 };
+
+type Consumer = Record<string, ResourceSubscriber & {resourceId: string}>;
 
 export default class ResourceManager {
   protocol: string;
 
   private _context: ResourceManagerContext;
   private _resources: Record<string, Resource>;
-  private _consumers: Record<
-    string,
-    Record<
-      string,
-      ResourceSubscriber & {
-        resourceId: string;
-      }
-    >
-  >;
+  private _consumers: Record<string, Consumer>;
   private _pruneRequest: number | null;
 
-  constructor({gl, protocol}) {
-    this.protocol = protocol || 'resource://';
+  constructor(props: {device: Device; protocol?: string}) {
+    this.protocol = props.protocol || 'resource://';
 
     this._context = {
-      gl,
+      device: props.device,
+      // @ts-expect-error
+      gl: props.device?.gl,
       resourceManager: this
     };
     this._resources = {};
@@ -142,17 +141,24 @@ export default class ResourceManager {
   ) {
     const consumers = this._consumers;
     const consumer = (consumers[consumerId] = consumers[consumerId] || {});
-    const request = consumer[requestId] || {};
+    let request = consumer[requestId];
 
-    const oldResource = request.resourceId && this._resources[request.resourceId];
+    const oldResource = request && request.resourceId && this._resources[request.resourceId];
     if (oldResource) {
       oldResource.unsubscribe(request);
       this.prune();
     }
     if (resource) {
+      if (request) {
+        request.onChange = onChange;
+        request.resourceId = resource.id;
+      } else {
+        request = {
+          onChange,
+          resourceId: resource.id
+        };
+      }
       consumer[requestId] = request;
-      request.onChange = onChange;
-      request.resourceId = resource.id;
       resource.subscribe(request);
     }
   }

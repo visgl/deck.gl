@@ -4,7 +4,7 @@
 
 # Usage (Aggregation in World space)
 ```
-const aggregator = new GPUGridAggregator(gl);
+const aggregator = new GPUGridAggregator(device);
 
 const results = aggregator.run({
   attributes, // position and weight attributes
@@ -29,7 +29,7 @@ const results = aggregator.run({
 You can also perform aggregation in screen space by provide a viewport and set `projectPoints` to true. Aggregator will first project positions and then aggregate them in screen space.
 
 ```
-const aggregator = new GPUGridAggregator(gl);
+const aggregator = new GPUGridAggregator(device);
 
 const results = aggregator.run({
   attributes, // position and weight attributes
@@ -57,7 +57,7 @@ const results = aggregator.run({
 
 ‘ScreenGridAggregator’ constructor takes following arguments and constructs an object.
 
-* gl (WebGLContext) : used for querying WebGL features and creating required webgl resources.
+* device (WebGLContext) : used for querying WebGL features and creating required webgl resources.
 * opts (Object) : Optionally contains and ‘id’ and ‘sahderCache’ object for caching/re-using shaders.
 
 

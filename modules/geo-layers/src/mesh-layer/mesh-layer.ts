@@ -1,7 +1,7 @@
 import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
-import {Model, pbr} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {pbr} from '@luma.gl/shadertools';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
@@ -63,7 +63,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     const attributeManager = this.getAttributeManager();
     if (featureIds) {
       // attributeManager is always defined in a primitive layer
-      attributeManager!.add({
+      attributeManager.add({
         featureIdsPickingColors: {
           type: GL.UNSIGNED_BYTE,
           size: 3,
@@ -140,7 +140,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
     this.state.materialParser?.delete();
 
-    return new GLTFMaterialParser(this.context.gl, {
+    return new GLTFMaterialParser(this.context.device, {
       attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
       material: {unlit, ...pbrMaterial},
       pbrDebug: false,
@@ -152,7 +152,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   calculateFeatureIdsPickingColors(attribute) {
     // This updater is only called if featureIds is not null
-    const featureIds = this.props.featureIds!;
+    const featureIds = this.props.featureIds;
     const value = new Uint8ClampedArray(featureIds.length * attribute.size);
 
     const pickingColor = [];

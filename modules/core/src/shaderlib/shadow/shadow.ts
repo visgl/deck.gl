@@ -23,7 +23,7 @@ import {Vector3, Matrix4} from '@math.gl/core';
 import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
-import type {Texture2D} from '@luma.gl/webgl';
+import type {Texture2D} from '@luma.gl/webgl-legacy';
 import type {ShaderModule, NumericArray} from '../../types/types';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
@@ -158,7 +158,7 @@ function getViewProjectionMatrices({
     [0, viewport.height, -1], // bottom left near
     [viewport.width, viewport.height, -1] // bottom right near
   ].map(pixel =>
-    // @ts-expect-error z may be undefined
+    // ts-expect-error z may be undefined
     screenToCommonSpace(pixel, pixelUnprojectionMatrix)
   );
 
@@ -257,7 +257,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (opts = {}, context = {}) => {
+  getUniforms: (opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {}, context = {}) => {
     if (
       'viewport' in opts &&
       (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))

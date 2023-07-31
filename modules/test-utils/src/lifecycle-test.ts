@@ -21,7 +21,7 @@
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
 
 import {makeSpy} from '@probe.gl/test-utils';
-import gl from './utils/setup-gl';
+import {device} from './utils/setup-gl';
 
 const testViewport = new MapView().makeViewport({
   width: 100,
@@ -36,7 +36,7 @@ function defaultOnError(error, title) {
 }
 
 function initializeLayerManager({layer, viewport = testViewport, onError = defaultOnError}) {
-  const layerManager = new LayerManager(gl, {viewport});
+  const layerManager = new LayerManager(device, {viewport});
   layerManager.setProps({
     onError: error => onError(error, `initializing ${layer.id}`)
   });
@@ -58,7 +58,7 @@ export function testInitializeLayer(opts) {
 
 export async function testInitializeLayerAsync(opts) {
   const layerManager = initializeLayerManager(opts);
-  const deckRenderer = new DeckRenderer(gl);
+  const deckRenderer = new DeckRenderer(device);
   while (!opts.layer.isLoaded) {
     await update({layerManager, deckRenderer});
   }
@@ -134,8 +134,8 @@ function setupLayerTests(
 ) {
   const oldResourceCounts = getResourceCounts();
 
-  const layerManager = new LayerManager(gl, {viewport, timeline});
-  const deckRenderer = new DeckRenderer(gl);
+  const layerManager = new LayerManager(device, {viewport, timeline});
+  const deckRenderer = new DeckRenderer(device);
 
   layerManager.context.animationProps = {
     time: 0

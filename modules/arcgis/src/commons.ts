@@ -1,14 +1,23 @@
 /* eslint-disable no-invalid-this */
 
+import type {Device} from '@luma.gl/api';
+import {
+  GL,
+  Model,
+  Buffer,
+  Framebuffer,
+  instrumentGLContext,
+  withParameters
+} from '@luma.gl/webgl-legacy';
 import {Deck} from '@deck.gl/core';
-import {Model, Buffer, Framebuffer, instrumentGLContext, withParameters} from '@luma.gl/core';
 
-export function initializeResources(gl) {
-  instrumentGLContext(gl);
+export function initializeResources(device: Device) {
+  // @ts-expect-error
+  instrumentGLContext(device.gl);
 
-  this.buffer = new Buffer(gl, new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  this.buffer = new Buffer(device, new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
 
-  this.model = new Model(gl, {
+  this.model = new Model(device, {
     vs: `
       attribute vec2 a_pos;
       varying vec2 v_texcoord;
@@ -28,13 +37,14 @@ export function initializeResources(gl) {
       }
     `,
     attributes: {
+      // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
     vertexCount: 4,
-    drawMode: gl.TRIANGLE_STRIP
+    drawMode: GL.TRIANGLE_STRIP
   });
 
-  this.deckFbo = new Framebuffer(gl, {width: 1, height: 1});
+  this.deckFbo = new Framebuffer(device, {width: 1, height: 1});
 
   this.deckInstance = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
@@ -44,7 +54,7 @@ export function initializeResources(gl) {
     controller: false,
 
     // We use the same WebGL context as the ArcGIS API for JavaScript.
-    gl,
+    gl: device.gl,
 
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
@@ -92,6 +102,7 @@ export function render({gl, width, height, viewState}) {
       viewport: [0, 0, width, height]
     },
     () => {
+      // eslint-disable-next-line camelcase
       this.model.setUniforms({u_texture: this.deckFbo}).draw();
     }
   );

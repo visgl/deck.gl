@@ -1,16 +1,14 @@
-import {Framebuffer, withParameters} from '@luma.gl/core';
+import {Framebuffer, withParameters} from '@luma.gl/webgl-legacy';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollisionFilterPass extends LayersPass {
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
-    const gl = this.gl;
-
     const padding = 1;
 
     return withParameters(
-      gl,
+      this.device,
       {
         scissorTest: true,
         scissor: [padding, padding, target.width - 2 * padding, target.height - 2 * padding],

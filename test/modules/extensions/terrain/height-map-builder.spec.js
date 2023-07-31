@@ -17,7 +17,7 @@ test('HeightMapBuilder#diffing', async t => {
 
   await lifecycle.update({viewport, layers: [terrainLayer]});
 
-  const heightMap = new HeightMapBuilder(terrainLayer.context.gl);
+  const heightMap = new HeightMapBuilder(terrainLayer.context.device);
 
   t.notOk(
     heightMap.shouldUpdate({layers: [terrainLayer], viewport}),

@@ -1,6 +1,5 @@
 import {LayerExtension} from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, Texture2D} from '@luma.gl/webgl-legacy';
 
 import {patternShaders} from './shaders.glsl';
 
@@ -109,7 +108,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const attributeManager = this.getAttributeManager();
 
     if (extension.opts.pattern) {
-      attributeManager!.add({
+      attributeManager.add({
         fillPatternFrames: {
           size: 4,
           accessor: 'getFillPattern',

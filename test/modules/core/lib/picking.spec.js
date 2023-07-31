@@ -24,7 +24,7 @@ import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {gl} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 
 import {equals} from '@math.gl/core';
 
@@ -135,9 +135,9 @@ function validateUniforms(actual, expected) {
 
 /* eslint-disable max-statements */
 test('processPickInfo', async t => {
-  const layerManager = new LayerManager(gl, {viewport: parameters.viewports[0]});
+  const layerManager = new LayerManager(device, {viewport: parameters.viewports[0]});
   layerManager.setProps({onError: t.notOk});
-  const deckRenderer = new DeckRenderer(gl);
+  const deckRenderer = new DeckRenderer(device);
 
   layerManager.setLayers(parameters.layers);
 

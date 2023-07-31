@@ -3,7 +3,7 @@
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
-import type {Texture2D} from '@luma.gl/core';
+import type {Texture2D} from '@luma.gl/webgl-legacy';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
@@ -102,7 +102,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
     `
   },
   // eslint-disable-next-line complexity
-  getUniforms: (opts = {}, uniforms) => {
+  getUniforms: (opts: Partial<TerrainModuleSettings> = {}, uniforms) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
@@ -130,6 +130,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       } else if (terrainCover) {
         // This is a terrain layer
         const isPicking = opts.pickingActive;
+        // @ts-expect-error
         sampler = isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();

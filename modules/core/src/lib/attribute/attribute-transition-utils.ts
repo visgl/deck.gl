@@ -1,8 +1,9 @@
+import type {Device} from '@luma.gl/api';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer} from '@luma.gl/webgl-legacy';
 
 export interface TransitionSettings {
   type: string;
@@ -67,7 +68,7 @@ export function normalizeTransitionSettings(
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(
-  gl: WebGLRenderingContext,
+  device: Device,
   attribute: Attribute
 ): [Buffer, BufferAccessor] | NumericArray {
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
@@ -87,7 +88,7 @@ export function getSourceBufferAttribute(
   // constant
   // don't pass normalized here because the `value` from a normalized attribute is
   // already normalized
-  return attribute.value as NumericArray;
+  return attribute.value;
 }
 
 export function getAttributeTypeFromSize(size: number): string {
@@ -106,13 +107,13 @@ export function getAttributeTypeFromSize(size: number): string {
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {
-  buffers.push(buffers.shift() as Buffer);
+  buffers.push(buffers.shift());
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -155,7 +156,7 @@ export function padBuffer({
 
   const toData = isConstant
     ? attribute.value
-    : (attribute.getBuffer() as Buffer).getData({srcByteOffset: byteOffset});
+    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));

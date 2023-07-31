@@ -4,7 +4,7 @@ import {
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
-import {withParameters} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/webgl-legacy';
 import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
@@ -47,7 +47,7 @@ export class TerrainPickingPass extends PickLayersPass {
       return;
     }
 
-    const layers = terrainCover.filterLayers(opts.layers!);
+    const layers = terrainCover.filterLayers(opts.layers);
     const terrainLayer = terrainCover.targetLayer;
     if (terrainLayer.props.pickable) {
       layers.unshift(terrainLayer);
@@ -55,7 +55,7 @@ export class TerrainPickingPass extends PickLayersPass {
     target.resize(viewport);
 
     withParameters(
-      this.gl,
+      this.device,
       {
         depthTest: false
       },
