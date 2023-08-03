@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.23] - Aug 3 2023
+
+- Update LICENSE (#8033)
+- Fix TileLayer updateTriggers propagation (#8035)
+
 #### deck.gl [8.9.22] - Jul 20 2023
 
 - fix(geo-layers): Cesium tilesets loading (#8014)
