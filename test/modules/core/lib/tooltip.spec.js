@@ -11,7 +11,7 @@ function setupTest() {
   const container = document.createElement('div');
   const widgetManager = new WidgetManager({parentElement: container});
   const tooltip = new Tooltip();
-  widgetManager.add(tooltip);
+  widgetManager.addDefault(tooltip);
   return {tooltip, widgetManager, container};
 }
 

@@ -46,6 +46,8 @@ export type TooltipContent =
     };
 
 export default class Tooltip implements Widget {
+  id = 'default-tooltip';
+  props = {};
   isVisible: boolean = false;
   deck?: Deck;
   element?: HTMLDivElement;
@@ -66,6 +68,8 @@ export default class Tooltip implements Widget {
     this.deck = undefined;
     this.element = undefined;
   }
+
+  setProps() {}
 
   onViewportChange(viewport: Viewport) {
     if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {

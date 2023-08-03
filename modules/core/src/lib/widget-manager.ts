@@ -5,11 +5,15 @@ import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 
 import {EVENTS} from './constants';
+import {deepEqual} from '../utils/deep-equal';
 
 export interface Widget<PropsT = any> {
+  id: string;
+  props: PropsT;
   // Populated by core when mounted
   _element?: HTMLDivElement | null;
   _viewId?: string | null;
+  _placement?: WidgetPlacement;
 
   // Lifecycle hooks
   /** Called when the widget is added to a Deck instance.
@@ -23,7 +27,7 @@ export interface Widget<PropsT = any> {
   /** Called when the widget is removed */
   onRemove: () => void;
   /** Called to update widget options */
-  setProps?: (props: Partial<PropsT>) => void;
+  setProps: (props: Partial<PropsT>) => void;
 
   // Optional event hooks
   /** Called when the containing view is changed */
@@ -42,6 +46,19 @@ export interface Widget<PropsT = any> {
   onDragEnd?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
 }
 
+export type WidgetConfig =
+  | Widget
+  | {
+      widget: Widget;
+      viewId?: string | null;
+      placement?: WidgetPlacement;
+    };
+type NormalizedWidgetConfig = {
+  widget: Widget;
+  viewId: string | null;
+  placement: WidgetPlacement;
+};
+
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
   'top-right': {top: 0, right: 0},
@@ -49,6 +66,7 @@ const PLACEMENTS = {
   'bottom-right': {bottom: 0, right: 0},
   fill: {top: 0, left: 0, bottom: 0, right: 0}
 } as const;
+const DEFAULT_PLACEMENT = 'top-left';
 
 export type WidgetPlacement = keyof typeof PLACEMENTS;
 
@@ -57,37 +75,105 @@ const ROOT_CONTAINER_ID = '__root';
 export class WidgetManager {
   deck: Deck;
   parentElement?: HTMLElement | null;
-  containers: {[id: string]: HTMLDivElement} = {};
-  widgets: Widget[] = [];
-  lastViewports: {[id: string]: Viewport} = {};
+
+  private widgets: Widget[] = [];
+  private defaultWidgets: Widget[] = [];
+  private containers: {[id: string]: HTMLDivElement} = {};
+  private lastViewports: {[id: string]: Viewport} = {};
+  private configs: WidgetConfig[] = [];
 
   constructor({deck, parentElement}: {deck: Deck; parentElement?: HTMLElement | null}) {
     this.deck = deck;
     this.parentElement = parentElement;
   }
 
+  // Declarative API
+  setProps(props: {widgets?: WidgetConfig[]}) {
+    if (props.widgets && !deepEqual(props.widgets, this.configs, 1)) {
+      this._setConfigs(props.widgets);
+    }
+  }
+
   finalize() {
     for (const widget of this.widgets) {
-      this.remove(widget);
+      this._remove(widget);
     }
+    this.defaultWidgets.length = 0;
+    this.widgets.length = 0;
     for (const id in this.containers) {
       this.containers[id].remove();
     }
   }
 
-  add(
+  // Imperative API, not affected by the declarative prop
+  addDefault(
     widget: Widget,
-    opts: {
+    options?: {
       viewId?: string | null;
       placement?: WidgetPlacement;
-    } = {}
+    }
   ) {
-    if (this.widgets.includes(widget)) {
-      // widget already added
-      return;
+    if (!this.defaultWidgets.find(w => w.id === widget.id)) {
+      const {viewId, placement} = normalizeConfig({widget, ...options});
+      this._add(widget, viewId, placement);
+      this.defaultWidgets.push(widget);
+      this._setConfigs(this.configs);
+    }
+  }
+
+  private _setConfigs(nextConfigs: WidgetConfig[]) {
+    this.configs = nextConfigs;
+    const oldWidgetMap: Record<string, Widget | null> = {};
+
+    for (const widget of this.widgets) {
+      oldWidgetMap[widget.id] = widget;
+    }
+    // Clear and rebuild the list
+    this.widgets.length = 0;
+
+    // Add all default widgets
+    for (const widget of this.defaultWidgets) {
+      oldWidgetMap[widget.id] = null;
+      this.widgets.push(widget);
     }
 
-    const {placement = 'top-left', viewId = null} = opts;
+    for (const config of nextConfigs) {
+      const normalizedConfig = normalizeConfig(config);
+      const {viewId, placement} = normalizedConfig;
+      let {widget} = normalizedConfig;
+
+      const oldWidget = oldWidgetMap[widget.id];
+      if (!oldWidget) {
+        // Widget is new
+        this._add(widget, viewId, placement);
+      } else if (
+        // Widget placement changed
+        oldWidget._viewId !== viewId ||
+        oldWidget._placement !== placement
+      ) {
+        this._remove(oldWidget);
+        this._add(widget, viewId, placement);
+      } else if (widget !== oldWidget) {
+        // Widget props changed
+        oldWidget.setProps(widget.props);
+        widget = oldWidget;
+      }
+
+      // mark as matched
+      oldWidgetMap[widget.id] = null;
+      this.widgets.push(widget);
+    }
+
+    for (const id in oldWidgetMap) {
+      const oldWidget = oldWidgetMap[id];
+      if (oldWidget) {
+        // No longer exists
+        this._remove(oldWidget);
+      }
+    }
+  }
+
+  private _add(widget: Widget, viewId: string | null, placement: WidgetPlacement) {
     const element = widget.onAdd({deck: this.deck, viewId});
 
     if (element) {
@@ -95,16 +181,10 @@ export class WidgetManager {
     }
     widget._viewId = viewId;
     widget._element = element;
-    this.widgets.push(widget);
+    widget._placement = placement;
   }
 
-  remove(widget: Widget) {
-    const i = this.widgets.indexOf(widget);
-    if (i < 0) {
-      // widget not found
-      return;
-    }
-    this.widgets.splice(i, 1);
+  private _remove(widget: Widget) {
     widget.onRemove();
 
     if (widget._element) {
@@ -213,4 +293,19 @@ export class WidgetManager {
       }
     }
   }
+}
+
+function normalizeConfig(config: WidgetConfig): NormalizedWidgetConfig {
+  if ('widget' in config) {
+    return {
+      widget: config.widget,
+      viewId: config.viewId ?? null,
+      placement: config.placement ?? DEFAULT_PLACEMENT
+    };
+  }
+  return {
+    widget: config,
+    viewId: null,
+    placement: DEFAULT_PLACEMENT
+  };
 }
