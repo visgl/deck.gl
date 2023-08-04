@@ -90,13 +90,12 @@ test('Tooltip#remove', t => {
   const {widgetManager, tooltip, container} = setupTest();
 
   t.equals(container.querySelectorAll('.deck-tooltip').length, 1, 'Tooltip element present');
-  widgetManager.remove(tooltip);
+  widgetManager.finalize();
   t.equals(
     container.querySelectorAll('.deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
 
-  widgetManager.finalize();
   t.end();
 });
