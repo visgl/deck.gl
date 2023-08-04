@@ -76,18 +76,21 @@ export class WidgetManager {
   deck: Deck;
   parentElement?: HTMLElement | null;
 
-  private widgets: Widget[] = [];
+  /** Widgets added via the imperative API */
   private defaultWidgets: Widget[] = [];
+  /** Resolved widgets from both imperative and declarative APIs */
+  private widgets: Widget[] = [];
+  /** The last configs received from the declarative API */
+  private configs: WidgetConfig[] = [];
   private containers: {[id: string]: HTMLDivElement} = {};
   private lastViewports: {[id: string]: Viewport} = {};
-  private configs: WidgetConfig[] = [];
 
   constructor({deck, parentElement}: {deck: Deck; parentElement?: HTMLElement | null}) {
     this.deck = deck;
     this.parentElement = parentElement;
   }
 
-  // Declarative API
+  /** Declarative API to configure widgets */
   setProps(props: {widgets?: WidgetConfig[]}) {
     if (props.widgets && !deepEqual(props.widgets, this.configs, 1)) {
       this._setConfigs(props.widgets);
@@ -105,7 +108,7 @@ export class WidgetManager {
     }
   }
 
-  // Imperative API, not affected by the declarative prop
+  /** Imperative API. Widgets added this way are not affected by the declarative prop. */
   addDefault(
     widget: Widget,
     options?: {
@@ -117,10 +120,12 @@ export class WidgetManager {
       const {viewId, placement} = normalizeConfig({widget, ...options});
       this._add(widget, viewId, placement);
       this.defaultWidgets.push(widget);
+      // Update widget list
       this._setConfigs(this.configs);
     }
   }
 
+  /** Resolve widgets from the declarative prop */
   private _setConfigs(nextConfigs: WidgetConfig[]) {
     this.configs = nextConfigs;
     const oldWidgetMap: Record<string, Widget | null> = {};
