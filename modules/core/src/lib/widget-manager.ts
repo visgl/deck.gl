@@ -10,10 +10,11 @@ import {deepEqual} from '../utils/deep-equal';
 export interface Widget<PropsT = any> {
   id: string;
   props: PropsT;
+  viewId?: string | null;
+  placement?: WidgetPlacement;
+
   // Populated by core when mounted
   _element?: HTMLDivElement | null;
-  _viewId?: string | null;
-  _placement?: WidgetPlacement;
 
   // Lifecycle hooks
   /** Called when the widget is added to a Deck instance.
@@ -46,19 +47,6 @@ export interface Widget<PropsT = any> {
   onDragEnd?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
 }
 
-export type WidgetConfig =
-  | Widget
-  | {
-      widget: Widget;
-      viewId?: string | null;
-      placement?: WidgetPlacement;
-    };
-type NormalizedWidgetConfig = {
-  widget: Widget;
-  viewId: string | null;
-  placement: WidgetPlacement;
-};
-
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
   'top-right': {top: 0, right: 0},
@@ -78,10 +66,10 @@ export class WidgetManager {
 
   /** Widgets added via the imperative API */
   private defaultWidgets: Widget[] = [];
-  /** Resolved widgets from both imperative and declarative APIs */
+  /** Widgets received from the declarative API */
   private widgets: Widget[] = [];
-  /** The last configs received from the declarative API */
-  private configs: WidgetConfig[] = [];
+  /** Resolved widgets from both imperative and declarative APIs */
+  private resolvedWidgets: Widget[] = [];
   private containers: {[id: string]: HTMLDivElement} = {};
   private lastViewports: {[id: string]: Viewport} = {};
 
@@ -90,74 +78,66 @@ export class WidgetManager {
     this.parentElement = parentElement;
   }
 
+  getWidgets(): Widget[] {
+    return this.resolvedWidgets;
+  }
+
   /** Declarative API to configure widgets */
-  setProps(props: {widgets?: WidgetConfig[]}) {
-    if (props.widgets && !deepEqual(props.widgets, this.configs, 1)) {
-      this._setConfigs(props.widgets);
+  setProps(props: {widgets?: Widget[]}) {
+    if (props.widgets && !deepEqual(props.widgets, this.widgets, 1)) {
+      this._setWidgets(props.widgets);
     }
   }
 
   finalize() {
-    for (const widget of this.widgets) {
+    for (const widget of this.getWidgets()) {
       this._remove(widget);
     }
     this.defaultWidgets.length = 0;
-    this.widgets.length = 0;
+    this.resolvedWidgets.length = 0;
     for (const id in this.containers) {
       this.containers[id].remove();
     }
   }
 
   /** Imperative API. Widgets added this way are not affected by the declarative prop. */
-  addDefault(
-    widget: Widget,
-    options?: {
-      viewId?: string | null;
-      placement?: WidgetPlacement;
-    }
-  ) {
+  addDefault(widget: Widget) {
     if (!this.defaultWidgets.find(w => w.id === widget.id)) {
-      const {viewId, placement} = normalizeConfig({widget, ...options});
-      this._add(widget, viewId, placement);
+      this._add(widget);
       this.defaultWidgets.push(widget);
       // Update widget list
-      this._setConfigs(this.configs);
+      this._setWidgets(this.widgets);
     }
   }
 
   /** Resolve widgets from the declarative prop */
-  private _setConfigs(nextConfigs: WidgetConfig[]) {
-    this.configs = nextConfigs;
+  private _setWidgets(nextWidgets: Widget[]) {
     const oldWidgetMap: Record<string, Widget | null> = {};
 
-    for (const widget of this.widgets) {
+    for (const widget of this.resolvedWidgets) {
       oldWidgetMap[widget.id] = widget;
     }
     // Clear and rebuild the list
-    this.widgets.length = 0;
+    this.resolvedWidgets.length = 0;
 
     // Add all default widgets
     for (const widget of this.defaultWidgets) {
       oldWidgetMap[widget.id] = null;
-      this.widgets.push(widget);
+      this.resolvedWidgets.push(widget);
     }
 
-    for (const config of nextConfigs) {
-      const normalizedConfig = normalizeConfig(config);
-      const {viewId, placement} = normalizedConfig;
-      let {widget} = normalizedConfig;
-
+    for (let widget of nextWidgets) {
       const oldWidget = oldWidgetMap[widget.id];
       if (!oldWidget) {
         // Widget is new
-        this._add(widget, viewId, placement);
+        this._add(widget);
       } else if (
         // Widget placement changed
-        oldWidget._viewId !== viewId ||
-        oldWidget._placement !== placement
+        oldWidget.viewId !== widget.viewId ||
+        oldWidget.placement !== widget.placement
       ) {
         this._remove(oldWidget);
-        this._add(widget, viewId, placement);
+        this._add(widget);
       } else if (widget !== oldWidget) {
         // Widget props changed
         oldWidget.setProps(widget.props);
@@ -166,7 +146,7 @@ export class WidgetManager {
 
       // mark as matched
       oldWidgetMap[widget.id] = null;
-      this.widgets.push(widget);
+      this.resolvedWidgets.push(widget);
     }
 
     for (const id in oldWidgetMap) {
@@ -176,17 +156,17 @@ export class WidgetManager {
         this._remove(oldWidget);
       }
     }
+    this.widgets = nextWidgets;
   }
 
-  private _add(widget: Widget, viewId: string | null, placement: WidgetPlacement) {
+  private _add(widget: Widget) {
+    const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
     const element = widget.onAdd({deck: this.deck, viewId});
 
     if (element) {
       this._getContainer(viewId, placement).append(element);
     }
-    widget._viewId = viewId;
     widget._element = element;
-    widget._placement = placement;
   }
 
   private _remove(widget: Widget) {
@@ -196,7 +176,6 @@ export class WidgetManager {
       widget._element.remove();
     }
     widget._element = undefined;
-    widget._viewId = undefined;
   }
 
   /* global document */
@@ -250,8 +229,8 @@ export class WidgetManager {
     }, {});
     const {lastViewports} = this;
 
-    for (const widget of this.widgets) {
-      const viewId = widget._viewId;
+    for (const widget of this.getWidgets()) {
+      const {viewId} = widget;
       if (viewId) {
         // Attached to a specific view
         const viewport = viewportsById[viewId];
@@ -278,8 +257,8 @@ export class WidgetManager {
   }
 
   onHover(info: PickingInfo, event: MjolnirPointerEvent) {
-    for (const widget of this.widgets) {
-      const viewId = widget._viewId;
+    for (const widget of this.getWidgets()) {
+      const {viewId} = widget;
       if (!viewId || viewId === info.viewport?.id) {
         widget.onHover?.(info, event);
       }
@@ -291,26 +270,11 @@ export class WidgetManager {
     if (!eventOptions) {
       return;
     }
-    for (const widget of this.widgets) {
-      const viewId = widget._viewId;
+    for (const widget of this.getWidgets()) {
+      const {viewId} = widget;
       if (!viewId || viewId === info.viewport?.id) {
         widget[eventOptions.handler]?.(info, event);
       }
     }
   }
-}
-
-function normalizeConfig(config: WidgetConfig): NormalizedWidgetConfig {
-  if ('widget' in config) {
-    return {
-      widget: config.widget,
-      viewId: config.viewId ?? null,
-      placement: config.placement ?? DEFAULT_PLACEMENT
-    };
-  }
-  return {
-    widget: config,
-    viewId: null,
-    placement: DEFAULT_PLACEMENT
-  };
 }
