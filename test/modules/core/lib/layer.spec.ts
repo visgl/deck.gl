@@ -647,7 +647,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.props.uniforms;
           t.deepEqual(
             modelUniforms.picking_uHighlightColor,
             [0, 0, HALF_BYTE, HALF_BYTE],
@@ -665,7 +665,7 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.getUniforms();
+          modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             0,
@@ -682,7 +682,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.props.uniforms;
           t.deepEqual(
             modelUniforms.picking_uHighlightColor,
             [1, 0, 0, HALF_BYTE],
@@ -705,7 +705,7 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.getUniforms();
+          modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             1,
@@ -727,7 +727,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             1,
@@ -745,7 +745,7 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.getUniforms();
+          modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             1,
@@ -767,7 +767,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.getUniforms();
+          let modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             0,
@@ -780,7 +780,7 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.getUniforms();
+          modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             1,
@@ -801,7 +801,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.getUniforms();
+          const modelUniforms = layer.state.model.props.uniforms;
           t.is(
             modelUniforms.picking_uSelectedColorValid,
             1,
@@ -822,7 +822,7 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.getUniforms();
+          const modelUniforms = layer.state.model.props.uniforms;
           t.deepEqual(
             modelUniforms.picking_uHighlightColor,
             [1, 0, 0, HALF_BYTE],
