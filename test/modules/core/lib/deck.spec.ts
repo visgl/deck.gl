@@ -128,8 +128,10 @@ test('Deck#auto view state', t => {
     device,
     width: 1,
     height: 1,
+
     // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
+    // TODO v9 does not seem supported
+    // autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     views: [
       new MapView({id: 'default'}),
