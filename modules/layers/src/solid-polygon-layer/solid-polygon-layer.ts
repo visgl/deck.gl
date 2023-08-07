@@ -339,7 +339,29 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       elevationScale
     };
 
-    // TODO - v9 Model API not as dynamic
+    // TODO - v9 Model API probably does not yet handle this
+    if (sideModel) {
+      sideModel.props.instanceCount = polygonTesselator.instanceCount - 1;
+      sideModel.setUniforms(renderUniforms);
+      if (wireframe) {
+        sideModel.props.topology = 'line-strip';
+        sideModel.setUniforms({isWireframe: true});
+        sideModel.draw(this.context.renderPass);
+      }
+      if (filled) {
+        // TODO v9 TRIANGLE-FAN not supported
+        sideModel.props.topology = 'triangle-fan';
+        sideModel.setUniforms({isWireframe: false});
+        sideModel.draw(this.context.renderPass);
+      }
+    }
+
+    if (topModel) {
+      topModel.props.vertexCount = polygonTesselator.vertexCount;
+      topModel.setUniforms(renderUniforms);
+      topModel.draw(this.context.renderPass);
+    }
+
     // Note: the order is important
     // if (sideModel) {
     //   sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);

@@ -3,7 +3,7 @@ import {GL} from '@luma.gl/constants';
 
 const DEFAULT_PARAMETERS = {
   minFilter: 'nearest',
-  magFilter: 'nearest',
+  magFilter: 'nearest'
 };
 
 type FloatTextureOptions = {
@@ -23,7 +23,7 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
-  const texture =  this.context.device.createTexture({
+  const texture = this.context.device.createTexture({
     data,
     format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
     type: GL.FLOAT,

@@ -19,9 +19,7 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/api';
-import {Framebuffer} from '@luma.gl/api';
 import {readPixelsToArray} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {

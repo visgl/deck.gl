@@ -186,7 +186,7 @@ export type UpdateParameters<LayerT extends Layer> = {
 type SharedLayerState = {
   model?: Model;
   [key: string]: any;
-}
+};
 
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
