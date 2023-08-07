@@ -121,8 +121,7 @@ test.skip('Deck#rendering, picking, logging', t => {
   });
 });
 
-// TODO v9 viewport issue
-test.skip('Deck#auto view state', t => {
+test('Deck#auto view state', t => {
   let onViewStateChangeCalled = 0;
 
   const deck = new Deck({

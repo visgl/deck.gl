@@ -107,7 +107,12 @@ function getIconId(icon: UnpackedIcon): string {
 }
 
 // resize texture without losing original data
-function resizeTexture(texture: Texture, width: number, height: number, sampler: SamplerProps): Texture {
+function resizeTexture(
+  texture: Texture,
+  width: number,
+  height: number,
+  sampler: SamplerProps
+): Texture {
   const oldWidth = texture.width;
   const oldHeight = texture.height;
 

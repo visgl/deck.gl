@@ -59,7 +59,8 @@ test('AttributeTransitionManager#constructor', t => {
 });
 
 // TODO v9 - transform disabled
-if (false) { // device.info.type === 'webgl2') {
+if (false) {
+  // device.info.type === 'webgl2') {
   test('AttributeTransitionManager#update', t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});

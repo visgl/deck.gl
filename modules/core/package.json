@@ -39,6 +39,7 @@
     "@loaders.gl/core": "^3.4.13",
     "@loaders.gl/images": "^3.4.13",
     "@luma.gl/api": "9.0.0-alpha.25",
+    "@luma.gl/constants": "9.0.0-alpha.25",
     "@luma.gl/engine": "9.0.0-alpha.25",
     "@luma.gl/shadertools": "9.0.0-alpha.25",
     "@luma.gl/webgl": "9.0.0-alpha.25",

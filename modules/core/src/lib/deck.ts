@@ -432,7 +432,7 @@ export default class Deck {
     this.widgetManager?.finalize();
     this.widgetManager = null;
 
-    if (!this.props.canvas && !this.props.gl && this.canvas) {
+    if (!this.props.canvas && !this.props.device && this.canvas) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
@@ -787,6 +787,9 @@ export default class Deck {
       useDevicePixels
     } = props;
 
+    // TODO v9 should we install WebGL backend as default for now
+    luma.registerDevices([WebGLDevice]);
+
     return new AnimationLoop({
       // width,
       // height,
@@ -924,7 +927,7 @@ export default class Deck {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
-      // TODO v9 
+      // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
       // should have a method to start state tracking even if not enabled?

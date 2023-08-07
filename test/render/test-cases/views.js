@@ -7,7 +7,7 @@ import {
   FirstPersonView
 } from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-// TODO v9 
+// TODO v9
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
@@ -90,7 +90,7 @@ export default [
     ],
     goldenImage: './test/render/golden-images/map-repeat.png'
   }
-  // TODO v9 
+  // TODO v9
   /*
   ...[true, false].map(binary => {
     const id = `globe-mvt${binary ? '-binary' : ''}`;

@@ -12,7 +12,7 @@ import daynight from 'deck.gl-test/data/daynight.geo.json';
 import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import {parseColor, setOpacity} from '../../../examples/layer-browser/src/utils/color';
-// TODO v9 
+// TODO v9
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
 
@@ -234,7 +234,7 @@ export default [
     ],
     goldenImage: './test/render/golden-images/geojson-large.png'
   },
-  // TODO v9 
+  // TODO v9
   /*
   {
     name: 'geojson-hole-and-lighting',

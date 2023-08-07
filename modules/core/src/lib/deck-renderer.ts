@@ -130,7 +130,7 @@ export default class DeckRenderer {
     const {renderBuffers} = this;
     if (renderBuffers.length === 0) {
       renderBuffers.push(
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}), 
+        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
         this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
       );
     }

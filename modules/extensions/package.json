@@ -38,6 +38,7 @@
     "@luma.gl/api": "9.0.0-alpha.25",
     "@luma.gl/engine": "9.0.0-alpha.25",
     "@luma.gl/shadertools": "9.0.0-alpha.25",
+    "@luma.gl/webgl": "9.0.0-alpha.25",
     "@math.gl/core": "4.0.0-alpha.4",
     "@math.gl/constants": "4.0.0-alpha.4",
     "@math.gl/web-mercator": "4.0.0-alpha.4",
