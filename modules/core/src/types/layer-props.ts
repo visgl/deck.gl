@@ -6,7 +6,7 @@ import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
+import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl-legacy';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib';
 

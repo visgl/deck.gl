@@ -75,16 +75,16 @@ function getRefHandles(thisRef: DeckInstanceRef): DeckGLRef {
       return thisRef.deck;
     },
     // The following method can only be called after ref is available, by which point deck is defined in useEffect
-    pickObject: opts => thisRef.deck!.pickObject(opts),
-    pickMultipleObjects: opts => thisRef.deck!.pickMultipleObjects(opts),
-    pickObjects: opts => thisRef.deck!.pickObjects(opts)
+    pickObject: opts => thisRef.deck.pickObject(opts),
+    pickMultipleObjects: opts => thisRef.deck.pickMultipleObjects(opts),
+    pickObjects: opts => thisRef.deck.pickObjects(opts)
   };
 }
 
 function redrawDeck(thisRef: DeckInstanceRef) {
   if (thisRef.redrawReason) {
     // Only redraw if we have received a dirty flag
-    // @ts-expect-error accessing protected method
+    // ts-expect-error accessing protected method
     thisRef.deck._drawLayers(thisRef.redrawReason);
     thisRef.redrawReason = null;
   }

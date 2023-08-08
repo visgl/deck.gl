@@ -73,7 +73,7 @@ export const MATRIX_ATTRIBUTES = {
   } as const,
 
   update(attribute, {startRow, endRow}) {
-    // @ts-expect-error: "this" will be bound to a layer when this function is called
+    // ts-expect-error: "this" will be bound to a layer when this  function is called
     const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = this.props;
 
     const arrayMatrix = Array.isArray(getTransformMatrix);

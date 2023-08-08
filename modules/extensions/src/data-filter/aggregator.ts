@@ -1,5 +1,5 @@
-import {Model, Texture2D, Framebuffer, isWebGL2} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {Device} from '@luma.gl/api';
+import {GL, Model, Texture2D, Framebuffer} from '@luma.gl/webgl-legacy';
 
 const AGGREGATE_VS = `\
 #define SHADER_NAME data-filter-vertex-shader
@@ -48,7 +48,10 @@ void main() {
 }
 `;
 
-export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
+export function supportsFloatTarget(device: Device): boolean {
+  // @ts-expect-error
+  const gl = device.gl;
+
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
   return Boolean(
     gl.getExtension('EXT_float_blend') &&
@@ -60,21 +63,21 @@ export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
-export function getFramebuffer(gl: WebGLRenderingContext, useFloatTarget: boolean): Framebuffer {
+export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebuffer {
   if (useFloatTarget) {
-    return new Framebuffer(gl, {
+    return new Framebuffer(device, {
       width: 1,
       height: 1,
       attachments: {
-        [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
-          format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+        [GL.COLOR_ATTACHMENT0]: new Texture2D(device, {
+          format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
           type: GL.FLOAT,
           mipmaps: false
         })
       }
     });
   }
-  return new Framebuffer(gl, {
+  return new Framebuffer(device, {
     width: 256,
     height: 64,
     depth: false
@@ -82,17 +85,13 @@ export function getFramebuffer(gl: WebGLRenderingContext, useFloatTarget: boolea
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(
-  gl: WebGLRenderingContext,
-  shaderOptions: any,
-  useFloatTarget: boolean
-): Model {
+export function getModel(device: Device, shaderOptions: any, useFloatTarget: boolean): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;
   }
 
-  return new Model(gl, {
+  return new Model(device, {
     id: 'data-filter-aggregation-model',
     vertexCount: 1,
     isInstanced: false,

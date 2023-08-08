@@ -35,8 +35,9 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {GL} from '@luma.gl/webgl-legacy';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/webgl-legacy';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -169,9 +170,8 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {changeFlags, props} = params;
     super.updateState(params);
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
     if (changeFlags.dataChanged) {
@@ -191,7 +191,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -199,7 +199,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

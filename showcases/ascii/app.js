@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL, {OrthographicView} from 'deck.gl';
-import {isWebGL2} from 'luma.gl';
+import {isWebGL2} from '@luma.gl/core';
 import ControlPanel from './components/control-panel';
 import AsciiLayer from './ascii-layer/ascii-layer';
 

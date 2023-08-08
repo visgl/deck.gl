@@ -1,6 +1,7 @@
 /* global document */
-import GL from '@luma.gl/constants';
-import {Texture2D, copyToTexture} from '@luma.gl/core';
+import {Device} from '@luma.gl/api';
+import {GL, Texture2D, copyToTexture} from '@luma.gl/webgl-legacy';
+// import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -114,7 +115,7 @@ function resizeTexture(
   const oldWidth = texture.width;
   const oldHeight = texture.height;
 
-  const newTexture = new Texture2D(texture.gl, {width, height, parameters});
+  const newTexture = new Texture2D(texture.device, {width, height, parameters});
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
@@ -272,7 +273,7 @@ export function getDiffIcons(
 }
 
 export default class IconManager {
-  gl: WebGLRenderingContext;
+  device: Device;
 
   private onUpdate: () => void;
   private onError: (context: LoadIconErrorContext) => void;
@@ -298,7 +299,7 @@ export default class IconManager {
   private _canvas: HTMLCanvasElement | null = null;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       onUpdate = noop,
       onError = noop
@@ -309,7 +310,7 @@ export default class IconManager {
       onError: (context: LoadIconErrorContext) => void;
     }
   ) {
-    this.gl = gl;
+    this.device = device;
     this.onUpdate = onUpdate;
     this.onError = onError;
   }
@@ -322,9 +323,9 @@ export default class IconManager {
     return this._texture || this._externalTexture;
   }
 
-  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon {
+  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon | null {
     const id = this._autoPacking ? getIconId(icon as UnpackedIcon) : (icon as string);
-    return this._mapping[id] || {};
+    return this._mapping[id] || null;
   }
 
   setProps({
@@ -394,7 +395,7 @@ export default class IconManager {
 
       // create new texture
       if (!this._texture) {
-        this._texture = new Texture2D(this.gl, {
+        this._texture = new Texture2D(this.device, {
           width: this._canvasWidth,
           height: this._canvasHeight,
           parameters: this._textureParameters || DEFAULT_TEXTURE_PARAMETERS
@@ -425,9 +426,9 @@ export default class IconManager {
     })[]
   ): void {
     // This method is only called in the auto packing case, where _canvas is defined
-    const ctx = this._canvas!.getContext('2d', {
+    const ctx = this._canvas.getContext('2d', {
       willReadFrequently: true
-    }) as CanvasRenderingContext2D;
+    });
 
     for (const icon of icons) {
       this._pendingCount++;

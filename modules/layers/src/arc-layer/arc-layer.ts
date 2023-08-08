@@ -34,8 +34,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -226,9 +226,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     super.updateState(opts);
     // Re-generate model if geometry changed
     if (opts.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -250,7 +249,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     let positions: number[] = [];
     const NUM_SEGMENTS = 50;
     /*
@@ -264,7 +263,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
-    const model = new Model(gl, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* global setTimeout clearTimeout */
-import GL from '@luma.gl/constants';
 import {
   getBounds,
   boundsContain,
@@ -29,6 +28,7 @@ import {
   getTextureParams
 } from './heatmap-layer-utils';
 import {
+  GL,
   Buffer,
   Texture2D,
   Transform,
@@ -36,7 +36,7 @@ import {
   withParameters,
   FEATURES,
   hasFeatures
-} from '@luma.gl/core';
+} from '@luma.gl/webgl-legacy';
 import {
   Accessor,
   AccessorFunction,
@@ -208,8 +208,7 @@ export default class HeatmapLayer<
   };
 
   initializeState() {
-    const {gl} = this.context;
-    if (!hasFeatures(gl, REQUIRED_FEATURES)) {
+    if (!hasFeatures(this.context.device, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
@@ -336,7 +335,7 @@ export default class HeatmapLayer<
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
+    return new AttributeManager(this.context.device, {
       id: this.props.id,
       stats: this.context.stats
     });
@@ -349,11 +348,12 @@ export default class HeatmapLayer<
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
-      this.isAttributeChanged() || // if any attribute is changed
-      this.isAggregationDirty(opts, {
+      (this.isAttributeChanged() && 'attribute changed') || // if any attribute is changed
+      (this.isAggregationDirty(opts, {
         compareAll: true,
         dimension: dimensions.data
-      });
+      }) &&
+        'aggregation is dirty');
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
 
     const {zoom} = this.state;
@@ -365,18 +365,17 @@ export default class HeatmapLayer<
   }
 
   _createTextures() {
-    const {gl} = this.context;
     const {textureSize, format, type} = this.state;
 
     this.setState({
-      weightsTexture: new Texture2D(gl, {
+      weightsTexture: new Texture2D(this.context.device, {
         width: textureSize,
         height: textureSize,
         format,
         type,
         ...TEXTURE_OPTIONS
       }),
-      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
+      maxWeightsTexture: new Texture2D(this.context.device, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
     });
   }
 
@@ -390,12 +389,13 @@ export default class HeatmapLayer<
   }
 
   _setupTextureParams() {
-    const {gl} = this.context;
+    const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, getParameters(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(gl, FLOAT_TARGET_FEATURES);
-    const {format, type} = getTextureParams({gl, floatTargetSupport});
+    // @ts-expect-error
+    const textureSize = Math.min(weightsTextureSize, getParameters(device, GL.MAX_TEXTURE_SIZE));
+    const floatTargetSupport = hasFeatures(device, FLOAT_TARGET_FEATURES);
+    const {format, type} = getTextureParams({device, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, type, weightsScale});
     if (!floatTargetSupport) {
@@ -420,12 +420,11 @@ export default class HeatmapLayer<
   }
 
   _createWeightsTransform(shaders = {}) {
-    const {gl} = this.context;
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     weightsTransform?.delete();
 
-    weightsTransform = new Transform(gl, {
+    weightsTransform = new Transform(this.context.device, {
       id: `${this.id}-weights-transform`,
       elementCount: 1,
       _targetTexture: weightsTexture,
@@ -436,7 +435,6 @@ export default class HeatmapLayer<
   }
 
   _setupResources() {
-    const {gl} = this.context;
     this._createTextures();
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
 
@@ -444,7 +442,7 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new Transform(gl, {
+    const maxWeightTransform = new Transform(this.context.device, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
         inTexture: weightsTexture
@@ -460,11 +458,11 @@ export default class HeatmapLayer<
       maxWeightsTexture,
       maxWeightTransform,
       zoom: null,
-      triPositionBuffer: new Buffer(gl, {
+      triPositionBuffer: new Buffer(this.context.device, {
         byteLength: 48,
         accessor: {size: 3}
       }),
-      triTexCoordBuffer: new Buffer(gl, {
+      triTexCoordBuffer: new Buffer(this.context.device, {
         byteLength: 48,
         accessor: {size: 2}
       })
@@ -550,7 +548,7 @@ export default class HeatmapLayer<
     triPositionBuffer.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds)
     );
     triTexCoordBuffer.subData(packVertices(textureBounds, 2));
   }
@@ -566,7 +564,7 @@ export default class HeatmapLayer<
         width: colorRange.length
       });
     } else {
-      colorTexture = new Texture2D(this.context.gl, {
+      colorTexture = new Texture2D(this.context.device, {
         data: colors,
         width: colorRange.length,
         height: 1,

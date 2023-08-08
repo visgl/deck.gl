@@ -1,7 +1,6 @@
 import {Deck} from '@deck.gl/core';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {Framebuffer, Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL, Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
 
 import sfZipcodes from '../../../examples/layer-browser/data/sf.zip.geo.json';
 

@@ -29,6 +29,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
+import {GL} from '@luma.gl/webgl-legacy';
 
 import {defaultColorRange} from '../utils/color-utils';
 
@@ -36,7 +37,6 @@ import {pointToHexbin} from './hexagon-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 
-import GL from '@luma.gl/constants';
 import {AggregateAccessor} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -267,7 +267,8 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
     this.state = {
       cpuAggregator,
       aggregatorState: cpuAggregator.state,
-      vertices: null
+      vertices: null,
+      layerData: undefined
     };
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
@@ -288,6 +289,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
       if (this.state.aggregatorState.layerData !== aggregatorState.layerData) {
         // if user provided custom aggregator and returns hexagonVertices,
         // Need to recalculate radius and angle based on vertices
+        // @ts-expect-error
         const {hexagonVertices} = aggregatorState.layerData || {};
         this.setState({
           vertices: hexagonVertices && this.convertLatLngToMeterOffset(hexagonVertices)

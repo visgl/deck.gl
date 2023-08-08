@@ -1,4 +1,7 @@
-import {Transform} from '@luma.gl/core';
+// deck.gl, MIT license
+
+import type {Device} from '@luma.gl/api';
+import {Transform} from '@luma.gl/webgl-legacy';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
@@ -18,7 +21,7 @@ export default class AttributeTransitionManager {
   id: string;
   isSupported: boolean;
 
-  private gl: WebGLRenderingContext;
+  private device: Device;
   private timeline?: Timeline;
 
   private transitions: {[id: string]: GPUTransition};
@@ -26,7 +29,7 @@ export default class AttributeTransitionManager {
   private numInstances: number;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       id,
       timeline
@@ -36,14 +39,13 @@ export default class AttributeTransitionManager {
     }
   ) {
     this.id = id;
-    this.gl = gl;
+    this.device = device;
     this.timeline = timeline;
 
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-
-    this.isSupported = Transform.isSupported(gl);
+    this.isSupported = Transform.isSupported(device);
   }
 
   finalize(): void {
@@ -164,7 +166,7 @@ export default class AttributeTransitionManager {
         this.transitions[attributeName] = new TransitionType({
           attribute,
           timeline: this.timeline,
-          gl: this.gl
+          device: this.device
         });
       } else {
         log.error(`unsupported transition type '${settings.type}'`)();

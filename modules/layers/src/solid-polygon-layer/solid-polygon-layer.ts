@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeatures, FEATURES} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model, hasFeatures, FEATURES} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -373,10 +373,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       props.extruded !== oldProps.extruded;
 
     if (regenerateModels) {
-      this.state.models?.forEach(model => model.delete());
+      this.state.models?.forEach(model => model.destroy());
 
-      this.setState(this._getModels(this.context.gl));
-      attributeManager!.invalidateAll();
+      this.setState(this._getModels());
+      attributeManager.invalidateAll();
     }
   }
 
@@ -419,7 +419,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
   }
 
-  protected _getModels(gl: WebGLRenderingContext): Model {
+  protected _getModels() {
     const {id, filled, extruded} = this.props;
 
     let topModel;
@@ -429,7 +429,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
 
-      topModel = new Model(gl, {
+      topModel = new Model(this.context.device, {
         ...shaders,
         id: `${id}-top`,
         drawMode: GL.TRIANGLES,
@@ -445,7 +445,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
     }
     if (extruded) {
-      sideModel = new Model(gl, {
+      sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
         geometry: new Geometry({
@@ -466,8 +466,16 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       sideModel.userData.excludeAttributes = {indices: true};
     }
 
+    const models: Model[] = [];
+    if (sideModel) {
+      models.push(sideModel);
+    }
+    if (topModel) {
+      models.push(topModel);
+    }
+
     return {
-      models: [sideModel, topModel].filter(Boolean),
+      models,
       topModel,
       sideModel
     };

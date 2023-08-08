@@ -19,8 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {GL, Model} from '@luma.gl/webgl-legacy';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
@@ -161,7 +161,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       positions: {
         size: 3,
         // Start filling buffer from 1 vertex in
@@ -260,15 +260,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
-        attributeManager!.invalidateAll();
+        attributeManager.invalidateAll();
       }
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
-      attributeManager!.invalidateAll();
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      attributeManager.invalidateAll();
     }
   }
 
@@ -329,7 +328,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       .draw();
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -374,7 +373,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({

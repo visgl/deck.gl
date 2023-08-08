@@ -1,4 +1,4 @@
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 import {
   COORDINATE_SYSTEM,
   _GlobeView as GlobeView,

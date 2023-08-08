@@ -343,7 +343,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         const layers = this.renderSubLayers({
           ...this.props,
           ...this.getSubLayerProps({
-            id: tile.id
+            id: tile.id,
+            updateTriggers: this.props.updateTriggers
           }),
           data: tile.content,
           _offset: 0,
@@ -359,7 +360,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         subLayerProps &&
         tile.layers[0] &&
         Object.keys(subLayerProps).some(
-          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
+          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
         )
       ) {
         tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));

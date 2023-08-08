@@ -132,8 +132,8 @@ const TYPE_DEFINITIONS = {
     validate(value, propType: NumberPropType) {
       return (
         Number.isFinite(value) &&
-        (!('max' in propType) || value <= propType.max!) &&
-        (!('min' in propType) || value >= propType.min!)
+        (!('max' in propType) || value <= propType.max) &&
+        (!('min' in propType) || value >= propType.min)
       );
     }
   },
@@ -199,10 +199,10 @@ const TYPE_DEFINITIONS = {
   image: {
     transform: (value, propType: ImagePropType, component) => {
       const context = (component as Layer).context;
-      if (!context || !context.gl) {
+      if (!context || !context.device) {
         return null;
       }
-      return createTexture(component.id, context.gl, value, {
+      return createTexture(component.id, context.device, value, {
         ...propType.parameters,
         ...component.props.textureParameters
       });

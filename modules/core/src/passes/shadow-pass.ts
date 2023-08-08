@@ -1,11 +1,6 @@
+import type {Device} from '@luma.gl/api';
+import {GL, Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/webgl-legacy';
 import {default as LayersPass} from './layers-pass';
-import {
-  Framebuffer,
-  Texture2D,
-  Renderbuffer,
-  withParameters,
-  cssToDeviceRatio
-} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture2D;
@@ -13,39 +8,39 @@ export default class ShadowPass extends LayersPass {
   fbo: Framebuffer;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     props?: {
       id;
     }
   ) {
-    super(gl, props);
+    super(device, props);
 
     // The shadowMap texture
-    this.shadowMap = new Texture2D(gl, {
+    this.shadowMap = new Texture2D(device, {
       width: 1,
       height: 1,
       parameters: {
-        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
       }
     });
 
-    this.depthBuffer = new Renderbuffer(gl, {
-      format: gl.DEPTH_COMPONENT16,
+    this.depthBuffer = new Renderbuffer(device, {
+      format: GL.DEPTH_COMPONENT16,
       width: 1,
       height: 1
     });
 
-    this.fbo = new Framebuffer(gl, {
+    this.fbo = new Framebuffer(device, {
       id: 'shadowmap',
       width: 1,
       height: 1,
       attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.shadowMap,
+        [GL.COLOR_ATTACHMENT0]: this.shadowMap,
         // Depth attachment has to be specified for depth test to work
-        [gl.DEPTH_ATTACHMENT]: this.depthBuffer
+        [GL.DEPTH_ATTACHMENT]: this.depthBuffer
       }
     });
   }
@@ -54,7 +49,7 @@ export default class ShadowPass extends LayersPass {
     const target = this.fbo;
 
     withParameters(
-      this.gl,
+      this.device,
       {
         depthRange: [0, 1],
         depthTest: true,
@@ -62,8 +57,9 @@ export default class ShadowPass extends LayersPass {
         clearColor: [1, 1, 1, 1]
       },
       () => {
+        const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+
         const viewport = params.viewports[0];
-        const pixelRatio = cssToDeviceRatio(this.gl);
         const width = viewport.width * pixelRatio;
         const height = viewport.height * pixelRatio;
         if (width !== target.width || height !== target.height) {
@@ -87,18 +83,18 @@ export default class ShadowPass extends LayersPass {
 
   delete() {
     if (this.fbo) {
-      this.fbo.delete();
-      this.fbo = null;
+      this.fbo.destroy();
+      this.fbo = null!;
     }
 
     if (this.shadowMap) {
-      this.shadowMap.delete();
-      this.shadowMap = null;
+      this.shadowMap.destroy();
+      this.shadowMap = null!;
     }
 
     if (this.depthBuffer) {
-      this.depthBuffer.delete();
-      this.depthBuffer = null;
+      this.depthBuffer.destroy();
+      this.depthBuffer = null!;
     }
   }
 }

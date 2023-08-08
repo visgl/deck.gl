@@ -1,10 +1,13 @@
-import {Texture2D, ProgramManager} from '@luma.gl/core';
+import type {Device} from '@luma.gl/api';
+import {ProgramManager} from '@luma.gl/webgl-legacy';
+import {Texture2D} from '@luma.gl/webgl-legacy';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
+import {getProgramManager} from '../../shaderlib';
 
 import type Layer from '../../lib/layer';
 import type {Effect, PreRenderOptions} from '../../lib/effect';
@@ -32,14 +35,14 @@ export default class LightingEffect implements Effect {
   props!: LightingEffectProps;
   shadowColor: number[] = DEFAULT_SHADOW_COLOR;
 
-  private shadow!: boolean;
-  private ambientLight!: AmbientLight | null;
-  private directionalLights!: DirectionalLight[];
-  private pointLights!: PointLight[];
+  private shadow: boolean = false;
+  private ambientLight?: AmbientLight | null = null;
+  private directionalLights: DirectionalLight[] = [];
+  private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture2D[] = [];
   private dummyShadowMap: Texture2D | null = null;
-  private programManager?: ProgramManager;
+  private pipelineFactory?: ProgramManager;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
@@ -76,7 +79,7 @@ export default class LightingEffect implements Effect {
   }
 
   preRender(
-    gl: WebGLRenderingContext,
+    device: Device,
     {layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions
   ) {
     if (!this.shadow) return;
@@ -85,18 +88,17 @@ export default class LightingEffect implements Effect {
     this.shadowMatrices = this._calculateMatrices();
 
     if (this.shadowPasses.length === 0) {
-      this._createShadowPasses(gl);
+      this._createShadowPasses(device);
     }
-    if (!this.programManager) {
-      // TODO - support multiple contexts
-      this.programManager = ProgramManager.getDefaultProgramManager(gl);
+    if (!this.pipelineFactory) {
+      this.pipelineFactory = getProgramManager(device);
       if (shadow) {
-        this.programManager.addDefaultModule(shadow);
+        this.pipelineFactory.addDefaultModule(shadow);
       }
     }
 
     if (!this.dummyShadowMap) {
-      this.dummyShadowMap = new Texture2D(gl, {
+      this.dummyShadowMap = new Texture2D(device, {
         width: 1,
         height: 1
       });
@@ -122,7 +124,7 @@ export default class LightingEffect implements Effect {
   getModuleParameters(layer: Layer) {
     const parameters: {
       lightSources?: {
-        ambientLight: AmbientLight | null;
+        ambientLight?: AmbientLight | null;
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };
@@ -161,12 +163,12 @@ export default class LightingEffect implements Effect {
 
     if (this.dummyShadowMap) {
       this.dummyShadowMap.delete();
-      this.dummyShadowMap = null;
+      this.dummyShadowMap = undefined;
     }
 
-    if (this.shadow && this.programManager) {
-      this.programManager.removeDefaultModule(shadow);
-      this.programManager = null;
+    if (this.shadow && this.pipelineFactory) {
+      this.pipelineFactory.removeDefaultModule(shadow);
+      this.pipelineFactory = null!;
     }
   }
 
@@ -182,9 +184,9 @@ export default class LightingEffect implements Effect {
     return lightMatrices;
   }
 
-  private _createShadowPasses(gl: WebGLRenderingContext): void {
+  private _createShadowPasses(device: Device): void {
     for (let i = 0; i < this.directionalLights.length; i++) {
-      const shadowPass = new ShadowPass(gl);
+      const shadowPass = new ShadowPass(device);
       this.shadowPasses[i] = shadowPass;
       this.shadowMaps[i] = shadowPass.shadowMap;
     }

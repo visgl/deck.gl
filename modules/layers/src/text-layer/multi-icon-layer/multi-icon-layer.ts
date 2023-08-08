@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl-legacy';
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
@@ -68,7 +68,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager!.addInstanced({
+    attributeManager.addInstanced({
       instanceOffsets: {
         size: 2,
         accessor: 'getIconOffsets'

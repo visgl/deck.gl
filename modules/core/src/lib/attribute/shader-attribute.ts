@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import type DataColumn from './data-column';
 import type {BufferAccessor, ShaderAttributeOptions} from './data-column';
-import type {Buffer} from '@luma.gl/webgl';
+import type {Buffer} from '@luma.gl/webgl-legacy';
 import type {NumericArray} from '../../types/types';
 
 export interface IShaderAttribute {

@@ -1,5 +1,7 @@
 import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/core';
+import type {Device} from '@luma.gl/api';
+import {Texture2D} from '@luma.gl/webgl-legacy';
+// import {readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
@@ -43,12 +45,12 @@ export default class MaskEffect implements Effect {
   private lastViewport?: Viewport;
 
   preRender(
-    gl: WebGLRenderingContext,
+    device: Device,
     {layers, layerFilter, viewports, onViewportActive, views, isPicking}: PreRenderOptions
   ): MaskPreRenderStats {
     let didRender = false;
     if (!this.dummyMaskMap) {
-      this.dummyMaskMap = new Texture2D(gl, {
+      this.dummyMaskMap = new Texture2D(device, {
         width: 1,
         height: 1
       });
@@ -68,7 +70,7 @@ export default class MaskEffect implements Effect {
     this.masks = {};
 
     if (!this.maskPass) {
-      this.maskPass = new MaskPass(gl, {id: 'default-mask'});
+      this.maskPass = new MaskPass(device, {id: 'default-mask'});
       this.maskMap = this.maskPass.maskMap;
     }
 
@@ -157,7 +159,7 @@ export default class MaskEffect implements Effect {
         const maskViewport =
           layerBounds &&
           makeViewport({
-            bounds: channelInfo.bounds!,
+            bounds: channelInfo.bounds,
             viewport,
             width: maskMap.width,
             height: maskMap.height,

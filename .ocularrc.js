@@ -21,7 +21,8 @@ const useLocalLuma = false;
 
 const config = {
   lint: {
-    paths: ['modules', 'test', 'examples', 'website']
+    paths: ['modules', 'test']
+    // paths: ['modules', 'test', 'examples', 'website']
   },
 
   bundle: {

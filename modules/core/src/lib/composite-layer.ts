@@ -261,7 +261,7 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
   /** (Internal) Called after an update to rerender sub layers */
   protected _postUpdate(updateParams: UpdateParameters<this>, forceUpdate: boolean) {
     // @ts-ignore (TS2531) this method is only called internally when internalState is defined
-    let subLayers = this.internalState.subLayers as Layer[];
+    let subLayers = this.internalState.subLayers;
     const shouldUpdate = !subLayers || this.needsUpdate();
     if (shouldUpdate) {
       const subLayersList = this.renderLayers();
