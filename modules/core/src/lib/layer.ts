@@ -53,6 +53,7 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
+import {RenderPass} from '@luma.gl/api';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -989,10 +990,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Calculates uniforms
   _drawLayer({
+    renderPass,
     moduleParameters = null,
     uniforms = {},
     parameters = {}
   }: {
+    renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
     parameters: any;
@@ -1025,7 +1028,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // Call subclass lifecycle method
       withParameters(context.gl, parameters, () => {
-        const opts = {moduleParameters, uniforms, parameters, context};
+        const opts = {renderPass,moduleParameters, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
