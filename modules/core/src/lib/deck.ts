@@ -379,8 +379,17 @@ export default class Deck {
       this.device = props.device;
     } else if (props.gl) {
       this.device = WebGLDevice.attach(props.gl);
-    } else {
-      // device will be created asynchronously by the animation loop when that is initialized
+    }
+
+    let deviceOrPromise: Device | Promise<Device> = this.device;
+    if (!deviceOrPromise) {
+      // TODO v9 should we install WebGL backend as default for now?
+      luma.registerDevices([WebGLDevice]);
+
+      deviceOrPromise = luma.createDevice(this.props.deviceProps);
+      deviceOrPromise.then(device => {
+        this.device = device;
+      })
     }
 
     // Create a canvas if no device is available
@@ -390,7 +399,7 @@ export default class Deck {
       }
     }
 
-    this.animationLoop = this._createAnimationLoop(props);
+    this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
     this.setProps(props);
 
@@ -772,11 +781,10 @@ export default class Deck {
     }
   }
 
-  private _createAnimationLoop(props: DeckProps): AnimationLoop {
+  private _createAnimationLoop(deviceOrPromise: Device | Promise<Device>, props: DeckProps): AnimationLoop {
     const {
       // width,
       // height,
-      device,
       gl,
       deviceProps,
       glOptions,
@@ -787,33 +795,20 @@ export default class Deck {
       useDevicePixels
     } = props;
 
-    // TODO v9 should we install WebGL backend as default for now
-    luma.registerDevices([WebGLDevice]);
-
     return new AnimationLoop({
-      // width,
-      // height,
+      device: deviceOrPromise,
       useDevicePixels,
-      autoResizeDrawingBuffer: !device && !gl, // do not auto resize external context
+      // TODO v9 
+      // autoResizeDrawingBuffer: !deviceOrPromise && !gl, // do not auto resize external context
       autoResizeViewport: false,
-      device: this.device,
-      onCreateDevice: props =>
-        luma.createDevice({
-          ...glOptions,
-          ...deviceProps,
-          ...props,
-          canvas: this.canvas,
-          debug,
-          // Note can use device.lost
-          onContextLost: () => this._onContextLost()
-        }),
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
+      onError
+
       // onBeforeRender,
       // onAfterRender,
-      onError
     });
   }
 
