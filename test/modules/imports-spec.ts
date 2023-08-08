@@ -120,10 +120,11 @@ test('deck.gl re-exports', t => {
     findMissingExports(geoLayers, deck),
     'deck.gl re-exports everything from @deck.gl/geo-layers'
   );
-  t.notOk(
-    findMissingExports(meshLayers, deck),
-    'deck.gl re-exports everything from @deck.gl/mesh-layers'
-  );
+  // TODO - v9 - restore when luma.gl/gltf module is available again
+  // t.notOk(
+  //   findMissingExports(meshLayers, deck),
+  //   'deck.gl re-exports everything from @deck.gl/mesh-layers'
+  // );
 
   t.end();
 });
