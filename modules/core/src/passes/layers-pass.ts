@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/api';
 import {clear, setParameters, withParameters} from '@luma.gl/webgl';
-import type {Framebuffer} from '@luma.gl/api';
+import type {Framebuffer, RenderPass} from '@luma.gl/api';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -51,8 +51,10 @@ export type RenderStats = {
   pickableCount: number;
 };
 
+/** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
+  renderPass: RenderPass;
 
   render(options: LayersPassRenderOptions): any {
     setParameters(this.device, {framebuffer: options.target});
