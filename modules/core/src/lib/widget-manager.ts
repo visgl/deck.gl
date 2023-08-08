@@ -8,9 +8,16 @@ import {EVENTS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
 
 export interface Widget<PropsT = any> {
+  /** Unique identifier of the widget. */
   id: string;
+  /** Widget prop types. */
   props: PropsT;
+  /**
+   * The view id that this widget is being attached to. Default `null`.
+   * If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+   */
   viewId?: string | null;
+  /** Widget positioning within the view. Default 'top-left'. */
   placement?: WidgetPlacement;
 
   // Populated by core when mounted
@@ -70,7 +77,10 @@ export class WidgetManager {
   private widgets: Widget[] = [];
   /** Resolved widgets from both imperative and declarative APIs */
   private resolvedWidgets: Widget[] = [];
+
+  /** Mounted HTML containers */
   private containers: {[id: string]: HTMLDivElement} = {};
+  /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
 
   constructor({deck, parentElement}: {deck: Deck; parentElement?: HTMLElement | null}) {
