@@ -95,12 +95,12 @@ Each of the `XXXSource` classes takes an options object as a constructor paramet
 
 ```javascript
 type CartoSourceOptions = {
-	connectionName: string,
-	credentials: CloudNativeCredentials,
-	clientId?: string,
-	formatTiles?: TileFormat,
-	headers?: Headers,
-	v?: string
+  connectionName: string,
+  credentials: CloudNativeCredentials,
+  clientId?: string,
+  formatTiles?: TileFormat,
+  headers?: Headers,
+  v?: string
 };
 ```
 
@@ -108,9 +108,9 @@ type CartoSourceOptions = {
 
 ```javascript
 type CartoTableSourceOptions = CartoSourceOptions & {
-	columns?: string[],
-	spatialDataColumn?: string,
-	name: string
+  columns?: string[],
+  spatialDataColumn?: string,
+  name: string
 };
 ```
 
@@ -118,7 +118,7 @@ type CartoTableSourceOptions = CartoSourceOptions & {
 
 ```javascript
 type CartoTilesetSourceOptions = CartoSourceOptions & {
-	name: string
+  name: string
 };
 ```
 
@@ -126,9 +126,9 @@ type CartoTilesetSourceOptions = CartoSourceOptions & {
 
 ```javascript
 type CartoTableSourceOptions = CartoSourceOptions & {
-	spatialDataColumn?: string,
-	query: string,
-	queryParameters?: QueryParameters
+  spatialDataColumn?: string,
+  query: string,
+  queryParameters?: QueryParameters
 };
 ```
 
@@ -136,8 +136,8 @@ type CartoTableSourceOptions = CartoSourceOptions & {
 
 ```javascript
 type CartoH3TableSourceOptions = CartoTableSourceOptions & {
-	aggregationExp?: string,
-	aggregationResLevel?: number
+  aggregationExp?: string,
+  aggregationResLevel?: number
 };
 ```
 
@@ -145,8 +145,8 @@ type CartoH3TableSourceOptions = CartoTableSourceOptions & {
 
 ```javascript
 type CartoH3QuerySourceOptions = CartoQuerySourceOptions & {
-	aggregationExp?: string,
-	aggregationResLevel?: number
+  aggregationExp?: string,
+  aggregationResLevel?: number
 };
 ```
 
@@ -154,8 +154,8 @@ type CartoH3QuerySourceOptions = CartoQuerySourceOptions & {
 
 ```javascript
 type CartoH3TilesetSourceOptions = CartoTilesetSourceOptions & {
-	aggregationExp?: string,
-	aggregationResLevel?: number
+  aggregationExp?: string,
+  aggregationResLevel?: number
 };
 ```
 
@@ -195,7 +195,7 @@ setDefaultCredentials({accessToken: 'XXX'});
 
 // Layer-specific
 new CartoLayer({
-	credentials: {accessToken: 'XXX'}
+  credentials: {accessToken: 'XXX'}
 });
 ```
 
@@ -207,9 +207,9 @@ For the global configuration case the `XXXTileLayers` can read the configured ac
 new CartoTileLayer({
   loadOptions: {
     fetch: {
-			headers: {Authorization: `Bearer ${accessToken}`}
+      headers: {Authorization: `Bearer ${accessToken}`}
     }
-	})
+  })
 });
 ```
 
