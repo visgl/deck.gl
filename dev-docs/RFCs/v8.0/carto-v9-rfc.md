@@ -1,4 +1,4 @@
-# UI Module RFC
+# CARTO v9 API RFC
 
 - **Author**: Felix Palmer
 - **Date**: August 2023
