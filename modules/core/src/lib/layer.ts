@@ -750,7 +750,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     );
 
     // @ts-expect-error v9 shader attributes
-    model.setAttributes(shaderAttributes);
+    model.setAttributes(shaderAttributes, true);
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
