@@ -58,10 +58,10 @@ void main(void) {
       }
       gl_FragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (filled) {
-    gl_FragColor = vFillColor;
-  } else {
+  } else if (!filled) {
     discard;
+  } else {
+    gl_FragColor = vFillColor;
   }
 
   gl_FragColor.a *= inCircle;
