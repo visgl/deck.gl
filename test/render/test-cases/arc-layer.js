@@ -209,5 +209,31 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/great-circle.png'
+  },
+  {
+    name: 'great-circle-modified-segments',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0,
+      repeat: true
+    },
+    layers: [
+      new ArcLayer({
+        id: 'great-circle-modified-segments',
+        data: dataSamples.greatCircles,
+        getWidth: 5,
+        getHeight: 0,
+        greatCircle: true,
+        numSegments: 8,
+        getSourcePosition: d => d.source,
+        getTargetPosition: d => d.target,
+        getSourceColor: [64, 255, 0],
+        getTargetColor: [0, 128, 200]
+      })
+    ],
+    goldenImage: './test/render/golden-images/great-circle-modified-segments.png'
   }
 ];
