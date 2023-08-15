@@ -24,8 +24,6 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   }
 };
 
-const CartoSpatialTileWorkerLoader = createWorkerLoader(CartoSpatialTileLoader);
-
 function parseCartoSpatialTile(
   arrayBuffer: ArrayBuffer,
   options?: LoaderOptions
@@ -41,4 +39,4 @@ function parseCartoSpatialTile(
   return binaryToSpatialjson(data);
 }
 
-export default CartoSpatialTileWorkerLoader;
+export default createWorkerLoader(CartoSpatialTileLoader);
