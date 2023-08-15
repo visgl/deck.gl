@@ -131,4 +131,4 @@ export type {Effect, PreRenderOptions, PostRenderOptions} from './lib/effect';
 export type {PickingUniforms, ProjectUniforms} from './shaderlib';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
-export type {Widget} from './lib/widget-manager';
+export type {Widget, WidgetPlacement} from './lib/widget-manager';
