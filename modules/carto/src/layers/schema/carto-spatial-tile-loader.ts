@@ -4,15 +4,16 @@ import {Tile, TileReader} from './carto-spatial-tile';
 import {parsePbf} from './tile-loader-utils';
 import {IndexScheme, binaryToSpatialjson, SpatialJson} from './spatialjson-utils';
 
+const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
+
 const CartoSpatialTileLoader: LoaderWithParser = {
   name: 'CARTO Spatial Tile',
-  version: '1',
+  version: VERSION,
   id: 'cartoSpatialTile',
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-spatial-tile'],
   category: 'geometry',
-  worker: false,
   parse: async (arrayBuffer, options) => parseCartoSpatialTile(arrayBuffer, options),
   parseSync: parseCartoSpatialTile,
   options: {
@@ -21,6 +22,16 @@ const CartoSpatialTileLoader: LoaderWithParser = {
     } as {scheme: IndexScheme}
   }
 };
+
+function createWorkerLoader(loader: LoaderWithParser) {
+  const {id} = loader;
+  const options = loader.options[id] as {workerUrl: string};
+  options.workerUrl = `http://localhost:8081/dist/${id}-worker.js`;
+
+  return {...loader, worker: true, options};
+}
+
+const CartoSpatialTileWorkerLoader = createWorkerLoader(CartoSpatialTileLoader);
 
 function parseCartoSpatialTile(
   arrayBuffer: ArrayBuffer,
