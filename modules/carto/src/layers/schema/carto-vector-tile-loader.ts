@@ -3,16 +3,18 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
 import {parsePbf} from './tile-loader-utils';
+import {createWorkerLoader} from '../../utils';
+
+const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',
-  version: '1',
+  version: VERSION,
   id: 'cartoVectorTile',
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-vector-tile'],
   category: 'geometry',
-  worker: false,
   parse: async (arrayBuffer, options) => parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   options: {}
@@ -29,4 +31,4 @@ function parseCartoVectorTile(
   return tile as unknown as BinaryFeatures;
 }
 
-export default CartoVectorTileLoader;
+export default createWorkerLoader(CartoVectorTileLoader);

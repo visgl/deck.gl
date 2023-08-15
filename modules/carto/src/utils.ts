@@ -30,7 +30,11 @@ export function createBinaryProxy(
 // Utility to convert local loader into a worker loader with unpkg.com URL
 export function createWorkerLoader(loader: LoaderWithParser) {
   const {id, version} = loader;
-  const options = loader.options[id] as LoaderOptions;
+  let options = loader.options[id] as LoaderOptions;
+  if (!options) {
+    options = {};
+    loader.options[id] = options;
+  }
 
   // options.workerUrl = `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
   // For local testing `yarn build-workers` and then host `modules/carto/dist/`
