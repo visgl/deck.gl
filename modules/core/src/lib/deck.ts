@@ -24,7 +24,7 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import {WidgetManager, Widget, WidgetPlacement} from './widget-manager';
+import {WidgetManager, Widget} from './widget-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -181,6 +181,8 @@ export type DeckProps = {
   _pickable?: boolean;
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
+  /** An array of Widget instances to be added to the parent element. */
+  widgets?: Widget[];
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
@@ -258,6 +260,7 @@ const defaultProps = {
   _pickable: true,
   _typedArrayManagerProps: {},
   _customRender: null,
+  widgets: [],
 
   onDeviceInitialized: noop,
   onWebGLInitialized: noop,
@@ -485,6 +488,7 @@ export default class Deck {
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);
       this.deckPicker.setProps(resolvedProps);
+      this.widgetManager.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -988,7 +992,7 @@ export default class Deck {
       deck: this,
       parentElement: this.canvas?.parentElement
     });
-    this.widgetManager.add(new Tooltip(), {placement: 'fill'});
+    this.widgetManager.addDefault(new Tooltip());
 
     this.setProps(this.props);
 
