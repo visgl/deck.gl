@@ -36,9 +36,9 @@ export function createWorkerLoader(loader: LoaderWithParser) {
     loader.options[id] = options;
   }
 
-  // options.workerUrl = `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
+  options.workerUrl = `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
   // For local testing `yarn build-workers` and then host `modules/carto/dist/`
-  options.workerUrl = `http://localhost:8081/dist/${id}-worker.js`;
+  // options.workerUrl = `http://localhost:8081/dist/${id}-worker.js`;
 
   return {...loader, worker: true};
 }
