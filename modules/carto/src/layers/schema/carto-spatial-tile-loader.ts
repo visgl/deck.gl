@@ -2,6 +2,7 @@ import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {Tile, TileReader} from './carto-spatial-tile';
 import {parsePbf} from './tile-loader-utils';
+import {createWorkerLoader} from '../../utils';
 import {IndexScheme, binaryToSpatialjson, SpatialJson} from './spatialjson-utils';
 
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
@@ -23,14 +24,6 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   }
 };
 
-function createWorkerLoader(loader: LoaderWithParser) {
-  const {id} = loader;
-  const options = loader.options[id] as {workerUrl: string};
-  options.workerUrl = `http://localhost:8081/dist/${id}-worker.js`;
-
-  return {...loader, worker: true, options};
-}
-
 const CartoSpatialTileWorkerLoader = createWorkerLoader(CartoSpatialTileLoader);
 
 function parseCartoSpatialTile(
@@ -48,4 +41,4 @@ function parseCartoSpatialTile(
   return binaryToSpatialjson(data);
 }
 
-export default CartoSpatialTileLoader;
+export default CartoSpatialTileWorkerLoader;

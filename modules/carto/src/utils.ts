@@ -1,4 +1,5 @@
 import {log} from '@deck.gl/core';
+import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {Properties, NumericProps} from './layers/schema/spatialjson-utils';
 
 export function assert(condition: unknown, message?: string): asserts condition {
@@ -24,4 +25,13 @@ export function createBinaryProxy(
       return property in numericProps || property in target;
     }
   });
+}
+
+// Utility to convert local loader into a worker loader with unpkg.com URL
+export function createWorkerLoader(loader: LoaderWithParser) {
+  const {id} = loader;
+  const options = loader.options[id] as LoaderOptions;
+  options.workerUrl = `http://localhost:8081/dist/${id}-worker.js`;
+
+  return {...loader, worker: true};
 }
