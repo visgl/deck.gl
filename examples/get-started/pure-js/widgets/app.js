@@ -1,5 +1,11 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {FullscreenWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+import {luma} from '@luma.gl/api';
+import {WebGLDevice} from '@luma.gl/webgl';
+
+luma.registerDevices([WebGLDevice]);
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -57,5 +63,6 @@ new Deck({
       getTargetColor: [200, 0, 80],
       getWidth: 1
     })
-  ]
+  ],
+  widgets: [new FullscreenWidget({})]
 });
