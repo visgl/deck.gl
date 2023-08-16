@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
+import {Buffer, TypedArray} from '@luma.gl/api';
 import {GL} from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
@@ -54,6 +55,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/api';
+import ShaderAttribute, {IShaderAttribute} from './attribute/shader-attribute';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -749,10 +751,102 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       excludeAttributes
     );
 
-    // @ts-expect-error v9 shader attributes
-    model.setAttributes(shaderAttributes, true);
+    const {bufferAttributes, constantAttributes, indices} = this._splitAttributes(shaderAttributes);
+    log.group(0, `Layer:${this.id}.setAttributes()`)();
+    log.log('inputs=', Object.keys(shaderAttributes))();
+    log.log('indices=', indices || 'N/A')();
+    log.log('buffers=', bufferAttributes)();
+    log.log('constants=', constantAttributes)();
+    log.groupEnd(0)();
+
+    if (indices) {
+      model.setIndexBuffer(indices);
+    }
+    model.setAttributes(bufferAttributes);
+    model.setConstantAttributes(constantAttributes);
   }
 
+  // Temporary hack to support deck.gl's dependency on luma.gl v8 Model attribute API.
+  _splitAttributes(
+    attributes: Record<string, IShaderAttribute>,
+    filterBuffers?: boolean
+  ): {
+    bufferAttributes: Record<string, Buffer>;
+    constantAttributes: Record<string, TypedArray>;
+    indices?: Buffer;
+  } {
+    const bufferAttributes: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
+
+    for (const name in attributes) {
+      let attribute = attributes[name] as Attribute | ShaderAttribute;
+
+      if (name === 'positions')
+      debugger
+
+
+      if (attribute.source?._buffer instanceof Buffer) {
+        bufferAttributes[name] = attribute.source._buffer;
+        continue;
+      }
+      if (Array.isArray(attribute) && attribute[1] instanceof Buffer) {
+        bufferAttributes[name] = attribute[1];
+        // TODO - what do we do with the accessor?
+        continue;
+      }
+
+      // Check for constants (getValue / value)
+      const value = attribute.getValue ? attribute.getValue() : attribute.value;
+      // if (attribute.getValue) {
+      //   console.warn(`attribute ${name}: getValue() will be removed`);
+      // }
+      if (ArrayBuffer.isView(value)) {
+        constantAttributes[name] = value;
+        continue;
+      }
+      if (value instanceof Buffer) {
+        bufferAttributes[name] = value;
+        continue;
+      }
+      if (Array.isArray(value) && value[1] instanceof Buffer) {
+        bufferAttributes[name] = value[1];
+        // TODO - what do we do with the accessor?
+        continue;
+      }
+
+      // @ts-expect-error
+      if (attribute.constant || !attribute._buffer) {
+        constantAttributes[name] = new Float32Array(attribute.value);
+        continue;
+      }
+
+      if (attribute?._buffer) {
+        bufferAttributes[name] = attribute._buffer;
+        continue;
+      }
+      if (attribute?.source?._buffer) {
+        bufferAttributes[name] = attribute.source?._buffer;
+        continue;
+      }
+
+    }
+
+    const indices: Buffer | undefined = bufferAttributes.indices;
+    delete bufferAttributes.indices;
+
+    // Sanity check
+    const bufferCount = 
+      Object.keys(bufferAttributes).length + 
+      Object.keys(constantAttributes).length + 
+      (indices ? 1 : 0);
+
+    if (bufferCount !== Object.keys(attributes).length) {
+      debugger;
+    }  
+
+    return {bufferAttributes, constantAttributes, indices};
+  }
+  
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
@@ -1202,7 +1296,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // TODO luma v9
     // model?.setInstanceCount(this.getNumInstances());
     if (model) {
-      model.props.instanceCount = this.getNumInstances();
+      model.instanceCount = this.getNumInstances();
     }
 
     // Set picking module parameters to match props

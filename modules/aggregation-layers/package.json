@@ -31,16 +31,16 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@luma.gl/api": "9.0.0-alpha.27",
-    "@luma.gl/shadertools": "9.0.0-alpha.27",
+    "@luma.gl/api": "9.0.0-alpha.29",
+    "@luma.gl/shadertools": "9.0.0-alpha.29",
     "@math.gl/web-mercator": "4.0.0-alpha.4",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
-    "@luma.gl/api": "9.0.0-alpha.27",
-    "@luma.gl/engine": "9.0.0-alpha.27"
+    "@luma.gl/api": "9.0.0-alpha.29",
+    "@luma.gl/engine": "9.0.0-alpha.29"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
