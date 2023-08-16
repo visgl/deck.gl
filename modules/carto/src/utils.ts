@@ -1,5 +1,4 @@
 import {log} from '@deck.gl/core';
-import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 import type {Properties, NumericProps} from './layers/schema/spatialjson-utils';
 
 export function assert(condition: unknown, message?: string): asserts condition {

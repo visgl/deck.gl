@@ -10,7 +10,7 @@ const id = 'cartoSpatialTile';
 
 type CartoSpatialTileLoaderOptions = LoaderOptions & {
   cartoSpatialTile?: {
-    scheme: 'quadbin' | 'h3';
+    scheme: IndexScheme;
     workerUrl: string;
   };
 };
