@@ -31,7 +31,8 @@ const CartoVectorTileLoader: LoaderWithParser = {
   parse: async (arrayBuffer, options?: CartoVectorTileLoaderOptions) =>
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
-  options: {}
+  worker: false, // TODO set to true once workers deployed to unpkg
+  options: DEFAULT_OPTIONS
 };
 
 function parseCartoVectorTile(
