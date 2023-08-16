@@ -51,7 +51,7 @@ At a high level we want to achieve an API which makes it clearer to the user wha
 To do so, the interaction with the CARTO API will be done via a set of typed helper classes which aid the user in obtaining the TileJSON needed for a particular layer.
 
 ```javascript
-import CartoQuerySource, CartoQuerySourceOptions, CartoTileLayer from '@deck.gl/carto';
+import {CartoQuerySource, CartoQuerySourceOptions, CartoVectorLayer} from '@deck.gl/carto';
 
 // Global options
 setDefaultCredentials({accessToken: 'XXXX'});
@@ -65,7 +65,7 @@ const options: CartoQuerySourceOptions = {
 // Returns a Promise which resolves to TileJSON payload. Can optionally await if needed
 const data = CartoQuerySource(options);
 
-const layer = new CartoTileLayer({
+const layer = new CartoVectorLayer({
   data,
 
   // ...style props
@@ -76,18 +76,18 @@ const layer = new CartoTileLayer({
 
 The goal is to have descriptive names for classes and options, even if this means they are more verbose.
 
-| Source class                | Layer                   |
-| --------------------------- | ----------------------- |
-| `CartoTableSource`          | `CartoTileLayer`        |
-| `CartoTilesetSource`        | `CartoTileLayer`        |
-| `CartoQuerySource`          | `CartoTileLayer`        |
-| `CartoH3TableSource`        | `CartoH3TileLayer`      |
-| `CartoH3QuerySource`        | `CartoH3TileLayer`      |
-| `CartoH3TilesetSource`      | `CartoH3TileLayer`      |
-| `CartoQuadbinTableSource`   | `CartoQuadbinTileLayer` |
-| `CartoQuadbinQuerySource`   | `CartoQuadbinTileLayer` |
-| `CartoQuadbinTilesetSource` | `CartoQuadbinTileLayer` |
-| `CartoRasterSource`         | `CartoRasterTileLayer`  |
+| Source class                | Options type                                          | Layer                   |
+| --------------------------- | ----------------------------------------------------- | ----------------------- |
+| `CartoVectorTableSource`    | `CartoTableSourceOptions`                             | `CartoVectorLayer`      |
+| `CartoVectorTilesetSource`  | `CartoTilesetSourceOptions`                           | `CartoVectorLayer`      |
+| `CartoVectorQuerySource`    | `CartoQuerySourceOptions`                             | `CartoVectorLayer` |
+| `CartoH3TableSource`        | `CartoTableSourceOptions & CartoAggregationOptions`   | `CartoH3TileLayer`      |
+| `CartoH3QuerySource`        | `CartoTilesetSourceOptions & CartoAggregationOptions` | `CartoH3TileLayer`      |
+| `CartoH3TilesetSource`      | `CartoQuerySourceOptions`                             | `CartoH3TileLayer`      |
+| `CartoQuadbinTableSource`   | `CartoTableSourceOptions & CartoAggregationOptions`   | `CartoQuadbinTileLayer` |
+| `CartoQuadbinQuerySource`   | `CartoTilesetSourceOptions & CartoAggregationOptions` | `CartoQuadbinTileLayer` |
+| `CartoQuadbinTilesetSource` | `CartoQuerySourceOptions`                             | `CartoQuadbinTileLayer` |
+| `CartoRasterSource`         | `CartoTilesetSourceOptions`                           | `CartoRasterTileLayer`  |
 
 ### Options
 
@@ -95,13 +95,16 @@ Each of the `XXXSource` classes takes an options object as a constructor paramet
 
 ```javascript
 type CartoSourceOptions = {
+  apiVersion?: '3.2', // Default '3.2'
+  apiBaseUrl?: 'string', // Default 'https://gcp-us-east1.api.carto.com' or global apiBaseUrl
+  accessToken?: 'string', // Default to global access token
   connectionName: string,
-  credentials: CloudNativeCredentials,
-  clientId?: string,
+  clientId?: string, // Default 'deck-gl-carto'
   formatTiles?: TileFormat,
   headers?: Headers,
-  v?: string
+  mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
 };
+
 ```
 
 #### CartoTableSourceOptions
@@ -110,7 +113,7 @@ type CartoSourceOptions = {
 type CartoTableSourceOptions = CartoSourceOptions & {
   columns?: string[],
   spatialDataColumn?: string,
-  name: string
+  tableName: string
 };
 ```
 
@@ -118,69 +121,27 @@ type CartoTableSourceOptions = CartoSourceOptions & {
 
 ```javascript
 type CartoTilesetSourceOptions = CartoSourceOptions & {
-  name: string
+  tableName: string
 };
 ```
 
 #### CartoQuerySourceOptions
 
 ```javascript
-type CartoTableSourceOptions = CartoSourceOptions & {
+type CartoQuerySourceOptions = CartoSourceOptions & {
   spatialDataColumn?: string,
-  query: string,
+  sqlQuery: string,
   queryParameters?: QueryParameters
 };
 ```
 
-#### CartoH3TableSourceOptions
+#### CartoAggregationOptions
 
 ```javascript
-type CartoH3TableSourceOptions = CartoTableSourceOptions & {
+type CartoAggregationOptions = {
   aggregationExp?: string,
   aggregationResLevel?: number
 };
-```
-
-#### CartoH3QuerySourceOptions
-
-```javascript
-type CartoH3QuerySourceOptions = CartoQuerySourceOptions & {
-  aggregationExp?: string,
-  aggregationResLevel?: number
-};
-```
-
-#### CartoH3TilesetSourceOptions
-
-```javascript
-type CartoH3TilesetSourceOptions = CartoTilesetSourceOptions & {
-  aggregationExp?: string,
-  aggregationResLevel?: number
-};
-```
-
-#### CartoQuadbinTableSourceOptions
-
-```javascript
-type CartoQuadbinTableSourceOptions = CartoH3TableSourceOptions;
-```
-
-#### CartoQuadbinQuerySourceOptions
-
-```javascript
-type CartoQuadbinQuerySourceOptions = CartoH3QuerySourceOptions;
-```
-
-#### CartoQuadbinTilesetSourceOptions
-
-```javascript
-type CartoQuadbinTilesetSourceOptions = CartoH3TilesetSourceOptions;
-```
-
-#### CartoRasterSourceOptions
-
-```javascript
-type CartoRasterSourceOptions = CartoTilesetSourceOptions;
 ```
 
 ## Implementation details
@@ -204,7 +165,7 @@ The [options](https://github.com/visgl/deck.gl/blob/master/modules/carto/src/con
 For the global configuration case the `XXXTileLayers` can read the configured access token automatically, but for the per-Layer specification the `XXXTileLayer` needs to use the access token in the header:
 
 ```javascript
-new CartoTileLayer({
+new CartoVectorLayer({
   loadOptions: {
     fetch: {
       headers: {Authorization: `Bearer ${accessToken}`}
@@ -217,6 +178,6 @@ This is in line with [deck.gl docs](https://deck.gl/docs/developer-guide/loading
 
 ### MVT vs binary data format
 
-Due to differences in data warehouses, when rendering vector data using the `CartoTileLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
+Due to differences in data warehouses, when rendering vector data using the `CartoVectorLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
 
 The two layers are very similar (`CartoTileLayer` being an extension of `MVTLayer`) and thus in v9 `CartoTileLayer` will be enhanced to support MVT data so that it can be used with all data warehouses. `CartoTableSource`, `CartoTilesetSource` & `CartoQuerySource` will similarly be written such that they can parse both formats.
