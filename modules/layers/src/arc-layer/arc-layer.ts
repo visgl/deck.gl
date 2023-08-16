@@ -246,7 +246,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       this.props;
 
     this.state.model
-      .setUniforms(uniforms)
+      .setUniforms(uniforms);
+    this.state.model
       .setUniforms({
         greatCircle,
         widthUnits: UNIT[widthUnits],
@@ -254,7 +255,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         widthMinPixels,
         widthMaxPixels,
         useShortestPath: wrapLongitude
-      })
+      });
+    this.state.model
       .draw(this.context.renderPass);
   }
 

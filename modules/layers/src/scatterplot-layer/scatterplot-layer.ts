@@ -251,23 +251,22 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels
     } = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        stroked: stroked ? 1 : 0,
-        filled,
-        billboard,
-        antialiasing,
-        radiusUnits: UNIT[radiusUnits],
-        radiusScale,
-        radiusMinPixels,
-        radiusMaxPixels,
-        lineWidthUnits: UNIT[lineWidthUnits],
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels
-      })
-      .draw(this.context.renderPass);
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      stroked: stroked ? 1 : 0,
+      filled,
+      billboard,
+      antialiasing,
+      radiusUnits: UNIT[radiusUnits],
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      lineWidthUnits: UNIT[lineWidthUnits],
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
@@ -277,6 +276,13 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferMap: [
+        { name: 'instancePositions', format: 'float32x3'},
+        { name: 'instanceRadius', format: 'float32'},
+        { name: 'instanceLineWidths', format: 'float32'},
+        { name: 'instanceFillColors', format: 'unorm8x4'},
+        { name: 'instanceLineColors', format: 'unorm8x4'},
+      ],
       geometry: new Geometry({
         topology: 'triangle-strip',
         vertexCount: 4,
