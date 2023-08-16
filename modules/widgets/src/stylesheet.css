@@ -1,0 +1,41 @@
+.deckgl-wdgt {
+  /* desktop */
+  --button-size: 28px;
+  --button-corner-radius: 8px;
+  /* light flat */
+  --button-background: #fff;
+  --button-stroke: rgba(255, 255, 255, 0.3);
+  --button-inner-stroke: unset;
+  --button-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.25);
+  --button-backdrop-blur: unset;
+}
+
+.deckgl-wdgt-button-border {
+  width: var(--button-size);
+  height: var(--button-size);
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  background: var(--button-stroke);
+  border-radius: var(--button-corner-radius);
+  box-shadow: var(--button-shadow);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deckgl-wdgt-button-border button {
+  width: calc(var(--button-size) - 2px);
+  height: calc(var(--button-size) - 2px);
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  background: var(--button-background);
+  backdrop-filter: var(--button-backdrop-blur);
+  border: var(--button-inner-stroke);
+  border-radius: calc(var(--button-corner-radius) - 1px);
+
+  pointer-events: auto;
+  cursor: pointer;
+}

@@ -15,6 +15,7 @@ interface FullscreenWidgetProps {
   id: string;
   viewId?: string | null;
   placement?: WidgetPlacement;
+  label?: string;
 }
 
 class FullscreenWidget implements Widget<FullscreenWidgetProps> {
@@ -31,16 +32,15 @@ class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     this.id = props.id || 'fullscreen';
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
+    props.label = props.label || 'Toggle Fullscreen';
     this.props = props;
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const widget = document.createElement('div');
-    widget.className = 'deck-fullscreen-widget';
-    // Object.assign(el.style, defaultStyle);
-    // el.addEventListener('click', () => this.handleClick());
-    const v = <div>Hello World</div>;
-    // const vdom = h('h1', null, 'Hello World!');
+    widget.className = 'deckgl-wdgt deckgl-wdgt-fullscreen';
+    // Object.assign(widget.style, defaultStyle);
+    const v = <Button onClick={() => this.handleClick()} label={this.props.label} />;
     render(v, widget);
 
     this.deck = deck;
@@ -77,5 +77,16 @@ class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     this.isFullscreen = false;
   }
 }
+
+const Button = props => {
+  const {label, onClick} = props;
+  return (
+    <div className="deckgl-wdgt-button-border">
+      <button className="deckgl-wdgt-button" type="button" onClick={onClick} title={label}>
+        {props.children}
+      </button>
+    </div>
+  );
+};
 
 export default FullscreenWidget;
