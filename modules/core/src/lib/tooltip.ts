@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Widget} from './widget-manager';
+import type {Widget, WidgetPlacement} from './widget-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type Deck from './deck';
@@ -46,6 +46,9 @@ export type TooltipContent =
     };
 
 export default class Tooltip implements Widget {
+  id = 'default-tooltip';
+  placement: WidgetPlacement = 'fill';
+  props = {};
   isVisible: boolean = false;
   deck?: Deck;
   element?: HTMLDivElement;
@@ -66,6 +69,8 @@ export default class Tooltip implements Widget {
     this.deck = undefined;
     this.element = undefined;
   }
+
+  setProps() {}
 
   onViewportChange(viewport: Viewport) {
     if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {
