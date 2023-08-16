@@ -15,6 +15,12 @@ interface FullscreenWidgetProps {
   id: string;
   viewId?: string | null;
   placement?: WidgetPlacement;
+  /**
+   * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
+   * By default, the map container element will be made full screen.
+   */
+  /* eslint-enable max-len */
+  container?: HTMLElement;
   label?: string;
 }
 
@@ -68,7 +74,8 @@ class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   async requestFullscreen() {
     // @ts-expect-error canvas is protected. Merge https://github.com/visgl/deck.gl/pull/7919?
-    await this.deck?.canvas?.parentElement?.requestFullscreen({navigationUI: 'hide'});
+    const container = this.props.container || this.deck?.canvas?.parentElement;
+    await container.requestFullscreen({navigationUI: 'hide'});
     this.isFullscreen = true;
   }
 
