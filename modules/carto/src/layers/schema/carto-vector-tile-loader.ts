@@ -3,26 +3,40 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
 import {parsePbf} from './tile-loader-utils';
-import {createWorkerLoader} from '../../utils';
+import {getWorkerUrl} from '../../utils';
 
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
+const id = 'cartoVectorTile';
+
+type CartoVectorTileLoaderOptions = LoaderOptions & {
+  cartoVectorTile?: {
+    workerUrl: string;
+  };
+};
+
+const DEFAULT_OPTIONS: CartoVectorTileLoaderOptions = {
+  cartoVectorTile: {
+    workerUrl: getWorkerUrl(id, VERSION)
+  }
+};
 
 const CartoVectorTileLoader: LoaderWithParser = {
   name: 'CARTO Vector Tile',
   version: VERSION,
-  id: 'cartoVectorTile',
+  id,
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-vector-tile'],
   category: 'geometry',
-  parse: async (arrayBuffer, options) => parseCartoVectorTile(arrayBuffer, options),
+  parse: async (arrayBuffer, options?: CartoVectorTileLoaderOptions) =>
+    parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
   options: {}
 };
 
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
-  options?: LoaderOptions
+  options?: CartoVectorTileLoaderOptions
 ): BinaryFeatures | null {
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer, TileReader);
@@ -31,4 +45,4 @@ function parseCartoVectorTile(
   return tile as unknown as BinaryFeatures;
 }
 
-export default createWorkerLoader(CartoVectorTileLoader);
+export default CartoVectorTileLoader;

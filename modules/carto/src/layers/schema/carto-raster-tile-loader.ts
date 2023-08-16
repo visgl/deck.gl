@@ -2,20 +2,34 @@ import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
 
 import {TileReader} from './carto-raster-tile';
 import {parsePbf} from './tile-loader-utils';
-import {createWorkerLoader} from '../../utils';
+import {getWorkerUrl} from '../../utils';
 import {NumericProps, Properties} from './spatialjson-utils';
 
 const VERSION = typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'latest';
+const id = 'cartoRasterTile';
+
+type CartoRasterTileLoaderOptions = LoaderOptions & {
+  cartoRasterTile?: {
+    workerUrl: string;
+  };
+};
+
+const DEFAULT_OPTIONS: CartoRasterTileLoaderOptions = {
+  cartoRasterTile: {
+    workerUrl: getWorkerUrl(id, VERSION)
+  }
+};
 
 const CartoRasterTileLoader: LoaderWithParser = {
   name: 'CARTO Raster Tile',
   version: VERSION,
-  id: 'cartoRasterTile',
+  id,
   module: 'carto',
   extensions: ['pbf'],
   mimeTypes: ['application/vnd.carto-raster-tile'],
   category: 'geometry',
-  parse: async (arrayBuffer, options) => parseCartoRasterTile(arrayBuffer, options),
+  parse: async (arrayBuffer, options?: CartoRasterTileLoaderOptions) =>
+    parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
   options: {}
 };
@@ -29,7 +43,10 @@ export type Raster = {
   };
 };
 
-function parseCartoRasterTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions): Raster | null {
+function parseCartoRasterTile(
+  arrayBuffer: ArrayBuffer,
+  options?: CartoRasterTileLoaderOptions
+): Raster | null {
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer, TileReader);
   const {bands, blockHeight, blockWidth} = tile;
@@ -41,4 +58,4 @@ function parseCartoRasterTile(arrayBuffer: ArrayBuffer, options?: LoaderOptions)
   return {blockWidth, blockHeight, cells: {numericProps, properties: []}};
 }
 
-export default createWorkerLoader(CartoRasterTileLoader);
+export default CartoRasterTileLoader;
