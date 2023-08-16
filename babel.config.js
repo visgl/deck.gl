@@ -13,6 +13,17 @@ module.exports = getBabelConfig({
           patterns: ['**/*.glsl.js', '**/*.glsl.ts']
         }
       ]
+    ],
+    overrides: [
+      {
+        include: './modules/widgets/**/*.{ts,tsx}',
+        presets: [['@babel/typescript', {jsxPragma: 'h'}]],
+        plugins: [
+          ['@babel/transform-react-jsx', {pragma: 'h'}]
+          // 'babel-plugin-transform-redom-jsx',
+          // ['@babel/transform-react-jsx', {pragma: 'el'}]
+        ]
+      }
     ]
   }
 });

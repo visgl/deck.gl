@@ -109,6 +109,12 @@ module.exports = getESLintConfig({
           'import/named': 0,
           'no-new': 0
         }
+      },
+      {
+        files: ['modules/widgets/**/*.tsx'],
+        rules: {
+          'react/react-in-jsx-scope': 0
+        }
       }
     ],
 
