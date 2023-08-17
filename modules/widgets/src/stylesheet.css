@@ -1,27 +1,16 @@
 .deckgl-wdgt {
-  /* desktop */
-  --button-size: 28px;
-  --button-corner-radius: 8px;
-  /* light flat */
-  --button-background: #fff;
-  --button-stroke: rgba(255, 255, 255, 0.3);
-  --button-inner-stroke: unset;
-  --button-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.25);
-  --button-backdrop-blur: unset;
-
-  --wdgt-margin: 12px;
-  margin: var(--wdgt-margin);
+  margin: var(--wdgt-margin, 12px);
 }
 
 .deckgl-wdgt-button-border {
-  width: var(--button-size);
-  height: var(--button-size);
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
   box-sizing: border-box;
   flex-shrink: 0;
 
-  background: var(--button-stroke);
-  border-radius: var(--button-corner-radius);
-  box-shadow: var(--button-shadow);
+  background: var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
 
   display: flex;
   align-items: center;
@@ -29,15 +18,15 @@
 }
 
 .deckgl-wdgt-button-border button {
-  width: calc(var(--button-size) - 2px);
-  height: calc(var(--button-size) - 2px);
+  width: calc(var(--button-size, 28px) - 2px);
+  height: calc(var(--button-size, 28px) - 2px);
   box-sizing: border-box;
   flex-shrink: 0;
 
-  background: var(--button-background);
-  backdrop-filter: var(--button-backdrop-blur);
-  border: var(--button-inner-stroke);
-  border-radius: calc(var(--button-corner-radius) - 1px);
+  background: var(--button-background, #fff);
+  backdrop-filter: var(--button-backdrop-filter, unset);
+  border: var(--button-inner-stroke, unset);
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
 
   pointer-events: auto;
   cursor: pointer;

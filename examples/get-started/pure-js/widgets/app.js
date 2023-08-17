@@ -7,6 +7,23 @@ import {WebGLDevice} from '@luma.gl/webgl';
 
 luma.registerDevices([WebGLDevice]);
 
+const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+const widgetTheme = prefersDarkScheme.matches ? {
+  // Dark Glass Theme
+  '--button-background': 'rgba(18, 18, 20, 0.75)',
+  '--button-stroke': 'rgba(18, 18, 20, 0.30)',
+  '--button-inner-stroke': '1px solid rgba(18, 18, 20, 0.75)',
+  '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--button-backdrop-filter': 'blur(4px)'
+} : {
+  // Light Glass Theme
+  '--button-background': 'rgba(255, 255, 255, 0.6)',
+  '--button-stroke': 'rgba(255, 255, 255, 0.3)',
+  '--button-inner-stroke': '1px solid rgba(255, 255, 255, 0.6)',
+  '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
+  '--button-backdrop-filter': 'blur(4px)'
+}
+
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -64,32 +81,5 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [new FullscreenWidget({
-    style: {
-      // Light Glass Theme
-      // '--button-background': 'rgba(255, 255, 255, 0.6)',
-      // '--button-stroke': 'rgba(255, 255, 255, 0.3)',
-      // '--button-inner-stroke': '1px solid rgba(255, 255, 255, 0.6)',
-      // '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
-      // '--button-backdrop-blur': 'blur(4px)',
-
-      // Dark Flat Theme
-      // '--button-background': 'rgba(18, 18, 20, 1)',
-      // '--button-stroke': 'rgba(18, 18, 20, 0.30)',
-      // '--button-inner-stroke': 'unset',
-      // '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
-      // '--button-backdrop-blur': 'unset',
-
-      // Dark Glass Theme
-      '--button-background': 'rgba(18, 18, 20, 0.75)',
-      '--button-stroke': 'rgba(18, 18, 20, 0.30)',
-      '--button-inner-stroke': '1px solid rgba(18, 18, 20, 0.75)',
-      '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
-      '--button-backdrop-blur': 'blur(4px)',
-
-      // Mobile
-      // '--button-size': '48px',
-      // '--button-border-radius': '12px'
-    }
-  })]
+  widgets: [new FullscreenWidget({style: widgetTheme})]
 });
