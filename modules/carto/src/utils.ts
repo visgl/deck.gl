@@ -25,3 +25,9 @@ export function createBinaryProxy(
     }
   });
 }
+
+export function getWorkerUrl(id: string, version: string) {
+  // For local testing `yarn build-workers` and then host `modules/carto/dist/`
+  // return `http://localhost:8081/dist/${id}-worker.js`;
+  return `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
+}
