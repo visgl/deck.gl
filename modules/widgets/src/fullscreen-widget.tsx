@@ -22,6 +22,7 @@ interface FullscreenWidgetProps {
   /* eslint-enable max-len */
   container?: HTMLElement;
   label?: string;
+  style?: Partial<CSSStyleDeclaration>;
 }
 
 class FullscreenWidget implements Widget<FullscreenWidgetProps> {
@@ -39,20 +40,21 @@ class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
     props.label = props.label || 'Toggle Fullscreen';
+    props.style = props.style || {};
     this.props = props;
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
-    const widget = document.createElement('div');
-    widget.className = 'deckgl-wdgt deckgl-wdgt-fullscreen';
-    // Object.assign(widget.style, defaultStyle);
-    const v = <Button onClick={() => this.handleClick()} label={this.props.label} />;
-    render(v, widget);
+    const el = document.createElement('div');
+    el.className = 'deckgl-wdgt deckgl-wdgt-fullscreen';
+    Object.entries(this.props.style).map(([key, value]) => el.style.setProperty(key, value));
+    const ui = <Button onClick={() => this.handleClick()} label={this.props.label} />;
+    render(ui, el);
 
     this.deck = deck;
-    this.element = widget;
+    this.element = el;
 
-    return widget;
+    return el;
   }
 
   onRemove() {
