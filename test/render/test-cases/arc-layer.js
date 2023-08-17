@@ -217,17 +217,16 @@ export default [
       longitude: 0,
       zoom: 0,
       pitch: 0,
-      bearing: 0,
-      repeat: true
+      bearing: 0
     },
     layers: [
       new ArcLayer({
         id: 'great-circle-modified-segments',
-        data: dataSamples.greatCircles,
+        data: [{source: [64, 17], target: [-112, 7]}],
         getWidth: 5,
         getHeight: 0,
         greatCircle: true,
-        numSegments: 8,
+        numSegments: 150,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
         getSourceColor: [64, 255, 0],
