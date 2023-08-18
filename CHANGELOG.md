@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.24] - Aug 17 2023
+
+- Fix Scatterplot layer rendering on Xclipse 920 graphics (#8053)
+
 #### deck.gl [8.9.23] - Aug 3 2023
 
 - Update LICENSE (#8033)
