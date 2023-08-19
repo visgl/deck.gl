@@ -6,7 +6,7 @@ import type {NumericArray} from '../../types/types';
 
 export interface IShaderAttribute {
   value: NumericArray | null;
-  getValue(): [Buffer, BufferAccessor] | NumericArray | null;
+  getValue(): Buffer | NumericArray | null;
 }
 
 /* This class creates a luma.gl-compatible "view" on top of a DataColumn instance */
@@ -24,11 +24,11 @@ export default class ShaderAttribute implements IShaderAttribute {
     return this.source.value;
   }
 
-  getValue(): [Buffer, BufferAccessor] | NumericArray | null {
+  getValue(): Buffer | NumericArray | null {
     const buffer = this.source.getBuffer();
     const accessor = this.getAccessor();
     if (buffer) {
-      return [buffer, accessor];
+      return buffer;
     }
 
     const {value} = this.source;

@@ -6,8 +6,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
-import type {Device} from '@luma.gl/api';
-import type {Buffer} from '@luma.gl/api';
+import type {Device, Buffer, BufferMapping} from '@luma.gl/api';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -346,6 +345,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     return shaderAttributes;
+  }
+
+  getBufferMap(): BufferMapping {
+    const shaderAttributeDefs = this.settings.shaderAttributes;
+
+    if (!shaderAttributeDefs) {
+      return super.getBufferMap(this.id, null);
+    }
+
+    let result: BufferMapping;
+    for (const shaderAttributeName in shaderAttributeDefs) {
+      const map = super.getBufferMap(shaderAttributeName, shaderAttributeDefs[shaderAttributeName]);
+      if (result) {
+        // @ts-ignore
+        result.attributes.push(...map.attributes);
+      } else {
+        result = map;
+      }
+    }
+    return result;
   }
 
   /* eslint-disable max-depth, max-statements */
