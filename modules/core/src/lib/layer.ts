@@ -55,7 +55,6 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/api';
-import ShaderAttribute, {IShaderAttribute} from './attribute/shader-attribute';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -702,7 +701,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = Math.floor(pickingColorCache.length / 3);
+    const cacheSize = Math.floor(pickingColorCache.length / 4);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     // @ts-ignore (TS2531) internalState is always defined when this method is called
@@ -716,26 +715,26 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
-        size: 3,
+        size: 4,
         copy: true,
         maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = Math.floor(pickingColorCache.length / 3);
+      const newCacheSize = Math.floor(pickingColorCache.length / 4);
       const pickingColor = [];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
-        pickingColorCache[i * 3 + 0] = pickingColor[0];
-        pickingColorCache[i * 3 + 1] = pickingColor[1];
-        pickingColorCache[i * 3 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 0] = pickingColor[0];
+        pickingColorCache[i * 4 + 1] = pickingColor[1];
+        pickingColorCache[i * 4 + 2] = pickingColor[2];
       }
     }
 
-    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
+    attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
-  /** Apply changed attributes to  */
+  /** Apply changed attributes to model */
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
@@ -744,107 +743,30 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   ) {
     const attributeManager = this.getAttributeManager();
     // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = model.userData?.excludeAttributes;
     // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
     const shaderAttributes = attributeManager.getShaderAttributes(
       changedAttributes,
       excludeAttributes
     );
 
-    const {bufferAttributes, constantAttributes, indices} = this._splitAttributes(shaderAttributes);
-    log.group(0, `Layer:${this.id}.setAttributes()`)();
-    log.log('inputs=', Object.keys(shaderAttributes))();
-    log.log('indices=', indices || 'N/A')();
-    log.log('buffers=', bufferAttributes)();
-    log.log('constants=', constantAttributes)();
-    log.groupEnd(0)();
-
-    if (indices) {
-      model.setIndexBuffer(indices);
-    }
-    model.setAttributes(bufferAttributes);
-    model.setConstantAttributes(constantAttributes);
-  }
-
-  // Temporary hack to support deck.gl's dependency on luma.gl v8 Model attribute API.
-  _splitAttributes(
-    attributes: Record<string, IShaderAttribute>,
-    filterBuffers?: boolean
-  ): {
-    bufferAttributes: Record<string, Buffer>;
-    constantAttributes: Record<string, TypedArray>;
-    indices?: Buffer;
-  } {
-    const bufferAttributes: Record<string, Buffer> = {};
-    const constantAttributes: Record<string, TypedArray> = {};
-
-    for (const name in attributes) {
-      let attribute = attributes[name] as Attribute | ShaderAttribute;
-
-      if (name === 'positions')
-      debugger
-
-
-      if (attribute.source?._buffer instanceof Buffer) {
-        bufferAttributes[name] = attribute.source._buffer;
-        continue;
-      }
-      if (Array.isArray(attribute) && attribute[1] instanceof Buffer) {
-        bufferAttributes[name] = attribute[1];
-        // TODO - what do we do with the accessor?
-        continue;
-      }
-
-      // Check for constants (getValue / value)
-      const value = attribute.getValue ? attribute.getValue() : attribute.value;
-      // if (attribute.getValue) {
-      //   console.warn(`attribute ${name}: getValue() will be removed`);
-      // }
-      if (ArrayBuffer.isView(value)) {
-        constantAttributes[name] = value;
-        continue;
-      }
+    for (const name in shaderAttributes) {
+      const value = shaderAttributes[name].getValue();
       if (value instanceof Buffer) {
-        bufferAttributes[name] = value;
-        continue;
+        if (name === 'indices') {
+          model.setIndexBuffer(value);
+        } else {
+          model.setAttributes({
+            [name]: value
+          });
+        }
+        // TODO - update buffer map?
+      } else {
+        model.setConstantAttributes({
+          [name]: value as TypedArray
+        })
       }
-      if (Array.isArray(value) && value[1] instanceof Buffer) {
-        bufferAttributes[name] = value[1];
-        // TODO - what do we do with the accessor?
-        continue;
-      }
-
-      // @ts-expect-error
-      if (attribute.constant || !attribute._buffer) {
-        constantAttributes[name] = new Float32Array(attribute.value);
-        continue;
-      }
-
-      if (attribute?._buffer) {
-        bufferAttributes[name] = attribute._buffer;
-        continue;
-      }
-      if (attribute?.source?._buffer) {
-        bufferAttributes[name] = attribute.source?._buffer;
-        continue;
-      }
-
     }
-
-    const indices: Buffer | undefined = bufferAttributes.indices;
-    delete bufferAttributes.indices;
-
-    // Sanity check
-    const bufferCount = 
-      Object.keys(bufferAttributes).length + 
-      Object.keys(constantAttributes).length + 
-      (indices ? 1 : 0);
-
-    if (bufferCount !== Object.keys(attributes).length) {
-      debugger;
-    }  
-
-    return {bufferAttributes, constantAttributes, indices};
   }
   
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
@@ -934,7 +856,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       attributeManager.addInstanced({
         instancePickingColors: {
           type: GL.UNSIGNED_BYTE,
-          size: 3,
+          size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
           // eslint-disable-next-line @typescript-eslint/unbound-method

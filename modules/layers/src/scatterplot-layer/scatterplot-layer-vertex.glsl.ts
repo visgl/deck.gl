@@ -29,7 +29,7 @@ attribute float instanceRadius;
 attribute float instanceLineWidths;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
-attribute vec3 instancePickingColors;
+// attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusScale;
@@ -76,7 +76,7 @@ void main(void) {
   // position on the containing square in [-1, 1] space
   unitPosition = edgePadding * positions.xy;
   geometry.uv = unitPosition;
-  geometry.pickingColor = instancePickingColors;
+  // geometry.pickingColor = instancePickingColors;
 
   innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
   

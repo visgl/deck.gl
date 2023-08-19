@@ -392,13 +392,6 @@ export default class Deck {
       })
     }
 
-    // Create a canvas if no device is available
-    if (!this.device) {
-      if (typeof document !== 'undefined') {
-        this.canvas = this._createCanvas(props);
-      }
-    }
-
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
     this.setProps(props);
@@ -799,7 +792,7 @@ export default class Deck {
       device: deviceOrPromise,
       useDevicePixels,
       // TODO v9 
-      // autoResizeDrawingBuffer: !deviceOrPromise && !gl, // do not auto resize external context
+      autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),

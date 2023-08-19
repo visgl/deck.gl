@@ -29,7 +29,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Device} from '@luma.gl/api';
+import type {Device, BufferMapping} from '@luma.gl/api';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -324,6 +324,22 @@ export default class AttributeManager {
       }
     }
     return shaderAttributes;
+  }
+
+  getBufferMaps(
+    attributes?: {[id: string]: Attribute},
+    excludeAttributes: Record<string, boolean> = {}
+  ): BufferMapping[] {
+    if (!attributes) {
+      attributes = this.getAttributes();
+    }
+    const bufferMaps: BufferMapping[] = [];
+    for (const attributeName in attributes) {
+      if (!excludeAttributes[attributeName]) {
+        bufferMaps.push(attributes[attributeName].getBufferMap());
+      }
+    }
+    return bufferMaps;
   }
 
   // PRIVATE METHODS

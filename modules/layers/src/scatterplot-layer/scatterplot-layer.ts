@@ -272,21 +272,16 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
-
+console.log(this.getAttributeManager().getBufferMaps());
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: [
-        { name: 'instancePositions', format: 'float32x3'},
-        { name: 'instanceRadius', format: 'float32'},
-        { name: 'instanceLineWidths', format: 'float32'},
-        { name: 'instanceFillColors', format: 'unorm8x4'},
-        { name: 'instanceLineColors', format: 'unorm8x4'},
-      ],
+      bufferMap: this.getAttributeManager().getBufferMaps(),
       geometry: new Geometry({
         topology: 'triangle-strip',
-        vertexCount: 4,
+        vertexCount: 6,
         attributes: {
+          indices: {size: 1, value: new Uint16Array([0, 1, 2, 0, 2, 3])},
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),

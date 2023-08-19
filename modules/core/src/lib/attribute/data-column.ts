@@ -1,11 +1,11 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/api';
-import {Buffer} from '@luma.gl/api';
+import {Buffer, BufferMapping} from '@luma.gl/api';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
-import {glArrayFromType} from './gl-utils';
+import {glArrayFromType, getBufferMap} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -264,11 +264,44 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(): [BufferWithAccessor, BufferAccessor] | NumericArray | null {
+  getValue(): Buffer | NumericArray | null {
     if (this.state.constant) {
       return this.value;
     }
-    return [this.getBuffer(), this.getAccessor() as BufferAccessor];
+    return this.getBuffer();
+  }
+
+  getBufferMap(
+    id: string,
+    options: Partial<ShaderAttributeOptions> | null
+  ): BufferMapping {
+    const accessor = this.getAccessor();
+    if (this.doublePrecision) {
+      const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
+        accessor,
+        options || {}
+      );
+      return {
+        type: 'interleave',
+        name: id,
+        byteStride: doubleShaderAttributeDefs.high.stride,
+        attributes: [
+          getBufferMap(id, {...accessor, ...doubleShaderAttributeDefs.high}),
+          getBufferMap(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
+        ]
+      };
+    } else if (options) {
+      const shaderAttributeDef = resolveShaderAttribute(accessor, options);
+      return {
+        type: 'interleave',
+        name: id,
+        byteStride: getStride(accessor),
+        attributes: [
+          getBufferMap(id, {...accessor, ...shaderAttributeDef})
+        ]
+      }
+    }
+    return getBufferMap(id, accessor);
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -350,7 +383,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       }
       state.externalBuffer = null;
       state.constant = true;
-      this.value = value;
+      this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;

@@ -74,8 +74,7 @@ export default class DeckRenderer {
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
-      ...opts,
-      target: opts.target || this.device.canvasContext.getCurrentFramebuffer()
+      ...opts
     };
 
     if (renderOpts.effects) {
