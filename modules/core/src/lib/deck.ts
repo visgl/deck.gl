@@ -383,7 +383,10 @@ export default class Deck {
       // TODO v9 should we install WebGL backend as default for now?
       luma.registerDevices([WebGLDevice]);
 
-      deviceOrPromise = luma.createDevice(this.props.deviceProps);
+      deviceOrPromise = luma.createDevice({
+        ...props.deviceProps,
+        canvas: this._createCanvas(props)
+      });
       deviceOrPromise.then(device => {
         this.device = device;
       });
