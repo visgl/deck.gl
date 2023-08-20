@@ -309,23 +309,6 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  // Returns shader attributes
-  getShaderAttributes(
-    attributes?: {[id: string]: Attribute},
-    excludeAttributes: Record<string, boolean> = {}
-  ): {[id: string]: IShaderAttribute} {
-    if (!attributes) {
-      attributes = this.getAttributes();
-    }
-    const shaderAttributes = {};
-    for (const attributeName in attributes) {
-      if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
-      }
-    }
-    return shaderAttributes;
-  }
-
   getBufferMaps(
     attributes?: {[id: string]: Attribute},
     excludeAttributes: Record<string, boolean> = {}

@@ -231,32 +231,6 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     typedArrayManager.release(this.state.allocatedValue);
   }
 
-  getShaderAttributes(
-    id: string,
-    options: Partial<ShaderAttributeOptions> | null
-  ): Record<string, IShaderAttribute> {
-    if (this.doublePrecision) {
-      const shaderAttributes = {};
-      const isBuffer64Bit = this.value instanceof Float64Array;
-
-      const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
-        this.getAccessor(),
-        options || {}
-      );
-
-      shaderAttributes[id] = new ShaderAttribute(this, doubleShaderAttributeDefs.high);
-      shaderAttributes[`${id}64Low`] = isBuffer64Bit
-        ? new ShaderAttribute(this, doubleShaderAttributeDefs.low)
-        : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
-      return shaderAttributes;
-    }
-    if (options) {
-      const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
-      return {[id]: new ShaderAttribute(this, shaderAttributeDef)};
-    }
-    return {[id]: this};
-  }
-
   getBuffer(): BufferWithAccessor | null {
     if (this.state.constant) {
       return null;

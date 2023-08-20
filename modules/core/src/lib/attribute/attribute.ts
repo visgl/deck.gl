@@ -333,20 +333,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return vertexIndex * this.size;
   }
 
-  getShaderAttributes(): Record<string, IShaderAttribute> {
-    const shaderAttributeDefs = this.settings.shaderAttributes || {[this.id]: null};
-    const shaderAttributes: Record<string, IShaderAttribute> = {};
-
-    for (const shaderAttributeName in shaderAttributeDefs) {
-      Object.assign(
-        shaderAttributes,
-        super.getShaderAttributes(shaderAttributeName, shaderAttributeDefs[shaderAttributeName])
-      );
-    }
-
-    return shaderAttributes;
-  }
-
   getBufferMap(): BufferMapping {
     const shaderAttributeDefs = this.settings.shaderAttributes;
 

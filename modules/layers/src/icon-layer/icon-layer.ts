@@ -296,13 +296,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
-    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferMap: this.getAttributeManager().getBufferMaps(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-strip',
         attributes: {
           // The size must be explicitly passed here otherwise luma.gl
           // will default to assuming that positions are 3D (x,y,z)

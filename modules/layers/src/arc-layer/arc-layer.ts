@@ -258,7 +258,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
-    const {id, numSegments} = this.props;
+    const {numSegments} = this.props;
     let positions: number[] = [];
     /*
      *  (0, -1)-------------_(1, -1)
@@ -273,11 +273,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
-      id,
+      id: this.props.id,
+      bufferMap: this.getAttributeManager().getBufferMaps(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true
