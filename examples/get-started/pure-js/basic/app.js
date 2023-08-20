@@ -8,28 +8,28 @@ const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
 const INITIAL_VIEW_STATE = {
-  latitude: 0,
-  longitude: 0,
-  zoom: 0,
-  // bearing: 0,
-  // pitch: 30
+  latitude: 51.47,
+  longitude: 0.45,
+  zoom: 4,
+  bearing: 0,
+  pitch: 30
 };
 
 new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
-    // new GeoJsonLayer({
-    //   id: 'base-map',
-    //   data: COUNTRIES,
-    //   // Styles
-    //   stroked: true,
-    //   filled: true,
-    //   lineWidthMinPixels: 2,
-    //   opacity: 0.4,
-    //   getLineColor: [60, 60, 60],
-    //   getFillColor: [200, 200, 200]
-    // }),
+    new GeoJsonLayer({
+      id: 'base-map',
+      data: COUNTRIES,
+      // Styles
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
+      opacity: 0.4,
+      getLineColor: [60, 60, 60],
+      getFillColor: [200, 200, 200]
+    }),
     new GeoJsonLayer({
       id: 'airports',
       data: AIR_PORTS,
@@ -46,16 +46,16 @@ new Deck({
         // eslint-disable-next-line
         info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
     }),
-    // new ArcLayer({
-    //   id: 'arcs',
-    //   data: AIR_PORTS,
-    //   dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-    //   // Styles
-    //   getSourcePosition: f => [-0.4531566, 51.4709959], // London
-    //   getTargetPosition: f => f.geometry.coordinates,
-    //   getSourceColor: [0, 128, 200],
-    //   getTargetColor: [200, 0, 80],
-    //   getWidth: 1
-    // })
+    new ArcLayer({
+      id: 'arcs',
+      data: AIR_PORTS,
+      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+      // Styles
+      getSourcePosition: f => [-0.4531566, 51.4709959], // London
+      getTargetPosition: f => f.geometry.coordinates,
+      getSourceColor: [0, 128, 200],
+      getTargetColor: [200, 0, 80],
+      getWidth: 1
+    })
   ]
 });

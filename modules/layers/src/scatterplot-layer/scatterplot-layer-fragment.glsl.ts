@@ -65,6 +65,6 @@ void main(void) {
   }
 
   gl_FragColor.a *= inCircle;
-  // DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;
