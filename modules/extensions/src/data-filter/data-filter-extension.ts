@@ -223,8 +223,10 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       filterModel
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
-          ...filterValues.getShaderAttributes(),
-          ...(filterIndices && filterIndices.getShaderAttributes())
+          [filterValues.id]: filterValues.getValue(),
+          ...(filterIndices && {
+            [filterIndices.id]: filterIndices.getValue()
+          })
         })
         .draw({
           framebuffer: filterFBO,

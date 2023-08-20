@@ -75,7 +75,7 @@ export default abstract class AggregationLayer<
   }
 
   getAttributes() {
-    return this.getAttributeManager()!.getShaderAttributes();
+    return this.getAttributeManager()!.getAttributes();
   }
 
   getModuleSettings() {

@@ -741,17 +741,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       [id: string]: Attribute;
     }
   ) {
-    const attributeManager = this.getAttributeManager();
     // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes;
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const shaderAttributes = attributeManager.getShaderAttributes(
-      changedAttributes,
-      excludeAttributes
-    );
+    const excludeAttributes = model.userData?.excludeAttributes || {};
 
-    for (const name in shaderAttributes) {
-      const value = shaderAttributes[name].getValue();
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
+      }
+      const value = changedAttributes[name].getValue();
       if (value instanceof Buffer) {
         if (name === 'indices') {
           model.setIndexBuffer(value);
