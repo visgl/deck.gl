@@ -1,6 +1,6 @@
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
-import type {Texture} from '@luma.gl/api';
+import type {Texture} from '@luma.gl/core';
 
 const vs = `
 uniform vec4 mask_bounds;

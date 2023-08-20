@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device, Texture} from '@luma.gl/api';
+import {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
@@ -107,7 +107,8 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
     const {model} = this.state;
-    model.setUniforms(uniforms).setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       minColor,
       maxColor,
       maxTexture,
@@ -146,7 +147,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         attributes: {
           positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
         }

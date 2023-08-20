@@ -32,7 +32,7 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/api';
+import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {PBRMaterialParser} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';

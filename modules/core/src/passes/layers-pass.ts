@@ -1,6 +1,6 @@
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {clear, setParameters, withParameters} from '@luma.gl/webgl';
-import type {Framebuffer, RenderPass} from '@luma.gl/api';
+import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -55,11 +55,10 @@ export type RenderStats = {
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
-  ;
 
   render(options: LayersPassRenderOptions): any {
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
-    
+
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters: {
@@ -201,7 +200,7 @@ export default class LayersPass extends Pass {
     });
 
     // TODO v9 - since clearing is done in renderPass construction in luma.gl v9
-    // we have a choice 
+    // we have a choice
     if (view && view.props.clear) {
       console.warn(`${view.id}: Per view clearing not yet implemented in deck.gl v9`);
 
@@ -248,9 +247,9 @@ export default class LayersPass extends Pass {
         moduleParameters.viewport = viewport;
 
         // TODO v9 - we are sending renderPass both as a parameter and through the context.
-        // Long-term, it is likely better not to have user defined layer methods have to access 
+        // Long-term, it is likely better not to have user defined layer methods have to access
         // the "global" layer context.
-        layer.context.renderPass = renderPass
+        layer.context.renderPass = renderPass;
 
         try {
           layer._drawLayer({

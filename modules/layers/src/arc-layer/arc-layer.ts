@@ -245,19 +245,16 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
       this.props;
 
-    this.state.model
-      .setUniforms(uniforms);
-    this.state.model
-      .setUniforms({
-        greatCircle,
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude
-      });
-    this.state.model
-      .draw(this.context.renderPass);
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      greatCircle,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -278,7 +275,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       ...this.getShaders(),
       id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
           positions: new Float32Array(positions)
         }

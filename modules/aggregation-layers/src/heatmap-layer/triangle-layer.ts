@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, Texture} from '@luma.gl/api';
+import type {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
@@ -61,7 +61,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         vertexCount
       })
     });
@@ -73,17 +73,16 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
       this.props;
 
-    model
-      .setUniforms({
-        ...uniforms,
-        texture,
-        maxTexture,
-        colorTexture,
-        intensity,
-        threshold,
-        aggregationMode,
-        colorDomain
-      })
-      .draw(this.context.renderPass);
+    model.setUniforms({
+      ...uniforms,
+      texture,
+      maxTexture,
+      colorTexture,
+      intensity,
+      threshold,
+      aggregationMode,
+      colorDomain
+    });
+    model.draw(this.context.renderPass);
   }
 }

@@ -1,4 +1,4 @@
-import {Device, Framebuffer} from '@luma.gl/api';
+import {Device, Framebuffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 

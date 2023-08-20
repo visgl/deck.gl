@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, RenderPass} from '@luma.gl/api';
+import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import type {PipelineFactory} from '@luma.gl/engine';
 import {LIFECYCLE} from '../lifecycle/constants';

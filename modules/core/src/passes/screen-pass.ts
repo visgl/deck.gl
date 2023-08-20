@@ -1,8 +1,8 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import {setParameters, withParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';

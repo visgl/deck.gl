@@ -1,4 +1,4 @@
-import {Device, Texture, SamplerProps, Sampler} from '@luma.gl/api';
+import {Device, Texture, SamplerProps, Sampler} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 
 const DEFAULT_TEXTURE_PARAMETERS: SamplerProps = {

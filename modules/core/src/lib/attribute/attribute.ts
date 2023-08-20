@@ -6,7 +6,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
-import type {Device, Buffer, BufferMapping} from '@luma.gl/api';
+import type {Device, Buffer, BufferMapping} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 

@@ -274,7 +274,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         vertexCount: 6
       }),
       isInstanced: false
@@ -293,17 +293,16 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model
-        .setUniforms(uniforms)
-        .setUniforms({
-          bitmapTexture: image,
-          desaturate,
-          transparentColor: transparentColor.map(x => x / 255),
-          tintColor: tintColor.slice(0, 3).map(x => x / 255),
-          coordinateConversion,
-          bounds
-        })
-        .draw(this.context.renderPass);
+      model.setUniforms(uniforms);
+      model.setUniforms({
+        bitmapTexture: image,
+        desaturate,
+        transparentColor: transparentColor.map(x => x / 255),
+        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+        coordinateConversion,
+        bounds
+      });
+      model.draw(this.context.renderPass);
     }
   }
 

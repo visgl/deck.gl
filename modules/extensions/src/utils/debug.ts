@@ -1,6 +1,6 @@
 /* global document */
 
-import {Framebuffer} from '@luma.gl/api';
+import {Framebuffer} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/webgl';
 
 /** Debug utility to draw FBO contents onto screen */

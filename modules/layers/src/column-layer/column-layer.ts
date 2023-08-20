@@ -383,7 +383,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     } = this.props;
     const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
-    model.setUniforms(uniforms).setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -401,31 +402,28 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      model.setProps({isIndexed: true});
-      model
-        .setVertexCount(wireframeVertexCount)
-        .setDrawMode(GL.LINES)
-        .setUniforms({isStroke: true})
-        .draw(this.context.renderPass);
+      // model.setProps({isIndexed: true});
+      // model.setVertexCount(wireframeVertexCount);
+      // model.setTopology('line-list');
+      model.setUniforms({isStroke: true});
+      model.draw(this.context.renderPass);
     }
     if (filled) {
-      model.setProps({isIndexed: false});
-      model
-        .setVertexCount(fillVertexCount)
-        .setDrawMode(GL.TRIANGLE_STRIP)
-        .setUniforms({isStroke: false})
-        .draw(this.context.renderPass);
+      // model.setProps({isIndexed: false});
+      // model.setVertexCount(fillVertexCount);
+      // model.setTopology('triangle-string');
+      model.setUniforms({isStroke: false});
+      model.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
-      model.setProps({isIndexed: false});
-      // The width of the stroke is achieved by flattening the side of the cylinder.
-      // Skip the last 1/3 of the vertices which is the top.
-      model
-        .setVertexCount((fillVertexCount * 2) / 3)
-        .setDrawMode(GL.TRIANGLE_STRIP)
-        .setUniforms({isStroke: true})
-        .draw(this.context.renderPass);
+      // model.setProps({isIndexed: false});
+      // // The width of the stroke is achieved by flattening the side of the cylinder.
+      // // Skip the last 1/3 of the vertices which is the top.
+      // model.setVertexCount((fillVertexCount * 2) / 3);
+      // model.setTopology('triangle-string');
+      model.setUniforms({isStroke: true});
+      model.draw(this.context.renderPass);
     }
   }
 }

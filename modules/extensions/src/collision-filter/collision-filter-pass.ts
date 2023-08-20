@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/api';
+import {Framebuffer} from '@luma.gl/core';
 import {withParameters} from '@luma.gl/webgl';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 

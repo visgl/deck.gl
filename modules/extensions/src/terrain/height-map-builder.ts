@@ -1,4 +1,4 @@
-import {Device, Framebuffer} from '@luma.gl/api';
+import {Device, Framebuffer} from '@luma.gl/core';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 

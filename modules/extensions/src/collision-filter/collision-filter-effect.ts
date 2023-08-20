@@ -1,4 +1,4 @@
-import {Device, Framebuffer, Texture} from '@luma.gl/api';
+import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {WEBGLRenderbuffer} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {equals} from '@math.gl/core';

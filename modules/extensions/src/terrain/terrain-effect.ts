@@ -1,4 +1,4 @@
-import {Device, Texture} from '@luma.gl/api';
+import {Device, Texture} from '@luma.gl/core';
 import {log, getProgramManager} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';

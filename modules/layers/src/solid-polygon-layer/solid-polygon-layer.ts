@@ -455,7 +455,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       topModel = new Model(this.context.device, {
         ...shaders,
         id: `${id}-top`,
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           vertexPositions: new Float32Array([0, 1])
         },
@@ -472,7 +472,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-side`,
         geometry: new Geometry({
-          drawMode: GL.LINES,
+          topology: 'line-list',
           vertexCount: 4,
           attributes: {
             // top right - top left - bootom left - bottom right

@@ -25,7 +25,7 @@ import {device} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
-import {Buffer} from '@luma.gl/api';
+import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 
 test('Attribute#imports', t => {

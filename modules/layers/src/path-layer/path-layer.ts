@@ -314,19 +314,18 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMaxPixels
     } = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        jointType: Number(jointRounded),
-        capType: Number(capRounded),
-        billboard,
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        miterLimit,
-        widthMinPixels,
-        widthMaxPixels
-      })
-      .draw(this.context.renderPass);
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      jointType: Number(jointRounded),
+      capType: Number(capRounded),
+      billboard,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      miterLimit,
+      widthMinPixels,
+      widthMaxPixels
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -378,7 +377,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           indices: new Uint16Array(SEGMENT_INDICES),
           positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}

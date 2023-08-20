@@ -5,9 +5,9 @@ export async function waitForGLTFAssets(gltfObjects: {scenes: GroupNode[]}): Pro
   const remaining: any[] = [];
 
   gltfObjects.scenes.forEach(scene => {
-    scene.traverse((model: ModelNode) => {
+    scene.traverse((modelNode: ModelNode) => {
       // TODO v9 getUnforms() was removed, hack it with props.uniforms
-      Object.values(model.model.props.uniforms).forEach((uniform: any) => {
+      Object.values(modelNode.model.uniforms).forEach((uniform: any) => {
         if (uniform.loaded === false) {
           remaining.push(uniform);
         }

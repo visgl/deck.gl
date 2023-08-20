@@ -1,6 +1,6 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
 import type {GLParameters} from '@luma.gl/webgl';
-import type {Framebuffer} from '@luma.gl/api';
+import type {Framebuffer} from '@luma.gl/core';
 import {withParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import log from '../utils/log';

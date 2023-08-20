@@ -1,5 +1,5 @@
 /* global setTimeout */
-import {Device} from '@luma.gl/api';
+import {Device} from '@luma.gl/core';
 import Resource from './resource';
 import type {ResourceSubscriber} from './resource';
 
