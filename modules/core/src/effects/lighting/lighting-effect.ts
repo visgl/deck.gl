@@ -1,6 +1,6 @@
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {PipelineFactory} from '@luma.gl/engine';
-import {Texture} from '@luma.gl/api';
+import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';

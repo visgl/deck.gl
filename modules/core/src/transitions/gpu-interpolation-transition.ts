@@ -1,6 +1,6 @@
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {Timeline, Transform} from '@luma.gl/engine';
-import {Buffer} from '@luma.gl/api';
+import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {

@@ -1,5 +1,5 @@
 import {log, BinaryAttribute} from '@deck.gl/core';
-import {uid} from '@luma.gl/api';
+import {uid} from '@luma.gl/core';
 import {Geometry} from '@luma.gl/engine';
 
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';

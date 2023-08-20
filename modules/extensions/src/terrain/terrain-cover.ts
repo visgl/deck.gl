@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/api';
+import {Framebuffer} from '@luma.gl/core';
 
 import type {Layer, Viewport} from '@deck.gl/core';
 

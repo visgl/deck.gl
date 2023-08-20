@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, DeviceFeature} from '@luma.gl/api';
+import type {Device, DeviceFeature} from '@luma.gl/core';
 import {Model, Transform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {readPixelsToBuffer, withParameters, clear} from '@luma.gl/webgl';

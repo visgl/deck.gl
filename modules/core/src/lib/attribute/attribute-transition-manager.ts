@@ -1,6 +1,6 @@
 // deck.gl, MIT license
 
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {Transform} from '@luma.gl/engine';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';

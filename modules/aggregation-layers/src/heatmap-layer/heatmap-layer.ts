@@ -27,7 +27,7 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {DeviceFeature, Texture, TextureProps} from '@luma.gl/api';
+import {DeviceFeature, Texture, TextureProps} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Transform} from '@luma.gl/engine';
 import {BufferWithAccessor, getParameters, withParameters} from '@luma.gl/webgl';

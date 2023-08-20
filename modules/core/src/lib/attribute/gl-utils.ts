@@ -1,5 +1,5 @@
 import {GL} from '@luma.gl/constants';
-import type {BufferMapping, VertexFormat} from '@luma.gl/api';
+import type {BufferMapping, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor} from './data-column';
 
@@ -53,7 +53,7 @@ export function getBufferMap(name: string, accessor: BufferAccessor): BufferMapp
   }
   const result: BufferMapping = {
     name,
-    format: accessor.size > 1 ? `${type}x${accessor.size}` as VertexFormat : type
+    format: accessor.size > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type
   };
   if (accessor.stride) {
     result.byteStride = accessor.stride;

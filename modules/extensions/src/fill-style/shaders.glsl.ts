@@ -1,7 +1,7 @@
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, _ShaderModule as ShaderModule, ProjectUniforms} from '@deck.gl/core';
 
-import type {Texture} from '@luma.gl/api';
+import type {Texture} from '@luma.gl/core';
 
 /*
  * fill pattern shader module

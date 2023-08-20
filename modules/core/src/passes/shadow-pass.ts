@@ -1,4 +1,4 @@
-import type {Device, Framebuffer, Texture} from '@luma.gl/api';
+import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {WEBGLRenderbuffer, withParameters} from '@luma.gl/webgl';
 import {default as LayersPass} from './layers-pass';
 

@@ -32,13 +32,13 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {getBrowser} from '@probe.gl/env';
-import {luma, Device, DeviceProps} from '@luma.gl/api';
+import {luma, Device, DeviceProps} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {setParameters} from '@luma.gl/webgl';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Framebuffer} from '@luma.gl/api';
+import type {Framebuffer} from '@luma.gl/core';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -386,7 +386,7 @@ export default class Deck {
       deviceOrPromise = luma.createDevice(this.props.deviceProps);
       deviceOrPromise.then(device => {
         this.device = device;
-      })
+      });
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
@@ -770,7 +770,10 @@ export default class Deck {
     }
   }
 
-  private _createAnimationLoop(deviceOrPromise: Device | Promise<Device>, props: DeckProps): AnimationLoop {
+  private _createAnimationLoop(
+    deviceOrPromise: Device | Promise<Device>,
+    props: DeckProps
+  ): AnimationLoop {
     const {
       // width,
       // height,
@@ -787,7 +790,7 @@ export default class Deck {
     return new AnimationLoop({
       device: deviceOrPromise,
       useDevicePixels,
-      // TODO v9 
+      // TODO v9
       autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
       // @ts-expect-error luma.gl needs to accept Promise<void> return value

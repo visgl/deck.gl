@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
 import {GLTFAnimator, GLTFEnvironment, createGLTFObjects} from '@luma.gl/experimental';

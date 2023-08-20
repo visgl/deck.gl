@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
@@ -29,7 +29,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/api';
+import type {Framebuffer as LumaFramebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';

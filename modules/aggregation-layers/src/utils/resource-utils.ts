@@ -1,4 +1,4 @@
-import {Device} from '@luma.gl/api';
+import {Device} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 
 const DEFAULT_PARAMETERS = {

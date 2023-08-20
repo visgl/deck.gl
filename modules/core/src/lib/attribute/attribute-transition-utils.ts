@@ -1,5 +1,5 @@
-import type {Device} from '@luma.gl/api';
-import type {Buffer} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
+import type {Buffer} from '@luma.gl/core';
 import type {BufferWithAccessor} from '@luma.gl/webgl';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';

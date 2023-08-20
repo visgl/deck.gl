@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {Buffer, TypedArray} from '@luma.gl/api';
+import {Buffer, TypedArray} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {withParameters, setParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
@@ -54,7 +54,7 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
-import {RenderPass} from '@luma.gl/api';
+import {RenderPass} from '@luma.gl/core';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -764,11 +764,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       } else {
         model.setConstantAttributes({
           [name]: value as TypedArray
-        })
+        });
       }
     }
   }
-  
+
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
@@ -1044,7 +1044,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // Call subclass lifecycle method
       withParameters(context.gl, parameters, () => {
-        const opts = {renderPass,moduleParameters, uniforms, parameters, context};
+        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {

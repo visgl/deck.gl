@@ -1,7 +1,7 @@
 import type Layer from './layer';
 import type {LayersPassRenderOptions} from '../passes/layers-pass';
-import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/core';
 
 export type PreRenderOptions = LayersPassRenderOptions;
 export type PostRenderOptions = LayersPassRenderOptions & {

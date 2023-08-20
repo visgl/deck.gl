@@ -31,7 +31,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/api';
+import {Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';

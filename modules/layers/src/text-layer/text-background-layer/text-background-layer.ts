@@ -145,18 +145,17 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       padding = [padding[0], padding[1], padding[0], padding[1]];
     }
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        billboard,
-        stroked: Boolean(getLineWidth),
-        padding,
-        sizeUnits: UNIT[sizeUnits],
-        sizeScale,
-        sizeMinPixels,
-        sizeMaxPixels
-      })
-      .draw(this.context.renderPass);
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      billboard,
+      stroked: Boolean(getLineWidth),
+      padding,
+      sizeUnits: UNIT[sizeUnits],
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -167,7 +166,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         vertexCount: 4,
         attributes: {
           positions: {size: 2, value: new Float32Array(positions)}

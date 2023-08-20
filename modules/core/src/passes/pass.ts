@@ -1,8 +1,8 @@
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 
-/** 
+/**
  * Base class for passes
- * @todo v9 - should the luma.gl RenderPass be owned by this class? 
+ * @todo v9 - should the luma.gl RenderPass be owned by this class?
  * Currently owned by subclasses
  */
 export default class Pass {

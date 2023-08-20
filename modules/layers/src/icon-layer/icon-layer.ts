@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import {Texture} from '@luma.gl/api';
+import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 
@@ -278,19 +278,18 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model
-        .setUniforms(uniforms)
-        .setUniforms({
-          iconsTexture,
-          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeUnits: UNIT[sizeUnits],
-          sizeScale,
-          sizeMinPixels,
-          sizeMaxPixels,
-          billboard,
-          alphaCutoff
-        })
-        .draw(this.context.renderPass);
+      this.state.model.setUniforms(uniforms);
+      this.state.model.setUniforms({
+        iconsTexture,
+        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+        sizeUnits: UNIT[sizeUnits],
+        sizeScale,
+        sizeMinPixels,
+        sizeMaxPixels,
+        billboard,
+        alphaCutoff
+      });
+      this.state.model.draw(this.context.renderPass);
     }
   }
 
@@ -303,7 +302,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         attributes: {
           // The size must be explicitly passed here otherwise luma.gl
           // will default to assuming that positions are 3D (x,y,z)

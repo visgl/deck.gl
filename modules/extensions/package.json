@@ -31,14 +31,14 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@luma.gl/shadertools": "9.0.0-alpha.29"
+    "@luma.gl/shadertools": "9.0.0-alpha.30"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/api": "9.0.0-alpha.29",
-    "@luma.gl/engine": "9.0.0-alpha.29",
-    "@luma.gl/shadertools": "9.0.0-alpha.29",
-    "@luma.gl/webgl": "9.0.0-alpha.29",
+    "@luma.gl/core": "9.0.0-alpha.30",
+    "@luma.gl/engine": "9.0.0-alpha.30",
+    "@luma.gl/shadertools": "9.0.0-alpha.30",
+    "@luma.gl/webgl": "9.0.0-alpha.30",
     "@math.gl/core": "4.0.0-alpha.4",
     "@math.gl/constants": "4.0.0-alpha.4",
     "@math.gl/web-mercator": "4.0.0-alpha.4",

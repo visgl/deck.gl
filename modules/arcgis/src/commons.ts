@@ -1,6 +1,6 @@
 /* eslint-disable no-invalid-this */
 
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {withParameters} from '@luma.gl/webgl';

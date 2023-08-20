@@ -1,7 +1,7 @@
 /* eslint-disable complexity, max-statements, max-params */
-import type {Device} from '@luma.gl/api';
+import type {Device} from '@luma.gl/core';
 import {Transform} from '@luma.gl/engine';
-import {Buffer, Framebuffer, Texture} from '@luma.gl/api';
+import {Buffer, Framebuffer, Texture} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {
@@ -21,7 +21,7 @@ import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
   Texture as LumaTexture2D
-} from '@luma.gl/api';
+} from '@luma.gl/core';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 

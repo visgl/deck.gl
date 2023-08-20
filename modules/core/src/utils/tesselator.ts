@@ -21,7 +21,7 @@ import {createIterable, getAccessorFromBuffer} from './iterable-utils';
 import defaultTypedArrayManager from './typed-array-manager';
 import assert from './assert';
 
-import {Buffer} from '@luma.gl/api';
+import {Buffer} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 
 import type {BinaryAttribute} from '../lib/attribute/attribute';

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/api';
+import {Device} from '@luma.gl/core';
 import {PipelineFactory} from '@luma.gl/engine';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';

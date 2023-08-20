@@ -4,7 +4,7 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Make sure there is a device registered
-import {luma} from '@luma.gl/api';
+import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 luma.registerDevices([WebGLDevice]);
 
