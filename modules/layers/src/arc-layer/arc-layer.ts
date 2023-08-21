@@ -52,7 +52,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   getTilt: {type: 'accessor', value: 0},
 
   greatCircle: false,
-  numSegments: {type: 'number', value: 50, min: 0},
+  numSegments: {type: 'number', value: 50, min: 1},
 
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
