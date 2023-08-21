@@ -1,6 +1,6 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {FullscreenWidget} from '@deck.gl/widgets';
+import {FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import {luma} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
@@ -8,21 +8,7 @@ import {WebGLDevice} from '@luma.gl/webgl';
 luma.registerDevices([WebGLDevice]);
 
 const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const widgetTheme = prefersDarkScheme.matches ? {
-  // Dark Glass Theme
-  '--button-background': 'rgba(18, 18, 20, 0.75)',
-  '--button-stroke': 'rgba(18, 18, 20, 0.30)',
-  '--button-inner-stroke': '1px solid rgba(18, 18, 20, 0.75)',
-  '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
-  '--button-backdrop-filter': 'blur(4px)'
-} : {
-  // Light Glass Theme
-  '--button-background': 'rgba(255, 255, 255, 0.6)',
-  '--button-stroke': 'rgba(255, 255, 255, 0.3)',
-  '--button-inner-stroke': '1px solid rgba(255, 255, 255, 0.6)',
-  '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
-  '--button-backdrop-filter': 'blur(4px)'
-}
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
