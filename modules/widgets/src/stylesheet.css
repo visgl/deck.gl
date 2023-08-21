@@ -1,8 +1,8 @@
-.deckgl-wdgt {
-  margin: var(--wdgt-margin, 12px);
+.deckgl-widget {
+  margin: var(--widget-margin, 12px);
 }
 
-.deckgl-wdgt-button-border {
+.deckgl-widget-button-border {
   width: var(--button-size, 28px);
   height: var(--button-size, 28px);
   box-sizing: border-box;
@@ -17,7 +17,7 @@
   justify-content: center;
 }
 
-.deckgl-wdgt-button-border button {
+.deckgl-widget-button-border button {
   width: calc(var(--button-size, 28px) - 2px);
   height: calc(var(--button-size, 28px) - 2px);
   box-sizing: border-box;

@@ -25,7 +25,7 @@ interface FullscreenWidgetProps {
   style?: Partial<CSSStyleDeclaration>;
 }
 
-class FullscreenWidget implements Widget<FullscreenWidgetProps> {
+export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   id = 'fullscreen';
   props: FullscreenWidgetProps;
   placement: WidgetPlacement = 'top-left';
@@ -46,7 +46,7 @@ class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const el = document.createElement('div');
-    el.className = 'deckgl-wdgt deckgl-wdgt-fullscreen';
+    el.className = 'deckgl-widget deckgl-widget-fullscreen';
     Object.entries(this.props.style).map(([key, value]) => el.style.setProperty(key, value));
     const ui = <Button onClick={() => this.handleClick()} label={this.props.label} />;
     render(ui, el);
@@ -98,4 +98,3 @@ const Button = props => {
   );
 };
 
-export default FullscreenWidget;

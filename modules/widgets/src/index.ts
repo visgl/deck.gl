@@ -1,1 +1,1 @@
-export {default as FullscreenWidget} from './fullscreen-widget';
+export {FullscreenWidget} from './fullscreen-widget';
