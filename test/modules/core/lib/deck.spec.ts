@@ -69,6 +69,8 @@ test('Deck#no views', t => {
 
     onAfterRender: () => {
       t.is(deck.deckRenderer.renderCount, 0, 'DeckRenderer did not render');
+      deck.finalize();
+      t.end();
     }
   });
 
