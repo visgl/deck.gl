@@ -1,15 +1,6 @@
+/* global document */
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {h, render} from 'preact';
-
-/* global document */
-const defaultStyle: Readonly<Partial<CSSStyleDeclaration>> = {
-  pointerEvents: 'auto',
-  color: '#a0a7b4',
-  backgroundColor: '#29323c',
-  margin: '10px',
-  height: '30px',
-  width: '30px'
-};
 
 interface FullscreenWidgetProps {
   id: string;
