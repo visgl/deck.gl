@@ -1,17 +1,13 @@
-import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
+import {FlyToInterpolator, type Deck, type Viewport, type Widget, type WidgetPlacement} from '@deck.gl/core';
 import {h, render} from 'preact';
 
 interface ZoomWidgetProps {
   id: string;
   viewId?: string | null;
   placement?: WidgetPlacement;
-  /**
-   * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
-   * By default, the map container element will be made full screen.
-   */
-  /* eslint-enable max-len */
-  container?: HTMLElement;
-  label?: string;
+  zoomInLabel?: string;
+  zoomOutLabel?: string;
+  transitionDuration?: number;
   style?: Partial<CSSStyleDeclaration>;
 }
 
@@ -21,8 +17,6 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
   placement: WidgetPlacement = 'top-left';
   viewId = null;
   viewport: Viewport;
-
-  isZoom: boolean = false;
   deck?: Deck;
   element?: HTMLDivElement;
 
@@ -30,31 +24,33 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.id = props.id || 'zoom';
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
-    props.label = props.label || 'Toggle Zoom';
+    props.transitionDuration = props.transitionDuration || 200;
+    props.zoomInLabel = props.zoomInLabel || 'Zoom In';
+    props.zoomOutLabel = props.zoomOutLabel || 'Zoom Out';
     props.style = props.style || {};
     this.props = props;
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
-    const el = document.createElement('div');
-    el.className = 'deckgl-widget deckgl-widget-zoom';
-    Object.entries(this.props.style).map(([key, value]) => el.style.setProperty(key, value));
+    const element = document.createElement('div');
+    element.className = 'deckgl-widget deckgl-widget-zoom';
+    Object.entries(this.props.style).map(([key, value]) => element.style.setProperty(key, value));
     const ui = (
       <div style="display:flex; flex-direction:column;">
-        <Button onClick={() => this.handleZoomIn()} label={this.props.label}>
+        <Button onClick={() => this.handleZoomIn()} label={this.props.zoomInLabel}>
           <path d="M12 4.5v15m7.5-7.5h-15" />
         </Button>
-        <Button onClick={() => this.handleZoomOut()} label={this.props.label}>
+        <Button onClick={() => this.handleZoomOut()} label={this.props.zoomOutLabel}>
           <path d="M19.5 12h-15" />
         </Button>
       </div>
     );
-    render(ui, el);
+    render(ui, element);
 
     this.deck = deck;
-    this.element = el;
+    this.element = element;
 
-    return el;
+    return element;
   }
 
   onRemove() {
@@ -72,7 +68,10 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
 
   handleZoom(nextZoom: number) {
     const viewId = this.viewId || 'default-view';
-    const nextViewState = {...this.viewport, zoom: nextZoom};
+    const nextViewState = {...this.viewport, zoom: nextZoom,
+      transitionDuration: this.props.transitionDuration,
+      transitionInterpolator: new FlyToInterpolator()
+    };
     // @ts-ignore Using private method temporary until there's a public one
     this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
   }
