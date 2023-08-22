@@ -31,3 +31,7 @@
   pointer-events: auto;
   cursor: pointer;
 }
+
+.deckgl-widget-button {
+  color: white;
+}

@@ -1,14 +1,14 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
+import {ZoomWidget, FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import {luma} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
 
 luma.registerDevices([WebGLDevice]);
 
-const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -67,5 +67,5 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [new FullscreenWidget({style: widgetTheme})]
+  widgets: [new ZoomWidget({style: widgetTheme}), new FullscreenWidget({style: widgetTheme})]
 });
