@@ -36,7 +36,7 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
     element.className = 'deckgl-widget deckgl-widget-zoom';
     Object.entries(this.props.style).map(([key, value]) => element.style.setProperty(key, value));
     const ui = (
-      <div style="display:flex; flex-direction:column;">
+      <div className="deckgl-widget-button-group">
         <Button onClick={() => this.handleZoomIn()} label={this.props.zoomInLabel}>
           <path d="M12 4.5v15m7.5-7.5h-15" />
         </Button>

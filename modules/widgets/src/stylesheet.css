@@ -35,3 +35,20 @@
 .deckgl-widget-button {
   color: white;
 }
+
+.deckgl-widget-button-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.deckgl-widget-button-group > *:not(:last-child),
+.deckgl-widget-button-group > *:not(:last-child) > button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.deckgl-widget-button-group > *:not(:first-child),
+.deckgl-widget-button-group > *:not(:first-child) > button {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
