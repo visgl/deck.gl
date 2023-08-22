@@ -23,6 +23,7 @@ interface FullscreenWidgetProps {
   container?: HTMLElement;
   label?: string;
   style?: Partial<CSSStyleDeclaration>;
+  className?: string;
 }
 
 export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
@@ -45,10 +46,12 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
+    const {label, style, className} = this.props;
     const el = document.createElement('div');
     el.className = 'deckgl-widget deckgl-widget-fullscreen';
-    Object.entries(this.props.style).map(([key, value]) => el.style.setProperty(key, value));
-    const ui = <Button onClick={() => this.handleClick()} label={this.props.label} />;
+    if (className) el.classList.add(className);
+    Object.entries(style).map(([key, value]) => el.style.setProperty(key, value));
+    const ui = <Button onClick={() => this.handleClick()} label={label} />;
     render(ui, el);
 
     this.deck = deck;
@@ -90,8 +93,8 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 const Button = props => {
   const {label, onClick} = props;
   return (
-    <div className="deckgl-wdgt-button-border">
-      <button className="deckgl-wdgt-button" type="button" onClick={onClick} title={label}>
+    <div className="deckgl-widget-button-border">
+      <button className="deckgl-widget-button" type="button" onClick={onClick} title={label}>
         {props.children}
       </button>
     </div>
