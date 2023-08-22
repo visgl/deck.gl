@@ -56,6 +56,27 @@ test('Deck#constructor', t => {
   t.pass('Deck constructor did not throw');
 });
 
+test('Deck#no views', t => {
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    views: [],
+    layers: [],
+
+    onAfterRender: () => {
+      t.is(deck.deckRenderer.renderCount, 0, 'DeckRenderer did not render');
+      deck.finalize();
+      t.end();
+    }
+  });
+
+  t.pass('Deck constructor did not throw');
+});
+
 test('Deck#rendering, picking, logging', t => {
   // Test logging functionalities
   log.priority = 4;
