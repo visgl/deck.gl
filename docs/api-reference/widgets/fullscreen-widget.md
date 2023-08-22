@@ -1,21 +1,45 @@
 # FullscreenWidget
 
-## Variables
+## Props
 
-### Size
+### `id` (String)
 
-| Name | Type | Default |
-| ---- | ---- | ------- |
-| `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
-| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
-| `--wdgt-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
+Default: `'fullscreen'`
 
-### Color
+Unique identifier of the widget.
 
-| Name | Type | Default |
-| ---- | ---- | ------- |
-| `--button-background` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#fff` |
-| `--button-stroke` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(255, 255, 255, 0.3)` |
-| `--button-inner-stroke` | [Border](https://developer.mozilla.org/en-US/docs/Web/CSS/border) | `unset` |
-| `--button-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
-| `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
+### `viewId` (String, optional)
+
+Default: `null`
+
+The view id that this widget is being attached to. If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+
+### `placement` (String, optional)
+
+Default: `'top-left'`
+
+Widget position within the view relatitive to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+
+### `container` (HTMLElement, optional)
+
+Default: `undefined`
+
+A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
+
+### `label` (String, optional)
+
+Hovering a mouse over the widget will display the label as a tooltip.
+
+Default: `'Toggle Fullscreen'`
+
+### `style` (Object, optional)
+
+Default: `{}`
+
+Additional CSS styles for the canvas.
+
+### `className` (String, optional)
+
+Default: `undefined`
+
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-fullscreen-widget`.
