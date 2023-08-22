@@ -65,6 +65,10 @@ export default class DeckRenderer {
     clearStack?: boolean;
     clearCanvas?: boolean;
   }) {
+    if (!opts.viewports.length) {
+      return;
+    }
+
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     const renderOpts: LayersPassRenderOptions = {
