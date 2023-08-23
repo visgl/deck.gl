@@ -215,7 +215,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: this.getAttributeManager().getBufferMaps(),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

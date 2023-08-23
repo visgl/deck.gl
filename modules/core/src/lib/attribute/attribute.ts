@@ -333,22 +333,23 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return vertexIndex * this.size;
   }
 
-  getBufferMap(): BufferLayout {
+  getBufferLayout(): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
+    const result: BufferLayout = super.getBufferLayout(this.id, null);
 
     if (!shaderAttributeDefs) {
-      return super.getBufferMap(this.id, null);
+      return result;
     }
 
-    let result: BufferLayout;
+    // @ts-ignore
+    result.attributes = result.attributes || [];
     for (const shaderAttributeName in shaderAttributeDefs) {
-      const map = super.getBufferMap(shaderAttributeName, shaderAttributeDefs[shaderAttributeName]);
-      if (result) {
-        // @ts-ignore
-        result.attributes.push(...map.attributes);
-      } else {
-        result = map;
-      }
+      const map = super.getBufferLayout(
+        shaderAttributeName,
+        shaderAttributeDefs[shaderAttributeName]
+      );
+      // @ts-ignore
+      result.attributes.push(...map.attributes);
     }
     return result;
   }

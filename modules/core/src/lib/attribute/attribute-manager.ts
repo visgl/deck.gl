@@ -309,7 +309,7 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  getBufferMaps(
+  getBufferLayouts(
     attributes?: {[id: string]: Attribute},
     excludeAttributes: Record<string, boolean> = {}
   ): BufferLayout[] {
@@ -319,7 +319,7 @@ export default class AttributeManager {
     const bufferMaps: BufferLayout[] = [];
     for (const attributeName in attributes) {
       if (!excludeAttributes[attributeName]) {
-        bufferMaps.push(attributes[attributeName].getBufferMap());
+        bufferMaps.push(attributes[attributeName].getBufferLayout());
       }
     }
     return bufferMaps;

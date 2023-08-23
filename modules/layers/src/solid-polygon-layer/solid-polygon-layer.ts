@@ -223,13 +223,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
             vertexOffset: 0,
             divisor: 1
           },
-          nextPositions: {
+          instanceNextPositions: {
             vertexOffset: 1,
             divisor: 1
           }
         }
       },
-      vertexValid: {
+      instanceVertexValid: {
         size: 1,
         divisor: 1,
         type: GL.UNSIGNED_BYTE,
@@ -258,9 +258,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
-          fillColors: {
-            divisor: 0
-          },
           instanceFillColors: {
             divisor: 1
           }
@@ -274,16 +271,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
-          lineColors: {
-            divisor: 0
-          },
           instanceLineColors: {
             divisor: 1
           }
         }
       },
       pickingColors: {
-        size: 3,
+        size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
@@ -361,25 +355,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       topModel.setUniforms(renderUniforms);
       topModel.draw(this.context.renderPass);
     }
-
-    // Note: the order is important
-    // if (sideModel) {
-    //   sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-    //   sideModel.setUniforms(renderUniforms);
-    //   if (wireframe) {
-    //     sideModel.setDrawMode(GL.LINE_STRIP);
-    //     sideModel.setUniforms({isWireframe: true}).draw(this.context.renderPass);
-    //   }
-    //   if (filled) {
-    //     sideModel.setDrawMode(GL.TRIANGLE_FAN);
-    //     sideModel.setUniforms({isWireframe: false}).draw(this.context.renderPass);
-    //   }
-    // }
-
-    // if (topModel) {
-    //   topModel.setVertexCount(polygonTesselator.vertexCount);
-    //   topModel.setUniforms(renderUniforms).draw(this.context.renderPass);
-    // }
   }
 
   updateState(updateParams: UpdateParameters<this>) {
@@ -456,21 +431,25 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...shaders,
         id: `${id}-top`,
         topology: 'triangle-list',
-        attributes: {
-          vertexPositions: new Float32Array([0, 1])
-        },
         uniforms: {
           isWireframe: false,
           isSideVertex: false
         },
+        bufferLayout: this.getAttributeManager().getBufferLayouts(),
         vertexCount: 0,
         isIndexed: true
       });
+
+      topModel.setConstantAttributes({
+        vertexPositions: new Float32Array([0, 1])
+      });
+      topModel.userData.excludeAttributes = {instanceVertexValid: true};
     }
     if (extruded) {
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
+        bufferLayout: this.getAttributeManager().getBufferLayouts(),
         geometry: new Geometry({
           topology: 'line-list',
           vertexCount: 4,

@@ -46,7 +46,7 @@ const glTypeToBufferFormat = {
   [GL.INT]: 'sint32'
 } as const;
 
-export function getBufferMap(name: string, accessor: BufferAccessor): BufferLayout {
+export function getBufferLayout(name: string, accessor: BufferAccessor): BufferLayout {
   let type = glTypeToBufferFormat[accessor.type ?? GL.FLOAT];
   if (accessor.normalized) {
     type = type.replace('int', 'norm');
