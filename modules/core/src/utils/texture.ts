@@ -1,5 +1,4 @@
-import {Device, Texture, SamplerProps, Sampler} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+import {Device, Texture, SamplerProps} from '@luma.gl/core';
 
 const DEFAULT_TEXTURE_PARAMETERS: SamplerProps = {
   minFilter: 'linear',

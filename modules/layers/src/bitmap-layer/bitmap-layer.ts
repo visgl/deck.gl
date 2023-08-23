@@ -297,7 +297,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       model.setBindings({bitmapTexture: image as Texture});
       model.setUniforms({
         desaturate,
-        transparentColor: transparentColor.map(x => x / 255),
+        transparentColor: transparentColor.map(x => x / 255) as number[],
         tintColor: tintColor.slice(0, 3).map(x => x / 255),
         coordinateConversion,
         bounds

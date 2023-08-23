@@ -4,7 +4,7 @@ import {Buffer, BufferLayout} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
-import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
+import {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType, getBufferLayout} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';

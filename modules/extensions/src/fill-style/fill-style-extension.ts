@@ -1,5 +1,4 @@
 import {LayerExtension} from '@deck.gl/core';
-import {GL} from '@luma.gl/constants';
 
 import {patternShaders} from './shaders.glsl';
 

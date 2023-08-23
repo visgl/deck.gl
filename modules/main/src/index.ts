@@ -88,7 +88,7 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
-  getProgramManager
+  getShaderAssembler
 } from '@deck.gl/core';
 
 //

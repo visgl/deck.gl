@@ -20,7 +20,6 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
-import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';

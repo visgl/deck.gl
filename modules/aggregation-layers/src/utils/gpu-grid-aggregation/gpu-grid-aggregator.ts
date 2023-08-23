@@ -23,7 +23,7 @@ import {Model, Transform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {readPixelsToBuffer, withParameters, clear} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
-import {log, project32, _mergeShaders as mergeShaders, getProgramManager} from '@deck.gl/core';
+import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
@@ -658,7 +658,7 @@ function getAggregationModel(device: Device, shaderOptions) {
     id: 'Gird-Aggregation-Model',
     vertexCount: 1,
     drawMode: GL.POINTS,
-    programManager: getProgramManager(device),
+    shaderAssembler: getShaderAssembler(),
     ...shaders
   });
 }

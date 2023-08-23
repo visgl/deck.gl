@@ -1,7 +1,6 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/core';
 import {Transform} from '@luma.gl/engine';
-import {Buffer, Framebuffer, Texture} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {
