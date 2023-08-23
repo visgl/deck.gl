@@ -33,7 +33,7 @@ const CartoSpatialTileLoader: LoaderWithParser = {
   parse: async (arrayBuffer, options?: CartoSpatialTileLoaderOptions) =>
     parseCartoSpatialTile(arrayBuffer, options),
   parseSync: parseCartoSpatialTile,
-  worker: false, // TODO set to true once workers deployed to unpkg
+  worker: true,
   options: DEFAULT_OPTIONS
 };
 
