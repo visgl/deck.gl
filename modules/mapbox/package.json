@@ -30,7 +30,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/core": "9.0.0-alpha.31",
+    "@luma.gl/core": "9.0.0-alpha.32",
     "@math.gl/web-mercator": "4.0.0-alpha.4",
     "@types/mapbox-gl": "^2.6.3"
   },
