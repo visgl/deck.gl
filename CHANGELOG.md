@@ -3022,7 +3022,7 @@ For Earlier Beta Releases see below
 - Add polygonLayer geojsonLayer elevationScale prop to whats-new.md (#1237)
 - OrbitController pure-js support (#1234)
 
-#### [4.2.0-alpha.30] - Dec 12
+#### [4.2.0-alpha.31] - Dec 12
 - DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
 - DOCS: New Roadmap doc, linking to RFCs.
 - DOCS: List experimental 4.2 features in Roadmap doc.

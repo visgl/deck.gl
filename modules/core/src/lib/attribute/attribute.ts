@@ -6,7 +6,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
-import type {Device, Buffer, BufferMapping} from '@luma.gl/core';
+import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -333,14 +333,14 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return vertexIndex * this.size;
   }
 
-  getBufferMap(): BufferMapping {
+  getBufferMap(): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
 
     if (!shaderAttributeDefs) {
       return super.getBufferMap(this.id, null);
     }
 
-    let result: BufferMapping;
+    let result: BufferLayout;
     for (const shaderAttributeName in shaderAttributeDefs) {
       const map = super.getBufferMap(shaderAttributeName, shaderAttributeDefs[shaderAttributeName]);
       if (result) {

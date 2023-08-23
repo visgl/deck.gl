@@ -1,5 +1,5 @@
 import {GL} from '@luma.gl/constants';
-import type {BufferMapping, VertexFormat} from '@luma.gl/core';
+import type {BufferLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor} from './data-column';
 
@@ -46,12 +46,12 @@ const glTypeToBufferFormat = {
   [GL.INT]: 'sint32'
 } as const;
 
-export function getBufferMap(name: string, accessor: BufferAccessor): BufferMapping {
+export function getBufferMap(name: string, accessor: BufferAccessor): BufferLayout {
   let type = glTypeToBufferFormat[accessor.type ?? GL.FLOAT];
   if (accessor.normalized) {
     type = type.replace('int', 'norm');
   }
-  const result: BufferMapping = {
+  const result: BufferLayout = {
     name,
     format: accessor.size > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type
   };

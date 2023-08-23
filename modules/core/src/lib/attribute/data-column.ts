@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/core';
-import {Buffer, BufferMapping} from '@luma.gl/core';
+import {Buffer, BufferLayout} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
@@ -245,7 +245,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.getBuffer();
   }
 
-  getBufferMap(id: string, options: Partial<ShaderAttributeOptions> | null): BufferMapping {
+  getBufferMap(id: string, options: Partial<ShaderAttributeOptions> | null): BufferLayout {
     const accessor = this.getAccessor();
     if (this.doublePrecision) {
       const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
@@ -253,9 +253,9 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         options || {}
       );
       return {
-        type: 'interleave',
         name: id,
         byteStride: doubleShaderAttributeDefs.high.stride,
+        // interleave
         attributes: [
           getBufferMap(id, {...accessor, ...doubleShaderAttributeDefs.high}),
           getBufferMap(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
@@ -264,9 +264,9 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       return {
-        type: 'interleave',
         name: id,
         byteStride: getStride(accessor),
+        // interleave
         attributes: [getBufferMap(id, {...accessor, ...shaderAttributeDef})]
       };
     }
