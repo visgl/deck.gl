@@ -368,21 +368,21 @@ test(`getDataV2#versionError`, async t => {
   {
     props: {},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table'
   },
   {
     props: {
       format: FORMATS.GEOJSON
     },
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table'
   },
   {
     props: {
       format: FORMATS.NDJSON
     },
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table'
   },
   {
     props: {
@@ -393,37 +393,37 @@ test(`getDataV2#versionError`, async t => {
       }
     },
     mapInstantiationUrl:
-      'http://carto-api-with-slash/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table'
+      'http://carto-api-with-slash/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table'
   },
   {
     props: {geoColumn: 'geog'},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=geog'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&geo_column=geog'
   },
   {
     props: {columns: ['a', 'b', 'c']},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&columns=a%2Cb%2Cc'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&columns=a%2Cb%2Cc'
   },
   {
     props: {columns: ['a', 'b', 'c'], geoColumn: 'geog'},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=geog&columns=a%2Cb%2Cc'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&geo_column=geog&columns=a%2Cb%2Cc'
   },
   {
     props: {geoColumn: 'geog', aggregationExp: 'sum(col) as value'},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&geo_column=geog&aggregationExp=sum(col)%20as%20value'
   },
   {
     props: {geoColumn: 'quadbin:quadbin', aggregationExp: 'sum(col) as v', aggregationResLevel: 7},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=quadbin%3Aquadbin&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&geo_column=quadbin%3Aquadbin&aggregationExp=sum(col)%20as%20v&aggregationResLevel=7'
   },
   {
     props: {geoColumn: 'h3:h3', aggregationResLevel: 7},
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.1&name=table&geo_column=h3%3Ah3&aggregationExp=1%20AS%20value&aggregationResLevel=7'
+      'http://carto-api/v3/maps/connection_name/table?client=deck-gl-carto&v=3.2&name=table&geo_column=h3%3Ah3&aggregationExp=1%20AS%20value&aggregationResLevel=7'
   },
   {
     props: {
@@ -432,7 +432,7 @@ test(`getDataV2#versionError`, async t => {
       queryParameters: {end: '2021-09-17', start: '2021-09-15'}
     },
     mapInstantiationUrl:
-      'http://carto-api/v3/maps/connection_name/query?client=deck-gl-carto&v=3.1&q=select%20*%20from%20table&queryParameters=%7B%22end%22%3A%222021-09-17%22%2C%22start%22%3A%222021-09-15%22%7D'
+      'http://carto-api/v3/maps/connection_name/query?client=deck-gl-carto&v=3.2&q=select%20*%20from%20table&queryParameters=%7B%22end%22%3A%222021-09-17%22%2C%22start%22%3A%222021-09-15%22%7D'
   }
 ].forEach(({props, mapInstantiationUrl}) => {
   for (const useSetDefaultCredentials of [true, false]) {
@@ -557,7 +557,7 @@ test('fetchLayerData#post', async t => {
       const body = JSON.parse(options.body);
       t.is(body.q, source, 'should have query in body');
       t.is(body.client, 'deck-gl-carto', 'should have client in body');
-      t.is(body.v, '3.1', 'should have v=3.1 in body');
+      t.is(body.v, '3.2', 'should have v=3.2 in body');
       for (const p in props) {
         // Special case for geoColumn
         const prop = p === 'geoColumn' ? 'geo_column' : p;
@@ -825,7 +825,7 @@ test('fetchMap#geoColumn', async t => {
   const geoColumn = 'geo_column';
   const columns = ['a', 'b'];
 
-  const mapInstantiationUrl = `https://gcp-us-east1.api.carto.com/v3/maps/${connectionName}/table?client=deck-gl-carto&v=3.1&name=${source}&geo_column=${geoColumn}&columns=a%2Cb`;
+  const mapInstantiationUrl = `https://gcp-us-east1.api.carto.com/v3/maps/${connectionName}/table?client=deck-gl-carto&v=3.2&name=${source}&geo_column=${geoColumn}&columns=a%2Cb`;
   const table = {type: MAP_TYPES.TABLE, columns, geoColumn, connectionName, source};
 
   const mapResponse = {
