@@ -58,18 +58,8 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
     }
 
     let loadOptions = this.getLoadOptions();
-    const {fetch, formatTiles} = this.props;
+    const {fetch} = this.props;
     const {signal} = tile;
-
-    // The backend doesn't yet support our custom mime-type, so force it here
-    // TODO remove once backend sends the correct mime-type
-    if (formatTiles === TILE_FORMATS.BINARY) {
-      loadOptions = {
-        ...loadOptions,
-        mimeType: 'application/vnd.carto-vector-tile'
-      };
-    }
-
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
   }
 
