@@ -266,7 +266,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: this.getAttributeManager().getBufferMaps(),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

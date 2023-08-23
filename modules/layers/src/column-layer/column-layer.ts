@@ -349,7 +349,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: this.getAttributeManager().getBufferMaps(),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       isInstanced: true
     });
   }

@@ -301,7 +301,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: this.getAttributeManager().getBufferMaps(),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

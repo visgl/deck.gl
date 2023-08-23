@@ -21,7 +21,7 @@
 export default `\
 
 attribute vec2 vertexPositions;
-attribute float vertexValid;
+attribute float instanceVertexValid;
 
 uniform bool extruded;
 uniform bool isWireframe;
@@ -52,7 +52,7 @@ vec3 project_offset_normal(vec3 vector) {
 
 void calculatePosition(PolygonProps props) {
 #ifdef IS_SIDE_VERTEX
-  if(vertexValid < 0.5){
+  if(instanceVertexValid < 0.5){
     gl_Position = vec4(0.);
     return;
   }

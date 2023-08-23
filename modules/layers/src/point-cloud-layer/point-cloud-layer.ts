@@ -200,7 +200,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferMap: this.getAttributeManager().getBufferMaps(),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {

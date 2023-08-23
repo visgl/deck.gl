@@ -5,7 +5,7 @@ import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
 import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
-import {glArrayFromType, getBufferMap} from './gl-utils';
+import {glArrayFromType, getBufferLayout} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -196,13 +196,20 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   get buffer(): BufferWithAccessor {
     if (!this._buffer) {
       const {isIndexed, type} = this.settings;
-      // @ts-expect-error This returns a classic buffer under the hood
-      this._buffer = this.device.createBuffer({
-        id: this.id,
-        usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
-        // @ts-expect-error acceessor is deprecated
-        accessor: {type}
-      });
+      if (isIndexed) {
+        // @ts-expect-error This returns a classic buffer under the hood
+        this._buffer = this.device.createBuffer({
+          id: this.id,
+          usage: Buffer.INDEX,
+          indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32'
+        });
+      } else {
+        // @ts-expect-error This returns a classic buffer under the hood
+        this._buffer = this.device.createBuffer({
+          id: this.id,
+          usage: Buffer.VERTEX
+        });
+      }
     }
     return this._buffer;
   }
@@ -245,7 +252,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.getBuffer();
   }
 
-  getBufferMap(id: string, options: Partial<ShaderAttributeOptions> | null): BufferLayout {
+  getBufferLayout(id: string, options: Partial<ShaderAttributeOptions> | null): BufferLayout {
     const accessor = this.getAccessor();
     if (this.doublePrecision) {
       const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
@@ -253,24 +260,23 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         options || {}
       );
       return {
-        name: id,
+        name: this.id,
         byteStride: doubleShaderAttributeDefs.high.stride,
         // interleave
         attributes: [
-          getBufferMap(id, {...accessor, ...doubleShaderAttributeDefs.high}),
-          getBufferMap(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
+          getBufferLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
+          getBufferLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
         ]
       };
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       return {
-        name: id,
+        name: this.id,
         byteStride: getStride(accessor),
-        // interleave
-        attributes: [getBufferMap(id, {...accessor, ...shaderAttributeDef})]
+        attributes: [getBufferLayout(id, {...accessor, ...shaderAttributeDef})]
       };
     }
-    return getBufferMap(id, accessor);
+    return getBufferLayout(id, accessor);
   }
 
   getAccessor(): DataColumnSettings<Options> {

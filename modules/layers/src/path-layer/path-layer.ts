@@ -163,7 +163,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      positions: {
+      instancePositions: {
         size: 3,
         // Start filling buffer from 1 vertex in
         vertexOffset: 1,
@@ -211,7 +211,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {
-        size: 3,
+        size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
@@ -376,6 +376,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
