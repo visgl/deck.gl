@@ -142,6 +142,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   state!: {
     topModel?: Model;
     sideModel?: Model;
+    strokeModel?: Model;
     models?: Model[];
     numInstances: number;
     polygonTesselator: PolygonTesselator;
@@ -232,7 +233,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       instanceVertexValid: {
         size: 1,
         divisor: 1,
-        type: GL.UNSIGNED_BYTE,
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
         noAlloc
@@ -282,9 +282,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
         shaderAttributes: {
-          pickingColors: {
-            divisor: 0
-          },
           instancePickingColors: {
             divisor: 1
           }
@@ -325,7 +322,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
-    const {topModel, sideModel, polygonTesselator} = this.state;
+    const {topModel, sideModel, strokeModel, polygonTesselator} = this.state;
 
     const renderUniforms = {
       ...uniforms,
@@ -333,24 +330,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       elevationScale
     };
 
-    // TODO - v9 Model API probably does not handle topology switching
-    if (sideModel) {
-      sideModel.instanceCount = polygonTesselator.instanceCount - 1;
-      sideModel.setUniforms(renderUniforms);
-      // if (wireframe) {
-      //   sideModel.props.topology = 'line-strip';
-      //   sideModel.setUniforms({isWireframe: true});
-      //   sideModel.draw(this.context.renderPass);
-      // }
-      // if (filled) {
-      //   // TODO v9 TRIANGLE-FAN not supported
-      //   sideModel.props.topology = 'triangle-fan';
-      //   sideModel.setUniforms({isWireframe: false});
-      //   sideModel.draw(this.context.renderPass);
-      // }
+    // Note - the order is important
+    if (strokeModel && wireframe) {
+      strokeModel.instanceCount = polygonTesselator.instanceCount - 1;
+      strokeModel.setUniforms(renderUniforms);
+      strokeModel.draw(this.context.renderPass);
     }
 
-    if (topModel) {
+    if (sideModel && filled) {
+      sideModel.instanceCount = polygonTesselator.instanceCount - 1;
+      sideModel.setUniforms(renderUniforms);
+      sideModel.draw(this.context.renderPass);
+    }
+
+    if (topModel && filled) {
       topModel.vertexCount = polygonTesselator.vertexCount;
       topModel.setUniforms(renderUniforms);
       topModel.draw(this.context.renderPass);
@@ -422,6 +415,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     let topModel;
     let sideModel;
+    let strokeModel;
+
+    const bufferLayout = this.getAttributeManager().getBufferLayouts();
 
     if (filled) {
       const shaders = this.getShaders('top');
@@ -432,54 +428,72 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         id: `${id}-top`,
         topology: 'triangle-list',
         uniforms: {
-          isWireframe: false,
-          isSideVertex: false
+          isWireframe: false
         },
-        bufferLayout: this.getAttributeManager().getBufferLayouts(),
-        vertexCount: 0,
-        isIndexed: true
+        bufferLayout,
+        isIndexed: true,
+        userData: {
+          excludeAttributes: {instanceVertexValid: true}
+        }
       });
 
       topModel.setConstantAttributes({
         vertexPositions: new Float32Array([0, 1])
       });
-      topModel.userData.excludeAttributes = {instanceVertexValid: true};
     }
     if (extruded) {
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
-        bufferLayout: this.getAttributeManager().getBufferLayouts(),
+        bufferLayout,
+        uniforms: {
+          isWireframe: false
+        },
         geometry: new Geometry({
-          topology: 'line-list',
-          vertexCount: 4,
+          topology: 'triangle-strip',
           attributes: {
-            // top right - top left - bootom left - bottom right
+            // top right - top left - bottom right - bottom left
+            vertexPositions: {
+              size: 2,
+              value: new Float32Array([1, 0, 0, 0, 1, 1, 0, 1])
+            }
+          }
+        }),
+        isInstanced: 1,
+        userData: {
+          excludeAttributes: {indices: true}
+        }
+      });
+
+      strokeModel = new Model(this.context.device, {
+        ...this.getShaders('side'),
+        id: `${id}-stroke`,
+        bufferLayout,
+        uniforms: {
+          isWireframe: true
+        },
+        geometry: new Geometry({
+          topology: 'line-strip',
+          attributes: {
+            // top right - top left - bottom left - bottom right
             vertexPositions: {
               size: 2,
               value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
             }
           }
         }),
-        instanceCount: 0,
-        isInstanced: 1
+        isInstanced: 1,
+        userData: {
+          excludeAttributes: {indices: true}
+        }
       });
-
-      sideModel.userData.excludeAttributes = {indices: true};
-    }
-
-    const models: Model[] = [];
-    if (sideModel) {
-      models.push(sideModel);
-    }
-    if (topModel) {
-      models.push(topModel);
     }
 
     return {
-      models,
+      models: [sideModel, strokeModel, topModel].filter(Boolean),
       topModel,
-      sideModel
+      sideModel,
+      strokeModel
     };
   }
 

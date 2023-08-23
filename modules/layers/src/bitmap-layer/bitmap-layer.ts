@@ -33,8 +33,8 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import {Geometry, Model} from '@luma.gl/engine';
+import type {Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
@@ -173,8 +173,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
-      // @ts-expect-error v9 API is not as dynamic
-      this.state.model.setVertexCount(mesh.vertexCount);
+      this.state.model.vertexCount = mesh.vertexCount;
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
@@ -273,6 +272,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         vertexCount: 6
@@ -294,8 +294,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // Render the image
     if (image && model) {
       model.setUniforms(uniforms);
+      model.setBindings({bitmapTexture: image as Texture});
       model.setUniforms({
-        bitmapTexture: image,
         desaturate,
         transparentColor: transparentColor.map(x => x / 255),
         tintColor: tintColor.slice(0, 3).map(x => x / 255),

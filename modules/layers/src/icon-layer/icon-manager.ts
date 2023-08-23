@@ -54,6 +54,13 @@ type PrepackedIcon = {
   y: number;
 } & IconDef;
 
+const MISSING_ICON: PrepackedIcon = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0
+};
+
 export type IconMapping = Record<string, PrepackedIcon>;
 
 export type LoadIconErrorContext = {
@@ -325,9 +332,9 @@ export default class IconManager {
     return this._texture || this._externalTexture;
   }
 
-  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon | null {
+  getIconMapping(icon: string | UnpackedIcon): PrepackedIcon {
     const id = this._autoPacking ? getIconId(icon as UnpackedIcon) : (icon as string);
-    return this._mapping[id] || null;
+    return this._mapping[id] || MISSING_ICON;
   }
 
   setProps({
