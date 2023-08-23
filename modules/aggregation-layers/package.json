@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
+    "@luma.gl/constants": "9.0.0-alpha.32",
     "@luma.gl/core": "9.0.0-alpha.32",
     "@luma.gl/shadertools": "9.0.0-alpha.32",
     "@math.gl/web-mercator": "4.0.0-alpha.4",

@@ -1,5 +1,4 @@
 import type {Device} from '@luma.gl/core';
-import {clear, setParameters, withParameters} from '@luma.gl/webgl';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';

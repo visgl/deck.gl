@@ -362,7 +362,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       wireframeVertexCount: geometry.indices.value.length
     });
 
-    this.state.model.setProps({geometry});
+    this.state.model.setGeometry(geometry);
   }
 
   draw({uniforms}) {

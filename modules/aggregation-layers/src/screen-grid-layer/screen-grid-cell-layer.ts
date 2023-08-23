@@ -108,20 +108,21 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     const colorDomain = this.props.colorDomain || [1, 0];
     const {model} = this.state;
     model.setUniforms(uniforms);
+    model.setBindings({
+      maxTexture
+    });
     model.setUniforms({
       minColor,
       maxColor,
-      maxTexture,
       colorDomain
     });
+    model.setParameters({
+      depthWriteEnabled: false,
+      // How to specify depth mask in WebGPU?
+      // depthMask: false,
+      ...parameters
+    });
     model.draw(this.context.renderPass);
-    // TODO v9 - we can't set parameter here, must be done in model creation
-    // .draw({
-    //   parameters: {
-    //   depthTest: false,
-    //   depthMask: false,
-    //   ...parameters
-    // })
   }
 
   calculateInstancePositions(attribute, {numInstances}) {

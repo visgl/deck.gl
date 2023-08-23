@@ -28,6 +28,7 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
+    // @ts-expect-error ClipSpace prototype
     this.model = new ClipSpace(device, {id, fs, modules: [module]});
   }
 
@@ -58,17 +59,17 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(this.device, {color: true});
-    this.model.setProps({
-      moduleSettings: options.moduleSettings,
-      uniforms: {
-        texture: inputBuffer,
-        texSize: [inputBuffer.width, inputBuffer.height]
-      }
-      // luma v9
-      // parameters: {
-      //   depthWrite: false,
-      //   depthTest: false
-      // }
+    this.model.setShaderModuleProps(options.moduleSettings);
+    this.model.setBindings({
+      texture: inputBuffer.colorAttachments[0]
+    });
+    this.model.setUniforms({
+      texSize: [inputBuffer.width, inputBuffer.height]
+    });
+    this.model.setParameters({
+      depthWriteEnabled: false,
+      // depthWrite: false,
+      depthCompare: 'always'
     });
     this.model.draw(this.device.getDefaultRenderPass());
   }

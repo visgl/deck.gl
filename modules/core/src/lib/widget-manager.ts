@@ -180,6 +180,7 @@ export class WidgetManager {
         // Not attached to a specific view
         if (widget.onViewportChange) {
           for (const viewport of viewports) {
+            // eslint-disable-next-line max-depth
             if (!viewport.equals(lastViewports[viewport.id])) {
               widget.onViewportChange(viewport);
             }
