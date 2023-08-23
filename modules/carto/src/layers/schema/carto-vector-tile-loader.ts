@@ -1,5 +1,6 @@
+import earcut from 'earcut';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatures, BinaryPolygonFeatures, TypedArray} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -31,9 +32,58 @@ const CartoVectorTileLoader: LoaderWithParser = {
   parse: async (arrayBuffer, options?: CartoVectorTileLoaderOptions) =>
     parseCartoVectorTile(arrayBuffer, options),
   parseSync: parseCartoVectorTile,
-  worker: false, // TODO set to true once workers deployed to unpkg
+  worker: true,
   options: DEFAULT_OPTIONS
 };
+
+function triangulatePolygon(
+  polygons: BinaryPolygonFeatures,
+  target: number[],
+  {
+    startPosition,
+    endPosition,
+    indices
+  }: {startPosition: number; endPosition: number; indices: TypedArray}
+): void {
+  const coordLength = polygons.positions.size;
+  const start = startPosition * coordLength;
+  const end = endPosition * coordLength;
+
+  // Extract positions and holes for just this polygon
+  const polygonPositions = polygons.positions.value.subarray(start, end);
+
+  // Holes are referenced relative to outer polygon
+  const holes = indices.slice(1).map((n: number) => n - startPosition);
+
+  // Compute triangulation
+  const triangles = earcut(polygonPositions, holes, coordLength);
+
+  // Indices returned by triangulation are relative to start
+  // of polygon, so we need to offset
+  for (let t = 0, tl = triangles.length; t < tl; ++t) {
+    target.push(startPosition + triangles[t]);
+  }
+}
+
+function triangulate(polygons: BinaryPolygonFeatures) {
+  const {polygonIndices, positions, primitivePolygonIndices} = polygons;
+  const triangles = [];
+
+  let rangeStart = 0;
+  for (let i = 0; i < polygonIndices.value.length - 1; i++) {
+    const startPosition = polygonIndices.value[i];
+    const endPosition = polygonIndices.value[i + 1];
+
+    // Extract hole indices between start & end position
+    const rangeEnd = primitivePolygonIndices.value.indexOf(endPosition);
+    const indices = primitivePolygonIndices.value.subarray(rangeStart, rangeEnd);
+    rangeStart = rangeEnd;
+
+    triangulatePolygon(polygons, triangles, {startPosition, endPosition, indices});
+  }
+
+  polygons.triangles = {value: new Uint32Array(triangles), size: 1};
+}
 
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
@@ -42,8 +92,11 @@ function parseCartoVectorTile(
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer, TileReader);
 
-  // Note: there is slight, difference in `numericProps` type, however geojson/mvtlayer can cope with this
-  return tile as unknown as BinaryFeatures;
+  if (tile.polygons && !tile.polygons.triangles) {
+    triangulate(tile.polygons);
+  }
+
+  return tile;
 }
 
 export default CartoVectorTileLoader;
