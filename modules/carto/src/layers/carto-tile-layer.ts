@@ -57,7 +57,7 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
       return Promise.reject('Invalid URL');
     }
 
-    let loadOptions = this.getLoadOptions();
+    const loadOptions = this.getLoadOptions();
     const {fetch} = this.props;
     const {signal} = tile;
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
