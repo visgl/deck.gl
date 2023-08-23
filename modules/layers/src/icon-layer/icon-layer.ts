@@ -278,9 +278,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
+      this.state.model.setBindings({iconsTexture});
       this.state.model.setUniforms(uniforms);
       this.state.model.setUniforms({
-        iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
