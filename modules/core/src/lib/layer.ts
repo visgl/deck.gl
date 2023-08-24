@@ -1212,11 +1212,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Note: Automatic instance count update only works for single layers
     const {model} = this.state;
-    // TODO luma v9
-    // model?.setInstanceCount(this.getNumInstances());
-    if (model) {
-      model.instanceCount = this.getNumInstances();
-    }
+    model?.setInstanceCount(this.getNumInstances());
 
     // Set picking module parameters to match props
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;

@@ -234,6 +234,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   static layerName = 'ColumnLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    fillModel?: Model;
+    wireframeModel?: Model;
+    models?: Model[];
+    fillVertexCount?: number;
+    edgeDistance?: number;
+  };
+
   getShaders() {
     const {device} = this.context;
     const transpileToGLSL100 = device.info.type === 'webgl2';
@@ -305,10 +313,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       changeFlags.extensionsChanged || props.flatShading !== oldProps.flatShading;
 
     if (regenerateModels) {
-      this.state.model?.destroy();
-      this.state.model = this._getModel();
+      this.state.models?.forEach(model => model.destroy());
+      this.setState(this._getModels());
       this.getAttributeManager()!.invalidateAll();
     }
+
+    const instanceCount = this.getNumInstances();
+    this.state.fillModel.setInstanceCount(instanceCount);
+    this.state.wireframeModel.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
@@ -345,24 +357,45 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return geometry;
   }
 
-  protected _getModel(): Model {
-    return new Model(this.context.device, {
-      ...this.getShaders(),
-      id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+  protected _getModels() {
+    const shaders = this.getShaders();
+    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+
+    const fillModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-fill`,
+      bufferLayout,
       isInstanced: true
     });
+    const wireframeModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-wireframe`,
+      bufferLayout,
+      isInstanced: true
+    });
+
+    return {
+      fillModel,
+      wireframeModel,
+      models: [wireframeModel, fillModel]
+    };
   }
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
-    const geometry: any = this.getGeometry(diskResolution, vertices, extruded || stroked);
+    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
 
     this.setState({
-      fillVertexCount: geometry.attributes.POSITION.value.length / 3,
-      wireframeVertexCount: geometry.indices.value.length
+      fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    this.state.model.setGeometry(geometry);
+    const {fillModel, wireframeModel} = this.state; 
+    fillModel.setGeometry(geometry);
+    fillModel.setTopology('triangle-strip');
+    // Disable indices
+    fillModel.setIndexBuffer(null);
+
+    wireframeModel.setGeometry(geometry);
+    wireframeModel.setTopology('line-list');
   }
 
   draw({uniforms}) {
@@ -382,10 +415,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       radius,
       angle
     } = this.props;
-    const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
+    const {fillModel, wireframeModel, fillVertexCount, edgeDistance} = this.state;
 
-    model.setUniforms(uniforms);
-    model.setUniforms({
+    const renderUniforms = {
+      ...uniforms,
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -399,32 +432,31 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels
-    });
+    };
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      // model.setProps({isIndexed: true});
-      // model.setVertexCount(wireframeVertexCount);
-      // model.setTopology('line-list');
-      model.setUniforms({isStroke: true});
-      model.draw(this.context.renderPass);
+      wireframeModel.setUniforms(renderUniforms);
+      wireframeModel.setUniforms({isStroke: true});
+      wireframeModel.draw(this.context.renderPass);
     }
+
+    fillModel.setUniforms(renderUniforms);
+
     if (filled) {
       // model.setProps({isIndexed: false});
-      // model.setVertexCount(fillVertexCount);
-      // model.setTopology('triangle-string');
-      model.setUniforms({isStroke: false});
-      model.draw(this.context.renderPass);
+      fillModel.setVertexCount(fillVertexCount);
+      fillModel.setUniforms({isStroke: false});
+      fillModel.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
       // model.setProps({isIndexed: false});
-      // // The width of the stroke is achieved by flattening the side of the cylinder.
-      // // Skip the last 1/3 of the vertices which is the top.
-      // model.setVertexCount((fillVertexCount * 2) / 3);
-      // model.setTopology('triangle-string');
-      model.setUniforms({isStroke: true});
-      model.draw(this.context.renderPass);
+      // The width of the stroke is achieved by flattening the side of the cylinder.
+      // Skip the last 1/3 of the vertices which is the top.
+      fillModel.setVertexCount((fillVertexCount * 2) / 3);
+      fillModel.setUniforms({isStroke: true});
+      fillModel.draw(this.context.renderPass);
     }
   }
 }

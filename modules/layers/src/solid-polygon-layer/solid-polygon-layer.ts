@@ -142,7 +142,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   state!: {
     topModel?: Model;
     sideModel?: Model;
-    strokeModel?: Model;
+    wireframeModel?: Model;
     models?: Model[];
     numInstances: number;
     polygonTesselator: PolygonTesselator;
@@ -206,7 +206,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         update: this.calculateIndices,
         noAlloc
       },
-      positions: {
+      vertexPositions: {
         size: 3,
         type: GL.DOUBLE,
         fp64: this.use64bitPositions(),
@@ -216,10 +216,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
-          positions: {
-            vertexOffset: 0,
-            divisor: 0
-          },
           instancePositions: {
             vertexOffset: 0,
             divisor: 1
@@ -232,6 +228,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       instanceVertexValid: {
         size: 1,
+        type: GL.UNSIGNED_SHORT,
         divisor: 1,
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -242,9 +239,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
         shaderAttributes: {
-          elevations: {
-            divisor: 0
-          },
           instanceElevations: {
             divisor: 1
           }
@@ -322,7 +316,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
-    const {topModel, sideModel, strokeModel, polygonTesselator} = this.state;
+    const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
 
     const renderUniforms = {
       ...uniforms,
@@ -331,20 +325,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     };
 
     // Note - the order is important
-    if (strokeModel && wireframe) {
-      strokeModel.instanceCount = polygonTesselator.instanceCount - 1;
-      strokeModel.setUniforms(renderUniforms);
-      strokeModel.draw(this.context.renderPass);
+    if (wireframeModel && wireframe) {
+      wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+      wireframeModel.setUniforms(renderUniforms);
+      wireframeModel.draw(this.context.renderPass);
     }
 
     if (sideModel && filled) {
-      sideModel.instanceCount = polygonTesselator.instanceCount - 1;
+      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.setUniforms(renderUniforms);
       sideModel.draw(this.context.renderPass);
     }
 
     if (topModel && filled) {
-      topModel.vertexCount = polygonTesselator.vertexCount;
+      topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms);
       topModel.draw(this.context.renderPass);
     }
@@ -415,7 +409,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     let topModel;
     let sideModel;
-    let strokeModel;
+    let wireframeModel;
 
     const bufferLayout = this.getAttributeManager().getBufferLayouts();
 
@@ -438,7 +432,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
 
       topModel.setConstantAttributes({
-        vertexPositions: new Float32Array([0, 1])
+        positions: new Float32Array([0, 1])
       });
     }
     if (extruded) {
@@ -453,7 +447,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           topology: 'triangle-strip',
           attributes: {
             // top right - top left - bottom right - bottom left
-            vertexPositions: {
+            positions: {
               size: 2,
               value: new Float32Array([1, 0, 0, 0, 1, 1, 0, 1])
             }
@@ -465,9 +459,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         }
       });
 
-      strokeModel = new Model(this.context.device, {
+      wireframeModel = new Model(this.context.device, {
         ...this.getShaders('side'),
-        id: `${id}-stroke`,
+        id: `${id}-wireframe`,
         bufferLayout,
         uniforms: {
           isWireframe: true
@@ -476,7 +470,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           topology: 'line-strip',
           attributes: {
             // top right - top left - bottom left - bottom right
-            vertexPositions: {
+            positions: {
               size: 2,
               value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
             }
@@ -490,10 +484,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
 
     return {
-      models: [sideModel, strokeModel, topModel].filter(Boolean),
+      models: [sideModel, wireframeModel, topModel].filter(Boolean),
       topModel,
       sideModel,
-      strokeModel
+      wireframeModel
     };
   }
 
