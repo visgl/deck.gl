@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.26] - Aug 23 2023
+
+- CARTO: Don't hardcode mime-types (#8076)
+- CARTO: Polygon triangulation in CartoVectorTileLoader (#8064)
+- DeckRenderer abort rendering when no views (#8065)
+
 #### deck.gl [8.9.25] - Aug 18 2023
 
 - CARTO worker loaders (#8056)
