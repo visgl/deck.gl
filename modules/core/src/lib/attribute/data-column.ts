@@ -5,7 +5,7 @@ import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
 import {IShaderAttribute} from './shader-attribute';
-import {glArrayFromType, getBufferLayout} from './gl-utils';
+import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -264,8 +264,8 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         byteStride: doubleShaderAttributeDefs.high.stride,
         // interleave
         attributes: [
-          getBufferLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
-          getBufferLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
+          getBufferAttributeLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
+          getBufferAttributeLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
         ]
       };
     } else if (options) {
@@ -273,10 +273,15 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       return {
         name: this.id,
         byteStride: getStride(accessor),
-        attributes: [getBufferLayout(id, {...accessor, ...shaderAttributeDef})]
+        attributes: [getBufferAttributeLayout(id, {...accessor, ...shaderAttributeDef})]
       };
     }
-    return getBufferLayout(id, accessor);
+    const bufferAttributeLayout = getBufferAttributeLayout(id, accessor)
+    return {
+      name: bufferAttributeLayout.attribute,
+      byteStride: 0,
+      attributes: [bufferAttributeLayout]
+    };
   }
 
   getAccessor(): DataColumnSettings<Options> {
