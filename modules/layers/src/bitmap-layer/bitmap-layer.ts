@@ -173,7 +173,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
-      this.state.model.vertexCount = mesh.vertexCount;
+      this.state.model.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
@@ -273,10 +273,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager().getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-list',
-        vertexCount: 6
-      }),
+      topology: 'triangle-list',
       isInstanced: false
     });
   }
