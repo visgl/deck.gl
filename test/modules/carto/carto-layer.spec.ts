@@ -88,43 +88,45 @@ mockedV3Test('CartoLayer#v3', async t => {
     }
   };
 
+  const props = {
+    connection: 'conn_name',
+    credentials: CREDENTIALS_V3,
+    loadOptions: {worker: false}
+  };
+
   await testLayerAsync({
     Layer: CartoLayer,
     testCases: [
       {
         props: {
+          ...props,
           data: 'select * from table',
-          type: MAP_TYPES.QUERY,
-          connection: 'conn_name',
-          credentials: CREDENTIALS_V3
+          type: MAP_TYPES.QUERY
         },
         onAfterUpdate
       },
       {
         props: {
+          ...props,
           data: 'tileset',
-          connection: 'conn_name',
-          type: MAP_TYPES.TILESET,
-          credentials: CREDENTIALS_V3
+          type: MAP_TYPES.TILESET
         },
         onAfterUpdate
       },
       {
         props: {
+          ...props,
           data: 'table',
-          connection: 'conn_name',
-          type: MAP_TYPES.TABLE,
-          credentials: CREDENTIALS_V3
+          type: MAP_TYPES.TABLE
         },
         onAfterUpdate
       },
       {
         props: {
+          ...props,
           data: 'dynamic_tileset',
-          connection: 'conn_name',
           type: MAP_TYPES.TABLE,
-          formatTiles: TILE_FORMATS.BINARY,
-          credentials: CREDENTIALS_V3
+          formatTiles: TILE_FORMATS.BINARY
         },
         onAfterUpdate
       }
@@ -164,7 +166,8 @@ mockedV3Test('CartoLayer#loadOptions', async t => {
           credentials: CREDENTIALS_V3,
           loadOptions: {
             custom: 'value',
-            fetch: {headers: {'Custom-Header': 'Header-Value'}}
+            fetch: {headers: {'Custom-Header': 'Header-Value'}},
+            worker: false
           }
         },
         onAfterUpdate
@@ -326,7 +329,8 @@ mockedV3Test('CartoLayer#_updateData executed when props changes', async t => {
         type: MAP_TYPES.TABLE,
         data: 'table',
         connection: 'connection_name',
-        credentials: CREDENTIALS_V3
+        credentials: CREDENTIALS_V3,
+        loadOptions: {worker: false}
       },
       onAfterUpdate({layer, spies}) {
         if (layer.isLoaded) {
@@ -428,7 +432,8 @@ mockedV3Test('CartoLayer#_updateData invalid apiVersion', async t => {
         type: MAP_TYPES.TABLE,
         data: 'table',
         connection: 'connection_name',
-        credentials: CREDENTIALS_V3
+        credentials: CREDENTIALS_V3,
+        loadOptions: {worker: false}
       }
     },
     {
@@ -465,6 +470,7 @@ mockedV3Test('CartoLayer#onDataLoad', async t => {
         type: MAP_TYPES.TILESET,
         connection: 'connection_name',
         credentials: CREDENTIALS_V3,
+        loadOptions: {worker: false},
         onDataLoad
       },
       onAfterUpdate: ({layer}) => {
@@ -509,6 +515,7 @@ mockedV3Test('CartoLayer#onDataError', async t => {
         type: MAP_TYPES.TILESET,
         connection: 'connection_name',
         credentials: CREDENTIALS_V3,
+        loadOptions: {worker: false},
         onDataError
       },
       onAfterUpdate: ({layer}) => {
@@ -550,7 +557,7 @@ mockedV3Test('CartoLayer#dynamic', async t => {
         formatTiles: TILE_FORMATS.BINARY,
         connection: 'connection_name',
         credentials: CREDENTIALS_V3,
-
+        loadOptions: {worker: false},
         onDataLoad
       },
       onAfterUpdate: ({layer, subLayers}) => {
