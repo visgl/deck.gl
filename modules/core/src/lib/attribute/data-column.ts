@@ -254,34 +254,32 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
 
   getBufferLayout(id: string, options: Partial<ShaderAttributeOptions> | null): BufferLayout {
     const accessor = this.getAccessor();
+    const result: BufferLayout = {
+      name: this.id,
+      byteStride: getStride(accessor),
+      attributes: []
+    };
+
     if (this.doublePrecision) {
       const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
         accessor,
         options || {}
       );
-      return {
-        name: this.id,
-        byteStride: doubleShaderAttributeDefs.high.stride,
-        // interleave
-        attributes: [
-          getBufferAttributeLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
-          getBufferAttributeLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
-        ]
-      };
+      result.attributes.push(
+        getBufferAttributeLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
+        getBufferAttributeLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
+      );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
-      return {
-        name: this.id,
-        byteStride: getStride(accessor),
-        attributes: [getBufferAttributeLayout(id, {...accessor, ...shaderAttributeDef})]
-      };
+      result.attributes.push(
+        getBufferAttributeLayout(id, {...accessor, ...shaderAttributeDef})
+      );
+    } else {
+      result.attributes.push(
+        getBufferAttributeLayout(id, accessor)
+      );
     }
-    const bufferAttributeLayout = getBufferAttributeLayout(id, accessor)
-    return {
-      name: bufferAttributeLayout.attribute,
-      byteStride: 0,
-      attributes: [bufferAttributeLayout]
-    };
+    return result;
   }
 
   getAccessor(): DataColumnSettings<Options> {

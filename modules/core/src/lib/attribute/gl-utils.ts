@@ -51,17 +51,10 @@ export function getBufferAttributeLayout(name: string, accessor: BufferAccessor)
   if (accessor.normalized) {
     type = type.replace('int', 'norm');
   }
-  const result: BufferAttributeLayout = {
+  return {
     attribute: name,
     format: accessor.size > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };
-  // if (accessor.stride) {
-  //   result.byteStride = accessor.stride;
-  // }
-  // if (accessor.offset) {
-  //   result.attributes[0].byteOffset = accessor.offset;
-  // }
-  return result;
 }

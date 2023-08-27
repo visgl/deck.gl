@@ -340,8 +340,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return result;
     }
 
-    // @ts-ignore
-    result.attributes = result.attributes || [];
     for (const shaderAttributeName in shaderAttributeDefs) {
       const map = super.getBufferLayout(
         shaderAttributeName,
