@@ -195,9 +195,9 @@ export default class GPUGridAggregator {
       resources
     } = this.state;
 
-    gridAggregationModel?.delete();
-    allAggregationModel?.delete();
-    meanTransform?.delete();
+    gridAggregationModel?.destroy();
+    allAggregationModel?.destroy();
+    meanTransform?.destroy();
 
     deleteResources([
       framebuffers,
@@ -406,14 +406,12 @@ export default class GPUGridAggregator {
       () => {
         clear(this.device, {color: true});
 
-        allAggregationModel.draw({
-          parameters,
-          uniforms: {
-            uSampler: framebuffers[id].texture,
-            gridSize,
-            combineMaxMin
-          }
-        });
+        // allAggregationModel.setParameters(parameters);
+        allAggregationModel.setUniforms({gridSize, combineMaxMin});
+        allAggregationModel.setBindings({uSampler: framebuffers[id].texture});
+        allAggregationModel.draw();
+        // TODO - we need to create a render pass for the aggregation
+        // allAggregationModel.draw(renderPass);
       }
     );
   }
@@ -567,7 +565,7 @@ export default class GPUGridAggregator {
 
   _setupModels({numCol = 0, numRow = 0} = {}) {
     const {shaderOptions} = this.state;
-    this.gridAggregationModel?.delete();
+    this.gridAggregationModel?.destroy();
     this.gridAggregationModel = getAggregationModel(this.device, shaderOptions);
     if (!this.allAggregationModel) {
       const instanceCount = numCol * numRow;
@@ -655,7 +653,7 @@ function getAggregationModel(device: Device, shaderOptions) {
   );
 
   return new Model(device, {
-    id: 'Gird-Aggregation-Model',
+    id: 'Grid-Aggregation-Model',
     vertexCount: 1,
     drawMode: GL.POINTS,
     shaderAssembler: getShaderAssembler(),
@@ -663,14 +661,14 @@ function getAggregationModel(device: Device, shaderOptions) {
   });
 }
 
-function getAllAggregationModel(device: Device, instanceCount) {
+function getAllAggregationModel(device: Device, instanceCount: number): void {
   return new Model(device, {
     id: 'All-Aggregation-Model',
     vs: AGGREGATE_ALL_VS,
     fs: AGGREGATE_ALL_FS,
     modules: [fp64arithmetic],
     vertexCount: 1,
-    drawMode: GL.POINTS,
+    topology: 'point-list',
     isInstanced: true,
     instanceCount,
     attributes: {

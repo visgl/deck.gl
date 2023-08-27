@@ -1,7 +1,6 @@
-import {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+import {Device, Sampler, SamplerProps} from '@luma.gl/core';
 
-const DEFAULT_PARAMETERS = {
+const DEFAULT_PARAMETERS: SamplerProps = {
   minFilter: 'nearest',
   magFilter: 'nearest'
 };
@@ -12,10 +11,11 @@ type FloatTextureOptions = {
   height?: number;
   data?: any;
   unpackFlipY?: boolean;
-  parameters?: Record<GL, GL>;
+  parameters?: SamplerProps;
 };
 
-export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
+  // TODO - not working
+  export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
   const {
     width = 1,
     height = 1,
@@ -23,18 +23,18 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
-  const texture = this.context.device.createTexture({
+  const texture = device.createTexture({
     data,
-    format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
-    type: GL.FLOAT,
-    border: 0,
+    format: 'rgba32float', // device.info.type === 'webgl2' ? 'rgba32float' : GL.RGBA,
+    // type: GL.FLOAT,
+    // border: 0,
     mipmaps: false,
-    parameters,
-    dataFormat: GL.RGBA,
+    sampler: parameters,
+    // dataFormat: GL.RGBA,
     width,
     height,
     // ts-expect-error
-    unpackFlipY
+    // unpackFlipY
   });
   return texture;
 }
