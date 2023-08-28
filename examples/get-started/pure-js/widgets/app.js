@@ -1,6 +1,12 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {ZoomWidget, FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  DarkGlassTheme,
+  LightGlassTheme
+} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import {luma} from '@luma.gl/api';
 import {WebGLDevice} from '@luma.gl/webgl';
@@ -67,5 +73,9 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [new ZoomWidget({style: widgetTheme}), new FullscreenWidget({style: widgetTheme})]
+  widgets: [
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme})
+  ]
 });
