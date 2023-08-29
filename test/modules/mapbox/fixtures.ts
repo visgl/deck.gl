@@ -1,4 +1,4 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 export const DEFAULT_PARAMETERS = {
   depthMask: true,

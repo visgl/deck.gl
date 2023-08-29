@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-promise/tape';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import assert from 'assert';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
@@ -30,7 +30,7 @@ import {project64} from '@deck.gl/extensions';
 import {config} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
 import {fp64} from '@luma.gl/shadertools';
-import {Transform, Buffer} from '@luma.gl/webgl-legacy';
+import {Transform} from '@luma.gl/engine';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
 // import {clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
@@ -59,8 +59,8 @@ const TEST_VIEWPORT_HIGH_ZOOM = new WebMercatorViewport({
   height: 600
 });
 
-const DUMMY_SOURCE_BUFFER = new Buffer(device, 1);
-const OUT_BUFFER = new Buffer(device, 16);
+const DUMMY_SOURCE_BUFFER = device.createBuffer({byteLength: 1});
+const OUT_BUFFER = device.createBuffer({byteLength: 16});
 
 // used in printing a float into GLSL code, 1 will be 1.0 to avoid GLSL compile errors
 const MAX_FRACTION_DIGITS = 20;

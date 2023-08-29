@@ -20,7 +20,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
 
@@ -167,7 +167,7 @@ test('AttributeManager.update - constant attribute', t => {
   // First update, should set constant value
   attributeManager.update({
     numInstances: 2,
-    props: {getColor: [0.5, 0.8, 0.1]},
+    props: {getColor: [0.5, 0.75, 0.125]},
     data: [1, 2]
   });
 
@@ -181,13 +181,13 @@ test('AttributeManager.update - constant attribute', t => {
   // second update, should autoalloc and update the value array
   attributeManager.update({
     numInstances: 2,
-    props: {getColor: [0.5, 0.8, 0.1]},
+    props: {getColor: [0.5, 0.75, 0.125]},
     data: [1, 2]
   });
 
   t.is(updateCalled, 1, 'updater is called');
   t.ok(attribute.state.allocatedValue, 'should allocate new value array');
-  t.deepEqual(attribute.value, [0.5, 0.8, 0.1], 'correct attribute value');
+  t.deepEqual(attribute.value, [0.5, 0.75, 0.125], 'correct attribute value');
   t.ok(attribute.state.constant, 'constant value is set');
 
   attributeManager.invalidate('colors');
@@ -230,8 +230,6 @@ test('AttributeManager.update - external virtual buffers', t => {
   attribute = attributeManager.getAttributes()['colors'];
   t.ok(ArrayBuffer.isView(attribute.value), 'colors attribute has typed array');
 
-  const colors = attribute.getShaderAttributes().colors;
-
   attributeManager.update({
     numInstances: 1,
     buffers: {
@@ -240,7 +238,11 @@ test('AttributeManager.update - external virtual buffers', t => {
     }
   });
 
-  t.is(colors.getAccessor().type, GL.FLOAT, 'colors accessor is set to correct type');
+  t.is(
+    attribute.getBufferLayout().attributes[0].format,
+    'float32x3',
+    'colors is set to correct format'
+  );
 
   attributeManager.update({
     numInstances: 1,
@@ -249,7 +251,11 @@ test('AttributeManager.update - external virtual buffers', t => {
       colors: new Uint32Array([0, 0, 0])
     }
   });
-  t.is(colors.getAccessor().type, GL.UNSIGNED_INT, 'colors accessor is set to correct type');
+  t.is(
+    attribute.getBufferLayout().attributes[0].format,
+    'uint32x3',
+    'colors is set to correct format'
+  );
 
   t.end();
 });

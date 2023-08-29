@@ -20,7 +20,8 @@
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -250,35 +251,33 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels
     } = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        stroked: stroked ? 1 : 0,
-        filled,
-        billboard,
-        antialiasing,
-        radiusUnits: UNIT[radiusUnits],
-        radiusScale,
-        radiusMinPixels,
-        radiusMaxPixels,
-        lineWidthUnits: UNIT[lineWidthUnits],
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      stroked: stroked ? 1 : 0,
+      filled,
+      billboard,
+      antialiasing,
+      radiusUnits: UNIT[radiusUnits],
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      lineWidthUnits: UNIT[lineWidthUnits],
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
     // a square that minimally cover the unit circle
-    const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
-
+    const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
-        vertexCount: 4,
         attributes: {
           positions: {size: 3, value: new Float32Array(positions)}
         }

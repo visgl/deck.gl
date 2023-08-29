@@ -20,7 +20,6 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
-import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
@@ -29,7 +28,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Device} from '@luma.gl/api';
+import type {Device, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -309,21 +308,20 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  // Returns shader attributes
-  getShaderAttributes(
+  getBufferLayouts(
     attributes?: {[id: string]: Attribute},
     excludeAttributes: Record<string, boolean> = {}
-  ): {[id: string]: IShaderAttribute} {
+  ): BufferLayout[] {
     if (!attributes) {
       attributes = this.getAttributes();
     }
-    const shaderAttributes = {};
+    const bufferMaps: BufferLayout[] = [];
     for (const attributeName in attributes) {
       if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
+        bufferMaps.push(attributes[attributeName].getBufferLayout());
       }
     }
-    return shaderAttributes;
+    return bufferMaps;
   }
 
   // PRIVATE METHODS

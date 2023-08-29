@@ -1,13 +1,12 @@
-import type {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/webgl-legacy';
-import {Texture2D} from '@luma.gl/webgl-legacy';
+import type {Device, Shader} from '@luma.gl/core';
+import {ShaderAssembler} from '@luma.gl/shadertools';
+import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
-import {getProgramManager} from '../../shaderlib';
 
 import type Layer from '../../lib/layer';
 import type {Effect, PreRenderOptions} from '../../lib/effect';
@@ -40,9 +39,9 @@ export default class LightingEffect implements Effect {
   private directionalLights: DirectionalLight[] = [];
   private pointLights: PointLight[] = [];
   private shadowPasses: ShadowPass[] = [];
-  private shadowMaps: Texture2D[] = [];
-  private dummyShadowMap: Texture2D | null = null;
-  private pipelineFactory?: ProgramManager;
+  private shadowMaps: Texture[] = [];
+  private dummyShadowMap: Texture | null = null;
+  private shaderAssembler?: ShaderAssembler;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
@@ -90,15 +89,15 @@ export default class LightingEffect implements Effect {
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(device);
     }
-    if (!this.pipelineFactory) {
-      this.pipelineFactory = getProgramManager(device);
+    if (!this.shaderAssembler) {
+      this.shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
       if (shadow) {
-        this.pipelineFactory.addDefaultModule(shadow);
+        this.shaderAssembler.addDefaultModule(shadow);
       }
     }
 
     if (!this.dummyShadowMap) {
-      this.dummyShadowMap = new Texture2D(device, {
+      this.dummyShadowMap = device.createTexture({
         width: 1,
         height: 1
       });
@@ -128,8 +127,8 @@ export default class LightingEffect implements Effect {
         directionalLights: DirectionalLight[];
         pointLights: PointLight[];
       };
-      shadowMaps?: Texture2D[];
-      dummyShadowMap?: Texture2D;
+      shadowMaps?: Texture[];
+      dummyShadowMap?: Texture;
       shadowColor?: number[];
       shadowMatrices?: Matrix4[];
     } = this.shadow
@@ -166,9 +165,9 @@ export default class LightingEffect implements Effect {
       this.dummyShadowMap = undefined;
     }
 
-    if (this.shadow && this.pipelineFactory) {
-      this.pipelineFactory.removeDefaultModule(shadow);
-      this.pipelineFactory = null!;
+    if (this.shadow && this.shaderAssembler) {
+      this.shaderAssembler.removeDefaultModule(shadow);
+      this.shaderAssembler = null!;
     }
   }
 

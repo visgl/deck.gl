@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device} from '@luma.gl/api';
-import {GL, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import {readPixelsToArray} from '@luma.gl/webgl';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -29,7 +29,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/webgl-legacy';
+import type {Framebuffer as LumaFramebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
@@ -104,7 +104,7 @@ export default class DeckPicker {
       this.pickingFBO.delete();
     }
     if (this.depthFBO) {
-      this.depthFBO.color.delete();
+      this.depthFBO.colorAttachments[0].delete();
       this.depthFBO.delete();
     }
   }
@@ -146,15 +146,16 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
-      this.pickingFBO = new Framebuffer(this.device);
+      this.pickingFBO = this.device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
-      if (Framebuffer.isSupported(this.device, {colorBufferFloat: true})) {
-        const depthFBO = new Framebuffer(this.device);
-        depthFBO.attach({
-          [GL.COLOR_ATTACHMENT0]: new Texture2D(this.device, {
-            format: this.device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
-            type: GL.FLOAT
-          })
+      if (this.device.isTextureFormatRenderable('rgba32float')) {
+        const depthFBO = this.device.createFramebuffer({
+          colorAttachments: [
+            this.device.createTexture({
+              format: this.device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm'
+              // type: GL.FLOAT
+            })
+          ]
         });
         this.depthFBO = depthFBO;
       }

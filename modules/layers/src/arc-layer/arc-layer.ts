@@ -35,7 +35,8 @@ import {
 } from '@deck.gl/core';
 
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -244,21 +245,20 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
       this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        greatCircle,
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      greatCircle,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
-    const {id, numSegments} = this.props;
+    const {numSegments} = this.props;
     let positions: number[] = [];
     /*
      *  (0, -1)-------------_(1, -1)
@@ -273,11 +273,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
-      id,
+      id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true

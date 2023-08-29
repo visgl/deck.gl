@@ -1,4 +1,4 @@
-import {Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
+import {Framebuffer, Texture} from '@luma.gl/core';
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
@@ -85,11 +85,11 @@ const inject = {
 type CollisionModuleSettings = {
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
-  dummyCollisionMap?: Texture2D;
+  dummyCollisionMap?: Texture;
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture2D};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},

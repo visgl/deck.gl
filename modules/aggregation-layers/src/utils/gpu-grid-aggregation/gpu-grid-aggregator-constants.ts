@@ -1,4 +1,4 @@
-import {GL} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 export const DEFAULT_RUN_PARAMS = {
@@ -36,9 +36,9 @@ export const MAX_MIN_TEXTURE_OPTS = {
   type: GL.FLOAT,
   border: 0,
   mipmaps: false,
-  parameters: {
-    [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
-    [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
+  sampler: {
+    minFilter: 'nearest',
+    magFilter: 'nearest'
   },
   dataFormat: GL.RGBA,
   width: 1,

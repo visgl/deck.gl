@@ -18,9 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/api';
+import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ProgramManager} from '@luma.gl/webgl-legacy';
+import type {PipelineFactory} from '@luma.gl/engine';
+import {ShaderAssembler} from '@luma.gl/shadertools';
+import {getPipelineFactory, getShaderAssembler} from '../shaderlib';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug';
@@ -29,7 +31,6 @@ import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 
 import Viewport from '../viewports/viewport';
-import {getProgramManager} from '../shaderlib';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
@@ -43,7 +44,9 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck;
   device: Device;
-  pipelineFactory: ProgramManager;
+  shaderAssembler: ShaderAssembler;
+  pipelineFactory: PipelineFactory;
+  renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
@@ -102,7 +105,9 @@ export default class LayerManager {
       gl: device?.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      pipelineFactory: (device && getProgramManager(device))!,
+      shaderAssembler: getShaderAssembler(),
+      pipelineFactory: (device && getPipelineFactory(device))!,
+      renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function

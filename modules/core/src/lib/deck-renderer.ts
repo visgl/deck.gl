@@ -1,5 +1,5 @@
-import type {Device} from '@luma.gl/api';
-import {Framebuffer} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
@@ -74,8 +74,7 @@ export default class DeckRenderer {
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
-      ...opts,
-      target: opts.target || Framebuffer.getDefaultFramebuffer(this.gl)
+      ...opts
     };
 
     if (renderOpts.effects) {
@@ -129,7 +128,10 @@ export default class DeckRenderer {
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     if (renderBuffers.length === 0) {
-      renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
+      renderBuffers.push(
+        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
+        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
+      );
     }
     for (const buffer of renderBuffers) {
       buffer.resize();

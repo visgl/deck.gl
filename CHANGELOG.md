@@ -3016,13 +3016,13 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-alpha.31] - Dec 14
+#### [4.2.0-alpha.32] - Dec 14
 - API Audit: remove initWebGLParameters and move pure-js example  (#1235)
 - Fix for invalid triggerName in attribute-manager.invalidate(triggerName) function (#1238)
 - Add polygonLayer geojsonLayer elevationScale prop to whats-new.md (#1237)
 - OrbitController pure-js support (#1234)
 
-#### [4.2.0-alpha.30] - Dec 12
+#### [4.2.0-alpha.32] - Dec 12
 - DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
 - DOCS: New Roadmap doc, linking to RFCs.
 - DOCS: List experimental 4.2 features in Roadmap doc.
