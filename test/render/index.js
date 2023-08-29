@@ -25,7 +25,7 @@ import {SnapshotTestRunner} from '@deck.gl/test-utils';
 import './jupyter-widget';
 
 // luma.gl v9 disable - likely a canvas sizing type issue?
-test.skip('Render Test', t => {
+test.only('Render Test', t => {
   // tape's default timeout is 500ms
   t.timeoutAfter(TEST_CASES.length * 10000 + 10000);
 
@@ -40,9 +40,9 @@ test.skip('Render Test', t => {
 
       imageDiffOptions: {
         threshold: 0.99,
-        includeEmpty: false
+        includeEmpty: false,
         // uncomment to save screenshot to disk
-        // , saveOnFail: true
+        saveOnFail: true
         // uncomment `saveAs` to overwrite current golden images
         // if left commented will be saved as `[name]-fail.png.` enabling comparison
         // , saveAs: '[name].png'
