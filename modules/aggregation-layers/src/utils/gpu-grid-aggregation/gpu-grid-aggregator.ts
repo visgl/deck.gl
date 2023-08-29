@@ -661,7 +661,7 @@ function getAggregationModel(device: Device, shaderOptions) {
   });
 }
 
-function getAllAggregationModel(device: Device, instanceCount: number): void {
+function getAllAggregationModel(device: Device, instanceCount: number): Model {
   return new Model(device, {
     id: 'All-Aggregation-Model',
     vs: AGGREGATE_ALL_VS,

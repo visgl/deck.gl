@@ -741,29 +741,36 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       [id: string]: Attribute;
     }
   ) {
+    if (!Object.keys(changedAttributes).length) {
+      return;
+    }
+
     // @ts-ignore luma.gl type issue
     const excludeAttributes = model.userData?.excludeAttributes || {};
+    const attributeBuffers: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
 
     for (const name in changedAttributes) {
       if (excludeAttributes[name]) {
         continue;
       }
-      const value = changedAttributes[name].getValue();
-      if (value instanceof Buffer) {
-        if (name === 'indices') {
-          model.setIndexBuffer(value);
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
         } else {
-          model.setAttributes({
-            [name]: value
-          });
+          constantAttributes[attributeName] = value as TypedArray;
         }
-        // TODO - update buffer map?
-      } else {
-        model.setConstantAttributes({
-          [name]: value as TypedArray
-        });
       }
     }
+    // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.

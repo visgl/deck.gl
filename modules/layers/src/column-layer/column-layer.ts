@@ -63,6 +63,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   wireframe: false,
   filled: true,
   stroked: false,
+  flatShading: false,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -244,7 +245,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   getShaders() {
     const {device} = this.context;
-    const transpileToGLSL100 = device.info.type === 'webgl2';
+    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
     const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
@@ -388,7 +389,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    const {fillModel, wireframeModel} = this.state; 
+    const {fillModel, wireframeModel} = this.state;
     fillModel.setGeometry(geometry);
     fillModel.setTopology('triangle-strip');
     // Disable indices

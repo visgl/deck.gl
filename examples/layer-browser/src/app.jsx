@@ -185,7 +185,7 @@ export default class App extends PureComponent {
           const layer = this._renderExampleLayer(example, settings, index++);
 
           if (typeof settings !== 'object') {
-            activeExamples[exampleName] = LayerControls.getSettings(layer.props);
+            activeExamples[exampleName] = LayerControls.getSettings(layer.props, example.props);
           }
 
           layers.push(layer);
