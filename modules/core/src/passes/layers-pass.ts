@@ -333,9 +333,7 @@ export default class LayersPass extends Pass {
       Object.create(layer.internalState?.propsInTransition || layer.props),
       {
         autoWrapLongitude: layer.wrapLongitude,
-        // @ts-ignore
         viewport: layer.context.viewport,
-        // @ts-ignore
         mousePosition: layer.context.mousePosition,
         pickingActive: 0,
         devicePixelRatio

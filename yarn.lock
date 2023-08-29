@@ -4743,15 +4743,9 @@ camelcase@^5.0.0, camelcase@^5.3.1:
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
 caniuse-lite@^1.0.30001254:
-<<<<<<< HEAD
-  version "1.0.30001524"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001524.tgz"
-  integrity sha512-Jj917pJtYg9HSJBF95HVX3Cdr89JUyLT4IZ8SvM5aDRni95swKgYi3TgYLH5hnGfPE/U1dg6IfZ50UsIlLkwSA==
-=======
   version "1.0.30001523"
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001523.tgz"
   integrity sha512-I5q5cisATTPZ1mc588Z//pj/Ox80ERYDfR71YnvY7raS/NOk8xXlZcB0sF7JdqaV//kOaa6aus7lRfpdnt1eBA==
->>>>>>> 43dbd0d53 (updated bufferlayouts)
 
 cardinal@~0.4.2:
   version "0.4.4"

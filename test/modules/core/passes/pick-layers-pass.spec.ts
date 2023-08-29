@@ -41,7 +41,7 @@ test('PickLayersPass#drawPickingBuffer', t => {
 
   t.ok(`PickLayersPass rendered`);
   t.equal(
-    models[0].pipeline.props.uniforms.lighting_uEnabled,
+    models[0].pipeline.uniforms.lighting_uEnabled,
     false,
     `PickLayersPass lighting disabled correctly`
   );

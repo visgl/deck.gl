@@ -58,22 +58,10 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-<<<<<<< HEAD
     "@loaders.gl/csv": "^3.4.13",
     "@loaders.gl/polyfills": "^3.4.13",
-    "@luma.gl/test-utils": "9.0.0-alpha.33",
-    "@luma.gl/webgpu": "9.0.0-alpha.33",
-=======
-    "@loaders.gl/csv": "^3.4.2",
-    "@loaders.gl/polyfills": "^3.4.2",
-<<<<<<< HEAD
-    "@luma.gl/test-utils": "9.0.0-alpha.34",
-    "@luma.gl/webgpu": "9.0.0-alpha.34",
->>>>>>> 43dbd0d53 (updated bufferlayouts)
-=======
     "@luma.gl/test-utils": "9.0.0-alpha.35",
     "@luma.gl/webgpu": "9.0.0-alpha.35",
->>>>>>> 3acff44d1 (alpha.35)
     "@math.gl/proj4": "4.0.0-alpha.4",
     "@probe.gl/bench": "^4.0.4",
     "@probe.gl/test-utils": "^4.0.4",
