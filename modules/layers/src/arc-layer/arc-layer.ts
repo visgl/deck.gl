@@ -52,6 +52,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   getTilt: {type: 'accessor', value: 0},
 
   greatCircle: false,
+  numSegments: {type: 'number', value: 50, min: 1},
 
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
@@ -70,6 +71,12 @@ type _ArcLayerProps<DataT> = {
    * @default false
    */
   greatCircle?: boolean;
+
+  /**
+   * The number of segments used to draw each arc.
+   * @default 50
+   */
+  numSegments?: number;
 
   /**
    * The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
@@ -224,8 +231,9 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   updateState(opts: UpdateParameters<this>): void {
     super.updateState(opts);
+    const {props, oldProps, changeFlags} = opts;
     // Re-generate model if geometry changed
-    if (opts.changeFlags.extensionsChanged) {
+    if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -250,8 +258,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
+    const {id, numSegments} = this.props;
     let positions: number[] = [];
-    const NUM_SEGMENTS = 50;
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -259,13 +267,13 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
      *       |  _,-"          |
      *   (0, 1)"-------------(1, 1)
      */
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
+    for (let i = 0; i < numSegments; i++) {
       positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
-      id: this.props.id,
+      id,
       geometry: new Geometry({
         drawMode: GL.TRIANGLE_STRIP,
         attributes: {
@@ -275,7 +283,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       isInstanced: true
     });
 
-    model.setUniforms({numSegments: NUM_SEGMENTS});
+    model.setUniforms({numSegments});
 
     return model;
   }
