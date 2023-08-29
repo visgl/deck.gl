@@ -272,7 +272,11 @@ test('LayersPass#GLViewport', t => {
 
   const layerManager = new LayerManager(device, {});
   const layersPass = new DrawLayersPass(device);
-  const framebuffer = device.createFramebuffer({width: 100, height: 100, colorAttachments: ['rgba8unorm']});
+  const framebuffer = device.createFramebuffer({
+    width: 100,
+    height: 100,
+    colorAttachments: ['rgba8unorm']
+  });
   layerManager.setLayers(layers);
 
   const testCases = [
