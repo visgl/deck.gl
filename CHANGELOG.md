@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.27] - Aug 29 2023
+
+- Added new numSegments prop in ArcLayer (#8055)
+- Bump loaders.gl (#8087)
+- Fix TileLayer isLoaded crash (#8074)
+
 #### deck.gl [8.9.26] - Aug 23 2023
 
 - CARTO: Don't hardcode mime-types (#8076)
