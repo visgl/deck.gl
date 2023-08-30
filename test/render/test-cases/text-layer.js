@@ -147,7 +147,7 @@ export default OS === 'Mac'
         },
         layers: [
           new TextLayer({
-            id: 'text-layer',
+            id: 'text-layer-2',
             data: points.slice(0, 10),
             coordinateOrigin: [-122.44, 37.75],
             coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
@@ -174,7 +174,7 @@ export default OS === 'Mac'
         },
         layers: [
           new TextLayer({
-            id: 'text-layer',
+            id: 'text-layer-2',
             data: points.slice(0, 5),
             coordinateOrigin: [-122.44, 37.75],
             coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
@@ -203,7 +203,7 @@ export default OS === 'Mac'
         },
         layers: [
           new TextLayer({
-            id: 'text-layer',
+            id: 'text-layer-2',
             data: points.slice(0, 10),
             coordinateOrigin: [-122.44, 37.75],
             coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,

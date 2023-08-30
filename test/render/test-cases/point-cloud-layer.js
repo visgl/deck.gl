@@ -54,7 +54,7 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/pointcloud-lnglat.png'
-  },
+  }
   // TODO - v9 binary buffer
   // {
   //   name: 'pointcloud-meter',

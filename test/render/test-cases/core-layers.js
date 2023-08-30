@@ -227,7 +227,7 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/bitmap-imagecoordinates.png'
-  },
+  }
   // TODO - v9 binary attributes
   // {
   //   name: 'binary',
