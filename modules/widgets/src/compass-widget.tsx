@@ -1,4 +1,4 @@
-import {FlyToInterpolator, WebMercatorViewport} from '@deck.gl/core';
+import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {h, render} from 'preact';
 
@@ -55,6 +55,8 @@ class CompassWidget implements Widget<CompassWidgetProps> {
   getRotation() {
     if (this.viewport instanceof WebMercatorViewport) {
       return [-this.viewport.bearing, this.viewport.pitch];
+    } else if (this.viewport instanceof _GlobeViewport) {
+      return [0, Math.max(-80, Math.min(80, this.viewport.latitude))];
     }
     return [0, 0];
   }
