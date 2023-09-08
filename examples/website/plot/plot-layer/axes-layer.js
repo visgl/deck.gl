@@ -227,7 +227,7 @@ export default class AxesLayer extends Layer {
       vs: gridVertex,
       fs: fragmentShader,
       geometry: new Geometry({
-        topology: 'line-list',,
+        topology: 'line-list',
         attributes: {
           positions: new Float32Array(gridPositions),
           normals: new Float32Array(gridNormals)
