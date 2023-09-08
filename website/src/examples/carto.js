@@ -18,17 +18,9 @@ const INDUSTRIES = {
   'Eating Places': 'eap',
   'Grocery and Food Stores': 'gro'
 };
-const WEEKS = {
-  'Week 1': ['2020-01-01', '2020-01-05'],
-  'Week 2': ['2020-01-06', '2020-01-12'],
-  'Week 3': ['2020-01-06', '2020-01-12'],
-  'Week 4': ['2020-01-13', '2020-01-19'],
-  'Week 5': ['2020-01-20', '2020-01-26'],
-  'Week 6': ['2020-01-27', '2020-01-31']
-};
 
 class CartoSQLDemo extends Component {
-  static title = 'Mastercard Index In NewYork';
+  static title = 'Mastercard Index In New York';
 
   static code = `${GITHUB_TREE}/examples/website/carto-sql`;
 
@@ -44,8 +36,7 @@ class CartoSQLDemo extends Component {
       type: 'select',
       options: Object.keys(INDUSTRIES),
       value: 'Total Retail'
-    },
-    week: {displayName: 'Week', type: 'select', options: Object.keys(WEEKS), value: 'Week 1'}
+    }
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -88,9 +79,8 @@ class CartoSQLDemo extends Component {
     const {params} = this.props;
     const index = INDEXES[params.index.value];
     const industry = INDUSTRIES[params.industry.value];
-    const week = WEEKS[params.week.value];
 
-    return <App {...this.props} mrliIndex={index} industry={industry} week={week} />;
+    return <App {...this.props} mrliIndex={index} industry={industry} />;
   }
 }
 
