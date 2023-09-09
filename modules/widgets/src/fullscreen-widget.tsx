@@ -44,7 +44,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     const el = document.createElement('div');
     el.classList.add('deckgl-widget', 'deckgl-widget-fullscreen');
     if (className) el.classList.add(className);
-    Object.entries(style).map(([key, value]) => el.style.setProperty(key, value));
+    Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
     this.deck = deck;
     this.element = el;
     this.update();
@@ -89,7 +89,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
     if (!deepEqual(oldProps.style, props.style, 1)) {
       Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
-      Object.entries(props.style).map(([key, value]) => el.style.setProperty(key, value));
+      Object.entries(props.style).map(([key, value]) => el.style.setProperty(key, value as string));
     }
 
     Object.assign(this.props, props);
