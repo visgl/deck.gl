@@ -113,7 +113,7 @@ module.exports = getESLintConfig({
       {
         files: ['modules/widgets/**/*.tsx'],
         rules: {
-          // Widgets use JSX, but do not use React so we don't want react lint rules.
+          // For widgets module. Disable React-style JSX linting since they conflict with Preact JSX.
           'react/react-in-jsx-scope': 0
         }
       }
