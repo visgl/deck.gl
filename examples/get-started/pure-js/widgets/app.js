@@ -67,5 +67,9 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [new FullscreenWidget({style: widgetTheme})]
+  widgets: [
+    new FullscreenWidget({}),
+    new FullscreenWidget({id: 'themed', style: widgetTheme}), 
+    new FullscreenWidget({id: 'purple', className: 'purple'})
+  ]
 });
