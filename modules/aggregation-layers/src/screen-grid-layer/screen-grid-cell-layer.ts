@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/api';
-import {Geometry} from '@luma.gl/engine';
-import {GL, Model, FEATURES, hasFeatures, Texture2D} from '@luma.gl/webgl-legacy';
+import {Device, Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
@@ -46,7 +46,7 @@ export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<Da
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
-  maxTexture: Texture2D;
+  maxTexture: Texture;
 };
 
 export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
@@ -56,7 +56,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   static defaultProps = defaultProps;
 
   static isSupported(device: Device) {
-    return hasFeatures(device, [FEATURES.TEXTURE_FLOAT]);
+    return device.features.has('texture-formats-float32-webgl1');
   }
 
   state!: Layer['state'] & {
@@ -107,21 +107,22 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
     const {model} = this.state;
-    model
-      .setUniforms(uniforms)
-      .setUniforms({
-        minColor,
-        maxColor,
-        maxTexture,
-        colorDomain
-      })
-      .draw({
-        parameters: {
-          depthTest: false,
-          depthMask: false,
-          ...parameters
-        }
-      });
+    model.setUniforms(uniforms);
+    model.setBindings({
+      maxTexture
+    });
+    model.setUniforms({
+      minColor,
+      maxColor,
+      colorDomain
+    });
+    model.setParameters({
+      depthWriteEnabled: false,
+      // How to specify depth mask in WebGPU?
+      // depthMask: false,
+      ...parameters
+    });
+    model.draw(this.context.renderPass);
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -147,11 +148,12 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         attributes: {
           positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
         }
       }),
+      // @ts-expect-error TODO v9 API not as dynamic
       isInstanced: true
     });
   }

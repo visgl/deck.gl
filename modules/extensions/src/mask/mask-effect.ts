@@ -1,6 +1,5 @@
 import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
-import type {Device} from '@luma.gl/api';
-import {Texture2D} from '@luma.gl/webgl-legacy';
+import type {Device, Texture} from '@luma.gl/core';
 // import {readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
@@ -37,11 +36,11 @@ export default class MaskEffect implements Effect {
   useInPicking = true;
   order = 0;
 
-  private dummyMaskMap?: Texture2D;
+  private dummyMaskMap?: Texture;
   private channels: (Channel | null)[] = [];
   private masks: Record<string, Mask> | null = null;
   private maskPass?: MaskPass;
-  private maskMap?: Texture2D;
+  private maskMap?: Texture;
   private lastViewport?: Viewport;
 
   preRender(
@@ -50,7 +49,7 @@ export default class MaskEffect implements Effect {
   ): MaskPreRenderStats {
     let didRender = false;
     if (!this.dummyMaskMap) {
-      this.dummyMaskMap = new Texture2D(device, {
+      this.dummyMaskMap = device.createTexture({
         width: 1,
         height: 1
       });
@@ -249,7 +248,7 @@ export default class MaskEffect implements Effect {
   }
 
   getModuleParameters(): {
-    maskMap: Texture2D;
+    maskMap: Texture;
     maskChannels: Record<string, Mask> | null;
   } {
     return {

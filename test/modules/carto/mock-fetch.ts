@@ -78,6 +78,9 @@ function mockFetchMapsV2() {
 export function mockFetchMapsV3() {
   const fetch = globalThis.fetch;
   globalThis.fetch = (url, {headers}) => {
+    if (url.indexOf('formatTiles=binary') !== -1) {
+      headers = {...headers, 'Content-Type': 'application/vnd.carto-vector-tile'};
+    }
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {

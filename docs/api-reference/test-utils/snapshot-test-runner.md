@@ -124,7 +124,7 @@ Whether the test is being run in headless mode. In headless mode, Chromium uses 
 
 ## Image Diff Options
 
-The test renderer and each test case may choose to override the default image diffing options. The following options from [captureAndDiffScreen](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/browser-test-driver#browsertestdriver_captureanddiffscreenoptions--object) are supported:
+The test renderer and each test case may choose to override the default image diffing options. The following options from [captureAndDiffScreen](https://github.com/uber-web/probe.gl/blob/master/docs/modules/test-utils/browser-test-driver.md#browsertestdriver_captureanddiffscreenoptions--object) are supported:
 
 * `tolerance`
 * `threshold`

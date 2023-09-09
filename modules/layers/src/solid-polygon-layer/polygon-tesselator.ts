@@ -65,7 +65,7 @@ export default class PolygonTesselator extends Tesselator<
       ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
-        vertexValid: {type: Uint8ClampedArray, size: 1},
+        vertexValid: {type: Uint16Array, size: 1},
         indices: {type: IndexType, size: 1}
       }
     });

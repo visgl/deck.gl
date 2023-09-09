@@ -1,5 +1,4 @@
 import {LayerExtension} from '@deck.gl/core';
-import {GL, Texture2D} from '@luma.gl/webgl-legacy';
 
 import {patternShaders} from './shaders.glsl';
 
@@ -8,7 +7,7 @@ import type {
   LayerContext,
   Accessor,
   AccessorFunction,
-  Texture,
+  TextureSource,
   UpdateParameters
 } from '@deck.gl/core';
 
@@ -19,7 +18,7 @@ const defaultProps = {
     value: null,
     async: true,
     parameters: {
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
+      minFilter: 'linear'
     }
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
@@ -35,7 +34,7 @@ export type FillStyleExtensionProps<DataT = any> = {
    */
   fillPatternEnabled?: boolean;
   /** Sprite image url or texture that packs all your patterns into one layout. */
-  fillPatternAtlas?: string | Texture;
+  fillPatternAtlas?: string | TextureSource;
   /** Pattern names mapped to pattern definitions, or a url that points to a JSON file. */
   fillPatternMapping?:
     | string
@@ -150,7 +149,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       });
     }
     this.setState({
-      emptyTexture: new Texture2D(this.context.gl, {
+      emptyTexture: this.context.device.createTexture({
         data: new Uint8Array(4),
         width: 1,
         height: 1

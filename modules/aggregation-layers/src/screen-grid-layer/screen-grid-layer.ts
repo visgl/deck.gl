@@ -31,7 +31,8 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {GL, Texture2D} from '@luma.gl/webgl-legacy';
+import {Texture} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -150,7 +151,7 @@ export default class ScreenGridLayer<
     gpuGridAggregator?: any;
     gpuAggregation?: any;
     weights?: any;
-    maxTexture?: Texture2D;
+    maxTexture?: Texture;
   };
 
   initializeState() {

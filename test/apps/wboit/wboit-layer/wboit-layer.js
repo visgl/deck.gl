@@ -167,7 +167,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
     const oitModel = new Model(this.context.device, {
       vs: oitBlendVs,
       fs: oitBlendFs,
-      drawMode: GL.TRIANGLE_STRIP,
+      topology: 'triangle-strip',
       attributes: {
         positions: [
           new Buffer(this.context.device, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])),

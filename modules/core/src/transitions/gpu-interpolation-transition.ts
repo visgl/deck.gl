@@ -1,6 +1,7 @@
-import type {Device} from '@luma.gl/api';
-import {Timeline} from '@luma.gl/engine';
-import {GL, Buffer, Transform} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import {Timeline, Transform} from '@luma.gl/engine';
+import {Buffer} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
   padBuffer,
@@ -56,8 +57,8 @@ export default class GPUInterpolationTransition implements GPUTransition {
       usage: GL.DYNAMIC_COPY
     };
     this.buffers = [
-      new Buffer(device, bufferOpts), // from
-      new Buffer(device, bufferOpts) // current
+      device.createBuffer(bufferOpts), // from
+      device.createBuffer(bufferOpts) // current
     ];
   }
 
@@ -98,6 +99,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
+      // @ts-expect-error BufferWithAccessor
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes

@@ -1,4 +1,4 @@
-import {GL} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
 
 import {
@@ -358,7 +358,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
       new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: getMeshGeometry(attributes),
         indices
       });

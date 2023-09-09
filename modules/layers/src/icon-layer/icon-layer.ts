@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl-legacy';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -38,14 +38,13 @@ import type {
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/webgl-legacy';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
-  iconAtlas?: string | Texture2D;
+  iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
 
@@ -279,32 +278,32 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model
-        .setUniforms(uniforms)
-        .setUniforms({
-          iconsTexture,
-          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeUnits: UNIT[sizeUnits],
-          sizeScale,
-          sizeMinPixels,
-          sizeMaxPixels,
-          billboard,
-          alphaCutoff
-        })
-        .draw();
+      this.state.model.setBindings({iconsTexture});
+      this.state.model.setUniforms(uniforms);
+      this.state.model.setUniforms({
+        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+        sizeUnits: UNIT[sizeUnits],
+        sizeScale,
+        sizeMinPixels,
+        sizeMaxPixels,
+        billboard,
+        alphaCutoff
+      });
+      this.state.model.draw(this.context.renderPass);
     }
   }
 
   protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: attribute vec2 positions;
-    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-strip',
         attributes: {
           // The size must be explicitly passed here otherwise luma.gl
           // will default to assuming that positions are 3D (x,y,z)

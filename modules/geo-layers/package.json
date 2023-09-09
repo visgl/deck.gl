@@ -31,16 +31,15 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/3d-tiles": "^3.4.2",
-    "@loaders.gl/gis": "^3.4.2",
-    "@loaders.gl/loader-utils": "^3.4.2",
-    "@loaders.gl/mvt": "^3.4.2",
-    "@loaders.gl/schema": "^3.4.2",
-    "@loaders.gl/terrain": "^3.4.2",
-    "@loaders.gl/tiles": "^3.4.2",
-    "@loaders.gl/wms": "^3.4.2",
-    "@luma.gl/experimental": "9.0.0-alpha.21",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.21",
+    "@loaders.gl/3d-tiles": "^3.4.13",
+    "@loaders.gl/gis": "^3.4.13",
+    "@loaders.gl/loader-utils": "^3.4.13",
+    "@loaders.gl/mvt": "^3.4.13",
+    "@loaders.gl/schema": "^3.4.13",
+    "@loaders.gl/terrain": "^3.4.13",
+    "@loaders.gl/tiles": "^3.4.13",
+    "@loaders.gl/wms": "^3.4.13",
+    "@luma.gl/core": "9.0.0-alpha.35",
     "@math.gl/core": "4.0.0-alpha.4",
     "@math.gl/culling": "4.0.0-alpha.4",
     "@math.gl/web-mercator": "4.0.0-alpha.4",
@@ -53,9 +52,9 @@
     "@deck.gl/extensions": "^8.0.0",
     "@deck.gl/layers": "^8.0.0",
     "@deck.gl/mesh-layers": "^8.0.0",
-    "@loaders.gl/core": "^3.4.2",
-    "@luma.gl/shadertools": "9.0.0-alpha.21",
-    "@luma.gl/webgl-legacy": "9.0.0-alpha.21"
+    "@loaders.gl/core": "^3.4.13",
+    "@luma.gl/core": "9.0.0-alpha.35",
+    "@luma.gl/shadertools": "9.0.0-alpha.35"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
