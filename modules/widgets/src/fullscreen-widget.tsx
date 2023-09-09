@@ -1,4 +1,5 @@
 /* global document */
+import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
 import {h, render} from 'preact';
 
@@ -39,7 +40,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const {label, style, className} = this.props;
     const el = document.createElement('div');
-    el.className = 'deckgl-widget deckgl-widget-fullscreen';
+    el.classList.add('deckgl-widget', 'deckgl-widget-fullscreen');
     if (className) el.classList.add(className);
     Object.entries(style).map(([key, value]) => el.style.setProperty(key, value));
     const ui = <Button onClick={() => this.handleClick()} label={label} />;
@@ -57,6 +58,18 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   setProps(props: FullscreenWidgetProps) {
+    const oldProps = this.props;
+    const el = this.element;
+    if (oldProps.className !== props.className) {
+      if (oldProps.className) el.classList.remove(oldProps.className);
+      if (props.className) el.classList.add(props.className);
+    }
+
+    if (!deepEqual(oldProps.style, props.style, 1)) {
+      Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
+      Object.entries(props.style).map(([key, value]) => el.style.setProperty(key, value));
+    }
+
     Object.assign(this.props, props);
   }
 
