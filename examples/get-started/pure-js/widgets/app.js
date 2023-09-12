@@ -2,7 +2,7 @@ import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
-import {luma} from '@luma.gl/api';
+import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 
 luma.registerDevices([WebGLDevice]);
