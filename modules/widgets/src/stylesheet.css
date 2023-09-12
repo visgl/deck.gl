@@ -35,11 +35,11 @@
 }
 
 .deckgl-widget-button-icon {
-  color: var(--button-icon-idle, rgba(97, 97, 102, 1))
+  color: var(--button-icon-idle, rgba(97, 97, 102, 1));
 }
 
 .deckgl-widget-button-icon:hover {
-  color: var(--button-icon-hover, rgba(24, 24, 26, 1))
+  color: var(--button-icon-hover, rgba(24, 24, 26, 1));
 }
 
 .deckgl-pseudo-fullscreen {
