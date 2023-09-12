@@ -1,4 +1,5 @@
-import {FlyToInterpolator, type Deck, type Viewport, type Widget, type WidgetPlacement} from '@deck.gl/core';
+import {FlyToInterpolator} from '@deck.gl/core';
+import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {h, render} from 'preact';
 
 interface ZoomWidgetProps {
@@ -9,6 +10,7 @@ interface ZoomWidgetProps {
   zoomOutLabel?: string;
   transitionDuration?: number;
   style?: Partial<CSSStyleDeclaration>;
+  className?: string;
 }
 
 class ZoomWidget implements Widget<ZoomWidgetProps> {
@@ -32,9 +34,11 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
+    const {style, className} = this.props;
     const element = document.createElement('div');
-    element.className = 'deckgl-widget deckgl-widget-zoom';
-    Object.entries(this.props.style).map(([key, value]) => element.style.setProperty(key, value));
+    element.classList.add('deckgl-widget', 'deckgl-widget-zoom');
+    if (className) element.classList.add(className);
+    Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
     const ui = (
       <div className="deckgl-widget-button-group">
         <Button onClick={() => this.handleZoomIn()} label={this.props.zoomInLabel}>
@@ -68,7 +72,9 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
 
   handleZoom(nextZoom: number) {
     const viewId = this.viewId || 'default-view';
-    const nextViewState = {...this.viewport, zoom: nextZoom,
+    const nextViewState = {
+      ...this.viewport,
+      zoom: nextZoom,
       transitionDuration: this.props.transitionDuration,
       transitionInterpolator: new FlyToInterpolator()
     };

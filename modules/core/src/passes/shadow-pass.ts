@@ -1,10 +1,10 @@
-import type {Device} from '@luma.gl/api';
-import {GL, Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/webgl-legacy';
+import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import {WEBGLRenderbuffer, withParameters} from '@luma.gl/webgl';
 import {default as LayersPass} from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
-  shadowMap: Texture2D;
-  depthBuffer: Renderbuffer;
+  shadowMap: Texture;
+  depthBuffer: WEBGLRenderbuffer;
   fbo: Framebuffer;
 
   constructor(
@@ -16,32 +16,31 @@ export default class ShadowPass extends LayersPass {
     super(device, props);
 
     // The shadowMap texture
-    this.shadowMap = new Texture2D(device, {
+    this.shadowMap = device.createTexture({
       width: 1,
       height: 1,
-      parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+      sampler: {
+        minFilter: 'linear',
+        magFilter: 'linear',
+        addressModeU: 'clamp-to-edge',
+        addressModeV: 'clamp-to-edge'
       }
     });
 
-    this.depthBuffer = new Renderbuffer(device, {
-      format: GL.DEPTH_COMPONENT16,
+    this.depthBuffer = new WEBGLRenderbuffer(device as any, {
+      format: 'depth16unorm',
       width: 1,
       height: 1
     });
 
-    this.fbo = new Framebuffer(device, {
+    this.fbo = device.createFramebuffer({
       id: 'shadowmap',
       width: 1,
       height: 1,
-      attachments: {
-        [GL.COLOR_ATTACHMENT0]: this.shadowMap,
-        // Depth attachment has to be specified for depth test to work
-        [GL.DEPTH_ATTACHMENT]: this.depthBuffer
-      }
+      colorAttachments: [this.shadowMap],
+      // Depth attachment has to be specified for depth test to work
+      // @ts-expect-error Renderbuffer typing not solved in luma.gl
+      depthStencilAttachment: this.depthBuffer
     });
   }
 

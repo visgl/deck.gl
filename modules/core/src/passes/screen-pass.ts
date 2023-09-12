@@ -1,9 +1,10 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import type {Device} from '@luma.gl/api';
-import type {Framebuffer} from '@luma.gl/webgl-legacy';
-import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/core';
+import {ClipSpace} from '@luma.gl/engine';
+import {setParameters, withParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
 
 import type {ShaderModule} from '../types/types';
@@ -27,6 +28,7 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
+    // @ts-expect-error ClipSpace prototype
     this.model = new ClipSpace(device, {id, fs, modules: [module]});
   }
 
@@ -57,16 +59,18 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(this.device, {color: true});
-    this.model.draw({
-      moduleSettings: options.moduleSettings,
-      uniforms: {
-        texture: inputBuffer,
-        texSize: [inputBuffer.width, inputBuffer.height]
-      },
-      parameters: {
-        depthWrite: false,
-        depthTest: false
-      }
+    this.model.setShaderModuleProps(options.moduleSettings);
+    this.model.setBindings({
+      texture: inputBuffer.colorAttachments[0]
     });
+    this.model.setUniforms({
+      texSize: [inputBuffer.width, inputBuffer.height]
+    });
+    this.model.setParameters({
+      depthWriteEnabled: false,
+      // depthWrite: false,
+      depthCompare: 'always'
+    });
+    this.model.draw(this.device.getDefaultRenderPass());
   }
 }

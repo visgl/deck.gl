@@ -1,7 +1,8 @@
 import type {NumericArray} from '@math.gl/core';
 import {GLTFMaterialParser} from '@luma.gl/experimental';
 import {pbr} from '@luma.gl/shadertools';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
@@ -106,7 +107,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     this.setState({materialParser});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
-    const model = new Model(this.context.gl, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id,
       geometry: mesh,

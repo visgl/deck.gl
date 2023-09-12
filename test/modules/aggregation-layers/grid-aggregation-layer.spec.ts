@@ -29,7 +29,7 @@ import {Layer} from 'deck.gl';
 import {testLayer, device} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl-test/data';
 import {equals} from '@math.gl/core';
-import {GL, Buffer} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 
 const BASE_LAYER_ID = 'composite-layer-id';
 const PROPS = {
@@ -64,7 +64,7 @@ class TestGridAggregationLayer extends GridAggregationLayer {
         count: {
           needMax: true,
           size: 1,
-          maxBuffer: new Buffer(device, {
+          maxBuffer: device.createBuffer({
             byteLength: 4 * 4,
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })

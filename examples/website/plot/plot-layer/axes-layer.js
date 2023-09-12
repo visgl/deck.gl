@@ -227,7 +227,7 @@ export default class AxesLayer extends Layer {
       vs: gridVertex,
       fs: fragmentShader,
       geometry: new Geometry({
-        drawMode: GL.LINES,
+        topology: 'line-list',
         attributes: {
           positions: new Float32Array(gridPositions),
           normals: new Float32Array(gridNormals)
@@ -276,7 +276,7 @@ export default class AxesLayer extends Layer {
       vs: labelVertex,
       fs: labelFragment,
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           indices: new Uint16Array(labelIndices),
           positions: new Float32Array(labelPositions),

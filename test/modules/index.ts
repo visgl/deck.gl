@@ -21,15 +21,15 @@
 import './imports-spec';
 import './core';
 
-import './layers';
-import './aggregation-layers';
-import './carto';
-import './geo-layers';
-import './mesh-layers';
+// import './layers';
+// import './aggregation-layers';
+// import './carto';
+// import './geo-layers';
+// import './mesh-layers';
 
-import './google-maps';
-import './mapbox';
-import './json';
-import './react';
-import './jupyter-widget';
-import './extensions';
+// import './google-maps';
+// import './mapbox';
+// import './json';
+// import './react';
+// import './jupyter-widget';
+// import './extensions';

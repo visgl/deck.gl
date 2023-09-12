@@ -35,9 +35,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl-legacy';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/webgl-legacy';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -182,13 +181,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        sizeUnits: UNIT[sizeUnits],
-        radiusPixels: pointSize
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      sizeUnits: UNIT[sizeUnits],
+      radiusPixels: pointSize
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -202,8 +200,9 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           positions: new Float32Array(positions)
         }

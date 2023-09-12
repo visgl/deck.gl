@@ -8,7 +8,7 @@ import {
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
-import {luma} from '@luma.gl/api';
+import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 
 luma.registerDevices([WebGLDevice]);
@@ -76,6 +76,9 @@ new Deck({
   widgets: [
     new ZoomWidget({style: widgetTheme}),
     new CompassWidget({style: widgetTheme}),
-    new FullscreenWidget({style: widgetTheme})
+
+    new FullscreenWidget({}),
+    new FullscreenWidget({id: 'themed', style: widgetTheme}),
+    new FullscreenWidget({id: 'purple', className: 'purple'})
   ]
 });

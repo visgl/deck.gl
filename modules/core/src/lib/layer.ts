@@ -19,7 +19,9 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-import {GL, withParameters, setParameters} from '@luma.gl/webgl-legacy';
+import {Buffer, TypedArray} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
+import {withParameters, setParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -44,7 +46,7 @@ import {load} from '@loaders.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/webgl-legacy';
+import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -52,6 +54,7 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
+import {RenderPass} from '@luma.gl/core';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -182,6 +185,11 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type SharedLayerState = {
+  model?: Model;
+  [key: string]: any;
+};
+
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
 > {
@@ -199,7 +207,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
-  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+  state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
 
@@ -693,7 +701,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = Math.floor(pickingColorCache.length / 3);
+    const cacheSize = Math.floor(pickingColorCache.length / 4);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     // @ts-ignore (TS2531) internalState is always defined when this method is called
@@ -707,42 +715,62 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
-        size: 3,
+        size: 4,
         copy: true,
         maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = Math.floor(pickingColorCache.length / 3);
+      const newCacheSize = Math.floor(pickingColorCache.length / 4);
       const pickingColor = [];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
-        pickingColorCache[i * 3 + 0] = pickingColor[0];
-        pickingColorCache[i * 3 + 1] = pickingColor[1];
-        pickingColorCache[i * 3 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 0] = pickingColor[0];
+        pickingColorCache[i * 4 + 1] = pickingColor[1];
+        pickingColorCache[i * 4 + 2] = pickingColor[2];
       }
     }
 
-    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
+    attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
-  /** Apply changed attributes to  */
+  /** Apply changed attributes to model */
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
       [id: string]: Attribute;
     }
   ) {
-    const attributeManager = this.getAttributeManager();
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData.excludeAttributes || {};
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const shaderAttributes = attributeManager.getShaderAttributes(
-      changedAttributes,
-      excludeAttributes
-    );
+    if (!Object.keys(changedAttributes).length) {
+      return;
+    }
 
-    model.setAttributes(shaderAttributes);
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const attributeBuffers: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
+
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
+      }
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else {
+          constantAttributes[attributeName] = value as TypedArray;
+        }
+      }
+    }
+    // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
@@ -832,7 +860,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       attributeManager.addInstanced({
         instancePickingColors: {
           type: GL.UNSIGNED_BYTE,
-          size: 3,
+          size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
           // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -982,10 +1010,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Calculates uniforms
   _drawLayer({
+    renderPass,
     moduleParameters = null,
     uniforms = {},
     parameters = {}
   }: {
+    renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
     parameters: any;
@@ -1018,7 +1048,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // Call subclass lifecycle method
       withParameters(context.gl, parameters, () => {
-        const opts = {moduleParameters, uniforms, parameters, context};
+        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {

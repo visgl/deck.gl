@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/webgl-legacy';
+import {GL} from '@luma.gl/constants';
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
@@ -125,7 +125,8 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        this.state.model.draw({uniforms: {outlineBuffer: DEFAULT_BUFFER}});
+        this.state.model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
+        this.state.model.draw(this.context.renderPass);
       }
     }
   }

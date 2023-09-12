@@ -4,10 +4,9 @@ import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
-import {Framebuffer} from '@luma.gl/webgl-legacy';
 
 test('PickLayersPass#drawPickingBuffer', t => {
-  const pickingFBO = new Framebuffer(device);
+  const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
   // Resize it to current canvas size (this is a noop if size hasn't changed)
   pickingFBO.resize({width: 100, height: 100});
@@ -42,7 +41,7 @@ test('PickLayersPass#drawPickingBuffer', t => {
 
   t.ok(`PickLayersPass rendered`);
   t.equal(
-    models[0].program.uniforms.lighting_uEnabled,
+    models[0].pipeline.uniforms.lighting_uEnabled,
     false,
     `PickLayersPass lighting disabled correctly`
   );

@@ -1,9 +1,8 @@
-import {Device} from '@luma.gl/api';
-import {GL, Framebuffer, Texture2D} from '@luma.gl/webgl-legacy';
+import {Device, Sampler, SamplerProps} from '@luma.gl/core';
 
-const DEFAULT_PARAMETERS = {
-  [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
-  [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
+const DEFAULT_PARAMETERS: SamplerProps = {
+  minFilter: 'nearest',
+  magFilter: 'nearest'
 };
 
 type FloatTextureOptions = {
@@ -12,9 +11,10 @@ type FloatTextureOptions = {
   height?: number;
   data?: any;
   unpackFlipY?: boolean;
-  parameters?: Record<GL, GL>;
+  parameters?: SamplerProps;
 };
 
+// TODO - not working
 export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
   const {
     width = 1,
@@ -23,31 +23,29 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
-  const texture = new Texture2D(device, {
+  const texture = device.createTexture({
     data,
-    format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
-    type: GL.FLOAT,
-    border: 0,
+    format: 'rgba32float', // device.info.type === 'webgl2' ? 'rgba32float' : GL.RGBA,
+    // type: GL.FLOAT,
+    // border: 0,
     mipmaps: false,
-    parameters,
-    dataFormat: GL.RGBA,
+    sampler: parameters,
+    // dataFormat: GL.RGBA,
     width,
-    height,
-    // @ts-expect-error
-    unpackFlipY
+    height
+    // ts-expect-error
+    // unpackFlipY
   });
   return texture;
 }
 
 export function getFramebuffer(device: Device, opts) {
   const {id, width = 1, height = 1, texture} = opts;
-  const fb = new Framebuffer(device, {
+  const fb = device.createFramebuffer({
     id,
     width,
     height,
-    attachments: {
-      [GL.COLOR_ATTACHMENT0]: texture
-    }
+    colorAttachments: [texture]
   });
 
   return fb;

@@ -6,15 +6,14 @@ interface CompassWidgetProps {
   id: string;
   viewId?: string | null;
   placement?: WidgetPlacement;
-  CompassLabel?: string;
+  label?: string;
   transitionDuration?: number;
   style?: Partial<CSSStyleDeclaration>;
+  className?: string;
 }
 
-const ICON_HEIGHT = 16;
-
 class CompassWidget implements Widget<CompassWidgetProps> {
-  id = 'Compass';
+  id = 'compass';
   props: CompassWidgetProps;
   placement: WidgetPlacement = 'top-left';
   viewId = null;
@@ -23,11 +22,11 @@ class CompassWidget implements Widget<CompassWidgetProps> {
   element?: HTMLDivElement;
 
   constructor(props: CompassWidgetProps) {
-    this.id = props.id || 'Compass';
+    this.id = props.id || 'compass';
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
     props.transitionDuration = props.transitionDuration || 200;
-    props.CompassLabel = props.CompassLabel || 'Compass';
+    props.label = props.label || 'Compass';
     props.style = props.style || {};
     this.props = props;
   }
@@ -42,13 +41,14 @@ class CompassWidget implements Widget<CompassWidgetProps> {
   }
 
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
+    const {style, className} = this.props;
     const element = document.createElement('div');
-    element.className = 'deckgl-widget deckgl-widget-Compass';
-    Object.entries(this.props.style).map(([key, value]) => element.style.setProperty(key, value));
+    element.classList.add('deckgl-widget', 'deckgl-widget-compass');
+    if (className) element.classList.add(className);
+    Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
     this.deck = deck;
     this.element = element;
     this.update();
-
     return element;
   }
 
@@ -64,22 +64,16 @@ class CompassWidget implements Widget<CompassWidgetProps> {
   update() {
     const [rz, rx] = this.getRotation();
     const ui = (
-      <div className="deckgl-widget-button-group">
-        <div className="deckgl-widget-button-border" style={{perspective: ICON_HEIGHT * 10}}>
+      <div className="deckgl-widget-button">
+        <div className="deckgl-widget-button-border" style={{perspective: 100}}>
           <button
-            className="deckgl-widget-button"
             type="button"
             onClick={() => this.handleCompassReset()}
-            label={this.props.CompassLabel}
+            label={this.props.label}
             style={{transform: `rotateX(${rx}deg)`}}
           >
-            <svg
-              fill="none"
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${ICON_HEIGHT} ${ICON_HEIGHT}`}
-            >
-              <g transform={`rotate(${rz},${ICON_HEIGHT / 2},${ICON_HEIGHT / 2})`}>
+            <svg fill="none" width="100%" height="100%" viewBox={'0 0 16 16'}>
+              <g transform={`rotate(${rz},8,8)`}>
                 <path d="M5 8.00006L7.99987 0L10.9997 8.00006H5Z" fill="#F05C44" />
                 <path
                   d="M11.0002 7.99994L8.00038 16L5.00051 7.99994L11.0002 7.99994Z"

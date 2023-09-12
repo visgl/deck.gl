@@ -31,7 +31,7 @@ const CartoRasterTileLoader: LoaderWithParser = {
   parse: async (arrayBuffer, options?: CartoRasterTileLoaderOptions) =>
     parseCartoRasterTile(arrayBuffer, options),
   parseSync: parseCartoRasterTile,
-  worker: false, // TODO set to true once workers deployed to unpkg
+  worker: true,
   options: DEFAULT_OPTIONS
 };
 

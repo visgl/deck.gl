@@ -29,12 +29,13 @@ import {
   GetPickingInfoParams,
   UpdateParameters,
   Color,
-  Texture,
+  TextureSource,
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Geometry, Model} from '@luma.gl/engine';
+import type {Texture} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -71,7 +72,7 @@ type _BitmapLayerProps = {
    *
    * @default null
    */
-  image?: string | Texture | null;
+  image?: string | TextureSource | null;
 
   /**
    * Supported formats:
@@ -271,10 +272,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        vertexCount: 6
-      }),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      topology: 'triangle-list',
       isInstanced: false
     });
   }
@@ -291,17 +290,16 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model
-        .setUniforms(uniforms)
-        .setUniforms({
-          bitmapTexture: image,
-          desaturate,
-          transparentColor: transparentColor.map(x => x / 255),
-          tintColor: tintColor.slice(0, 3).map(x => x / 255),
-          coordinateConversion,
-          bounds
-        })
-        .draw();
+      model.setUniforms(uniforms);
+      model.setBindings({bitmapTexture: image as Texture});
+      model.setUniforms({
+        desaturate,
+        transparentColor: transparentColor.map(x => x / 255) as number[],
+        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+        coordinateConversion,
+        bounds
+      });
+      model.draw(this.context.renderPass);
     }
   }
 

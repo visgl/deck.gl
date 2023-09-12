@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import GLConstants from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/constants';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';

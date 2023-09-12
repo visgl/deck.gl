@@ -26,9 +26,9 @@ export default `\
 
 
 attribute vec3 instancePositions;
-attribute vec3 nextPositions;
+attribute vec3 instanceNextPositions;
 attribute vec3 instancePositions64Low;
-attribute vec3 nextPositions64Low;
+attribute vec3 instanceNextPositions64Low;
 attribute float instanceElevations;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
@@ -42,11 +42,11 @@ void main(void) {
   #if RING_WINDING_ORDER_CW == 1
     props.positions = instancePositions;
     props.positions64Low = instancePositions64Low;
-    props.nextPositions = nextPositions;
-    props.nextPositions64Low = nextPositions64Low;
+    props.nextPositions = instanceNextPositions;
+    props.nextPositions64Low = instanceNextPositions64Low;
   #else
-    props.positions = nextPositions;
-    props.positions64Low = nextPositions64Low;
+    props.positions = instanceNextPositions;
+    props.positions64Low = instanceNextPositions64Low;
     props.nextPositions = instancePositions;
     props.nextPositions64Low = instancePositions64Low;
   #endif
