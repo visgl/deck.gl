@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@luma.gl/shadertools": "^8.5.20"
+    "@luma.gl/shadertools": "^8.5.21"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",

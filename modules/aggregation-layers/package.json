@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@luma.gl/constants": "^8.5.20",
-    "@luma.gl/shadertools": "^8.5.20",
+    "@luma.gl/constants": "^8.5.21",
+    "@luma.gl/shadertools": "^8.5.21",
     "@math.gl/web-mercator": "^3.6.2",
     "d3-hexbin": "^0.2.1"
   },
