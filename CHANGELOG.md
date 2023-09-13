@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.28] - Sep 13 2023
+
+- [mapbox] Fix interleaving when base map has terrain (#8111)
+- Add typings for React render callback children (#8109)
+- Upgrade luma.gl (#8112)
+
 #### deck.gl [8.9.27] - Aug 29 2023
 
 - Added new numSegments prop in ArcLayer (#8055)

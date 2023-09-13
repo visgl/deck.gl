@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "8.9.27",
+  "version": "8.9.28",
   "keywords": [
     "webgl",
     "visualization",
@@ -29,17 +29,17 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@deck.gl/aggregation-layers": "8.9.27",
-    "@deck.gl/carto": "8.9.27",
-    "@deck.gl/core": "8.9.27",
-    "@deck.gl/extensions": "8.9.27",
-    "@deck.gl/geo-layers": "8.9.27",
-    "@deck.gl/google-maps": "8.9.27",
-    "@deck.gl/json": "8.9.27",
-    "@deck.gl/layers": "8.9.27",
-    "@deck.gl/mapbox": "8.9.27",
-    "@deck.gl/mesh-layers": "8.9.27",
-    "@deck.gl/react": "8.9.27"
+    "@deck.gl/aggregation-layers": "8.9.28",
+    "@deck.gl/carto": "8.9.28",
+    "@deck.gl/core": "8.9.28",
+    "@deck.gl/extensions": "8.9.28",
+    "@deck.gl/geo-layers": "8.9.28",
+    "@deck.gl/google-maps": "8.9.28",
+    "@deck.gl/json": "8.9.28",
+    "@deck.gl/layers": "8.9.28",
+    "@deck.gl/mapbox": "8.9.28",
+    "@deck.gl/mesh-layers": "8.9.28",
+    "@deck.gl/react": "8.9.28"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
