@@ -32,7 +32,7 @@
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/images": "^3.4.13",
     "@loaders.gl/schema": "^3.4.13",
-    "@luma.gl/constants": "^8.5.20",
+    "@luma.gl/constants": "^8.5.21",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^3.6.2",
     "@math.gl/polygon": "^3.6.2",
