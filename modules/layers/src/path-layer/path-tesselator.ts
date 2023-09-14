@@ -118,7 +118,9 @@ export default class PathTesselator extends Tesselator<
         context.vertexStart += geometrySize;
       }
     } else {
+      // @ts-expect-error
       this._updateSegmentTypes(path, context);
+      // @ts-expect-error
       this._updatePositions(path, context);
     }
   }

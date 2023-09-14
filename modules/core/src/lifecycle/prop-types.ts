@@ -2,7 +2,7 @@ import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 
 import type Component from './component';
-import type {Color, Texture} from '../types/layer-props';
+import type {Color, TextureSource} from '../types/layer-props';
 import type Layer from '../lib/layer';
 
 type BasePropType<ValueT> = {
@@ -81,7 +81,7 @@ type FunctionPropType<T = Function> = BasePropType<T> & {
 type DataPropType<T = any> = BasePropType<T> & {
   type: 'data';
 };
-type ImagePropType = BasePropType<Texture | null> & {
+type ImagePropType = BasePropType<TextureSource | null> & {
   type: 'image';
   parameters?: Record<number, number>;
 };
@@ -132,8 +132,8 @@ const TYPE_DEFINITIONS = {
     validate(value, propType: NumberPropType) {
       return (
         Number.isFinite(value) &&
-        (!('max' in propType) || value <= propType.max!) &&
-        (!('min' in propType) || value >= propType.min!)
+        (!('max' in propType) || value <= propType.max) &&
+        (!('min' in propType) || value >= propType.min)
       );
     }
   },
@@ -199,10 +199,10 @@ const TYPE_DEFINITIONS = {
   image: {
     transform: (value, propType: ImagePropType, component) => {
       const context = (component as Layer).context;
-      if (!context || !context.gl) {
+      if (!context || !context.device) {
         return null;
       }
-      return createTexture(component.id, context.gl, value, {
+      return createTexture(component.id, context.device, value, {
         ...propType.parameters,
         ...component.props.textureParameters
       });

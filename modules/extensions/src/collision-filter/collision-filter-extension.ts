@@ -65,7 +65,7 @@ export default class CollisionFilterExtension extends LayerExtension {
     }
     this.context.deck?._addDefaultEffect(new CollisionFilterEffect());
     const attributeManager = this.getAttributeManager();
-    attributeManager!.add({
+    attributeManager.add({
       collisionPriorities: {
         size: 1,
         accessor: 'getCollisionPriority',

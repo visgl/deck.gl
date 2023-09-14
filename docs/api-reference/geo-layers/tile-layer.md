@@ -314,11 +314,11 @@ Class that manages loading and purging of tile data. This class caches recently 
 
 To implement a custom indexing scheme, extend `Tileset2D` and implement the following interface:
 
-- `getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse})` - returns an array of indices in the given viewport. The indices should have the shape of Objects, like: `{q: '0123'}` to allow referencing in the URL template supplied to the `data` prop.
+- `getTileIndices({viewport, maxZoom, minZoom, zRange, modelMatrix, modelMatrixInverse})` - returns an array of indices in the given viewport. The indices should have the shape of Objects, like `{q: '0123'}`, to allow referencing in the URL template supplied to the `data` prop.
 - `getTileId(index)` - returns unique string key for a tile index.
-- `getParentIndex(index)` - returns index of the parent tile.
+- `getParentIndex(index)` - returns the index of the parent tile.
 - `getTileZoom(index)` - returns a zoom level for a tile index.
-- `getTileMetadata(index) - returns additional metadata to add to tile (optional).
+- `getTileMetadata(index)` - returns additional metadata to add to tile.  This must be an object that contains a bounding box as `bbox` in the format `{west: number, south: number, east: number, north: number}`.
 
 For example, to index using [quadkeys](https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system#tile-coordinates-and-quadkeys):
 

@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.9.0-beta.6",
+  "version": "8.10.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -35,20 +35,23 @@
     "DEPRECATED: math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"
   ],
   "dependencies": {
-    "@loaders.gl/core": "^3.4.2",
-    "@loaders.gl/images": "^3.4.2",
-    "@luma.gl/constants": "^8.5.20",
-    "@luma.gl/core": "^8.5.20",
-    "@luma.gl/webgl": "^8.5.20",
-    "@math.gl/core": "^3.6.2",
-    "@math.gl/sun": "^3.6.2",
-    "@math.gl/web-mercator": "^3.6.2",
-    "@probe.gl/env": "^3.5.0",
-    "@probe.gl/log": "^3.5.0",
-    "@probe.gl/stats": "^3.5.0",
+    "@babel/runtime": "^7.0.0",
+    "@loaders.gl/core": "^3.4.13",
+    "@loaders.gl/images": "^3.4.13",
+    "@luma.gl/core": "9.0.0-alpha.35",
+    "@luma.gl/constants": "9.0.0-alpha.35",
+    "@luma.gl/engine": "9.0.0-alpha.35",
+    "@luma.gl/shadertools": "9.0.0-alpha.35",
+    "@luma.gl/webgl": "9.0.0-alpha.35",
+    "@math.gl/core": "4.0.0-alpha.4",
+    "@math.gl/sun": "4.0.0-alpha.4",
+    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@probe.gl/env": "^4.0.4",
+    "@probe.gl/log": "^4.0.4",
+    "@probe.gl/stats": "^4.0.4",
     "gl-matrix": "^3.0.0",
-    "math.gl": "^3.6.2",
-    "mjolnir.js": "^2.7.0"
+    "mjolnir.js": "^2.7.0",
+    "@types/offscreencanvas": "^2019.6.4"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

@@ -36,7 +36,7 @@ function isAccessor(settingName) {
 }
 
 export default class LayerControls extends PureComponent {
-  static getSettings(props) {
+  static getSettings(props, defaults) {
     const keys = [];
     for (const key in props) {
       if (!PROP_BLACK_LIST.has(key)) {
@@ -47,7 +47,7 @@ export default class LayerControls extends PureComponent {
 
     const settings = {};
     for (const key of keys) {
-      settings[key] = props[key];
+      settings[key] = key in defaults ? defaults[key] : props[key];
     }
     return settings;
   }

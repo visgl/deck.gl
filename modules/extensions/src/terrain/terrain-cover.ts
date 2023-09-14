@@ -163,7 +163,7 @@ export class TerrainCover {
       return null;
     }
     if (!this.fbo) {
-      this.fbo = createRenderTarget(this.targetLayer.context.gl, {id: this.id});
+      this.fbo = createRenderTarget(this.targetLayer.context.device, {id: this.id});
     }
     return this.fbo;
   }
@@ -173,7 +173,9 @@ export class TerrainCover {
       return null;
     }
     if (!this.pickingFbo) {
-      this.pickingFbo = createRenderTarget(this.targetLayer.context.gl, {id: `${this.id}-picking`});
+      this.pickingFbo = createRenderTarget(this.targetLayer.context.device, {
+        id: `${this.id}-picking`
+      });
     }
     return this.pickingFbo;
   }
@@ -185,12 +187,12 @@ export class TerrainCover {
   delete() {
     const {fbo, pickingFbo} = this;
     if (fbo) {
-      fbo.texture.delete();
-      fbo.delete();
+      fbo.colorAttachments[0].destroy();
+      fbo.destroy();
     }
     if (pickingFbo) {
-      pickingFbo.texture.delete();
-      pickingFbo.delete();
+      pickingFbo.colorAttachments[0].destroy();
+      pickingFbo.destroy();
     }
   }
 }
@@ -217,7 +219,7 @@ function getTile(layer: Layer): TileHeader | null {
     if (tile) {
       return tile;
     }
-    layer = layer.parent as Layer;
+    layer = layer.parent;
   }
   return null;
 }

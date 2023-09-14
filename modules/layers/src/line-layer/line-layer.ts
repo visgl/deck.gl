@@ -32,8 +32,9 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
@@ -173,9 +174,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -183,28 +183,26 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude ? 1 : 0
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude ? 1 : 0
+    });
+    this.state.model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      this.state.model
-        .setUniforms({
-          useShortestPath: -1
-        })
-        .draw();
+      this.state.model.setUniforms({
+        useShortestPath: -1
+      });
+      this.state.model.draw(this.context.renderPass);
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -214,13 +212,14 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true

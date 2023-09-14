@@ -18,6 +18,7 @@
     {"path": "../layers"},
     {"path": "../mapbox"},
     {"path": "../mesh-layers"},
-    {"path": "../react"}
+    {"path": "../react"},
+    {"path": "../widgets"}
   ]
 }

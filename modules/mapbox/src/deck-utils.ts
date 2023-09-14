@@ -4,7 +4,7 @@ import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 type UserData = {
   isExternal: boolean;
@@ -230,7 +230,7 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
     const dy = cameraY - center[1];
     const cameraToCenterDistanceGround = Math.sqrt(dx * dx + dy * dy);
 
-    const pitchRadians = pitch! * DEGREES_TO_RADIANS;
+    const pitchRadians = pitch * DEGREES_TO_RADIANS;
     const altitudePixels = 1.5 * height;
     const scale =
       pitchRadians < 0.001
@@ -275,7 +275,11 @@ function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMerca
       ? // match mapbox-gl@>=1.3.0's projection matrix
         0.02
       : // use deck.gl's own default
-        0.1
+        0.1,
+    // @ts-expect-error Mapbox specific - extract near plane position
+    nearZ: map.transform._nearZ / map.transform.height,
+    // @ts-expect-error Mapbox specific - extract far plane position
+    farZ: map.transform._farZ / map.transform.height
   });
 }
 

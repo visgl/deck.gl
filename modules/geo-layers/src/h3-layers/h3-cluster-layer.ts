@@ -1,8 +1,9 @@
-import {h3SetToMultiPolygon, H3IndexInput} from 'h3-js';
+import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {default as H3HexagonLayer} from './h3-hexagon-layer';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
+import {normalizeLongitudes} from './h3-utils';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
   getHexagons: {type: 'accessor', value: d => d.hexagons}
@@ -45,9 +46,13 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
       for (const object of iterable) {
         objectInfo.index++;
         const hexagons = getHexagons(object, objectInfo);
-        const multiPolygon = h3SetToMultiPolygon(hexagons, true);
+        const multiPolygon = cellsToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
+          // Normalize polygons to prevent wrapping over the anti-meridian
+          for (const ring of polygon) {
+            normalizeLongitudes(ring);
+          }
           polygons.push(this.getSubLayerRow({polygon}, object, objectInfo.index));
         }
       }

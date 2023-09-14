@@ -394,8 +394,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     objectInfo: AccessorContext<DataT>
   ): ReturnType<typeof transformParagraph> {
     const {fontAtlasManager} = this.state;
-    const iconMapping = fontAtlasManager.mapping!;
-    const getText = this.state.getText!;
+    const iconMapping = fontAtlasManager.mapping;
+    const getText = this.state.getText;
     const {wordBreak, lineHeight, maxWidth} = this.props;
 
     const paragraph = getText(object, objectInfo) || '';
@@ -479,7 +479,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -581,7 +581,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
-          iconAtlas: texture,
+          iconAtlas: atlas,
           iconMapping: mapping,
 
           getPosition,

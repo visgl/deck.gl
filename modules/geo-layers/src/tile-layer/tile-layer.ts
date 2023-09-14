@@ -165,7 +165,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles.every(
+    return this.state?.tileset?.selectedTiles?.every(
       tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
     );
   }
@@ -342,7 +342,10 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
           ...this.props,
-          id: `${this.id}-${tile.id}`,
+          ...this.getSubLayerProps({
+            id: tile.id,
+            updateTriggers: this.props.updateTriggers
+          }),
           data: tile.content,
           _offset: 0,
           tile
@@ -357,7 +360,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         subLayerProps &&
         tile.layers[0] &&
         Object.keys(subLayerProps).some(
-          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
+          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
         )
       ) {
         tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));

@@ -174,7 +174,7 @@ export default class GlobeViewport extends Viewport {
     if (Number.isFinite(z)) {
       return [X, Y, Z];
     }
-    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
+    return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
   }
 
   projectPosition(xyz: number[]): [number, number, number] {

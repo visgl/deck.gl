@@ -2,7 +2,7 @@
   "name": "@deck.gl/extensions",
   "description": "Plug-and-play functionalities for deck.gl layers",
   "license": "MIT",
-  "version": "8.9.0-beta.6",
+  "version": "8.10.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -30,14 +30,19 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/shadertools": "^8.5.20"
+    "@babel/runtime": "^7.0.0",
+    "@luma.gl/shadertools": "9.0.0-alpha.35"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/constants": "^8.0.0",
-    "@luma.gl/core": "^8.0.0",
-    "@math.gl/core": "^3.6.2",
-    "@math.gl/web-mercator": "^3.6.2",
+    "@luma.gl/constants": "9.0.0-alpha.35",
+    "@luma.gl/core": "9.0.0-alpha.35",
+    "@luma.gl/engine": "9.0.0-alpha.35",
+    "@luma.gl/shadertools": "9.0.0-alpha.35",
+    "@luma.gl/webgl": "9.0.0-alpha.35",
+    "@math.gl/core": "4.0.0-alpha.4",
+    "@math.gl/constants": "4.0.0-alpha.4",
+    "@math.gl/web-mercator": "4.0.0-alpha.4",
     "gl-matrix": "^3.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"

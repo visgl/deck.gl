@@ -37,8 +37,8 @@ function App({viewState}) {
 
 The CARTO platform supports storing data using a spatial index. The `geoColumn` prop is used to specify a database column that contains geographic data. When `geoColumn` has one of the following values, the data will be interpreted as a spatial index:
 
-- `h3` [H3](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#h3) indexing system will be used
-- `quadbin` [Quadbin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin) indexing system will be used
+- `h3` [H3](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3) indexing system will be used
+- `quadbin` [Quadbin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) indexing system will be used
 
 Tiled data will be used, with the layer created depending on the spatial index used:
 

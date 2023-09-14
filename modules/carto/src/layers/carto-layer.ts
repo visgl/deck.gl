@@ -288,7 +288,7 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
     const {uniqueIdProperty} = defaultProps;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {data: _notUsed, ...propsNoData} = this.props;
-    // @ts-expect-error 'uniqueIdProperty' is specified more than once, so this usage will be overwritten.
+    // TODO ts-expect-error 'uniqueIdProperty' is specified more than once, so this usage will be overwritten.
     const props = {uniqueIdProperty, ...propsNoData};
 
     if (apiVersion === API_VERSIONS.V1 || apiVersion === API_VERSIONS.V2) {
@@ -297,6 +297,7 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
 
     /* global URL */
     const tileUrl = new URL(data.tiles[0]);
+    // @ts-expect-error
     props.formatTiles =
       props.formatTiles || (tileUrl.searchParams.get('formatTiles') as TileFormat);
 
@@ -311,11 +312,17 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
     if (!data) return null;
 
     const {credentials, updateTriggers} = this.props;
-    const loadOptions: any = {};
+    const loadOptions: any = this.getLoadOptions() || {};
     if (apiVersion === API_VERSIONS.V3) {
       const localConfig = {...getDefaultCredentials(), ...credentials} as CloudNativeCredentials;
       const {accessToken} = localConfig;
-      loadOptions.fetch = {headers: {Authorization: `Bearer ${accessToken}`}};
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {
+          ...loadOptions.fetch?.headers,
+          Authorization: `Bearer ${accessToken}`
+        }
+      };
     }
 
     const [layer, props] = this._getSubLayerAndProps();

@@ -1,8 +1,10 @@
+import type {Device} from '@luma.gl/core';
+import type {Buffer} from '@luma.gl/core';
+import type {BufferWithAccessor} from '@luma.gl/webgl';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import type {Buffer} from '@luma.gl/webgl';
 
 export interface TransitionSettings {
   type: string;
@@ -67,7 +69,7 @@ export function normalizeTransitionSettings(
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(
-  gl: WebGLRenderingContext,
+  device: Device,
   attribute: Attribute
 ): [Buffer, BufferAccessor] | NumericArray {
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
@@ -87,7 +89,7 @@ export function getSourceBufferAttribute(
   // constant
   // don't pass normalized here because the `value` from a normalized attribute is
   // already normalized
-  return attribute.value as NumericArray;
+  return attribute.value;
 }
 
 export function getAttributeTypeFromSize(size: number): string {
@@ -106,13 +108,13 @@ export function getAttributeTypeFromSize(size: number): string {
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {
-  buffers.push(buffers.shift() as Buffer);
+  buffers.push(buffers.shift());
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -155,7 +157,7 @@ export function padBuffer({
 
   const toData = isConstant
     ? attribute.value
-    : (attribute.getBuffer() as Buffer).getData({srcByteOffset: byteOffset});
+    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
@@ -165,7 +167,8 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
-  const source = buffer.getData({length: fromLength});
+  const bufferWithAccessor = buffer as BufferWithAccessor;
+  const source = bufferWithAccessor.getData({length: fromLength});
   const data = new Float32Array(toLength);
   padArray({
     source,
@@ -177,8 +180,8 @@ export function padBuffer({
   });
 
   // TODO: support offset in buffer.setData?
-  if (buffer.byteLength < data.byteLength + byteOffset) {
-    buffer.reallocate(data.byteLength + byteOffset);
+  if (bufferWithAccessor.byteLength < data.byteLength + byteOffset) {
+    bufferWithAccessor.reallocate(data.byteLength + byteOffset);
   }
-  buffer.subData({data, offset: byteOffset});
+  bufferWithAccessor.subData({data, offset: byteOffset});
 }

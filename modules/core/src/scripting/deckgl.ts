@@ -75,7 +75,6 @@ export default class DeckGL extends Deck {
 
     super({canvas: deckCanvas, ...props});
 
-    // @ts-expect-error map lib is not typed
     if (map && map.Map) {
       // Default create mapbox map
       this._map =

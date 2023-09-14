@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {readPixelsToArray, clear} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
+import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
-import {readPixelsToArray, clear} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
-
-import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -155,9 +154,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       });
     }
 
-    const {gl} = this.context;
+    const {device} = this.context;
     if (attributeManager && extension.opts.countItems) {
-      const useFloatTarget = aggregator.supportsFloatTarget(gl);
+      const useFloatTarget = aggregator.supportsFloatTarget(device);
       // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
       // The vertex shader checks if a vertex has the same "index" as the previous vertex
       // so that we only write one count cross multiple vertices of the same object
@@ -182,9 +181,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         }
       });
 
-      const filterFBO = aggregator.getFramebuffer(gl, useFloatTarget);
+      const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
-        gl,
+        device,
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
@@ -200,7 +199,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       const attributeManager = this.getAttributeManager();
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
-        attributeManager!.attributes.filterValues.needsUpdate() ||
+        attributeManager.attributes.filterValues.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange;
@@ -219,14 +218,13 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
-      const {gl} = this.context;
-      clear(gl, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
+      clear(this.context.device, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
 
       filterModel
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
-          ...filterValues.getShaderAttributes(),
-          ...(filterIndices && filterIndices.getShaderAttributes())
+          ...filterValues.getValue(),
+          ...filterIndices?.getValue()
         })
         .draw({
           framebuffer: filterFBO,

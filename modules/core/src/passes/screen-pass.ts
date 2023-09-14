@@ -1,18 +1,17 @@
-//
-// A base render pass.
-//
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
+import type {Device} from '@luma.gl/core';
 import type {Framebuffer} from '@luma.gl/core';
-import {ClipSpace, setParameters, withParameters, clear} from '@luma.gl/core';
+import {ClipSpace} from '@luma.gl/engine';
+import {setParameters, withParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
 
 import type {ShaderModule} from '../types/types';
 
 type ScreenPassProps = {
   module: ShaderModule;
-  fs: string | null;
+  fs?: string;
   id: string;
 };
 
@@ -22,28 +21,31 @@ type ScreenPassRenderOptions = {
   moduleSettings: any;
 };
 
+/** A base render pass. */
 export default class ScreenPass extends Pass {
   model: ClipSpace;
 
-  constructor(gl: WebGLRenderingContext, props: ScreenPassProps) {
-    super(gl, props);
+  constructor(device: Device, props: ScreenPassProps) {
+    super(device, props);
     const {module, fs, id} = props;
-    this.model = new ClipSpace(gl, {id, fs, modules: [module]});
+    // @ts-expect-error ClipSpace prototype
+    this.model = new ClipSpace(device, {id, fs, modules: [module]});
   }
 
   render(params: ScreenPassRenderOptions): void {
-    const gl = this.gl;
+    const [drawingBufferWidth, drawingBufferHeight] =
+      this.device.canvasContext.getDrawingBufferSize();
+    setParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
 
-    setParameters(gl, {viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]});
-
-    withParameters(gl, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
-      this._renderPass(gl, params)
+    // TODO change to device when luma.gl is fixed
+    withParameters(this.device, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
+      this._renderPass(this.device, params)
     );
   }
 
   delete() {
-    this.model.delete();
-    this.model = null;
+    this.model.destroy();
+    this.model = null!;
   }
 
   // Private methods
@@ -54,19 +56,21 @@ export default class ScreenPass extends Pass {
    * @param inputBuffer - Frame buffer that contains the result of the previous pass
    * @param outputBuffer - Frame buffer that serves as the output render target
    */
-  protected _renderPass(gl: WebGLRenderingContext, options: ScreenPassRenderOptions) {
+  protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
-    clear(gl, {color: true});
-    this.model.draw({
-      moduleSettings: options.moduleSettings,
-      uniforms: {
-        texture: inputBuffer,
-        texSize: [inputBuffer.width, inputBuffer.height]
-      },
-      parameters: {
-        depthWrite: false,
-        depthTest: false
-      }
+    clear(this.device, {color: true});
+    this.model.setShaderModuleProps(options.moduleSettings);
+    this.model.setBindings({
+      texture: inputBuffer.colorAttachments[0]
     });
+    this.model.setUniforms({
+      texSize: [inputBuffer.width, inputBuffer.height]
+    });
+    this.model.setParameters({
+      depthWriteEnabled: false,
+      // depthWrite: false,
+      depthCompare: 'always'
+    });
+    this.model.draw(this.device.getDefaultRenderPass());
   }
 }

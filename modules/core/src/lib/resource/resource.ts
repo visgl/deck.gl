@@ -47,8 +47,8 @@ export default class Resource<T = any> {
     return this.isLoaded
       ? this._error
         ? Promise.reject(this._error)
-        : this._content!
-      : this._loader!.then(() => this.getData());
+        : this._content
+      : this._loader.then(() => this.getData());
   }
 
   setData(data: any, forceUpdate?: boolean) {

@@ -1,9 +1,8 @@
-import {withParameters} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
-
-import GL from '@luma.gl/constants';
 
 export type TerrainPassRenderOptions = LayersPassRenderOptions;
 
@@ -35,7 +34,7 @@ export class TerrainPass extends LayersPass {
     target.resize(viewport);
 
     withParameters(
-      this.gl,
+      this.device,
       {
         clearColor: [0, 0, 0, 0],
         blend: true,
@@ -48,7 +47,7 @@ export class TerrainPass extends LayersPass {
           ...opts,
           target,
           pass: 'terrain-height-map',
-          layers: opts.layers!,
+          layers: opts.layers,
           viewports: [viewport],
           effects: []
         })
@@ -64,12 +63,13 @@ export class TerrainPass extends LayersPass {
       return;
     }
 
-    const layers = terrainCover.filterLayers(opts.layers!);
+    const layers = terrainCover.filterLayers(opts.layers);
     target.resize(viewport);
 
     withParameters(
-      this.gl,
+      this.device,
       {
+        clearColor: [0, 0, 0, 0],
         depthTest: false
       },
       () =>

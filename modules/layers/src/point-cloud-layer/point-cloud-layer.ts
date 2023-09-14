@@ -35,8 +35,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -169,9 +169,8 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {changeFlags, props} = params;
     super.updateState(params);
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
     if (changeFlags.dataChanged) {
@@ -182,16 +181,15 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        sizeUnits: UNIT[sizeUnits],
-        radiusPixels: pointSize
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      sizeUnits: UNIT[sizeUnits],
+      radiusPixels: pointSize
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -199,11 +197,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           positions: new Float32Array(positions)
         }

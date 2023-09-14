@@ -4,7 +4,7 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@luma.gl/debug": "^8.5.2",
+    "@luma.gl/debug": "9.0.0-alpha.15",
     "deck.gl": "^8.4.0",
     "glsl-transpiler": "^1.8.5"
   },

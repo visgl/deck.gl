@@ -11,6 +11,7 @@ import jupyterTransport from './lib/jupyter-transport';
 import JupyterTransportModel from './lib/jupyter-transport-model';
 import JupyterTransportView from './lib/jupyter-transport-view';
 
+// eslint-disable-next-line import/namespace
 import * as deckExports from './deck-bundle';
 import * as lumaExports from '@deck.gl/core/scripting/lumagl';
 import * as loadersExports from '@deck.gl/core/scripting/loadersgl';

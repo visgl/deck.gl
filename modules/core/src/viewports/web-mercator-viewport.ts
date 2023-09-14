@@ -78,6 +78,10 @@ export type WebMercatorViewportOptions = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1.01` */
   farZMultiplier?: number;
+  /** Optionally override the near plane position. `nearZMultiplier` is ignored if `nearZ` is supplied. */
+  nearZ?: number;
+  /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
+  farZ?: number;
   /** Render multiple copies of the world */
   repeat?: boolean;
   /** Internal use */
@@ -115,6 +119,8 @@ export default class WebMercatorViewport extends Viewport {
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
+      nearZ,
+      farZ,
       orthographic = false,
       projectionMatrix,
 
@@ -165,6 +171,13 @@ export default class WebMercatorViewport extends Viewport {
         nearZMultiplier,
         farZMultiplier
       });
+
+      if (Number.isFinite(nearZ)) {
+        projectionParameters.near = nearZ;
+      }
+      if (Number.isFinite(farZ)) {
+        projectionParameters.far = farZ;
+      }
     }
 
     // The uncentered matrix allows us two move the center addition to the

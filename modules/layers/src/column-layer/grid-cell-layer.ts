@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CubeGeometry} from '@luma.gl/core';
-import {UNIT} from '@deck.gl/core';
-import ColumnLayer, {ColumnLayerProps} from './column-layer';
-
 import type {DefaultProps} from '@deck.gl/core';
+import {UNIT} from '@deck.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
+import ColumnLayer, {ColumnLayerProps} from './column-layer';
 
 const defaultProps: DefaultProps<GridCellLayerProps> = {
   cellSize: {type: 'number', min: 0, value: 1000},
@@ -47,25 +46,26 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
   static layerName = 'GridCellLayer';
   static defaultProps = defaultProps;
 
-  getGeometry(diskResolution) {
-    return new CubeGeometry();
+  protected _updateGeometry() {
+    const geometry = new CubeGeometry();
+    this.state.fillModel.setGeometry(geometry);
   }
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        radius: cellSize / 2,
-        radiusUnits: UNIT[radiusUnits],
-        angle,
-        offset,
-        extruded,
-        coverage,
-        elevationScale,
-        edgeDistance: 1,
-        isWireframe: false
-      })
-      .draw();
+    const {fillModel} = this.state;
+    fillModel.setUniforms(uniforms);
+    fillModel.setUniforms({
+      radius: cellSize / 2,
+      radiusUnits: UNIT[radiusUnits],
+      angle,
+      offset,
+      extruded,
+      coverage,
+      elevationScale,
+      edgeDistance: 1,
+      isStroke: false
+    });
+    fillModel.draw(this.context.renderPass);
   }
 }

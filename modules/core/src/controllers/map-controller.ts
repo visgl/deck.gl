@@ -293,7 +293,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     }
 
     const {maxZoom, minZoom} = this.getViewportProps();
-    let zoom = (startZoom as number) + Math.log2(scale);
+    let zoom = startZoom + Math.log2(scale);
     zoom = clamp(zoom, minZoom, maxZoom);
 
     const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});

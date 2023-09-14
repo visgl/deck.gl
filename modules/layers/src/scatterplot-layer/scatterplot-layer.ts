@@ -19,8 +19,9 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -228,9 +229,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -251,35 +251,33 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels
     } = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        stroked: stroked ? 1 : 0,
-        filled,
-        billboard,
-        antialiasing,
-        radiusUnits: UNIT[radiusUnits],
-        radiusScale,
-        radiusMinPixels,
-        radiusMaxPixels,
-        lineWidthUnits: UNIT[lineWidthUnits],
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      stroked: stroked ? 1 : 0,
+      filled,
+      billboard,
+      antialiasing,
+      radiusUnits: UNIT[radiusUnits],
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      lineWidthUnits: UNIT[lineWidthUnits],
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl) {
+  protected _getModel() {
     // a square that minimally cover the unit circle
-    const positions = [-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0];
-
-    return new Model(gl, {
+    const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
-        vertexCount: 4,
+        topology: 'triangle-strip',
         attributes: {
           positions: {size: 3, value: new Float32Array(positions)}
         }

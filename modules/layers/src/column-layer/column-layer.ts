@@ -36,8 +36,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, isWebGL2, hasFeature, FEATURES} from '@luma.gl/core';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -63,6 +63,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   wireframe: false,
   filled: true,
   stroked: false,
+  flatShading: false,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -234,12 +235,20 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   static layerName = 'ColumnLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    fillModel?: Model;
+    wireframeModel?: Model;
+    models?: Model[];
+    fillVertexCount?: number;
+    edgeDistance?: number;
+  };
+
   getShaders() {
-    const {gl} = this.context;
-    const transpileToGLSL100 = !isWebGL2(gl);
+    const {device} = this.context;
+    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && hasFeature(gl, FEATURES.GLSL_DERIVATIVES);
+    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
     if (useDerivatives) {
       defines.FLAT_SHADING = 1;
     }
@@ -305,11 +314,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       changeFlags.extensionsChanged || props.flatShading !== oldProps.flatShading;
 
     if (regenerateModels) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.models?.forEach(model => model.destroy());
+      this.setState(this._getModels());
       this.getAttributeManager()!.invalidateAll();
     }
+
+    const instanceCount = this.getNumInstances();
+    this.state.fillModel.setInstanceCount(instanceCount);
+    this.state.wireframeModel.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
@@ -346,23 +358,45 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return geometry;
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
-      ...this.getShaders(),
-      id: this.props.id,
+  protected _getModels() {
+    const shaders = this.getShaders();
+    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+
+    const fillModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-fill`,
+      bufferLayout,
       isInstanced: true
     });
+    const wireframeModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-wireframe`,
+      bufferLayout,
+      isInstanced: true
+    });
+
+    return {
+      fillModel,
+      wireframeModel,
+      models: [wireframeModel, fillModel]
+    };
   }
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
-    const geometry: any = this.getGeometry(diskResolution, vertices, extruded || stroked);
+    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
 
     this.setState({
-      fillVertexCount: geometry.attributes.POSITION.value.length / 3,
-      wireframeVertexCount: geometry.indices.value.length
+      fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    this.state.model.setProps({geometry});
+    const {fillModel, wireframeModel} = this.state;
+    fillModel.setGeometry(geometry);
+    fillModel.setTopology('triangle-strip');
+    // Disable indices
+    fillModel.setIndexBuffer(null);
+
+    wireframeModel.setGeometry(geometry);
+    wireframeModel.setTopology('line-list');
   }
 
   draw({uniforms}) {
@@ -382,9 +416,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       radius,
       angle
     } = this.props;
-    const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
+    const {fillModel, wireframeModel, fillVertexCount, edgeDistance} = this.state;
 
-    model.setUniforms(uniforms).setUniforms({
+    const renderUniforms = {
+      ...uniforms,
       radius,
       angle: (angle / 180) * Math.PI,
       offset,
@@ -398,35 +433,31 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       widthScale: lineWidthScale,
       widthMinPixels: lineWidthMinPixels,
       widthMaxPixels: lineWidthMaxPixels
-    });
+    };
 
     // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      model.setProps({isIndexed: true});
-      model
-        .setVertexCount(wireframeVertexCount)
-        .setDrawMode(GL.LINES)
-        .setUniforms({isStroke: true})
-        .draw();
+      wireframeModel.setUniforms(renderUniforms);
+      wireframeModel.setUniforms({isStroke: true});
+      wireframeModel.draw(this.context.renderPass);
     }
+
+    fillModel.setUniforms(renderUniforms);
+
     if (filled) {
-      model.setProps({isIndexed: false});
-      model
-        .setVertexCount(fillVertexCount)
-        .setDrawMode(GL.TRIANGLE_STRIP)
-        .setUniforms({isStroke: false})
-        .draw();
+      // model.setProps({isIndexed: false});
+      fillModel.setVertexCount(fillVertexCount);
+      fillModel.setUniforms({isStroke: false});
+      fillModel.draw(this.context.renderPass);
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
-      model.setProps({isIndexed: false});
+      // model.setProps({isIndexed: false});
       // The width of the stroke is achieved by flattening the side of the cylinder.
       // Skip the last 1/3 of the vertices which is the top.
-      model
-        .setVertexCount((fillVertexCount * 2) / 3)
-        .setDrawMode(GL.TRIANGLE_STRIP)
-        .setUniforms({isStroke: true})
-        .draw();
+      fillModel.setVertexCount((fillVertexCount * 2) / 3);
+      fillModel.setUniforms({isStroke: true});
+      fillModel.draw(this.context.renderPass);
     }
   }
 }

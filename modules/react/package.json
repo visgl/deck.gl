@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "8.9.0-beta.6",
+  "version": "8.10.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -25,6 +25,9 @@
   ],
   "sideEffects": false,
   "scripts": {},
+  "dependencies": {
+    "@babel/runtime": "^7.0.0"
+  },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
     "@types/react": ">= 16.3",

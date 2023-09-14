@@ -167,7 +167,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // Maps sometimes returns undefined instead of 0
   const heading = map.getHeading() || 0;
 
-  let zoom = (map.getZoom() as number) - 1;
+  let zoom = map.getZoom() - 1;
 
   let scale;
 

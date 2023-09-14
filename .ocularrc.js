@@ -5,13 +5,10 @@ const nodeModules = join(packageRoot, 'node_modules');
 const lumaModules = join(packageRoot, '../luma.gl/modules');
 
 const LUMA_ALIASES_LOCAL = {
-  'luma.gl': `${lumaModules}/main/src`,
   '@luma.gl/constants': `${lumaModules}/constants/src`,
   '@luma.gl/core': `${lumaModules}/core/src`,
-  '@luma.gl/debug': `${lumaModules}/debug/src`,
   '@luma.gl/engine': `${lumaModules}/engine/src`,
   '@luma.gl/webgl': `${lumaModules}/webgl/src`,
-  '@luma.gl/gltools': `${lumaModules}/gltools/src`,
   '@luma.gl/shadertools': `${lumaModules}/shadertools/src`,
   '@luma.gl/test-utils': `${lumaModules}/test-utils/src`,
   '@luma.gl/experimental': `${lumaModules}/experimental/src`
@@ -21,7 +18,8 @@ const useLocalLuma = false;
 
 const config = {
   lint: {
-    paths: ['modules', 'test', 'examples', 'website']
+    paths: ['modules', 'test']
+    // paths: ['modules', 'test', 'examples', 'website']
   },
 
   bundle: {

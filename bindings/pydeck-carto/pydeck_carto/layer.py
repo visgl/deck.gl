@@ -1,6 +1,6 @@
 import pydeck as pdk
 
-H3_VERSION = "~3.7.*"
+H3_VERSION = "~4.1.*"
 DECKGL_VERSION = "~8.8.*"
 
 LIBRARIES_TO_INCLUDE = [

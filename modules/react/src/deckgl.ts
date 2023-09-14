@@ -30,7 +30,7 @@ import {
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
-import extractJSXLayers from './utils/extract-jsx-layers';
+import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
@@ -58,7 +58,7 @@ export type DeckGLProps = Omit<
   Deck?: typeof Deck;
   width?: string | number;
   height?: string | number;
-  children?: React.ReactNode;
+  children?: React.ReactNode | DeckGLRenderCallback;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
 };
 
@@ -75,16 +75,16 @@ function getRefHandles(thisRef: DeckInstanceRef): DeckGLRef {
       return thisRef.deck;
     },
     // The following method can only be called after ref is available, by which point deck is defined in useEffect
-    pickObject: opts => thisRef.deck!.pickObject(opts),
-    pickMultipleObjects: opts => thisRef.deck!.pickMultipleObjects(opts),
-    pickObjects: opts => thisRef.deck!.pickObjects(opts)
+    pickObject: opts => thisRef.deck.pickObject(opts),
+    pickMultipleObjects: opts => thisRef.deck.pickMultipleObjects(opts),
+    pickObjects: opts => thisRef.deck.pickObjects(opts)
   };
 }
 
 function redrawDeck(thisRef: DeckInstanceRef) {
   if (thisRef.redrawReason) {
     // Only redraw if we have received a dirty flag
-    // @ts-expect-error accessing protected method
+    // ts-expect-error accessing protected method
     thisRef.deck._drawLayers(thisRef.redrawReason);
     thisRef.redrawReason = null;
   }

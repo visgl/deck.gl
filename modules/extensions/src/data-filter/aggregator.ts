@@ -1,5 +1,6 @@
-import {Model, Texture2D, Framebuffer, isWebGL2} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {Device, Framebuffer} from '@luma.gl/core';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 const AGGREGATE_VS = `\
 #define SHADER_NAME data-filter-vertex-shader
@@ -48,7 +49,10 @@ void main() {
 }
 `;
 
-export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
+export function supportsFloatTarget(device: Device): boolean {
+  // @ts-expect-error
+  const gl = device.gl;
+
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
   return Boolean(
     gl.getExtension('EXT_float_blend') &&
@@ -60,39 +64,35 @@ export function supportsFloatTarget(gl: WebGLRenderingContext): boolean {
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
-export function getFramebuffer(gl: WebGLRenderingContext, useFloatTarget: boolean): Framebuffer {
+export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebuffer {
   if (useFloatTarget) {
-    return new Framebuffer(gl, {
+    return device.createFramebuffer({
       width: 1,
       height: 1,
-      attachments: {
-        [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
-          format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+      colorAttachments: [
+        device.createTexture({
+          format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
           type: GL.FLOAT,
           mipmaps: false
         })
-      }
+      ]
     });
   }
-  return new Framebuffer(gl, {
+  return device.createFramebuffer({
     width: 256,
     height: 64,
-    depth: false
+    colorAttachments: [device.createTexture({format: 'rgba8unorm', type: GL.FLOAT, mipmaps: false})]
   });
 }
 
 // Increments the counter based on dataFilter_value
-export function getModel(
-  gl: WebGLRenderingContext,
-  shaderOptions: any,
-  useFloatTarget: boolean
-): Model {
+export function getModel(device: Device, shaderOptions: any, useFloatTarget: boolean): Model {
   shaderOptions.defines.NON_INSTANCED_MODEL = 1;
   if (useFloatTarget) {
     shaderOptions.defines.FLOAT_TARGET = 1;
   }
 
-  return new Model(gl, {
+  return new Model(device, {
     id: 'data-filter-aggregation-model',
     vertexCount: 1,
     isInstanced: false,

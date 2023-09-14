@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from '@luma.gl/core';
+import {fp32} from '@luma.gl/shadertools';
 import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';

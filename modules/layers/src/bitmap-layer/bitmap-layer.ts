@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
 import {
   Layer,
   project32,
@@ -30,11 +29,13 @@ import {
   GetPickingInfoParams,
   UpdateParameters,
   Color,
-  Texture,
+  TextureSource,
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry, Model} from '@luma.gl/engine';
+import type {Texture} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -71,7 +72,7 @@ type _BitmapLayerProps = {
    *
    * @default null
    */
-  image?: string | Texture | null;
+  image?: string | TextureSource | null;
 
   /**
    * Supported formats:
@@ -164,9 +165,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     const attributeManager = this.getAttributeManager()!;
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       attributeManager.invalidateAll();
     }
 
@@ -194,7 +194,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       return info;
     }
 
-    const {width, height} = image as Texture;
+    // TODO shouldn't happen, this is an async prop...
+    if (typeof image === 'string') {
+      throw new Error('string');
+    }
+
+    const {width, height} = image;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;
@@ -202,7 +207,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
 
-    const pixel = [Math.floor(uv[0] * (width as number)), Math.floor(uv[1] * (height as number))];
+    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
 
     info.bitmap = {
       size: {width, height}, // Size of bitmap
@@ -253,8 +258,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     return createMesh(normalizedBounds, this.context.viewport.resolution);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
-    if (!gl) {
+  protected _getModel(): Model {
+    // TODO - why? are we really supporting context-less BitmapLayer
+    if (!this.context.device) {
       return null;
     }
 
@@ -263,13 +269,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
        |       |
       0,1 --- 1,1
     */
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        vertexCount: 6
-      }),
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      topology: 'triangle-list',
       isInstanced: false
     });
   }
@@ -286,17 +290,16 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model
-        .setUniforms(uniforms)
-        .setUniforms({
-          bitmapTexture: image,
-          desaturate,
-          transparentColor: transparentColor.map(x => x / 255),
-          tintColor: tintColor.slice(0, 3).map(x => x / 255),
-          coordinateConversion,
-          bounds
-        })
-        .draw();
+      model.setUniforms(uniforms);
+      model.setBindings({bitmapTexture: image as Texture});
+      model.setUniforms({
+        desaturate,
+        transparentColor: transparentColor.map(x => x / 255) as number[],
+        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+        coordinateConversion,
+        bounds
+      });
+      model.draw(this.context.renderPass);
     }
   }
 

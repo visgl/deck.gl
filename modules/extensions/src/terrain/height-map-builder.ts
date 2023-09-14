@@ -1,4 +1,4 @@
-import {Framebuffer} from '@luma.gl/core';
+import {Device, Framebuffer} from '@luma.gl/core';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
@@ -20,7 +20,7 @@ export class HeightMapBuilder {
   bounds: Bounds | null = null;
 
   protected fbo?: Framebuffer;
-  protected gl: WebGLRenderingContext;
+  protected device: Device;
   /** Last rendered layers */
   private layers: Layer[] = [];
   /** Last layer.getBounds() */
@@ -29,12 +29,12 @@ export class HeightMapBuilder {
   private layersBoundsCommon: Bounds | null = null;
   private lastViewport: Viewport | null = null;
 
-  static isSupported(gl: WebGLRenderingContext): boolean {
-    return Framebuffer.isSupported(gl, {colorBufferFloat: true});
+  static isSupported(device: Device): boolean {
+    return device.isTextureFormatRenderable('rgba32float');
   }
 
-  constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
+  constructor(device: Device) {
+    this.device = device;
   }
 
   /** Returns the height map framebuffer for read/write access.
@@ -45,7 +45,7 @@ export class HeightMapBuilder {
       return null;
     }
     if (!this.fbo) {
-      this.fbo = createRenderTarget(this.gl, {id: 'height-map', float: true});
+      this.fbo = createRenderTarget(this.device, {id: 'height-map', float: true});
     }
     return this.fbo;
   }
@@ -118,7 +118,7 @@ export class HeightMapBuilder {
 
   delete() {
     if (this.fbo) {
-      this.fbo.color.delete();
+      this.fbo.colorAttachments[0].delete();
       this.fbo.delete();
     }
   }

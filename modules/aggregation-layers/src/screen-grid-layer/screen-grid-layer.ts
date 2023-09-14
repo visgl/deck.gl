@@ -31,13 +31,13 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import type {Texture2D} from '@luma.gl/core';
+import {Texture} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
-import {getFloatTexture} from '../utils/resource-utils.js';
+import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   ...ScreenGridCellLayer.defaultProps,
@@ -151,12 +151,11 @@ export default class ScreenGridLayer<
     gpuGridAggregator?: any;
     gpuAggregation?: any;
     weights?: any;
-    maxTexture?: Texture2D;
+    maxTexture?: Texture;
   };
 
   initializeState() {
-    const {gl} = this.context;
-    if (!ScreenGridCellLayer.isSupported(gl)) {
+    if (!ScreenGridCellLayer.isSupported(this.context.device)) {
       // max aggregated value is sampled from a float texture
       this.setState({supported: false});
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
@@ -172,7 +171,7 @@ export default class ScreenGridLayer<
         size: 1,
         operation: AGGREGATION_OPERATION.SUM,
         needMax: true,
-        maxTexture: getFloatTexture(gl, {id: `${this.id}-max-texture`})
+        maxTexture: getFloatTexture(this.context.device, {id: `${this.id}-max-texture`})
       }
     };
     this.setState({
@@ -276,7 +275,7 @@ export default class ScreenGridLayer<
     const {viewportChanged} = opts.changeFlags;
     let gpuAggregation = opts.props.gpuAggregation;
     if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.device)) {
         log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
         gpuAggregation = false;
       }

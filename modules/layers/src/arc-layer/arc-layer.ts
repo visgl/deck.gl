@@ -34,8 +34,9 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -52,6 +53,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   getTilt: {type: 'accessor', value: 0},
 
   greatCircle: false,
+  numSegments: {type: 'number', value: 50, min: 1},
 
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
@@ -70,6 +72,12 @@ type _ArcLayerProps<DataT> = {
    * @default false
    */
   greatCircle?: boolean;
+
+  /**
+   * The number of segments used to draw each arc.
+   * @default 50
+   */
+  numSegments?: number;
 
   /**
    * The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
@@ -224,11 +232,11 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   updateState(opts: UpdateParameters<this>): void {
     super.updateState(opts);
+    const {props, oldProps, changeFlags} = opts;
     // Re-generate model if geometry changed
-    if (opts.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+    if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -237,22 +245,21 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
       this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        greatCircle,
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      greatCircle,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude
+    });
+    this.state.model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
+    const {numSegments} = this.props;
     let positions: number[] = [];
-    const NUM_SEGMENTS = 50;
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -260,23 +267,24 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
      *       |  _,-"          |
      *   (0, 1)"-------------(1, 1)
      */
-    for (let i = 0; i < NUM_SEGMENTS; i++) {
+    for (let i = 0; i < numSegments; i++) {
       positions = positions.concat([i, 1, 0, i, -1, 0]);
     }
 
-    const model = new Model(gl, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true
     });
 
-    model.setUniforms({numSegments: NUM_SEGMENTS});
+    model.setUniforms({numSegments});
 
     return model;
   }

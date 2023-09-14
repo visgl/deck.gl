@@ -2,7 +2,7 @@ import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {GLTFEnvironment} from '@luma.gl/experimental';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 import * as dataSamples from '../data-samples';
 

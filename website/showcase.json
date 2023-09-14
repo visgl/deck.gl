@@ -1,7 +1,16 @@
 [
   {
+    "name": "Internet Speed Tests Map",
+    "url": "https://fairinternetreport.com/research/internet-speed-map-single-day",
+    "image": "/images/showcase/fairinternetreport.com-speed-test-map.jpg",
+    "links": {
+      "by Fair Internet Report": "https://fairinternetreport.com/"
+    },
+    "description": "An interactive map displaying 3.6 million speed tests from a single day in June 2023, animated seamlessly over a responsive MapBox layer. Deck.gl's performance and custom shaders ensure the animations run smoothly and vividly. Data is efficiently loaded from a binary format and accessed with array offsets in JavaScript for optimal performance."
+  },
+  {
     "name": "I3S Explorer",
-    "url": "https://i3s.actionengine.com/",
+    "url": "https://i3s.loaders.gl/",
     "image": "/images/examples/arcgis.jpg",
     "links": {},
     "description": "Visualization and Debug Tool for I3S 3D geographic data"

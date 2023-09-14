@@ -1,4 +1,6 @@
-import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
+import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
@@ -7,48 +9,45 @@ type MaskPassRenderOptions = LayersPassRenderOptions & {
 };
 
 export default class MaskPass extends LayersPass {
-  maskMap: Texture2D;
+  maskMap: Texture;
   fbo: Framebuffer;
 
-  constructor(gl, props: {id: string; mapSize?: number}) {
-    super(gl, props);
+  constructor(device: Device, props: {id: string; mapSize?: number}) {
+    super(device, props);
 
     const {mapSize = 2048} = props;
 
-    this.maskMap = new Texture2D(gl, {
+    this.maskMap = device.createTexture({
+      format: 'rgba8unorm',
       width: mapSize,
       height: mapSize,
-      parameters: {
-        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
+      sampler: {
+        minFilter: 'linear',
+        magFilter: 'linear',
+        addressModeU: 'clamp-to-edge',
+        addressModeV: 'clamp-to-edge'
       }
     });
 
-    this.fbo = new Framebuffer(gl, {
+    this.fbo = device.createFramebuffer({
       id: 'maskmap',
       width: mapSize,
       height: mapSize,
-      attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.maskMap
-      }
+      colorAttachments: [this.maskMap]
     });
   }
 
   render(options: MaskPassRenderOptions) {
-    const gl = this.gl;
-
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
 
     return withParameters(
-      gl,
+      this.device,
       {
         clearColor: [255, 255, 255, 255],
         blend: true,
-        blendFunc: [gl.ZERO, gl.ONE],
-        blendEquation: gl.FUNC_SUBTRACT,
+        blendFunc: [GL.ZERO, GL.ONE],
+        blendEquation: GL.FUNC_SUBTRACT,
         colorMask,
         depthTest: false
       },

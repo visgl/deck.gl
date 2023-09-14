@@ -87,7 +87,9 @@ export {
   // Utilities
   Tesselator,
   fp64LowPart,
-  createIterable
+  createIterable,
+  getPipelineFactory,
+  getShaderAssembler
 } from '@deck.gl/core';
 
 //
@@ -130,13 +132,15 @@ export {
   TileLayer,
   _Tileset2D,
   TripsLayer,
-  Tile3DLayer,
-  TerrainLayer,
+  // TODO v9 glTF dependent layers
+  // Tile3DLayer,
+  // TerrainLayer,
   MVTLayer,
   GeohashLayer
 } from '@deck.gl/geo-layers';
 
-export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
+// TODO v9 glTF dependent layers
+// export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE
@@ -166,11 +170,12 @@ export type {
   Unit,
   Position,
   Color,
-  Texture,
+  TextureSource,
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect
+  Effect,
+  Widget
 } from '@deck.gl/core';
 
 export type {

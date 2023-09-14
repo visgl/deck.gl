@@ -3,16 +3,16 @@
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
-import type {Texture2D} from '@luma.gl/core';
+import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
   pickingActive?: boolean;
-  heightMap: Texture2D | null;
+  heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
-  dummyHeightMap: Texture2D;
+  dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
@@ -102,7 +102,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
     `
   },
   // eslint-disable-next-line complexity
-  getUniforms: (opts = {}, uniforms) => {
+  getUniforms: (opts: Partial<TerrainModuleSettings> = {}, uniforms) => {
     if ('dummyHeightMap' in opts) {
       const {
         drawToTerrainHeightMap,
@@ -117,7 +117,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler: Texture2D = dummyHeightMap;
+      let sampler: Texture = dummyHeightMap;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -130,6 +130,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       } else if (terrainCover) {
         // This is a terrain layer
         const isPicking = opts.pickingActive;
+        // @ts-expect-error
         sampler = isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();

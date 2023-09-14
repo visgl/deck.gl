@@ -2,7 +2,7 @@
   "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
-  "version": "8.9.0-beta.6",
+  "version": "8.10.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -30,8 +30,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^8.5.16",
-    "@math.gl/web-mercator": "^3.6.2",
+    "@luma.gl/core": "9.0.0-alpha.35",
+    "@math.gl/web-mercator": "4.0.0-alpha.4",
     "@types/mapbox-gl": "^2.6.3"
   },
   "peerDependencies": {

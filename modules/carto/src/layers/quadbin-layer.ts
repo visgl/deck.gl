@@ -39,7 +39,8 @@ export default class QuadbinLayer<DataT = any, ExtraProps extends {} = {}> exten
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage)
+      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }
