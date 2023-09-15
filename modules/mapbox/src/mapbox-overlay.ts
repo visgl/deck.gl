@@ -177,6 +177,11 @@ export default class MapboxOverlay implements IControl {
     }
   }
 
+  /** If interleaved: true, returns base map's canvas, otherwise forwards the Deck.getCanvas method. */
+  getCanvas(): HTMLCanvasElement | null {
+    return this._interleaved ? this._map.getCanvas() : this._deck.getCanvas();
+  }
+
   private _handleStyleChange = () => {
     resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
   };
