@@ -42,18 +42,18 @@ new deck.FullscreenWidget({});
 
 Define CSS variables to customize the appearance of widgets.
 
-Apply to all wigdets with the `.deckgl-widget` selector:
+Apply to all wigdets with the `.deck-widget` selector:
 
 ```css
-.deckgl-widget {
+.deck-widget {
     --button-size: 48px;
 }
 ```
 
-Apply to one widget type with `.deckgl-widget-[type]` selector:
+Apply to one widget type with `.deck-widget-[type]` selector:
 
 ```css
-.deckgl-widget-fullscreen {
+.deck-widget-fullscreen {
     --button-size: 48px;
 }
 ```
@@ -81,7 +81,7 @@ new FullscreenWidget({ className: 'my-class'})
 | ---- | ---- | ------- |
 | `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
 | `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
-| `--wdgt-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
+| `--widget-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
 
 ### Color
 

@@ -1,8 +1,8 @@
-.deckgl-widget {
+.deck-widget {
   margin: var(--widget-margin, 12px);
 }
 
-.deckgl-widget-button-border {
+.deck-widget-button-border {
   width: var(--button-size, 28px);
   height: var(--button-size, 28px);
   box-sizing: border-box;
@@ -17,7 +17,7 @@
   justify-content: center;
 }
 
-.deckgl-widget-button-border button {
+.deck-widget-button-border button {
   width: calc(var(--button-size, 28px) - 2px);
   height: calc(var(--button-size, 28px) - 2px);
   box-sizing: border-box;
@@ -34,15 +34,15 @@
   padding: 0;
 }
 
-.deckgl-widget-button-icon {
+.deck-widget-button-icon {
   color: var(--button-icon-idle, rgba(97, 97, 102, 1));
 }
 
-.deckgl-widget-button-icon:hover {
+.deck-widget-button-icon:hover {
   color: var(--button-icon-hover, rgba(24, 24, 26, 1));
 }
 
-.deckgl-pseudo-fullscreen {
+.deck-pseudo-fullscreen {
   height: 100% !important;
   left: 0 !important;
   position: fixed !important;

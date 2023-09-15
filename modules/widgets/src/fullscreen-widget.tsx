@@ -42,7 +42,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const {style, className} = this.props;
     const el = document.createElement('div');
-    el.classList.add('deckgl-widget', 'deckgl-widget-fullscreen');
+    el.classList.add('deck-widget', 'deck-widget-fullscreen');
     if (className) el.classList.add(className);
     Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
     this.deck = deck;
@@ -136,6 +136,6 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   togglePseudoFullscreen() {
-    this.getContainer().classList.toggle('deckgl-pseudo-fullscreen');
+    this.getContainer().classList.toggle('deck-pseudo-fullscreen');
   }
 }
