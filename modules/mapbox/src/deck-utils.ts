@@ -275,7 +275,11 @@ function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMerca
       ? // match mapbox-gl@>=1.3.0's projection matrix
         0.02
       : // use deck.gl's own default
-        0.1
+        0.1,
+    // @ts-expect-error Mapbox specific - extract near plane position
+    nearZ: map.transform._nearZ / map.transform.height,
+    // @ts-expect-error Mapbox specific - extract far plane position
+    farZ: map.transform._farZ / map.transform.height
   });
 }
 
