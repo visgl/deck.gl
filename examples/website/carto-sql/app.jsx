@@ -4,7 +4,13 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {CartoLayer, setDefaultCredentials, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
+import {
+  CartoLayer,
+  colorBins,
+  setDefaultCredentials,
+  API_VERSIONS,
+  MAP_TYPES
+} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7368521,
@@ -14,21 +20,9 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-// Colors for the breaks of the polygon layer
-const POLYGON_COLORS = {
-  COLOR_1: [225, 83, 131],
-  COLOR_2: [241, 109, 122],
-  COLOR_3: [250, 138, 118],
-  COLOR_4: [255, 166, 121],
-  COLOR_5: [255, 194, 133],
-  COLOR_6: [255, 221, 154],
-  OTHER: [254, 246, 181]
-};
-
 setDefaultCredentials({
-  apiVersion: API_VERSIONS.V2,
-  username: 'public',
-  apiKey: 'SdBjYyF8NhILWw7kU0n2NQ'
+  accessToken:
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJiMGY0ZjVkZSJ9.DaQK48iBPzXtvmAUuCwESXvY_3eGz5J5Qx6Tg2Id-nM'
 });
 
 const transitionInterpolator = new LinearInterpolator();
@@ -36,7 +30,6 @@ const transitionInterpolator = new LinearInterpolator();
 export default function App({
   mrliIndex = 'txn_amt',
   industry = 'ret',
-  week = ['2020-01-01', '2020-01-05'],
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
   const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
@@ -44,60 +37,47 @@ export default function App({
   const rotateCamera = useCallback(() => {
     updateViewState(v => ({
       ...v,
-      bearing: v.bearing + 0.5,
-      transitionDuration: 1000,
+      bearing: v.bearing + 15,
+      transitionDuration: 30000,
       transitionInterpolator,
       onTransitionEnd: rotateCamera
     }));
   }, []);
 
-  const SQL = `SELECT the_geom_webmercator, avg(${mrliIndex}) as index
-            FROM mrli_ny_jan WHERE industry ='${industry}' AND timeinstant BETWEEN '${week[0]}' AND '${week[1]}'
-            GROUP BY the_geom_webmercator`;
+  const getIndex = f => (f.properties[mrliIndex] ? parseFloat(f.properties[mrliIndex]) : 0);
 
   const layers = [
     new CartoLayer({
       id: 'carto-layer',
+      connection: 'bigquery',
       type: MAP_TYPES.QUERY,
-      data: SQL,
-      getFillColor: object => {
-        if (object.properties.index > 1000) {
-          return POLYGON_COLORS.COLOR_1;
-        } else if (object.properties.index > 500) {
-          return POLYGON_COLORS.COLOR_2;
-        } else if (object.properties.index > 300) {
-          return POLYGON_COLORS.COLOR_3;
-        } else if (object.properties.index > 100) {
-          return POLYGON_COLORS.COLOR_4;
-        } else if (object.properties.index > 50) {
-          return POLYGON_COLORS.COLOR_5;
-        } else if (object.properties.index > 25) {
-          return POLYGON_COLORS.COLOR_6;
-        }
-        return POLYGON_COLORS.OTHER;
-      },
+      data: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
+      queryParameters: {industry},
+      getFillColor: colorBins({
+        attr: getIndex,
+        domain: [25, 50, 100, 300, 500, 1000],
+        colors: 'PinkYl'
+      }),
       getLineColor: [0, 0, 0, 0],
-      lineWidthMinPixels: 0,
       pickable: true,
       filled: true,
       extruded: true,
       wireframe: true,
-      getElevation: f => {
-        return f.properties.index ? f.properties.index : 0;
-      },
+      getElevation: getIndex,
       transitions: {
-        getElevation: {
-          duration: 1000,
-          enter: () => [0]
-        }
+        getElevation: {duration: 1000, enter: () => [0]},
+        getFillColor: {duration: 1000}
+      },
+      updateTriggers: {
+        getElevation: [mrliIndex],
+        getFillColor: [mrliIndex]
       }
     })
   ];
 
   const getTooltip = ({object}) => {
     if (!object) return false;
-    const {index} = object.properties;
-
+    const index = getIndex(object);
     return `Index: ${index.toFixed(2)}`;
   };
 
