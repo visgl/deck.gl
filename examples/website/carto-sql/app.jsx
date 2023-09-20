@@ -4,13 +4,7 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {
-  CartoLayer,
-  colorBins,
-  setDefaultCredentials,
-  API_VERSIONS,
-  MAP_TYPES
-} from '@deck.gl/carto';
+import {CartoLayer, colorBins, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7368521,
