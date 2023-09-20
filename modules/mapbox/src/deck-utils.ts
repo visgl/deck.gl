@@ -162,7 +162,8 @@ export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
 
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
-    layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
+    layerFilter: ({layer: deckLayer}) =>
+      layer.id === deckLayer.id || deckLayer.props.operation.includes('terrain'),
     clearStack,
     clearCanvas: false
   });
