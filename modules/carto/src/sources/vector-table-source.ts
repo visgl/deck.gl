@@ -9,6 +9,12 @@ import {
 export type CartoVectorTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
+  tableName: string;
+};
+
+type UrlParameters = {
+  columns?: string;
+  spatialDataColumn?: string;
   name: string;
 };
 
@@ -17,10 +23,18 @@ export async function CartoVectorTableSource(
     Partial<CartoSourceOptionalOptions> &
     CartoVectorTableSourceOptions
 ): Promise<CartoTilejsonResult> {
-  const {columns, spatialDataColumn, name} = options;
-  const urlParameters = {name} as Record<keyof CartoVectorTableSourceOptions, string>;
+  const {columns, spatialDataColumn, tableName} = options;
+  const urlParameters: UrlParameters = {name: tableName};
+
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  return CartoBaseSource<CartoVectorTableSourceOptions>(MAP_TYPES.TABLE, options, urlParameters);
+  if (spatialDataColumn) {
+    urlParameters.spatialDataColumn = spatialDataColumn;
+  }
+  return CartoBaseSource<CartoVectorTableSourceOptions, UrlParameters>(
+    MAP_TYPES.TABLE,
+    options,
+    urlParameters
+  );
 }

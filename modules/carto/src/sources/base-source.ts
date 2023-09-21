@@ -10,10 +10,10 @@ import {
 } from './common';
 import {buildApiEndpoint, requestWithParameters} from './utils';
 
-export async function CartoBaseSource<T>(
+export async function CartoBaseSource<SourceOptions, UrlParameters extends Record<string, string>>(
   endpoint: MapType,
-  options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions & T,
-  urlParameters: Record<keyof T, string>
+  options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions & SourceOptions,
+  urlParameters: UrlParameters
 ): Promise<CartoTilejsonResult> {
   const baseUrl = buildApiEndpoint({...SOURCE_DEFAULTS, ...options, endpoint});
   const {accessToken} = options;

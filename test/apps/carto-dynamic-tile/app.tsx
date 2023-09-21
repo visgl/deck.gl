@@ -8,8 +8,7 @@ import {
   CartoVectorTableSource,
   CartoTilejsonResult,
   _CartoTileLayer as CartoTileLayer,
-  colorBins,
-  withDefaults
+  colorBins
 } from '@deck.gl/carto';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
@@ -38,7 +37,7 @@ const COLUMNS = {
 };
 
 const accessToken =
-  'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJhMjQyNDM4MSJ9.5bAXb8y7PyIOB__X7i-iQUWCZgLkedtGoqRI25HuQxc';
+  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRVNGNZTHAwaThjYnVMNkd0LTE0diJ9.eyJodHRwOi8vYXBwLmNhcnRvLmNvbS9lbWFpbCI6ImZwYWxtZXJAY2FydG9kYi5jb20iLCJodHRwOi8vYXBwLmNhcnRvLmNvbS9hY2NvdW50X2lkIjoiYWNfN3hoZnd5bWwiLCJpc3MiOiJodHRwczovL2F1dGguY2FydG8uY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3OTY5NjU1OTI5NjExMjIxNDg2IiwiYXVkIjoiY2FydG8tY2xvdWQtbmF0aXZlLWFwaSIsImlhdCI6MTY5NTMwNzgxNywiZXhwIjoxNjk1Mzk0MjE3LCJhenAiOiJBdHh2SERldVhsUjhYUGZGMm5qMlV2MkkyOXB2bUN4dSIsInBlcm1pc3Npb25zIjpbImV4ZWN1dGU6d29ya2Zsb3dzIiwicmVhZDphY2NvdW50IiwicmVhZDphcHBzIiwicmVhZDpjb25uZWN0aW9ucyIsInJlYWQ6Y3VycmVudF91c2VyIiwicmVhZDppbXBvcnRzIiwicmVhZDpsaXN0ZWRfYXBwcyIsInJlYWQ6bWFwcyIsInJlYWQ6dGlsZXNldHMiLCJyZWFkOnRva2VucyIsInJlYWQ6d29ya2Zsb3dzIiwidXBkYXRlOmN1cnJlbnRfdXNlciIsIndyaXRlOmFwcHMiLCJ3cml0ZTpjYXJ0by1kdy1ncmFudHMiLCJ3cml0ZTpjb25uZWN0aW9ucyIsIndyaXRlOmltcG9ydHMiLCJ3cml0ZTptYXBzIiwid3JpdGU6dG9rZW5zIiwid3JpdGU6d29ya2Zsb3dzIl19.RDg_neVMRY7IbWVnrtduYo6vIr5z27IbYNgNdFQSc4JeVJtPPrTXeBT1gWbjztpf2O9kPHm5iruK8Pp1sFRD39beWY49mnluo1IreL7xmjCH0RS_AN9Vo5liyj5wv-R80J9EQZCPu6N_M53otNZlSLFju7-ENpFpiiHwVUVuIFpGT0ZLjS3vVYTSrGXwgOMLfnTuTLgtASqSKcy9x8WntWGQ1T-7FnIAOT-iwgsD5nMcie-uiwopov7WJ5b9Txu2dge-WJOIdVqmegE6_sk6lPzokC8Zh-ccv-IlqE1FhH6fVLkUixywwGvZcWkOEH3gjC6GhGIW4VhRcDs-nfe0Zw';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
@@ -86,7 +85,7 @@ function createCarto(datasource, columns) {
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
     if (tableName) {
-      return CartoVectorTableSource({...globalOptions, name: tableName});
+      return CartoVectorTableSource({...globalOptions, tableName});
     }
 
     return null;
