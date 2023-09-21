@@ -31,3 +31,5 @@ export type {
 } from './sources/common';
 export {CartoVectorTableSource} from './sources/vector-table-source';
 export type {CartoVectorTableSourceOptions} from './sources/vector-table-source';
+export {CartoVectorQuerySource} from './sources/vector-query-source';
+export type {CartoVectorQuerySourceOptions} from './sources/vector-query-source';

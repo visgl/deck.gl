@@ -5,6 +5,7 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
+  CartoVectorQuerySource,
   CartoVectorTableSource,
   CartoTilejsonResult,
   _CartoTileLayer as CartoTileLayer,
@@ -24,6 +25,15 @@ const config = {
       attr: 'grossFloorAreaM2',
       domain: [0, 200, 400, 1000, 2000, 5000],
       colors: 'Magenta'
+    })
+  },
+  'vector-query': {
+    sqlQuery:
+      'select * from `cartodb-on-gcp-backend-team`.alasarr.madrid_buildings where grossFloorAreaM2 > 2000',
+    getFillColor: colorBins({
+      attr: 'grossFloorAreaM2',
+      domain: [0, 200, 400, 1000, 2000, 5000],
+      colors: 'OrYel'
     })
   }
 };
@@ -81,15 +91,18 @@ function Root() {
 }
 
 function createCarto(datasource, columns) {
-  const {getFillColor, tableName} = datasource;
+  const {getFillColor, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
     if (tableName) {
       return CartoVectorTableSource({...globalOptions, tableName});
     }
+    if (sqlQuery) {
+      return CartoVectorQuerySource({...globalOptions, sqlQuery});
+    }
 
     return null;
-  }, [tableName]);
+  }, [sqlQuery, tableName]);
 
   return new CartoTileLayer({
     id: 'carto',

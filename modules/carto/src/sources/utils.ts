@@ -9,15 +9,6 @@ import {
 } from './common';
 import {buildMapsUrlFromBase} from '../config';
 
-function encodeParameters(parameters) {
-  return Object.entries(parameters).map(([key, value]) => {
-    if (typeof value !== 'string') {
-      value = JSON.stringify(value);
-    }
-    return encodeParameter(key, value as string);
-  });
-}
-
 export async function requestWithParameters<T = any>({
   baseUrl,
   parameters,
@@ -31,9 +22,13 @@ export async function requestWithParameters<T = any>({
 }): Promise<T> {
   let url = baseUrl;
   if (parameters) {
-    const encodedParameters = encodeParameters({...DEFAULT_PARAMETERS, ...parameters});
+    const allParameters = {...DEFAULT_PARAMETERS, ...parameters};
+    const encodedParameters = Object.entries(allParameters).map(([key, value]) => {
+      return encodeParameter(key, value);
+    });
     url += `?${encodedParameters.join('&')}`;
   }
+
   const headers = {...DEFAULT_HEADERS, ...customHeaders};
   try {
     /* global fetch */
