@@ -24,6 +24,9 @@ const defaultProps: DefaultProps<CartoTileLayerProps> = {
   ...MVTLayer.defaultProps,
   formatTiles: defaultTileFormat
 };
+// TODO define correct type
+// @ts-ignore
+defaultProps.data.async = true;
 
 /** All properties supported by CartoTileLayer. */
 export type CartoTileLayerProps = _CartoTileLayerProps & MVTLayerProps;
@@ -47,8 +50,36 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
 
   initializeState(): void {
     super.initializeState();
-    const binary = this.props.formatTiles === TILE_FORMATS.BINARY;
+    const binary = this.props.formatTiles === TILE_FORMATS.BINARY || TILE_FORMATS.MVT;
     this.setState({binary});
+  }
+
+  updateState(parameters) {
+    const {props} = parameters;
+    if (props.data) {
+      super.updateState(parameters);
+
+      const formatTiles = new URL(props.data.tiles[0]).searchParams.get('formatTiles');
+      const mvt = formatTiles === TILE_FORMATS.MVT;
+      this.setState({mvt});
+    }
+  }
+
+  getLoadOptions(): any {
+    // Insert access token if not specified
+    const loadOptions = super.getLoadOptions() || {};
+    // @ts-ignore
+    const {accessToken} = this.props.data;
+    if (!loadOptions?.fetch?.headers?.Authorization) {
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+      };
+    }
+
+    // Use binary for MVT loading
+    loadOptions.gis = {format: 'binary'};
+    return loadOptions;
   }
 
   getTileData(tile: TileLoadProps) {

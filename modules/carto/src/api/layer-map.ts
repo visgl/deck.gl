@@ -16,7 +16,7 @@ import moment from 'moment-timezone';
 import {Accessor, Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
 import CartoTileLayer from '../layers/carto-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
@@ -204,7 +204,7 @@ export function layerFromTileDataset(
   formatTiles: TileFormat | null = TILE_FORMATS.MVT,
   scheme: string,
   type?: MapType
-): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
+): typeof CartoTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
@@ -214,11 +214,7 @@ export function layerFromTileDataset(
   if (scheme === 'quadbin') {
     return QuadbinTileLayer;
   }
-  if (formatTiles === 'mvt') {
-    return MVTLayer;
-  }
 
-  // formatTiles === BINARY|JSON|GEOJSON
   return CartoTileLayer;
 }
 
