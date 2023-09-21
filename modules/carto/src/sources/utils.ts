@@ -1,7 +1,7 @@
 import {APIErrorContext, CartoAPIError} from '../api/carto-api-error';
 import {encodeParameter, MapType, TileFormat} from '../api/maps-api-common';
 import {
-  CartoSourceOptions,
+  CartoSourceOptionalOptions,
   DEFAULT_HEADERS,
   DEFAULT_PARAMETERS,
   MAX_GET_LENGTH,
@@ -56,28 +56,16 @@ export async function requestWithParameters<T = any>({
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-/**
- * Decorator function to apply global options to a Source object
- *
- * Example:
- * const AuthenticatedSource = withDefaults<typeof CartoXXXSource>(CartoXXXSource, {accessToken: 'XXX'});
- * const tilejson = await AuthenticatedSource({tableName: 'my.table'});
- */
-export function withDefaults<T extends (...args: any) => any>(
-  Source: T,
-  defaults: Partial<CartoSourceOptions>
-) {
-  // Modify passed in options type so that all global options are optional
-  type Options = Parameters<T>[0];
-  type LocalOptions = Optional<Options, keyof CartoSourceOptions>;
-  return (options: LocalOptions) => Source({...SOURCE_DEFAULTS, ...defaults, ...options});
-}
-
 export function buildApiEndpoint({
   apiBaseUrl,
   connectionName,
-  mapsUrl,
-  endpoint
-}: CartoSourceOptions & {endpoint: MapType}): string {
+  endpoint,
+  mapsUrl
+}: {
+  apiBaseUrl: string;
+  connectionName: string;
+  endpoint: MapType;
+  mapsUrl?: string;
+}): string {
   return `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/${connectionName}/${endpoint}`;
 }

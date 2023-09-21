@@ -3,8 +3,7 @@ import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult,
-  SOURCE_DEFAULTS
+  CartoTilejsonResult
 } from './common';
 
 export type CartoVectorTableSourceOptions = {
@@ -13,19 +12,15 @@ export type CartoVectorTableSourceOptions = {
   name: string;
 };
 
-type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
 export async function CartoVectorTableSource(
-  options: CartoSourceRequiredOptions & CartoVectorTableSourceOptions
+  options: CartoSourceRequiredOptions &
+    Partial<CartoSourceOptionalOptions> &
+    CartoVectorTableSourceOptions
 ): Promise<CartoTilejsonResult> {
   const {columns, spatialDataColumn, name} = options;
   const urlParameters = {name} as Record<keyof CartoVectorTableSourceOptions, string>;
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  return CartoBaseSource<CartoVectorTableSourceOptions>(
-    MAP_TYPES.TABLE,
-    {...SOURCE_DEFAULTS, ...options},
-    urlParameters
-  );
+  return CartoBaseSource<CartoVectorTableSourceOptions>(MAP_TYPES.TABLE, options, urlParameters);
 }

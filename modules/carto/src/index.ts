@@ -24,7 +24,10 @@ export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
 export {SOURCE_DEFAULTS} from './sources/common';
-export type {CartoTilejsonResult} from './sources/common';
-export {withDefaults} from './sources/utils';
+export type {
+  CartoSourceOptionalOptions,
+  CartoSourceRequiredOptions,
+  CartoTilejsonResult
+} from './sources/common';
 export {CartoVectorTableSource} from './sources/vector-table-source';
 export type {CartoVectorTableSourceOptions} from './sources/vector-table-source';

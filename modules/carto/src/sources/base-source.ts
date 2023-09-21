@@ -1,14 +1,21 @@
-import {encodeParameter, MapType, REQUEST_TYPES, Tilejson} from '../api/maps-api-common';
+import {encodeParameter, MapType, REQUEST_TYPES} from '../api/maps-api-common';
 import {APIErrorContext} from '../api/carto-api-error';
-import {CartoSourceOptions, CartoTilejsonResult, TilejsonMapInstantiation} from './common';
+import {
+  CartoSourceOptionalOptions,
+  CartoSourceRequiredOptions,
+  CartoTilejsonResult,
+  SOURCE_DEFAULTS,
+  Tilejson,
+  TilejsonMapInstantiation
+} from './common';
 import {buildApiEndpoint, requestWithParameters} from './utils';
 
 export async function CartoBaseSource<T>(
   endpoint: MapType,
-  options: CartoSourceOptions & T,
+  options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions & T,
   urlParameters: Record<keyof T, string>
 ): Promise<CartoTilejsonResult> {
-  const baseUrl = buildApiEndpoint({...options, endpoint});
+  const baseUrl = buildApiEndpoint({...SOURCE_DEFAULTS, ...options, endpoint});
   const {accessToken} = options;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
