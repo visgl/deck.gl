@@ -49,8 +49,6 @@ export async function requestWithParameters<T = any>({
   }
 }
 
-type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
 export function buildApiEndpoint({
   apiBaseUrl,
   connectionName,
