@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.30] - Sep 21 2023
+
+- [mapbox] fix drawing TerrainExtension in interleaved mode (#8115)
+
 #### deck.gl [8.9.29] - Sep 20 2023
 
 - CARTO: Use null as default value for KeyValueObject (#8119)
