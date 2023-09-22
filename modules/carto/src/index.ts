@@ -23,15 +23,17 @@ export {
 export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
-export {SOURCE_DEFAULTS} from './sources/common';
+export {
+  CartoVectorTableSource,
+  CartoVectorTilesetSource,
+  CartoVectorQuerySource,
+  SOURCE_DEFAULTS
+} from './sources';
 export type {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult
-} from './sources/common';
-export {CartoVectorTableSource} from './sources/vector-table-source';
-export type {CartoVectorTableSourceOptions} from './sources/vector-table-source';
-export {CartoVectorTilesetSource} from './sources/vector-tileset-source';
-export type {CartoVectorTilesetSourceOptions} from './sources/vector-tileset-source';
-export {CartoVectorQuerySource} from './sources/vector-query-source';
-export type {CartoVectorQuerySourceOptions} from './sources/vector-query-source';
+  CartoTilejsonResult,
+  CartoVectorTableSourceOptions,
+  CartoVectorTilesetSourceOptions,
+  CartoVectorQuerySourceOptions
+} from './sources';
