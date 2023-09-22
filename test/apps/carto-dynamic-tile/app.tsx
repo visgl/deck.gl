@@ -96,7 +96,8 @@ function createCarto(datasource) {
 
   return new CartoVectorLayer({
     id: 'carto',
-    data: tilejson as any, // TODO type
+    // @ts-ignore
+    data: tilejson, // TODO how to correctly specify data type?
 
     // Styling
     pickable: true,
