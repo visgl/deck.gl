@@ -31,5 +31,7 @@ export type {
 } from './sources/common';
 export {CartoVectorTableSource} from './sources/vector-table-source';
 export type {CartoVectorTableSourceOptions} from './sources/vector-table-source';
+export {CartoVectorTilesetSource} from './sources/vector-tileset-source';
+export type {CartoVectorTilesetSourceOptions} from './sources/vector-tileset-source';
 export {CartoVectorQuerySource} from './sources/vector-query-source';
 export type {CartoVectorQuerySourceOptions} from './sources/vector-query-source';

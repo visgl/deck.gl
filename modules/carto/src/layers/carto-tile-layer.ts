@@ -106,6 +106,10 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
       return null;
     }
 
+    if (this.state.mvt) {
+      return super.renderSubLayers(props) as GeoJsonLayer;
+    }
+
     const tileBbox = props.tile.bbox as any;
     const {west, south, east, north} = tileBbox;
 

@@ -5,8 +5,9 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  CartoVectorQuerySource,
   CartoVectorTableSource,
+  CartoVectorTilesetSource,
+  CartoVectorQuerySource,
   CartoTilejsonResult,
   _CartoTileLayer as CartoTileLayer,
   colorBins
@@ -35,6 +36,9 @@ const config = {
       domain: [0, 200, 400, 1000, 2000, 5000],
       colors: 'OrYel'
     })
+  },
+  'vector-tileset': {
+    tableName: 'cartobq.nexus_demo.transmission_lines_tileset_simplified'
   }
 };
 
@@ -94,7 +98,11 @@ function createCarto(datasource, columns) {
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
     if (tableName) {
-      return CartoVectorTableSource({...globalOptions, tableName});
+      if (tableName.includes('tileset')) {
+        return CartoVectorTilesetSource({...globalOptions, tableName});
+      } else {
+        return CartoVectorTableSource({...globalOptions, tableName});
+      }
     }
     if (sqlQuery) {
       return CartoVectorQuerySource({...globalOptions, sqlQuery});
