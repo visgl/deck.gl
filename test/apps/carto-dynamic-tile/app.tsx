@@ -9,7 +9,7 @@ import {
   CartoVectorTilesetSource,
   CartoVectorQuerySource,
   CartoTilejsonResult,
-  _CartoTileLayer as CartoTileLayer,
+  CartoVectorLayer,
   colorBins
 } from '@deck.gl/carto';
 
@@ -94,7 +94,7 @@ function createCarto(datasource) {
     return Source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
   }, [Source, columns, spatialDataColumn, sqlQuery, tableName]);
 
-  return new CartoTileLayer({
+  return new CartoVectorLayer({
     id: 'carto',
     data: tilejson as any, // TODO type
 

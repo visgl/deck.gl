@@ -20,7 +20,7 @@ import type {Feature} from 'geojson';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
-const defaultProps: DefaultProps<CartoTileLayerProps> = {
+const defaultProps: DefaultProps<CartoVectorLayerProps> = {
   ...MVTLayer.defaultProps,
   formatTiles: defaultTileFormat
 };
@@ -28,11 +28,11 @@ const defaultProps: DefaultProps<CartoTileLayerProps> = {
 // @ts-ignore
 defaultProps.data.async = true;
 
-/** All properties supported by CartoTileLayer. */
-export type CartoTileLayerProps = _CartoTileLayerProps & MVTLayerProps;
+/** All properties supported by CartoVectorLayer. */
+export type CartoVectorLayerProps = _CartoVectorLayerProps & MVTLayerProps;
 
-/** Properties added by CartoTileLayer. */
-type _CartoTileLayerProps = {
+/** Properties added by CartoVectorLayer. */
+type _CartoVectorLayerProps = {
   /** Use to override the default tile data format.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
@@ -42,10 +42,10 @@ type _CartoTileLayerProps = {
   formatTiles?: TileFormat;
 };
 
-export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
-  Required<_CartoTileLayerProps> & ExtraProps
+export default class CartoVectorLayer<ExtraProps extends {} = {}> extends MVTLayer<
+  Required<_CartoVectorLayerProps> & ExtraProps
 > {
-  static layerName = 'CartoTileLayer';
+  static layerName = 'CartoVectorLayer';
   static defaultProps = defaultProps;
 
   initializeState(): void {
