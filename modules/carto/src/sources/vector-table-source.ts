@@ -14,7 +14,7 @@ export type CartoVectorTableSourceOptions = {
 
 type UrlParameters = {
   columns?: string;
-  spatialDataColumn?: string;
+  geo_column?: string;
   name: string;
 };
 
@@ -30,7 +30,7 @@ export async function CartoVectorTableSource(
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
+    urlParameters.geo_column = spatialDataColumn;
   }
   return CartoBaseSource<CartoVectorTableSourceOptions, UrlParameters>(
     MAP_TYPES.TABLE,

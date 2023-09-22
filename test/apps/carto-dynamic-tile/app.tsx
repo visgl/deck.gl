@@ -14,40 +14,43 @@ import {
 } from '@deck.gl/carto';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-const INITIAL_VIEW_STATE = {longitude: -3.7082998, latitude: 40.4205556, zoom: 15};
+const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
 const config = {
+  'vector-query': {
+    Source: CartoVectorQuerySource,
+    sqlQuery:
+      'select geom, district from carto-demo-data.demo_tables.chicago_crime_sample where year > 2016',
+    getFillColor: [255, 0, 0]
+  },
   'vector-table': {
-    tableName: 'cartodb-on-gcp-backend-team.alasarr.madrid_buildings',
+    Source: CartoVectorTableSource,
+    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+    columns: ['date', 'year'],
     getFillColor: colorBins({
-      attr: 'grossFloorAreaM2',
-      domain: [0, 200, 400, 1000, 2000, 5000],
+      attr: 'year',
+      domain: [2002, 2006, 2010, 2016, 2020],
       colors: 'Magenta'
     })
   },
-  'vector-query': {
-    sqlQuery:
-      'select * from `cartodb-on-gcp-backend-team`.alasarr.madrid_buildings where grossFloorAreaM2 > 2000',
-    getFillColor: colorBins({
-      attr: 'grossFloorAreaM2',
-      domain: [0, 200, 400, 1000, 2000, 5000],
-      colors: 'OrYel'
-    })
+  'vector-table-dynamic': {
+    Source: CartoVectorTableSource,
+    tableName: 'carto-demo-data.demo_tables.osm_buildings_usa',
+    spatialDataColumn: 'geog',
+    getFillColor: [131, 44, 247]
   },
   'vector-tileset': {
-    tableName: 'cartobq.nexus_demo.transmission_lines_tileset_simplified'
+    Source: CartoVectorTilesetSource,
+    tableName: 'carto-demo-data.demo_tilesets.sociodemographics_usa_blockgroup',
+    getFillColor: colorBins({
+      attr: 'income_per_capita',
+      domain: [15000, 25000, 35000, 45000, 60000],
+      colors: 'OrYel'
+    })
   }
-};
-
-const COLUMNS = {
-  do_area: false,
-  do_date: false,
-  do_label: true,
-  do_perimeter: true,
-  do_num_vertices: false
 };
 
 const accessToken = 'XXX';
@@ -55,17 +58,15 @@ const accessToken = 'XXX';
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
 function Root() {
-  const [columns, setColumns] = useState(COLUMNS);
   const [dataset, setDataset] = useState('vector-table');
   const datasource = config[dataset];
-  const cols = trueKeys(columns);
 
   return (
     <>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[createCarto(datasource, cols)]}
+        layers={[createCarto(datasource)]}
         getTooltip={({object}) => {
           const properties = object?.properties;
           if (!properties) return null;
@@ -82,34 +83,16 @@ function Root() {
         value={dataset}
         onSelect={setDataset}
       />
-      <MultiSelect
-        enabled={datasource.tableName}
-        obj={COLUMNS}
-        onChange={e => {
-          setColumns({...e});
-        }}
-      />
     </>
   );
 }
 
-function createCarto(datasource, columns) {
-  const {getFillColor, sqlQuery, tableName} = datasource;
+function createCarto(datasource) {
+  const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
-    if (tableName) {
-      if (tableName.includes('tileset')) {
-        return CartoVectorTilesetSource({...globalOptions, tableName});
-      } else {
-        return CartoVectorTableSource({...globalOptions, tableName});
-      }
-    }
-    if (sqlQuery) {
-      return CartoVectorQuerySource({...globalOptions, sqlQuery});
-    }
-
-    return null;
-  }, [sqlQuery, tableName]);
+    return Source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
+  }, [Source, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new CartoTileLayer({
     id: 'carto',
@@ -117,6 +100,7 @@ function createCarto(datasource, columns) {
 
     // Styling
     pickable: true,
+    pointRadiusMinPixels: 5,
     lineWidthMinPixels: 1,
     getFillColor
   });
@@ -128,7 +112,7 @@ function ObjectSelect({title, obj, value, onSelect}) {
     <>
       <select
         onChange={e => onSelect(e.target.value)}
-        style={{position: 'relative', padding: 4, margin: 2, width: 200}}
+        style={{position: 'relative', padding: 4, margin: 2, width: 250}}
         value={value}
       >
         <option hidden>{title}</option>
@@ -141,47 +125,6 @@ function ObjectSelect({title, obj, value, onSelect}) {
       <br></br>
     </>
   );
-}
-
-const boxStyle = {
-  position: 'relative',
-  background: 'rgba(255, 255, 255, 0.9)',
-  padding: '4px 8px',
-  margin: 3,
-  width: 150
-} as React.CSSProperties;
-function MultiSelect({enabled, obj, onChange}) {
-  return (
-    <div style={{...boxStyle, ...(enabled ? {} : {pointerEvents: 'none', opacity: 0.2})}}>
-      {Object.entries(obj).map(([key, value]) => (
-        <Checkbox
-          key={key}
-          label={key}
-          value={value}
-          onChange={e => {
-            obj[key] = e.target.checked;
-            onChange(obj);
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function Checkbox({label, value, onChange}) {
-  return (
-    <label>
-      {label}:
-      <input type="checkbox" checked={value} onChange={onChange} />
-      <br />
-    </label>
-  );
-}
-
-function trueKeys(obj) {
-  return Object.entries(obj)
-    .filter(([k, v]) => v)
-    .map(([k, v]) => k);
 }
 
 const container = document.body.appendChild(document.createElement('div'));

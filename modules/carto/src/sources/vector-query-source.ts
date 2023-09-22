@@ -13,7 +13,7 @@ export type CartoVectorQuerySourceOptions = {
 };
 
 type UrlParameters = {
-  spatialDataColumn?: string;
+  geo_column?: string;
   q: string;
   queryParameters?: string;
 };
@@ -27,7 +27,7 @@ export async function CartoVectorQuerySource(
   const urlParameters: UrlParameters = {q: sqlQuery};
 
   if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
+    urlParameters.geo_column = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
