@@ -52,7 +52,9 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
+    // @ts-expect-error
     this.state.model.setUniforms(uniforms);
+    // @ts-expect-error
     this.state.model.setUniforms({
       radius: cellSize / 2,
       radiusUnits: UNIT[radiusUnits],
@@ -64,6 +66,7 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
       edgeDistance: 1,
       isWireframe: false
     });
+    // @ts-expect-error
     this.state.model.draw(this.context.renderPass);
   }
 }
