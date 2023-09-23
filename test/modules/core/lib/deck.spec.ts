@@ -297,5 +297,17 @@ test('Deck#style', t => {
     t.is(deck.getCanvas().style.getPropertyValue(key), value, 'style is applied');
   });
 
+  deck.setProps({
+    style: {
+      '--css-var': 'updated'
+    }
+  });
+  t.is(deck.getCanvas().style.getPropertyValue('--css-var'), 'updated', 'style is updated');
+  t.is(
+    deck.getCanvas().style.getPropertyValue('backgroundColor'),
+    'pink',
+    'old style is still set'
+  );
+
   t.end();
 });

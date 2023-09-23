@@ -466,6 +466,7 @@ export default class Deck {
     // Merge with existing props
     Object.assign(this.props, props);
 
+    this._setStyle(this.props);
     // Update CSS size of canvas
     this._setCanvasSize(this.props);
 
@@ -742,6 +743,21 @@ export default class Deck {
     );
 
     return canvas;
+  }
+
+  /** Updates canvas style, if provided as props */
+  private _setStyle(props: Required<DeckProps>): void {
+    if (!this.canvas) {
+      return;
+    }
+    const newStyle = props.style;
+    const oldStyle = this.props.style;
+    if (!deepEqual(oldStyle, newStyle, 1)) {
+      Object.entries(oldStyle).map(([key]) => this.canvas.style.removeProperty(key));
+      Object.entries(newStyle).map(([key, value]) =>
+        this.canvas.style.setProperty(key, value as string)
+      );
+    }
   }
 
   /** Updates canvas width and/or height, if provided as props */
