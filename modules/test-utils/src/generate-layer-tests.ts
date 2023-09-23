@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import {_count as count} from '@deck.gl/core';
 
-function noop() {}
+function noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
 function defaultAssert(condition, comment) {
   if (!condition) {

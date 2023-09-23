@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
+import {glsl} from '@luma.gl/core';
+
+export default glsl`\
+#version 300 es
 #define SHADER_NAME scatterplot-layer-fragment-shader
 
 precision highp float;
-
-uniform bool filled;
-uniform float stroked;
-uniform bool antialiasing;
+precision highp int;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
@@ -33,11 +33,30 @@ varying vec2 unitPosition;
 varying float innerUnitRadius;
 varying float outerRadiusPixels;
 
+// Needs to be identical to vertex shader uniforms
+uniform scatterplotUniforms {
+  // float opacity;
+  float radiusScale;
+  float radiusMinPixels;
+  float radiusMaxPixels;
+  float lineWidthScale;
+  float lineWidthMinPixels;
+  float lineWidthMaxPixels;
+  float stroked;
+  bool filled;
+  bool antialiasing;
+  bool billboard;
+  int radiusUnits;
+  int lineWidthUnits;
+} scatterplot;
+
+ uniform float opacity;
+
 void main(void) {
   geometry.uv = unitPosition;
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
-  float inCircle = antialiasing ? 
+  float inCircle = scatterplot.antialiasing ? 
     smoothedge(distToCenter, outerRadiusPixels) : 
     step(distToCenter, outerRadiusPixels);
 
@@ -45,12 +64,12 @@ void main(void) {
     discard;
   }
 
-  if (stroked > 0.5) {
-    float isLine = antialiasing ? 
+  if (scatterplot.stroked > 0.5) {
+    float isLine = scatterplot.antialiasing ? 
       smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
       step(innerUnitRadius * outerRadiusPixels, distToCenter);
 
-    if (filled) {
+    if (scatterplot.filled) {
       gl_FragColor = mix(vFillColor, vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
@@ -58,7 +77,7 @@ void main(void) {
       }
       gl_FragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (filled) {
+  } else if (scatterplot.filled) {
     gl_FragColor = vFillColor;
   } else {
     discard;
