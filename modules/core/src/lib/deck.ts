@@ -736,7 +736,10 @@ export default class Deck {
       parent.appendChild(canvas);
     }
 
-    Object.assign(canvas.style, props.style);
+    // Set css variables and properties
+    Object.entries(props.style).map(([key, value]) =>
+      (canvas as HTMLCanvasElement).style.setProperty(key, value as string)
+    );
 
     return canvas;
   }

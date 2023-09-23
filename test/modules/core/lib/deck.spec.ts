@@ -264,3 +264,38 @@ test('Deck#resourceManager', async t => {
   deck.finalize();
   t.end();
 });
+
+test('Deck#style', t => {
+  const style = {
+    backgroundColor: 'pink',
+    '--css-var': 'test'
+  };
+
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    // This is required because the jsdom canvas does not have client width/height
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    },
+
+    layers: [],
+
+    style
+  });
+
+  console.log(style);
+  console.log(deck.getCanvas());
+  console.log(deck.getCanvas().style);
+
+  Object.entries(style).map(([key, value]) => {
+    t.is(deck.getCanvas().style.getPropertyValue(key), value, 'style is applied');
+  });
+
+  t.end();
+});
