@@ -62,7 +62,11 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     const {label} = this.props;
     const el = this.element;
     const ui = (
-      <IconButton onClick={this.handleClick.bind(this)} label={label} className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'} />
+      <IconButton
+        onClick={this.handleClick.bind(this)}
+        label={label}
+        className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
+      />
     );
     render(ui, el);
   }
