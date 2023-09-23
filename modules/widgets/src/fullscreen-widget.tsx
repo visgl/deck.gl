@@ -88,8 +88,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   getContainer() {
-    // @ts-expect-error canvas is protected. Merge https://github.com/visgl/deck.gl/pull/7919?
-    return this.props.container || this.deck?.canvas?.parentElement;
+    return this.props.container || this.deck?.getCanvas()?.parentElement;
   }
 
   onFullscreenChange() {
