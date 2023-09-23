@@ -109,12 +109,18 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)`
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)`
 
-### Replacing Icons
+### Icon
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
+| `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
+
+#### Replacing Icons
 
 Users can to customize icons to better align with their design preferences or branding. This section provides a step-by-step guide on how to replace and customize these icons.
 
 1. Prepare Your Icons:
-  - Ensure your icons are available as [SVG data url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url). These will be used for a CSS [mask-image](https://developer.mozilla.org/en-US/docs/Web/CSS/mask-image).
+  - Ensure your icons are available as [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url). These will be used for a CSS [mask-image](https://developer.mozilla.org/en-US/docs/Web/CSS/mask-image).
 2. Icon Replacement:
   - Use CSS variables, such as `--icon-fullscreen-enter`, to replace the default icons with your customized ones.
 3. Color Customization:
