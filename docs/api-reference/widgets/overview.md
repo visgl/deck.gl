@@ -52,7 +52,7 @@ Apply to all wigdets with the `.deck-widget` selector.
 }
 ```
 
-> Note: Variables can also be globally applied in `:root`, however 
+> Note: While variables can be globally applied using the `:root` selector, ensuring their availability throughout the entire document, this method is not recommended. Applying variables globally can lead to naming conflicts, especially in larger projects or when integrating with other libraries.
 
 ### Type-specific Theming
 
@@ -129,7 +129,6 @@ Users can to customize icons to better align with their design preferences or br
 
 Example:
 ```css
-/* Replacing the fullscreen icon and recoloring blue */
 .deck-widget {
     --icon-fullscreen-enter: url('path_to_your_svg_icon.svg');
     --button-icon-idle: blue;
