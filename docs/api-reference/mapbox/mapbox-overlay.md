@@ -173,6 +173,9 @@ See [Deck.pickMultipleObjects](../core/deck.md#pickmultipleobjects).
 
 Removes the control and deletes all resources.
 
+##### getCanvas
+
+See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.
 
 ## Remarks
 
