@@ -587,6 +587,19 @@ Frees all resources associated with this `Deck` instance.
 
 `deck.finalize()`
 
+##### `getCanvas` {#getcanvas}
+
+Get the canvas element attached to this `Deck` instance.
+
+`deck.getCanvas()`
+
+Returns:
+
+* Either an `HTMLCanvasElement` or `null` if one isn't assigned.
+
+Notes:
+
+* See the [canvas](#canvas) prop for more information.
 
 ##### `setProps` {#setprops}
 

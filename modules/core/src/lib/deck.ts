@@ -559,6 +559,11 @@ export default class Deck {
     return this.viewManager.getViewports(rect);
   }
 
+  /** Get the current canvas element. */
+  getCanvas(): HTMLCanvasElement | null {
+    return this.canvas;
+  }
+
   /** Query the object rendered on top at a given point */
   pickObject(opts: {
     /** x position in pixels */
