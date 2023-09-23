@@ -38,6 +38,7 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('\n');
 
+// @ts-expect-error
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],

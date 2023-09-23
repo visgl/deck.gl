@@ -204,7 +204,7 @@ export default class LayersPass extends Pass {
       console.warn(`${view.id}: Per view clearing not yet implemented in deck.gl v9`);
 
       // const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      // withParameters(
+      // withGLParameters(
       //   device,
       //   {
       //     scissorTest: true,

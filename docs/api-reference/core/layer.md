@@ -472,7 +472,7 @@ The function receives two arguments:
 
 The `parameters` allows applications to specify values for WebGL parameters such as blending mode, depth testing etc. Any `parameters` will be applied temporarily while rendering this layer only.
 
-To get access to static parameter values, applications can `import GL from '@luma.gl/constants'`. Please refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
+To get access to static parameter values, applications can `import GL from '@luma.gl/constants'`. Please refer to the luma.gl [setGLParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
 
 
 ##### `getPolygonOffset` (Function, optional) {#getpolygonoffset}

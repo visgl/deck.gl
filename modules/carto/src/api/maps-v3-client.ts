@@ -152,7 +152,7 @@ type MapsAPIParameters = {
 /**
  * Build a URL with all required parameters
  */
-function getParameters({
+function getGLParameters({
   type,
   source,
   geoColumn,
@@ -213,7 +213,7 @@ export async function mapInstantiation({
   queryParameters
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const parameters = getParameters({
+  const parameters = getGLParameters({
     type,
     source,
     geoColumn,

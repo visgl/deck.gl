@@ -1639,7 +1639,7 @@ For developers that write their own custom layers, the `shadertools` shader asse
 
 ### Per-Layer Control of WebGL Parameters
 
-The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides applications with significant control over the detailed rendering of layers. Note that the new `parameters` prop directly leverages the luma.gl v4 [setParameters](https://luma.gl/docs/api-reference-legacy/context/parameter-setting#setparameters) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+The base `Layer` class (which is inherited by all layers) supports a new property `parameters` that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This provides applications with significant control over the detailed rendering of layers. Note that the new `parameters` prop directly leverages the luma.gl v4 [setGLParameters](https://luma.gl/docs/api-reference-legacy/context/parameter-setting#setparameters) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
 
 
 ### Layer Attribute Control

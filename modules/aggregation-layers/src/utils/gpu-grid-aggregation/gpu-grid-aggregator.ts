@@ -21,7 +21,7 @@
 import type {Device, DeviceFeature} from '@luma.gl/core';
 import {Model, Transform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {readPixelsToBuffer, withParameters, clear} from '@luma.gl/webgl';
+import {readPixelsToBuffer, withGLParameters, clear} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
@@ -396,7 +396,7 @@ export default class GPUGridAggregator {
     const {framebuffers} = this.state;
     const {allAggregationModel} = this;
 
-    withParameters(
+    withGLParameters(
       this.device,
       {
         ...clearParams,
@@ -406,7 +406,7 @@ export default class GPUGridAggregator {
       () => {
         clear(this.device, {color: true});
 
-        // allAggregationModel.setParameters(parameters);
+        // allAggregationModel.setGLParameters(parameters);
         allAggregationModel.setUniforms({gridSize, combineMaxMin});
         allAggregationModel.setBindings({uSampler: framebuffers[id].texture});
         allAggregationModel.draw();
@@ -427,7 +427,7 @@ export default class GPUGridAggregator {
       operation === AGGREGATION_OPERATION.MIN
         ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
         : [0, 0, 0, 0];
-    withParameters(
+    withGLParameters(
       this.device,
       {
         framebuffer: framebuffers[id],

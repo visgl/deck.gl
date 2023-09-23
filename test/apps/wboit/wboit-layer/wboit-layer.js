@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL, Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
+import {GL, Model, Framebuffer, Texture2D, withGLParameters, Buffer} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -108,7 +108,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
   draw(opts) {
     this.state.accumulationFramebuffer.clear({color: [0, 0, 0, 1], depth: 1});
 
-    withParameters(
+    withGLParameters(
       this.context.device,
       {
         blendFunc: [GL.ONE, GL.ONE, GL.ZERO, GL.ONE_MINUS_SRC_ALPHA],
@@ -130,7 +130,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
       }
     );
 
-    withParameters(
+    withGLParameters(
       this.context.device,
       {
         blendFunc: [GL.ONE, gl.ONE_MINUS_SRC_ALPHA],
@@ -143,7 +143,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
       }
     );
 
-    withParameters(
+    withGLParameters(
       this.context.device,
       {
         blend: false,

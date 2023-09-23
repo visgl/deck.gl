@@ -105,10 +105,13 @@ const getCollisionUniforms = (
   };
 };
 
-export default {
+// @ts-expect-error
+export const collision: ShaderModule = {
   name: 'collision',
   dependencies: [project],
   vs,
   inject,
   getUniforms: getCollisionUniforms
 } as ShaderModule;
+
+export default collision;
