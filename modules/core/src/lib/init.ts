@@ -58,7 +58,6 @@ function checkVersion() {
 
     registerLoaders([
       jsonLoader,
-      // @ts-expect-error non-standard Loader format
       [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
     ]);
   }
