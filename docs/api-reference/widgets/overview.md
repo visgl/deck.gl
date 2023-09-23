@@ -38,11 +38,13 @@ new FullscreenWidget({});
 new deck.FullscreenWidget({});
 ```
 
-## CSS Themeing
+## CSS Theming
 
-Define CSS variables to customize the appearance of widgets.
+Customizing the appearance of widgets can be achieved using CSS variables. This section provides guidance on how to theme widgets at different levels of specificity.
 
-Apply to all wigdets with the `.deck-widget` selector:
+### Global Theming
+
+Apply to all wigdets with the `.deck-widget` selector.
 
 ```css
 .deck-widget {
@@ -50,7 +52,11 @@ Apply to all wigdets with the `.deck-widget` selector:
 }
 ```
 
-Apply to one widget type with `.deck-widget-[type]` selector:
+> Note: Variables can also be globally applied in `:root`, however 
+
+### Type-specific Theming
+
+Theme a specific type of widget using the `.deck-widget-[type]` selector.
 
 ```css
 .deck-widget-fullscreen {
@@ -58,13 +64,17 @@ Apply to one widget type with `.deck-widget-[type]` selector:
 }
 ```
 
-Apply to one instance of a widget with inline styles:
+### Instance-specific Theming
+
+Apply styles to a single instance of a widget using inline styles.
 
 ```js
 new FullscreenWidget({ style: {'--button-size': '48px'}})
 ```
 
-Apply a custom class to a widget:
+### Custom Class Theming
+
+Define a custom class with your desired styles and apply it to a widget.
 
 ```css
 .my-class {
@@ -74,6 +84,10 @@ Apply a custom class to a widget:
 ```js
 new FullscreenWidget({ className: 'my-class'})
 ```
+
+## Customizable CSS Variables
+
+We've provided a set of CSS variables to make styling UI Widgets more convenient. These variables allow for customization of widget sizes, colors, and other properties. Below is a comprehensive list of these variables, their expected types, and default values:
 
 ### Size
 
@@ -94,3 +108,24 @@ new FullscreenWidget({ className: 'my-class'})
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)`
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)`
+
+### Replacing Icons
+
+Users can to customize icons to better align with their design preferences or branding. This section provides a step-by-step guide on how to replace and customize these icons.
+
+1. Prepare Your Icons:
+  - Ensure your icons are available as [SVG data url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url). These will be used for a CSS [mask-image](https://developer.mozilla.org/en-US/docs/Web/CSS/mask-image).
+2. Icon Replacement:
+  - Use CSS variables, such as `--icon-fullscreen-enter`, to replace the default icons with your customized ones.
+3. Color Customization:
+  - The original color embedded in your SVG will be disregarded. However, it's crucial that the SVG isn't transparent.
+  - Customize the color of your icon using the appropriate CSS variable, such as `--button-icon-idle`.
+
+Example:
+```css
+/* Replacing the fullscreen icon and recoloring blue */
+.deck-widget {
+    --icon-fullscreen-enter: url('path_to_your_svg_icon.svg');
+    --button-icon-idle: blue;
+}
+```
