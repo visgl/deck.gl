@@ -5,11 +5,13 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
+  CartoQuadbinTableSource,
   CartoVectorTableSource,
   CartoVectorTilesetSource,
   CartoVectorQuerySource,
   CartoTilejsonResult,
   CartoVectorLayer,
+  QuadbinTileLayer,
   colorBins
 } from '@deck.gl/carto';
 
@@ -19,7 +21,23 @@ const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
+const Layer = {
+  'quadbin': QuadbinTileLayer,
+  'vector': CartoVectorLayer
+}
+
 const config = {
+  'quadbin-table': {
+    Source: CartoQuadbinTableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
+    aggregationExp: 'avg(population) as population_average',
+    spatialDataColumn: 'quadbin:quadbin',
+    getFillColor: colorBins({
+      attr: 'population_average',
+      domain: [10, 50, 100, 250, 500, 1000],
+      colors: 'SunsetDark'
+    })
+  },
   'vector-query': {
     Source: CartoVectorQuerySource,
     sqlQuery:
@@ -53,20 +71,28 @@ const config = {
   }
 };
 
-const accessToken = 'XXX';
+const accessToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRVNGNZTHAwaThjYnVMNkd0LTE0diJ9.eyJodHRwOi8vYXBwLmNhcnRvLmNvbS9lbWFpbCI6ImZwYWxtZXJAY2FydG9kYi5jb20iLCJodHRwOi8vYXBwLmNhcnRvLmNvbS9hY2NvdW50X2lkIjoiYWNfN3hoZnd5bWwiLCJpc3MiOiJodHRwczovL2F1dGguY2FydG8uY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3OTY5NjU1OTI5NjExMjIxNDg2IiwiYXVkIjoiY2FydG8tY2xvdWQtbmF0aXZlLWFwaSIsImlhdCI6MTY5NTYzNDA5MSwiZXhwIjoxNjk1NzIwNDkxLCJhenAiOiJBdHh2SERldVhsUjhYUGZGMm5qMlV2MkkyOXB2bUN4dSIsInBlcm1pc3Npb25zIjpbImV4ZWN1dGU6d29ya2Zsb3dzIiwicmVhZDphY2NvdW50IiwicmVhZDphcHBzIiwicmVhZDpjb25uZWN0aW9ucyIsInJlYWQ6Y3VycmVudF91c2VyIiwicmVhZDppbXBvcnRzIiwicmVhZDpsaXN0ZWRfYXBwcyIsInJlYWQ6bWFwcyIsInJlYWQ6dGlsZXNldHMiLCJyZWFkOnRva2VucyIsInJlYWQ6d29ya2Zsb3dzIiwidXBkYXRlOmN1cnJlbnRfdXNlciIsIndyaXRlOmFwcHMiLCJ3cml0ZTpjYXJ0by1kdy1ncmFudHMiLCJ3cml0ZTpjb25uZWN0aW9ucyIsIndyaXRlOmltcG9ydHMiLCJ3cml0ZTptYXBzIiwid3JpdGU6dG9rZW5zIiwid3JpdGU6d29ya2Zsb3dzIl19.Pe3-CiKxbzvZSVEpOOau-4C0KvgwRY9z3JrQN9nBkXNe5nw4RRNjZKwximMJfGn6agkicwpul8IfkTibEJl3gtoEOMQN2azWGMuxFd0cLEPgg6w2bCDWHi6QBjNC_VCW0jRw_ldE4W3J0rwfCLdoUuqdF28a6E3JA2_2GtT5fMupbriCFhLLDOgPt4gm3KoQI7YOe7PI6c5nEWbYeg4Eb776P5ggMdgcgjerBLo5Jnzzt8FAqmBCKZriJC4RZhy5cXyvevtJoAX-NmTcz2YpBLiWeRSx_vkHkB86YQQ2NHY91mWW4Y_n6cpT0-FEmhXHb1qhQTVPqnnlDPxaktPjsQ';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
 function Root() {
   const [dataset, setDataset] = useState('vector-table');
   const datasource = config[dataset];
+  let layers;
+
+  if (dataset.includes('quadbin')) {
+    layers = [createQuadbinLayer(datasource)];
+
+  } else if (dataset.includes('vector')) {
+    layers = [createVectorLayer(datasource)];
+  } 
 
   return (
     <>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[createCarto(datasource)]}
+        layers={layers}
         getTooltip={({object}) => {
           const properties = object?.properties;
           if (!properties) return null;
@@ -87,22 +113,36 @@ function Root() {
   );
 }
 
-function createCarto(datasource) {
-  const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+function createQuadbinLayer(datasource) {
+  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
-    return Source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
-  }, [Source, columns, spatialDataColumn, sqlQuery, tableName]);
+    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
+  }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
+
+  return new QuadbinTileLayer({
+    id: 'carto',
+    // @ts-ignore
+    data: tilejson, // TODO how to correctly specify data type?
+    pickable: true,
+    stroked: false,
+    getFillColor
+  });
+}
+
+function createVectorLayer(datasource) {
+  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+  // useMemo to avoid a map instantiation on every re-render
+  const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
+    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
+  }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new CartoVectorLayer({
     id: 'carto',
     // @ts-ignore
     data: tilejson, // TODO how to correctly specify data type?
-
-    // Styling
     pickable: true,
     pointRadiusMinPixels: 5,
-    lineWidthMinPixels: 1,
     getFillColor
   });
 }

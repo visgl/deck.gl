@@ -58,6 +58,21 @@ export default class QuadbinTileLayer<
     }
   }
 
+  getLoadOptions(): any {
+    // Insert access token if not specified
+    const loadOptions = super.getLoadOptions() || {};
+    // @ts-ignore
+    const {accessToken} = this.props.data;
+    if (!loadOptions?.fetch?.headers?.Authorization) {
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+      };
+    }
+
+    return loadOptions;
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {data, tileJSON} = this.state;
     const maxZoom = parseInt(tileJSON?.maxresolution);

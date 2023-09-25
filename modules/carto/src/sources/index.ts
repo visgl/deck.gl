@@ -5,6 +5,9 @@ export type {
   CartoTilejsonResult
 } from './common';
 
+export {CartoQuadbinTableSource} from './quadbin-table-source';
+export type {CartoQuadbinTableSourceOptions} from './quadbin-table-source';
+
 export {CartoVectorTableSource} from './vector-table-source';
 export type {CartoVectorTableSourceOptions} from './vector-table-source';
 
