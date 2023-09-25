@@ -36,9 +36,9 @@
     "@deck.gl/layers": "8.10.0-alpha.2",
     "@deck.gl/mesh-layers": "8.10.0-alpha.2",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",
-    "@loaders.gl/3d-tiles": "4.0.0-alpha.25",
-    "@loaders.gl/core": "4.0.0-alpha.25",
-    "@loaders.gl/csv": "4.0.0-alpha.25",
+    "@loaders.gl/3d-tiles": "4.0.0-alpha.26",
+    "@loaders.gl/core": "4.0.0-alpha.26",
+    "@loaders.gl/csv": "4.0.0-alpha.26",
     "@luma.gl/constants": "^8.5.20",
     "mapbox-gl": "^1.13.2"
   },
