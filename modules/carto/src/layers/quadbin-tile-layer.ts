@@ -21,12 +21,10 @@ export const renderSubLayers = props => {
   });
 };
 
-type AsyncSource<T> = null | T | Promise<T>;
-
 const tilejsonType = {
   type: 'object' as const,
-  value: null as AsyncSource<CartoTilejsonResult>,
-  validate: (value, propType) =>
+  value: null as null | CartoTilejsonResult,
+  validate: (value: CartoTilejsonResult, propType) =>
     (propType.optional && value === null) ||
     (typeof value === 'object' &&
       Array.isArray(value.tiles) &&
@@ -46,7 +44,7 @@ export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
 
 /** Properties added by QuadbinTileLayer. */
 type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> & {
-  data: AsyncSource<CartoTilejsonResult>;
+  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
   aggregationResLevel?: number;
 };
 
@@ -56,23 +54,6 @@ export default class QuadbinTileLayer<
 > extends CompositeLayer<ExtraProps & Required<_QuadbinTileLayerProps<DataT>>> {
   static layerName = 'QuadbinTileLayer';
   static defaultProps = defaultProps;
-
-  state!: {
-    tileJSON: any;
-    data: any;
-  };
-  initializeState(): void {
-    this.setState({data: null, tileJSON: null});
-  }
-
-  updateState({changeFlags}: UpdateParameters<this>): void {
-    if (changeFlags.dataChanged) {
-      let {data} = this.props;
-      const tileJSON = data;
-      data = (tileJSON as any).tiles;
-      this.setState({data, tileJSON});
-    }
-  }
 
   getLoadOptions(): any {
     // Insert access token if not specified
@@ -90,13 +71,15 @@ export default class QuadbinTileLayer<
   }
 
   renderLayers(): Layer | null | LayersList {
-    const {data, tileJSON} = this.state;
-    const maxZoom = parseInt(tileJSON?.maxresolution);
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    if (!tileJSON) return null;
+
+    const maxZoom = tileJSON.maxresolution;
     return [
       // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `quadbin-tile-layer-${this.props.id}`,
-        data,
+        data: tileJSON.tiles,
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,

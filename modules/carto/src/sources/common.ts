@@ -33,6 +33,8 @@ export interface Tilejson {
   scheme: string;
   tiles: string[];
   properties_tiles: string[];
+  minresolution: number;
+  maxresolution: number;
   minzoom: number;
   maxzoom: number;
   bounds: [number, number, number, number];
