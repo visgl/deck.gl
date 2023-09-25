@@ -13,6 +13,14 @@ module.exports = getBabelConfig({
           patterns: ['**/*.glsl.js', '**/*.glsl.ts']
         }
       ]
+    ],
+    overrides: [
+      {
+        include: './modules/widgets/**/*.{ts,tsx}',
+        // Parse preact-style JSX in @deck.gl/widgets.
+        presets: [['@babel/typescript', {jsxPragma: 'h'}]],
+        plugins: [['@babel/plugin-transform-react-jsx', {pragma: 'h'}]]
+      }
     ]
   }
 });

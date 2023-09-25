@@ -5,7 +5,10 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "typed"
+    "outDir": "typed",
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
   },
   "references": [
     {"path": "../core"}
