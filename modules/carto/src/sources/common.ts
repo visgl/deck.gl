@@ -82,3 +82,15 @@ export const DEFAULT_HEADERS = {
   Accept: 'application/json',
   'Content-Type': 'application/json'
 };
+
+export const TilejsonPropType = {
+  type: 'object' as const,
+  value: null as null | CartoTilejsonResult,
+  validate: (value: CartoTilejsonResult, propType) =>
+    (propType.optional && value === null) ||
+    (typeof value === 'object' &&
+      Array.isArray(value.tiles) &&
+      value.tiles.every(url => typeof url === 'string')),
+  compare: 2,
+  async: true
+};

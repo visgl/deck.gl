@@ -1,16 +1,9 @@
-import {
-  CompositeLayer,
-  CompositeLayerProps,
-  Layer,
-  LayersList,
-  UpdateParameters,
-  DefaultProps
-} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import type {CartoTilejsonResult, Tilejson} from '../sources/common';
+import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -21,21 +14,9 @@ export const renderSubLayers = props => {
   });
 };
 
-const tilejsonType = {
-  type: 'object' as const,
-  value: null as null | CartoTilejsonResult,
-  validate: (value: CartoTilejsonResult, propType) =>
-    (propType.optional && value === null) ||
-    (typeof value === 'object' &&
-      Array.isArray(value.tiles) &&
-      value.tiles.every(url => typeof url === 'string')),
-  compare: 2,
-  async: true
-};
-
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
   aggregationResLevel: 6,
-  data: tilejsonType
+  data: TilejsonPropType
 };
 
 /** All properties supported by QuadbinTileLayer. */
