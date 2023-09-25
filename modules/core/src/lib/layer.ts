@@ -190,9 +190,9 @@ type SharedLayerState = {
   [key: string]: any;
 };
 
-export default abstract class Layer<PropsT extends {} = {}> extends Component<
-  PropsT & Required<LayerProps>
-> {
+export default abstract class Layer<
+  PropsT extends {} = {}
+> extends Component<PropsT & Required<LayerProps>> {
   static defaultProps: DefaultProps = defaultProps;
   static layerName: string = 'Layer';
 
