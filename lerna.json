@@ -4,8 +4,7 @@
   "npmClient": "yarn",
   "useWorkspaces": true,
   "packages": [
-    "modules/*",
-    "website"
+    "modules/*"
   ],
   "command": {
     "bootstrap": {}
