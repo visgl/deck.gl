@@ -14,8 +14,8 @@ type FloatTextureOptions = {
   parameters?: SamplerProps;
 };
 
-  // TODO - not working
-  export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
+// TODO - not working
+export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
   const {
     width = 1,
     height = 1,
@@ -32,7 +32,7 @@ type FloatTextureOptions = {
     sampler: parameters,
     // dataFormat: GL.RGBA,
     width,
-    height,
+    height
     // ts-expect-error
     // unpackFlipY
   });

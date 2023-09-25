@@ -38,8 +38,10 @@ export default class ScreenPass extends Pass {
     setGLParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
 
     // TODO change to device when luma.gl is fixed
-    withGLParameters(this.device, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
-      this._renderPass(this.device, params)
+    withGLParameters(
+      this.device,
+      {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]},
+      () => this._renderPass(this.device, params)
     );
   }
 

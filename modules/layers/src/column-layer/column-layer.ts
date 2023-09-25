@@ -388,7 +388,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    const {fillModel, wireframeModel} = this.state; 
+    const {fillModel, wireframeModel} = this.state;
     fillModel.setGeometry(geometry);
     fillModel.setTopology('triangle-strip');
     // Disable indices

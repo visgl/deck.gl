@@ -276,7 +276,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
         attributes: [getBufferAttributeLayout(id, {...accessor, ...shaderAttributeDef})]
       };
     }
-    const bufferAttributeLayout = getBufferAttributeLayout(id, accessor)
+    const bufferAttributeLayout = getBufferAttributeLayout(id, accessor);
     return {
       name: bufferAttributeLayout.attribute,
       byteStride: 0,
