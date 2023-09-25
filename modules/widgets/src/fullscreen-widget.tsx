@@ -6,7 +6,6 @@ import {IconButton} from './components';
 
 interface FullscreenWidgetProps {
   id: string;
-  viewId?: string | null;
   placement?: WidgetPlacement;
   /**
    * A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen.
@@ -14,7 +13,14 @@ interface FullscreenWidgetProps {
    */
   /* eslint-enable max-len */
   container?: HTMLElement;
-  label?: string;
+  /**
+   * Tooltip message when out of fullscreen.
+   */
+  enterLabel?: string;
+  /**
+   * Tooltip message when fullscreen.
+   */
+  exitLabel?: string;
   style?: Partial<CSSStyleDeclaration>;
   className?: string;
 }
@@ -23,7 +29,6 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   id = 'fullscreen';
   props: FullscreenWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  viewId = null;
 
   deck?: Deck;
   element?: HTMLDivElement;
@@ -32,9 +37,9 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   constructor(props: FullscreenWidgetProps) {
     this.id = props.id || 'fullscreen';
-    this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
-    props.label = props.label || 'Toggle Fullscreen';
+    props.enterLabel = props.enterLabel || 'Enter Fullscreen';
+    props.exitLabel = props.exitLabel || 'Exit Fullscreen';
     props.style = props.style || {};
     this.props = props;
   }
@@ -59,12 +64,12 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   update() {
-    const {label} = this.props;
+    const {enterLabel, exitLabel} = this.props;
     const el = this.element;
     const ui = (
       <IconButton
         onClick={this.handleClick.bind(this)}
-        label={label}
+        label={this.fullscreen ? exitLabel : enterLabel}
         className={this.fullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />
     );

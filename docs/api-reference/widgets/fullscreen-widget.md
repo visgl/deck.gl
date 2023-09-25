@@ -8,12 +8,6 @@ Default: `'fullscreen'`
 
 Unique identifier of the widget.
 
-### `viewId` (String, optional)
-
-Default: `null`
-
-The view id that this widget is being attached to. If assigned, this widget will only respond to events occured inside the specific view that matches this id.
-
 ### `placement` (String, optional)
 
 Default: `'top-left'`
@@ -26,11 +20,17 @@ Default: `undefined`
 
 A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
 
-### `label` (String, optional)
+### `enterLabel` (String, optional)
 
-Hovering a mouse over the widget will display the label as a tooltip.
+Toolip message displayed while hovering a mouse over the widget when out of fullscreen.
 
-Default: `'Toggle Fullscreen'`
+Default: `'Enter Fullscreen'`
+
+### `exitLabel` (String, optional)
+
+Toolip message displayed while hovering a mouse over the widget when fullscreen.
+
+Default: `'Exit Fullscreen'`
 
 ### `style` (Object, optional)
 
