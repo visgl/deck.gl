@@ -28,9 +28,16 @@ type UrlParameters = {
 export async function CartoQuadbinTableSource(
   options: CartoSourceRequiredOptions &
     Partial<CartoSourceOptionalOptions> &
-    CartoQuadbinTableSourceOptions & CartoAggregationOptions
+    CartoQuadbinTableSourceOptions &
+    CartoAggregationOptions
 ): Promise<CartoTilejsonResult> {
-  const {aggregationExp, aggregationResLevel, columns, spatialDataColumn, tableName} = options;
+  const {
+    aggregationExp = '1 AS value',
+    aggregationResLevel = 6,
+    columns,
+    spatialDataColumn = 'quadbin:quadbin',
+    tableName
+  } = options;
   const urlParameters: UrlParameters = {name: tableName};
 
   if (columns) {

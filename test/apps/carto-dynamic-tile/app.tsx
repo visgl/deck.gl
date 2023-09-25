@@ -31,7 +31,6 @@ const config = {
     Source: CartoQuadbinTableSource,
     tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
     aggregationExp: 'avg(population) as population_average',
-    spatialDataColumn: 'quadbin:quadbin',
     getFillColor: colorBins({
       attr: 'population_average',
       domain: [10, 50, 100, 250, 500, 1000],
