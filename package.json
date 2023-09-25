@@ -14,8 +14,7 @@
     "url": "https://github.com/visgl/deck.gl.git"
   },
   "workspaces": [
-    "modules/*",
-    "website"
+    "modules/*"
   ],
   "resolution_comments": {
     "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test",
