@@ -21,11 +21,6 @@ const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
-const Layer = {
-  'quadbin': QuadbinTileLayer,
-  'vector': CartoVectorLayer
-}
-
 const config = {
   'quadbin-table': {
     Source: CartoQuadbinTableSource,
@@ -115,14 +110,13 @@ function Root() {
 function createQuadbinLayer(datasource) {
   const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
     return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
   }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new QuadbinTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     stroked: false,
     getFillColor
@@ -130,11 +124,11 @@ function createQuadbinLayer(datasource) {
 }
 
 function createVectorLayer(datasource) {
-  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+  const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult> | null>(() => {
-    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
-  }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
+    return Source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
+  }, [Source, null, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new CartoVectorLayer({
     id: 'carto',

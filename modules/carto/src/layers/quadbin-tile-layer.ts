@@ -10,6 +10,7 @@ import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
+import type {CartoTilejsonResult, Tilejson} from '../sources/common';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -20,8 +21,23 @@ export const renderSubLayers = props => {
   });
 };
 
+type AsyncSource<T> = null | T | Promise<T>;
+
+const tilejsonType = {
+  type: 'object' as const,
+  value: null as AsyncSource<CartoTilejsonResult>,
+  validate: (value, propType) =>
+    (propType.optional && value === null) ||
+    (typeof value === 'object' &&
+      Array.isArray(value.tiles) &&
+      value.tiles.every(url => typeof url === 'string')),
+  compare: 2,
+  async: true
+};
+
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  aggregationResLevel: 6
+  aggregationResLevel: 6,
+  data: tilejsonType
 };
 
 /** All properties supported by QuadbinTileLayer. */
@@ -29,8 +45,8 @@ export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
   CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */
-type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
-  data: string;
+type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> & {
+  data: AsyncSource<CartoTilejsonResult>;
   aggregationResLevel?: number;
 };
 
@@ -77,6 +93,7 @@ export default class QuadbinTileLayer<
     const {data, tileJSON} = this.state;
     const maxZoom = parseInt(tileJSON?.maxresolution);
     return [
+      // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `quadbin-tile-layer-${this.props.id}`,
         data,
