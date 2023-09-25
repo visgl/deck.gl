@@ -27,7 +27,7 @@
     "postinstall": "./scripts/postinstall.sh",
     "clean": "ocular-clean && rm -rf modules/*/typed",
     "build": "npm run clean && ocular-build && lerna run build && node scripts/typed-entry.js",
-    "version": "ocular-build core",
+    "version": "ocular-build core,carto",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
