@@ -1,5 +1,5 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {withParameters} from '@luma.gl/webgl';
+import {withGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
@@ -41,7 +41,7 @@ export default class MaskPass extends LayersPass {
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
 
-    return withParameters(
+    return withGLParameters(
       this.device,
       {
         clearColor: [255, 255, 255, 255],

@@ -247,13 +247,13 @@ export default class DataColumn<Options, State> {
   getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
     const result: Record<string, Buffer | NumericArray | null> = {};
     if (this.state.constant) {
-      result[this.id] = this.value;
+      result[attributeName] = this.value;
     } else {
-      result[this.id] = this.getBuffer();
+      result[attributeName] = this.getBuffer();
     }
     if (this.doublePrecision) {
       if (this.value instanceof Float64Array) {
-        result[`${attributeName}64Low`] = result[this.id];
+        result[`${attributeName}64Low`] = result[attributeName];
       } else {
         // Disable fp64 low part
         result[`${attributeName}64Low`] = new Float32Array(this.size);

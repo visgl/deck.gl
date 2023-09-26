@@ -21,7 +21,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
-import {withParameters, setParameters} from '@luma.gl/webgl';
+import {withGLParameters, setGLParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -1044,10 +1044,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setParameters(context.device, {polygonOffset: offsets});
+      setGLParameters(context.device, {polygonOffset: offsets});
 
       // Call subclass lifecycle method
-      withParameters(context.gl, parameters, () => {
+      withGLParameters(context.gl, parameters, () => {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions

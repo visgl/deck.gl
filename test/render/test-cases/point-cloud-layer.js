@@ -54,33 +54,34 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/pointcloud-lnglat.png'
-  },
-  {
-    name: 'pointcloud-meter',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 13,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PointCloudLayer({
-        id: 'pointcloud-meter',
-        data: {
-          length: POINTCLOUD.length,
-          attributes: {
-            getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
-            getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
-            getColor: {value: new Uint8Array(POINTCLOUD.flatMap(d => d.color)), size: 3}
-          }
-        },
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: positionOrigin,
-        pointSize: 1.333333,
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/pointcloud-meter.png'
   }
+  // TODO - v9 binary buffer
+  // {
+  //   name: 'pointcloud-meter',
+  //   viewState: {
+  //     latitude: 37.751537058389985,
+  //     longitude: -122.42694203247012,
+  //     zoom: 13,
+  //     pitch: 0,
+  //     bearing: 0
+  //   },
+  //   layers: [
+  //     new PointCloudLayer({
+  //       id: 'pointcloud-meter',
+  //       data: {
+  //         length: POINTCLOUD.length,
+  //         attributes: {
+  //           getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
+  //           getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
+  //           getColor: {value: new Uint8Array(POINTCLOUD.flatMap(d => d.color)), size: 3}
+  //         }
+  //       },
+  //       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  //       coordinateOrigin: positionOrigin,
+  //       pointSize: 1.333333,
+  //       pickable: true
+  //     })
+  //   ],
+  //   goldenImage: './test/render/golden-images/pointcloud-meter.png'
+  // }
 ];

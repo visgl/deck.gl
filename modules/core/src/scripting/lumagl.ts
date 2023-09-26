@@ -25,9 +25,9 @@ export {
   isWebGL2,
   FEATURES,
   hasFeatures,
-  getParameters,
-  setParameters,
-  withParameters,
+  getGLParameters,
+  setGLParameters,
+  withGLParameters,
   cssToDeviceRatio,
   // Copy and blit
   // These are needed by submodules and rely on using the same copy
