@@ -9,8 +9,9 @@ import {
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
+import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
 
-const renderSubLayers = props => {
+const renderSubLayers = (props: H3HexagonLayerProps) => {
   const {data} = props;
   const {index} = props.tile;
   if (!data || !data.length) return null;
@@ -23,7 +24,8 @@ const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
-  aggregationResLevel: 4
+  aggregationResLevel: 4,
+  data: TilejsonPropType
 };
 
 /** All properties supported by H3TileLayer. */
@@ -34,8 +36,8 @@ export type H3TileLayerProps<DataT = any> = _H3TileLayerProps<DataT> & Composite
 type H3HexagonLayerProps<DataT = any> = Record<string, any>;
 
 /** Properties added by H3TileLayer. */
-type _H3TileLayerProps<DataT> = H3HexagonLayerProps<DataT> & {
-  data: string;
+type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> & {
+  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
   aggregationResLevel?: number;
 };
 
@@ -45,30 +47,30 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   static layerName = 'H3TileLayer';
   static defaultProps = defaultProps;
 
-  state!: {
-    tileJSON: any;
-    data: any;
-  };
-
   initializeState(): void {
     H3HexagonLayer._checkH3Lib();
-    this.setState({data: null, tileJSON: null});
   }
 
-  updateState({changeFlags}: UpdateParameters<this>): void {
-    if (changeFlags.dataChanged) {
-      let {data} = this.props;
-      const tileJSON = data;
-      data = (tileJSON as any).tiles;
-      this.setState({data, tileJSON});
+  getLoadOptions(): any {
+    // Insert access token if not specified
+    const loadOptions = super.getLoadOptions() || {};
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    const {accessToken} = tileJSON;
+    if (!loadOptions?.fetch?.headers?.Authorization) {
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+      };
     }
+
+    return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const {data, tileJSON} = this.state;
-    let minresolution = parseInt(tileJSON.minresolution);
-    let maxresolution = parseInt(tileJSON.maxresolution);
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    if (!tileJSON) return null;
 
+    let {minresolution, maxresolution} = tileJSON;
     // Convert Mercator zooms provided in props into H3 res levels
     // and clip into valid range provided from the tilejson
     if (this.props.minZoom) {
@@ -87,11 +89,12 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     // The naming is unfortunate, but minZoom & maxZoom in the context
     // of a Tileset2D refer to the resolution levels, not the Mercator zooms
     return [
+      // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `h3-tile-layer-${this.props.id}`,
-        data,
-        // @ts-expect-error Tileset2D should be generic over TileIndex
-        TilesetClass: H3Tileset2D,
+        data: tileJSON.tiles,
+        // TODO: Tileset2D should be generic over TileIndex type
+        TilesetClass: H3Tileset2D as any,
         renderSubLayers,
         // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
         minZoom: minresolution,

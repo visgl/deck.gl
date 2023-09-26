@@ -39,8 +39,8 @@ export default class QuadbinTileLayer<
   getLoadOptions(): any {
     // Insert access token if not specified
     const loadOptions = super.getLoadOptions() || {};
-    // @ts-ignore
-    const {accessToken} = this.props.data;
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    const {accessToken} = tileJSON;
     if (!loadOptions?.fetch?.headers?.Authorization) {
       loadOptions.fetch = {
         ...loadOptions.fetch,

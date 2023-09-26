@@ -70,7 +70,6 @@ function createH3Layer(datasource) {
 
   return new H3TileLayer({
     id: 'carto',
-    // @ts-ignore
     data: tilejson,
     pickable: true,
     stroked: false,
