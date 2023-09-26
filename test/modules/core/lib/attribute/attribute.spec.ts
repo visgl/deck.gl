@@ -281,7 +281,11 @@ test('Attribute#shaderAttributes', t => {
   t.is(attributeLayout.format, 'float32x3', 'Attribute instanceNextPositions has correct format');
   t.is(attributeLayout.byteOffset, 12, 'Attribute instanceNextPositions has correct offset');
 
-  t.deepEquals(attribute.getValue(), {positions: buffer1}, 'Attribute has buffer');
+  t.deepEquals(
+    attribute.getValue(),
+    {positions: buffer1, instancePositions: buffer1, instanceNextPositions: buffer1},
+    'Attribute has buffer'
+  );
 
   buffer1.delete();
   attribute.delete();

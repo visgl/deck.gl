@@ -30,7 +30,7 @@ import {
 import {DeviceFeature, Texture, TextureProps} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Transform} from '@luma.gl/engine';
-import {BufferWithAccessor, getParameters, withParameters} from '@luma.gl/webgl';
+import {BufferWithAccessor, withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -602,7 +602,7 @@ export default class HeatmapLayer<
       elementCount: this.getNumInstances()
     });
     // Need to explictly specify clearColor as external context may have modified it
-    withParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
+    withGLParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
       weightsTransform.run({
         uniforms,
         parameters: {

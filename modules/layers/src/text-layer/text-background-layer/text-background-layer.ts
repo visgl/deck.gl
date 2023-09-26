@@ -165,6 +165,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-fan-webgl',
         vertexCount: 4,

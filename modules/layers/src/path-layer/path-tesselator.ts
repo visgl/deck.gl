@@ -132,7 +132,7 @@ export default class PathTesselator extends Tesselator<
       geometrySize: number;
     }
   ) {
-    const segmentTypes = this.attributes.segmentTypes as TypedArray;
+    const segmentTypes = this.attributes.segmentTypes;
     const isPathClosed = path ? this.isClosed(path) : false;
     const {vertexStart, geometrySize} = context;
 

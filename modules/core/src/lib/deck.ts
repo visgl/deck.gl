@@ -35,7 +35,7 @@ import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
-import {setParameters} from '@luma.gl/webgl';
+import {setGLParameters} from '@luma.gl/webgl';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import type {Framebuffer} from '@luma.gl/core';
@@ -933,7 +933,7 @@ export default class Deck {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    setParameters(this.device, {
+    setGLParameters(this.device, {
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
@@ -1023,7 +1023,7 @@ export default class Deck {
   ) {
     const {device, gl} = this.layerManager?.context;
 
-    setParameters(device, this.props.parameters);
+    setGLParameters(device, this.props.parameters);
 
     this.props.onBeforeRender({device, gl});
 

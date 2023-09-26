@@ -4,7 +4,7 @@ import {Layer, CompositeLayer, LayerManager, Viewport} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {device} from '@deck.gl/test-utils';
-import {getParameters} from '@luma.gl/webgl';
+import {getGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
 class TestLayer extends Layer {
