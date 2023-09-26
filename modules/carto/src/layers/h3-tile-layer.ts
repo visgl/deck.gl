@@ -98,8 +98,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         maxZoom: maxresolution,
         loadOptions: {
           ...this.getLoadOptions(),
-          cartoSpatialTile: {scheme: 'h3'},
-          mimeType: 'application/vnd.carto-spatial-tile'
+          cartoSpatialTile: {scheme: 'h3'}
         }
       })
     ];

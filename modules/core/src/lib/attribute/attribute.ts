@@ -332,16 +332,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return vertexIndex * this.size;
   }
 
+  getValue(): Record<string, Buffer | NumericArray | null> {
+    const shaderAttributeDefs = this.settings.shaderAttributes;
+    const result = super.getValue();
+    if (!shaderAttributeDefs) {
+      return result;
+    }
+    for (const shaderAttributeName in shaderAttributeDefs) {
+      Object.assign(result, super.getValue(shaderAttributeName));
+    }
+    return result;
+  }
+
   getBufferLayout(): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
-    const result: BufferLayout = super.getBufferLayout(this.id, null);
+    const result: BufferLayout = super.getBufferLayout();
 
     if (!shaderAttributeDefs) {
       return result;
     }
 
-    // @ts-ignore
-    result.attributes = result.attributes || [];
     for (const shaderAttributeName in shaderAttributeDefs) {
       const map = super.getBufferLayout(
         shaderAttributeName,

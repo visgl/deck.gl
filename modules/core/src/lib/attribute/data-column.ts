@@ -4,7 +4,6 @@ import {Buffer, BufferLayout} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
-import {IShaderAttribute} from './shader-attribute';
 import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
@@ -118,7 +117,7 @@ type DataColumnInternalState<Options, State> = State & {
   constant: boolean;
 };
 
-export default class DataColumn<Options, State> implements IShaderAttribute {
+export default class DataColumn<Options, State> {
   device: Device;
   id: string;
   size: number;
@@ -245,43 +244,56 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(): Buffer | NumericArray | null {
+  getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
+    const result: Record<string, Buffer | NumericArray | null> = {};
     if (this.state.constant) {
-      return this.value;
+      result[attributeName] = this.value;
+    } else {
+      result[attributeName] = this.getBuffer();
     }
-    return this.getBuffer();
+    if (this.doublePrecision) {
+      if (this.value instanceof Float64Array) {
+        result[`${attributeName}64Low`] = result[attributeName];
+      } else {
+        // Disable fp64 low part
+        result[`${attributeName}64Low`] = new Float32Array(this.size);
+      }
+    }
+    return result;
   }
 
-  getBufferLayout(id: string, options: Partial<ShaderAttributeOptions> | null): BufferLayout {
+  getBufferLayout(
+    attributeName: string = this.id,
+    options: Partial<ShaderAttributeOptions> | null = null
+  ): BufferLayout {
     const accessor = this.getAccessor();
+    const result: BufferLayout = {
+      name: this.id,
+      byteStride: getStride(accessor),
+      attributes: []
+    };
+
     if (this.doublePrecision) {
       const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
         accessor,
         options || {}
       );
-      return {
-        name: this.id,
-        byteStride: doubleShaderAttributeDefs.high.stride,
-        // interleave
-        attributes: [
-          getBufferAttributeLayout(id, {...accessor, ...doubleShaderAttributeDefs.high}),
-          getBufferAttributeLayout(`${id}64Low`, {...accessor, ...doubleShaderAttributeDefs.low})
-        ]
-      };
+      result.attributes.push(
+        getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
+        getBufferAttributeLayout(`${attributeName}64Low`, {
+          ...accessor,
+          ...doubleShaderAttributeDefs.low
+        })
+      );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
-      return {
-        name: this.id,
-        byteStride: getStride(accessor),
-        attributes: [getBufferAttributeLayout(id, {...accessor, ...shaderAttributeDef})]
-      };
+      result.attributes.push(
+        getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
+      );
+    } else {
+      result.attributes.push(getBufferAttributeLayout(attributeName, accessor));
     }
-    const bufferAttributeLayout = getBufferAttributeLayout(id, accessor);
-    return {
-      name: bufferAttributeLayout.attribute,
-      byteStride: 0,
-      attributes: [bufferAttributeLayout]
-    };
+    return result;
   }
 
   getAccessor(): DataColumnSettings<Options> {

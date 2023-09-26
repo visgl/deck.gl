@@ -50,6 +50,36 @@ deckgl.addWidget(new LoadingIndicator({size: 48}));
 
 When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occured inside the specific view that matches this id.
 
+### Members
+
+A `Widget` implements the following members.
+
+##### `id`
+
+Unique identifier of the widget.
+
+##### `props` (Object)
+
+Any options for the widget, as passed into the constructor and can be updated with `setProps`.
+
+##### `viewId` (String | null)
+
+* Default: `null`
+
+The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
+
+##### `placement` (String, optional)
+
+* Default: `'top-left'`
+
+Widget positioning within the view. One of:
+
+- `'top-left'`
+- `'top-right'`
+- `'bottom-left'`
+- `'bottom-right'`
+- `'fill'`
+
 ### Methods
 
 ##### `onAdd`

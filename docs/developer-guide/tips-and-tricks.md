@@ -7,7 +7,7 @@
 
 The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering.
 
-The new `parameters` prop leverages the luma.gl v4 [setGLParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
+The new `parameters` prop leverages the luma.gl v4 [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
 
 
 ### z-fighting and Depth Testing

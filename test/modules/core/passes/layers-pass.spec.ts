@@ -272,7 +272,11 @@ test('LayersPass#GLViewport', t => {
 
   const layerManager = new LayerManager(device, {});
   const layersPass = new DrawLayersPass(device);
-  const framebuffer = device.createFramebuffer({width: 100, height: 100});
+  const framebuffer = device.createFramebuffer({
+    width: 100,
+    height: 100,
+    colorAttachments: ['rgba8unorm']
+  });
   layerManager.setLayers(layers);
 
   const testCases = [
@@ -338,7 +342,8 @@ test('LayersPass#GLViewport', t => {
     });
 
     t.deepEqual(
-      getGLParameters(device, GL.VIEWPORT),
+      // @ts-expect-error glParameters not exposed
+      layerManager.context.renderPass.glParameters.viewport,
       expectedGLViewport,
       `${name} sets viewport correctly`
     );

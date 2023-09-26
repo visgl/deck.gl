@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/gltf": "^3.4.2",
+    "@loaders.gl/gltf": "^3.4.13",
     "@luma.gl/core": "9.0.0-alpha.36",
     "@luma.gl/shadertools": "9.0.0-alpha.36"
   },

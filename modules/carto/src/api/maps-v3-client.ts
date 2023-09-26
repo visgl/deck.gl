@@ -32,7 +32,7 @@ import {assert} from '../utils';
 
 const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
-const V3_MINOR_VERSION = '3.1';
+const V3_MINOR_VERSION = '3.2';
 
 export type Headers = Record<string, string>;
 interface RequestParams {
@@ -152,7 +152,7 @@ type MapsAPIParameters = {
 /**
  * Build a URL with all required parameters
  */
-function getGLParameters({
+function getParameters({
   type,
   source,
   geoColumn,
@@ -213,7 +213,7 @@ export async function mapInstantiation({
   queryParameters
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
-  const parameters = getGLParameters({
+  const parameters = getParameters({
     type,
     source,
     geoColumn,

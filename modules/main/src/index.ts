@@ -88,6 +88,7 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
+  getPipelineFactory,
   getShaderAssembler
 } from '@deck.gl/core';
 

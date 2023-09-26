@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/images": "^3.4.2",
-    "@loaders.gl/schema": "^3.4.2",
+    "@loaders.gl/images": "^3.4.13",
+    "@loaders.gl/schema": "^3.4.13",
     "@luma.gl/core": "9.0.0-alpha.36",
     "@luma.gl/engine": "9.0.0-alpha.36",
     "@luma.gl/shadertools": "9.0.0-alpha.36",
@@ -44,7 +44,7 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "^3.4.2",
+    "@loaders.gl/core": "^3.4.13",
     "@luma.gl/core": "9.0.0-alpha.36",
     "@luma.gl/engine": "9.0.0-alpha.36",
     "@luma.gl/shadertools": "9.0.0-alpha.36"

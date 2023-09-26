@@ -116,16 +116,20 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
 
     if (extension.opts.dash) {
       attributeManager.addInstanced({
-        instanceDashArrays: {size: 2, accessor: 'getDashArray'}
-      });
-    }
-    if (extension.opts.highPrecisionDash) {
-      attributeManager.addInstanced({
-        instanceDashOffsets: {
-          size: 1,
-          accessor: 'getPath',
-          transform: extension.getDashOffsets.bind(this)
-        }
+        instanceDashArrays: {size: 2, accessor: 'getDashArray'},
+        instanceDashOffsets: extension.opts.highPrecisionDash
+          ? {
+              size: 1,
+              accessor: 'getPath',
+              transform: extension.getDashOffsets.bind(this)
+            }
+          : {
+              size: 1,
+              update: attribute => {
+                attribute.constant = true;
+                attribute.value = [0];
+              }
+            }
       });
     }
     if (extension.opts.offset) {

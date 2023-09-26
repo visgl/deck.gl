@@ -84,7 +84,7 @@ export default class CollisionFilterEffect implements Effect {
     for (const collisionGroup in channels) {
       const collisionFBO = this.collisionFBOs[collisionGroup];
       const renderInfo = channels[collisionGroup];
-      // const [width, height] = device.canvasContext.getPixelSize();
+      const [width, height] = device.canvasContext.getPixelSize();
       collisionFBO.resize({
         // @ts-expect-error
         width: device.gl.canvas.width / DOWNSCALE,

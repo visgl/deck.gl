@@ -150,18 +150,18 @@ test('Attribute#setConstantValue', t => {
     }
   });
   // clear redraw flag
-  t.ok(attribute.getValue()[0] instanceof Buffer, 'attribute is using packed buffer');
+  t.ok(attribute.getValue().positions instanceof Buffer, 'attribute is using packed buffer');
   attribute.needsRedraw({clearChangedFlags: true});
 
   attribute.setConstantValue([0, 0, 0]);
-  t.deepEqual(attribute.getValue(), [0, 0, 0], 'attribute set to constant value');
+  t.deepEqual(attribute.getValue().positions, [0, 0, 0], 'attribute set to constant value');
   t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
 
   attribute.setConstantValue([0, 0, 0]);
   t.notOk(attribute.needsRedraw({clearChangedFlags: true}), 'attribute should not need redraw');
 
   attribute.setConstantValue([0, 0, 1]);
-  t.deepEqual(attribute.getValue(), [0, 0, 1], 'attribute set to constant value');
+  t.deepEqual(attribute.getValue().positions, [0, 0, 1], 'attribute set to constant value');
   t.ok(attribute.needsRedraw({clearChangedFlags: true}), 'attribute marked needs redraw');
 
   attribute.delete();
@@ -175,7 +175,7 @@ test('Attribute#setConstantValue', t => {
   });
 
   attribute.setConstantValue([255, 255, 0]);
-  t.deepEqual(attribute.getValue(), [1, 1, 0], 'constant value is normalized');
+  t.deepEqual(attribute.getValue().colors, [1, 1, 0], 'constant value is normalized');
 
   t.end();
 });
@@ -258,7 +258,6 @@ test('Attribute#shaderAttributes', t => {
     update,
     size: 3,
     shaderAttributes: {
-      positions: {},
       instancePositions: {
         divisor: 1
       },
@@ -270,28 +269,22 @@ test('Attribute#shaderAttributes', t => {
   });
   attribute.setData({buffer: buffer1});
 
-  const shaderAttributes = attribute.getShaderAttributes();
-  t.ok(shaderAttributes.positions, 'Shader attribute created');
-  let accessor = shaderAttributes.positions.getAccessor();
-  t.equals(accessor.size, 3, 'Shader attribute inherits pointer properties');
-  t.ok(shaderAttributes.instancePositions, 'Multiple shader attributes created');
-  accessor = shaderAttributes.instancePositions.getAccessor();
-  t.equals(accessor.size, 3, 'Multiple shader attributes inherit pointer properties');
-  t.equals(accessor.divisor, 1, 'Shader attribute defines pointer properties');
-  accessor = shaderAttributes.instanceNextPositions.getAccessor();
-  t.equals(accessor.stride, 12, 'Shader attribute defines explicit stride');
-  t.equals(accessor.offset, 12, 'Shader attribute defines offset');
+  const bufferLayout = attribute.getBufferLayout();
+  t.is(bufferLayout.byteStride, 12, 'Buffer layout has correct stride');
+  let attributeLayout = bufferLayout.attributes[0];
+  t.is(attributeLayout.format, 'float32x3', 'Attribute position has correct format');
+  t.is(attributeLayout.byteOffset, 0, 'Attribute position has correct offset');
+  attributeLayout = bufferLayout.attributes[1];
+  t.is(attributeLayout.format, 'float32x3', 'Attribute instancePositions has correct format');
+  t.is(attributeLayout.byteOffset, 0, 'Attribute instancePositions has correct offset');
+  attributeLayout = bufferLayout.attributes[2];
+  t.is(attributeLayout.format, 'float32x3', 'Attribute instanceNextPositions has correct format');
+  t.is(attributeLayout.byteOffset, 12, 'Attribute instanceNextPositions has correct offset');
 
-  t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
-  t.equals(
-    attribute.getBuffer(),
-    shaderAttributes.positions.getValue()[0],
-    'Shader attribute shares parent buffer'
-  );
-  t.equals(
-    attribute.getBuffer(),
-    shaderAttributes.instancePositions.getValue()[0],
-    'Shader attribute shares parent buffer'
+  t.deepEquals(
+    attribute.getValue(),
+    {positions: buffer1, instancePositions: buffer1, instanceNextPositions: buffer1},
+    'Attribute has buffer'
   );
 
   buffer1.delete();
@@ -872,48 +865,46 @@ test('Attribute#setExternalBuffer#shaderAttributes', t => {
     }
   });
 
-  const buffer = device.createBuffer({byteLength: 16});
   const value8 = new Uint8Array(16);
   const value32 = new Float32Array(16);
   const value64 = new Float64Array(16);
 
   attribute.setExternalBuffer(value8);
-  let shaderAttributes = attribute.getShaderAttributes();
-  t.is(shaderAttributes.a.getAccessor().stride, 4, 'shaderAttribute has correct stride');
-  t.is(shaderAttributes.a.getAccessor().offset, 1, 'shaderAttribute has correct offset');
+  let bufferLayout = attribute.getBufferLayout();
+  t.is(bufferLayout.byteStride, 4, 'Buffer layout has correct stride');
+  t.is(bufferLayout.attributes[1].format, 'unorm8', 'Attribute a has correct format');
+  t.is(bufferLayout.attributes[1].byteOffset, 1, 'Attribute a has correct offset');
 
   attribute.setExternalBuffer({value: value8, stride: 8, offset: 2});
-  shaderAttributes = attribute.getShaderAttributes();
-  t.is(shaderAttributes.a.getAccessor().stride, 8, 'shaderAttribute has correct stride');
-  t.is(shaderAttributes.a.getAccessor().offset, 3, 'shaderAttribute has correct offset');
+  bufferLayout = attribute.getBufferLayout();
+  t.is(bufferLayout.byteStride, 8, 'Buffer layout has correct stride');
+  t.is(bufferLayout.attributes[1].format, 'unorm8', 'Attribute a has correct format');
+  t.is(bufferLayout.attributes[1].byteOffset, 3, 'Attribute a has correct offset');
 
   attribute.setExternalBuffer({value: value32, offset: 2});
-  shaderAttributes = attribute.getShaderAttributes();
-  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
-  t.is(shaderAttributes.a.getAccessor().offset, 6, 'shaderAttribute has correct offset');
+  bufferLayout = attribute.getBufferLayout();
+  t.is(bufferLayout.byteStride, 16, 'Buffer layout has correct stride');
+  t.is(bufferLayout.attributes[1].format, 'float32', 'Attribute a has correct format');
+  t.is(bufferLayout.attributes[1].byteOffset, 6, 'Attribute a has correct offset');
 
   attribute2.setExternalBuffer(value32);
-  shaderAttributes = attribute2.getShaderAttributes();
-  t.is(shaderAttributes.a.getAccessor().stride, 16, 'shaderAttribute has correct stride');
-  t.is(shaderAttributes.a.getAccessor().offset, 0, 'shaderAttribute has correct offset');
-  t.deepEqual(shaderAttributes.a64Low, [0, 0, 0, 0], 'shaderAttribute low part is constant');
+  bufferLayout = attribute2.getBufferLayout();
+  t.is(bufferLayout.byteStride, 16, 'Buffer layout has correct stride');
+  t.is(bufferLayout.attributes[2].format, 'float32x4', 'Attribute a has correct format');
+  t.is(bufferLayout.attributes[2].byteOffset, 0, 'Attribute a has correct offset');
+  t.is(bufferLayout.attributes[3].format, 'float32x4', 'Attribute a64Low has correct format');
+  t.is(bufferLayout.attributes[3].byteOffset, 16, 'Attribute a64Low has correct offset');
+  t.deepEqual(attribute2.getValue().a64Low, [0, 0, 0, 0], 'shaderAttribute low part is constant');
 
   attribute2.setExternalBuffer({value: value64, stride: 48, offset: 8});
-  shaderAttributes = attribute2.getShaderAttributes();
-  t.is(shaderAttributes.a.getAccessor().stride, 48, 'shaderAttribute has correct stride');
-  t.is(shaderAttributes.a.getAccessor().offset, 8, 'shaderAttribute has correct offset');
-  t.is(
-    shaderAttributes.a64Low.getAccessor().stride,
-    48,
-    'shaderAttribute low part has correct stride'
-  );
-  t.is(
-    shaderAttributes.a64Low.getAccessor().offset,
-    24,
-    'shaderAttribute low part has correct offset'
-  );
+  bufferLayout = attribute2.getBufferLayout();
+  t.is(bufferLayout.byteStride, 48, 'Buffer layout has correct stride');
+  t.is(bufferLayout.attributes[2].format, 'float32x4', 'Attribute a has correct format');
+  t.is(bufferLayout.attributes[2].byteOffset, 8, 'Attribute a has correct offset');
+  t.is(bufferLayout.attributes[3].format, 'float32x4', 'Attribute a64Low has correct format');
+  t.is(bufferLayout.attributes[3].byteOffset, 24, 'Attribute a64Low has correct offset');
+  t.ok(attribute2.getValue().a64Low instanceof Buffer, 'shaderAttribute low part is buffer');
 
-  buffer.delete();
   attribute.delete();
   attribute2.delete();
 
@@ -983,33 +974,32 @@ test('Attribute#setBinaryValue', t => {
 
 test('Attribute#doublePrecision', t0 => {
   const validateShaderAttributes = (t, attribute, is64Bit) => {
-    const shaderAttributes = attribute.getShaderAttributes();
+    const bufferLayout = attribute.getBufferLayout();
     t.deepEqual(
-      Object.keys(shaderAttributes),
+      bufferLayout.attributes.map(a => a.attribute),
       ['positions', 'positions64Low'],
-      'shaderAttributes generated'
+      'buffer layout generated'
     );
 
     if (is64Bit) {
-      const [buffer, accessor] = shaderAttributes.positions.getValue();
-      t.is(buffer, attribute.getBuffer(), 'shaderAttributes.positions buffer');
-      t.is(accessor.offset, 0, 'shaderAttributes.positions offset');
-      t.is(accessor.stride, 24, 'shaderAttributes.positions stride');
-
-      const [buffer64Low, accessor64Low] = shaderAttributes.positions64Low.getValue();
-      t.is(buffer64Low, attribute.getBuffer(), 'shaderAttributes.positions64Low buffer');
-      t.is(accessor64Low.offset, 12, 'shaderAttributes.positions64Low offset');
-      t.is(accessor64Low.stride, 24, 'shaderAttributes.positions64Low stride');
-    } else {
-      const [buffer, accessor] = shaderAttributes.positions.getValue();
-      t.is(buffer, attribute.getBuffer(), 'shaderAttributes.positions buffer');
-      t.is(accessor.offset, 0, 'shaderAttributes.positions offset');
-      t.is(accessor.stride, 12, 'shaderAttributes.positions stride');
-      t.deepEqual(
-        shaderAttributes.positions64Low,
-        [0, 0, 0],
-        'shaderAttributes.positions64Low is constant'
+      t.is(bufferLayout.byteStride, 24, 'Buffer layout has correct stride');
+      t.is(bufferLayout.attributes[0].byteOffset, 0, 'Attribute positions has correct offset');
+      t.is(
+        bufferLayout.attributes[1].byteOffset,
+        12,
+        'Attribute positions64Low has correct offset'
       );
+
+      const values = attribute.getValue();
+      t.is(values.positions, attribute.getBuffer(), 'positions value is buffer');
+      t.is(values.positions64Low, attribute.getBuffer(), 'positions64Low value is buffer');
+    } else {
+      t.is(bufferLayout.byteStride, 12, 'Buffer layout has correct stride');
+      t.is(bufferLayout.attributes[0].byteOffset, 0, 'Attribute positions has correct offset');
+
+      const values = attribute.getValue();
+      t.is(values.positions, attribute.getBuffer(), 'positions value is buffer');
+      t.deepEqual(values.positions64Low, [0, 0, 0], 'positions64Low value is buffer');
     }
   };
 

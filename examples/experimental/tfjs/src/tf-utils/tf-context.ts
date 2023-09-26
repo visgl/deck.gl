@@ -1,4 +1,4 @@
-import {pushContextState, popContextState, getGLParameters, setGLParameters} from '@luma.gl/gltools';
+import {pushContextState, popContextState, getParameters, setParameters} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';
 import * as tfgl from '@tensorflow/tfjs-backend-webgl';
 import GL from '@luma.gl/constants';
@@ -41,7 +41,7 @@ export class CustomTFContext {
     pushContextState(gl);
 
     if (this.lastContextState) {
-      setGLParameters(gl, this.lastContextState);
+      setParameters(gl, this.lastContextState);
       (gl as WebGL2RenderingContext).bindVertexArray(
         this.lastContextState[GL.VERTEX_ARRAY_BINDING]
       );
@@ -56,7 +56,7 @@ export class CustomTFContext {
     });
 
     this.lastContextState = {
-      ...getGLParameters(gl),
+      ...getParameters(gl),
       // gl states not tracked by luma but expected by TF
       [GL.ELEMENT_ARRAY_BUFFER_BINDING]: gl.getParameter(GL.ELEMENT_ARRAY_BUFFER_BINDING),
       [GL.VERTEX_ARRAY_BINDING]: gl.getParameter(GL.VERTEX_ARRAY_BINDING)

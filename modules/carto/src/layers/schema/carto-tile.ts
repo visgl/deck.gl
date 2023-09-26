@@ -8,7 +8,7 @@ interface KeyValueObject {
 
 class KeyValueObjectReader {
   static read(pbf, end?: number): KeyValueObject {
-    return pbf.readFields(KeyValueObjectReader._readField, {key: '', value: ''}, end);
+    return pbf.readFields(KeyValueObjectReader._readField, {key: '', value: null}, end);
   }
   static _readField(this: void, tag: number, obj: KeyValueObject, pbf) {
     if (tag === 1) obj.key = pbf.readString();

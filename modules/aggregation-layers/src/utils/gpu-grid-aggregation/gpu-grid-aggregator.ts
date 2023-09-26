@@ -406,7 +406,7 @@ export default class GPUGridAggregator {
       () => {
         clear(this.device, {color: true});
 
-        // allAggregationModel.setGLParameters(parameters);
+        // allAggregationModel.setParameters(parameters);
         allAggregationModel.setUniforms({gridSize, combineMaxMin});
         allAggregationModel.setBindings({uSampler: framebuffers[id].texture});
         allAggregationModel.draw();

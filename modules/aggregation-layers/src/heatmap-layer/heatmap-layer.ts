@@ -30,7 +30,7 @@ import {
 import {DeviceFeature, Texture, TextureProps} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Transform} from '@luma.gl/engine';
-import {BufferWithAccessor, getGLParameters, withGLParameters} from '@luma.gl/webgl';
+import {BufferWithAccessor, withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,

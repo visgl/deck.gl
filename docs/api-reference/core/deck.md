@@ -141,7 +141,7 @@ Note:
 
 ##### `parameters` (Object) {#parameters}
 
-Expects an object with WebGL settings. Before each frame is rendered, this object will be passed to luma.gl's `setGLParameters` function to reset the WebGL context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
+Expects an object with WebGL settings. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the WebGL context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
 
 ```js
 {
@@ -153,7 +153,7 @@ Expects an object with WebGL settings. Before each frame is rendered, this objec
 }
 ```
 
-Refer to the luma.gl [setGLParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
+Refer to the luma.gl [setParameters](https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md) API for documentation on supported parameters and values.
 
 ```js
 import GL from '@luma.gl/constants';
@@ -169,7 +169,7 @@ new Deck({
 Notes:
 
 - Any WebGL `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
-- An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setGLParameters` method inside it.
+- An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 
 ##### `layers` (Array) {#layers}
 
@@ -587,6 +587,19 @@ Frees all resources associated with this `Deck` instance.
 
 `deck.finalize()`
 
+##### `getCanvas` {#getcanvas}
+
+Get the canvas element attached to this `Deck` instance.
+
+`deck.getCanvas()`
+
+Returns:
+
+* Either an `HTMLCanvasElement` or `null` if one isn't assigned.
+
+Notes:
+
+* See the [canvas](#canvas) prop for more information.
 
 ##### `setProps` {#setprops}
 

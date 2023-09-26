@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {createBinaryProxy} from '@deck.gl/carto/utils';
+import {createBinaryProxy, getWorkerUrl} from '@deck.gl/carto/utils';
 
 test('createBinaryProxy', async t => {
   const binary = {
@@ -12,5 +12,13 @@ test('createBinaryProxy', async t => {
   t.ok(!('missing' in proxy), 'Proxy missing key');
   t.equal(proxy.temperature, 20, 'Proxy has correct temperature value');
   t.equal(proxy.name, 'name2', 'Proxy has correct name value');
+  t.end();
+});
+
+test('getWorkerUrl', async t => {
+  t.equal(
+    getWorkerUrl('cartoTest', '1.2.3'),
+    'https://unpkg.com/@deck.gl/carto@1.2.3/dist/cartoTest-worker.js'
+  );
   t.end();
 });
