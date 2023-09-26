@@ -1,4 +1,4 @@
-import {MapInstantiation, TileFormat} from '../api/maps-api-common';
+import {MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
 
 export type CartoSourceRequiredOptions = {
   accessToken: string;
@@ -11,6 +11,17 @@ export type CartoSourceOptionalOptions = {
   formatTiles: TileFormat;
   headers: Record<string, string>;
   mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
+};
+
+export type CartoAggregationOptions = {
+  aggregationExp?: string;
+  aggregationResLevel?: number;
+};
+
+export type CartoQuerySourceOptions = {
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters?: QueryParameters;
 };
 
 export const SOURCE_DEFAULTS: CartoSourceOptionalOptions = {

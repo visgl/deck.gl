@@ -3,14 +3,13 @@ import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult
+  CartoTilejsonResult,
+  CartoQuerySourceOptions
 } from './common';
 
-export type CartoVectorQuerySourceOptions = {
-  spatialDataColumn?: string;
-  sqlQuery: string;
-  queryParameters?: QueryParameters;
-};
+export type CartoVectorQuerySourceOptions = CartoSourceRequiredOptions &
+  Partial<CartoSourceOptionalOptions> &
+  CartoQuerySourceOptions;
 
 type UrlParameters = {
   geo_column?: string;
@@ -19,9 +18,7 @@ type UrlParameters = {
 };
 
 export async function CartoVectorQuerySource(
-  options: CartoSourceRequiredOptions &
-    Partial<CartoSourceOptionalOptions> &
-    CartoVectorQuerySourceOptions
+  options: CartoVectorQuerySourceOptions
 ): Promise<CartoTilejsonResult> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;
   const urlParameters: UrlParameters = {q: sqlQuery};

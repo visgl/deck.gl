@@ -25,6 +25,7 @@ export type {CartoLayerProps} from './layers/carto-layer';
 
 export {
   CartoQuadbinTableSource,
+  CartoQuadbinQuerySource,
   CartoVectorTableSource,
   CartoVectorTilesetSource,
   CartoVectorQuerySource,
@@ -35,6 +36,7 @@ export type {
   CartoSourceRequiredOptions,
   CartoTilejsonResult,
   CartoQuadbinTableSourceOptions,
+  CartoQuadbinQuerySourceOptions,
   CartoVectorTableSourceOptions,
   CartoVectorTilesetSourceOptions,
   CartoVectorQuerySourceOptions

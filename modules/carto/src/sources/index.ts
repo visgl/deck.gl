@@ -8,6 +8,9 @@ export type {
 export {CartoQuadbinTableSource} from './quadbin-table-source';
 export type {CartoQuadbinTableSourceOptions} from './quadbin-table-source';
 
+export {CartoQuadbinQuerySource} from './quadbin-query-source';
+export type {CartoQuadbinQuerySourceOptions} from './quadbin-query-source';
+
 export {CartoVectorTableSource} from './vector-table-source';
 export type {CartoVectorTableSourceOptions} from './vector-table-source';
 
