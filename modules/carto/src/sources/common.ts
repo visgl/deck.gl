@@ -1,3 +1,4 @@
+import type {Feature} from 'geojson';
 import {MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
 
 export type CartoSourceRequiredOptions = {
@@ -8,6 +9,7 @@ export type CartoSourceRequiredOptions = {
 export type CartoSourceOptionalOptions = {
   apiBaseUrl: string;
   clientId: string; // Default 'deck-gl-carto'
+  format: 'tilejson' | 'geojson';
   formatTiles: TileFormat;
   headers: Record<string, string>;
   mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
@@ -37,6 +39,7 @@ export type CartoTilesetSourceOptions = {
 export const SOURCE_DEFAULTS: CartoSourceOptionalOptions = {
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   clientId: 'deck-gl-carto',
+  format: 'tilejson',
   formatTiles: 'binary',
   headers: {}
 };
@@ -89,6 +92,7 @@ export interface VectorLayer {
 }
 
 export type CartoTilejsonResult = Tilejson & {accessToken: string};
+export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 
 export const DEFAULT_CLIENT = 'deck-gl-carto';
 export const V3_MINOR_VERSION = '3.2';

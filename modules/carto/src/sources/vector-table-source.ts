@@ -1,11 +1,11 @@
-import type {GeoJSON} from 'geojson';
 import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTableSourceOptions,
-  CartoTilejsonResult
+  CartoTilejsonResult,
+  GeojsonResult
 } from './common';
 
 export type CartoVectorTableSourceOptions = CartoSourceRequiredOptions &
@@ -19,19 +19,13 @@ type UrlParameters = {
 };
 
 export async function CartoVectorTableSource(
-  options: CartoVectorTableSourceOptions,
-  format?: 'tilejson'
+  options: CartoVectorTableSourceOptions & {format?: 'tilejson'}
 ): Promise<CartoTilejsonResult>;
-
 export async function CartoVectorTableSource(
-  options: CartoVectorTableSourceOptions,
-  format: 'geojson'
-): Promise<GeoJSON>;
+  options: CartoVectorTableSourceOptions & {format: 'geojson'}
+): Promise<GeojsonResult>;
 
-export async function CartoVectorTableSource(
-  options: CartoVectorTableSourceOptions,
-  format?: 'tilejson' | 'geojson'
-): Promise<any> {
+export async function CartoVectorTableSource(options: CartoVectorTableSourceOptions): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
@@ -41,5 +35,5 @@ export async function CartoVectorTableSource(
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters, format);
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
 }

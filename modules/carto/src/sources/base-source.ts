@@ -1,10 +1,10 @@
-import type {GeoJSON} from 'geojson';
 import {encodeParameter, MapType, REQUEST_TYPES} from '../api/maps-api-common';
 import {APIErrorContext} from '../api/carto-api-error';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTilejsonResult,
+  GeojsonResult,
   SOURCE_DEFAULTS,
   Tilejson,
   TilejsonMapInstantiation
@@ -14,11 +14,11 @@ import {buildApiEndpoint, requestWithParameters} from './utils';
 export async function CartoBaseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,
   options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions,
-  urlParameters: UrlParameters,
-  format: 'tilejson' | 'geojson' = 'tilejson'
-): Promise<GeoJSON | CartoTilejsonResult> {
-  const baseUrl = buildApiEndpoint({...SOURCE_DEFAULTS, ...options, endpoint});
-  const {accessToken} = options;
+  urlParameters: UrlParameters
+): Promise<GeojsonResult | CartoTilejsonResult> {
+  const mergedOptions = {...SOURCE_DEFAULTS, ...options, endpoint};
+  const baseUrl = buildApiEndpoint(mergedOptions);
+  const {accessToken, format} = mergedOptions;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
   const errorContext: APIErrorContext = {
@@ -34,19 +34,19 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
     errorContext
   });
 
-  const tilejsonUrl = mapInstantiation[format].url[0];
+  const dataUrl = mapInstantiation[format].url[0];
   errorContext.requestType = REQUEST_TYPES.DATA;
 
   if (format === 'tilejson') {
     const tilejson = await requestWithParameters<Tilejson>({
-      baseUrl: tilejsonUrl,
+      baseUrl: dataUrl,
       headers,
       errorContext
     });
     return {...tilejson, accessToken};
   } else {
-    return await requestWithParameters<GeoJSON>({
-      baseUrl: tilejsonUrl,
+    return await requestWithParameters<GeojsonResult>({
+      baseUrl: dataUrl,
       headers,
       errorContext
     });
