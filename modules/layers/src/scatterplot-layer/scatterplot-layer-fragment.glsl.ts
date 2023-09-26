@@ -77,7 +77,7 @@ void main(void) {
       }
       gl_FragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (!filled) {
+  } else if (!scatterplot.filled) {
     discard;
   } else {
     gl_FragColor = vFillColor;
