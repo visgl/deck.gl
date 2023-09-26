@@ -15,7 +15,8 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
   endpoint: MapType,
   options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions,
   urlParameters: UrlParameters
-): Promise<GeojsonResult | CartoTilejsonResult> {
+): Promise<any> {
+  // TODO return type: Promise<GeojsonResult | CartoTilejsonResult>
   const mergedOptions = {...SOURCE_DEFAULTS, ...options, endpoint};
   const baseUrl = buildApiEndpoint(mergedOptions);
   const {accessToken, format} = mergedOptions;
