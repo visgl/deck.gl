@@ -17,25 +17,13 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
-import type {CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
-export const tilejsonType = {
-  type: 'object' as const,
-  value: null as Promise<CartoTilejsonResult> | null,
-  validate: (value, propType) =>
-    (propType.optional && value === null) ||
-    (typeof value === 'object' &&
-      Array.isArray(value.tiles) &&
-      value.tiles.every(url => typeof url === 'string')),
-  compare: 2,
-  async: true
-};
-
 const defaultProps: DefaultProps<CartoVectorLayerProps> = {
   ...MVTLayer.defaultProps,
-  data: tilejsonType,
+  data: TilejsonPropType,
   formatTiles: defaultTileFormat
 };
 
@@ -44,7 +32,7 @@ export type CartoVectorLayerProps = _CartoVectorLayerProps & Omit<MVTLayerProps,
 
 /** Properties added by CartoVectorLayer. */
 type _CartoVectorLayerProps = {
-  data: Promise<CartoTilejsonResult> | null;
+  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
   /** Use to override the default tile data format.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
