@@ -62,6 +62,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
       };
     }
+    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'h3'};
 
     return loadOptions;
   }
@@ -99,10 +100,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         // minZoom and maxZoom are H3 resolutions, however we must use this naming as that is what the Tileset2D class expects
         minZoom: minresolution,
         maxZoom: maxresolution,
-        loadOptions: {
-          ...this.getLoadOptions(),
-          cartoSpatialTile: {scheme: 'h3'}
-        }
+        loadOptions: this.getLoadOptions()
       })
     ];
   }

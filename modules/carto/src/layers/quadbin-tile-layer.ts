@@ -47,6 +47,7 @@ export default class QuadbinTileLayer<
         headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
       };
     }
+    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
 
     return loadOptions;
   }
@@ -65,10 +66,7 @@ export default class QuadbinTileLayer<
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
         maxZoom,
-        loadOptions: {
-          ...this.getLoadOptions(),
-          cartoSpatialTile: {scheme: 'quadbin'}
-        }
+        loadOptions: this.getLoadOptions()
       })
     ];
   }
