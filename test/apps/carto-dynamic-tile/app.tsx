@@ -5,15 +5,11 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  CartoQuadbinTableSource,
-  CartoVectorTableSource,
-  CartoVectorTilesetSource,
-  CartoVectorQuerySource,
   CartoTilejsonResult,
   CartoVectorLayer,
   QuadbinTileLayer,
-  colorBins
 } from '@deck.gl/carto';
+import datasets from './datasets';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
@@ -21,57 +17,12 @@ const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
-const config = {
-  'quadbin-table': {
-    Source: CartoQuadbinTableSource,
-    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
-    aggregationExp: 'avg(population) as population_average',
-    getFillColor: colorBins({
-      attr: 'population_average',
-      domain: [10, 50, 100, 250, 500, 1000],
-      colors: 'SunsetDark'
-    })
-  },
-  'vector-query': {
-    Source: CartoVectorQuerySource,
-    sqlQuery:
-      'select geom, district from carto-demo-data.demo_tables.chicago_crime_sample where year > 2016',
-    getFillColor: [255, 0, 0]
-  },
-  'vector-table': {
-    Source: CartoVectorTableSource,
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-    columns: ['date', 'year'],
-    getFillColor: colorBins({
-      attr: 'year',
-      domain: [2002, 2006, 2010, 2016, 2020],
-      colors: 'Magenta'
-    })
-  },
-  'vector-table-dynamic': {
-    Source: CartoVectorTableSource,
-    tableName: 'carto-demo-data.demo_tables.osm_buildings_usa',
-    spatialDataColumn: 'geog',
-    getFillColor: [131, 44, 247]
-  },
-  'vector-tileset': {
-    Source: CartoVectorTilesetSource,
-    tableName: 'carto-demo-data.demo_tilesets.sociodemographics_usa_blockgroup',
-    getFillColor: colorBins({
-      attr: 'income_per_capita',
-      domain: [15000, 25000, 35000, 45000, 60000],
-      colors: 'OrYel'
-    })
-  }
-};
-
-const accessToken = 'XXX';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
 function Root() {
-  const [dataset, setDataset] = useState('quadbin-table');
-  const datasource = config[dataset];
+  const [dataset, setDataset] = useState(Object.keys(datasets)[0]);
+  const datasource = datasets[dataset];
   let layers;
 
   if (dataset.includes('quadbin')) {
@@ -99,7 +50,7 @@ function Root() {
       </DeckGL>
       <ObjectSelect
         title="dataset"
-        obj={Object.keys(config)}
+        obj={Object.keys(datasets)}
         value={dataset}
         onSelect={setDataset}
       />
