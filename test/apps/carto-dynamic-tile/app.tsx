@@ -7,6 +7,7 @@ import DeckGL from '@deck.gl/react';
 import {
   CartoTilejsonResult,
   CartoVectorLayer,
+  H3TileLayer,
   QuadbinTileLayer,
 } from '@deck.gl/carto';
 import datasets from './datasets';
@@ -17,7 +18,7 @@ const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 const connectionName = 'bigquery';
 
-const accessToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRVNGNZTHAwaThjYnVMNkd0LTE0diJ9.eyJodHRwOi8vYXBwLmNhcnRvLmNvbS9lbWFpbCI6ImZwYWxtZXJAY2FydG9kYi5jb20iLCJodHRwOi8vYXBwLmNhcnRvLmNvbS9hY2NvdW50X2lkIjoiYWNfN3hoZnd5bWwiLCJpc3MiOiJodHRwczovL2F1dGguY2FydG8uY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3OTY5NjU1OTI5NjExMjIxNDg2IiwiYXVkIjoiY2FydG8tY2xvdWQtbmF0aXZlLWFwaSIsImlhdCI6MTY5NTYzNDA5MSwiZXhwIjoxNjk1NzIwNDkxLCJhenAiOiJBdHh2SERldVhsUjhYUGZGMm5qMlV2MkkyOXB2bUN4dSIsInBlcm1pc3Npb25zIjpbImV4ZWN1dGU6d29ya2Zsb3dzIiwicmVhZDphY2NvdW50IiwicmVhZDphcHBzIiwicmVhZDpjb25uZWN0aW9ucyIsInJlYWQ6Y3VycmVudF91c2VyIiwicmVhZDppbXBvcnRzIiwicmVhZDpsaXN0ZWRfYXBwcyIsInJlYWQ6bWFwcyIsInJlYWQ6dGlsZXNldHMiLCJyZWFkOnRva2VucyIsInJlYWQ6d29ya2Zsb3dzIiwidXBkYXRlOmN1cnJlbnRfdXNlciIsIndyaXRlOmFwcHMiLCJ3cml0ZTpjYXJ0by1kdy1ncmFudHMiLCJ3cml0ZTpjb25uZWN0aW9ucyIsIndyaXRlOmltcG9ydHMiLCJ3cml0ZTptYXBzIiwid3JpdGU6dG9rZW5zIiwid3JpdGU6d29ya2Zsb3dzIl19.Pe3-CiKxbzvZSVEpOOau-4C0KvgwRY9z3JrQN9nBkXNe5nw4RRNjZKwximMJfGn6agkicwpul8IfkTibEJl3gtoEOMQN2azWGMuxFd0cLEPgg6w2bCDWHi6QBjNC_VCW0jRw_ldE4W3J0rwfCLdoUuqdF28a6E3JA2_2GtT5fMupbriCFhLLDOgPt4gm3KoQI7YOe7PI6c5nEWbYeg4Eb776P5ggMdgcgjerBLo5Jnzzt8FAqmBCKZriJC4RZhy5cXyvevtJoAX-NmTcz2YpBLiWeRSx_vkHkB86YQQ2NHY91mWW4Y_n6cpT0-FEmhXHb1qhQTVPqnnlDPxaktPjsQ';
+const accessToken = 'XXX';
 
 const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl not required
 
@@ -26,9 +27,10 @@ function Root() {
   const datasource = datasets[dataset];
   let layers;
 
-  if (dataset.includes('quadbin')) {
+  if (dataset.includes('h3')) {
+    layers = [createH3Layer(datasource)];
+  } else if (dataset.includes('quadbin')) {
     layers = [createQuadbinLayer(datasource)];
-
   } else if (dataset.includes('vector')) {
     layers = [createVectorLayer(datasource)];
   } 
@@ -59,6 +61,22 @@ function Root() {
   );
 }
 
+function createH3Layer(datasource) {
+  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+  // useMemo to avoid a map instantiation on every re-render
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
+    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
+  }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
+
+  return new H3TileLayer({
+    id: 'carto',
+    // @ts-ignore
+    data: tilejson,
+    pickable: true,
+    stroked: false,
+    getFillColor
+  });
+}
 function createQuadbinLayer(datasource) {
   const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render

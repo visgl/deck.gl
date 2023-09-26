@@ -1,7 +1,7 @@
 export {getDefaultCredentials, setDefaultCredentials} from './config';
 export {default as CartoLayer} from './layers/carto-layer';
 export {default as CartoVectorLayer} from './layers/carto-vector-layer';
-export {default as _H3TileLayer} from './layers/h3-tile-layer';
+export {default as H3TileLayer} from './layers/h3-tile-layer';
 export {default as _PointLabelLayer} from './layers/point-label-layer';
 export {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 export {default as _RasterTileLayer} from './layers/raster-tile-layer';
@@ -24,6 +24,9 @@ export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
 export {
+  CartoH3QuerySource,
+  CartoH3TableSource,
+  CartoH3TilesetSource,
   CartoQuadbinQuerySource,
   CartoQuadbinTableSource,
   CartoQuadbinTilesetSource,
@@ -36,6 +39,9 @@ export type {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTilejsonResult,
+  CartoH3QuerySourceOptions,
+  CartoH3TableSourceOptions,
+  CartoH3TilesetSourceOptions,
   CartoQuadbinQuerySourceOptions,
   CartoQuadbinTableSourceOptions,
   CartoQuadbinTilesetSourceOptions,

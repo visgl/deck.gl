@@ -1,4 +1,7 @@
 import {
+  CartoH3TilesetSource,
+  CartoH3TableSource,
+  CartoH3QuerySource,
   CartoQuadbinTableSource,
   CartoQuadbinTilesetSource,
   CartoQuadbinQuerySource,
@@ -9,6 +12,37 @@ import {
 } from '@deck.gl/carto';
 
 export default {
+  'h3-query': {
+    Source: CartoH3QuerySource,
+    sqlQuery:
+      'select h3, population from carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
+    aggregationExp: 'min(population) as population_min',
+    getFillColor: colorBins({
+      attr: 'population_min',
+      domain: [10, 50, 100, 250, 500, 1000],
+      colors: 'BrwnYl'
+    })
+  },
+  'h3-table': {
+    Source: CartoH3TableSource,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
+    aggregationExp: 'avg(population) as population_average',
+    getFillColor: colorBins({
+      attr: 'population_average',
+      domain: [10, 50, 100, 250, 500, 1000],
+      colors: 'SunsetDark'
+    })
+  },
+  'h3-tileset': {
+    Source: CartoH3TilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset',
+    getFillColor: colorBins({
+      attr: 'retail',
+      domain: [1, 2, 3, 5, 8, 11],
+      colors: 'Earth'
+    })
+  },
   'quadbin-query': {
     Source: CartoQuadbinQuerySource,
     sqlQuery:

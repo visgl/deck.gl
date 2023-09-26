@@ -5,6 +5,15 @@ export type {
   CartoTilejsonResult
 } from './common';
 
+export {CartoH3QuerySource} from './h3-query-source';
+export type {CartoH3QuerySourceOptions} from './h3-query-source';
+
+export {CartoH3TableSource} from './h3-table-source';
+export type {CartoH3TableSourceOptions} from './h3-table-source';
+
+export {CartoH3TilesetSource} from './h3-tileset-source';
+export type {CartoH3TilesetSourceOptions} from './h3-tileset-source';
+
 export {CartoQuadbinQuerySource} from './quadbin-query-source';
 export type {CartoQuadbinQuerySourceOptions} from './quadbin-query-source';
 
