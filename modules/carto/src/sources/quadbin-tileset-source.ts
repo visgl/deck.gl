@@ -21,9 +21,5 @@ export async function CartoQuadbinTilesetSource(
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return CartoBaseSource<CartoQuadbinTilesetSourceOptions, UrlParameters>(
-    MAP_TYPES.TILESET,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TILESET, options, urlParameters);
 }

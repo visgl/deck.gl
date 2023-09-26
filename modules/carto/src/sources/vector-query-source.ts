@@ -29,9 +29,5 @@ export async function CartoVectorQuerySource(
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<CartoVectorQuerySourceOptions, UrlParameters>(
-    MAP_TYPES.QUERY,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
 }

@@ -45,9 +45,5 @@ export async function CartoQuadbinQuerySource(
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<CartoQuadbinQuerySourceOptions, UrlParameters>(
-    MAP_TYPES.QUERY,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
 }

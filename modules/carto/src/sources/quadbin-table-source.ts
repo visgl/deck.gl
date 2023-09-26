@@ -45,9 +45,5 @@ export async function CartoQuadbinTableSource(
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  return CartoBaseSource<CartoQuadbinTableSourceOptions, UrlParameters>(
-    MAP_TYPES.TABLE,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
 }

@@ -21,9 +21,5 @@ export async function CartoH3TilesetSource(
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return CartoBaseSource<CartoH3TilesetSourceOptions, UrlParameters>(
-    MAP_TYPES.TILESET,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TILESET, options, urlParameters);
 }

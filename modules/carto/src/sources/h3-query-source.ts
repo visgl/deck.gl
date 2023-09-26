@@ -45,9 +45,5 @@ export async function CartoH3QuerySource(
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<CartoH3QuerySourceOptions, UrlParameters>(
-    MAP_TYPES.QUERY,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
 }

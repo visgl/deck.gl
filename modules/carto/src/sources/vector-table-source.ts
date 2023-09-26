@@ -29,9 +29,5 @@ export async function CartoVectorTableSource(
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return CartoBaseSource<CartoVectorTableSourceOptions, UrlParameters>(
-    MAP_TYPES.TABLE,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
 }

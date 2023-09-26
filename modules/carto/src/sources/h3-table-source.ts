@@ -45,9 +45,5 @@ export async function CartoH3TableSource(
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  return CartoBaseSource<CartoH3TableSourceOptions, UrlParameters>(
-    MAP_TYPES.TABLE,
-    options,
-    urlParameters
-  );
+  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
 }
