@@ -24,6 +24,12 @@ export type CartoQuerySourceOptions = {
   queryParameters?: QueryParameters;
 };
 
+export type CartoTableSourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
+};
+
 export type CartoTilesetSourceOptions = {
   tableName: string;
 };

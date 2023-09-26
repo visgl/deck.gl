@@ -1,21 +1,17 @@
 import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
+  CartoAggregationOptions,
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
+  CartoTableSourceOptions,
   CartoTilejsonResult
 } from './common';
 
-type CartoAggregationOptions = {
-  aggregationExp?: string;
-  aggregationResLevel?: number;
-};
-
-export type CartoQuadbinTableSourceOptions = {
-  columns?: string[];
-  spatialDataColumn?: string;
-  tableName: string;
-};
+export type CartoQuadbinTableSourceOptions = CartoSourceRequiredOptions &
+  Partial<CartoSourceOptionalOptions> &
+  CartoTableSourceOptions &
+  CartoAggregationOptions;
 
 type UrlParameters = {
   columns?: string;
@@ -26,10 +22,7 @@ type UrlParameters = {
 };
 
 export async function CartoQuadbinTableSource(
-  options: CartoSourceRequiredOptions &
-    Partial<CartoSourceOptionalOptions> &
-    CartoQuadbinTableSourceOptions &
-    CartoAggregationOptions
+  options: CartoQuadbinTableSourceOptions
 ): Promise<CartoTilejsonResult> {
   const {
     aggregationExp = '1 AS value',

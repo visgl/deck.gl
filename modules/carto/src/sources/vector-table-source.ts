@@ -3,14 +3,13 @@ import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
+  CartoTableSourceOptions,
   CartoTilejsonResult
 } from './common';
 
-export type CartoVectorTableSourceOptions = {
-  columns?: string[];
-  spatialDataColumn?: string;
-  tableName: string;
-};
+export type CartoVectorTableSourceOptions = CartoSourceRequiredOptions &
+  Partial<CartoSourceOptionalOptions> &
+  CartoTableSourceOptions;
 
 type UrlParameters = {
   columns?: string;
@@ -19,9 +18,7 @@ type UrlParameters = {
 };
 
 export async function CartoVectorTableSource(
-  options: CartoSourceRequiredOptions &
-    Partial<CartoSourceOptionalOptions> &
-    CartoVectorTableSourceOptions
+  options: CartoVectorTableSourceOptions
 ): Promise<CartoTilejsonResult> {
   const {columns, spatialDataColumn, tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
