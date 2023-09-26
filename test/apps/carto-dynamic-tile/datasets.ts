@@ -1,5 +1,6 @@
 import {
   CartoQuadbinTableSource,
+  CartoQuadbinTilesetSource,
   CartoQuadbinQuerySource,
   CartoVectorTableSource,
   CartoVectorTilesetSource,
@@ -8,6 +9,17 @@ import {
 } from '@deck.gl/carto';
 
 export default {
+  'quadbin-query': {
+    Source: CartoQuadbinQuerySource,
+    sqlQuery:
+      'select quadbin, population from carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
+    aggregationExp: 'min(population) as population_min',
+    getFillColor: colorBins({
+      attr: 'population_min',
+      domain: [10, 50, 100, 250, 500, 1000],
+      colors: 'BrwnYl'
+    })
+  },
   'quadbin-table': {
     Source: CartoQuadbinTableSource,
     tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
@@ -18,15 +30,14 @@ export default {
       colors: 'SunsetDark'
     })
   },
-  'quadbin-query': {
-    Source: CartoQuadbinQuerySource,
-    sqlQuery:
-      'select quadbin, population from carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
-    aggregationExp: 'min(population) as population_min',
+  'quadbin-tileset': {
+    Source: CartoQuadbinTilesetSource,
+    tableName:
+      'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset',
     getFillColor: colorBins({
-      attr: 'population_min',
-      domain: [10, 50, 100, 250, 500, 1000],
-      colors: 'BrwnYl'
+      attr: 'avg_retail',
+      domain: [1, 2, 3, 5, 8, 11],
+      colors: 'Earth'
     })
   },
   'vector-query': {

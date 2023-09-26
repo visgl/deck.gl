@@ -7,7 +7,7 @@ import {
   CartoTilesetSourceOptions
 } from './common';
 
-export type CartoVectorTilesetSourceOptions = CartoSourceRequiredOptions &
+export type CartoQuadbinTilesetSourceOptions = CartoSourceRequiredOptions &
   Partial<CartoSourceOptionalOptions> &
   CartoTilesetSourceOptions;
 
@@ -15,13 +15,13 @@ type UrlParameters = {
   name: string;
 };
 
-export async function CartoVectorTilesetSource(
-  options: CartoVectorTilesetSourceOptions
+export async function CartoQuadbinTilesetSource(
+  options: CartoQuadbinTilesetSourceOptions
 ): Promise<CartoTilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return CartoBaseSource<CartoVectorTilesetSourceOptions, UrlParameters>(
+  return CartoBaseSource<CartoQuadbinTilesetSourceOptions, UrlParameters>(
     MAP_TYPES.TILESET,
     options,
     urlParameters

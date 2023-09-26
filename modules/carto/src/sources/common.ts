@@ -24,6 +24,10 @@ export type CartoQuerySourceOptions = {
   queryParameters?: QueryParameters;
 };
 
+export type CartoTilesetSourceOptions = {
+  tableName: string;
+};
+
 export const SOURCE_DEFAULTS: CartoSourceOptionalOptions = {
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   clientId: 'deck-gl-carto',

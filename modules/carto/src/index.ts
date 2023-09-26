@@ -24,20 +24,22 @@ export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
 export {
-  CartoQuadbinTableSource,
   CartoQuadbinQuerySource,
+  CartoQuadbinTableSource,
+  CartoQuadbinTilesetSource,
+  CartoVectorQuerySource,
   CartoVectorTableSource,
   CartoVectorTilesetSource,
-  CartoVectorQuerySource,
   SOURCE_DEFAULTS
 } from './sources';
 export type {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTilejsonResult,
-  CartoQuadbinTableSourceOptions,
   CartoQuadbinQuerySourceOptions,
+  CartoQuadbinTableSourceOptions,
+  CartoQuadbinTilesetSourceOptions,
+  CartoVectorQuerySourceOptions,
   CartoVectorTableSourceOptions,
-  CartoVectorTilesetSourceOptions,
-  CartoVectorQuerySourceOptions
+  CartoVectorTilesetSourceOptions
 } from './sources';
