@@ -7,6 +7,7 @@ import DeckGL from '@deck.gl/react';
 import {
   CartoTilejsonResult,
   CartoVectorLayer,
+  CartoVectorTableSource,
   H3TileLayer,
   QuadbinTileLayer,
 } from '@deck.gl/carto';
@@ -91,6 +92,14 @@ function createQuadbinLayer(datasource) {
     getFillColor
   });
 }
+
+async function fetchLayerData() {
+  const datasource = datasets['vector-table'];
+  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'}, 'geojson');
+  // console.log(data.tiles); // <- Typescript error
+  console.log(data.type); // <- type: GeoJSON
+}
+fetchLayerData();
 
 function createVectorLayer(datasource) {
   const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
