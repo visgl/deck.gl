@@ -1,5 +1,5 @@
 import type {Feature} from 'geojson';
-import {MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
+import {Format, MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
 
 export type CartoSourceRequiredOptions = {
   accessToken: string;
@@ -9,7 +9,7 @@ export type CartoSourceRequiredOptions = {
 export type CartoSourceOptionalOptions = {
   apiBaseUrl: string;
   clientId: string; // Default 'deck-gl-carto'
-  format: 'tilejson' | 'geojson';
+  format: Format;
   formatTiles: TileFormat;
   headers: Record<string, string>;
   mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
@@ -93,9 +93,11 @@ export interface VectorLayer {
 
 export type CartoTilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
+export type JsonResult = any[];
 export interface TypedSource<T> {
   (options: T & {format?: 'tilejson'}): Promise<CartoTilejsonResult>;
   (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
+  (options: T & {format: 'json'}): Promise<JsonResult>;
 }
 
 export const DEFAULT_CLIENT = 'deck-gl-carto';

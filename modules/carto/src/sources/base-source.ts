@@ -5,6 +5,7 @@ import {
   CartoSourceRequiredOptions,
   CartoTilejsonResult,
   GeojsonResult,
+  JsonResult,
   SOURCE_DEFAULTS,
   Tilejson,
   TilejsonMapInstantiation
@@ -15,8 +16,7 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
   endpoint: MapType,
   options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions,
   urlParameters: UrlParameters
-): Promise<any> {
-  // TODO return type: Promise<GeojsonResult | CartoTilejsonResult>
+): Promise<CartoTilejsonResult | GeojsonResult | JsonResult> {
   const mergedOptions = {...SOURCE_DEFAULTS, ...options, endpoint};
   const baseUrl = buildApiEndpoint(mergedOptions);
   const {accessToken, format} = mergedOptions;

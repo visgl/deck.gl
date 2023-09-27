@@ -94,9 +94,10 @@ function createQuadbinLayer(datasource) {
 }
 
 async function fetchLayerData() {
-  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample', format: 'geojson'});
+  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'});
   console.log(data.tiles); // <- Typescript error
   console.log(data.features); // <- type: GeoJSON
+  console.log(data)
 }
 fetchLayerData();
 
