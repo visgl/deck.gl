@@ -93,6 +93,10 @@ export interface VectorLayer {
 
 export type CartoTilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
+export interface TypedSource<T> {
+  (options: T & {format?: 'tilejson'}): Promise<CartoTilejsonResult>;
+  (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
+}
 
 export const DEFAULT_CLIENT = 'deck-gl-carto';
 export const V3_MINOR_VERSION = '3.2';
