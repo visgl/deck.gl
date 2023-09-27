@@ -94,8 +94,10 @@ export interface VectorLayer {
 export type CartoTilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 export type JsonResult = any[];
-export interface TypedSource<T> {
+export interface TilejsonSource<T> {
   (options: T & {format?: 'tilejson'}): Promise<CartoTilejsonResult>;
+}
+export interface TypedSource<T> extends TilejsonSource<T> {
   (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
   (options: T & {format: 'json'}): Promise<JsonResult>;
 }
