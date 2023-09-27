@@ -4,6 +4,7 @@ import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
+import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
@@ -55,6 +56,7 @@ type AttributeInternalState = {
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
+  layoutChanged: boolean;
   updateRanges: number[][];
 };
 
@@ -70,6 +72,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
+      layoutChanged: false,
       updateRanges: range.FULL
     });
 
@@ -99,6 +102,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const needsRedraw = this.state.needsRedraw;
     this.state.needsRedraw = needsRedraw && !clearChangedFlags;
     return needsRedraw;
+  }
+
+  layoutChanged({clearChangedFlags = false}: {clearChangedFlags?: boolean} = {}): boolean {
+    const layoutChanged = this.state.layoutChanged;
+    this.state.layoutChanged = layoutChanged && !clearChangedFlags;
+    return layoutChanged;
+  }
+
+  setAccessor(accessor: typeof this.settings) {
+    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    super.setAccessor(accessor);
   }
 
   getUpdateTriggers(): string[] {

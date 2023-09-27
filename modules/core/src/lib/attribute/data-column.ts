@@ -296,6 +296,10 @@ export default class DataColumn<Options, State> {
     return result;
   }
 
+  setAccessor(accessor: DataColumnSettings<Options>) {
+    this.state.bufferAccessor = accessor;
+  }
+
   getAccessor(): DataColumnSettings<Options> {
     return this.state.bufferAccessor;
   }
@@ -358,7 +362,6 @@ export default class DataColumn<Options, State> {
     }
 
     const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
-    state.bufferAccessor = accessor;
     state.bounds = null; // clear cached bounds
 
     if (opts.constant) {
@@ -400,10 +403,18 @@ export default class DataColumn<Options, State> {
       accessor.bytesPerElement = value.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
 
-      const {buffer, byteOffset} = this;
+      const {buffer} = this;
+      const byteOffset = (accessor.vertexOffset || 0) * getStride(accessor);
 
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, accessor);
+      }
+      if (this.settings.isIndexed) {
+        const ArrayType = this.settings.defaultType;
+        if (value.constructor !== ArrayType) {
+          // Cast the index buffer to expected type
+          value = new ArrayType(value);
+        }
       }
 
       // A small over allocation is used as safety margin
@@ -418,6 +429,8 @@ export default class DataColumn<Options, State> {
       // @ts-ignore
       accessor.type = opts.type || buffer.accessor.type;
     }
+
+    this.setAccessor(accessor);
 
     return true;
   }
@@ -478,7 +491,7 @@ export default class DataColumn<Options, State> {
     state.allocatedValue = value;
     state.constant = false;
     state.externalBuffer = null;
-    state.bufferAccessor = this.settings;
+    this.setAccessor(this.settings);
     return true;
   }
 

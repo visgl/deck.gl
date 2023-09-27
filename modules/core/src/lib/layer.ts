@@ -634,8 +634,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Send updated attributes to the WebGL model */
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
+    // If some buffer layout changed
+    let bufferLayoutChanged = false;
+    const opts = {clearChangedFlags: true};
+    for (const id in changedAttributes) {
+      if (changedAttributes[id].layoutChanged(opts)) {
+        bufferLayoutChanged = true;
+      }
+    }
+
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
     }
   }
 
@@ -739,10 +748,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     model: Model,
     changedAttributes: {
       [id: string]: Attribute;
-    }
+    },
+    bufferLayoutChanged = false
   ) {
     if (!Object.keys(changedAttributes).length) {
       return;
+    }
+
+    if (bufferLayoutChanged) {
+      model.setBufferLayout(this.getAttributeManager().getBufferLayouts());
     }
 
     // @ts-ignore luma.gl type issue

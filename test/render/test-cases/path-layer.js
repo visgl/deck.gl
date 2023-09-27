@@ -49,47 +49,46 @@ export default [
     ],
     goldenImage: './test/render/golden-images/path-lnglat.png'
   },
-  // TODO - v9 binary attributes
-  // {
-  //   name: 'path-lnglat-binary',
-  //   viewState: {
-  //     latitude: 37.751537058389985,
-  //     longitude: -122.42694203247012,
-  //     zoom: 11.5,
-  //     pitch: 0,
-  //     bearing: 0
-  //   },
-  //   layers: [
-  //     new PathLayer({
-  //       id: 'path-lnglat',
-  //       data: {
-  //         length: zigzag.length,
-  //         startIndices: zigzag.reduce(
-  //           (acc, d) => {
-  //             acc.push(acc[acc.length - 1] + d.path.length);
-  //             return acc;
-  //           },
-  //           [0]
-  //         ),
-  //         attributes: {
-  //           getPath: {
-  //             value: new Float64Array(zigzag.flatMap(d => d.path.flat())),
-  //             size: 2
-  //           },
-  //           getColor: {
-  //             value: new Uint8Array(zigzag.flatMap(d => d.path.flatMap(p => [255, 0, 0]))),
-  //             size: 3
-  //           }
-  //         }
-  //       },
-  //       getWidth: 200,
-  //       miterLimit: 0,
-  //       opacity: 0.6,
-  //       widthMinPixels: 1
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/path-lnglat.png'
-  // },
+  {
+    name: 'path-lnglat-binary',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-lnglat',
+        data: {
+          length: zigzag.length,
+          startIndices: zigzag.reduce(
+            (acc, d) => {
+              acc.push(acc[acc.length - 1] + d.path.length);
+              return acc;
+            },
+            [0]
+          ),
+          attributes: {
+            getPath: {
+              value: new Float64Array(zigzag.flatMap(d => d.path.flat())),
+              size: 2
+            },
+            getColor: {
+              value: new Uint8Array(zigzag.flatMap(d => d.path.flatMap(p => [255, 0, 0]))),
+              size: 3
+            }
+          }
+        },
+        getWidth: 200,
+        miterLimit: 0,
+        opacity: 0.6,
+        widthMinPixels: 1
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-lnglat.png'
+  },
   {
     name: 'path-billboard',
     viewState: {
