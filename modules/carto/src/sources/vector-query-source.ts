@@ -1,10 +1,9 @@
-import {MAP_TYPES, QueryParameters} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult,
-  CartoQuerySourceOptions
+  CartoQuerySourceOptions,
+  TypedSource
 } from './common';
 
 export type CartoVectorQuerySourceOptions = CartoSourceRequiredOptions &
@@ -17,9 +16,9 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-export async function CartoVectorQuerySource(
+const CartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async function (
   options: CartoVectorQuerySourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;
   const urlParameters: UrlParameters = {q: sqlQuery};
 
@@ -29,5 +28,7 @@ export async function CartoVectorQuerySource(
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
-}
+  return CartoBaseSource<UrlParameters>('query', options, urlParameters);
+};
+
+export {CartoVectorQuerySource};
