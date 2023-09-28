@@ -32,7 +32,12 @@ export async function requestWithParameters<T = any>({
     } else {
       response = await fetch(url, {headers});
     }
-    const json = await response.json();
+    let json: any;
+    try {
+      json = await response.json();
+    } catch {
+      json = {error: ''};
+    }
     if (!response.ok) {
       throw new CartoAPIError(json.error, errorContext, response);
     }
