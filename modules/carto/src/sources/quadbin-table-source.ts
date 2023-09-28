@@ -1,4 +1,3 @@
-import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
@@ -45,7 +44,7 @@ const CartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
+  return CartoBaseSource<UrlParameters>('table', options, urlParameters);
 };
 
 export {CartoQuadbinTableSource};

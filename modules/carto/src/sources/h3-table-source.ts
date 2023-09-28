@@ -1,11 +1,10 @@
-import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTableSourceOptions,
-  CartoTilejsonResult
+  TilejsonSource
 } from './common';
 
 export type CartoH3TableSourceOptions = CartoSourceRequiredOptions &
@@ -21,9 +20,9 @@ type UrlParameters = {
   aggregationResLevel?: string;
 };
 
-export async function CartoH3TableSource(
+const CartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async function (
   options: CartoH3TableSourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {
     aggregationExp = '1 AS value',
     aggregationResLevel = 4,
@@ -45,5 +44,7 @@ export async function CartoH3TableSource(
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
-}
+  return CartoBaseSource<UrlParameters>('table', options, urlParameters);
+};
+
+export {CartoH3TableSource};

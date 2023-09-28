@@ -1,4 +1,3 @@
-import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
@@ -21,7 +20,7 @@ const CartoQuadbinTilesetSource: TilejsonSource<CartoQuadbinTilesetSourceOptions
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.TILESET, options, urlParameters);
+  return CartoBaseSource<UrlParameters>('tileset', options, urlParameters);
 };
 
 export {CartoQuadbinTilesetSource};

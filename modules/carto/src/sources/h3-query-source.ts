@@ -1,11 +1,10 @@
-import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
   CartoQuerySourceOptions,
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult
+  TilejsonSource
 } from './common';
 
 export type CartoH3QuerySourceOptions = CartoSourceRequiredOptions &
@@ -21,9 +20,9 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-export async function CartoH3QuerySource(
+const CartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async function (
   options: CartoH3QuerySourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {
     aggregationExp = '1 AS value',
     aggregationResLevel = 4,
@@ -45,5 +44,7 @@ export async function CartoH3QuerySource(
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
-}
+  return CartoBaseSource<UrlParameters>('query', options, urlParameters);
+};
+
+export {CartoH3QuerySource};

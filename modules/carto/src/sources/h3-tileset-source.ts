@@ -1,10 +1,9 @@
-import {MAP_TYPES} from '../api/maps-api-common';
 import {CartoBaseSource} from './base-source';
 import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult,
-  CartoTilesetSourceOptions
+  CartoTilesetSourceOptions,
+  TilejsonSource
 } from './common';
 
 export type CartoH3TilesetSourceOptions = CartoSourceRequiredOptions &
@@ -15,11 +14,13 @@ type UrlParameters = {
   name: string;
 };
 
-export async function CartoH3TilesetSource(
+const CartoH3TilesetSource: TilejsonSource<CartoH3TilesetSourceOptions> = async function (
   options: CartoH3TilesetSourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return CartoBaseSource<UrlParameters>(MAP_TYPES.TILESET, options, urlParameters);
-}
+  return CartoBaseSource<UrlParameters>('tileset', options, urlParameters);
+};
+
+export {CartoH3TilesetSource};
