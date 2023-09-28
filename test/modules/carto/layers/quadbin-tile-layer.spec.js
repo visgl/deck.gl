@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils';
-import {_QuadbinTileLayer as QuadbinTileLayer} from '@deck.gl/carto';
+import {QuadbinTileLayer} from '@deck.gl/carto';
 import {renderSubLayers} from '@deck.gl/carto/layers/quadbin-tile-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {testPickingLayer} from '../../layers/test-picking-layer';

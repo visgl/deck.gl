@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {_CartoTileLayer as CartoTileLayer} from '@deck.gl/carto';
+import {VectorTileLayer} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
@@ -21,17 +21,17 @@ const geoJSONData = [
 
 const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
 
-test(`CartoTileLayer#picking`, async t => {
-  class TestCartoTileLayer extends CartoTileLayer {
+test(`VectorTileLayer#picking`, async t => {
+  class TestVectorTileLayer extends VectorTileLayer {
     getTileData() {
       return geoJSONBinaryData;
     }
   }
 
-  TestCartoTileLayer.layerName = 'TestCartoTileLayer';
+  TestVectorTileLayer.layerName = 'TestVectorTileLayer';
 
   await testPickingLayer({
-    layer: new TestCartoTileLayer({
+    layer: new TestVectorTileLayer({
       id: 'mvt',
       binary: true,
       data: ['https://json_2/{z}/{x}/{y}.mvt'],
