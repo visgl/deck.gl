@@ -1,20 +1,8 @@
 import {CartoBaseSource} from './base-source';
-import {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoTableSourceOptions,
-  TypedSource
-} from './common';
+import {CartoSourceOptions, CartoTableSourceOptions, TypedSource} from './common';
 
-export type CartoVectorTableSourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
-  CartoTableSourceOptions;
-
-type UrlParameters = {
-  columns?: string;
-  geo_column?: string;
-  name: string;
-};
+export type CartoVectorTableSourceOptions = CartoSourceOptions & CartoTableSourceOptions;
+type UrlParameters = {columns?: string; geo_column?: string; name: string};
 
 const CartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async function (
   options: CartoVectorTableSourceOptions

@@ -8,12 +8,14 @@ export type CartoSourceRequiredOptions = {
 
 export type CartoSourceOptionalOptions = {
   apiBaseUrl: string;
-  clientId: string; // Default 'deck-gl-carto'
+  clientId: string;
   format: Format;
   formatTiles: TileFormat;
   headers: Record<string, string>;
-  mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
+  mapsUrl?: string;
 };
+
+export type CartoSourceOptions = CartoSourceRequiredOptions & Partial<CartoSourceOptionalOptions>;
 
 export type CartoAggregationOptions = {
   aggregationExp?: string;

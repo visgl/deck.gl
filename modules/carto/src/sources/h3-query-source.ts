@@ -2,16 +2,13 @@ import {CartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
   CartoQuerySourceOptions,
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
+  CartoSourceOptions,
   TilejsonSource
 } from './common';
 
-export type CartoH3QuerySourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
+export type CartoH3QuerySourceOptions = CartoSourceOptions &
   CartoQuerySourceOptions &
   CartoAggregationOptions;
-
 type UrlParameters = {
   aggregationExp?: string;
   aggregationResLevel?: string;

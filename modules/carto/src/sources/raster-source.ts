@@ -1,18 +1,8 @@
 import {CartoBaseSource} from './base-source';
-import {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoTableSourceOptions,
-  TypedSource
-} from './common';
+import {CartoSourceOptions, CartoTableSourceOptions, TypedSource} from './common';
 
-export type CartoRasterSourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
-  CartoTableSourceOptions;
-
-type UrlParameters = {
-  name: string;
-};
+export type CartoRasterSourceOptions = CartoSourceOptions & CartoTableSourceOptions;
+type UrlParameters = {name: string};
 
 const CartoRasterSource: TypedSource<CartoRasterSourceOptions> = async function (
   options: CartoRasterSourceOptions

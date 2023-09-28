@@ -1,9 +1,5 @@
 export {SOURCE_DEFAULTS} from './common';
-export type {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoTilejsonResult
-} from './common';
+export type {CartoTilejsonResult, GeojsonResult, JsonResult} from './common';
 
 export {CartoH3QuerySource} from './h3-query-source';
 export type {CartoH3QuerySourceOptions} from './h3-query-source';

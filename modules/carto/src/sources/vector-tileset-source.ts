@@ -1,18 +1,8 @@
 import {CartoBaseSource} from './base-source';
-import {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoTilesetSourceOptions,
-  TilejsonSource
-} from './common';
+import {CartoSourceOptions, CartoTilesetSourceOptions, TilejsonSource} from './common';
 
-export type CartoVectorTilesetSourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
-  CartoTilesetSourceOptions;
-
-type UrlParameters = {
-  name: string;
-};
+export type CartoVectorTilesetSourceOptions = CartoSourceOptions & CartoTilesetSourceOptions;
+type UrlParameters = {name: string};
 
 const CartoVectorTilesetSource: TilejsonSource<CartoVectorTilesetSourceOptions> = async function (
   options: CartoVectorTilesetSourceOptions

@@ -1,20 +1,8 @@
 import {CartoBaseSource} from './base-source';
-import {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoQuerySourceOptions,
-  TypedSource
-} from './common';
+import {CartoSourceOptions, CartoQuerySourceOptions, TypedSource} from './common';
 
-export type CartoVectorQuerySourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
-  CartoQuerySourceOptions;
-
-type UrlParameters = {
-  geo_column?: string;
-  q: string;
-  queryParameters?: string;
-};
+export type CartoVectorQuerySourceOptions = CartoSourceOptions & CartoQuerySourceOptions;
+type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
 
 const CartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async function (
   options: CartoVectorQuerySourceOptions

@@ -47,5 +47,7 @@ export type {
   CartoQuadbinTilesetSourceOptions,
   CartoVectorQuerySourceOptions,
   CartoVectorTableSourceOptions,
-  CartoVectorTilesetSourceOptions
+  CartoVectorTilesetSourceOptions,
+  GeojsonResult,
+  JsonResult
 } from './sources';

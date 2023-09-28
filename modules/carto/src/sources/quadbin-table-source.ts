@@ -1,14 +1,12 @@
 import {CartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
+  CartoSourceOptions,
   CartoTableSourceOptions,
   TilejsonSource
 } from './common';
 
-export type CartoQuadbinTableSourceOptions = CartoSourceRequiredOptions &
-  Partial<CartoSourceOptionalOptions> &
+export type CartoQuadbinTableSourceOptions = CartoSourceOptions &
   CartoTableSourceOptions &
   CartoAggregationOptions;
 
