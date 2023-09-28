@@ -5,7 +5,7 @@ import {
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
   CartoTableSourceOptions,
-  CartoTilejsonResult
+  TilejsonSource
 } from './common';
 
 export type CartoQuadbinTableSourceOptions = CartoSourceRequiredOptions &
@@ -21,9 +21,9 @@ type UrlParameters = {
   aggregationResLevel?: string;
 };
 
-export async function CartoQuadbinTableSource(
+const CartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
   options: CartoQuadbinTableSourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {
     aggregationExp = '1 AS value',
     aggregationResLevel = 6,
@@ -46,4 +46,6 @@ export async function CartoQuadbinTableSource(
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   return CartoBaseSource<UrlParameters>(MAP_TYPES.TABLE, options, urlParameters);
-}
+};
+
+export {CartoQuadbinTableSource};

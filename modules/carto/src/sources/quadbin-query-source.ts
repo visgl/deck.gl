@@ -5,7 +5,7 @@ import {
   CartoQuerySourceOptions,
   CartoSourceOptionalOptions,
   CartoSourceRequiredOptions,
-  CartoTilejsonResult
+  TilejsonSource
 } from './common';
 
 export type CartoQuadbinQuerySourceOptions = CartoSourceRequiredOptions &
@@ -21,9 +21,9 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-export async function CartoQuadbinQuerySource(
+const CartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = async function (
   options: CartoQuadbinQuerySourceOptions
-): Promise<CartoTilejsonResult> {
+): Promise<any> {
   const {
     aggregationExp = '1 AS value',
     aggregationResLevel = 6,
@@ -46,4 +46,6 @@ export async function CartoQuadbinQuerySource(
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
   return CartoBaseSource<UrlParameters>(MAP_TYPES.QUERY, options, urlParameters);
-}
+};
+
+export {CartoQuadbinQuerySource};
