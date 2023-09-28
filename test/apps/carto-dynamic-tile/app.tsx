@@ -152,7 +152,7 @@ async function fetchLayerData() {
     tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
     format: 'geojson'
   });
-  console.log(data.tiles); // <- Typescript error
+  // console.log(data.tiles); // <- Typescript error
   console.log(data.features); // <- type: GeoJSON
   console.log(data);
 }

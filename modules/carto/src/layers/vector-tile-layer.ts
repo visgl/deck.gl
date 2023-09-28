@@ -17,7 +17,7 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
-import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;

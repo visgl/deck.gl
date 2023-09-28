@@ -2,7 +2,7 @@ import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} fr
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 export const renderSubLayers = props => {

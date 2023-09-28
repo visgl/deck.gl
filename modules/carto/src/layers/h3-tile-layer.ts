@@ -1,14 +1,8 @@
-import {
-  CompositeLayer,
-  CompositeLayerProps,
-  Layer,
-  LayersList,
-  DefaultProps
-} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 const renderSubLayers = (props: H3HexagonLayerProps) => {
