@@ -37,6 +37,11 @@ One should note that this module is *not required* to use mapbox-gl as a base ma
 
 It may be easier to understand the concepts of the module if you are already a mapbox-gl developer.
 
+### Using mapbox-gl controls with deck.gl
+
+The Mapbox ecosystem offers many well-designed controls, from the basic functionalities of `NavigationControl`, `Popup` and `GeolocateControl`, to vendor-service-bound UI implementations such as `mapbox-gl-geocoder` and `mapbox-gl-directions`. These libraries require that the Mapbox Map holds the source of truth of the camera state, instead of the normal [state management](../../developer-guide/interactivity.md) by `Deck`. When you use the `MapboxLayer` or `MapboxOverlay` classes from this module, deck.gl plays nice with all the mapbox-gl peripherals.
+
+
 ### Mixing deck.gl layers and Mapbox layers
 
 One major use case for interleaving deck.gl and Mapbox is that some important information in the Mapbox map could be hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
@@ -50,11 +55,6 @@ Mapbox provides an example of [finding the first label layer](https://www.mapbox
 
 
 In some cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a Mapbox basemap, while seamlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and Mapbox layer catalogs. In this case, a `beforeId` is not needed.
-
-
-### Using mapbox-gl controls with deck.gl
-
-The Mapbox ecosystem offers many well-designed controls, from the basic functionalities of `NavigationControl`, `Popup` and `GeolocateControl`, to vendor-service-bound UI implementations such as `mapbox-gl-geocoder` and `mapbox-gl-directions`. These libraries require that the Mapbox Map holds the source of truth of the camera state, instead of the normal [state management](../../developer-guide/interactivity.md) by `Deck`. When you use the `MapboxLayer` or `MapboxOverlay` classes from this module, deck.gl plays nice with all the mapbox-gl peripherals.
 
 
 ## Limitations
