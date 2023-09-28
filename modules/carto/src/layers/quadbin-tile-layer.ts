@@ -4,6 +4,7 @@ import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
 import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {injectAccessToken} from './utils';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -37,18 +38,10 @@ export default class QuadbinTileLayer<
   static defaultProps = defaultProps;
 
   getLoadOptions(): any {
-    // Insert access token if not specified
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as CartoTilejsonResult;
-    const {accessToken} = tileJSON;
-    if (!loadOptions?.fetch?.headers?.Authorization) {
-      loadOptions.fetch = {
-        ...loadOptions.fetch,
-        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
-      };
-    }
+    injectAccessToken(loadOptions, tileJSON.accessToken)
     loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
-
     return loadOptions;
   }
 

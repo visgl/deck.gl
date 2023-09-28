@@ -18,6 +18,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
 import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {injectAccessToken} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
@@ -68,19 +69,10 @@ export default class CartoVectorLayer<ExtraProps extends {} = {}> extends MVTLay
   }
 
   getLoadOptions(): any {
-    // Insert access token if not specified
     const loadOptions = super.getLoadOptions() || {};
-    // @ts-ignore
-    const {accessToken} = this.props.data;
-    if (!loadOptions?.fetch?.headers?.Authorization) {
-      loadOptions.fetch = {
-        ...loadOptions.fetch,
-        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
-      };
-    }
-
-    // Use binary for MVT loading
-    loadOptions.gis = {format: 'binary'};
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    injectAccessToken(loadOptions, tileJSON.accessToken);
+    loadOptions.gis = {format: 'binary'}; // Use binary for MVT loading
     return loadOptions;
   }
 

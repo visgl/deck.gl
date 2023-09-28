@@ -3,6 +3,7 @@ import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {TilejsonPropType, type CartoTilejsonResult} from '../sources/common';
+import {injectAccessToken} from './utils';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -44,17 +45,9 @@ export default class RasterTileLayer<
   }
 
   getLoadOptions(): any {
-    // Insert access token if not specified
     const loadOptions = super.getLoadOptions() || {};
     const tileJSON = this.props.data as CartoTilejsonResult;
-    const {accessToken} = tileJSON;
-    if (!loadOptions?.fetch?.headers?.Authorization) {
-      loadOptions.fetch = {
-        ...loadOptions.fetch,
-        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
-      };
-    }
-
+    injectAccessToken(loadOptions, tileJSON.accessToken);
     return loadOptions;
   }
 
