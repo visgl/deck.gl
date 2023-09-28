@@ -83,13 +83,13 @@ The goal is to have descriptive names for classes and options, even if this mean
 | `CartoVectorTableSource`    | `CartoTableSourceOptions`                             | `VectorTileLayer`       |
 | `CartoVectorTilesetSource`  | `CartoTilesetSourceOptions`                           | `VectorTileLayer`       |
 | `CartoVectorQuerySource`    | `CartoQuerySourceOptions`                             | `VectorTileLayer`       |
-| `CartoH3TableSource`        | `CartoTableSourceOptions & CartoAggregationOptions`   | `CartoH3TileLayer`      |
-| `CartoH3QuerySource`        | `CartoTilesetSourceOptions & CartoAggregationOptions` | `CartoH3TileLayer`      |
-| `CartoH3TilesetSource`      | `CartoQuerySourceOptions`                             | `CartoH3TileLayer`      |
-| `CartoQuadbinTableSource`   | `CartoTableSourceOptions & CartoAggregationOptions`   | `CartoQuadbinTileLayer` |
-| `CartoQuadbinQuerySource`   | `CartoTilesetSourceOptions & CartoAggregationOptions` | `CartoQuadbinTileLayer` |
-| `CartoQuadbinTilesetSource` | `CartoQuerySourceOptions`                             | `CartoQuadbinTileLayer` |
-| `CartoRasterSource`         | `CartoTilesetSourceOptions`                           | `CartoRasterTileLayer`  |
+| `CartoH3TableSource`        | `CartoTableSourceOptions & CartoAggregationOptions`   | `H3TileLayer`           |
+| `CartoH3QuerySource`        | `CartoTilesetSourceOptions & CartoAggregationOptions` | `H3TileLayer`           |
+| `CartoH3TilesetSource`      | `CartoQuerySourceOptions`                             | `H3TileLayer`           |
+| `CartoQuadbinTableSource`   | `CartoTableSourceOptions & CartoAggregationOptions`   | `QuadbinTileLayer`      |
+| `CartoQuadbinQuerySource`   | `CartoTilesetSourceOptions & CartoAggregationOptions` | `QuadbinTileLayer`      |
+| `CartoQuadbinTilesetSource` | `CartoQuerySourceOptions`                             | `QuadbinTileLayer`      |
+| `CartoRasterSource`         | `CartoTilesetSourceOptions`                           | `RasterTileLayer`       |
 
 ### Options
 
