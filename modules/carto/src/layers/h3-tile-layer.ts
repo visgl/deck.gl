@@ -71,6 +71,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const tileJSON = this.props.data as CartoTilejsonResult;
     if (!tileJSON) return null;
 
+    const {tiles: data} = tileJSON;
     let {minresolution, maxresolution} = tileJSON;
     // Convert Mercator zooms provided in props into H3 res levels
     // and clip into valid range provided from the tilejson
@@ -93,7 +94,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `h3-tile-layer-${this.props.id}`,
-        data: tileJSON.tiles,
+        data,
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: H3Tileset2D as any,
         renderSubLayers,

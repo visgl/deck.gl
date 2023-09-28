@@ -56,12 +56,12 @@ export default class QuadbinTileLayer<
     const tileJSON = this.props.data as CartoTilejsonResult;
     if (!tileJSON) return null;
 
-    const maxZoom = tileJSON.maxresolution;
+    const {tiles: data, maxresolution: maxZoom} = tileJSON;
     return [
       // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `quadbin-tile-layer-${this.props.id}`,
-        data: tileJSON.tiles,
+        data,
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
