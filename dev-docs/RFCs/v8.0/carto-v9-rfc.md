@@ -51,15 +51,14 @@ At a high level we want to achieve an API which makes it clearer to the user wha
 To do so, the interaction with the CARTO API will be done via a set of typed helper classes which aid the user in obtaining the TileJSON needed for a particular layer.
 
 ```javascript
-import {CartoVectorTableSource, CartoVectorLayer, SOURCE_DEFAULTS} from '@deck.gl/carto';
+import {CartoVectorTableSource, VectorTileLayer} from '@deck.gl/carto';
 
 const globalOptions = {
   accessToken: 'XXX',
   connectionName: 'my-connection',
-  ...SOURCE_DEFAULTS //
 }
 
-// All properties in one place
+// All options in one place
 const options = {
   tableName: 'carto.example.table',
   columns: ['column1', 'column2']
@@ -68,7 +67,7 @@ const options = {
 // Returns a Promise which resolves to TileJSON payload. Can optionally await if needed
 const data = CartoVectorTableSource({...globalOptions, ...options});
 
-const layer = new CartoVectorLayer({
+const layer = new VectorTileLayer({
   data,
 
   // ...style props
@@ -81,9 +80,9 @@ The goal is to have descriptive names for classes and options, even if this mean
 
 | Source class                | Options type                                          | Layer                   |
 | --------------------------- | ----------------------------------------------------- | ----------------------- |
-| `CartoVectorTableSource`    | `CartoTableSourceOptions`                             | `CartoVectorLayer`      |
-| `CartoVectorTilesetSource`  | `CartoTilesetSourceOptions`                           | `CartoVectorLayer`      |
-| `CartoVectorQuerySource`    | `CartoQuerySourceOptions`                             | `CartoVectorLayer` |
+| `CartoVectorTableSource`    | `CartoTableSourceOptions`                             | `VectorTileLayer`       |
+| `CartoVectorTilesetSource`  | `CartoTilesetSourceOptions`                           | `VectorTileLayer`       |
+| `CartoVectorQuerySource`    | `CartoQuerySourceOptions`                             | `VectorTileLayer`       |
 | `CartoH3TableSource`        | `CartoTableSourceOptions & CartoAggregationOptions`   | `CartoH3TileLayer`      |
 | `CartoH3QuerySource`        | `CartoTilesetSourceOptions & CartoAggregationOptions` | `CartoH3TileLayer`      |
 | `CartoH3TilesetSource`      | `CartoQuerySourceOptions`                             | `CartoH3TileLayer`      |
@@ -180,7 +179,7 @@ const AuthenticatedVectorTableSource = withDefaults<typeof CartoVectorTableSourc
 ); // All other default values automatically added
 
 // Use in app (with full type checking of options)
-const layer = new CartoVectorLayer({
+const layer = new VectorTileLayer({
   data: AuthenticatedVectorTableSource({tableName: 'my-table'})
   ...
 });
@@ -192,9 +191,9 @@ All of the Sources above require an `accessToken` parameter which will be use wh
 
 ### MVT vs binary data format
 
-Due to differences in data warehouses, when rendering vector data using the `CartoVectorLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
+Due to differences in data warehouses, when rendering vector data using the `VectorTileLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
 
-The two layers are very similar (`CartoTileLayer` being an extension of `MVTLayer`) and thus in v9 `CartoVectorLayer` will be enhanced to support MVT data so that it can be used with all data warehouses. `CartoTableSource`, `CartoTilesetSource` & `CartoQuerySource` will similarly be written such that they can parse both formats.
+The two layers are very similar (`CartoTileLayer` being an extension of `MVTLayer`) and thus in v9 `VectorTileLayer` will be enhanced to support MVT data so that it can be used with all data warehouses. `CartoTableSource`, `CartoTilesetSource` & `CartoQuerySource` will similarly be written such that they can parse both formats.
 
 ### React considerations
 
@@ -206,7 +205,7 @@ function MyComponent(tableName) {
     return AuthenticatedVectorTableSource({tableName});
   }, [tableName]);
 
-  return new CartoVectorLayer({
+  return new VectorTileLayer({
     data
     ...
   });
