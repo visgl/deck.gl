@@ -145,6 +145,32 @@ type CartoAggregationOptions = {
 };
 ```
 
+
+### Return types
+
+Each of the above `XXXSource` classes returns a `CartoTilejsonResult` (wrapped in a `Promise`) which is the TileJSON payload from the API, enhanced with the access token passed to the source. This can then be passed to the relevant Layer class for visualization.
+
+#### fetchLayerData
+
+The old API has a method `fetchLayerData` which performed a similar function to the `XXXSource` function. In v9 this function is removed and instead the `XXXSource` functions support a `format` option.
+
+```javascript
+const data = await CartoVectorTableSource({
+  ...globalOptions,
+  tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+  format: 'geojson'
+});
+
+console.log(data.features); // <-- data is typed as a GeoJSON object
+```
+
+All of the sources are typed using [Function Overloads](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads) so that depending on the value passed in the `format` option, the return value of the `XXXSource` will be correct. In addition, sources which do not support a given format will report an error:
+
+```javascript
+
+```
+
+
 ## Implementation details
 
 ### Authorization
