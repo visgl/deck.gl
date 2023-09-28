@@ -2,6 +2,7 @@ import {
   CartoH3TilesetSource,
   CartoH3TableSource,
   CartoH3QuerySource,
+  CartoRasterSource,
   CartoQuadbinTableSource,
   CartoQuadbinTilesetSource,
   CartoQuadbinQuerySource,
@@ -72,6 +73,15 @@ export default {
       attr: 'avg_retail',
       domain: [1, 2, 3, 5, 8, 11],
       colors: 'Earth'
+    })
+  },
+  raster: {
+    Source: CartoRasterSource,
+    tableName: 'cartodb-data-engineering-team.jarroyo_raster.sdsc23_5_quadbin',
+    getFillColor: colorBins({
+      attr: 'band_1',
+      domain: [0, 5, 10, 15, 20, 25, 30],
+      colors: 'Temps'
     })
   },
   'vector-query': {

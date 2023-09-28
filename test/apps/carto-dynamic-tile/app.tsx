@@ -9,9 +9,11 @@ import {
   CartoVectorLayer,
   CartoVectorTableSource,
   H3TileLayer,
+  RasterTileLayer,
   QuadbinTileLayer,
 } from '@deck.gl/carto';
 import datasets from './datasets';
+import {Layer} from '@deck.gl/core';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
@@ -26,10 +28,12 @@ const globalOptions = {accessToken, apiBaseUrl, connectionName}; // apiBaseUrl n
 function Root() {
   const [dataset, setDataset] = useState(Object.keys(datasets)[0]);
   const datasource = datasets[dataset];
-  let layers;
+  let layers: Layer[] = [];
 
   if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
+  } else if (dataset.includes('raster')) {
+    layers = [useRasterLayer(datasource)];
   } else if (dataset.includes('quadbin')) {
     layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
@@ -77,6 +81,23 @@ function useH3Layer(datasource) {
     getFillColor
   });
 }
+
+function useRasterLayer(datasource) {
+  const {getFillColor, Source, tableName} = datasource;
+  // useMemo to avoid a map instantiation on every re-render
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
+    return Source({...globalOptions, tableName});
+  }, [Source, null, null, null, null, tableName]);
+
+  return new RasterTileLayer({
+    id: 'carto',
+    data: tilejson, // TODO how to correctly specify data type?
+    pickable: true,
+    getFillColor
+  });
+}
+
+
 function useQuadbinLayer(datasource) {
   const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
@@ -92,14 +113,6 @@ function useQuadbinLayer(datasource) {
     getFillColor
   });
 }
-
-async function fetchLayerData() {
-  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'});
-  console.log(data.tiles); // <- Typescript error
-  console.log(data.features); // <- type: GeoJSON
-  console.log(data)
-}
-fetchLayerData();
 
 function useVectorLayer(datasource) {
   const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
@@ -117,6 +130,15 @@ function useVectorLayer(datasource) {
     getFillColor
   });
 }
+
+async function fetchLayerData() {
+  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample', format: 'geojson'});
+  console.log(data.tiles); // <- Typescript error
+  console.log(data.features); // <- type: GeoJSON
+  console.log(data)
+}
+fetchLayerData();
+
 
 function ObjectSelect({title, obj, value, onSelect}) {
   const keys = Object.values(obj).sort() as string[];

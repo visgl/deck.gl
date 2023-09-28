@@ -14,6 +14,9 @@ export type {CartoH3TableSourceOptions} from './h3-table-source';
 export {CartoH3TilesetSource} from './h3-tileset-source';
 export type {CartoH3TilesetSourceOptions} from './h3-tileset-source';
 
+export {CartoRasterSource} from './raster-source';
+export type {CartoRasterSourceOptions} from './raster-source';
+
 export {CartoQuadbinQuerySource} from './quadbin-query-source';
 export type {CartoQuadbinQuerySourceOptions} from './quadbin-query-source';
 

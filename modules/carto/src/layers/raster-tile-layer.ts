@@ -44,6 +44,21 @@ export default class RasterTileLayer<
     }
   }
 
+  getLoadOptions(): any {
+    // Insert access token if not specified
+    const loadOptions = super.getLoadOptions() || {};
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    const {accessToken} = tileJSON;
+    if (!loadOptions?.fetch?.headers?.Authorization) {
+      loadOptions.fetch = {
+        ...loadOptions.fetch,
+        headers: {...loadOptions.fetch?.headers, Authorization: `Bearer ${accessToken}`}
+      };
+    }
+
+    return loadOptions;
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {data, tileJSON} = this.state;
     const minZoom = parseInt(tileJSON?.minzoom);
@@ -56,7 +71,8 @@ export default class RasterTileLayer<
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
         minZoom,
-        maxZoom
+        maxZoom,
+        loadOptions: this.getLoadOptions()
       })
     ];
   }
