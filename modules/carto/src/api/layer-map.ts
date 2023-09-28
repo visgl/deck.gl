@@ -18,10 +18,10 @@ import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-lay
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
-import CartoVectorLayer from '../layers/carto-vector-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
+import VectorTileLayer from '../layers/vector-tile-layer';
 import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
 import {assert, createBinaryProxy} from '../utils';
 import {
@@ -204,7 +204,7 @@ export function layerFromTileDataset(
   formatTiles: TileFormat | null = TILE_FORMATS.MVT,
   scheme: string,
   type?: MapType
-): typeof CartoVectorLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
+): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
@@ -215,7 +215,7 @@ export function layerFromTileDataset(
     return QuadbinTileLayer;
   }
 
-  return CartoVectorLayer;
+  return VectorTileLayer;
 }
 
 function getTileLayer(dataset: MapDataset, basePropMap) {

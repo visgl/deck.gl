@@ -1,6 +1,6 @@
 export {getDefaultCredentials, setDefaultCredentials} from './config';
-export {default as CartoLayer} from './layers/carto-layer';
-export {default as CartoVectorLayer} from './layers/carto-vector-layer';
+export {default as CartoLayer} from './layers/carto-layer'; // <-- REMOVE in v9
+export {default as VectorTileLayer} from './layers/vector-tile-layer';
 export {default as H3TileLayer} from './layers/h3-tile-layer';
 export {default as _PointLabelLayer} from './layers/point-label-layer';
 export {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';

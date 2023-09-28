@@ -6,11 +6,11 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
   CartoTilejsonResult,
-  CartoVectorLayer,
   CartoVectorTableSource,
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
+  VectorTileLayer
 } from '@deck.gl/carto';
 import datasets from './datasets';
 import {Layer} from '@deck.gl/core';
@@ -38,7 +38,7 @@ function Root() {
     layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
     layers = [useVectorLayer(datasource)];
-  } 
+  }
 
   return (
     <>
@@ -67,10 +67,18 @@ function Root() {
 }
 
 function useH3Layer(datasource) {
-  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} =
+    datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
+    return Source({
+      ...globalOptions,
+      aggregationExp,
+      columns,
+      spatialDataColumn,
+      sqlQuery,
+      tableName
+    });
   }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new H3TileLayer({
@@ -97,12 +105,19 @@ function useRasterLayer(datasource) {
   });
 }
 
-
 function useQuadbinLayer(datasource) {
-  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
+  const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} =
+    datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return Source({...globalOptions, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName});
+    return Source({
+      ...globalOptions,
+      aggregationExp,
+      columns,
+      spatialDataColumn,
+      sqlQuery,
+      tableName
+    });
   }, [Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
 
   return new QuadbinTileLayer({
@@ -121,7 +136,7 @@ function useVectorLayer(datasource) {
     return Source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
   }, [Source, null, columns, spatialDataColumn, sqlQuery, tableName]);
 
-  return new CartoVectorLayer({
+  return new VectorTileLayer({
     id: 'carto',
     // @ts-ignore
     data: tilejson, // TODO how to correctly specify data type?
@@ -132,13 +147,16 @@ function useVectorLayer(datasource) {
 }
 
 async function fetchLayerData() {
-  const data = await CartoVectorTableSource({...globalOptions, tableName: 'carto-demo-data.demo_tables.chicago_crime_sample', format: 'geojson'});
+  const data = await CartoVectorTableSource({
+    ...globalOptions,
+    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+    format: 'geojson'
+  });
   console.log(data.tiles); // <- Typescript error
   console.log(data.features); // <- type: GeoJSON
-  console.log(data)
+  console.log(data);
 }
 fetchLayerData();
-
 
 function ObjectSelect({title, obj, value, onSelect}) {
   const keys = Object.values(obj).sort() as string[];

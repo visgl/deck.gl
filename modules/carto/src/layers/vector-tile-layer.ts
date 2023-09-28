@@ -22,17 +22,17 @@ import {injectAccessToken} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
-const defaultProps: DefaultProps<CartoVectorLayerProps> = {
+const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
   data: TilejsonPropType,
   formatTiles: defaultTileFormat
 };
 
-/** All properties supported by CartoVectorLayer. */
-export type CartoVectorLayerProps = _CartoVectorLayerProps & Omit<MVTLayerProps, 'data'>;
+/** All properties supported by VectorTileLayer. */
+export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, 'data'>;
 
-/** Properties added by CartoVectorLayer. */
-type _CartoVectorLayerProps = {
+/** Properties added by VectorTileLayer. */
+type _VectorTileLayerProps = {
   data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
   /** Use to override the default tile data format.
    *
@@ -45,10 +45,10 @@ type _CartoVectorLayerProps = {
 
 // TODO Perhaps we can't subclass MVTLayer and keep types. Better to subclass TileLayer instead?
 // @ts-ignore
-export default class CartoVectorLayer<ExtraProps extends {} = {}> extends MVTLayer<
-  Required<_CartoVectorLayerProps> & ExtraProps
+export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
+  Required<_VectorTileLayerProps> & ExtraProps
 > {
-  static layerName = 'CartoVectorLayer';
+  static layerName = 'VectorTileLayer';
   static defaultProps = defaultProps;
 
   initializeState(): void {
