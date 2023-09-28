@@ -93,28 +93,38 @@ The goal is to have descriptive names for classes and options, even if this mean
 
 ### Options
 
-Each of the `XXXSource` classes takes an options object as a constructor parameter, all inheriting from the common `CartoSourceOptions` base type.
+Each of the `XXXSource` classes takes an options object as a constructor parameter, all inheriting from the common `CartoSourceOptions` base type and other options types to enforce the passing of the correct parameters to the API.
 
 ```javascript
-type CartoSourceOptions = {
-  apiBaseUrl?: 'string', // Default 'https://gcp-us-east1.api.carto.com' or global apiBaseUrl
-  accessToken?: 'string', // Default to global access token
-  connectionName: string,
-  clientId?: string, // Default 'deck-gl-carto'
-  formatTiles?: TileFormat,
-  headers?: Headers,
-  mapsUrl?: string; // Default `${apiBaseUrl}/v3/maps`
+export type CartoSourceOptions = {
+  accessToken: string;
+  apiBaseUrl?: string;
+  clientId?: string;
+  connectionName: string;
+  format?: Format;
+  formatTiles?: TileFormat;
+  headers?: Record<string, string>;
+  mapsUrl?: string;
 };
+```
 
+#### CartoQuerySourceOptions
+
+```javascript
+export type CartoQuerySourceOptions = {
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters?: QueryParameters;
+};
 ```
 
 #### CartoTableSourceOptions
 
 ```javascript
-type CartoTableSourceOptions = CartoSourceOptions & {
-  columns?: string[],
-  spatialDataColumn?: string,
-  tableName: string
+export type CartoTableSourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
 };
 ```
 
@@ -123,16 +133,6 @@ type CartoTableSourceOptions = CartoSourceOptions & {
 ```javascript
 type CartoTilesetSourceOptions = CartoSourceOptions & {
   tableName: string
-};
-```
-
-#### CartoQuerySourceOptions
-
-```javascript
-type CartoQuerySourceOptions = CartoSourceOptions & {
-  spatialDataColumn?: string,
-  sqlQuery: string,
-  queryParameters?: QueryParameters
 };
 ```
 
