@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {CartoBaseSource} from './base-source';
 import {CartoSourceOptions, CartoTableSourceOptions, TypedSource} from './common';
 

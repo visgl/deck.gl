@@ -3,7 +3,6 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';

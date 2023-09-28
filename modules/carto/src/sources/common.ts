@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import type {Feature} from 'geojson';
 import {Format, MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
 

@@ -112,9 +112,9 @@ async function requestData({
 }: RequestParams & {
   format: Format;
 }): Promise<Response | unknown> {
-  if (format === FORMATS.NDJSON) {
-    return request({method, url, accessToken, body, errorContext});
-  }
+  // if (format === FORMATS.NDJSON) {
+  //   return request({method, url, accessToken, body, errorContext});
+  // }
 
   const data = await requestJson<any>({method, url, accessToken, body, errorContext});
   return data.rows ? data.rows : data;
@@ -393,7 +393,7 @@ async function _fetchDataUrl({
     assert(url, `Format ${format} not available`);
   } else {
     // guess map format
-    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.NDJSON, FORMATS.TILEJSON];
+    const prioritizedFormats = [FORMATS.GEOJSON, FORMATS.JSON, FORMATS.TILEJSON];
     for (const f of prioritizedFormats) {
       url = getUrlFromMetadata(metadata, f);
       if (url) {

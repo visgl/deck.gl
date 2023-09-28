@@ -45,11 +45,11 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
       errorContext
     });
     return {...tilejson, accessToken};
-  } else {
-    return await requestWithParameters<GeojsonResult>({
-      baseUrl: dataUrl,
-      headers,
-      errorContext
-    });
   }
+
+  return await requestWithParameters<GeojsonResult | JsonResult>({
+    baseUrl: dataUrl,
+    headers,
+    errorContext
+  });
 }

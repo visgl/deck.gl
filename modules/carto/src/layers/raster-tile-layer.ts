@@ -28,21 +28,7 @@ export default class RasterTileLayer<
   ExtraProps extends {} = {}
 > extends CompositeLayer<ExtraProps & Required<_RasterTileLayerProps<DataT>>> {
   static layerName = 'RasterTileLayer';
-  static defaultProps = {};
-
-  state!: {tileJSON: any; data: any};
-  initializeState(): void {
-    this.setState({data: null, tileJSON: null});
-  }
-
-  updateState({changeFlags}: UpdateParameters<this>): void {
-    if (changeFlags.dataChanged) {
-      let {data} = this.props;
-      const tileJSON = data;
-      data = (tileJSON as any).tiles;
-      this.setState({data, tileJSON});
-    }
-  }
+  static defaultProps = defaultProps;
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
