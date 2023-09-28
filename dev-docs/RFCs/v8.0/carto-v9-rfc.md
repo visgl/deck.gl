@@ -167,9 +167,12 @@ console.log(data.features); // <-- data is typed as a GeoJSON object
 All of the sources are typed using [Function Overloads](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads) so that depending on the value passed in the `format` option, the return value of the `XXXSource` will be correct. In addition, sources which do not support a given format will report an error:
 
 ```javascript
-
+const data = await CartoRasterSource({
+  ...globalOptions,
+  tableName: 'carto-demo-data.raster.table',
+  format: 'geojson' // <-- Error as 'geojson' not a valid format for this source
+});
 ```
-
 
 ## Implementation details
 
@@ -189,37 +192,29 @@ new CartoLayer({
 
 The [options](https://github.com/visgl/deck.gl/blob/master/modules/carto/src/config.ts#L22-L25) used in the `credentials` Object are only needed for the Map Instantiation and the `XXXTileLayer`s do not need to know about them (all the context is already in the `tiles` URL). The exception is the access token, which must be present on the tile requests.
 
-In the v9 API the `setDefaultCredentials` method is removed completely to avoid storing global state. Instead the `accessToken` must be passed to each Source manually, it is then up to the develop if they choose to build an abstraction, e.g. using the `withDefaults` helper.
+In the v9 API the `setDefaultCredentials` method is removed completely to avoid storing global state. Instead the CARTO Layers all support extracting the access token from the `CartoTilejsonResult` and automatically including it in the `loadOptions`.
 
-### withDefaults helper function
+### Defaults
 
-A common use case is that a developer wants to use a single connection, access token, api base URL etc in their app, along with the defaults defined in `SOURCE_DEFAULTS`. In order to simplify this, a wrapper function - `withDefaults` - is provided to enable the following pattern:
+As detailed above, all of the `XXXSource` functions expect options from the `CartoSourceOptions` to be present. The properties in this type that are marked as optional will be automatically filled in by the source and only need to be provided when they differ from the defaults.
 
 
 ```javascript
 // Define in utility file
 const defaults = {accessToken, apiBaseUrl, connectionName};
-const AuthenticatedVectorTableSource = withDefaults<typeof CartoVectorTableSource>(
-  CartoVectorTableSource,
-  defaults
-); // All other default values automatically added
-
-// Use in app (with full type checking of options)
-const layer = new VectorTileLayer({
-  data: AuthenticatedVectorTableSource({tableName: 'my-table'})
-  ...
+const tilejson = await CartoVectorTableSource({
+  accessToken: 'XXX',
+  apiBaseUrl: 'https://custom.domain.com', // <-- override default
+  connectionName: 'my-connection',
+  tableName: 'carto.my.table'
 });
 ```
 
-### Automatic layer authentication
-
-All of the Sources above require an `accessToken` parameter which will be use when fetching the TileJSON payload. Once the TileJSON is fetched, the access token will be added to the payload so the CartoXXXLayers can automatically read it, and append it to the `loadOptions`.
-
 ### MVT vs binary data format
 
-Due to differences in data warehouses, when rendering vector data using the `VectorTileLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
+Due to differences in data warehouses, when rendering vector data using the `CartoTileLayer` the format is MVT in some cases and CARTO's internal binary format in others. In v8 `CartoLayer` deals with this by instantiating either a `MVTLayer` or a `CartoTileLayer`.
 
-The two layers are very similar (`CartoTileLayer` being an extension of `MVTLayer`) and thus in v9 `VectorTileLayer` will be enhanced to support MVT data so that it can be used with all data warehouses. `CartoTableSource`, `CartoTilesetSource` & `CartoQuerySource` will similarly be written such that they can parse both formats.
+The two layers are very similar (`CartoTileLayer` being an extension of `MVTLayer`) and thus in v9 `CartoTileLayer` will be enhanced to support MVT data so that it can be used with all data warehouses. It will also be renamed to `VectorTileLayer` to be consistent with other Layers.
 
 ### React considerations
 
@@ -228,7 +223,7 @@ In React, the component will be re-rendered often and we want to avoid fetching 
 ```jsx
 function MyComponent(tableName) {
   const data = useMemo<CartoTilejsonResult>(() => {
-    return AuthenticatedVectorTableSource({tableName});
+    return CartoVectorTableSource({...globalOptions, tableName});
   }, [tableName]);
 
   return new VectorTileLayer({
