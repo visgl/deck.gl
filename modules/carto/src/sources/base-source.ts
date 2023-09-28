@@ -1,4 +1,4 @@
-import {encodeParameter, MapType, REQUEST_TYPES} from '../api/maps-api-common';
+import type {MapType} from '../api/maps-api-common';
 import {APIErrorContext} from '../api/carto-api-error';
 import {
   CartoSourceOptionalOptions,
@@ -23,7 +23,7 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
   const errorContext: APIErrorContext = {
-    requestType: REQUEST_TYPES.INSTANTIATION,
+    requestType: 'Map instantiation',
     connection: options.connectionName,
     type: endpoint,
     source: JSON.stringify(urlParameters, undefined, 2)
@@ -36,7 +36,7 @@ export async function CartoBaseSource<UrlParameters extends Record<string, strin
   });
 
   const dataUrl = mapInstantiation[format].url[0];
-  errorContext.requestType = REQUEST_TYPES.DATA;
+  errorContext.requestType = 'Map data';
 
   if (format === 'tilejson') {
     const tilejson = await requestWithParameters<Tilejson>({

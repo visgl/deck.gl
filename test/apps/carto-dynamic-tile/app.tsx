@@ -29,11 +29,11 @@ function Root() {
   let layers;
 
   if (dataset.includes('h3')) {
-    layers = [createH3Layer(datasource)];
+    layers = [useH3Layer(datasource)];
   } else if (dataset.includes('quadbin')) {
-    layers = [createQuadbinLayer(datasource)];
+    layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
-    layers = [createVectorLayer(datasource)];
+    layers = [useVectorLayer(datasource)];
   } 
 
   return (
@@ -62,7 +62,7 @@ function Root() {
   );
 }
 
-function createH3Layer(datasource) {
+function useH3Layer(datasource) {
   const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
@@ -77,7 +77,7 @@ function createH3Layer(datasource) {
     getFillColor
   });
 }
-function createQuadbinLayer(datasource) {
+function useQuadbinLayer(datasource) {
   const {getFillColor, Source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
@@ -101,7 +101,7 @@ async function fetchLayerData() {
 }
 fetchLayerData();
 
-function createVectorLayer(datasource) {
+function useVectorLayer(datasource) {
   const {getFillColor, Source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
   // useMemo to avoid a map instantiation on every re-render
   const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {

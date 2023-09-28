@@ -1,12 +1,6 @@
 import {APIErrorContext, CartoAPIError} from '../api/carto-api-error';
-import {encodeParameter, MapType, TileFormat} from '../api/maps-api-common';
-import {
-  CartoSourceOptionalOptions,
-  DEFAULT_HEADERS,
-  DEFAULT_PARAMETERS,
-  MAX_GET_LENGTH,
-  SOURCE_DEFAULTS
-} from './common';
+import {encodeParameter, MapType} from '../api/maps-api-common';
+import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
 import {buildMapsUrlFromBase} from '../config';
 
 export async function requestWithParameters<T = any>({
@@ -32,7 +26,7 @@ export async function requestWithParameters<T = any>({
   const headers = {...DEFAULT_HEADERS, ...customHeaders};
   try {
     /* global fetch */
-    let response;
+    let response: Response;
     if (url.length > MAX_GET_LENGTH) {
       response = await fetch(url, {method: 'POST', body: JSON.stringify(parameters), headers});
     } else {
