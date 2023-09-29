@@ -18,7 +18,7 @@ import {
   TILESTATS_RESPONSE,
   mockFetchMapsV3
 } from '../mock-fetch';
-import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
+// import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
   test(`getDataV2#v1#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {

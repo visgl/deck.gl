@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * Maps API Client for Carto 3
  */
