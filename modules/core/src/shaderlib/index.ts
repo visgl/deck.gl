@@ -18,14 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/api';
-import {ProgramManager} from '@luma.gl/webgl-legacy';
+import {Device} from '@luma.gl/core';
+import {ShaderAssembler} from '@luma.gl/shadertools';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
 import project from './project/project';
 import project32 from './project32/project32';
 import shadow from './shadow/shadow';
 import picking from './picking/picking';
+import {PipelineFactory} from '@luma.gl/engine';
 
 const DEFAULT_MODULES = [project];
 
@@ -36,16 +37,22 @@ const SHADER_HOOKS = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-export function getProgramManager(device: Device) {
-  const pipelineFactory = ProgramManager.getDefaultProgramManager(device);
+export function getShaderAssembler() {
+  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
-    pipelineFactory.addDefaultModule(shaderModule);
+    shaderAssembler.addDefaultModule(shaderModule);
   }
   for (const shaderHook of SHADER_HOOKS) {
-    pipelineFactory.addShaderHook(shaderHook);
+    shaderAssembler.addShaderHook(shaderHook);
   }
 
+  return shaderAssembler;
+}
+
+// TODO - is this really needed now that modules are registered on the ShaderAssembler
+export function getPipelineFactory(device: Device) {
+  const pipelineFactory = PipelineFactory.getDefaultPipelineFactory(device);
   return pipelineFactory;
 }
 

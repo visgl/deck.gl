@@ -1,5 +1,6 @@
-import type {Device} from '@luma.gl/api';
-import {GL, Framebuffer, Texture2D, withParameters} from '@luma.gl/webgl-legacy';
+import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import {withGLParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
@@ -8,7 +9,7 @@ type MaskPassRenderOptions = LayersPassRenderOptions & {
 };
 
 export default class MaskPass extends LayersPass {
-  maskMap: Texture2D;
+  maskMap: Texture;
   fbo: Framebuffer;
 
   constructor(device: Device, props: {id: string; mapSize?: number}) {
@@ -16,24 +17,23 @@ export default class MaskPass extends LayersPass {
 
     const {mapSize = 2048} = props;
 
-    this.maskMap = new Texture2D(device, {
+    this.maskMap = device.createTexture({
+      format: 'rgba8unorm',
       width: mapSize,
       height: mapSize,
-      parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+      sampler: {
+        minFilter: 'linear',
+        magFilter: 'linear',
+        addressModeU: 'clamp-to-edge',
+        addressModeV: 'clamp-to-edge'
       }
     });
 
-    this.fbo = new Framebuffer(device, {
+    this.fbo = device.createFramebuffer({
       id: 'maskmap',
       width: mapSize,
       height: mapSize,
-      attachments: {
-        [GL.COLOR_ATTACHMENT0]: this.maskMap
-      }
+      colorAttachments: [this.maskMap]
     });
   }
 
@@ -41,7 +41,7 @@ export default class MaskPass extends LayersPass {
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
 
-    return withParameters(
+    return withGLParameters(
       this.device,
       {
         clearColor: [255, 255, 255, 255],

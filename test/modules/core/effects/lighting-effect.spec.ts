@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {LightingEffect, getProgramManager} from '@deck.gl/core';
+import {LightingEffect, getShaderAssembler} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -54,8 +54,8 @@ test('LightingEffect#getModuleParameters', t => {
   );
   t.deepEqual(lightSources.pointLights[1].color, [255, 0, 0], 'point light color is ok');
 
-  t.equal(lightSources.ambientLight, null, 'Lighting effect getParameters is ok');
-  t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getParameters is ok');
+  t.equal(lightSources.ambientLight, null, 'Lighting effect getGLParameters is ok');
+  t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getGLParameters is ok');
 
   lightingEffect.cleanup();
   t.end();
@@ -114,7 +114,7 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
-  const pipelineFactory = getProgramManager(device);
+  const pipelineFactory = getShaderAssembler();
   lightingEffect.preRender(device, {
     layers: [],
     viewports: [testViewport],
@@ -122,13 +122,13 @@ test('LightingEffect#shadow module', t => {
     views: [],
     pixelRatio: 1
   });
-  // @ts-expect-error private
+  // ts-expect-error private
   let defaultModules = pipelineFactory._defaultModules;
   let hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
 
   lightingEffect.cleanup();
-  // @ts-expect-error private
+  // ts-expect-error private
   defaultModules = pipelineFactory._defaultModules;
   hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');

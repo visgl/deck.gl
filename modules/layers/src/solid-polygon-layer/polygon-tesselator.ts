@@ -65,7 +65,7 @@ export default class PolygonTesselator extends Tesselator<
       ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
-        vertexValid: {type: Uint8ClampedArray, size: 1},
+        vertexValid: {type: Uint16Array, size: 1},
         indices: {type: IndexType, size: 1}
       }
     });
@@ -233,7 +233,7 @@ export default class PolygonTesselator extends Tesselator<
     {vertexStart, geometrySize}: GeometryUpdateContext
   ) {
     const {positionSize} = this;
-    const vertexValid = this.attributes.vertexValid as TypedArray;
+    const vertexValid = this.attributes.vertexValid;
     const holeIndices = polygon && Polygon.getHoleIndices(polygon);
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,

@@ -20,8 +20,8 @@
 
 export default `\
 
-attribute vec2 vertexPositions;
-attribute float vertexValid;
+attribute vec2 positions;
+attribute float instanceVertexValid;
 
 uniform bool extruded;
 uniform bool isWireframe;
@@ -52,7 +52,7 @@ vec3 project_offset_normal(vec3 vector) {
 
 void calculatePosition(PolygonProps props) {
 #ifdef IS_SIDE_VERTEX
-  if(vertexValid < 0.5){
+  if(instanceVertexValid < 0.5){
     gl_Position = vec4(0.);
     return;
   }
@@ -68,15 +68,15 @@ void calculatePosition(PolygonProps props) {
   geometry.pickingColor = props.pickingColors;
 
 #ifdef IS_SIDE_VERTEX
-  pos = mix(props.positions, props.nextPositions, vertexPositions.x);
-  pos64Low = mix(props.positions64Low, props.nextPositions64Low, vertexPositions.x);
+  pos = mix(props.positions, props.nextPositions, positions.x);
+  pos64Low = mix(props.positions64Low, props.nextPositions64Low, positions.x);
 #else
   pos = props.positions;
   pos64Low = props.positions64Low;
 #endif
 
   if (extruded) {
-    pos.z += props.elevations * vertexPositions.y * elevationScale;
+    pos.z += props.elevations * positions.y * elevationScale;
   }
   gl_Position = project_position_to_clipspace(pos, pos64Low, vec3(0.), geometry.position);
 

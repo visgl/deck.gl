@@ -23,7 +23,7 @@
 export {VERSION} from './lib/init';
 
 // Import shaderlib to make sure shader modules are initialized
-export {getProgramManager} from './shaderlib';
+export {getPipelineFactory, getShaderAssembler} from './shaderlib';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
@@ -124,7 +124,7 @@ export type {
   Operation,
   Position,
   Color,
-  Texture,
+  TextureSource,
   Material
 } from './types/layer-props';
 export type {FilterContext} from './passes/layers-pass';
@@ -135,7 +135,7 @@ export type {Effect, PreRenderOptions, PostRenderOptions} from './lib/effect';
 export type {PickingUniforms, ProjectUniforms} from './shaderlib';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
-export type {Widget} from './lib/widget-manager';
+export type {Widget, WidgetPlacement} from './lib/widget-manager';
 
 // INTERNAL, DO NOT USER
 // @deprecated internal do not use

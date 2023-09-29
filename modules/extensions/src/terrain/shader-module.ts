@@ -3,16 +3,16 @@
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
-import type {Texture2D} from '@luma.gl/webgl-legacy';
+import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
   pickingActive?: boolean;
-  heightMap: Texture2D | null;
+  heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
-  dummyHeightMap: Texture2D;
+  dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
@@ -38,6 +38,7 @@ const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
   .join('\n');
 
+// @ts-expect-error
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
@@ -117,7 +118,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler: Texture2D = dummyHeightMap;
+      let sampler: Texture = dummyHeightMap;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {

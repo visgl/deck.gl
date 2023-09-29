@@ -1,13 +1,8 @@
 /* eslint-disable complexity, max-statements, max-params */
-import type {Device} from '@luma.gl/api';
-import {
-  GL,
-  Buffer,
-  Transform,
-  Framebuffer,
-  Texture2D,
-  readPixelsToArray
-} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import {Transform} from '@luma.gl/engine';
+import {readPixelsToArray} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {
   padBuffer,
   getAttributeTypeFromSize,
@@ -20,12 +15,12 @@ import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/webgl-legacy';
+import type {Transform as LumaTransform} from '@luma.gl/engine';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
-  Texture2D as LumaTexture2D
-} from '@luma.gl/webgl-legacy';
+  Texture as LumaTexture2D
+} from '@luma.gl/core';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
@@ -75,9 +70,9 @@ export default class GPUSpringTransition implements GPUTransition {
       usage: GL.DYNAMIC_COPY
     };
     this.buffers = [
-      new Buffer(device, bufferOpts), // previous
-      new Buffer(device, bufferOpts), // current
-      new Buffer(device, bufferOpts) // next
+      device.createBuffer(bufferOpts), // previous
+      device.createBuffer(bufferOpts), // current
+      device.createBuffer(bufferOpts) // next
     ];
   }
 
@@ -108,6 +103,7 @@ export default class GPUSpringTransition implements GPUTransition {
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
+      // @ts-expect-error accessor is deprecated
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -123,7 +119,7 @@ export default class GPUSpringTransition implements GPUTransition {
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
-        // @ts-expect-error TODO - this looks like a real type mismatch!!!
+        // @ts-ignore TODO - this looks like a real type mismatch!!!
         aTo: getSourceBufferAttribute(device, attribute)
       }
     });
@@ -165,6 +161,7 @@ export default class GPUSpringTransition implements GPUTransition {
 
     cycleBuffers(buffers);
     this.attributeInTransition.setData({
+      // @ts-expect-error
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -249,25 +246,21 @@ void main(void) {
 }
 
 function getTexture(device: Device): LumaTexture2D {
-  return new Texture2D(device, {
+  return device.createTexture({
     data: new Uint8Array(4),
-    format: GL.RGBA,
-    type: GL.UNSIGNED_BYTE,
-    border: 0,
+    format: 'rgba8unorm',
     mipmaps: false,
-    dataFormat: GL.RGBA,
+    // dataFormat: GL.RGBA,
     width: 1,
     height: 1
   });
 }
 
 function getFramebuffer(device: Device, texture: LumaTexture2D): LumaFramebuffer {
-  return new Framebuffer(device, {
+  return device.createFramebuffer({
     id: 'spring-transition-is-transitioning-framebuffer',
     width: 1,
     height: 1,
-    attachments: {
-      [GL.COLOR_ATTACHMENT0]: texture
-    }
+    colorAttachments: [texture]
   });
 }

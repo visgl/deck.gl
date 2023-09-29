@@ -24,7 +24,7 @@ import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
-import {WidgetManager, Widget, WidgetPlacement} from './widget-manager';
+import {WidgetManager, Widget} from './widget-manager';
 import Tooltip from './tooltip';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
@@ -32,10 +32,13 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {getBrowser} from '@probe.gl/env';
-import {luma, Device, DeviceProps} from '@luma.gl/api';
+import {luma, Device, DeviceProps} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
-import {GL, AnimationLoop, instrumentGLContext, setParameters} from '@luma.gl/webgl-legacy';
+import {setGLParameters} from '@luma.gl/webgl';
+import {AnimationLoop} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
+import type {Framebuffer} from '@luma.gl/core';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -49,7 +52,6 @@ import type Layer from './layer';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {Framebuffer} from '@luma.gl/webgl-legacy';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
@@ -181,6 +183,8 @@ export type DeckProps = {
   _pickable?: boolean;
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
+  /** An array of Widget instances to be added to the parent element. */
+  widgets?: Widget[];
 
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
@@ -258,6 +262,7 @@ const defaultProps = {
   _pickable: true,
   _typedArrayManagerProps: {},
   _customRender: null,
+  widgets: [],
 
   onDeviceInitialized: noop,
   onWebGLInitialized: noop,
@@ -374,18 +379,23 @@ export default class Deck {
       this.device = props.device;
     } else if (props.gl) {
       this.device = WebGLDevice.attach(props.gl);
-    } else {
-      // device will be created asynchronously by the animation loop when that is initialized
     }
 
-    // Create a canvas if no device is available
-    if (!this.device) {
-      if (typeof document !== 'undefined') {
-        this.canvas = this._createCanvas(props);
-      }
+    let deviceOrPromise: Device | Promise<Device> = this.device;
+    if (!deviceOrPromise) {
+      // TODO v9 should we install WebGL backend as default for now?
+      luma.registerDevices([WebGLDevice]);
+
+      deviceOrPromise = luma.createDevice({
+        ...props.deviceProps,
+        canvas: this._createCanvas(props)
+      });
+      deviceOrPromise.then(device => {
+        this.device = device;
+      });
     }
 
-    this.animationLoop = this._createAnimationLoop(props);
+    this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
 
     this.setProps(props);
 
@@ -427,7 +437,7 @@ export default class Deck {
     this.widgetManager?.finalize();
     this.widgetManager = null;
 
-    if (!this.props.canvas && !this.props.gl && this.canvas) {
+    if (!this.props.canvas && !this.props.device && this.canvas) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
@@ -485,6 +495,7 @@ export default class Deck {
       this.effectManager.setProps(resolvedProps);
       this.deckRenderer.setProps(resolvedProps);
       this.deckPicker.setProps(resolvedProps);
+      this.widgetManager.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -574,6 +585,11 @@ export default class Deck {
   getViewports(rect?: {x: number; y: number; width?: number; height?: number}): Viewport[] {
     assert(this.viewManager);
     return this.viewManager.getViewports(rect);
+  }
+
+  /** Get the current canvas element. */
+  getCanvas(): HTMLCanvasElement | null {
+    return this.canvas;
   }
 
   /** Query the object rendered on top at a given point */
@@ -766,11 +782,13 @@ export default class Deck {
     }
   }
 
-  private _createAnimationLoop(props: DeckProps): AnimationLoop {
+  private _createAnimationLoop(
+    deviceOrPromise: Device | Promise<Device>,
+    props: DeckProps
+  ): AnimationLoop {
     const {
       // width,
       // height,
-      device,
       gl,
       deviceProps,
       glOptions,
@@ -782,28 +800,19 @@ export default class Deck {
     } = props;
 
     return new AnimationLoop({
-      // width,
-      // height,
+      device: deviceOrPromise,
       useDevicePixels,
-      autoResizeDrawingBuffer: !device && !gl, // do not auto resize external context
+      // TODO v9
+      autoResizeDrawingBuffer: !gl, // do not auto resize external context
       autoResizeViewport: false,
-      device: this.device,
-      onCreateDevice: props =>
-        luma.createDevice({
-          ...glOptions,
-          ...deviceProps,
-          ...props,
-          canvas: this.canvas,
-          debug,
-          // @ts-expect-error Note can use device.lost
-          onContextLost: () => this._onContextLost()
-        }),
+      // @ts-expect-error luma.gl needs to accept Promise<void> return value
       onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
+      onError
+
       // onBeforeRender,
       // onAfterRender,
-      onError
     });
   }
 
@@ -917,13 +926,14 @@ export default class Deck {
     // if external context...
     if (!this.canvas) {
       this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
-      // @ts-expect-error - Currently luma.gl v9 does not expose these options
+      // TODO v9
+      // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
       // should have a method to start state tracking even if not enabled?
-      instrumentGLContext(this.device.gl, {enable: true, copyState: true});
+      // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    setParameters(this.device, {
+    setGLParameters(this.device, {
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
@@ -988,7 +998,7 @@ export default class Deck {
       deck: this,
       parentElement: this.canvas?.parentElement
     });
-    this.widgetManager.add(new Tooltip(), {placement: 'fill'});
+    this.widgetManager.addDefault(new Tooltip());
 
     this.setProps(this.props);
 
@@ -1013,7 +1023,7 @@ export default class Deck {
   ) {
     const {device, gl} = this.layerManager?.context;
 
-    setParameters(device, this.props.parameters);
+    setGLParameters(device, this.props.parameters);
 
     this.props.onBeforeRender({device, gl});
 

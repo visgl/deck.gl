@@ -16,17 +16,18 @@ export {
   TruncatedConeGeometry
 } from '@luma.gl/engine';
 
-export {Model, Transform, ProgramManager} from '@luma.gl/webgl-legacy';
+export {Model, Transform, PipelineFactory} from '@luma.gl/engine';
 
+/*
 export {
   // Context utilities
   instrumentGLContext,
   isWebGL2,
   FEATURES,
   hasFeatures,
-  getParameters,
-  setParameters,
-  withParameters,
+  getGLParameters,
+  setGLParameters,
+  withGLParameters,
   cssToDeviceRatio,
   // Copy and blit
   // These are needed by submodules and rely on using the same copy
@@ -44,4 +45,5 @@ export {
   // WebGL2 classes
   Texture3D,
   TransformFeedback
-} from '@luma.gl/webgl-legacy';
+} from '@luma.gl/webgl';
+*/

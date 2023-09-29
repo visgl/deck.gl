@@ -5,8 +5,15 @@ import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import {WebMercatorViewport} from '@deck.gl/core';
 
 class TestWidget {
-  constructor({id}) {
-    this.id = id;
+  constructor(props) {
+    this.id = props.id;
+    this.viewId = props.viewId || null;
+    this.placement = props.placement || 'top-left';
+    this.props = props;
+  }
+
+  setProps(props) {
+    Object.assign(this.props, props);
   }
 
   onAdd() {
@@ -27,16 +34,16 @@ const mockDeckInstance = {
   height: 400
 };
 
-test('WidgetManager#add, remove', t => {
+test('WidgetManager#setProps', t => {
   const container = document.createElement('div');
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
 
-  t.is(widgetManager.widgets.length, 0, 'no widgets');
+  t.is(widgetManager.getWidgets().length, 0, 'no widgets');
 
   const widgetA = new TestWidget({id: 'A'});
-  widgetManager.add(widgetA);
-  t.is(widgetManager.widgets.length, 1, 'widget is added');
-  t.is(widgetA._viewId, null, 'view id is assigned');
+  // Only A
+  widgetManager.setProps({widgets: [widgetA]});
+  t.is(widgetManager.getWidgets().length, 1, 'widget is added');
   t.ok(widgetA.isVisible, 'widget.onAdd is called');
   t.ok(
     widgetManager.containers['__root'].contains(widgetA._element),
@@ -44,13 +51,12 @@ test('WidgetManager#add, remove', t => {
   );
   t.is(container.childElementCount, 1, 'widget container is added');
 
-  widgetManager.add(widgetA);
-  t.is(widgetManager.widgets.length, 1, 'widget cannot be added more than once');
-
-  const widgetB = new TestWidget({id: 'B'});
-  widgetManager.add(widgetB, {viewId: 'map', placement: 'bottom-right'});
-  t.is(widgetManager.widgets.length, 2, 'widget is added');
-  t.is(widgetB._viewId, 'map', 'view id is assigned');
+  const widgetB = new TestWidget({id: 'B', viewId: 'map', placement: 'bottom-right'});
+  // A and B
+  widgetManager.setProps({
+    widgets: [widgetA, widgetB]
+  });
+  t.is(widgetManager.getWidgets().length, 2, 'widget is added');
   t.ok(widgetB.isVisible, 'widget.onAdd is called');
   t.ok(
     widgetManager.containers['map'].contains(widgetB._element),
@@ -59,8 +65,11 @@ test('WidgetManager#add, remove', t => {
   t.is(container.childElementCount, 2, 'widget container is added');
 
   const elementA = widgetA._element;
-  widgetManager.remove(widgetA);
-  t.is(widgetManager.widgets.length, 1, 'widget is removed');
+  // Only B
+  widgetManager.setProps({
+    widgets: [widgetB]
+  });
+  t.is(widgetManager.getWidgets().length, 1, 'widget is removed');
   t.notOk(widgetA._element, 'widget context is cleared');
   t.notOk(widgetA.isVisible, 'widget.onRemove is called');
   t.notOk(
@@ -68,13 +77,25 @@ test('WidgetManager#add, remove', t => {
     'widget UI is removed from the container'
   );
 
-  widgetManager.remove(widgetA);
-  t.is(widgetManager.widgets.length, 1, 'widget is already removed');
+  let widgetB2 = new TestWidget({id: 'B', version: 2, viewId: 'map', placement: 'bottom-right'});
+  // Only B2
+  widgetManager.setProps({widgets: [widgetB2]});
+  t.is(widgetManager.getWidgets().length, 1, 'widget count');
+  t.is(widgetManager.getWidgets()[0], widgetB, 'old widget is reused');
+  t.is(widgetB.props.version, 2, 'old widget is updated');
+
+  widgetB2 = new TestWidget({id: 'B', version: 2, viewId: 'map', placement: 'fill'});
+  // Only B2 with new placement
+  widgetManager.setProps({widgets: [widgetB2]});
+  t.is(widgetManager.getWidgets().length, 1, 'widget count');
+  t.is(widgetManager.getWidgets()[0], widgetB2, 'new widget is used');
+  t.notOk(widgetB.isVisible, 'widget.onRemove is called');
+  t.ok(widgetB2.isVisible, 'widget.onAdd is called');
 
   widgetManager.finalize();
-  t.is(widgetManager.widgets.length, 0, 'all widgets are removed');
+  t.is(widgetManager.getWidgets().length, 0, 'all widgets are removed');
   t.is(container.childElementCount, 0, 'all widget containers are removed');
-  t.notOk(widgetB.isVisible, 'widget.onRemove is called');
+  t.notOk(widgetB2.isVisible, 'widget.onRemove is called');
 
   t.end();
 });
@@ -84,7 +105,7 @@ test('WidgetManager#onRedraw#without viewId', t => {
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
-  widgetManager.add(widget);
+  widgetManager.addDefault(widget);
 
   t.doesNotThrow(
     () =>
@@ -174,8 +195,8 @@ test('WidgetManager#onRedraw#viewId', t => {
   const parentElement = document.createElement('div');
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
-  const widget = new TestWidget({id: 'A'});
-  widgetManager.add(widget, {placement: 'bottom-right', viewId: 'minimap'});
+  const widget = new TestWidget({id: 'A', placement: 'bottom-right', viewId: 'minimap'});
+  widgetManager.addDefault(widget);
 
   t.doesNotThrow(
     () =>
@@ -287,7 +308,7 @@ test('WidgetManager#onHover, onEvent#without viewId', t => {
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
   const widget = new TestWidget({id: 'A'});
-  widgetManager.add(widget);
+  widgetManager.addDefault(widget);
 
   const pickedInfo = {
     viewport: new WebMercatorViewport(),
@@ -321,8 +342,8 @@ test('WidgetManager#onHover, onEvent#viewId', t => {
   const parentElement = document.createElement('div');
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
-  const widget = new TestWidget({id: 'A'});
-  widgetManager.add(widget, {viewId: 'map'});
+  const widget = new TestWidget({id: 'A', viewId: 'map'});
+  widgetManager.addDefault(widget);
 
   let pickedInfo = {
     viewport: new WebMercatorViewport({id: 'map'}),

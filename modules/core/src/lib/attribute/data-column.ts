@@ -1,10 +1,10 @@
 /* eslint-disable complexity */
-import type {Device} from '@luma.gl/api';
-import type {Buffer as LumaBuffer} from '@luma.gl/webgl-legacy';
-import {GL, hasFeature, FEATURES, Buffer} from '@luma.gl/webgl-legacy';
+import type {Device} from '@luma.gl/core';
+import {Buffer, BufferLayout} from '@luma.gl/core';
+import {BufferWithAccessor} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 
-import ShaderAttribute, {IShaderAttribute} from './shader-attribute';
-import {glArrayFromType} from './gl-utils';
+import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -109,7 +109,7 @@ type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 };
 
 type DataColumnInternalState<Options, State> = State & {
-  externalBuffer: LumaBuffer | null;
+  externalBuffer: BufferWithAccessor | null;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -117,7 +117,7 @@ type DataColumnInternalState<Options, State> = State & {
   constant: boolean;
 };
 
-export default class DataColumn<Options, State> implements IShaderAttribute {
+export default class DataColumn<Options, State> {
   device: Device;
   id: string;
   size: number;
@@ -125,7 +125,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   value: NumericArray | null;
   doublePrecision: boolean;
 
-  protected _buffer: LumaBuffer | null;
+  protected _buffer: BufferWithAccessor | null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -146,10 +146,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
-      bufferType =
-        device && hasFeature(device, FEATURES.ELEMENT_INDEX_UINT32)
-          ? GL.UNSIGNED_INT
-          : GL.UNSIGNED_SHORT;
+      bufferType = device.features.has('index-uint32-webgl1') ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }
@@ -195,14 +192,23 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     return this.state.constant;
   }
 
-  get buffer(): LumaBuffer {
+  get buffer(): BufferWithAccessor {
     if (!this._buffer) {
       const {isIndexed, type} = this.settings;
-      this._buffer = new Buffer(this.device, {
-        id: this.id,
-        target: isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER,
-        accessor: {type}
-      });
+      if (isIndexed) {
+        // @ts-expect-error This returns a classic buffer under the hood
+        this._buffer = this.device.createBuffer({
+          id: this.id,
+          usage: Buffer.INDEX,
+          indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32'
+        });
+      } else {
+        // @ts-expect-error This returns a classic buffer under the hood
+        this._buffer = this.device.createBuffer({
+          id: this.id,
+          usage: Buffer.VERTEX
+        });
+      }
     }
     return this._buffer;
   }
@@ -231,44 +237,63 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     typedArrayManager.release(this.state.allocatedValue);
   }
 
-  getShaderAttributes(
-    id: string,
-    options: Partial<ShaderAttributeOptions> | null
-  ): Record<string, IShaderAttribute> {
-    if (this.doublePrecision) {
-      const shaderAttributes = {};
-      const isBuffer64Bit = this.value instanceof Float64Array;
-
-      const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
-        this.getAccessor(),
-        options || {}
-      );
-
-      shaderAttributes[id] = new ShaderAttribute(this, doubleShaderAttributeDefs.high);
-      shaderAttributes[`${id}64Low`] = isBuffer64Bit
-        ? new ShaderAttribute(this, doubleShaderAttributeDefs.low)
-        : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
-      return shaderAttributes;
-    }
-    if (options) {
-      const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
-      return {[id]: new ShaderAttribute(this, shaderAttributeDef)};
-    }
-    return {[id]: this};
-  }
-
-  getBuffer(): LumaBuffer | null {
+  getBuffer(): BufferWithAccessor | null {
     if (this.state.constant) {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(): [LumaBuffer, BufferAccessor] | NumericArray | null {
+  getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
+    const result: Record<string, Buffer | NumericArray | null> = {};
     if (this.state.constant) {
-      return this.value;
+      result[attributeName] = this.value;
+    } else {
+      result[attributeName] = this.getBuffer();
     }
-    return [this.getBuffer(), this.getAccessor() as BufferAccessor];
+    if (this.doublePrecision) {
+      if (this.value instanceof Float64Array) {
+        result[`${attributeName}64Low`] = result[attributeName];
+      } else {
+        // Disable fp64 low part
+        result[`${attributeName}64Low`] = new Float32Array(this.size);
+      }
+    }
+    return result;
+  }
+
+  getBufferLayout(
+    attributeName: string = this.id,
+    options: Partial<ShaderAttributeOptions> | null = null
+  ): BufferLayout {
+    const accessor = this.getAccessor();
+    const result: BufferLayout = {
+      name: this.id,
+      byteStride: getStride(accessor),
+      attributes: []
+    };
+
+    if (this.doublePrecision) {
+      const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
+        accessor,
+        options || {}
+      );
+      result.attributes.push(
+        getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
+        getBufferAttributeLayout(`${attributeName}64Low`, {
+          ...accessor,
+          ...doubleShaderAttributeDefs.low
+        })
+      );
+    } else if (options) {
+      const shaderAttributeDef = resolveShaderAttribute(accessor, options);
+      result.attributes.push(
+        getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
+      );
+    } else {
+      result.attributes.push(getBufferAttributeLayout(attributeName, accessor));
+    }
+    return result;
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -310,11 +335,11 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
   setData(
     data:
       | TypedArray
-      | LumaBuffer
+      | BufferWithAccessor
       | ({
           constant?: boolean;
           value?: NumericArray;
-          buffer?: LumaBuffer;
+          buffer?: BufferWithAccessor;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -322,7 +347,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
     let opts: {
       constant?: boolean;
       value?: NumericArray;
-      buffer?: LumaBuffer;
+      buffer?: BufferWithAccessor;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
@@ -350,7 +375,7 @@ export default class DataColumn<Options, State> implements IShaderAttribute {
       }
       state.externalBuffer = null;
       state.constant = true;
-      this.value = value;
+      this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;

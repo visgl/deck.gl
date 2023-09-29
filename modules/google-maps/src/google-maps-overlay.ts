@@ -1,6 +1,6 @@
 /* global google */
-import {getParameters, setParameters, withParameters, GLParameters} from '@luma.gl/webgl-legacy';
-import {GL} from '@luma.gl/webgl-legacy';
+import {getGLParameters, setGLParameters, withGLParameters, GLParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import {
   createDeckInstance,
   destroyDeckInstance,
@@ -167,13 +167,13 @@ export default class GoogleMapsOverlay {
 
     // By default, animationLoop._renderFrame invokes
     // animationLoop.onRender. We override this to wrap
-    // in withParameters so we don't modify the GL state
+    // in withGLParameters so we don't modify the GL state
     // @ts-ignore accessing protected member
     const {animationLoop} = deck;
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-      withParameters(gl, {}, () => {
-        animationLoop.onRender(animationLoop.animationProps);
+      withGLParameters(gl, {}, () => {
+        animationLoop.props.onRender(animationLoop.animationProps);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
@@ -236,7 +236,7 @@ export default class GoogleMapsOverlay {
     if (deck.isInitialized) {
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
-      const _framebuffer = getParameters(gl, GL.FRAMEBUFFER_BINDING);
+      const _framebuffer = getGLParameters(gl, GL.FRAMEBUFFER_BINDING);
       // @ts-expect-error
       deck.setProps({_framebuffer});
 
@@ -247,13 +247,13 @@ export default class GoogleMapsOverlay {
 
       // Workaround for bug in Google maps where viewport state is wrong
       // TODO remove once fixed
-      setParameters(gl, {
+      setGLParameters(gl, {
         viewport: [0, 0, gl.canvas.width, gl.canvas.height],
         scissor: [0, 0, gl.canvas.width, gl.canvas.height],
         stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
       });
 
-      withParameters(gl, GL_STATE, () => {
+      withGLParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
         });

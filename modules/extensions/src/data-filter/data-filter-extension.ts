@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL, readPixelsToArray, clear} from '@luma.gl/webgl-legacy';
+import {readPixelsToArray, clear} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {LayerExtension} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
@@ -222,8 +223,8 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       filterModel
         .updateModuleSettings(params.moduleParameters)
         .setAttributes({
-          ...filterValues.getShaderAttributes(),
-          ...(filterIndices && filterIndices.getShaderAttributes())
+          ...filterValues.getValue(),
+          ...filterIndices?.getValue()
         })
         .draw({
           framebuffer: filterFBO,

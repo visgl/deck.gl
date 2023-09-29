@@ -29,7 +29,9 @@ import {
 } from '@deck.gl/core';
 import {CubeGeometry} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {GL, Model, Buffer} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {Buffer} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';
@@ -128,24 +130,23 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     const domainUniforms = this.getDomainUniforms();
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
     this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms(domainUniforms)
-      .setUniforms({
-        cellSize,
-        offset,
-        extruded,
-        elevationScale,
-        coverage,
-        gridSize,
-        gridOrigin,
-        gridOriginLow,
-        gridOffset,
-        gridOffsetLow,
-        colorRange,
-        elevationRange
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms(domainUniforms);
+    this.state.model.setUniforms({
+      cellSize,
+      offset,
+      extruded,
+      elevationScale,
+      coverage,
+      gridSize,
+      gridOrigin,
+      gridOriginLow,
+      gridOffset,
+      gridOffsetLow,
+      colorRange,
+      elevationRange
+    });
+    this.state.model.draw(this.context.renderPass);
     this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }
 
@@ -178,7 +179,8 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   }
 
   private _setupUniformBuffer(model: Model): void {
-    const programHandle = model.program.handle;
+    // @ts-expect-error TODO v9 This code is not portable to WebGPU
+    const programHandle = model.pipeline.handle;
 
     const gl = this.context.gl as WebGL2RenderingContext;
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');

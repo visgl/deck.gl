@@ -33,7 +33,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {GL, Model} from '@luma.gl/webgl-legacy';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
@@ -182,24 +183,22 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude ? 1 : 0
-      })
-      .draw();
+    this.state.model.setUniforms(uniforms);
+    this.state.model.setUniforms({
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude ? 1 : 0
+    });
+    this.state.model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      this.state.model
-        .setUniforms({
-          useShortestPath: -1
-        })
-        .draw();
+      this.state.model.setUniforms({
+        useShortestPath: -1
+      });
+      this.state.model.draw(this.context.renderPass);
     }
   }
 
@@ -216,10 +215,11 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true
