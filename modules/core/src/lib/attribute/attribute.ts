@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor} from './data-column';
+import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor, DataColumnSettings} from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
@@ -104,13 +104,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return needsRedraw;
   }
 
-  layoutChanged({clearChangedFlags = false}: {clearChangedFlags?: boolean} = {}): boolean {
-    const layoutChanged = this.state.layoutChanged;
-    this.state.layoutChanged = layoutChanged && !clearChangedFlags;
-    return layoutChanged;
+  layoutChanged(): boolean {
+    return this.state.layoutChanged;
   }
 
-  setAccessor(accessor: typeof this.settings) {
+  setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
     this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
     super.setAccessor(accessor);
   }
@@ -359,6 +357,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   }
 
   getBufferLayout(): BufferLayout {
+    // Clear change flag
+    this.state.layoutChanged = false;
+
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result: BufferLayout = super.getBufferLayout();
 

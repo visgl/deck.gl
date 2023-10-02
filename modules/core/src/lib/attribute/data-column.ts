@@ -99,7 +99,7 @@ export type DataColumnOptions<Options> = Options &
     defaultValue?: number | number[];
   };
 
-type DataColumnSettings<Options> = DataColumnOptions<Options> & {
+export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
   type: number;
   size: number;
   logicalType?: number;

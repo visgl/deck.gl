@@ -636,9 +636,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
     // If some buffer layout changed
     let bufferLayoutChanged = false;
-    const opts = {clearChangedFlags: true};
     for (const id in changedAttributes) {
-      if (changedAttributes[id].layoutChanged(opts)) {
+      if (changedAttributes[id].layoutChanged()) {
         bufferLayoutChanged = true;
       }
     }
@@ -756,7 +755,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     if (bufferLayoutChanged) {
-      model.setBufferLayout(this.getAttributeManager().getBufferLayouts());
+      const attributeManager = this.getAttributeManager();
+      model.setBufferLayout(attributeManager.getBufferLayouts());
+      // All attributes must be reset after buffer layout change
+      changedAttributes = attributeManager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
