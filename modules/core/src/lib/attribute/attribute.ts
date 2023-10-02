@@ -1,5 +1,10 @@
 /* eslint-disable complexity */
-import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor, DataColumnSettings} from './data-column';
+import DataColumn, {
+  DataColumnOptions,
+  ShaderAttributeOptions,
+  BufferAccessor,
+  DataColumnSettings
+} from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
