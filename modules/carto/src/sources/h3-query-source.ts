@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import {CartoBaseSource} from './base-source';
+import {cartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
   CartoQuerySourceOptions,
@@ -18,7 +18,7 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const CartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async function (
+const cartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async function (
   options: CartoH3QuerySourceOptions
 ): Promise<any> {
   const {
@@ -42,7 +42,7 @@ const CartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async func
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
 };
 
-export {CartoH3QuerySource};
+export {cartoH3QuerySource};

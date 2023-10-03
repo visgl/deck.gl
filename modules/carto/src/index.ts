@@ -24,16 +24,16 @@ export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
 export {
-  CartoH3QuerySource,
-  CartoH3TableSource,
-  CartoH3TilesetSource,
-  CartoRasterSource,
-  CartoQuadbinQuerySource,
-  CartoQuadbinTableSource,
-  CartoQuadbinTilesetSource,
-  CartoVectorQuerySource,
-  CartoVectorTableSource,
-  CartoVectorTilesetSource,
+  cartoH3QuerySource,
+  cartoH3TableSource,
+  cartoH3TilesetSource,
+  cartoRasterSource,
+  cartoQuadbinQuerySource,
+  cartoQuadbinTableSource,
+  cartoQuadbinTilesetSource,
+  cartoVectorQuerySource,
+  cartoVectorTableSource,
+  cartoVectorTilesetSource,
   SOURCE_DEFAULTS
 } from './sources';
 export type {

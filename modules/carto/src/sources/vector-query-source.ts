@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
-import {CartoBaseSource} from './base-source';
+import {cartoBaseSource} from './base-source';
 import {CartoSourceOptions, CartoQuerySourceOptions, TypedSource} from './common';
 
 export type CartoVectorQuerySourceOptions = CartoSourceOptions & CartoQuerySourceOptions;
 type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
 
-const CartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async function (
+const cartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async function (
   options: CartoVectorQuerySourceOptions
 ): Promise<any> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;
@@ -17,7 +17,7 @@ const CartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return CartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
 };
 
-export {CartoVectorQuerySource};
+export {cartoVectorQuerySource};

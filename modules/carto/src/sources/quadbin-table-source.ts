@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import {CartoBaseSource} from './base-source';
+import {cartoBaseSource} from './base-source';
 import {
   CartoAggregationOptions,
   CartoSourceOptions,
@@ -19,7 +19,7 @@ type UrlParameters = {
   aggregationResLevel?: string;
 };
 
-const CartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
+const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
   options: CartoQuadbinTableSourceOptions
 ): Promise<any> {
   const {
@@ -43,7 +43,7 @@ const CartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  return CartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {CartoQuadbinTableSource};
+export {cartoQuadbinTableSource};

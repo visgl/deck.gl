@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
-import {CartoBaseSource} from './base-source';
+import {cartoBaseSource} from './base-source';
 import {CartoSourceOptions, CartoTableSourceOptions, TypedSource} from './common';
 
 export type CartoVectorTableSourceOptions = CartoSourceOptions & CartoTableSourceOptions;
 type UrlParameters = {columns?: string; geo_column?: string; name: string};
 
-const CartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async function (
+const cartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async function (
   options: CartoVectorTableSourceOptions
 ): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;
@@ -17,7 +17,7 @@ const CartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return CartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {CartoVectorTableSource};
+export {cartoVectorTableSource};
