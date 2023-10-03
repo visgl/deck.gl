@@ -12,7 +12,7 @@ export type CartoQuadbinQuerySourceOptions = CartoSourceOptions &
   CartoAggregationOptions;
 
 type UrlParameters = {
-  aggregationExp?: string;
+  aggregationExp: string;
   aggregationResLevel?: string;
   geo_column?: string;
   q: string;
@@ -23,17 +23,14 @@ const cartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = 
   options: CartoQuadbinQuerySourceOptions
 ): Promise<any> {
   const {
-    aggregationExp = '1 AS value',
+    aggregationExp,
     aggregationResLevel = 6,
     sqlQuery,
     spatialDataColumn = 'quadbin:quadbin',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
 
-  if (aggregationExp) {
-    urlParameters.aggregationExp = aggregationExp;
-  }
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }

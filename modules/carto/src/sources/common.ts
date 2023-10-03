@@ -19,7 +19,7 @@ export type CartoSourceOptionalOptions = {
 export type CartoSourceOptions = CartoSourceRequiredOptions & Partial<CartoSourceOptionalOptions>;
 
 export type CartoAggregationOptions = {
-  aggregationExp?: string;
+  aggregationExp: string;
   aggregationResLevel?: number;
 };
 

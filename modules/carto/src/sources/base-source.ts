@@ -12,7 +12,7 @@ import {
 } from './common';
 import {buildApiEndpoint, requestWithParameters} from './utils';
 
-export async function CartoBaseSource<UrlParameters extends Record<string, string>>(
+export async function cartoBaseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,
   options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions,
   urlParameters: UrlParameters

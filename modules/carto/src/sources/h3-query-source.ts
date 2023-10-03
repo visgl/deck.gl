@@ -11,7 +11,7 @@ export type CartoH3QuerySourceOptions = CartoSourceOptions &
   CartoQuerySourceOptions &
   CartoAggregationOptions;
 type UrlParameters = {
-  aggregationExp?: string;
+  aggregationExp: string;
   aggregationResLevel?: string;
   geo_column?: string;
   q: string;
@@ -22,17 +22,14 @@ const cartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async func
   options: CartoH3QuerySourceOptions
 ): Promise<any> {
   const {
-    aggregationExp = '1 AS value',
+    aggregationExp,
     aggregationResLevel = 4,
     sqlQuery,
     spatialDataColumn = 'h3:h3',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
 
-  if (aggregationExp) {
-    urlParameters.aggregationExp = aggregationExp;
-  }
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }

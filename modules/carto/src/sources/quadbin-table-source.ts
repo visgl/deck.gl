@@ -12,36 +12,33 @@ export type CartoQuadbinTableSourceOptions = CartoSourceOptions &
   CartoAggregationOptions;
 
 type UrlParameters = {
+  aggregationExp: string;
+  aggregationResLevel?: string;
   columns?: string;
   geo_column?: string;
   name: string;
-  aggregationExp?: string;
-  aggregationResLevel?: string;
 };
 
 const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
   options: CartoQuadbinTableSourceOptions
 ): Promise<any> {
   const {
-    aggregationExp = '1 AS value',
+    aggregationExp,
     aggregationResLevel = 6,
     columns,
     spatialDataColumn = 'quadbin:quadbin',
     tableName
   } = options;
-  const urlParameters: UrlParameters = {name: tableName};
+  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
 
+  if (aggregationResLevel) {
+    urlParameters.aggregationResLevel = String(aggregationResLevel);
+  }
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
-  }
-  if (aggregationExp) {
-    urlParameters.aggregationExp = aggregationExp;
-  }
-  if (aggregationResLevel) {
-    urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };

@@ -12,36 +12,33 @@ export type CartoH3TableSourceOptions = CartoSourceOptions &
   CartoAggregationOptions;
 
 type UrlParameters = {
+  aggregationExp: string;
+  aggregationResLevel?: string;
   columns?: string;
   geo_column?: string;
   name: string;
-  aggregationExp?: string;
-  aggregationResLevel?: string;
 };
 
 const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async function (
   options: CartoH3TableSourceOptions
 ): Promise<any> {
   const {
-    aggregationExp = '1 AS value',
+    aggregationExp,
     aggregationResLevel = 4,
     columns,
     spatialDataColumn = 'h3:h3',
     tableName
   } = options;
-  const urlParameters: UrlParameters = {name: tableName};
+  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
 
+  if (aggregationResLevel) {
+    urlParameters.aggregationResLevel = String(aggregationResLevel);
+  }
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
-  }
-  if (aggregationExp) {
-    urlParameters.aggregationExp = aggregationExp;
-  }
-  if (aggregationResLevel) {
-    urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };
