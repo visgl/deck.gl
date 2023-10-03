@@ -51,7 +51,7 @@ export default [].concat(
   quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
-  // mvtLayerTests,
+  mvtLayerTests,
   geohashLayerTests,
   // simpleMeshLayerTests,
   // scenegraphLayerTests,

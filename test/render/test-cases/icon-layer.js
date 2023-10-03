@@ -31,43 +31,42 @@ export default [
     ],
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
-  // TODO - v9 binary attributes
-  // {
-  //   name: 'icon-lnglat-external-buffer',
-  //   viewState: {
-  //     latitude: 37.751537058389985,
-  //     longitude: -122.42694203247012,
-  //     zoom: 11.5,
-  //     pitch: 0,
-  //     bearing: 0
-  //   },
-  //   // rendering times
-  //   layers: [
-  //     new IconLayer({
-  //       id: 'icon-lnglat',
-  //       data: {
-  //         length: points.length,
-  //         attributes: {
-  //           getPosition: {
-  //             value: new Float32Array(points.flatMap(d => d.COORDINATES)),
-  //             size: 2
-  //           },
-  //           getSize: new Float32Array(points.flatMap(d => (d.RACKS > 2 ? 2 : 1))),
-  //           getIcon: {
-  //             value: new Uint8Array(points.flatMap(d => (d.PLACEMENT === 'SW' ? 1 : 2))),
-  //             size: 1
-  //           }
-  //         }
-  //       },
-  //       iconAtlas: ICON_ATLAS,
-  //       iconMapping: {1: iconMapping.marker, 2: iconMapping['marker-warning']},
-  //       sizeScale: 12,
-  //       getColor: [64, 64, 72],
-  //       opacity: 0.8
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/icon-lnglat.png'
-  // },
+  {
+    name: 'icon-lnglat-external-buffer',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: {
+          length: points.length,
+          attributes: {
+            getPosition: {
+              value: new Float32Array(points.flatMap(d => d.COORDINATES)),
+              size: 2
+            },
+            getSize: new Float32Array(points.flatMap(d => (d.RACKS > 2 ? 2 : 1))),
+            getIcon: {
+              value: new Uint8Array(points.flatMap(d => (d.PLACEMENT === 'SW' ? 1 : 2))),
+              size: 1
+            }
+          }
+        },
+        iconAtlas: ICON_ATLAS,
+        iconMapping: {1: iconMapping.marker, 2: iconMapping['marker-warning']},
+        sizeScale: 12,
+        getColor: [64, 64, 72],
+        opacity: 0.8
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
   {
     name: 'icon-lnglat-facing-up',
     viewState: {

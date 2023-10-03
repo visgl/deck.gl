@@ -105,10 +105,10 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (!normalize) {
         // skip packing and set attribute value directly
         // TODO - avoid mutating user-provided object
-        buffers.positions = geometryBuffer;
+        buffers.vertexPositions = geometryBuffer;
       }
     }
-    this.geometryBuffer = buffers.positions;
+    this.geometryBuffer = buffers.vertexPositions;
 
     if (Array.isArray(dataChanged)) {
       // is partial update

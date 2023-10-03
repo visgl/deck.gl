@@ -163,7 +163,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instancePositions: {
+      vertexPositions: {
         size: 3,
         // Start filling buffer from 1 vertex in
         vertexOffset: 1,

@@ -430,10 +430,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           excludeAttributes: {instanceVertexValid: true}
         }
       });
-
-      topModel.setConstantAttributes({
-        positions: new Float32Array([0, 1])
-      });
     }
     if (extruded) {
       sideModel = new Model(this.context.device, {

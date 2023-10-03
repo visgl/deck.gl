@@ -1,9 +1,15 @@
 /* eslint-disable complexity */
-import DataColumn, {DataColumnOptions, ShaderAttributeOptions, BufferAccessor} from './data-column';
+import DataColumn, {
+  DataColumnOptions,
+  ShaderAttributeOptions,
+  BufferAccessor,
+  DataColumnSettings
+} from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
+import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
@@ -55,6 +61,7 @@ type AttributeInternalState = {
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
+  layoutChanged: boolean;
   updateRanges: number[][];
 };
 
@@ -70,6 +77,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
+      layoutChanged: false,
       updateRanges: range.FULL
     });
 
@@ -99,6 +107,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const needsRedraw = this.state.needsRedraw;
     this.state.needsRedraw = needsRedraw && !clearChangedFlags;
     return needsRedraw;
+  }
+
+  layoutChanged(): boolean {
+    return this.state.layoutChanged;
+  }
+
+  setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
+    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    super.setAccessor(accessor);
   }
 
   getUpdateTriggers(): string[] {
@@ -345,6 +362,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   }
 
   getBufferLayout(): BufferLayout {
+    // Clear change flag
+    this.state.layoutChanged = false;
+
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result: BufferLayout = super.getBufferLayout();
 
