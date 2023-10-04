@@ -6,6 +6,7 @@ import LinearInterpolator from '../transitions/linear-interpolator';
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
 
 const MOVEMENT_SPEED = 20;
+const PAN_SPEED = 500;
 
 type FirstPersonStateProps = {
   width: number;
@@ -28,6 +29,8 @@ type FirstPersonStateInternal = {
   startBearing?: number;
   startPitch?: number;
   startZoomPosition?: number[];
+  startPanPos?: [number, number];
+  startPanPosition?: number[];
 };
 
 class FirstPersonState extends ViewState<
@@ -58,7 +61,9 @@ class FirstPersonState extends ViewState<
       startRotatePos,
       startBearing,
       startPitch,
-      startZoomPosition
+      startZoomPosition,
+      startPanPos,
+      startPanPosition
     } = options;
 
     super(
@@ -77,7 +82,9 @@ class FirstPersonState extends ViewState<
         startRotatePos,
         startBearing,
         startPitch,
-        startZoomPosition
+        startZoomPosition,
+        startPanPos,
+        startPanPosition
       }
     );
   }
@@ -88,16 +95,37 @@ class FirstPersonState extends ViewState<
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart(): FirstPersonState {
-    return this;
+  panStart({pos}): FirstPersonState {
+    const {position} = this.getViewportProps();
+    return this._getUpdatedState({
+      startPanPos: pos,
+      startPanPosition: position
+    });
   }
 
   /**
    * Pan
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  pan(): FirstPersonState {
-    return this;
+  pan({pos}): FirstPersonState {
+    if (!pos) {
+      return this;
+    }
+    const {startPanPos, startPanPosition} = this.getState();
+    const {width, height, bearing, pitch} = this.getViewportProps();
+    const deltaScaleX = (PAN_SPEED * (pos[0] - startPanPos[0])) / width;
+    const deltaScaleY = (PAN_SPEED * (pos[1] - startPanPos[1])) / height;
+
+    const up = new SphericalCoordinates({bearing, pitch: pitch});
+    const forward = new SphericalCoordinates({bearing: bearing, pitch: -90});
+    const yDirection = up.toVector3().normalize();
+    const xDirection = forward.toVector3().cross(yDirection).normalize();
+
+    return this._getUpdatedState({
+      position: new Vector3(startPanPosition)
+        .add(xDirection.scale(deltaScaleX))
+        .add(yDirection.scale(deltaScaleY))
+    });
   }
 
   /**
@@ -105,7 +133,10 @@ class FirstPersonState extends ViewState<
    * Must call if `panStart()` was called
    */
   panEnd(): FirstPersonState {
-    return this;
+    return this._getUpdatedState({
+      startPanPos: null,
+      startPanPosition: null
+    });
   }
 
   /**
