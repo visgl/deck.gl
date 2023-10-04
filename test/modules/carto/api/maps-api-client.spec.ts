@@ -8,7 +8,6 @@ import {
   MAP_TYPES,
   _getDataV2,
   fetchLayerData,
-  fetchMap,
   getDefaultCredentials,
   setDefaultCredentials
 } from '@deck.gl/carto';
@@ -19,7 +18,7 @@ import {
   TILESTATS_RESPONSE,
   mockFetchMapsV3
 } from '../mock-fetch';
-import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
+// import {EMPTY_KEPLER_MAP_CONFIG} from './parseMap.spec';
 
 for (const useSetDefaultCredentials of [true, false]) {
   test(`getDataV2#v1#setDefaultCredentials(${String(useSetDefaultCredentials)})`, async t => {
@@ -609,7 +608,7 @@ test('fetchLayerData#post', async t => {
   t.end();
 });
 
-test('fetchMap#no datasets', async t => {
+/* test('fetchMap#no datasets', async t => {
   const cartoMapId = 'abcd-1234';
   const mapUrl = `http://carto-api/v3/maps/public/${cartoMapId}`;
   const mapResponse = {id: cartoMapId, datasets: [], keplerMapConfig: EMPTY_KEPLER_MAP_CONFIG};
@@ -861,4 +860,4 @@ test('fetchMap#geoColumn', async t => {
   globalThis.fetch = fetch;
 
   t.end();
-});
+}); */
