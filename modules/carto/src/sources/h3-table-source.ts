@@ -4,6 +4,7 @@ import {
   CartoAggregationOptions,
   CartoSourceOptions,
   CartoTableSourceOptions,
+  SpatialDataType,
   TilejsonSource
 } from './common';
 
@@ -15,21 +16,16 @@ type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
   columns?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   name: string;
 };
 
 const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async function (
   options: CartoH3TableSourceOptions
 ): Promise<any> {
-  const {
-    aggregationExp,
-    aggregationResLevel = 4,
-    columns,
-    spatialDataColumn = 'h3:h3',
-    tableName
-  } = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
+  const {aggregationExp, aggregationResLevel = 4, columns, spatialDataColumn, tableName} = options;
+  const urlParameters: UrlParameters = {aggregationExp, name: tableName, spatialDataType: 'h3'};
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
@@ -38,7 +34,7 @@ const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async func
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
+    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };

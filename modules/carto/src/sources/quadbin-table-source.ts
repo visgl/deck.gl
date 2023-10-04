@@ -4,6 +4,7 @@ import {
   CartoAggregationOptions,
   CartoSourceOptions,
   CartoTableSourceOptions,
+  SpatialDataType,
   TilejsonSource
 } from './common';
 
@@ -15,21 +16,20 @@ type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
   columns?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   name: string;
 };
 
 const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
   options: CartoQuadbinTableSourceOptions
 ): Promise<any> {
-  const {
+  const {aggregationExp, aggregationResLevel = 6, columns, spatialDataColumn, tableName} = options;
+  const urlParameters: UrlParameters = {
     aggregationExp,
-    aggregationResLevel = 6,
-    columns,
-    spatialDataColumn = 'quadbin:quadbin',
-    tableName
-  } = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
+    name: tableName,
+    spatialDataType: 'quadbin'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
@@ -38,7 +38,7 @@ const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = 
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
+    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   return cartoBaseSource<UrlParameters>('table', options, urlParameters);
 };
