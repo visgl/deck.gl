@@ -116,8 +116,8 @@ class FirstPersonState extends ViewState<
     const deltaScaleX = (PAN_SPEED * (pos[0] - startPanPos[0])) / width;
     const deltaScaleY = (PAN_SPEED * (pos[1] - startPanPos[1])) / height;
 
-    const up = new SphericalCoordinates({bearing, pitch: pitch});
-    const forward = new SphericalCoordinates({bearing: bearing, pitch: -90});
+    const up = new SphericalCoordinates({bearing, pitch});
+    const forward = new SphericalCoordinates({bearing, pitch: -90});
     const yDirection = up.toVector3().normalize();
     const xDirection = forward.toVector3().cross(yDirection).normalize();
 
