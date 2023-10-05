@@ -532,12 +532,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
+    event.srcEvent.preventDefault();
 
     const {speed = 0.01, smooth = false} = this.scrollZoom === true ? {} : this.scrollZoom;
     const {delta} = event;
