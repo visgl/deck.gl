@@ -2,7 +2,7 @@
   "name": "@deck.gl/widgets",
   "description": "UI widgets for deck.gl",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "8.10.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },

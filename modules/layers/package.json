@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "8.10.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
