@@ -48,7 +48,7 @@ type DeckGLProps = DeckProps & {
   /** DOM element to add deck.gl canvas to */
   container?: Element;
   /** base map library, mapboxgl or maplibregl */
-  map?: object;
+  map?: any;
 };
 
 /**

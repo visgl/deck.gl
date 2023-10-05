@@ -84,12 +84,11 @@ export default class CollisionFilterEffect implements Effect {
     for (const collisionGroup in channels) {
       const collisionFBO = this.collisionFBOs[collisionGroup];
       const renderInfo = channels[collisionGroup];
+      // @ts-expect-error TODO - assuming WebGL context
       const [width, height] = device.canvasContext.getPixelSize();
       collisionFBO.resize({
-        // @ts-expect-error
-        width: device.gl.canvas.width / DOWNSCALE,
-        // @ts-expect-error
-        height: device.gl.canvas.height / DOWNSCALE
+        width: width / DOWNSCALE,
+        height: height / DOWNSCALE
       });
       this._render(renderInfo, {
         effects,
@@ -148,7 +147,7 @@ export default class CollisionFilterEffect implements Effect {
       const collisionFBO = this.collisionFBOs[collisionGroup];
 
       // Rerender collision FBO
-      this.collisionFilterPass.renderCollisionMap(collisionFBO, {
+      this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
         pass: 'collision-filter',
         isPicking: true,
         layers: renderInfo.layers,
@@ -160,6 +159,7 @@ export default class CollisionFilterEffect implements Effect {
         moduleParameters: {
           // To avoid feedback loop forming between Framebuffer and active Texture.
           dummyCollisionMap: this.dummyCollisionMap,
+          // @ts-expect-error TODO - assuming WebGL context
           devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
         }
       });
@@ -213,7 +213,7 @@ export default class CollisionFilterEffect implements Effect {
   } {
     const {collisionGroup} = (layer as Layer<CollisionFilterExtensionProps>).props;
     const {collisionFBOs, dummyCollisionMap} = this;
-    return {collisionFBO: collisionFBOs[collisionGroup], dummyCollisionMap};
+    return {collisionFBO: collisionFBOs[collisionGroup], dummyCollisionMap: dummyCollisionMap!};
   }
 
   cleanup(): void {

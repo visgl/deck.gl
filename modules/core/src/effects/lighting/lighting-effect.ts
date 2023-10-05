@@ -128,7 +128,7 @@ export default class LightingEffect implements Effect {
         pointLights: PointLight[];
       };
       shadowMaps?: Texture[];
-      dummyShadowMap?: Texture;
+      dummyShadowMap?: Texture | null;
       shadowColor?: number[];
       shadowMatrices?: Matrix4[];
     } = this.shadow
@@ -161,8 +161,8 @@ export default class LightingEffect implements Effect {
     this.shadowMaps.length = 0;
 
     if (this.dummyShadowMap) {
-      this.dummyShadowMap.delete();
-      this.dummyShadowMap = undefined;
+      this.dummyShadowMap.destroy();
+      this.dummyShadowMap = null;
     }
 
     if (this.shadow && this.shaderAssembler) {

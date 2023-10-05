@@ -219,7 +219,7 @@ function getTile(layer: Layer): TileHeader | null {
     if (tile) {
       return tile;
     }
-    layer = layer.parent;
+    layer = layer.parent as Layer;
   }
   return null;
 }

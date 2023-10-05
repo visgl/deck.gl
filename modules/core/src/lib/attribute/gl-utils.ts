@@ -56,7 +56,7 @@ export function getBufferAttributeLayout(
   }
   return {
     attribute: name,
-    format: accessor.size > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
+    format: (accessor.size as number) > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };

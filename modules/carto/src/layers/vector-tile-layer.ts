@@ -51,6 +51,10 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
   static layerName = 'VectorTileLayer';
   static defaultProps = defaultProps;
 
+  state!: MVTLayer['state'] & {
+    mvt: boolean;
+  };
+
   initializeState(): void {
     super.initializeState();
     const binary = this.props.formatTiles === TILE_FORMATS.BINARY || TILE_FORMATS.MVT;

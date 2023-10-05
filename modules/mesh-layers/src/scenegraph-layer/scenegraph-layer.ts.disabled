@@ -45,7 +45,7 @@ import type {
 
 const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
 
-export type ScenegraphLayerProps<DataT = any> = _ScenegraphLayerProps<DataT> & LayerProps;
+export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
 type _ScenegraphLayerProps<DataT> = {
   data: LayerDataSource<DataT>;

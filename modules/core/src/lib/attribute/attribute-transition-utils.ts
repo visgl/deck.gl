@@ -2,7 +2,7 @@ import type {Device} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import type {BufferWithAccessor} from '@luma.gl/webgl';
 import {padArray} from '../../utils/array-utils';
-import {NumericArray} from '../../types/types';
+import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
 
@@ -89,7 +89,7 @@ export function getSourceBufferAttribute(
   // constant
   // don't pass normalized here because the `value` from a normalized attribute is
   // already normalized
-  return attribute.value;
+  return attribute.value as NumericArray;
 }
 
 export function getAttributeTypeFromSize(size: number): string {
@@ -108,13 +108,13 @@ export function getAttributeTypeFromSize(size: number): string {
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {
-  buffers.push(buffers.shift());
+  buffers.push(buffers.shift() as Buffer);
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? value.length : numInstances * size) * multiplier;
+  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -156,8 +156,8 @@ export function padBuffer({
   }
 
   const toData = isConstant
-    ? attribute.value
-    : attribute.getBuffer().getData({srcByteOffset: byteOffset});
+    ? (attribute.value as TypedArray)
+    : (attribute.getBuffer() as Buffer).getData();
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
@@ -165,7 +165,7 @@ export function padBuffer({
 
   const getMissingData = isConstant
     ? (i, chunk) => getData(toData, chunk)
-    : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
+    : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
   const bufferWithAccessor = buffer as BufferWithAccessor;
   const source = bufferWithAccessor.getData({length: fromLength});

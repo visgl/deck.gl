@@ -326,7 +326,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         size: binaryValue.size || this.size,
         stride: binaryValue.stride,
         offset: binaryValue.offset,
-        startIndices,
+        startIndices: startIndices as NumericArray,
         nested: needsNormalize
       });
       // Fall through to auto updater

@@ -126,7 +126,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   abstract get ControllerState(): ConstructorOf<ControllerState>;
   abstract get transition(): TransitionProps;
 
-  // ts-expect-error (2564) - not assigned in the constructor
+  // @ts-expect-error (2564) - not assigned in the constructor
   protected props: ControllerProps;
   protected state: Record<string, any> = {};
 

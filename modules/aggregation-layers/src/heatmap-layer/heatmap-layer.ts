@@ -27,7 +27,7 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {DeviceFeature, Texture, TextureProps} from '@luma.gl/core';
+import {DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Transform} from '@luma.gl/engine';
 import {BufferWithAccessor, withGLParameters} from '@luma.gl/webgl';
@@ -72,7 +72,7 @@ const AGGREGATION_MODE = {
 };
 
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
@@ -101,7 +101,7 @@ const DIMENSIONS = {
   }
 };
 
-export type HeatmapLayerProps<DataT = any> = _HeatmapLayerProps<DataT> &
+export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 type _HeatmapLayerProps<DataT> = {
@@ -193,12 +193,22 @@ export default class HeatmapLayer<
     colorDomain?: number[];
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
+    maxWeightsTexture?: Texture;
+    colorTexture?: Texture;
     zoom?: number;
     worldBounds?: number[];
     normalizedCommonBounds?: number[];
     updateTimer?: any;
     triPositionBuffer?: BufferWithAccessor;
     triTexCoordBuffer?: BufferWithAccessor;
+    weightsTransform?: Transform;
+    maxWeightTransform?: Transform;
+    textureSize: number;
+    format: TextureFormat;
+    type: GL;
+    weightsScale: number;
+    visibleWorldBounds: number[];
+    viewportCorners: number[][];
   };
 
   initializeState() {
@@ -313,13 +323,13 @@ export default class HeatmapLayer<
       colorTexture,
       updateTimer
     } = this.state;
-    weightsTransform?.delete();
-    weightsTexture?.delete();
-    maxWeightTransform?.delete();
-    maxWeightsTexture?.delete();
-    triPositionBuffer?.delete();
-    triTexCoordBuffer?.delete();
-    colorTexture?.delete();
+    weightsTransform?.destroy();
+    weightsTexture?.destroy();
+    maxWeightTransform?.destroy();
+    maxWeightsTexture?.destroy();
+    triPositionBuffer?.destroy();
+    triTexCoordBuffer?.destroy();
+    colorTexture?.destroy();
     if (updateTimer) {
       clearTimeout(updateTimer);
     }
@@ -386,7 +396,7 @@ export default class HeatmapLayer<
     const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
+    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D as number);
     const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
     const {format, type} = getTextureParams({device, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -472,7 +482,7 @@ export default class HeatmapLayer<
 
   _updateMaxWeightValue() {
     const {maxWeightTransform} = this.state;
-    maxWeightTransform.run({
+    maxWeightTransform!.run({
       parameters: {
         blend: true,
         depthTest: false,
@@ -540,12 +550,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.subData(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
@@ -554,6 +564,7 @@ export default class HeatmapLayer<
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
     if (colorTexture) {
+      // @ts-expect-error TODO - no longer supported in v9?
       colorTexture.setImageData({
         data: colors,
         width: colorRange.length
@@ -571,7 +582,8 @@ export default class HeatmapLayer<
 
   _updateWeightmap() {
     const {radiusPixels, colorDomain, aggregation} = this.props;
-    const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
+    const {worldBounds, textureSize, weightsScale} = this.state;
+    const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
 
     // convert world bounds to common using Layer's coordiante system and origin
@@ -612,6 +624,7 @@ export default class HeatmapLayer<
           blendEquation: GL.FUNC_ADD
         },
         clearRenderTarget: true,
+        // @ts-expect-error TODO - no longer supported in v9?
         attributes: this.getAttributes(),
         moduleSettings: this.getModuleSettings()
       });

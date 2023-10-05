@@ -44,7 +44,7 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
 };
 
 /** All properties supported by Tile3DLayer */
-export type Tile3DLayerProps<DataT = any> = _Tile3DLayerProps<DataT> & CompositeLayerProps;
+export type Tile3DLayerProps<DataT = unknown> = _Tile3DLayerProps<DataT> & CompositeLayerProps;
 
 /** Props added by the Tile3DLayer */
 type _Tile3DLayerProps<DataT> = {
