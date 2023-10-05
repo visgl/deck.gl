@@ -42,8 +42,8 @@ import fs from './line-layer-fragment.glsl';
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const defaultProps: DefaultProps<LineLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
-  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: (x: any) => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
 
@@ -54,7 +54,7 @@ const defaultProps: DefaultProps<LineLayerProps> = {
 };
 
 /** All properties supported by LineLayer. */
-export type LineLayerProps<DataT = any> = _LineLayerProps<DataT> & LayerProps;
+export type LineLayerProps<DataT = unknown> = _LineLayerProps<DataT> & LayerProps;
 
 /** Properties added by LineLayer. */
 type _LineLayerProps<DataT> = {

@@ -83,15 +83,16 @@ export default class BrushingExtension extends LayerExtension {
     }
 
     // Trigger redraw when mouse moves
-    // TODO - expose this in a better way
-    this.state.onMouseMove = () => {
+    const onMouseMove = () => {
       this.getCurrentLayer()?.setNeedsRedraw();
     };
+    // TODO - expose this in a better way
+    this.state.onMouseMove = onMouseMove;
     if (context.deck) {
       // @ts-expect-error (2446) accessing protected property
       context.deck.eventManager.on({
-        pointermove: this.state.onMouseMove,
-        pointerleave: this.state.onMouseMove
+        pointermove: onMouseMove,
+        pointerleave: onMouseMove
       });
     }
   }
@@ -99,10 +100,11 @@ export default class BrushingExtension extends LayerExtension {
   finalizeState(this: Layer<BrushingExtensionProps>, context: LayerContext, extension: this) {
     // Remove event listeners
     if (context.deck) {
+      const onMouseMove = this.state.onMouseMove as () => void;
       // @ts-expect-error (2446) accessing protected property
       context.deck.eventManager.off({
-        pointermove: this.state.onMouseMove,
-        pointerleave: this.state.onMouseMove
+        pointermove: onMouseMove,
+        pointerleave: onMouseMove
       });
     }
   }

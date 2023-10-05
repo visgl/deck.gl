@@ -31,7 +31,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import type {Buffer, Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
@@ -40,8 +40,8 @@ import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregati
 import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps<any>>),
-  getPosition: {type: 'accessor', value: d => d.position},
+  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps<unknown>>),
+  getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
   gpuAggregation: true,
@@ -60,7 +60,7 @@ const DIMENSIONS = {
 };
 
 /** All properties supported by ScreenGridLayer. */
-export type ScreenGridLayerProps<DataT = any> = _ScreenGridLayerProps<DataT> &
+export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
@@ -152,6 +152,8 @@ export default class ScreenGridLayer<
     gpuAggregation?: any;
     weights?: any;
     maxTexture?: Texture;
+    aggregationBuffer?: Buffer;
+    maxBuffer?: Buffer;
   };
 
   initializeState() {

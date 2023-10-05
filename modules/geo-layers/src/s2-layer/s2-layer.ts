@@ -23,11 +23,11 @@ import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 const defaultProps: DefaultProps<S2LayerProps> = {
-  getS2Token: {type: 'accessor', value: d => d.token}
+  getS2Token: {type: 'accessor', value: (d: any) => d.token}
 };
 
 /** All properties supported by S2Layer. */
-export type S2LayerProps<DataT = any> = _S2LayerProps<DataT> & GeoCellLayerProps<DataT>;
+export type S2LayerProps<DataT = unknown> = _S2LayerProps<DataT> & GeoCellLayerProps<DataT>;
 
 /** Properties added by S2Layer. */
 type _S2LayerProps<DataT> = {

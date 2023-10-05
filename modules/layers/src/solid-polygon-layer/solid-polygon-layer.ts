@@ -105,7 +105,7 @@ type _SolidPolygonLayerProps<DataT> = {
 };
 
 /** Render filled and/or extruded polygons. */
-export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> & LayerProps;
+export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -119,7 +119,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
-  getPolygon: {type: 'accessor', value: f => f.polygon},
+  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   getElevation: {type: 'accessor', value: 1000},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},

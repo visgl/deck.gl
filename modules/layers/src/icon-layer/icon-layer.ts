@@ -110,7 +110,7 @@ type _IconLayerProps<DataT> = {
   textureParameters?: Record<number, number> | null;
 };
 
-export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps;
+export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -124,8 +124,8 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', value: x => x.position},
-  getIcon: {type: 'accessor', value: x => x.icon},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getIcon: {type: 'accessor', value: (x: any) => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},

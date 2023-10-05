@@ -44,8 +44,8 @@ import fs from './arc-layer-fragment.glsl';
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
-  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: (x: any) => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
@@ -62,7 +62,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 };
 
 /** All properties supported by ArcLayer. */
-export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps;
+export type ArcLayerProps<DataT = unknown> = _ArcLayerProps<DataT> & LayerProps;
 
 /** Properties added by ArcLayer. */
 type _ArcLayerProps<DataT> = {

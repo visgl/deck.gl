@@ -186,7 +186,7 @@ export type UpdateParameters<LayerT extends Layer> = {
 };
 
 type SharedLayerState = {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
@@ -325,7 +325,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
   getModels(): Model[] {
-    return (this.state && (this.state.models || (this.state.model && [this.state.model]))) || [];
+    const state = this.state as {
+      models?: Model[];
+      model: Model;
+    };
+    return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
   /** Update shader module parameters */
@@ -415,7 +419,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Second check if the layer has set its own value
     if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
+      return this.state.numInstances as number;
     }
 
     // Use container library to get a count for any ES6 container or object
@@ -434,7 +438,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Second check if the layer has set its own value
     if (this.state && this.state.startIndices) {
-      return this.state.startIndices;
+      return this.state.startIndices as NumericArray;
     }
 
     return null;
@@ -755,10 +759,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     if (bufferLayoutChanged) {
       // AttributeManager is always defined when this method is called
-      const attributeManager = this.getAttributeManager();
-      model.setBufferLayout(attributeManager!.getBufferLayouts());
+      const attributeManager = this.getAttributeManager()!;
+      model.setBufferLayout(attributeManager.getBufferLayouts());
       // All attributes must be reset after buffer layout change
-      changedAttributes = attributeManager!.getAttributes();
+      changedAttributes = attributeManager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
@@ -1234,7 +1238,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
-    const {model} = this.state;
+    const model = this.state.model as Model | undefined;
     model?.setInstanceCount(this.getNumInstances());
 
     // Set picking module parameters to match props

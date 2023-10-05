@@ -109,7 +109,7 @@ type _PathLayerProps<DataT> = {
   rounded?: boolean;
 };
 
-export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps;
+export type PathLayerProps<DataT = unknown> = _PathLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -124,7 +124,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   billboard: false,
   _pathType: null,
 
-  getPath: {type: 'accessor', value: object => object.path},
+  getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
 

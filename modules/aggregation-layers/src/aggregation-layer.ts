@@ -38,9 +38,10 @@ export default abstract class AggregationLayer<
 > extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
 
-  state!: CompositeLayer['state'] & {
+  state!: {
     ignoreProps?: Record<string, any>;
     dimensions?: any;
+    changedAttributes?: Record<string, any>;
   };
 
   initializeAggregationLayer(dimensions: any) {

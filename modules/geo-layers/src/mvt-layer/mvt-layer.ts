@@ -31,6 +31,7 @@ import {
   Tileset2D,
   Tile2DHeader,
   getURLFromTemplate,
+  URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
 } from '../tileset-2d';
@@ -102,6 +103,15 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
+  state!: TileLayer<ParsedMvtTile>['state'] & {
+    binary: boolean;
+    data: URLTemplate;
+    tileJSON: any;
+    highlightColor: number[];
+    hoveredFeatureId: number | string | null;
+    hoveredFeatureLayerName: string | null;
+  };
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
@@ -114,7 +124,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 
   get isLoaded(): boolean {
-    return this.state && this.state.data && this.state.tileset && super.isLoaded;
+    return Boolean(this.state && this.state.data && this.state.tileset && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -340,8 +350,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return findIndexBinary(
         data,
         uniqueIdProperty,
-        featureIdToHighlight,
-        isHighlighted ? '' : hoveredFeatureLayerName
+        featureIdToHighlight!,
+        isHighlighted ? '' : hoveredFeatureLayerName!
       );
     }
 
@@ -382,7 +392,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state.tileset;
+    const tileset: Tileset2D = this.state.tileset!;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {

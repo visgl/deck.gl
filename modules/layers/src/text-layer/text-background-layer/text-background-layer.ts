@@ -37,7 +37,8 @@ type _TextBackgroundLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 };
 
-export type TextBackgroundLayerProps<DataT = any> = _TextBackgroundLayerProps<DataT> & LayerProps;
+export type TextBackgroundLayerProps<DataT = unknown> = _TextBackgroundLayerProps<DataT> &
+  LayerProps;
 
 const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   billboard: true,
@@ -48,7 +49,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
 
   padding: {type: 'array', value: [0, 0, 0, 0]},
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},

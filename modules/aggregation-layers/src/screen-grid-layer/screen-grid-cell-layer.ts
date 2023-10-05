@@ -40,7 +40,8 @@ const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
 };
 
 /** All properties supported by ScreenGridCellLayer. */
-export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<DataT> & LayerProps;
+export type ScreenGridCellLayerProps<DataT = unknown> = _ScreenGridCellLayerProps<DataT> &
+  LayerProps;
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {

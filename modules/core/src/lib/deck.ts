@@ -807,7 +807,7 @@ export default class Deck {
       onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
-      // @ts-expect-error typing mismatch
+      // @ts-expect-error typing mismatch: AnimationLoop does not accept onError:null
       onError
 
       // onBeforeRender,

@@ -70,7 +70,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   extruded: false,
   hexagonAggregator: pointToHexbin,
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   // Optional material for 'lighting' shader module
   material: true,
 
@@ -79,11 +79,11 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
 };
 
 /** All properties supported by by HexagonLayer. */
-export type HexagonLayerProps<DataT = any> = _HexagonLayerProps<DataT> &
+export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 /** Properties added by HexagonLayer. */
-type _HexagonLayerProps<DataT = any> = {
+type _HexagonLayerProps<DataT = unknown> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
    * @default 1000
@@ -256,7 +256,8 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
 
   state!: AggregationLayer<DataT>['state'] & {
     cpuAggregator: CPUAggregator;
-    aggregatorState: any;
+    aggregatorState: CPUAggregator['state'];
+    vertices: number[][] | null;
   };
   initializeState() {
     const cpuAggregator = new CPUAggregator({
@@ -267,8 +268,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
     this.state = {
       cpuAggregator,
       aggregatorState: cpuAggregator.state,
-      vertices: null,
-      layerData: undefined
+      vertices: null
     };
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
@@ -361,6 +361,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
       ? {vertices, radius: 1}
       : {
           // default geometry
+          // @ts-expect-error TODO - undefined property?
           radius: aggregatorState.layerData.radiusCommon || 1,
           radiusUnits: 'common',
           angle: 90

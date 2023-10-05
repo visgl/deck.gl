@@ -59,7 +59,7 @@ export default class BinSorter {
   sortedBins!: AggregatedBin[];
   binMap: Record<number, AggregatedBin>;
 
-  constructor(bins: any[] = [], props: Partial<typeof defaultProps> = defaultProps) {
+  constructor(bins: unknown[] = [], props: Partial<typeof defaultProps> = defaultProps) {
     this.aggregatedBins = this.getAggregatedBins(bins, props);
     this._updateMinMaxValues();
     this.binMap = this.getBinMap();

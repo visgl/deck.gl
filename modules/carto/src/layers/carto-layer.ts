@@ -171,6 +171,11 @@ export default class CartoLayer<ExtraProps extends {} = {}> extends CompositeLay
   static layerName = 'CartoLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    data: any;
+    apiVersion: string | null;
+  };
+
   initializeState(): void {
     this.state = {
       data: null,

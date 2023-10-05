@@ -48,7 +48,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -79,7 +79,7 @@ function normalizeData(data) {
 }
 
 /** All properties supported by PointCloudLayer. */
-export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps;
+export type PointCloudLayerProps<DataT = unknown> = _PointCloudLayerProps<DataT> & LayerProps;
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {

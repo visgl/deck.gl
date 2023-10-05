@@ -65,7 +65,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
@@ -75,7 +75,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
 };
 
 /** All properties supported by ColumnLayer. */
-export type ColumnLayerProps<DataT = any> = _ColumnLayerProps<DataT> & LayerProps;
+export type ColumnLayerProps<DataT = unknown> = _ColumnLayerProps<DataT> & LayerProps;
 
 /** Properties added by ColumnLayer. */
 type _ColumnLayerProps<DataT> = {

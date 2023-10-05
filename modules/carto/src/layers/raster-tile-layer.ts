@@ -16,7 +16,8 @@ const defaultProps: DefaultProps<RasterTileLayerProps> = {
 };
 
 /** All properties supported by RasterTileLayer. */
-export type RasterTileLayerProps<DataT = any> = _RasterTileLayerProps<DataT> & CompositeLayerProps;
+export type RasterTileLayerProps<DataT = unknown> = _RasterTileLayerProps<DataT> &
+  CompositeLayerProps;
 
 /** Properties added by RasterTileLayer. */
 type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> & {

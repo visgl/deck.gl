@@ -28,7 +28,7 @@ const defaultProps: DefaultProps<MeshLayerProps> = {
 };
 
 /** All properties supported by MeshLayer. */
-export type MeshLayerProps<DataT = any> = _MeshLayerProps & SimpleMeshLayerProps<DataT>;
+export type MeshLayerProps<DataT = unknown> = _MeshLayerProps & SimpleMeshLayerProps<DataT>;
 
 /** Properties added by MeshLayer. */
 type _MeshLayerProps = {

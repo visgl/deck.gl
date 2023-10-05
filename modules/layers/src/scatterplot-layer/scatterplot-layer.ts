@@ -40,7 +40,7 @@ import type {
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 /** All props supported by the ScatterplotLayer */
-export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps;
+export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
 
 /** Props added by the ScatterplotLayer */
 type _ScatterplotLayerProps<DataT> = {
@@ -162,7 +162,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},

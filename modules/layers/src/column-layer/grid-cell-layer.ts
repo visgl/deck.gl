@@ -29,7 +29,7 @@ const defaultProps: DefaultProps<GridCellLayerProps> = {
 };
 
 /** All properties supported by GridCellLayer. */
-export type GridCellLayerProps<DataT = any> = _GridCellLayerProps & ColumnLayerProps<DataT>;
+export type GridCellLayerProps<DataT = unknown> = _GridCellLayerProps & ColumnLayerProps<DataT>;
 
 /** Properties added by GridCellLayer. */
 type _GridCellLayerProps = {
