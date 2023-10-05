@@ -27,7 +27,6 @@ export const GEO_COLUMN_SUPPORT: MapType[] = [MAP_TYPES.QUERY, MAP_TYPES.TABLE];
 // AVAILABLE FORMATS
 export const FORMATS = {
   GEOJSON: 'geojson',
-  NDJSON: 'ndjson',
   TILEJSON: 'tilejson',
   JSON: 'json'
 } as const;
