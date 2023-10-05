@@ -351,7 +351,12 @@ class FirstPersonState extends ViewState<
 
   _getUpdatedState(newProps: Record<string, any>): FirstPersonState {
     // Update _viewportProps
-    return new FirstPersonState({...this.getViewportProps(), ...this.getState(), ...newProps});
+    return new FirstPersonState({
+      makeViewport: this.makeViewport,
+      ...this.getViewportProps(),
+      ...this.getState(),
+      ...newProps
+    });
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
