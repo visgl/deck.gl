@@ -386,7 +386,7 @@ export default class HeatmapLayer<
     const {device} = this.context;
     const {weightsTextureSize} = this.props;
 
-    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
+    const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D as number);
     const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
     const {format, type} = getTextureParams({device, floatTargetSupport});
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
@@ -540,12 +540,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.subData(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds)
+      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.subData(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {

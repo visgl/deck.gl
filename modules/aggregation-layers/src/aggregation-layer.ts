@@ -87,6 +87,7 @@ export default abstract class AggregationLayer<
       viewport,
       mousePosition,
       pickingActive: 0,
+      // @ts-expect-error TODO - assuming WebGL context
       devicePixelRatio: device.canvasContext.cssToDeviceRatio()
     });
     return moduleSettings;

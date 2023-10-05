@@ -40,7 +40,7 @@ import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregati
 import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...ScreenGridCellLayer.defaultProps,
+  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps<any>>),
   getPosition: {type: 'accessor', value: d => d.position},
   getWeight: {type: 'accessor', value: 1},
 

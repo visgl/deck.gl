@@ -186,7 +186,6 @@ export type UpdateParameters<LayerT extends Layer> = {
 };
 
 type SharedLayerState = {
-  model?: Model;
   [key: string]: any;
 };
 
@@ -411,7 +410,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   getNumInstances(): number {
     // First Check if app has provided an explicit value
     if (Number.isFinite(this.props.numInstances)) {
-      return this.props.numInstances;
+      return this.props.numInstances as number;
     }
 
     // Second check if the layer has set its own value
@@ -482,7 +481,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Enable/disable picking buffer
     if (attributeManager) {
       const {props} = params;
-      const hasPickingBuffer = this.internalState.hasPickingBuffer;
+      const hasPickingBuffer = this.internalState!.hasPickingBuffer;
       const needsPickingBuffer =
         Number.isInteger(props.highlightedObjectIndex) ||
         props.pickable ||
@@ -490,7 +489,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // Only generate picking buffer if needed
       if (hasPickingBuffer !== needsPickingBuffer) {
-        this.internalState.hasPickingBuffer = needsPickingBuffer;
+        this.internalState!.hasPickingBuffer = needsPickingBuffer;
         const {pickingColors, instancePickingColors} = attributeManager.attributes;
         const pickingColorsAttribute = pickingColors || instancePickingColors;
         if (pickingColorsAttribute) {
@@ -755,10 +754,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     if (bufferLayoutChanged) {
+      // AttributeManager is always defined when this method is called
       const attributeManager = this.getAttributeManager();
-      model.setBufferLayout(attributeManager.getBufferLayouts());
+      model.setBufferLayout(attributeManager!.getBufferLayouts());
       // All attributes must be reset after buffer layout change
-      changedAttributes = attributeManager.getAttributes();
+      changedAttributes = attributeManager!.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
@@ -966,7 +966,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     const currentProps = this.props;
     const context = this.context;
-    const internalState = this.internalState;
+    const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
@@ -1257,7 +1257,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
         parameters.pickingSelectedColor =
-          Number.isFinite(highlightedObjectIndex) && highlightedObjectIndex >= 0
+          Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }

@@ -199,7 +199,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       const attributeManager = this.getAttributeManager();
       const filterNeedsUpdate =
         // attributeManager must be defined for filterModel to be set
-        attributeManager.attributes.filterValues.needsUpdate() ||
+        attributeManager!.attributes.filterValues.needsUpdate() ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange;

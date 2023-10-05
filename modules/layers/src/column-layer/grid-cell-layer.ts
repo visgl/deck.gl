@@ -48,12 +48,12 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
 
   protected _updateGeometry() {
     const geometry = new CubeGeometry();
-    this.state.fillModel.setGeometry(geometry);
+    this.state.fillModel!.setGeometry(geometry);
   }
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle, radiusUnits} = this.props;
-    const {fillModel} = this.state;
+    const fillModel = this.state.fillModel!;
     fillModel.setUniforms(uniforms);
     fillModel.setUniforms({
       radius: cellSize / 2,

@@ -181,6 +181,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   static defaultProps = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
@@ -250,9 +254,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
+    const model = this.state.model!;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       stroked: stroked ? 1 : 0,
       filled,
       billboard,
@@ -266,7 +271,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
@@ -275,7 +280,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

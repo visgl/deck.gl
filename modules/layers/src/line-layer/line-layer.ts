@@ -117,6 +117,10 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   static layerName = 'LineLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
       'instanceSourcePositions',
@@ -182,23 +186,24 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const model = this.state.model!;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
       useShortestPath: wrapLongitude ? 1 : 0
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      this.state.model.setUniforms({
+      model.setUniforms({
         useShortestPath: -1
       });
-      this.state.model.draw(this.context.renderPass);
+      model.draw(this.context.renderPass);
     }
   }
 
@@ -215,7 +220,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

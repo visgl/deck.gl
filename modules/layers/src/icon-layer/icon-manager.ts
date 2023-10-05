@@ -436,9 +436,9 @@ export default class IconManager {
     })[]
   ): void {
     // This method is only called in the auto packing case, where _canvas is defined
-    const ctx = this._canvas.getContext('2d', {
+    const ctx = this._canvas!.getContext('2d', {
       willReadFrequently: true
-    });
+    }) as CanvasRenderingContext2D;
 
     for (const icon of icons) {
       this._pendingCount++;

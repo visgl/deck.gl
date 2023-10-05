@@ -65,7 +65,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   static layerName = 'TextBackgroundLayer';
 
   state!: {
-    model: Model;
+    model?: Model;
   };
 
   getShaders() {
@@ -145,8 +145,9 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       padding = [padding[0], padding[1], padding[0], padding[1]];
     }
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
+    model.setUniforms({
       billboard,
       stroked: Boolean(getLineWidth),
       padding,
@@ -155,7 +156,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMinPixels,
       sizeMaxPixels
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -165,7 +166,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-fan-webgl',
         vertexCount: 4,

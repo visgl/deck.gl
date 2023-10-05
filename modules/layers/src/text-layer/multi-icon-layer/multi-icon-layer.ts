@@ -68,7 +68,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.initializeState();
 
     const attributeManager = this.getAttributeManager();
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       instanceOffsets: {
         size: 2,
         accessor: 'getIconOffsets'
@@ -123,10 +123,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     if (sdf && outlineWidth) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
+      const model = this.state.model!;
 
       if (iconsTexture) {
-        this.state.model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
-        this.state.model.draw(this.context.renderPass);
+        model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
+        model.draw(this.context.renderPass);
       }
     }
   }

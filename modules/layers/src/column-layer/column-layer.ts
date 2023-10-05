@@ -239,8 +239,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     fillModel?: Model;
     wireframeModel?: Model;
     models?: Model[];
-    fillVertexCount?: number;
-    edgeDistance?: number;
+    fillVertexCount: number;
+    edgeDistance: number;
   };
 
   getShaders() {
@@ -320,8 +320,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     const instanceCount = this.getNumInstances();
-    this.state.fillModel.setInstanceCount(instanceCount);
-    this.state.wireframeModel.setInstanceCount(instanceCount);
+    this.state.fillModel!.setInstanceCount(instanceCount);
+    this.state.wireframeModel!.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
@@ -360,7 +360,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
 
     const fillModel = new Model(this.context.device, {
       ...shaders,
@@ -389,7 +389,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    const {fillModel, wireframeModel} = this.state;
+    const fillModel = this.state.fillModel!;
+    const wireframeModel = this.state.wireframeModel!;
     fillModel.setGeometry(geometry);
     fillModel.setTopology('triangle-strip');
     // Disable indices
@@ -416,7 +417,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       radius,
       angle
     } = this.props;
-    const {fillModel, wireframeModel, fillVertexCount, edgeDistance} = this.state;
+    const fillModel = this.state.fillModel!;
+    const wireframeModel = this.state.wireframeModel!;
+    const {fillVertexCount, edgeDistance} = this.state;
 
     const renderUniforms = {
       ...uniforms,

@@ -32,10 +32,8 @@ const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
 const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
-  // @ts-expect-error
-  cellSizePixels: {value: 100, min: 1},
-  // @ts-expect-error
-  cellMarginPixels: {value: 2, min: 0, max: 5},
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange
@@ -59,8 +57,8 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     return device.features.has('texture-formats-float32-webgl1');
   }
 
-  state!: Layer['state'] & {
-    model: Model;
+  state!: {
+    model?: Model;
   };
   getShaders() {
     return {vs, fs, modules: [picking]};
@@ -106,7 +104,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model} = this.state;
+    const model = this.state.model!;
     model.setUniforms(uniforms);
     model.setBindings({
       maxTexture
@@ -174,7 +172,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   _updateUniforms(oldProps, props, changeFlags): void {
-    const {model} = this.state;
+    const model = this.state.model!;
     if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
       model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
     }

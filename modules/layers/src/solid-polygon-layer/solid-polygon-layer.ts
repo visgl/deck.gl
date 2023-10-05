@@ -361,7 +361,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.state.models?.forEach(model => model.destroy());
 
       this.setState(this._getModels());
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
 
@@ -411,7 +411,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     let sideModel;
     let wireframeModel;
 
-    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
 
     if (filled) {
       const shaders = this.getShaders('top');

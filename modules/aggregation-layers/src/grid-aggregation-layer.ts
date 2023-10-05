@@ -197,7 +197,7 @@ export default abstract class GridAggregationLayer<
   _uploadAggregationResults(): void {
     const {numCol, numRow} = this.state;
     const {data} = this.state.layerData;
-    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins;
+    const {aggregatedBins, minValue, maxValue, totalCount} = this.state.sortedBins!;
 
     const ELEMENTCOUNT = 4;
     const aggregationSize = numCol * numRow * ELEMENTCOUNT;
