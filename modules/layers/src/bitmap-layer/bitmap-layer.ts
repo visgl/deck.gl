@@ -33,7 +33,7 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry, Model} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
 import type {Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';

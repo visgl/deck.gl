@@ -19,12 +19,10 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {UniformStore} from '@luma.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-
-import vs from './scatterplot-layer-vertex.glsl';
-import fs from './scatterplot-layer-fragment.glsl';
 
 import type {
   LayerProps,
@@ -36,6 +34,9 @@ import type {
   Color,
   DefaultProps
 } from '@deck.gl/core';
+
+import vs, {ScatterplotLayerUniforms, scatterplot} from './scatterplot-layer-vertex.glsl';
+import fs from './scatterplot-layer-fragment.glsl';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -181,11 +182,19 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   static defaultProps = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
+  state!: Layer['state'] & {
+    uniformStore: UniformStore<{scatterplot: ScatterplotLayerUniforms}>;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
 
   initializeState() {
+    this.state.uniformStore = new UniformStore<{scatterplot: ScatterplotLayerUniforms}>({
+      scatterplot
+    });
+
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -251,20 +260,25 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels
     } = this.props;
 
+    // opacity etc
     this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
-      stroked: stroked ? 1 : 0,
-      filled,
-      billboard,
-      antialiasing,
-      radiusUnits: UNIT[radiusUnits],
-      radiusScale,
-      radiusMinPixels,
-      radiusMaxPixels,
-      lineWidthUnits: UNIT[lineWidthUnits],
-      lineWidthScale,
-      lineWidthMinPixels,
-      lineWidthMaxPixels
+
+    // scatterplot uniform block
+    this.state.uniformStore.setUniforms({
+      scatterplot: {
+        stroked: stroked ? 1 : 0,
+        filled,
+        billboard,
+        antialiasing,
+        radiusUnits: UNIT[radiusUnits],
+        radiusScale,
+        radiusMinPixels,
+        radiusMaxPixels,
+        lineWidthUnits: UNIT[lineWidthUnits],
+        lineWidthScale,
+        lineWidthMinPixels,
+        lineWidthMaxPixels
+      }
     });
     this.state.model.draw(this.context.renderPass);
   }
@@ -282,6 +296,12 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
+      bindings: {
+        scatterplotUniforms: this.state.uniformStore.getManagedUniformBuffer(
+          this.context.device,
+          'scatterplot'
+        )
+      },
       isInstanced: true
     });
   }
