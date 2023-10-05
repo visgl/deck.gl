@@ -1,6 +1,7 @@
 import {registerLoaders} from '@loaders.gl/core';
+import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
-registerLoaders([CartoVectorTileLoader]);
+registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);
 
 import {DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -76,8 +77,10 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     return loadOptions;
   }
 
-  getTileData(tile: TileLoadProps) {
-    const url = _getURLFromTemplate(this.state.data, tile);
+  async getTileData(tile: TileLoadProps) {
+    const tileJSON = this.props.data as CartoTilejsonResult;
+    const {tiles, properties_tiles} = tileJSON;
+    const url = _getURLFromTemplate(tiles, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
@@ -85,7 +88,46 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     const loadOptions = this.getLoadOptions();
     const {fetch} = this.props;
     const {signal} = tile;
-    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+
+    // Fetch geometry and attributes separately
+    const geometryFetch = fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+
+    if (!properties_tiles) {
+      return await geometryFetch;
+    }
+
+    const propertiesUrl = _getURLFromTemplate(properties_tiles, tile);
+    if (!propertiesUrl) {
+      return Promise.reject('Invalid properties URL');
+    }
+
+    const attributesFetch = fetch(propertiesUrl, {
+      propName: 'data',
+      layer: this,
+      loadOptions,
+      signal
+    });
+    const [geometry, attributes] = await Promise.all([geometryFetch, attributesFetch]);
+    if (!geometry) return null;
+
+    return this._mergeBoundaryData(geometry, attributes);
+  }
+
+  _mergeBoundaryData(geometry, properties) {
+    const mapping = {};
+    for (const {geoid, ...rest} of properties.properties) {
+      if ((geoid as string) in mapping) {
+        throw new Error(`Duplicate geoid key in mapping: ${geoid}`);
+      }
+      mapping[geoid] = rest;
+    }
+
+    for (const type of ['points', 'lines', 'polygons']) {
+      // TODO numericProps?
+      geometry[type].properties = geometry[type].properties.map(({geoid}) => mapping[geoid]);
+    }
+
+    return geometry;
   }
 
   renderSubLayers(

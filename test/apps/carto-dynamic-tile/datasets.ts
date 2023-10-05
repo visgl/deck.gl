@@ -1,18 +1,43 @@
 import {
-  cartoH3TilesetSource,
-  cartoH3TableSource,
+  cartoBoundaryQuerySource,
+  cartoBoundaryTableSource,
   cartoH3QuerySource,
-  cartoRasterSource,
+  cartoH3TableSource,
+  cartoH3TilesetSource,
+  cartoQuadbinQuerySource,
   cartoQuadbinTableSource,
   cartoQuadbinTilesetSource,
-  cartoQuadbinQuerySource,
+  cartoRasterSource,
+  cartoVectorQuerySource,
   cartoVectorTableSource,
   cartoVectorTilesetSource,
-  cartoVectorQuerySource,
   colorBins
 } from '@deck.gl/carto';
 
 export default {
+  'boundary-query': {
+    source: cartoBoundaryQuerySource,
+    boundaryId: 'usa_pos4',
+    propertiesSqlSource:
+      'select * from `cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered`',
+    getFillColor: colorBins({
+      // TODO remove parseFloat, only needed as binary format encodes as strings
+      attr: d => parseFloat(d!.properties!['do_perimeter']),
+      domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
+      colors: 'Peach'
+    })
+  },
+  'boundary-table': {
+    source: cartoBoundaryTableSource,
+    boundaryId: 'usa_pos4',
+    columns: ['do_label', 'do_perimeter'],
+    propertiesTableSource: 'cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered',
+    getFillColor: colorBins({
+      attr: d => parseFloat(d!.properties!['do_perimeter']),
+      domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
+      colors: 'Purp'
+    })
+  },
   'h3-query': {
     source: cartoH3QuerySource,
     sqlQuery:

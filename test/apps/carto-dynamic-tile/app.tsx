@@ -30,7 +30,9 @@ function Root() {
   const datasource = datasets[dataset];
   let layers: Layer[] = [];
 
-  if (dataset.includes('h3')) {
+  if (dataset.includes('boundary')) {
+    layers = [useBoundaryLayer(datasource)];
+  } else if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
   } else if (dataset.includes('raster')) {
     layers = [useRasterLayer(datasource)];
@@ -38,6 +40,8 @@ function Root() {
     layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
     layers = [useVectorLayer(datasource)];
+  } else {
+    console.error('Unknown type of dataset', dataset);
   }
 
   return (
@@ -64,6 +68,30 @@ function Root() {
       />
     </>
   );
+}
+
+function useBoundaryLayer(datasource) {
+  const {getFillColor, source, boundaryId, columns, propertiesSqlSource, propertiesTableSource} =
+    datasource;
+  // useMemo to avoid a map instantiation on every re-render
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
+    return source({
+      ...globalOptions,
+      boundaryId,
+      columns,
+      propertiesTableSource,
+      propertiesSqlSource
+    });
+  }, [source, boundaryId, columns, propertiesSqlSource, propertiesTableSource, null]);
+
+  return new VectorTileLayer({
+    id: 'carto',
+    // @ts-ignore
+    data: tilejson, // TODO how to correctly specify data type?
+    pickable: true,
+    pointRadiusMinPixels: 5,
+    getFillColor
+  });
 }
 
 function useH3Layer(datasource) {

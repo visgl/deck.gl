@@ -1,6 +1,12 @@
 export {SOURCE_DEFAULTS} from './common';
 export type {CartoTilejsonResult, GeojsonResult, JsonResult} from './common';
 
+export {cartoBoundaryQuerySource} from './boundary-query-source';
+export type {CartoBoundaryQuerySourceOptions} from './boundary-query-source';
+
+export {cartoBoundaryTableSource} from './boundary-table-source';
+export type {CartoBoundaryTableSourceOptions} from './boundary-table-source';
+
 export {cartoH3QuerySource} from './h3-query-source';
 export type {CartoH3QuerySourceOptions} from './h3-query-source';
 

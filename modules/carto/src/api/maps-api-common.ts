@@ -15,6 +15,7 @@ export const DEFAULT_MAPS_URL_FORMAT = {
 } as const;
 
 export const MAP_TYPES = {
+  BOUNDARY: 'boundary',
   QUERY: 'query',
   TABLE: 'table',
   TILESET: 'tileset',

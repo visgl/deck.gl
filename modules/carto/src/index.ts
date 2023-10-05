@@ -24,27 +24,31 @@ export type {APIErrorContext, QueryParameters} from './api';
 export type {CartoLayerProps} from './layers/carto-layer';
 
 export {
+  SOURCE_DEFAULTS,
+  cartoBoundaryQuerySource,
+  cartoBoundaryTableSource,
   cartoH3QuerySource,
   cartoH3TableSource,
   cartoH3TilesetSource,
-  cartoRasterSource,
   cartoQuadbinQuerySource,
   cartoQuadbinTableSource,
   cartoQuadbinTilesetSource,
+  cartoRasterSource,
   cartoVectorQuerySource,
   cartoVectorTableSource,
-  cartoVectorTilesetSource,
-  SOURCE_DEFAULTS
+  cartoVectorTilesetSource
 } from './sources';
 export type {
-  CartoTilejsonResult,
+  CartoBoundaryQuerySourceOptions,
+  CartoBoundaryTableSourceOptions,
   CartoH3QuerySourceOptions,
   CartoH3TableSourceOptions,
   CartoH3TilesetSourceOptions,
-  CartoRasterSourceOptions,
   CartoQuadbinQuerySourceOptions,
   CartoQuadbinTableSourceOptions,
   CartoQuadbinTilesetSourceOptions,
+  CartoRasterSourceOptions,
+  CartoTilejsonResult,
   CartoVectorQuerySourceOptions,
   CartoVectorTableSourceOptions,
   CartoVectorTilesetSourceOptions,
