@@ -1,6 +1,7 @@
 import Controller from './controller';
 import ViewState from './view-state';
 import {mod} from '../utils/math-utils';
+import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
 import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
@@ -38,7 +39,14 @@ class FirstPersonState extends ViewState<
   FirstPersonStateProps,
   FirstPersonStateInternal
 > {
-  constructor(options: FirstPersonStateProps & FirstPersonStateInternal) {
+  makeViewport: (props: Record<string, any>) => Viewport;
+
+  constructor(
+    options: FirstPersonStateProps &
+      FirstPersonStateInternal & {
+        makeViewport: (props: Record<string, any>) => Viewport;
+      }
+  ) {
     const {
       /* Viewport arguments */
       width, // Width of viewport
@@ -87,6 +95,8 @@ class FirstPersonState extends ViewState<
         startPanPosition
       }
     );
+
+    this.makeViewport = options.makeViewport;
   }
 
   /* Public API */
@@ -219,14 +229,20 @@ class FirstPersonState extends ViewState<
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({scale}: {scale: number}): FirstPersonState {
-    let {startZoomPosition} = this.getState();
-    if (!startZoomPosition) {
-      startZoomPosition = this.getViewportProps().position;
-    }
+  zoom({pos, scale}: {pos: [number, number]; scale: number}): FirstPersonState {
+    const viewportProps = this.getViewportProps();
+    const startZoomPosition = this.getState().startZoomPosition || viewportProps.position;
+    const viewport = this.makeViewport(viewportProps);
+    const {projectionMatrix, width} = viewport;
+    const fovxRadians = 2.0 * Math.atan(1.0 / projectionMatrix[0]);
+    const angle = fovxRadians * (pos[0] / width - 0.5);
 
-    const direction = this.getDirection();
-    return this._move(direction, Math.log2(scale) * MOVEMENT_SPEED, startZoomPosition);
+    const direction = this.getDirection(true);
+    return this._move(
+      direction.rotateZ({radians: -angle}),
+      Math.log2(scale) * MOVEMENT_SPEED,
+      startZoomPosition
+    );
   }
 
   /**
@@ -286,11 +302,11 @@ class FirstPersonState extends ViewState<
   }
 
   zoomIn(speed: number = 2): FirstPersonState {
-    return this.zoom({scale: speed});
+    return this.zoom({pos: [0, 0], scale: speed});
   }
 
   zoomOut(speed: number = 2): FirstPersonState {
-    return this.zoom({scale: 1 / speed});
+    return this.zoom({pos: [0, 0], scale: 1 / speed});
   }
 
   // shortest path between two view states
