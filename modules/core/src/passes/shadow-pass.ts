@@ -56,8 +56,7 @@ export default class ShadowPass extends LayersPass {
         clearColor: [1, 1, 1, 1]
       },
       () => {
-        // @ts-expect-error TODO - assuming WebGL context
-        const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+        const pixelRatio = this.device.getCanvasContext().cssToDeviceRatio();
 
         const viewport = params.viewports[0];
         const width = viewport.width * pixelRatio;

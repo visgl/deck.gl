@@ -84,8 +84,7 @@ export default class CollisionFilterEffect implements Effect {
     for (const collisionGroup in channels) {
       const collisionFBO = this.collisionFBOs[collisionGroup];
       const renderInfo = channels[collisionGroup];
-      // @ts-expect-error TODO - assuming WebGL context
-      const [width, height] = device.canvasContext.getPixelSize();
+      const [width, height] = device.getCanvasContext().getPixelSize();
       collisionFBO.resize({
         width: width / DOWNSCALE,
         height: height / DOWNSCALE
@@ -159,8 +158,7 @@ export default class CollisionFilterEffect implements Effect {
         moduleParameters: {
           // To avoid feedback loop forming between Framebuffer and active Texture.
           dummyCollisionMap: this.dummyCollisionMap,
-          // @ts-expect-error TODO - assuming WebGL context
-          devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
+          devicePixelRatio: collisionFBO.device.getCanvasContext().getDevicePixelRatio() / DOWNSCALE
         }
       });
     }

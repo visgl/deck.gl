@@ -32,8 +32,8 @@
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@luma.gl/engine": "9.0.0-alpha.37"
+    "@luma.gl/core": "9.0.0-alpha.38",
+    "@luma.gl/engine": "9.0.0-alpha.38"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",

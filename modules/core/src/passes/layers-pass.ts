@@ -56,8 +56,7 @@ export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
   render(options: LayersPassRenderOptions): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+    const [width, height] = this.device.getCanvasContext().getDrawingBufferSize();
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
@@ -328,8 +327,7 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const devicePixelRatio = this.device.getCanvasContext().cssToDeviceRatio();
 
     const moduleParameters = Object.assign(
       Object.create(layer.internalState?.propsInTransition || layer.props),
@@ -415,12 +413,10 @@ function getGLViewport(
 ): [number, number, number, number] {
   const pixelRatio =
     (moduleParameters && moduleParameters.devicePixelRatio) ||
-    // @ts-expect-error TODO - assuming WebGL context
-    device.canvasContext.cssToDeviceRatio();
+    device.getCanvasContext().cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  // @ts-expect-error TODO - assuming WebGL context
-  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const [, drawingBufferHeight] = device.getCanvasContext().getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

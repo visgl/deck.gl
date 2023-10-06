@@ -924,7 +924,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
+      this.canvas = this.device.getCanvasContext().canvas as HTMLCanvasElement;
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
