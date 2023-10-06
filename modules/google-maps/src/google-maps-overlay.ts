@@ -169,11 +169,11 @@ export default class GoogleMapsOverlay {
     // animationLoop.onRender. We override this to wrap
     // in withGLParameters so we don't modify the GL state
     // @ts-ignore accessing protected member
-    const {animationLoop} = deck;
+    const animationLoop = deck.animationLoop!;
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       withGLParameters(gl, {}, () => {
-        animationLoop.props.onRender(animationLoop.animationProps);
+        animationLoop.props.onRender(animationLoop.animationProps!);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };

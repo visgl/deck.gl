@@ -120,12 +120,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   static layerName = 'BitmapLayer';
   static defaultProps = defaultProps;
 
-  state!: Layer['state'] & {
+  state!: {
     disablePicking?: boolean;
     model?: Model;
     mesh?: any;
-    coordinateConversion?: number;
-    bounds?: number[];
+    coordinateConversion: number;
+    bounds: number[];
   };
 
   getShaders() {
@@ -173,7 +173,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (props.bounds !== oldProps.bounds) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
-      this.state.model.setVertexCount(mesh.vertexCount);
+      this.state.model!.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
@@ -199,7 +199,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       throw new Error('string');
     }
 
-    const {width, height} = image;
+    const {width, height} = image as Texture;
 
     // Picking color doesn't represent object index in this layer
     info.index = 0;
@@ -259,11 +259,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   protected _getModel(): Model {
-    // TODO - why? are we really supporting context-less BitmapLayer
-    if (!this.context.device) {
-      return null;
-    }
-
     /*
       0,0 --- 1,0
        |       |
@@ -272,7 +267,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       topology: 'triangle-list',
       isInstanced: false
     });

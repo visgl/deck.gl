@@ -38,9 +38,10 @@ export default abstract class AggregationLayer<
 > extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
 
-  state!: CompositeLayer['state'] & {
+  state!: {
     ignoreProps?: Record<string, any>;
     dimensions?: any;
+    changedAttributes?: Record<string, any>;
   };
 
   initializeAggregationLayer(dimensions: any) {
@@ -87,6 +88,7 @@ export default abstract class AggregationLayer<
       viewport,
       mousePosition,
       pickingActive: 0,
+      // @ts-expect-error TODO - assuming WebGL context
       devicePixelRatio: device.canvasContext.cssToDeviceRatio()
     });
     return moduleSettings;

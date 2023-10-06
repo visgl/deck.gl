@@ -21,7 +21,7 @@ const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
 };
 
 /** All properties supported by QuadbinTileLayer. */
-export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
+export type QuadbinTileLayerProps<DataT = unknown> = _QuadbinTileLayerProps<DataT> &
   CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */

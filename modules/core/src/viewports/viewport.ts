@@ -293,7 +293,7 @@ export default class Viewport {
     if (Number.isFinite(z)) {
       return [X, Y, Z];
     }
-    return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
+    return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
   // NON_LINEAR PROJECTION HOOKS
@@ -435,8 +435,8 @@ export default class Viewport {
 
   /* eslint-disable complexity, max-statements */
   private _initProps(opts: ViewportOptions) {
-    const longitude = opts.longitude;
-    const latitude = opts.latitude;
+    const longitude = opts.longitude as number;
+    const latitude = opts.latitude as number;
 
     if (this.isGeospatial) {
       if (!Number.isFinite(opts.zoom)) {

@@ -10,7 +10,13 @@ const EPSILON = 1e-5;
  * @param damping {Number}
  * @param stiffness {Number}
  */
-function updateSpringElement(prev, cur, dest, damping, stiffness) {
+function updateSpringElement(
+  prev: number,
+  cur: number,
+  dest: number,
+  damping: number,
+  stiffness: number
+): number {
   const velocity = cur - prev;
   const delta = dest - cur;
   const spring = delta * stiffness;
@@ -26,15 +32,30 @@ function updateSpringElement(prev, cur, dest, damping, stiffness) {
  * @param damping {Number}
  * @param stiffness {Number}
  */
-function updateSpring(prev, cur, dest, damping, stiffness) {
+function updateSpring(prev: number, cur: number, dest: number, damping: number, stiffness: number);
+function updateSpring(
+  prev: number[],
+  cur: number[],
+  dest: number[],
+  damping: number,
+  stiffness: number
+): number[];
+
+function updateSpring(
+  prev: number | number[],
+  cur: number | number[],
+  dest: number | number[],
+  damping: number,
+  stiffness: number
+): number | number[] {
   if (Array.isArray(dest)) {
-    const next = [];
+    const next: number[] = [];
     for (let i = 0; i < dest.length; i++) {
       next[i] = updateSpringElement(prev[i], cur[i], dest[i], damping, stiffness);
     }
     return next;
   }
-  return updateSpringElement(prev, cur, dest, damping, stiffness);
+  return updateSpringElement(prev as number, cur as number, dest, damping, stiffness);
 }
 
 /*

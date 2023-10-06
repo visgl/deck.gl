@@ -158,10 +158,10 @@ export default class MaskEffect implements Effect {
         const maskViewport =
           layerBounds &&
           makeViewport({
-            bounds: channelInfo.bounds,
+            bounds: channelInfo.bounds!,
             viewport,
-            width: maskMap.width,
-            height: maskMap.height,
+            width: maskMap!.width,
+            height: maskMap!.height,
             border: 1
           });
 
@@ -252,7 +252,7 @@ export default class MaskEffect implements Effect {
     maskChannels: Record<string, Mask> | null;
   } {
     return {
-      maskMap: this.masks ? this.maskMap : this.dummyMaskMap,
+      maskMap: this.masks ? this.maskMap! : this.dummyMaskMap!,
       maskChannels: this.masks
     };
   }

@@ -25,7 +25,7 @@ export type JSONConverterProps = {
 
 export default class JSONConverter {
   log = console; // eslint-disable-line
-  configuration: JSONConfiguration;
+  configuration!: JSONConfiguration;
   onJSONChange = () => {};
   json = null;
   convertedJson = null;

@@ -38,7 +38,11 @@ export function pointToHexbin(props, aggregationParams) {
   const radiusCommon = getRadiusInCommon(radius, viewport, centerLngLat);
 
   // add world space coordinates to points
-  const screenPoints = [];
+  const screenPoints: {
+    screenCoord: number[];
+    source: any;
+    index: number;
+  }[] = [];
   const {iterable, objectInfo} = createIterable(data);
   const positions = attributes.positions.value;
   const {size} = attributes.positions.getAccessor();

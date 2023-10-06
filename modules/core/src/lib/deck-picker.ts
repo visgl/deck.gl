@@ -29,7 +29,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
@@ -65,8 +65,8 @@ type PickOperationContext = {
 /** Manages picking in a Deck context */
 export default class DeckPicker {
   device: Device;
-  pickingFBO?: LumaFramebuffer;
-  depthFBO?: LumaFramebuffer;
+  pickingFBO?: Framebuffer;
+  depthFBO?: Framebuffer;
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
 
@@ -197,6 +197,7 @@ export default class DeckPicker {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   } {
+    // @ts-expect-error TODO - assuming WebGL context
     const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
@@ -213,6 +214,7 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
+    // @ts-expect-error TODO - assuming WebGL context
     const devicePixelRange = this.device.canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
@@ -220,7 +222,7 @@ export default class DeckPicker {
     ];
 
     const deviceRadius = Math.round(radius * pixelRatio);
-    const {width, height} = this.pickingFBO;
+    const {width, height} = this.pickingFBO as Framebuffer;
     const deviceRect = this._getPickingRect({
       deviceX: devicePixel[0],
       deviceY: devicePixel[1],
@@ -278,8 +280,8 @@ export default class DeckPicker {
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX,
-              y: pickInfo.pickedY,
+              x: pickInfo.pickedX as number,
+              y: pickInfo.pickedY as number,
               width: 1,
               height: 1
             },
@@ -334,7 +336,7 @@ export default class DeckPicker {
       layer.restorePickingColors();
     }
 
-    return {result, emptyInfo: infos.get(null)};
+    return {result, emptyInfo: infos!.get(null) as PickingInfo};
   }
 
   /** Pick all objects within the given bounding box */
@@ -361,7 +363,9 @@ export default class DeckPicker {
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
+    // @ts-expect-error TODO - assuming WebGL context
     const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    // @ts-expect-error TODO - assuming WebGL context
     const leftTop = this.device.canvasContext.cssToDevicePixels([x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
@@ -369,6 +373,7 @@ export default class DeckPicker {
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
+    // @ts-expect-error TODO - assuming WebGL context
     const rightBottom = this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
@@ -414,7 +419,7 @@ export default class DeckPicker {
         pixelRatio
       };
 
-      info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
+      info = getLayerPickingInfo({layer: pickInfo.pickedLayer as Layer, info, mode});
       if (!uniqueInfos.has(info.object)) {
         uniqueInfos.set(info.object, info);
       }
@@ -509,7 +514,7 @@ export default class DeckPicker {
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
     const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    readPixelsToArray(pickingFBO, {
+    readPixelsToArray(pickingFBO as Framebuffer, {
       sourceX: x,
       sourceY: y,
       sourceWidth: width,

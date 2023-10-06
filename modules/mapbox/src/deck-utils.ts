@@ -231,7 +231,7 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
     const dy = cameraY - center[1];
     const cameraToCenterDistanceGround = Math.sqrt(dx * dx + dy * dy);
 
-    const pitchRadians = pitch * DEGREES_TO_RADIANS;
+    const pitchRadians = pitch! * DEGREES_TO_RADIANS;
     const altitudePixels = 1.5 * height;
     const scale =
       pitchRadians < 0.001

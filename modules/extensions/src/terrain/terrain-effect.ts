@@ -20,7 +20,7 @@ export class TerrainEffect implements Effect {
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
-  private dummyHeightMap: Texture;
+  private dummyHeightMap?: Texture;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
@@ -99,7 +99,7 @@ export class TerrainEffect implements Effect {
       // @ts-expect-error
       heightMap: this.heightMap?.getRenderFramebuffer(),
       heightMapBounds: this.heightMap?.bounds,
-      dummyHeightMap: this.dummyHeightMap,
+      dummyHeightMap: this.dummyHeightMap!,
       terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
       useTerrainHeightMap: terrainDrawMode === 'offset',
       terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')

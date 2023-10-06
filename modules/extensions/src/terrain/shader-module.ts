@@ -118,7 +118,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler: Texture = dummyHeightMap;
+      let sampler = dummyHeightMap as Texture;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -143,7 +143,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
           mode = mode === TERRAIN_MODE.SKIP ? TERRAIN_MODE.USE_COVER_ONLY : TERRAIN_MODE.USE_COVER;
           bounds = terrainCover.bounds;
         } else {
-          sampler = dummyHeightMap;
+          sampler = dummyHeightMap!;
         }
       }
 

@@ -171,7 +171,7 @@ type _SimpleMeshLayerProps<DataT> = {
   material?: Material;
 };
 
-export type SimpleMeshLayerProps<DataT = any> = _SimpleMeshLayerProps<DataT> & LayerProps;
+export type SimpleMeshLayerProps<DataT = unknown> = _SimpleMeshLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},

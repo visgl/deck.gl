@@ -7,7 +7,7 @@ import {SeparatedGeometries} from './geojson';
 // TODO: PathLayer is not yet typed
 type PathLayerProps = LayerProps & Record<string, any>;
 
-type SubLayersProps = {
+export type SubLayersProps = {
   points: Partial<ScatterplotLayerProps>;
   lines: Partial<PathLayerProps>;
   polygons: Partial<PolygonLayerProps>;

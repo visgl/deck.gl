@@ -401,6 +401,7 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
+      // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
       attribute.setConstantValue(attribute.value);
       return;
     }

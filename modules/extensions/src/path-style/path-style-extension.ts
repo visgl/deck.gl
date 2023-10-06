@@ -23,6 +23,7 @@ import {dashShaders, offsetShaders} from './shaders.glsl';
 import {dist} from 'gl-matrix/vec3';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+import type {Model} from '@luma.gl/engine';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -155,7 +156,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
     }
 
-    this.state.model.setUniforms(uniforms);
+    (this.state.model as Model)?.setUniforms(uniforms);
   }
 
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
