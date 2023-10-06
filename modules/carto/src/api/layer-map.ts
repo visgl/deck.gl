@@ -33,6 +33,7 @@ import {
   VisualChannels
 } from './types';
 
+const HEX_COLOR_COLUMN = 'HexColor column';
 const SCALE_FUNCS = {
   linear: scaleLinear,
   ordinal: scaleOrdinal,
@@ -313,7 +314,7 @@ export function opacityToAlpha(opacity?: number) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
-function getAccessorKeys(name: string, aggregation: string | undefined): string[] {
+function getAccessorKeys(name: string, aggregation?: string | undefined): string[] {
   let keys = [name];
   if (aggregation) {
     // Snowflake will capitalized the keys, need to check lower and upper case version
@@ -341,15 +342,19 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 export function getColorAccessor(
   {name},
   scaleType: SCALE_TYPE,
-  {aggregation, range: {colors, colorMap}},
+  {aggregation, range: {colors, colorMap, type, column}},
   opacity: number | undefined,
   data: any
 ) {
-  const scale = SCALE_FUNCS[scaleType as any]();
+  let scale = SCALE_FUNCS[scaleType as any]();
   let domain: (string | number)[] = [];
   let scaleColor: string[] = [];
+  let accessorKeys = getAccessorKeys(name, aggregation);
 
-  if (Array.isArray(colorMap)) {
+  if (type === HEX_COLOR_COLUMN) {
+    scale = v => v;
+    accessorKeys = getAccessorKeys(column.name);
+  } else if (Array.isArray(colorMap)) {
     colorMap.forEach(([value, color]) => {
       domain.push(value);
       scaleColor.push(color);
@@ -363,12 +368,11 @@ export function getColorAccessor(
     domain = domain.slice(0, scaleColor.length);
   }
 
-  scale.domain(domain);
-  scale.range(scaleColor);
-  scale.unknown(UNKNOWN_COLOR);
+  scale.domain?.(domain);
+  scale.range?.(scaleColor);
+  scale.unknown?.(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
-  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
     if (!(accessorKeys[0] in properties)) {
       accessorKeys = findAccessorKey(accessorKeys, properties);
