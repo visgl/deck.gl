@@ -23,7 +23,7 @@ import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
 import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
-import {assert, createBinaryProxy} from '../utils';
+import {assert, createBinaryProxy, customIdentityScale} from '../utils';
 import {
   CustomMarkersRange,
   MapDataset,
@@ -42,7 +42,8 @@ const SCALE_FUNCS = {
   quantile: scaleQuantile,
   quantize: scaleQuantize,
   sqrt: scaleSqrt,
-  custom: scaleThreshold
+  custom: scaleThreshold,
+  identity: customIdentityScale
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
@@ -346,14 +347,12 @@ export function getColorAccessor(
   opacity: number | undefined,
   data: any
 ) {
-  let scale = SCALE_FUNCS[scaleType as any]();
   let domain: (string | number)[] = [];
   let scaleColor: string[] = [];
-  let accessorKeys = getAccessorKeys(name, aggregation);
 
   if (type === HEX_COLOR_COLUMN) {
-    scale = v => v;
-    accessorKeys = getAccessorKeys(column.name);
+    scaleType = 'identity';
+    name = column.name;
   } else if (Array.isArray(colorMap)) {
     colorMap.forEach(([value, color]) => {
       domain.push(value);
@@ -368,11 +367,13 @@ export function getColorAccessor(
     domain = domain.slice(0, scaleColor.length);
   }
 
-  scale.domain?.(domain);
-  scale.range?.(scaleColor);
-  scale.unknown?.(UNKNOWN_COLOR);
+  const scale = SCALE_FUNCS[scaleType as any]();
+  scale.domain(domain);
+  scale.range(scaleColor);
+  scale.unknown(UNKNOWN_COLOR);
   const alpha = opacityToAlpha(opacity);
 
+  let accessorKeys = getAccessorKeys(name, aggregation);
   const accessor = properties => {
     if (!(accessorKeys[0] in properties)) {
       accessorKeys = findAccessorKey(accessorKeys, properties);
