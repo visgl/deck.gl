@@ -21,7 +21,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
-#### deck.gl [8.10.0-alpha.3] - Oct 5 2023
+#### deck.gl [8.10.0-alpha.4] - Oct 5 2023
 
 - add(widgets) fullscreen widget (#8024)
 - CARTO: Initial implementation of v9 API (#8167)
