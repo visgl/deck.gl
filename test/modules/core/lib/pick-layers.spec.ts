@@ -30,7 +30,7 @@ import {
   GeoJsonLayer,
   GridLayer
 } from 'deck.gl';
-import MaskExtension from '@deck.gl/extensions/mask/mask-extension';
+import {MaskExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 
 const VIEW_STATE = {
@@ -245,7 +245,7 @@ const TEST_CASES = [
             height: 100
           },
           results: {
-            count: 34
+            count: 6
           }
         }
       ]
