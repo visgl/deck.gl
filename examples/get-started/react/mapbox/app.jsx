@@ -1,7 +1,9 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {StaticMap, MapContext, NavigationControl} from 'react-map-gl';
+import {Map, NavigationControl, useControl} from 'react-map-gl/maplibre';
 import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
+import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
@@ -16,11 +18,11 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-const NAV_CONTROL_STYLE = {
-  position: 'absolute',
-  top: 10,
-  left: 10
-};
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new DeckOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
 
 function Root() {
   const onClick = info => {
@@ -59,15 +61,13 @@ function Root() {
   ];
 
   return (
-    <DeckGL
+    <Map
       initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
-      layers={layers}
-      ContextProvider={MapContext.Provider}
+      mapStyle={MAP_STYLE}
     >
-      <StaticMap mapStyle={MAP_STYLE} />
-      <NavigationControl style={NAV_CONTROL_STYLE} />
-    </DeckGL>
+      <DeckGLOverlay layers={layers} />
+      <NavigationControl position='top-left' />
+    </Map>
   );
 }
 
