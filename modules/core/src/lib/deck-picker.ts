@@ -177,13 +177,6 @@ export default class DeckPicker {
       layer => this.pickLayersPass.shouldDrawLayer(layer) && !layer.isComposite
     );
 
-    // const requiredMasks = new Set(
-    //   // @ts-ignore
-    //   pickableLayers.filter(layer => layer.props.maskId).map(layer => layer.props.maskId)
-    // );
-    // const requiredMaskLayers = layers.filter(layer => requiredMasks.has(layer.props.id));
-    // pickableLayers = pickableLayers.concat(requiredMaskLayers);
-
     return pickableLayers.length ? pickableLayers : null;
   }
 
