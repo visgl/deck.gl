@@ -2,7 +2,7 @@
   "name": "@deck.gl/mesh-layers",
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
-  "version": "8.9.30",
+  "version": "8.9.31",
   "publishConfig": {
     "access": "public"
   },

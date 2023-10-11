@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.31] - Oct 11 2023
+
+- Draw mask layers when rendering to picking buffer (#8176)
+- Export TripsLayerProps through geo-layer (#8175)
+- Added a getCanvas helper function on deck (#7919)
+- Fix issue where deck.gl blocks wheel scroll over non-interactive area (#8161)
+- CARTO: Add carto module to `version` build script (#8123)
+
 #### deck.gl [8.9.30] - Sep 21 2023
 
 - [mapbox] fix drawing TerrainExtension in interleaved mode (#8115)
