@@ -30,6 +30,7 @@ import {
   GeoJsonLayer,
   GridLayer
 } from 'deck.gl';
+import {MaskExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 
 const VIEW_STATE = {
@@ -199,6 +200,50 @@ const TEST_CASES = [
           },
           results: {
             count: 0
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: 'scatterplotLayer-masked',
+    props: {
+      layers: [
+        new ScatterplotLayer({
+          id: 'mask',
+          operation: 'mask',
+          data: DATA.points.slice(0, 300),
+          getPosition: d => d.COORDINATES,
+          getRadius: d => d.SPACES,
+          radiusScale: 5,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 5
+        }),
+        new ScatterplotLayer({
+          id: 'points',
+          data: DATA.points,
+          getPosition: d => d.COORDINATES,
+          getRadius: d => d.SPACES,
+          pickable: true,
+          radiusScale: 30,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 30,
+          extensions: [new MaskExtension()],
+          maskId: 'mask'
+        })
+      ]
+    },
+    pickingMethods: {
+      pickObjects: [
+        {
+          parameters: {
+            x: 300,
+            y: 300,
+            width: 100,
+            height: 100
+          },
+          results: {
+            count: 6
           }
         }
       ]
