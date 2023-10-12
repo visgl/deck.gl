@@ -10,7 +10,9 @@ import {
   MAP_TYPES as CARTO_MAP_TYPES,
   colorBins,
   colorCategories,
-  colorContinuous
+  colorContinuous,
+  cartoVectorTilesetSource,
+  VectorTileLayer
 } from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -34,13 +36,13 @@ export default {
     AggregationLayers,
     GeoLayers,
     MeshLayers,
-    {CartoLayer},
+    {CartoLayer, VectorTileLayer},
     // Any non-standard views
     {}
   ),
 
   // Functions that should be executed by JSON converter
-  functions: {colorBins, colorCategories, colorContinuous},
+  functions: {cartoVectorTilesetSource, colorBins, colorCategories, colorContinuous},
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
