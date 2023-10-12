@@ -6,13 +6,11 @@ import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
 import {
-  CartoLayer,
-  MAP_TYPES as CARTO_MAP_TYPES,
+  CARTO_LAYERS,
+  CARTO_SOURCES,
   colorBins,
   colorCategories,
-  colorContinuous,
-  cartoVectorTilesetSource,
-  VectorTileLayer
+  colorContinuous
 } from '@deck.gl/carto';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
@@ -34,22 +32,21 @@ export default {
     // a map of all layers that should be exposes as JSONLayers
     Layers,
     AggregationLayers,
+    CARTO_LAYERS,
     GeoLayers,
     MeshLayers,
-    {CartoLayer, VectorTileLayer},
     // Any non-standard views
     {}
   ),
 
   // Functions that should be executed by JSON converter
-  functions: {cartoVectorTilesetSource, colorBins, colorCategories, colorContinuous},
+  functions: {...CARTO_SOURCES, colorBins, colorCategories, colorContinuous},
 
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
     COORDINATE_SYSTEM,
-    GL: GLConstants,
-    CARTO_MAP_TYPES
+    GL: GLConstants
   },
 
   // Constants that should be resolved with the provided values by JSON converter
