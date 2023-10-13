@@ -17,10 +17,13 @@
     "modules/*"
   ],
   "resolution_comments": {
-    "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test"
+    "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test",
+    "math.gl": "loaders.gl pulls in v3 packages"
   },
   "resolutions": {
-    "escaper": "3.0.6"
+    "escaper": "3.0.6",
+    "@math.gl/core": "4.0.0-beta.1",
+    "@math.gl/proj4": "4.0.0-beta.1"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
@@ -79,9 +82,5 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {},
-  "resolutions": {
-    "@math.gl/core": "4.0.0-beta.1",
-    "@math.gl/proj4": "4.0.0-beta.1"
-  }
+  "dependencies": {}
 }
