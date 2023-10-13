@@ -16,7 +16,7 @@ module.exports = getBabelConfig({
     ],
     overrides: [
       {
-        include: './modules/widgets/**/*.{ts,tsx}',
+        include: './modules/widgets/**/*.tsx',
         // Parse preact-style JSX in @deck.gl/widgets.
         presets: [['@babel/typescript', {jsxPragma: 'h'}]],
         plugins: [['@babel/plugin-transform-react-jsx', {pragma: 'h'}]]
