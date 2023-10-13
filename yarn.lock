@@ -3037,16 +3037,7 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@math.gl/core@3.6.2", "@math.gl/core@^3.5.0", "@math.gl/core@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.6.2.tgz#2f05c0f9655b1979fd8a74147d463d7795eb29a3"
-  integrity sha512-1GxQNy1EI1FvJNw3VRKoV97ZAOfDaGMRyfasA0RSl7IT98deLUOga6K5LOy4VYpD2YFgF85RBabpO6xJKyJHQg==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/types" "3.6.2"
-    gl-matrix "^3.4.0"
-
-"@math.gl/core@4.0.0-beta.1":
+"@math.gl/core@3.6.2", "@math.gl/core@4.0.0-beta.1", "@math.gl/core@^3.5.0", "@math.gl/core@^3.5.1":
   version "4.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-4.0.0-beta.1.tgz#22cf5f8bdeb48ca55840bada3cf7513c06c03399"
   integrity sha512-FJ4blmrrj+vDiFFw1ErbR7q5JK4SWva2uIdu4OQHo1uZDEY6amJ7nHC3g5UCt4izyQ66Ntirx1B37dLrOJpdlQ==
@@ -3110,11 +3101,6 @@
   integrity sha512-QrSoVHJkjl2xd3PtGimlUCDizl8WRwClFwmNfeAeJnepsWtvaLan7njft5vyCTQF7VIdd4SZxyTNomtTvo+kiw==
   dependencies:
     "@babel/runtime" "^7.12.0"
-
-"@math.gl/types@3.6.2":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-3.6.2.tgz#2c17c5d88b3ae968df1f9af0f959de08389536e6"
-  integrity sha512-Vl9rod2vJDk0LofWrAWlBS3kAQO9a/V2w6MtXBOOpjF7USa4qECE9kjhKTORUET/OH2gHbzrgBDAzhATgnsAvg==
 
 "@math.gl/types@4.0.0-beta.1":
   version "4.0.0-beta.1"
@@ -6123,10 +6109,10 @@ escape-string-regexp@^4.0.0:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz#14ba83a5d373e3d311e5afca29cf5bfad965bf34"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
 
-escaper@3.0.6, escaper@^2.5.3:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/escaper/-/escaper-3.0.6.tgz#82cb26d95e3de87c87ef786b0592ac19a55c704b"
-  integrity sha512-QEdbdnIdh8+VgK6jr2iOixGR/havRmnwAMqFmYldBn6QZrTYmuwHlAE4bZ36PUa5kKlnrb0egSvEQTvFfdHtEw==
+escaper@^2.5.3:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/escaper/-/escaper-2.5.3.tgz#8b8fe90ba364054151ab7eff18b4ce43b1e13ab5"
+  integrity sha512-QGb9sFxBVpbzMggrKTX0ry1oiI4CSDAl9vIL702hzl1jGW8VZs7qfqTRX7WDOjoNDoEVGcEtu1ZOQgReSfT2kQ==
 
 escodegen@^2.0.0:
   version "2.0.0"

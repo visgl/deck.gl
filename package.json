@@ -79,5 +79,9 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "resolutions": {
+    "@math.gl/core": "4.0.0-beta.1",
+    "@math.gl/proj4": "4.0.0-beta.1"
+  }
 }
