@@ -245,10 +245,21 @@ export default class DataColumn<Options, State> {
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
-    const result: Record<string, Buffer | NumericArray | null> = {};
+  getValue(
+    attributeName: string = this.id,
+    options: Partial<ShaderAttributeOptions> | null = null
+  ): Record<string, Buffer | TypedArray | null> {
+    const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
-      result[attributeName] = this.value;
+      const value = this.value as TypedArray;
+      if (options) {
+        const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
+        const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
+        const size = shaderAttributeDef.size || this.size;
+        result[attributeName] = value.subarray(offset, offset + size);
+      } else {
+        result[attributeName] = value;
+      }
     } else {
       result[attributeName] = this.getBuffer();
     }
