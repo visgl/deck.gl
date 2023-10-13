@@ -40,9 +40,9 @@
     "@loaders.gl/tiles": "^3.4.13",
     "@loaders.gl/wms": "^3.4.13",
     "@luma.gl/core": "9.0.0-alpha.37",
-    "@math.gl/core": "4.0.0-alpha.4",
-    "@math.gl/culling": "4.0.0-alpha.4",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@math.gl/core": "^4.0.0",
+    "@math.gl/culling": "^4.0.0",
+    "@math.gl/web-mercator": "^4.0.0",
     "@types/geojson": "^7946.0.8",
     "h3-js": "^4.1.0",
     "long": "^3.2.0"
