@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {Matrix4} from 'math.gl';
+import {Matrix4} from '@math.gl/core';
 
 import {WebMercatorViewport, OrthographicView} from '@deck.gl/core';
 

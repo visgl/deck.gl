@@ -22,8 +22,12 @@
   },
   "resolutions": {
     "escaper": "3.0.6",
-    "@math.gl/core": "4.0.0-beta.1",
-    "@math.gl/proj4": "4.0.0-beta.1"
+    "math.gl": "^4.0.0",
+    "@math.gl/core": "^4.0.0",
+    "@math.gl/web-mercator": "^4.0.0",
+    "@math.gl/culling": "^4.0.0",
+    "@math.gl/geospatial": "^4.0.0",
+    "@math.gl/proj4": "^4.0.0"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
@@ -55,9 +59,9 @@
     "@loaders.gl/csv": "^3.4.13",
     "@loaders.gl/polyfills": "^3.4.13",
     "@luma.gl/test-utils": "^8.5.20",
-    "@math.gl/proj4": "4.0.0-beta.1",
-    "@probe.gl/bench": "^3.5.4",
-    "@probe.gl/test-utils": "^3.5.4",
+    "@math.gl/proj4": "^4.0.0",
+    "@probe.gl/bench": "^4.0.0",
+    "@probe.gl/test-utils": "^4.0.0",
     "@types/react": "^18.0.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.3",

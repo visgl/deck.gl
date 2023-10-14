@@ -41,9 +41,9 @@
     "@loaders.gl/wms": "^3.4.13",
     "@luma.gl/constants": "^8.5.20",
     "@luma.gl/experimental": "^8.5.20",
-    "@math.gl/core": "4.0.0-beta.1",
-    "@math.gl/culling": "4.0.0-beta.1",
-    "@math.gl/web-mercator": "4.0.0-beta.1",
+    "@math.gl/core": "^4.0.0",
+    "@math.gl/culling": "^4.0.0",
+    "@math.gl/web-mercator": "^4.0.0",
     "@types/geojson": "^7946.0.8",
     "h3-js": "^4.1.0",
     "long": "^3.2.0"
