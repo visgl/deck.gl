@@ -41,7 +41,7 @@
     "@luma.gl/shadertools": "9.0.0-alpha.37",
     "@luma.gl/webgl": "9.0.0-alpha.37",
     "@math.gl/core": "^4.0.0",
-    "@math.gl/web-mercator": "^4.0.0".
+    "@math.gl/web-mercator": "^4.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

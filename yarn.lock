@@ -3044,86 +3044,14 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-<<<<<<< HEAD
-"@math.gl/core@3.6.2", "@math.gl/core@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-3.6.2.tgz#2f05c0f9655b1979fd8a74147d463d7795eb29a3"
-  integrity sha512-1GxQNy1EI1FvJNw3VRKoV97ZAOfDaGMRyfasA0RSl7IT98deLUOga6K5LOy4VYpD2YFgF85RBabpO6xJKyJHQg==
-=======
-"@math.gl/core@3.6.3", "@math.gl/core@4.0.0", "@math.gl/core@^3.5.0", "@math.gl/core@^3.5.1", "@math.gl/core@^4.0.0":
+"@math.gl/core@3.6.2", "@math.gl/core@4.0.0", "@math.gl/core@4.0.0-alpha.4", "@math.gl/core@^3.5.1", "@math.gl/core@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-4.0.0.tgz#db64af16743ee4def7c1e294b3d1247621d2dabc"
   integrity sha512-qGbP4R8G0dsh5OUO+eWKX5NJwZitkV8CdVEolRFSoPteE0lrWxsg01FwAjegKv4jCm975VJ4HxDcb4L6KAiGGw==
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   dependencies:
     "@babel/runtime" "^7.12.0"
     "@math.gl/types" "4.0.0"
 
-<<<<<<< HEAD
-"@math.gl/core@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-4.0.0-alpha.4.tgz#6d8b4ecb084be6800800fe8748fc173dc5e64f72"
-  integrity sha512-lP8Sb1t2b4nmNTAwk6U0BG1Sl1/oj2PTUQTrFLUq0itEk5ppcc6Z6VqYovgxoOng44e5cLx7rfdaDT9l3EjTqQ==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/types" "4.0.0-alpha.4"
-
-"@math.gl/culling@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-4.0.0-alpha.4.tgz#3ec98adffd3bfcd63f7f10e6941e529bca24749c"
-  integrity sha512-BzQnG9SDQy84safvKNBg942ocfUwrEXPDJPkCOAf1EAdDAE8f3PdVx3QCymilxBj7c2d+NylAL2hGrMzIGhZ1w==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "4.0.0-alpha.4"
-    gl-matrix "^3.4.3"
-
-"@math.gl/culling@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-3.6.2.tgz#f35e1b18cd8b3c1e48f29ff41a8c54202fb7c691"
-  integrity sha512-KYO4Wi8XY4dNh7GrPke0A6Z6hQS4CAxnUVkFIIilLH0z4PggdMC/NrHezMlTwVxJS0Zvuy/Pr5uP5Nm9HY5y0g==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "3.6.2"
-    gl-matrix "^3.4.0"
-
-"@math.gl/geospatial@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-3.6.2.tgz#db0fb64cdf49bdf8db344bbae3d585f4045b84ff"
-  integrity sha512-FAg0JT7n3V4p/FuN1b6jiou+jaMxtj2GAvj8qArv0XK0L+CBd7SOl9J/LWr+GCMvX8wAvOXdB3AzrdV2UwUsuQ==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "3.6.2"
-    gl-matrix "^3.4.0"
-
-"@math.gl/polygon@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-4.0.0-alpha.4.tgz#f12b227df950858caa5eab746f75d2cde59375da"
-  integrity sha512-fDQMPGp+bVcJGMRBy+zd8kQQBnaVwjDv25UgXKDXsFvPPNRC7uyr6xXcoGsujPXAdnU5sfpG66VATfOzHYkd1A==
-  dependencies:
-    "@math.gl/core" "4.0.0-alpha.4"
-
-"@math.gl/polygon@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.6.2.tgz#6999d20b227ea89877ed61655a3ea7c898fe4bd6"
-  integrity sha512-Kq9jQrO4Iv1oGb5/goS6JFzezYmynW7PrmKXLiI7vvS6jGw/ATZzl7Wn+8Svlta9NpuKKPI7DcBYSYSvfmnIoA==
-  dependencies:
-    "@math.gl/core" "3.6.2"
-
-"@math.gl/proj4@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/proj4/-/proj4-4.0.0-alpha.4.tgz#3d37fd575bc90571974b8221da9bd59805884bfd"
-  integrity sha512-H41jm9/V2j73aQ3RZqHJuFO0FW/Jmkny+dtCh0gfhAIrrEitzva70hkx8u7/1xTqjYpj6uA9Z86W/BTGOvH1nw==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    "@math.gl/core" "4.0.0-alpha.4"
-    "@types/proj4" "^2.5.0"
-    proj4 "2.6.2"
-
-"@math.gl/sun@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/sun/-/sun-4.0.0-alpha.4.tgz#a33680040cdffa621debf01d0e0f6a1fdae8ea5b"
-  integrity sha512-uBS2u+cBCYS9uTYuZsthui1AppzzUZepAJhMm71f1yeFYdv37I2HARou2/e65JoLKMRNOpA6bNyN79WzYZwW+w==
-=======
 "@math.gl/culling@^3.5.1", "@math.gl/culling@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@math.gl/culling/-/culling-4.0.0.tgz#5bb96ec38645944088176911a6f4aab43b265cb9"
@@ -3141,11 +3069,11 @@
     "@math.gl/core" "4.0.0"
 
 "@math.gl/polygon@^3.5.1":
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.6.3.tgz#0c19c0b059cedde1cd760cc3796e9180f75bcbde"
-  integrity sha512-FivQ1ZnYcAss1wVifOkHP/ZnlfQy1IL/769uzNtiHxwUbW0kZG3yyOZ9I7fwyzR5Hvqt3ErJKHjSYZr0uVlz5g==
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/@math.gl/polygon/-/polygon-3.6.2.tgz#6999d20b227ea89877ed61655a3ea7c898fe4bd6"
+  integrity sha512-Kq9jQrO4Iv1oGb5/goS6JFzezYmynW7PrmKXLiI7vvS6jGw/ATZzl7Wn+8Svlta9NpuKKPI7DcBYSYSvfmnIoA==
   dependencies:
-    "@math.gl/core" "3.6.3"
+    "@math.gl/core" "3.6.2"
 
 "@math.gl/polygon@^4.0.0":
   version "4.0.0"
@@ -3168,7 +3096,6 @@
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@math.gl/sun/-/sun-4.0.0.tgz#20cf7960093e26d29685d76ee8b7364e38f9460e"
   integrity sha512-CEjq/IC/RWjrqgmG/496yJDmwgiASKBnFPjEsGcbVpwFh0kM8wLUGykf9z3nHQ0nY54RwgbrR1nyzQuAqDLShw==
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   dependencies:
     "@babel/runtime" "^7.12.0"
 
@@ -3177,30 +3104,15 @@
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.0.0.tgz#20c649dcef8459d9dd1f83a708d7410fe06a3309"
   integrity sha512-ZqU7o0LFaWQK/0wYobCwQKrKhRHaihps8oE74CLnWAdTTjXkM2vA8dU7vdx238QfXkNkz4Mv+KYklHpXMQJ8Hw==
 
-<<<<<<< HEAD
 "@math.gl/types@4.0.0-alpha.4":
   version "4.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.0.0-alpha.4.tgz#eb2875f2e20dd03ddcd3033153bec413dc430935"
   integrity sha512-+sA2EJKFbB57xDgkiTSTelnnrvmTG0ZxoYZOEEgwr6y4AKfzzBsuESTVjUfv0o5LnuDv8ctJ1vHXm4Khg9bjsg==
 
-"@math.gl/web-mercator@4.0.0-alpha.4":
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-4.0.0-alpha.4.tgz#58de9b7eba014e292ecde96b5f3ba8e6ab883a0c"
-  integrity sha512-vl3ybYsZCFzWsNGlc+bxJKrwymP/kOyesCWSpGZ4P/9vUJ7cXPB8nlScolBK4G3ecXeNBdw43EiA9b8jEqmXZg==
-  dependencies:
-    "@babel/runtime" "^7.12.0"
-    gl-matrix "^3.4.3"
-
-"@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.6.2.tgz#1fd8fc2f1dfa794e5fe03eed328d53f69e7bf932"
-  integrity sha512-jud2n6YEPp0+PHseG/gtJXskYAMQEM3bOyyPdwwEeu9OekjeWvkC9q3OGDF7Ve7KUA2kPbNzpD/r8VBhuixk8w==
-=======
 "@math.gl/web-mercator@^3.1.3", "@math.gl/web-mercator@^3.5.1", "@math.gl/web-mercator@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-4.0.0.tgz#2df70ec478b464337991b9fcdc3acaacf41311cc"
   integrity sha512-dtzjaJPckyAEsCT0eHayPoZ8RrHg7XkQq9fZAHAn8CPiyLX0J0ZdvpH1x4a3qe7Ct7CPo6ChnqSk0DwItA4aNQ==
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   dependencies:
     "@babel/runtime" "^7.12.0"
 
@@ -3338,11 +3250,7 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.3.tgz#8b68da1ebd7fc603999cf6ebee34a4899a14b88e"
   integrity sha512-xDu17cEfh7Kid/d95kB6tZsLOmSWKCZKtprnhVepjsSaCij+lM3mItSJDuuHDMbCWTh8Ejmebwb+KONcCJ0eXQ==
 
-<<<<<<< HEAD
 "@probe.gl/bench@^4.0.4":
-=======
-"@probe.gl/bench@^4.0.0":
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-4.0.4.tgz#833353fac77a74dc4b7b32b12da9ca6319995063"
   integrity sha512-7cf8VLdt4/8lhsUnt6+0bxGaYCK2udeuQ2uwUtyR4nCWcOPbVhknt6XcSI8l6NRrr4oGEJ3vF9nj5561dIl3Gg==
@@ -3350,36 +3258,14 @@
     "@babel/runtime" "^7.0.0"
     "@probe.gl/log" "4.0.4"
 
-<<<<<<< HEAD
 "@probe.gl/env@4.0.4", "@probe.gl/env@^4.0.2", "@probe.gl/env@^4.0.4":
-=======
-"@probe.gl/env@3.5.0", "@probe.gl/env@^3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-3.5.0.tgz#c6d8fbf414fda3eba7b3813cc274e76245216fe0"
-  integrity sha512-YdlpZZshhyYxvWDBmZ5RIW2pTR14Pw4p9czMlt/v7F6HbFzWfAdmH7q6xVwFRYxUpQLwhWensWyv4aFysiWl4g==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-"@probe.gl/env@4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-4.0.3.tgz#c437b139953ceda9c1a13bad2be9c14d3ff3ba03"
-  integrity sha512-Iz2/xPHMa5adDBw/m7nyQ0bKgLXZqMauPfV2ePU9ZOfkt6NnWMzQAjBeeXufujE6vndJUAALgpweO/YjYkKo+Q==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-"@probe.gl/env@4.0.4", "@probe.gl/env@^4.0.0":
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-4.0.4.tgz#ea4e7d16f143faaf1e863316c6ccfe68db8b66a4"
   integrity sha512-sYNGqesDfWD6dFP5oNZtTeFA4Z6ak5T4a8BNPdNhoqy7PK9w70JHrb6mv+RKWqKXq33KiwCDWL7fYxx2HuEH2w==
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-<<<<<<< HEAD
 "@probe.gl/log@4.0.4", "@probe.gl/log@^4.0.1", "@probe.gl/log@^4.0.2", "@probe.gl/log@^4.0.4":
-=======
-"@probe.gl/log@4.0.4", "@probe.gl/log@^4.0.0":
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@probe.gl/log/-/log-4.0.4.tgz#e42d1d0e22981c4010521c350cad2305bce02976"
   integrity sha512-WpmXl6njlBMwrm8HBh/b4kSp/xnY1VVmeT4PWUKF+RkVbFuKQbsU11dA1IxoMd7gSY+5DGIwxGfAv1H5OMzA4A==
@@ -3394,25 +3280,7 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-<<<<<<< HEAD
 "@probe.gl/test-utils@^4.0.3", "@probe.gl/test-utils@^4.0.4":
-=======
-"@probe.gl/stats@^4.0.0":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@probe.gl/stats/-/stats-4.0.4.tgz#b33a47bf192951d0789dfd2044b295c3709386bd"
-  integrity sha512-SDuSY/D4yDL6LQDa69l/GCcnZLRiGYdyvYkxWb0CgnzTPdPrcdrzGkzkvpC3zsA4fEFw2smlDje370QGHwlisg==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-"@probe.gl/stats@^4.0.1":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@probe.gl/stats/-/stats-4.0.3.tgz#a17ea752eb3d7540d0a5c92d8c9cea268a48930a"
-  integrity sha512-8BNKDmgwNqvcBNEcsIavtEWQp1WvBfryLodAv1YX8/Swg60Ky3ElDNNpSDuIVMnFDvI/De0zXiuXXydtn86/vA==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-"@probe.gl/test-utils@^4.0.0", "@probe.gl/test-utils@^4.0.3":
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-4.0.4.tgz#86533d0a6ea3db03d3d41356830e4de8b0d84c8d"
   integrity sha512-VxcFQ0yxgvbdL/4HQnrSFhaSRoUYGm6UB7xlah+DNUhBOJNF+30Cba7ekZYkq6u1ggcS+bRIf7Susgb4UXuI3g==
@@ -3560,7 +3428,7 @@
   resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
   integrity sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
 
-"@types/geojson@*", "@types/geojson@^7946.0.7", "@types/geojson@^7946.0.8":
+"@types/geojson@^7946.0.7", "@types/geojson@^7946.0.8":
   version "7946.0.8"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.8.tgz#30744afdb385e2945e22f3b033f897f76b1f12ca"
   integrity sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==
@@ -3615,13 +3483,6 @@
   version "4.14.155"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.155.tgz#e2b4514f46a261fd11542e47519c20ebce7bc23a"
   integrity sha512-vEcX7S7aPhsBCivxMwAANQburHBtfN9RdyXFk84IJmu2Z4Hkg1tOFgaslRiEqqvoLtbCBi6ika1EMspE+NZ9Lg==
-
-"@types/mapbox-gl@^2.6.3":
-  version "2.6.3"
-  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-2.6.3.tgz#09e4992bb540fe5e024eebc5fbc315317cb13ffe"
-  integrity sha512-oF5eQmczkoPQfxfRSwpF9GcrWi3YleptJ67uiCQKps+7aKxwIbww0EHHqIrxvOg49l07+AZBtJU2FPKZm1jKAg==
-  dependencies:
-    "@types/geojson" "*"
 
 "@types/mdast@^3.0.0":
   version "3.0.10"
@@ -7194,11 +7055,7 @@ gl-matrix@^3.0.0:
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.3.0.tgz#232eef60b1c8b30a28cbbe75b2caf6c48fd6358b"
   integrity sha512-COb7LDz+SXaHtl/h4LeaFcNdJdAQSDeVqjiIihSXNrkWObZLhDI4hIkZC11Aeqp7bcE72clzB0BnDXr2SmslRA==
 
-<<<<<<< HEAD
-gl-matrix@^3.2.1, gl-matrix@^3.4.0, gl-matrix@^3.4.3:
-=======
 gl-matrix@^3.2.1:
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.4.3.tgz#fc1191e8320009fd4d20e9339595c6041ddc22c9"
   integrity sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==
@@ -8910,8 +8767,6 @@ mapbox-gl@^1.13.2:
     tinyqueue "^2.0.3"
     vt-pbf "^3.1.1"
 
-<<<<<<< HEAD
-=======
 math.gl@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-4.0.0.tgz#3ad72415de664df1f7e93e3d6af3a738f89a93fc"
@@ -8919,7 +8774,6 @@ math.gl@^4.0.0:
   dependencies:
     "@math.gl/core" "4.0.0"
 
->>>>>>> 719ece647 (chore: Upgrade to math.gl@4.0.0. Remove gl-matrix)
 mdast-util-from-markdown@^0.8.5:
   version "0.8.5"
   resolved "https://registry.yarnpkg.com/mdast-util-from-markdown/-/mdast-util-from-markdown-0.8.5.tgz#d1ef2ca42bc377ecb0463a987910dae89bd9a28c"
