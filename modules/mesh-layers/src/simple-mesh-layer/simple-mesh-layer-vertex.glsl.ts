@@ -16,9 +16,9 @@ in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
-in vec3 instanceModelMatrix_c0;
-in vec3 instanceModelMatrix_c1;
-in vec3 instanceModelMatrix_c2;
+in vec3 instanceModelMatrixCol0;
+in vec3 instanceModelMatrixCol1;
+in vec3 instanceModelMatrixCol2;
 in vec3 instanceTranslation;
 
 // Outputs to fragment shader
@@ -37,7 +37,7 @@ void main(void) {
   cameraPosition = project_uCameraPosition;
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
-  mat3 instanceModelMatrix = mat3(instanceModelMatrix_c0, instanceModelMatrix_c1, instanceModelMatrix_c2);
+  mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
 
   if (composeModelMatrix) {

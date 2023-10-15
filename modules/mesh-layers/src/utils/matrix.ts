@@ -54,15 +54,15 @@ export const MATRIX_ATTRIBUTES = {
   size: 12,
   accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
   shaderAttributes: {
-    instanceModelMatrix_c0: {
+    instanceModelMatrixCol0: {
       size: 3,
       elementOffset: 0
     },
-    instanceModelMatrix_c1: {
+    instanceModelMatrixCol1: {
       size: 3,
       elementOffset: 3
     },
-    instanceModelMatrix_c2: {
+    instanceModelMatrixCol2: {
       size: 3,
       elementOffset: 6
     },
