@@ -156,14 +156,6 @@ Whether to render the mesh in wireframe mode.
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
-##### `_useMeshColors` (Boolean, optional) {#_usemeshcolors}
-
-- Default: `false`
-
-Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute). If set to `true`, vertex colors will be used. If set to `false` (default) vertex colors will be ignored.
-
-Remarks:
-- In the next major release of deck.gl, vertex colors are expected to always be used when supplied with a mesh. This property will then likely be removed and effectively default to true.
 
 ### Data Accessors
 
