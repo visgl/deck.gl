@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.10.0-alpha.4",
+  "version": "8.10.0-alpha.5",
   "publishConfig": {
     "access": "public"
   },

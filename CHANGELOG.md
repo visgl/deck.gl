@@ -21,6 +21,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
+#### deck.gl [8.10.0-alpha.5] - Oct 17 2023
+
+ - chore(tests) bump puppeteer version (#8202)
+ - Add new link to showcase page (#8190)
+ - Chore: fix missing anchor tags (#8194)
+ - [chore] Fix widget module publishing (#8178)
+ - Draw mask layers when rendering to picking buffer (#8176)
+ - Export TripsLayerProps through geo-layer (#8175)
+
 #### deck.gl [8.10.0-alpha.4] - Oct 5 2023
 
 - add(widgets) fullscreen widget (#8024)
