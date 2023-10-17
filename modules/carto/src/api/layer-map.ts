@@ -346,10 +346,10 @@ export function getColorAccessor(
   opacity: number | undefined,
   data: any
 ) {
-  let {name} = field;
+  let name = field.name;
+
   if (field.colorColumn) {
     name = field.colorColumn;
-    scaleType = 'identity';
   }
 
   const {domain, scaleColor} = getDomainAndScaleColor(name, scaleType, range, data);
