@@ -23,7 +23,7 @@ import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
 import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
-import {assert, createBinaryProxy, customIdentityScale} from '../utils';
+import {assert, createBinaryProxy, scaleIdentity} from '../utils';
 import {
   CustomMarkersRange,
   MapDataset,
@@ -33,7 +33,6 @@ import {
   VisualChannels
 } from './types';
 
-const HEX_COLOR_COLUMN = 'HexColor column';
 const SCALE_FUNCS = {
   linear: scaleLinear,
   ordinal: scaleOrdinal,
@@ -43,7 +42,7 @@ const SCALE_FUNCS = {
   quantize: scaleQuantize,
   sqrt: scaleSqrt,
   custom: scaleThreshold,
-  identity: customIdentityScale
+  identity: scaleIdentity
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
@@ -341,33 +340,21 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 }
 
 export function getColorAccessor(
-  {name},
+  field: VisualChannelField,
   scaleType: SCALE_TYPE,
-  {aggregation, range: {colors, colorMap, type, column}},
+  {aggregation, range},
   opacity: number | undefined,
   data: any
 ) {
-  let domain: (string | number)[] = [];
-  let scaleColor: string[] = [];
-
-  if (type === HEX_COLOR_COLUMN) {
+  let {name} = field;
+  if (field.colorColumn) {
+    name = field.colorColumn;
     scaleType = 'identity';
-    name = column.name;
-  } else if (Array.isArray(colorMap)) {
-    colorMap.forEach(([value, color]) => {
-      domain.push(value);
-      scaleColor.push(color);
-    });
-  } else {
-    domain = calculateDomain(data, name, scaleType, colors.length);
-    scaleColor = colors;
   }
 
-  if (scaleType === 'ordinal') {
-    domain = domain.slice(0, scaleColor.length);
-  }
-
+  const {domain, scaleColor} = getDomainAndScaleColor(name, scaleType, range, data);
   const scale = SCALE_FUNCS[scaleType as any]();
+
   scale.domain(domain);
   scale.range(scaleColor);
   scale.unknown(UNKNOWN_COLOR);
@@ -383,6 +370,33 @@ export function getColorAccessor(
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
+}
+
+export function getDomainAndScaleColor(name, scaleType, range, data) {
+  let domain: (string | number)[] = [];
+  let scaleColor: string[] = [];
+
+  if (scaleType === 'identity') {
+    return {domain, scaleColor};
+  }
+
+  const {colorMap, colors} = range;
+
+  if (Array.isArray(colorMap)) {
+    colorMap.forEach(([value, color]) => {
+      domain.push(value);
+      scaleColor.push(color);
+    });
+  } else {
+    domain = calculateDomain(data, name, scaleType, colors.length);
+    scaleColor = colors;
+  }
+
+  if (scaleType === 'ordinal') {
+    domain = domain.slice(0, scaleColor.length);
+  }
+
+  return {domain, scaleColor};
 }
 
 const FALLBACK_ICON =

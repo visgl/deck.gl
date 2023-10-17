@@ -32,7 +32,7 @@ export function getWorkerUrl(id: string, version: string) {
   return `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
 }
 
-export function customIdentityScale() {
+export function scaleIdentity() {
   let unknown;
 
   function scale(x) {
@@ -51,7 +51,7 @@ export function customIdentityScale() {
     return unknown;
   };
 
-  scale.copy = () => customIdentityScale().unknown(unknown);
+  scale.copy = () => scaleIdentity().unknown(unknown);
 
   return scale;
 }
