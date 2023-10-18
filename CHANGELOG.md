@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
+#### deck.gl [8.10.0-alpha.6] - Oct 18 2023
+
+ - Fix stylesheet.css (#8210)
+
 #### deck.gl [8.10.0-alpha.5] - Oct 17 2023
 
  - chore(tests) bump puppeteer version (#8202)
