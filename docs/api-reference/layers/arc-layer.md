@@ -85,7 +85,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 If `true`, create the arc along the shortest path on the earth surface. This option is only effective with data in the `LNGLAT` coordinate system.
 
-##### `numSegments` (Number, optional) {#numSegments}
+##### `numSegments` (Number, optional) {#numsegments}
 
 * Default: `50`
 
