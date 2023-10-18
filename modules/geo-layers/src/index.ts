@@ -29,7 +29,7 @@ export {default as H3ClusterLayer} from './h3-layers/h3-cluster-layer';
 export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
 // TODO v9 layers that depend on luma glTF code
 // export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
-// export {default as TerrainLayer} from './terrain-layer/terrain-layer';
+export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
 export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 
@@ -45,7 +45,7 @@ export type {TileLayerProps} from './tile-layer/tile-layer';
 export type {TripsLayerProps} from './trips-layer/trips-layer';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 // TODO v9 layers that depend on luma glTF code
-// export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
+export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
 // export type {Tile3DLayerProps} from './tile-3d-layer/tile-3d-layer';
 export type {MVTLayerProps} from './mvt-layer/mvt-layer';
 export type {GeoCellLayerProps as _GeoCellLayerProps} from './geo-cell-layer/GeoCellLayer';

@@ -1,38 +1,26 @@
 /* global fetch */
-import React, {useCallback, useState, useMemo} from 'react';
+import React, {useCallback, useState} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, OPERATION} from '@deck.gl/core';
-import {GeoJsonLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
+import {OPERATION} from '@deck.gl/core';
+import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
-import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
-import {parse} from '@loaders.gl/core';
+import {cartoVectorTableSource, VectorTileLayer} from '@deck.gl/carto';
 
-setDefaultCredentials({
-  accessToken: 'XXX'
-});
-
+const accessToken = 'XXX';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json';
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 const PLACES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_populated_places_simple.geojson';
-const COUNTRIES =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson';
 const US_STATES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
-const basemap = new GeoJsonLayer({
-  id: 'base-map',
-  data: COUNTRIES,
-  // Styles
-  stroked: true,
-  filled: true,
-  lineWidthMinPixels: 2,
-  opacity: 0.4,
-  getLineColor: [60, 60, 60],
-  getFillColor: [200, 200, 200]
+const cartoData = cartoVectorTableSource({
+  accessToken,
+  connectionName: 'bigquery',
+  tableName: 'cartobq.public_account.populated_places'
 });
 
 /* eslint-disable react/no-deprecated */
@@ -109,11 +97,9 @@ export default function App() {
         highlightColor: [255, 255, 255, 150]
       }),
     showCarto &&
-      new CartoLayer({
+      new VectorTileLayer({
         id: 'places',
-        connection: 'bigquery',
-        type: MAP_TYPES.TABLE,
-        data: 'cartobq.public_account.populated_places',
+        data: cartoData,
 
         getFillColor: [200, 0, 80],
         pointType: 'text',

@@ -783,8 +783,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           } else {
             attributeBuffers[attributeName] = value;
           }
-        } else {
-          constantAttributes[attributeName] = value as TypedArray;
+        } else if (value) {
+          constantAttributes[attributeName] = value;
         }
       }
     }
