@@ -54,21 +54,21 @@ When a widget instance is added to Deck, the user can optionally specify a `view
 
 A `Widget` implements the following members.
 
-##### `id`
+##### `id` {#id}
 
 Unique identifier of the widget.
 
-##### `props` (Object)
+##### `props` (Object) {#props}
 
 Any options for the widget, as passed into the constructor and can be updated with `setProps`.
 
-##### `viewId` (String | null)
+##### `viewId` (String | null) {#viewid}
 
 * Default: `null`
 
 The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
 
-##### `placement` (String, optional)
+##### `placement` (String, optional) {#placement}
 
 * Default: `'top-left'`
 
@@ -82,7 +82,7 @@ Widget positioning within the view. One of:
 
 ### Methods
 
-##### `onAdd`
+##### `onAdd` {#onadd}
 
 Required. Called when the widget is added to a Deck instance.
 
@@ -94,22 +94,22 @@ Receives the following arguments:
 
 Returns an optional UI element that should be appended to the Deck container.
 
-##### `onRemove`
+##### `onRemove` {#onremove}
 
 Required. Called when the widget is removed.
 
-##### `setProps`
+##### `setProps` {#setprops}
 
 Optional. Called to update widget options.
 
-##### `onViewportChange`
+##### `onViewportChange` {#onviewportchange}
 
 Op†ional. Called when the containing view is changed. If `viewId: null`, will be called if any viewport changes.
 
 Receives the following arguments:
 - `viewport` (Viewport) - the viewport that has changed
 
-##### `onRedraw`
+##### `onRedraw` {#onredraw}
 
 Optional. Called when the containing view is redrawn. If `viewId: null`, will be called if anything redraws.
 
@@ -118,7 +118,7 @@ Receives the following arguments:
   + `viewports` (Viewport[]) - the viewports that are being redrawn
   + `layers` (Layer[]) - the layers that are being redrawn
 
-##### `onHover`
+##### `onHover` {#onhover}
 
 Optional. Called when a hover event occurs in the containing view. If `viewId: null`, will be called if hover occurs in any view.
 
@@ -128,7 +128,7 @@ Receives arguments:
 * `event` - the original gesture event
 
 
-##### `onClick`
+##### `onClick` {#onclick}
 
 Optional. Called when a click event occurs in the containing view. If `viewId: null`, will be called if click occurs in any view.
 
@@ -138,7 +138,7 @@ Receives arguments:
 * `event` - the original gesture event
 
 
-##### `onDragStart`
+##### `onDragStart` {#ondragstart}
 
 Optional. Called when a dragstart event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
@@ -147,7 +147,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDrag`
+##### `onDrag` {#ondrag}
 
 Optional. Called when a drag event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
@@ -156,7 +156,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDragEnd`
+##### `onDragEnd` {#ondragend}
 
 Optional. Called when a dragend event occurs in the containing view. If `viewId: null`, will be called if drag occurs in any view.
 
