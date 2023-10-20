@@ -27,8 +27,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### deck.gl [8.10.0-alpha.5] - Oct 17 2023
 
- - chore(tests) bump puppeteer version (#8202)
- - Add new link to showcase page (#8190)
+ - [chore] Fix widget module publishing (#8178)
 
 #### deck.gl [8.10.0-alpha.4] - Oct 5 2023
 
