@@ -1,10 +1,15 @@
-import React, {useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {CartoLayer, colorBins, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
+import {
+  CartoTilejsonResult,
+  cartoVectorQuerySource,
+  colorBins,
+  VectorTileLayer
+} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7368521,
@@ -14,11 +19,12 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-setDefaultCredentials({
+const globalOptions = {
   accessToken:
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJiMGY0ZjVkZSJ9.DaQK48iBPzXtvmAUuCwESXvY_3eGz5J5Qx6Tg2Id-nM'
-});
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJiMGY0ZjVkZSJ9.DaQK48iBPzXtvmAUuCwESXvY_3eGz5J5Qx6Tg2Id-nM',
 
+  connectionName: 'bigquery'
+};
 const transitionInterpolator = new LinearInterpolator();
 
 export default function App({
@@ -40,13 +46,18 @@ export default function App({
 
   const getIndex = f => (f.properties[mrliIndex] ? parseFloat(f.properties[mrliIndex]) : 0);
 
+  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
+    return cartoVectorQuerySource({
+      ...globalOptions,
+      sqlQuery: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
+      queryParameters: {industry}
+    });
+  }, [industry]);
+
   const layers = [
-    new CartoLayer({
+    new VectorTileLayer({
       id: 'carto-layer',
-      connection: 'bigquery',
-      type: MAP_TYPES.QUERY,
-      data: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
-      queryParameters: {industry},
+      data: tilejson,
       getFillColor: colorBins({
         attr: getIndex,
         domain: [25, 50, 100, 300, 500, 1000],

@@ -34,7 +34,7 @@ import {
 } from '@deck.gl/core';
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {PBRMaterialParser} from '@luma.gl/gltf';
+// import {PBRMaterialParser} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -55,38 +55,53 @@ import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {getMeshBoundingBox} from '@loaders.gl/schema';
 
-function validateGeometryAttributes(attributes: Record<string, any>, useMeshColors: boolean): void {
-  const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
-  const useColorAttribute = hasColorAttribute && useMeshColors;
-  if (!useColorAttribute) {
-    attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
+function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
+  const positionAttribute = attributes.positions || attributes.POSITION;
+  log.assert(positionAttribute, 'no "postions" or "POSITION" attribute in mesh');
+
+  const vertexCount = positionAttribute.value.length / positionAttribute.size;
+  let colorAttribute = attributes.COLOR_0 || attributes.colors;
+  if (!colorAttribute) {
+    colorAttribute = {size: 3, value: new Float32Array(vertexCount * 3).fill(1)};
   }
-  log.assert(
-    attributes.positions || attributes.POSITION,
-    'no "postions" or "POSITION" attribute in mesh'
-  );
+  let normalAttribute = attributes.NORMAL || attributes.normals;
+  if (!normalAttribute) {
+    normalAttribute = {size: 3, value: new Float32Array(vertexCount * 3).fill(0)};
+  }
+  let texCoordAttribute = attributes.TEXCOORD_0 || attributes.texCoords;
+  if (!texCoordAttribute) {
+    texCoordAttribute = {size: 2, value: new Float32Array(vertexCount * 2).fill(0)};
+  }
+
+  return {
+    positions: positionAttribute,
+    colors: colorAttribute,
+    normals: normalAttribute,
+    texCoords: texCoordAttribute
+  };
 }
 
 /*
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
-function getGeometry(data: Mesh, useMeshColors: boolean): Geometry {
-  if ((data as any).attributes) {
-    validateGeometryAttributes((data as any).attributes, useMeshColors);
-    if (data instanceof Geometry) {
-      return data;
-    } else {
-      return new Geometry(data);
-    }
-  } else if ((data as MeshAttributes).positions || (data as MeshAttributes).POSITION) {
-    validateGeometryAttributes(data, useMeshColors);
+function getGeometry(data: Mesh): Geometry {
+  if (data instanceof Geometry) {
+    // @ts-expect-error data.attributes is readonly
+    data.attributes = normalizeGeometryAttributes(data.attributes);
+    return data;
+  } else if ((data as any).attributes) {
     return new Geometry({
-      // @ts-expect-error Type incompatiblity between luma.gl and loaders.gl
-      attributes: data
+      ...data,
+      topology: 'triangle-list',
+      attributes: normalizeGeometryAttributes((data as any).attributes)
+    });
+  } else {
+    return new Geometry({
+      topology: 'triangle-list',
+      attributes: normalizeGeometryAttributes(data as MeshAttributes)
     });
   }
-  throw Error('Invalid mesh');
 }
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
@@ -141,13 +156,6 @@ type _SimpleMeshLayerProps<DataT> = {
    * @default 1
    */
   sizeScale?: number;
-  /**
-   * @deprecated Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute).
-   * If set to `false` vertex colors will be ignored.
-   * This prop will be removed and set to always true in the next major release.
-   * @default false
-   */
-  _useMeshColors?: boolean;
 
   /**
    * (Experimental) If rendering only one instance of the mesh, set this to false to treat mesh positions
@@ -177,9 +185,6 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
-  // Whether the color attribute in a mesh will be used
-  // This prop will be removed and set to true in next major release
-  _useMeshColors: {type: 'boolean', value: false},
 
   // _instanced is a hack to use world position instead of meter offsets in mesh
   // TODO - formalize API
@@ -190,7 +195,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
@@ -213,7 +218,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'SimpleMeshLayer';
 
   state!: {
-    materialParser?: PBRMaterialParser;
+    // materialParser?: PBRMaterialParser;
     model?: Model;
     emptyTexture: Texture;
     hasNormals?: boolean;
@@ -255,7 +260,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     if (!result) {
       // Otherwise, calculate bounding box from positions
-      const {attributes} = getGeometry(mesh as Mesh, this.props._useMeshColors);
+      const {attributes} = getGeometry(mesh as Mesh);
       attributes.POSITION = attributes.POSITION || attributes.positions;
 
       //@ts-expect-error
@@ -291,7 +296,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this.setState({
       // Avoid luma.gl's missing uniform warning
       // TODO - add feature to luma.gl to specify ignored uniforms?
-      emptyTexture:  this.context.device.createTexture({
+      emptyTexture: this.context.device.createTexture({
         data: new Uint8Array(4),
         width: 1,
         height: 1
@@ -322,9 +327,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.setTexture(props.texture);
     }
 
-    if (this.state.model) {
-      this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
-    }
+    // if (this.state.model) {
+    //   this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
+    // }
   }
 
   finalizeState(context: LayerContext) {
@@ -334,35 +339,38 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({uniforms}) {
-    if (!this.state.model) {
+    const {model} = this.state;
+    if (!model) {
       return;
     }
 
     const {viewport, renderPass} = this.context;
     const {sizeScale, coordinateSystem, _instanced} = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        sizeScale,
-        composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
-        flatShading: !this.state.hasNormals
-      })
-      .draw(renderPass);
+    model.setUniforms(uniforms);
+    model.setUniforms({
+      sizeScale,
+      composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
+      flatShading: !this.state.hasNormals
+    });
+    model.draw(renderPass);
   }
 
   protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: getGeometry(mesh, this.props._useMeshColors),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      geometry: getGeometry(mesh),
       isInstanced: true
     });
 
     const {texture} = this.props;
     const {emptyTexture} = this.state;
+    model.setBindings({
+      sampler: (texture as Texture) || emptyTexture
+    });
     model.setUniforms({
-      sampler: texture || emptyTexture,
       hasTexture: Boolean(texture)
     });
 
@@ -375,8 +383,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
+      model.setBindings({
+        sampler: texture || emptyTexture
+      });
       model.setUniforms({
-        sampler: texture || emptyTexture,
         hasTexture: Boolean(texture)
       });
     }
