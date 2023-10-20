@@ -2,7 +2,7 @@
   "name": "@deck.gl/widgets",
   "description": "UI widgets for deck.gl",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "8.10.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -30,7 +30,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0"
+    "@babel/runtime": "^7.0.0",
+    "preact": "^10.17.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0"

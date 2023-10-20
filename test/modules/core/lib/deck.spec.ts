@@ -58,10 +58,10 @@ test('Deck#constructor', t => {
 
 test('Deck#no views', t => {
   const deck = new Deck({
-    device,
+    gl,
     width: 1,
     height: 1,
-    autoResizeDrawingBuffer: device.canvasContext.htmlCanvas.clientWidth > 0,
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
 
     viewState: {longitude: 0, latitude: 0, zoom: 0},
     views: [],

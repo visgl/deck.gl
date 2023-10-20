@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "8.10.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -36,8 +36,8 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/core": "4.0.0-alpha.26",
-    "@loaders.gl/images": "4.0.0-alpha.26",
+    "@loaders.gl/core": "4.0.0-beta.5",
+    "@loaders.gl/images": "4.0.0-beta.5",
     "@luma.gl/constants": "^8.5.20",
     "@luma.gl/core": "^8.5.20",
     "@luma.gl/webgl": "^8.5.20",

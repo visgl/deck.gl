@@ -21,6 +21,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
+#### deck.gl [8.10.0-alpha.6] - Oct 18 2023
+
+ - Fix stylesheet.css (#8210)
+
+#### deck.gl [8.10.0-alpha.5] - Oct 17 2023
+
+ - [chore] Fix widget module publishing (#8178)
+
+#### deck.gl [8.10.0-alpha.4] - Oct 5 2023
+
+- add(widgets) fullscreen widget (#8024)
+- CARTO: Initial implementation of v9 API (#8167)
+- Added a getCanvas helper function on deck (#7919)
+- Added new numSegments prop in ArcLayer (#8055)
+- Bump loaders.gl (#8087)
+- Add widgets prop to Deck class (#8023)
+
 #### deck.gl [8.10.0-alpha.2] - Jul 28 2023
 
 - add(modules) widget module (#8016)

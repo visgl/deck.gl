@@ -40,6 +40,11 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
+function getTooltip({object}) {
+  if (!object || object.geometry?.type === 'Polygon') return null;
+  return object.name;
+}
+
 /* eslint-disable  max-nested-callbacks */
 function getLayerData(data) {
   if (!data || !data.length) {
@@ -224,7 +229,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         },
         autoHighlight: true,
         highlightColor: [255, 255, 255, 150],
-        radiusScale: 3000,
+        radiusScale: 15000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
         maskId: maskEnabled && 'mask2',
@@ -251,6 +256,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         layers={showLayers ? layers : []}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
+        getTooltip={getTooltip}
       >
         <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>

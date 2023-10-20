@@ -44,11 +44,7 @@ function getTooltip({tile}) {
 export default function App({showBorder = false, onTilesLoad = null}) {
   const tileLayer = new TileLayer({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    data: [
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    ],
+    data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
 
     // Since these OSM tiles support HTTP/2, we can make many concurrent requests
     // and we aren't limited by the browser to a certain number per domain.

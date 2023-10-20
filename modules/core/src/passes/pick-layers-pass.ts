@@ -118,7 +118,11 @@ export default class PickLayersPass extends LayersPass {
 
   shouldDrawLayer(layer: Layer): boolean {
     const {pickable, operation} = layer.props;
-    return (pickable && operation.includes('draw')) || operation.includes('terrain');
+    return (
+      (pickable && operation.includes('draw')) ||
+      operation.includes('terrain') ||
+      operation.includes('mask')
+    );
   }
 
   protected getModuleParameters() {

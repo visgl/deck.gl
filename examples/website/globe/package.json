@@ -9,7 +9,11 @@
     "build": "vite build"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@loaders.gl/csv": "4.0.0-alpha.26",
+=======
+    "@loaders.gl/csv": "^3.4.13",
+>>>>>>> 8.10-release
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "deck.gl": "^8.8.0",
