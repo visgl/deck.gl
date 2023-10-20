@@ -340,19 +340,13 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 }
 
 export function getColorAccessor(
-  field: VisualChannelField,
+  {name, colorColumn}: VisualChannelField,
   scaleType: SCALE_TYPE,
   {aggregation, range},
   opacity: number | undefined,
   data: any
 ) {
-  let name = field.name;
-
-  if (field.colorColumn) {
-    name = field.colorColumn;
-  }
-
-  const {domain, scaleColor} = getDomainAndScaleColor(name, scaleType, range, data);
+  const {domain, scaleColor} = getDomainAndScaleColor(colorColumn || name, scaleType, range, data);
   const scale = SCALE_FUNCS[scaleType as any]();
 
   scale.domain(domain);
