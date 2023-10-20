@@ -1,15 +1,8 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {
-  CartoAggregationOptions,
-  CartoQuerySourceOptions,
-  CartoSourceOptions,
-  TilejsonSource
-} from './common';
+import {baseSource} from './base-source';
+import {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './common';
 
-export type CartoH3QuerySourceOptions = CartoSourceOptions &
-  CartoQuerySourceOptions &
-  CartoAggregationOptions;
+export type H3QuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
@@ -18,8 +11,8 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const cartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async function (
-  options: CartoH3QuerySourceOptions
+const h3QuerySource: TilejsonSource<H3QuerySourceOptions> = async function (
+  options: H3QuerySourceOptions
 ): Promise<any> {
   const {
     aggregationExp,
@@ -39,7 +32,7 @@ const cartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async func
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters);
 };
 
-export {cartoH3QuerySource};
+export {h3QuerySource};

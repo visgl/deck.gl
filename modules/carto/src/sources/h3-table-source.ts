@@ -1,15 +1,8 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {
-  CartoAggregationOptions,
-  CartoSourceOptions,
-  CartoTableSourceOptions,
-  TilejsonSource
-} from './common';
+import {baseSource} from './base-source';
+import {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './common';
 
-export type CartoH3TableSourceOptions = CartoSourceOptions &
-  CartoTableSourceOptions &
-  CartoAggregationOptions;
+export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -19,8 +12,8 @@ type UrlParameters = {
   name: string;
 };
 
-const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async function (
-  options: CartoH3TableSourceOptions
+const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
+  options: H3TableSourceOptions
 ): Promise<any> {
   const {
     aggregationExp,
@@ -40,7 +33,7 @@ const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async func
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {cartoH3TableSource};
+export {h3TableSource};

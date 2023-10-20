@@ -1,15 +1,8 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {
-  CartoAggregationOptions,
-  CartoQuerySourceOptions,
-  CartoSourceOptions,
-  TilejsonSource
-} from './common';
+import {baseSource} from './base-source';
+import {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './common';
 
-export type CartoQuadbinQuerySourceOptions = CartoSourceOptions &
-  CartoQuerySourceOptions &
-  CartoAggregationOptions;
+export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -19,8 +12,8 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const cartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = async function (
-  options: CartoQuadbinQuerySourceOptions
+const quadbinQuerySource: TilejsonSource<QuadbinQuerySourceOptions> = async function (
+  options: QuadbinQuerySourceOptions
 ): Promise<any> {
   const {
     aggregationExp,
@@ -40,7 +33,7 @@ const cartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = 
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters);
 };
 
-export {cartoQuadbinQuerySource};
+export {quadbinQuerySource};
