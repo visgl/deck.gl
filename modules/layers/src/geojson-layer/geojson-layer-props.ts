@@ -15,7 +15,9 @@ type SubLayersProps = {
 };
 
 type ExtendedBinaryFeature = {
-  [P in keyof BinaryFeatureCollection]: BinaryFeatureCollection[P] & {attributes?: Record<string, BinaryAttribute>};
+  [P in keyof BinaryFeatureCollection]: BinaryFeatureCollection[P] & {
+    attributes?: Record<string, BinaryAttribute>;
+  };
 };
 
 function createEmptyLayerProps(): SubLayersProps {

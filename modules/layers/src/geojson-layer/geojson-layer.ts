@@ -406,7 +406,9 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
     if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
-      info.index = (this.props.data as BinaryFeatureCollection).points!.globalFeatureIds.value[index];
+      info.index = (this.props.data as BinaryFeatureCollection).points!.globalFeatureIds.value[
+        index
+      ];
     }
     return info;
   }
