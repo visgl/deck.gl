@@ -58,6 +58,7 @@ function checkVersion() {
 
     registerLoaders([
       jsonLoader,
+      // @ts-expect-error TODO typing needs to be fixed in loaders.gl
       [ImageLoader, {imagebitmap: {premultiplyAlpha: 'none'}}]
     ]);
   }
