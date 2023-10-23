@@ -36,8 +36,8 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/core": "^3.4.13",
-    "@loaders.gl/images": "^3.4.13",
+    "@loaders.gl/core": "4.0.0-beta.5",
+    "@loaders.gl/images": "4.0.0-beta.5",
     "@luma.gl/core": "9.0.0-alpha.37",
     "@luma.gl/constants": "9.0.0-alpha.37",
     "@luma.gl/engine": "9.0.0-alpha.37",
