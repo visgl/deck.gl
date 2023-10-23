@@ -39,6 +39,8 @@ export type CartoTilesetSourceOptions = {
   tableName: string;
 };
 
+export type SpatialDataType = 'geometry' | 'h3' | 'quadbin';
+
 export const SOURCE_DEFAULTS: CartoSourceOptionalOptions = {
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   clientId: 'deck-gl-carto',
@@ -106,7 +108,7 @@ export interface TypedSource<T> extends TilejsonSource<T> {
 }
 
 export const DEFAULT_CLIENT = 'deck-gl-carto';
-export const V3_MINOR_VERSION = '3.2';
+export const V3_MINOR_VERSION = '3.3';
 export const MAX_GET_LENGTH = 8192;
 
 export const DEFAULT_PARAMETERS = {

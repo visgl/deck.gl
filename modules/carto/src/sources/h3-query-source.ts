@@ -4,6 +4,7 @@ import {
   CartoAggregationOptions,
   CartoQuerySourceOptions,
   CartoSourceOptions,
+  SpatialDataType,
   TilejsonSource
 } from './common';
 
@@ -13,7 +14,8 @@ export type CartoH3QuerySourceOptions = CartoSourceOptions &
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   q: string;
   queryParameters?: string;
 };
@@ -25,16 +27,16 @@ const cartoH3QuerySource: TilejsonSource<CartoH3QuerySourceOptions> = async func
     aggregationExp,
     aggregationResLevel = 4,
     sqlQuery,
-    spatialDataColumn = 'h3:h3',
+    spatialDataColumn,
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
+  const urlParameters: UrlParameters = {aggregationExp, spatialDataType: 'h3', q: sqlQuery};
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
+    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

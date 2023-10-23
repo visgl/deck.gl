@@ -4,6 +4,7 @@ import {
   CartoAggregationOptions,
   CartoQuerySourceOptions,
   CartoSourceOptions,
+  SpatialDataType,
   TilejsonSource
 } from './common';
 
@@ -14,7 +15,8 @@ export type CartoQuadbinQuerySourceOptions = CartoSourceOptions &
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   q: string;
   queryParameters?: string;
 };
@@ -26,16 +28,16 @@ const cartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = 
     aggregationExp,
     aggregationResLevel = 6,
     sqlQuery,
-    spatialDataColumn = 'quadbin:quadbin',
+    spatialDataColumn,
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
+  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery, spatialDataType: 'quadbin'};
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
+    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
