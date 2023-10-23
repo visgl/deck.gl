@@ -1,7 +1,6 @@
 import './api/carto-api-error.spec';
 import './api/layer-map.spec';
 // import './api/parseMap.spec';
-import './api/maps-api-client.spec';
 import './config.spec';
 import './utils.spec';
 import './layers/carto-vector-tile.spec';
