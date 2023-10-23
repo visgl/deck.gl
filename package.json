@@ -80,9 +80,5 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {},
-  "volta": {
-    "node": "18.18.2",
-    "yarn": "1.22.19"
-  }
+  "dependencies": {}
 }
