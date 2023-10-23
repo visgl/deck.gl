@@ -3,6 +3,7 @@ import {encodeParameter, MapType} from '../api/maps-api-common';
 import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
 import {buildMapsUrlFromBase} from '../config';
 
+const REQUEST_CACHE = new Map();
 export async function requestWithParameters<T = any>({
   baseUrl,
   parameters,
@@ -14,6 +15,11 @@ export async function requestWithParameters<T = any>({
   headers: Record<string, string>;
   errorContext: APIErrorContext;
 }): Promise<T> {
+  const key = JSON.stringify({baseUrl, parameters, customHeaders});
+  if (REQUEST_CACHE.has(key)) {
+    return REQUEST_CACHE.get(key);
+  }
+
   let url = baseUrl;
   if (parameters) {
     const allParameters = {...DEFAULT_PARAMETERS, ...parameters};
@@ -39,9 +45,11 @@ export async function requestWithParameters<T = any>({
       json = {error: ''};
     }
     if (!response.ok) {
+      REQUEST_CACHE.delete(key);
       throw new CartoAPIError(json.error, errorContext, response);
     }
 
+    REQUEST_CACHE.set(key, json);
     return json;
   } catch (error) {
     throw new CartoAPIError(error as Error, errorContext);
