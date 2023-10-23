@@ -32,7 +32,6 @@ export {
   CartoAPIError,
   fetchLayerData,
   fetchMap,
-  getDataV2 as _getDataV2,
   mapInstantiation as _mapInstantiation
 } from './api';
 export type {APIErrorContext, QueryParameters} from './api';
