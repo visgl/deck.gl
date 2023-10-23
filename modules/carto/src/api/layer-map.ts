@@ -368,7 +368,7 @@ function calculateLayerScale(name, scaleType, range, data) {
 
   if (scaleType !== 'identity') {
     const {colorMap, colors} = range;
-  
+
     if (Array.isArray(colorMap)) {
       colorMap.forEach(([value, color]) => {
         domain.push(value);
@@ -378,12 +378,11 @@ function calculateLayerScale(name, scaleType, range, data) {
       domain = calculateDomain(data, name, scaleType, colors.length);
       scaleColor = colors;
     }
-  
+
     if (scaleType === 'ordinal') {
       domain = domain.slice(0, scaleColor.length);
     }
   }
-
 
   scale.domain(domain);
   scale.range(scaleColor);
