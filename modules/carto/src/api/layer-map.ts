@@ -346,12 +346,7 @@ export function getColorAccessor(
   opacity: number | undefined,
   data: any
 ) {
-  const {domain, scaleColor} = getDomainAndScaleColor(colorColumn || name, scaleType, range, data);
-  const scale = SCALE_FUNCS[scaleType as any]();
-
-  scale.domain(domain);
-  scale.range(scaleColor);
-  scale.unknown(UNKNOWN_COLOR);
+  const scale = calculateLayerScale(colorColumn || name, scaleType, range, data);
   const alpha = opacityToAlpha(opacity);
 
   let accessorKeys = getAccessorKeys(name, aggregation);
@@ -366,31 +361,35 @@ export function getColorAccessor(
   return normalizeAccessor(accessor, data);
 }
 
-export function getDomainAndScaleColor(name, scaleType, range, data) {
+function calculateLayerScale(name, scaleType, range, data) {
+  const scale = SCALE_FUNCS[scaleType]();
   let domain: (string | number)[] = [];
   let scaleColor: string[] = [];
 
-  if (scaleType === 'identity') {
-    return {domain, scaleColor};
+  if (scaleType !== 'identity') {
+    const {colorMap, colors} = range;
+  
+    if (Array.isArray(colorMap)) {
+      colorMap.forEach(([value, color]) => {
+        domain.push(value);
+        scaleColor.push(color);
+      });
+    } else {
+      domain = calculateDomain(data, name, scaleType, colors.length);
+      scaleColor = colors;
+    }
+  
+    if (scaleType === 'ordinal') {
+      domain = domain.slice(0, scaleColor.length);
+    }
   }
 
-  const {colorMap, colors} = range;
 
-  if (Array.isArray(colorMap)) {
-    colorMap.forEach(([value, color]) => {
-      domain.push(value);
-      scaleColor.push(color);
-    });
-  } else {
-    domain = calculateDomain(data, name, scaleType, colors.length);
-    scaleColor = colors;
-  }
+  scale.domain(domain);
+  scale.range(scaleColor);
+  scale.unknown(UNKNOWN_COLOR);
 
-  if (scaleType === 'ordinal') {
-    domain = domain.slice(0, scaleColor.length);
-  }
-
-  return {domain, scaleColor};
+  return scale;
 }
 
 const FALLBACK_ICON =
