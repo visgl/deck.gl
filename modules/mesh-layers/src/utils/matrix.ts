@@ -54,15 +54,15 @@ export const MATRIX_ATTRIBUTES = {
   size: 12,
   accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
   shaderAttributes: {
-    instanceModelMatrix__LOCATION_0: {
+    instanceModelMatrixCol0: {
       size: 3,
       elementOffset: 0
     },
-    instanceModelMatrix__LOCATION_1: {
+    instanceModelMatrixCol1: {
       size: 3,
       elementOffset: 3
     },
-    instanceModelMatrix__LOCATION_2: {
+    instanceModelMatrixCol2: {
       size: 3,
       elementOffset: 6
     },
@@ -73,7 +73,7 @@ export const MATRIX_ATTRIBUTES = {
   } as const,
 
   update(attribute, {startRow, endRow}) {
-    // ts-expect-error: "this" will be bound to a layer when this  function is called
+    // @ts-expect-error: "this" will be bound to a layer when this  function is called
     const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = this.props;
 
     const arrayMatrix = Array.isArray(getTransformMatrix);

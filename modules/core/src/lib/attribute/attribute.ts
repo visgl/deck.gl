@@ -326,7 +326,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         size: binaryValue.size || this.size,
         stride: binaryValue.stride,
         offset: binaryValue.offset,
-        startIndices,
+        startIndices: startIndices as NumericArray,
         nested: needsNormalize
       });
       // Fall through to auto updater
@@ -349,14 +349,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return vertexIndex * this.size;
   }
 
-  getValue(): Record<string, Buffer | NumericArray | null> {
+  getValue(): Record<string, Buffer | TypedArray | null> {
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result = super.getValue();
     if (!shaderAttributeDefs) {
       return result;
     }
     for (const shaderAttributeName in shaderAttributeDefs) {
-      Object.assign(result, super.getValue(shaderAttributeName));
+      Object.assign(
+        result,
+        super.getValue(shaderAttributeName, shaderAttributeDefs[shaderAttributeName])
+      );
     }
     return result;
   }

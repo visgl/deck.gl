@@ -23,11 +23,11 @@ const defaultProps: DefaultProps<H3HexagonLayerProps> = {
 };
 
 /** All properties supported by H3TileLayer. */
-export type H3TileLayerProps<DataT = any> = _H3TileLayerProps<DataT> & CompositeLayerProps;
+export type H3TileLayerProps<DataT = unknown> = _H3TileLayerProps<DataT> & CompositeLayerProps;
 
 // TODO: use type from h3-hexagon-layer when available
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type H3HexagonLayerProps<DataT = any> = Record<string, any>;
+type H3HexagonLayerProps<DataT = unknown> = Record<string, any>;
 
 /** Properties added by H3TileLayer. */
 type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> & {

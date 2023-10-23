@@ -65,7 +65,19 @@ export type GPUGridAggregatorProps = {
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
-  static getAggregationData({aggregationData, maxData, minData, maxMinData, pixelIndex}) {
+  static getAggregationData({
+    aggregationData,
+    maxData,
+    minData,
+    maxMinData,
+    pixelIndex
+  }: {
+    aggregationData?: Float32Array;
+    maxData?: Float32Array;
+    minData?: Float32Array;
+    maxMinData?: Float32Array;
+    pixelIndex: number;
+  }) {
     const index = pixelIndex * PIXEL_SIZE;
     const results: {cellCount?; cellWeight?; maxCellWieght?; minCellWeight?; totalCount?} = {};
     if (aggregationData) {
@@ -82,7 +94,7 @@ export default class GPUGridAggregator {
       }
       if (minData) {
         results.minCellWeight = minData[0];
-        results.totalCount = maxData[3];
+        results.totalCount = minData[3];
       }
     }
     return results;
@@ -224,8 +236,13 @@ export default class GPUGridAggregator {
   // Reads aggregation data into JS Array object
   // For WebGL1, data is available in JS Array objects already.
   // For WebGL2, data is read from Buffer objects and cached for subsequent queries.
-  getData(weightId): {aggregationData?} {
-    const data: {aggregationData?} = {};
+  getData(weightId) {
+    const data: {
+      aggregationData?: Float32Array;
+      maxData?: Float32Array;
+      minData?: Float32Array;
+      maxMinData?: Float32Array;
+    } = {};
     const results = this.state.results;
     if (!results[weightId].aggregationData) {
       // cache the results if reading from the buffer (WebGL2 path)
