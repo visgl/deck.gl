@@ -17,7 +17,7 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
-import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, TilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
@@ -33,7 +33,7 @@ export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, '
 
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
-  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
+  data: null | TilejsonResult | Promise<TilejsonResult>;
   /** Use to override the default tile data format.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
@@ -74,7 +74,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     injectAccessToken(loadOptions, tileJSON.accessToken);
     loadOptions.gis = {format: 'binary'}; // Use binary for MVT loading
     return loadOptions;
