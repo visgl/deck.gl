@@ -1,11 +1,11 @@
 import type {
-  BinaryFeatures,
-  BinaryLineFeatures,
-  BinaryPointFeatures,
-  BinaryPolygonFeatures
+  BinaryFeatureCollection,
+  BinaryLineFeature,
+  BinaryPointFeature,
+  BinaryPolygonFeature
 } from '@loaders.gl/schema';
 
-type FeatureTypes = BinaryPointFeatures | BinaryLineFeatures | BinaryPolygonFeatures;
+type FeatureTypes = BinaryPointFeature | BinaryLineFeature | BinaryPolygonFeature;
 
 const GEOM_TYPES = ['points', 'lines', 'polygons'];
 /**
@@ -18,7 +18,7 @@ const GEOM_TYPES = ['points', 'lines', 'polygons'];
  * @param {String} layerName - the layer to search in
  */
 export default function findIndexBinary(
-  data: BinaryFeatures,
+  data: BinaryFeatureCollection,
   uniqueIdProperty: string,
   featureId: string | number,
   layerName: string

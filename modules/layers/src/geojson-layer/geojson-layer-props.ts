@@ -1,7 +1,7 @@
 import {BinaryAttribute, LayerData, LayerProps} from '@deck.gl/core';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
-import {BinaryFeatures} from '@loaders.gl/schema';
+import {BinaryFeatureCollection} from '@loaders.gl/schema';
 import {SeparatedGeometries} from './geojson';
 
 // TODO: PathLayer is not yet typed
@@ -14,8 +14,10 @@ export type SubLayersProps = {
   polygonsOutline: Partial<PathLayerProps>;
 };
 
-type ExtendedBinaryFeatures = {
-  [P in keyof BinaryFeatures]: BinaryFeatures[P] & {attributes?: Record<string, BinaryAttribute>};
+type ExtendedBinaryFeatureCollection = {
+  [P in keyof Omit<BinaryFeatureCollection, 'shape'>]: BinaryFeatureCollection[P] & {
+    attributes?: Record<string, BinaryAttribute>;
+  };
 };
 
 function createEmptyLayerProps(): SubLayersProps {
@@ -60,7 +62,7 @@ export function createLayerPropsFromFeatures(
 }
 
 export function createLayerPropsFromBinary(
-  geojsonBinary: Required<ExtendedBinaryFeatures>,
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
   encodePickingColor
 ): SubLayersProps {
   // The binary data format is documented here
