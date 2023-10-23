@@ -108,4 +108,4 @@ export const parameters = {
   blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
   blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
   depthTest: false
-};
+} as const;

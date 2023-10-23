@@ -107,7 +107,7 @@ export default class GPUSpringTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value
+      value: attribute.value as NumericArray
     });
 
     // when an attribute changes values, a new transition is started. These
@@ -131,7 +131,7 @@ export default class GPUSpringTransition implements GPUTransition {
     if (!updated) {
       return false;
     }
-    const settings = this.settings;
+    const settings = this.settings as SpringTransitionSettings;
 
     transform.update({
       sourceBuffers: {
@@ -165,7 +165,7 @@ export default class GPUSpringTransition implements GPUTransition {
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value
+      value: this.attribute.value as NumericArray
     });
 
     const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;

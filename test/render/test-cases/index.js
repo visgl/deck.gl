@@ -21,10 +21,9 @@ import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 import geohashLayerTests from './geohash-layer';
-// TODO v9
-// import terrainLayerTests from './terrain-layer';
+import terrainLayerTests from './terrain-layer';
 // mesh-layers
-// import simpleMeshLayerTests from './simple-mesh-layer';
+import simpleMeshLayerTests from './simple-mesh-layer';
 // import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
@@ -53,12 +52,12 @@ export default [].concat(
   tripsLayerTests,
   mvtLayerTests,
   geohashLayerTests,
-  // simpleMeshLayerTests,
+  simpleMeshLayerTests,
   // scenegraphLayerTests,
-  viewsTests
+  viewsTests,
   // effectsTests,
   // TODO - Broken in headless mode with Chrome 113
   // transitionTests,
-  // terrainLayerTests,
+  terrainLayerTests
   // collisionFilterExtensionTests
 );

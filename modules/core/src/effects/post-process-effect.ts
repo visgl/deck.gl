@@ -126,5 +126,5 @@ function getFragmentShaderForRenderPass(module, pass = module): string {
   }
 
   // console.error(`${module.name} no fragment shader generated`);
-  return undefined;
+  return '';
 }

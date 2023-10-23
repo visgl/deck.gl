@@ -158,7 +158,7 @@ function getViewProjectionMatrices({
     [0, viewport.height, -1], // bottom left near
     [viewport.width, viewport.height, -1] // bottom right near
   ].map(pixel =>
-    // ts-expect-error z may be undefined
+    // @ts-expect-error z may be undefined
     screenToCommonSpace(pixel, pixelUnprojectionMatrix)
   );
 

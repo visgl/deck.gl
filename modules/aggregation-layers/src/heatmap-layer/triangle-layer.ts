@@ -39,6 +39,10 @@ type _TriangleLayerProps = {
 export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   static layerName = 'TriangleLayer';
 
+  state!: {
+    model: Model;
+  };
+
   getShaders() {
     return {vs, fs, modules: [project32]};
   }

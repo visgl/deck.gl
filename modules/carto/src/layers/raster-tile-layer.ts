@@ -2,7 +2,7 @@ import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} fr
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, TilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 export const renderSubLayers = props => {
@@ -16,11 +16,12 @@ const defaultProps: DefaultProps<RasterTileLayerProps> = {
 };
 
 /** All properties supported by RasterTileLayer. */
-export type RasterTileLayerProps<DataT = any> = _RasterTileLayerProps<DataT> & CompositeLayerProps;
+export type RasterTileLayerProps<DataT = unknown> = _RasterTileLayerProps<DataT> &
+  CompositeLayerProps;
 
 /** Properties added by RasterTileLayer. */
 type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> & {
-  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
+  data: null | TilejsonResult | Promise<TilejsonResult>;
 };
 
 export default class RasterTileLayer<
@@ -32,13 +33,13 @@ export default class RasterTileLayer<
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     injectAccessToken(loadOptions, tileJSON.accessToken);
     return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;
