@@ -3,14 +3,14 @@
 // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
 
 import {
-  BinaryFeatures,
-  BinaryLineFeatures,
-  BinaryPointFeatures,
-  BinaryPolygonFeatures,
+  BinaryFeatureCollection,
+  BinaryLineFeature,
+  BinaryPointFeature,
+  BinaryPolygonFeature,
   Feature
 } from '@loaders.gl/schema';
 
-export type BinaryFeatureTypes = BinaryPointFeatures | BinaryLineFeatures | BinaryPolygonFeatures;
+export type BinaryFeatureTypes = BinaryPointFeature | BinaryLineFeature | BinaryPolygonFeature;
 
 type FeaureOnlyProperties = Pick<Feature, 'properties'>;
 
@@ -53,7 +53,7 @@ function getPropertiesForIndex(
 
 // Custom picking color to keep binary indexes
 export function calculatePickingColors(
-  geojsonBinary: BinaryFeatures,
+  geojsonBinary: BinaryFeatureCollection,
   encodePickingColor: (id: number, result: number[]) => void
 ): Record<string, Uint8ClampedArray | null> {
   const pickingColors: Record<string, Uint8ClampedArray | null> = {

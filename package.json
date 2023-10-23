@@ -27,12 +27,6 @@
     "@probe.gl/env": "4.0.4",
     "escaper": "3.0.6",
     "vite": "^4.3.9",
-    "math.gl": "^4.0.0",
-    "@math.gl/core": "^4.0.0",
-    "@math.gl/web-mercator": "^4.0.0",
-    "@math.gl/culling": "^4.0.0",
-    "@math.gl/geospatial": "^4.0.0",
-    "@math.gl/proj4": "^4.0.0",
     "puppeteer": "^21.3.8"
   },
   "scripts": {
@@ -66,8 +60,8 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^3.4.13",
-    "@loaders.gl/polyfills": "^3.4.13",
+    "@loaders.gl/csv": "4.0.0-beta.5",
+    "@loaders.gl/polyfills": "4.0.0-beta.5",
     "@luma.gl/test-utils": "9.0.0-alpha.37",
     "@luma.gl/webgpu": "9.0.0-alpha.37",
     "@math.gl/proj4": "^4.0.0",
