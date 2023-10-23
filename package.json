@@ -63,7 +63,7 @@
     "@loaders.gl/polyfills": "4.0.0-beta.5",
     "@luma.gl/test-utils": "9.0.0-alpha.37",
     "@luma.gl/webgpu": "9.0.0-alpha.37",
-    "@math.gl/proj4": "4.0.0-alpha.4",
+    "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.4",
     "@probe.gl/test-utils": "^4.0.4",
     "@types/react": "^18.0.0",

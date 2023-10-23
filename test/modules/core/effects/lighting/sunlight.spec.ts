@@ -2,8 +2,7 @@
 import test from 'tape-promise/tape';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport, PolygonLayer} from 'deck.gl';
 import {_SunLight as SunLight} from '@deck.gl/core';
-
-import {angle} from 'gl-matrix/vec3';
+import {vec3} from '@math.gl/core';
 
 test('Sunlight#Constructor', t => {
   const sunLight = new SunLight({
@@ -110,7 +109,7 @@ test('Sunlight#getProjectedLight', t => {
     layer.context.viewport = testCase.viewport;
     const projectedLight = sunLight.getProjectedLight({layer});
     t.comment(projectedLight.direction.join(','));
-    t.ok(angle(projectedLight.direction, testCase.expected) < 0.05, testCase.title);
+    t.ok(vec3.angle(projectedLight.direction, testCase.expected) < 0.05, testCase.title);
   }
 
   t.end();
