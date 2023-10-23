@@ -30,7 +30,7 @@
     "@deck.gl/core": "^8.0.0",
     "@luma.gl/test-utils": "^8.5.0",
     "@luma.gl/webgl": "^8.5.0",
-    "@probe.gl/test-utils": "^3.5.0"
+    "@probe.gl/test-utils": "^4.0.0"
   },
   "scripts": {},
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
