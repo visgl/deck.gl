@@ -18,8 +18,7 @@
   ],
   "resolution_comments": {
     "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test",
-    "vite": "process polyfill missing",
-    "math.gl": "loaders.gl pulls in v3 packages"
+    "vite": "process polyfill missing"
   },
   "resolutions": {
     "@probe.gl/log": "4.0.4",
