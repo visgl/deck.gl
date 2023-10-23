@@ -16,7 +16,8 @@ import {
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import type {ImageSourceMetadata, ImageType, ImageServiceType} from '@loaders.gl/wms';
+import type {ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
+import type {ImageServiceType} from '@loaders.gl/wms';
 import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
