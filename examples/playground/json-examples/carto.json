@@ -1,9 +1,9 @@
 {
-  "description": "CartoLayer declarative example",
+  "description": "CARTO vector tileset declarative example",
   "initialViewState": {
     "latitude": 40.7368521,
     "longitude": -73.8536065,
-    "zoom": 3,
+    "zoom": 9,
     "pitch": 0,
     "bearing": 0
   },
@@ -11,19 +11,23 @@
     {
       "@@type": "MapView",
       "controller": true,
-      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"    
+      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
     }
   ],
   "layers": [
     {
-      "@@type": "CartoLayer",
-      "type": "@@#CARTO_MAP_TYPES.TILESET",
-      "data": "cartobq.maps.osm_buildings",
+      "@@type": "VectorTileLayer",
+      "data": {
+        "@@function": "cartoVectorTilesetSource",
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiI1YjI0OWE2ZCJ9.Y7zB30NJFzq5fPv8W5nkoH5lPXFWQP0uywDtqUg8y8c",
+        "connectionName": "bqconn",
+        "tableName": "cartobq.public_account.nyc_taxi_points_demo_id"
+      },
       "getFillColor": {
         "@@function": "colorBins",
         "attr": "aggregated_total",
         "domain": [10, 100, 1000, 10000, 100000, 1000000],
-        "colors": "BluYl"
+        "colors": "SunsetDark"
       },
       "pointRadiusMinPixels": 2,
       "stroked": false
