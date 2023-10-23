@@ -2,7 +2,7 @@ import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} fr
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
+import {TilejsonPropType, TilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
 
 const renderSubLayers = (props: H3HexagonLayerProps) => {
@@ -31,7 +31,7 @@ type H3HexagonLayerProps<DataT = unknown> = Record<string, any>;
 
 /** Properties added by H3TileLayer. */
 type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> & {
-  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
+  data: null | TilejsonResult | Promise<TilejsonResult>;
   aggregationResLevel?: number;
 };
 
@@ -47,14 +47,14 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     injectAccessToken(loadOptions, tileJSON.accessToken);
     loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'h3'};
     return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data} = tileJSON;

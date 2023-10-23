@@ -1,16 +1,14 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
+import {baseSource} from './base-source';
 import {
-  CartoAggregationOptions,
-  CartoSourceOptions,
-  CartoTableSourceOptions,
+  AggregationOptions,
+  SourceOptions,
   SpatialDataType,
+  TableSourceOptions,
   TilejsonSource
 } from './common';
 
-export type CartoQuadbinTableSourceOptions = CartoSourceOptions &
-  CartoTableSourceOptions &
-  CartoAggregationOptions;
+export type QuadbinTableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
@@ -21,8 +19,8 @@ type UrlParameters = {
   name: string;
 };
 
-const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = async function (
-  options: CartoQuadbinTableSourceOptions
+const quadbinTableSource: TilejsonSource<QuadbinTableSourceOptions> = async function (
+  options: QuadbinTableSourceOptions
 ): Promise<any> {
   const {aggregationExp, aggregationResLevel = 6, columns, spatialDataColumn, tableName} = options;
   const urlParameters: UrlParameters = {
@@ -40,7 +38,7 @@ const cartoQuadbinTableSource: TilejsonSource<CartoQuadbinTableSourceOptions> = 
   if (spatialDataColumn) {
     urlParameters.spatialDataColumn = spatialDataColumn;
   }
-  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {cartoQuadbinTableSource};
+export {quadbinTableSource};

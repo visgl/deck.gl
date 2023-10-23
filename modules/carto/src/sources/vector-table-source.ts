@@ -1,8 +1,8 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoTableSourceOptions, SpatialDataType, TypedSource} from './common';
+import {baseSource} from './base-source';
+import {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './common';
 
-export type CartoVectorTableSourceOptions = CartoSourceOptions & CartoTableSourceOptions;
+export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
 type UrlParameters = {
   columns?: string;
   spatialDataType: SpatialDataType;
@@ -10,8 +10,8 @@ type UrlParameters = {
   name: string;
 };
 
-const cartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async function (
-  options: CartoVectorTableSourceOptions
+const vectorTableSource: TypedSource<VectorTableSourceOptions> = async function (
+  options: VectorTableSourceOptions
 ): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;
   const urlParameters: UrlParameters = {name: tableName, spatialDataType: 'geometry'};
@@ -22,7 +22,7 @@ const cartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async
   if (spatialDataColumn) {
     urlParameters.spatialDataColumn = spatialDataColumn;
   }
-  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {cartoVectorTableSource};
+export {vectorTableSource};
