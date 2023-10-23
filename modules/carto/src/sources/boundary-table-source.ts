@@ -1,7 +1,7 @@
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, TilejsonSource} from './common';
+import {baseSource} from './base-source';
+import {SourceOptions, TilejsonSource} from './common';
 
-export type CartoBoundaryTableSourceOptions = CartoSourceOptions & {
+export type BoundaryTableSourceOptions = SourceOptions & {
   boundaryId: string;
   columns?: string[];
   propertiesTableSource: string;
@@ -12,8 +12,8 @@ type UrlParameters = {
   propertiesTableSource: string;
 };
 
-const cartoBoundaryTableSource: TilejsonSource<CartoBoundaryTableSourceOptions> = async function (
-  options: CartoBoundaryTableSourceOptions
+const boundaryTableSource: TilejsonSource<BoundaryTableSourceOptions> = async function (
+  options: BoundaryTableSourceOptions
 ): Promise<any> {
   const {boundaryId, columns, propertiesTableSource} = options;
   const urlParameters: UrlParameters = {boundaryId, propertiesTableSource};
@@ -21,7 +21,7 @@ const cartoBoundaryTableSource: TilejsonSource<CartoBoundaryTableSourceOptions> 
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  return cartoBaseSource<UrlParameters>('boundary', options, urlParameters);
+  return baseSource<UrlParameters>('boundary', options, urlParameters);
 };
 
-export {cartoBoundaryTableSource};
+export {boundaryTableSource};

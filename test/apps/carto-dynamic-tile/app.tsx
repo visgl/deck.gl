@@ -73,16 +73,13 @@ function Root() {
 function useBoundaryLayer(datasource) {
   const {getFillColor, source, boundaryId, columns, propertiesSqlSource, propertiesTableSource} =
     datasource;
-  // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return source({
-      ...globalOptions,
-      boundaryId,
-      columns,
-      propertiesTableSource,
-      propertiesSqlSource
-    });
-  }, [source, boundaryId, columns, propertiesSqlSource, propertiesTableSource, null]);
+  const tilejson = source({
+    ...globalOptions,
+    boundaryId,
+    columns,
+    propertiesTableSource,
+    propertiesSqlSource
+  });
 
   return new VectorTileLayer({
     id: 'carto',
