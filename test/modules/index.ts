@@ -32,4 +32,4 @@ import './mapbox';
 import './json';
 import './react';
 import './jupyter-widget';
-// import './extensions';
+import './extensions';
