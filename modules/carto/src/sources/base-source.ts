@@ -1,9 +1,9 @@
 import type {MapType} from '../api/maps-api-common';
 import {APIErrorContext} from '../api/carto-api-error';
 import {
-  CartoSourceOptionalOptions,
-  CartoSourceRequiredOptions,
-  CartoTilejsonResult,
+  SourceOptionalOptions,
+  SourceRequiredOptions,
+  TilejsonResult,
   GeojsonResult,
   JsonResult,
   SOURCE_DEFAULTS,
@@ -12,11 +12,11 @@ import {
 } from './common';
 import {buildApiEndpoint, requestWithParameters} from './utils';
 
-export async function cartoBaseSource<UrlParameters extends Record<string, string>>(
+export async function baseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,
-  options: Partial<CartoSourceOptionalOptions> & CartoSourceRequiredOptions,
+  options: Partial<SourceOptionalOptions> & SourceRequiredOptions,
   urlParameters: UrlParameters
-): Promise<CartoTilejsonResult | GeojsonResult | JsonResult> {
+): Promise<TilejsonResult | GeojsonResult | JsonResult> {
   const mergedOptions = {...SOURCE_DEFAULTS, ...options, endpoint};
   const baseUrl = buildApiEndpoint(mergedOptions);
   const {accessToken, format} = mergedOptions;

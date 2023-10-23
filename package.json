@@ -25,7 +25,8 @@
     "@probe.gl/stats": "4.0.4",
     "@probe.gl/env": "4.0.4",
     "escaper": "3.0.6",
-    "vite": "^4.3.9"
+    "vite": "^4.3.9",
+    "puppeteer": "^21.3.8"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
@@ -74,7 +75,7 @@
     "gl": "6.0.2",
     "glsl-transpiler": "^1.8.6",
     "jsdom": "^20.0.0",
-    "ocular-dev-tools": "2.0.0-alpha.13",
+    "ocular-dev-tools": "2.0.0-alpha.19",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "react": "^18.0.0",

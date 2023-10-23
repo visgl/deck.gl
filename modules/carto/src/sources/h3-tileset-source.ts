@@ -1,16 +1,16 @@
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoTilesetSourceOptions, TilejsonSource} from './common';
+import {baseSource} from './base-source';
+import {SourceOptions, TilesetSourceOptions, TilejsonSource} from './common';
 
-export type CartoH3TilesetSourceOptions = CartoSourceOptions & CartoTilesetSourceOptions;
+export type H3TilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const cartoH3TilesetSource: TilejsonSource<CartoH3TilesetSourceOptions> = async function (
-  options: CartoH3TilesetSourceOptions
+const h3TilesetSource: TilejsonSource<H3TilesetSourceOptions> = async function (
+  options: H3TilesetSourceOptions
 ): Promise<any> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return cartoBaseSource<UrlParameters>('tileset', options, urlParameters);
+  return baseSource<UrlParameters>('tileset', options, urlParameters);
 };
 
-export {cartoH3TilesetSource};
+export {h3TilesetSource};

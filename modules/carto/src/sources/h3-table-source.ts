@@ -1,35 +1,29 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
+import {baseSource} from './base-source';
 import {
-  CartoAggregationOptions,
-  CartoSourceOptions,
-  CartoTableSourceOptions,
+  AggregationOptions,
+  SourceOptions,
+  SpatialDataType,
+  TableSourceOptions,
   TilejsonSource
 } from './common';
 
-export type CartoH3TableSourceOptions = CartoSourceOptions &
-  CartoTableSourceOptions &
-  CartoAggregationOptions;
+export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
   columns?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   name: string;
 };
 
-const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async function (
-  options: CartoH3TableSourceOptions
+const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
+  options: H3TableSourceOptions
 ): Promise<any> {
-  const {
-    aggregationExp,
-    aggregationResLevel = 4,
-    columns,
-    spatialDataColumn = 'h3:h3',
-    tableName
-  } = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
+  const {aggregationExp, aggregationResLevel = 4, columns, spatialDataColumn, tableName} = options;
+  const urlParameters: UrlParameters = {aggregationExp, name: tableName, spatialDataType: 'h3'};
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
@@ -38,9 +32,9 @@ const cartoH3TableSource: TilejsonSource<CartoH3TableSourceOptions> = async func
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
+    urlParameters.spatialDataColumn = spatialDataColumn;
   }
-  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters);
 };
 
-export {cartoH3TableSource};
+export {h3TableSource};
