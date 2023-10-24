@@ -48,6 +48,7 @@ const examples = [
   // Spatial index layers
   '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
   '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
+  '38255824-e1d5-4a8f-b803-324aa75ef08a', // dynamic spatial index h3 ana (tileset)
   '433b5f7e-af50-4da3-8803-26dfe58972d8', // dynamic tiling ana
   'ab8cc16b-e6b2-409a-8e0a-39ad6f6dfc12', // dynamic tiling snowflake
   'a42992e9-df58-451e-ad71-d7e91fe4a0df', // No aggregationExp provided
@@ -83,7 +84,7 @@ const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
 iframe.style.height = 'calc(50% + 20px)';
 iframe.src = `${apiBaseUrl.replace('api', 'app')}/map/${id}`;
-document.body.appendChild(iframe);
+// document.body.appendChild(iframe);
 
 for (const e of examples) {
   const btn = document.createElement('button');

@@ -31,14 +31,18 @@ import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
 import {
+  GeojsonResult,
+  JsonResult,
   TilejsonResult,
+  h3QuerySource,
+  h3TableSource,
   quadbinQuerySource,
   quadbinTableSource,
-  quadbinTilesetSource,
   vectorQuerySource,
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
+import {baseSource} from '../sources/base-source';
 
 const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
@@ -398,7 +402,7 @@ async function _fetchMapDataset(
     cache: number;
     connectionName: string;
     geoColumn: string;
-    data: TilejsonResult;
+    data: TilejsonResult | GeojsonResult | JsonResult;
     columns: string[];
     format: Format;
     aggregationExp: string;
@@ -431,27 +435,46 @@ async function _fetchMapDataset(
     headers
   };
 
-  const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
-  if (spatialDataType === 'geom') {
-    const options = {...globalOptions, spatialDataColumn};
-    if (type === 'table') {
-      dataset.data = await vectorTableSource({...options, columns, tableName: source});
-    } else if (type === 'query') {
-      dataset.data = await vectorQuerySource({...options, sqlQuery: source});
-    } else if (type === 'tileset') {
-      dataset.data = await vectorTilesetSource({...options, tableName: source});
-    }
-  } else if (spatialDataType === 'quadbin') {
-    const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
-    if (type === 'table') {
-      dataset.data = await quadbinTableSource({...options, columns, tableName: source});
-    } else if (type === 'query') {
-      dataset.data = await quadbinQuerySource({...options, sqlQuery: source});
-    } else if (type === 'tileset') {
-      dataset.data = await quadbinTilesetSource({...options, tableName: source});
+  if (type === 'tileset') {
+    // TODO do we want a generic tilesetSource?
+    dataset.data = await vectorTilesetSource({...globalOptions, tableName: source});
+  } else if (!geoColumn) {
+    // TODO is using baseSource a good idea?
+    if (type === 'query') {
+      dataset.data = await baseSource<{q: string}>(type, {...globalOptions, format}, {q: source});
+    } else {
+      dataset.data = await baseSource<{name: string}>(
+        type,
+        {...globalOptions, format},
+        {name: source}
+      );
     }
   } else {
-    debugger;
+    const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
+    if (spatialDataType === 'geom') {
+      const options = {...globalOptions, spatialDataColumn};
+      if (type === 'table') {
+        dataset.data = await vectorTableSource({...options, columns, tableName: source});
+      } else if (type === 'query') {
+        dataset.data = await vectorQuerySource({...options, sqlQuery: source});
+      }
+    } else if (spatialDataType === 'h3') {
+      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      if (type === 'table') {
+        dataset.data = await h3TableSource({...options, columns, tableName: source});
+      } else if (type === 'query') {
+        dataset.data = await h3QuerySource({...options, sqlQuery: source});
+      }
+    } else if (spatialDataType === 'quadbin') {
+      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      if (type === 'table') {
+        dataset.data = await quadbinTableSource({...options, columns, tableName: source});
+      } else if (type === 'query') {
+        dataset.data = await quadbinQuerySource({...options, sqlQuery: source});
+      }
+    } else {
+      debugger;
+    }
   }
   const {cache} = dataset.data || {};
   const cacheChanged = !(cache && dataset.cache === cache);
