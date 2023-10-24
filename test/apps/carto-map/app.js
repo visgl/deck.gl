@@ -74,7 +74,8 @@ const examples = [
   '12119dd2-0ddb-4fd2-b48a-15a1b7511e52', // Overlapping empty circles
   '3c892452-3806-4ebf-821b-a76f4562dd0c', // points and lines
   '21cc8261-e626-4778-a78b-76fe8b808214', // markers tilesets
-  '4e8f215f-97b4-4f4e-8b53-465c3908c317' // markers points
+  '4e8f215f-97b4-4f4e-8b53-465c3908c317', // markers points
+  '27de26b4-b94f-4e94-b291-41d1a21d3d02' // HexColumn color
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id') : examples[0];
