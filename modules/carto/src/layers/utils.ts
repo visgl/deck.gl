@@ -1,3 +1,6 @@
+import {Tile as PropertiesTile} from './schema/carto-properties-tile';
+import {Tile as VectorTile} from './schema/carto-tile';
+
 /**
  * Adds access token to Authorization header in loadOptions
  */
@@ -10,10 +13,10 @@ export function injectAccessToken(loadOptions: any, accessToken: string): void {
   }
 }
 
-export function mergeBoundaryData(geometry, properties) {
+export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTile): VectorTile {
   const mapping = {};
   for (const {geoid, ...rest} of properties.properties) {
-    if ((geoid as string) in mapping) {
+    if (geoid in mapping) {
       throw new Error(`Duplicate geoid key in mapping: ${geoid}`);
     }
     mapping[geoid] = rest;
@@ -29,13 +32,15 @@ export function mergeBoundaryData(geometry, properties) {
 
     // numericProps need to be filled to match length of positions buffer
     const {positions, globalFeatureIds} = geom;
-    let indices: TypedArray = null;
+    let indices: Uint16Array | Uint32Array | null = null;
     if (type === 'lines') indices = geom.pathIndices.value;
     if (type === 'polygons') indices = geom.polygonIndices.value;
     const length = positions.value.length / positions.size;
     for (const key in properties.numericProps) {
       const sourceProp = properties.numericProps[key].value;
-      const TypedArray = sourceProp.constructor;
+      const TypedArray = sourceProp.constructor as
+        | Float32ArrayConstructor
+        | Float64ArrayConstructor;
       const destProp = new TypedArray(length);
       geom.numericProps[key] = {value: destProp, size: 1};
 
