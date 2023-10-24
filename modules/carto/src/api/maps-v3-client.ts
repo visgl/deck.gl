@@ -30,6 +30,7 @@ import {APIErrorContext, CartoAPIError} from './carto-api-error';
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
+import {quadbinTableSource} from '../sources';
 
 const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
@@ -393,6 +394,7 @@ async function _fetchMapDataset(
     aggregationExp,
     aggregationResLevel,
     connectionName: connection,
+    connectionName,
     columns,
     format,
     geoColumn,
@@ -400,34 +402,53 @@ async function _fetchMapDataset(
     type,
     queryParameters
   } = dataset;
-  // First fetch metadata
-  const {url, mapFormat} = await _fetchDataUrl({
-    aggregationExp,
-    aggregationResLevel,
-    clientId,
-    credentials: {...credentials, accessToken},
-    connection,
-    columns,
-    format,
-    geoColumn,
-    headers,
-    source,
-    type,
-    queryParameters
-  });
 
-  // Extract the last time the data changed
-  const cache = parseInt(new URL(url).searchParams.get('cache') || '', 10);
-  if (cache && dataset.cache === cache) {
-    return false;
+  const globalOptions = {accessToken, apiBaseUrl: credentials.apiBaseUrl, connectionName};
+
+  const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
+  if (spatialDataType === 'quadbin') {
+    dataset.data = await quadbinTableSource({
+      ...globalOptions,
+      aggregationExp,
+      aggregationResLevel,
+      columns,
+      spatialDataColumn: geoColumn,
+      tableName: source
+    });
   }
+  const {cache} = dataset.data;
+  const cacheChanged = !(cache && dataset.cache === cache);
   dataset.cache = cache;
+  return cacheChanged;
 
-  // Only fetch if the data has changed
-  const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
-  dataset.data = await requestData({url, format: mapFormat, accessToken, errorContext});
+  // // First fetch metadata
+  // const {url, mapFormat} = await _fetchDataUrl({
+  //   aggregationExp,
+  //   aggregationResLevel,
+  //   clientId,
+  //   credentials: {...credentials, accessToken},
+  //   connection,
+  //   columns,
+  //   format,
+  //   geoColumn,
+  //   headers,
+  //   source,
+  //   type,
+  //   queryParameters
+  // });
 
-  return true;
+  // // Extract the last time the data changed
+  // const cache = parseInt(new URL(url).searchParams.get('cache') || '', 10);
+  // if (cache && dataset.cache === cache) {
+  //   return false;
+  // }
+  // dataset.cache = cache;
+
+  // // Only fetch if the data has changed
+  // const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
+  // dataset.data = await requestData({url, format: mapFormat, accessToken, errorContext});
+
+  // return true;
 }
 
 async function _fetchTilestats(

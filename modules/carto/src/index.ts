@@ -24,15 +24,7 @@ export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {
-  FORMATS,
-  TILE_FORMATS,
-  MAP_TYPES,
-  API_VERSIONS,
-  CartoAPIError,
-  fetchMap,
-  mapInstantiation as _mapInstantiation
-} from './api';
+export {FORMATS, TILE_FORMATS, MAP_TYPES, API_VERSIONS, CartoAPIError, fetchMap} from './api';
 export type {APIErrorContext, QueryParameters} from './api';
 
 import {

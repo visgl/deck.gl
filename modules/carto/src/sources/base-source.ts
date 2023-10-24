@@ -36,6 +36,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
   });
 
   const dataUrl = mapInstantiation[format].url[0];
+  const cache = parseInt(new URL(dataUrl).searchParams.get('cache') || '', 10);
   errorContext.requestType = 'Map data';
 
   if (format === 'tilejson') {
@@ -44,7 +45,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
       headers,
       errorContext
     });
-    return {...tilejson, accessToken};
+    return {...tilejson, accessToken, cache};
   }
 
   return await requestWithParameters<GeojsonResult | JsonResult>({
