@@ -34,6 +34,7 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
+import {requestWithParameters} from '../sources/utils';
 
 const MAX_GET_LENGTH = 8192;
 
@@ -204,22 +205,13 @@ async function _fetchTilestats(
   }
 
   const errorContext = {requestType: REQUEST_TYPES.TILE_STATS, connection, type, source};
-  let url = baseUrl;
-  if (type === MAP_TYPES.QUERY) {
-    url += `?${encodeParameter('q', source)}`;
-  }
-  let stats;
-  if (url.length > MAX_GET_LENGTH && type === MAP_TYPES.QUERY) {
-    stats = await requestJson({
-      method: 'POST',
-      url: baseUrl,
-      accessToken,
-      body: JSON.stringify({q: source}),
-      errorContext
-    });
-  } else {
-    stats = await requestJson({url, accessToken, errorContext});
-  }
+  const headers = {Authorization: `Bearer ${accessToken}`};
+  const stats = await requestWithParameters({
+    baseUrl,
+    headers,
+    parameters: type === 'query' ? {q: source} : {},
+    errorContext
+  });
 
   // Replace tilestats for attribute with value from API
   const {attributes} = dataset.data.tilestats.layers[0];
