@@ -30,7 +30,6 @@ export {
   MAP_TYPES,
   API_VERSIONS,
   CartoAPIError,
-  fetchLayerData,
   fetchMap,
   mapInstantiation as _mapInstantiation
 } from './api';

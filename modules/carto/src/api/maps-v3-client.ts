@@ -298,44 +298,6 @@ export interface FetchLayerDataResult {
   format?: Format;
   schema: SchemaField[];
 }
-export async function fetchLayerData({
-  type,
-  source,
-  connection,
-  credentials,
-  geoColumn,
-  columns,
-  format,
-  formatTiles,
-  clientId,
-  headers,
-  aggregationExp,
-  aggregationResLevel,
-  queryParameters
-}: FetchLayerDataParams): Promise<FetchLayerDataResult> {
-  // Internally we split data fetching into two parts to allow us to
-  // conditionally fetch the actual data, depending on the metadata state
-  const {url, accessToken, mapFormat, metadata} = await _fetchDataUrl({
-    type,
-    source,
-    connection,
-    credentials,
-    geoColumn,
-    columns,
-    format,
-    formatTiles,
-    clientId,
-    headers,
-    aggregationExp,
-    aggregationResLevel,
-    queryParameters
-  });
-
-  const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
-  const data = await requestData({url, format: mapFormat, accessToken, errorContext});
-  const result: FetchLayerDataResult = {data, format: mapFormat, schema: metadata.schema};
-  return result;
-}
 
 async function _fetchDataUrl({
   type,
