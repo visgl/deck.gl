@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/images": "4.0.0-beta.6",
-    "@loaders.gl/schema": "4.0.0-beta.6",
+    "@loaders.gl/images": "4.0.0-beta.7",
+    "@loaders.gl/schema": "4.0.0-beta.7",
     "@luma.gl/constants": "^8.5.20",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^3.6.2",
@@ -41,7 +41,7 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "4.0.0-beta.6",
+    "@loaders.gl/core": "4.0.0-beta.7",
     "@luma.gl/core": "^8.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
