@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.32] - Oct 24 2023
+
+- CARTO: Support styling layer by color column (#8177)
+
 #### deck.gl [8.9.31] - Oct 11 2023
 
 - Draw mask layers when rendering to picking buffer (#8176)
