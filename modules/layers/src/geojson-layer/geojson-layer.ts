@@ -32,7 +32,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
@@ -57,7 +57,7 @@ export type GeoJsonLayerProps = _GeoJsonLayerProps & CompositeLayerProps;
 
 /** Properties added by GeoJsonLayer */
 export type _GeoJsonLayerProps = {
-  data: string | GeoJSON | BinaryFeatures | Promise<GeoJSON | BinaryFeatures>;
+  data: string | GeoJSON | BinaryFeatureCollection | Promise<GeoJSON | BinaryFeatureCollection>;
   /**
    * How to render Point and MultiPoint features in the data.
    *
@@ -423,7 +423,9 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
     if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
-      info.index = (this.props.data as BinaryFeatures).points!.globalFeatureIds.value[index];
+      info.index = (this.props.data as BinaryFeatureCollection).points!.globalFeatureIds.value[
+        index
+      ];
     }
     return info;
   }

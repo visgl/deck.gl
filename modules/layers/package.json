@@ -30,21 +30,21 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/images": "^3.4.13",
-    "@loaders.gl/schema": "^3.4.13",
+    "@loaders.gl/images": "4.0.0-beta.5",
+    "@loaders.gl/schema": "4.0.0-beta.5",
     "@luma.gl/core": "9.0.0-alpha.37",
     "@luma.gl/engine": "9.0.0-alpha.37",
     "@luma.gl/shadertools": "9.0.0-alpha.37",
     "@luma.gl/constants": "9.0.0-alpha.37",
     "@mapbox/tiny-sdf": "^2.0.5",
-    "@math.gl/core": "4.0.0-alpha.4",
-    "@math.gl/polygon": "4.0.0-alpha.4",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@math.gl/core": "^4.0.0",
+    "@math.gl/polygon": "^4.0.0",
+    "@math.gl/web-mercator": "^4.0.0",
     "earcut": "^2.2.4"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@loaders.gl/core": "^3.4.13",
+    "@loaders.gl/core": "4.0.0-beta.5",
     "@luma.gl/core": "9.0.0-alpha.37",
     "@luma.gl/engine": "9.0.0-alpha.37",
     "@luma.gl/shadertools": "9.0.0-alpha.37"
