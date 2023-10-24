@@ -2,13 +2,8 @@
 /**
  * Maps API Client for Carto 3
  */
-import {
-  getDefaultCredentials,
-  buildMapsUrlFromBase,
-  buildStatsUrlFromBase,
-  CloudNativeCredentials
-} from '../config';
-import {API_VERSIONS, Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
+import {CloudNativeCredentials, buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
+import {Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
 
 import type {APIErrorContext} from './carto-api-error';
 
@@ -17,6 +12,7 @@ import {assert} from '../utils';
 import {
   GeojsonResult,
   JsonResult,
+  SOURCE_DEFAULTS,
   TilejsonResult,
   h3QuerySource,
   h3TableSource,
@@ -44,7 +40,7 @@ async function _fetchMapDataset(
     queryParameters: QueryParameters;
   },
   accessToken: string,
-  credentials: CloudNativeCredentials,
+  apiBaseUrl: string,
   clientId?: string,
   headers?: Record<string, string>
 ) {
@@ -63,7 +59,7 @@ async function _fetchMapDataset(
   const cache: {value?: number} = {};
   const globalOptions: any = {
     accessToken,
-    apiBaseUrl: credentials.apiBaseUrl,
+    apiBaseUrl,
     cache,
     clientId,
     connectionName,
@@ -109,15 +105,10 @@ async function _fetchMapDataset(
   return cacheChanged;
 }
 
-async function _fetchTilestats(
-  attribute,
-  dataset,
-  accessToken: string,
-  credentials: CloudNativeCredentials
-) {
+async function _fetchTilestats(attribute, dataset, accessToken: string, apiBaseUrl: string) {
   const {connectionName: connection, source, type} = dataset;
 
-  const statsUrl = buildStatsUrlFromBase(credentials.apiBaseUrl);
+  const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
   let baseUrl = `${statsUrl}/${connection}/`;
   if (type === MAP_TYPES.QUERY) {
     baseUrl += attribute;
@@ -145,19 +136,16 @@ async function _fetchTilestats(
 async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
-  credentials: CloudNativeCredentials,
+  apiBaseUrl: string,
   headers?: Record<string, string>
 ) {
   const promises = datasets.map(dataset =>
-    _fetchMapDataset(dataset, token, credentials, clientId, headers)
+    _fetchMapDataset(dataset, token, apiBaseUrl, clientId, headers)
   );
   return await Promise.all(promises);
 }
 
-async function fillInTileStats(
-  {datasets, keplerMapConfig, token},
-  credentials: CloudNativeCredentials
-) {
+async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: string) {
   const attributes: {attribute?: string; dataset?: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
@@ -185,41 +173,32 @@ async function fillInTileStats(
   }
 
   const promises = filteredAttributes.map(({attribute, dataset}) =>
-    _fetchTilestats(attribute, dataset, token, credentials)
+    _fetchTilestats(attribute, dataset, token, apiBaseUrl)
   );
   return await Promise.all(promises);
 }
 
 /* eslint-disable max-statements */
 export async function fetchMap({
+  apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
   cartoMapId,
-  clientId,
-  credentials,
+  clientId = SOURCE_DEFAULTS.clientId,
   headers = {},
+  mapsUrl,
   autoRefresh,
   onNewData
 }: {
+  apiBaseUrl: string;
   cartoMapId: string;
   clientId: string;
   credentials?: CloudNativeCredentials;
   headers: Record<string, string>;
+  mapsUrl?: string;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 }) {
-  const defaultCredentials = getDefaultCredentials();
-  const localCreds = {
-    ...(defaultCredentials.apiVersion === API_VERSIONS.V3 && defaultCredentials),
-    ...credentials
-  } as CloudNativeCredentials;
-  const {accessToken} = localCreds;
-
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
-
-  assert(localCreds.apiVersion === API_VERSIONS.V3, 'Method only available for v3');
-  assert(localCreds.apiBaseUrl, 'Must define apiBaseUrl');
-  if (!localCreds.mapsUrl) {
-    localCreds.mapsUrl = buildMapsUrlFromBase(localCreds.apiBaseUrl);
-  }
+  assert(apiBaseUrl, 'Must define apiBaseUrl');
 
   if (autoRefresh || onNewData) {
     assert(onNewData, 'Must define `onNewData` when using autoRefresh');
@@ -230,7 +209,7 @@ export async function fetchMap({
     );
   }
 
-  const baseUrl = `${localCreds.mapsUrl}/public/${cartoMapId}`;
+  const baseUrl = `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
   const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext});
 
@@ -240,7 +219,7 @@ export async function fetchMap({
   if (autoRefresh) {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, localCreds, headers);
+      const changed = await fillInMapDatasets(map, clientId, apiBaseUrl, headers);
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -266,10 +245,10 @@ export async function fetchMap({
   });
 
   // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, clientId, localCreds, headers);
+  await fillInMapDatasets(map, clientId, apiBaseUrl, headers);
 
   // Mutates attributes in visualChannels to contain tile stats
-  await fillInTileStats(map, localCreds);
+  await fillInTileStats(map, apiBaseUrl);
   const out = {...parseMap(map), ...{stopAutoRefresh}};
 
   const textLayers = out.layers.filter(layer => {
