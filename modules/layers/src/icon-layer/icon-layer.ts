@@ -110,7 +110,7 @@ type _IconLayerProps<DataT> = {
   textureParameters?: Record<number, number> | null;
 };
 
-export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps;
+export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -124,8 +124,8 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', value: x => x.position},
-  getIcon: {type: 'accessor', value: x => x.icon},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getIcon: {type: 'accessor', value: (x: any) => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
@@ -162,7 +162,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -231,7 +231,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     // internalState is always defined during updateState
-    const prePacked = iconAtlas || this.internalState.isAsyncPropLoading('iconAtlas');
+    const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
@@ -243,7 +243,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     // prepacked iconAtlas from user
     if (prePacked) {
       if (oldProps.iconMapping !== props.iconMapping) {
-        attributeManager.invalidate('getIcon');
+        attributeManager!.invalidate('getIcon');
       }
     } else if (
       changeFlags.dataChanged ||
@@ -257,7 +257,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */
@@ -278,9 +278,11 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model.setBindings({iconsTexture});
-      this.state.model.setUniforms(uniforms);
-      this.state.model.setUniforms({
+      const model = this.state.model!;
+
+      model.setBindings({iconsTexture});
+      model.setUniforms(uniforms);
+      model.setUniforms({
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
@@ -289,7 +291,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         billboard,
         alphaCutoff
       });
-      this.state.model.draw(this.context.renderPass);
+      model.draw(this.context.renderPass);
     }
   }
 
@@ -301,7 +303,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {
@@ -331,12 +333,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected getInstanceOffset(icon: string): number[] {
-    const mapping = this.state.iconManager.getIconMapping(icon);
-    if (mapping) {
-      return [mapping.width / 2 - mapping.anchorX, mapping.height / 2 - mapping.anchorY];
-    }
-    // TODO - this was undefined before...
-    return [0, 0];
+    const {
+      width,
+      height,
+      anchorX = width / 2,
+      anchorY = height / 2
+    } = this.state.iconManager.getIconMapping(icon);
+    return [width / 2 - anchorX, height / 2 - anchorY];
   }
 
   protected getInstanceColorMode(icon: string): number {

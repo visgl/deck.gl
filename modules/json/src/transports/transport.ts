@@ -2,7 +2,7 @@
 const state = {
   onInitialize: _ => _,
   onFinalize: _ => _,
-  onMessage: null
+  onMessage: _ => _
 };
 
 export default class Transport {

@@ -48,7 +48,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -79,7 +79,7 @@ function normalizeData(data) {
 }
 
 /** All properties supported by PointCloudLayer. */
-export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps;
+export type PointCloudLayerProps<DataT = unknown> = _PointCloudLayerProps<DataT> & LayerProps;
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {
@@ -135,6 +135,10 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'PointCloudLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
@@ -180,13 +184,14 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
+    const model = this.state.model!;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       sizeUnits: UNIT[sizeUnits],
       radiusPixels: pointSize
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -200,7 +205,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {

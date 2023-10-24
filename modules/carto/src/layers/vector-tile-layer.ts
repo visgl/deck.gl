@@ -14,22 +14,26 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
+import {TilejsonPropType, TilejsonResult} from '../sources/common';
+import {injectAccessToken} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
-const defaultProps: DefaultProps<CartoTileLayerProps> = {
+const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
+  data: TilejsonPropType,
   formatTiles: defaultTileFormat
 };
 
-/** All properties supported by CartoTileLayer. */
-export type CartoTileLayerProps = _CartoTileLayerProps & MVTLayerProps;
+/** All properties supported by VectorTileLayer. */
+export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, 'data'>;
 
-/** Properties added by CartoTileLayer. */
-type _CartoTileLayerProps = {
+/** Properties added by VectorTileLayer. */
+type _VectorTileLayerProps = {
+  data: null | TilejsonResult | Promise<TilejsonResult>;
   /** Use to override the default tile data format.
    *
    * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
@@ -39,16 +43,41 @@ type _CartoTileLayerProps = {
   formatTiles?: TileFormat;
 };
 
-export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
-  Required<_CartoTileLayerProps> & ExtraProps
+// TODO Perhaps we can't subclass MVTLayer and keep types. Better to subclass TileLayer instead?
+// @ts-ignore
+export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
+  Required<_VectorTileLayerProps> & ExtraProps
 > {
-  static layerName = 'CartoTileLayer';
+  static layerName = 'VectorTileLayer';
   static defaultProps = defaultProps;
+
+  state!: MVTLayer['state'] & {
+    mvt: boolean;
+  };
 
   initializeState(): void {
     super.initializeState();
-    const binary = this.props.formatTiles === TILE_FORMATS.BINARY;
+    const binary = this.props.formatTiles === TILE_FORMATS.BINARY || TILE_FORMATS.MVT;
     this.setState({binary});
+  }
+
+  updateState(parameters) {
+    const {props} = parameters;
+    if (props.data) {
+      super.updateState(parameters);
+
+      const formatTiles = new URL(props.data.tiles[0]).searchParams.get('formatTiles');
+      const mvt = formatTiles === TILE_FORMATS.MVT;
+      this.setState({mvt});
+    }
+  }
+
+  getLoadOptions(): any {
+    const loadOptions = super.getLoadOptions() || {};
+    const tileJSON = this.props.data as TilejsonResult;
+    injectAccessToken(loadOptions, tileJSON.accessToken);
+    loadOptions.gis = {format: 'binary'}; // Use binary for MVT loading
+    return loadOptions;
   }
 
   getTileData(tile: TileLoadProps) {
@@ -75,6 +104,10 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
       return null;
     }
 
+    if (this.state.mvt) {
+      return super.renderSubLayers(props) as GeoJsonLayer;
+    }
+
     const tileBbox = props.tile.bbox as any;
     const {west, south, east, north} = tileBbox;
 
@@ -94,7 +127,7 @@ export default class CartoTileLayer<ExtraProps extends {} = {}> extends MVTLayer
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }

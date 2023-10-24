@@ -21,6 +21,15 @@
 import {createIterable} from '@deck.gl/core';
 import {getGridOffset} from '../utils/grid-aggregation-utils';
 
+export type GridHash = {
+  [key: string]: {
+    count: number;
+    points: unknown[];
+    lonIdx: number;
+    latIdx: number;
+  };
+};
+
 /**
  * Calculate density grid from an array of points
  * @param {Object} props - object containing :
@@ -41,7 +50,6 @@ import {getGridOffset} from '../utils/grid-aggregation-utils';
  */
 export function pointToDensityGridDataCPU(props, aggregationParams) {
   const hashInfo = pointsToGridHashing(props, aggregationParams);
-  // @ts-expect-error
   const result = getGridLayerDataFromGridHash(hashInfo);
 
   return {
@@ -59,7 +67,14 @@ export function pointToDensityGridDataCPU(props, aggregationParams) {
  * @returns {object} - grid hash and cell dimension
  */
 /* eslint-disable-next-line max-statements, complexity */
-function pointsToGridHashing(props, aggregationParams) {
+function pointsToGridHashing(
+  props,
+  aggregationParams
+): {
+  gridHash: GridHash;
+  gridOffset: {xOffset: number; yOffset: number};
+  offsets: [number, number];
+} {
   const {data = [], cellSize} = props;
   const {attributes, viewport, projectPoints, numInstances} = aggregationParams;
   const positions = attributes.positions.value;
@@ -70,7 +85,7 @@ function pointsToGridHashing(props, aggregationParams) {
   const gridOffset = aggregationParams.gridOffset || getGridOffset(boundingBox, cellSize);
 
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
-    return {gridHash: {}, gridOffset};
+    return {gridHash: {}, gridOffset, offsets: [0, 0]};
   }
 
   const {width, height} = viewport;
@@ -112,7 +127,15 @@ function pointsToGridHashing(props, aggregationParams) {
 }
 /* eslint-enable max-statements, complexity */
 
-function getGridLayerDataFromGridHash({gridHash, gridOffset, offsets}) {
+function getGridLayerDataFromGridHash({
+  gridHash,
+  gridOffset,
+  offsets
+}: {
+  gridHash: GridHash;
+  gridOffset: {xOffset: number; yOffset: number};
+  offsets: [number, number];
+}) {
   const data = new Array(Object.keys(gridHash).length);
   let i = 0;
   for (const key in gridHash) {

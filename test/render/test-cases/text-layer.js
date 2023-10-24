@@ -103,39 +103,38 @@ export default OS === 'Mac'
         imageDiffOptions,
         goldenImage: './test/render/golden-images/text-layer.png'
       },
-      // TODO - v9 binary attributes
-      // {
-      //   name: 'text-layer-binary',
-      //   viewState: {
-      //     latitude: 37.751,
-      //     longitude: -122.427,
-      //     zoom: 11.5,
-      //     pitch: 0,
-      //     bearing: 0
-      //   },
-      //   layers: [
-      //     new TextLayer({
-      //       id: 'text-layer',
-      //       data: getBinaryAttributes(
-      //         points.slice(0, 50),
-      //         x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
-      //         {
-      //           getPosition: {accessor: x => x.COORDINATES, size: 2},
-      //           getColor: {accessor: x => [1, 0, 0], size: 3, normalized: false}
-      //         }
-      //       ),
-      //       fontFamily: 'Arial',
-      //       getSize: 20,
-      //       getAngle: 0,
-      //       sizeScale: 1,
-      //       getTextAnchor: 'start',
-      //       getAlignmentBaseline: 'center',
-      //       getPixelOffset: [10, 0]
-      //     })
-      //   ],
-      //   imageDiffOptions,
-      //   goldenImage: './test/render/golden-images/text-layer.png'
-      // },
+      {
+        name: 'text-layer-binary',
+        viewState: {
+          latitude: 37.751,
+          longitude: -122.427,
+          zoom: 11.5,
+          pitch: 0,
+          bearing: 0
+        },
+        layers: [
+          new TextLayer({
+            id: 'text-layer',
+            data: getBinaryAttributes(
+              points.slice(0, 50),
+              x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+              {
+                getPosition: {accessor: x => x.COORDINATES, size: 2},
+                getColor: {accessor: x => [1, 0, 0], size: 3, normalized: false}
+              }
+            ),
+            fontFamily: 'Arial',
+            getSize: 20,
+            getAngle: 0,
+            sizeScale: 1,
+            getTextAnchor: 'start',
+            getAlignmentBaseline: 'center',
+            getPixelOffset: [10, 0]
+          })
+        ],
+        imageDiffOptions,
+        goldenImage: './test/render/golden-images/text-layer.png'
+      },
       {
         name: 'text-layer-multi-lines',
         viewState: {

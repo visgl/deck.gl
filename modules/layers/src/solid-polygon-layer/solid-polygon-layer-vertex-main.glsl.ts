@@ -20,9 +20,6 @@
 
 export default `\
 
-attribute vec2 positions;
-attribute float instanceVertexValid;
-
 uniform bool extruded;
 uniform bool isWireframe;
 uniform float elevationScale;
@@ -34,10 +31,9 @@ struct PolygonProps {
   vec4 fillColors;
   vec4 lineColors;
   vec3 positions;
-  vec3 nextPositions;
-  vec3 pickingColors;
   vec3 positions64Low;
-  vec3 nextPositions64Low;
+  vec3 pickingColors;
+  vec3 normal;
   float elevations;
 };
 
@@ -51,49 +47,24 @@ vec3 project_offset_normal(vec3 vector) {
 }
 
 void calculatePosition(PolygonProps props) {
-#ifdef IS_SIDE_VERTEX
-  if(instanceVertexValid < 0.5){
-    gl_Position = vec4(0.);
-    return;
-  }
-#endif
-
-  vec3 pos;
-  vec3 pos64Low;
+  vec3 pos = props.positions;
+  vec3 pos64Low = props.positions64Low;
   vec3 normal;
   vec4 colors = isWireframe ? props.lineColors : props.fillColors;
 
   geometry.worldPosition = props.positions;
-  geometry.worldPositionAlt = props.nextPositions;
   geometry.pickingColor = props.pickingColors;
 
-#ifdef IS_SIDE_VERTEX
-  pos = mix(props.positions, props.nextPositions, positions.x);
-  pos64Low = mix(props.positions64Low, props.nextPositions64Low, positions.x);
-#else
-  pos = props.positions;
-  pos64Low = props.positions64Low;
-#endif
-
   if (extruded) {
-    pos.z += props.elevations * positions.y * elevationScale;
+    pos.z += props.elevations * elevationScale;
   }
   gl_Position = project_position_to_clipspace(pos, pos64Low, vec3(0.), geometry.position);
 
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   if (extruded) {
-  #ifdef IS_SIDE_VERTEX
-    normal = vec3(
-      props.positions.y - props.nextPositions.y + (props.positions64Low.y - props.nextPositions64Low.y),
-      props.nextPositions.x - props.positions.x + (props.nextPositions64Low.x - props.positions64Low.x),
-      0.0);
-    normal = project_offset_normal(normal);
-  #else
-    normal = project_normal(vec3(0.0, 0.0, 1.0));
-  #endif
-    geometry.normal = normal;
-    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, geometry.position.xyz, normal);
+    geometry.normal = props.normal;
+    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, colors.a * opacity);
   } else {
     vColor = vec4(colors.rgb, colors.a * opacity);

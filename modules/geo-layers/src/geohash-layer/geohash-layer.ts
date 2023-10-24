@@ -3,13 +3,13 @@ import GeoCellLayer from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
 const defaultProps: DefaultProps<GeohashLayerProps> = {
-  getGeohash: {type: 'accessor', value: d => d.geohash}
+  getGeohash: {type: 'accessor', value: (d: any) => d.geohash}
 };
 
 /**
  * Properties of `GeohashLayer`.
  */
-type GeohashLayerProps<DataT = any> = {
+type GeohashLayerProps<DataT = unknown> = {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *

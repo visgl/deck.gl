@@ -42,12 +42,12 @@ const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
-  getHexagon: {type: 'accessor', value: x => x.hexagon},
+  getHexagon: {type: 'accessor', value: (x: any) => x.hexagon},
   extruded: true
 };
 
 /** All properties supported by H3HexagonLayer */
-export type H3HexagonLayerProps<DataT = any> = _H3HexagonLayerProps<DataT> &
+export type H3HexagonLayerProps<DataT = unknown> = _H3HexagonLayerProps<DataT> &
   PolygonLayerProps<DataT>;
 
 /** Props added by the H3HexagonLayer */

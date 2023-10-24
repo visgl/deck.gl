@@ -126,7 +126,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   abstract get ControllerState(): ConstructorOf<ControllerState>;
   abstract get transition(): TransitionProps;
 
-  // ts-expect-error (2564) - not assigned in the constructor
+  // @ts-expect-error (2564) - not assigned in the constructor
   protected props: ControllerProps;
   protected state: Record<string, any> = {};
 
@@ -532,12 +532,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
+    event.srcEvent.preventDefault();
 
     const {speed = 0.01, smooth = false} = this.scrollZoom === true ? {} : this.scrollZoom;
     const {delta} = event;

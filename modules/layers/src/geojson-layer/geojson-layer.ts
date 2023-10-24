@@ -32,7 +32,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
@@ -46,14 +46,18 @@ import {
 } from './sub-layer-map';
 
 import {getGeojsonFeatures, SeparatedGeometries, separateGeojsonFeatures} from './geojson';
-import {createLayerPropsFromFeatures, createLayerPropsFromBinary} from './geojson-layer-props';
+import {
+  createLayerPropsFromFeatures,
+  createLayerPropsFromBinary,
+  SubLayersProps
+} from './geojson-layer-props';
 
 /** All properties supported by GeoJsonLayer */
 export type GeoJsonLayerProps = _GeoJsonLayerProps & CompositeLayerProps;
 
 /** Properties added by GeoJsonLayer */
 export type _GeoJsonLayerProps = {
-  data: string | GeoJSON | BinaryFeatures | Promise<GeoJSON | BinaryFeatures>;
+  data: string | GeoJSON | BinaryFeatureCollection | Promise<GeoJSON | BinaryFeatureCollection>;
   /**
    * How to render Point and MultiPoint features in the data.
    *
@@ -332,10 +336,23 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
   static layerName = 'GeoJsonLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    layerProps: Partial<SubLayersProps>;
+    features: Partial<SeparatedGeometries>;
+    featuresDiff: Partial<{
+      [key in keyof SeparatedGeometries]: {
+        startRow: number;
+        endRow: number;
+      }[];
+    }>;
+    binary?: boolean;
+  };
+
   initializeState(): void {
     this.state = {
       layerProps: {},
-      features: {}
+      features: {},
+      featuresDiff: {}
     };
   }
 
@@ -404,9 +421,11 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
   getPickingInfo(params): GeoJsonPickingInfo {
     const info = super.getPickingInfo(params) as GeoJsonPickingInfo;
     const {index, sourceLayer} = info;
-    info.featureType = FEATURE_TYPES.find(ft => sourceLayer.id.startsWith(`${this.id}-${ft}-`));
-    if (index >= 0 && sourceLayer.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
-      info.index = (this.props.data as BinaryFeatures).points.globalFeatureIds.value[index];
+    info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
+    if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
+      info.index = (this.props.data as BinaryFeatureCollection).points!.globalFeatureIds.value[
+        index
+      ];
     }
     return info;
   }
@@ -429,7 +448,7 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     const id = 'polygons-fill';
 
     const PolygonFillLayer =
-      this.shouldRenderSubLayer(id, layerProps.polygons.data) &&
+      this.shouldRenderSubLayer(id, layerProps.polygons?.data) &&
       this.getSubLayerClass(id, POLYGON_LAYER.type);
 
     if (PolygonFillLayer) {
@@ -463,10 +482,10 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     const PolygonStrokeLayer =
       !extruded &&
       stroked &&
-      this.shouldRenderSubLayer(polygonStrokeLayerId, layerProps.polygonsOutline.data) &&
+      this.shouldRenderSubLayer(polygonStrokeLayerId, layerProps.polygonsOutline?.data) &&
       this.getSubLayerClass(polygonStrokeLayerId, LINE_LAYER.type);
     const LineStringsLayer =
-      this.shouldRenderSubLayer(lineStringsLayerId, layerProps.lines.data) &&
+      this.shouldRenderSubLayer(lineStringsLayerId, layerProps.lines?.data) &&
       this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
 
     if (PolygonStrokeLayer || LineStringsLayer) {
@@ -503,6 +522,7 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
     let {highlightedObjectIndex} = this.props;
 
     if (!binary && Number.isFinite(highlightedObjectIndex)) {
+      // @ts-expect-error TODO - type non-binary data
       highlightedObjectIndex = layerProps.points.data.findIndex(
         d => d.__source.index === highlightedObjectIndex
       );
@@ -516,7 +536,7 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
       const PointLayerMapping = POINT_LAYER[type];
       const PointsLayer: _ConstructorOf<Layer> =
         PointLayerMapping &&
-        this.shouldRenderSubLayer(id, layerProps.points.data) &&
+        this.shouldRenderSubLayer(id, layerProps.points?.data) &&
         this.getSubLayerClass(id, PointLayerMapping.type);
       if (PointsLayer) {
         const forwardedProps = forwardProps(this, PointLayerMapping.props);
@@ -526,9 +546,11 @@ export default class GeoJsonLayer<ExtraProps extends {} = {}> extends CompositeL
           // Picking colors are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // @ts-expect-error TODO - type binary data
           const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
+            // @ts-expect-error TODO - type binary data
             data: {...pointsLayerProps.data, attributes: rest}
           };
         }

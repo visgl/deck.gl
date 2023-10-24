@@ -56,8 +56,17 @@ export function getBufferAttributeLayout(
   }
   return {
     attribute: name,
-    format: accessor.size > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
+    format: (accessor.size as number) > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };
+}
+
+export function bufferLayoutEqual(accessor1: BufferAccessor, accessor2: BufferAccessor) {
+  return (
+    (accessor1.type ?? GL.FLOAT) === (accessor2.type ?? GL.FLOAT) &&
+    accessor1.size === accessor2.size &&
+    accessor1.stride === accessor2.stride &&
+    (accessor1.offset || 0) === (accessor2.offset || 0)
+  );
 }

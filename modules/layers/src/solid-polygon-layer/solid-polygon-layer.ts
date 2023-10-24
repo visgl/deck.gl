@@ -105,7 +105,7 @@ type _SolidPolygonLayerProps<DataT> = {
 };
 
 /** Render filled and/or extruded polygons. */
-export type SolidPolygonLayerProps<DataT = any> = _SolidPolygonLayerProps<DataT> & LayerProps;
+export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -119,7 +119,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
-  getPolygon: {type: 'accessor', value: f => f.polygon},
+  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   getElevation: {type: 'accessor', value: 1000},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -361,7 +361,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.state.models?.forEach(model => model.destroy());
 
       this.setState(this._getModels());
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
 
@@ -411,7 +411,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     let sideModel;
     let wireframeModel;
 
-    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
 
     if (filled) {
       const shaders = this.getShaders('top');
@@ -429,10 +429,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         userData: {
           excludeAttributes: {instanceVertexValid: true}
         }
-      });
-
-      topModel.setConstantAttributes({
-        positions: new Float32Array([0, 1])
       });
     }
     if (extruded) {

@@ -132,8 +132,8 @@ const TYPE_DEFINITIONS = {
     validate(value, propType: NumberPropType) {
       return (
         Number.isFinite(value) &&
-        (!('max' in propType) || value <= propType.max) &&
-        (!('min' in propType) || value >= propType.min)
+        (!('max' in propType) || value <= propType.max!) &&
+        (!('min' in propType) || value >= propType.min!)
       );
     }
   },
