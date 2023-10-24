@@ -2,10 +2,10 @@
 /**
  * Maps API Client for Carto 3
  */
-import {CloudNativeCredentials, buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
+import {buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
 import {Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
 
-import type {APIErrorContext} from './carto-api-error';
+import {CartoAPIError, APIErrorContext} from './carto-api-error';
 
 import {parseMap} from './parseMap';
 import {assert} from '../utils';
@@ -24,21 +24,24 @@ import {
 } from '../sources';
 import {requestWithParameters} from '../sources/utils';
 
+type Dataset = {
+  id: string;
+  type: MapType;
+  source: string;
+  cache?: number;
+  connectionName: string;
+  geoColumn: string;
+  data: TilejsonResult | GeojsonResult | JsonResult;
+  columns: string[];
+  format: Format;
+  aggregationExp: string;
+  aggregationResLevel: number;
+  queryParameters: QueryParameters;
+};
+
 /* global clearInterval, setInterval, URL */
 async function _fetchMapDataset(
-  dataset: {
-    type: MapType;
-    source: string;
-    cache?: number;
-    connectionName: string;
-    geoColumn: string;
-    data: TilejsonResult | GeojsonResult | JsonResult;
-    columns: string[];
-    format: Format;
-    aggregationExp: string;
-    aggregationResLevel: number;
-    queryParameters: QueryParameters;
-  },
+  dataset: Dataset,
   accessToken: string,
   apiBaseUrl: string,
   clientId?: string,
@@ -105,19 +108,27 @@ async function _fetchMapDataset(
   return cacheChanged;
 }
 
-async function _fetchTilestats(attribute, dataset, accessToken: string, apiBaseUrl: string) {
-  const {connectionName: connection, source, type} = dataset;
+async function _fetchTilestats(
+  attribute,
+  dataset: Dataset,
+  accessToken: string,
+  apiBaseUrl: string
+) {
+  const {connectionName: connection, data, id, source, type} = dataset;
+  const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
+  if (!('tilestats' in data)) {
+    throw new CartoAPIError(new Error(`Invalid dataset for tilestats: ${id}`), errorContext);
+  }
 
   const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
   let baseUrl = `${statsUrl}/${connection}/`;
-  if (type === MAP_TYPES.QUERY) {
+  if (type === 'query') {
     baseUrl += attribute;
   } else {
     // MAP_TYPE.TABLE
     baseUrl += `${source}/${attribute}`;
   }
 
-  const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
   const headers = {Authorization: `Bearer ${accessToken}`};
   const stats = await requestWithParameters({
     baseUrl,
@@ -127,14 +138,14 @@ async function _fetchTilestats(attribute, dataset, accessToken: string, apiBaseU
   });
 
   // Replace tilestats for attribute with value from API
-  const {attributes} = dataset.data.tilestats.layers[0];
+  const {attributes} = data.tilestats.layers[0];
   const index = attributes.findIndex(d => d.attribute === attribute);
   attributes[index] = stats;
   return true;
 }
 
 async function fillInMapDatasets(
-  {datasets, token},
+  {datasets, token}: {datasets: Dataset[]; token: string},
   clientId: string,
   apiBaseUrl: string,
   headers?: Record<string, string>
@@ -191,7 +202,6 @@ export async function fetchMap({
   apiBaseUrl: string;
   cartoMapId: string;
   clientId: string;
-  credentials?: CloudNativeCredentials;
   headers: Record<string, string>;
   mapsUrl?: string;
   autoRefresh?: number;
