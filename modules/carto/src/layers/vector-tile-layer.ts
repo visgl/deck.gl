@@ -19,7 +19,7 @@ import type {BinaryFeatures} from '@loaders.gl/schema';
 import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
 import {TilejsonPropType, TilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import {injectAccessToken, mergeBoundaryData} from './utils';
 
 const defaultTileFormat = TILE_FORMATS.BINARY;
 
@@ -114,24 +114,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     const [geometry, attributes] = await Promise.all([geometryFetch, attributesFetch]);
     if (!geometry) return null;
 
-    return this._mergeBoundaryData(geometry, attributes);
-  }
-
-  _mergeBoundaryData(geometry, properties) {
-    const mapping = {};
-    for (const {geoid, ...rest} of properties.properties) {
-      if ((geoid as string) in mapping) {
-        throw new Error(`Duplicate geoid key in mapping: ${geoid}`);
-      }
-      mapping[geoid] = rest;
-    }
-
-    for (const type of ['points', 'lines', 'polygons']) {
-      // TODO numericProps?
-      geometry[type].properties = geometry[type].properties.map(({geoid}) => mapping[geoid]);
-    }
-
-    return geometry;
+    return mergeBoundaryData(geometry, attributes);
   }
 
   renderSubLayers(

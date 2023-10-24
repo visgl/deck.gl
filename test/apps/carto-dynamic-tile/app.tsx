@@ -18,7 +18,7 @@ import {Layer} from '@deck.gl/core';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 const INITIAL_VIEW_STATE = {longitude: -87.65, latitude: 41.82, zoom: 10};
 
-const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
+const apiBaseUrl = 'https://gcp-us-east1-13.dev.api.carto.com';
 const connectionName = 'bigquery';
 
 const accessToken = 'XXX';
