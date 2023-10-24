@@ -1,5 +1,4 @@
 export {getDefaultCredentials, setDefaultCredentials} from './config';
-export {default as CartoLayer} from './layers/carto-layer'; // <-- REMOVE in v9
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
@@ -33,11 +32,9 @@ export {
   CartoAPIError,
   fetchLayerData,
   fetchMap,
-  getDataV2 as _getDataV2,
   mapInstantiation as _mapInstantiation
 } from './api';
 export type {APIErrorContext, QueryParameters} from './api';
-export type {CartoLayerProps} from './layers/carto-layer';
 
 import {
   h3QuerySource,

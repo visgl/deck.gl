@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable complexity, camelcase */
 
-import * as mat4 from 'gl-matrix/mat4';
-import * as vec4 from 'gl-matrix/vec4';
+import {mat4, vec4} from '@math.gl/core';
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
