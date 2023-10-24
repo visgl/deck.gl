@@ -273,14 +273,14 @@ export async function fetchMap({
   cartoMapId,
   clientId,
   credentials,
-  headers,
+  headers = {},
   autoRefresh,
   onNewData
 }: {
   cartoMapId: string;
   clientId: string;
   credentials?: CloudNativeCredentials;
-  headers?: Headers;
+  headers: Headers;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 }) {
@@ -308,9 +308,9 @@ export async function fetchMap({
     );
   }
 
-  const url = `${localCreds.mapsUrl}/public/${cartoMapId}`;
+  const baseUrl = `${localCreds.mapsUrl}/public/${cartoMapId}`;
   const errorContext = {requestType: REQUEST_TYPES.PUBLIC_MAP, mapId: cartoMapId};
-  const map = await requestJson<any>({url, headers, accessToken, errorContext});
+  const map = await requestWithParameters({baseUrl, headers, errorContext});
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
