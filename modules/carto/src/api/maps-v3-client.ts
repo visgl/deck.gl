@@ -227,9 +227,11 @@ export async function fetchMap({
   // will not update when a map is published.
   let stopAutoRefresh: (() => void) | undefined;
   if (autoRefresh) {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, apiBaseUrl, headers);
+      const changed = await fillInMapDatasets(map, clientId, apiBaseUrl, {
+        ...headers,
+        'If-Modified-Since': new Date().toUTCString()
+      });
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
