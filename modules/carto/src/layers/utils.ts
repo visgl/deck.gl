@@ -20,21 +20,40 @@ export function mergeBoundaryData(geometry, properties) {
   }
 
   for (const type of ['points', 'lines', 'polygons']) {
-    geometry[type].properties = geometry[type].properties.map(({geoid}) => mapping[geoid]);
-  }
+    const geom = geometry[type];
+    if (geom.positions.value.length === 0) {
+      continue;
+    }
 
-  const length = geometry.polygons.positions.value.length / geometry.polygons.positions.size;
-  for (const key in properties.numericProps) {
-    const sourceProp = properties.numericProps[key].value;
-    const TypedArray = sourceProp.constructor;
-    const destProp = new TypedArray(length);
-    geometry.polygons.numericProps[key] = {value: destProp, size: 1};
-    const polygonIndices = geometry.polygons.polygonIndices.value;
-    for (let i = 0; i < polygonIndices.length - 1; i++) {
-      const startIndex = polygonIndices[i];
-      const endIndex = polygonIndices[i + 1];
-      const featureId = geometry.polygons.globalFeatureIds.value[startIndex];
-      destProp.fill(sourceProp[featureId], startIndex, endIndex);
+    geom.properties = geom.properties.map(({geoid}) => mapping[geoid]);
+
+    // numericProps need to be filled to match length of positions buffer
+    const {positions, globalFeatureIds} = geom;
+    let indices: TypedArray = null;
+    if (type === 'lines') indices = geom.pathIndices.value;
+    if (type === 'polygons') indices = geom.polygonIndices.value;
+    const length = positions.value.length / positions.size;
+    for (const key in properties.numericProps) {
+      const sourceProp = properties.numericProps[key].value;
+      const TypedArray = sourceProp.constructor;
+      const destProp = new TypedArray(length);
+      geom.numericProps[key] = {value: destProp, size: 1};
+
+      if (!indices) {
+        for (let i = 0; i < length; i++) {
+          // points
+          const featureId = globalFeatureIds.value[i];
+          destProp[i] = sourceProp[featureId];
+        }
+      } else {
+        // lines|polygons
+        for (let i = 0; i < indices.length - 1; i++) {
+          const startIndex = indices[i];
+          const endIndex = indices[i + 1];
+          const featureId = globalFeatureIds.value[startIndex];
+          destProp.fill(sourceProp[featureId], startIndex, endIndex);
+        }
+      }
     }
   }
 
