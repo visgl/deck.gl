@@ -8,17 +8,9 @@ import {
   buildStatsUrlFromBase,
   CloudNativeCredentials
 } from '../config';
-import {
-  API_VERSIONS,
-  encodeParameter,
-  Format,
-  MapType,
-  MAP_TYPES,
-  QueryParameters,
-  REQUEST_TYPES
-} from './maps-api-common';
+import {API_VERSIONS, Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
 
-import {APIErrorContext, CartoAPIError} from './carto-api-error';
+import type {APIErrorContext} from './carto-api-error';
 
 import {parseMap} from './parseMap';
 import {assert} from '../utils';
@@ -35,76 +27,6 @@ import {
   vectorTilesetSource
 } from '../sources';
 import {requestWithParameters} from '../sources/utils';
-
-const MAX_GET_LENGTH = 8192;
-
-export type Headers = Record<string, string>;
-interface RequestParams {
-  method?: string;
-  url: string;
-  headers?: Headers;
-  accessToken?: string;
-  body?: any;
-  errorContext: APIErrorContext;
-}
-
-/**
- * Request against Maps API
- */
-async function request({
-  method,
-  url,
-  headers: customHeaders,
-  accessToken,
-  body,
-  errorContext
-}: RequestParams): Promise<Response> {
-  const headers: Headers = {
-    ...customHeaders,
-    Accept: 'application/json'
-  };
-
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  if (method === 'POST') {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  try {
-    /* global fetch */
-    return await fetch(url, {
-      method,
-      headers,
-      body
-    });
-  } catch (error) {
-    throw new CartoAPIError(error as Error, errorContext);
-  }
-}
-
-async function requestJson<T = unknown>({
-  method,
-  url,
-  headers,
-  accessToken,
-  body,
-  errorContext
-}: RequestParams): Promise<T> {
-  const response = await request({method, url, headers, accessToken, body, errorContext});
-  let json;
-  try {
-    json = await response.json();
-  } catch (error) {
-    json = {error: ''};
-  }
-
-  if (!response.ok) {
-    throw new CartoAPIError(json.error, errorContext, response);
-  }
-  return json as T;
-}
 
 /* global clearInterval, setInterval, URL */
 async function _fetchMapDataset(
@@ -124,7 +46,7 @@ async function _fetchMapDataset(
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
-  headers?: Headers
+  headers?: Record<string, string>
 ) {
   const {
     aggregationExp,
@@ -204,7 +126,7 @@ async function _fetchTilestats(
     baseUrl += `${source}/${attribute}`;
   }
 
-  const errorContext = {requestType: REQUEST_TYPES.TILE_STATS, connection, type, source};
+  const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
   const headers = {Authorization: `Bearer ${accessToken}`};
   const stats = await requestWithParameters({
     baseUrl,
@@ -224,7 +146,7 @@ async function fillInMapDatasets(
   {datasets, token},
   clientId: string,
   credentials: CloudNativeCredentials,
-  headers?: Headers
+  headers?: Record<string, string>
 ) {
   const promises = datasets.map(dataset =>
     _fetchMapDataset(dataset, token, credentials, clientId, headers)
@@ -280,7 +202,7 @@ export async function fetchMap({
   cartoMapId: string;
   clientId: string;
   credentials?: CloudNativeCredentials;
-  headers: Headers;
+  headers: Record<string, string>;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 }) {
@@ -309,7 +231,7 @@ export async function fetchMap({
   }
 
   const baseUrl = `${localCreds.mapsUrl}/public/${cartoMapId}`;
-  const errorContext = {requestType: REQUEST_TYPES.PUBLIC_MAP, mapId: cartoMapId};
+  const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext});
 
   // Periodically check if the data has changed. Note that this
