@@ -40,7 +40,7 @@
     "@loaders.gl/mvt": "4.0.0-beta.7",
     "@loaders.gl/tiles": "4.0.0-beta.7",
     "@luma.gl/constants": "^8.5.20",
-    "@math.gl/web-mercator": "^3.6.2",
+    "@math.gl/web-mercator": "^4.0.0",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
     "d3-color": "^3.1.0",
