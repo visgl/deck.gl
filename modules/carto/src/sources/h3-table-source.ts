@@ -1,12 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {
-  AggregationOptions,
-  SourceOptions,
-  SpatialDataType,
-  TableSourceOptions,
-  TilejsonSource
-} from './common';
+import {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './common';
 
 export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
@@ -14,16 +8,21 @@ type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
   columns?: string;
-  spatialDataType: SpatialDataType;
-  spatialDataColumn?: string;
+  geo_column?: string;
   name: string;
 };
 
 const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
   options: H3TableSourceOptions
 ): Promise<any> {
-  const {aggregationExp, aggregationResLevel = 4, columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName, spatialDataType: 'h3'};
+  const {
+    aggregationExp,
+    aggregationResLevel = 4,
+    columns,
+    spatialDataColumn = 'h3:h3',
+    tableName
+  } = options;
+  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
@@ -32,7 +31,7 @@ const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
+    urlParameters.geo_column = spatialDataColumn;
   }
   return baseSource<UrlParameters>('table', options, urlParameters);
 };
