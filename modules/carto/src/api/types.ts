@@ -3,6 +3,7 @@ import {SCALE_TYPE} from './layer-map';
 export type VisualChannelField = {
   name: string;
   type: string;
+  colorColumn?: string;
 };
 
 export type VisualChannels = {
