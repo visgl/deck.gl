@@ -440,37 +440,28 @@ async function _fetchMapDataset(
     // TODO do we want a generic tilesetSource?
     // @ts-ignore
     dataset.data = await vectorTilesetSource({...globalOptions, tableName: source});
-  }
-
-  if (!geoColumn) {
-    // TODO is using baseSource a good idea?
-    if (type === 'query') {
-      dataset.data = await baseSource<{q: string}>(type, globalOptions, {q: source});
-    } else {
-      dataset.data = await baseSource<{name: string}>(type, globalOptions, {name: source});
-    }
   } else {
-    const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
+    const [spatialDataType, spatialDataColumn] = geoColumn ? geoColumn.split(':') : ['geom'];
     if (spatialDataType === 'geom') {
       const options = {...globalOptions, spatialDataColumn};
       if (type === 'table') {
         dataset.data = await vectorTableSource({...options, columns, tableName: source});
       } else if (type === 'query') {
-        dataset.data = await vectorQuerySource({...options, sqlQuery: source});
+        dataset.data = await vectorQuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'h3') {
       const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
       if (type === 'table') {
         dataset.data = await h3TableSource({...options, columns, tableName: source});
       } else if (type === 'query') {
-        dataset.data = await h3QuerySource({...options, sqlQuery: source});
+        dataset.data = await h3QuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'quadbin') {
       const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
       if (type === 'table') {
         dataset.data = await quadbinTableSource({...options, columns, tableName: source});
       } else if (type === 'query') {
-        dataset.data = await quadbinQuerySource({...options, sqlQuery: source});
+        dataset.data = await quadbinQuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else {
       debugger;
