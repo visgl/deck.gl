@@ -399,7 +399,7 @@ async function _fetchMapDataset(
   dataset: {
     type: MapType;
     source: string;
-    cache: number;
+    cache?: number;
     connectionName: string;
     geoColumn: string;
     data: TilejsonResult | GeojsonResult | JsonResult;
@@ -427,9 +427,11 @@ async function _fetchMapDataset(
     queryParameters
   } = dataset;
 
+  const cache: {value?: number} = {};
   const globalOptions: any = {
     accessToken,
     apiBaseUrl: credentials.apiBaseUrl,
+    cache,
     clientId,
     connectionName,
     format,
@@ -467,9 +469,12 @@ async function _fetchMapDataset(
       debugger;
     }
   }
-  const {cache} = dataset.data || {};
-  const cacheChanged = !(cache && dataset.cache === cache);
-  dataset.cache = cache;
+  let cacheChanged = true;
+  if (cache.value) {
+    cacheChanged = dataset.cache !== cache.value;
+    dataset.cache = cache.value;
+  }
+
   return cacheChanged;
 }
 

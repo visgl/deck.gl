@@ -9,6 +9,7 @@ export type SourceRequiredOptions = {
 
 export type SourceOptionalOptions = {
   apiBaseUrl: string;
+  cache?: {value?: number};
   clientId: string;
   format: Format;
   formatTiles: TileFormat;
@@ -96,7 +97,7 @@ export interface VectorLayer {
   fields: Record<string, string>;
 }
 
-export type TilejsonResult = Tilejson & {accessToken: string; cache: number};
+export type TilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 export type JsonResult = any[];
 export interface TilejsonSource<T> {

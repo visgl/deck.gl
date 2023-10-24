@@ -17,7 +17,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
   options: Partial<SourceOptionalOptions> & SourceRequiredOptions,
   urlParameters: UrlParameters
 ): Promise<TilejsonResult | GeojsonResult | JsonResult> {
-  const {accessToken, connectionName, ...optionalOptions} = options;
+  const {accessToken, connectionName, cache, ...optionalOptions} = options;
   const mergedOptions = {...SOURCE_DEFAULTS, accessToken, connectionName, endpoint};
   for (const key in optionalOptions) {
     if (optionalOptions[key]) {
@@ -42,7 +42,9 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
   });
 
   const dataUrl = mapInstantiation[format].url[0];
-  const cache = parseInt(new URL(dataUrl).searchParams.get('cache') || '', 10);
+  if (cache) {
+    cache.value = parseInt(new URL(dataUrl).searchParams.get('cache') || '', 10);
+  }
   errorContext.requestType = 'Map data';
 
   if (format === 'tilejson') {
@@ -51,7 +53,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
       headers,
       errorContext
     });
-    return {...tilejson, accessToken, cache};
+    return {...tilejson, accessToken};
   }
 
   return await requestWithParameters<GeojsonResult | JsonResult>({
