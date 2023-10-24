@@ -30,7 +30,12 @@ import {APIErrorContext, CartoAPIError} from './carto-api-error';
 import {parseMap} from './parseMap';
 import {log} from '@deck.gl/core';
 import {assert} from '../utils';
-import {quadbinTableSource} from '../sources';
+import {
+  TilejsonResult,
+  quadbinQuerySource,
+  quadbinTableSource,
+  quadbinTilesetSource
+} from '../sources';
 
 const MAX_GET_LENGTH = 8192;
 const DEFAULT_CLIENT = 'deck-gl-carto';
@@ -384,7 +389,19 @@ async function _fetchDataUrl({
 
 /* global clearInterval, setInterval, URL */
 async function _fetchMapDataset(
-  dataset,
+  dataset: {
+    type: MapType;
+    source: string;
+    cache: number;
+    connectionName: string;
+    geoColumn: string;
+    data: TilejsonResult;
+    columns: string[];
+    format: Format;
+    aggregationExp: string;
+    aggregationResLevel: number;
+    queryParameters: QueryParameters;
+  },
   accessToken: string,
   credentials: CloudNativeCredentials,
   clientId?: string,
@@ -403,20 +420,26 @@ async function _fetchMapDataset(
     queryParameters
   } = dataset;
 
-  const globalOptions = {accessToken, apiBaseUrl: credentials.apiBaseUrl, connectionName};
+  const globalOptions = {
+    accessToken,
+    apiBaseUrl: credentials.apiBaseUrl,
+    clientId,
+    connectionName,
+    headers
+  };
 
   const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
   if (spatialDataType === 'quadbin') {
-    dataset.data = await quadbinTableSource({
-      ...globalOptions,
-      aggregationExp,
-      aggregationResLevel,
-      columns,
-      spatialDataColumn: geoColumn,
-      tableName: source
-    });
+    const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+    if (type === 'table') {
+      dataset.data = await quadbinTableSource({...options, columns, tableName: source});
+    } else if (type === 'query') {
+      dataset.data = await quadbinQuerySource({...options, sqlQuery: source});
+    } else if (type === 'tileset') {
+      dataset.data = await quadbinTilesetSource({...options, tableName: source});
+    }
   }
-  const {cache} = dataset.data;
+  const {cache} = dataset.data || {};
   const cacheChanged = !(cache && dataset.cache === cache);
   dataset.cache = cache;
   return cacheChanged;
