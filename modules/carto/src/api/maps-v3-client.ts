@@ -34,7 +34,10 @@ import {
   TilejsonResult,
   quadbinQuerySource,
   quadbinTableSource,
-  quadbinTilesetSource
+  quadbinTilesetSource,
+  vectorQuerySource,
+  vectorTableSource,
+  vectorTilesetSource
 } from '../sources';
 
 const MAX_GET_LENGTH = 8192;
@@ -429,7 +432,16 @@ async function _fetchMapDataset(
   };
 
   const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
-  if (spatialDataType === 'quadbin') {
+  if (spatialDataType === 'geom') {
+    const options = {...globalOptions, spatialDataColumn};
+    if (type === 'table') {
+      dataset.data = await vectorTableSource({...options, columns, tableName: source});
+    } else if (type === 'query') {
+      dataset.data = await vectorQuerySource({...options, sqlQuery: source});
+    } else if (type === 'tileset') {
+      dataset.data = await vectorTilesetSource({...options, tableName: source});
+    }
+  } else if (spatialDataType === 'quadbin') {
     const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
     if (type === 'table') {
       dataset.data = await quadbinTableSource({...options, columns, tableName: source});
@@ -438,40 +450,13 @@ async function _fetchMapDataset(
     } else if (type === 'tileset') {
       dataset.data = await quadbinTilesetSource({...options, tableName: source});
     }
+  } else {
+    debugger;
   }
   const {cache} = dataset.data || {};
   const cacheChanged = !(cache && dataset.cache === cache);
   dataset.cache = cache;
   return cacheChanged;
-
-  // // First fetch metadata
-  // const {url, mapFormat} = await _fetchDataUrl({
-  //   aggregationExp,
-  //   aggregationResLevel,
-  //   clientId,
-  //   credentials: {...credentials, accessToken},
-  //   connection,
-  //   columns,
-  //   format,
-  //   geoColumn,
-  //   headers,
-  //   source,
-  //   type,
-  //   queryParameters
-  // });
-
-  // // Extract the last time the data changed
-  // const cache = parseInt(new URL(url).searchParams.get('cache') || '', 10);
-  // if (cache && dataset.cache === cache) {
-  //   return false;
-  // }
-  // dataset.cache = cache;
-
-  // // Only fetch if the data has changed
-  // const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
-  // dataset.data = await requestData({url, format: mapFormat, accessToken, errorContext});
-
-  // return true;
 }
 
 async function _fetchTilestats(
