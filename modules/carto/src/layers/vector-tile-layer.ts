@@ -15,7 +15,6 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
 import type {Feature} from 'geojson';
 import {TilejsonPropType, TilejsonResult} from '../sources/common';
 import {injectAccessToken} from './utils';
@@ -56,7 +55,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
       super.updateState(parameters);
 
       const formatTiles = new URL(props.data.tiles[0]).searchParams.get('formatTiles');
-      const mvt = formatTiles === TILE_FORMATS.MVT;
+      const mvt = formatTiles === 'mvt';
       this.setState({mvt});
     }
   }
