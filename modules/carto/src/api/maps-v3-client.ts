@@ -427,27 +427,27 @@ async function _fetchMapDataset(
     queryParameters
   } = dataset;
 
-  const globalOptions = {
+  const globalOptions: any = {
     accessToken,
     apiBaseUrl: credentials.apiBaseUrl,
     clientId,
     connectionName,
+    format,
     headers
   };
 
   if (type === 'tileset') {
     // TODO do we want a generic tilesetSource?
+    // @ts-ignore
     dataset.data = await vectorTilesetSource({...globalOptions, tableName: source});
-  } else if (!geoColumn) {
+  }
+
+  if (!geoColumn) {
     // TODO is using baseSource a good idea?
     if (type === 'query') {
-      dataset.data = await baseSource<{q: string}>(type, {...globalOptions, format}, {q: source});
+      dataset.data = await baseSource<{q: string}>(type, globalOptions, {q: source});
     } else {
-      dataset.data = await baseSource<{name: string}>(
-        type,
-        {...globalOptions, format},
-        {name: source}
-      );
+      dataset.data = await baseSource<{name: string}>(type, globalOptions, {name: source});
     }
   } else {
     const [spatialDataType, spatialDataColumn] = geoColumn.split(':');
