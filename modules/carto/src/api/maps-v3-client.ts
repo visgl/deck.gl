@@ -191,6 +191,16 @@ async function fillInTileStats(
   return await Promise.all(promises);
 }
 
+export type FetchMapOptions = {
+  apiBaseUrl?: string;
+  cartoMapId: string;
+  clientId?: string;
+  headers?: Record<string, string>;
+  mapsUrl?: string;
+  autoRefresh?: number;
+  onNewData?: (map: any) => void;
+};
+
 /* eslint-disable max-statements */
 export async function fetchMap({
   apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
@@ -200,15 +210,7 @@ export async function fetchMap({
   mapsUrl,
   autoRefresh,
   onNewData
-}: {
-  apiBaseUrl: string;
-  cartoMapId: string;
-  clientId: string;
-  headers: Record<string, string>;
-  mapsUrl?: string;
-  autoRefresh?: number;
-  onNewData?: (map: any) => void;
-}) {
+}: FetchMapOptions) {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');
 

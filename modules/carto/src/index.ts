@@ -24,7 +24,14 @@ export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
 export {CartoAPIError, fetchMap} from './api';
-export type {APIErrorContext, Format, MapType, RequestType, QueryParameters} from './api';
+export type {
+  APIErrorContext,
+  FetchMapOptions,
+  Format,
+  MapType,
+  RequestType,
+  QueryParameters
+} from './api';
 
 import {
   h3QuerySource,
