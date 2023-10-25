@@ -10,7 +10,7 @@ function encodeParameter(name: string, value: string | boolean | number): string
 }
 
 const REQUEST_CACHE = new Map();
-export default async function requestWithParameters<T = any>({
+export async function requestWithParameters<T = any>({
   baseUrl,
   parameters,
   headers: customHeaders,

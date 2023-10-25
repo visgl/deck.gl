@@ -10,7 +10,7 @@ import {
   Tilejson,
   TilejsonMapInstantiation
 } from './common';
-import requestWithParameters from '../api/request-with-parameters';
+import {requestWithParameters} from '../api/request-with-parameters';
 
 export async function baseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,

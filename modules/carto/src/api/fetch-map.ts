@@ -4,7 +4,7 @@
  */
 import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
 import {CartoAPIError} from './carto-api-error';
-import {parseMap} from './parseMap';
+import {parseMap} from './parse-map';
 import {assert} from '../utils';
 import {
   GeojsonResult,
@@ -19,7 +19,7 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
-import requestWithParameters from './request-with-parameters';
+import {requestWithParameters} from './request-with-parameters';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
 
 type Dataset = {
