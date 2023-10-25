@@ -31,3 +31,27 @@ export function getWorkerUrl(id: string, version: string) {
   // return `http://localhost:8081/dist/${id}-worker.js`;
   return `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
 }
+
+export function scaleIdentity() {
+  let unknown;
+
+  function scale(x) {
+    return x === null ? unknown : x;
+  }
+
+  scale.invert = scale;
+
+  scale.domain = scale.range = d => d;
+
+  scale.unknown = u => {
+    if (u) {
+      unknown = u;
+    }
+
+    return unknown;
+  };
+
+  scale.copy = () => scaleIdentity().unknown(unknown);
+
+  return scale;
+}
