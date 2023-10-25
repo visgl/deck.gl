@@ -1,16 +1,24 @@
-import type {MapType} from '../api/maps-api-common';
-import type {APIErrorContext} from '../api/carto-api-error';
-import {
-  SourceOptionalOptions,
-  SourceRequiredOptions,
-  TilejsonResult,
+/* eslint-disable camelcase */
+import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from '../api/common';
+import {buildSourceUrl} from '../api/endpoints';
+import {requestWithParameters} from '../api/request-with-parameters';
+import type {APIErrorContext, MapType} from '../api/types';
+import type {
   GeojsonResult,
   JsonResult,
-  SOURCE_DEFAULTS,
+  SourceOptionalOptions,
+  SourceRequiredOptions,
   Tilejson,
-  TilejsonMapInstantiation
-} from './common';
-import {buildApiEndpoint, requestWithParameters} from './utils';
+  TilejsonMapInstantiation,
+  TilejsonResult
+} from './types';
+
+export const SOURCE_DEFAULTS: SourceOptionalOptions = {
+  apiBaseUrl: DEFAULT_API_BASE_URL,
+  clientId: DEFAULT_CLIENT,
+  format: 'tilejson',
+  headers: {}
+};
 
 export async function baseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,
@@ -24,7 +32,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
       mergedOptions[key] = optionalOptions[key];
     }
   }
-  const baseUrl = buildApiEndpoint(mergedOptions);
+  const baseUrl = buildSourceUrl(mergedOptions);
   const {format} = mergedOptions;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 

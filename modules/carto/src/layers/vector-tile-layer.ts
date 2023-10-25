@@ -16,8 +16,8 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
-import {TilejsonPropType, TilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,

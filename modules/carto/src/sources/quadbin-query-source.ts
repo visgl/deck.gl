@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './common';
+import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './types';
 
 export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 

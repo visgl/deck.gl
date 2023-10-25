@@ -1,4 +1,4 @@
-import {fetchMap, setDefaultCredentials} from '@deck.gl/carto';
+import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
@@ -8,24 +8,23 @@ import mapboxgl from 'mapbox-gl';
 
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
-setDefaultCredentials({apiBaseUrl});
 
-async function createMap(cartoMapId) {
+async function createMap(cartoMapId: string) {
   const deck = new Deck({canvas: 'deck-canvas'});
-  const mapConfiguration = {cartoMapId};
+  const options: FetchMapOptions = {apiBaseUrl, cartoMapId};
 
   // Auto-refresh (optional)
   const autoRefresh = false;
   if (autoRefresh) {
     // Autorefresh the data every 5 seconds
-    mapConfiguration.autoRefresh = 5;
-    mapConfiguration.onNewData = ({layers}) => {
+    options.autoRefresh = 5;
+    options.onNewData = ({layers}) => {
       deck.setProps({layers});
     };
   }
 
   // Get map info from CARTO and update deck
-  const {initialViewState, mapStyle, layers} = await fetchMap(mapConfiguration);
+  const {initialViewState, mapStyle, layers} = await fetchMap(options);
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
@@ -76,7 +75,7 @@ const examples = [
   '27de26b4-b94f-4e94-b291-41d1a21d3d02' // HexColumn color
 ];
 const params = new URLSearchParams(location.search.slice(1));
-const id = params.has('id') ? params.get('id') : examples[0];
+const id = params.has('id') ? params.get('id')! : examples[0];
 
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
@@ -96,12 +95,12 @@ for (const e of examples) {
     btn.style.background = '#e3f6ff';
   }
   btn.onclick = () => {
-    window.location = `?id=${e}`;
+    window.location.assign(`?id=${e}`);
   };
   document.body.appendChild(btn);
 }
 
-const mapContainer = document.getElementById('container');
+const mapContainer = document.getElementById('container')!;
 mapContainer.style.height = 'calc(50% - 26px)';
 mapContainer.style.margin = '5px';
 

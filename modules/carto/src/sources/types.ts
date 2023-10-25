@@ -1,6 +1,5 @@
-/* eslint-disable camelcase */
 import type {Feature} from 'geojson';
-import {Format, MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
+import type {Format, MapInstantiation, QueryParameters} from '../api/types';
 
 export type SourceRequiredOptions = {
   accessToken: string;
@@ -12,7 +11,6 @@ export type SourceOptionalOptions = {
   cache?: {value?: number};
   clientId: string;
   format: Format;
-  formatTiles: TileFormat;
   headers: Record<string, string>;
   mapsUrl?: string;
 };
@@ -40,15 +38,7 @@ export type TilesetSourceOptions = {
   tableName: string;
 };
 
-export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
-
-export const SOURCE_DEFAULTS: SourceOptionalOptions = {
-  apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
-  clientId: 'deck-gl-carto',
-  format: 'tilejson',
-  formatTiles: 'binary',
-  headers: {}
-};
+export type SpatialDataType = 'geometry' | 'h3' | 'quadbin';
 
 export type TilejsonMapInstantiation = MapInstantiation & {
   tilejson: {url: string[]};
@@ -107,29 +97,3 @@ export interface TypedSource<T> extends TilejsonSource<T> {
   (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
   (options: T & {format: 'json'}): Promise<JsonResult>;
 }
-
-export const DEFAULT_CLIENT = 'deck-gl-carto';
-export const V3_MINOR_VERSION = '3.2';
-export const MAX_GET_LENGTH = 8192;
-
-export const DEFAULT_PARAMETERS = {
-  client: DEFAULT_CLIENT,
-  v: V3_MINOR_VERSION
-};
-
-export const DEFAULT_HEADERS = {
-  Accept: 'application/json',
-  'Content-Type': 'application/json'
-};
-
-export const TilejsonPropType = {
-  type: 'object' as const,
-  value: null as null | TilejsonResult,
-  validate: (value: TilejsonResult, propType) =>
-    (propType.optional && value === null) ||
-    (typeof value === 'object' &&
-      Array.isArray(value.tiles) &&
-      value.tiles.every(url => typeof url === 'string')),
-  compare: 2,
-  async: true
-};

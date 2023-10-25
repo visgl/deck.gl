@@ -22,7 +22,7 @@ import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
-import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
+import {MapType} from './types';
 import {assert, createBinaryProxy, scaleIdentity} from '../utils';
 import {
   CustomMarkersRange,
@@ -202,7 +202,6 @@ export function getLayer(
 }
 
 export function layerFromTileDataset(
-  formatTiles: TileFormat | null = TILE_FORMATS.MVT,
   scheme: string,
   type?: MapType
 ): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
@@ -223,22 +222,16 @@ function getTileLayer(dataset: MapDataset, basePropMap) {
   const {
     aggregationExp,
     aggregationResLevel,
-    data: {
-      scheme,
-      tiles: [tileUrl]
-    }
+    data: {scheme}
   } = dataset;
-  /* global URL */
-  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') as TileFormat;
 
   return {
-    Layer: layerFromTileDataset(formatTiles, scheme),
+    Layer: layerFromTileDataset(scheme),
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
       ...(aggregationExp && {aggregationExp}),
       ...(aggregationResLevel && {aggregationResLevel}),
-      formatTiles,
       uniqueIdProperty: 'geoid'
     }
   };

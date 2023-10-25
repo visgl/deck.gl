@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './common';
+import type {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './types';
 
 export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
 type UrlParameters = {columns?: string; geo_column?: string; name: string};

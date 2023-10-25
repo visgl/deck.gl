@@ -2,17 +2,12 @@
 /**
  * Maps API Client for Carto 3
  */
-import {buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
-import {Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
-
-import {CartoAPIError, APIErrorContext} from './carto-api-error';
-
-import {parseMap} from './parseMap';
-import {assert} from '../utils';
+import {CartoAPIError} from './carto-api-error';
+import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
+import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
 import {
   GeojsonResult,
   JsonResult,
-  SOURCE_DEFAULTS,
   TilejsonResult,
   h3QuerySource,
   h3TableSource,
@@ -22,7 +17,10 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
-import {requestWithParameters} from '../sources/utils';
+import {parseMap} from './parse-map';
+import {requestWithParameters} from './request-with-parameters';
+import {assert} from '../utils';
+import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
 
 type Dataset = {
   id: string;
@@ -157,7 +155,10 @@ async function fillInMapDatasets(
   return await Promise.all(promises);
 }
 
-async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: string) {
+async function fillInTileStats(
+  {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
+  apiBaseUrl: string
+) {
   const attributes: {attribute?: string; dataset?: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
@@ -165,7 +166,7 @@ async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: s
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
         const dataset = datasets.find(d => d.id === layer.config.dataId);
-        if (dataset.data.tilestats && dataset.type !== MAP_TYPES.TILESET) {
+        if (dataset && dataset.type !== 'tileset' && (dataset.data as TilejsonResult).tilestats) {
           // Only fetch stats for QUERY & TABLE map types
           attributes.push({attribute, dataset});
         }
@@ -190,24 +191,26 @@ async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: s
   return await Promise.all(promises);
 }
 
+export type FetchMapOptions = {
+  apiBaseUrl?: string;
+  cartoMapId: string;
+  clientId?: string;
+  headers?: Record<string, string>;
+  mapsUrl?: string;
+  autoRefresh?: number;
+  onNewData?: (map: any) => void;
+};
+
 /* eslint-disable max-statements */
 export async function fetchMap({
-  apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
+  apiBaseUrl = DEFAULT_API_BASE_URL,
   cartoMapId,
-  clientId = SOURCE_DEFAULTS.clientId,
+  clientId = DEFAULT_CLIENT,
   headers = {},
   mapsUrl,
   autoRefresh,
   onNewData
-}: {
-  apiBaseUrl: string;
-  cartoMapId: string;
-  clientId: string;
-  headers: Record<string, string>;
-  mapsUrl?: string;
-  autoRefresh?: number;
-  onNewData?: (map: any) => void;
-}) {
+}: FetchMapOptions) {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');
 

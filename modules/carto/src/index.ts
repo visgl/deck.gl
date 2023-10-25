@@ -1,4 +1,3 @@
-export {getDefaultCredentials, setDefaultCredentials} from './config';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
@@ -24,8 +23,15 @@ export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {FORMATS, TILE_FORMATS, MAP_TYPES, API_VERSIONS, CartoAPIError, fetchMap} from './api';
-export type {APIErrorContext, QueryParameters} from './api';
+export {CartoAPIError, fetchMap} from './api';
+export type {
+  APIErrorContext,
+  FetchMapOptions,
+  Format,
+  MapType,
+  RequestType,
+  QueryParameters
+} from './api';
 
 import {
   h3QuerySource,

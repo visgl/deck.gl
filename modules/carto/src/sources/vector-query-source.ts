@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {SourceOptions, QuerySourceOptions, SpatialDataType, TypedSource} from './common';
+import type {SourceOptions, QuerySourceOptions, SpatialDataType, TypedSource} from './types';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
 type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
