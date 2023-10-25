@@ -1,3 +1,4 @@
+import {buildSourceUrl} from '../api/endpoints';
 import type {APIErrorContext, MapType} from '../api/types';
 import {
   SourceOptionalOptions,
@@ -9,7 +10,7 @@ import {
   Tilejson,
   TilejsonMapInstantiation
 } from './common';
-import {buildApiEndpoint, requestWithParameters} from './utils';
+import {requestWithParameters} from './utils';
 
 export async function baseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,
@@ -23,7 +24,7 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
       mergedOptions[key] = optionalOptions[key];
     }
   }
-  const baseUrl = buildApiEndpoint(mergedOptions);
+  const baseUrl = buildSourceUrl(mergedOptions);
   const {format} = mergedOptions;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 

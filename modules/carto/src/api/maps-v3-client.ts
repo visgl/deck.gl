@@ -2,7 +2,7 @@
 /**
  * Maps API Client for Carto 3
  */
-import {buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
+import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
 import {CartoAPIError} from './carto-api-error';
 import {parseMap} from './parseMap';
 import {assert} from '../utils';

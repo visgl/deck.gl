@@ -1,3 +1,5 @@
+import {MapType} from './types';
+
 export type V3Endpoint = 'maps' | 'stats';
 
 function buildUrlFromBase(apiBaseUrl: string, endpoint: V3Endpoint) {
@@ -15,4 +17,18 @@ export function buildMapsUrlFromBase(apiBaseUrl: string): string {
 
 export function buildStatsUrlFromBase(apiBaseUrl: string): string {
   return buildUrlFromBase(apiBaseUrl, 'stats');
+}
+
+export function buildSourceUrl({
+  apiBaseUrl,
+  connectionName,
+  endpoint,
+  mapsUrl
+}: {
+  apiBaseUrl: string;
+  connectionName: string;
+  endpoint: MapType;
+  mapsUrl?: string;
+}): string {
+  return `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/${connectionName}/${endpoint}`;
 }
