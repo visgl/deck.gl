@@ -9,7 +9,7 @@ const vectorQuerySource: TypedSource<VectorQuerySourceOptions> = async function 
   options: VectorQuerySourceOptions
 ): Promise<any> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+  const urlParameters: UrlParameters = {spatialDataType: 'geo', q: sqlQuery};
 
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;

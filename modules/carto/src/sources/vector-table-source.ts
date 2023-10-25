@@ -9,7 +9,7 @@ const vectorTableSource: TypedSource<VectorTableSourceOptions> = async function 
   options: VectorTableSourceOptions
 ): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {name: tableName};
+  const urlParameters: UrlParameters = {name: tableName, spatialDataType: 'geo'};
 
   if (columns) {
     urlParameters.columns = columns.join(',');
