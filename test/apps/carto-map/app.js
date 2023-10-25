@@ -82,7 +82,7 @@ const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
 iframe.style.height = 'calc(50% + 20px)';
 iframe.src = `${apiBaseUrl.replace('api', 'app')}/map/${id}`;
-// document.body.appendChild(iframe);
+document.body.appendChild(iframe);
 
 for (const e of examples) {
   const btn = document.createElement('button');
