@@ -57,8 +57,8 @@
   },
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
-    "@loaders.gl/csv": "4.0.0-beta.7",
-    "@loaders.gl/polyfills": "4.0.0-beta.7",
+    "@loaders.gl/csv": "4.0.0-beta.8",
+    "@loaders.gl/polyfills": "4.0.0-beta.8",
     "@luma.gl/test-utils": "^8.5.20",
     "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.0",
