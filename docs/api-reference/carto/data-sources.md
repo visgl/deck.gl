@@ -1,0 +1,235 @@
+# Data Sources
+
+To ease interacting with the CARTO platform, the CARTO deck.gl module includes a number of functions, which simplify the use of fetching your data from CARTO. At a high level these can be thought of as wrappers around the browsers `fetch` function, except that rather than passing a URL, options that specify the data in the CARTO are used.
+
+### Overview
+
+The data source functions are a compact way to describe the data that you want to fetch. For example, to fetch a table from BigQuery:
+
+```js
+import {vectorTableSource} from '@deck.gl/carto';
+const data = vectorTableSource({
+  accessToken: 'XXX',
+  connectionName: 'bigquery',
+  tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+})
+```
+
+### Data formats
+
+Depending on the specific data source, it may be possible to request the data in a different format from the CARTO API. This is done using the `format` property, and can be useful when using the data with [custom layers](./overview#support-for-other-deckgl-layers). By default, the `format` prop is `'tilejson'` as this is the format that the [CARTO deck.gl layers](./overview#carto-layers) expect.
+
+For example, to instead fetch as list of rows in JSON format:
+
+```js
+import {vectorQuerySource} from '@deck.gl/carto';
+const rows = await vectorQuerySource({
+  accessToken: 'XXX',
+  connectionName: 'bigquery',
+  tableName: 'carto-demo-data.test_tables.test',
+  format: 'json'
+});
+```
+
+### Promise API
+
+All data source functions return a Promise, which can be resolved to obtain the actual data, as is shown in the example in the [Data formats](#data-formats) section above.
+
+As the [core deck.gl Layer prop supports Promises](../core/layer#data), it is often not necessary to resolve or await the Promise and the data source can be directly passed to the data prop:
+
+```jsx
+import {H3TileLayer, h3TilesetSource} from '@deck.gl/carto';
+new H3TileLayer({
+  data: h3TilesetSource({
+    accessToken: 'XXX',
+    connectionName: 'bigquery',
+    tableName: 'carto-demo-data.demo_tables.h3_data'
+  }),
+
+  getFillColor: d => d.properties.color
+});
+```
+
+### Types
+
+All the data source functions are fully typed, to aid in providing the correct parameters. In addition to enforcing the parameters passed, the return value of the function is deduced based on the value of the `format` property.
+
+
+### Available Data Sources
+
+All data source functions take the following global options:
+
+```
+type SourceOptions = {
+  accessToken: string;
+  connectionName: string;
+  apiBaseUrl?: string;
+  clientId?: string;
+  format?: Format;
+  headers?: Record<string, string>;
+  mapsUrl?: string;
+};
+```
+
+In addition, the following options are supported on each source:
+
+#### h3TableSource
+
+```ts
+type H3TableSourceOptions = {
+  aggregationExp: string;
+  aggregationResLevel?: number;
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
+}
+```
+
+#### h3QuerySource
+
+```ts
+type H3QuerySourceOptions = {
+  aggregationExp: string;
+  aggregationResLevel?: number;
+  columns?: string[];
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### h3TilesetSource
+
+```ts
+type H3TilesetSourceOptions = {
+  tableName: string;
+}
+```
+
+#### vectorTableSource
+
+```ts
+type vectorTableSourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
+}
+```
+
+#### vectorQuerySource
+
+```ts
+type vectorQuerySourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### vectorTilesetSource
+
+```ts
+type vectorTilesetSourceOptions = {
+  tableName: string;
+}
+
+#### rasterTilesetSource
+
+```ts
+type rasterTilesetSourceOptions = {
+  tableName: string;
+
+```
+
+#### rasterTableSource
+
+```ts
+type quadbinTableSourceOptions = {
+  aggregationExp: string;
+  aggregationResLevel?: number;
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
+}
+```
+
+#### quadbinQuerySource
+
+```ts
+type quadbinQuerySourceOptions = {
+  aggregationExp: string;
+  aggregationResLevel?: number;
+  columns?: string[];
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### quadbinTilesetSource
+
+```ts
+type quadbinTilesetSourceOptions = {
+  tableName: string;
+}
+```
+
+### QueryParameters
+
+QueryParameters are used to parametrize SQL queries. The format depends on the source's provider, some examples:
+
+[PostgreSQL and Redshift](https://node-postgres.com/features/queries):
+```ts
+vectorQuerySource({
+  ...,
+  sqlQuery: `select * from users where username=$1`,
+  queryParameters: ['my-name']
+})
+```
+
+[BigQuery positional](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+```ts
+vectorQuerySource({
+  ...,
+  sqlQuery: `select * from users where username=$1`,
+  queryParameters: ['my-name']
+})
+```
+
+
+[BigQuery named parameters](https://cloud.google.com/bigquery/docs/parameterized-queries#node.js):
+```ts
+vectorQuerySource({
+  ...,
+  sqlQuery: `select * from users where username=@username`,
+  queryParameters: { username: 'my-name' }
+})
+```
+
+[Snowflake positional](https://docs.snowflake.com/en/user-guide/nodejs-driver-use.html#binding-statement-parameters) :
+```ts
+vectorQuerySource({
+  ...,
+  sqlQuery: `select * from users where username=?`,
+  queryParameters: ['my-name']
+});
+```
+
+or
+
+```ts
+vectorQuerySource({
+  data: `select * from users where username=:1`,
+  queryParameters: ['my-name']
+});
+```
+
+[Databricks ODBC](https://github.com/markdirish/node-odbc#bindparameters-callback)
+```ts
+vectorQuerySource({
+  ...
+  data: `select * from users where username=?`,
+  queryParameters: ['my-name']
+});
+```

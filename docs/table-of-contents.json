@@ -224,6 +224,7 @@
         "label": "@deck.gl/carto",
         "items": [
           "api-reference/carto/overview",
+          "api-reference/carto/data-sources",
           "api-reference/carto/fetch-map",
           "api-reference/carto/carto-layer",
           "api-reference/carto/basemap",

@@ -96,7 +96,11 @@ The CARTO module includes a [collection of layers](#carto-layers) for easy visua
 It is also straightforward to request data in two additional formats, `'geojson'` and `'json'`. It can then be integrated with other deck.gl layers, for example:
 
 
-```js
+```jsx
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
+import {vectorTableSource} from '@deck.gl/carto';
+
 function App() {
   const data = vectorTableSource({
     accessToken: 'XXX',
