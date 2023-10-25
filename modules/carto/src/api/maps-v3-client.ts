@@ -3,10 +3,7 @@
  * Maps API Client for Carto 3
  */
 import {buildMapsUrlFromBase, buildStatsUrlFromBase} from '../config';
-import {Format, MapType, MAP_TYPES, QueryParameters} from './maps-api-common';
-
-import {CartoAPIError, APIErrorContext} from './carto-api-error';
-
+import {CartoAPIError} from './carto-api-error';
 import {parseMap} from './parseMap';
 import {assert} from '../utils';
 import {
@@ -23,6 +20,7 @@ import {
   vectorTilesetSource
 } from '../sources';
 import {requestWithParameters} from '../sources/utils';
+import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
 
 type Dataset = {
   id: string;
@@ -157,7 +155,10 @@ async function fillInMapDatasets(
   return await Promise.all(promises);
 }
 
-async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: string) {
+async function fillInTileStats(
+  {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
+  apiBaseUrl: string
+) {
   const attributes: {attribute?: string; dataset?: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
@@ -165,7 +166,7 @@ async function fillInTileStats({datasets, keplerMapConfig, token}, apiBaseUrl: s
       const attribute = layer.visualChannels[channel]?.name;
       if (attribute) {
         const dataset = datasets.find(d => d.id === layer.config.dataId);
-        if (dataset.data.tilestats && dataset.type !== MAP_TYPES.TILESET) {
+        if (dataset && dataset.type !== 'tileset' && (dataset.data as TilejsonResult).tilestats) {
           // Only fetch stats for QUERY & TABLE map types
           attributes.push({attribute, dataset});
         }

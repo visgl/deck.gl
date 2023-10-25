@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import type {Feature} from 'geojson';
-import {Format, MapInstantiation, TileFormat, QueryParameters} from '../api/maps-api-common';
+import {Format, MapInstantiation, QueryParameters} from '../api/types';
 
 export type SourceRequiredOptions = {
   accessToken: string;
@@ -12,7 +12,6 @@ export type SourceOptionalOptions = {
   cache?: {value?: number};
   clientId: string;
   format: Format;
-  formatTiles: TileFormat;
   headers: Record<string, string>;
   mapsUrl?: string;
 };
@@ -46,7 +45,6 @@ export const SOURCE_DEFAULTS: SourceOptionalOptions = {
   apiBaseUrl: 'https://gcp-us-east1.api.carto.com',
   clientId: 'deck-gl-carto',
   format: 'tilejson',
-  formatTiles: 'binary',
   headers: {}
 };
 

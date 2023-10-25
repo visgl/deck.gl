@@ -1,5 +1,4 @@
-import type {MapType} from '../api/maps-api-common';
-import type {APIErrorContext} from '../api/carto-api-error';
+import type {APIErrorContext, MapType} from '../api/types';
 import {
   SourceOptionalOptions,
   SourceRequiredOptions,

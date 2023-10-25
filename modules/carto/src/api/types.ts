@@ -1,5 +1,53 @@
 import {SCALE_TYPE} from './layer-map';
 
+export type Format = 'json' | 'geojson' | 'tilejson';
+export type MapType = 'query' | 'table' | 'tileset' | 'raster';
+export type RequestType = 'Map data' | 'Map instantiation' | 'Public map' | 'Tile stats';
+export type APIErrorContext = {
+  requestType: RequestType;
+  mapId?: string;
+  connection?: string;
+  source?: string;
+  type?: MapType;
+};
+
+export enum SchemaFieldType {
+  Number = 'number',
+  Bigint = 'bigint',
+  String = 'string',
+  Geometry = 'geometry',
+  Timestamp = 'timestamp',
+  Object = 'object',
+  Boolean = 'boolean',
+  Variant = 'variant',
+  Unknown = 'unknown'
+}
+export interface SchemaField {
+  name: string;
+  type: SchemaFieldType; // Field type in the CARTO stack, common for all providers
+}
+
+export interface MapInstantiation extends MapInstantiationFormats {
+  nrows: number;
+  size?: number;
+  schema: SchemaField[];
+}
+
+type MapInstantiationFormats = Record<
+  Format,
+  {
+    url: string[];
+    error?: any;
+  }
+>;
+
+export type QueryParameterValue = string | number | boolean | Array<QueryParameterValue> | object;
+
+export type NamedQueryParameter = Record<string, QueryParameterValue>;
+
+export type PositionalQueryParameter = QueryParameterValue[];
+
+export type QueryParameters = NamedQueryParameter | PositionalQueryParameter;
 export type VisualChannelField = {
   name: string;
   type: string;

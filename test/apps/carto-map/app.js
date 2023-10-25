@@ -1,4 +1,4 @@
-import {fetchMap, setDefaultCredentials} from '@deck.gl/carto';
+import {fetchMap} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
@@ -8,11 +8,10 @@ import mapboxgl from 'mapbox-gl';
 
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
-setDefaultCredentials({apiBaseUrl});
 
 async function createMap(cartoMapId) {
   const deck = new Deck({canvas: 'deck-canvas'});
-  const mapConfiguration = {cartoMapId};
+  const mapConfiguration = {apiBaseUrl, cartoMapId};
 
   // Auto-refresh (optional)
   const autoRefresh = false;
