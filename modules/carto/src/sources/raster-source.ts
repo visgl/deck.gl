@@ -1,5 +1,5 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilesetSourceOptions, TypedSource} from './common';
+import type {SourceOptions, TilesetSourceOptions, TypedSource} from './types';
 
 export type RasterSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};

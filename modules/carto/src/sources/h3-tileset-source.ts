@@ -1,5 +1,5 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilesetSourceOptions, TilejsonSource} from './common';
+import type {SourceOptions, TilesetSourceOptions, TilejsonSource} from './types';
 
 export type H3TilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};

@@ -1,5 +1,5 @@
 export {SOURCE_DEFAULTS} from './common';
-export type {TilejsonResult, GeojsonResult, JsonResult} from './common';
+export type {TilejsonResult, GeojsonResult, JsonResult} from './types';
 
 export {h3QuerySource} from './h3-query-source';
 export type {H3QuerySourceOptions} from './h3-query-source';

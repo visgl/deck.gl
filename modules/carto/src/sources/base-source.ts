@@ -1,15 +1,15 @@
 import {buildSourceUrl} from '../api/endpoints';
 import type {APIErrorContext, MapType} from '../api/types';
-import {
+import type {
   SourceOptionalOptions,
   SourceRequiredOptions,
   TilejsonResult,
   GeojsonResult,
   JsonResult,
-  SOURCE_DEFAULTS,
   Tilejson,
   TilejsonMapInstantiation
-} from './common';
+} from './types';
+import {SOURCE_DEFAULTS} from './common';
 import {requestWithParameters} from '../api/request-with-parameters';
 
 export async function baseSource<UrlParameters extends Record<string, string>>(

@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './common';
+import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './types';
 
 export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
