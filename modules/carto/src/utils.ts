@@ -13,7 +13,7 @@ export function createBinaryProxy(
 ) {
   const {properties, numericProps} = data;
   return new Proxy(properties[index] || {}, {
-    get(target, property, receiver) {
+    get(target, property) {
       if (property in numericProps) {
         return numericProps[property as string].value[index];
       }

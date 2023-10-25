@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import type {Feature} from 'geojson';
-import {Format, MapInstantiation, QueryParameters} from '../api/types';
+import type {Format, MapInstantiation, QueryParameters} from '../api/types';
 
 export type SourceRequiredOptions = {
   accessToken: string;
