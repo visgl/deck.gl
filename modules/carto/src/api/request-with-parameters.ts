@@ -1,5 +1,5 @@
 import {CartoAPIError} from '../api/carto-api-error';
-import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
+import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from '../sources/common';
 import type {APIErrorContext} from '../api/types';
 
 /**
@@ -10,7 +10,7 @@ function encodeParameter(name: string, value: string | boolean | number): string
 }
 
 const REQUEST_CACHE = new Map();
-export async function requestWithParameters<T = any>({
+export default async function requestWithParameters<T = any>({
   baseUrl,
   parameters,
   headers: customHeaders,

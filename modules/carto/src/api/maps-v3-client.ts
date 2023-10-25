@@ -19,7 +19,7 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
-import {requestWithParameters} from '../sources/utils';
+import requestWithParameters from './request-with-parameters';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
 
 type Dataset = {
