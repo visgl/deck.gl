@@ -2,14 +2,12 @@
 /**
  * Maps API Client for Carto 3
  */
-import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
 import {CartoAPIError} from './carto-api-error';
-import {parseMap} from './parse-map';
-import {assert} from '../utils';
+import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
+import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
 import {
   GeojsonResult,
   JsonResult,
-  SOURCE_DEFAULTS,
   TilejsonResult,
   h3QuerySource,
   h3TableSource,
@@ -19,7 +17,9 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources';
+import {parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
+import {assert} from '../utils';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
 
 type Dataset = {
@@ -203,9 +203,9 @@ export type FetchMapOptions = {
 
 /* eslint-disable max-statements */
 export async function fetchMap({
-  apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
+  apiBaseUrl = DEFAULT_API_BASE_URL,
   cartoMapId,
-  clientId = SOURCE_DEFAULTS.clientId,
+  clientId = DEFAULT_CLIENT,
   headers = {},
   mapsUrl,
   autoRefresh,

@@ -1,16 +1,24 @@
+/* eslint-disable camelcase */
+import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from '../api/common';
 import {buildSourceUrl} from '../api/endpoints';
+import {requestWithParameters} from '../api/request-with-parameters';
 import type {APIErrorContext, MapType} from '../api/types';
 import type {
-  SourceOptionalOptions,
-  SourceRequiredOptions,
-  TilejsonResult,
   GeojsonResult,
   JsonResult,
+  SourceOptionalOptions,
+  SourceRequiredOptions,
   Tilejson,
-  TilejsonMapInstantiation
+  TilejsonMapInstantiation,
+  TilejsonResult
 } from './types';
-import {SOURCE_DEFAULTS} from './common';
-import {requestWithParameters} from '../api/request-with-parameters';
+
+export const SOURCE_DEFAULTS: SourceOptionalOptions = {
+  apiBaseUrl: DEFAULT_API_BASE_URL,
+  clientId: DEFAULT_CLIENT,
+  format: 'tilejson',
+  headers: {}
+};
 
 export async function baseSource<UrlParameters extends Record<string, string>>(
   endpoint: MapType,

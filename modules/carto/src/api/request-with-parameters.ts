@@ -1,6 +1,6 @@
-import {CartoAPIError} from '../api/carto-api-error';
-import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from '../sources/common';
-import type {APIErrorContext} from '../api/types';
+import {CartoAPIError} from './carto-api-error';
+import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
+import type {APIErrorContext} from './types';
 
 /**
  * Simple encode parameter
