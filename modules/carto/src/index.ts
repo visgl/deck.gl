@@ -1,4 +1,3 @@
-export {getDefaultCredentials, setDefaultCredentials} from './config';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
