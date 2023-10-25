@@ -438,7 +438,12 @@ export default class IconManager {
           const iconDef = this._mapping[id];
           const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          const {data, width, height} = resizeImage(ctx, imageData as ImageBitmap, maxWidth, maxHeight);
+          const {data, width, height} = resizeImage(
+            ctx,
+            imageData as ImageBitmap,
+            maxWidth,
+            maxHeight
+          );
 
           this._texture.setSubImageData({
             data,

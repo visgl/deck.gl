@@ -1,6 +1,9 @@
 dist/
 dist-es6/
 test/
+node_modules/
+Applications/
+
 website/build/
 modules/*/typed
 node_modules/
