@@ -66,7 +66,7 @@ function triangulatePolygon(
 }
 
 function triangulate(polygons: BinaryPolygonFeature) {
-  const {polygonIndices, positions, primitivePolygonIndices} = polygons;
+  const {polygonIndices, primitivePolygonIndices} = polygons;
   const triangles = [];
 
   let rangeStart = 0;

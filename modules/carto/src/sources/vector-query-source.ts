@@ -3,21 +3,16 @@ import {baseSource} from './base-source';
 import {SourceOptions, QuerySourceOptions, SpatialDataType, TypedSource} from './common';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
-type UrlParameters = {
-  spatialDataType: SpatialDataType;
-  spatialDataColumn?: string;
-  q: string;
-  queryParameters?: string;
-};
+type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
 
 const vectorQuerySource: TypedSource<VectorQuerySourceOptions> = async function (
   options: VectorQuerySourceOptions
 ): Promise<any> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {spatialDataType: 'geo', q: sqlQuery};
+  const urlParameters: UrlParameters = {q: sqlQuery};
 
   if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
+    urlParameters.geo_column = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

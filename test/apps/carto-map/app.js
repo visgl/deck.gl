@@ -59,8 +59,6 @@ const examples = [
   'b45bb22f-6b2e-4a35-8d46-c8272251f450', // heatmap
 
   // Layers
-  'b874e2d9-7896-4a9e-a0ba-42bdaf8730f5', // Points with altitude column
-  '86094c6b-16f7-44fa-aca9-c3dc0617c362', // SF extruded hex
   '420acda4-088f-448b-82f4-dcaaaf18d5a1', // Points with multiple labels
   'ff6ac53f-741a-49fb-b615-d040bc5a96b8', // NYC extruded buildings
   'ba2ef0ba-e7bb-4a9a-a2a0-e8ade556b3d2', // Blended Texas tilesets
