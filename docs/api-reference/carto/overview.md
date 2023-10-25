@@ -36,24 +36,26 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ### Custom layers connected to CARTO datasource
 
-```js
+```jsx
 import DeckGL from '@deck.gl/react';
-import {CartoLayer, setDefaultCredentials, API_VERSIONS, MAP_TYPES} from '@deck.gl/carto';
+import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
 
-setDefaultCredentials({accessToken: 'XXX'});
+function App() {
+  const data = vectorQuerySource({
+    accessToken: 'XXX',
+    connectionName: 'bigquery',
+    sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
+  });
 
-function App({viewState}) {
-  const layer = new CartoLayer({
-    type: MAP_TYPES.QUERY,
-    connection: 'bigquery',
-    data: 'SELECT * FROM cartobq.testtables.points_10k',
+  const layer = new VectorTileLayer({
+    data,
     pointRadiusMinPixels: 2,
     getLineColor: [0, 0, 0, 200],
     getFillColor: [238, 77, 90],
     lineWidthMinPixels: 1
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL layers={[layer]} />;
 }
 ```
 
@@ -67,65 +69,47 @@ You can see working examples for the following:
 
 - [Pure JS](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/pure-js): Integrate in a pure js application, using webpack.
 
-### CARTO credentials
+### CARTO Layers
 
-This is an object to define the connection to CARTO, including the credentials (and optionally the parameters to point to specific API endpoints).
+The CARTO module contains a number of custom layers which can be used to visualize the data, which work in conjunction with the [data source](#carto-data-sources) functions:
 
-These are the available properties:
+- [H3TileLayer](./carto-layer.md)
+- [QuadbinTileLayer](./carto-layer.md)
+- [RasterTileLayer](./carto-layer.md)
+- [VectorTileLayer](./carto-layer.md)
 
-- `apiBaseUrl` (optional): base URL for requests to the API (can be obtained in the CARTO 3 Workspace). Default: `https://gcp-us-east1.api.carto.com`.
-- `accessToken` (optional): token to authenticate/authorize requests to the Maps API (private datasets)
-- `mapsUrl` (optional): Maps API URL Template. By default it is derived from `apiBaseUrl`:
-  - `https://{apiBaseUrl}/v3/maps`
+### CARTO Data sources
+
+There are a number of data source functions for accessing data from the CARTO platform. These provide a simple way to fetch data from the CARTO platform, which can then be used with deck.gl layers. When
+
+#### Authentication
+
+When defining a data source it is necessary to provide a:
+
+- `accessToken`: token to authenticate/authorize requests to the CARTO API,
+- `connectionName`: name of connection configured in the CARTO platform.
 
 ### Support for other deck.gl layers
 
-The CARTO submodule includes the CartoLayer that simplifies the interaction with the CARTO platform. If you want to use other deck.gl layers (i.e. ArcLayer, H3HexagonLayer...), there are two possibilities depending on the API version you are using:
+The CARTO module includes a [collection of layers](#carto-layers) for easy visualization of data from the CARTO platfrom. For performace and scalability, this data is served as tiles.
 
-You can directly retrieve the data in the format expected by the layer using the `fetchLayerData` function:
+It is also straightforward to request data in two additional formats, `'geojson'` and `'json'`. It can then be integrated with other deck.gl layers, for example:
+
 
 ```js
-import {FORMATS, fetchLayerData} from '@deck.gl/carto';
-import {H3HexagonLayer} from '@deck.gl/geo-layers/';
+function App() {
+  const data = vectorTableSource({
+    accessToken: 'XXX',
+    connectionName: 'bigquery',
+    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+    format: 'geojson'
+  });
 
-const {data} = await fetchLayerData({
-  type: MAP_TYPES.QUERY,
-  source: `SELECT bqcarto.h3.ST_ASH3(internal_point_geom, 4) as h3, count(*) as count
-              FROM bigquery-public-data.geo_us_census_places.us_national_places WHERE state=?
-            GROUP BY h3`,
-  connection: 'connection_name',
-  format: FORMATS.JSON,
-  queryParameters: ['AL']
-});
+  const layer = new GeoJsonLayer({
+    data,
+    getFillColor: d => d.properties.color
+  });
 
-new H3HexagonLayer({
-  data,
-  filled: true,
-  getHexagon: d => d.h3,
-  getFillColor: d => [0, (1 - d.count / 10) * 255, 0],
-  getLineColor: [0, 0, 0, 200]
-});
+  return <DeckGL layers={[layer]} />;
+}
 ```
-
-The formats available are JSON, GEOJSON, TILEJSON, and NDJSON. [NDJSON](http://ndjson.org/) (Newline Delimited JSON) allows to handle incremental data loading https://deck.gl/docs/developer-guide/performance#handle-incremental-data-loading.
-
-### Constants
-
-To make it easier to work with the CARTO module the following constants are provided:
-
-| ENUMERATION  | VALUES   |
-| ------------ | -------- |
-| API_VERSIONS | V1       |
-|              | V2       |
-|              | V3       |
-| MAP_TYPES    | QUERY    |
-|              | TABLE    |
-|              | TILESET  |
-| FORMATS      | GEOJSON  |
-|              | JSON     |
-|              | TILEJSON |
-|              | NDJSON   |
-| TILE_FORMATS | BINARY   |
-|              | JSON     |
-|              | GEOJSON  |
-|              | MVT      |
