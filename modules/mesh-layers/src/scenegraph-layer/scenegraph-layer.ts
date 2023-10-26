@@ -29,7 +29,7 @@ import {
   createGLTFObjects
 } from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -250,8 +250,9 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     } else if (props.scenegraph && !props.scenegraph.gltf) {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
-      scenegraphData = {gltf, ...gltfObjects};
+      const processedGLTF = postProcessGLTF(gltf);
+      const gltfObjects = createGLTFObjects(gl, processedGLTF, this._getModelOptions());
+      scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw()); // eslint-disable-line @typescript-eslint/no-floating-promises
     } else if (props.scenegraph) {
