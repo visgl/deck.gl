@@ -55,11 +55,14 @@ new H3TileLayer({
 All the data source functions are fully typed, to aid in providing the correct parameters. In addition to enforcing the parameters passed, the return value of the function is deduced based on the value of the `format` property.
 
 
+### Caching
+
+
 ### Available Data Sources
 
 All data source functions take the following global options:
 
-```
+```ts
 type SourceOptions = {
   accessToken: string;
   connectionName: string;
