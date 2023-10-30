@@ -1,31 +1,30 @@
-# VectorTileLayer
+# H3TileLayer
 
-`VectorTileLayer` is a layer for visualizing tiled vector data. It inherits all the properties from the [`MVTLayer`](../geo-layers/mvt-layer.md).
+`H3TileLayer` is a layer for visualizing tiled data described using the [H3 Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3). It inherits all the properties from the [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md).
 
 ## Usage 
 
 ```tsx
 import DeckGL from '@deck.gl/react';
-import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
+import {H3TileLayer, h3QuerySource} from '@deck.gl/carto';
 
 function App({viewState}) {
-  const data = vectorTableSource({
+  const data = h3QuerySource({
     accessToken: 'XXX',
     connectionName: 'bigquery',
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
+    sqlQuery: 'select * from carto-demo-data.demo_tables.chicago_crime_sample',
   });
 
-  const layer = new VectorTileLayer({
+  const layer = new H3TileLayer({
     data,
-    pointRadiusMinPixels: 2,
-    getLineColor: [0, 0, 0, 200],
-    getFillColor: [238, 77, 90],
-    lineWidthMinPixels: 1
+    getFillColor: d => d.properties.color
   })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
 }
 ```
+
+## Installation
 
 To install the dependencies from NPM:
 
@@ -35,9 +34,9 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
 ```
 
-```ts
-import {VectorTileLayer} from '@deck.gl/carto';
-new VectorTileLayer({});
+```js
+import {H3TileLayer} from '@deck.gl/carto';
+new H3TileLayer({});
 ```
 
 To use pre-bundled scripts:
@@ -54,12 +53,12 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.carto.VectorTileLayer({});
+new deck.carto.H3TileLayer({});
 ```
 
 ## Properties
 
-The properties of [`MVTLayer`](../geo-layers/mvt-layer.md) will be inherited.
+The properties of [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) will be inherited.
 
 ##### `data` (TilejsonResult) {#data}
 
@@ -67,10 +66,10 @@ Required. A valid `TilejsonResult` object.
 
 Use one of the following [Data Sources](./data-sources.md) to fetch this from the CARTO API:
 
-- [vectorTableSource](./data-sources#vectortablesource)
-- [vectorQuerySource](./data-sources#vectorquerysource)
-- [vectorTilesetSource](./data-sources#vectortilesetsource)
+- [h3TableSource](./data-sources#h3tablesource)
+- [h3QuerySource](./data-sources#h3querysource)
+- [h3TilesetSource](./data-sources#h3tilesetsource)
 
 ## Source
 
-[modules/carto/src/layers/vector-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/vector-tile-layer.ts)
+[modules/carto/src/layers/h3-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/h3-tile-layer.ts)
