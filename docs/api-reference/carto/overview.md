@@ -73,10 +73,10 @@ You can see working examples for the following:
 
 The CARTO module contains a number of custom layers which can be used to visualize the data, which work in conjunction with the [data source](#carto-data-sources) functions:
 
-- [H3TileLayer](./carto-layer.md)
-- [QuadbinTileLayer](./carto-layer.md)
-- [RasterTileLayer](./carto-layer.md)
-- [VectorTileLayer](./carto-layer.md)
+- [H3TileLayer](./h3-tile-layer.md)
+- [QuadbinTileLayer](./quadbin-tile-layer.md)
+- [RasterTileLayer](./raster-tile-layer.md)
+- [VectorTileLayer](./vector-tile-layer.md)
 
 ### CARTO Data sources
 

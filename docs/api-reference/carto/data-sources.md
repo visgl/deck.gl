@@ -57,6 +57,7 @@ All the data source functions are fully typed, to aid in providing the correct p
 
 ### Caching
 
+The dataSource functions have an internal cache, which avoids fetching data from the server if the parameters have not changed. Thus they can be used, for example, in React `render()` functions without needing memoization.
 
 ### Available Data Sources
 
@@ -136,16 +137,17 @@ type vectorQuerySourceOptions = {
 type vectorTilesetSourceOptions = {
   tableName: string;
 }
+```
 
 #### rasterTilesetSource
 
 ```ts
 type rasterTilesetSourceOptions = {
   tableName: string;
-
+}
 ```
 
-#### rasterTableSource
+#### quadbinTableSource
 
 ```ts
 type quadbinTableSourceOptions = {
