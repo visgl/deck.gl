@@ -1,5 +1,5 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilejsonSource} from './common';
+import type {SourceOptions, TilejsonSource} from './types';
 
 export type BoundaryTableSourceOptions = SourceOptions & {
   boundaryId: string;

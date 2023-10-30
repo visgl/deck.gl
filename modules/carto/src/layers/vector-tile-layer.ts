@@ -71,7 +71,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
   }
 
   async getTileData(tile: TileLoadProps) {
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     const {tiles, properties_tiles} = tileJSON;
     const url = _getURLFromTemplate(tiles, tile);
     if (!url) {
