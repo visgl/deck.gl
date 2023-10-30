@@ -61,13 +61,7 @@ function App() {
 
 ### Examples
 
-You can see working examples for the following:
-
-- [Scripting](https://carto.com/developers/deck-gl/examples/): Quick scripting examples to play with the module without NPM or Webpack. If you're not a web developer, this is probably what you're looking for.
-
-- [React](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/react): Integrate in a React application.
-
-- [Pure JS](https://github.com/CartoDB/viz-doc/tree/master/deck.gl/examples/pure-js): Integrate in a pure js application, using webpack.
+You can view a collection of working examples on the [CARTO documentation website](https://docs.carto.com/carto-for-developers/carto-for-deck.gl/examples).
 
 ### CARTO Layers
 
@@ -80,11 +74,11 @@ The CARTO module contains a number of custom layers which can be used to visuali
 
 ### CARTO Data sources
 
-There are a number of data source functions for accessing data from the CARTO platform. These provide a simple way to fetch data from the CARTO platform, which can then be used with deck.gl layers. When
+There are a number of [data source functions](./data-sources.md) for accessing data from the CARTO platform. These provide a simple way to fetch data from the CARTO platform, which can then be used with deck.gl layers.
 
 #### Authentication
 
-When defining a data source it is necessary to provide a:
+When defining a [data source](./data-sources.md) it is necessary to provide a:
 
 - `accessToken`: token to authenticate/authorize requests to the CARTO API,
 - `connectionName`: name of connection configured in the CARTO platform.
