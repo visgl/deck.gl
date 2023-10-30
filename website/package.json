@@ -14,10 +14,10 @@
     "write-heading-ids": "ts-node ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
-    "@loaders.gl/i3s": "^3.4.13",
-    "@loaders.gl/las": "^3.4.13",
-    "@loaders.gl/obj": "^3.4.13",
-    "@loaders.gl/ply": "^3.4.13",
+    "@loaders.gl/i3s": "4.0.0-beta.5",
+    "@loaders.gl/las": "4.0.0-beta.5",
+    "@loaders.gl/obj": "4.0.0-beta.5",
+    "@loaders.gl/ply": "4.0.0-beta.5",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",

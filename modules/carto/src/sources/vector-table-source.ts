@@ -1,26 +1,21 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './common';
+import type {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './types';
 
 export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
-type UrlParameters = {
-  columns?: string;
-  spatialDataType: SpatialDataType;
-  spatialDataColumn?: string;
-  name: string;
-};
+type UrlParameters = {columns?: string; geo_column?: string; name: string};
 
 const vectorTableSource: TypedSource<VectorTableSourceOptions> = async function (
   options: VectorTableSourceOptions
 ): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {name: tableName, spatialDataType: 'geometry'};
+  const urlParameters: UrlParameters = {name: tableName};
 
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
   if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
+    urlParameters.geo_column = spatialDataColumn;
   }
   return baseSource<UrlParameters>('table', options, urlParameters);
 };

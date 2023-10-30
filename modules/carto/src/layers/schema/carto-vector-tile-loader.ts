@@ -1,6 +1,6 @@
 import earcut from 'earcut';
 import {LoaderOptions, LoaderWithParser} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures, BinaryPolygonFeatures, TypedArray} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';
 
 import {TileReader} from './carto-tile';
 import {parsePbf} from './tile-loader-utils';
@@ -37,7 +37,7 @@ const CartoVectorTileLoader: LoaderWithParser = {
 };
 
 function triangulatePolygon(
-  polygons: BinaryPolygonFeatures,
+  polygons: BinaryPolygonFeature,
   target: number[],
   {
     startPosition,
@@ -65,8 +65,8 @@ function triangulatePolygon(
   }
 }
 
-function triangulate(polygons: BinaryPolygonFeatures) {
-  const {polygonIndices, positions, primitivePolygonIndices} = polygons;
+function triangulate(polygons: BinaryPolygonFeature) {
+  const {polygonIndices, primitivePolygonIndices} = polygons;
   const triangles = [];
 
   let rangeStart = 0;
@@ -88,7 +88,7 @@ function triangulate(polygons: BinaryPolygonFeatures) {
 function parseCartoVectorTile(
   arrayBuffer: ArrayBuffer,
   options?: CartoVectorTileLoaderOptions
-): BinaryFeatures | null {
+): BinaryFeatureCollection | null {
   if (!arrayBuffer) return null;
   const tile = parsePbf(arrayBuffer, TileReader);
 

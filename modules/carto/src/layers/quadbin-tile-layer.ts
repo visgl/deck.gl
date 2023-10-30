@@ -3,8 +3,8 @@ import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import {TilejsonPropType, TilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
 export const renderSubLayers = props => {
   const {data} = props;

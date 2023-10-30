@@ -15,18 +15,15 @@ import {
 } from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
-import type {BinaryFeatures} from '@loaders.gl/schema';
-import {TileFormat, TILE_FORMATS} from '../api/maps-api-common';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
-import {TilejsonPropType, TilejsonResult} from '../sources/common';
-import {injectAccessToken, mergeBoundaryData} from './utils';
 
-const defaultTileFormat = TILE_FORMATS.BINARY;
+import type {TilejsonResult} from '../sources/types';
+import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
-  data: TilejsonPropType,
-  formatTiles: defaultTileFormat
+  data: TilejsonPropType
 };
 
 /** All properties supported by VectorTileLayer. */
@@ -35,13 +32,6 @@ export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, '
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
   data: null | TilejsonResult | Promise<TilejsonResult>;
-  /** Use to override the default tile data format.
-   *
-   * Possible values are: `TILE_FORMATS.BINARY`, `TILE_FORMATS.GEOJSON` and `TILE_FORMATS.MVT`.
-   *
-   * Only supported when `apiVersion` is `API_VERSIONS.V3` and `format` is `FORMATS.TILEJSON`.
-   */
-  formatTiles?: TileFormat;
 };
 
 // TODO Perhaps we can't subclass MVTLayer and keep types. Better to subclass TileLayer instead?
@@ -58,8 +48,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
 
   initializeState(): void {
     super.initializeState();
-    const binary = this.props.formatTiles === TILE_FORMATS.BINARY || TILE_FORMATS.MVT;
-    this.setState({binary});
+    this.setState({binary: true});
   }
 
   updateState(parameters) {
@@ -68,7 +57,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
       super.updateState(parameters);
 
       const formatTiles = new URL(props.data.tiles[0]).searchParams.get('formatTiles');
-      const mvt = formatTiles === TILE_FORMATS.MVT;
+      const mvt = formatTiles === 'mvt';
       this.setState({mvt});
     }
   }
@@ -152,7 +141,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }

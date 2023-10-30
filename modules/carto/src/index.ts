@@ -1,5 +1,3 @@
-export {getDefaultCredentials, setDefaultCredentials} from './config';
-export {default as CartoLayer} from './layers/carto-layer'; // <-- REMOVE in v9
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
@@ -25,19 +23,15 @@ export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {
-  FORMATS,
-  TILE_FORMATS,
-  MAP_TYPES,
-  API_VERSIONS,
-  CartoAPIError,
-  fetchLayerData,
-  fetchMap,
-  getDataV2 as _getDataV2,
-  mapInstantiation as _mapInstantiation
+export {CartoAPIError, fetchMap} from './api';
+export type {
+  APIErrorContext,
+  FetchMapOptions,
+  Format,
+  MapType,
+  RequestType,
+  QueryParameters
 } from './api';
-export type {APIErrorContext, QueryParameters} from './api';
-export type {CartoLayerProps} from './layers/carto-layer';
 
 import {
   boundaryQuerySource,

@@ -17,7 +17,7 @@ import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -60,7 +60,7 @@ export type TileJson = {
   version?: string;
 };
 
-type ParsedMvtTile = Feature[] | BinaryFeatures;
+type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
@@ -299,7 +299,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }

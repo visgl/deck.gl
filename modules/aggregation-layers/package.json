@@ -34,7 +34,7 @@
     "@luma.gl/constants": "9.0.0-alpha.37",
     "@luma.gl/core": "9.0.0-alpha.37",
     "@luma.gl/shadertools": "9.0.0-alpha.37",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@math.gl/web-mercator": "^4.0.0",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {

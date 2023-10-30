@@ -1,5 +1,6 @@
 import {Tile as PropertiesTile} from './schema/carto-properties-tile';
 import {Tile as VectorTile} from './schema/carto-tile';
+import type {TilejsonResult} from '../sources/types';
 
 /**
  * Adds access token to Authorization header in loadOptions
@@ -64,3 +65,15 @@ export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTi
 
   return geometry;
 }
+
+export const TilejsonPropType = {
+  type: 'object' as const,
+  value: null as null | TilejsonResult,
+  validate: (value: TilejsonResult, propType) =>
+    (propType.optional && value === null) ||
+    (typeof value === 'object' &&
+      Array.isArray(value.tiles) &&
+      value.tiles.every(url => typeof url === 'string')),
+  compare: 2,
+  async: true
+};
