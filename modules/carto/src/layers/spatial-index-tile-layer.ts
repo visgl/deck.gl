@@ -1,11 +1,11 @@
 import {registerLoaders} from '@loaders.gl/core';
-import {DefaultProps, UpdateParameters} from '@deck.gl/core';
+import {DefaultProps} from '@deck.gl/core';
 import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
-import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
+import {TileLayer, _Tile2DHeader as Tile2DHeader, TileLayerProps} from '@deck.gl/geo-layers';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
@@ -15,7 +15,7 @@ const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {};
 
 /** All properties supported by SpatialIndexTileLayer. */
 export type SpatialIndexTileLayerProps<DataT = unknown> = _SpatialIndexTileLayerProps &
-  TileLayer<DataT>;
+  TileLayerProps<DataT>;
 
 /** Properties added by SpatialIndexTileLayer. */
 type _SpatialIndexTileLayerProps = {};
