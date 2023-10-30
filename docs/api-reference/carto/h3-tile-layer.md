@@ -1,6 +1,6 @@
 # H3TileLayer
 
-`H3TileLayer` is a layer for visualizing tiled data described using the [H3 Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3). It inherits all the properties from the [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md).
+`H3TileLayer` is a layer for visualizing tiled data described using the [H3 Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3).
 
 ## Usage 
 
@@ -58,7 +58,7 @@ new deck.carto.H3TileLayer({});
 
 ## Properties
 
-The properties of [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) will be inherited.
+Inherits all properties from [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
 
 ##### `data` (TilejsonResult) {#data}
 
