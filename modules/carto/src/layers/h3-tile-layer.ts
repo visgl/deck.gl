@@ -18,7 +18,6 @@ const renderSubLayers = (props: H3HexagonLayerProps) => {
 };
 
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
-  aggregationResLevel: 4,
   data: TilejsonPropType
 };
 
@@ -32,7 +31,6 @@ type H3HexagonLayerProps<DataT = unknown> = Record<string, any>;
 /** Properties added by H3TileLayer. */
 type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> & {
   data: null | TilejsonResult | Promise<TilejsonResult>;
-  aggregationResLevel?: number;
 };
 
 export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<

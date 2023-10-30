@@ -16,7 +16,6 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  aggregationResLevel: 6,
   data: TilejsonPropType
 };
 
@@ -27,7 +26,6 @@ export type QuadbinTileLayerProps<DataT = unknown> = _QuadbinTileLayerProps<Data
 /** Properties added by QuadbinTileLayer. */
 type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> & {
   data: null | TilejsonResult | Promise<TilejsonResult>;
-  aggregationResLevel?: number;
 };
 
 export default class QuadbinTileLayer<
