@@ -21,7 +21,7 @@ export const TilejsonPropType = {
     (typeof value === 'object' &&
       Array.isArray(value.tiles) &&
       value.tiles.every(url => typeof url === 'string')),
-  equal(value1, value2) {
+  equal: (value1, value2) => {
     return deepEqual(value1, value2, 2);
   },
   async: true
