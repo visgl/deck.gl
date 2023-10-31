@@ -21,7 +21,8 @@ import {injectAccessToken, TilejsonPropType} from './utils';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  dataComparator: TilejsonPropType.equal
 };
 
 /** All properties supported by VectorTileLayer. */
