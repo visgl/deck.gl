@@ -327,9 +327,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.setTexture(props.texture);
     }
 
-    // if (this.state.model) {
-    //   this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
-    // }
+    if (this.state.model) {
+      this.state.model.setTopology(this.props.wireframe ? 'line-strip' : 'triangle-list');
+    }
   }
 
   finalizeState(context: LayerContext) {
