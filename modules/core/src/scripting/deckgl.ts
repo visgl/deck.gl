@@ -80,6 +80,7 @@ export default class DeckGL extends Deck {
       // Default create mapbox map
       this._map =
         isMap &&
+        // @ts-ignore Dependency issue?
         new Mapbox({
           ...props,
           viewState,

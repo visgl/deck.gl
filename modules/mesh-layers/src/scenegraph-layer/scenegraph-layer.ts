@@ -29,7 +29,7 @@ import {
   createGLTFObjects
 } from '@luma.gl/experimental';
 import GL from '@luma.gl/constants';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -247,20 +247,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
-    } else if (props.scenegraph && !props.scenegraph.gltf) {
+    } else if (props.scenegraph && typeof props.scenegraph === 'object') {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const gltfObjects = createGLTFObjects(gl, gltf, this._getModelOptions());
-      scenegraphData = {gltf, ...gltfObjects};
+      const processedGLTF = postProcessGLTF(gltf);
+      const gltfObjects = createGLTFObjects(gl, processedGLTF, this._getModelOptions());
+      scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw()); // eslint-disable-line @typescript-eslint/no-floating-promises
-    } else if (props.scenegraph) {
-      // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
-      log.deprecated(
-        'ScenegraphLayer.props.scenegraph',
-        'Use GLTFLoader instead of GLTFScenegraphLoader'
-      )();
-      scenegraphData = props.scenegraph;
     }
 
     const options = {layer: this, gl};

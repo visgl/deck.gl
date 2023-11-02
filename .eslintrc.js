@@ -1,6 +1,7 @@
 const {getESLintConfig} = require('ocular-dev-tools/configuration');
 
 module.exports = getESLintConfig({
+  root: true,
   react: '18.0.0',
   overrides: {
     parserOptions: {
