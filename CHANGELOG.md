@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v8.10 Prereleases
 
+#### deck.gl [8.10.0-alpha.7] - Nov 2 2023
+
+ - feat: Upgrade v8.10 to loaders.gl v4 (#8133)
+ - chore: Upgrade v8.10 to math.gl@4.0.0. Remove gl-matrix (#8200)
+
 #### deck.gl [8.10.0-alpha.6] - Oct 18 2023
 
  - Fix stylesheet.css (#8210)
