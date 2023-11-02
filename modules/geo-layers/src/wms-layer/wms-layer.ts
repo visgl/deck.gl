@@ -224,6 +224,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       this.state.loadCounter++;
       this.props.onImageLoadStart(requestId);
 
+      // @ts-expect-error Check type changes
       const image = await this.state.imageSource.getImage(requestParams);
 
       // If a request takes a long time, later requests may have already loaded.

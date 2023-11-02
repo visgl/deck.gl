@@ -73,7 +73,7 @@ class MockGLTFAnimator {
   animate() {}
 }
 
-test.only('ScenegraphLayer#tests', t => {
+test('ScenegraphLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: ScenegraphLayer,
     sampleProps: {
