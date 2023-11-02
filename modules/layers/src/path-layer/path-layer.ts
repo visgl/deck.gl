@@ -158,6 +158,10 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return false;
   }
 
+  getBounds(): [number[], number[]] | null {
+    return this.getAttributeManager()?.getBounds(['vertexPositions']);
+  }
+
   initializeState() {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
