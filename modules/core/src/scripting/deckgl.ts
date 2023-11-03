@@ -115,11 +115,13 @@ export default class DeckGL extends Deck {
     // Update the base map
     if (this._map) {
       const viewport = this.getViewports()[0];
-      this._map.setProps({
-        width: viewport.width,
-        height: viewport.height,
-        viewState: viewport
-      });
+      if (viewport) {
+        this._map.setProps({
+          width: viewport.width,
+          height: viewport.height,
+          viewState: viewport
+        });
+      }
     }
     super._drawLayers(redrawReason, options);
   }
