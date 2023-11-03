@@ -101,11 +101,11 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
-    collision_texture: !drawToCollisionMap && collisionFBO ? collisionFBO : dummyCollisionMap
+    collision_texture:
+      !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
 };
 
-// @ts-expect-error
 export default {
   name: 'collision',
   dependencies: [project],
