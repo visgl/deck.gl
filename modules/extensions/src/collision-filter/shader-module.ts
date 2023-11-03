@@ -89,7 +89,7 @@ type CollisionModuleSettings = {
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Texture};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},
@@ -106,10 +106,11 @@ const getCollisionUniforms = (
   };
 };
 
+// @ts-expect-error
 export default {
   name: 'collision',
   dependencies: [project],
   vs,
   inject,
   getUniforms: getCollisionUniforms
-} as ShaderModule;
+} as ShaderModule<CollisionModuleSettings>;
