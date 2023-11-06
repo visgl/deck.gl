@@ -2,7 +2,7 @@
 
 Deck.gl is the preferred and official solution for creating modern geospatial web applications using [CARTO Location Intelligence platform](https://carto.com/).
 
-With deck.gl and the all-new **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake, Databricks and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
+With deck.gl and the **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake, Databricks and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
@@ -80,32 +80,32 @@ There are a number of [data source functions](./data-sources.md) for accessing d
 
 When defining a [data source](./data-sources.md) it is necessary to provide a:
 
-- `accessToken`: token to authenticate/authorize requests to the CARTO API,
-- `connectionName`: name of connection configured in the CARTO platform.
+- `accessToken`: token to [authenticate/authorize requests](https://docs.carto.com/carto-for-developers/key-concepts/authentication-methods) to the CARTO API,
+- `connectionName`: name of [connection](https://docs.carto.com/carto-for-developers/key-concepts/connections) configured in the CARTO platform.
 
 ### Support for other deck.gl layers
 
 The CARTO module includes a [collection of layers](#carto-layers) for easy visualization of data from the CARTO platfrom. For performace and scalability, this data is served as tiles.
 
-It is also straightforward to request data in two additional formats, `'geojson'` and `'json'`. It can then be integrated with other deck.gl layers, for example:
+It is also straightforward to request data directly using the CARTO [SQL API](https://docs.carto.com/carto-for-developers/key-concepts/apis#sql). It can then be integrated with other deck.gl layers, for example:
 
 
 ```jsx
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {vectorTableSource} from '@deck.gl/carto';
+import {sqlSource} from '@deck.gl/carto';
 
+// TODO: fix example to actually work
 function App() {
-  const data = vectorTableSource({
+  const data = sqlSource({
     accessToken: 'XXX',
     connectionName: 'carto_dw',
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-    format: 'geojson'
+    sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
   });
 
-  const layer = new GeoJsonLayer({
+  const layer = new ScatterplotLayer({
     data,
-    getFillColor: d => d.properties.color
+    getFillColor: d => d.color
   });
 
   return <DeckGL layers={[layer]} />;
