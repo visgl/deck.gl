@@ -95,7 +95,6 @@ import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {query} from '@deck.gl/carto';
 
-// TODO: fix example to actually work
 function App() {
   const data = query({
     accessToken: 'XXX',
@@ -105,7 +104,9 @@ function App() {
 
   const layer = new ScatterplotLayer({
     data,
-    getFillColor: d => d.color
+    dataTransform: data => data.rows,
+    getPosition: d => d.geom.coordinates,
+    getRadius: d => d.size
   });
 
   return <DeckGL layers={[layer]} />;

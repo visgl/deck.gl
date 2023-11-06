@@ -57,6 +57,35 @@ type SourceOptions = {
 
 In addition, the following options are supported on each source:
 
+#### vectorTableSource
+
+```ts
+type vectorTableSourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  tableName: string;
+}
+```
+
+#### vectorQuerySource
+
+```ts
+type vectorQuerySourceOptions = {
+  columns?: string[];
+  spatialDataColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### vectorTilesetSource
+
+```ts
+type vectorTilesetSourceOptions = {
+  tableName: string;
+}
+```
+
 #### h3TableSource
 
 ```ts
@@ -90,43 +119,6 @@ type H3TilesetSourceOptions = {
 }
 ```
 
-#### vectorTableSource
-
-```ts
-type vectorTableSourceOptions = {
-  columns?: string[];
-  spatialDataColumn?: string;
-  tableName: string;
-}
-```
-
-#### vectorQuerySource
-
-```ts
-type vectorQuerySourceOptions = {
-  columns?: string[];
-  spatialDataColumn?: string;
-  sqlQuery: string;
-  queryParameters: QueryParameters;
-}
-```
-
-#### vectorTilesetSource
-
-```ts
-type vectorTilesetSourceOptions = {
-  tableName: string;
-}
-```
-
-#### rasterTilesetSource
-
-```ts
-type rasterTilesetSourceOptions = {
-  tableName: string;
-}
-```
-
 #### quadbinTableSource
 
 ```ts
@@ -156,6 +148,14 @@ type quadbinQuerySourceOptions = {
 
 ```ts
 type quadbinTilesetSourceOptions = {
+  tableName: string;
+}
+```
+
+#### rasterTilesetSource
+
+```ts
+type rasterTilesetSourceOptions = {
   tableName: string;
 }
 ```
