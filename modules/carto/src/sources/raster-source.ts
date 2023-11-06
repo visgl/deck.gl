@@ -1,10 +1,10 @@
 import {baseSource} from './base-source';
-import type {SourceOptions, TilesetSourceOptions, TypedSource} from './types';
+import type {SourceOptions, TilesetSourceOptions, TilejsonSource} from './types';
 
 export type RasterSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const rasterSource: TypedSource<RasterSourceOptions> = async function (
+const rasterSource: TilejsonSource<RasterSourceOptions> = async function (
   options: RasterSourceOptions
 ): Promise<any> {
   const {tableName} = options;

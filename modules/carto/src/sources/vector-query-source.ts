@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {SourceOptions, QuerySourceOptions, SpatialDataType, TypedSource} from './types';
+import type {SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonSource} from './types';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
 type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
 
-const vectorQuerySource: TypedSource<VectorQuerySourceOptions> = async function (
+const vectorQuerySource: TilejsonSource<VectorQuerySourceOptions> = async function (
   options: VectorQuerySourceOptions
 ): Promise<any> {
   const {spatialDataColumn, sqlQuery, queryParameters} = options;

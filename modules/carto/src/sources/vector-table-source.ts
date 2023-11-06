@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './types';
+import type {SourceOptions, SpatialDataType, TableSourceOptions, TilejsonSource} from './types';
 
 export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
 type UrlParameters = {columns?: string; geo_column?: string; name: string};
 
-const vectorTableSource: TypedSource<VectorTableSourceOptions> = async function (
+const vectorTableSource: TilejsonSource<VectorTableSourceOptions> = async function (
   options: VectorTableSourceOptions
 ): Promise<any> {
   const {columns, spatialDataColumn, tableName} = options;

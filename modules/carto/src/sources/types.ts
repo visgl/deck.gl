@@ -93,7 +93,3 @@ export type JsonResult = any[];
 export interface TilejsonSource<T> {
   (options: T & {format?: 'tilejson'}): Promise<TilejsonResult>;
 }
-export interface TypedSource<T> extends TilejsonSource<T> {
-  (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
-  (options: T & {format: 'json'}): Promise<JsonResult>;
-}
