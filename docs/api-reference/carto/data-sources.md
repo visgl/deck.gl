@@ -15,27 +15,9 @@ const data = vectorTableSource({
 })
 ```
 
-### Data formats
-
-Depending on the specific data source, it may be possible to request the data in a different format from the CARTO API. This is done using the `format` property, and can be useful when using the data with [custom layers](./overview#support-for-other-deckgl-layers). By default, the `format` prop is `'tilejson'` as this is the format that the [CARTO deck.gl layers](./overview#carto-layers) expect.
-
-For example, to instead fetch as list of rows in JSON format:
-
-```js
-import {vectorQuerySource} from '@deck.gl/carto';
-const rows = await vectorQuerySource({
-  accessToken: 'XXX',
-  connectionName: 'carto_dw',
-  tableName: 'carto-demo-data.test_tables.test',
-  format: 'json'
-});
-```
-
 ### Promise API
 
-All data source functions return a Promise, which can be resolved to obtain the actual data, as is shown in the example in the [Data formats](#data-formats) section above.
-
-As the [core deck.gl Layer prop supports Promises](../core/layer#data), it is often not necessary to resolve or await the Promise and the data source can be directly passed to the data prop:
+All data source functions return a Promise, which can be resolved to obtain the actual Tilejson. However, as the [core deck.gl Layer prop supports Promises](../core/layer#data), it is often not necessary to resolve or await the Promise and the data source can be directly passed to the data prop:
 
 ```jsx
 import {H3TileLayer, h3TilesetSource} from '@deck.gl/carto';
@@ -52,8 +34,7 @@ new H3TileLayer({
 
 ### Types
 
-All the data source functions are fully typed, to aid in providing the correct parameters. In addition to enforcing the parameters passed, the return value of the function is deduced based on the value of the `format` property.
-
+All the data source functions are fully typed, to aid in providing the correct parameters and working correctly with the return value.
 
 ### Caching
 
@@ -69,7 +50,6 @@ type SourceOptions = {
   connectionName: string;
   apiBaseUrl?: string;
   clientId?: string;
-  format?: Format;
   headers?: Record<string, string>;
   mapsUrl?: string;
 };

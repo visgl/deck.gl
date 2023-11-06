@@ -2,7 +2,7 @@
 
 Deck.gl is the preferred and official solution for creating modern geospatial web applications using [CARTO Location Intelligence platform](https://carto.com/).
 
-With deck.gl and the **CARTO 3 platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO 3 provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake, Databricks and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
+With deck.gl and the **CARTO platform** you can directly access spatial datasets and tilesets that are hosted in your current cloud data warehouse. CARTO provides seamless integrations with Google BigQuery, Amazon Redshift, Snowflake, Databricks and PostgreSQL-compatible databases, eliminating the need to move your data into CARTO.
 
 <img src="https://raw.githubusercontent.com/CartoDB/viz-doc/master/deck.gl/img/osm_buildings.jpg" />
 
@@ -93,11 +93,11 @@ It is also straightforward to request data directly using the CARTO [SQL API](ht
 ```jsx
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {sqlSource} from '@deck.gl/carto';
+import {query} from '@deck.gl/carto';
 
 // TODO: fix example to actually work
 function App() {
-  const data = sqlSource({
+  const data = query({
     accessToken: 'XXX',
     connectionName: 'carto_dw',
     sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
