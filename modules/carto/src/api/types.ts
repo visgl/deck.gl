@@ -2,7 +2,7 @@ import {SCALE_TYPE} from './layer-map';
 
 export type Format = 'json' | 'geojson' | 'tilejson';
 export type MapType = 'query' | 'table' | 'tileset' | 'raster';
-export type RequestType = 'Map data' | 'Map instantiation' | 'Public map' | 'Tile stats';
+export type RequestType = 'Map data' | 'Map instantiation' | 'Public map' | 'Tile stats' | 'SQL';
 export type APIErrorContext = {
   requestType: RequestType;
   mapId?: string;
