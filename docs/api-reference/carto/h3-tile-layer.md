@@ -11,7 +11,7 @@ import {H3TileLayer, h3QuerySource} from '@deck.gl/carto';
 function App({viewState}) {
   const data = h3QuerySource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     sqlQuery: 'select * from carto-demo-data.demo_tables.chicago_crime_sample',
   });
 

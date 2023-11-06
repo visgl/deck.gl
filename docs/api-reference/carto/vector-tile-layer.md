@@ -11,7 +11,7 @@ import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
 function App({viewState}) {
   const data = vectorTableSource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
   });
 

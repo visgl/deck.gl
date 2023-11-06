@@ -43,7 +43,7 @@ import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
 function App() {
   const data = vectorQuerySource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
   });
 
@@ -98,7 +98,7 @@ import {vectorTableSource} from '@deck.gl/carto';
 function App() {
   const data = vectorTableSource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
     format: 'geojson'
   });

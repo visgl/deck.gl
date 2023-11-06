@@ -11,7 +11,7 @@ import {QuadbinTileLayer, quadbinTilesetSource} from '@deck.gl/carto';
 function App({viewState}) {
   const data = quadbinTilesetSource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     tableName: 'carto-demo-data.demo_tilesets.quadbin'
   });
 

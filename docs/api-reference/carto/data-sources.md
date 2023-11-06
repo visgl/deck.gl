@@ -4,13 +4,13 @@ To ease interacting with the CARTO platform, the CARTO deck.gl module includes a
 
 ### Overview
 
-The data source functions are a compact way to describe the data that you want to fetch. For example, to fetch a table from BigQuery:
+The data source functions are a compact way to describe the data that you want to fetch. For example, to fetch a table from a data warehouse from the connection `carto_dw`:
 
 ```js
 import {vectorTableSource} from '@deck.gl/carto';
 const data = vectorTableSource({
   accessToken: 'XXX',
-  connectionName: 'bigquery',
+  connectionName: 'carto_dw',
   tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
 })
 ```
@@ -25,7 +25,7 @@ For example, to instead fetch as list of rows in JSON format:
 import {vectorQuerySource} from '@deck.gl/carto';
 const rows = await vectorQuerySource({
   accessToken: 'XXX',
-  connectionName: 'bigquery',
+  connectionName: 'carto_dw',
   tableName: 'carto-demo-data.test_tables.test',
   format: 'json'
 });
@@ -42,7 +42,7 @@ import {H3TileLayer, h3TilesetSource} from '@deck.gl/carto';
 new H3TileLayer({
   data: h3TilesetSource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     tableName: 'carto-demo-data.demo_tables.h3_data'
   }),
 

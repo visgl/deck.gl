@@ -11,7 +11,7 @@ import {RasterTileLayer, rasterTilesetSource} from '@deck.gl/carto';
 function App({viewState}) {
   const data = rasterTilesetSource({
     accessToken: 'XXX',
-    connectionName: 'bigquery',
+    connectionName: 'carto_dw',
     tableName: 'cartobq.public_account.temperature_raster'
   });
 
