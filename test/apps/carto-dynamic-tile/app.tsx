@@ -5,7 +5,6 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  TilejsonResult,
   vectorTableSource,
   H3TileLayer,
   RasterTileLayer,
@@ -137,11 +136,8 @@ function useVectorLayer(datasource) {
 async function fetchLayerData() {
   const data = await vectorTableSource({
     ...globalOptions,
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-    format: 'geojson'
+    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'
   });
-  // console.log(data.tiles); // <- Typescript error
-  console.log(data.features); // <- type: GeoJSON
   console.log(data);
 }
 fetchLayerData();

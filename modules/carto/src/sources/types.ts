@@ -10,6 +10,7 @@ export type SourceOptionalOptions = {
   apiBaseUrl: string;
   cache?: {value?: number};
   clientId: string;
+  /** @deprecated  use `query` instead **/
   format: Format;
   headers: Record<string, string>;
   mapsUrl?: string;
