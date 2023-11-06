@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './types';
+import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonResult} from './types';
 
 export type H3QuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 type UrlParameters = {
@@ -11,9 +11,9 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const h3QuerySource: TilejsonSource<H3QuerySourceOptions> = async function (
+export const h3QuerySource = async function (
   options: H3QuerySourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 4,
@@ -32,7 +32,5 @@ const h3QuerySource: TilejsonSource<H3QuerySourceOptions> = async function (
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return baseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {h3QuerySource};
