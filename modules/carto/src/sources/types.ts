@@ -91,3 +91,8 @@ export interface VectorLayer {
 export type TilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 export type JsonResult = any[];
+export type QueryResult = {
+  meta: {cacheHit: boolean; location: string; totalBytesProcessed: string};
+  rows: Record<string, any>[];
+  schema: {name: string; type: string}[];
+};

@@ -9,6 +9,7 @@ import {
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
+  query,
   VectorTileLayer
 } from '@deck.gl/carto';
 import datasets from './datasets';
@@ -134,11 +135,11 @@ function useVectorLayer(datasource) {
 }
 
 async function fetchLayerData() {
-  const data = await vectorTableSource({
+  const data = await query({
     ...globalOptions,
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample'
+    sqlQuery: 'select * from carto-demo-data.demo_tables.chicago_crime_sample'
   });
-  console.log(data);
+  console.log(data.rows[0]);
 }
 fetchLayerData();
 
