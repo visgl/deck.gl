@@ -7,6 +7,7 @@ import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import DeckGL from '@deck.gl/react';
 import {Matrix4} from '@math.gl/core';
+import type {MeshAttributes} from '@loaders.gl/schema';
 
 import {scaleLinear} from 'd3-scale';
 import {sortData} from './sort-data';
@@ -20,8 +21,11 @@ const CHART_HEIGHT = 500;
 const SPACING = 60;
 const ROW_SIZE = 25;
 
-const borderMesh = {
-  positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0])
+const borderMesh: MeshAttributes = {
+  positions: {
+    value: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]),
+    size: 3
+  }
 };
 const xScale = scaleLinear()
   .domain([1880, 2020]) // year
@@ -31,7 +35,7 @@ const yScale = scaleLinear()
   .domain([-60, 35]) // temperature
   .range([CHART_HEIGHT, 0]);
 const yTicks = [-60, -30, 0, 30];
-export const colorScale = scaleLinear()
+export const colorScale = scaleLinear<[number, number, number]>()
   .domain([-60, -10, 30]) // temperature
   .range([
     [80, 160, 225],
@@ -39,7 +43,7 @@ export const colorScale = scaleLinear()
     [255, 80, 80]
   ]);
 
-function getOffset(chartIndex) {
+function getOffset(chartIndex: number) {
   const y = Math.floor(chartIndex / ROW_SIZE);
   const x = chartIndex % ROW_SIZE;
   return [x * (CHART_WIDTH + SPACING), y * (CHART_HEIGHT + SPACING), 0];
@@ -59,7 +63,7 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data, groupBy = 'Country'}) {
+export default function App({data = null, groupBy = 'Country'}) {
   const dataSlices = useMemo(() => sortData(data, groupBy), [data, groupBy]);
 
   const initialViewState = useMemo(() => {
