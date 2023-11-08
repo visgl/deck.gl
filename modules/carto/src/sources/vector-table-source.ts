@@ -13,14 +13,11 @@ type UrlParameters = {
 export const vectorTableSource = async function (
   options: VectorTableSourceOptions
 ): Promise<TilejsonResult> {
-  const {columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {name: tableName, spatialDataType: 'geometry'};
+  const {columns, spatialDataColumn = 'geom', tableName} = options;
+  const urlParameters: UrlParameters = {name: tableName, spatialDataColumn, spatialDataType: 'geo'};
 
   if (columns) {
     urlParameters.columns = columns.join(',');
-  }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };

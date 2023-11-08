@@ -1,6 +1,6 @@
 export const DEFAULT_API_BASE_URL = 'https://gcp-us-east1.api.carto.com';
 export const DEFAULT_CLIENT = 'deck-gl-carto';
-export const V3_MINOR_VERSION = '3.2';
+export const V3_MINOR_VERSION = '3.3';
 export const MAX_GET_LENGTH = 8192;
 
 export const DEFAULT_PARAMETERS = {

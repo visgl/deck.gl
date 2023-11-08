@@ -26,16 +26,18 @@ export const quadbinQuerySource = async function (
     aggregationExp,
     aggregationResLevel = 6,
     sqlQuery,
-    spatialDataColumn,
+    spatialDataColumn = 'quadbin',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery, spatialDataType: 'quadbin'};
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    q: sqlQuery,
+    spatialDataColumn,
+    spatialDataType: 'quadbin'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
-  }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

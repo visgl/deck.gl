@@ -22,17 +22,25 @@ type UrlParameters = {
 export const h3TableSource = async function (
   options: H3TableSourceOptions
 ): Promise<TilejsonResult> {
-  const {aggregationExp, aggregationResLevel = 4, columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName, spatialDataType: 'h3'};
+  const {
+    aggregationExp,
+    aggregationResLevel = 4,
+    columns,
+    spatialDataColumn = 'h3',
+    tableName
+  } = options;
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    name: tableName,
+    spatialDataColumn,
+    spatialDataType: 'h3'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   if (columns) {
     urlParameters.columns = columns.join(',');
-  }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };

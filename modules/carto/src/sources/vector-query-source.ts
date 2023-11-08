@@ -13,12 +13,9 @@ type UrlParameters = {
 export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {spatialDataType: 'geometry', q: sqlQuery};
+  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
+  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
 
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }

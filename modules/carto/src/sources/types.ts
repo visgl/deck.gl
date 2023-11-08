@@ -39,7 +39,7 @@ export type TilesetSourceOptions = {
   tableName: string;
 };
 
-export type SpatialDataType = 'geometry' | 'h3' | 'quadbin';
+export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
 
 export type TilejsonMapInstantiation = MapInstantiation & {
   tilejson: {url: string[]};

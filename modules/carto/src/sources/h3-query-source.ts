@@ -25,16 +25,18 @@ export const h3QuerySource = async function (
     aggregationExp,
     aggregationResLevel = 4,
     sqlQuery,
-    spatialDataColumn,
+    spatialDataColumn = 'h3',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, spatialDataType: 'h3', q: sqlQuery};
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    spatialDataColumn,
+    spatialDataType: 'h3',
+    q: sqlQuery
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
-  }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

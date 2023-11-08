@@ -22,11 +22,18 @@ type UrlParameters = {
 export const quadbinTableSource = async function (
   options: QuadbinTableSourceOptions
 ): Promise<TilejsonResult> {
-  const {aggregationExp, aggregationResLevel = 6, columns, spatialDataColumn, tableName} = options;
+  const {
+    aggregationExp,
+    aggregationResLevel = 6,
+    columns,
+    spatialDataColumn = 'quadbin',
+    tableName
+  } = options;
 
   const urlParameters: UrlParameters = {
     aggregationExp,
     name: tableName,
+    spatialDataColumn,
     spatialDataType: 'quadbin'
   };
 
@@ -35,9 +42,6 @@ export const quadbinTableSource = async function (
   }
   if (columns) {
     urlParameters.columns = columns.join(',');
-  }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
