@@ -1,5 +1,5 @@
 import {baseSource} from './base-source';
-import type {SourceOptions, TilejsonSource} from './types';
+import type {SourceOptions, TilejsonResult} from './types';
 
 export type BoundaryQuerySourceOptions = SourceOptions & {
   boundaryId: string;
@@ -10,12 +10,10 @@ type UrlParameters = {
   propertiesQuerySource: string;
 };
 
-const boundaryQuerySource: TilejsonSource<BoundaryQuerySourceOptions> = async function (
+export const boundaryQuerySource = async function (
   options: BoundaryQuerySourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {boundaryId, propertiesSqlSource: propertiesQuerySource} = options;
   const urlParameters: UrlParameters = {boundaryId, propertiesQuerySource};
-  return baseSource<UrlParameters>('boundary', options, urlParameters);
+  return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {boundaryQuerySource};
