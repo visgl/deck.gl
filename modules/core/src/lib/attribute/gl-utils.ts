@@ -62,11 +62,15 @@ export function getBufferAttributeLayout(
   };
 }
 
+export function getStride(accessor: DataColumnSettings<any>): number {
+  return accessor.stride || accessor.size * accessor.bytesPerElement;
+}
+
 export function bufferLayoutEqual(accessor1: BufferAccessor, accessor2: BufferAccessor) {
   return (
     (accessor1.type ?? GL.FLOAT) === (accessor2.type ?? GL.FLOAT) &&
     accessor1.size === accessor2.size &&
-    accessor1.stride === accessor2.stride &&
+    getStride(accessor1) === getStride(accessor2) &&
     (accessor1.offset || 0) === (accessor2.offset || 0)
   );
 }
