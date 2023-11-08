@@ -1,7 +1,7 @@
 import {GL} from '@luma.gl/constants';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
-import type {BufferAccessor} from './data-column';
+import type {BufferAccessor, DataColumnSettings} from './data-column';
 
 /* eslint-disable complexity */
 export function glArrayFromType(glType: number): TypedArrayConstructor {
