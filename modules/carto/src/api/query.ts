@@ -20,7 +20,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
   const errorContext: APIErrorContext = {
-    requestType: 'SQL API',
+    requestType: 'SQL',
     connection: options.connectionName,
     type: 'query',
     source: JSON.stringify(urlParameters, undefined, 2)
