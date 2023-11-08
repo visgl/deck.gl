@@ -4,16 +4,13 @@ import {buildQueryUrlFromBase} from './endpoints';
 import {requestWithParameters} from './request-with-parameters';
 import {APIErrorContext} from './types';
 
-export type QueryOptions = SourceOptions & QuerySourceOptions;
-type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
+export type QueryOptions = SourceOptions & Omit<QuerySourceOptions, 'spatialDataColumn'>;
+type UrlParameters = {q: string; queryParameters?: string};
 
 export const query = async function (options: QueryOptions): Promise<QueryResult> {
-  const {apiBaseUrl, connectionName, spatialDataColumn, sqlQuery, queryParameters} = options;
+  const {apiBaseUrl, connectionName, sqlQuery, queryParameters} = options;
   const urlParameters: UrlParameters = {q: sqlQuery};
 
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
@@ -23,7 +20,7 @@ export const query = async function (options: QueryOptions): Promise<QueryResult
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
   const errorContext: APIErrorContext = {
-    requestType: 'SQL',
+    requestType: 'SQL API',
     connection: options.connectionName,
     type: 'query',
     source: JSON.stringify(urlParameters, undefined, 2)
