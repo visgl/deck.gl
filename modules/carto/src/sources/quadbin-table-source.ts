@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './types';
+import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonResult} from './types';
 
 export type QuadbinTableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
@@ -12,9 +12,9 @@ type UrlParameters = {
   name: string;
 };
 
-const quadbinTableSource: TilejsonSource<QuadbinTableSourceOptions> = async function (
+export const quadbinTableSource = async function (
   options: QuadbinTableSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 6,
@@ -33,7 +33,5 @@ const quadbinTableSource: TilejsonSource<QuadbinTableSourceOptions> = async func
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return baseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {quadbinTableSource};

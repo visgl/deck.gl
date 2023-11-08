@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './types';
+import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonResult} from './types';
 
 export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 
@@ -12,9 +12,9 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const quadbinQuerySource: TilejsonSource<QuadbinQuerySourceOptions> = async function (
+export const quadbinQuerySource = async function (
   options: QuadbinQuerySourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 6,
@@ -33,7 +33,5 @@ const quadbinQuerySource: TilejsonSource<QuadbinQuerySourceOptions> = async func
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return baseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {quadbinQuerySource};

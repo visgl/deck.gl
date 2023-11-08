@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './types';
+import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonResult} from './types';
 
 export type H3TableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
@@ -12,9 +12,9 @@ type UrlParameters = {
   name: string;
 };
 
-const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
+export const h3TableSource = async function (
   options: H3TableSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 4,
@@ -33,7 +33,5 @@ const h3TableSource: TilejsonSource<H3TableSourceOptions> = async function (
   if (spatialDataColumn) {
     urlParameters.geo_column = spatialDataColumn;
   }
-  return baseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {h3TableSource};
