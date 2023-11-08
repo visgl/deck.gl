@@ -1,7 +1,7 @@
 import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
@@ -16,7 +16,6 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  aggregationResLevel: 6,
   data: TilejsonPropType
 };
 
@@ -25,10 +24,10 @@ export type QuadbinTileLayerProps<DataT = unknown> = _QuadbinTileLayerProps<Data
   CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */
-type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> & {
-  data: null | TilejsonResult | Promise<TilejsonResult>;
-  aggregationResLevel?: number;
-};
+type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 export default class QuadbinTileLayer<
   DataT = any,

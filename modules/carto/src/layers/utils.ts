@@ -1,5 +1,6 @@
 import {Tile as PropertiesTile} from './schema/carto-properties-tile';
 import {Tile as VectorTile} from './schema/carto-tile';
+import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {TilejsonResult} from '../sources/types';
 
 /**
@@ -74,6 +75,8 @@ export const TilejsonPropType = {
     (typeof value === 'object' &&
       Array.isArray(value.tiles) &&
       value.tiles.every(url => typeof url === 'string')),
-  compare: 2,
+  equal: (value1, value2) => {
+    return deepEqual(value1, value2, 2);
+  },
   async: true
 };
