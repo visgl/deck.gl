@@ -3,17 +3,19 @@ import {baseSource} from './base-source';
 import type {SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
-type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
+type UrlParameters = {
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
+  q: string;
+  queryParameters?: string;
+};
 
 export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
+  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
 
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
