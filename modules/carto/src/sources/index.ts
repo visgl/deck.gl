@@ -7,6 +7,9 @@ export type {BoundaryQuerySourceOptions} from './boundary-query-source';
 export {boundaryTableSource} from './boundary-table-source';
 export type {BoundaryTableSourceOptions} from './boundary-table-source';
 
+export {boundaryTilesetSource} from './boundary-tileset-source';
+export type {BoundaryTilesetSourceOptions} from './boundary-tileset-source';
+
 export {h3QuerySource} from './h3-query-source';
 export type {H3QuerySourceOptions} from './h3-query-source';
 
