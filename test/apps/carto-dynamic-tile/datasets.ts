@@ -20,7 +20,7 @@ export default {
     source: boundaryQuerySource,
     boundaryId: 'usa_pos4',
     matchingColumn: 'geoid',
-    queryName:
+    sqlQuery:
       'select * from `cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered`',
     getFillColor: colorBins({
       // TODO remove parseFloat, only needed as binary format encodes as strings
