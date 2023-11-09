@@ -71,7 +71,6 @@ type vectorTableSourceOptions = {
 
 ```ts
 type vectorQuerySourceOptions = {
-  columns?: string[];
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -104,7 +103,6 @@ type H3TableSourceOptions = {
 type H3QuerySourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
-  columns?: string[];
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -137,7 +135,6 @@ type quadbinTableSourceOptions = {
 type quadbinQuerySourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
-  columns?: string[];
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -157,6 +154,37 @@ type quadbinTilesetSourceOptions = {
 ```ts
 type rasterTilesetSourceOptions = {
   tableName: string;
+}
+```
+
+#### boundaryTableSource
+
+```ts
+type boundaryTableSourceOptions = {
+  boundaryId: string;
+  columns?: string[];
+  matchingColumn?: string;
+  tableName: string;
+}
+```
+
+#### boundaryQuerySource
+
+```ts
+type boundaryQuerySourceOptions = {
+  boundaryId: string;
+  matchingColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### boundaryTilesetSource
+
+```ts
+type boundaryTilesetSourceOptions = {
+  boundaryId: string;
+  columns?: string[];
 }
 ```
 
