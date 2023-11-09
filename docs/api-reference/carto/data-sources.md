@@ -60,7 +60,7 @@ In addition, the following options are supported on each source:
 #### vectorTableSource
 
 ```ts
-type vectorTableSourceOptions = {
+type VectorTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
@@ -70,7 +70,7 @@ type vectorTableSourceOptions = {
 #### vectorQuerySource
 
 ```ts
-type vectorQuerySourceOptions = {
+type VectorQuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -80,7 +80,7 @@ type vectorQuerySourceOptions = {
 #### vectorTilesetSource
 
 ```ts
-type vectorTilesetSourceOptions = {
+type VectorTilesetSourceOptions = {
   tableName: string;
 }
 ```
@@ -120,7 +120,7 @@ type H3TilesetSourceOptions = {
 #### quadbinTableSource
 
 ```ts
-type quadbinTableSourceOptions = {
+type QuadbinTableSourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
   columns?: string[];
@@ -132,7 +132,7 @@ type quadbinTableSourceOptions = {
 #### quadbinQuerySource
 
 ```ts
-type quadbinQuerySourceOptions = {
+type QuadbinQuerySourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
   spatialDataColumn?: string;
@@ -144,7 +144,7 @@ type quadbinQuerySourceOptions = {
 #### quadbinTilesetSource
 
 ```ts
-type quadbinTilesetSourceOptions = {
+type QuadbinTilesetSourceOptions = {
   tableName: string;
 }
 ```
@@ -152,7 +152,7 @@ type quadbinTilesetSourceOptions = {
 #### rasterTilesetSource
 
 ```ts
-type rasterTilesetSourceOptions = {
+type RasterTilesetSourceOptions = {
   tableName: string;
 }
 ```
@@ -160,7 +160,7 @@ type rasterTilesetSourceOptions = {
 #### boundaryTableSource
 
 ```ts
-type boundaryTableSourceOptions = {
+type BoundaryTableSourceOptions = {
   boundaryId: string;
   columns?: string[];
   matchingColumn?: string;
@@ -171,7 +171,7 @@ type boundaryTableSourceOptions = {
 #### boundaryQuerySource
 
 ```ts
-type boundaryQuerySourceOptions = {
+type BoundaryQuerySourceOptions = {
   boundaryId: string;
   matchingColumn?: string;
   sqlQuery: string;
@@ -182,7 +182,7 @@ type boundaryQuerySourceOptions = {
 #### boundaryTilesetSource
 
 ```ts
-type boundaryTilesetSourceOptions = {
+type BoundaryTilesetSourceOptions = {
   boundaryId: string;
   columns?: string[];
 }
