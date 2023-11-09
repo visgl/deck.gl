@@ -35,6 +35,9 @@ export type {
 } from './api';
 
 import {
+  boundaryQuerySource,
+  boundaryTableSource,
+  boundaryTilesetSource,
   h3QuerySource,
   h3TableSource,
   h3TilesetSource,
@@ -49,6 +52,9 @@ import {
 } from './sources';
 
 const CARTO_SOURCES = {
+  boundaryQuerySource,
+  boundaryTableSource,
+  boundaryTilesetSource,
   h3QuerySource,
   h3TableSource,
   h3TilesetSource,
@@ -62,6 +68,9 @@ const CARTO_SOURCES = {
 };
 
 export {
+  boundaryQuerySource,
+  boundaryTableSource,
+  boundaryTilesetSource,
   h3QuerySource,
   h3TableSource,
   h3TilesetSource,
@@ -78,6 +87,9 @@ export {
 
 export type {
   TilejsonResult,
+  BoundaryQuerySourceOptions,
+  BoundaryTableSourceOptions,
+  BoundaryTilesetSourceOptions,
   H3QuerySourceOptions,
   H3TableSourceOptions,
   H3TilesetSourceOptions,
