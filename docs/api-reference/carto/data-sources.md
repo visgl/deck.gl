@@ -149,7 +149,7 @@ type QuadbinTilesetSourceOptions = {
 }
 ```
 
-#### rasterTilesetSource
+#### rasterTilesetSource (Experimental)
 
 ```ts
 type RasterTilesetSourceOptions = {
@@ -157,7 +157,7 @@ type RasterTilesetSourceOptions = {
 }
 ```
 
-#### boundaryTableSource
+#### boundaryTableSource (Experimental)
 
 ```ts
 type BoundaryTableSourceOptions = {
@@ -168,7 +168,7 @@ type BoundaryTableSourceOptions = {
 }
 ```
 
-#### boundaryQuerySource
+#### boundaryQuerySource (Experimental)
 
 ```ts
 type BoundaryQuerySourceOptions = {
@@ -179,7 +179,7 @@ type BoundaryQuerySourceOptions = {
 }
 ```
 
-#### boundaryTilesetSource
+#### boundaryTilesetSource (Experimental)
 
 ```ts
 type BoundaryTilesetSourceOptions = {
