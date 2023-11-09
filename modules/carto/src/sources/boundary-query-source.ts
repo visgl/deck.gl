@@ -11,7 +11,7 @@ export type BoundaryQuerySourceOptions = SourceOptions & {
 type UrlParameters = {
   boundaryId: string;
   matchingColumn: string;
-  propertiesQuerySource: string;
+  sqlQuery: string;
   queryParameters?: string;
 };
 
@@ -22,7 +22,7 @@ export const boundaryQuerySource = async function (
   const urlParameters: UrlParameters = {
     boundaryId,
     matchingColumn,
-    propertiesQuerySource: sqlQuery
+    sqlQuery
   };
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

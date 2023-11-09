@@ -11,7 +11,7 @@ type UrlParameters = {
   boundaryId: string;
   columns?: string;
   matchingColumn: string;
-  propertiesTableSource: string;
+  tableName: string;
 };
 
 export const boundaryTableSource = async function (
@@ -21,7 +21,7 @@ export const boundaryTableSource = async function (
   const urlParameters: UrlParameters = {
     boundaryId,
     matchingColumn,
-    propertiesTableSource: tableName
+    tableName
   };
 
   if (columns) {
