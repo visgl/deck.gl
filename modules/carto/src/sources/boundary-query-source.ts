@@ -3,23 +3,23 @@ import type {SourceOptions, TilejsonResult} from './types';
 
 export type BoundaryQuerySourceOptions = SourceOptions & {
   boundaryId: string;
-  matchingPropertyName?: string;
-  propertiesSqlQuery: string;
+  matchingColumn?: string;
+  queryName: string;
 };
 type UrlParameters = {
   boundaryId: string;
-  matchingPropertyName: string;
+  matchingColumn: string;
   propertiesQuerySource: string;
 };
 
 export const boundaryQuerySource = async function (
   options: BoundaryQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {boundaryId, matchingPropertyName = 'id', propertiesSqlQuery} = options;
+  const {boundaryId, matchingColumn = 'id', queryName} = options;
   const urlParameters: UrlParameters = {
     boundaryId,
-    matchingPropertyName,
-    propertiesQuerySource: propertiesSqlQuery
+    matchingColumn,
+    propertiesQuerySource: queryName
   };
   return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
 };

@@ -71,22 +71,15 @@ function Root() {
 }
 
 function useBoundaryLayer(datasource) {
-  const {
-    getFillColor,
-    source,
-    boundaryId,
-    columns,
-    matchingPropertyName,
-    propertiesSqlQuery,
-    propertiesTableName
-  } = datasource;
+  const {getFillColor, source, boundaryId, columns, matchingColumn, queryName, tableName} =
+    datasource;
   const tilejson = source({
     ...globalOptions,
     boundaryId,
     columns,
-    matchingPropertyName,
-    propertiesTableName,
-    propertiesSqlQuery
+    matchingColumn,
+    tableName,
+    queryName
   });
 
   return new VectorTileLayer({
