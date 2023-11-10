@@ -33,10 +33,10 @@
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/images": "4.0.3",
     "@loaders.gl/schema": "4.0.3",
-    "@luma.gl/constants": "9.0.0-alpha.42",
-    "@luma.gl/core": "9.0.0-alpha.42",
-    "@luma.gl/engine": "9.0.0-alpha.42",
-    "@luma.gl/shadertools": "9.0.0-alpha.42",
+    "@luma.gl/constants": "^9.0.0-alpha.45",
+    "@luma.gl/core": "^9.0.0-alpha.45",
+    "@luma.gl/engine": "^9.0.0-alpha.45",
+    "@luma.gl/shadertools": "^9.0.0-alpha.45",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^4.0.0",
     "@math.gl/polygon": "^4.0.0",
@@ -46,9 +46,9 @@
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-alpha",
     "@loaders.gl/core": "4.0.3",
-    "@luma.gl/core": "9.0.0-alpha.42",
-    "@luma.gl/engine": "9.0.0-alpha.42",
-    "@luma.gl/shadertools": "9.0.0-alpha.42"
+    "@luma.gl/core": "^9.0.0-alpha.45",
+    "@luma.gl/engine": "^9.0.0-alpha.45",
+    "@luma.gl/shadertools": "^9.0.0-alpha.45"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

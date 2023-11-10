@@ -22,6 +22,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
+import {picking as _picking} from '@luma.gl/shadertools';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -36,6 +37,7 @@ import type {
   Color,
   DefaultProps
 } from '@deck.gl/core';
+import {UniformStore} from '@luma.gl/core';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -185,8 +187,14 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     model?: Model;
   };
 
+  // TODO why NonNullable? Why is `typeof picking.uniforms` `PickingUniforms` in luma
+  // but `PickingUniforms | undefined` here?
+  // uniformStore = new UniformStore<{picking: typeof picking.uniforms}>({picking});
+  uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
+
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    // return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32]});
   }
 
   initializeState() {
@@ -233,6 +241,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
+      this.uniformStore = new UniformStore<{picking: any}>({picking});
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -271,6 +280,26 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     });
+
+    const {
+      isActive,
+      isAttribute,
+      isHighlightActive,
+      highlightColor,
+      highlightedObjectColor,
+      useFloatColors
+    } = model.uniforms;
+    this.uniformStore.setUniforms({
+      picking: {
+        isActive,
+        isAttribute,
+        isHighlightActive,
+        highlightColor,
+        highlightedObjectColor,
+        useFloatColors
+      } as typeof picking.uniforms
+    });
+
     model.draw(this.context.renderPass);
   }
 
@@ -281,6 +310,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bindings: {
+        //        picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+      },
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

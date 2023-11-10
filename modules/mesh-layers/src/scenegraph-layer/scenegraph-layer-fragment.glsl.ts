@@ -1,6 +1,8 @@
 export default `\
 #version 300 es
 
+#define SHADER_NAME scenegraph-layer-fragment-shader
+
 // Uniforms
 uniform float opacity;
 

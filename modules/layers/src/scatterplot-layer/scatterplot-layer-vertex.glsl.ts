@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
+
 #define SHADER_NAME scatterplot-layer-vertex-shader
 
 attribute vec3 positions;

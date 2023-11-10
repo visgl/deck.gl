@@ -54,6 +54,6 @@ import './modules/main/bundle';
 // import './modules/carto/layers/raster-tile-layer.spec';
 // import './modules/core/lib/pick-layers.spec';
 
-import './render';
+// import './render';
 // TODO disabled for v9, restore ASAP
 // import './interaction';

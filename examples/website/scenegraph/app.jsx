@@ -3,11 +3,13 @@ import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
+import {LightingEffect, AmbientLight, PointLight} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 // Data provided by the OpenSky Network, http://www.opensky-network.org
-const DATA_URL = 'https://opensky-network.org/api/states/all';
+// const DATA_URL = 'https://opensky-network.org/api/states/all';
+const DATA_URL = './all.json';
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const REFRESH_TIME = 30000;
@@ -17,9 +19,9 @@ const ANIMATIONS = {
 };
 
 const INITIAL_VIEW_STATE = {
-  latitude: 39.1,
-  longitude: -94.57,
-  zoom: 3.8,
+  latitude: 40.7,
+  longitude: -74.03,
+  zoom: 12,
   maxZoom: 16,
   pitch: 0,
   bearing: 0
@@ -59,6 +61,10 @@ function getTooltip({object}) {
     Direction: ${object[DATA_INDEX.TRUE_TRACK] || 0}`
   );
 }
+
+const lightingEffect = new LightingEffect({
+  ambient: new AmbientLight({color: [255, 255, 255], intensity: 1.0})
+});
 
 export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) {
   const [data, setData] = useState(null);
@@ -120,6 +126,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
 
   return (
     <DeckGL
+      effects={[lightingEffect]}
       layers={[layer]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

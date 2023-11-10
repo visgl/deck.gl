@@ -237,7 +237,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking],
+      modules: [project32, phongLighting],
       transpileToGLSL100,
       defines
     });
@@ -357,10 +357,12 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
+    console.log('bufferLayout simple-mesh', bufferLayout);
     const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout,
       geometry: getGeometry(mesh),
       isInstanced: true
     });
