@@ -418,8 +418,13 @@ export default class DeckPicker {
       };
 
       info = getLayerPickingInfo({layer: pickInfo.pickedLayer as Layer, info, mode});
-      if (!uniqueInfos.has(info.object)) {
-        uniqueInfos.set(info.object, info);
+
+      // info.object may be null if the layer is using non-iterable data.
+      // Fall back to using <layer_id>[<index>] as identifier.
+      // info.layer is always populated because it's a picked pixel
+      const pickedObjectKey = info.object ?? `${info.layer!.id}[${info.index}]`;
+      if (!uniqueInfos.has(pickedObjectKey)) {
+        uniqueInfos.set(pickedObjectKey, info);
       }
     }
 
