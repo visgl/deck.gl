@@ -1,6 +1,12 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, SourceOptions, TableSourceOptions, TilejsonSource} from './types';
+import type {
+  AggregationOptions,
+  SourceOptions,
+  SpatialDataType,
+  TableSourceOptions,
+  TilejsonResult
+} from './types';
 
 export type QuadbinTableSourceOptions = SourceOptions & TableSourceOptions & AggregationOptions;
 
@@ -8,21 +14,28 @@ type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
   columns?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   name: string;
 };
 
-const quadbinTableSource: TilejsonSource<QuadbinTableSourceOptions> = async function (
+export const quadbinTableSource = async function (
   options: QuadbinTableSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 6,
     columns,
-    spatialDataColumn = 'quadbin:quadbin',
+    spatialDataColumn = 'quadbin',
     tableName
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, name: tableName};
+
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    name: tableName,
+    spatialDataColumn,
+    spatialDataType: 'quadbin'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
@@ -30,10 +43,5 @@ const quadbinTableSource: TilejsonSource<QuadbinTableSourceOptions> = async func
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
-  return baseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {quadbinTableSource};
