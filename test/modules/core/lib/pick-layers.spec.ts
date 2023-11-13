@@ -208,6 +208,95 @@ const TEST_CASES = [
     }
   },
   {
+    id: 'scatterplotLayer-binary',
+    props: {
+      layers: [
+        new ScatterplotLayer({
+          data: {
+            length: DATA.points.length,
+            attributes: {
+              getPosition: {
+                value: new Float64Array(DATA.points.flatMap(d => d.COORDINATES)),
+                size: 2
+              },
+              getRadius: {value: new Float32Array(DATA.points.map(d => d.SPACES)), size: 1}
+            }
+          },
+          pickable: true,
+          radiusScale: 30,
+          radiusMinPixels: 1,
+          radiusMaxPixels: 30
+        })
+      ]
+    },
+    pickingMethods: {
+      pickObject: [
+        {
+          parameters: {
+            x: 60,
+            y: 160
+          },
+          results: {
+            count: 1
+          }
+        },
+        {
+          parameters: {
+            x: 90,
+            y: 350
+          },
+          results: {
+            count: 0
+          }
+        }
+      ],
+      pickObjects: [
+        {
+          parameters: {
+            x: 300,
+            y: 300,
+            width: 100,
+            height: 100
+          },
+          results: {
+            count: 34
+          }
+        },
+        {
+          parameters: {
+            x: 50,
+            y: 50,
+            width: 10,
+            height: 10
+          },
+          results: {
+            count: 0
+          }
+        }
+      ],
+      pickMultipleObjects: [
+        {
+          parameters: {
+            x: 250,
+            y: 273
+          },
+          results: {
+            count: 2
+          }
+        },
+        {
+          parameters: {
+            x: 300,
+            y: 300
+          },
+          results: {
+            count: 0
+          }
+        }
+      ]
+    }
+  },
+  {
     id: 'scatterplotLayer-masked',
     props: {
       layers: [
@@ -688,7 +777,7 @@ test(`pickingTest`, t => {
 
         if (pickInfos.length > 1) {
           t.equal(
-            new Set(pickInfos.map(x => x.object)).size,
+            new Set(pickInfos.map(x => x.object ?? x.index)).size,
             pickInfos.length,
             'Returned distinct picked objects'
           );

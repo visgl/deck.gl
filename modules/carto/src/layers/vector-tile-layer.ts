@@ -1,6 +1,7 @@
 import {registerLoaders} from '@loaders.gl/core';
+import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
-registerLoaders([CartoVectorTileLoader]);
+registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);
 
 import {DefaultProps} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -16,12 +17,14 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
+
 import type {TilejsonResult} from '../sources/types';
-import {injectAccessToken, TilejsonPropType} from './utils';
+import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  dataComparator: TilejsonPropType.equal
 };
 
 /** All properties supported by VectorTileLayer. */
@@ -68,8 +71,10 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     return loadOptions;
   }
 
-  getTileData(tile: TileLoadProps) {
-    const url = _getURLFromTemplate(this.state.data, tile);
+  async getTileData(tile: TileLoadProps) {
+    const tileJSON = this.props.data as TilejsonResult;
+    const {tiles, properties_tiles} = tileJSON;
+    const url = _getURLFromTemplate(tiles, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
     }
@@ -77,7 +82,29 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     const loadOptions = this.getLoadOptions();
     const {fetch} = this.props;
     const {signal} = tile;
-    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+
+    // Fetch geometry and attributes separately
+    const geometryFetch = fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+
+    if (!properties_tiles) {
+      return await geometryFetch;
+    }
+
+    const propertiesUrl = _getURLFromTemplate(properties_tiles, tile);
+    if (!propertiesUrl) {
+      return Promise.reject('Invalid properties URL');
+    }
+
+    const attributesFetch = fetch(propertiesUrl, {
+      propName: 'data',
+      layer: this,
+      loadOptions,
+      signal
+    });
+    const [geometry, attributes] = await Promise.all([geometryFetch, attributesFetch]);
+    if (!geometry) return null;
+
+    return mergeBoundaryData(geometry, attributes);
   }
 
   renderSubLayers(
