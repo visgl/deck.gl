@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-alpha.2] - Mon 13 2023
+
+- [chore] Bump loaders 4.0.3 & luma 9.0.0-alpha.42 (#8262)
+- Use getStride() in bufferLayoutEqual() comparison (#8268)
+- Fix pickObjects when using binary data (#8216)
+
 #### deck.gl [9.0.0-alpha.1] - Fri 10 2023
 
 - chore: use node 18 (#8222)
