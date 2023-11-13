@@ -1,16 +1,14 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilesetSourceOptions, TilejsonSource} from './common';
+import type {SourceOptions, TilesetSourceOptions, TilejsonResult} from './types';
 
 export type VectorTilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const vectorTilesetSource: TilejsonSource<VectorTilesetSourceOptions> = async function (
+export const vectorTilesetSource = async function (
   options: VectorTilesetSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return baseSource<UrlParameters>('tileset', options, urlParameters);
+  return baseSource<UrlParameters>('tileset', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {vectorTilesetSource};

@@ -1,15 +1,23 @@
-import {APIErrorContext, CartoAPIError} from '../api/carto-api-error';
-import {encodeParameter, MapType} from '../api/maps-api-common';
+import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
-import {buildMapsUrlFromBase} from '../config';
+import type {APIErrorContext} from './types';
+
+/**
+ * Simple encode parameter
+ */
+function encodeParameter(name: string, value: string | boolean | number): string {
+  return `${name}=${encodeURIComponent(value)}`;
+}
 
 const REQUEST_CACHE = new Map();
 export async function requestWithParameters<T = any>({
+  accessToken,
   baseUrl,
   parameters,
   headers: customHeaders,
   errorContext
 }: {
+  accessToken?: string;
   baseUrl: string;
   parameters?: Record<string, string>;
   headers: Record<string, string>;
@@ -41,6 +49,9 @@ export async function requestWithParameters<T = any>({
     let json: any;
     try {
       json = await response.json();
+      if (accessToken) {
+        json.accessToken = accessToken;
+      }
     } catch {
       json = {error: ''};
     }
@@ -54,18 +65,4 @@ export async function requestWithParameters<T = any>({
   } catch (error) {
     throw new CartoAPIError(error as Error, errorContext);
   }
-}
-
-export function buildApiEndpoint({
-  apiBaseUrl,
-  connectionName,
-  endpoint,
-  mapsUrl
-}: {
-  apiBaseUrl: string;
-  connectionName: string;
-  endpoint: MapType;
-  mapsUrl?: string;
-}): string {
-  return `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/${connectionName}/${endpoint}`;
 }

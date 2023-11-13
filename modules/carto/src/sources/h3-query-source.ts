@@ -1,12 +1,12 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {
+import type {
   AggregationOptions,
   QuerySourceOptions,
   SourceOptions,
   SpatialDataType,
-  TilejsonSource
-} from './common';
+  TilejsonResult
+} from './types';
 
 export type H3QuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 type UrlParameters = {
@@ -18,28 +18,28 @@ type UrlParameters = {
   queryParameters?: string;
 };
 
-const h3QuerySource: TilejsonSource<H3QuerySourceOptions> = async function (
+export const h3QuerySource = async function (
   options: H3QuerySourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 4,
     sqlQuery,
-    spatialDataColumn,
+    spatialDataColumn = 'h3',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, spatialDataType: 'h3', q: sqlQuery};
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    spatialDataColumn,
+    spatialDataType: 'h3',
+    q: sqlQuery
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return baseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {h3QuerySource};

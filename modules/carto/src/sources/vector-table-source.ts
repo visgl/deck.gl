@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import {SourceOptions, SpatialDataType, TableSourceOptions, TypedSource} from './common';
+import type {SourceOptions, SpatialDataType, TableSourceOptions, TilejsonResult} from './types';
 
 export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
 type UrlParameters = {
@@ -10,19 +10,14 @@ type UrlParameters = {
   name: string;
 };
 
-const vectorTableSource: TypedSource<VectorTableSourceOptions> = async function (
+export const vectorTableSource = async function (
   options: VectorTableSourceOptions
-): Promise<any> {
-  const {columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {name: tableName, spatialDataType: 'geometry'};
+): Promise<TilejsonResult> {
+  const {columns, spatialDataColumn = 'geom', tableName} = options;
+  const urlParameters: UrlParameters = {name: tableName, spatialDataColumn, spatialDataType: 'geo'};
 
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  if (spatialDataColumn) {
-    urlParameters.spatialDataColumn = spatialDataColumn;
-  }
-  return baseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {vectorTableSource};

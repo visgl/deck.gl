@@ -1,4 +1,4 @@
-import {fetchMap, setDefaultCredentials} from '@deck.gl/carto';
+import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
@@ -8,24 +8,23 @@ import mapboxgl from 'mapbox-gl';
 
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
-setDefaultCredentials({apiBaseUrl});
 
-async function createMap(cartoMapId) {
+async function createMap(cartoMapId: string) {
   const deck = new Deck({canvas: 'deck-canvas'});
-  const mapConfiguration = {cartoMapId};
+  const options: FetchMapOptions = {apiBaseUrl, cartoMapId};
 
   // Auto-refresh (optional)
   const autoRefresh = false;
   if (autoRefresh) {
     // Autorefresh the data every 5 seconds
-    mapConfiguration.autoRefresh = 5;
-    mapConfiguration.onNewData = ({layers}) => {
+    options.autoRefresh = 5;
+    options.onNewData = ({layers}) => {
       deck.setProps({layers});
     };
   }
 
   // Get map info from CARTO and update deck
-  const {initialViewState, mapStyle, layers} = await fetchMap(mapConfiguration);
+  const {initialViewState, mapStyle, layers} = await fetchMap(options);
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
@@ -59,8 +58,6 @@ const examples = [
   'b45bb22f-6b2e-4a35-8d46-c8272251f450', // heatmap
 
   // Layers
-  'b874e2d9-7896-4a9e-a0ba-42bdaf8730f5', // Points with altitude column
-  '86094c6b-16f7-44fa-aca9-c3dc0617c362', // SF extruded hex
   '420acda4-088f-448b-82f4-dcaaaf18d5a1', // Points with multiple labels
   'ff6ac53f-741a-49fb-b615-d040bc5a96b8', // NYC extruded buildings
   'ba2ef0ba-e7bb-4a9a-a2a0-e8ade556b3d2', // Blended Texas tilesets
@@ -74,10 +71,11 @@ const examples = [
   '12119dd2-0ddb-4fd2-b48a-15a1b7511e52', // Overlapping empty circles
   '3c892452-3806-4ebf-821b-a76f4562dd0c', // points and lines
   '21cc8261-e626-4778-a78b-76fe8b808214', // markers tilesets
-  '4e8f215f-97b4-4f4e-8b53-465c3908c317' // markers points
+  '4e8f215f-97b4-4f4e-8b53-465c3908c317', // markers points
+  '27de26b4-b94f-4e94-b291-41d1a21d3d02' // HexColumn color
 ];
 const params = new URLSearchParams(location.search.slice(1));
-const id = params.has('id') ? params.get('id') : examples[0];
+const id = params.has('id') ? params.get('id')! : examples[0];
 
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
@@ -97,12 +95,12 @@ for (const e of examples) {
     btn.style.background = '#e3f6ff';
   }
   btn.onclick = () => {
-    window.location = `?id=${e}`;
+    window.location.assign(`?id=${e}`);
   };
   document.body.appendChild(btn);
 }
 
-const mapContainer = document.getElementById('container');
+const mapContainer = document.getElementById('container')!;
 mapContainer.style.height = 'calc(50% - 26px)';
 mapContainer.style.margin = '5px';
 

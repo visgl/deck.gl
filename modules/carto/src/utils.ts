@@ -13,7 +13,7 @@ export function createBinaryProxy(
 ) {
   const {properties, numericProps} = data;
   return new Proxy(properties[index] || {}, {
-    get(target, property, receiver) {
+    get(target, property) {
       if (property in numericProps) {
         return numericProps[property as string].value[index];
       }
@@ -30,4 +30,28 @@ export function getWorkerUrl(id: string, version: string) {
   // For local testing `yarn build-workers` and then host `modules/carto/dist/`
   // return `http://localhost:8081/dist/${id}-worker.js`;
   return `https://unpkg.com/@deck.gl/carto@${version}/dist/${id}-worker.js`;
+}
+
+export function scaleIdentity() {
+  let unknown;
+
+  function scale(x) {
+    return x === null ? unknown : x;
+  }
+
+  scale.invert = scale;
+
+  scale.domain = scale.range = d => d;
+
+  scale.unknown = u => {
+    if (u) {
+      unknown = u;
+    }
+
+    return unknown;
+  };
+
+  scale.copy = () => scaleIdentity().unknown(unknown);
+
+  return scale;
 }
