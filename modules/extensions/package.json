@@ -31,15 +31,15 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@luma.gl/shadertools": "9.0.0-alpha.41"
+    "@luma.gl/shadertools": "9.0.0-alpha.42"
   },
   "peerDependencies": {
     "@deck.gl/core": "^8.0.0",
-    "@luma.gl/constants": "9.0.0-alpha.41",
-    "@luma.gl/core": "9.0.0-alpha.41",
-    "@luma.gl/engine": "9.0.0-alpha.41",
-    "@luma.gl/shadertools": "9.0.0-alpha.41",
-    "@luma.gl/webgl": "9.0.0-alpha.41",
+    "@luma.gl/constants": "9.0.0-alpha.42",
+    "@luma.gl/core": "9.0.0-alpha.42",
+    "@luma.gl/engine": "9.0.0-alpha.42",
+    "@luma.gl/shadertools": "9.0.0-alpha.42",
+    "@luma.gl/webgl": "9.0.0-alpha.42",
     "@math.gl/core": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0"
   },
