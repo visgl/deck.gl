@@ -399,13 +399,17 @@ export default class DeckPicker {
 
     const pickInfos = getUniqueObjects(pickedResult);
 
-    // Only return unique infos, identified by info.object
-    const uniqueInfos = new Map();
+    // `getUniqueObjects` dedup by picked color
+    // However different picked color may be linked to the same picked object, e.g. stroke and fill of the same polygon
+    // picked from different sub layers of a GeoJsonLayer
+    // Here after resolving the picked index with `layer.getPickingInfo`, we need to dedup again by unique picked objects
+    const uniquePickedObjects = new Map<string, Set<unknown>>();
+    const uniqueInfos: PickingInfo[] = [];
 
-    const isMaxObjects = Number.isFinite(maxObjects);
+    const limitMaxObjects = Number.isFinite(maxObjects);
 
     for (let i = 0; i < pickInfos.length; i++) {
-      if (isMaxObjects && maxObjects && uniqueInfos.size >= maxObjects) {
+      if (limitMaxObjects && uniqueInfos.length >= maxObjects!) {
         break;
       }
       const pickInfo = pickInfos[i];
@@ -420,12 +424,22 @@ export default class DeckPicker {
       };
 
       info = getLayerPickingInfo({layer: pickInfo.pickedLayer as Layer, info, mode});
-      if (!uniqueInfos.has(info.object)) {
-        uniqueInfos.set(info.object, info);
+      // info.layer is always populated because it's a picked pixel
+      const pickedLayerId = info.layer!.id;
+      if (!uniquePickedObjects.has(pickedLayerId)) {
+        uniquePickedObjects.set(pickedLayerId, new Set<unknown>());
+      }
+      const uniqueObjectsInLayer = uniquePickedObjects.get(pickedLayerId) as Set<unknown>;
+      // info.object may be null if the layer is using non-iterable data.
+      // Fall back to using index as identifier.
+      const pickedObjectKey = info.object ?? info.index;
+      if (!uniqueObjectsInLayer.has(pickedObjectKey)) {
+        uniqueObjectsInLayer.add(pickedObjectKey);
+        uniqueInfos.push(info);
       }
     }
 
-    return Array.from(uniqueInfos.values());
+    return uniqueInfos;
   }
 
   /** Renders layers into the picking buffer with picking colors and read the pixels. */

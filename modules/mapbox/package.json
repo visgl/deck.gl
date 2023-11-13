@@ -2,7 +2,7 @@
   "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "9.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },

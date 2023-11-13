@@ -17,6 +17,22 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.0
+
+### deck.gl v9.0 Prereleases
+
+#### deck.gl [9.0.0-alpha.1] - Fri 10 2023
+
+- chore: use node 18 (#8222)
+- chore: loaders.gl update to v4.0 (#8215)
+- chore: math.gl update to v4.0 (#8204)
+- Fix SimpleMeshLayer (#8201)
+- chore: luma.gl update to v9.0 (#8195)
+- Binary attribute support (#8153)
+- CARTO v9 API (#8269, #8265, #8259, #8239, #8238, #8228, #8233, #8225, #8224, #8218, #8217, #8214, #8168, #8192, #8191, #8167)
+- Add tensorflow example (#7931)
+- Update layers to luma v9 (#7901)
+
 ## deck.gl v8.10
 
 ### deck.gl v8.10 Prereleases

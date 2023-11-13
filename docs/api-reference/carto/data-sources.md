@@ -60,7 +60,7 @@ In addition, the following options are supported on each source:
 #### vectorTableSource
 
 ```ts
-type vectorTableSourceOptions = {
+type VectorTableSourceOptions = {
   columns?: string[];
   spatialDataColumn?: string;
   tableName: string;
@@ -70,8 +70,7 @@ type vectorTableSourceOptions = {
 #### vectorQuerySource
 
 ```ts
-type vectorQuerySourceOptions = {
-  columns?: string[];
+type VectorQuerySourceOptions = {
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -81,7 +80,7 @@ type vectorQuerySourceOptions = {
 #### vectorTilesetSource
 
 ```ts
-type vectorTilesetSourceOptions = {
+type VectorTilesetSourceOptions = {
   tableName: string;
 }
 ```
@@ -104,7 +103,6 @@ type H3TableSourceOptions = {
 type H3QuerySourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
-  columns?: string[];
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -122,7 +120,7 @@ type H3TilesetSourceOptions = {
 #### quadbinTableSource
 
 ```ts
-type quadbinTableSourceOptions = {
+type QuadbinTableSourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
   columns?: string[];
@@ -134,10 +132,9 @@ type quadbinTableSourceOptions = {
 #### quadbinQuerySource
 
 ```ts
-type quadbinQuerySourceOptions = {
+type QuadbinQuerySourceOptions = {
   aggregationExp: string;
   aggregationResLevel?: number;
-  columns?: string[];
   spatialDataColumn?: string;
   sqlQuery: string;
   queryParameters: QueryParameters;
@@ -147,16 +144,47 @@ type quadbinQuerySourceOptions = {
 #### quadbinTilesetSource
 
 ```ts
-type quadbinTilesetSourceOptions = {
+type QuadbinTilesetSourceOptions = {
   tableName: string;
 }
 ```
 
-#### rasterTilesetSource
+#### rasterTilesetSource (Experimental)
 
 ```ts
-type rasterTilesetSourceOptions = {
+type RasterTilesetSourceOptions = {
   tableName: string;
+}
+```
+
+#### boundaryTableSource (Experimental)
+
+```ts
+type BoundaryTableSourceOptions = {
+  boundaryId: string;
+  columns?: string[];
+  matchingColumn?: string;
+  tableName: string;
+}
+```
+
+#### boundaryQuerySource (Experimental)
+
+```ts
+type BoundaryQuerySourceOptions = {
+  boundaryId: string;
+  matchingColumn?: string;
+  sqlQuery: string;
+  queryParameters: QueryParameters;
+}
+```
+
+#### boundaryTilesetSource (Experimental)
+
+```ts
+type BoundaryTilesetSourceOptions = {
+  boundaryId: string;
+  columns?: string[];
 }
 ```
 
