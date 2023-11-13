@@ -1,23 +1,23 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {SourceOptions, QuerySourceOptions, SpatialDataType, TypedSource} from './types';
+import type {SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
-type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
+type UrlParameters = {
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
+  q: string;
+  queryParameters?: string;
+};
 
-const vectorQuerySource: TypedSource<VectorQuerySourceOptions> = async function (
+export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
-): Promise<any> {
-  const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+): Promise<TilejsonResult> {
+  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
+  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
 
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return baseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {vectorQuerySource};

@@ -1,6 +1,6 @@
 import {MapType} from './types';
 
-export type V3Endpoint = 'maps' | 'stats';
+export type V3Endpoint = 'maps' | 'stats' | 'sql';
 
 function buildUrlFromBase(apiBaseUrl: string, endpoint: V3Endpoint) {
   let suffix = `/v3/${endpoint}`;
@@ -17,6 +17,10 @@ export function buildMapsUrlFromBase(apiBaseUrl: string): string {
 
 export function buildStatsUrlFromBase(apiBaseUrl: string): string {
   return buildUrlFromBase(apiBaseUrl, 'stats');
+}
+
+export function buildQueryUrlFromBase(apiBaseUrl: string): string {
+  return buildUrlFromBase(apiBaseUrl, 'sql');
 }
 
 export function buildSourceUrl({

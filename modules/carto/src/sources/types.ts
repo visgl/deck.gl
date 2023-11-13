@@ -10,6 +10,7 @@ export type SourceOptionalOptions = {
   apiBaseUrl: string;
   cache?: {value?: number};
   clientId: string;
+  /** @deprecated  use `query` instead **/
   format: Format;
   headers: Record<string, string>;
   mapsUrl?: string;
@@ -38,7 +39,7 @@ export type TilesetSourceOptions = {
   tableName: string;
 };
 
-export type SpatialDataType = 'geometry' | 'h3' | 'quadbin';
+export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
 
 export type TilejsonMapInstantiation = MapInstantiation & {
   tilejson: {url: string[]};
@@ -90,10 +91,8 @@ export interface VectorLayer {
 export type TilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 export type JsonResult = any[];
-export interface TilejsonSource<T> {
-  (options: T & {format?: 'tilejson'}): Promise<TilejsonResult>;
-}
-export interface TypedSource<T> extends TilejsonSource<T> {
-  (options: T & {format: 'geojson'}): Promise<GeojsonResult>;
-  (options: T & {format: 'json'}): Promise<JsonResult>;
-}
+export type QueryResult = {
+  meta: {cacheHit: boolean; location: string; totalBytesProcessed: string};
+  rows: Record<string, any>[];
+  schema: {name: string; type: string}[];
+};
