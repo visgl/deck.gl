@@ -105,7 +105,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   get isLoaded(): boolean {
-    return Boolean(
+    return Boolean(this.state?.tileset3d?.isLoaded() && super.isLoaded)
       this.state &&
       this.state.tileset3d &&
       this.state.tileset3d.isLoaded() &&
