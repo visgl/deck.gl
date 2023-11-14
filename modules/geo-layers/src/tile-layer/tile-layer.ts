@@ -165,8 +165,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles?.every(
-      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+    return Boolean(
+      this.state?.tileset?.isLoaded &&
+        this.state?.tileset?.selectedTiles?.every(tile =>
+          tile.layers?.every(layer => layer.isLoaded)
+        ) &&
+        super.isLoaded
     );
   }
 

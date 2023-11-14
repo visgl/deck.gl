@@ -114,7 +114,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 
   get isLoaded(): boolean {
-    return this.state && this.state.data && this.state.tileset && super.isLoaded;
+    return this.state?.data && super.isLoaded;
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {

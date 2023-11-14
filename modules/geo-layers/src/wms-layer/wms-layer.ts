@@ -85,7 +85,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     // Track the explicit loading done by this layer
-    return Boolean(this.state) && this.state.loadCounter === 0 && super.isLoaded;
+    return this.state?.loadCounter === 0 && super.isLoaded;
   }
 
   /** Lets deck.gl know that we want viewport change events */

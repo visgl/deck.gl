@@ -240,6 +240,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this._deleteScenegraph();
   }
 
+  get isLoaded(): boolean {
+    return this.state?.scenegraph && super.isLoaded;
+  }
+
   private _updateScenegraph(): void {
     const props = this.props;
     const {gl} = this.context;

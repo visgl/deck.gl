@@ -348,6 +348,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       .draw();
   }
 
+  get isLoaded(): boolean {
+    return this.state?.model && super.isLoaded;
+  }
+
   protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.gl, {
       ...this.getShaders(),
