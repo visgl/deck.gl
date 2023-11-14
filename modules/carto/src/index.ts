@@ -5,6 +5,7 @@ export {default as H3TileLayer} from './layers/h3-tile-layer';
 export {default as _PointLabelLayer} from './layers/point-label-layer';
 export {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 export {default as RasterTileLayer} from './layers/raster-tile-layer';
+export {triangulate} from './layers/schema/carto-vector-tile-loader';
 export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';

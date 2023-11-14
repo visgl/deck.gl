@@ -1,4 +1,5 @@
 import {BinaryAttribute, LayerData, LayerProps} from '@deck.gl/core';
+import {triangulate} from '@deck.gl/carto';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
 import {BinaryFeatures} from '@loaders.gl/schema';
@@ -120,6 +121,10 @@ export function createLayerPropsFromBinary(
     featureIds: polygons.featureIds
   } as LayerData<any>;
   layerProps.polygons._normalize = false;
+  if (polygons.polygonIndices.value.length > 0 && !polygons.triangles) {
+    // apply polygon tessellation if not already done
+    triangulate(polygons);
+  }
   if (polygons.triangles) {
     (layerProps.polygons.data as any).attributes.indices = polygons.triangles.value;
   }
