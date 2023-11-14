@@ -163,6 +163,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     return false;
   }
 
+  getBounds(): [number[], number[]] | null {
+    return this.getAttributeManager()?.getBounds(['vertexPositions']);
+  }
+
   initializeState() {
     const {device, viewport} = this.context;
     let {coordinateSystem} = this.props;
