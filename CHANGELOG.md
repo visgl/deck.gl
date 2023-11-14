@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-alpha.3] - Tue 14 2023
+
+- Use vertexPositions in getBounds (#8247)
+
 #### deck.gl [9.0.0-alpha.2] - Mon 13 2023
 
 - [chore] Bump loaders 4.0.3 & luma 9.0.0-alpha.42 (#8262)
