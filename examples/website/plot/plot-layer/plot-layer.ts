@@ -1,15 +1,55 @@
-import {CompositeLayer, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {scaleLinear} from 'd3-scale';
+import {
+  Color,
+  CompositeLayer,
+  CompositeLayerProps,
+  COORDINATE_SYSTEM,
+  DefaultProps,
+} from '@deck.gl/core';
+import {ScaleLinear, scaleLinear} from 'd3-scale';
 
 import AxesLayer from './axes-layer';
 import SurfaceLayer from './surface-layer';
+import {$TODO} from './types';
 
 const DEFAULT_GET_SCALE = {type: 'function', value: () => scaleLinear()};
 const DEFAULT_TICK_FORMAT = {type: 'function', value: x => x.toFixed(2)};
 const DEFAULT_TICK_COUNT = 6;
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
-const defaultProps = {
+/** All props supported by PlotLayer. */
+export type PlotLayerProps<DataT = unknown> = _PlotLayerProps<DataT> & CompositeLayerProps;
+
+type _PlotLayerProps<DataT> = {
+  // SurfaceLayer props
+  getPosition: $TODO;
+  getColor: $TODO;
+  getXScale: $TODO;
+  getYScale: $TODO;
+  getZScale: $TODO;
+  uCount: number;
+  vCount: number;
+  lightStrength: number;
+
+  // AxesLayer props
+  drawAxes?: boolean;
+  fontSize?: number;
+  xScale?: ScaleLinear<number, number>;
+  yScale?: ScaleLinear<number, number>;
+  zScale?: ScaleLinear<number, number>;
+  xTicks: number;
+  yTicks: number;
+  zTicks: number;
+  xTickFormat: $TODO;
+  yTickFormat: $TODO;
+  zTickFormat: $TODO;
+  axesPadding: 0;
+  axesColor: Color;
+  xTitle: string;
+  yTitle: string;
+  zTitle: string;
+};
+
+const defaultProps: DefaultProps<PlotLayerProps> = {
   // SurfaceLayer props
   getPosition: {type: 'accessor', value: (u, v) => [0, 0, 0]},
   getColor: {type: 'accessor', value: (x, y, z) => DEFAULT_COLOR},
@@ -69,7 +109,18 @@ const defaultProps = {
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
-export default class PlotLayer extends CompositeLayer {
+export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
+  ExtraPropsT & Required<_PlotLayerProps<DataT>>
+> {
+  static layerName = 'PlotLayer';
+  static defaultProps = defaultProps;
+
+  declare state: CompositeLayer['state'] & {
+    xScale: ScaleLinear<number, number>;
+    yScale: ScaleLinear<number, number>;
+    zScale: ScaleLinear<number, number>;
+  };
+
   updateState() {
     const {uCount, vCount, getPosition, getXScale, getYScale, getZScale} = this.props;
 
@@ -179,6 +230,3 @@ export default class PlotLayer extends CompositeLayer {
     ];
   }
 }
-
-PlotLayer.layerName = 'PlotLayer';
-PlotLayer.defaultProps = defaultProps;

@@ -1,6 +1,7 @@
-import {Layer} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Color, DefaultProps, Layer, LayerDataSource, LayerProps} from '@deck.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {Texture} from '@luma.gl/core';
+import {ScaleLinear} from 'd3-scale';
 
 import {textMatrixToTexture} from './utils';
 
@@ -8,18 +9,27 @@ import fragmentShader from './axes-fragment.glsl';
 import gridVertex from './grid-vertex.glsl';
 import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
+import {$TODO, Axis, Tick, TickFormat, Vec2, Vec3} from './types';
 
 /* Constants */
 const DEFAULT_FONT_SIZE = 48;
 const DEFAULT_TICK_COUNT = 6;
 const DEFAULT_TICK_FORMAT = x => x.toFixed(2);
+const DEFAULT_COLOR: Color = [0, 0, 0, 255];
 
-const defaultProps = {
+interface LabelTexture {
+  labelHeight: number;
+  labelWidths: number[];
+  labelTextureDim: Vec2;
+  labelTexture: Texture;
+}
+
+const defaultProps: DefaultProps<AxesLayerProps> = {
   data: [],
   fontSize: 12,
-  xScale: null,
-  yScale: null,
-  zScale: null,
+  xScale: undefined,
+  yScale: undefined,
+  zScale: undefined,
   xTicks: DEFAULT_TICK_COUNT,
   yTicks: DEFAULT_TICK_COUNT,
   zTicks: DEFAULT_TICK_COUNT,
@@ -27,46 +37,33 @@ const defaultProps = {
   yTickFormat: DEFAULT_TICK_FORMAT,
   zTickFormat: DEFAULT_TICK_FORMAT,
   padding: 0,
-  color: [0, 0, 0, 255],
+  color: DEFAULT_COLOR,
   xTitle: 'x',
   yTitle: 'y',
   zTitle: 'z'
 };
 
-/* Utils */
-function flatten(arrayOfArrays) {
-  const flatArray = arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
-  if (Array.isArray(flatArray[0])) {
-    return flatten(flatArray);
-  }
-  return flatArray;
-}
+/** All props supported by AxesLayer. */
+export type AxesLayerProps<DataT = unknown> = _AxesLayerProps<DataT> & LayerProps;
 
-function getTicks(props) {
-  const {axis} = props;
-  let ticks = props[`${axis}Ticks`];
-  const scale = props[`${axis}Scale`];
-  const tickFormat = props[`${axis}TickFormat`];
-
-  if (!Array.isArray(ticks)) {
-    ticks = scale.ticks(ticks);
-  }
-
-  const titleTick = {
-    value: props[`${axis}Title`],
-    position: (scale.range()[0] + scale.range()[1]) / 2,
-    text: props[`${axis}Title`]
-  };
-
-  return [
-    ...ticks.map(t => ({
-      value: t,
-      position: scale(t),
-      text: tickFormat(t, axis)
-    })),
-    titleTick
-  ];
-}
+type _AxesLayerProps<DataT> = {
+  data: LayerDataSource<DataT>;
+  fontSize: number;
+  xScale?: ScaleLinear<number, number>;
+  yScale?: ScaleLinear<number, number>;
+  zScale?: ScaleLinear<number, number>;
+  xTicks: number;
+  yTicks: number;
+  zTicks: number;
+  xTickFormat: TickFormat<DataT>;
+  yTickFormat: TickFormat<DataT>;
+  zTickFormat: TickFormat<DataT>;
+  padding: 0;
+  color: Color;
+  xTitle: string;
+  yTitle: string;
+  zTitle: string;
+};
 
 /*
  * @classdesc
@@ -93,7 +90,22 @@ function getTicks(props) {
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
-export default class AxesLayer extends Layer {
+export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
+  ExtraPropsT & Required<_AxesLayerProps<DataT>>
+> {
+  static layerName = 'AxesLayer';
+  static defaultProps = defaultProps;
+
+  declare state: Layer['state'] & {
+    models: [Model, Model];
+    modelsByName: {grids: Model; labels: Model};
+    instanceCount: number;
+    ticks: [Tick[], Tick[], Tick[]];
+    gridDims: Vec3;
+    gridCenter: Vec3;
+    labelTexture: LabelTexture | null;
+  };
+
   initializeState() {
     const {gl} = this.context;
     const attributeManager = this.getAttributeManager();
@@ -104,15 +116,7 @@ export default class AxesLayer extends Layer {
       instanceIsTitle: {size: 1, update: this.calculateInstanceIsTitle, noAlloc: true}
     });
 
-    this.setState(
-      Object.assign(
-        {
-          numInstances: 0,
-          labels: null
-        },
-        this._getModels(gl)
-      )
-    );
+    this.setState(Object.assign({instanceCount: 0}, this._getModels(gl)));
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -157,7 +161,13 @@ export default class AxesLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {gridDims, gridCenter, modelsByName, labelTexture, numInstances} = this.state;
+    const {
+      gridDims,
+      gridCenter,
+      modelsByName,
+      labelTexture: {labelTexture, ...labelTextureUniforms},
+      instanceCount
+    } = this.state;
     const {fontSize, color, padding} = this.props;
 
     if (labelTexture) {
@@ -169,13 +179,17 @@ export default class AxesLayer extends Layer {
         strokeColor: color
       };
 
-      modelsByName.grids.setInstanceCount(numInstances);
-      modelsByName.labels.setInstanceCount(numInstances);
+      modelsByName.grids.setInstanceCount(instanceCount);
+      modelsByName.labels.setInstanceCount(instanceCount);
 
-      modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms)).draw();
-      modelsByName.labels
-        .setUniforms(Object.assign({}, uniforms, baseUniforms, labelTexture))
-        .draw();
+      modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms));
+      modelsByName.labels.setBindings({labelTexture});
+      modelsByName.labels.setUniforms(
+        Object.assign({}, uniforms, baseUniforms, labelTextureUniforms)
+      );
+
+      modelsByName.grids.draw(this.context.renderPass as $TODO);
+      modelsByName.labels.draw(this.context.renderPass as $TODO);
     }
   }
 
@@ -222,29 +236,30 @@ export default class AxesLayer extends Layer {
       0, -1, 0, 0, -1, 0
     ];
 
-    const grids = new Model(gl, {
+    const grids = new Model(gl.device, {
       id: `${this.props.id}-grids`,
       vs: gridVertex,
       fs: fragmentShader,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'line-list',
         attributes: {
-          positions: new Float32Array(gridPositions),
-          normals: new Float32Array(gridNormals)
+          positions: {value: new Float32Array(gridPositions), size: 3},
+          normals: {value: new Float32Array(gridNormals), size: 3}
         },
         vertexCount: gridPositions.length / 3
       }),
-      isInstanced: true
+      instanceCount: 0
     });
 
     /* labels
      * one label is placed at each end of every grid line
      * show/hide is toggled by the vertex shader
      */
-    let labelTexCoords = [];
-    let labelPositions = [];
-    let labelNormals = [];
-    let labelIndices = [];
+    let labelTexCoords: number[] = [];
+    let labelPositions: number[] = [];
+    let labelNormals: number[] = [];
+    let labelIndices: number[] = [];
     for (let i = 0; i < 8; i++) {
       /*
        * each label is rendered as a rectangle
@@ -271,20 +286,21 @@ export default class AxesLayer extends Layer {
       }
     }
 
-    const labels = new Model(gl, {
+    const labels = new Model(gl.device, {
       id: `${this.props.id}-labels`,
       vs: labelVertex,
       fs: labelFragment,
+      bufferLayout: this.getAttributeManager().getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
           indices: new Uint16Array(labelIndices),
-          positions: new Float32Array(labelPositions),
-          texCoords: {size: 2, value: new Float32Array(labelTexCoords)},
-          normals: new Float32Array(labelNormals)
+          positions: {value: new Float32Array(labelPositions), size: 3},
+          texCoords: {value: new Float32Array(labelTexCoords), size: 2},
+          normals: {value: new Float32Array(labelNormals), size: 3}
         }
       }),
-      isInstanced: true
+      instanceCount: 0
     });
 
     return {
@@ -301,7 +317,7 @@ export default class AxesLayer extends Layer {
     const value = new Float32Array(flatten(positions));
     attribute.value = value;
 
-    this.setState({numInstances: value.length / attribute.size});
+    this.setState({instanceCount: value.length / attribute.size});
   }
 
   calculateInstanceNormals(attribute) {
@@ -329,9 +345,9 @@ export default class AxesLayer extends Layer {
     attribute.value = new Float32Array(flatten(isTitle));
   }
 
-  renderLabelTexture(ticks) {
-    if (this.state.labels) {
-      this.state.labels.labelTexture.delete();
+  renderLabelTexture(ticks): LabelTexture | null {
+    if (this.state.labelTexture) {
+      this.state.labelTexture.labelTexture.destroy();
     }
 
     // attach a 2d texture of all the label texts
@@ -351,5 +367,37 @@ export default class AxesLayer extends Layer {
   }
 }
 
-AxesLayer.layerName = 'AxesLayer';
-AxesLayer.defaultProps = defaultProps;
+/* Utils */
+function flatten(arrayOfArrays) {
+  const flatArray = arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
+  if (Array.isArray(flatArray[0])) {
+    return flatten(flatArray);
+  }
+  return flatArray;
+}
+
+function getTicks(props: AxesLayerProps<number> & {axis: Axis}): Tick[] {
+  const {axis} = props;
+  let ticks = props[`${axis}Ticks`] as number | number[];
+  const scale = props[`${axis}Scale`];
+  const tickFormat = props[`${axis}TickFormat`];
+
+  if (!Array.isArray(ticks)) {
+    ticks = scale.ticks(ticks);
+  }
+
+  const titleTick = {
+    value: props[`${axis}Title`],
+    position: (scale.range()[0] + scale.range()[1]) / 2,
+    text: props[`${axis}Title`]
+  };
+
+  return [
+    ...ticks.map(t => ({
+      value: String(t),
+      position: scale(t),
+      text: tickFormat(t, axis)
+    })),
+    titleTick
+  ];
+}
