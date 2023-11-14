@@ -113,7 +113,7 @@ async function _fetchTilestats(
   accessToken: string,
   apiBaseUrl: string
 ) {
-  const {connectionName: connection, data, id, source, type} = dataset;
+  const {connectionName: connection, data, id, source, type, queryParameters} = dataset;
   const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
   if (!('tilestats' in data)) {
     throw new CartoAPIError(new Error(`Invalid dataset for tilestats: ${id}`), errorContext);
@@ -132,7 +132,10 @@ async function _fetchTilestats(
   const stats = await requestWithParameters({
     baseUrl,
     headers,
-    parameters: type === 'query' ? {q: source} : {},
+    parameters:
+      type === 'query'
+        ? {q: source, ...(queryParameters && {queryParameters: JSON.stringify(queryParameters)})}
+        : {},
     errorContext
   });
 
