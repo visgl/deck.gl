@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "9.0.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -36,22 +36,22 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/core": "4.0.0-beta.5",
-    "@loaders.gl/images": "4.0.0-beta.5",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@luma.gl/constants": "9.0.0-alpha.37",
-    "@luma.gl/engine": "9.0.0-alpha.37",
-    "@luma.gl/shadertools": "9.0.0-alpha.37",
-    "@luma.gl/webgl": "9.0.0-alpha.37",
+    "@loaders.gl/core": "4.0.3",
+    "@loaders.gl/images": "4.0.3",
+    "@luma.gl/constants": "9.0.0-alpha.42",
+    "@luma.gl/core": "9.0.0-alpha.42",
+    "@luma.gl/engine": "9.0.0-alpha.42",
+    "@luma.gl/shadertools": "9.0.0-alpha.42",
+    "@luma.gl/webgl": "9.0.0-alpha.42",
     "@math.gl/core": "^4.0.0",
     "@math.gl/sun": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
     "@probe.gl/env": "^4.0.4",
     "@probe.gl/log": "^4.0.4",
     "@probe.gl/stats": "^4.0.4",
+    "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
-    "mjolnir.js": "^2.7.0",
-    "@types/offscreencanvas": "^2019.6.4"
+    "mjolnir.js": "^2.7.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

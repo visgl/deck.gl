@@ -4,7 +4,7 @@ import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
-import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
+import {glArrayFromType, getBufferAttributeLayout, getStride} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -33,10 +33,6 @@ export type ShaderAttributeOptions = Partial<BufferAccessor> & {
   vertexOffset?: number;
   elementOffset?: number;
 };
-
-function getStride(accessor: DataColumnSettings<any>): number {
-  return accessor.stride || accessor.size * accessor.bytesPerElement;
-}
 
 function resolveShaderAttribute(
   baseAccessor: DataColumnSettings<any>,

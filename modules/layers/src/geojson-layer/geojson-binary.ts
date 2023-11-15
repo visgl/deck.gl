@@ -2,6 +2,7 @@
 // the geojson-binary format defined at loaders.gl:
 // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md
 
+import {BinaryAttribute} from '@deck.gl/core';
 import {
   BinaryFeatureCollection,
   BinaryLineFeature,
@@ -11,6 +12,12 @@ import {
 } from '@loaders.gl/schema';
 
 export type BinaryFeatureTypes = BinaryPointFeature | BinaryLineFeature | BinaryPolygonFeature;
+
+export type ExtendedBinaryFeatureCollection = {
+  [P in keyof Omit<BinaryFeatureCollection, 'shape'>]: BinaryFeatureCollection[P] & {
+    attributes?: Record<string, BinaryAttribute>;
+  };
+};
 
 type FeaureOnlyProperties = Pick<Feature, 'properties'>;
 
@@ -53,7 +60,7 @@ function getPropertiesForIndex(
 
 // Custom picking color to keep binary indexes
 export function calculatePickingColors(
-  geojsonBinary: BinaryFeatureCollection,
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
   encodePickingColor: (id: number, result: number[]) => void
 ): Record<string, Uint8ClampedArray | null> {
   const pickingColors: Record<string, Uint8ClampedArray | null> = {
