@@ -1,39 +1,46 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {AggregationOptions, QuerySourceOptions, SourceOptions, TilejsonSource} from './types';
+import type {
+  AggregationOptions,
+  QuerySourceOptions,
+  SourceOptions,
+  SpatialDataType,
+  TilejsonResult
+} from './types';
 
 export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   q: string;
   queryParameters?: string;
 };
 
-const quadbinQuerySource: TilejsonSource<QuadbinQuerySourceOptions> = async function (
+export const quadbinQuerySource = async function (
   options: QuadbinQuerySourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 6,
     sqlQuery,
-    spatialDataColumn = 'quadbin:quadbin',
+    spatialDataColumn = 'quadbin',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    q: sqlQuery,
+    spatialDataColumn,
+    spatialDataType: 'quadbin'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return baseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {quadbinQuerySource};
