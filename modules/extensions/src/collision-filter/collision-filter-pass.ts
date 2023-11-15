@@ -7,18 +7,18 @@ type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 export default class CollisionFilterPass extends LayersPass {
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const padding = 1;
+    const clearColor = [0, 0, 0, 0];
 
     return withGLParameters(
       this.device,
       {
         scissorTest: true,
         scissor: [padding, padding, target.width - 2 * padding, target.height - 2 * padding],
-        clearColor: [0, 0, 0, 0],
         blend: false,
         depthTest: true,
         depthRange: [0, 1]
       },
-      () => this.render({...options, target, pass: 'collision'})
+      () => this.render({...options, clearColor, target, pass: 'collision'})
     );
   }
 

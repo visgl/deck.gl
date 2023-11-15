@@ -247,7 +247,7 @@ export default class CollisionFilterEffect implements Effect {
     const depthBuffer = new WEBGLRenderbuffer(
       // @ts-expect-error TODO v9 needs to be WebGLDevice
       device,
-      {format: 'depth16', width, height}
+      {format: 'depth16unorm', width, height}
     );
     this.collisionFBOs[collisionGroup] = device.createFramebuffer({
       id: `collision-${collisionGroup}`,
@@ -261,12 +261,9 @@ export default class CollisionFilterEffect implements Effect {
 
   destroyFBO(collisionGroup: string) {
     const fbo = this.collisionFBOs[collisionGroup];
-    // @ts-expect-error
-    const attachments = fbo.attachments as Texture[];
-    for (const attachment of Object.values(attachments)) {
-      attachment.delete();
-    }
-    fbo.delete();
+    fbo.colorAttachments[0]?.destroy();
+    fbo.depthStencilAttachment?.destroy();
+    fbo.destroy();
     delete this.collisionFBOs[collisionGroup];
   }
 }
