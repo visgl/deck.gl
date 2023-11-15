@@ -248,8 +248,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           normals: {value: new Float32Array(gridNormals), size: 3}
         },
         vertexCount: gridPositions.length / 3
-      }),
-      instanceCount: 0
+      })
     });
 
     /* labels
@@ -299,8 +298,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           texCoords: {value: new Float32Array(labelTexCoords), size: 2},
           normals: {value: new Float32Array(labelNormals), size: 3}
         }
-      }),
-      instanceCount: 0
+      })
     });
 
     return {
