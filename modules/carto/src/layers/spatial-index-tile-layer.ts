@@ -5,7 +5,11 @@ import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
-import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
+import {
+  TileLayer,
+  _Tile2DHeader as Tile2DHeader,
+  _Tileset2D as Tileset2D
+} from '@deck.gl/geo-layers';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
@@ -31,6 +35,16 @@ export default class SpatialIndexTileLayer<
   static layerName = 'SpatialIndexTileLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    // TODO: tileset should be generic for either H3Tileset2D or QuadbinTileset2D
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+
+    hoveredFeatureId: BigInt | number | null;
+    highlightColor?: number[];
+  };
+
   updateState(params: UpdateParameters<this>) {
     const {props, oldProps} = params;
     if (props.aggregationResLevel !== oldProps.aggregationResLevel) {
@@ -44,7 +58,7 @@ export default class SpatialIndexTileLayer<
   protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
+    let newHoveredFeatureId: BigInt | number | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = hoveredFeature.id;
@@ -79,7 +93,7 @@ export default class SpatialIndexTileLayer<
       !isFeatureIdPresent ||
       !Array.isArray(data) ||
       // Quick check for whether id is within tile. data.findIndex is expensive
-      !this._featureInTile(tile, hoveredFeatureId)
+      !this._featureInTile(tile, hoveredFeatureId!)
     ) {
       return -1;
     }
@@ -88,14 +102,18 @@ export default class SpatialIndexTileLayer<
   }
 
   _featureInTile(tile: Tile2DHeader, featureId: BigInt | number) {
-    const {getTileZoom, getParentIndex} = this.state.tileset;
+    // TODO: Tile2DHeader index should be generic for H3TileIndex or QuadbinTileIndex
+    const {getTileZoom, getParentIndex} = this.state.tileset!;
     const tileZoom = getTileZoom(tile.index);
     // @ts-ignore
     const KEY = tile.index.q ? 'q' : 'i';
     let featureIndex = {[KEY]: featureId};
+    // @ts-ignore
     let featureZoom = getTileZoom(featureIndex);
     while (!(featureZoom <= tileZoom)) {
+      // @ts-ignore
       featureIndex = getParentIndex(featureIndex);
+      // @ts-ignore
       featureZoom = getTileZoom(featureIndex);
     }
 

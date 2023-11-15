@@ -1,7 +1,7 @@
 import {Viewport} from '@deck.gl/core';
 
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4, equals} from '@math.gl/core';
+import {Matrix4, NumericArray, equals} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';
 
@@ -123,7 +123,7 @@ export class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
-  private _zRange?: ZRange;
+  private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -162,6 +162,7 @@ export class Tileset2D {
 
     // Cache the last processed viewport
     this._viewport = null;
+    this._zRange = null;
     this._selectedTiles = null;
     this._frameNumber = 0;
 
@@ -226,8 +227,12 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4} = {}
+    {zRange, modelMatrix}: {zRange: ZRange | null; modelMatrix: NumericArray | null} = {
+      zRange: null,
+      modelMatrix: null
+    }
   ): number {
+    // @ts-expect-error Matrix4 can accept null
     const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (
@@ -326,7 +331,7 @@ export class Tileset2D {
     viewport: Viewport;
     maxZoom?: number;
     minZoom?: number;
-    zRange: ZRange | undefined;
+    zRange: ZRange | null;
     tileSize?: number;
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;
@@ -352,7 +357,7 @@ export class Tileset2D {
   }
 
   /** Returns a zoom level for a tile index */
-  getTileZoom(index: TileIndex) {
+  getTileZoom(this: void, index: TileIndex) {
     return index.z;
   }
 
@@ -364,7 +369,7 @@ export class Tileset2D {
   }
 
   /** Returns index of the parent tile */
-  getParentIndex(index: TileIndex) {
+  getParentIndex(this: void, index: TileIndex) {
     const x = Math.floor(index.x / 2);
     const y = Math.floor(index.y / 2);
     const z = index.z - 1;

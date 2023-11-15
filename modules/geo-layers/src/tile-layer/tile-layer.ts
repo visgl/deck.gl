@@ -153,6 +153,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
 
+  state!: {
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+  };
+
   initializeState() {
     this.state = {
       tileset: null,
@@ -165,8 +171,10 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles?.every(
-      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+    return Boolean(
+      this.state?.tileset?.selectedTiles?.every(
+        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+      )
     );
   }
 
@@ -194,7 +202,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         tileset.reloadAll();
       } else {
         // some render options changed, regenerate sub layers now
-        this.state.tileset.tiles.forEach(tile => {
+        this.state.tileset?.tiles.forEach(tile => {
           tile.layers = null;
         });
       }
@@ -237,8 +245,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   private _updateTileset(): void {
     const {tileset} = this.state;
     const {zRange, modelMatrix} = this.props;
-    const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
-    const {isLoaded} = tileset;
+    const frameNumber = tileset!.update(this.context.viewport, {zRange, modelMatrix});
+    const {isLoaded} = tileset!;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;
     const tilesetChanged = this.state.frameNumber !== frameNumber;
@@ -260,7 +268,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles);
+      onViewportLoad(tileset!.selectedTiles!);
     }
   }
 
@@ -334,43 +342,45 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   renderLayers(): Layer | null | LayersList {
-    return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
-      const subLayerProps = this.getSubLayerPropsByTile(tile);
-      // cache the rendered layer in the tile
-      if (!tile.isLoaded && !tile.content) {
-        // nothing to show
-      } else if (!tile.layers) {
-        const layers = this.renderSubLayers({
-          ...this.props,
-          ...this.getSubLayerProps({
-            id: tile.id,
-            updateTriggers: this.props.updateTriggers
-          }),
-          data: tile.content,
-          _offset: 0,
-          tile
-        });
-        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
-          layer.clone({
-            tile,
-            ...subLayerProps
-          })
-        );
-      } else if (
-        subLayerProps &&
-        tile.layers[0] &&
-        Object.keys(subLayerProps).some(
-          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
-        )
-      ) {
-        tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));
-      }
-      return tile.layers;
-    });
+    return (
+      this.state.tileset?.tiles.map((tile: Tile2DHeader) => {
+        const subLayerProps = this.getSubLayerPropsByTile(tile);
+        // cache the rendered layer in the tile
+        if (!tile.isLoaded && !tile.content) {
+          // nothing to show
+        } else if (!tile.layers) {
+          const layers = this.renderSubLayers({
+            ...this.props,
+            ...this.getSubLayerProps({
+              id: tile.id,
+              updateTriggers: this.props.updateTriggers
+            }),
+            data: tile.content,
+            _offset: 0,
+            tile
+          });
+          tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
+            layer.clone({
+              tile,
+              ...subLayerProps
+            })
+          );
+        } else if (
+          subLayerProps &&
+          tile.layers[0] &&
+          Object.keys(subLayerProps).some(
+            propName => tile.layers![0].props[propName] !== subLayerProps[propName]
+          )
+        ) {
+          tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));
+        }
+        return tile.layers;
+      }) || null
+    );
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return this.state.tileset.isTileVisible(tile, cullRect);
+    return Boolean(this.state.tileset?.isTileVisible(tile, cullRect));
   }
 }

@@ -15,13 +15,13 @@ const GEOM_TYPES = ['points', 'lines', 'polygons'];
  * @param {Object} data - The data in binary format
  * @param {String} uniqueIdProperty - Name of the unique id property
  * @param {Number|String} featureId - feature id to find
- * @param {String} layerName - the layer to search in
+ * @param {String|null} layerName - the layer to search in
  */
 export default function findIndexBinary(
   data: BinaryFeatures,
   uniqueIdProperty: string,
   featureId: string | number,
-  layerName: string
+  layerName: string | null
 ): number {
   for (const gt of GEOM_TYPES) {
     const index = data[gt] && findIndexByType(data[gt], uniqueIdProperty, featureId, layerName);
@@ -37,7 +37,7 @@ function findIndexByType(
   geomData: FeatureTypes,
   uniqueIdProperty: string,
   featureId: string | number,
-  layerName: string
+  layerName: string | null
 ): number {
   const featureIds = geomData.featureIds.value;
 

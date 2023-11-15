@@ -25,7 +25,7 @@ import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox, URLTemplate} from '../tileset-2d';
 import {
   urlType,
   Tileset2D,
@@ -64,10 +64,12 @@ type ParsedMvtTile = Feature[] | BinaryFeatures;
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
   Omit<GeoJsonLayerProps, 'data'> &
-  TileLayerProps<ParsedMvtTile>;
+  Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
+  data: TileJson | URLTemplate;
+
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
 
@@ -102,6 +104,19 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+
+    data?: any;
+    tileJSON: TileJson | null;
+    binary: boolean;
+    hoveredFeatureId: string | number | null;
+    hoveredFeatureLayerName: string | null;
+    highlightColor?: number[];
+  };
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
@@ -109,7 +124,9 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     this.setState({
       binary,
       data: null,
-      tileJSON: null
+      tileJSON: null,
+      hoveredFeatureId: null,
+      hoveredFeatureLayerName: null
     });
   }
 
@@ -135,8 +152,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data: any = this.props.data;
-    let tileJSON: any = null;
+    let data = this.props.data;
+    let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
       const {onDataLoad, fetch} = this.props;
@@ -151,7 +168,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       if (onDataLoad) {
         onDataLoad(tileJSON, {propName: 'data', layer: this});
       }
-    } else if (data.tilejson) {
+    } else if (data && typeof data === 'object' && 'tilejson' in data) {
       tileJSON = data;
     }
 
@@ -164,7 +181,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   _getTilesetOptions(): Tileset2DProps {
     const opts = super._getTilesetOptions();
-    const tileJSON: TileJson | null | undefined = this.state.tileJSON;
+    const tileJSON: TileJson | null = this.state.tileJSON;
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
@@ -258,8 +275,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
-    let newHoveredFeatureLayerName;
+    let newHoveredFeatureId: string | number | null = null;
+    let newHoveredFeatureLayerName: string | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
@@ -323,7 +340,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return -1;
     }
 
-    const featureIdToHighlight = isHighlighted ? highlightedFeatureId : hoveredFeatureId;
+    const featureIdToHighlight = isHighlighted ? highlightedFeatureId! : hoveredFeatureId!;
 
     // Iterable data
     if (Array.isArray(data)) {
@@ -382,10 +399,10 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state.tileset;
+    const tileset: Tileset2D | null = this.state.tileset;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
-    tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
+    tileset?.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {
