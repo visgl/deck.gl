@@ -6,7 +6,7 @@ export type BoundaryQuerySourceOptions = SourceOptions & {
   boundaryId: string;
   matchingColumn?: string;
   sqlQuery: string;
-  queryParameters: QueryParameters;
+  queryParameters?: QueryParameters;
 };
 type UrlParameters = {
   boundaryId: string;
