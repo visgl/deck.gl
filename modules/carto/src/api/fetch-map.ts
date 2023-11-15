@@ -129,13 +129,17 @@ async function _fetchTilestats(
   }
 
   const headers = {Authorization: `Bearer ${accessToken}`};
+  const parameters: Record<string, string> = {};
+  if (type === 'query') {
+    parameters.q = source;
+    if (queryParameters) {
+      parameters.queryParameters = JSON.stringify(queryParameters);
+    }
+  }
   const stats = await requestWithParameters({
     baseUrl,
     headers,
-    parameters:
-      type === 'query'
-        ? {q: source, ...(queryParameters && {queryParameters: JSON.stringify(queryParameters)})}
-        : {},
+    parameters,
     errorContext
   });
 
