@@ -633,7 +633,7 @@ Parameters:
 Get the closest pickable and visible object at the given screen coordinate.
 
 ```js
-deck.pickObject({x, y, radius, layerIds})
+deck.pickObject({x, y, radius, layerIds, unproject3D})
 ```
 
 Parameters:
@@ -654,7 +654,7 @@ Returns:
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
 ```js
-deck.pickMultipleObjects({x, y, radius, layerIds, depth})
+deck.pickMultipleObjects({x, y, radius, layerIds, depth, unproject3D})
 ```
 
 Parameters:
@@ -680,7 +680,7 @@ Notes:
 Get all pickable and visible objects within a bounding box.
 
 ```js
-deck.pickObjects({x, y, width, height, layerIds})
+deck.pickObjects({x, y, width, height, layerIds, maxObjects})
 ```
 
 Parameters:
