@@ -105,7 +105,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
       fs: fragmentShader,
       modules: [picking],
       topology: 'triangle-list',
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       vertexCount: 0
     });
   }
@@ -126,29 +126,29 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
    *   0--------> 1
    *              x
    */
-  encodePickingColor(i: number) {
+  encodePickingColor(i: number, target: number[] = []) {
     const {uCount, vCount} = this.props;
 
     const xIndex = i % uCount;
     const yIndex = (i - xIndex) / uCount;
 
-    return [(xIndex / (uCount - 1)) * 255, (yIndex / (vCount - 1)) * 255, 1] as $TODO;
+    return [(xIndex / (uCount - 1)) * 255, (yIndex / (vCount - 1)) * 255, 1];
   }
 
   decodePickingColor([r, g, b]: Color): number {
     if (b === 0) {
       return -1;
     }
-    return [r / 255, g / 255] as $TODO;
+    return r | g << 8;
   }
 
   getPickingInfo(opts) {
     const {info} = opts;
 
     if (info && info.index !== -1) {
-      const [u, v] = info.index;
       const {getPosition} = this.props;
-
+      const u = (info.index & 255) / 255;
+      const v = (info.index >> 8) / 255;
       info.sample = getPosition(u, v);
     }
 
@@ -227,7 +227,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
     const {vertexCount} = this.state;
 
     // reuse the calculated [x, y, z] in positions
-    const positions = this.getAttributeManager()!.attributes.positions.value;
+    const positions = this.getAttributeManager()!.attributes.positions.value!;
     const value = new Uint8ClampedArray(vertexCount! * attribute.size);
 
     // Support constant colors

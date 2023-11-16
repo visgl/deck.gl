@@ -49,9 +49,9 @@ export type AxesLayerProps<DataT = unknown> = _AxesLayerProps<DataT> & LayerProp
 type _AxesLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   fontSize: number;
-  xScale?: ScaleLinear<number, number>;
-  yScale?: ScaleLinear<number, number>;
-  zScale?: ScaleLinear<number, number>;
+  xScale: ScaleLinear<number, number>;
+  yScale: ScaleLinear<number, number>;
+  zScale: ScaleLinear<number, number>;
   xTicks: number;
   yTicks: number;
   zTicks: number;
@@ -99,7 +99,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   declare state: Layer['state'] & {
     models: [Model, Model];
     modelsByName: {grids: Model; labels: Model};
-    instanceCount: number;
+    numInstances: number;
     ticks: [Tick[], Tick[], Tick[]];
     gridDims: Vec3;
     gridCenter: Vec3;
@@ -108,7 +108,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   initializeState() {
     const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions, noAlloc: true},
@@ -116,11 +116,11 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       instanceIsTitle: {size: 1, update: this.calculateInstanceIsTitle, noAlloc: true}
     });
 
-    this.setState(Object.assign({instanceCount: 0}, this._getModels(gl)));
+    this.setState(Object.assign({numInstances: 0}, this._getModels(gl)));
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager()!;
 
     if (
       oldProps.xScale !== props.xScale ||
@@ -161,13 +161,8 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}) {
-    const {
-      gridDims,
-      gridCenter,
-      modelsByName,
-      labelTexture: {labelTexture, ...labelTextureUniforms},
-      instanceCount
-    } = this.state;
+    const {gridDims, gridCenter, modelsByName, numInstances} = this.state;
+    const {labelTexture, ...labelTextureUniforms} = this.state.labelTexture!;
     const {fontSize, color, padding} = this.props;
 
     if (labelTexture) {
@@ -179,8 +174,8 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         strokeColor: color
       };
 
-      modelsByName.grids.setInstanceCount(instanceCount);
-      modelsByName.labels.setInstanceCount(instanceCount);
+      modelsByName.grids.setInstanceCount(numInstances);
+      modelsByName.labels.setInstanceCount(numInstances);
 
       modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms));
       modelsByName.labels.setBindings({labelTexture});
@@ -240,7 +235,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       id: `${this.props.id}-grids`,
       vs: gridVertex,
       fs: fragmentShader,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'line-list',
         attributes: {
@@ -289,7 +284,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       id: `${this.props.id}-labels`,
       vs: labelVertex,
       fs: labelFragment,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
@@ -315,7 +310,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const value = new Float32Array(flatten(positions));
     attribute.value = value;
 
-    this.setState({instanceCount: value.length / attribute.size});
+    this.setState({numInstances: value.length / attribute.size});
   }
 
   calculateInstanceNormals(attribute) {
@@ -381,7 +376,7 @@ function getTicks(props: AxesLayerProps<number> & {axis: Axis}): Tick[] {
   const tickFormat = props[`${axis}TickFormat`];
 
   if (!Array.isArray(ticks)) {
-    ticks = scale.ticks(ticks);
+    ticks = scale.ticks(ticks) as number[];
   }
 
   const titleTick = {
