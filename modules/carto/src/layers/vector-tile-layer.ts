@@ -104,7 +104,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     const [geometry, attributes] = await Promise.all([geometryFetch, attributesFetch]);
     if (!geometry) return null;
 
-    return mergeBoundaryData(geometry, attributes);
+    return attributes ? mergeBoundaryData(geometry, attributes) : geometry;
   }
 
   renderSubLayers(

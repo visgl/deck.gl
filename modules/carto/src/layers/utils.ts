@@ -1,3 +1,4 @@
+import {log} from '@deck.gl/core';
 import {Tile as PropertiesTile} from './schema/carto-properties-tile';
 import {Tile as VectorTile} from './schema/carto-tile';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
@@ -19,9 +20,10 @@ export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTi
   const mapping = {};
   for (const {geoid, ...rest} of properties.properties) {
     if (geoid in mapping) {
-      throw new Error(`Duplicate geoid key in mapping: ${geoid}`);
+      log.warn(`Duplicate geoid key in boundary mapping, using first occurance`)();
+    } else {
+      mapping[geoid] = rest;
     }
-    mapping[geoid] = rest;
   }
 
   for (const type of ['points', 'lines', 'polygons']) {
