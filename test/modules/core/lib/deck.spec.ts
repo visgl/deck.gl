@@ -61,7 +61,7 @@ test('Deck#no views', t => {
     device,
     width: 1,
     height: 1,
-    autoResizeDrawingBuffer: device.canvasContext.htmlCanvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {longitude: 0, latitude: 0, zoom: 0},
     views: [],
