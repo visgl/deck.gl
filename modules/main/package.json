@@ -15,6 +15,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",

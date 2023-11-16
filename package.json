@@ -32,7 +32,7 @@
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "postinstall": "./scripts/postinstall.sh",
     "clean": "ocular-clean && rm -rf modules/*/typed",
-    "build": "npm run clean && ocular-build && lerna run build && node scripts/typed-entry.js",
+    "build": "npm run clean && ocular-build && lerna run build",
     "version": "ocular-build core,carto",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
