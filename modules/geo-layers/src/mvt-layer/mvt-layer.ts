@@ -402,7 +402,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const tileset: Tileset2D | null = this.state.tileset;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
-    tileset?.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
+    tileset!.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {
