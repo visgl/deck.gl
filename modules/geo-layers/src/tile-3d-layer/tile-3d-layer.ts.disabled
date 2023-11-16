@@ -105,8 +105,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   get isLoaded(): boolean {
-    const {tileset3d} = this.state;
-    return tileset3d !== null && tileset3d.isLoaded();
+    return Boolean(this.state?.tileset3d?.isLoaded() && super.isLoaded);
   }
 
   shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
