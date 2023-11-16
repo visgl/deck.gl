@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "9.0.0-alpha.1",
+  "version": "9.0.0-alpha.4",
   "publishConfig": {
     "access": "public"
   },
@@ -17,6 +17,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -32,8 +33,8 @@
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/images": "4.0.3",
     "@loaders.gl/schema": "4.0.3",
-    "@luma.gl/core": "9.0.0-alpha.42",
     "@luma.gl/constants": "9.0.0-alpha.42",
+    "@luma.gl/core": "9.0.0-alpha.42",
     "@luma.gl/engine": "9.0.0-alpha.42",
     "@luma.gl/shadertools": "9.0.0-alpha.42",
     "@mapbox/tiny-sdf": "^2.0.5",

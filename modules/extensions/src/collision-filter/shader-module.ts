@@ -89,7 +89,7 @@ type CollisionModuleSettings = {
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Texture};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},
@@ -101,7 +101,8 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
-    collision_texture: !drawToCollisionMap && collisionFBO ? collisionFBO : dummyCollisionMap
+    collision_texture:
+      !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
 };
 
@@ -112,4 +113,4 @@ export default {
   vs,
   inject,
   getUniforms: getCollisionUniforms
-} as ShaderModule;
+} as ShaderModule<CollisionModuleSettings>;

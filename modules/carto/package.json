@@ -2,7 +2,7 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "9.0.0-alpha.1",
+  "version": "9.0.0-alpha.4",
   "publishConfig": {
     "access": "public"
   },
@@ -20,6 +20,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -39,8 +40,8 @@
     "@loaders.gl/loader-utils": "4.0.3",
     "@loaders.gl/mvt": "4.0.3",
     "@loaders.gl/tiles": "4.0.3",
-    "@luma.gl/core": "9.0.0-alpha.42",
     "@luma.gl/constants": "9.0.0-alpha.42",
+    "@luma.gl/core": "9.0.0-alpha.42",
     "@math.gl/web-mercator": "^4.0.0",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
