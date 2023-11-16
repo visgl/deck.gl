@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-alpha.4] - Thu 16 2023
+
+- CARTO: Handle empty 204 responses (#8286)
+- Improve Tile3DLayer#isLoaded (#8285)
+- v9 CollisionFilterExtension (#8255)
+- Pass clearColor to luma RenderPass from MaskPass
+- Always provide all the shadowMap bindings (#8246)
+- CARTO: Add queryParameters to stats requests in fetchMap
+- CARTO: QueryParameters should be optional for boundaries (#8282)
+
 #### deck.gl [9.0.0-alpha.3] - Tue 14 2023
 
 - Use vertexPositions in getBounds (#8247)
