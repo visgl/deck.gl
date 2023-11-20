@@ -30,7 +30,7 @@
     "@babel/runtime": "^7.0.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/core": "^9.0.0-alpha",
     "@types/react": ">= 16.3",
     "react": ">=16.3",
     "react-dom": ">=16.3"
