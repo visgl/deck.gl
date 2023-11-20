@@ -1,8 +1,5 @@
 module.exports = {
-  presets: [
-    require.resolve('@docusaurus/core/lib/babel/preset'),
-    ['@babel/preset-typescript', {allowDeclareFields: true}]
-  ],
+  presets: [require.resolve('@docusaurus/core/lib/babel/preset')],
   plugins: [
     'version-inline',
     'inline-webgl-constants',

@@ -59,13 +59,13 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
   static defaultProps = defaultProps;
   static layerName: string = 'SurfaceLayer';
 
-  declare state: Layer['state'] & {
+  // @ts-ignore
+  state!: Layer['state'] & {
     model?: Model;
     vertexCount: number;
   };
 
   initializeState() {
-    // const {gl} = this.context;
     const noAlloc = true;
 
     /* eslint-disable max-len */
@@ -99,7 +99,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
 
   getModel() {
     // 3d surface
-    return new Model(this.context.device as $TODO, {
+    return new Model(this.context.device, {
       id: `${this.props.id}-surface`,
       vs: surfaceVertex,
       fs: fragmentShader,
@@ -114,7 +114,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
     const {lightStrength} = this.props;
 
     this.state.model!.setUniforms(Object.assign({}, uniforms, {lightStrength}));
-    this.state.model!.draw(this.context.renderPass as $TODO);
+    this.state.model!.draw(this.context.renderPass);
   }
 
   /*

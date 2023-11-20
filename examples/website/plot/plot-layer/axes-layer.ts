@@ -9,7 +9,7 @@ import fragmentShader from './axes-fragment.glsl';
 import gridVertex from './grid-vertex.glsl';
 import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
-import {$TODO, Axis, Tick, TickFormat, Vec2, Vec3} from './types';
+import {Axis, Tick, TickFormat, Vec2, Vec3} from './types';
 
 /* Constants */
 const DEFAULT_FONT_SIZE = 48;
@@ -96,7 +96,8 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'AxesLayer';
   static defaultProps = defaultProps;
 
-  declare state: Layer['state'] & {
+  // @ts-ignore
+  state!: Layer['state'] & {
     models: [Model, Model];
     modelsByName: {grids: Model; labels: Model};
     numInstances: number;
@@ -183,8 +184,8 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         Object.assign({}, uniforms, baseUniforms, labelTextureUniforms)
       );
 
-      modelsByName.grids.draw(this.context.renderPass as $TODO);
-      modelsByName.labels.draw(this.context.renderPass as $TODO);
+      modelsByName.grids.draw(this.context.renderPass);
+      modelsByName.labels.draw(this.context.renderPass);
     }
   }
 
