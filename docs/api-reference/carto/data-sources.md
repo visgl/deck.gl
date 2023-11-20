@@ -161,10 +161,10 @@ type RasterTilesetSourceOptions = {
 
 ```ts
 type BoundaryTableSourceOptions = {
-  boundaryId: string;
+  tilesetTableName: string;
   columns?: string[];
   matchingColumn?: string;
-  tableName: string;
+  propertiesTableName: string;
 }
 ```
 
@@ -172,19 +172,10 @@ type BoundaryTableSourceOptions = {
 
 ```ts
 type BoundaryQuerySourceOptions = {
-  boundaryId: string;
+  tilesetTableName: string;
   matchingColumn?: string;
-  sqlQuery: string;
-  queryParameters: QueryParameters;
-}
-```
-
-#### boundaryTilesetSource (Experimental)
-
-```ts
-type BoundaryTilesetSourceOptions = {
-  boundaryId: string;
-  columns?: string[];
+  propertiesSqlQuery: string;
+  queryParameters?: QueryParameters;
 }
 ```
 
