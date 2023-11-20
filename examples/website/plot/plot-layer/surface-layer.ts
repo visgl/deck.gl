@@ -1,12 +1,20 @@
 import {Layer, picking} from '@deck.gl/core';
-import type {Color, DefaultProps, LayerDataSource, LayerProps} from '@deck.gl/core';
+import type {
+  Accessor,
+  AccessorContext,
+  AccessorFunction,
+  Color,
+  DefaultProps,
+  LayerDataSource,
+  LayerProps
+} from '@deck.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Model} from '@luma.gl/engine';
 import {ScaleLinear} from 'd3-scale';
 
 import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';
-import {$TODO} from './types';
+import {Vec3} from './types';
 
 const DEFAULT_COLOR: Color = [0, 0, 0, 255];
 
@@ -23,12 +31,12 @@ const defaultProps: DefaultProps<SurfaceLayerProps> = {
 };
 
 /** All props supported by SurfaceLayer. */
-export type SurfaceLayerProps<DataT = unknown> = _SurfaceLayerProps<DataT> & LayerProps;
+export type SurfaceLayerProps<DataT extends Vec3 = Vec3> = _SurfaceLayerProps<DataT> & LayerProps;
 
-type _SurfaceLayerProps<DataT> = {
+type _SurfaceLayerProps<DataT extends Vec3 = Vec3> = {
   data: LayerDataSource<DataT>;
-  getPosition?: $TODO;
-  getColor?: $TODO;
+  getPosition?: AccessorFunction<DataT, Vec3>;
+  getColor?: Accessor<DataT, Color>;
   xScale?: ScaleLinear<number, number>;
   yScale?: ScaleLinear<number, number>;
   zScale?: ScaleLinear<number, number>;
@@ -53,9 +61,10 @@ type _SurfaceLayerProps<DataT> = {
  * @param {Integer} [props.vCount] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  */
-export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
-  ExtraPropsT & Required<_SurfaceLayerProps<DataT>>
-> {
+export default class SurfaceLayer<
+  DataT extends Vec3 = Vec3,
+  ExtraPropsT extends {} = {}
+> extends Layer<ExtraPropsT & Required<_SurfaceLayerProps<DataT>>> {
   static defaultProps = defaultProps;
   static layerName: string = 'SurfaceLayer';
 
@@ -139,7 +148,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
     if (b === 0) {
       return -1;
     }
-    return r | g << 8;
+    return r | (g << 8);
   }
 
   getPickingInfo(opts) {
@@ -149,7 +158,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
       const {getPosition} = this.props;
       const u = (info.index & 255) / 255;
       const v = (info.index >> 8) / 255;
-      info.sample = getPosition(u, v);
+      info.sample = getPosition([u, v, 0] as DataT, {} as AccessorContext<DataT>);
     }
 
     return info;
@@ -205,7 +214,7 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
       for (let uIndex = 0; uIndex < uCount; uIndex++) {
         const u = uIndex / (uCount - 1);
         const v = vIndex / (vCount - 1);
-        const [x, y, z] = getPosition(u, v);
+        const [x, y, z] = getPosition([u, v, 0] as DataT, {} as AccessorContext<DataT>);
 
         const isXFinite = isFinite(x);
         const isYFinite = isFinite(y);
@@ -231,12 +240,13 @@ export default class SurfaceLayer<DataT = any, ExtraPropsT extends {} = {}> exte
     const value = new Uint8ClampedArray(vertexCount! * attribute.size);
 
     // Support constant colors
-    let {getColor} = this.props;
-    getColor = typeof getColor === 'function' ? getColor : () => getColor;
+    const getColor =
+      typeof this.props.getColor === 'function' ? this.props.getColor : () => this.props.getColor;
 
     for (let i = 0; i < vertexCount; i++) {
       const index = i * 4;
-      const color = getColor(positions[index], positions[index + 2], positions[index + 1]);
+      const position = [positions[index], positions[index + 2], positions[index + 1]];
+      const color = getColor(position as DataT, {} as AccessorContext<DataT>);
       value[i * 4] = color[0];
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];

@@ -1,4 +1,7 @@
 import {
+  Accessor,
+  AccessorContext,
+  AccessorFunction,
   Color,
   CompositeLayer,
   CompositeLayerProps,
@@ -9,23 +12,23 @@ import {ScaleLinear, scaleLinear} from 'd3-scale';
 
 import AxesLayer from './axes-layer';
 import SurfaceLayer from './surface-layer';
-import {$TODO} from './types';
+import {Range, TickFormat, Vec3} from './types';
 
-const DEFAULT_GET_SCALE = {type: 'function', value: () => scaleLinear()};
-const DEFAULT_TICK_FORMAT = {type: 'function', value: x => x.toFixed(2)};
+const DEFAULT_GET_SCALE = {type: 'function', value: () => scaleLinear()} as const;
+const DEFAULT_TICK_FORMAT = {type: 'function', value: (x: number) => x.toFixed(2)} as const;
 const DEFAULT_TICK_COUNT = 6;
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: Color = [0, 0, 0, 255];
 
 /** All props supported by PlotLayer. */
-export type PlotLayerProps<DataT = unknown> = _PlotLayerProps<DataT> & CompositeLayerProps;
+export type PlotLayerProps<DataT extends Vec3 = Vec3> = _PlotLayerProps<DataT> & CompositeLayerProps;
 
-type _PlotLayerProps<DataT> = {
+type _PlotLayerProps<DataT extends Vec3 = Vec3> = {
   // SurfaceLayer props
-  getPosition: $TODO;
-  getColor: $TODO;
-  getXScale: $TODO;
-  getYScale: $TODO;
-  getZScale: $TODO;
+  getPosition: AccessorFunction<DataT, Vec3>;
+  getColor: AccessorFunction<DataT, Color>;
+  getXScale: AccessorFunction<Range, ScaleLinear<number, number>>;
+  getYScale: AccessorFunction<Range, ScaleLinear<number, number>>;
+  getZScale: AccessorFunction<Range, ScaleLinear<number, number>>;
   uCount: number;
   vCount: number;
   lightStrength: number;
@@ -39,9 +42,9 @@ type _PlotLayerProps<DataT> = {
   xTicks: number;
   yTicks: number;
   zTicks: number;
-  xTickFormat: $TODO;
-  yTickFormat: $TODO;
-  zTickFormat: $TODO;
+  xTickFormat: TickFormat<DataT>;
+  yTickFormat: TickFormat<DataT>;
+  zTickFormat: TickFormat<DataT>;
   axesPadding: 0;
   axesColor: Color;
   xTitle: string;
@@ -51,8 +54,8 @@ type _PlotLayerProps<DataT> = {
 
 const defaultProps: DefaultProps<PlotLayerProps> = {
   // SurfaceLayer props
-  getPosition: {type: 'accessor', value: (u, v) => [0, 0, 0]},
-  getColor: {type: 'accessor', value: (x, y, z) => DEFAULT_COLOR},
+  getPosition: {type: 'accessor', value: ([u, v]) => [0, 0, 0]},
+  getColor: {type: 'accessor', value: ([x, y, z]) => DEFAULT_COLOR},
   getXScale: DEFAULT_GET_SCALE,
   getYScale: DEFAULT_GET_SCALE,
   getZScale: DEFAULT_GET_SCALE,
@@ -66,9 +69,9 @@ const defaultProps: DefaultProps<PlotLayerProps> = {
   xTicks: DEFAULT_TICK_COUNT,
   yTicks: DEFAULT_TICK_COUNT,
   zTicks: DEFAULT_TICK_COUNT,
-  xTickFormat: DEFAULT_TICK_FORMAT,
-  yTickFormat: DEFAULT_TICK_FORMAT,
-  zTickFormat: DEFAULT_TICK_FORMAT,
+  xTickFormat: DEFAULT_TICK_FORMAT as unknown as TickFormat<unknown>,
+  yTickFormat: DEFAULT_TICK_FORMAT as unknown as TickFormat<unknown>,
+  zTickFormat: DEFAULT_TICK_FORMAT as unknown as TickFormat<unknown>,
   xTitle: 'x',
   yTitle: 'y',
   zTitle: 'z',
@@ -109,7 +112,7 @@ const defaultProps: DefaultProps<PlotLayerProps> = {
  * @param {Number} [props.fontSize] - size of the labels
  * @param {Array} [props.axesColor] - color of the gridlines, in [r,g,b,a]
  */
-export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
+export default class PlotLayer<DataT extends Vec3 = Vec3, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_PlotLayerProps<DataT>>
 > {
   static layerName = 'PlotLayer';
@@ -137,7 +140,7 @@ export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       for (let uIndex = 0; uIndex < uCount; uIndex++) {
         const u = uIndex / (uCount - 1);
         const v = vIndex / (vCount - 1);
-        const [x, y, z] = getPosition(u, v);
+        const [x, y, z] = getPosition([u, v, 0] as DataT, {} as AccessorContext<DataT>);
 
         if (isFinite(x)) {
           xMin = Math.min(xMin, x);
@@ -154,9 +157,9 @@ export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     }
 
-    const xScale = getXScale({min: xMin, max: xMax});
-    const yScale = getYScale({min: yMin, max: yMax});
-    const zScale = getZScale({min: zMin, max: zMax});
+    const xScale = getXScale({min: xMin, max: xMax}, {} as AccessorContext<Range>);
+    const yScale = getYScale({min: yMin, max: yMax}, {} as AccessorContext<Range>);
+    const zScale = getZScale({min: zMin, max: zMax}, {} as AccessorContext<Range>);
 
     this.setState({xScale, yScale, zScale});
   }
@@ -188,8 +191,8 @@ export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [
       new SurfaceLayer(
         {
-          getPosition,
-          getColor,
+          getPosition: getPosition as AccessorFunction<Vec3, Vec3>,
+          getColor: getColor as Accessor<Vec3, Color>,
           uCount,
           vCount,
           xScale,

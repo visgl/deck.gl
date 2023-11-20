@@ -14,7 +14,7 @@ import {Axis, Tick, TickFormat, Vec2, Vec3} from './types';
 /* Constants */
 const DEFAULT_FONT_SIZE = 48;
 const DEFAULT_TICK_COUNT = 6;
-const DEFAULT_TICK_FORMAT = x => x.toFixed(2);
+const DEFAULT_TICK_FORMAT = (x: number) => x.toFixed(2);
 const DEFAULT_COLOR: Color = [0, 0, 0, 255];
 
 interface LabelTexture {
@@ -33,9 +33,9 @@ const defaultProps: DefaultProps<AxesLayerProps> = {
   xTicks: DEFAULT_TICK_COUNT,
   yTicks: DEFAULT_TICK_COUNT,
   zTicks: DEFAULT_TICK_COUNT,
-  xTickFormat: DEFAULT_TICK_FORMAT,
-  yTickFormat: DEFAULT_TICK_FORMAT,
-  zTickFormat: DEFAULT_TICK_FORMAT,
+  xTickFormat: DEFAULT_TICK_FORMAT as TickFormat<unknown>,
+  yTickFormat: DEFAULT_TICK_FORMAT as TickFormat<unknown>,
+  zTickFormat: DEFAULT_TICK_FORMAT as TickFormat<unknown>,
   padding: 0,
   color: DEFAULT_COLOR,
   xTitle: 'x',
