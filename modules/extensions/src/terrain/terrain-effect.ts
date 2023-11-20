@@ -1,5 +1,5 @@
-import {Texture2D, ProgramManager} from '@luma.gl/core';
-import {log} from '@deck.gl/core';
+import {Device, Texture} from '@luma.gl/core';
+import {log, getShaderAssembler} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
 import {TerrainCover} from './terrain-cover';
@@ -20,7 +20,7 @@ export class TerrainEffect implements Effect {
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
-  private dummyHeightMap: Texture2D;
+  private dummyHeightMap?: Texture;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
@@ -28,28 +28,28 @@ export class TerrainEffect implements Effect {
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
-  initialize(gl: WebGLRenderingContext) {
-    this.dummyHeightMap = new Texture2D(gl, {
+  initialize(device: Device) {
+    this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
       data: new Uint8Array([0, 0, 0, 0])
     });
-    this.terrainPass = new TerrainPass(gl, {id: 'terrain'});
-    this.terrainPickingPass = new TerrainPickingPass(gl, {id: 'terrain-picking'});
+    this.terrainPass = new TerrainPass(device, {id: 'terrain'});
+    this.terrainPickingPass = new TerrainPickingPass(device, {id: 'terrain-picking'});
 
-    if (HeightMapBuilder.isSupported(gl)) {
-      this.heightMap = new HeightMapBuilder(gl);
+    if (HeightMapBuilder.isSupported(device)) {
+      this.heightMap = new HeightMapBuilder(device);
     } else {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
-    ProgramManager.getDefaultProgramManager(gl).addDefaultModule(terrainModule);
+    getShaderAssembler().addDefaultModule(terrainModule);
   }
 
-  preRender(gl: WebGLRenderingContext, opts: PreRenderOptions): void {
+  preRender(device: Device, opts: PreRenderOptions): void {
     if (!this.dummyHeightMap) {
       // First time this effect is in use, initialize resources and register the shader module
-      this.initialize(gl);
+      this.initialize(device);
       for (const layer of opts.layers) {
         // Force the terrain layer (and its descendents) to rebuild their models with the new shader
         if (layer.props.operation.includes('terrain')) {
@@ -96,9 +96,10 @@ export class TerrainEffect implements Effect {
     const {terrainDrawMode} = layer.state;
 
     return {
+      // @ts-expect-error
       heightMap: this.heightMap?.getRenderFramebuffer(),
       heightMapBounds: this.heightMap?.bounds,
-      dummyHeightMap: this.dummyHeightMap,
+      dummyHeightMap: this.dummyHeightMap!,
       terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
       useTerrainHeightMap: terrainDrawMode === 'offset',
       terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')

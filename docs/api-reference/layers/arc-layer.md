@@ -85,6 +85,12 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 If `true`, create the arc along the shortest path on the earth surface. This option is only effective with data in the `LNGLAT` coordinate system.
 
+##### `numSegments` (Number, optional) {#numsegments}
+
+* Default: `50`
+
+The number of segments used to draw each arc. This prop can be used to make arcs smooth when using `greatCircle` with long paths.
+
 ##### `widthUnits` (String, optional) {#widthunits}
 
 * Default: `'pixels'`

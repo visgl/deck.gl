@@ -23,7 +23,7 @@ import {Vector3, Matrix4} from '@math.gl/core';
 import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
-import type {Texture2D} from '@luma.gl/webgl';
+import type {Texture} from '@luma.gl/core';
 import type {ShaderModule, NumericArray} from '../../types/types';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
@@ -111,8 +111,8 @@ type ShadowModuleSettings = {
   viewport: Viewport;
   shadowEnabled?: boolean;
   drawToShadowMap?: boolean;
-  shadowMaps?: Texture2D[];
-  dummyShadowMap?: Texture2D;
+  shadowMaps?: Texture[];
+  dummyShadowMap?: Texture;
   shadowColor?: number[];
   shadowMatrices?: Matrix4[];
   shadowLightId?: number;
@@ -234,12 +234,11 @@ function createShadowUniforms(
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
     uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
     uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
+  }
 
-    if (opts.shadowMaps && opts.shadowMaps.length > 0) {
-      uniforms[`shadow_uShadowMap${i}`] = opts.shadowMaps[i];
-    } else {
-      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMap;
-    }
+  for (let i = 0; i < 2; i++) {
+    uniforms[`shadow_uShadowMap${i}`] =
+      (opts.shadowMaps && opts.shadowMaps[i]) || opts.dummyShadowMap;
   }
   return uniforms;
 }
@@ -257,7 +256,7 @@ export default {
     color = shadow_filterShadowColor(color);
     `
   },
-  getUniforms: (opts = {}, context = {}) => {
+  getUniforms: (opts: {drawToShadowMap?: boolean; shadowMaps?: unknown[]} = {}, context = {}) => {
     if (
       'viewport' in opts &&
       (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0))

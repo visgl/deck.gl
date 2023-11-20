@@ -6,11 +6,12 @@ import {
 import {getQuadbinPolygon} from './quadbin-utils';
 
 const defaultProps: DefaultProps<QuadbinLayerProps> = {
-  getQuadbin: {type: 'accessor', value: d => d.quadbin}
+  getQuadbin: {type: 'accessor', value: (d: any) => d.quadbin}
 };
 
 /** All properties supported by QuadbinLayer. */
-export type QuadbinLayerProps<DataT = any> = _QuadbinLayerProps<DataT> & GeoCellLayerProps<DataT>;
+export type QuadbinLayerProps<DataT = unknown> = _QuadbinLayerProps<DataT> &
+  GeoCellLayerProps<DataT>;
 
 /** Properties added by QuadbinLayer. */
 type _QuadbinLayerProps<DataT> = {
@@ -39,7 +40,8 @@ export default class QuadbinLayer<DataT = any, ExtraProps extends {} = {}> exten
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage)
+      getPolygon: (x: DataT, objectInfo) => getQuadbinPolygon(getQuadbin(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }

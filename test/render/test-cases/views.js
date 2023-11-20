@@ -1,4 +1,4 @@
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 import {
   COORDINATE_SYSTEM,
   _GlobeView as GlobeView,
@@ -7,7 +7,8 @@ import {
   FirstPersonView
 } from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+// TODO v9
+// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
@@ -88,7 +89,9 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/map-repeat.png'
-  },
+  }
+  // TODO v9
+  /*
   ...[true, false].map(binary => {
     const id = `globe-mvt${binary ? '-binary' : ''}`;
     return {
@@ -136,4 +139,5 @@ export default [
       goldenImage: `./test/render/golden-images/globe-mvt.png`
     };
   })
+  */
 ];

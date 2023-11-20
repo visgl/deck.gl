@@ -26,7 +26,6 @@ import {
   UpdateParameters,
   CompositeLayerProps
 } from '@deck.gl/core';
-import {cssToDeviceRatio} from '@luma.gl/core';
 import {filterProps} from './utils/prop-utils';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
@@ -39,9 +38,10 @@ export default abstract class AggregationLayer<
 > extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
 
-  state!: CompositeLayer['state'] & {
+  state!: {
     ignoreProps?: Record<string, any>;
     dimensions?: any;
+    changedAttributes?: Record<string, any>;
   };
 
   initializeAggregationLayer(dimensions: any) {
@@ -76,19 +76,20 @@ export default abstract class AggregationLayer<
   }
 
   getAttributes() {
-    return this.getAttributeManager()!.getShaderAttributes();
+    return this.getAttributeManager()!.getAttributes();
   }
 
   getModuleSettings() {
     // For regular layer draw this happens during draw cycle (_drawLayersInViewport) not during update cycle
     // For aggregation layers this is called during updateState to update aggregation data
     // NOTE: it is similar to LayerPass._getModuleParameters() but doesn't inlcude `effects` it is not needed for aggregation
-    const {viewport, mousePosition, gl} = this.context;
+    const {viewport, mousePosition, device} = this.context;
     const moduleSettings = Object.assign(Object.create(this.props), {
       viewport,
       mousePosition,
       pickingActive: 0,
-      devicePixelRatio: cssToDeviceRatio(gl)
+      // @ts-expect-error TODO - assuming WebGL context
+      devicePixelRatio: device.canvasContext.cssToDeviceRatio()
     });
     return moduleSettings;
   }
@@ -168,7 +169,7 @@ export default abstract class AggregationLayer<
 
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
+    return new AttributeManager(this.context.device, {
       id: this.props.id,
       stats: this.context.stats
     });

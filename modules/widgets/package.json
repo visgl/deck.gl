@@ -1,0 +1,41 @@
+{
+  "name": "@deck.gl/widgets",
+  "description": "UI widgets for deck.gl",
+  "license": "MIT",
+  "version": "9.0.0-alpha.4",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "components",
+    "widgets"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "typed",
+    "dist.min.js"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build-bundle": "ocular-bundle ./bundle.ts",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0",
+    "preact": "^10.17.0"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^9.0.0-alpha"
+  },
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
+}

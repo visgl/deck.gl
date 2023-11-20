@@ -4,18 +4,30 @@
  */
 export {
   // Core classes
-  Model,
-  Transform,
-  ProgramManager,
   Timeline,
+  // Geometries
+  Geometry,
+  ConeGeometry,
+  CubeGeometry,
+  CylinderGeometry,
+  IcoSphereGeometry,
+  PlaneGeometry,
+  SphereGeometry,
+  TruncatedConeGeometry
+} from '@luma.gl/engine';
+
+export {Model, Transform, PipelineFactory} from '@luma.gl/engine';
+
+/*
+export {
   // Context utilities
   instrumentGLContext,
   isWebGL2,
   FEATURES,
   hasFeatures,
-  getParameters,
-  setParameters,
-  withParameters,
+  getGLParameters,
+  setGLParameters,
+  withGLParameters,
   cssToDeviceRatio,
   // Copy and blit
   // These are needed by submodules and rely on using the same copy
@@ -32,14 +44,6 @@ export {
   TextureCube,
   // WebGL2 classes
   Texture3D,
-  TransformFeedback,
-  // Geometries
-  Geometry,
-  ConeGeometry,
-  CubeGeometry,
-  CylinderGeometry,
-  IcoSphereGeometry,
-  PlaneGeometry,
-  SphereGeometry,
-  TruncatedConeGeometry
-} from '@luma.gl/core';
+  TransformFeedback
+} from '@luma.gl/webgl';
+*/

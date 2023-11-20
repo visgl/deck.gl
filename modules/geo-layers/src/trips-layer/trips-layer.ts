@@ -26,14 +26,14 @@ const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
-  getTimestamps: {type: 'accessor', value: d => d.timestamps}
+  getTimestamps: {type: 'accessor', value: (d: any) => d.timestamps}
 };
 
 /** All properties supported by TripsLayer. */
-export type TripsLayerProps<DataT = any> = _TripsLayerProps<DataT> & PathLayerProps<DataT>;
+export type TripsLayerProps<DataT = unknown> = _TripsLayerProps<DataT> & PathLayerProps<DataT>;
 
 /** Properties added by TripsLayer. */
-type _TripsLayerProps<DataT = any> = {
+type _TripsLayerProps<DataT = unknown> = {
   /**
    * Whether or not the path fades out.
    * @default true

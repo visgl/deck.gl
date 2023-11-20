@@ -1,5 +1,6 @@
 import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
-import {Texture2D} from '@luma.gl/core';
+import type {Device, Texture} from '@luma.gl/core';
+// import {readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
@@ -35,20 +36,20 @@ export default class MaskEffect implements Effect {
   useInPicking = true;
   order = 0;
 
-  private dummyMaskMap?: Texture2D;
+  private dummyMaskMap?: Texture;
   private channels: (Channel | null)[] = [];
   private masks: Record<string, Mask> | null = null;
   private maskPass?: MaskPass;
-  private maskMap?: Texture2D;
+  private maskMap?: Texture;
   private lastViewport?: Viewport;
 
   preRender(
-    gl: WebGLRenderingContext,
+    device: Device,
     {layers, layerFilter, viewports, onViewportActive, views, isPicking}: PreRenderOptions
   ): MaskPreRenderStats {
     let didRender = false;
     if (!this.dummyMaskMap) {
-      this.dummyMaskMap = new Texture2D(gl, {
+      this.dummyMaskMap = device.createTexture({
         width: 1,
         height: 1
       });
@@ -68,7 +69,7 @@ export default class MaskEffect implements Effect {
     this.masks = {};
 
     if (!this.maskPass) {
-      this.maskPass = new MaskPass(gl, {id: 'default-mask'});
+      this.maskPass = new MaskPass(device, {id: 'default-mask'});
       this.maskMap = this.maskPass.maskMap;
     }
 
@@ -159,8 +160,8 @@ export default class MaskEffect implements Effect {
           makeViewport({
             bounds: channelInfo.bounds!,
             viewport,
-            width: maskMap.width,
-            height: maskMap.height,
+            width: maskMap!.width,
+            height: maskMap!.height,
             border: 1
           });
 
@@ -247,11 +248,11 @@ export default class MaskEffect implements Effect {
   }
 
   getModuleParameters(): {
-    maskMap: Texture2D;
+    maskMap: Texture;
     maskChannels: Record<string, Mask> | null;
   } {
     return {
-      maskMap: this.masks ? this.maskMap : this.dummyMaskMap,
+      maskMap: this.masks ? this.maskMap! : this.dummyMaskMap!,
       maskChannels: this.masks
     };
   }

@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.module.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "typed",
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "references": [
+    {"path": "../core"}
+  ]
+}

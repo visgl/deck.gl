@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL} from '@luma.gl/constants';
+import {LayerContext, log, UpdateParameters, Accessor} from '@deck.gl/core';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
 import GPUGridAggregator from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {Buffer} from '@luma.gl/core';
-import {LayerContext, log, UpdateParameters} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import BinSorter from './utils/bin-sorter';
 import {pointToDensityGridDataCPU} from './cpu-grid-layer/grid-aggregator';
+import type {Buffer} from '@luma.gl/core';
 
 export type GridAggregationLayerProps<DataT> = AggregationLayerProps<DataT>;
 
@@ -35,20 +35,46 @@ export default abstract class GridAggregationLayer<
   static layerName = 'GridAggregationLayer';
 
   state!: AggregationLayer<DataT>['state'] & {
-    aggregationDataDirty?: any;
-    aggregationWeightsDirty?: any;
+    aggregationDataDirty?: boolean;
+    aggregationWeightsDirty?: boolean;
+    aggregationDirty?: boolean;
     gpuAggregation?: any;
     getValue?: () => any;
     sortedBins?: BinSorter;
+    weights: {
+      [key: string]: {
+        aggregationBuffer?: Buffer;
+        maxMinBuffer?: Buffer;
+        aggregationData: Float32Array | null;
+        maxMinData: Float32Array;
+        maxData: Float32Array;
+        minData: Float32Array;
+        getWeight: Accessor<DataT, number>;
+        operation: number;
+      };
+    };
+    cpuGridAggregator?: Function;
+    gpuGridAggregator?: GPUGridAggregator;
+    layerData: any;
+    numRow: number;
+    numCol: number;
+    gridOffset: {xOffset: number; yOffset: number};
+    posOffset: number[];
+    gridOrigin: number[];
+    translation: number[];
+    scaling: number[];
+    boundingBox: {xMin: number; yMin: number; xMax: number; yMax: number};
+    projectPoints?: (p: [number, number]) => [number, number];
   };
 
   initializeAggregationLayer({dimensions}) {
-    const {gl} = this.context;
     super.initializeAggregationLayer(dimensions);
     this.setState({
       // CPU aggregation results
       layerData: {},
-      gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-gpu-aggregator`}),
+      gpuGridAggregator: new GPUGridAggregator(this.context.device, {
+        id: `${this.id}-gpu-aggregator`
+      }),
       cpuGridAggregator: pointToDensityGridDataCPU
     });
   }
@@ -94,13 +120,13 @@ export default abstract class GridAggregationLayer<
 
   updateShaders(shaders: any): void {
     if (this.state.gpuAggregation) {
-      this.state.gpuGridAggregator.updateShaders(shaders);
+      this.state.gpuGridAggregator!.updateShaders(shaders);
     }
   }
 
   // Methods that can be overriden by subclasses for customizations
 
-  updateAggregationState(opts) {
+  updateAggregationState(opts: UpdateParameters<this>) {
     // Sublayers should implement this method.
     log.assert(false);
   }
@@ -108,15 +134,15 @@ export default abstract class GridAggregationLayer<
   allocateResources(numRow, numCol) {
     if (this.state.numRow !== numRow || this.state.numCol !== numCol) {
       const dataBytes = numCol * numRow * 4 * 4;
-      const gl = this.context.gl;
       const {weights} = this.state;
       for (const name in weights) {
         const weight = weights[name];
         if (weight.aggregationBuffer) {
           weight.aggregationBuffer.delete();
         }
-        weight.aggregationBuffer = new Buffer(gl, {
+        weight.aggregationBuffer = this.context.device.createBuffer({
           byteLength: dataBytes,
+          // @ts-expect-error legacy
           accessor: {
             size: 4,
             type: GL.FLOAT,
@@ -159,7 +185,7 @@ export default abstract class GridAggregationLayer<
     const vertexCount = this.getNumInstances();
 
     if (!gpuAggregation) {
-      const result = cpuGridAggregator(props, {
+      const result = cpuGridAggregator!(props, {
         gridOffset,
         projectPoints,
         attributes,
@@ -172,7 +198,7 @@ export default abstract class GridAggregationLayer<
       });
     } else {
       const {weights} = this.state;
-      gpuGridAggregator.run({
+      gpuGridAggregator!.run({
         weights,
         cellSize: [gridOffset.xOffset, gridOffset.yOffset],
         numCol,

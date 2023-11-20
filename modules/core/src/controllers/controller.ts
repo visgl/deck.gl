@@ -27,7 +27,7 @@ import {ConstructorOf} from '../types/types';
 import type Viewport from '../viewports/viewport';
 
 import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -532,12 +532,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
+    event.srcEvent.preventDefault();
 
     const {speed = 0.01, smooth = false} = this.scrollZoom === true ? {} : this.scrollZoom;
     const {delta} = event;

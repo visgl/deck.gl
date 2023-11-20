@@ -1,4 +1,4 @@
-import {Framebuffer, Texture2D} from '@luma.gl/core';
+import {Framebuffer, Texture} from '@luma.gl/core';
 import {project} from '@deck.gl/core';
 import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
@@ -85,11 +85,11 @@ const inject = {
 type CollisionModuleSettings = {
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
-  dummyCollisionMap?: Texture2D;
+  dummyCollisionMap?: Texture;
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture2D};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Texture};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},
@@ -101,14 +101,16 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
-    collision_texture: !drawToCollisionMap && collisionFBO ? collisionFBO : dummyCollisionMap
+    collision_texture:
+      !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
 };
 
+// @ts-expect-error
 export default {
   name: 'collision',
   dependencies: [project],
   vs,
   inject,
   getUniforms: getCollisionUniforms
-} as ShaderModule;
+} as ShaderModule<CollisionModuleSettings>;

@@ -8,6 +8,7 @@ export * from '@deck.gl/geo-layers';
 export * from '@deck.gl/google-maps';
 export * from '@deck.gl/mesh-layers';
 export * from '@deck.gl/mapbox';
+export * from '@deck.gl/widgets';
 
 /* eslint-disable import/no-extraneous-dependencies */
 /** h3-js is not bundled due to webpack's externals config

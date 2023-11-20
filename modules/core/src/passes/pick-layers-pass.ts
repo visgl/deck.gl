@@ -1,13 +1,14 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import {withParameters} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import type {GLParameters} from '@luma.gl/webgl';
+import type {Framebuffer} from '@luma.gl/core';
+import {withGLParameters} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/constants';
 import log from '../utils/log';
 
-import type {Framebuffer} from '@luma.gl/core';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS = {
+const PICKING_PARAMETERS: GLParameters = {
   blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
   blendEquation: GL.FUNC_ADD
 };
@@ -68,7 +69,6 @@ export default class PickLayersPass extends LayersPass {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats;
   } {
-    const gl = this.gl;
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
 
@@ -77,8 +77,8 @@ export default class PickLayersPass extends LayersPass {
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = withParameters(
-      gl,
+    const renderStatus = withGLParameters(
+      this.device,
       {
         scissorTest: true,
         scissor: [x, y, width, height],
@@ -118,7 +118,11 @@ export default class PickLayersPass extends LayersPass {
 
   shouldDrawLayer(layer: Layer): boolean {
     const {pickable, operation} = layer.props;
-    return (pickable && operation.includes('draw')) || operation.includes('terrain');
+    return (
+      (pickable && operation.includes('draw')) ||
+      operation.includes('terrain') ||
+      operation.includes('mask')
+    );
   }
 
   protected getModuleParameters() {

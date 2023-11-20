@@ -23,8 +23,8 @@ import main from './solid-polygon-layer-vertex-main.glsl';
 export default `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 positions64Low;
+attribute vec3 vertexPositions;
+attribute vec3 vertexPositions64Low;
 attribute float elevations;
 attribute vec4 fillColors;
 attribute vec4 lineColors;
@@ -35,12 +35,13 @@ ${main}
 void main(void) {
   PolygonProps props;
 
-  props.positions = positions;
-  props.positions64Low = positions64Low;
+  props.positions = vertexPositions;
+  props.positions64Low = vertexPositions64Low;
   props.elevations = elevations;
   props.fillColors = fillColors;
   props.lineColors = lineColors;
   props.pickingColors = pickingColors;
+  props.normal = project_normal(vec3(0.0, 0.0, 1.0));
 
   calculatePosition(props);
 }

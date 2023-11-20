@@ -165,14 +165,14 @@ export default class App extends PureComponent {
     let index = 1;
     const layers = [
       // the ground - for shadows to drop on
-      new SolidPolygonLayer({
-        id: 'ground',
-        data: LAND_COVER,
-        getPolygon: f => f,
-        extruded: false,
-        filled: true,
-        getFillColor: [0, 0, 0, 0]
-      })
+      // new SolidPolygonLayer({
+      //   id: 'ground',
+      //   data: LAND_COVER,
+      //   getPolygon: f => f,
+      //   extruded: false,
+      //   filled: true,
+      //   getFillColor: [0, 0, 0, 0]
+      // })
     ];
     const {activeExamples} = this.state;
 
@@ -185,7 +185,7 @@ export default class App extends PureComponent {
           const layer = this._renderExampleLayer(example, settings, index++);
 
           if (typeof settings !== 'object') {
-            activeExamples[exampleName] = LayerControls.getSettings(layer.props);
+            activeExamples[exampleName] = LayerControls.getSettings(layer.props, example.props);
           }
 
           layers.push(layer);

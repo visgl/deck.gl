@@ -1,5 +1,7 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
+import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
+import type {BufferAccessor, DataColumnSettings} from './data-column';
 
 /* eslint-disable complexity */
 export function glArrayFromType(glType: number): TypedArrayConstructor {
@@ -29,3 +31,49 @@ export function glArrayFromType(glType: number): TypedArrayConstructor {
   }
 }
 /* eslint-enable complexity */
+
+const glTypeToBufferFormat = {
+  [GL.FLOAT]: 'float32',
+  [GL.DOUBLE]: 'float32',
+  [GL.UNSIGNED_SHORT]: 'uint16',
+  [GL.UNSIGNED_SHORT_5_6_5]: 'uint16',
+  [GL.UNSIGNED_SHORT_4_4_4_4]: 'uint16',
+  [GL.UNSIGNED_SHORT_5_5_5_1]: 'uint16',
+  [GL.UNSIGNED_INT]: 'uint32',
+  [GL.UNSIGNED_BYTE]: 'uint8',
+  [GL.BYTE]: 'sint8',
+  [GL.SHORT]: 'sint16',
+  [GL.INT]: 'sint32'
+} as const;
+
+export function getBufferAttributeLayout(
+  name: string,
+  accessor: BufferAccessor
+): BufferAttributeLayout {
+  let type = glTypeToBufferFormat[accessor.type ?? GL.FLOAT];
+  if (accessor.normalized) {
+    type = type.replace('int', 'norm');
+  }
+  return {
+    attribute: name,
+    format: (accessor.size as number) > 1 ? (`${type}x${accessor.size}` as VertexFormat) : type,
+    byteOffset: accessor.offset || 0
+    // Note stride is set on the top level
+  };
+}
+
+export function getStride(accessor: DataColumnSettings<unknown>): number {
+  return accessor.stride || accessor.size * accessor.bytesPerElement;
+}
+
+export function bufferLayoutEqual(
+  accessor1: DataColumnSettings<unknown>,
+  accessor2: DataColumnSettings<unknown>
+) {
+  return (
+    (accessor1.type ?? GL.FLOAT) === (accessor2.type ?? GL.FLOAT) &&
+    accessor1.size === accessor2.size &&
+    getStride(accessor1) === getStride(accessor2) &&
+    (accessor1.offset || 0) === (accessor2.offset || 0)
+  );
+}

@@ -91,15 +91,15 @@ When the map was last updated.
 
 ##### `initialViewState` (String) {#initialviewstate}
 
-The [view state]/docs/developer-guide/views.md#view-state).
+The [view state](../../developer-guide/views.md#view-state).
 
 ##### `mapStyle` (String) {#mapstyle}
 
-An identifier describing the [basemap]/docs/api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
+An identifier describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
 ##### `layers` (Array) {#layers}
 
-A collection of deck.gl [layers]/docs/api-reference/layers.md).
+A collection of deck.gl [layers](../core/layer.md).
 
 ##### `stopAutoRefresh` (Function) {#stopautorefresh}
 

@@ -4,7 +4,7 @@ import type MapboxLayer from './mapbox-layer';
 import type {Map} from 'mapbox-gl';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 type UserData = {
   isExternal: boolean;
@@ -162,7 +162,8 @@ export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
 
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
-    layerFilter: ({layer: deckLayer}) => layer.id === deckLayer.id,
+    layerFilter: ({layer: deckLayer}) =>
+      layer.id === deckLayer.id || deckLayer.props.operation.includes('terrain'),
     clearStack,
     clearCanvas: false
   });
@@ -275,7 +276,9 @@ function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMerca
       ? // match mapbox-gl@>=1.3.0's projection matrix
         0.02
       : // use deck.gl's own default
-        0.1
+        0.1,
+    nearZ: map.transform._nearZ / map.transform.height,
+    farZ: map.transform._farZ / map.transform.height
   });
 }
 

@@ -1,12 +1,13 @@
+import type {Device} from '@luma.gl/core';
+import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-import {Framebuffer} from '@luma.gl/core';
 
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
-import type {Effect} from './effect';
+import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
@@ -14,6 +15,7 @@ const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
+  device: Device;
   gl: WebGLRenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
@@ -25,12 +27,14 @@ export default class DeckRenderer {
   private renderBuffers: Framebuffer[];
   private lastPostProcessEffect: string | null;
 
-  constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
+  constructor(device: Device) {
+    this.device = device;
+    // @ts-expect-error
+    this.gl = device.gl;
     this.layerFilter = null;
     this.drawPickingColors = false;
-    this.drawLayersPass = new DrawLayersPass(gl);
-    this.pickLayersPass = new PickLayersPass(gl);
+    this.drawLayersPass = new DrawLayersPass(device);
+    this.pickLayersPass = new PickLayersPass(device);
     this.renderCount = 0;
     this._needsRedraw = 'Initial render';
     this.renderBuffers = [];
@@ -56,18 +60,21 @@ export default class DeckRenderer {
     views: {[viewId: string]: View};
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
   }) {
+    if (!opts.viewports.length) {
+      return;
+    }
+
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
-      ...opts,
-      target: opts.target || Framebuffer.getDefaultFramebuffer(this.gl)
+      ...opts
     };
 
     if (renderOpts.effects) {
@@ -107,7 +114,7 @@ export default class DeckRenderer {
     opts.preRenderStats = opts.preRenderStats || {};
 
     for (const effect of effects) {
-      opts.preRenderStats[effect.id] = effect.preRender(this.gl, opts);
+      opts.preRenderStats[effect.id] = effect.preRender(this.device, opts);
       if (effect.postRender) {
         this.lastPostProcessEffect = effect.id;
       }
@@ -121,7 +128,10 @@ export default class DeckRenderer {
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
     if (renderBuffers.length === 0) {
-      renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
+      renderBuffers.push(
+        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
+        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
+      );
     }
     for (const buffer of renderBuffers) {
       buffer.resize();
@@ -130,20 +140,19 @@ export default class DeckRenderer {
 
   private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
     const {renderBuffers} = this;
-    const params = {
+    const params: PostRenderOptions = {
       ...opts,
       inputBuffer: renderBuffers[0],
-      swapBuffer: renderBuffers[1],
-      target: null
+      swapBuffer: renderBuffers[1]
     };
     for (const effect of effects) {
       if (effect.postRender) {
         if (effect.id === this.lastPostProcessEffect) {
           params.target = opts.target;
-          effect.postRender(this.gl, params);
+          effect.postRender(this.device, params);
           break;
         }
-        const buffer = effect.postRender(this.gl, params);
+        const buffer = effect.postRender(this.device, params);
         params.inputBuffer = buffer;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }

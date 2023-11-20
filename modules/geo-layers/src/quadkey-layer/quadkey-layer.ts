@@ -3,11 +3,12 @@ import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
 const defaultProps: DefaultProps<QuadkeyLayerProps> = {
-  getQuadkey: {type: 'accessor', value: d => d.quadkey}
+  getQuadkey: {type: 'accessor', value: (d: any) => d.quadkey}
 };
 
 /** All properties supported by QuadkeyLayer. */
-export type QuadkeyLayerProps<DataT = any> = _QuadkeyLayerProps<DataT> & GeoCellLayerProps<DataT>;
+export type QuadkeyLayerProps<DataT = unknown> = _QuadkeyLayerProps<DataT> &
+  GeoCellLayerProps<DataT>;
 
 /** Properties added by QuadkeyLayer. */
 type _QuadkeyLayerProps<DataT> = {
@@ -28,14 +29,17 @@ export default class QuadkeyLayer<DataT = any, ExtraProps extends {} = {}> exten
   static defaultProps = defaultProps;
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
-    const {data, getQuadkey} = this.props;
+    const {data, extruded, getQuadkey} = this.props;
+    // To avoid z-fighting reduce polygon footprint when extruding
+    const coverage = extruded ? 0.99 : 1;
 
     return {
       data,
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo), coverage),
+      updateTriggers: {getPolygon: coverage}
     };
   }
 }

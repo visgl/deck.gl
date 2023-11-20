@@ -6,7 +6,7 @@ const defaultProps: DefaultProps<GeoCellLayerProps> = {
 };
 
 /** All properties supported by GeoCellLayer. */
-export type GeoCellLayerProps<DataT = any> = PolygonLayerProps<DataT>;
+export type GeoCellLayerProps<DataT = unknown> = PolygonLayerProps<DataT>;
 
 export default class GeoCellLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
   Required<GeoCellLayerProps<DataT>> & ExtraProps
@@ -45,6 +45,7 @@ export default class GeoCellLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
+    const {updateTriggers: boundsUpdateTriggers, ...boundsProps} = this.indexToBounds() || {};
     return new CellLayer(
       {
         filled,
@@ -73,13 +74,14 @@ export default class GeoCellLayer<DataT = any, ExtraProps extends {} = {}> exten
       this.getSubLayerProps({
         id: 'cell',
         updateTriggers: updateTriggers && {
+          ...boundsUpdateTriggers,
           getElevation: updateTriggers.getElevation,
           getFillColor: updateTriggers.getFillColor,
           getLineColor: updateTriggers.getLineColor,
           getLineWidth: updateTriggers.getLineWidth
         }
       }),
-      this.indexToBounds()
+      boundsProps
     );
   }
 }

@@ -1,4 +1,4 @@
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   CompositeLayer,
@@ -65,7 +65,7 @@ class RasterColumnLayer extends ColumnLayer {
 }
 
 /** All properties supported by RasterLayer. */
-export type RasterLayerProps<DataT = any> = _RasterLayerProps &
+export type RasterLayerProps<DataT = unknown> = _RasterLayerProps &
   ColumnLayerProps<DataT> &
   CompositeLayerProps;
 

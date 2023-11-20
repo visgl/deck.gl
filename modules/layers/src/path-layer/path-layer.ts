@@ -19,8 +19,9 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
@@ -108,7 +109,7 @@ type _PathLayerProps<DataT> = {
   rounded?: boolean;
 };
 
-export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps;
+export type PathLayerProps<DataT = unknown> = _PathLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -123,7 +124,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   billboard: false,
   _pathType: null,
 
-  getPath: {type: 'accessor', value: object => object.path},
+  getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
 
@@ -157,12 +158,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return false;
   }
 
+  getBounds(): [number[], number[]] | null {
+    return this.getAttributeManager()?.getBounds(['vertexPositions']);
+  }
+
   initializeState() {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager!.addInstanced({
-      positions: {
+      vertexPositions: {
         size: 3,
         // Start filling buffer from 1 vertex in
         vertexOffset: 1,
@@ -210,7 +215,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {
-        size: 3,
+        size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
@@ -265,9 +270,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       attributeManager!.invalidateAll();
     }
   }
@@ -314,22 +318,22 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMaxPixels
     } = this.props;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        jointType: Number(jointRounded),
-        capType: Number(capRounded),
-        billboard,
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        miterLimit,
-        widthMinPixels,
-        widthMaxPixels
-      })
-      .draw();
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
+    model.setUniforms({
+      jointType: Number(jointRounded),
+      capType: Number(capRounded),
+      billboard,
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      miterLimit,
+      widthMinPixels,
+      widthMaxPixels
+    });
+    model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -374,11 +378,12 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           indices: new Uint16Array(SEGMENT_INDICES),
           positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}

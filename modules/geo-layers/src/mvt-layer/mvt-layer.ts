@@ -17,7 +17,7 @@ import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -31,6 +31,7 @@ import {
   Tileset2D,
   Tile2DHeader,
   getURLFromTemplate,
+  URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
 } from '../tileset-2d';
@@ -59,7 +60,7 @@ export type TileJson = {
   version?: string;
 };
 
-type ParsedMvtTile = Feature[] | BinaryFeatures;
+type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
@@ -75,7 +76,7 @@ export type _MVTLayerProps = {
   uniqueIdProperty?: string;
 
   /** A feature with ID corresponding to the supplied value will be highlighted. */
-  highlightedFeatureId?: string | null;
+  highlightedFeatureId?: string | number | null;
 
   /**
    * Use tile data in binary format.
@@ -102,6 +103,15 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
+  state!: TileLayer<ParsedMvtTile>['state'] & {
+    binary: boolean;
+    data: URLTemplate;
+    tileJSON: any;
+    highlightColor: number[];
+    hoveredFeatureId: number | string | null;
+    hoveredFeatureLayerName: string | null;
+  };
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
@@ -114,7 +124,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 
   get isLoaded(): boolean {
-    return this.state && this.state.data && this.state.tileset && super.isLoaded;
+    return Boolean(this.state && this.state.data && this.state.tileset && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -169,14 +179,14 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     if (tileJSON) {
       if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
-        opts.minZoom = tileJSON.minzoom as number;
+        opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
         (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
       ) {
-        opts.maxZoom = tileJSON.maxzoom as number;
+        opts.maxZoom = tileJSON.maxzoom;
       }
     }
     return opts;
@@ -289,7 +299,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
@@ -340,8 +350,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return findIndexBinary(
         data,
         uniqueIdProperty,
-        featureIdToHighlight,
-        isHighlighted ? '' : hoveredFeatureLayerName
+        featureIdToHighlight!,
+        isHighlighted ? '' : hoveredFeatureLayerName!
       );
     }
 
@@ -382,7 +392,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state.tileset;
+    const tileset: Tileset2D = this.state.tileset!;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {

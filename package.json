@@ -17,25 +17,34 @@
     "modules/*"
   ],
   "resolution_comments": {
-    "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test"
+    "escaper": "v2 has an invalid main field in package.json, breaks esbuild during browser test",
+    "vite": "process polyfill missing"
   },
   "resolutions": {
-    "escaper": "3.0.6"
+    "@probe.gl/log": "4.0.4",
+    "@probe.gl/stats": "4.0.4",
+    "@probe.gl/env": "4.0.4",
+    "escaper": "3.0.6",
+    "vite": "^4.3.9",
+    "puppeteer": "^21.3.8"
   },
   "scripts": {
     "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "postinstall": "./scripts/postinstall.sh",
-    "clean": "ocular-clean",
-    "build": "ocular-clean && ocular-build && lerna run build && node scripts/typed-entry.js",
-    "version": "ocular-build core",
+    "clean": "ocular-clean && rm -rf modules/*/typed",
+    "build": "npm run clean && ocular-build && lerna run build",
+    "version": "ocular-build core,carto",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish": "ocular-publish",
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
+    "test-ci": "ocular-lint && ocular-test browser-headless",
     "test-fast": "ocular-test fast",
     "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
+    "tsclean": "find . -name tsconfig.tsbuildinfo -exec rm {} \\;",
+    "tsbuild": "tsc -b tsconfig.build.json",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",
     "metrics": "ocular-metrics",
@@ -49,22 +58,24 @@
   },
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
-    "@loaders.gl/csv": "^3.4.2",
-    "@loaders.gl/polyfills": "^3.4.2",
-    "@luma.gl/test-utils": "^8.5.20",
-    "@math.gl/proj4": "^3.6.3",
-    "@probe.gl/bench": "^3.5.4",
-    "@probe.gl/test-utils": "^3.5.4",
+    "@babel/register": "^7.13.0",
+    "@loaders.gl/csv": "4.0.3",
+    "@loaders.gl/polyfills": "4.0.3",
+    "@luma.gl/test-utils": "9.0.0-alpha.42",
+    "@luma.gl/webgpu": "9.0.0-alpha.42",
+    "@math.gl/proj4": "^4.0.0",
+    "@probe.gl/bench": "^4.0.4",
+    "@probe.gl/test-utils": "^4.0.4",
     "@types/react": "^18.0.0",
+    "abortcontroller-polyfill": "^1.5.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.3",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-preset-minify": "^0.5.0",
-    "canvas": "^2.11.0",
-    "gl": "^6.0.0",
+    "gl": "6.0.2",
     "glsl-transpiler": "^1.8.6",
     "jsdom": "^20.0.0",
-    "ocular-dev-tools": "2.0.0-alpha.9",
+    "ocular-dev-tools": "2.0.0-alpha.19",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "react": "^18.0.0",
@@ -80,5 +91,9 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "volta": {
+    "node": "16.19.1",
+    "yarn": "1.22.19"
+  }
 }

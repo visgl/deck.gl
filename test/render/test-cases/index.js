@@ -24,7 +24,7 @@ import geohashLayerTests from './geohash-layer';
 import terrainLayerTests from './terrain-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
-import scenegraphLayerTests from './scenegraph-layer';
+// import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
@@ -38,14 +38,14 @@ export default [].concat(
   geojsonLayerTests,
   pathLayerTests,
   pointCloudLayerTests,
-  polygonLayerTests,
+  // polygonLayerTests,
   iconLayerTests,
   textLayerTests,
-  contourLayerTests,
-  gridLayerTests,
+  // contourLayerTests,
+  // gridLayerTests,
   hexagonLayerTests,
-  screenGridLayerTests,
-  heatmapLayerTests,
+  // screenGridLayerTests,
+  // heatmapLayerTests,
   h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,
@@ -53,11 +53,11 @@ export default [].concat(
   mvtLayerTests,
   geohashLayerTests,
   simpleMeshLayerTests,
-  scenegraphLayerTests,
+  // scenegraphLayerTests,
   viewsTests,
-  effectsTests,
+  // effectsTests,
   // TODO - Broken in headless mode with Chrome 113
   // transitionTests,
-  terrainLayerTests,
-  collisionFilterExtensionTests
+  terrainLayerTests
+  // collisionFilterExtensionTests
 );

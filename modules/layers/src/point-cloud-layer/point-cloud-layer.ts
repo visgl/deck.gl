@@ -35,8 +35,8 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -48,7 +48,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -79,7 +79,7 @@ function normalizeData(data) {
 }
 
 /** All properties supported by PointCloudLayer. */
-export type PointCloudLayerProps<DataT = any> = _PointCloudLayerProps<DataT> & LayerProps;
+export type PointCloudLayerProps<DataT = unknown> = _PointCloudLayerProps<DataT> & LayerProps;
 
 /** Properties added by PointCloudLayer. */
 type _PointCloudLayerProps<DataT> = {
@@ -135,6 +135,10 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'PointCloudLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, gouraudLighting, picking]});
   }
@@ -169,9 +173,8 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {changeFlags, props} = params;
     super.updateState(params);
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
     if (changeFlags.dataChanged) {
@@ -181,17 +184,17 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   draw({uniforms}) {
     const {pointSize, sizeUnits} = this.props;
+    const model = this.state.model!;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        sizeUnits: UNIT[sizeUnits],
-        radiusPixels: pointSize
-      })
-      .draw();
+    model.setUniforms(uniforms);
+    model.setUniforms({
+      sizeUnits: UNIT[sizeUnits],
+      radiusPixels: pointSize
+    });
+    model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // a triangle that minimally cover the unit circle
     const positions: number[] = [];
     for (let i = 0; i < 3; i++) {
@@ -199,11 +202,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
+        topology: 'triangle-list',
         attributes: {
           positions: new Float32Array(positions)
         }

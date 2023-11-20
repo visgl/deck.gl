@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {GridCellLayer} from '@deck.gl/layers';
 import {Accessor, AccessorFunction, Color, Position, Material, DefaultProps} from '@deck.gl/core';
 
@@ -62,7 +62,7 @@ const defaultProps: DefaultProps<CPUGridLayerProps> = {
   // grid
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   extruded: false,
 
   // Optional material for 'lighting' shader module
@@ -73,7 +73,7 @@ const defaultProps: DefaultProps<CPUGridLayerProps> = {
 };
 
 /** All properties supported by CPUGridLayer. */
-export type CPUGridLayerProps<DataT = any> = _CPUGridLayerProps<DataT> &
+export type CPUGridLayerProps<DataT = unknown> = _CPUGridLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 /** Properties added by CPUGridLayer. */
@@ -243,6 +243,11 @@ export default class CPUGridLayer<
 > extends AggregationLayer<DataT, ExtraPropsT & Required<_CPUGridLayerProps<DataT>>> {
   static layerName = 'CPUGridLayer';
   static defaultProps = defaultProps;
+
+  state!: AggregationLayer<DataT>['state'] & {
+    cpuAggregator: CPUAggregator;
+    aggregatorState: CPUAggregator['state'];
+  };
 
   initializeState(): void {
     const cpuAggregator = new CPUAggregator({

@@ -1,7 +1,6 @@
 import {Deck} from '@deck.gl/core';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {Framebuffer, Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 import sfZipcodes from '../../../examples/layer-browser/data/sf.zip.geo.json';
 
@@ -22,7 +21,7 @@ const deck = new Deck({
 
 function noop() {}
 
-function onInitialize(gl) {
+function onInitialize(device) {
   framebuffer = new Framebuffer(gl);
   framebuffer.attach({
     [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {

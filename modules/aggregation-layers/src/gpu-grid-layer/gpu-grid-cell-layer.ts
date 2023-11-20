@@ -24,13 +24,14 @@ import {
   project32,
   gouraudLighting,
   picking,
-  LayerContext,
   LayerProps,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, Buffer} from '@luma.gl/core';
+import {CubeGeometry} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
+import {Model} from '@luma.gl/engine';
+import {Buffer} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';
@@ -63,7 +64,12 @@ const defaultProps: DefaultProps<_GPUGridCellLayerProps & LayerProps> = {
 };
 
 type _GPUGridCellLayerProps = _GPUGridLayerProps<any> & {
+  cellSize: number;
   offset: number[];
+  coverage: number;
+  extruded: boolean;
+  elevationScale: number;
+  elevationRange: [number, number];
   gridSize: number[];
   gridOrigin: number[];
   gridOffset: number[];
@@ -75,6 +81,10 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   static layerName = 'GPUGridCellLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({
       vs,
@@ -83,7 +93,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     });
   }
 
-  initializeState({gl}: LayerContext) {
+  initializeState(): void {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       colors: {
@@ -95,13 +105,13 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
         noAlloc: true
       }
     });
-    const model = this._getModel(gl);
+    const model = this._getModel();
     this._setupUniformBuffer(model);
     this.setState({model});
   }
 
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       geometry: new CubeGeometry(),
@@ -123,30 +133,30 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
       colorMaxMinBuffer,
       elevationMaxMinBuffer
     } = this.props;
+    const model = this.state.model!;
 
     const gridOriginLow = [fp64LowPart(gridOrigin[0]), fp64LowPart(gridOrigin[1])];
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
     const domainUniforms = this.getDomainUniforms();
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
     this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms(domainUniforms)
-      .setUniforms({
-        cellSize,
-        offset,
-        extruded,
-        elevationScale,
-        coverage,
-        gridSize,
-        gridOrigin,
-        gridOriginLow,
-        gridOffset,
-        gridOffsetLow,
-        colorRange,
-        elevationRange
-      })
-      .draw();
+    model.setUniforms(uniforms);
+    model.setUniforms(domainUniforms);
+    model.setUniforms({
+      cellSize,
+      offset,
+      extruded,
+      elevationScale,
+      coverage,
+      gridSize,
+      gridOrigin,
+      gridOriginLow,
+      gridOffset,
+      gridOffsetLow,
+      colorRange,
+      elevationRange
+    });
+    model.draw(this.context.renderPass);
     this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }
 
@@ -179,9 +189,10 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   }
 
   private _setupUniformBuffer(model: Model): void {
-    const gl = this.context.gl as WebGL2RenderingContext;
-    const programHandle = model.program.handle;
+    // @ts-expect-error TODO v9 This code is not portable to WebGPU
+    const programHandle = model.pipeline.handle;
 
+    const gl = this.context.gl as WebGL2RenderingContext;
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
     const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
     gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);

@@ -29,6 +29,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
+import {GL} from '@luma.gl/constants';
 
 import {defaultColorRange} from '../utils/color-utils';
 
@@ -36,7 +37,6 @@ import {pointToHexbin} from './hexagon-aggregator';
 import CPUAggregator from '../utils/cpu-aggregator';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 
-import GL from '@luma.gl/constants';
 import {AggregateAccessor} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -70,7 +70,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   extruded: false,
   hexagonAggregator: pointToHexbin,
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   // Optional material for 'lighting' shader module
   material: true,
 
@@ -79,11 +79,11 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
 };
 
 /** All properties supported by by HexagonLayer. */
-export type HexagonLayerProps<DataT = any> = _HexagonLayerProps<DataT> &
+export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 /** Properties added by HexagonLayer. */
-type _HexagonLayerProps<DataT = any> = {
+type _HexagonLayerProps<DataT = unknown> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
    * @default 1000
@@ -256,7 +256,8 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
 
   state!: AggregationLayer<DataT>['state'] & {
     cpuAggregator: CPUAggregator;
-    aggregatorState: any;
+    aggregatorState: CPUAggregator['state'];
+    vertices: number[][] | null;
   };
   initializeState() {
     const cpuAggregator = new CPUAggregator({
@@ -288,6 +289,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
       if (this.state.aggregatorState.layerData !== aggregatorState.layerData) {
         // if user provided custom aggregator and returns hexagonVertices,
         // Need to recalculate radius and angle based on vertices
+        // @ts-expect-error
         const {hexagonVertices} = aggregatorState.layerData || {};
         this.setState({
           vertices: hexagonVertices && this.convertLatLngToMeterOffset(hexagonVertices)
@@ -359,6 +361,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
       ? {vertices, radius: 1}
       : {
           // default geometry
+          // @ts-expect-error TODO - undefined property?
           radius: aggregatorState.layerData.radiusCommon || 1,
           radiusUnits: 'common',
           angle: 90

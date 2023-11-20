@@ -16,14 +16,14 @@ import moment from 'moment-timezone';
 import {Accessor, Layer, _ConstructorOf as ConstructorOf} from '@deck.gl/core';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {H3HexagonLayer, MVTLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
-import CartoTileLayer from '../layers/carto-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
-import {MapType, TILE_FORMATS, TileFormat} from './maps-api-common';
-import {assert, createBinaryProxy} from '../utils';
+import VectorTileLayer from '../layers/vector-tile-layer';
+import {MapType} from './types';
+import {assert, createBinaryProxy, scaleIdentity} from '../utils';
 import {
   CustomMarkersRange,
   MapDataset,
@@ -41,7 +41,8 @@ const SCALE_FUNCS = {
   quantile: scaleQuantile,
   quantize: scaleQuantize,
   sqrt: scaleSqrt,
-  custom: scaleThreshold
+  custom: scaleThreshold,
+  identity: scaleIdentity
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
@@ -201,10 +202,9 @@ export function getLayer(
 }
 
 export function layerFromTileDataset(
-  formatTiles: TileFormat | null = TILE_FORMATS.MVT,
   scheme: string,
   type?: MapType
-): typeof CartoTileLayer | typeof H3TileLayer | typeof MVTLayer | typeof QuadbinTileLayer {
+): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
@@ -214,34 +214,24 @@ export function layerFromTileDataset(
   if (scheme === 'quadbin') {
     return QuadbinTileLayer;
   }
-  if (formatTiles === 'mvt') {
-    return MVTLayer;
-  }
 
-  // formatTiles === BINARY|JSON|GEOJSON
-  return CartoTileLayer;
+  return VectorTileLayer;
 }
 
 function getTileLayer(dataset: MapDataset, basePropMap) {
   const {
     aggregationExp,
     aggregationResLevel,
-    data: {
-      scheme,
-      tiles: [tileUrl]
-    }
+    data: {scheme}
   } = dataset;
-  /* global URL */
-  const formatTiles = new URL(tileUrl).searchParams.get('formatTiles') as TileFormat;
 
   return {
-    Layer: layerFromTileDataset(formatTiles, scheme),
+    Layer: layerFromTileDataset(scheme),
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
       ...(aggregationExp && {aggregationExp}),
       ...(aggregationResLevel && {aggregationResLevel}),
-      formatTiles,
       uniqueIdProperty: 'geoid'
     }
   };
@@ -317,7 +307,7 @@ export function opacityToAlpha(opacity?: number) {
   return opacity !== undefined ? Math.round(255 * Math.pow(opacity, 1 / 2.2)) : 255;
 }
 
-function getAccessorKeys(name: string, aggregation: string | undefined): string[] {
+function getAccessorKeys(name: string, aggregation?: string | undefined): string[] {
   let keys = [name];
   if (aggregation) {
     // Snowflake will capitalized the keys, need to check lower and upper case version
@@ -343,33 +333,13 @@ export function getColorValueAccessor({name}, colorAggregation, data: any) {
 }
 
 export function getColorAccessor(
-  {name},
+  {name, colorColumn}: VisualChannelField,
   scaleType: SCALE_TYPE,
-  {aggregation, range: {colors, colorMap}},
+  {aggregation, range},
   opacity: number | undefined,
   data: any
 ) {
-  const scale = SCALE_FUNCS[scaleType as any]();
-  let domain: (string | number)[] = [];
-  let scaleColor: string[] = [];
-
-  if (Array.isArray(colorMap)) {
-    colorMap.forEach(([value, color]) => {
-      domain.push(value);
-      scaleColor.push(color);
-    });
-  } else {
-    domain = calculateDomain(data, name, scaleType, colors.length);
-    scaleColor = colors;
-  }
-
-  if (scaleType === 'ordinal') {
-    domain = domain.slice(0, scaleColor.length);
-  }
-
-  scale.domain(domain);
-  scale.range(scaleColor);
-  scale.unknown(UNKNOWN_COLOR);
+  const scale = calculateLayerScale(colorColumn || name, scaleType, range, data);
   const alpha = opacityToAlpha(opacity);
 
   let accessorKeys = getAccessorKeys(name, aggregation);
@@ -382,6 +352,36 @@ export function getColorAccessor(
     return [r, g, b, propertyValue === null ? 0 : alpha];
   };
   return normalizeAccessor(accessor, data);
+}
+
+function calculateLayerScale(name, scaleType, range, data) {
+  const scale = SCALE_FUNCS[scaleType]();
+  let domain: (string | number)[] = [];
+  let scaleColor: string[] = [];
+
+  if (scaleType !== 'identity') {
+    const {colorMap, colors} = range;
+
+    if (Array.isArray(colorMap)) {
+      colorMap.forEach(([value, color]) => {
+        domain.push(value);
+        scaleColor.push(color);
+      });
+    } else {
+      domain = calculateDomain(data, name, scaleType, colors.length);
+      scaleColor = colors;
+    }
+
+    if (scaleType === 'ordinal') {
+      domain = domain.slice(0, scaleColor.length);
+    }
+  }
+
+  scale.domain(domain);
+  scale.range(scaleColor);
+  scale.unknown(UNKNOWN_COLOR);
+
+  return scale;
 }
 
 const FALLBACK_ICON =
