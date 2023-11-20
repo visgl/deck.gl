@@ -37,7 +37,7 @@
     "@types/google.maps": "^3.48.6"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0",
+    "@deck.gl/core": "^9.0.0-alpha",
     "@luma.gl/constants": "9.0.0-alpha.42",
     "@luma.gl/core": "9.0.0-alpha.42",
     "@luma.gl/engine": "9.0.0-alpha.42",
