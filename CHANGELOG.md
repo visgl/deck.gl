@@ -21,7 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
-#### deck.gl [9.0.0-alpha.4] - Thu 16 2023
+#### deck.gl [9.0.0-alpha.5] - Nov 20 2023
+
+- [chore] Bump peerDependencies to 9.0.0 (#8295)
+- Expose types at the package roots (#8293)
+
+#### deck.gl [9.0.0-alpha.4] - Nov 16 2023
 
 - CARTO: Handle empty 204 responses (#8286)
 - Improve Tile3DLayer#isLoaded (#8285)
@@ -31,17 +36,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - CARTO: Add queryParameters to stats requests in fetchMap
 - CARTO: QueryParameters should be optional for boundaries (#8282)
 
-#### deck.gl [9.0.0-alpha.3] - Tue 14 2023
+#### deck.gl [9.0.0-alpha.3] - Nov 14 2023
 
 - Use vertexPositions in getBounds (#8247)
 
-#### deck.gl [9.0.0-alpha.2] - Mon 13 2023
+#### deck.gl [9.0.0-alpha.2] - Nov 13 2023
 
 - [chore] Bump loaders 4.0.3 & luma 9.0.0-alpha.42 (#8262)
 - Use getStride() in bufferLayoutEqual() comparison (#8268)
 - Fix pickObjects when using binary data (#8216)
 
-#### deck.gl [9.0.0-alpha.1] - Fri 10 2023
+#### deck.gl [9.0.0-alpha.1] - Nov 10 2023
 
 - chore: use node 18 (#8222)
 - chore: loaders.gl update to v4.0 (#8215)
