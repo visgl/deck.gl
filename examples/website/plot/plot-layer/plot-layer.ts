@@ -115,7 +115,8 @@ export default class PlotLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'PlotLayer';
   static defaultProps = defaultProps;
 
-  declare state: CompositeLayer['state'] & {
+  // @ts-ignore
+  state!: CompositeLayer['state'] & {
     xScale: ScaleLinear<number, number>;
     yScale: ScaleLinear<number, number>;
     zScale: ScaleLinear<number, number>;
