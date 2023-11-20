@@ -35,7 +35,7 @@
     "@luma.gl/shadertools": "9.0.0-alpha.42"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0",
+    "@deck.gl/core": "^9.0.0",
     "@luma.gl/constants": "9.0.0-alpha.42",
     "@luma.gl/core": "9.0.0-alpha.42",
     "@luma.gl/engine": "9.0.0-alpha.42",
