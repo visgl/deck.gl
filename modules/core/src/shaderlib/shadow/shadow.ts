@@ -158,7 +158,7 @@ function getViewProjectionMatrices({
     [0, viewport.height, -1], // bottom left near
     [viewport.width, viewport.height, -1] // bottom right near
   ].map(pixel =>
-    // ts-expect-error z may be undefined
+    // @ts-expect-error z may be undefined
     screenToCommonSpace(pixel, pixelUnprojectionMatrix)
   );
 
@@ -234,12 +234,11 @@ function createShadowUniforms(
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
     uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
     uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
+  }
 
-    if (opts.shadowMaps && opts.shadowMaps.length > 0) {
-      uniforms[`shadow_uShadowMap${i}`] = opts.shadowMaps[i];
-    } else {
-      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMap;
-    }
+  for (let i = 0; i < 2; i++) {
+    uniforms[`shadow_uShadowMap${i}`] =
+      (opts.shadowMaps && opts.shadowMaps[i]) || opts.dummyShadowMap;
   }
   return uniforms;
 }

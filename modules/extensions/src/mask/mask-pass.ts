@@ -40,18 +40,18 @@ export default class MaskPass extends LayersPass {
   render(options: MaskPassRenderOptions) {
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
+    const clearColor = [255, 255, 255, 255];
 
     return withGLParameters(
       this.device,
       {
-        clearColor: [255, 255, 255, 255],
         blend: true,
         blendFunc: [GL.ZERO, GL.ONE],
         blendEquation: GL.FUNC_SUBTRACT,
         colorMask,
         depthTest: false
       },
-      () => super.render({...options, target: this.fbo, pass: 'mask'})
+      () => super.render({...options, clearColor, target: this.fbo, pass: 'mask'})
     );
   }
 

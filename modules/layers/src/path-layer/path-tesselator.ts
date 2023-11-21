@@ -118,9 +118,7 @@ export default class PathTesselator extends Tesselator<
         context.vertexStart += geometrySize;
       }
     } else {
-      // @ts-expect-error
       this._updateSegmentTypes(path, context);
-      // @ts-expect-error
       this._updatePositions(path, context);
     }
   }
@@ -132,7 +130,7 @@ export default class PathTesselator extends Tesselator<
       geometrySize: number;
     }
   ) {
-    const segmentTypes = this.attributes.segmentTypes;
+    const segmentTypes = this.attributes.segmentTypes as TypedArray;
     const isPathClosed = path ? this.isClosed(path) : false;
     const {vertexStart, geometrySize} = context;
 

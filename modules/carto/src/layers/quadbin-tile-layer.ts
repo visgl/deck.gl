@@ -1,15 +1,10 @@
-import {
-  CompositeLayer,
-  CompositeLayerProps,
-  Layer,
-  LayersList,
-  UpdateParameters,
-  DefaultProps
-} from '@deck.gl/core';
+import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -21,18 +16,18 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  aggregationResLevel: 6
+  data: TilejsonPropType
 };
 
 /** All properties supported by QuadbinTileLayer. */
-export type QuadbinTileLayerProps<DataT = any> = _QuadbinTileLayerProps<DataT> &
+export type QuadbinTileLayerProps<DataT = unknown> = _QuadbinTileLayerProps<DataT> &
   CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */
-type _QuadbinTileLayerProps<DataT> = QuadbinLayerProps<DataT> & {
-  data: string;
-  aggregationResLevel?: number;
-};
+type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 export default class QuadbinTileLayer<
   DataT = any,
@@ -41,27 +36,21 @@ export default class QuadbinTileLayer<
   static layerName = 'QuadbinTileLayer';
   static defaultProps = defaultProps;
 
-  state!: {
-    tileJSON: any;
-    data: any;
-  };
-  initializeState(): void {
-    this.setState({data: null, tileJSON: null});
-  }
-
-  updateState({changeFlags}: UpdateParameters<this>): void {
-    if (changeFlags.dataChanged) {
-      let {data} = this.props;
-      const tileJSON = data;
-      data = (tileJSON as any).tiles;
-      this.setState({data, tileJSON});
-    }
+  getLoadOptions(): any {
+    const loadOptions = super.getLoadOptions() || {};
+    const tileJSON = this.props.data as TilejsonResult;
+    injectAccessToken(loadOptions, tileJSON.accessToken);
+    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
+    return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const {data, tileJSON} = this.state;
-    const maxZoom = parseInt(tileJSON?.maxresolution);
+    const tileJSON = this.props.data as TilejsonResult;
+    if (!tileJSON) return null;
+
+    const {tiles: data, maxresolution: maxZoom} = tileJSON;
     return [
+      // @ts-ignore
       new SpatialIndexTileLayer(this.props, {
         id: `quadbin-tile-layer-${this.props.id}`,
         data,
@@ -69,10 +58,7 @@ export default class QuadbinTileLayer<
         TilesetClass: QuadbinTileset2D as any,
         renderSubLayers,
         maxZoom,
-        loadOptions: {
-          ...this.getLoadOptions(),
-          cartoSpatialTile: {scheme: 'quadbin'}
-        }
+        loadOptions: this.getLoadOptions()
       })
     ];
   }

@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "9.0.0-alpha.5",
   "publishConfig": {
     "access": "public"
   },
@@ -18,6 +18,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -31,30 +32,30 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/3d-tiles": "^3.4.13",
-    "@loaders.gl/gis": "^3.4.13",
-    "@loaders.gl/loader-utils": "^3.4.13",
-    "@loaders.gl/mvt": "^3.4.13",
-    "@loaders.gl/schema": "^3.4.13",
-    "@loaders.gl/terrain": "^3.4.13",
-    "@loaders.gl/tiles": "^3.4.13",
-    "@loaders.gl/wms": "^3.4.13",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@math.gl/core": "4.0.0-alpha.4",
-    "@math.gl/culling": "4.0.0-alpha.4",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@loaders.gl/3d-tiles": "4.0.3",
+    "@loaders.gl/gis": "4.0.3",
+    "@loaders.gl/loader-utils": "4.0.3",
+    "@loaders.gl/mvt": "4.0.3",
+    "@loaders.gl/schema": "4.0.3",
+    "@loaders.gl/terrain": "4.0.3",
+    "@loaders.gl/tiles": "4.0.3",
+    "@loaders.gl/wms": "4.0.3",
+    "@luma.gl/core": "9.0.0-alpha.42",
+    "@math.gl/core": "^4.0.0",
+    "@math.gl/culling": "^4.0.0",
+    "@math.gl/web-mercator": "^4.0.0",
     "@types/geojson": "^7946.0.8",
     "h3-js": "^4.1.0",
     "long": "^3.2.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0",
-    "@deck.gl/extensions": "^8.0.0",
-    "@deck.gl/layers": "^8.0.0",
-    "@deck.gl/mesh-layers": "^8.0.0",
-    "@loaders.gl/core": "^3.4.13",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@luma.gl/shadertools": "9.0.0-alpha.37"
+    "@deck.gl/core": "^9.0.0-alpha",
+    "@deck.gl/extensions": "^9.0.0-alpha",
+    "@deck.gl/layers": "^9.0.0-alpha",
+    "@deck.gl/mesh-layers": "^9.0.0-alpha",
+    "@loaders.gl/core": "4.0.3",
+    "@luma.gl/core": "9.0.0-alpha.42",
+    "@luma.gl/shadertools": "9.0.0-alpha.42"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

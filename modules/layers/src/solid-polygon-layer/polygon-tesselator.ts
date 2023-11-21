@@ -233,7 +233,7 @@ export default class PolygonTesselator extends Tesselator<
     {vertexStart, geometrySize}: GeometryUpdateContext
   ) {
     const {positionSize} = this;
-    const vertexValid = this.attributes.vertexValid;
+    const vertexValid = this.attributes.vertexValid as TypedArray;
     const holeIndices = polygon && Polygon.getHoleIndices(polygon);
     /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,

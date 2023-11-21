@@ -16,7 +16,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
 };
 
 /** All properties supported by GridLayer. */
-export type GridLayerProps<DataT = any> = _GridLayerProps<DataT> & CompositeLayerProps;
+export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
 
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = CPUGridLayerProps<DataT> &

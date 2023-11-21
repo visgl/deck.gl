@@ -1,10 +1,10 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/core';
-import {Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
-import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
+import {glArrayFromType, getBufferAttributeLayout, getStride} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -33,10 +33,6 @@ export type ShaderAttributeOptions = Partial<BufferAccessor> & {
   vertexOffset?: number;
   elementOffset?: number;
 };
-
-function getStride(accessor: DataColumnSettings<any>): number {
-  return accessor.stride || accessor.size * accessor.bytesPerElement;
-}
 
 function resolveShaderAttribute(
   baseAccessor: DataColumnSettings<any>,
@@ -210,6 +206,7 @@ export default class DataColumn<Options, State> {
         });
       }
     }
+    // @ts-ignore this._buffer cannot be null
     return this._buffer;
   }
 
@@ -244,10 +241,21 @@ export default class DataColumn<Options, State> {
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
-    const result: Record<string, Buffer | NumericArray | null> = {};
+  getValue(
+    attributeName: string = this.id,
+    options: Partial<ShaderAttributeOptions> | null = null
+  ): Record<string, Buffer | TypedArray | null> {
+    const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
-      result[attributeName] = this.value;
+      const value = this.value as TypedArray;
+      if (options) {
+        const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
+        const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
+        const size = shaderAttributeDef.size || this.size;
+        result[attributeName] = value.subarray(offset, offset + size);
+      } else {
+        result[attributeName] = value;
+      }
     } else {
       result[attributeName] = this.getBuffer();
     }
@@ -267,10 +275,11 @@ export default class DataColumn<Options, State> {
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
     const accessor = this.getAccessor();
+    const attributes: BufferAttributeLayout[] = [];
     const result: BufferLayout = {
       name: this.id,
       byteStride: getStride(accessor),
-      attributes: []
+      attributes
     };
 
     if (this.doublePrecision) {
@@ -278,7 +287,7 @@ export default class DataColumn<Options, State> {
         accessor,
         options || {}
       );
-      result.attributes.push(
+      attributes.push(
         getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
         getBufferAttributeLayout(`${attributeName}64Low`, {
           ...accessor,
@@ -287,11 +296,11 @@ export default class DataColumn<Options, State> {
       );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
-      result.attributes.push(
+      attributes.push(
         getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
       );
     } else {
-      result.attributes.push(getBufferAttributeLayout(attributeName, accessor));
+      attributes.push(getBufferAttributeLayout(attributeName, accessor));
     }
     return result;
   }
@@ -424,7 +433,7 @@ export default class DataColumn<Options, State> {
         buffer.reallocate(requiredBufferSize);
       }
       // Hack: force Buffer to infer data type
-      buffer.setAccessor(null);
+      buffer.setAccessor({});
       buffer.subData({data: value, offset: byteOffset});
       // @ts-ignore
       accessor.type = opts.type || buffer.accessor.type;

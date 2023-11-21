@@ -42,12 +42,12 @@ import {replaceInRange} from '../utils';
 /**
  * All properties supported by `PolygonLayer`.
  */
-export type PolygonLayerProps<DataT = any> = _PolygonLayerProps<DataT> & CompositeLayerProps;
+export type PolygonLayerProps<DataT = unknown> = _PolygonLayerProps<DataT> & CompositeLayerProps;
 
 /**
  * Properties added by `PolygonLayer`.
  */
-type _PolygonLayerProps<DataT = any> = {
+type _PolygonLayerProps<DataT = unknown> = {
   data: LayerDataSource<DataT>;
   /**
    * Whether to draw an outline around the polygon (solid fill).
@@ -233,7 +233,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   lineJointRounded: false,
   lineMiterLimit: 4,
 
-  getPolygon: {type: 'accessor', value: f => f.polygon},
+  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   // Polygon fill color
   getFillColor: {type: 'accessor', value: defaultFillColor},
   // Point, line and polygon outline color
@@ -254,9 +254,20 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
   static layerName = 'PolygonLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    paths: number[][];
+    pathsDiff:
+      | {
+          startRow: number;
+          endRow: number;
+        }[]
+      | null;
+  };
+
   initializeState(): void {
     this.state = {
-      paths: []
+      paths: [],
+      pathsDiff: null
     };
 
     if (this.props.getLineDashArray) {

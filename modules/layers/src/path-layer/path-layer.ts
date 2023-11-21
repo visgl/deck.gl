@@ -109,7 +109,7 @@ type _PathLayerProps<DataT> = {
   rounded?: boolean;
 };
 
-export type PathLayerProps<DataT = any> = _PathLayerProps<DataT> & LayerProps;
+export type PathLayerProps<DataT = unknown> = _PathLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -124,7 +124,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   billboard: false,
   _pathType: null,
 
-  getPath: {type: 'accessor', value: object => object.path},
+  getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
 
@@ -158,11 +158,15 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return false;
   }
 
+  getBounds(): [number[], number[]] | null {
+    return this.getAttributeManager()?.getBounds(['vertexPositions']);
+  }
+
   initializeState() {
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       vertexPositions: {
         size: 3,
         // Start filling buffer from 1 vertex in
@@ -261,14 +265,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       if (!changeFlags.dataChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
-        attributeManager.invalidateAll();
+        attributeManager!.invalidateAll();
       }
     }
 
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
-      attributeManager.invalidateAll();
+      attributeManager!.invalidateAll();
     }
   }
 
@@ -314,8 +318,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMaxPixels
     } = this.props;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
+    model.setUniforms({
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
@@ -325,7 +330,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMinPixels,
       widthMaxPixels
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -376,7 +381,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {

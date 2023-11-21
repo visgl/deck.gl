@@ -17,7 +17,7 @@ import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -31,6 +31,7 @@ import {
   Tileset2D,
   Tile2DHeader,
   getURLFromTemplate,
+  URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
 } from '../tileset-2d';
@@ -59,7 +60,7 @@ export type TileJson = {
   version?: string;
 };
 
-type ParsedMvtTile = Feature[] | BinaryFeatures;
+type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
@@ -102,6 +103,15 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
+  state!: TileLayer<ParsedMvtTile>['state'] & {
+    binary: boolean;
+    data: URLTemplate;
+    tileJSON: any;
+    highlightColor: number[];
+    hoveredFeatureId: number | string | null;
+    hoveredFeatureLayerName: string | null;
+  };
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
@@ -114,7 +124,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 
   get isLoaded(): boolean {
-    return this.state && this.state.data && this.state.tileset && super.isLoaded;
+    return Boolean(this.state && this.state.data && this.state.tileset && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -168,13 +178,13 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
-      if (Number.isFinite(tileJSON.minzoom) && tileJSON.minzoom > minZoom) {
+      if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
         opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
-        (!Number.isFinite(maxZoom) || tileJSON.maxzoom < maxZoom)
+        (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
       ) {
         opts.maxZoom = tileJSON.maxzoom;
       }
@@ -288,8 +298,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const isWGS84 = Boolean(this.context.viewport.resolution);
 
     if (this.state.binary && info.index !== -1) {
-      const {data} = params.sourceLayer.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      const {data} = params.sourceLayer!.props;
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
@@ -340,8 +350,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return findIndexBinary(
         data,
         uniqueIdProperty,
-        featureIdToHighlight,
-        isHighlighted ? '' : hoveredFeatureLayerName
+        featureIdToHighlight!,
+        isHighlighted ? '' : hoveredFeatureLayerName!
       );
     }
 
@@ -355,7 +365,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     const x = viewport.x;
     const y = viewport.y;
     const layerIds = [this.id];
-    return deck.pickObjects({x, y, width, height, layerIds, maxObjects});
+    return deck!.pickObjects({x, y, width, height, layerIds, maxObjects});
   }
 
   /** Get the rendered features in the current viewport. */
@@ -382,9 +392,9 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state.tileset;
+    const tileset: Tileset2D = this.state.tileset!;
 
-    // TODO ts-expect-error selectedTiles are always initialized when tile is being processed
+    // @ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs

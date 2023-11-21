@@ -64,7 +64,12 @@ const defaultProps: DefaultProps<_GPUGridCellLayerProps & LayerProps> = {
 };
 
 type _GPUGridCellLayerProps = _GPUGridLayerProps<any> & {
+  cellSize: number;
   offset: number[];
+  coverage: number;
+  extruded: boolean;
+  elevationScale: number;
+  elevationRange: [number, number];
   gridSize: number[];
   gridOrigin: number[];
   gridOffset: number[];
@@ -75,6 +80,10 @@ type _GPUGridCellLayerProps = _GPUGridLayerProps<any> & {
 export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
   static layerName = 'GPUGridCellLayer';
   static defaultProps = defaultProps;
+
+  state!: {
+    model?: Model;
+  };
 
   getShaders() {
     return super.getShaders({
@@ -124,15 +133,16 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
       colorMaxMinBuffer,
       elevationMaxMinBuffer
     } = this.props;
+    const model = this.state.model!;
 
     const gridOriginLow = [fp64LowPart(gridOrigin[0]), fp64LowPart(gridOrigin[1])];
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
     const domainUniforms = this.getDomainUniforms();
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
     this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms(domainUniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms(domainUniforms);
+    model.setUniforms({
       cellSize,
       offset,
       extruded,
@@ -146,7 +156,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
       colorRange,
       elevationRange
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
     this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }
 

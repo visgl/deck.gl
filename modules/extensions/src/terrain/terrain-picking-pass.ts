@@ -47,7 +47,7 @@ export class TerrainPickingPass extends PickLayersPass {
       return;
     }
 
-    const layers = terrainCover.filterLayers(opts.layers);
+    const layers = terrainCover.filterLayers(opts.layers!);
     const terrainLayer = terrainCover.targetLayer;
     if (terrainLayer.props.pickable) {
       layers.unshift(terrainLayer);

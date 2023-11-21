@@ -7,7 +7,7 @@ import PickLayersPass from '../passes/pick-layers-pass';
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
-import type {Effect} from './effect';
+import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
@@ -60,7 +60,7 @@ export default class DeckRenderer {
     views: {[viewId: string]: View};
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
@@ -140,11 +140,10 @@ export default class DeckRenderer {
 
   private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
     const {renderBuffers} = this;
-    const params = {
+    const params: PostRenderOptions = {
       ...opts,
       inputBuffer: renderBuffers[0],
-      swapBuffer: renderBuffers[1],
-      target: null
+      swapBuffer: renderBuffers[1]
     };
     for (const effect of effects) {
       if (effect.postRender) {

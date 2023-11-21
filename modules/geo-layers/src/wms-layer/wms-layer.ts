@@ -16,7 +16,8 @@ import {
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import type {ImageSourceMetadata, ImageType, ImageServiceType} from '@loaders.gl/wms';
+import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
+import type {ImageServiceType} from '@loaders.gl/wms';
 import {ImageSource, createImageSource} from '@loaders.gl/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
@@ -206,17 +207,20 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
       srs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
     }
-    const requestParams = {
+    const requestParams: GetImageParameters = {
       width,
       height,
-      bbox: bounds,
+      boundingBox: [
+        [bounds[0], bounds[1]],
+        [bounds[2], bounds[3]]
+      ],
       layers,
-      srs
+      crs: srs
     };
     if (srs === 'EPSG:3857') {
-      const [minX, minY] = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
-      const [maxX, maxY] = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
-      requestParams.bbox = [minX, minY, maxX, maxY];
+      const min = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
+      const max = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
+      requestParams.boundingBox = [min, max];
     }
 
     try {

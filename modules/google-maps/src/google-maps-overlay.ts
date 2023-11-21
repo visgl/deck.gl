@@ -76,9 +76,9 @@ export default class GoogleMapsOverlay {
   setProps(props: Partial<GoogleMapsOverlayProps>): void {
     Object.assign(this.props, props);
     if (this._deck) {
-      if (props.style) {
-        // @ts-ignore accessing protected member
-        const parentStyle = this._deck.canvas.parentElement.style;
+      const canvas = this._deck.getCanvas();
+      if (props.style && canvas?.parentElement) {
+        const parentStyle = canvas.parentElement.style;
         Object.assign(parentStyle, props.style);
         props.style = null;
       }
@@ -169,11 +169,11 @@ export default class GoogleMapsOverlay {
     // animationLoop.onRender. We override this to wrap
     // in withGLParameters so we don't modify the GL state
     // @ts-ignore accessing protected member
-    const {animationLoop} = deck;
+    const animationLoop = deck.animationLoop!;
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       withGLParameters(gl, {}, () => {
-        animationLoop.props.onRender(animationLoop.animationProps);
+        animationLoop.props.onRender(animationLoop.animationProps!);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
@@ -202,10 +202,12 @@ export default class GoogleMapsOverlay {
       this._overlay as google.maps.OverlayView
     );
 
-    // @ts-ignore accessing protected member
-    const parentStyle = deck.canvas.parentElement.style;
-    parentStyle.left = `${left}px`;
-    parentStyle.top = `${top}px`;
+    const canvas = deck.getCanvas();
+    if (canvas?.parentElement) {
+      const parentStyle = canvas.parentElement.style;
+      parentStyle.left = `${left}px`;
+      parentStyle.top = `${top}px`;
+    }
 
     const altitude = 10000;
     deck.setProps({

@@ -34,6 +34,7 @@ export default class ScreenPass extends Pass {
 
   render(params: ScreenPassRenderOptions): void {
     const [drawingBufferWidth, drawingBufferHeight] =
+      // @ts-expect-error TODO - assuming WebGL context
       this.device.canvasContext.getDrawingBufferSize();
     setGLParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
 
