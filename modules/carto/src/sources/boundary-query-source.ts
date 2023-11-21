@@ -3,26 +3,26 @@ import {baseSource} from './base-source';
 import type {SourceOptions, TilejsonResult} from './types';
 
 export type BoundaryQuerySourceOptions = SourceOptions & {
-  boundaryId: string;
+  tilesetTableName: string;
   matchingColumn?: string;
-  sqlQuery: string;
+  propertiesSqlQuery: string;
   queryParameters?: QueryParameters;
 };
 type UrlParameters = {
-  boundaryId: string;
+  tilesetTableName: string;
   matchingColumn: string;
-  sqlQuery: string;
+  propertiesSqlQuery: string;
   queryParameters?: string;
 };
 
 export const boundaryQuerySource = async function (
   options: BoundaryQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {boundaryId, matchingColumn = 'id', sqlQuery, queryParameters} = options;
+  const {tilesetTableName, matchingColumn = 'id', propertiesSqlQuery, queryParameters} = options;
   const urlParameters: UrlParameters = {
-    boundaryId,
+    tilesetTableName,
     matchingColumn,
-    sqlQuery
+    propertiesSqlQuery
   };
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

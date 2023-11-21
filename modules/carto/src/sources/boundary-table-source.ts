@@ -2,26 +2,26 @@ import {baseSource} from './base-source';
 import type {SourceOptions, TilejsonResult} from './types';
 
 export type BoundaryTableSourceOptions = SourceOptions & {
-  boundaryId: string;
+  tilesetTableName: string;
   columns?: string[];
   matchingColumn?: string;
-  tableName: string;
+  propertiesTableName: string;
 };
 type UrlParameters = {
-  boundaryId: string;
+  tilesetTableName: string;
   columns?: string;
   matchingColumn: string;
-  tableName: string;
+  propertiesTableName: string;
 };
 
 export const boundaryTableSource = async function (
   options: BoundaryTableSourceOptions
 ): Promise<TilejsonResult> {
-  const {boundaryId, columns, matchingColumn = 'id', tableName} = options;
+  const {tilesetTableName, columns, matchingColumn = 'id', propertiesTableName} = options;
   const urlParameters: UrlParameters = {
-    boundaryId,
+    tilesetTableName,
     matchingColumn,
-    tableName
+    propertiesTableName
   };
 
   if (columns) {
