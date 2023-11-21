@@ -11,7 +11,7 @@ export type BoundaryQuerySourceOptions = SourceOptions & {
 type UrlParameters = {
   tilesetTableName: string;
   matchingColumn: string;
-  sqlQuery: string; // TODO rename to propertiesSqlQuery
+  propertiesSqlQuery: string;
   queryParameters?: string;
 };
 
@@ -22,7 +22,7 @@ export const boundaryQuerySource = async function (
   const urlParameters: UrlParameters = {
     tilesetTableName,
     matchingColumn,
-    sqlQuery: propertiesSqlQuery
+    propertiesSqlQuery
   };
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

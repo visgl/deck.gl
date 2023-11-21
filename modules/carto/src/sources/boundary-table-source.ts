@@ -11,7 +11,7 @@ type UrlParameters = {
   tilesetTableName: string;
   columns?: string;
   matchingColumn: string;
-  tableName: string; // TODO: rename to propertiesTableName
+  propertiesTableName: string;
 };
 
 export const boundaryTableSource = async function (
@@ -21,7 +21,7 @@ export const boundaryTableSource = async function (
   const urlParameters: UrlParameters = {
     tilesetTableName,
     matchingColumn,
-    tableName: propertiesTableName
+    propertiesTableName
   };
 
   if (columns) {
