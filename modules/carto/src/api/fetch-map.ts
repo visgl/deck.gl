@@ -203,7 +203,6 @@ export type FetchMapOptions = {
   cartoMapId: string;
   clientId?: string;
   headers?: Record<string, string>;
-  mapsUrl?: string;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 };
@@ -214,7 +213,6 @@ export async function fetchMap({
   cartoMapId,
   clientId = DEFAULT_CLIENT,
   headers = {},
-  mapsUrl,
   autoRefresh,
   onNewData
 }: FetchMapOptions) {
@@ -230,7 +228,7 @@ export async function fetchMap({
     );
   }
 
-  const baseUrl = `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
+  const baseUrl = `${buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
   const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext});
 
