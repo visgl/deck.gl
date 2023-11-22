@@ -11,18 +11,6 @@ function buildUrlFromBase(apiBaseUrl: string, endpoint: V3Endpoint) {
   return `${apiBaseUrl}${suffix}`;
 }
 
-export function buildMapsUrlFromBase(apiBaseUrl: string): string {
-  return buildUrlFromBase(apiBaseUrl, 'maps');
-}
-
-export function buildStatsUrlFromBase(apiBaseUrl: string): string {
-  return buildUrlFromBase(apiBaseUrl, 'stats');
-}
-
-export function buildQueryUrlFromBase(apiBaseUrl: string): string {
-  return buildUrlFromBase(apiBaseUrl, 'sql');
-}
-
 export function buildPublicMapUrl({
   apiBaseUrl,
   cartoMapId
@@ -30,7 +18,7 @@ export function buildPublicMapUrl({
   apiBaseUrl: string;
   cartoMapId: string;
 }): string {
-  return `${buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
+  return `${buildUrlFromBase(apiBaseUrl, 'maps')}/public/${cartoMapId}`;
 }
 
 export function buildStatsUrl({
@@ -46,8 +34,7 @@ export function buildStatsUrl({
   source: string;
   type: MapType;
 }): string {
-  const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
-  let baseUrl = `${statsUrl}/${connectionName}/`;
+  let baseUrl = `${buildUrlFromBase(apiBaseUrl, 'stats')}/${connectionName}/`;
   if (type === 'query') {
     baseUrl += attribute;
   } else {
@@ -67,7 +54,7 @@ export function buildSourceUrl({
   connectionName: string;
   endpoint: MapType;
 }): string {
-  return `${buildMapsUrlFromBase(apiBaseUrl)}/${connectionName}/${endpoint}`;
+  return `${buildUrlFromBase(apiBaseUrl, 'maps')}/${connectionName}/${endpoint}`;
 }
 
 export function buildQueryUrl({
@@ -77,5 +64,5 @@ export function buildQueryUrl({
   apiBaseUrl: string;
   connectionName: string;
 }): string {
-  return `${buildQueryUrlFromBase(apiBaseUrl)}/${connectionName}/query`;
+  return `${buildUrlFromBase(apiBaseUrl, 'sql')}/${connectionName}/query`;
 }

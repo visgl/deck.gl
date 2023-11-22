@@ -1,6 +1,6 @@
 import {SOURCE_DEFAULTS} from '../sources';
 import type {SourceOptions, QuerySourceOptions, QueryResult} from '../sources/types';
-import {buildQueryUrl, buildQueryUrlFromBase} from './endpoints';
+import {buildQueryUrl} from './endpoints';
 import {requestWithParameters} from './request-with-parameters';
 import {APIErrorContext} from './types';
 
