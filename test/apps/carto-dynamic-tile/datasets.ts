@@ -17,9 +17,9 @@ import {
 export default {
   'boundary-query': {
     source: boundaryQuerySource,
-    boundaryId: 'usa_pos4',
+    tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
     matchingColumn: 'geoid',
-    sqlQuery:
+    propertiesSqlQuery:
       'select * from `cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered`',
     getFillColor: colorBins({
       // TODO remove parseFloat, only needed as binary format encodes as strings
@@ -30,10 +30,10 @@ export default {
   },
   'boundary-table': {
     source: boundaryTableSource,
-    boundaryId: 'usa_pos4',
+    tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
     matchingColumn: 'geoid',
     columns: ['do_label', 'do_perimeter'],
-    tableName: 'cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered',
+    propertiesTableName: 'cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered',
     getFillColor: colorBins({
       attr: d => parseFloat(d!.properties!['do_perimeter']),
       domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
