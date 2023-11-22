@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, Texture} from '@luma.gl/core';
+import type {Buffer, Device, Texture} from '@luma.gl/core';
 import {Model, Geometry, GPUGeometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
