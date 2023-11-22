@@ -68,7 +68,6 @@ export default class SurfaceLayer<
   static defaultProps = defaultProps;
   static layerName: string = 'SurfaceLayer';
 
-  // @ts-ignore
   state!: Layer['state'] & {
     model?: Model;
     vertexCount: number;

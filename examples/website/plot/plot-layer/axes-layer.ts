@@ -96,7 +96,6 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static layerName = 'AxesLayer';
   static defaultProps = defaultProps;
 
-  // @ts-ignore
   state!: Layer['state'] & {
     models: [Model, Model];
     modelsByName: {grids: Model; labels: Model};
