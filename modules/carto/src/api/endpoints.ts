@@ -23,6 +23,16 @@ export function buildQueryUrlFromBase(apiBaseUrl: string): string {
   return buildUrlFromBase(apiBaseUrl, 'sql');
 }
 
+export function buildPublicMapUrl({
+  apiBaseUrl,
+  cartoMapId
+}: {
+  apiBaseUrl: string;
+  cartoMapId: string;
+}): string {
+  return `${buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
+}
+
 export function buildStatsUrl({
   attribute,
   apiBaseUrl,

@@ -4,7 +4,7 @@
  */
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
-import {buildMapsUrlFromBase, buildStatsUrl} from './endpoints';
+import {buildPublicMapUrl, buildStatsUrl} from './endpoints';
 import {
   GeojsonResult,
   JsonResult,
@@ -225,7 +225,7 @@ export async function fetchMap({
     );
   }
 
-  const baseUrl = `${buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
+  const baseUrl = buildPublicMapUrl({apiBaseUrl, cartoMapId});
   const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext});
 
