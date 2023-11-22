@@ -4,7 +4,7 @@
  */
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
-import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
+import {buildMapsUrlFromBase, buildStatsUrl} from './endpoints';
 import {
   GeojsonResult,
   JsonResult,
@@ -108,26 +108,23 @@ async function _fetchMapDataset(
 }
 
 async function _fetchTilestats(
-  attribute,
+  attribute: string,
   dataset: Dataset,
   accessToken: string,
   apiBaseUrl: string
 ) {
-  const {connectionName: connection, data, id, source, type, queryParameters} = dataset;
-  const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
+  const {connectionName, data, id, source, type, queryParameters} = dataset;
+  const errorContext: APIErrorContext = {
+    requestType: 'Tile stats',
+    connection: connectionName,
+    type,
+    source
+  };
   if (!('tilestats' in data)) {
     throw new CartoAPIError(new Error(`Invalid dataset for tilestats: ${id}`), errorContext);
   }
 
-  const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
-  let baseUrl = `${statsUrl}/${connection}/`;
-  if (type === 'query') {
-    baseUrl += attribute;
-  } else {
-    // MAP_TYPE.TABLE
-    baseUrl += `${source}/${attribute}`;
-  }
-
+  const baseUrl = buildStatsUrl({attribute, apiBaseUrl, ...dataset});
   const headers = {Authorization: `Bearer ${accessToken}`};
   const parameters: Record<string, string> = {};
   if (type === 'query') {

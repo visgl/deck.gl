@@ -23,6 +23,31 @@ export function buildQueryUrlFromBase(apiBaseUrl: string): string {
   return buildUrlFromBase(apiBaseUrl, 'sql');
 }
 
+export function buildStatsUrl({
+  attribute,
+  apiBaseUrl,
+  connectionName,
+  source,
+  type
+}: {
+  attribute: string;
+  apiBaseUrl: string;
+  connectionName: string;
+  source: string;
+  type: MapType;
+}): string {
+  const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
+  let baseUrl = `${statsUrl}/${connectionName}/`;
+  if (type === 'query') {
+    baseUrl += attribute;
+  } else {
+    // type === 'table'
+    baseUrl += `${source}/${attribute}`;
+  }
+
+  return baseUrl;
+}
+
 export function buildSourceUrl({
   apiBaseUrl,
   connectionName,
