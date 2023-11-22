@@ -1,4 +1,4 @@
-import {Device} from '@luma.gl/core';
+import {Device, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 
 export function getBounds(points: number[][]): number[] {
@@ -85,15 +85,15 @@ export function getTextureParams({
 }: {
   device: Device;
   floatTargetSupport?: boolean;
-}) {
+}): {format: TextureFormat; type: number} {
   return floatTargetSupport
     ? {
         // format:  should be RGBA32F on WebGL2 (float textures), RGBA in WebGL1 for float or non float textures
-        format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
+        format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
         type: GL.FLOAT
       }
     : {
-        format: GL.RGBA,
+        format: 'rgba8unorm',
         type: GL.UNSIGNED_BYTE
       };
 }

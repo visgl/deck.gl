@@ -19,13 +19,14 @@
 // THE SOFTWARE.
 
 import type {Device, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {Model, Geometry, GPUGeometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
 type _TriangleLayerProps = {
+  data: {attributes: Record<string, Buffer>};
   colorDomain: number[];
   aggregationMode: string;
   threshold: number;
@@ -59,13 +60,18 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   }
 
   _getModel(device: Device): Model {
-    const {vertexCount} = this.props;
+    const {colorTexture, maxTexture, texture, vertexCount} = this.props;
+
+    const {attributes} = this.props.data;
 
     return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: new Geometry({
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      geometry: new GPUGeometry({
+        attributes,
         topology: 'triangle-fan-webgl',
+        bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
         vertexCount
       })
     });
@@ -77,11 +83,9 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
       this.props;
 
+    model.setBindings({texture, maxTexture, colorTexture});
     model.setUniforms({
       ...uniforms,
-      texture,
-      maxTexture,
-      colorTexture,
       intensity,
       threshold,
       aggregationMode,

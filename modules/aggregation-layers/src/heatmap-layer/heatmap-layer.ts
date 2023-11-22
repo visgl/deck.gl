@@ -373,13 +373,13 @@ export default class HeatmapLayer<
 
     this.setState({
       weightsTexture: this.context.device.createTexture({
+        ...TEXTURE_PROPS,
         width: textureSize,
         height: textureSize,
         format,
-        type,
-        ...TEXTURE_PROPS
+        type
       }),
-      maxWeightsTexture: this.context.device.createTexture({format, type, ...TEXTURE_PROPS}) // 1 X 1 texture,
+      maxWeightsTexture: this.context.device.createTexture({...TEXTURE_PROPS, format, type}) // 1 X 1 texture,
     });
   }
 
@@ -571,10 +571,10 @@ export default class HeatmapLayer<
       });
     } else {
       colorTexture = this.context.device.createTexture({
+        ...TEXTURE_PROPS,
         data: colors,
         width: colorRange.length,
-        height: 1,
-        ...TEXTURE_PROPS
+        height: 1
       });
     }
     this.setState({colorTexture});
