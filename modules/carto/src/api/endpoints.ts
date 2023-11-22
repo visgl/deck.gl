@@ -69,3 +69,13 @@ export function buildSourceUrl({
 }): string {
   return `${buildMapsUrlFromBase(apiBaseUrl)}/${connectionName}/${endpoint}`;
 }
+
+export function buildQueryUrl({
+  apiBaseUrl,
+  connectionName
+}: {
+  apiBaseUrl: string;
+  connectionName: string;
+}): string {
+  return `${buildQueryUrlFromBase(apiBaseUrl)}/${connectionName}/query`;
+}

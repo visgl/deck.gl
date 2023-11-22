@@ -1,6 +1,6 @@
 import {SOURCE_DEFAULTS} from '../sources';
 import type {SourceOptions, QuerySourceOptions, QueryResult} from '../sources/types';
-import {buildQueryUrlFromBase} from './endpoints';
+import {buildQueryUrl, buildQueryUrlFromBase} from './endpoints';
 import {requestWithParameters} from './request-with-parameters';
 import {APIErrorContext} from './types';
 
@@ -8,15 +8,19 @@ export type QueryOptions = SourceOptions & Omit<QuerySourceOptions, 'spatialData
 type UrlParameters = {q: string; queryParameters?: string};
 
 export const query = async function (options: QueryOptions): Promise<QueryResult> {
-  const {apiBaseUrl, connectionName, sqlQuery, queryParameters} = options;
+  const {
+    apiBaseUrl = SOURCE_DEFAULTS.apiBaseUrl,
+    connectionName,
+    sqlQuery,
+    queryParameters
+  } = options;
   const urlParameters: UrlParameters = {q: sqlQuery};
 
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
 
-  const queryUrl = buildQueryUrlFromBase(apiBaseUrl || SOURCE_DEFAULTS.apiBaseUrl);
-  const baseUrl = `${queryUrl}/${connectionName}/query`;
+  const baseUrl = buildQueryUrl({apiBaseUrl, connectionName});
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
 
   const errorContext: APIErrorContext = {
