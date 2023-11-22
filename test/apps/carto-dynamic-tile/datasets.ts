@@ -1,7 +1,6 @@
 import {
   boundaryQuerySource,
   boundaryTableSource,
-  boundaryTilesetSource,
   h3TilesetSource,
   h3TableSource,
   h3QuerySource,
@@ -39,15 +38,6 @@ export default {
       attr: d => parseFloat(d!.properties!['do_perimeter']),
       domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
       colors: 'Purp'
-    })
-  },
-  'boundary-tileset': {
-    source: boundaryTilesetSource,
-    boundaryId: 'usa_pos4',
-    getFillColor: colorBins({
-      attr: d => parseFloat(d!.properties!['do_perimeter']),
-      domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
-      colors: 'Burg'
     })
   },
   'h3-query': {
