@@ -163,7 +163,7 @@ async function fillInTileStats(
   {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
   apiBaseUrl: string
 ) {
-  const attributes: {attribute?: string; dataset?: any}[] = [];
+  const attributes: {attribute: string; dataset: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
     for (const channel of Object.keys(layer.visualChannels)) {
@@ -178,7 +178,7 @@ async function fillInTileStats(
     }
   }
   // Remove duplicates to avoid repeated requests
-  const filteredAttributes: {attribute?: string; dataset?: any}[] = [];
+  const filteredAttributes: {attribute: string; dataset: any}[] = [];
   for (const a of attributes) {
     if (
       !filteredAttributes.find(
