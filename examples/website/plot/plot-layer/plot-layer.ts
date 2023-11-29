@@ -118,7 +118,6 @@ export default class PlotLayer<DataT extends Vec3 = Vec3, ExtraPropsT extends {}
   static layerName = 'PlotLayer';
   static defaultProps = defaultProps;
 
-  // @ts-ignore
   state!: CompositeLayer['state'] & {
     xScale: ScaleLinear<number, number>;
     yScale: ScaleLinear<number, number>;
