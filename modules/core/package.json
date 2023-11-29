@@ -32,9 +32,6 @@
     "build-bundle": "ocular-bundle ./bundle/index.ts",
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
-  "dependencies_comments": [
-    "DEPRECATED: math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"
-  ],
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/core": "4.0.3",
