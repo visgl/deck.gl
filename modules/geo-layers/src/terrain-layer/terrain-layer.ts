@@ -343,7 +343,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       );
     }
 
-    if (!this.state.terrain) {
+    if (!elevationData) {
       return null;
     }
 
