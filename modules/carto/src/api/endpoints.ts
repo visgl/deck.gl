@@ -2,13 +2,17 @@ import {MapType} from './types';
 
 export type V3Endpoint = 'maps' | 'stats' | 'sql';
 
-function buildUrlFromBase(apiBaseUrl: string, endpoint: V3Endpoint) {
-  let suffix = `/v3/${endpoint}`;
-  if (apiBaseUrl.endsWith('/')) {
-    suffix = suffix.substring(1);
-  }
+function joinPath(...args: string[]): string {
+  return args.map(part => (part.endsWith('/') ? part.slice(0, -1) : part)).join('/');
+}
 
-  return `${apiBaseUrl}${suffix}`;
+function buildV3Path(
+  apiBaseUrl: string,
+  version: 'v3',
+  endpoint: V3Endpoint,
+  ...rest: string[]
+): string {
+  return joinPath(apiBaseUrl, version, endpoint, ...rest);
 }
 
 export function buildPublicMapUrl({
@@ -18,7 +22,7 @@ export function buildPublicMapUrl({
   apiBaseUrl: string;
   cartoMapId: string;
 }): string {
-  return `${buildUrlFromBase(apiBaseUrl, 'maps')}/public/${cartoMapId}`;
+  return buildV3Path(apiBaseUrl, 'v3', 'maps', 'public', cartoMapId);
 }
 
 export function buildStatsUrl({
@@ -34,15 +38,12 @@ export function buildStatsUrl({
   source: string;
   type: MapType;
 }): string {
-  let baseUrl = `${buildUrlFromBase(apiBaseUrl, 'stats')}/${connectionName}/`;
   if (type === 'query') {
-    baseUrl += attribute;
-  } else {
-    // type === 'table'
-    baseUrl += `${source}/${attribute}`;
+    return buildV3Path(apiBaseUrl, 'v3', 'stats', connectionName, attribute);
   }
 
-  return baseUrl;
+  // type === 'table'
+  return buildV3Path(apiBaseUrl, 'v3', 'stats', connectionName, source, attribute);
 }
 
 export function buildSourceUrl({
@@ -54,7 +55,7 @@ export function buildSourceUrl({
   connectionName: string;
   endpoint: MapType;
 }): string {
-  return `${buildUrlFromBase(apiBaseUrl, 'maps')}/${connectionName}/${endpoint}`;
+  return buildV3Path(apiBaseUrl, 'v3', 'maps', connectionName, endpoint);
 }
 
 export function buildQueryUrl({
@@ -64,5 +65,5 @@ export function buildQueryUrl({
   apiBaseUrl: string;
   connectionName: string;
 }): string {
-  return `${buildUrlFromBase(apiBaseUrl, 'sql')}/${connectionName}/query`;
+  return buildV3Path(apiBaseUrl, 'v3', 'sql', connectionName, 'query');
 }
