@@ -4,7 +4,7 @@
  */
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_API_BASE_URL, DEFAULT_CLIENT} from './common';
-import {buildMapsUrlFromBase, buildStatsUrlFromBase} from './endpoints';
+import {buildPublicMapUrl, buildStatsUrl} from './endpoints';
 import {
   GeojsonResult,
   JsonResult,
@@ -108,26 +108,23 @@ async function _fetchMapDataset(
 }
 
 async function _fetchTilestats(
-  attribute,
+  attribute: string,
   dataset: Dataset,
   accessToken: string,
   apiBaseUrl: string
 ) {
-  const {connectionName: connection, data, id, source, type, queryParameters} = dataset;
-  const errorContext: APIErrorContext = {requestType: 'Tile stats', connection, type, source};
+  const {connectionName, data, id, source, type, queryParameters} = dataset;
+  const errorContext: APIErrorContext = {
+    requestType: 'Tile stats',
+    connection: connectionName,
+    type,
+    source
+  };
   if (!('tilestats' in data)) {
     throw new CartoAPIError(new Error(`Invalid dataset for tilestats: ${id}`), errorContext);
   }
 
-  const statsUrl = buildStatsUrlFromBase(apiBaseUrl);
-  let baseUrl = `${statsUrl}/${connection}/`;
-  if (type === 'query') {
-    baseUrl += attribute;
-  } else {
-    // MAP_TYPE.TABLE
-    baseUrl += `${source}/${attribute}`;
-  }
-
+  const baseUrl = buildStatsUrl({attribute, apiBaseUrl, ...dataset});
   const headers = {Authorization: `Bearer ${accessToken}`};
   const parameters: Record<string, string> = {};
   if (type === 'query') {
@@ -166,7 +163,7 @@ async function fillInTileStats(
   {datasets, keplerMapConfig, token}: {datasets: Dataset[]; keplerMapConfig: any; token: string},
   apiBaseUrl: string
 ) {
-  const attributes: {attribute?: string; dataset?: any}[] = [];
+  const attributes: {attribute: string; dataset: any}[] = [];
   const {layers} = keplerMapConfig.config.visState;
   for (const layer of layers) {
     for (const channel of Object.keys(layer.visualChannels)) {
@@ -181,7 +178,7 @@ async function fillInTileStats(
     }
   }
   // Remove duplicates to avoid repeated requests
-  const filteredAttributes: {attribute?: string; dataset?: any}[] = [];
+  const filteredAttributes: {attribute: string; dataset: any}[] = [];
   for (const a of attributes) {
     if (
       !filteredAttributes.find(
@@ -203,7 +200,6 @@ export type FetchMapOptions = {
   cartoMapId: string;
   clientId?: string;
   headers?: Record<string, string>;
-  mapsUrl?: string;
   autoRefresh?: number;
   onNewData?: (map: any) => void;
 };
@@ -214,7 +210,6 @@ export async function fetchMap({
   cartoMapId,
   clientId = DEFAULT_CLIENT,
   headers = {},
-  mapsUrl,
   autoRefresh,
   onNewData
 }: FetchMapOptions) {
@@ -230,7 +225,7 @@ export async function fetchMap({
     );
   }
 
-  const baseUrl = `${mapsUrl || buildMapsUrlFromBase(apiBaseUrl)}/public/${cartoMapId}`;
+  const baseUrl = buildPublicMapUrl({apiBaseUrl, cartoMapId});
   const errorContext: APIErrorContext = {requestType: 'Public map', mapId: cartoMapId};
   const map = await requestWithParameters({baseUrl, headers, errorContext});
 

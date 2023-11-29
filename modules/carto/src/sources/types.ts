@@ -13,7 +13,6 @@ export type SourceOptionalOptions = {
   /** @deprecated  use `query` instead **/
   format: Format;
   headers: Record<string, string>;
-  mapsUrl?: string;
 };
 
 export type SourceOptions = SourceRequiredOptions & Partial<SourceOptionalOptions>;
