@@ -13,6 +13,9 @@ permissions:
 jobs:
   test-node:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: ['18.x']
     permissions:
       checks: write
       contents: read
@@ -20,11 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@86f86b36ef15e6570752e7175f451a512eac206b # v2.1.1
 
-      - name: Use Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
         with:
-          # headless GL 6.0.1 needs recent version of Node 16.
-          node-version: '16.19'
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: |
@@ -45,20 +47,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        node-version: ['18.x']
         python-version: [3.8]
 
     steps:
       - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Use Python ${{ matrix.python-version }}
         uses: actions/setup-python@75f3110429a8c05be0e1bf360334e4cced2b63fa # v2.3.3
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
+        with:
+          node-version: ${{ matrix.node-version }}
+
       - name: Install dependencies
         run: |
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash
-          nvm install 16.9 && nvm use 16.9
           cd bindings/pydeck
           make setup-env
           make init
