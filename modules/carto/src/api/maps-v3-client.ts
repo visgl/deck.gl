@@ -135,7 +135,7 @@ type FetchLayerDataParams = {
   aggregationExp?: string;
   aggregationResLevel?: number;
   queryParameters?: QueryParameters;
-  filters?: Filters
+  filters?: Filters;
 };
 
 type MapsAPIParameters = {
@@ -299,7 +299,10 @@ function checkFetchLayerDataParameters({
     assert(!aggregationResLevel, 'Have aggregationResLevel, but geoColumn parameter is missing');
   }
   if (filters) {
-    assert(type === MAP_TYPES.TABLE || type === MAP_TYPES.QUERY, 'The filters parameter is only supported by type table and query');
+    assert(
+      type === MAP_TYPES.TABLE || type === MAP_TYPES.QUERY,
+      'The filters parameter is only supported by type table and query'
+    );
   }
 }
 

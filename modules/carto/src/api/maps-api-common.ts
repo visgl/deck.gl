@@ -96,7 +96,7 @@ export type PositionalQueryParameter = QueryParameterValue[];
 export type QueryParameters = NamedQueryParameter | PositionalQueryParameter;
 
 export interface Filters {
-  [column: string]: Partial<Record<FilterTypes, FilterValues>>
+  [column: string]: Partial<Record<FilterTypes, FilterValues>>;
 }
 
 export enum FilterTypes {
@@ -108,5 +108,5 @@ export enum FilterTypes {
 }
 
 export interface FilterValues {
-  values: string[] | number[] | number[][]
+  values: string[] | number[] | number[][];
 }
