@@ -224,7 +224,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
     uniformStore: UniformStore<{
-      picking: Record<string, UniformValue>
+      picking: Record<string, UniformValue>;
     }>;
   };
 
@@ -361,9 +361,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
-    const { device } = this.context;
-    const { texture } = this.props;
-    const { uniformStore, emptyTexture } = this.state;
+    const {device} = this.context;
+    const {texture} = this.props;
+    const {uniformStore, emptyTexture} = this.state;
 
     const model = new Model(device, {
       ...this.getShaders(),
@@ -372,7 +372,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       geometry: getGeometry(mesh),
       isInstanced: true,
       bindings: {
-        picking: uniformStore.getManagedUniformBuffer(device, 'picking'),
+        picking: uniformStore.getManagedUniformBuffer(device, 'picking')
       }
     });
 
