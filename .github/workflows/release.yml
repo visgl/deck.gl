@@ -18,13 +18,13 @@ jobs:
       ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
 
     steps:
-      - uses: actions/checkout@86f86b36ef15e6570752e7175f451a512eac206b # v2.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Get git tags (https://github.com/actions/checkout/issues/206)
         run: git fetch --tags -f
 
       - name: Use Node.js
-        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: '18.x'
 
