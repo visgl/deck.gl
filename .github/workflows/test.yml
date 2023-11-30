@@ -13,9 +13,6 @@ permissions:
 jobs:
   test-node:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        node-version: ['18.x']
     permissions:
       checks: write
       contents: read
@@ -23,10 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '18.x'
 
       - name: Install dependencies
         run: |
@@ -47,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ['18.x']
         python-version: [3.8]
 
     steps:
@@ -58,10 +54,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '18.x'
 
       - name: Install dependencies
         run: |
