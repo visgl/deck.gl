@@ -94,3 +94,19 @@ export type NamedQueryParameter = Record<string, QueryParameterValue>;
 export type PositionalQueryParameter = QueryParameterValue[];
 
 export type QueryParameters = NamedQueryParameter | PositionalQueryParameter;
+
+export interface Filters {
+  [column: string]: Partial<Record<FilterTypes, FilterValues>>
+}
+
+export enum FilterTypes {
+  In = 'in',
+  Between = 'between', // [a, b] both are included
+  ClosedOpen = 'closed_open', // [a, b) a is included, b is not
+  Time = 'time',
+  StringSearch = 'stringSearch'
+}
+
+export interface FilterValues {
+  values: string[] | number[] | number[][]
+}
