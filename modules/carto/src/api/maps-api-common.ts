@@ -96,7 +96,15 @@ export type PositionalQueryParameter = QueryParameterValue[];
 export type QueryParameters = NamedQueryParameter | PositionalQueryParameter;
 
 export interface Filters {
-  [column: string]: Partial<Record<FilterTypes, FilterValues>>;
+  [column: string]: Filter;
+}
+
+interface Filter {
+  [FilterTypes.In]: number[],
+  [FilterTypes.Between]: number[][]
+  [FilterTypes.ClosedOpen]: number[][]
+  [FilterTypes.Time]: number[][]
+  [FilterTypes.StringSearch]: string[]
 }
 
 export enum FilterTypes {
@@ -107,6 +115,3 @@ export enum FilterTypes {
   StringSearch = 'stringSearch'
 }
 
-export interface FilterValues {
-  values: string[] | number[] | number[][];
-}
