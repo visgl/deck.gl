@@ -78,7 +78,9 @@ export class Tile2DHeader<DataT = any> {
   }
 
   get isLoaded(): boolean {
-    return this._isLoaded && !this._needsReload;
+    return (
+      this._isLoaded && !this._needsReload && Boolean(this.layers?.every(layer => layer.isLoaded))
+    );
   }
 
   get isLoading(): boolean {

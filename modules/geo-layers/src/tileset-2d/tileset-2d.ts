@@ -181,7 +181,7 @@ export class Tileset2D {
   }
 
   get isLoaded(): boolean {
-    return this._selectedTiles !== null && this._selectedTiles.every(tile => tile.isLoaded);
+    return Boolean(this._selectedTiles?.every(tile => tile.isLoaded));
   }
 
   get needsReload(): boolean {
