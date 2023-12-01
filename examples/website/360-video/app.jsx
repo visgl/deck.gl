@@ -7,8 +7,9 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
 
 // Video created by the NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons
+// Source: https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm
 const VIDEO_URL =
-  'https://upload.wikimedia.org/wikipedia/commons/transcoded/0/0a/NASA_VR-360_Astronaut_Training-_Space_Walk.webm/NASA_VR-360_Astronaut_Training-_Space_Walk.webm.1080p.webm';
+  'https://upload.wikimedia.org/wikipedia/commons/0/0a/NASA_VR-360_Astronaut_Training-_Space_Walk.webm';
 
 const sphere = new SphereGeometry({
   nlat: 50,
