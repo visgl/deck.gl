@@ -32,7 +32,7 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import {Texture, UniformStore, UniformValue} from '@luma.gl/core';
+import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 // import {PBRMaterialParser} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
@@ -223,9 +223,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
-    uniformStore: UniformStore<{
-      picking: Record<string, UniformValue>;
-    }>;
   };
 
   getShaders() {
@@ -303,8 +300,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         data: new Uint8Array(4),
         width: 1,
         height: 1
-      }),
-      uniformStore: new UniformStore({picking})
+      })
     });
   }
 
@@ -361,21 +357,16 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
-    const {device} = this.context;
-    const {texture} = this.props;
-    const {uniformStore, emptyTexture} = this.state;
-
-    const model = new Model(device, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: getGeometry(mesh),
-      isInstanced: true,
-      bindings: {
-        picking: uniformStore.getManagedUniformBuffer(device, 'picking')
-      }
+      isInstanced: true
     });
 
+    const {texture} = this.props;
+    const {emptyTexture} = this.state;
     model.setBindings({
       sampler: (texture as Texture) || emptyTexture
     });
