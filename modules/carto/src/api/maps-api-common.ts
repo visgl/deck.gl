@@ -100,11 +100,11 @@ export interface Filters {
 }
 
 interface Filter {
-  [FilterTypes.In]: number[],
-  [FilterTypes.Between]: number[][]
-  [FilterTypes.ClosedOpen]: number[][]
-  [FilterTypes.Time]: number[][]
-  [FilterTypes.StringSearch]: string[]
+  [FilterTypes.In]: number[];
+  [FilterTypes.Between]: number[][];
+  [FilterTypes.ClosedOpen]: number[][];
+  [FilterTypes.Time]: number[][];
+  [FilterTypes.StringSearch]: string[];
 }
 
 export enum FilterTypes {
@@ -114,4 +114,3 @@ export enum FilterTypes {
   Time = 'time',
   StringSearch = 'stringSearch'
 }
-
