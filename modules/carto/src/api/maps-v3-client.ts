@@ -21,7 +21,8 @@ import {
   REQUEST_TYPES,
   SchemaField,
   TileFormat,
-  TILE_FORMATS
+  TILE_FORMATS,
+  Filters
 } from './maps-api-common';
 
 import {APIErrorContext, CartoAPIError} from './carto-api-error';
@@ -134,6 +135,7 @@ type FetchLayerDataParams = {
   aggregationExp?: string;
   aggregationResLevel?: number;
   queryParameters?: QueryParameters;
+  filters?: Filters;
 };
 
 type MapsAPIParameters = {
@@ -146,6 +148,7 @@ type MapsAPIParameters = {
   columns?: string;
   aggregationExp?: string;
   aggregationResLevel?: number;
+  filters?: Filters;
 };
 
 /**
@@ -159,7 +162,8 @@ function getParameters({
   clientId,
   aggregationExp,
   aggregationResLevel,
-  queryParameters
+  queryParameters,
+  filters
 }: Omit<FetchLayerDataParams, 'connection' | 'credentials'>): MapsAPIParameters {
   const parameters: MapsAPIParameters = {
     client: clientId || DEFAULT_CLIENT,
@@ -188,6 +192,9 @@ function getParameters({
   if (aggregationResLevel) {
     parameters.aggregationResLevel = aggregationResLevel;
   }
+  if (filters) {
+    parameters.filters = filters;
+  }
 
   return parameters;
 }
@@ -208,7 +215,8 @@ export async function mapInstantiation({
   headers,
   aggregationExp,
   aggregationResLevel,
-  queryParameters
+  queryParameters,
+  filters
 }: FetchLayerDataParams): Promise<MapInstantiation> {
   const baseUrl = `${credentials.mapsUrl}/${connection}/${type}`;
   const parameters = getParameters({
@@ -219,7 +227,8 @@ export async function mapInstantiation({
     clientId,
     aggregationResLevel,
     aggregationExp,
-    queryParameters
+    queryParameters,
+    filters
   });
   const encodedParameters = Object.entries(parameters).map(([key, value]) => {
     if (typeof value !== 'string') {
@@ -263,7 +272,8 @@ function checkFetchLayerDataParameters({
   geoColumn,
   columns,
   aggregationExp,
-  aggregationResLevel
+  aggregationResLevel,
+  filters
 }: FetchLayerDataParams) {
   assert(connection, 'Must define connection');
   assert(type, 'Must define a type');
@@ -288,6 +298,12 @@ function checkFetchLayerDataParameters({
     assert(!aggregationExp, 'Have aggregationExp, but geoColumn parameter is missing');
     assert(!aggregationResLevel, 'Have aggregationResLevel, but geoColumn parameter is missing');
   }
+  if (filters) {
+    assert(
+      type === MAP_TYPES.TABLE || type === MAP_TYPES.QUERY,
+      'The filters parameter is only supported by type table and query'
+    );
+  }
 }
 
 export interface FetchLayerDataResult {
@@ -308,7 +324,8 @@ export async function fetchLayerData({
   headers,
   aggregationExp,
   aggregationResLevel,
-  queryParameters
+  queryParameters,
+  filters
 }: FetchLayerDataParams): Promise<FetchLayerDataResult> {
   // Internally we split data fetching into two parts to allow us to
   // conditionally fetch the actual data, depending on the metadata state
@@ -325,7 +342,8 @@ export async function fetchLayerData({
     headers,
     aggregationExp,
     aggregationResLevel,
-    queryParameters
+    queryParameters,
+    filters
   });
 
   const errorContext = {requestType: REQUEST_TYPES.DATA, connection, type, source};
@@ -347,7 +365,8 @@ async function _fetchDataUrl({
   headers,
   aggregationExp,
   aggregationResLevel,
-  queryParameters
+  queryParameters,
+  filters
 }: FetchLayerDataParams) {
   const defaultCredentials = getDefaultCredentials();
   // Only pick up default credentials if they have been defined for
@@ -364,7 +383,8 @@ async function _fetchDataUrl({
     geoColumn,
     columns,
     aggregationExp,
-    aggregationResLevel
+    aggregationResLevel,
+    filters
   });
 
   if (!localCreds.mapsUrl) {
@@ -382,7 +402,8 @@ async function _fetchDataUrl({
     headers,
     aggregationExp,
     aggregationResLevel,
-    queryParameters
+    queryParameters,
+    filters
   });
   let url: string | null = null;
   let mapFormat: Format | undefined;
