@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.33] - Dec 5 2023
+
+- CARTO: added filter parameter to fetchLayerData (#8328)
+- Improve Tile3DLayer.isLoaded (#8279)
+- Fix pickObjects when using binary data (#8253)
+- Use getCanvas() in GoogleMapsOverlay (#8272)
+- Fix scripting interface error when canvas is invisible (#8254)
+
 #### deck.gl [8.9.32] - Oct 24 2023
 
 - CARTO: Support styling layer by color column (#8177)
