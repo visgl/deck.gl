@@ -8,7 +8,6 @@ import type {
   JsonResult,
   SourceOptionalOptions,
   SourceRequiredOptions,
-  Tilejson,
   TilejsonMapInstantiation,
   TilejsonResult
 } from './types';
