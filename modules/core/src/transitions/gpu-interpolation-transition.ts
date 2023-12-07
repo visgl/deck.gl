@@ -99,7 +99,6 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
-      // @ts-expect-error BufferWithAccessor
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes

@@ -280,7 +280,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     state.lastExternalBuffer = buffer;
     this.setNeedsRedraw();
-    // @ts-expect-error BufferWithAccessor
     this.setData(buffer);
     return true;
   }
@@ -334,7 +333,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     this.clearNeedsUpdate();
-    // @ts-expect-error BufferWithAccessor
     this.setData(buffer);
     return true;
   }

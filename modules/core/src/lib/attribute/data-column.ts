@@ -1,10 +1,14 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/core';
 import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
-import {BufferWithAccessor} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 
-import {glArrayFromType, getBufferAttributeLayout, getStride} from './gl-utils';
+import {
+  glArrayFromType,
+  getBufferAttributeLayout,
+  getStride,
+  getGLTypeFromTypedArray
+} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
@@ -105,7 +109,7 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 };
 
 type DataColumnInternalState<Options, State> = State & {
-  externalBuffer: BufferWithAccessor | null;
+  externalBuffer: Buffer | null;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -121,7 +125,7 @@ export default class DataColumn<Options, State> {
   value: NumericArray | null;
   doublePrecision: boolean;
 
-  protected _buffer: BufferWithAccessor | null;
+  protected _buffer: Buffer | null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -188,26 +192,12 @@ export default class DataColumn<Options, State> {
     return this.state.constant;
   }
 
-  get buffer(): BufferWithAccessor {
+  get buffer(): Buffer {
     if (!this._buffer) {
-      const {isIndexed, type} = this.settings;
-      if (isIndexed) {
-        // @ts-expect-error This returns a classic buffer under the hood
-        this._buffer = this.device.createBuffer({
-          id: this.id,
-          usage: Buffer.INDEX,
-          indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32'
-        });
-      } else {
-        // @ts-expect-error This returns a classic buffer under the hood
-        this._buffer = this.device.createBuffer({
-          id: this.id,
-          usage: Buffer.VERTEX
-        });
-      }
+      // TODO(v9): No point in allocating an empty buffer, try to avoid this.
+      this._createBuffer(4);
     }
-    // @ts-ignore this._buffer cannot be null
-    return this._buffer;
+    return this._buffer!;
   }
 
   get byteOffset(): number {
@@ -234,7 +224,7 @@ export default class DataColumn<Options, State> {
     typedArrayManager.release(this.state.allocatedValue);
   }
 
-  getBuffer(): BufferWithAccessor | null {
+  getBuffer(): Buffer | null {
     if (this.state.constant) {
       return null;
     }
@@ -348,11 +338,11 @@ export default class DataColumn<Options, State> {
   setData(
     data:
       | TypedArray
-      | BufferWithAccessor
+      | Buffer
       | ({
           constant?: boolean;
           value?: NumericArray;
-          buffer?: BufferWithAccessor;
+          buffer?: Buffer;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -360,7 +350,7 @@ export default class DataColumn<Options, State> {
     let opts: {
       constant?: boolean;
       value?: NumericArray;
-      buffer?: BufferWithAccessor;
+      buffer?: Buffer;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
@@ -371,6 +361,14 @@ export default class DataColumn<Options, State> {
     }
 
     const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
+
+    if (ArrayBuffer.isView(opts.value)) {
+      const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
+      accessor.type = opts.type || (is64Bit ? GL.FLOAT : getGLTypeFromTypedArray(opts.value));
+      accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
+      accessor.stride = getStride(accessor);
+    }
+
     state.bounds = null; // clear cached bounds
 
     if (opts.constant) {
@@ -393,14 +391,6 @@ export default class DataColumn<Options, State> {
       state.externalBuffer = buffer;
       state.constant = false;
       this.value = opts.value || null;
-      const isBuffer64Bit = opts.value instanceof Float64Array;
-
-      // Copy the type of the buffer into the accessor
-      // @ts-ignore
-      accessor.type = opts.type || buffer.accessor.type;
-      // @ts-ignore
-      accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT * (isBuffer64Bit ? 2 : 1);
-      accessor.stride = getStride(accessor);
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
 
@@ -409,11 +399,9 @@ export default class DataColumn<Options, State> {
       state.constant = false;
       this.value = value;
 
-      accessor.bytesPerElement = value.BYTES_PER_ELEMENT;
-      accessor.stride = getStride(accessor);
-
-      const {buffer} = this;
-      const byteOffset = (accessor.vertexOffset || 0) * getStride(accessor);
+      let {buffer} = this;
+      const stride = getStride(accessor);
+      const byteOffset = (accessor.vertexOffset || 0) * stride;
 
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, accessor);
@@ -428,15 +416,13 @@ export default class DataColumn<Options, State> {
 
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
-      const requiredBufferSize = value.byteLength + byteOffset + accessor.stride * 2;
+      const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
       if (buffer.byteLength < requiredBufferSize) {
-        buffer.reallocate(requiredBufferSize);
+        this._createBuffer(requiredBufferSize);
+        buffer = this.buffer;
       }
-      // Hack: force Buffer to infer data type
-      buffer.setAccessor({});
-      buffer.subData({data: value, offset: byteOffset});
-      // @ts-ignore
-      accessor.type = opts.type || buffer.accessor.type;
+
+      buffer.write(value, byteOffset);
     }
 
     this.setAccessor(accessor);
@@ -454,17 +440,16 @@ export default class DataColumn<Options, State> {
 
     const value = this.value as TypedArray;
     const {startOffset = 0, endOffset} = opts;
-    this.buffer.subData({
-      data:
-        this.doublePrecision && value instanceof Float64Array
-          ? toDoublePrecisionArray(value, {
-              size: this.size,
-              startIndex: startOffset,
-              endIndex: endOffset
-            })
-          : value.subarray(startOffset, endOffset),
-      offset: startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
-    });
+    this.buffer.write(
+      this.doublePrecision && value instanceof Float64Array
+        ? toDoublePrecisionArray(value, {
+            size: this.size,
+            startIndex: startOffset,
+            endIndex: endOffset
+          })
+        : value.subarray(startOffset, endOffset),
+      startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
+    );
   }
 
   allocate(numInstances: number, copy: boolean = false): boolean {
@@ -480,20 +465,20 @@ export default class DataColumn<Options, State> {
 
     this.value = value;
 
-    const {buffer, byteOffset} = this;
+    const {byteOffset} = this;
+    let {buffer} = this;
 
     if (buffer.byteLength < value.byteLength + byteOffset) {
-      buffer.reallocate(value.byteLength + byteOffset);
-
+      this._createBuffer(value.byteLength + byteOffset);
+      buffer = this.buffer;
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.
         // TODO - copy old buffer to new buffer on the GPU
-        buffer.subData({
-          data:
-            oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
-          offset: byteOffset
-        });
+        buffer.write(
+          oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
+          byteOffset
+        );
       }
     }
 
@@ -602,5 +587,31 @@ export default class DataColumn<Options, State> {
       }
     }
     return true;
+  }
+
+  protected _createBuffer(byteLength: number) {
+    byteLength = byteLength || this._buffer?.byteLength || 0;
+
+    if (this._buffer) {
+      this._buffer.destroy();
+    }
+
+    const {isIndexed, type} = this.settings;
+    if (isIndexed) {
+      this._buffer = this.device.createBuffer({
+        ...this._buffer?.props,
+        id: this.id,
+        usage: Buffer.INDEX,
+        indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32',
+        byteLength
+      });
+    } else {
+      this._buffer = this.device.createBuffer({
+        ...this._buffer?.props,
+        id: this.id,
+        usage: Buffer.VERTEX,
+        byteLength
+      });
+    }
   }
 }

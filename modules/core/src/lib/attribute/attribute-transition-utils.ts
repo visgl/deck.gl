@@ -1,6 +1,5 @@
 import type {Device} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
-import type {BufferWithAccessor} from '@luma.gl/webgl';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
@@ -167,12 +166,17 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  const bufferWithAccessor = buffer as BufferWithAccessor;
-  const source = bufferWithAccessor.getData({length: fromLength});
-  const data = new Float32Array(toLength);
+  // TODO(donmccurdy): Might need a helper function here.
+  const sourceData = buffer.getData();
+  const source = new Float32Array(
+    sourceData.buffer,
+    sourceData.byteOffset,
+    sourceData.byteLength / Float32Array.BYTES_PER_ELEMENT
+  );
+  const target = new Float32Array(toLength);
   padArray({
     source,
-    target: data,
+    target,
     sourceStartIndices: fromStartIndices,
     targetStartIndices: toStartIndices,
     size,
@@ -180,8 +184,8 @@ export function padBuffer({
   });
 
   // TODO: support offset in buffer.setData?
-  if (bufferWithAccessor.byteLength < data.byteLength + byteOffset) {
-    bufferWithAccessor.reallocate(data.byteLength + byteOffset);
+  if (buffer.byteLength < target.byteLength + byteOffset) {
+    throw new Error(`Buffer size is immutable, ${buffer.byteLength} bytes`);
   }
-  bufferWithAccessor.subData({data, offset: byteOffset});
+  buffer.write(target, byteOffset);
 }
