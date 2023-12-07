@@ -590,28 +590,17 @@ export default class DataColumn<Options, State> {
   }
 
   protected _createBuffer(byteLength: number) {
-    byteLength = byteLength || this._buffer?.byteLength || 0;
-
     if (this._buffer) {
       this._buffer.destroy();
     }
 
     const {isIndexed, type} = this.settings;
-    if (isIndexed) {
-      this._buffer = this.device.createBuffer({
-        ...this._buffer?.props,
-        id: this.id,
-        usage: Buffer.INDEX,
-        indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32',
-        byteLength
-      });
-    } else {
-      this._buffer = this.device.createBuffer({
-        ...this._buffer?.props,
-        id: this.id,
-        usage: Buffer.VERTEX,
-        byteLength
-      });
-    }
+    this._buffer = this.device.createBuffer({
+      ...this._buffer?.props,
+      id: this.id,
+      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+      indexType: isIndexed ? (type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32') : undefined,
+      byteLength
+    });
   }
 }
