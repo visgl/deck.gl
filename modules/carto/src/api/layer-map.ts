@@ -254,7 +254,9 @@ function domainFromAttribute(attribute, scaleType: SCALE_TYPE, scaleLength: numb
   }
 
   if (scaleType === 'quantile' && attribute.quantiles) {
-    return attribute.quantiles[scaleLength];
+    return attribute.quantiles.global
+      ? attribute.quantiles.global[scaleLength]
+      : attribute.quantiles[scaleLength];
   }
 
   let {min} = attribute;
