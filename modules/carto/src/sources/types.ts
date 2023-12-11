@@ -104,7 +104,7 @@ export type TableSourceOptions = {
   /**
    * Columns to retrieve from the table.
    *
-   * If not specified, all columns are returned.
+   * If not present, all columns are returned.
    */
   columns?: string[];
 
