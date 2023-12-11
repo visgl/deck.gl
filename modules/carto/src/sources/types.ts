@@ -52,8 +52,6 @@ export type AggregationOptions = {
   /**
    * Defines the tile aggregation resolution.
    *
-   * If not present,
-   *
    * @default 6 for quadbin and 4 for h3 sources
    */
   aggregationResLevel?: number;
@@ -73,22 +71,21 @@ export type QuerySourceOptions = {
   /**
    * Values for named or positional paramteres in the query.
    *
+   * The way query parameters are determined by data warehouse.
    *
-   * The way query parameters are determined by data ware house.
-   *
-   *  * BigQuery has named query parameters as `⁣⁣@name` and they can be specified as dictionary
+   *  * BigQuery has named query parameters, specified with a dictionary, and referenced by key (`@key`)
    *
    *     ```
    *     sqlQuery: "SELECT * FROM carto-demo-data.demo_tables.retail_stores WHERE storetype = ⁣@type AND revenue > ⁣@minRevenue"
    *     queryParameters: { type: 'Supermarket', minRevenue: 1000000 }
    *     ```
-   * * Snowflake supports positional parametes, in form `:1`, `:2`, etc.
+   * * Snowflake supports positional parameters, in the form `:1`, `:2`, etc.
    *
    *     ```
    *     sqlQuery: "SELECT * FROM demo_db.public.import_retail_stores WHERE storetype = :2 AND revenue > :1
    *     queryParameters: [100000, "Supermarket"]
    *     ```
-   * * Postgres and Redhisft supports positional parametes, but in form `$1`, `$2`, etc.
+   * * Postgres and Redhisft supports positional parameters, but in the form `$1`, `$2`, etc.
    *
    *     ```
    *     sqlQuery: "SELECT * FROM carto_demo_data.demo_tables.retail_stores WHERE storetype = $2 AND revenue > $1
@@ -107,7 +104,7 @@ export type TableSourceOptions = {
   /**
    * Columns to retrieve from the table.
    *
-   * If not specidfied, default all columns are returned.
+   * If not specified, all columns are returned.
    */
   columns?: string[];
 
