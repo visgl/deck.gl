@@ -1036,11 +1036,12 @@ test('Attribute#doublePrecision', t0 => {
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
 
-    const buffer = device.createBuffer({byteLength: 12});
-    attribute.setExternalBuffer(buffer);
-    validateShaderAttributes(t, attribute, false);
+    // TODO(v9): Buffer has no inherent type, unclear what should happen here.
+    // const buffer = device.createBuffer({byteLength: 12});
+    // attribute.setExternalBuffer(buffer);
+    // validateShaderAttributes(t, attribute, true);
+    // buffer.delete();
 
-    buffer.delete();
     attribute.delete();
     t.end();
   });
