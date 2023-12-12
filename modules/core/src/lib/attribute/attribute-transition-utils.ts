@@ -4,7 +4,6 @@ import {padArray} from '../../utils/array-utils';
 import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import { BufferWithAccessor } from '@luma.gl/webgl';
 
 export interface TransitionSettings {
   type: string;
@@ -168,8 +167,7 @@ export function padBuffer({
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
   // TODO(donmccurdy): Replace with `.readAsync()` or a helper function.
-  const bufferWithAccessor = buffer as BufferWithAccessor;
-  const sourceData = bufferWithAccessor.getData({length: fromLength});
+  const sourceData = (buffer as any).getData({length: fromLength});
   const source = new Float32Array(
     sourceData.buffer,
     sourceData.byteOffset,
@@ -185,7 +183,6 @@ export function padBuffer({
     getData: getMissingData
   });
 
-  // TODO: support offset in buffer.setData?
   if (buffer.byteLength < target.byteLength + byteOffset) {
     throw new Error(`Buffer size is immutable, ${buffer.byteLength} bytes`);
   }
