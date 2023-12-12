@@ -17,7 +17,7 @@ test('Deck#constructor', t => {
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    // autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -87,7 +87,7 @@ test.skip('Deck#rendering, picking, logging', t => {
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    // autoResizeDrawingBuffer:  'clientWidth' in device.canvasContext.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -215,7 +215,7 @@ test('Deck#resourceManager', async t => {
     width: 1,
     height: 1,
     // This is required because the jsdom canvas does not have client width/height
-    // autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
+    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
