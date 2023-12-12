@@ -8,7 +8,6 @@ export interface ConstructorOf<T> {
 
 import {ShaderModule as _ShaderModule} from '@luma.gl/shadertools';
 
-// TODO remove and using type from luma.gl directly with generics
 export type ShaderModule<SettingsT = any> = _ShaderModule & {
   // name: string;
   // fs?: string;
