@@ -4,6 +4,7 @@ import {padArray} from '../../utils/array-utils';
 import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
+import { BufferWithAccessor } from '@luma.gl/webgl';
 
 export interface TransitionSettings {
   type: string;
@@ -166,8 +167,9 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  // TODO(donmccurdy): Might need a helper function here.
-  const sourceData = buffer.getData();
+  // TODO(donmccurdy): Replace with `.readAsync()` or a helper function.
+  const bufferWithAccessor = buffer as BufferWithAccessor;
+  const sourceData = bufferWithAccessor.getData({length: fromLength});
   const source = new Float32Array(
     sourceData.buffer,
     sourceData.byteOffset,
