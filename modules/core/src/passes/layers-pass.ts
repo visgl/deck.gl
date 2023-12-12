@@ -66,7 +66,7 @@ export default class LayersPass extends Pass {
         viewport: [0, 0, width, height]
       },
       // clear depth and color buffers, restoring transparency
-      clearColor: options.clearColor || (options.clearCanvas ? [0, 0, 0, 0] : undefined),
+      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
       clearDepth: options.clearCanvas ? 1 : undefined
     });
 
@@ -85,8 +85,7 @@ export default class LayersPass extends Pass {
       viewports,
       views,
       onViewportActive,
-      clearStack = true,
-      clearCanvas = true
+      clearStack = true
     } = options;
     options.pass = options.pass || 'unknown';
 
