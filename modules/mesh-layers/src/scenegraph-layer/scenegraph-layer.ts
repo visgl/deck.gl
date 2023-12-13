@@ -23,12 +23,10 @@ import {UniformStore} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
-import {GLTFAnimator, createScenegraphsFromGLTF} from '@luma.gl/gltf';
+import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
-
-type GLTFEnvironment = any;
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -95,9 +93,8 @@ type _ScenegraphLayerProps<DataT> = {
    * (Experimental) lighting environment. Requires `_lighting` to be `'pbr'`.
    */
   _imageBasedLightingEnvironment?:
-    | null
-    | GLTFEnvironment
-    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => GLTFEnvironment);
+    | PBREnvironment
+    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -165,7 +162,7 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   // flat or pbr
   _lighting: 'flat',
   // _lighting must be pbr for this to work
-  _imageBasedLightingEnvironment: null,
+  _imageBasedLightingEnvironment: undefined,
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -343,7 +340,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   private _getModelOptions(): GLTFInstantiatorOptions {
     const {_imageBasedLightingEnvironment} = this.props;
 
-    let env: GLTFEnvironment | null = null;
+    let env: PBREnvironment | undefined;
     if (_imageBasedLightingEnvironment) {
       if (typeof _imageBasedLightingEnvironment === 'function') {
         env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
