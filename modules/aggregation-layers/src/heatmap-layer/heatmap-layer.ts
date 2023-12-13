@@ -27,10 +27,10 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
+import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Transform} from '@luma.gl/engine';
-import {BufferWithAccessor, withGLParameters} from '@luma.gl/webgl';
+import {withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -199,8 +199,8 @@ export default class HeatmapLayer<
     worldBounds?: number[];
     normalizedCommonBounds?: number[];
     updateTimer?: any;
-    triPositionBuffer?: BufferWithAccessor;
-    triTexCoordBuffer?: BufferWithAccessor;
+    triPositionBuffer?: Buffer;
+    triTexCoordBuffer?: Buffer;
     weightsTransform?: Transform;
     maxWeightTransform?: Transform;
     textureSize: number;
@@ -550,12 +550,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer!.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer!.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
