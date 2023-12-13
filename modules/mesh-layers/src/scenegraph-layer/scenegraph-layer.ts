@@ -155,8 +155,7 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   sizeMinPixels: {type: 'number', min: 0, value: 0},
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
 
-  // @ts-ignore
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // flat or pbr
@@ -252,10 +251,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const gltf = props.scenegraph;
       const processedGLTF = postProcessGLTF(gltf);
 
-      const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
+      // TODO remove cast once https://github.com/visgl/luma.gl/pull/1877 deployed
+      const gltfObjects = createScenegraphsFromGLTF(
+        device,
+        processedGLTF,
+        this._getModelOptions()
+      ) as unknown as {animator: GLTFAnimator; scenes: GroupNode[]};
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
-      // @ts-ignore
       waitForGLTFAssets(gltfObjects).then(() => {
         this.setNeedsRedraw();
       }); // eslint-disable-line @typescript-eslint/no-floating-promises
