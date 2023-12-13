@@ -282,9 +282,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (this.state.attributesAvailable) {
       // attributeManager is always defined for primitive layers
       const allAttributes = this.getAttributeManager()!.getAttributes();
-      // @ts-ignore
-      scenegraph.traverse((model: ModelNode) => {
-        this._setModelAttributes(model.model, allAttributes, false);
+      scenegraph.traverse(node => {
+        if (node instanceof ModelNode) {
+          this._setModelAttributes(node.model, allAttributes, false);
+        }
       });
     }
   }
@@ -322,6 +323,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
+          // TODO remove once https://github.com/visgl/luma.gl/pull/1878 deployed
           // @ts-ignore
           const findResult = animations.find(({name}) => name === key);
           if (findResult) {
@@ -380,9 +382,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       }
     }
 
-    // @ts-ignore
-    this.state.scenegraph.traverse((model: ModelNode) => {
-      this._setModelAttributes(model.model, changedAttributes, bufferLayoutChanged);
+    this.state.scenegraph.traverse(node => {
+      if (node instanceof ModelNode) {
+        this._setModelAttributes(node.model, changedAttributes, bufferLayoutChanged);
+      }
     });
   }
 
@@ -397,42 +400,46 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const {viewport, renderPass} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
     const numInstances = this.getNumInstances();
-    // @ts-ignore
-    this.state.scenegraph.traverse(({model}: ModelNode, {worldMatrix}) => {
-      model.setInstanceCount(numInstances);
-      // @ts-ignore
-      model.updateModuleSettings(moduleParameters);
-      model.setUniforms({
-        sizeScale,
-        opacity,
-        sizeMinPixels,
-        sizeMaxPixels,
-        composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
-        sceneModelMatrix: worldMatrix,
-        // Needed for PBR (TODO: find better way to get it)
-        // eslint-disable-next-line camelcase
-        u_Camera: model.uniforms.project_uCameraPosition
-      });
+    this.state.scenegraph.traverse((node, {worldMatrix}) => {
+      if (node instanceof ModelNode) {
+        const {model} = node;
+        model.setInstanceCount(numInstances);
+        if (moduleParameters) {
+          model.updateModuleSettings(moduleParameters);
+        }
+        model.setUniforms({
+          sizeScale,
+          opacity,
+          sizeMinPixels,
+          sizeMaxPixels,
+          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+          sceneModelMatrix: worldMatrix,
+          // Needed for PBR (TODO: find better way to get it)
+          // eslint-disable-next-line camelcase
+          u_Camera: model.uniforms.project_uCameraPosition
+        });
 
-      const {
-        isActive,
-        isAttribute,
-        isHighlightActive,
-        highlightColor,
-        highlightedObjectColor,
-        useFloatColors
-      } = model.uniforms;
-      this.uniformStore.setUniforms({
-        picking: {
+        // TODO remove once picking with UBOs is working
+        const {
           isActive,
           isAttribute,
           isHighlightActive,
           highlightColor,
           highlightedObjectColor,
           useFloatColors
-        } as typeof picking.uniforms
-      });
-      model.draw(renderPass);
+        } = model.uniforms;
+        this.uniformStore.setUniforms({
+          picking: {
+            isActive,
+            isAttribute,
+            isHighlightActive,
+            highlightColor,
+            highlightedObjectColor,
+            useFloatColors
+          } as typeof picking.uniforms
+        });
+        model.draw(renderPass);
+      }
     });
   }
 }
