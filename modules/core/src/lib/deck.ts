@@ -1024,6 +1024,7 @@ export default class Deck {
 
     setGLParameters(device, this.props.parameters);
 
+    this.device?.canvasContext?.resize({useDevicePixels: this.props.useDevicePixels});
     this.props.onBeforeRender({device, gl});
 
     const opts = {

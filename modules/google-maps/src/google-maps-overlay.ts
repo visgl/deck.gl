@@ -247,14 +247,6 @@ export default class GoogleMapsOverlay {
       // a second repaint
       deck.needsRedraw({clearRedrawFlags: true});
 
-      // Workaround for bug in Google maps where viewport state is wrong
-      // TODO remove once fixed
-      setGLParameters(gl, {
-        viewport: [0, 0, gl.canvas.width, gl.canvas.height],
-        scissor: [0, 0, gl.canvas.width, gl.canvas.height],
-        stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
-      });
-
       withGLParameters(gl, GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
