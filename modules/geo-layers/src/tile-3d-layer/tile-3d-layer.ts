@@ -317,6 +317,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
 
+    // HACK why is this required?
+    modelMatrix[12] = 0;
+    modelMatrix[13] = 0;
+    modelMatrix[14] = 0;
+
     return new SubLayerClass(
       {
         _lighting: 'pbr'

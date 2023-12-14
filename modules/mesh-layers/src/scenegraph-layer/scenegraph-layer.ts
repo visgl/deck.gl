@@ -191,7 +191,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
 
   getShaders() {
-    const modules = [project32, picking];
+    const modules = [project32];
 
     if (this.props._lighting === 'pbr') {
       modules.push(pbr);
@@ -249,7 +249,9 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     } else if (props.scenegraph && typeof props.scenegraph === 'object') {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const processedGLTF = postProcessGLTF(gltf);
+
+      // Tiles3DLoader already processes GLTF
+      const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
       // TODO remove cast once https://github.com/visgl/luma.gl/pull/1877 deployed
       const gltfObjects = createScenegraphsFromGLTF(
@@ -361,7 +363,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         isInstanced: true,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
         bindings: {
-          picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+          // picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
         },
         ...this.getShaders()
       },
@@ -420,24 +422,24 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         });
 
         // TODO remove once picking with UBOs is working
-        const {
-          isActive,
-          isAttribute,
-          isHighlightActive,
-          highlightColor,
-          highlightedObjectColor,
-          useFloatColors
-        } = model.uniforms;
-        this.uniformStore.setUniforms({
-          picking: {
-            isActive,
-            isAttribute,
-            isHighlightActive,
-            highlightColor,
-            highlightedObjectColor,
-            useFloatColors
-          } as typeof picking.uniforms
-        });
+        // const {
+        //   isActive,
+        //   isAttribute,
+        //   isHighlightActive,
+        //   highlightColor,
+        //   highlightedObjectColor,
+        //   useFloatColors
+        // } = model.uniforms;
+        // this.uniformStore.setUniforms({
+        //   picking: {
+        //     isActive,
+        //     isAttribute,
+        //     isHighlightActive,
+        //     highlightColor,
+        //     highlightedObjectColor,
+        //     useFloatColors
+        //   } as typeof picking.uniforms
+        // });
         model.draw(renderPass);
       }
     });
