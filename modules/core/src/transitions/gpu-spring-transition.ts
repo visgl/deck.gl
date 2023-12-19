@@ -150,6 +150,7 @@ export default class GPUSpringTransition implements GPUTransition {
         damping: settings.damping
       },
       parameters: {
+        // @ts-ignore
         depthTest: false,
         blend: true,
         viewport: [0, 0, 1, 1],
@@ -177,6 +178,7 @@ export default class GPUSpringTransition implements GPUTransition {
 
   cancel() {
     this.transition.cancel();
+    // @ts-ignore
     this.transform.delete();
     for (const buffer of this.buffers) {
       buffer.delete();
@@ -194,6 +196,7 @@ function getTransform(
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new Transform(device, {
+    // @ts-ignore
     framebuffer,
     vs: `
 #define SHADER_NAME spring-transition-vertex-shader

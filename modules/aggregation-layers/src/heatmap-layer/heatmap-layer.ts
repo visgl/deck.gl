@@ -425,10 +425,12 @@ export default class HeatmapLayer<
   _createWeightsTransform(shaders = {}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
+    // @ts-ignore
     weightsTransform?.delete();
 
     weightsTransform = new Transform(this.context.device, {
       id: `${this.id}-weights-transform`,
+      // @ts-ignore
       elementCount: 1,
       _targetTexture: weightsTexture,
       _targetTextureVarying: 'weightsTexture',
@@ -484,6 +486,7 @@ export default class HeatmapLayer<
     const {maxWeightTransform} = this.state;
     maxWeightTransform!.run({
       parameters: {
+        // @ts-ignore
         blend: true,
         depthTest: false,
         blendFunc: [GL.ONE, GL.ONE],
@@ -611,6 +614,7 @@ export default class HeatmapLayer<
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
+      // @ts-ignore
       elementCount: this.getNumInstances()
     });
     // Need to explictly specify clearColor as external context may have modified it
@@ -618,13 +622,13 @@ export default class HeatmapLayer<
       weightsTransform.run({
         uniforms,
         parameters: {
+          // @ts-ignore
           blend: true,
           depthTest: false,
           blendFunc: [GL.ONE, GL.ONE],
           blendEquation: GL.FUNC_ADD
         },
         clearRenderTarget: true,
-        // @ts-expect-error TODO - no longer supported in v9?
         attributes: this.getAttributes(),
         moduleSettings: this.getModuleSettings()
       });

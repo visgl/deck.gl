@@ -138,6 +138,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
 
   cancel(): void {
     this.transition.cancel();
+    // @ts-ignore
     this.transform.delete();
     for (const buffer of this.buffers) {
       buffer.delete();
