@@ -40,7 +40,7 @@
     "@loaders.gl/terrain": "4.0.3",
     "@loaders.gl/tiles": "4.0.3",
     "@loaders.gl/wms": "4.0.3",
-    "@luma.gl/core": "^9.0.0-alpha.46",
+    "@luma.gl/core": "^9.0.0-alpha.47",
     "@math.gl/core": "^4.0.0",
     "@math.gl/culling": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
@@ -54,8 +54,8 @@
     "@deck.gl/layers": "^9.0.0-alpha",
     "@deck.gl/mesh-layers": "^9.0.0-alpha",
     "@loaders.gl/core": "4.0.3",
-    "@luma.gl/core": "^9.0.0-alpha.46",
-    "@luma.gl/shadertools": "^9.0.0-alpha.46"
+    "@luma.gl/core": "^9.0.0-alpha.47",
+    "@luma.gl/shadertools": "^9.0.0-alpha.47"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
