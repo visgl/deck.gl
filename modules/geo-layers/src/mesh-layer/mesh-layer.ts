@@ -15,10 +15,16 @@ export type Mesh = {
   indices?: MeshAttribute;
 };
 
-function validateGeometryAttributes(attributes) {
+function validateGeometryAttributes(attributes: MeshAttributes) {
+  const positionAttribute = attributes.positions || attributes.POSITION;
+  const vertexCount = positionAttribute.value.length / positionAttribute.size;
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
   if (!hasColorAttribute) {
-    attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
+    attributes.colors = {
+      size: 4,
+      value: new Uint8Array(vertexCount * 4).fill(255),
+      normalized: true
+    };
   }
 }
 
