@@ -18,7 +18,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
 import {load} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
@@ -250,7 +251,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   private _getSubLayer(
     tileHeader: Tile3D,
     oldLayer?: Layer
-  ): SimpleMeshLayer<DataT> | PointCloudLayer<DataT> | ScenegraphLayer<DataT> | null {
+  ): MeshLayer<DataT> | PointCloudLayer<DataT> | ScenegraphLayer<DataT> | null {
     if (!tileHeader.content) {
       return null;
     }
@@ -261,7 +262,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       case TILE_TYPE.SCENEGRAPH:
         return this._make3DModelLayer(tileHeader);
       case TILE_TYPE.MESH:
-        return this._makeSimpleMeshLayer(tileHeader, oldLayer as SimpleMeshLayer<DataT>);
+        return this._makeSimpleMeshLayer(tileHeader, oldLayer as MeshLayer<DataT>);
       default:
         throw new Error(`Tile3DLayer: Failed to render layer of type ${tileHeader.content.type}`);
     }
@@ -344,10 +345,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     );
   }
 
-  private _makeSimpleMeshLayer(
-    tileHeader: Tile3D,
-    oldLayer?: SimpleMeshLayer<DataT>
-  ): SimpleMeshLayer<DataT> {
+  private _makeSimpleMeshLayer(tileHeader: Tile3D, oldLayer?: MeshLayer<DataT>): MeshLayer<DataT> {
     const content = tileHeader.content;
     const {
       attributes,
@@ -368,7 +366,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         indices
       });
 
-    const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const SubLayerClass = this.getSubLayerClass('mesh', MeshLayer);
 
     return new SubLayerClass(
       this.getSubLayerProps({

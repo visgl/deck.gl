@@ -17,7 +17,9 @@ in vec3 featureIdsPickingColors;
 // Instance attributes
 in vec4 instanceColors;
 in vec3 instancePickingColors;
-in mat3 instanceModelMatrix;
+in vec3 instanceModelMatrixCol0;
+in vec3 instanceModelMatrixCol1;
+in vec3 instanceModelMatrixCol2;
 
 // Outputs to fragment shader
 out vec2 vTexCoord;
@@ -44,6 +46,8 @@ void main(void) {
   } else {
     geometry.pickingColor = instancePickingColors;
   }
+
+  mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 
   vTexCoord = uv;
   cameraPosition = project_uCameraPosition;

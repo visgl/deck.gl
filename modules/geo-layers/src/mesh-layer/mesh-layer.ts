@@ -1,5 +1,5 @@
 import type {NumericArray} from '@math.gl/core';
-import {GLTFMaterialParser} from '@luma.gl/experimental';
+import {parsePBRMaterial} from '@luma.gl/gltf';
 import {pbr} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
@@ -93,7 +93,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       // eslint-disable-next-line camelcase
-      u_Camera: this.state.model.getUniforms().project_uCameraPosition,
+      u_Camera: this.state.model.uniforms.project_uCameraPosition,
       pickFeatureIds: Boolean(featureIds)
     });
 
@@ -111,10 +111,11 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       ...this.getShaders(),
       id,
       geometry: mesh,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       defines: {
         ...shaders.defines,
         ...materialParser?.defines,
-        HAS_UV_REGIONS: mesh.attributes.uvRegions
+        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0
       },
       parameters: materialParser?.parameters,
       isInstanced: true
@@ -130,6 +131,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       const materialParser = this.parseMaterial(pbrMaterial, mesh);
       // Keep material parser to explicitly remove textures
       this.setState({materialParser});
+      model.setBindings(materialParser.bindings);
       model.setUniforms(materialParser.uniforms);
     }
   }
@@ -139,16 +141,16 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
 
-    this.state.materialParser?.delete();
-
-    return new GLTFMaterialParser(this.context.device, {
-      attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
-      material: {unlit, ...pbrMaterial},
-      pbrDebug: false,
-      imageBasedLightingEnvironment: null,
-      lights: true,
-      useTangents: false
-    });
+    return parsePBRMaterial(
+      this.context.device,
+      {unlit, ...pbrMaterial},
+      {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
+      {
+        pbrDebug: false,
+        lights: true,
+        useTangents: false
+      }
+    );
   }
 
   calculateFeatureIdsPickingColors(attribute) {
