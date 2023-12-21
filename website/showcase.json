@@ -1,7 +1,7 @@
 [
   {
     "name": "Taxo&Map Biodiversity Map",
-    "url": "https://labs.geomatico.es/taxomap4/#/en/",
+    "url": "https://taxomap.bioexplora.cat/?lang=en",
     "image": "/images/showcase/geomatico.es-taxomap.jpg",
     "links": {
       "by geomatico": "https://geomatico.es/en/"
