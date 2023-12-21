@@ -21,6 +21,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-alpha.6] - Nov 21 2023
+
+- [CARTO] User boundaries support (#8296)
+
 #### deck.gl [9.0.0-alpha.5] - Nov 20 2023
 
 - [chore] Bump peerDependencies to 9.0.0 (#8295)

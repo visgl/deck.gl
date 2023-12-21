@@ -103,7 +103,6 @@ export default class GPUSpringTransition implements GPUTransition {
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
-      // @ts-expect-error accessor is deprecated
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -161,7 +160,6 @@ export default class GPUSpringTransition implements GPUTransition {
 
     cycleBuffers(buffers);
     this.attributeInTransition.setData({
-      // @ts-expect-error
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
