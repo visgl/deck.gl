@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME multi-icon-layer-fragment-shader
 
 precision highp float;
@@ -32,9 +33,11 @@ uniform float sdfBuffer;
 uniform float outlineBuffer;
 uniform vec4 outlineColor;
 
-varying vec4 vColor;
-varying vec2 vTextureCoords;
-varying vec2 uv;
+in vec4 vColor;
+in vec2 vTextureCoords;
+in vec2 uv;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = uv;
@@ -63,9 +66,9 @@ void main(void) {
       discard;
     }
 
-    gl_FragColor = vec4(color.rgb, a * opacity);
+    fragColor = vec4(color.rgb, a * opacity);
   }
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;
