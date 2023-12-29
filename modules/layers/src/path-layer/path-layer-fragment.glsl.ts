@@ -19,23 +19,26 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME path-layer-fragment-shader
 
 precision highp float;
 
 uniform float miterLimit;
 
-varying vec4 vColor;
-varying vec2 vCornerOffset;
-varying float vMiterLength;
+in vec4 vColor;
+in vec2 vCornerOffset;
+in float vMiterLength;
 /*
  * vPathPosition represents the relative coordinates of the current fragment on the path segment.
  * vPathPosition.x - position along the width of the path, between [-1, 1]. 0 is the center line.
  * vPathPosition.y - position along the length of the path, between [0, L / width].
  */
-varying vec2 vPathPosition;
-varying float vPathLength;
-varying float vJointType;
+in vec2 vPathPosition;
+in float vPathLength;
+in float vJointType;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = vPathPosition;
@@ -50,8 +53,8 @@ void main(void) {
       discard;
     }
   }
-  gl_FragColor = vColor;
+  fragColor = vColor;
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;
