@@ -19,7 +19,7 @@ vec2 collision_getCoords(vec4 position) {
 }
 
 float collision_match(vec2 tex, vec3 pickingColor) {
-  vec4 collision_pickingColor = texture2D(collision_texture, tex);
+  vec4 collision_pickingColor = texture(collision_texture, tex);
   float delta = dot(abs(collision_pickingColor.rgb - pickingColor), vec3(1.0));
   float e = 0.001;
   return step(delta, e);

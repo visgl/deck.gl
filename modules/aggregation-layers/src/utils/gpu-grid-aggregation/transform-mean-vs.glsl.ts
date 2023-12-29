@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME gpu-aggregation-transform-mean-vs
-attribute vec4 aggregationValues;
-varying vec4 meanValues;
+in vec4 aggregationValues;
+out vec4 meanValues;
 
 void main()
 {

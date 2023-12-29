@@ -202,11 +202,11 @@ function getTransform(
 
 uniform float stiffness;
 uniform float damping;
-attribute ATTRIBUTE_TYPE aPrev;
-attribute ATTRIBUTE_TYPE aCur;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vNext;
-varying float vIsTransitioningFlag;
+in ATTRIBUTE_TYPE aPrev;
+in ATTRIBUTE_TYPE aCur;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vNext;
+out float vIsTransitioningFlag;
 
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
@@ -225,16 +225,19 @@ void main(void) {
   gl_PointSize = 100.0;
 }
 `,
-    fs: `
+    fs: `\
+#version 300 es
 #define SHADER_NAME spring-transition-is-transitioning-fragment-shader
 
-varying float vIsTransitioningFlag;
+in float vIsTransitioningFlag;
+
+out vec4 fragColor;
 
 void main(void) {
   if (vIsTransitioningFlag == 0.0) {
     discard;
   }
-  gl_FragColor = vec4(1.0);
+  fragColor = vec4(1.0);
 }`,
     defines: {
       ATTRIBUTE_TYPE: attributeType

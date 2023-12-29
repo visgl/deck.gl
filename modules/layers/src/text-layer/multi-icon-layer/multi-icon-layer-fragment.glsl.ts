@@ -43,7 +43,7 @@ void main(void) {
   geometry.uv = uv;
 
   if (!picking_uActive) {
-    float alpha = texture2D(iconsTexture, vTextureCoords).a;
+    float alpha = texture(iconsTexture, vTextureCoords).a;
     vec4 color = vColor;
 
     // if enable sdf (signed distance fields)

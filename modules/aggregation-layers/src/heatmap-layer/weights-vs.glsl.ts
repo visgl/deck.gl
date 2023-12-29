@@ -1,8 +1,9 @@
 export default `\
-attribute vec3 positions;
-attribute vec3 positions64Low;
-attribute float weights;
-varying vec4 weightsTexture;
+#version 300 es
+in vec3 positions;
+in vec3 positions64Low;
+in float weights;
+out vec4 weightsTexture;
 uniform float radiusPixels;
 uniform float textureWidth;
 uniform vec4 commonBounds;

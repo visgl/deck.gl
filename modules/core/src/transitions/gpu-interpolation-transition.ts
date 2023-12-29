@@ -146,13 +146,14 @@ export default class GPUInterpolationTransition implements GPUTransition {
   }
 }
 
-const vs = `
+const vs = `\
+#version 300 es
 #define SHADER_NAME interpolation-transition-vertex-shader
 
 uniform float time;
-attribute ATTRIBUTE_TYPE aFrom;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vCurrent;
+in ATTRIBUTE_TYPE aFrom;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
   vCurrent = mix(aFrom, aTo, time);
