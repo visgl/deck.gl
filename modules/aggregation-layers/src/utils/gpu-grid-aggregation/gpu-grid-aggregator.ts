@@ -18,20 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, DeviceFeature} from '@luma.gl/core';
+import type {ColorParameters, Device, DeviceFeature, Texture} from '@luma.gl/core';
 import {Model, TextureTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {readPixelsToBuffer, withGLParameters, clear} from '@luma.gl/webgl';
+import {readPixelsToBuffer} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
   MAX_32_BIT_FLOAT,
-  MIN_BLEND_EQUATION,
-  MAX_BLEND_EQUATION,
-  MAX_MIN_BLEND_EQUATION,
-  EQUATION_MAP,
   DEFAULT_WEIGHT_PARAMS,
   PIXEL_SIZE
 } from './gpu-grid-aggregator-constants';
@@ -79,17 +75,17 @@ export default class GPUGridAggregator {
     pixelIndex: number;
   }) {
     const index = pixelIndex * PIXEL_SIZE;
-    const results: {cellCount?; cellWeight?; maxCellWieght?; minCellWeight?; totalCount?} = {};
+    const results: {cellCount?; cellWeight?; maxCellWeight?; minCellWeight?; totalCount?} = {};
     if (aggregationData) {
       results.cellCount = aggregationData[index + 3];
       results.cellWeight = aggregationData[index];
     }
     if (maxMinData) {
-      results.maxCellWieght = maxMinData[0];
+      results.maxCellWeight = maxMinData[0];
       results.minCellWeight = maxMinData[3];
     } else {
       if (maxData) {
-        results.maxCellWieght = maxData[0];
+        results.maxCellWeight = maxData[0];
         results.totalCount = maxData[3];
       }
       if (minData) {
@@ -149,13 +145,13 @@ export default class GPUGridAggregator {
     // per weight GPU resources
     weightAttributes: {},
     textures: {},
-    meanTextures: {},
+    meanTextures: {} as Record<string, Texture>,
+    meanTransforms: {} as Record<string, TextureTransform>,
     buffers: {},
     framebuffers: {},
     maxMinFramebuffers: {},
     minFramebuffers: {},
     maxFramebuffers: {},
-    equations: {},
 
     shaderOptions: {},
     modelDirty: false,
@@ -171,9 +167,9 @@ export default class GPUGridAggregator {
   device: Device;
   _hasGPUSupport: boolean;
 
-  gridAggregationModel;
-  allAggregationModel;
-  meanTransform;
+  // TODO(donmccurdy): Validate forward declaration or remove.
+  gridAggregationModel: Model = undefined!;
+  allAggregationModel: Model = undefined!;
 
   constructor(device: Device, props: GPUGridAggregatorProps = {}) {
     this.id = props.id || 'gpu-grid-aggregator';
@@ -196,7 +192,7 @@ export default class GPUGridAggregator {
 
   // Delete owned resources.
   delete() {
-    const {gridAggregationModel, allAggregationModel, meanTransform} = this;
+    const {gridAggregationModel, allAggregationModel} = this;
     const {
       textures,
       framebuffers,
@@ -204,12 +200,12 @@ export default class GPUGridAggregator {
       minFramebuffers,
       maxFramebuffers,
       meanTextures,
+      meanTransforms,
       resources
     } = this.state;
 
     gridAggregationModel?.destroy();
     allAggregationModel?.destroy();
-    meanTransform?.destroy();
 
     deleteResources([
       framebuffers,
@@ -218,6 +214,7 @@ export default class GPUGridAggregator {
       minFramebuffers,
       maxFramebuffers,
       meanTextures,
+      meanTransforms,
       resources
     ]);
   }
@@ -376,6 +373,9 @@ export default class GPUGridAggregator {
       if (combineMaxMin) {
         this._renderToMaxMinTexture({
           id,
+          // TODO(donmccurdy): DO NOT SUBMIT.
+          // @ts-expect-error
+          // eslint-disable-next-line no-undef
           parameters: {...parameters, blendEquation: MAX_MIN_BLEND_EQUATION},
           gridSize,
           minOrMaxFb: maxMinFramebuffers[id],
@@ -386,6 +386,9 @@ export default class GPUGridAggregator {
         if (needMin) {
           this._renderToMaxMinTexture({
             id,
+            // TODO(donmccurdy): DO NOT SUBMIT.
+            // @ts-expect-error
+            // eslint-disable-next-line no-undef
             parameters: {...parameters, blendEquation: MIN_BLEND_EQUATION},
             gridSize,
             minOrMaxFb: minFramebuffers[id],
@@ -396,6 +399,9 @@ export default class GPUGridAggregator {
         if (needMax) {
           this._renderToMaxMinTexture({
             id,
+            // TODO(donmccurdy): DO NOT SUBMIT.
+            // @ts-expect-error
+            // eslint-disable-next-line no-undef
             parameters: {...parameters, blendEquation: MAX_BLEND_EQUATION},
             gridSize,
             minOrMaxFb: maxFramebuffers[id],
@@ -411,81 +417,99 @@ export default class GPUGridAggregator {
   _renderToMaxMinTexture(opts) {
     const {id, parameters, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
     const {framebuffers} = this.state;
-    const {allAggregationModel} = this;
-
-    withGLParameters(
-      this.device,
-      {
-        ...clearParams,
-        framebuffer: minOrMaxFb,
-        viewport: [0, 0, gridSize[0], gridSize[1]]
-      },
-      () => {
-        clear(this.device, {color: true});
-
-        // allAggregationModel.setParameters(parameters);
-        allAggregationModel.setUniforms({gridSize, combineMaxMin});
-        allAggregationModel.setBindings({uSampler: framebuffers[id].texture});
-        allAggregationModel.draw();
-        // TODO - we need to create a render pass for the aggregation
-        // allAggregationModel.draw(renderPass);
+    const model = this.allAggregationModel;
+    const renderPass = this.device.beginRenderPass({
+      ...clearParams,
+      framebuffer: minOrMaxFb,
+      parameters: {
+        viewport: [0, 0, gridSize[0], gridSize[1]],
+        ...parameters
       }
-    );
+    });
+    model.setUniforms({gridSize, combineMaxMin});
+    model.setBindings({uSampler: framebuffers[id].texture});
+    model.draw(renderPass);
+    renderPass.end();
   }
 
   // render all data points to aggregate weights
   _renderToWeightsTexture(opts) {
     const {id, parameters, moduleSettings, uniforms, gridSize, weights} = opts;
-    const {framebuffers, equations, weightAttributes} = this.state;
-    const {gridAggregationModel} = this;
+    const {framebuffers, weightAttributes} = this.state;
     const {operation} = weights[id];
 
     const clearColor =
       operation === AGGREGATION_OPERATION.MIN
         ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
         : [0, 0, 0, 0];
-    withGLParameters(
-      this.device,
-      {
-        framebuffer: framebuffers[id],
-        viewport: [0, 0, gridSize[0], gridSize[1]],
-        clearColor
-      },
-      () => {
-        clear(this.device, {color: true});
 
-        const attributes = {weights: weightAttributes[id]};
-        gridAggregationModel.draw({
-          parameters: {...parameters, blendEquation: equations[id]},
-          moduleSettings,
-          uniforms,
-          attributes
-        });
+    const renderPass = this.device.beginRenderPass({
+      framebuffer: framebuffers[id],
+      clearColor,
+      parameters: {
+        ...parameters,
+        viewport: [0, 0, gridSize[0], gridSize[1]]
       }
-    );
+      // TODO(donmccurdy): What are these?
+      // moduleSettings
+      // uniforms,
+      // attributes: {weights: weightAttributes[id]}
+    });
+    this.gridAggregationModel.draw(renderPass);
+    renderPass.end();
 
     if (operation === AGGREGATION_OPERATION.MEAN) {
-      const {meanTextures, textures} = this.state;
-      const transformOptions = {
-        _sourceTextures: {aggregationValues: meanTextures[id]}, // contains aggregated data
-        _targetTexture: textures[id], // store mean values,
-        elementCount: textures[id].width * textures[id].height
-      };
-      if (this.meanTransform) {
-        this.meanTransform.update(transformOptions);
-      } else {
-        this.meanTransform = getMeanTransform(this.device, transformOptions);
-      }
-      this.meanTransform.run({
-        parameters: {
-          blend: false,
-          depthTest: false
-        }
-      });
+      const {meanTextures, meanTransforms, textures} = this.state;
 
+      let meanTransform = meanTransforms[id];
+
+      // TODO(donmccurdy): Avoid .update(), but don't recreate on every frame.
+      // if (this.meanTransform) {
+      //   this.meanTransform.update(transformOptions);
+      // } else {
+      //   this.meanTransform = getMeanTransform(this.device, transformOptions);
+      // }
+
+      if (!meanTransform) {
+        // TODO(donmccurdy): Unclear lifecycle.
+        console.warn('[gpu-grid-agg] BuildingTextureTransform');
+        meanTransform = meanTransforms[id] = new TextureTransform(this.device, {
+          vs: TRANSFORM_MEAN_VS,
+          bindings: {aggregationValues: meanTextures[id]}, // contains aggregated data
+          targetTexture: textures[id], // store mean values,
+          targetTextureVarying: 'meanValues',
+          targetTextureChannels: 4, // TODO(donmccurdy): Correct?
+          vertexCount: textures[id].width * textures[id].height,
+          parameters: {
+            depthCompare: 'always',
+            // TODO(donmccurdy): Why was `blend: false` previously here?
+          }
+        });
+      }
+
+      meanTransform.run();
+
+      // TODO(v9): Unlikely to be portable.
       // update framebuffer with mean results so readPixelsToBuffer returns mean values
       framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: textures[id]});
     }
+  }
+
+  _getBlendParameters(weights: Record<string, any>): ColorParameters {
+    const params = {} as ColorParameters;
+
+    for (const id in weights) {
+      const {needMin, needMax, combineMaxMin} = weights[id];
+      if (combineMaxMin) {
+        params.blendColorOperation = 'max';
+        params.blendAlphaOperation = 'min';
+      } else {
+        // TODO(donmccurdy): Remaining blend parameters.
+      }
+      
+    }
+
+    return params;
   }
 
   _runAggregation(opts) {
@@ -506,8 +530,7 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      meanTextures,
-      equations
+      meanTextures
     } = this.state;
     const {weights} = opts;
     const {numCol, numRow} = opts;
@@ -525,6 +548,8 @@ export default class GPUGridAggregator {
         meanTextures[id] =
           meanTextures[id] ||
           getFloatTexture(this.device, {id: `${id}-mean-texture`, width: numCol, height: numRow});
+        // TODO(donmccurdy): DO NOT SUBMIT.
+        // @ts-expect-error
         meanTextures[id].resize(framebufferSize);
         texture = meanTextures[id];
       }
@@ -539,7 +564,6 @@ export default class GPUGridAggregator {
         });
       }
       framebuffers[id].resize(framebufferSize);
-      equations[id] = EQUATION_MAP[operation] || EQUATION_MAP[AGGREGATION_OPERATION.SUM];
       // For min/max framebuffers will use default size 1X1
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
@@ -692,13 +716,5 @@ function getAllAggregationModel(device: Device, instanceCount: number): Model {
       // @ts-expect-error
       position: [0, 0]
     }
-  });
-}
-
-function getMeanTransform(device: Device, opts) {
-  return new TextureTransform(device, {
-    vs: TRANSFORM_MEAN_VS,
-    _targetTextureVarying: 'meanValues',
-    ...opts
   });
 }

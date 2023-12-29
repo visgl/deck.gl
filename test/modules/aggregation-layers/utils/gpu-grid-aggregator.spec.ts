@@ -47,8 +47,7 @@ function testCounterMinMax(aggregator, t, opts) {
 }
 /* eslint-enable max-statements */
 
-// TODO luma v9
-test.skip('GPUGridAggregator#GPU', t => {
+test.only('GPUGridAggregator#GPU', t => {
   const sa = new GPUGridAggregator(device);
   const {data, weights} = fixture;
   const params = Object.assign({}, fixture, buildAttributes({data, weights}));

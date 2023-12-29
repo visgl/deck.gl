@@ -25,7 +25,6 @@ import {
   Accessor,
   AccessorFunction,
   Color,
-  Layer,
   log,
   Position,
   UpdateParameters,
@@ -35,7 +34,7 @@ import {
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
-import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
+import {getBoundingBox, getGridParams, readFloat32Array} from '../utils/grid-aggregation-utils';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
@@ -351,7 +350,7 @@ export default class ContourLayer<
     const {count} = this.state.weights;
     let {aggregationData} = count;
     if (!aggregationData) {
-      aggregationData = count.aggregationBuffer!.getData() as Float32Array;
+      aggregationData = readFloat32Array(count.aggregationBuffer!);
       count.aggregationData = aggregationData;
     }
 

@@ -46,10 +46,8 @@ import './modules';
 // Tests currently only work in browser
 import './modules/json/json-render.spec';
 import './modules/main/bundle';
-// import './modules/aggregation-layers/utils/gpu-grid-aggregator.spec';
-// import './modules/aggregation-layers/gpu-cpu-aggregator.spec';
-// import './modules/aggregation-layers/gpu-grid-layer/gpu-grid-layer.spec';
-// import './modules/aggregation-layers/heatmap-layer/heatmap-layer.spec';
+import './modules/aggregation-layers/index';
+
 // TODO disabled for v9, restore ASAP
 // import './modules/carto/layers/raster-tile-layer.spec';
 // import './modules/core/lib/pick-layers.spec';

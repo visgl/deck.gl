@@ -28,11 +28,15 @@ import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
 import './grid-layer.spec';
 import './screen-grid-layer.spec';
-import './utils/scale-utils.spec';
-import './utils/color-utils.spec';
-import './utils/bin-sorter.spec';
-import './utils/aggregation-operation-utils.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
 import './screengrid-cell-layer.spec';
 import './aggregation-layer.spec';
 import './grid-aggregation-layer.spec';
+
+// Utils
+import './utils/aggregation-operation-utils.spec';
+import './utils/bin-sorter.spec';
+import './utils/color-utils.spec';
+import './utils/gpu-grid-aggregator.spec';
+import './utils/grid-aggregation-utils.spec';
+import './utils/scale-utils.spec';

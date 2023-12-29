@@ -31,14 +31,14 @@ import {CubeGeometry} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import type {_GPUGridLayerProps} from './gpu-grid-layer';
 import vs from './gpu-grid-cell-layer-vertex.glsl';
 import fs from './gpu-grid-cell-layer-fragment.glsl';
+import { readFloat32Array } from '../utils/grid-aggregation-utils';
 
-const COLOR_DATA_UBO_INDEX = 0;
-const ELEVATION_DATA_UBO_INDEX = 1;
+// const COLOR_DATA_UBO_INDEX = 0;
+// const ELEVATION_DATA_UBO_INDEX = 1;
 
 const defaultProps: DefaultProps<_GPUGridCellLayerProps & LayerProps> = {
   // color
@@ -106,7 +106,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
       }
     });
     const model = this._getModel();
-    this._setupUniformBuffer(model);
+    // this._setupUniformBuffer(model);
     this.setState({model});
   }
 
@@ -139,7 +139,9 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
     const domainUniforms = this.getDomainUniforms();
     const colorRange = colorRangeToFlatArray(this.props.colorRange);
-    this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
+    const colorMaxMin = Array.from(readFloat32Array(colorMaxMinBuffer));
+    const elevationMaxMin = Array.from(readFloat32Array(elevationMaxMinBuffer));
+    // this.bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
     model.setUniforms(uniforms);
     model.setUniforms(domainUniforms);
     model.setUniforms({
@@ -154,21 +156,23 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
       gridOffset,
       gridOffsetLow,
       colorRange,
-      elevationRange
+      elevationRange,
+      colorMaxMin,
+      elevationMaxMin,
     });
     model.draw(this.context.renderPass);
-    this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
+    // this.unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer);
   }
 
-  bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
-    colorMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
-    elevationMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
-  }
+  // bindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
+  //   colorMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
+  //   elevationMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
+  // }
 
-  unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
-    colorMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
-    elevationMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
-  }
+  // unbindUniformBuffers(colorMaxMinBuffer, elevationMaxMinBuffer) {
+  //   colorMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
+  //   elevationMaxMinBuffer.unbind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
+  // }
 
   getDomainUniforms() {
     const {colorDomain, elevationDomain} = this.props;
@@ -188,14 +192,14 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     return domainUniforms;
   }
 
-  private _setupUniformBuffer(model: Model): void {
-    // @ts-expect-error TODO v9 This code is not portable to WebGPU
-    const programHandle = model.pipeline.handle;
+  // private _setupUniformBuffer(model: Model): void {
+  //   // @ts-expect-error TODO v9 This code is not portable to WebGPU
+  //   const programHandle = model.pipeline.handle;
 
-    const gl = this.context.gl as WebGL2RenderingContext;
-    const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
-    const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
-    gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);
-    gl.uniformBlockBinding(programHandle, elevationIndex, ELEVATION_DATA_UBO_INDEX);
-  }
+  //   const gl = this.context.gl as WebGL2RenderingContext;
+  //   const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
+  //   const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
+  //   gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);
+  //   gl.uniformBlockBinding(programHandle, elevationIndex, ELEVATION_DATA_UBO_INDEX);
+  // }
 }

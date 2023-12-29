@@ -39,6 +39,8 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
   return texture;
 }
 
+// TODO(donmccurdy): Consider removing this utility and explicitly creating
+// framebuffers. Allows stricter types and clearer responsibility for disposal.
 export function getFramebuffer(device: Device, opts) {
   const {id, width = 1, height = 1, texture} = opts;
   const fb = device.createFramebuffer({

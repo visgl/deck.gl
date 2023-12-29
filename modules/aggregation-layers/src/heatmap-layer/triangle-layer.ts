@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import type {Device, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {Model, Geometry, ModelProps} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
@@ -68,7 +68,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
         topology: 'triangle-fan-webgl',
         vertexCount
       })
-    });
+    } as ModelProps);
   }
 
   draw({uniforms}): void {

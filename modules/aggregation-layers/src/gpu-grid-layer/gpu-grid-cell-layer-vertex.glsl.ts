@@ -54,15 +54,18 @@ uniform bool colorDomainValid;
 uniform vec2 elevationDomain;
 uniform bool elevationDomainValid;
 
-layout(std140) uniform;
-uniform ColorData
-{
-  vec4 maxMinCount;
-} colorData;
-uniform ElevationData
-{
-  vec4 maxMinCount;
-} elevationData;
+uniform vec4 colorMaxMin;
+uniform vec4 elevationMaxMin;
+
+// layout(std140) uniform;
+// uniform ColorData
+// {
+//   vec4 maxMinCount;
+// } colorData;
+// uniform ElevationData
+// {
+//   vec4 maxMinCount;
+// } elevationData;
 
 #define EPSILON 0.00001
 
@@ -95,13 +98,13 @@ float linearScale(vec2 domain, vec2 range, float value) {
 }
 
 void main(void) {
-  vec2 clrDomain = colorDomainValid ? colorDomain : vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
+  vec2 clrDomain = colorDomainValid ? colorDomain : vec2(colorMaxMin.a, colorMaxMin.r);
   vec4 color = quantizeScale(clrDomain, colorRange, colors.r);
 
   float elevation = 0.0;
 
   if (extruded) {
-    vec2 elvDomain = elevationDomainValid ? elevationDomain : vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
+    vec2 elvDomain = elevationDomainValid ? elevationDomain : vec2(elevationMaxMin.a, elevationMaxMin.r);
     elevation = linearScale(elvDomain, elevationRange, elevations.r);
     elevation = elevation  * (positions.z + 1.0) / 2.0 * elevationScale;
   }

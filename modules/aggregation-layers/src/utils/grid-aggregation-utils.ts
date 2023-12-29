@@ -1,4 +1,7 @@
 import {log, COORDINATE_SYSTEM} from '@deck.gl/core';
+import { GL } from '@luma.gl/constants';
+import type {Buffer} from '@luma.gl/core';
+
 const R_EARTH = 6378000;
 
 function toFinite(n) {
@@ -144,4 +147,19 @@ function calculateLatOffset(dy) {
  */
 function calculateLonOffset(lat, dx) {
   return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
+}
+
+/**
+ * TODO(v9): Direct use of WebGL APIs is not portable and should be avoided. The portable
+ *  alternative to this function is asynchronous, which may be a more difficult change to
+ *  adopt in Deck.
+ * @deprecated
+ */
+export function readFloat32Array(buffer: Buffer, byteOffset = 0, byteLength = buffer.byteLength): Float32Array {
+  const data = new Uint8Array(byteLength);
+  // TODO(donmccurdy): Safe to access GL.* from this package, other than deprecation issue?
+  (buffer as any).gl.bindBuffer(GL.COPY_READ_BUFFER, (buffer as any).handle);
+  (buffer as any).gl2.getBufferSubData(GL.COPY_READ_BUFFER, byteOffset, data, 0, byteLength);
+  (buffer as any).gl.bindBuffer(GL.COPY_READ_BUFFER, null);
+  return new Float32Array(data.buffer, data.byteOffset, data.byteLength / 4);
 }
