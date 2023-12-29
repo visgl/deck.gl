@@ -5,7 +5,7 @@ import type {DataFilterExtensionProps} from './data-filter-extension';
 /*
  * data filter shader module
  */
-const vs = `\
+const vs = `
 uniform DATAFILTER_TYPE filter_min;
 uniform DATAFILTER_TYPE filter_softMin;
 uniform DATAFILTER_TYPE filter_softMax;
