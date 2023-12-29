@@ -17,16 +17,16 @@ const patternVs = `
   #define FILL_PATTERN_OFFSET_ATTRIB instanceFillPatternOffsets
 #endif
 
-attribute vec4 FILL_PATTERN_FRAME_ATTRIB;
-attribute float FILL_PATTERN_SCALE_ATTRIB;
-attribute vec2 FILL_PATTERN_OFFSET_ATTRIB;
+in vec4 FILL_PATTERN_FRAME_ATTRIB;
+in float FILL_PATTERN_SCALE_ATTRIB;
+in vec2 FILL_PATTERN_OFFSET_ATTRIB;
 
 uniform bool fill_patternEnabled;
 uniform vec2 fill_patternTextureSize;
 
-varying vec2 fill_uv;
-varying vec4 fill_patternBounds;
-varying vec4 fill_patternPlacement;
+out vec2 fill_uv;
+out vec4 fill_patternBounds;
+out vec4 fill_patternPlacement;
 `;
 
 const patternFs = `
@@ -36,9 +36,9 @@ uniform sampler2D fill_patternTexture;
 uniform vec2 fill_uvCoordinateOrigin;
 uniform vec2 fill_uvCoordinateOrigin64Low;
 
-varying vec4 fill_patternBounds;
-varying vec4 fill_patternPlacement;
-varying vec2 fill_uv;
+in vec4 fill_patternBounds;
+in vec4 fill_patternPlacement;
+in vec2 fill_uv;
 
 const float FILL_UV_SCALE = 512.0 / 40000000.0;
 `;
@@ -64,7 +64,7 @@ const inject = {
 
       vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
 
-      vec4 patternColor = texture2D(fill_patternTexture, texCoords);
+      vec4 patternColor = texture(fill_patternTexture, texCoords);
       color.a *= patternColor.a;
       if (!fill_patternMask) {
         color.rgb = patternColor.rgb;

@@ -19,19 +19,20 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME arc-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec4 instanceSourceColors;
-attribute vec4 instanceTargetColors;
-attribute vec3 instanceSourcePositions;
-attribute vec3 instanceSourcePositions64Low;
-attribute vec3 instanceTargetPositions;
-attribute vec3 instanceTargetPositions64Low;
-attribute vec3 instancePickingColors;
-attribute float instanceWidths;
-attribute float instanceHeights;
-attribute float instanceTilts;
+in vec3 positions;
+in vec4 instanceSourceColors;
+in vec4 instanceTargetColors;
+in vec3 instanceSourcePositions;
+in vec3 instanceSourcePositions64Low;
+in vec3 instanceTargetPositions;
+in vec3 instanceTargetPositions64Low;
+in vec3 instancePickingColors;
+in float instanceWidths;
+in float instanceHeights;
+in float instanceTilts;
 
 uniform bool greatCircle;
 uniform bool useShortestPath;
@@ -42,9 +43,9 @@ uniform float widthMinPixels;
 uniform float widthMaxPixels;
 uniform int widthUnits;
 
-varying vec4 vColor;
-varying vec2 uv;
-varying float isValid;
+out vec4 vColor;
+out vec2 uv;
+out float isValid;
 
 float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
   // d: distance on the xy plane
