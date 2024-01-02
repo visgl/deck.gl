@@ -58,13 +58,13 @@ const shaderModuleVs: ShaderModule = {
 
 const injectionVs = {
   'vs:#decl': `
-varying float clip_isVisible;
+out float clip_isVisible;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
   clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
 `,
   'fs:#decl': `
-varying float clip_isVisible;
+in float clip_isVisible;
 `,
   'fs:DECKGL_FILTER_COLOR': `
   if (clip_isVisible < 0.5) discard;
@@ -82,13 +82,13 @@ const shaderModuleFs: ShaderModule = {
 
 const injectionFs = {
   'vs:#decl': `
-varying vec2 clip_commonPosition;
+out vec2 clip_commonPosition;
 `,
   'vs:DECKGL_FILTER_GL_POSITION': `
   clip_commonPosition = geometry.position.xy;
 `,
   'fs:#decl': `
-varying vec2 clip_commonPosition;
+in vec2 clip_commonPosition;
 `,
   'fs:DECKGL_FILTER_COLOR': `
   if (!clip_isInBounds(clip_commonPosition)) discard;

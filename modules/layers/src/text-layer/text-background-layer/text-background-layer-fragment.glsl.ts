@@ -1,15 +1,18 @@
 export default `\
+#version 300 es
 #define SHADER_NAME text-background-layer-fragment-shader
 
 precision highp float;
 
 uniform bool stroked;
 
-varying vec4 vFillColor;
-varying vec4 vLineColor;
-varying float vLineWidth;
-varying vec2 uv;
-varying vec2 dimensions;
+in vec4 vFillColor;
+in vec4 vLineColor;
+in float vLineWidth;
+in vec2 uv;
+in vec2 dimensions;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = uv;
@@ -21,11 +24,11 @@ void main(void) {
       min(pixelPosition.y, dimensions.y - pixelPosition.y)
     );
     float isBorder = smoothedge(distToEdge, vLineWidth);
-    gl_FragColor = mix(vFillColor, vLineColor, isBorder);
+    fragColor = mix(vFillColor, vLineColor, isBorder);
   } else {
-    gl_FragColor = vFillColor;
+    fragColor = vFillColor;
   }
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

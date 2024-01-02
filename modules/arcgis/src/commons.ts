@@ -12,23 +12,26 @@ export function initializeResources(device: Device) {
   this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
 
   this.model = new Model(device, {
-    vs: `
-      attribute vec2 a_pos;
-      varying vec2 v_texcoord;
-      void main(void) {
-          gl_Position = vec4(a_pos, 0.0, 1.0);
-          v_texcoord = (a_pos + 1.0) / 2.0;
-      }
+    vs: `\
+#version 300 es
+in vec2 a_pos;
+out vec2 v_texcoord;
+void main(void) {
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+    v_texcoord = (a_pos + 1.0) / 2.0;
+}
     `,
-    fs: `
-      precision mediump float;
-      uniform sampler2D u_texture;
-      varying vec2 v_texcoord;
-      void main(void) {
-          vec4 rgba = texture2D(u_texture, v_texcoord);
-          rgba.rgb *= rgba.a;
-          gl_FragColor = rgba;
-      }
+    fs: `\
+#version 300 es
+precision mediump float;
+uniform sampler2D u_texture;
+in vec2 v_texcoord;
+out vec4 fragColor;
+void main(void) {
+    vec4 rgba = texture(u_texture, v_texcoord);
+    rgba.rgb *= rgba.a;
+    fragColor = rgba;
+}
     `,
     attributes: {
       // eslint-disable-next-line camelcase
