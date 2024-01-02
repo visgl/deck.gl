@@ -1,7 +1,7 @@
 // deck.gl, MIT license
 
 import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
+import {BufferTransform} from '@luma.gl/engine';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
@@ -45,7 +45,7 @@ export default class AttributeTransitionManager {
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-    this.isSupported = Transform.isSupported(device);
+    this.isSupported = device.features.has('transform-feedback-webgl2');
   }
 
   finalize(): void {

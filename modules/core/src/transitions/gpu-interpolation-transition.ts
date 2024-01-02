@@ -1,5 +1,5 @@
 import type {Device} from '@luma.gl/core';
-import {Timeline, Transform} from '@luma.gl/engine';
+import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
@@ -26,7 +26,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
   private transition: Transition;
   private currentStartIndices: NumericArray | null;
   private currentLength: number;
-  private transform: Transform;
+  private transform: BufferTransform;
   private buffers: Buffer[];
 
   constructor({
@@ -111,7 +111,6 @@ export default class GPUInterpolationTransition implements GPUTransition {
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
         aFrom: buffers[0],
-        // @ts-expect-error TODO - this looks like a real type mismatch!!!
         aTo: getSourceBufferAttribute(device, attribute)
       },
       feedbackBuffers: {
@@ -129,9 +128,8 @@ export default class GPUInterpolationTransition implements GPUTransition {
       if (easing) {
         t = easing(t);
       }
-      this.transform.run({
-        uniforms: {time: t}
-      });
+      this.transform.model.setUniforms({time: t});
+      this.transform.run();
     }
     return updated;
   }
@@ -161,9 +159,9 @@ void main(void) {
 }
 `;
 
-function getTransform(device: Device, attribute: Attribute): Transform {
+function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(device, {
+  return new BufferTransform(device, {
     vs,
     defines: {
       ATTRIBUTE_TYPE: attributeType
