@@ -62,6 +62,7 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
     clear(this.device, {color: true});
+    // @ts-expect-error TODO(v9) Likely to be a real error.
     this.model.setShaderModuleProps(options.moduleSettings);
     this.model.setBindings({
       texture: inputBuffer.colorAttachments[0]
