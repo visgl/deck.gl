@@ -57,6 +57,6 @@ void main(void) {
 
   vec4 linearColor = getLinearColor(weight);
   linearColor.a *= opacity;
-  fragColor =linearColor;
+  fragColor = linearColor;
 }
 `;
