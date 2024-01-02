@@ -68,9 +68,9 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
     shaders.inject = {
       'vs:#decl': `\
 uniform float trailLength;
-attribute float instanceTimestamps;
-attribute float instanceNextTimestamps;
-varying float vTime;
+in float instanceTimestamps;
+in float instanceNextTimestamps;
+out float vTime;
 `,
       // Timestamp of the vertex
       'vs:#main-end': `\
@@ -80,7 +80,7 @@ vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPa
 uniform bool fadeTrail;
 uniform float trailLength;
 uniform float currentTime;
-varying float vTime;
+in float vTime;
 `,
       // Drop the segments outside of the time window
       'fs:#main-start': `\
