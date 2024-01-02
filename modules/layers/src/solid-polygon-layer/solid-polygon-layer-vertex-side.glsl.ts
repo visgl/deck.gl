@@ -21,19 +21,20 @@
 import main from './solid-polygon-layer-vertex-main.glsl';
 
 export default `\
+#version 300 es
 #define SHADER_NAME solid-polygon-layer-vertex-shader-side
 
-attribute vec2 positions;
+in vec2 positions;
 
-attribute vec3 instancePositions;
-attribute vec3 instanceNextPositions;
-attribute vec3 instancePositions64Low;
-attribute vec3 instanceNextPositions64Low;
-attribute float instanceElevations;
-attribute vec4 instanceFillColors;
-attribute vec4 instanceLineColors;
-attribute vec3 instancePickingColors;
-attribute float instanceVertexValid;
+in vec3 instancePositions;
+in vec3 instanceNextPositions;
+in vec3 instancePositions64Low;
+in vec3 instanceNextPositions64Low;
+in float instanceElevations;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in vec3 instancePickingColors;
+in float instanceVertexValid;
 
 ${main}
 
