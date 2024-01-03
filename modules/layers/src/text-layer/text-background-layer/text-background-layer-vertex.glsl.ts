@@ -1,18 +1,19 @@
 export default `\
+#version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
 
-attribute vec2 positions;
+in vec2 positions;
 
-attribute vec3 instancePositions;
-attribute vec3 instancePositions64Low;
-attribute vec4 instanceRects;
-attribute float instanceSizes;
-attribute float instanceAngles;
-attribute vec2 instancePixelOffsets;
-attribute float instanceLineWidths;
-attribute vec4 instanceFillColors;
-attribute vec4 instanceLineColors;
-attribute vec3 instancePickingColors;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in vec4 instanceRects;
+in float instanceSizes;
+in float instanceAngles;
+in vec2 instancePixelOffsets;
+in float instanceLineWidths;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in vec3 instancePickingColors;
 
 uniform bool billboard;
 uniform float opacity;
@@ -22,11 +23,11 @@ uniform float sizeMaxPixels;
 uniform vec4 padding;
 uniform int sizeUnits;
 
-varying vec4 vFillColor;
-varying vec4 vLineColor;
-varying float vLineWidth;
-varying vec2 uv;
-varying vec2 dimensions;
+out vec4 vFillColor;
+out vec4 vLineColor;
+out float vLineWidth;
+out vec2 uv;
+out vec2 dimensions;
 
 vec2 rotate_by_angle(vec2 vertex, float angle) {
   float angle_radian = radians(angle);

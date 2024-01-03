@@ -84,33 +84,39 @@ function createPasses(device: Device, module: ShaderModule, id: string): ScreenP
 }
 
 const FILTER_FS_TEMPLATE = func => `\
+#version 300 es
 uniform sampler2D texture;
 uniform vec2 texSize;
 
-varying vec2 position;
-varying vec2 coordinate;
-varying vec2 uv;
+in vec2 position;
+in vec2 coordinate;
+in vec2 uv;
+
+out vec4 fragColor;
 
 void main() {
   vec2 texCoord = coordinate;
 
-  gl_FragColor = texture2D(texture, texCoord);
-  gl_FragColor = ${func}(gl_FragColor, texSize, texCoord);
+  fragColor = texture(texture, texCoord);
+  fragColor = ${func}(fragColor, texSize, texCoord);
 }
 `;
 
 const SAMPLER_FS_TEMPLATE = func => `\
+#version 300 es
 uniform sampler2D texture;
 uniform vec2 texSize;
 
-varying vec2 position;
-varying vec2 coordinate;
-varying vec2 uv;
+in vec2 position;
+in vec2 coordinate;
+in vec2 uv;
+
+out vec4 fragColor;
 
 void main() {
   vec2 texCoord = coordinate;
 
-  gl_FragColor = ${func}(texture, texSize, texCoord);
+  fragColor = ${func}(texture, texSize, texCoord);
 }
 `;
 

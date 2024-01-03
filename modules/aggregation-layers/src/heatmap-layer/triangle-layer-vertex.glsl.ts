@@ -21,6 +21,7 @@
 // Inspired by screen-grid-layer vertex shader in deck.gl
 
 export default `\
+#version 300 es
 #define SHADER_NAME heatp-map-layer-vertex-shader
 
 uniform sampler2D maxTexture;
@@ -29,17 +30,17 @@ uniform vec2 colorDomain;
 uniform float threshold;
 uniform float aggregationMode;
 
-attribute vec3 positions;
-attribute vec2 texCoords;
+in vec3 positions;
+in vec2 texCoords;
 
-varying vec2 vTexCoords;
-varying float vIntensityMin;
-varying float vIntensityMax;
+out vec2 vTexCoords;
+out float vIntensityMin;
+out float vIntensityMax;
 
 void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
   vTexCoords = texCoords;
-  vec4 maxTexture = texture2D(maxTexture, vec2(0.5));
+  vec4 maxTexture = texture(maxTexture, vec2(0.5));
   float maxValue = aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;
   float minValue = maxValue * threshold;
   if (colorDomain[1] > 0.) {

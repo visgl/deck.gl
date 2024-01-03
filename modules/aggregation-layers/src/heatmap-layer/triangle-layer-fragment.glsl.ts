@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME triangle-layer-fragment-shader
 
 precision highp float;
@@ -28,19 +29,21 @@ uniform sampler2D texture;
 uniform sampler2D colorTexture;
 uniform float aggregationMode;
 
-varying vec2 vTexCoords;
-varying float vIntensityMin;
-varying float vIntensityMax;
+in vec2 vTexCoords;
+in float vIntensityMin;
+in float vIntensityMax;
+
+out vec4 fragColor;
 
 vec4 getLinearColor(float value) {
   float factor = clamp(value * vIntensityMax, 0., 1.);
-  vec4 color = texture2D(colorTexture, vec2(factor, 0.5));
+  vec4 color = texture(colorTexture, vec2(factor, 0.5));
   color.a *= min(value * vIntensityMin, 1.0);
   return color;
 }
 
 void main(void) {
-  vec4 weights = texture2D(texture, vTexCoords);
+  vec4 weights = texture(texture, vTexCoords);
   float weight = weights.r;
 
   if (aggregationMode > 0.5) {
@@ -54,6 +57,6 @@ void main(void) {
 
   vec4 linearColor = getLinearColor(weight);
   linearColor.a *= opacity;
-  gl_FragColor =linearColor;
+  fragColor = linearColor;
 }
 `;

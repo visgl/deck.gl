@@ -297,7 +297,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
-    // specifed via: attribute vec2 positions;
+    // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
     return new Model(this.context.device, {
