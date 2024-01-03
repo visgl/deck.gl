@@ -3,10 +3,10 @@ import type {BufferAttributeLayout, TypedArray, VertexFormat} from '@luma.gl/cor
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings} from './data-column';
 
-/* eslint-disable complexity,@typescript-eslint/no-unsafe-enum-comparison */
+/* eslint-disable complexity */
 export function glArrayFromType(glType: number): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
-  switch (glType) {
+  switch (glType as GL) {
     case GL.FLOAT:
       return Float32Array;
     case GL.DOUBLE:
