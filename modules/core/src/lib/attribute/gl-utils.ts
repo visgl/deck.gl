@@ -6,7 +6,7 @@ import type {BufferAccessor, DataColumnSettings} from './data-column';
 /* eslint-disable complexity */
 export function glArrayFromType(glType: number): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
-  switch (glType) {
+  switch (glType as GL) {
     case GL.FLOAT:
       return Float32Array;
     case GL.DOUBLE:

@@ -512,7 +512,8 @@ export default class DataColumn<Options, State> {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
   normalizeConstant(value: NumericArray): NumericArray {
-    switch (this.settings.type) {
+    /* eslint-disable complexity */
+    switch (this.settings.type as GL) {
       case GL.BYTE:
         // normalize [-128, 127] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);

@@ -52,7 +52,7 @@ export type LayerContext = {
   timeline: Timeline;
   mousePosition: {x: number; y: number} | null;
   userData: any;
-  onError?: <PropsT>(error: Error, source: Layer<PropsT>) => void;
+  onError?: <PropsT extends {}>(error: Error, source: Layer<PropsT>) => void;
   /** @deprecated Use context.device */
   gl: WebGLRenderingContext;
 };
