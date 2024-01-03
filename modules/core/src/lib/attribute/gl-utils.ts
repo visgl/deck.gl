@@ -1,5 +1,5 @@
-import {GL} from '@luma.gl/constants';
-import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
+import {GL, GLDataType} from '@luma.gl/constants';
+import type {BufferAttributeLayout, TypedArray, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings} from './data-column';
 
@@ -76,4 +76,36 @@ export function bufferLayoutEqual(
     getStride(accessor1) === getStride(accessor2) &&
     (accessor1.offset || 0) === (accessor2.offset || 0)
   );
+}
+
+const ERR_TYPE_DEDUCTION = 'Failed to deduce GL constant from typed array';
+
+/**
+ * Converts TYPED ARRAYS to corresponding GL constant
+ * Used to auto deduce gl parameter types
+ * @todo Duplicated from `@luma.gl/webgl`.
+ */
+export function getGLTypeFromTypedArray(arrayOrType: TypedArray): GLDataType {
+  // If typed array, look up constructor
+  const type = ArrayBuffer.isView(arrayOrType) ? arrayOrType.constructor : arrayOrType;
+  switch (type) {
+    case Float32Array:
+      return GL.FLOAT;
+    case Uint16Array:
+      return GL.UNSIGNED_SHORT;
+    case Uint32Array:
+      return GL.UNSIGNED_INT;
+    case Uint8Array:
+      return GL.UNSIGNED_BYTE;
+    case Uint8ClampedArray:
+      return GL.UNSIGNED_BYTE;
+    case Int8Array:
+      return GL.BYTE;
+    case Int16Array:
+      return GL.SHORT;
+    case Int32Array:
+      return GL.INT;
+    default:
+      throw new Error(ERR_TYPE_DEDUCTION);
+  }
 }

@@ -1,10 +1,10 @@
 export const dashShaders = {
   inject: {
     'vs:#decl': `
-attribute vec2 instanceDashArrays;
-attribute float instanceDashOffsets;
-varying vec2 vDashArray;
-varying float vDashOffset;
+in vec2 instanceDashArrays;
+in float instanceDashOffsets;
+out vec2 vDashArray;
+out float vDashOffset;
 `,
 
     'vs:#main-end': `
@@ -16,12 +16,8 @@ vDashOffset = instanceDashOffsets / width.x;
 uniform float dashAlignMode;
 uniform float capType;
 uniform bool dashGapPickable;
-varying vec2 vDashArray;
-varying float vDashOffset;
-
-float round(float x) {
-  return floor(x + 0.5);
-}
+in vec2 vDashArray;
+in float vDashOffset;
 `,
 
     // if given position is in the gap part of the dashed line
@@ -75,7 +71,7 @@ float round(float x) {
 export const offsetShaders = {
   inject: {
     'vs:#decl': `
-attribute float instanceOffsets;
+in float instanceOffsets;
 `,
     'vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;

@@ -1,5 +1,14 @@
 [
   {
+    "name": "Taxo&Map Biodiversity Map",
+    "url": "https://taxomap.bioexplora.cat/?lang=en",
+    "image": "/images/showcase/geomatico.es-taxomap.jpg",
+    "links": {
+      "by geomatico": "https://geomatico.es/en/"
+    },
+    "description": "Biodiversity world map to browse the collections of the Natural Science Museum of Barcelona and other institutions. It loads of a dataset of 200,000 points with GPU filtering, providing high interactivity and refresh rates."
+  },
+  {
     "name": "Internet Speed Tests Map",
     "url": "https://fairinternetreport.com/research/internet-speed-map-single-day",
     "image": "/images/showcase/fairinternetreport.com-speed-test-map.jpg",

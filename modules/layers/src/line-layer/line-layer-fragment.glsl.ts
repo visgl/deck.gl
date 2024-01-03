@@ -19,18 +19,21 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME line-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
-varying vec2 uv;
+in vec4 vColor;
+in vec2 uv;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = uv;
 
-  gl_FragColor = vColor;
+  fragColor = vColor;
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

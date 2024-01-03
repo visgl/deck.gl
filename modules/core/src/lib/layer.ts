@@ -837,11 +837,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const start = colors.getVertexOffset(objectIndex);
     const end = colors.getVertexOffset(objectIndex + 1);
 
-    // Fill the sub buffer with 0s
-    colors.buffer.subData({
-      data: new Uint8Array(end - start),
-      offset: start // 1 byte per element
-    });
+    // Fill the sub buffer with 0s, 1 byte per element
+    colors.buffer.write(new Uint8Array(end - start), start);
   }
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */

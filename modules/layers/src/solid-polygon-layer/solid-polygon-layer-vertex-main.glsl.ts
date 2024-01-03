@@ -25,7 +25,7 @@ uniform bool isWireframe;
 uniform float elevationScale;
 uniform float opacity;
 
-varying vec4 vColor;
+out vec4 vColor;
 
 struct PolygonProps {
   vec4 fillColors;

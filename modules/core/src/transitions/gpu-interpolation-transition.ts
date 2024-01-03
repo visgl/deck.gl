@@ -99,7 +99,6 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
-      // @ts-expect-error BufferWithAccessor
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -147,13 +146,14 @@ export default class GPUInterpolationTransition implements GPUTransition {
   }
 }
 
-const vs = `
+const vs = `\
+#version 300 es
 #define SHADER_NAME interpolation-transition-vertex-shader
 
 uniform float time;
-attribute ATTRIBUTE_TYPE aFrom;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vCurrent;
+in ATTRIBUTE_TYPE aFrom;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
   vCurrent = mix(aFrom, aTo, time);
