@@ -61,7 +61,6 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   _getModel(device: Device): Model {
     const {vertexCount} = this.props;
 
-    // @ts-expect-error TODO(v9): Likely a real error.
     return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
