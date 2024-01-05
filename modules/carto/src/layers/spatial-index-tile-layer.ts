@@ -35,7 +35,7 @@ export default class SpatialIndexTileLayer<
   protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
+    let newHoveredFeatureId: BigInt | number | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = hoveredFeature.id;
@@ -79,15 +79,19 @@ export default class SpatialIndexTileLayer<
   }
 
   _featureInTile(tile: Tile2DHeader, featureId: BigInt | number) {
+    // TODO: Tile2DHeader index should be generic for H3TileIndex or QuadbinTileIndex
     const tileset = this.state.tileset!;
     const tileZoom = tileset.getTileZoom(tile.index);
     // @ts-ignore
     const KEY = tile.index.q ? 'q' : 'i';
     // TODO - Tileset2D methods expect tile index in the shape of {x, y, z}
-    let featureIndex: any = {[KEY]: featureId};
+    let featureIndex = {[KEY]: featureId};
+    // @ts-ignore
     let featureZoom = tileset.getTileZoom(featureIndex);
     while (!(featureZoom <= tileZoom)) {
+      // @ts-ignore
       featureIndex = tileset.getParentIndex(featureIndex);
+      // @ts-ignore
       featureZoom = tileset.getTileZoom(featureIndex);
     }
 
