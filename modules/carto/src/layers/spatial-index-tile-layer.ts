@@ -28,7 +28,7 @@ export default class SpatialIndexTileLayer<
   static defaultProps = defaultProps;
 
   state!: TileLayer<DataT>['state'] & {
-    hoveredFeatureId: number | null;
+    hoveredFeatureId: BigInt | number | null;
     highlightColor: number[];
   };
 
