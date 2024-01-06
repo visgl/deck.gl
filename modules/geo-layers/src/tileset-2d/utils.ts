@@ -143,7 +143,7 @@ export function getCullBounds({
   cullRect: {x: number; y: number; width: number; height: number};
 }): [number, number, number, number][] {
   const subViewports = viewport.subViewports || [viewport];
-  return subViewports.map(v => getCullBoundsInViewport(v, z!, cullRect));
+  return subViewports.map(v => getCullBoundsInViewport(v, z || 0, cullRect));
 }
 
 function getCullBoundsInViewport(

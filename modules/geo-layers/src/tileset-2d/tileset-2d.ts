@@ -232,8 +232,7 @@ export class Tileset2D {
       modelMatrix: null
     }
   ): number {
-    // @ts-expect-error Matrix4 can accept null
-    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (
       !this._viewport ||

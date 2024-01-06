@@ -104,17 +104,13 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
-  state!: {
-    tileset: Tileset2D | null;
-    isLoaded: boolean;
-    frameNumber?: number;
-
-    data?: any;
-    tileJSON: TileJson | null;
+  state!: TileLayer<ParsedMvtTile>['state'] & {
     binary: boolean;
-    hoveredFeatureId: string | number | null;
-    hoveredFeatureLayerName: string | null;
+    data: URLTemplate;
+    tileJSON: TileJson | null;
     highlightColor?: number[];
+    hoveredFeatureId: number | string | null;
+    hoveredFeatureLayerName: string | null;
   };
 
   initializeState(): void {
@@ -131,7 +127,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 
   get isLoaded(): boolean {
-    return this.state?.data && super.isLoaded;
+    return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -399,10 +395,10 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D | null = this.state.tileset;
+    const tileset: Tileset2D = this.state.tileset!;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
-    tileset!.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
+    tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {
       if (!tile.hasOwnProperty(propName)) {
         // eslint-disable-next-line accessor-pairs
         Object.defineProperty(tile, propName, {

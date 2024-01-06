@@ -202,7 +202,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         tileset.reloadAll();
       } else {
         // some render options changed, regenerate sub layers now
-        this.state.tileset?.tiles.forEach(tile => {
+        tileset.tiles.forEach(tile => {
           tile.layers = null;
         });
       }
@@ -379,6 +379,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return Boolean(this.state.tileset?.isTileVisible(tile, cullRect));
+    return this.state.tileset!.isTileVisible(tile, cullRect);
   }
 }
