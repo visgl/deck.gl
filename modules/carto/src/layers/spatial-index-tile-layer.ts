@@ -85,13 +85,10 @@ export default class SpatialIndexTileLayer<
     // @ts-ignore
     const KEY = tile.index.q ? 'q' : 'i';
     // TODO - Tileset2D methods expect tile index in the shape of {x, y, z}
-    let featureIndex = {[KEY]: featureId};
-    // @ts-ignore
+    let featureIndex: any = {[KEY]: featureId};
     let featureZoom = tileset.getTileZoom(featureIndex);
     while (!(featureZoom <= tileZoom)) {
-      // @ts-ignore
       featureIndex = tileset.getParentIndex(featureIndex);
-      // @ts-ignore
       featureZoom = tileset.getTileZoom(featureIndex);
     }
 
