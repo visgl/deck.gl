@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {equals} from '@math.gl/core';
-import {Transform} from '@luma.gl/engine';
+import {BufferTransform} from '@luma.gl/engine';
 import {project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
@@ -35,7 +35,7 @@ export function clipspaceToScreen(viewport, coords) {
   ];
 }
 
-export function runOnGPU({
+export async function runOnGPU({
   device,
   uniforms,
   vs,
@@ -43,20 +43,23 @@ export function runOnGPU({
   feedbackBuffers,
   elementCount,
   usefp64 = true
-}) {
+}): Promise<Float32Array> {
   const modules = usefp64 ? [project64] : [project32];
   // const modules = usefp64 ? ['project64'] : [];
-  const transform = new Transform(device, {
-    // TODO: remove sourceBuffers after https://github.com/visgl/luma.gl/pull/733
-    sourceBuffers,
+  const transform = new BufferTransform(device, {
+    // TODO(donmccurdy): Likely mismatched buffer types.
+    attributes: sourceBuffers,
     feedbackBuffers,
     vs,
     varyings: ['outValue'],
     modules,
-    elementCount: elementCount || 1
+    vertexCount: elementCount || 1
   });
-  transform.run({uniforms});
-  return feedbackBuffers.outValue.getData();
+  transform.model.setUniforms({uniforms});
+  transform.run();
+
+  const result: Uint8Array = feedbackBuffers.outValue.readAsync();
+  return new Float32Array(result.buffer, result.byteOffset, result.byteLength / 4);
 }
 
 export function verifyResult({t, name, actual, expected, sliceActual = false}) {

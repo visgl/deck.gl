@@ -24,7 +24,6 @@ import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl'
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform} from '@luma.gl/engine';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
@@ -335,7 +334,7 @@ test.skip('project#vs', t => {
 
     testCase.tests.forEach(c => {
       const expected = c.output;
-      if (Transform.isSupported(device)) {
+      if (device.features.has('transform-feedback-webgl2')) {
         config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
         const sourceBuffers = {dummy: DUMMY_SOURCE_BUFFER};
         const feedbackBuffers = {outValue: OUT_BUFFER};
