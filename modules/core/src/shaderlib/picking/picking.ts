@@ -33,6 +33,7 @@ export default {
     }
   },
   ...picking,
+  // TODO migrate to luma option names
   getUniforms(opts: PickingModuleSettings = {}): typeof picking.uniforms {
     return picking.getUniforms!({
       isActive: opts.pickingActive,
