@@ -334,8 +334,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
+    const {pickingActive, pickingAttribute, pickingHighlightColor, pickingSelectedColor, ...rest} =
+      moduleParameters;
     for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+      model.updateModuleSettings(rest);
+      model.shaderInputs.setProps({
+        picking: {pickingActive, pickingAttribute, pickingHighlightColor, pickingSelectedColor}
+      });
     }
   }
 

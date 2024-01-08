@@ -36,6 +36,7 @@ import type {
   Color,
   DefaultProps
 } from '@deck.gl/core';
+import {_ShaderInputs as ShaderInputs} from '@luma.gl/engine';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -185,6 +186,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     model?: Model;
   };
 
+  shaderInputs = new ShaderInputs<{picking: typeof picking.props}>({picking} as any);
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
@@ -233,6 +236,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
+      this.shaderInputs = new ShaderInputs<{picking: typeof picking.props}>({picking} as any);
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -271,6 +275,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     });
+
     model.draw(this.context.renderPass);
   }
 
@@ -287,7 +292,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
-      isInstanced: true
+      isInstanced: true,
+      shaderInputs: this.shaderInputs
     });
   }
 }
