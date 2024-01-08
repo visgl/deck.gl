@@ -1,10 +1,11 @@
+import {NumberArray} from '@luma.gl/core';
 import {picking} from '@luma.gl/shadertools';
 
-type PickingModuleSettings = {
+export type PickingModuleSettings = {
   /** Set to a picking color to visually highlight that item */
-  pickingSelectedColor?: [number, number, number] | null;
+  pickingSelectedColor?: NumberArray | null;
   /** Color of the highlight */
-  pickingHighlightColor?: [number, number, number, number];
+  pickingHighlightColor?: NumberArray;
   /** Set to true when rendering to off-screen "picking" buffer */
   pickingActive?: boolean;
   /** Set to true when picking an attribute value instead of object index */

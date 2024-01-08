@@ -55,6 +55,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
+import {PickingModuleSettings} from '../shaderlib/picking/picking';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -332,15 +333,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
+  // TODO deprecate in favour of setShaderInputs
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
-    const {pickingActive, pickingAttribute, pickingHighlightColor, pickingSelectedColor, ...rest} =
-      moduleParameters;
     for (const model of this.getModels()) {
-      model.updateModuleSettings(rest);
-      model.shaderInputs.setProps({
-        picking: {pickingActive, pickingAttribute, pickingHighlightColor, pickingSelectedColor}
-      });
+      model.updateModuleSettings(moduleParameters);
+    }
+  }
+
+  /** Update shader input parameters */
+  setShaderInputs(...props: Parameters<Model['shaderInputs']['setProps']>): void {
+    for (const model of this.getModels()) {
+      model.shaderInputs.setProps(...props);
     }
   }
 
@@ -1058,7 +1062,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
-        this.setModuleParameters(moduleParameters);
+        const {pickingActive, ...rest} = moduleParameters;
+        this.setModuleParameters(rest);
+        this.setShaderInputs({picking: {pickingActive}});
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1207,15 +1213,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const pickingModuleParameters: any = {
+    const picking: PickingModuleSettings = {
       pickingSelectedColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+      picking.pickingHighlightColor = highlightColor(info);
     }
-    this.setModuleParameters(pickingModuleParameters);
-    // setModuleParameters does not trigger redraw
+    this.setShaderInputs({picking});
+    // setShaderInputs does not trigger redraw
     this.setNeedsRedraw();
   }
 
@@ -1251,24 +1257,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const parameters: any = {};
+      const picking: PickingModuleSettings = {};
       if (!autoHighlight) {
-        parameters.pickingSelectedColor = null;
+        picking.pickingSelectedColor = null;
       }
       if (Array.isArray(highlightColor)) {
-        parameters.pickingHighlightColor = highlightColor;
+        picking.pickingHighlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
-        parameters.pickingSelectedColor =
+        picking.pickingSelectedColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }
 
-      this.setModuleParameters(parameters);
+      this.setShaderInputs({picking});
     }
   }
 
