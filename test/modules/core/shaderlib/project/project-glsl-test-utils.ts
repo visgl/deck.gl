@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {equals} from '@math.gl/core';
-import {BufferTransform} from '@luma.gl/engine';
+import type {Buffer, Device, UniformValue} from '@luma.gl/core';
+import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
 import {project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
@@ -38,27 +39,28 @@ export function clipspaceToScreen(viewport, coords) {
 export async function runOnGPU({
   device,
   uniforms,
-  vs,
-  sourceBuffers,
-  feedbackBuffers,
-  elementCount,
-  usefp64 = true
+  usefp64 = true,
+  ...transformProps
+}: {
+  device: Device,
+  uniforms: Record<string, UniformValue>,
+  vs: string,
+  feedbackBuffers: Record<string, Buffer>,
+  attributes?: Record<string, Buffer>,
+  bufferLayout?: unknown[],
+  vertexCount?: number
+  usefp64?: boolean,
 }): Promise<Float32Array> {
   const modules = usefp64 ? [project64] : [project32];
-  // const modules = usefp64 ? ['project64'] : [];
   const transform = new BufferTransform(device, {
-    // TODO(donmccurdy): Likely mismatched buffer types.
-    attributes: sourceBuffers,
-    feedbackBuffers,
-    vs,
+    ...(transformProps as BufferTransformProps),
     varyings: ['outValue'],
     modules,
-    vertexCount: elementCount || 1
   });
-  transform.model.setUniforms({uniforms});
+  transform.model.setUniforms(uniforms);
   transform.run();
 
-  const result: Uint8Array = feedbackBuffers.outValue.readAsync();
+  const result: Uint8Array = await transformProps.feedbackBuffers.outValue.readAsync();
   return new Float32Array(result.buffer, result.byteOffset, result.byteLength / 4);
 }
 

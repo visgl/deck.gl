@@ -30,10 +30,8 @@ import {project64} from '@deck.gl/extensions';
 import {config} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
 import {fp64} from '@luma.gl/shadertools';
-import {Transform} from '@luma.gl/engine';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
-// import {clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 
@@ -80,7 +78,9 @@ function toGLSLVec(array) {
 
 const TRANSFORM_VS = {
   project_position_to_clipspace: (pos, pos64Low = [0, 0, 0]) => `\
-varying vec4 outValue;
+#version 300 es
+
+out vec4 outValue;
 
 void main()
 {
@@ -91,7 +91,9 @@ void main()
 }
 `,
   project_position_to_clipspace_world_position: (pos, pos64Low = [0, 0, 0]) => `\
-varying vec4 outValue;
+#version 300 es
+
+out vec4 outValue;
 
 void main()
 {
@@ -275,13 +277,11 @@ test('project32&64#vs', async (t) => {
         if (device.features.has('transform-feedback-webgl2') && !skipOnGPU) {
           // Reduced precision tolerencewhen using 64 bit project module.
           config.EPSILON = usefp64 ? c.gpu64BitPrecision || 1e-7 : c.precision || 1e-7;
-          const sourceBuffers = {dummy: DUMMY_SOURCE_BUFFER};
           const feedbackBuffers = {outValue: OUT_BUFFER};
           let actual: number[] | Float32Array = await runOnGPU({
             device,
             uniforms,
             vs: c.vs,
-            sourceBuffers,
             feedbackBuffers,
             usefp64
           });
