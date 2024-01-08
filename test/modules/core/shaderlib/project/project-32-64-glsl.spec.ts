@@ -247,7 +247,7 @@ const TEST_CASES = [
   }
 ];
 
-test('project32&64#vs', async (t) => {
+test('project32&64#vs', async t => {
   const oldEpsilon = config.EPSILON;
   for (const usefp64 of [false, true]) {
     // TODO - luma.gl v9 test disablement

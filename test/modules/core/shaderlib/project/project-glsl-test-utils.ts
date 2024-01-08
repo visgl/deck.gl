@@ -42,20 +42,20 @@ export async function runOnGPU({
   usefp64 = true,
   ...transformProps
 }: {
-  device: Device,
-  uniforms: Record<string, UniformValue>,
-  vs: string,
-  feedbackBuffers: Record<string, Buffer>,
-  attributes?: Record<string, Buffer>,
-  bufferLayout?: unknown[],
-  vertexCount?: number
-  usefp64?: boolean,
+  device: Device;
+  uniforms: Record<string, UniformValue>;
+  vs: string;
+  feedbackBuffers: Record<string, Buffer>;
+  attributes?: Record<string, Buffer>;
+  bufferLayout?: unknown[];
+  vertexCount?: number;
+  usefp64?: boolean;
 }): Promise<Float32Array> {
   const modules = usefp64 ? [project64] : [project32];
   const transform = new BufferTransform(device, {
     ...(transformProps as BufferTransformProps),
     varyings: ['outValue'],
-    modules,
+    modules
   });
   transform.model.setUniforms(uniforms);
   transform.run();

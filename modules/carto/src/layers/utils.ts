@@ -20,7 +20,7 @@ export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTi
   const mapping = {};
   for (const {geoid, ...rest} of properties.properties) {
     if (geoid in mapping) {
-      log.warn(`Duplicate geoid key in boundary mapping, using first occurance`)();
+      log.warn('Duplicate geoid key in boundary mapping, using first occurance')();
     } else {
       mapping[geoid] = rest;
     }

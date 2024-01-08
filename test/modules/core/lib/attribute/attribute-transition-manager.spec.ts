@@ -38,22 +38,19 @@ const TEST_ATTRIBUTES = (function () {
 test('AttributeTransitionManager#constructor', t => {
   let manager = new AttributeTransitionManager(device, {id: 'attribute-transition'});
   t.ok(manager, 'AttributeTransitionManager is constructed');
-  // TODO v9 Transform is not supported
-  // t.is(
-  //   Boolean(manager.isSupported),
-  //   device.info.type === 'webgl2',
-  //   'AttributeTransitionManager checks WebGL support'
-  // );
+  t.is(
+    Boolean(manager.isSupported),
+    device.info.type === 'webgl2',
+    'AttributeTransitionManager checks WebGL support'
+  );
 
   manager.finalize();
   t.pass('AttributeTransitionManager is finalized');
 
-  manager = new AttributeTransitionManager(null, {id: 'attribute-transition'});
-  t.ok(manager, 'AttributeTransitionManager is constructed without GL context');
-  t.notOk(manager.isSupported, 'AttributeTransitionManager checks WebGL support');
-
-  manager.finalize();
-  t.pass('AttributeTransitionManager is finalized');
+  t.throws(
+    () => new AttributeTransitionManager(null, {id: 'attribute-transition'}),
+    'AttributeTransitionManager is constructed without device'
+  );
 
   t.end();
 });
