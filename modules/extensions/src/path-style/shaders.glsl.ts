@@ -47,7 +47,7 @@ in float vDashOffset;
 
     if (gapLength > 0.0 && unitOffset > solidLength) {
       if (capType <= 0.5) {
-        if (!(dashGapPickable && picking_uActive)) {
+        if (!(dashGapPickable && bool(picking.isActive))) {
           discard;
         }
       } else {
@@ -57,7 +57,7 @@ in float vDashOffset;
           vPathPosition.x
         ));
         if (distToEnd > 1.0) {
-          if (!(dashGapPickable && picking_uActive)) {
+          if (!(dashGapPickable && bool(picking.isActive))) {
             discard;
           }
         }

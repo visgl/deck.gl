@@ -42,7 +42,7 @@ out vec4 fragColor;
 void main(void) {
   geometry.uv = uv;
 
-  if (!picking_uActive) {
+  if (!bool(picking.isActive)) {
     float alpha = texture(iconsTexture, vTextureCoords).a;
     vec4 color = vColor;
 
