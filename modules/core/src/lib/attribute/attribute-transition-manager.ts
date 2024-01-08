@@ -1,7 +1,6 @@
 // deck.gl, MIT license
 
 import type {Device} from '@luma.gl/core';
-import {BufferTransform} from '@luma.gl/engine';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
@@ -148,8 +147,16 @@ export default class AttributeTransitionManager {
     // TODO: when switching transition types, make sure to carry over the attribute's
     // previous buffers, currentLength, startIndices, etc, to be used as the starting point
     // for the next transition
-    let isNew = !transition || transition.type !== settings.type;
-    if (isNew) {
+    let needsUpdate = !transition || transition.type !== settings.type;
+
+    if (
+      transition &&
+      attribute.buffer.byteLength > transition.attributeInTransition.buffer.byteLength
+    ) {
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
       if (!this.isSupported) {
         log.warn(
           `WebGL2 not supported by this browser. Transition for ${attributeName} is disabled.`
@@ -170,11 +177,11 @@ export default class AttributeTransitionManager {
         });
       } else {
         log.error(`unsupported transition type '${settings.type}'`)();
-        isNew = false;
+        needsUpdate = false;
       }
     }
 
-    if (isNew || attribute.needsRedraw()) {
+    if (needsUpdate || attribute.needsRedraw()) {
       this.needsRedraw = true;
       this.transitions[attributeName].start(settings, this.numInstances);
     }

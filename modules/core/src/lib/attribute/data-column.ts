@@ -184,7 +184,9 @@ export default class DataColumn<Options, State> {
       bounds: null,
       constant: false
     };
-    this._buffer = null;
+
+    // TODO(v9): Can we pre-allocate the correct size, instead?
+    this._buffer = this._createBuffer(0);
   }
   /* eslint-enable max-statements */
 
@@ -193,10 +195,6 @@ export default class DataColumn<Options, State> {
   }
 
   get buffer(): Buffer {
-    if (!this._buffer) {
-      // TODO(v9): No point in allocating an empty buffer, try to avoid this.
-      this._createBuffer(4);
-    }
     return this._buffer!;
   }
 
@@ -418,8 +416,7 @@ export default class DataColumn<Options, State> {
       // Shader attributes may try to access this buffer with bigger offsets
       const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
       if (buffer.byteLength < requiredBufferSize) {
-        this._createBuffer(requiredBufferSize);
-        buffer = this.buffer;
+        buffer = this._createBuffer(requiredBufferSize);
       }
 
       buffer.write(value, byteOffset);
@@ -469,8 +466,7 @@ export default class DataColumn<Options, State> {
     let {buffer} = this;
 
     if (buffer.byteLength < value.byteLength + byteOffset) {
-      this._createBuffer(value.byteLength + byteOffset);
-      buffer = this.buffer;
+      buffer = this._createBuffer(value.byteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.
@@ -590,11 +586,12 @@ export default class DataColumn<Options, State> {
     return true;
   }
 
-  protected _createBuffer(byteLength: number) {
+  protected _createBuffer(byteLength: number): Buffer {
     if (this._buffer) {
+      // console.log(`DataColumn#destroyBuffer: id = ${this.id}, byteLength = ${this._buffer.byteLength}`);
       this._buffer.destroy();
     }
-
+    // console.log(`DataColumn#createBuffer: id = ${this.id}, byteLength = ${byteLength}`);
     const {isIndexed, type} = this.settings;
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
@@ -603,5 +600,7 @@ export default class DataColumn<Options, State> {
       indexType: isIndexed ? (type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32') : undefined,
       byteLength
     });
+
+    return this._buffer;
   }
 }

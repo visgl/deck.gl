@@ -4,9 +4,9 @@ import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
-  padBuffer,
+  // padBuffer,
   getAttributeTypeFromSize,
-  getSourceBufferAttribute,
+  // getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers,
   InterpolationTransitionSettings
@@ -46,6 +46,9 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
     this.attributeInTransition = new Attribute(device, attribute.settings);
+    if (ArrayBuffer.isView(attribute.value)) {
+      this.attributeInTransition.setData(attribute.value);
+    }
     this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
@@ -53,7 +56,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.currentLength = 0;
     this.transform = getTransform(device, attribute);
     const bufferOpts = {
-      byteLength: 0,
+      byteLength: attribute.buffer.byteLength,
       usage: GL.DYNAMIC_COPY
     };
     this.buffers = [
@@ -78,23 +81,24 @@ export default class GPUInterpolationTransition implements GPUTransition {
     }
     this.settings = transitionSettings;
 
-    const {device, buffers, attribute} = this;
+    const {buffers, attribute} = this;
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
     // And the other buffer is now the current buffer.
     cycleBuffers(buffers);
 
-    const padBufferOpts = {
-      numInstances,
-      attribute,
-      fromLength: this.currentLength,
-      fromStartIndices: this.currentStartIndices,
-      getData: transitionSettings.enter
-    };
+    // const padBufferOpts = {
+    //   numInstances,
+    //   attribute,
+    //   fromLength: this.currentLength,
+    //   fromStartIndices: this.currentStartIndices,
+    //   getData: transitionSettings.enter
+    // };
 
-    for (const buffer of buffers) {
-      padBuffer({buffer, ...padBufferOpts});
-    }
+    // TODO(v9): Requires synchronous reads, unsupported in v9, or a different solution here.
+    // for (const buffer of buffers) {
+    //   padBuffer({buffer, ...padBufferOpts});
+    // }
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
@@ -107,16 +111,12 @@ export default class GPUInterpolationTransition implements GPUTransition {
 
     this.transition.start(transitionSettings);
 
-    this.transform.update({
-      elementCount: Math.floor(this.currentLength / attribute.size),
-      sourceBuffers: {
-        aFrom: buffers[0],
-        aTo: getSourceBufferAttribute(device, attribute)
-      },
-      feedbackBuffers: {
-        vCurrent: buffers[1]
-      }
-    });
+    this.transform.model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    // TODO(v9): Best way to handle 'constant' attributes?
+    this.transform.model.setAttributes(
+      attribute.getBuffer() ? {aFrom: buffers[0], aTo: attribute.getBuffer()!} : {aFrom: buffers[0]}
+    );
+    this.transform.transformFeedback.setBuffers({vCurrent: buffers[1]});
   }
 
   update(): boolean {
@@ -163,6 +163,11 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
   return new BufferTransform(device, {
     vs,
+    // TODO(v9): Can 'attribute' provide 'format' values?
+    bufferLayout: [
+      {name: 'aFrom', format: 'float32'},
+      {name: 'aTo', format: 'float32'}
+    ],
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },
