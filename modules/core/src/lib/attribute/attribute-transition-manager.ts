@@ -149,11 +149,7 @@ export default class AttributeTransitionManager {
     // previous buffers, currentLength, startIndices, etc, to be used as the starting point
     // for the next transition
     let needsUpdate = !transition || transition.type !== settings.type;
-
-    const currentByteLength = transition.attributeInTransition.buffer.byteLength;
-    if (transition && attribute.buffer.byteLength > currentByteLength) {
-      needsUpdate = true;
-    }
+    needsUpdate ||= attribute.buffer.byteLength > transition?.attributeInTransition.buffer.byteLength;
 
     if (needsUpdate) {
       if (!this.isSupported) {
