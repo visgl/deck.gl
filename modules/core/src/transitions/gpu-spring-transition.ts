@@ -7,6 +7,7 @@ import {
   padBuffer,
   getAttributeTypeFromSize,
   getAttributeBufferLength,
+  getAttributeVertexFormat,
   cycleBuffers,
   SpringTransitionSettings
 } from '../lib/attribute/attribute-transition-utils';
@@ -18,8 +19,7 @@ import type {BufferTransform as LumaTransform} from '@luma.gl/engine';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
-  Texture as LumaTexture2D,
-  VertexFormat as LumaVertexFormat
+  Texture as LumaTexture2D
 } from '@luma.gl/core';
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
@@ -231,7 +231,7 @@ function getTransform(
   buffers: [LumaBuffer, LumaBuffer, LumaBuffer]
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  const format = getVertexFormat(attribute.size as 1 | 2 | 3 | 4);
+  const format = getAttributeVertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
     vs: vsSpringTransform,
     fs: fsSpringTransform,
@@ -273,18 +273,4 @@ function getFramebuffer(device: Device, texture: LumaTexture2D): LumaFramebuffer
     height: 1,
     colorAttachments: [texture]
   });
-}
-
-function getVertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
-  switch (size) {
-    case 1:
-      return 'float32';
-    case 2:
-      return 'float32x2';
-    case 3:
-      return 'float32x3';
-    case 4:
-      return 'float32x4';
-  }
-  throw new Error('invalid type size');
 }

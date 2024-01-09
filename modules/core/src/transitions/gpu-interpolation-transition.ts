@@ -10,7 +10,8 @@ import {
   getAttributeBufferLength,
   cycleBuffers,
   InterpolationTransitionSettings,
-  padBuffer
+  padBuffer,
+  getAttributeVertexFormat
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
@@ -170,12 +171,12 @@ void main(void) {
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
+  const format = getAttributeVertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
     vs,
-    // TODO(v9): Can 'attribute' provide 'format' values?
     bufferLayout: [
-      {name: 'aFrom', format: 'float32'},
-      {name: 'aTo', format: 'float32'}
+      {name: 'aFrom', format},
+      {name: 'aTo', format}
     ],
     defines: {
       ATTRIBUTE_TYPE: attributeType

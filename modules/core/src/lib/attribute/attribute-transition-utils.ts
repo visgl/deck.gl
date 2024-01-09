@@ -5,6 +5,7 @@ import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
 import {GL} from '@luma.gl/constants';
+import {VertexFormat as LumaVertexFormat} from '@luma.gl/core';
 
 export interface TransitionSettings {
   type: string;
@@ -213,4 +214,18 @@ function getBufferData(
   _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, null);
 
   return dstArray;
+}
+
+export function getAttributeVertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
+  switch (size) {
+    case 1:
+      return 'float32';
+    case 2:
+      return 'float32x2';
+    case 3:
+      return 'float32x3';
+    case 4:
+      return 'float32x4';
+  }
+  throw new Error('invalid type size');
 }
