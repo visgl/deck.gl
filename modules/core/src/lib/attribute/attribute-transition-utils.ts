@@ -1,9 +1,10 @@
-import type {Device} from '@luma.gl/core';
+import type {Device, TypedArrayConstructor} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
+import {GL} from '@luma.gl/constants';
 
 export interface TransitionSettings {
   type: string;
@@ -123,6 +124,9 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
 // to a buffer layout of [4, 2], it should produce a buffer, using the transition setting's `enter`
 // function, that looks like this: [A1, A2, A3, A4 (user `enter` fn), B1, B2, 0]. Note: the final
 // 0 in this buffer is because we never shrink buffers, only grow them, for performance reasons.
+//
+// padBuffer may return either the original buffer, or a new buffer if the size of the original
+// was insufficient. Callers are responsible for disposing of the original buffer if needed.
 export function padBuffer({
   buffer,
   numInstances,
@@ -137,7 +141,7 @@ export function padBuffer({
   fromLength: number;
   fromStartIndices?: NumericArray | null;
   getData?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
-}): void {
+}): Buffer {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
   const precisionMultiplier =
@@ -151,12 +155,12 @@ export function padBuffer({
 
   // check if buffer needs to be padded
   if (!hasStartIndices && fromLength >= toLength) {
-    return;
+    return buffer;
   }
 
   const toData = isConstant
     ? (attribute.value as TypedArray)
-    : (attribute.getBuffer() as Buffer).getData();
+    : getBufferData(attribute.getBuffer()!, Float32Array);
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
@@ -166,13 +170,7 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  // TODO(donmccurdy): Replace with `.readAsync()` or a helper function.
-  const sourceData = (buffer as any).getData({length: fromLength});
-  const source = new Float32Array(
-    sourceData.buffer,
-    sourceData.byteOffset,
-    sourceData.byteLength / Float32Array.BYTES_PER_ELEMENT
-  );
+  const source = getBufferData(buffer, Float32Array, 0, fromLength * Float32Array.BYTES_PER_ELEMENT);
   const target = new Float32Array(toLength);
   padArray({
     source,
@@ -184,7 +182,25 @@ export function padBuffer({
   });
 
   if (buffer.byteLength < target.byteLength + byteOffset) {
-    throw new Error(`Buffer size is immutable, ${buffer.byteLength} bytes`);
+    buffer = buffer.device.createBuffer({byteLength: target.byteLength + byteOffset});
   }
   buffer.write(target, byteOffset);
+  return buffer;
+}
+
+/** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
+function getBufferData(buffer: Buffer, ctor: TypedArrayConstructor, byteOffset = 0, byteLength = buffer.byteLength): TypedArray {
+  const _buffer = buffer as any;
+  _buffer.device.assertWebGL2();
+
+  const dstLength = byteLength / ctor.BYTES_PER_ELEMENT;
+  const dstArray = new ctor(dstLength);
+  const dstOffset = 0;
+
+  // Use GL.COPY_READ_BUFFER to avoid disturbing other targets and locking type
+  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, _buffer.handle);
+  _buffer.gl2.getBufferSubData(GL.COPY_READ_BUFFER, byteOffset, dstArray, dstOffset, dstLength);
+  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, null);
+
+  return dstArray;
 }

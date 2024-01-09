@@ -9,7 +9,8 @@ import {
   // getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers,
-  InterpolationTransitionSettings
+  InterpolationTransitionSettings,
+  padBuffer
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
@@ -87,18 +88,26 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // And the other buffer is now the current buffer.
     cycleBuffers(buffers);
 
-    // const padBufferOpts = {
-    //   numInstances,
-    //   attribute,
-    //   fromLength: this.currentLength,
-    //   fromStartIndices: this.currentStartIndices,
-    //   getData: transitionSettings.enter
-    // };
+    const padBufferOpts = {
+      numInstances,
+      attribute,
+      fromLength: this.currentLength,
+      fromStartIndices: this.currentStartIndices,
+      getData: transitionSettings.enter
+    };
 
-    // TODO(v9): Requires synchronous reads, unsupported in v9, or a different solution here.
-    // for (const buffer of buffers) {
-    //   padBuffer({buffer, ...padBufferOpts});
-    // }
+    buffers.forEach((buffer, index) => {
+      const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
+
+      if (buffer !== paddedBuffer) {
+        buffer.destroy();
+        buffers[index] = paddedBuffer;
+        console.warn(
+          `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
+          `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+        );
+      }
+    });
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
