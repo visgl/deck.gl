@@ -24,53 +24,6 @@ import type {
 import type {NumericArray} from '../types/types';
 import type GPUTransition from './gpu-transition';
 
-const vsSpringTransform = `\
-#version 300 es
-#define SHADER_NAME spring-transition-vertex-shader
-
-#define EPSILON 0.00001
-
-uniform float stiffness;
-uniform float damping;
-in ATTRIBUTE_TYPE aPrev;
-in ATTRIBUTE_TYPE aCur;
-in ATTRIBUTE_TYPE aTo;
-out ATTRIBUTE_TYPE vNext;
-out float vIsTransitioningFlag;
-
-ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
-  ATTRIBUTE_TYPE velocity = cur - prev;
-  ATTRIBUTE_TYPE delta = dest - cur;
-  ATTRIBUTE_TYPE spring = delta * stiffness;
-  ATTRIBUTE_TYPE damper = velocity * -1.0 * damping;
-  return spring + damper + velocity + cur;
-}
-
-void main(void) {
-  bool isTransitioning = length(aCur - aPrev) > EPSILON || length(aTo - aCur) > EPSILON;
-  vIsTransitioningFlag = isTransitioning ? 1.0 : 0.0;
-
-  vNext = getNextValue(aCur, aPrev, aTo);
-  gl_Position = vec4(0, 0, 0, 1);
-  gl_PointSize = 100.0;
-}
-`;
-
-const fsSpringTransform = `\
-#version 300 es
-#define SHADER_NAME spring-transition-is-transitioning-fragment-shader
-
-in float vIsTransitioningFlag;
-
-out vec4 fragColor;
-
-void main(void) {
-  if (vIsTransitioningFlag == 0.0) {
-    discard;
-  }
-  fragColor = vec4(1.0);
-}`;
-
 export default class GPUSpringTransition implements GPUTransition {
   device: Device;
   type = 'spring';
@@ -225,6 +178,53 @@ export default class GPUSpringTransition implements GPUTransition {
   }
 }
 
+const vs = `\
+#version 300 es
+#define SHADER_NAME spring-transition-vertex-shader
+
+#define EPSILON 0.00001
+
+uniform float stiffness;
+uniform float damping;
+in ATTRIBUTE_TYPE aPrev;
+in ATTRIBUTE_TYPE aCur;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vNext;
+out float vIsTransitioningFlag;
+
+ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
+  ATTRIBUTE_TYPE velocity = cur - prev;
+  ATTRIBUTE_TYPE delta = dest - cur;
+  ATTRIBUTE_TYPE spring = delta * stiffness;
+  ATTRIBUTE_TYPE damper = velocity * -1.0 * damping;
+  return spring + damper + velocity + cur;
+}
+
+void main(void) {
+  bool isTransitioning = length(aCur - aPrev) > EPSILON || length(aTo - aCur) > EPSILON;
+  vIsTransitioningFlag = isTransitioning ? 1.0 : 0.0;
+
+  vNext = getNextValue(aCur, aPrev, aTo);
+  gl_Position = vec4(0, 0, 0, 1);
+  gl_PointSize = 100.0;
+}
+`;
+
+const fs = `\
+#version 300 es
+#define SHADER_NAME spring-transition-is-transitioning-fragment-shader
+
+in float vIsTransitioningFlag;
+
+out vec4 fragColor;
+
+void main(void) {
+  if (vIsTransitioningFlag == 0.0) {
+    discard;
+  }
+  fragColor = vec4(1.0);
+}`;
+
 function getTransform(
   device: Device,
   attribute: Attribute,
@@ -233,12 +233,13 @@ function getTransform(
   const attributeType = getAttributeTypeFromSize(attribute.size);
   const format = getAttributeVertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
-    vs: vsSpringTransform,
-    fs: fsSpringTransform,
+    vs,
+    fs,
     attributes: {aPrev: buffers[0], aCur: buffers[1]},
     bufferLayout: [
       {name: 'aPrev', format},
-      {name: 'aCur', format}
+      {name: 'aCur', format},
+      {name: 'aTo', format}
     ],
     feedbackBuffers: {vNext: buffers[2]},
     varyings: ['vNext'],
