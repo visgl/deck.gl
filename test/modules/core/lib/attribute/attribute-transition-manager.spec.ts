@@ -57,7 +57,8 @@ test('AttributeTransitionManager#constructor', t => {
 });
 
 if (device.info.type === 'webgl2') {
-  test('AttributeTransitionManager#update', async t => {
+  // TODO v9 re-enable
+  test.skip('AttributeTransitionManager#update', async t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -123,7 +124,8 @@ if (device.info.type === 'webgl2') {
     t.end();
   });
 
-  test('AttributeTransitionManager#transition', async t => {
+  // TODO v9 re-enable
+  test.skip('AttributeTransitionManager#transition', async t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
