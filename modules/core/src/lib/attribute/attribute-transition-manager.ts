@@ -4,12 +4,12 @@ import GPUInterpolationTransition from '../../transitions/gpu-interpolation-tran
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
 
-import type { Device } from '@luma.gl/core';
-import type { Timeline } from '@luma.gl/engine';
+import type {Device} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 import type GPUTransition from '../../transitions/gpu-transition';
-import type { ConstructorOf } from '../../types/types';
+import type {ConstructorOf} from '../../types/types';
 import type Attribute from './attribute';
-import type { TransitionSettings } from './attribute-transition-utils';
+import type {TransitionSettings} from './attribute-transition-utils';
 
 const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
   interpolation: GPUInterpolationTransition,
