@@ -1,6 +1,6 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
+import {BufferTransform} from '@luma.gl/engine';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {
@@ -15,7 +15,7 @@ import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/engine';
+import type {BufferTransform as LumaTransform} from '@luma.gl/engine';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
@@ -150,6 +150,7 @@ export default class GPUSpringTransition implements GPUTransition {
         damping: settings.damping
       },
       parameters: {
+        // @ts-expect-error TODO(v9): Update for BufferTransform API.
         depthTest: false,
         blend: true,
         viewport: [0, 0, 1, 1],
@@ -193,7 +194,8 @@ function getTransform(
   framebuffer: LumaFramebuffer
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(device, {
+  return new BufferTransform(device, {
+    // @ts-expect-error TODO(v9): Update for BufferTransform API.
     framebuffer,
     vs: `
 #define SHADER_NAME spring-transition-vertex-shader

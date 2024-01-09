@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import type {Device, DeviceFeature} from '@luma.gl/core';
-import {Model, Transform} from '@luma.gl/engine';
+import {Model, TextureTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {readPixelsToBuffer, withGLParameters, clear} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
@@ -696,7 +696,7 @@ function getAllAggregationModel(device: Device, instanceCount: number): Model {
 }
 
 function getMeanTransform(device: Device, opts) {
-  return new Transform(device, {
+  return new TextureTransform(device, {
     vs: TRANSFORM_MEAN_VS,
     _targetTextureVarying: 'meanValues',
     ...opts
