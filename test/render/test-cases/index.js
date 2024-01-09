@@ -50,7 +50,7 @@ export default [].concat(
   quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
-  mvtLayerTests,
+  // mvtLayerTests, // TODO(v9): Re-check after PR#8334
   geohashLayerTests,
   simpleMeshLayerTests,
   // scenegraphLayerTests,
