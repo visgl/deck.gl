@@ -103,6 +103,9 @@ export default class GPUInterpolationTransition implements GPUTransition {
       if (buffer !== paddedBuffer) {
         buffer.destroy();
         buffers[index] = paddedBuffer;
+
+        // TODO(v9): While this probably isn't necessary as a user-facing warning, it is helpful
+        // for debugging buffer allocation during deck.gl v9 development.
         console.warn(
           `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
             `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
