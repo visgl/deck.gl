@@ -37,6 +37,7 @@ export default class AttributeTransitionManager {
       timeline?: Timeline;
     }
   ) {
+    if (!device) throw new Error('AttributeTransitionManager is constructed without device');
     this.id = id;
     this.device = device;
     this.timeline = timeline;
