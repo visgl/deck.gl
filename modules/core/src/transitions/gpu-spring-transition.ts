@@ -150,7 +150,7 @@ export default class GPUSpringTransition implements GPUTransition {
         buffers[index] = paddedBuffer;
         console.warn(
           `[GPUSpringTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
-          `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
         );
       }
     });
@@ -193,7 +193,7 @@ export default class GPUSpringTransition implements GPUTransition {
       framebuffer,
       discard: false,
       parameters: {viewport: [0, 0, 1, 1]},
-      clearColor: [0, 0, 0, 0],
+      clearColor: [0, 0, 0, 0]
     });
 
     cycleBuffers(buffers);
@@ -236,7 +236,10 @@ function getTransform(
     vs: vsSpringTransform,
     fs: fsSpringTransform,
     attributes: {aPrev: buffers[0], aCur: buffers[1]},
-    bufferLayout: [{name: 'aPrev', format}, {name: 'aCur', format}],
+    bufferLayout: [
+      {name: 'aPrev', format},
+      {name: 'aCur', format}
+    ],
     feedbackBuffers: {vNext: buffers[2]},
     varyings: ['vNext'],
     defines: {ATTRIBUTE_TYPE: attributeType},
@@ -247,8 +250,8 @@ function getTransform(
       blendColorDstFactor: 'one',
       blendAlphaOperation: 'max',
       blendAlphaSrcFactor: 'one',
-      blendAlphaDstFactor: 'one',
-    },
+      blendAlphaDstFactor: 'one'
+    }
   });
 }
 
@@ -274,10 +277,14 @@ function getFramebuffer(device: Device, texture: LumaTexture2D): LumaFramebuffer
 
 function getVertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
   switch (size) {
-    case 1: return 'float32';
-    case 2: return 'float32x2';
-    case 3: return 'float32x3';
-    case 4: return 'float32x4';
+    case 1:
+      return 'float32';
+    case 2:
+      return 'float32x2';
+    case 3:
+      return 'float32x3';
+    case 4:
+      return 'float32x4';
   }
   throw new Error('invalid type size');
 }

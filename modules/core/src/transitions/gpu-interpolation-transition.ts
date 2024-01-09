@@ -104,7 +104,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
         buffers[index] = paddedBuffer;
         console.warn(
           `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
-          `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
         );
       }
     });

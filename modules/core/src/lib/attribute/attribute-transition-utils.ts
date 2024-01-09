@@ -170,7 +170,12 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  const source = getBufferData(buffer, Float32Array, 0, fromLength * Float32Array.BYTES_PER_ELEMENT);
+  const source = getBufferData(
+    buffer,
+    Float32Array,
+    0,
+    fromLength * Float32Array.BYTES_PER_ELEMENT
+  );
   const target = new Float32Array(toLength);
   padArray({
     source,
@@ -189,7 +194,12 @@ export function padBuffer({
 }
 
 /** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
-function getBufferData(buffer: Buffer, Ctor: TypedArrayConstructor, byteOffset = 0, byteLength = buffer.byteLength): TypedArray {
+function getBufferData(
+  buffer: Buffer,
+  Ctor: TypedArrayConstructor,
+  byteOffset = 0,
+  byteLength = buffer.byteLength
+): TypedArray {
   const _buffer = buffer as any;
   _buffer.device.assertWebGL2();
 
