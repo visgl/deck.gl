@@ -1,5 +1,5 @@
 /* eslint-disable complexity, max-statements, max-params */
-import {getVertexFormatFromAttribute, type Device} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
 import {BufferTransform} from '@luma.gl/engine';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
@@ -279,4 +279,5 @@ function getVertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
     case 3: return 'float32x3';
     case 4: return 'float32x4';
   }
+  throw new Error('invalid type size');
 }

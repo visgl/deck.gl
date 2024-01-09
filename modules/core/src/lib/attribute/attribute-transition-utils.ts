@@ -189,12 +189,12 @@ export function padBuffer({
 }
 
 /** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
-function getBufferData(buffer: Buffer, ctor: TypedArrayConstructor, byteOffset = 0, byteLength = buffer.byteLength): TypedArray {
+function getBufferData(buffer: Buffer, Ctor: TypedArrayConstructor, byteOffset = 0, byteLength = buffer.byteLength): TypedArray {
   const _buffer = buffer as any;
   _buffer.device.assertWebGL2();
 
-  const dstLength = byteLength / ctor.BYTES_PER_ELEMENT;
-  const dstArray = new ctor(dstLength);
+  const dstLength = byteLength / Ctor.BYTES_PER_ELEMENT;
+  const dstArray = new Ctor(dstLength);
   const dstOffset = 0;
 
   // Use GL.COPY_READ_BUFFER to avoid disturbing other targets and locking type
