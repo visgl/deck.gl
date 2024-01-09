@@ -195,7 +195,7 @@ export function padBuffer({
 }
 
 /** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
-function getBufferData(
+export function getBufferData(
   buffer: Buffer,
   Ctor: TypedArrayConstructor,
   byteOffset = 0,

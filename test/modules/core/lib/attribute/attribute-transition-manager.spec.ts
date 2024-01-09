@@ -57,8 +57,7 @@ test('AttributeTransitionManager#constructor', t => {
 });
 
 if (device.info.type === 'webgl2') {
-  // TODO v9 re-enable
-  test.skip('AttributeTransitionManager#update', async t => {
+  test('AttributeTransitionManager#update', async t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -78,7 +77,7 @@ if (device.info.type === 'webgl2') {
     t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
 
     // TEST_ATTRIBUTES initializes 'instanceSizes' (4x floats). DataColumn adds padding (stride x 2).
-    // byteLength = numInstances * 4 + 8.
+    // byteLength = numInstances * 4 + 8. Later reallocation may skip the padding.
 
     const sizeTransition = manager.transitions.instanceSizes;
     t.is(sizeTransition.buffers[0].byteLength, 4 * 4 + 8, 'buffer has correct size');
@@ -97,25 +96,25 @@ if (device.info.type === 'webgl2') {
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 10});
     manager.run();
     let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
-    // TODO(donmccurdy): Why was the last element expected to be 1?
+    let actual = await readArray(transitioningBuffer);
     t.deepEquals(
-      await readArray(transitioningBuffer),
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      actual,
+      [0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
       'buffer is extended with new data'
     );
-    t.is(transitioningBuffer.byteLength, 10 * 4 + 8, 'buffer has correct size');
+    t.is(transitioningBuffer.byteLength, 10 * 4, 'buffer has correct size');
 
     attributes.instanceSizes.setData({constant: true, value: [2]});
-    manager.update({attributes, transitions: {getSize: 1000}, numInstances: 10});
+    manager.update({attributes, transitions: {getSize: 1000}, numInstances: 12});
     manager.run();
     transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
-    // TODO(donmccurdy): Why were the last elements expected to be 1, 2?
+    actual = await readArray(transitioningBuffer);
     t.deepEquals(
-      await readArray(transitioningBuffer),
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      actual,
+      [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2],
       'buffer is extended with new data'
     );
-    t.is(transitioningBuffer.byteLength, 10 * 4 + 8, 'buffer has correct size');
+    t.is(transitioningBuffer.byteLength, 12 * 4, 'buffer has correct size');
 
     manager.finalize();
     t.notOk(transitioningBuffer._handle, 'transform buffer is deleted');
@@ -124,8 +123,7 @@ if (device.info.type === 'webgl2') {
     t.end();
   });
 
-  // TODO v9 re-enable
-  test.skip('AttributeTransitionManager#transition', async t => {
+  test('AttributeTransitionManager#transition', async t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
@@ -205,8 +203,7 @@ if (device.info.type === 'webgl2') {
   });
 } else {
   // AttributeTransitionManager should not fail in WebGL1
-  // TODO v9 re-enable
-  test.skip('AttributeTransitionManager#update, setCurrentTime', t => {
+  test('AttributeTransitionManager#update, setCurrentTime', t => {
     const timeline = new Timeline();
     const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
