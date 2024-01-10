@@ -10,10 +10,6 @@ import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
-// HACK to make PBR shaders GLSL300 (will fix in luma)
-pbr.vs = pbr.vs.replaceAll('varying', 'out');
-pbr.fs = pbr.fs.replaceAll('varying', 'in').replaceAll('texture2D', 'texture');
-
 export type Mesh = {
   attributes: MeshAttributes;
   indices?: MeshAttribute;
