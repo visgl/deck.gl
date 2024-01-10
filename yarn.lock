@@ -2794,6 +2794,16 @@
     "@probe.gl/log" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
+"@luma.gl/gltf@9.0.0-alpha.50":
+  version "9.0.0-alpha.50"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.0.0-alpha.50.tgz#5e3b135feebb8e1296c714654c7c8dd77b7128f9"
+  integrity sha512-0t6n22W8/31sj+iHlektSrEaaFDMpRIz0fCpL4uXGBjchhxcypkisaE8onUJqFu2ab/7pnRxHXto1IJlOKMVTw==
+  dependencies:
+    "@luma.gl/core" "9.0.0-alpha.50"
+    "@luma.gl/engine" "9.0.0-alpha.50"
+    "@luma.gl/webgl" "9.0.0-alpha.50"
+    "@math.gl/core" "4.0.0"
+
 "@luma.gl/shadertools@9.0.0-alpha.50":
   version "9.0.0-alpha.50"
   resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.0-alpha.50.tgz#ceaca3801d91f06a0b96acb2e88a6b515769717e"

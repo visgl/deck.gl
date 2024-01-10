@@ -22,9 +22,9 @@ import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
-import {GLTFAnimator, GLTFEnvironment, createGLTFObjects} from '@luma.gl/experimental';
+import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -32,7 +32,7 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
-import type {
+import {
   UpdateParameters,
   LayerContext,
   LayerProps,
@@ -42,6 +42,8 @@ import type {
   Accessor,
   DefaultProps
 } from '@deck.gl/core';
+
+type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
 
 const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
 
@@ -90,9 +92,8 @@ type _ScenegraphLayerProps<DataT> = {
    * (Experimental) lighting environment. Requires `_lighting` to be `'pbr'`.
    */
   _imageBasedLightingEnvironment?:
-    | null
-    | GLTFEnvironment
-    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => GLTFEnvironment);
+    | PBREnvironment
+    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -153,13 +154,13 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   sizeMinPixels: {type: 'number', min: 0, value: 0},
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // flat or pbr
   _lighting: 'flat',
   // _lighting must be pbr for this to work
-  _imageBasedLightingEnvironment: null,
+  _imageBasedLightingEnvironment: undefined,
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -199,7 +200,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   initializeState() {
     const attributeManager = this.getAttributeManager();
     // attributeManager is always defined for primitive layers
-    attributeManager.addInstanced({
+    attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
         type: GL.DOUBLE,
@@ -242,27 +243,24 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
-    } else if (props.scenegraph && !props.scenegraph.gltf) {
+    } else if (props.scenegraph && typeof props.scenegraph === 'object') {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const gltfObjects = createGLTFObjects(device, gltf, this._getModelOptions());
-      scenegraphData = {gltf, ...gltfObjects};
+      const processedGLTF = postProcessGLTF(gltf);
 
-      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw()); // eslint-disable-line @typescript-eslint/no-floating-promises
-    } else if (props.scenegraph) {
-      // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
-      log.deprecated(
-        'ScenegraphLayer.props.scenegraph',
-        'Use GLTFLoader instead of GLTFScenegraphLoader'
-      )();
-      scenegraphData = props.scenegraph;
+      const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
+      scenegraphData = {gltf: processedGLTF, ...gltfObjects};
+
+      waitForGLTFAssets(gltfObjects).then(() => {
+        this.setNeedsRedraw();
+      }); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
 
     const options = {layer: this, device: this.context.device};
     const scenegraph = props.getScene(scenegraphData, options);
     const animator = props.getAnimator(scenegraphData, options);
 
-    if (scenegraph instanceof ScenegraphNode) {
+    if (scenegraph instanceof GroupNode) {
       this._deleteScenegraph();
       this._applyAllAttributes(scenegraph);
       this._applyAnimationsProp(scenegraph, animator, props._animations);
@@ -276,8 +274,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (this.state.attributesAvailable) {
       // attributeManager is always defined for primitive layers
       const allAttributes = this.getAttributeManager()!.getAttributes();
-      scenegraph.traverse((model: ModelNode) => {
-        this._setModelAttributes(model.model, allAttributes);
+      scenegraph.traverse(node => {
+        if (node instanceof ModelNode) {
+          this._setModelAttributes(node.model, allAttributes, false);
+        }
       });
     }
   }
@@ -332,10 +332,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
   }
 
-  private _getModelOptions(): any {
+  private _getModelOptions(): GLTFInstantiatorOptions {
     const {_imageBasedLightingEnvironment} = this.props;
 
-    let env: GLTFEnvironment | null = null;
+    let env: PBREnvironment | undefined;
     if (_imageBasedLightingEnvironment) {
       if (typeof _imageBasedLightingEnvironment === 'function') {
         env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
@@ -345,12 +345,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     return {
-      gl: this.context.gl,
-      waitForFullLoad: true,
       imageBasedLightingEnvironment: env,
       modelOptions: {
+        id: this.props.id,
         isInstanced: true,
-        transpileToGLSL100: this.context.device.info.type !== 'webgl2',
+        bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
         ...this.getShaders()
       },
       // tangents are not supported
@@ -362,8 +361,18 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
-    this.state.scenegraph.traverse((model: ModelNode) => {
-      this._setModelAttributes(model.model, changedAttributes);
+    // If some buffer layout changed
+    let bufferLayoutChanged = false;
+    for (const id in changedAttributes) {
+      if (changedAttributes[id].layoutChanged()) {
+        bufferLayoutChanged = true;
+      }
+    }
+
+    this.state.scenegraph.traverse(node => {
+      if (node instanceof ModelNode) {
+        this._setModelAttributes(node.model, changedAttributes, bufferLayoutChanged);
+      }
     });
   }
 
@@ -375,15 +384,17 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.setNeedsRedraw();
     }
 
-    const {viewport} = this.context;
+    const {viewport, renderPass} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
     const numInstances = this.getNumInstances();
-    this.state.scenegraph.traverse((model: ModelNode, {worldMatrix}) => {
-      model.model.setInstanceCount(numInstances);
-      model.updateModuleSettings(moduleParameters);
-      model.draw({
-        parameters,
-        uniforms: {
+    this.state.scenegraph.traverse((node, {worldMatrix}) => {
+      if (node instanceof ModelNode) {
+        const {model} = node;
+        model.setInstanceCount(numInstances);
+        if (moduleParameters) {
+          model.updateModuleSettings(moduleParameters);
+        }
+        model.setUniforms({
           sizeScale,
           opacity,
           sizeMinPixels,
@@ -392,9 +403,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
-          u_Camera: model.model.getUniforms().project_uCameraPosition
-        }
-      });
+          u_Camera: model.uniforms.project_uCameraPosition
+        });
+
+        model.draw(renderPass);
+      }
     });
   }
 }
