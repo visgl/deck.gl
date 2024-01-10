@@ -237,7 +237,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting],
+      modules: [project32, phongLighting, picking],
       transpileToGLSL100,
       defines
     });

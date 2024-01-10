@@ -320,7 +320,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return new SubLayerClass(
       {
         // TODO(v9) PBR not working
-        // _lighting: 'pbr'
+        _lighting: 'pbr'
       },
       this.getSubLayerProps({
         id: 'scenegraph'
