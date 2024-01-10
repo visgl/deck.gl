@@ -19,6 +19,8 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
+luma.log.level = 3;
+
 export default function App({
   data = DATA_URL,
   intensity = 1,
@@ -29,7 +31,7 @@ export default function App({
   const layers = [
     new HeatmapLayer({
       data,
-      id: 'heatmp-layer',
+      id: 'heatmap-layer',
       pickable: false,
       getPosition: d => [d[0], d[1]],
       getWeight: d => d[2],
@@ -40,7 +42,10 @@ export default function App({
   ];
 
   return (
-    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}
+      debug={true}
+      deviceProps={{debug: true}}
+    >
       <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );

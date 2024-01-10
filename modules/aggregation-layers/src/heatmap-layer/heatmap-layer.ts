@@ -25,7 +25,9 @@ import {
   packVertices,
   scaleToAspectRatio,
   getTextureCoordinates,
-  getTextureFormat
+  getTextureFormat,
+  debugFBO,
+  getBufferData
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
@@ -44,7 +46,8 @@ import {
   log,
   Position,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
@@ -416,10 +419,22 @@ export default class HeatmapLayer<
     const {weightsTexture} = this.state;
     const attributeManager = this.getAttributeManager()!;
 
+    const attributes = attributeManager.getAttributes();
+    const positions = attributes.positions.buffer;
+    const weights = attributes.weights.buffer;
+
+    console.log({
+      attributes,
+      positions: getBufferData(positions, Float32Array),
+      weights: getBufferData(weights, Float32Array),
+    })
+
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      // attributes: this.getAttributes() as any, // TODO(donmccurdy): DO NOT SUBMIT.
+      // attributes: this.getAttributes(), // TODO(donmccurdy): DO NOT SUBMIT.
+      // attributes: attributeManager.getAttributes(),
+      // attributes: {positions, weights},
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
@@ -431,6 +446,7 @@ export default class HeatmapLayer<
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one'
       },
+      // TODO(donmccurdy): topology?
       ...shaders
     } as TextureTransformProps);
 
@@ -454,9 +470,9 @@ export default class HeatmapLayer<
       // TODO(donmccurdy): `inTexture` is a vertex attribute in the `max` shader, not a texture.
       // That hasn't changed, and I'm not currently able to follow how this worked before...
       // Luma is understandably warning about 'Unknown binding "inTexture"'.
-      bindings: {
-        inTexture: weightsTexture
-      },
+      // bindings: {inTexture: weightsTexture},
+      // attributes: {inTexture: weightsTexture},
+      // bufferLayout: [{name: 'inTexture', format: 'float32x4'}],
       targetTexture: maxWeightsTexture,
       targetTextureVarying: 'outTexture',
       targetTextureChannels: 4,
@@ -485,16 +501,14 @@ export default class HeatmapLayer<
 
   // overwrite super class method to update transform model
   updateShaders(shaderOptions) {
-    // TODO(donmccurdy): I'm very unsure what the update lifecycle is here,
-    // why do we update just this one transform model, and how do we safely
-    // merge the super class's props with the child class's shaders?
-
     // shader params (modules, injects) changed, update model object
     this._createWeightsTransform({vs: weightsVs, fs: weightsFs, ...shaderOptions});
+    // TODO: Does `maxWeightTransform` not also need to be updated?
   }
 
   _updateMaxWeightValue() {
     const {maxWeightTransform} = this.state;
+    console.warn('maxWeightTransform.run()');
     maxWeightTransform!.run();
   }
 
@@ -619,20 +633,34 @@ export default class HeatmapLayer<
     // ---
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
-    weightsTransform.model.setVertexCount(this.getNumInstances());
-    // Need to explictly specify clearColor as external context may have modified it
-    withGLParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
-      weightsTransform.model.setUniforms(uniforms);
-      weightsTransform.run({
-        clearColor: [0, 0, 0, 0]
-        // TODO(donmccurdy): Why are these passed into .run()? We may need to construct
-        // new Transform and/or model for changes here, and I don't know if .run() should
-        // handle that.
 
-        // attributes: this.getAttributes(),
-        // moduleSettings: this.getModuleSettings()
-      });
+    const attributeManager = this.getAttributeManager()!;
+
+    const attributes = attributeManager.getAttributes();
+    const positions = attributes.positions.buffer;
+    const weights = attributes.weights.buffer;
+
+    console.log({
+      attributes,
+      positions: getBufferData(positions, Float32Array),
+      weights: getBufferData(weights, Float32Array),
     });
+
+    console.warn('weightsTransform.run'); // TODO(donmccurdy): debug
+    
+    weightsTransform.model.setAttributes({positions, weights});
+    weightsTransform.model.setVertexCount(this.getNumInstances());
+    weightsTransform.model.setUniforms(uniforms);
+    weightsTransform.run({
+      // parameters: {viewport: this.context.viewport}, // TODO(donmccurdy): Needless?
+      clearColor: [0, 0, 0, 0]
+    });
+    
+    // TODO(donmccurdy): debug
+    debugFBO(this.state.weightsTexture, {
+      id: 'heatmap-layer-weightsTexture', opaque: true, top: '420px', rgbaScale: 255
+    });
+
     this._updateMaxWeightValue();
 
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)

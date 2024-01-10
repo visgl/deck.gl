@@ -11,6 +11,7 @@ uniform float weightsScale;
 void main()
 {
   weightsTexture = vec4(weights * weightsScale, 0., 0., 1.);
+  weightsTexture = vec4(1., 1., 1., 1.); // TODO(donmccurdy)
 
   float radiusTexels  = project_pixel_size(radiusPixels) * textureWidth / (commonBounds.z - commonBounds.x);
   gl_PointSize = radiusTexels * 2.;

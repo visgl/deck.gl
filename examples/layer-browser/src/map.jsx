@@ -10,6 +10,8 @@ import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 import LayerInfo from './components/layer-info';
 import {RenderMetrics} from './render-metrics';
 
+// luma.log.level = 3;
+
 const NAVIGATION_CONTROL_STYLES = {
   margin: 10,
   position: 'absolute'
@@ -151,15 +153,16 @@ export default class Map extends PureComponent {
           onHover={this._onHover}
           onClick={this._onClick}
           useDevicePixels={useDevicePixels}
-          debug={true}
+          // debug={true}
+          // deviceProps={{debug: true}}
           drawPickingColors={drawPickingColors}
           ContextProvider={MapContext.Provider}
           _onMetrics={this._onMetrics}
         >
-          <View id="basemap">
+          {/* <View id="basemap">
             <StaticMap key="map" mapStyle={MAP_STYLE} />
             <ViewportLabel key="label">Map View</ViewportLabel>
-          </View>
+          </View> */}
 
           <View id="first-person">
             <ViewportLabel>First Person View</ViewportLabel>
@@ -179,3 +182,10 @@ export default class Map extends PureComponent {
     );
   }
 }
+
+// setTimeout(() => {
+//   const spector = new SPECTOR.Spector();
+//   const canvas = document.querySelector('#default-deckgl-overlay');
+//   spector.captureCanvas(canvas, 100000); 
+//   setTimeout(() => spector.stopCapture(), 5000);
+// }, 500)

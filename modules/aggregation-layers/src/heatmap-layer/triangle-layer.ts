@@ -20,9 +20,10 @@
 
 import type {Buffer, Device, Texture} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {Layer, LayerContext, project32} from '@deck.gl/core';
+import {Layer, LayerContext, picking, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
+import { debugFBO, getBufferData } from './heatmap-layer-utils';
 
 type _TriangleLayerProps = {
   colorDomain: number[];
@@ -45,7 +46,9 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   };
 
   getShaders() {
-    return {vs, fs, modules: [project32]};
+    // TODO(donmccurdy): Including 'picking' fixes errors, but I'm not sure
+    // heatmap-layer really supports picking?
+    return {vs, fs, modules: [project32, picking]};
   }
 
   initializeState({device}: LayerContext): void {
@@ -57,7 +60,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     console.log('TriangleLayer#_getModel()'); // TODO(donmccurdy): DO NOT SUBMIT.
 
     const attributeManager = this.getAttributeManager()!;
-    const {vertexCount, data} = this.props;
+    const {vertexCount, data, weightsTexture, maxTexture, colorTexture} = this.props;
 
     // TODO(donmccurdy): This is probably doing nothing unless passed to the Model?
     attributeManager.add({
@@ -65,13 +68,23 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       texCoords: {size: 2, noAlloc: true}
     });
 
+    debugFBO(weightsTexture, {id: 'triangle-weightsTexture', opaque: true, top: '0', rgbaScale: 255});
+
+    // TODO(donmccurdy): cleanup.
+    console.log({
+      // weightsTexture: weightsTexture.
+      triangleAttributes: Object.entries((data as any).attributes)
+        .map(([name, buffer]: [string, Buffer]) => [name, getBufferData(buffer, Float32Array)])
+    });
+
     return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
-      attributes: data.attributes,
+      bindings: {weightsTexture, maxTexture, colorTexture}, // TODO(donmccurdy): required?
+      attributes: (data as any).attributes, // TODO(donmccurdy): types.
       bufferLayout: [
-        {name: 'positions', format: 'float32'},
-        {name: 'texCoords', format: 'float32'},
+        {name: 'positions', format: 'float32x3'},
+        {name: 'texCoords', format: 'float32x2'},
       ],
       topology: 'triangle-fan-webgl',
       vertexCount,
@@ -89,6 +102,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
     const {weightsTexture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
       this.props;
+
+    console.log('triangle:draw'); // TODO(donmccurdy)
 
     model.setUniforms({
       ...uniforms,
