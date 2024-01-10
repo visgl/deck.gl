@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import {UniformStore} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
@@ -187,8 +186,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     animator: GLTFAnimator;
     attributesAvailable?: boolean;
   };
-
-  uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
 
   getShaders() {
     const modules = [project32, picking];
@@ -360,9 +357,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         id: this.props.id,
         isInstanced: true,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-        bindings: {
-          picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
-        },
         ...this.getShaders()
       },
       // tangents are not supported
@@ -419,25 +413,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           u_Camera: model.uniforms.project_uCameraPosition
         });
 
-        // TODO remove once picking with UBOs is working
-        const {
-          isActive,
-          isAttribute,
-          isHighlightActive,
-          highlightColor,
-          highlightedObjectColor,
-          useFloatColors
-        } = model.uniforms;
-        this.uniformStore.setUniforms({
-          picking: {
-            isActive,
-            isAttribute,
-            isHighlightActive,
-            highlightColor,
-            highlightedObjectColor,
-            useFloatColors
-          } as typeof picking.uniforms
-        });
         model.draw(renderPass);
       }
     });
