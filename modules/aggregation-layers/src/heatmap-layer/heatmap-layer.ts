@@ -446,7 +446,7 @@ export default class HeatmapLayer<
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one'
       },
-      // TODO(donmccurdy): topology?
+      topology: 'point-list', // TODO(donmccurdy): right topology? match weights-vs.glsl.ts?
       ...shaders
     } as TextureTransformProps);
 
@@ -647,7 +647,7 @@ export default class HeatmapLayer<
     });
 
     console.warn('weightsTransform.run'); // TODO(donmccurdy): debug
-    
+
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.setUniforms(uniforms);
