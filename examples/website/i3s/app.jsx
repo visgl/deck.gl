@@ -16,7 +16,6 @@ const INITIAL_VIEW_STATE = {
 };
 
 export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
-  const [credits, setCredits] = useState('');
 
   const layers = [
     new Tile3DLayer({
