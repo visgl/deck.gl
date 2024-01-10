@@ -113,10 +113,11 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
         d[DATA_INDEX.LATITUDE] || 0,
         d[DATA_INDEX.GEO_ALTITUDE] || 0
       ],
-      getOrientation: d => [verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90],
-      transitions: {
-        getPosition: REFRESH_TIME * 0.9
-      }
+      getOrientation: d => [verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90]
+      // TODO(v9) Re-enable once attribute transitions working (#8392)
+      // transitions: {
+      //   getPosition: REFRESH_TIME * 0.9
+      // }
     });
 
   return (

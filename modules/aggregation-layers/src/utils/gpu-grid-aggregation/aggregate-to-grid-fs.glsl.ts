@@ -19,14 +19,17 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME gpu-aggregation-to-grid-fs
 
 precision highp float;
 
-varying vec3 vWeights;
+in vec3 vWeights;
+
+out vec4 fragColor;
 
 void main(void) {
-  gl_FragColor = vec4(vWeights, 1.0);
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  fragColor = vec4(vWeights, 1.0);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

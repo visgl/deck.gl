@@ -64,7 +64,6 @@ void main(void) {
   float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
   vec3 pos = (instanceModelMatrix * (sceneModelMatrix * vec4(positions, 1.0)).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
-
   if(composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates

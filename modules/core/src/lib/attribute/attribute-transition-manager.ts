@@ -1,7 +1,6 @@
 // deck.gl, MIT license
 
 import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
@@ -38,6 +37,7 @@ export default class AttributeTransitionManager {
       timeline?: Timeline;
     }
   ) {
+    if (!device) throw new Error('AttributeTransitionManager is constructed without device');
     this.id = id;
     this.device = device;
     this.timeline = timeline;
@@ -45,7 +45,7 @@ export default class AttributeTransitionManager {
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-    this.isSupported = Transform.isSupported(device);
+    this.isSupported = device.features.has('transform-feedback-webgl2');
   }
 
   finalize(): void {
@@ -148,8 +148,11 @@ export default class AttributeTransitionManager {
     // TODO: when switching transition types, make sure to carry over the attribute's
     // previous buffers, currentLength, startIndices, etc, to be used as the starting point
     // for the next transition
-    let isNew = !transition || transition.type !== settings.type;
-    if (isNew) {
+    let needsUpdate = !transition || transition.type !== settings.type;
+    needsUpdate ||=
+      attribute.buffer.byteLength > transition?.attributeInTransition.buffer.byteLength;
+
+    if (needsUpdate) {
       if (!this.isSupported) {
         log.warn(
           `WebGL2 not supported by this browser. Transition for ${attributeName} is disabled.`
@@ -170,11 +173,11 @@ export default class AttributeTransitionManager {
         });
       } else {
         log.error(`unsupported transition type '${settings.type}'`)();
-        isNew = false;
+        needsUpdate = false;
       }
     }
 
-    if (isNew || attribute.needsRedraw()) {
+    if (needsUpdate || attribute.needsRedraw()) {
       this.needsRedraw = true;
       this.transitions[attributeName].start(settings, this.numInstances);
     }

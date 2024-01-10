@@ -253,12 +253,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Tiles3DLoader already processes GLTF
       const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
-      // TODO remove cast once https://github.com/visgl/luma.gl/pull/1877 deployed
-      const gltfObjects = createScenegraphsFromGLTF(
-        device,
-        processedGLTF,
-        this._getModelOptions()
-      ) as unknown as {animator: GLTFAnimator; scenes: GroupNode[]};
+      const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => {
@@ -362,9 +357,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         id: this.props.id,
         isInstanced: true,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-        bindings: {
-          // picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
-        },
         ...this.getShaders()
       },
       // tangents are not supported
@@ -421,25 +413,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           u_Camera: model.uniforms.project_uCameraPosition
         });
 
-        // TODO remove once picking with UBOs is working
-        // const {
-        //   isActive,
-        //   isAttribute,
-        //   isHighlightActive,
-        //   highlightColor,
-        //   highlightedObjectColor,
-        //   useFloatColors
-        // } = model.uniforms;
-        // this.uniformStore.setUniforms({
-        //   picking: {
-        //     isActive,
-        //     isAttribute,
-        //     isHighlightActive,
-        //     highlightColor,
-        //     highlightedObjectColor,
-        //     useFloatColors
-        //   } as typeof picking.uniforms
-        // });
         model.draw(renderPass);
       }
     });

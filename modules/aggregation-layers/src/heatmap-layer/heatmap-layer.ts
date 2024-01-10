@@ -29,7 +29,7 @@ import {
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
-import {Transform} from '@luma.gl/engine';
+import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
@@ -201,8 +201,8 @@ export default class HeatmapLayer<
     updateTimer?: any;
     triPositionBuffer?: Buffer;
     triTexCoordBuffer?: Buffer;
-    weightsTransform?: Transform;
-    maxWeightTransform?: Transform;
+    weightsTransform?: TextureTransform;
+    maxWeightTransform?: TextureTransform;
     textureSize: number;
     format: TextureFormat;
     type: GL;
@@ -424,18 +424,15 @@ export default class HeatmapLayer<
 
   _createWeightsTransform(shaders = {}) {
     let {weightsTransform} = this.state;
-    const {weightsTexture} = this.state;
-    // @ts-ignore
     weightsTransform?.delete();
 
-    weightsTransform = new Transform(this.context.device, {
+    weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      // @ts-ignore
-      elementCount: 1,
-      _targetTexture: weightsTexture,
-      _targetTextureVarying: 'weightsTexture',
+      vertexCount: 1,
+      targetTexture: this.state.weightsTexture!,
+      targetTextureVarying: 'weightsTexture',
       ...shaders
-    });
+    } as TextureTransformProps);
     this.setState({weightsTransform});
   }
 
@@ -447,7 +444,7 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new Transform(this.context.device, {
+    const maxWeightTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
         inTexture: weightsTexture
@@ -486,7 +483,7 @@ export default class HeatmapLayer<
     const {maxWeightTransform} = this.state;
     maxWeightTransform!.run({
       parameters: {
-        // @ts-ignore
+        // @ts-expect-error TODO(v9): Resolve errors.
         blend: true,
         depthTest: false,
         blendFunc: [GL.ONE, GL.ONE],
@@ -614,7 +611,6 @@ export default class HeatmapLayer<
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
-      // @ts-ignore
       elementCount: this.getNumInstances()
     });
     // Need to explictly specify clearColor as external context may have modified it
@@ -622,7 +618,7 @@ export default class HeatmapLayer<
       weightsTransform.run({
         uniforms,
         parameters: {
-          // @ts-ignore
+          // @ts-expect-error TODO(v9): Resolve errors.
           blend: true,
           depthTest: false,
           blendFunc: [GL.ONE, GL.ONE],

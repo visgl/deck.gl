@@ -19,20 +19,21 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME icon-layer-vertex-shader
 
-attribute vec2 positions;
+in vec2 positions;
 
-attribute vec3 instancePositions;
-attribute vec3 instancePositions64Low;
-attribute float instanceSizes;
-attribute float instanceAngles;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
-attribute vec4 instanceIconFrames;
-attribute float instanceColorModes;
-attribute vec2 instanceOffsets;
-attribute vec2 instancePixelOffset;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in float instanceSizes;
+in float instanceAngles;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
+in vec4 instanceIconFrames;
+in float instanceColorModes;
+in vec2 instanceOffsets;
+in vec2 instancePixelOffset;
 
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
@@ -41,10 +42,10 @@ uniform float sizeMaxPixels;
 uniform bool billboard;
 uniform int sizeUnits;
 
-varying float vColorMode;
-varying vec4 vColor;
-varying vec2 vTextureCoords;
-varying vec2 uv;
+out float vColorMode;
+out vec4 vColor;
+out vec2 vTextureCoords;
+out vec2 uv;
 
 vec2 rotate_by_angle(vec2 vertex, float angle) {
   float angle_radian = angle * PI / 180.0;
