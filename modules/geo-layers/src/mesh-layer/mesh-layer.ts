@@ -113,7 +113,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
   protected getModel(mesh: Mesh): Model {
     const {id, pbrMaterial} = this.props;
     const parsedPBRMaterial = this.parseMaterial(pbrMaterial, mesh);
-    // Keep material parser to explicitly remove textures
+    // Keep material to explicitly remove textures
     this.setState({parsedPBRMaterial});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);

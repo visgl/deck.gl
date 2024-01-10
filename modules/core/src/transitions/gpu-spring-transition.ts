@@ -178,7 +178,6 @@ export default class GPUSpringTransition implements GPUTransition {
 
   cancel() {
     this.transition.cancel();
-    // @ts-ignore
     this.transform.delete();
     for (const buffer of this.buffers) {
       buffer.delete();
