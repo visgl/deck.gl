@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer, project32, picking, log} from '@deck.gl/core';
-import {UniformStore} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
@@ -188,10 +187,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributesAvailable?: boolean;
   };
 
-  uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
-
   getShaders() {
-    const modules = [project32];
+    const modules = [project32, picking];
 
     if (this.props._lighting === 'pbr') {
       modules.push(pbr);
@@ -320,8 +317,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
-          // TODO remove once https://github.com/visgl/luma.gl/pull/1878 deployed
-          // @ts-ignore
           const findResult = animations.find(({name}) => name === key);
           if (findResult) {
             Object.assign(findResult, value);
