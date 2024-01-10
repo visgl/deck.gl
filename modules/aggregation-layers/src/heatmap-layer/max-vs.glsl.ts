@@ -1,6 +1,7 @@
 export default `\
-attribute vec4 inTexture;
-varying vec4 outTexture;
+#version 300 es
+in vec4 inTexture;
+out vec4 outTexture;
 
 void main()
 {

@@ -24,7 +24,6 @@ import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl'
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
-import {Transform} from '@luma.gl/engine';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
@@ -81,7 +80,9 @@ function getScaler(a) {
 
 const TRANSFORM_VS = {
   project_size: (meter, worldPosition, commonPosition = [0, 0, 0, 0]) => `\
-varying ${getScalerType(meter)} outValue;
+#version 300 es
+
+out ${getScalerType(meter)} outValue;
 
 void main()
 {
@@ -91,7 +92,9 @@ void main()
 }
 `,
   project_position: (pos, pos64Low = [0, 0, 0]) => `\
-varying vec4 outValue;
+#version 300 es
+
+out vec4 outValue;
 
 void main()
 {
@@ -100,7 +103,9 @@ void main()
 }
 `,
   project_common_position_to_clipspace_vec4: pos => `\
-varying vec4 outValue;
+#version 300 es
+
+out vec4 outValue;
 
 void main()
 {
@@ -335,11 +340,10 @@ test.skip('project#vs', t => {
 
     testCase.tests.forEach(c => {
       const expected = c.output;
-      if (Transform.isSupported(device)) {
+      if (device.features.has('transform-feedback-webgl2')) {
         config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
-        const sourceBuffers = {dummy: DUMMY_SOURCE_BUFFER};
         const feedbackBuffers = {outValue: OUT_BUFFER};
-        let actual = runOnGPU({device, uniforms, vs: c.vs, sourceBuffers, feedbackBuffers});
+        let actual = runOnGPU({device, uniforms, vs: c.vs, feedbackBuffers});
         actual = c.mapResult ? c.mapResult(actual) : actual;
         const name = `GPU: ${c.name}`;
         verifyResult({t, name, actual, expected, sliceActual: true});

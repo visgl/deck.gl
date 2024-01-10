@@ -19,16 +19,17 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME line-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 instanceSourcePositions;
-attribute vec3 instanceTargetPositions;
-attribute vec3 instanceSourcePositions64Low;
-attribute vec3 instanceTargetPositions64Low;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
-attribute float instanceWidths;
+in vec3 positions;
+in vec3 instanceSourcePositions;
+in vec3 instanceTargetPositions;
+in vec3 instanceSourcePositions64Low;
+in vec3 instanceTargetPositions64Low;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
+in float instanceWidths;
 
 uniform float opacity;
 uniform float widthScale;
@@ -37,8 +38,8 @@ uniform float widthMaxPixels;
 uniform float useShortestPath;
 uniform int widthUnits;
 
-varying vec4 vColor;
-varying vec2 uv;
+out vec4 vColor;
+out vec2 uv;
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)

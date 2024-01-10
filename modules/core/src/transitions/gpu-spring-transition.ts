@@ -1,6 +1,6 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
+import {BufferTransform} from '@luma.gl/engine';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {
@@ -15,7 +15,7 @@ import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/engine';
+import type {BufferTransform as LumaTransform} from '@luma.gl/engine';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
@@ -150,6 +150,7 @@ export default class GPUSpringTransition implements GPUTransition {
         damping: settings.damping
       },
       parameters: {
+        // @ts-expect-error TODO(v9): Update for BufferTransform API.
         depthTest: false,
         blend: true,
         viewport: [0, 0, 1, 1],
@@ -193,7 +194,8 @@ function getTransform(
   framebuffer: LumaFramebuffer
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(device, {
+  return new BufferTransform(device, {
+    // @ts-expect-error TODO(v9): Update for BufferTransform API.
     framebuffer,
     vs: `
 #define SHADER_NAME spring-transition-vertex-shader
@@ -202,11 +204,11 @@ function getTransform(
 
 uniform float stiffness;
 uniform float damping;
-attribute ATTRIBUTE_TYPE aPrev;
-attribute ATTRIBUTE_TYPE aCur;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vNext;
-varying float vIsTransitioningFlag;
+in ATTRIBUTE_TYPE aPrev;
+in ATTRIBUTE_TYPE aCur;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vNext;
+out float vIsTransitioningFlag;
 
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
@@ -225,16 +227,19 @@ void main(void) {
   gl_PointSize = 100.0;
 }
 `,
-    fs: `
+    fs: `\
+#version 300 es
 #define SHADER_NAME spring-transition-is-transitioning-fragment-shader
 
-varying float vIsTransitioningFlag;
+in float vIsTransitioningFlag;
+
+out vec4 fragColor;
 
 void main(void) {
   if (vIsTransitioningFlag == 0.0) {
     discard;
   }
-  gl_FragColor = vec4(1.0);
+  fragColor = vec4(1.0);
 }`,
     defines: {
       ATTRIBUTE_TYPE: attributeType

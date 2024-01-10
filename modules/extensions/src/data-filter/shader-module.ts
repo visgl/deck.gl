@@ -30,7 +30,7 @@ attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
 
-varying float dataFilter_value;
+out float dataFilter_value;
 
 float dataFilter_reduceValue(float value) {
   return value;
@@ -64,7 +64,7 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
 
 const fs = `
 uniform bool filter_transformColor;
-varying float dataFilter_value;
+in float dataFilter_value;
 `;
 
 type DataFilterModuleSettings = {
