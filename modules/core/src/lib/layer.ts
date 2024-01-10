@@ -333,7 +333,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
-  // TODO deprecate in favour of setShaderInputs
+  // TODO deprecate in favour of setShaderModuleProps
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
@@ -342,7 +342,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Update shader input parameters */
-  setShaderInputs(...props: Parameters<Model['shaderInputs']['setProps']>): void {
+  setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
     for (const model of this.getModels()) {
       model.shaderInputs.setProps(...props);
     }
@@ -1064,7 +1064,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (moduleParameters) {
         const {pickingActive, pickingAttribute, ...rest} = moduleParameters;
         this.setModuleParameters(rest);
-        this.setShaderInputs({picking: {pickingActive, pickingAttribute}});
+        this.setShaderModuleProps({picking: {pickingActive, pickingAttribute}});
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1220,8 +1220,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (info.picked && typeof highlightColor === 'function') {
       picking.pickingHighlightColor = highlightColor(info);
     }
-    this.setShaderInputs({picking});
-    // setShaderInputs does not trigger redraw
+    this.setShaderModuleProps({picking});
+    // setShaderModuleProps does not trigger redraw
     this.setNeedsRedraw();
   }
 
@@ -1274,7 +1274,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             : null;
       }
 
-      this.setShaderInputs({picking});
+      this.setShaderModuleProps({picking});
     }
   }
 
