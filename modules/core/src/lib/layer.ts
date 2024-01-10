@@ -1062,8 +1062,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
-        const {pickingActive, pickingAttribute, ...rest} = moduleParameters;
-        this.setModuleParameters(rest);
+        const {pickingActive, pickingAttribute} = moduleParameters;
+        this.setModuleParameters(moduleParameters);
         this.setShaderModuleProps({picking: {pickingActive, pickingAttribute}});
       }
 
