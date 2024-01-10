@@ -7,7 +7,7 @@ import {
   padBuffer,
   getAttributeTypeFromSize,
   getAttributeBufferLength,
-  getAttributeVertexFormat,
+  getFloat32VertexFormat,
   cycleBuffers,
   SpringTransitionSettings
 } from '../lib/attribute/attribute-transition-utils';
@@ -95,7 +95,7 @@ export default class GPUSpringTransition implements GPUTransition {
       getData: transitionSettings.enter
     };
 
-    buffers.forEach((buffer, index) => {
+    for (const [index, buffer] of buffers.entries()) {
       const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
 
       if (buffer !== paddedBuffer) {
@@ -109,7 +109,7 @@ export default class GPUSpringTransition implements GPUTransition {
             `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
         );
       }
-    });
+    }
 
     this.settings = transitionSettings;
     this.currentStartIndices = attribute.startIndices;
@@ -234,7 +234,7 @@ function getTransform(
   buffers: [LumaBuffer, LumaBuffer, LumaBuffer]
 ): LumaTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  const format = getAttributeVertexFormat(attribute.size as 1 | 2 | 3 | 4);
+  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
     vs,
     fs,

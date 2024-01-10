@@ -4,14 +4,12 @@ import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
-  // padBuffer,
   getAttributeTypeFromSize,
-  // getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers,
   InterpolationTransitionSettings,
   padBuffer,
-  getAttributeVertexFormat
+  getFloat32VertexFormat
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
@@ -97,7 +95,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       getData: transitionSettings.enter
     };
 
-    buffers.forEach((buffer, index) => {
+    for (const [index, buffer] of buffers.entries()) {
       const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
 
       if (buffer !== paddedBuffer) {
@@ -111,7 +109,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
             `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
         );
       }
-    });
+    }
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
@@ -174,7 +172,7 @@ void main(void) {
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  const format = getAttributeVertexFormat(attribute.size as 1 | 2 | 3 | 4);
+  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
     vs,
     bufferLayout: [

@@ -93,6 +93,7 @@ export function getSourceBufferAttribute(
   return attribute.value as NumericArray;
 }
 
+/** Returns the GLSL attribute type ofor the given number of float32 components. */
 export function getAttributeTypeFromSize(size: number): string {
   switch (size) {
     case 1:
@@ -106,6 +107,21 @@ export function getAttributeTypeFromSize(size: number): string {
     default:
       throw new Error(`No defined attribute type for size "${size}"`);
   }
+}
+
+/** Returns the {@link VertexFormat} for the given number of float32 components. */
+export function getFloat32VertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
+  switch (size) {
+    case 1:
+      return 'float32';
+    case 2:
+      return 'float32x2';
+    case 3:
+      return 'float32x3';
+    case 4:
+      return 'float32x4';
+  }
+  throw new Error('invalid type size');
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {
@@ -197,15 +213,15 @@ export function padBuffer({
 /** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
 export function getBufferData(
   buffer: Buffer,
-  Ctor: TypedArrayConstructor,
+  TypedArray: TypedArrayConstructor,
   byteOffset = 0,
   byteLength = buffer.byteLength
 ): TypedArray {
   const _buffer = buffer as any;
   _buffer.device.assertWebGL2();
 
-  const dstLength = byteLength / Ctor.BYTES_PER_ELEMENT;
-  const dstArray = new Ctor(dstLength);
+  const dstLength = byteLength / TypedArray.BYTES_PER_ELEMENT;
+  const dstArray = new TypedArray(dstLength);
   const dstOffset = 0;
 
   // Use GL.COPY_READ_BUFFER to avoid disturbing other targets and locking type
@@ -214,18 +230,4 @@ export function getBufferData(
   _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, null);
 
   return dstArray;
-}
-
-export function getAttributeVertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
-  switch (size) {
-    case 1:
-      return 'float32';
-    case 2:
-      return 'float32x2';
-    case 3:
-      return 'float32x3';
-    case 4:
-      return 'float32x4';
-  }
-  throw new Error('invalid type size');
 }
