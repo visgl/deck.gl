@@ -93,7 +93,7 @@ export function getSourceBufferAttribute(
   return attribute.value as NumericArray;
 }
 
-/** Returns the GLSL attribute type ofor the given number of float32 components. */
+/** Returns the GLSL attribute type for the given number of float32 components. */
 export function getAttributeTypeFromSize(size: number): string {
   switch (size) {
     case 1:
