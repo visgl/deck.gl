@@ -248,12 +248,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const gltf = props.scenegraph;
       const processedGLTF = postProcessGLTF(gltf);
 
-      // TODO remove cast once https://github.com/visgl/luma.gl/pull/1877 deployed
-      const gltfObjects = createScenegraphsFromGLTF(
-        device,
-        processedGLTF,
-        this._getModelOptions()
-      ) as unknown as {animator: GLTFAnimator; scenes: GroupNode[]};
+      const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
       waitForGLTFAssets(gltfObjects).then(() => {
@@ -320,8 +315,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
-          // TODO remove once https://github.com/visgl/luma.gl/pull/1878 deployed
-          // @ts-ignore
           const findResult = animations.find(({name}) => name === key);
           if (findResult) {
             Object.assign(findResult, value);
