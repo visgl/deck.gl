@@ -246,7 +246,9 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     } else if (props.scenegraph && typeof props.scenegraph === 'object') {
       // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
       const gltf = props.scenegraph;
-      const processedGLTF = postProcessGLTF(gltf);
+
+      // Tiles3DLoader already processes GLTF
+      const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
       const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
