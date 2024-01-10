@@ -55,18 +55,17 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
       },
       operation: 'terrain+draw'
     }),
-    false &&
-      new GeoJsonLayer({
-        id: 'buildings',
-        data: BUILDING_DATA,
-        extensions: [new DataFilterExtension({filterSize: 1}), new TerrainExtension()],
-        stroked: false,
-        filled: true,
-        getFillColor: ({properties}) => colorScale(properties.distance_to_nearest_tree),
-        opacity,
-        getFilterValue: f => f.properties.distance_to_nearest_tree,
-        filterRange: [distance, 500]
-      })
+    new GeoJsonLayer({
+      id: 'buildings',
+      data: BUILDING_DATA,
+      extensions: [new DataFilterExtension({filterSize: 1}), new TerrainExtension()],
+      stroked: false,
+      filled: true,
+      getFillColor: ({properties}) => colorScale(properties.distance_to_nearest_tree),
+      opacity,
+      getFilterValue: f => f.properties.distance_to_nearest_tree,
+      filterRange: [distance, 500]
+    })
   ];
 
   return (
