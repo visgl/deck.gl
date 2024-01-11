@@ -132,16 +132,13 @@ export {
   TileLayer,
   _Tileset2D,
   TripsLayer,
-  // TODO v9 glTF dependent layers
-  // Tile3DLayer,
+  Tile3DLayer,
   TerrainLayer,
   MVTLayer,
   GeohashLayer
 } from '@deck.gl/geo-layers';
 
-// TODO v9 glTF dependent layers
-// ScenegraphLayer
-export {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE

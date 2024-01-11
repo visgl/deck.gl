@@ -37,7 +37,7 @@ in vec4 position_commonspace;
 void main(void) {
   fragColor = vColor;
 #ifdef FLAT_SHADING
-  if (extruded && !isStroke && !picking_uActive) {
+  if (extruded && !isStroke && !bool(picking.isActive)) {
     vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
     fragColor.rgb = lighting_getLightColor(vColor.rgb, project_uCameraPosition, position_commonspace.xyz, normal);
   }

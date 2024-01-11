@@ -34,7 +34,7 @@ import {
 } from '@deck.gl/core';
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-// import {PBRMaterialParser} from '@luma.gl/gltf';
+import {ParsedPBRMaterial} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -218,7 +218,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'SimpleMeshLayer';
 
   state!: {
-    // materialParser?: PBRMaterialParser;
+    parsedPBRMaterial?: ParsedPBRMaterial;
     model?: Model;
     emptyTexture: Texture;
     hasNormals?: boolean;

@@ -4,9 +4,9 @@ import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 const vs = `
 #ifdef NON_INSTANCED_MODEL
-attribute float collisionPriorities;
+in float collisionPriorities;
 #else
-attribute float instanceCollisionPriorities;
+in float instanceCollisionPriorities;
 #endif
 
 uniform sampler2D collision_texture;
