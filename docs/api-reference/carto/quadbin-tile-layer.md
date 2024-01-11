@@ -73,7 +73,7 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 
 ### Data Accessors
 
-##### `getQuadbin` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getquadkey}
+##### `getQuadbin` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getquadbin}
 
 _Note that the [`getQuadkey` accessor](../geo-layers/quadkey-layer#getquadkey) is replaced with `getQuadbin`_.
 
