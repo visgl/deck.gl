@@ -20,7 +20,6 @@
 
 import {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
@@ -152,8 +151,10 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
           positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
         }
       }),
-      // @ts-expect-error TODO v9 API not as dynamic
-      isInstanced: true
+      bufferLayout: [
+        {name: 'instancePositions', format: 'float32x3'},
+        {name: 'instanceCounts', format: 'float32x4'}
+      ]
     });
   }
 
