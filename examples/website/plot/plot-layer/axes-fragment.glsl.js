@@ -19,17 +19,20 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME graph-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
-varying float shouldDiscard;
+in vec4 vColor;
+in float shouldDiscard;
+
+out vec4 fragColor;
 
 void main(void) {
   if (shouldDiscard > 0.0) {
     discard;
   }
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }
 `;
