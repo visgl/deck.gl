@@ -73,12 +73,12 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     // TODO(donmccurdy): cleanup.
     console.log({
       // weightsTexture: weightsTexture.
-      triangleAttributes: Object.entries((data as any).attributes)
+      triangleAttributes: (Object.entries((data as any).attributes) as any)
         .map(([name, buffer]: [string, Buffer]) => [name, getBufferData(buffer, Float32Array)])
     });
 
     return new Model(device, {
-      ...this.getShaders(),
+      ...(this.getShaders() as any),
       id: this.props.id,
       bindings: {weightsTexture, maxTexture, colorTexture}, // TODO(donmccurdy): required?
       attributes: (data as any).attributes, // TODO(donmccurdy): types.

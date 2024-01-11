@@ -158,7 +158,7 @@ export const debugFBO = function (
 
   // Full map
   const offset = minimap ? color.length : 0;
-  console.warn(`drawing FBO: ${id}`);
+  console.log(`drawing FBO: ${id}`);
   if (color.some((v) => v > 0)) {
     console.error('THERE IS NON-ZERO DATA IN THE FBO!');
   }

@@ -508,7 +508,7 @@ export default class HeatmapLayer<
 
   _updateMaxWeightValue() {
     const {maxWeightTransform} = this.state;
-    console.warn('maxWeightTransform.run()');
+    console.log('maxWeightTransform.run()');
     maxWeightTransform!.run();
   }
 
@@ -646,7 +646,7 @@ export default class HeatmapLayer<
       weights: getBufferData(weights, Float32Array),
     });
 
-    console.warn('weightsTransform.run'); // TODO(donmccurdy): debug
+    console.log('weightsTransform.run'); // TODO(donmccurdy): debug
 
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
@@ -657,7 +657,7 @@ export default class HeatmapLayer<
     });
     
     // TODO(donmccurdy): debug
-    debugFBO(this.state.weightsTexture, {
+    debugFBO(this.state.weightsTexture!, {
       id: 'heatmap-layer-weightsTexture', opaque: true, top: '420px', rgbaScale: 255
     });
 
