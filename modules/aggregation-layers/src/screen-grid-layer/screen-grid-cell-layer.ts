@@ -25,6 +25,7 @@ import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import type {_ScreenGridLayerProps} from './screen-grid-layer';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
@@ -60,8 +61,9 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   state!: {
     model?: Model;
   };
-  getShaders() {
-    return {vs, fs, modules: [picking]};
+
+  getShaders(): {vs: string, fs: string, modules: ShaderModule[]} {
+    return {vs, fs, modules: [picking as ShaderModule]};
   }
 
   initializeState() {
