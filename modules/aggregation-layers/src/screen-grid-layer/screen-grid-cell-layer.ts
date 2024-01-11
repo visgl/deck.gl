@@ -62,7 +62,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     model?: Model;
   };
 
-  getShaders(): {vs: string, fs: string, modules: ShaderModule[]} {
+  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
     return {vs, fs, modules: [picking as ShaderModule]};
   }
 
