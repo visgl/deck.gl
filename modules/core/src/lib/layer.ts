@@ -1214,11 +1214,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
     const picking: PickingModuleSettings = {
-      pickingSelectedColor: info.picked ? info.color : null
+      highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      picking.pickingHighlightColor = highlightColor(info);
+      picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
     // setShaderModuleProps does not trigger redraw
@@ -1259,16 +1259,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     ) {
       const picking: PickingModuleSettings = {};
       if (!autoHighlight) {
-        picking.pickingSelectedColor = null;
+        picking.highlightedObjectColor = null;
       }
       if (Array.isArray(highlightColor)) {
-        picking.pickingHighlightColor = highlightColor;
+        picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
-        picking.pickingSelectedColor =
+        picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;

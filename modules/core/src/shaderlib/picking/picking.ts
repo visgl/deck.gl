@@ -3,9 +3,9 @@ import {picking} from '@luma.gl/shadertools';
 
 export type PickingModuleSettings = {
   /** Set to a picking color to visually highlight that item */
-  pickingSelectedColor?: NumberArray | null;
+  highlightedObjectColor?: NumberArray | null;
   /** Color of the highlight */
-  pickingHighlightColor?: NumberArray;
+  highlightColor?: NumberArray;
   /** Set to true when rendering to off-screen "picking" buffer */
   isActive?: boolean;
   /** Set to true when picking an attribute value instead of object index */
@@ -39,8 +39,8 @@ export default {
       isActive: opts.isActive,
       isAttribute: opts.isAttribute,
       useFloatColors: false,
-      highlightColor: opts.pickingHighlightColor,
-      highlightedObjectColor: opts.pickingSelectedColor
+      highlightColor: opts.highlightColor,
+      highlightedObjectColor: opts.highlightedObjectColor
     });
   }
 };
