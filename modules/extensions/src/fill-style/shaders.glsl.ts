@@ -1,5 +1,6 @@
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
-import type {Viewport, _ShaderModule as ShaderModule, ProjectUniforms} from '@deck.gl/core';
+import type {Viewport, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 

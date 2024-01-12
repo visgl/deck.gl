@@ -1,11 +1,9 @@
-import type {Device} from '@luma.gl/core';
-import {normalizeShaderModule} from '@luma.gl/shadertools';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
+import {normalizeShaderModule, ShaderModule} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
   id: string;
