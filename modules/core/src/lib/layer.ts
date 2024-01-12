@@ -55,7 +55,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingModuleSettings} from '../shaderlib/picking/picking';
+import {PickingSettings} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1213,7 +1213,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const picking: PickingModuleSettings = {
+    const picking: PickingSettings = {
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
@@ -1257,7 +1257,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const picking: PickingModuleSettings = {};
+      const picking: PickingSettings = {};
       if (!autoHighlight) {
         picking.highlightedObjectColor = null;
       }
