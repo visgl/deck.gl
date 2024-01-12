@@ -19,22 +19,25 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME arc-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
-varying vec2 uv;
-varying float isValid;
+in vec4 vColor;
+in vec2 uv;
+in float isValid;
+
+out vec4 fragColor;
 
 void main(void) {
   if (isValid == 0.0) {
     discard;
   }
 
-  gl_FragColor = vColor;
+  fragColor = vColor;
   geometry.uv = uv;
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

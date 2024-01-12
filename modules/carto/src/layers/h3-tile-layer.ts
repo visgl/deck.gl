@@ -1,11 +1,11 @@
 import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
+import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, TilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
-const renderSubLayers = (props: H3HexagonLayerProps) => {
+export const renderSubLayers = props => {
   const {data} = props;
   const {index} = props.tile;
   if (!data || !data.length) return null;
@@ -17,23 +17,18 @@ const renderSubLayers = (props: H3HexagonLayerProps) => {
   });
 };
 
-const defaultProps: DefaultProps<H3HexagonLayerProps> = {
-  aggregationResLevel: 4,
+const defaultProps: DefaultProps<H3TileLayerProps> = {
   data: TilejsonPropType
 };
 
 /** All properties supported by H3TileLayer. */
 export type H3TileLayerProps<DataT = unknown> = _H3TileLayerProps<DataT> & CompositeLayerProps;
 
-// TODO: use type from h3-hexagon-layer when available
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type H3HexagonLayerProps<DataT = unknown> = Record<string, any>;
-
 /** Properties added by H3TileLayer. */
-type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> & {
-  data: null | TilejsonResult | Promise<TilejsonResult>;
-  aggregationResLevel?: number;
-};
+type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_H3TileLayerProps<DataT>>

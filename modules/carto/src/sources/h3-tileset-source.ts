@@ -1,16 +1,14 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilesetSourceOptions, TilejsonSource} from './common';
+import type {SourceOptions, TilejsonResult, TilesetSourceOptions} from './types';
 
 export type H3TilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const h3TilesetSource: TilejsonSource<H3TilesetSourceOptions> = async function (
+export const h3TilesetSource = async function (
   options: H3TilesetSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return baseSource<UrlParameters>('tileset', options, urlParameters);
+  return baseSource<UrlParameters>('tileset', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {h3TilesetSource};

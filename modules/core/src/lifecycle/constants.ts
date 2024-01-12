@@ -7,7 +7,7 @@ export const LIFECYCLE = {
   FINALIZED: 'Finalized! Awaiting garbage collection'
 } as const;
 
-export type Lifecycle = typeof LIFECYCLE[keyof typeof LIFECYCLE];
+export type Lifecycle = (typeof LIFECYCLE)[keyof typeof LIFECYCLE];
 
 /* Secret props keys */
 // Symbols are non-enumerable by default, does not show in for...in or Object.keys

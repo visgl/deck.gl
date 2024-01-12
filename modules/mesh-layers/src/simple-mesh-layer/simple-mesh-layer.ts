@@ -34,7 +34,7 @@ import {
 } from '@deck.gl/core';
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-// import {PBRMaterialParser} from '@luma.gl/gltf';
+import {ParsedPBRMaterial} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -218,7 +218,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'SimpleMeshLayer';
 
   state!: {
-    // materialParser?: PBRMaterialParser;
+    parsedPBRMaterial?: ParsedPBRMaterial;
     model?: Model;
     emptyTexture: Texture;
     hasNormals?: boolean;
@@ -327,9 +327,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.setTexture(props.texture);
     }
 
-    // if (this.state.model) {
-    //   this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
-    // }
+    if (this.state.model) {
+      this.state.model.setTopology(this.props.wireframe ? 'line-strip' : 'triangle-list');
+    }
   }
 
   finalizeState(context: LayerContext) {

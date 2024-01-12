@@ -2,7 +2,7 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "9.0.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -20,6 +20,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -35,12 +36,12 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/gis": "4.0.0-beta.5",
-    "@loaders.gl/loader-utils": "4.0.0-beta.5",
-    "@loaders.gl/mvt": "4.0.0-beta.5",
-    "@loaders.gl/tiles": "4.0.0-beta.5",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@luma.gl/constants": "^8.5.20",
+    "@loaders.gl/gis": "4.1.0-alpha.9",
+    "@loaders.gl/loader-utils": "4.1.0-alpha.9",
+    "@loaders.gl/mvt": "4.1.0-alpha.9",
+    "@loaders.gl/tiles": "4.1.0-alpha.9",
+    "@luma.gl/constants": "9.0.0-alpha.52",
+    "@luma.gl/core": "9.0.0-alpha.52",
     "@math.gl/web-mercator": "^4.0.0",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
@@ -53,18 +54,18 @@
     "quadbin": "^0.1.9"
   },
   "devDependencies": {
-    "@loaders.gl/schema": "4.0.0-beta.5",
+    "@loaders.gl/schema": "4.1.0-alpha.9",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^1.4.2",
     "@types/d3-scale": "^3.0.0"
   },
   "peerDependencies": {
-    "@deck.gl/aggregation-layers": "^8.0.0",
-    "@deck.gl/core": "^8.0.0",
-    "@deck.gl/extensions": "^8.0.0",
-    "@deck.gl/geo-layers": "^8.0.0",
-    "@deck.gl/layers": "^8.0.0",
-    "@loaders.gl/core": "4.0.0-beta.5"
+    "@deck.gl/aggregation-layers": "^9.0.0-alpha",
+    "@deck.gl/core": "^9.0.0-alpha",
+    "@deck.gl/extensions": "^9.0.0-alpha",
+    "@deck.gl/geo-layers": "^9.0.0-alpha",
+    "@deck.gl/layers": "^9.0.0-alpha",
+    "@loaders.gl/core": "4.1.0-alpha.9"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

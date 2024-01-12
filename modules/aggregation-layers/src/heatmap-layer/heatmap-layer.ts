@@ -27,10 +27,10 @@ import {
   getTextureCoordinates,
   getTextureParams
 } from './heatmap-layer-utils';
-import {DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
+import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
-import {Transform} from '@luma.gl/engine';
-import {BufferWithAccessor, withGLParameters} from '@luma.gl/webgl';
+import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
+import {withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -199,10 +199,10 @@ export default class HeatmapLayer<
     worldBounds?: number[];
     normalizedCommonBounds?: number[];
     updateTimer?: any;
-    triPositionBuffer?: BufferWithAccessor;
-    triTexCoordBuffer?: BufferWithAccessor;
-    weightsTransform?: Transform;
-    maxWeightTransform?: Transform;
+    triPositionBuffer?: Buffer;
+    triTexCoordBuffer?: Buffer;
+    weightsTransform?: TextureTransform;
+    maxWeightTransform?: TextureTransform;
     textureSize: number;
     format: TextureFormat;
     type: GL;
@@ -424,16 +424,15 @@ export default class HeatmapLayer<
 
   _createWeightsTransform(shaders = {}) {
     let {weightsTransform} = this.state;
-    const {weightsTexture} = this.state;
     weightsTransform?.delete();
 
-    weightsTransform = new Transform(this.context.device, {
+    weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      elementCount: 1,
-      _targetTexture: weightsTexture,
-      _targetTextureVarying: 'weightsTexture',
+      vertexCount: 1,
+      targetTexture: this.state.weightsTexture!,
+      targetTextureVarying: 'weightsTexture',
       ...shaders
-    });
+    } as TextureTransformProps);
     this.setState({weightsTransform});
   }
 
@@ -445,7 +444,7 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new Transform(this.context.device, {
+    const maxWeightTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
         inTexture: weightsTexture
@@ -484,6 +483,7 @@ export default class HeatmapLayer<
     const {maxWeightTransform} = this.state;
     maxWeightTransform!.run({
       parameters: {
+        // @ts-expect-error TODO(v9): Resolve errors.
         blend: true,
         depthTest: false,
         blendFunc: [GL.ONE, GL.ONE],
@@ -550,12 +550,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer!.subData(packVertices(viewportCorners, 3));
+    triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
     );
-    triTexCoordBuffer!.subData(packVertices(textureBounds, 2));
+    triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
@@ -618,13 +618,13 @@ export default class HeatmapLayer<
       weightsTransform.run({
         uniforms,
         parameters: {
+          // @ts-expect-error TODO(v9): Resolve errors.
           blend: true,
           depthTest: false,
           blendFunc: [GL.ONE, GL.ONE],
           blendEquation: GL.FUNC_ADD
         },
         clearRenderTarget: true,
-        // @ts-expect-error TODO - no longer supported in v9?
         attributes: this.getAttributes(),
         moduleSettings: this.getModuleSettings()
       });

@@ -26,6 +26,8 @@ This method supports the following parameters:
 * *cache_filepath* (str, optional): File path where the token is stored. Default "home()/.carto-auth/token_oauth.json".
 * *use_cache* (bool, optional): Whether the stored cached token should be used. Default True.
 * *open_browser* (bool, optional): Whether the web browser should be opened to authorize a user. Default True.
+* *api_base_url* (str, optional): Base URL for a CARTO account.
+* *org* (str, optional): [Single Sign-On (SSO)](https://docs.carto.com/carto-user-manual/settings/users-and-groups/sso) organization in CARTO.
 
 M2M (advanced)
 ^^^^^^^^^^^^^^

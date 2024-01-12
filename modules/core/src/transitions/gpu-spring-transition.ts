@@ -1,13 +1,13 @@
 /* eslint-disable complexity, max-statements, max-params */
 import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
+import {BufferTransform} from '@luma.gl/engine';
 import {readPixelsToArray} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {
   padBuffer,
   getAttributeTypeFromSize,
-  getSourceBufferAttribute,
   getAttributeBufferLength,
+  getFloat32VertexFormat,
   cycleBuffers,
   SpringTransitionSettings
 } from '../lib/attribute/attribute-transition-utils';
@@ -15,7 +15,7 @@ import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
 import type {Timeline} from '@luma.gl/engine';
-import type {Transform as LumaTransform} from '@luma.gl/engine';
+import type {BufferTransform as LumaTransform} from '@luma.gl/engine';
 import type {
   Buffer as LumaBuffer,
   Framebuffer as LumaFramebuffer,
@@ -37,7 +37,7 @@ export default class GPUSpringTransition implements GPUTransition {
   private texture: LumaTexture2D;
   private framebuffer: LumaFramebuffer;
   private transform: LumaTransform;
-  private buffers: LumaBuffer[];
+  private buffers: [LumaBuffer, LumaBuffer, LumaBuffer];
 
   constructor({
     device,
@@ -64,7 +64,6 @@ export default class GPUSpringTransition implements GPUTransition {
     this.currentLength = 0;
     this.texture = getTexture(device);
     this.framebuffer = getFramebuffer(device, this.texture);
-    this.transform = getTransform(device, attribute, this.framebuffer);
     const bufferOpts = {
       byteLength: 0,
       usage: GL.DYNAMIC_COPY
@@ -74,6 +73,7 @@ export default class GPUSpringTransition implements GPUTransition {
       device.createBuffer(bufferOpts), // current
       device.createBuffer(bufferOpts) // next
     ];
+    this.transform = getTransform(device, attribute, this.buffers);
   }
 
   get inProgress(): boolean {
@@ -86,7 +86,7 @@ export default class GPUSpringTransition implements GPUTransition {
   // in case the attribute's buffer has changed in length or in
   // startIndices
   start(transitionSettings: SpringTransitionSettings, numInstances: number): void {
-    const {device, buffers, attribute} = this;
+    const {buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
       attribute,
@@ -95,15 +95,26 @@ export default class GPUSpringTransition implements GPUTransition {
       getData: transitionSettings.enter
     };
 
-    for (const buffer of buffers) {
-      padBuffer({buffer, ...padBufferOpts});
+    for (const [index, buffer] of buffers.entries()) {
+      const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
+
+      if (buffer !== paddedBuffer) {
+        buffer.destroy();
+        buffers[index] = paddedBuffer;
+
+        // TODO(v9): While this probably isn't necessary as a user-facing warning, it is helpful
+        // for debugging buffer allocation during deck.gl v9 development.
+        console.warn(
+          `[GPUSpringTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
+            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+        );
+      }
     }
 
     this.settings = transitionSettings;
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
-      // @ts-expect-error accessor is deprecated
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -116,13 +127,8 @@ export default class GPUSpringTransition implements GPUTransition {
     // this.transition.start() takes the latest settings and updates them.
     this.transition.start({...transitionSettings, duration: Infinity});
 
-    this.transform.update({
-      elementCount: Math.floor(this.currentLength / attribute.size),
-      sourceBuffers: {
-        // @ts-ignore TODO - this looks like a real type mismatch!!!
-        aTo: getSourceBufferAttribute(device, attribute)
-      }
-    });
+    this.transform.model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    this.transform.model.setAttributes({aTo: attribute.buffer});
   }
 
   update() {
@@ -133,35 +139,21 @@ export default class GPUSpringTransition implements GPUTransition {
     }
     const settings = this.settings as SpringTransitionSettings;
 
-    transform.update({
-      sourceBuffers: {
-        aPrev: buffers[0],
-        aCur: buffers[1]
-      },
-      feedbackBuffers: {
-        vNext: buffers[2]
-      }
+    this.transform.model.setAttributes({aPrev: buffers[0], aCur: buffers[1]});
+    this.transform.transformFeedback.setBuffers({vNext: buffers[2]});
+    transform.model.setUniforms({
+      stiffness: settings.stiffness,
+      damping: settings.damping
     });
     transform.run({
       framebuffer,
       discard: false,
-      clearRenderTarget: true,
-      uniforms: {
-        stiffness: settings.stiffness,
-        damping: settings.damping
-      },
-      parameters: {
-        depthTest: false,
-        blend: true,
-        viewport: [0, 0, 1, 1],
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: [GL.MAX, GL.MAX]
-      }
+      parameters: {viewport: [0, 0, 1, 1]},
+      clearColor: [0, 0, 0, 0]
     });
 
     cycleBuffers(buffers);
     this.attributeInTransition.setData({
-      // @ts-expect-error
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
@@ -183,32 +175,25 @@ export default class GPUSpringTransition implements GPUTransition {
     for (const buffer of this.buffers) {
       buffer.delete();
     }
-    this.buffers.length = 0;
+    (this.buffers as LumaBuffer[]).length = 0;
     this.texture.delete();
     this.framebuffer.delete();
   }
 }
 
-function getTransform(
-  device: Device,
-  attribute: Attribute,
-  framebuffer: LumaFramebuffer
-): LumaTransform {
-  const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(device, {
-    framebuffer,
-    vs: `
+const vs = `\
+#version 300 es
 #define SHADER_NAME spring-transition-vertex-shader
 
 #define EPSILON 0.00001
 
 uniform float stiffness;
 uniform float damping;
-attribute ATTRIBUTE_TYPE aPrev;
-attribute ATTRIBUTE_TYPE aCur;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vNext;
-varying float vIsTransitioningFlag;
+in ATTRIBUTE_TYPE aPrev;
+in ATTRIBUTE_TYPE aCur;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vNext;
+out float vIsTransitioningFlag;
 
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
@@ -226,22 +211,51 @@ void main(void) {
   gl_Position = vec4(0, 0, 0, 1);
   gl_PointSize = 100.0;
 }
-`,
-    fs: `
+`;
+
+const fs = `\
+#version 300 es
 #define SHADER_NAME spring-transition-is-transitioning-fragment-shader
 
-varying float vIsTransitioningFlag;
+in float vIsTransitioningFlag;
+
+out vec4 fragColor;
 
 void main(void) {
   if (vIsTransitioningFlag == 0.0) {
     discard;
   }
-  gl_FragColor = vec4(1.0);
-}`,
-    defines: {
-      ATTRIBUTE_TYPE: attributeType
-    },
-    varyings: ['vNext']
+  fragColor = vec4(1.0);
+}`;
+
+function getTransform(
+  device: Device,
+  attribute: Attribute,
+  buffers: [LumaBuffer, LumaBuffer, LumaBuffer]
+): LumaTransform {
+  const attributeType = getAttributeTypeFromSize(attribute.size);
+  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
+  return new BufferTransform(device, {
+    vs,
+    fs,
+    attributes: {aPrev: buffers[0], aCur: buffers[1]},
+    bufferLayout: [
+      {name: 'aPrev', format},
+      {name: 'aCur', format},
+      {name: 'aTo', format}
+    ],
+    feedbackBuffers: {vNext: buffers[2]},
+    varyings: ['vNext'],
+    defines: {ATTRIBUTE_TYPE: attributeType},
+    parameters: {
+      depthCompare: 'always',
+      blendColorOperation: 'max',
+      blendColorSrcFactor: 'one',
+      blendColorDstFactor: 'one',
+      blendAlphaOperation: 'max',
+      blendAlphaSrcFactor: 'one',
+      blendAlphaDstFactor: 'one'
+    }
   });
 }
 

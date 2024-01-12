@@ -5,11 +5,11 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  TilejsonResult,
   vectorTableSource,
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
+  query,
   VectorTileLayer
 } from '@deck.gl/carto';
 import datasets from './datasets';
@@ -30,7 +30,9 @@ function Root() {
   const datasource = datasets[dataset];
   let layers: Layer[] = [];
 
-  if (dataset.includes('h3')) {
+  if (dataset.includes('boundary')) {
+    layers = [useBoundaryLayer(datasource)];
+  } else if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
   } else if (dataset.includes('raster')) {
     layers = [useRasterLayer(datasource)];
@@ -38,6 +40,8 @@ function Root() {
     layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
     layers = [useVectorLayer(datasource)];
+  } else {
+    console.error('Unknown type of dataset', dataset);
   }
 
   return (
@@ -64,6 +68,35 @@ function Root() {
       />
     </>
   );
+}
+
+function useBoundaryLayer(datasource) {
+  const {
+    getFillColor,
+    source,
+    tilesetTableName,
+    columns,
+    matchingColumn,
+    propertiesSqlQuery,
+    propertiesTableName
+  } = datasource;
+  const tilejson = source({
+    ...globalOptions,
+    tilesetTableName,
+    columns,
+    matchingColumn,
+    propertiesTableName,
+    propertiesSqlQuery
+  });
+
+  return new VectorTileLayer({
+    id: 'carto',
+    // @ts-ignore
+    data: tilejson, // TODO how to correctly specify data type?
+    pickable: true,
+    pointRadiusMinPixels: 5,
+    getFillColor
+  });
 }
 
 function useH3Layer(datasource) {
@@ -135,14 +168,11 @@ function useVectorLayer(datasource) {
 }
 
 async function fetchLayerData() {
-  const data = await vectorTableSource({
+  const data = await query({
     ...globalOptions,
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-    format: 'geojson'
+    sqlQuery: 'select * from carto-demo-data.demo_tables.chicago_crime_sample'
   });
-  // console.log(data.tiles); // <- Typescript error
-  console.log(data.features); // <- type: GeoJSON
-  console.log(data);
+  console.log(data.rows[0]);
 }
 fetchLayerData();
 

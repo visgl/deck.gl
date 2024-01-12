@@ -1,5 +1,6 @@
 export {CartoAPIError} from './carto-api-error';
-export type {APIErrorContext} from './carto-api-error';
-export {FORMATS, TILE_FORMATS, MAP_TYPES, API_VERSIONS} from './maps-api-common';
-export type {QueryParameters} from './maps-api-common';
-export {fetchLayerData, fetchMap, mapInstantiation} from './maps-v3-client';
+export {fetchMap} from './fetch-map';
+export type {FetchMapOptions} from './fetch-map';
+export type {APIErrorContext, Format, MapType, RequestType, QueryParameters} from './types';
+export {query} from './query';
+export type {QueryOptions} from './query';

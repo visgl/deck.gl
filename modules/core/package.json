@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "version": "9.0.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -18,6 +18,7 @@
   },
   "main": "dist/es5/index.js",
   "module": "dist/esm/index.js",
+  "types": "typed/index.d.ts",
   "files": [
     "dist",
     "src",
@@ -31,27 +32,24 @@
     "build-bundle": "ocular-bundle ./bundle/index.ts",
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
-  "dependencies_comments": [
-    "DEPRECATED: math.gl module included as a bonus dependency in case someone was depending on it. Can be removed in deck.gl 9.0"
-  ],
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/core": "4.0.0-beta.5",
-    "@loaders.gl/images": "4.0.0-beta.5",
-    "@luma.gl/core": "9.0.0-alpha.37",
-    "@luma.gl/constants": "9.0.0-alpha.37",
-    "@luma.gl/engine": "9.0.0-alpha.37",
-    "@luma.gl/shadertools": "9.0.0-alpha.37",
-    "@luma.gl/webgl": "9.0.0-alpha.37",
+    "@loaders.gl/core": "4.1.0-alpha.9",
+    "@loaders.gl/images": "4.1.0-alpha.9",
+    "@luma.gl/constants": "9.0.0-alpha.52",
+    "@luma.gl/core": "9.0.0-alpha.52",
+    "@luma.gl/engine": "9.0.0-alpha.52",
+    "@luma.gl/shadertools": "9.0.0-alpha.52",
+    "@luma.gl/webgl": "9.0.0-alpha.52",
     "@math.gl/core": "^4.0.0",
     "@math.gl/sun": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
     "@probe.gl/env": "^4.0.4",
     "@probe.gl/log": "^4.0.4",
     "@probe.gl/stats": "^4.0.4",
+    "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
-    "mjolnir.js": "^2.7.0",
-    "@types/offscreencanvas": "^2019.6.4"
+    "mjolnir.js": "^2.7.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

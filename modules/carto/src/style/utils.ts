@@ -1,4 +1,5 @@
 import {Feature} from 'geojson';
+import {assert} from '../utils';
 
 const ALLOWED_ATTR_TYPES = Object.freeze(['function', 'string']);
 
@@ -16,10 +17,4 @@ export function getAttrValue<DataT = Feature, OutT = any>(
     return attr(d);
   }
   return (d as unknown as Feature)?.properties?.[attr] as OutT;
-}
-
-export function assert(condition, message = ''): asserts condition {
-  if (!condition) {
-    throw new Error(`CARTO style error: ${message}`);
-  }
 }

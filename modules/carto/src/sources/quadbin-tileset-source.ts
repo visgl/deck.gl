@@ -1,16 +1,14 @@
 import {baseSource} from './base-source';
-import {SourceOptions, TilesetSourceOptions, TilejsonSource} from './common';
+import type {SourceOptions, TilejsonResult, TilesetSourceOptions} from './types';
 
 export type QuadbinTilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const quadbinTilesetSource: TilejsonSource<QuadbinTilesetSourceOptions> = async function (
+export const quadbinTilesetSource = async function (
   options: QuadbinTilesetSourceOptions
-): Promise<any> {
+): Promise<TilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return baseSource<UrlParameters>('tileset', options, urlParameters);
+  return baseSource<UrlParameters>('tileset', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {quadbinTilesetSource};

@@ -4,12 +4,7 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {
-  CartoTilejsonResult,
-  cartoVectorQuerySource,
-  colorBins,
-  VectorTileLayer
-} from '@deck.gl/carto';
+import {colorBins, VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40.7368521,
@@ -46,18 +41,16 @@ export default function App({
 
   const getIndex = f => (f.properties[mrliIndex] ? parseFloat(f.properties[mrliIndex]) : 0);
 
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return cartoVectorQuerySource({
-      ...globalOptions,
-      sqlQuery: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
-      queryParameters: {industry}
-    });
-  }, [industry]);
+  const data = vectorQuerySource({
+    ...globalOptions,
+    sqlQuery: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
+    queryParameters: {industry}
+  });
 
   const layers = [
     new VectorTileLayer({
       id: 'carto-layer',
-      data: tilejson,
+      data,
       getFillColor: colorBins({
         attr: getIndex,
         domain: [25, 50, 100, 300, 500, 1000],
@@ -76,6 +69,10 @@ export default function App({
       updateTriggers: {
         getElevation: [mrliIndex],
         getFillColor: [mrliIndex]
+      },
+      loadOptions: {
+        // TODO use workers once v9.alpha packages available
+        worker: true
       }
     })
   ];

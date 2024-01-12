@@ -1,22 +1,48 @@
 import {Layer, picking} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model} from '@luma.gl/core';
+import type {
+  Accessor,
+  AccessorContext,
+  AccessorFunction,
+  Color,
+  DefaultProps,
+  LayerDataSource,
+  LayerProps
+} from '@deck.gl/core';
+import {GL} from '@luma.gl/constants';
+import {Model} from '@luma.gl/engine';
+import {ScaleLinear} from 'd3-scale';
 
 import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';
+import {Vec3} from './types';
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR: Color = [0, 0, 0, 255];
 
-const defaultProps = {
+const defaultProps: DefaultProps<SurfaceLayerProps> = {
   data: [],
   getPosition: () => [0, 0, 0],
   getColor: () => DEFAULT_COLOR,
-  xScale: null,
-  yScale: null,
-  zScale: null,
+  xScale: undefined,
+  yScale: undefined,
+  zScale: undefined,
   uCount: 100,
   vCount: 100,
   lightStrength: 0.1
+};
+
+/** All props supported by SurfaceLayer. */
+export type SurfaceLayerProps<DataT extends Vec3 = Vec3> = _SurfaceLayerProps<DataT> & LayerProps;
+
+type _SurfaceLayerProps<DataT extends Vec3 = Vec3> = {
+  data: LayerDataSource<DataT>;
+  getPosition?: AccessorFunction<DataT, Vec3>;
+  getColor?: Accessor<DataT, Color>;
+  xScale?: ScaleLinear<number, number>;
+  yScale?: ScaleLinear<number, number>;
+  zScale?: ScaleLinear<number, number>;
+  uCount?: number;
+  vCount?: number;
+  lightStrength?: number;
 };
 
 /*
@@ -35,14 +61,23 @@ const defaultProps = {
  * @param {Integer} [props.vCount] - number of samples within y range
  * @param {Number} [props.lightStrength] - front light strength
  */
-export default class SurfaceLayer extends Layer {
+export default class SurfaceLayer<
+  DataT extends Vec3 = Vec3,
+  ExtraPropsT extends {} = {}
+> extends Layer<ExtraPropsT & Required<_SurfaceLayerProps<DataT>>> {
+  static defaultProps = defaultProps;
+  static layerName: string = 'SurfaceLayer';
+
+  state!: Layer['state'] & {
+    model?: Model;
+    vertexCount: number;
+  };
+
   initializeState() {
-    const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
     const noAlloc = true;
 
     /* eslint-disable max-len */
-    attributeManager.add({
+    this.getAttributeManager()!.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {size: 4, accessor: 'getPosition', update: this.calculatePositions, noAlloc},
       colors: {
@@ -56,10 +91,7 @@ export default class SurfaceLayer extends Layer {
     });
     /* eslint-enable max-len */
 
-    gl.getExtension('OES_element_index_uint');
-    this.setState({
-      model: this.getModel(gl)
-    });
+    this.state.model = this.getModel();
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -67,37 +99,30 @@ export default class SurfaceLayer extends Layer {
       const {uCount, vCount} = props;
 
       if (oldProps.uCount !== uCount || oldProps.vCount !== vCount) {
-        this.setState({
-          vertexCount: uCount * vCount
-        });
-        this.getAttributeManager().invalidateAll();
+        this.state.vertexCount = uCount * vCount;
+        this.getAttributeManager()!.invalidateAll();
       }
     }
   }
 
-  getModel(gl) {
+  getModel() {
     // 3d surface
-    return new Model(gl, {
+    return new Model(this.context.device, {
       id: `${this.props.id}-surface`,
       vs: surfaceVertex,
       fs: fragmentShader,
       modules: [picking],
       topology: 'triangle-list',
-      vertexCount: 0,
-      isIndexed: true
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      vertexCount: 0
     });
   }
 
   draw({uniforms}) {
     const {lightStrength} = this.props;
 
-    this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          lightStrength
-        })
-      )
-      .draw();
+    this.state.model!.setUniforms(Object.assign({}, uniforms, {lightStrength}));
+    this.state.model!.draw(this.context.renderPass);
   }
 
   /*
@@ -109,7 +134,7 @@ export default class SurfaceLayer extends Layer {
    *   0--------> 1
    *              x
    */
-  encodePickingColor(i) {
+  encodePickingColor(i: number, target: number[] = []) {
     const {uCount, vCount} = this.props;
 
     const xIndex = i % uCount;
@@ -118,21 +143,21 @@ export default class SurfaceLayer extends Layer {
     return [(xIndex / (uCount - 1)) * 255, (yIndex / (vCount - 1)) * 255, 1];
   }
 
-  decodePickingColor([r, g, b]) {
+  decodePickingColor([r, g, b]: Color): number {
     if (b === 0) {
       return -1;
     }
-    return [r / 255, g / 255];
+    return r | (g << 8);
   }
 
   getPickingInfo(opts) {
     const {info} = opts;
 
     if (info && info.index !== -1) {
-      const [u, v] = info.index;
       const {getPosition} = this.props;
-
-      info.sample = getPosition(u, v);
+      const u = (info.index & 255) / 255;
+      const v = (info.index >> 8) / 255;
+      info.sample = getPosition([u, v, 0] as DataT, {} as AccessorContext<DataT>);
     }
 
     return info;
@@ -172,7 +197,7 @@ export default class SurfaceLayer extends Layer {
     }
 
     attribute.value = indices;
-    this.state.model.setVertexCount(indicesCount);
+    this.state.model!.setVertexCount(indicesCount);
   }
 
   // the fourth component is a flag for invalid z (NaN or Infinity)
@@ -188,7 +213,7 @@ export default class SurfaceLayer extends Layer {
       for (let uIndex = 0; uIndex < uCount; uIndex++) {
         const u = uIndex / (uCount - 1);
         const v = vIndex / (vCount - 1);
-        const [x, y, z] = getPosition(u, v);
+        const [x, y, z] = getPosition([u, v, 0] as DataT, {} as AccessorContext<DataT>);
 
         const isXFinite = isFinite(x);
         const isYFinite = isFinite(y);
@@ -208,19 +233,19 @@ export default class SurfaceLayer extends Layer {
 
   calculateColors(attribute) {
     const {vertexCount} = this.state;
-    const attributeManager = this.getAttributeManager();
 
     // reuse the calculated [x, y, z] in positions
-    const positions = attributeManager.attributes.positions.value;
-    const value = new Uint8ClampedArray(vertexCount * attribute.size);
+    const positions = this.getAttributeManager()!.attributes.positions.value!;
+    const value = new Uint8ClampedArray(vertexCount! * attribute.size);
 
     // Support constant colors
-    let {getColor} = this.props;
-    getColor = typeof getColor === 'function' ? getColor : () => getColor;
+    const getColor =
+      typeof this.props.getColor === 'function' ? this.props.getColor : () => this.props.getColor;
 
     for (let i = 0; i < vertexCount; i++) {
       const index = i * 4;
-      const color = getColor(positions[index], positions[index + 2], positions[index + 1]);
+      const position = [positions[index], positions[index + 2], positions[index + 1]];
+      const color = getColor(position as DataT, {} as AccessorContext<DataT>);
       value[i * 4] = color[0];
       value[i * 4 + 1] = color[1];
       value[i * 4 + 2] = color[2];
@@ -245,6 +270,3 @@ export default class SurfaceLayer extends Layer {
     attribute.value = value;
   }
 }
-
-SurfaceLayer.layerName = 'SurfaceLayer';
-SurfaceLayer.defaultProps = defaultProps;

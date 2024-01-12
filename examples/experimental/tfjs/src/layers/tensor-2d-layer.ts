@@ -47,7 +47,7 @@ export class Tensor2DLayer extends BitmapLayer<{
         'fs:DECKGL_FILTER_COLOR': `
             float normalizedValue = (color.a - colorDomain.x) / (colorDomain.y - colorDomain.x);
             vec2 coord = vec2(normalizedValue, 0.5);
-            color = texture2D(colorScale, coord);
+            color = texture(colorScale, coord);
         `
       }
     };

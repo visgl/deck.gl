@@ -17,6 +17,51 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.0
+
+### deck.gl v9.0 Prereleases
+
+#### deck.gl [9.0.0-alpha.6] - Nov 21 2023
+
+- [CARTO] User boundaries support (#8296)
+
+#### deck.gl [9.0.0-alpha.5] - Nov 20 2023
+
+- [chore] Bump peerDependencies to 9.0.0 (#8295)
+- Expose types at the package roots (#8293)
+
+#### deck.gl [9.0.0-alpha.4] - Nov 16 2023
+
+- CARTO: Handle empty 204 responses (#8286)
+- Improve Tile3DLayer#isLoaded (#8285)
+- v9 CollisionFilterExtension (#8255)
+- Pass clearColor to luma RenderPass from MaskPass
+- Always provide all the shadowMap bindings (#8246)
+- CARTO: Add queryParameters to stats requests in fetchMap
+- CARTO: QueryParameters should be optional for boundaries (#8282)
+
+#### deck.gl [9.0.0-alpha.3] - Nov 14 2023
+
+- Use vertexPositions in getBounds (#8247)
+
+#### deck.gl [9.0.0-alpha.2] - Nov 13 2023
+
+- [chore] Bump loaders 4.0.3 & luma 9.0.0-alpha.42 (#8262)
+- Use getStride() in bufferLayoutEqual() comparison (#8268)
+- Fix pickObjects when using binary data (#8216)
+
+#### deck.gl [9.0.0-alpha.1] - Nov 10 2023
+
+- chore: use node 18 (#8222)
+- chore: loaders.gl update to v4.0 (#8215)
+- chore: math.gl update to v4.0 (#8204)
+- Fix SimpleMeshLayer (#8201)
+- chore: luma.gl update to v9.0 (#8195)
+- Binary attribute support (#8153)
+- CARTO v9 API (#8269, #8265, #8259, #8239, #8238, #8228, #8233, #8225, #8224, #8218, #8217, #8214, #8168, #8192, #8191, #8167)
+- Add tensorflow example (#7931)
+- Update layers to luma v9 (#7901)
+
 ## deck.gl v8.10
 
 ### deck.gl v8.10 Prereleases

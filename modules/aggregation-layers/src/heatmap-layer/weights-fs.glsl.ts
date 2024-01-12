@@ -1,5 +1,7 @@
 export default `\
-varying vec4 weightsTexture;
+#version 300 es
+in vec4 weightsTexture;
+out vec4 fragColor;
 // Epanechnikov function, keeping for reference
 // float epanechnikovKDE(float u) {
 //   return 0.75 * (1.0 - u * u);
@@ -13,7 +15,7 @@ void main()
   if (dist > 0.5) {
     discard;
   }
-  gl_FragColor = weightsTexture * gaussianKDE(2. * dist);
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  fragColor = weightsTexture * gaussianKDE(2. * dist);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

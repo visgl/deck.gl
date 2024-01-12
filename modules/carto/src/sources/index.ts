@@ -1,5 +1,11 @@
-export {SOURCE_DEFAULTS} from './common';
-export type {TilejsonResult, GeojsonResult, JsonResult} from './common';
+export {SOURCE_DEFAULTS} from './base-source';
+export type {TilejsonResult, GeojsonResult, JsonResult} from './types';
+
+export {boundaryQuerySource} from './boundary-query-source';
+export type {BoundaryQuerySourceOptions} from './boundary-query-source';
+
+export {boundaryTableSource} from './boundary-table-source';
+export type {BoundaryTableSourceOptions} from './boundary-table-source';
 
 export {h3QuerySource} from './h3-query-source';
 export type {H3QuerySourceOptions} from './h3-query-source';

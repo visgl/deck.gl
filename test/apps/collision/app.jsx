@@ -6,7 +6,7 @@ import DeckGL from '@deck.gl/react';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
-import {cartoVectorTableSource, VectorTileLayer} from '@deck.gl/carto';
+import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
 
 const accessToken = 'XXX';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json';
@@ -17,7 +17,7 @@ const PLACES =
 const US_STATES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
-const cartoData = cartoVectorTableSource({
+const cartoData = vectorTableSource({
   accessToken,
   connectionName: 'bigquery',
   tableName: 'cartobq.public_account.populated_places'

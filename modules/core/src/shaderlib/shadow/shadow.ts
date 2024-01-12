@@ -37,7 +37,7 @@ uniform bool shadow_uUseShadowMap;
 uniform int shadow_uLightId;
 uniform float shadow_uLightCount;
 
-varying vec3 shadow_vPosition[max_lights];
+out vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
   if (shadow_uDrawShadowMap) {
@@ -64,14 +64,14 @@ uniform sampler2D shadow_uShadowMap1;
 uniform vec4 shadow_uColor;
 uniform float shadow_uLightCount;
 
-varying vec3 shadow_vPosition[max_lights];
+in vec3 shadow_vPosition[max_lights];
 
 const vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);
 const vec4 bitUnpackShift = 1.0 / bitPackShift;
 const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
 
 float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
-  vec4 rgbaDepth = texture2D(shadowMap, position.xy);
+  vec4 rgbaDepth = texture(shadowMap, position.xy);
 
   float z = dot(rgbaDepth, bitUnpackShift);
   return smoothstep(0.001, 0.01, position.z - z);
@@ -234,12 +234,11 @@ function createShadowUniforms(
   for (let i = 0; i < viewProjectionMatrices.length; i++) {
     uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
     uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
+  }
 
-    if (opts.shadowMaps && opts.shadowMaps.length > 0) {
-      uniforms[`shadow_uShadowMap${i}`] = opts.shadowMaps[i];
-    } else {
-      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMap;
-    }
+  for (let i = 0; i < 2; i++) {
+    uniforms[`shadow_uShadowMap${i}`] =
+      (opts.shadowMaps && opts.shadowMaps[i]) || opts.dummyShadowMap;
   }
   return uniforms;
 }
