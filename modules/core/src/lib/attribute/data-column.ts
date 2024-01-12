@@ -588,10 +588,9 @@ export default class DataColumn<Options, State> {
 
   protected _createBuffer(byteLength: number): Buffer {
     if (this._buffer) {
-      // console.log(`DataColumn#destroyBuffer: id = ${this.id}, byteLength = ${this._buffer.byteLength}`);
       this._buffer.destroy();
     }
-    // console.log(`DataColumn#createBuffer: id = ${this.id}, byteLength = ${byteLength}`);
+
     const {isIndexed, type} = this.settings;
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,

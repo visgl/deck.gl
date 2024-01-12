@@ -19,17 +19,18 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME graph-layer-vertex-shader
 
-attribute vec4 positions;
-attribute vec4 colors;
-attribute vec3 pickingColors;
+in vec4 positions;
+in vec4 colors;
+in vec3 pickingColors;
 
 uniform float lightStrength;
 uniform float opacity;
 
-varying vec4 vColor;
-varying float shouldDiscard;
+out vec4 vColor;
+out float shouldDiscard;
 
 void main(void) {
 
