@@ -7,9 +7,9 @@ export type PickingModuleSettings = {
   /** Color of the highlight */
   pickingHighlightColor?: NumberArray;
   /** Set to true when rendering to off-screen "picking" buffer */
-  pickingActive?: boolean;
+  isActive?: boolean;
   /** Set to true when picking an attribute value instead of object index */
-  pickingAttribute?: boolean;
+  isAttribute?: boolean;
 };
 
 export default {
