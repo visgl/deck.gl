@@ -19,23 +19,26 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME graph-layer-fragment-shader
 
 precision highp float;
 
 uniform sampler2D labelTexture;
 
-varying vec2 vTexCoords;
-varying float shouldDiscard;
+in vec2 vTexCoords;
+in float shouldDiscard;
+
+out vec4 fragColor;
 
 void main(void) {
   if (shouldDiscard > 0.0) {
     discard;
   }
-  vec4 color = texture2D(labelTexture, vTexCoords);
+  vec4 color = texture(labelTexture, vTexCoords);
   if (color.a == 0.0) {
     discard;
   }
-  gl_FragColor = color;
+  fragColor = color;
 }
 `;
