@@ -4,12 +4,12 @@ import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
-  // padBuffer,
   getAttributeTypeFromSize,
-  // getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers,
-  InterpolationTransitionSettings
+  InterpolationTransitionSettings,
+  padBuffer,
+  getFloat32VertexFormat
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
@@ -87,18 +87,29 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // And the other buffer is now the current buffer.
     cycleBuffers(buffers);
 
-    // const padBufferOpts = {
-    //   numInstances,
-    //   attribute,
-    //   fromLength: this.currentLength,
-    //   fromStartIndices: this.currentStartIndices,
-    //   getData: transitionSettings.enter
-    // };
+    const padBufferOpts = {
+      numInstances,
+      attribute,
+      fromLength: this.currentLength,
+      fromStartIndices: this.currentStartIndices,
+      getData: transitionSettings.enter
+    };
 
-    // TODO(v9): Requires synchronous reads, unsupported in v9, or a different solution here.
-    // for (const buffer of buffers) {
-    //   padBuffer({buffer, ...padBufferOpts});
-    // }
+    for (const [index, buffer] of buffers.entries()) {
+      const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
+
+      if (buffer !== paddedBuffer) {
+        buffer.destroy();
+        buffers[index] = paddedBuffer;
+
+        // TODO(v9): While this probably isn't necessary as a user-facing warning, it is helpful
+        // for debugging buffer allocation during deck.gl v9 development.
+        console.warn(
+          `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
+            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+        );
+      }
+    }
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
@@ -161,12 +172,12 @@ void main(void) {
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
+  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
     vs,
-    // TODO(v9): Can 'attribute' provide 'format' values?
     bufferLayout: [
-      {name: 'aFrom', format: 'float32'},
-      {name: 'aTo', format: 'float32'}
+      {name: 'aFrom', format},
+      {name: 'aTo', format}
     ],
     defines: {
       ATTRIBUTE_TYPE: attributeType
