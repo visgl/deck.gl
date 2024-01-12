@@ -53,6 +53,7 @@ export default function App({
       },
       pickable: true,
       aggregation: 'MAX',
+      gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
       contours,
       cellSize
     })
