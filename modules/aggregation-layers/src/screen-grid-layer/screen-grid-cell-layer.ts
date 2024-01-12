@@ -147,16 +147,21 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-list',
         attributes: {
-          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          // prettier-ignore
+          positions: new Float32Array([
+            0, 0, 0,
+            1, 0, 0,
+            1, 1, 0,
+            0, 0, 0,
+            1, 1, 0,
+            0, 1, 0,
+          ])
         }
-      }),
-      bufferLayout: [
-        {name: 'instancePositions', format: 'float32x3'},
-        {name: 'instanceCounts', format: 'float32x4'}
-      ]
+      })
     });
   }
 
