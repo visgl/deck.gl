@@ -36,8 +36,8 @@ export default {
   // TODO migrate to luma option names
   getUniforms(opts: PickingModuleSettings = {}): typeof picking.uniforms {
     return picking.getUniforms!({
-      isActive: opts.pickingActive,
-      isAttribute: opts.pickingAttribute,
+      isActive: opts.isActive,
+      isAttribute: opts.isAttribute,
       useFloatColors: false,
       highlightColor: opts.pickingHighlightColor,
       highlightedObjectColor: opts.pickingSelectedColor

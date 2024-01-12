@@ -1062,9 +1062,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
-        const {pickingActive, pickingAttribute} = moduleParameters;
+        const {isActive, isAttribute} = moduleParameters.picking;
         this.setModuleParameters(moduleParameters);
-        this.setShaderModuleProps({picking: {pickingActive, pickingAttribute}});
+        this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
 
       // Apply polygon offset to avoid z-fighting
