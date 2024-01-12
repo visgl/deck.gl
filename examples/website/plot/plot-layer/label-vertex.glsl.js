@@ -19,14 +19,15 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME graph-layer-axis-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 normals;
-attribute vec2 texCoords;
-attribute vec2 instancePositions;
-attribute vec3 instanceNormals;
-attribute float instanceIsTitle;
+in vec3 positions;
+in vec3 normals;
+in vec2 texCoords;
+in vec2 instancePositions;
+in vec3 instanceNormals;
+in float instanceIsTitle;
 
 uniform vec3 gridDims;
 uniform vec3 gridCenter;
@@ -36,8 +37,8 @@ uniform float fontSize;
 uniform float labelHeight;
 uniform vec2 labelTextureDim;
 
-varying vec2 vTexCoords;
-varying float shouldDiscard;
+out vec2 vTexCoords;
+out float shouldDiscard;
 
 const float LABEL_OFFSET = 0.02;
 const float TITLE_OFFSET = 0.06;
