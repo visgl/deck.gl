@@ -12,16 +12,12 @@ const GEOM_TYPES = ['points', 'lines', 'polygons'];
  * Return the index of feature (numericProps or featureIds) for given feature id
  * Example: findIndexBinary(data, 'id', 33) will return the index in the array of numericProps
  * of the feature 33.
- * @param {Object} data - The data in binary format
- * @param {String} uniqueIdProperty - Name of the unique id property
- * @param {Number|String} featureId - feature id to find
- * @param {String|null} layerName - the layer to search in
  */
 export default function findIndexBinary(
-  data: BinaryFeatureCollection,
-  uniqueIdProperty: string,
-  featureId: string | number,
-  layerName: string | null
+  data: BinaryFeatureCollection, // The data in binary format
+  uniqueIdProperty: string, // Name of the unique id property
+  featureId: string | number, // feature id to find
+  layerName: string | null // the layer to search in
 ): number {
   for (const gt of GEOM_TYPES) {
     const index = data[gt] && findIndexByType(data[gt], uniqueIdProperty, featureId, layerName);
