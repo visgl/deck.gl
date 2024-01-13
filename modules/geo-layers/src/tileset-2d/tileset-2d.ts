@@ -356,7 +356,7 @@ export class Tileset2D {
   }
 
   /** Returns a zoom level for a tile index */
-  getTileZoom(this: void, index: TileIndex) {
+  getTileZoom(index: TileIndex) {
     return index.z;
   }
 
@@ -368,7 +368,7 @@ export class Tileset2D {
   }
 
   /** Returns index of the parent tile */
-  getParentIndex(this: void, index: TileIndex) {
+  getParentIndex(index: TileIndex) {
     const x = Math.floor(index.x / 2);
     const y = Math.floor(index.y / 2);
     const z = index.z - 1;
