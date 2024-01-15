@@ -22,9 +22,9 @@ uniform bool filter_transformSize;
   #define DATAFILTER_ATTRIB_64LOW instanceFilterValues64Low
 #endif
 
-attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
+in DATAFILTER_TYPE DATAFILTER_ATTRIB;
 #ifdef DATAFILTER_DOUBLE
-  attribute DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
+  in DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
 
   uniform DATAFILTER_TYPE filter_min64High;
   uniform DATAFILTER_TYPE filter_max64High;

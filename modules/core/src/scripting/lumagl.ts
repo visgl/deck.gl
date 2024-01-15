@@ -16,7 +16,7 @@ export {
   TruncatedConeGeometry
 } from '@luma.gl/engine';
 
-export {Model, Transform, PipelineFactory} from '@luma.gl/engine';
+export {Model, BufferTransform, TextureTransform, PipelineFactory} from '@luma.gl/engine';
 
 /*
 export {

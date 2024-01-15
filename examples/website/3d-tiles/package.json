@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "deck.gl": "^8.8.0",
-    "@loaders.gl/3d-tiles": "4.0.3",
+    "@loaders.gl/3d-tiles": "4.1.0-alpha.9",
     "maplibre-gl": "^2.4.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

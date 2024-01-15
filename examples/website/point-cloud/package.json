@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/las": "4.0.3",
+    "@loaders.gl/las": "4.1.0-alpha.9",
     "deck.gl": "^8.8.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

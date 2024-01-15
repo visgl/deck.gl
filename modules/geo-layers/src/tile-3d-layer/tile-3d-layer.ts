@@ -137,7 +137,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   activateViewport(viewport: Viewport): void {
     const {activeViewports, lastUpdatedViewports} = this.state;
-    this.internalState.viewport = viewport;
+    this.internalState!.viewport = viewport;
 
     activeViewports[viewport.id] = viewport;
     const lastViewport = lastUpdatedViewports?.[viewport.id];
@@ -182,9 +182,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const options = {loadOptions: {...loadOptions}};
     let actualTilesetUrl = tilesetUrl;
-    // @ts-expect-error preload
     if (loader.preload) {
-      // @ts-expect-error preload
       const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
       if (preloadOptions.url) {
         actualTilesetUrl = preloadOptions.url;
