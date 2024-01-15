@@ -31,17 +31,7 @@ export default class ScreenPass extends Pass {
   }
 
   render(params: ScreenPassRenderOptions): void {
-    const [drawingBufferWidth, drawingBufferHeight] =
-      // @ts-expect-error TODO - assuming WebGL context
-      this.device.canvasContext.getDrawingBufferSize();
-    setGLParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
-
-    // TODO change to device when luma.gl is fixed
-    withGLParameters(
-      this.device,
-      {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]},
-      () => this._renderPass(this.device, params)
-    );
+    this._renderPass(this.device, params);
   }
 
   delete() {
@@ -58,20 +48,30 @@ export default class ScreenPass extends Pass {
    * @param outputBuffer - Frame buffer that serves as the output render target
    */
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
-    const {inputBuffer} = options;
+    const {inputBuffer, outputBuffer} = options;
     clear(this.device, {color: true});
-    this.model.setShaderModuleProps(options.moduleSettings);
+    this.model.shaderInputs.setProps({vignette: options.moduleSettings});
     this.model.setBindings({
-      texture: inputBuffer.colorAttachments[0]
+      texSrc: inputBuffer.colorAttachments[0]
     });
     this.model.setUniforms({
       texSize: [inputBuffer.width, inputBuffer.height]
     });
     this.model.setParameters({
       depthWriteEnabled: false,
-      // depthWrite: false,
       depthCompare: 'always'
     });
-    this.model.draw(this.device.getDefaultRenderPass());
+
+    // const defaultRenderPass = this.device.getDefaultRenderPass();
+    const renderPass = this.device.beginRenderPass({
+      framebuffer: outputBuffer,
+      parameters: {
+        viewport: [0, 0, inputBuffer.width, inputBuffer.height]
+      },
+      clearColor: [0, 0, 0, 0],
+      clearDepth: 1
+    });
+
+    this.model.draw(renderPass);
   }
 }

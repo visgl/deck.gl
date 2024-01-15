@@ -127,14 +127,21 @@ export default class DeckRenderer {
 
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
+    const size = this.device!.canvasContext!.getDrawingBufferSize();
     if (renderBuffers.length === 0) {
       renderBuffers.push(
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
+        this.device.createFramebuffer({
+          colorAttachments: ['rgba8unorm'],
+          depthStencilAttachment: 'depth16unorm'
+        }),
+        this.device.createFramebuffer({
+          colorAttachments: ['rgba8unorm'],
+          depthStencilAttachment: 'depth16unorm'
+        })
       );
     }
     for (const buffer of renderBuffers) {
-      buffer.resize();
+      buffer.resize(size);
     }
   }
 

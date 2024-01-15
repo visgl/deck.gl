@@ -34,7 +34,8 @@ export default class PostProcessEffect implements Effect {
     let outputBuffer = params.swapBuffer;
 
     for (let index = 0; index < this.passes.length; index++) {
-      if (target && index === this.passes.length - 1) {
+      // if (target && index === this.passes.length - 1) {
+      if (target !== undefined && index === this.passes.length - 1) {
         outputBuffer = target;
       }
       this.passes[index].render({inputBuffer, outputBuffer, moduleSettings: this.props});
@@ -80,7 +81,7 @@ function createPasses(device: Device, module: ShaderPass, id: string): ScreenPas
 
 const FILTER_FS_TEMPLATE = func => `\
 #version 300 es
-uniform sampler2D texture;
+uniform sampler2D texSrc;
 uniform vec2 texSize;
 
 in vec2 position;
@@ -92,14 +93,15 @@ out vec4 fragColor;
 void main() {
   vec2 texCoord = coordinate;
 
-  fragColor = texture(texture, texCoord);
+  fragColor = texture(texSrc, texCoord);
+  // fragColor = vec4(1.0, 0.0, 0.0, 1.0);
   fragColor = ${func}(fragColor, texSize, texCoord);
 }
 `;
 
 const SAMPLER_FS_TEMPLATE = func => `\
 #version 300 es
-uniform sampler2D texture;
+uniform sampler2D texSrc;
 uniform vec2 texSize;
 
 in vec2 position;
@@ -111,7 +113,7 @@ out vec4 fragColor;
 void main() {
   vec2 texCoord = coordinate;
 
-  fragColor = ${func}(texture, texSize, texCoord);
+  fragColor = ${func}(texSrc, texSize, texCoord);
 }
 `;
 
