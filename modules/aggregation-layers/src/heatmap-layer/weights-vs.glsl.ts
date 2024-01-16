@@ -21,5 +21,8 @@ void main()
   // map xy from commonBounds to [-1, 1]
   gl_Position.xy = (commonPosition.xy - commonBounds.xy) / (commonBounds.zw - commonBounds.xy) ;
   gl_Position.xy = (gl_Position.xy * 2.) - (1.);
+
+  // TODO(donmccurdy): Relevant?
+  gl_PointSize = 1.0;
 }
 `;
