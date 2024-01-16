@@ -20,12 +20,12 @@
 
 import {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import type {_ScreenGridLayerProps} from './screen-grid-layer';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
@@ -61,8 +61,9 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   state!: {
     model?: Model;
   };
-  getShaders() {
-    return {vs, fs, modules: [picking]};
+
+  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
+    return {vs, fs, modules: [picking as ShaderModule]};
   }
 
   initializeState() {
@@ -146,14 +147,21 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-list',
         attributes: {
-          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          // prettier-ignore
+          positions: new Float32Array([
+            0, 0, 0,
+            1, 0, 0,
+            1, 1, 0,
+            0, 0, 0,
+            1, 1, 0,
+            0, 1, 0,
+          ])
         }
-      }),
-      // @ts-expect-error TODO v9 API not as dynamic
-      isInstanced: true
+      })
     });
   }
 
