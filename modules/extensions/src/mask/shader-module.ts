@@ -1,5 +1,5 @@
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
 const vs = `

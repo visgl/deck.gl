@@ -4,7 +4,6 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
-import {isWebGL2} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL =
@@ -33,7 +32,7 @@ const colorRange = [
 export default function App({
   data = DATA_URL,
   cellSize = 20,
-  gpuAggregation = true,
+  gpuAggregation = false, // TODO(v9): Re-enable GPU aggregation.
   aggregation = 'SUM',
   disableGPUAggregation,
   mapStyle = MAP_STYLE
@@ -52,8 +51,8 @@ export default function App({
     })
   ];
 
-  const onInitialized = gl => {
-    if (!isWebGL2(gl)) {
+  const onInitialized = device => {
+    if (!device.features.has('webgl2')) {
       console.warn('GPU aggregation is not supported'); // eslint-disable-line
       if (disableGPUAggregation) {
         disableGPUAggregation();
@@ -65,7 +64,7 @@ export default function App({
     <DeckGL
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
-      onWebGLInitialized={onInitialized}
+      onDeviceInitialized={onInitialized}
       controller={true}
     >
       <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />

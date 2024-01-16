@@ -1,13 +1,11 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import type {Device} from '@luma.gl/core';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {setGLParameters, withGLParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
-
-import type {ShaderModule} from '../types/types';
 
 type ScreenPassProps = {
   module: ShaderModule;

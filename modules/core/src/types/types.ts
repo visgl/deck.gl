@@ -5,22 +5,3 @@ export {TypedArray, TypedArrayConstructor, NumberArray as NumericArray} from '@l
 export interface ConstructorOf<T> {
   new (...args): T;
 }
-
-import {ShaderModule as _ShaderModule} from '@luma.gl/shadertools';
-
-// TODO remove and using type from luma.gl directly with generics
-export type ShaderModule<SettingsT = any> = _ShaderModule & {
-  // name: string;
-  // fs?: string;
-  // vs?: string;
-  // uniforms?: Record<string, any>;
-  // defines?: Record<string, any>;
-  // dependencies?: ShaderModule[];
-  // inject?: Record<string, string>;
-  // getUniforms?: (opts: SettingsT | {}, uniforms: Record<string, any>) => Record<string, any>;
-  passes?: {
-    sampler?: string | boolean;
-    filter?: boolean;
-    uniforms?: Record<string, any>;
-  }[];
-};

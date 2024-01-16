@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import type {ShaderModule} from '../../types/types';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defines = '#define SMOOTH_EDGE_RADIUS 0.5';
 const vs = `
