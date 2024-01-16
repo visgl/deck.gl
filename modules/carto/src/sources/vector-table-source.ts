@@ -1,8 +1,14 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {SourceOptions, SpatialDataType, TableSourceOptions, TilejsonResult} from './types';
+import type {
+  SourceOptions,
+  SpatialDataType,
+  TableSourceOptions,
+  TilejsonResult,
+  ColumnsOption
+} from './types';
 
-export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
+export type VectorTableSourceOptions = SourceOptions & TableSourceOptions & ColumnsOption;
 type UrlParameters = {
   columns?: string;
   spatialDataType: SpatialDataType;
