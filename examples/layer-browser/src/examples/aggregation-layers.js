@@ -29,7 +29,7 @@ const ContourLayerExample = {
     id: 'contourLayer',
     cellSize: 200,
     getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
+    gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
     contours: [
       {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
       {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
@@ -45,7 +45,7 @@ const ContourLayerBandsExample = {
     id: 'contourLayer',
     cellSize: 200,
     getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
+    gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
     contours: [
       {threshold: [1, 5], color: [255, 0, 0]},
       {threshold: [5, 15], color: [0, 255, 0]},

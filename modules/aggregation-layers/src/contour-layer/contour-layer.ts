@@ -47,7 +47,7 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
-  gpuAggregation: true,
+  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
   aggregation: 'SUM',
 
   // contour lines
