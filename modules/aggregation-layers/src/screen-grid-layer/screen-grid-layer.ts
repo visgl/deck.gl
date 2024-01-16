@@ -265,7 +265,7 @@ export default class ScreenGridLayer<
   updateResults({aggregationData, maxData}) {
     const {count} = this.state.weights;
     count.aggregationData = aggregationData;
-    count.aggregationBuffer.setData({data: aggregationData});
+    count.aggregationBuffer.write(aggregationData);
     count.maxData = maxData;
     count.maxTexture.setImageData({data: maxData});
   }
