@@ -1,4 +1,4 @@
-import {Device, Sampler, SamplerProps} from '@luma.gl/core';
+import {Device, SamplerProps} from '@luma.gl/core';
 
 const DEFAULT_PARAMETERS: SamplerProps = {
   minFilter: 'nearest',
@@ -20,7 +20,7 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     width = 1,
     height = 1,
     data = null,
-    unpackFlipY = true,
+    // unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
   const texture = device.createTexture({

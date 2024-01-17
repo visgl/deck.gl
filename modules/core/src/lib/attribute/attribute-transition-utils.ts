@@ -120,6 +120,7 @@ export function getFloat32VertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
       return 'float32x3';
     case 4:
       return 'float32x4';
+    default:
   }
   throw new Error('invalid type size');
 }
