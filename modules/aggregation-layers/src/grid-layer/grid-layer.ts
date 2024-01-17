@@ -47,13 +47,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   initializeState() {
     this.state = {
-      useGPUAggregation: true
+      useGPUAggregation: false // TODO(v9): Re-enable GPU aggregation.
     };
   }
 
   updateState({props}: UpdateParameters<this>) {
     this.setState({
-      useGPUAggregation: this.canUseGPUAggregation(props)
+      // TODO(v9): Re-enable GPU aggregation.
+      // useGPUAggregation: this.canUseGPUAggregation(props)
+      useGPUAggregation: false
     });
   }
 

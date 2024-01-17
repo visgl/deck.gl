@@ -21,6 +21,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-alpha.7] - Jan 16 2024
+
+- [v9] Remove ShaderModule type (#8406)
+- fix(aggregation-layers): Fix screen-grid-layer with CPU aggregation (#8401)
+- [chore] Bump to loaders-4.1.0-alpha.9 (#8402)
+- [v9] Port plot-layer shaders to glsl300 (#8398)
+- fix(core): Update AttributeTransitionUtils for Luma v9 (#8392)
+- [v9] Tile3DLayer (#8357)
+- Update extension shaders to GLSL 300 (#8394)
+- [v9] ScenegraphLayer (#8350)
+- [v9] Picking module with uniform buffers (#8334)
+- chore(luma): Upgrade to luma.gl v9 alpha-50 (#8379)
+- bump ocular-devtools and adapt to typescript, prettier & eslint upgrade (#8366)
+- Update remaining shaders to GLSL 300 (#8373)
+- Update BitmapLayer, IconLayer, PointCloudLayer, TripsLayer to GLSL 300 (#8372)
+- Update ArcLayer, LineLayer, PolygonLayer to GLSL 300 (#8371)
+- Update PathLayer to GLSL 300 (#8370)
+- Update Scatterplot to GLSL 300 (#8369)
+- [v9] Fix GoogleMapsOverlay by not clearing canvas (#8351)
+- Remove use of deprecated BufferWithAccessor (#8345)
+- carto/fetchMap: fix support for quantile color scale in numeric columns for static tilesets (#8347)
+- CARTO: Remove mapsUrl (#8308)
+
 #### deck.gl [9.0.0-alpha.6] - Nov 21 2023
 
 - [CARTO] User boundaries support (#8296)
