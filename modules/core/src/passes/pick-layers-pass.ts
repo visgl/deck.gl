@@ -127,8 +127,10 @@ export default class PickLayersPass extends LayersPass {
 
   protected getModuleParameters() {
     return {
-      pickingActive: 1,
-      pickingAttribute: this.pickZ,
+      picking: {
+        isActive: 1,
+        isAttribute: this.pickZ
+      },
       // turn off lighting by adding empty light source object
       // lights shader module relies on the `lightSources` to turn on/off lighting
       lightSources: {}

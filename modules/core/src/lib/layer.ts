@@ -55,7 +55,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingModuleSettings} from '../shaderlib/picking/picking';
+import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1062,9 +1062,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
-        const {pickingActive, pickingAttribute} = moduleParameters;
+        const {isActive, isAttribute} = moduleParameters.picking;
         this.setModuleParameters(moduleParameters);
-        this.setShaderModuleProps({picking: {pickingActive, pickingAttribute}});
+        this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1213,12 +1213,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const picking: PickingModuleSettings = {
-      pickingSelectedColor: info.picked ? info.color : null
+    const picking: PickingProps = {
+      highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      picking.pickingHighlightColor = highlightColor(info);
+      picking.highlightColor = highlightColor(info);
     }
     this.setShaderModuleProps({picking});
     // setShaderModuleProps does not trigger redraw
@@ -1257,18 +1257,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const picking: PickingModuleSettings = {};
+      const picking: PickingProps = {};
       if (!autoHighlight) {
-        picking.pickingSelectedColor = null;
+        picking.highlightedObjectColor = null;
       }
       if (Array.isArray(highlightColor)) {
-        picking.pickingHighlightColor = highlightColor;
+        picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
-        picking.pickingSelectedColor =
+        picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
