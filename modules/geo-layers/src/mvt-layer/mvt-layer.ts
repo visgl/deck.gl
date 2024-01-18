@@ -145,8 +145,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data: any = this.props.data;
-    let tileJSON: any = null;
+    let data = this.props.data;
+    let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
       const {onDataLoad, fetch} = this.props;
@@ -161,7 +161,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       if (onDataLoad) {
         onDataLoad(tileJSON, {propName: 'data', layer: this});
       }
-    } else if (data.tilejson) {
+    } else if (typeof data !== 'string' && !Array.isArray(data) && data?.tilejson) {
       tileJSON = data;
     }
 
