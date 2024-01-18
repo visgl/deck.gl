@@ -19,15 +19,16 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME delaunay-vertex-shader
 
 uniform vec4 bbox;
 uniform vec2 size;
 
-attribute vec3 positions;
-attribute vec3 data;
+in vec3 positions;
+in vec3 data;
 
-varying vec4 vColor;
+out vec4 vColor;
 
 void main(void) {
   float posX = mix(-1., 1., (positions.x - bbox.x) / (bbox.y - bbox.x));

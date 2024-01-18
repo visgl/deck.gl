@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME wind-layer-vertex-shader
 
 #define PI 3.1415926535
@@ -40,18 +41,18 @@ uniform vec2 bounds2;
 uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
 
-attribute vec3 positions;
-attribute vec3 vertices;
-attribute vec3 normals;
+in vec3 positions;
+in vec3 vertices;
+in vec3 normals;
 
-varying vec4 vPosition;
-varying vec4 vNormal;
-varying vec4 vColor;
-varying float vAltitude;
+out vec4 vPosition;
+out vec4 vNormal;
+out vec4 vColor;
+out float vAltitude;
 
 float getAltitude(vec2 lngLat) {
   vec2 texCoords = (lngLat - elevationBounds.xy) / (elevationBounds.zw - elevationBounds.xy);
-  vec4 elevation = texture2D(elevationTexture, texCoords);
+  vec4 elevation = texture(elevationTexture, texCoords);
 
   return mix(elevationRange.x, elevationRange.y, elevation.r);
 }
@@ -61,8 +62,8 @@ void main(void) {
   float x = (positions.x - bbox.x) / (bbox.y - bbox.x);
   float y = (positions.y - bbox.z) / (bbox.w - bbox.z);
   vec2 coord = vec2(x, 1. - y);
-  vec4 texel1 = texture2D(dataFrom, coord);
-  vec4 texel2 = texture2D(dataTo, coord);
+  vec4 texel1 = texture(dataFrom, coord);
+  vec4 texel2 = texture(dataTo, coord);
   vec4 texel = mix(texel1, texel2, delta);
 
   // angle

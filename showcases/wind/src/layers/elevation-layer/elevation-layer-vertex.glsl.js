@@ -1,4 +1,5 @@
 export default `\
+#version 300 es
 #define SHADER_NAME elevation-layer-vertex-shader
 
 uniform sampler2D elevationTexture;
@@ -6,15 +7,15 @@ uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
 uniform float zScale;
 
-attribute vec3 positions;
+in vec3 positions;
 
-varying float lightWeight;
-varying vec3 vNormal;
-varying float vAltitude;
+out float lightWeight;
+out vec3 vNormal;
+out float vAltitude;
 
 vec3 getWorldPosition(vec2 lngLat) {
   vec2 texCoords = (lngLat - elevationBounds.xy) / (elevationBounds.zw - elevationBounds.xy);
-  vec4 elevation = texture2D(elevationTexture, texCoords);
+  vec4 elevation = texture(elevationTexture, texCoords);
 
   float altitude = mix(elevationRange.x, elevationRange.y, elevation.r);
 

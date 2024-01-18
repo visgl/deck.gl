@@ -19,12 +19,14 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME wind-layer-fragment-shader
 
-varying vec4 vPosition;
-varying vec4 vNormal;
-varying vec4 vColor;
-varying float vAltitude;
+in vec4 vPosition;
+in vec4 vNormal;
+in vec4 vColor;
+in float vAltitude;
+out vec4 fragColor;
 
 void main(void) {
   if (vColor.a == 0.) {
@@ -36,6 +38,6 @@ void main(void) {
   //   discard;
   // }
   float lightWeight = getLightWeight(vPosition.xyz, vNormal.xzy);
-  gl_FragColor = vec4(vColor.xyz * lightWeight, 1);
+  fragColor = vec4(vColor.xyz * lightWeight, 1);
 }
 `;

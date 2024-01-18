@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME particle-feedback-vertex-shader
 
 #define PI 3.1415926535
@@ -40,8 +41,8 @@ uniform vec2 bounds0;
 uniform vec2 bounds1;
 uniform vec2 bounds2;
 
-//attribute vec3 positions;
-attribute vec4 posFrom;
+//in vec3 positions;
+in vec4 posFrom;
 
 float rand(vec2 co){
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -52,8 +53,8 @@ void main(void) {
   float x = (posFrom.x - bbox.x) / (bbox.y - bbox.x);
   float y = (posFrom.y - bbox.z) / (bbox.w - bbox.z);
   vec2 coord = vec2(x, 1. - y);
-  vec4 texel1 = texture2D(dataFrom, coord);
-  vec4 texel2 = texture2D(dataTo, coord);
+  vec4 texel1 = texture(dataFrom, coord);
+  vec4 texel2 = texture(dataTo, coord);
   vec4 texel = mix(texel1, texel2, delta);
 
   // angle
