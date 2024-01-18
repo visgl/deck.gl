@@ -69,28 +69,23 @@ export type MVTLayerProps = _MVTLayerProps &
   Omit<GeoJsonLayerProps, 'data'> &
   Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
+// Test if types working (remove before landing)
 const tilejson: TileJson = {
   tilejson: '3.0.0',
   tiles: ['123'],
   vector_layers: []
 };
 
-const p: MVTLayerProps = {
-  id: 'asd',
-  data: tilejson
-};
-
-// Test if types working (remove before landing)
-() => {
-  new MVTLayer({
+function tests() {
+  const test1 = new MVTLayer({
     id: 'mvt',
     data: 'http://www.url.com'
   });
-  new MVTLayer({
+  const test2 = new MVTLayer({
     id: 'mvt',
     data: tilejson
   });
-  new MVTLayer({
+  const test3 = new MVTLayer({
     id: 'mvt',
     data: {
       tilejson: '3.0.0',
@@ -98,7 +93,7 @@ const p: MVTLayerProps = {
       vector_layers: []
     }
   });
-};
+}
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
