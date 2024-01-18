@@ -97,7 +97,7 @@ if (device.info.type === 'webgl2') {
     manager.run();
     let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
     let actual = await readArray(transitioningBuffer);
-    t.deepEquals(actual, [0, 0, 0, 0, 1, 1, 1, 1, 1, 1], 'buffer is extended with new data');
+    t.deepEquals(actual, [0, 0, 0, 0, 0, 0, 1, 1, 1, 1], 'buffer is extended with new data');
     t.is(transitioningBuffer.byteLength, 10 * 4, 'buffer has correct size');
 
     attributes.instanceSizes.setData({constant: true, value: [2]});
@@ -105,7 +105,7 @@ if (device.info.type === 'webgl2') {
     manager.run();
     transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
     actual = await readArray(transitioningBuffer);
-    t.deepEquals(actual, [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2], 'buffer is extended with new data');
+    t.deepEquals(actual, [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2], 'buffer is extended with new data');
     t.is(transitioningBuffer.byteLength, 12 * 4, 'buffer has correct size');
 
     manager.finalize();
