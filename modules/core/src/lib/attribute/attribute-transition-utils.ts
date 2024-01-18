@@ -177,7 +177,7 @@ export function padBuffer({
 
   const toData = isConstant
     ? (attribute.value as TypedArray)
-    : // @ts-expect-error TODO(v9.1): Avoid non-portable synchronous reads.
+    : // TODO(v9.1): Avoid non-portable synchronous reads.
       toFloat32Array(attribute.getBuffer()!.readSyncWebGL2());
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
@@ -188,7 +188,7 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  // @ts-expect-error TODO(v9.1): Avoid non-portable synchronous reads.
+  // TODO(v9.1): Avoid non-portable synchronous reads.
   const source = toFloat32Array(buffer.readSyncWebGL2());
   const target = new Float32Array(toLength);
   padArray({
