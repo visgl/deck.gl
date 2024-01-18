@@ -38,6 +38,8 @@ import {
 
 const WORLD_SIZE = 512;
 
+type URLTemplateOrTileJSON = URLTemplate | TileJson;
+
 const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
   data: urlType,
@@ -65,10 +67,43 @@ type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
   Omit<GeoJsonLayerProps, 'data'> &
-  TileLayerProps<ParsedMvtTile>;
+  Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
+
+const tilejson: TileJson = {
+  tilejson: '3.0.0',
+  tiles: ['123'],
+  vector_layers: []
+};
+
+const p: MVTLayerProps = {
+  id: 'asd',
+  data: tilejson
+};
+
+// Test if types working (remove before landing)
+() => {
+  new MVTLayer({
+    id: 'mvt',
+    data: 'http://www.url.com'
+  });
+  new MVTLayer({
+    id: 'mvt',
+    data: tilejson
+  });
+  new MVTLayer({
+    id: 'mvt',
+    data: {
+      tilejson: '3.0.0',
+      tiles: ['123'],
+      vector_layers: []
+    }
+  });
+};
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
+  data: URLTemplateOrTileJSON;
+
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
 
