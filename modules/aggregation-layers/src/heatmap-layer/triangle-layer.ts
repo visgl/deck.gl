@@ -20,7 +20,6 @@
 
 import type {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';

@@ -25,7 +25,6 @@ import {
   Accessor,
   AccessorFunction,
   Color,
-  Layer,
   log,
   Position,
   UpdateParameters,
