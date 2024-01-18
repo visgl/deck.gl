@@ -121,8 +121,8 @@ export function getFloat32VertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
     case 4:
       return 'float32x4';
     default:
+      throw new Error('invalid type size');
   }
-  throw new Error('invalid type size');
 }
 
 export function cycleBuffers(buffers: Buffer[]): void {

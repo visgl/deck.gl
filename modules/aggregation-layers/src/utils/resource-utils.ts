@@ -20,7 +20,6 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     width = 1,
     height = 1,
     data = null,
-    // unpackFlipY = true,
     parameters = DEFAULT_PARAMETERS
   } = opts;
   const texture = device.createTexture({
