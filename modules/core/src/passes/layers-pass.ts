@@ -337,7 +337,9 @@ export default class LayersPass extends Pass {
         autoWrapLongitude: layer.wrapLongitude,
         viewport: layer.context.viewport,
         mousePosition: layer.context.mousePosition,
-        pickingActive: 0,
+        picking: {
+          isActive: 0
+        },
         devicePixelRatio
       }
     );

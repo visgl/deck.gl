@@ -26,8 +26,10 @@ export default class CollisionFilterPass extends LayersPass {
     // Draw picking colors into collision FBO
     return {
       drawToCollisionMap: true,
-      pickingActive: 1,
-      pickingAttribute: false,
+      picking: {
+        isActive: 1,
+        isAttribute: false
+      },
       lightSources: {}
     };
   }

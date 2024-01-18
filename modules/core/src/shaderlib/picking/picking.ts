@@ -1,18 +1,8 @@
-import {NumberArray} from '@luma.gl/core';
 import {picking} from '@luma.gl/shadertools';
 
-export type PickingModuleSettings = {
-  /** Set to a picking color to visually highlight that item */
-  pickingSelectedColor?: NumberArray | null;
-  /** Color of the highlight */
-  pickingHighlightColor?: NumberArray;
-  /** Set to true when rendering to off-screen "picking" buffer */
-  pickingActive?: boolean;
-  /** Set to true when picking an attribute value instead of object index */
-  pickingAttribute?: boolean;
-};
-
 export default {
+  ...picking,
+  defaultUniforms: {...picking.defaultUniforms, useFloatColors: false},
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
     // for picking depth values
@@ -31,16 +21,5 @@ export default {
   color = picking_filterPickingColor(color);
     `
     }
-  },
-  ...picking,
-  // TODO migrate to luma option names
-  getUniforms(opts: PickingModuleSettings = {}): typeof picking.uniforms {
-    return picking.getUniforms!({
-      isActive: opts.pickingActive,
-      isAttribute: opts.pickingAttribute,
-      useFloatColors: false,
-      highlightColor: opts.pickingHighlightColor,
-      highlightedObjectColor: opts.pickingSelectedColor
-    });
   }
 };

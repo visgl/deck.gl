@@ -278,7 +278,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
-    if (moduleParameters.pickingActive && disablePicking) {
+    if (moduleParameters.picking.isActive && disablePicking) {
       return;
     }
 
