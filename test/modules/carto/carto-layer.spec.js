@@ -101,7 +101,8 @@ mockedV3Test('CartoLayer#v3', async t => {
         props: {
           ...props,
           data: 'select * from table',
-          type: MAP_TYPES.QUERY
+          type: MAP_TYPES.QUERY,
+          columns: ['a', 'b']
         },
         onAfterUpdate
       },
@@ -117,7 +118,8 @@ mockedV3Test('CartoLayer#v3', async t => {
         props: {
           ...props,
           data: 'table',
-          type: MAP_TYPES.TABLE
+          type: MAP_TYPES.TABLE,
+          columns: ['a', 'b']
         },
         onAfterUpdate
       },
@@ -252,7 +254,7 @@ mockedV1Test('CartoLayer#should throw with invalid params for v1 and v2', t => {
       },
       regex: /geoColumn prop is only supported for type/i
     })),
-    ...[MAP_TYPES.TILESET, MAP_TYPES.QUERY].map(type => ({
+    ...[MAP_TYPES.TILESET].map(type => ({
       title: `should throw when columns prop is used with type ${type}`,
       props: {
         ...layer.props,
