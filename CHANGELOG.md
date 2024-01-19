@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.34] - Fri 19 2024
+
+- CARTO: fetchLayerData to support columns prop for query sources (#8412)
+- v8 audit Layer#isLoaded implementations (#8290)
+- CARTO: fix support for quantile color scale in numeric columns for static quadbin/h3 tilesets (#8347)
+
 #### deck.gl [8.9.33] - Dec 5 2023
 
 - CARTO: added filter parameter to fetchLayerData (#8328)
