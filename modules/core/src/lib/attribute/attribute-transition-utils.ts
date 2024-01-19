@@ -1,10 +1,9 @@
-import type {Device, TypedArrayConstructor} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import {padArray} from '../../utils/array-utils';
 import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import {GL} from '@luma.gl/constants';
 import {VertexFormat as LumaVertexFormat} from '@luma.gl/core';
 
 export interface TransitionSettings {
@@ -178,7 +177,8 @@ export function padBuffer({
 
   const toData = isConstant
     ? (attribute.value as TypedArray)
-    : getBufferData(attribute.getBuffer()!, Float32Array);
+    : // TODO(v9.1): Avoid non-portable synchronous reads.
+      toFloat32Array(attribute.getBuffer()!.readSyncWebGL2());
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
@@ -188,12 +188,8 @@ export function padBuffer({
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  const source = getBufferData(
-    buffer,
-    Float32Array,
-    0,
-    fromLength * Float32Array.BYTES_PER_ELEMENT
-  );
+  // TODO(v9.1): Avoid non-portable synchronous reads.
+  const source = toFloat32Array(buffer.readSyncWebGL2());
   const target = new Float32Array(toLength);
   padArray({
     source,
@@ -211,24 +207,10 @@ export function padBuffer({
   return buffer;
 }
 
-/** @deprecated TODO(v9.1): Buffer reads should be asynchronous and avoid accessing GL context. */
-export function getBufferData(
-  buffer: Buffer,
-  TypedArray: TypedArrayConstructor,
-  byteOffset = 0,
-  byteLength = buffer.byteLength
-): TypedArray {
-  const _buffer = buffer as any;
-  _buffer.device.assertWebGL2();
-
-  const dstLength = byteLength / TypedArray.BYTES_PER_ELEMENT;
-  const dstArray = new TypedArray(dstLength);
-  const dstOffset = 0;
-
-  // Use GL.COPY_READ_BUFFER to avoid disturbing other targets and locking type
-  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, _buffer.handle);
-  _buffer.gl2.getBufferSubData(GL.COPY_READ_BUFFER, byteOffset, dstArray, dstOffset, dstLength);
-  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, null);
-
-  return dstArray;
+function toFloat32Array(bytes: Uint8Array): Float32Array {
+  return new Float32Array(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.byteLength / Float32Array.BYTES_PER_ELEMENT
+  );
 }
