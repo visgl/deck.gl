@@ -148,11 +148,6 @@ const TABLE_PARAMS = {
     regex: /geoColumn parameter is not supported by type tileset/
   },
   {
-    title: 'query + columns',
-    params: {...TABLE_PARAMS, type: MAP_TYPES.QUERY, columns: ['geo']},
-    regex: /columns parameter is not supported by type query/
-  },
-  {
     title: 'no geoColumn + aggregationExp',
     params: {...TABLE_PARAMS, aggregationExp: 'sum(x) as y'},
     regex: /aggregationExp, but geoColumn parameter is missing/
