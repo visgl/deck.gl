@@ -81,7 +81,15 @@ new Tile3DLayer({
 })
 ```
 
-All single pass "filter" shaders would be built-in: brightnessContrast, hueSaturation, vibrance, tint (mix original colors), fill (set colors to single hue), sepia, colorHalftone, and dotScreen.
+All single pass "filter" shaders would already be built-in: brightnessContrast, hueSaturation, vibrance, tint (mix original colors), fill (set colors to single hue), sepia, colorHalftone, and dotScreen. So, multiple filters can be applied with one instance:
+
+```js
+new Tile3DLayer({
+    extensions: [new ColorFilterExtension()]
+    hueSaturation: ...,
+    brightnessContrast: ...,
+})
+```
 
 ##### Props
 
@@ -91,9 +99,9 @@ Should a user need to customize the shader order we could have an `shaders` exte
 
 Usage: `new ColorFilterExtension({shaders: ['hueSaturation', 'tint']})`
 
-This may be useful in the event a user wanted to first make their layer greyscale and then tint it as opposed to tinting before desaturating.
+Shader order can give a different result, so this may be useful in the event a user wanted to first make their layer greyscale and then tint it as opposed to tinting before desaturating.
 
-The same prop may be useful for cherry picking which shaders to apply for users concerned with shader overhead.
+The same prop may be useful for cherry picking which shaders to apply when users are concerned with shader overhead.
 
 #### Pros and Cons
 
