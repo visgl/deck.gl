@@ -1,4 +1,3 @@
-import {GL} from '@luma.gl/constants';
 import {Geometry} from '@luma.gl/engine';
 
 import {
@@ -255,7 +254,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       return null;
     }
 
-    switch (tileHeader.type) {
+    switch (tileHeader.type as TILE_TYPE) {
       case TILE_TYPE.POINTCLOUD:
         return this._makePointCloudLayer(tileHeader, oldLayer as PointCloudLayer<DataT>);
       case TILE_TYPE.SCENEGRAPH:
