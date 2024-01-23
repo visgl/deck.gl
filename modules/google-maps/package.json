@@ -38,10 +38,10 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-alpha",
-    "@luma.gl/constants": "9.0.0-alpha.54",
-    "@luma.gl/core": "9.0.0-alpha.54",
-    "@luma.gl/engine": "9.0.0-alpha.54",
-    "@luma.gl/webgl": "9.0.0-alpha.54",
+    "@luma.gl/constants": "9.0.0-beta.1",
+    "@luma.gl/core": "9.0.0-beta.1",
+    "@luma.gl/engine": "9.0.0-beta.1",
+    "@luma.gl/webgl": "9.0.0-beta.1",
     "@math.gl/core": "^4.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
