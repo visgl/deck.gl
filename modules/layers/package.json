@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "9.0.0-alpha.7",
+  "version": "9.0.0-beta.1",
   "publishConfig": {
     "access": "public"
   },
@@ -33,10 +33,10 @@
     "@babel/runtime": "^7.0.0",
     "@loaders.gl/images": "4.1.0-alpha.9",
     "@loaders.gl/schema": "4.1.0-alpha.9",
-    "@luma.gl/constants": "9.0.0-alpha.53",
-    "@luma.gl/core": "9.0.0-alpha.53",
-    "@luma.gl/engine": "9.0.0-alpha.53",
-    "@luma.gl/shadertools": "9.0.0-alpha.53",
+    "@luma.gl/constants": "9.0.0-beta.1",
+    "@luma.gl/core": "9.0.0-beta.1",
+    "@luma.gl/engine": "9.0.0-beta.1",
+    "@luma.gl/shadertools": "9.0.0-beta.1",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^4.0.0",
     "@math.gl/polygon": "^4.0.0",
@@ -46,9 +46,9 @@
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-alpha",
     "@loaders.gl/core": "4.1.0-alpha.9",
-    "@luma.gl/core": "9.0.0-alpha.53",
-    "@luma.gl/engine": "9.0.0-alpha.53",
-    "@luma.gl/shadertools": "9.0.0-alpha.53"
+    "@luma.gl/core": "9.0.0-beta.1",
+    "@luma.gl/engine": "9.0.0-beta.1",
+    "@luma.gl/shadertools": "9.0.0-beta.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

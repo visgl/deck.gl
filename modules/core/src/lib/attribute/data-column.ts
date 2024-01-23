@@ -596,7 +596,7 @@ export default class DataColumn<Options, State> {
       ...this._buffer?.props,
       id: this.id,
       usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
-      indexType: isIndexed ? (type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32') : undefined,
+      indexType: isIndexed ? ((type as GL) === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32') : undefined,
       byteLength
     });
 

@@ -21,6 +21,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.1] - Jan 22 2024
+
+- chore(core): Remove getBufferData helper (#8425)
+- chore(lint): Fix lint errors (#8426)
+- CARTO: Only send baseUrl when request over max length (#8429)
+- [v9] Align picking module PickingProps with luma (#8405)
+- fix(aggregation-layers): Disable gpu aggregation by default (#8416)
+
 #### deck.gl [9.0.0-alpha.7] - Jan 16 2024
 
 - [v9] Remove ShaderModule type (#8406)

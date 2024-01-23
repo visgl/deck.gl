@@ -23,6 +23,7 @@ const colorScale = scaleLog()
 export function renderToDOM(container, data) {
   const map = new mapboxgl.Map({
     container,
+    useWebGL2: true,
     style: 'mapbox://styles/mapbox/light-v9',
     antialias: true,
     center: [-122.4034, 37.7845],
@@ -130,5 +131,5 @@ export async function loadAndRender(container) {
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/safegraph/sf-pois.csv',
     CSVLoader
   );
-  renderToDOM(container, data);
+  renderToDOM(container, data.data);
 }

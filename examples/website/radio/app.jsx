@@ -245,6 +245,6 @@ export function renderToDOM(container) {
   root.render(<App />);
 
   load(DATA_URL.STATIONS, CSVLoader, {csv: {delimiter: '\t', skipEmptyLines: true}}).then(data => {
-    root.render(<App data={data} />);
+    root.render(<App data={data.data} />);
   });
 }
