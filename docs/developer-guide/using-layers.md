@@ -106,7 +106,7 @@ deck.gl's architecture is based on the reactive programming paradigm:
 
 * In a reactive application, a complete UI description is "re-rendered" every time something in the application state changes (in the case of a deck.gl application, a new list of layers is created whenever something changes).
 * The UI framework (in this case, deck.gl) makes the choices about what to update, by comparing (or "diffing") the newly rendered UI description with the last rendered UI description.
-* The framework then the makes minimal necessary changes to account for the differences, and then redraws.
+* The framework then then makes the minimal necessary changes to account for the differences, and then redraws.
 * The required changes are made to "WebGL state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
 
 #### Creating Layer Instances Is Cheap
