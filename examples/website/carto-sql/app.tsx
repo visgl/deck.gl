@@ -4,27 +4,27 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator} from '@deck.gl/core';
-import {colorBins, VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
 
 const INITIAL_VIEW_STATE = {
-  latitude: 40.7368521,
-  longitude: -73.9936065,
-  zoom: 11,
+  latitude: 35.7368521,
+  longitude: -85.9936065,
+  zoom: 5,
   pitch: 60,
-  bearing: 0
+  bearing: -60
 };
 
 const globalOptions = {
   accessToken:
-    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfN3hoZnd5bWwiLCJqdGkiOiJiMGY0ZjVkZSJ9.DaQK48iBPzXtvmAUuCwESXvY_3eGz5J5Qx6Tg2Id-nM',
+    'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiI0YTA5YjlmMSJ9.SQlcn7UucERdnq9O6ELm_Wi02dyRIJ_2KSTEnlXFjIc',
 
-  connectionName: 'bigquery'
+  connectionName: 'carto_dw'
 };
 const transitionInterpolator = new LinearInterpolator();
 
 export default function App({
-  mrliIndex = 'txn_amt',
-  industry = 'ret',
+  urbanity = 'any',
+  tourism = 0,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
   const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
@@ -32,44 +32,45 @@ export default function App({
   const rotateCamera = useCallback(() => {
     updateViewState(v => ({
       ...v,
-      bearing: v.bearing + 15,
+      bearing: v.bearing + 30,
       transitionDuration: 30000,
       transitionInterpolator,
       onTransitionEnd: rotateCamera
     }));
   }, []);
 
-  const getIndex = f => (f.properties[mrliIndex] ? parseFloat(f.properties[mrliIndex]) : 0);
-
-  const data = vectorQuerySource({
+  const data = h3QuerySource({
     ...globalOptions,
-    sqlQuery: `SELECT * FROM cartobq.public_account.mastercard_geoinsights_jan where industry = @industry`,
-    queryParameters: {industry}
+    sqlQuery: `
+      SELECT h3, population, urbanity 
+      FROM carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2 
+      WHERE 
+        (@urbanity = 'any' OR urbanity = @urbanity)
+        AND tourism >= @tourism`,
+    aggregationExp: `SUM(population) as pop`,
+    aggregationResLevel: 5,
+    queryParameters: {urbanity, tourism}
   });
 
   const layers = [
-    new VectorTileLayer({
+    new H3TileLayer({
       id: 'carto-layer',
       data,
       getFillColor: colorBins({
-        attr: getIndex,
-        domain: [25, 50, 100, 300, 500, 1000],
+        attr: 'pop',
+        domain: [0, 10, 100, 1000, 10000, 50000, 100000],
         colors: 'PinkYl'
       }),
-      getLineColor: [0, 0, 0, 0],
       pickable: true,
       filled: true,
       extruded: true,
-      wireframe: true,
-      getElevation: getIndex,
-      transitions: {
-        getElevation: {duration: 1000, enter: () => [0]},
-        getFillColor: {duration: 1000}
+      getElevation: (d) => {
+        return d.properties.pop / 2
       },
-      updateTriggers: {
-        getElevation: [mrliIndex],
-        getFillColor: [mrliIndex]
-      },
+      // transitions: {
+      //   getElevation: {duration: 1000, enter: () => [0]},
+      //   getFillColor: {duration: 1000}
+      // },
       loadOptions: {
         // TODO use workers once v9.alpha packages available
         worker: true
@@ -79,8 +80,8 @@ export default function App({
 
   const getTooltip = ({object}) => {
     if (!object) return false;
-    const index = getIndex(object);
-    return `Index: ${index.toFixed(2)}`;
+    const population = object.properties.pop;
+    return `Population: ${population}`;
   };
 
   return (
