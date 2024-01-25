@@ -32,7 +32,7 @@ class CartoSQLDemo extends Component {
       min: 0,
       max: 10,
       step: 1,
-      displayValue: "1",
+      value: 0
     }
   };
 
