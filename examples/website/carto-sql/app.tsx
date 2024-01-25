@@ -1,10 +1,11 @@
 import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
+import {Map, ViewState} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
-import {LinearInterpolator} from '@deck.gl/core';
+import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
+import {TooltipContent} from '@deck.gl/core/typed/lib/tooltip';
 
 const INITIAL_VIEW_STATE = {
   latitude: 35.7368521,
@@ -27,7 +28,7 @@ export default function App({
   tourism = 0,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
-  const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
+  const [viewState, updateViewState] = useState<Record<string, any>>(INITIAL_VIEW_STATE);
 
   const rotateCamera = useCallback(() => {
     updateViewState(v => ({
@@ -78,8 +79,8 @@ export default function App({
     })
   ];
 
-  const getTooltip = ({object}) => {
-    if (!object) return false;
+  const getTooltip = ({object}: PickingInfo): TooltipContent => {
+    if (!object) return null;
     const population = object.properties.pop;
     return `Population: ${Math.round(population)}`;
   };
@@ -89,19 +90,11 @@ export default function App({
       controller={true}
       viewState={viewState}
       layers={layers}
-      // @ts-ignore
       getTooltip={getTooltip}
       onLoad={rotateCamera}
-      // @ts-ignore
       onViewStateChange={v => updateViewState(v.viewState)}
     >
-      <Map
-        reuseMaps
-        // @ts-ignore
-        mapLib={maplibregl}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-      />
+      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
     </DeckGL>
   );
 }
