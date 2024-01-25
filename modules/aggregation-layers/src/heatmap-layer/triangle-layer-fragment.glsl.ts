@@ -50,16 +50,13 @@ void main(void) {
     weight /= max(1.0, weights.a);
   }
 
-  // TODO(donmccurdy)
   // discard pixels with 0 weight.
-  // if (weight <= 0.) {
-  //    discard;
-  // }
+  if (weight <= 0.) {
+     discard;
+  }
 
   vec4 linearColor = getLinearColor(weight);
   linearColor.a *= opacity;
   fragColor = linearColor;
-
-  fragColor.a = 0.5; // TODO(donmccurdy): cleanup
 }
 `;

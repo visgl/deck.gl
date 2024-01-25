@@ -11,7 +11,7 @@ const DATA_URL =
 const INITIAL_VIEW_STATE = {
   longitude: -73.75,
   latitude: 40.73,
-  zoom: 9,
+  zoom: 11,
   maxZoom: 16,
   pitch: 0,
   bearing: 0
@@ -34,7 +34,7 @@ export default function App({
       id: 'heatmap-layer',
       pickable: false,
       getPosition: d => [d[0], d[1]],
-      getWeight: d => d[2],
+      getWeight: d => 0.003 * d[2],
       radiusPixels,
       intensity,
       threshold
@@ -42,7 +42,10 @@ export default function App({
   ];
 
   return (
-    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={layers}
       debug={true}
       deviceProps={{debug: true}}
     >

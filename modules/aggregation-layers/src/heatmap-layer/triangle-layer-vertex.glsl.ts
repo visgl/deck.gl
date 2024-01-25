@@ -48,7 +48,10 @@ void main(void) {
     maxValue = colorDomain[1];
     minValue = colorDomain[0];
   }
-  vIntensityMax = intensity / maxValue;
-  vIntensityMin = intensity / minValue;
+  // vIntensityMax = intensity / maxValue;
+  // vIntensityMin = intensity / minValue;
+  // TODO(felix) hardcode intensity values
+  vIntensityMax = 1.0;
+  vIntensityMin = 1.0;
 }
 `;
