@@ -31,9 +31,9 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-alpha",
-    "@types/react": ">= 16.3",
-    "react": ">=16.3",
-    "react-dom": ">=16.3"
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
