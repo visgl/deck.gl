@@ -4,38 +4,35 @@ import App from 'website-examples/carto-sql/app';
 
 import {makeExample} from '../components';
 
-const INDEXES = {
-  'Total Spend': 'txn_amt',
-  'Total Transactions': 'txn_cnt',
-  'Total Accounts': 'acct_cnt',
-  'Average Ticket Size': 'avg_ticket'
-};
-const INDUSTRIES = {
-  'Total Retail': 'ret',
-  'Total Apparel': 'app',
-  Accommodations: 'acc',
-  'Automotive Fuel': 'aut',
-  'Eating Places': 'eap',
-  'Grocery and Food Stores': 'gro'
+const URBANITY = {
+  All: 'any',
+  Remote: 'remote',
+  Rural: 'rural',
+  'Low-density urban': 'Low_density_urban',
+  'Medium-density urban': 'Medium_density_urban',
+  'High-density urban': 'High_density_urban',
+  'VeryHigh-density urban': 'Very_High_density_urban'
 };
 
 class CartoSQLDemo extends Component {
-  static title = 'Mastercard Index In New York';
+  static title = 'CARTO Spatial Features — USA';
 
   static code = `${GITHUB_TREE}/examples/website/carto-sql`;
 
   static parameters = {
-    index: {
-      displayName: 'Index',
+    urbanity: {
+      displayName: 'Urbanity',
       type: 'select',
-      options: Object.keys(INDEXES),
-      value: 'Total Spend'
+      options: Object.keys(URBANITY),
+      value: 'All'
     },
-    industry: {
-      displayName: 'Industry',
-      type: 'select',
-      options: Object.keys(INDUSTRIES),
-      value: 'Total Retail'
+    tourism: {
+      displayName: 'Tourism Presence',
+      type: 'range',
+      min: 0,
+      max: 10,
+      step: 1,
+      value: 0
     }
   };
 
@@ -44,12 +41,16 @@ class CartoSQLDemo extends Component {
   static renderInfo() {
     return (
       <div>
-        <p>Mastercard Index January 2020.</p>
         <p>
-          A locations’s index shows how it ranks against all the other locations in the area. The
-          number represents the percentile, for example, a 900 spend index means a location has
-          higher spend than 90% of locations.
+          Spatial Features is a dataset curated by CARTO, providing access to unified demographic,
+          environmental, and economical variables using spatial indexes. This particular example
+          covers the United States, using an H3 grid.
         </p>
+        <p>
+          This data is hosted in a cloud data warehouse (eg: BigQuery, Snowflake...) and is queried
+          live using SQL, including parameters, thanks to CARTO cloud-native connectivity.
+        </p>
+        <p>Population</p>
         <div style={{height: 8, width: '100%', display: 'flex', flexDirection: 'row'}}>
           <div style={{flex: '0 0 14.28%', background: 'rgb(254, 246, 181)'}} />
           <div style={{flex: '0 0 14.28%', background: 'rgb(255, 221, 154)'}} />
@@ -61,15 +62,18 @@ class CartoSQLDemo extends Component {
         </div>
         <div style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
           <div style={{width: '14.28%'}}>0</div>
-          <div style={{width: '14.28%'}}>25</div>
-          <div style={{width: '14.28%'}}>50</div>
+          <div style={{width: '14.28%'}}>10</div>
           <div style={{width: '14.28%'}}>100</div>
-          <div style={{width: '14.28%'}}>300</div>
-          <div style={{width: '14.28%'}}>500</div>
-          <div style={{width: '14.28%'}}>1000</div>
+          <div style={{width: '14.28%'}}>1k</div>
+          <div style={{width: '14.28%'}}>10k</div>
+          <div style={{width: '14.28%'}}>50k</div>
+          <div style={{width: '14.28%'}}>100k</div>
         </div>
         <p>
-          Data source: <a href="https://carto.com/solutions/mastercard/">MasterCard</a>
+          Data source:{' '}
+          <a href="https://carto.com/spatial-data-catalog/browser/dataset/cdb_spatial_fea_94e6b1f/">
+            CARTO
+          </a>
         </p>
       </div>
     );
@@ -77,10 +81,10 @@ class CartoSQLDemo extends Component {
 
   render() {
     const {params} = this.props;
-    const index = INDEXES[params.index.value];
-    const industry = INDUSTRIES[params.industry.value];
+    const urbanity = URBANITY[params.urbanity.value];
+    const tourism = params.tourism.value;
 
-    return <App {...this.props} mrliIndex={index} industry={industry} />;
+    return <App {...this.props} urbanity={urbanity} tourism={tourism} />;
   }
 }
 
