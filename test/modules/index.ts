@@ -21,11 +21,11 @@
 import './imports-spec';
 import './core';
 
-// import './layers';
-// import './aggregation-layers';
+import './layers';
+import './aggregation-layers';
 // import './carto';
 // import './geo-layers';
-// import './mesh-layers';
+import './mesh-layers';
 
 // import './google-maps';
 // import './mapbox';
