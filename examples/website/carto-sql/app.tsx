@@ -56,6 +56,7 @@ export default function App({
     new H3TileLayer({
       id: 'carto-layer',
       data,
+      // @ts-ignore
       getFillColor: colorBins({
         attr: 'pop',
         domain: [0, 10, 100, 1000, 10000, 50000, 100000],
@@ -89,11 +90,19 @@ export default function App({
       controller={true}
       viewState={viewState}
       layers={layers}
+      // @ts-ignore
       getTooltip={getTooltip}
       onLoad={rotateCamera}
+      // @ts-ignore
       onViewStateChange={v => updateViewState(v.viewState)}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      
+      <Map 
+        reuseMaps 
+        // @ts-ignore
+        mapLib={maplibregl} 
+        mapStyle={mapStyle} 
+        preventStyleDiffing={true} />
     </DeckGL>
   );
 }
