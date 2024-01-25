@@ -625,6 +625,7 @@ export default class HeatmapLayer<
     const uniforms = {
       radiusPixels,
       commonBounds,
+      worldBounds,
       textureWidth: textureSize,
       weightsScale
     };
