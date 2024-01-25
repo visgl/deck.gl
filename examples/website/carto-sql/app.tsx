@@ -65,9 +65,8 @@ export default function App({
       pickable: true,
       filled: true,
       extruded: true,
-      getElevation: (d) => {
-        return d.properties.pop / 2
-      },
+      elevationScale: 0.5,
+      getElevation: d => d.properties.pop,
       // transitions: {
       //   getElevation: {duration: 1000, enter: () => [0]},
       //   getFillColor: {duration: 1000}
@@ -82,7 +81,7 @@ export default function App({
   const getTooltip = ({object}) => {
     if (!object) return false;
     const population = object.properties.pop;
-    return `Population: ${population}`;
+    return `Population: ${Math.round(population)}`;
   };
 
   return (
@@ -96,13 +95,13 @@ export default function App({
       // @ts-ignore
       onViewStateChange={v => updateViewState(v.viewState)}
     >
-      
-      <Map 
-        reuseMaps 
+      <Map
+        reuseMaps
         // @ts-ignore
-        mapLib={maplibregl} 
-        mapStyle={mapStyle} 
-        preventStyleDiffing={true} />
+        mapLib={maplibregl}
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
+      />
     </DeckGL>
   );
 }

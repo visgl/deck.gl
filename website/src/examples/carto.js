@@ -5,9 +5,9 @@ import App from 'website-examples/carto-sql/app';
 import {makeExample} from '../components';
 
 const URBANITY = {
-  'All': 'any',
-  'Remote': 'remote',
-  'Rural': 'rural',
+  All: 'any',
+  Remote: 'remote',
+  Rural: 'rural',
   'Low-density urban': 'Low_density_urban',
   'Medium-density urban': 'Medium_density_urban',
   'High-density urban': 'High_density_urban',
@@ -36,22 +36,21 @@ class CartoSQLDemo extends Component {
     }
   };
 
-  // name, min, max, step, displayName, displayValue, onChange
-
   static mapStyle = MAPBOX_STYLES.DARK;
 
   static renderInfo() {
     return (
       <div>
         <p>
-          Spatial Features is a dataset curated by CARTO, providing access to unified demographic, environmental, and economical variables using spatial indexes. This particular example covers the United States, using an H3 grid.
-        </p>
-        <p> 
-          This data is hosted in a cloud data warehouse (eg: BigQuery, Snowflake...) and is queried live using SQL, including parameters, thanks to CARTO cloud-native connectivity.
+          Spatial Features is a dataset curated by CARTO, providing access to unified demographic,
+          environmental, and economical variables using spatial indexes. This particular example
+          covers the United States, using an H3 grid.
         </p>
         <p>
-          Population
+          This data is hosted in a cloud data warehouse (eg: BigQuery, Snowflake...) and is queried
+          live using SQL, including parameters, thanks to CARTO cloud-native connectivity.
         </p>
+        <p>Population</p>
         <div style={{height: 8, width: '100%', display: 'flex', flexDirection: 'row'}}>
           <div style={{flex: '0 0 14.28%', background: 'rgb(254, 246, 181)'}} />
           <div style={{flex: '0 0 14.28%', background: 'rgb(255, 221, 154)'}} />
@@ -71,7 +70,10 @@ class CartoSQLDemo extends Component {
           <div style={{width: '14.28%'}}>100k</div>
         </div>
         <p>
-          Data source: <a href="https://carto.com/spatial-data-catalog/browser/dataset/cdb_spatial_fea_94e6b1f/">CARTO</a>
+          Data source:{' '}
+          <a href="https://carto.com/spatial-data-catalog/browser/dataset/cdb_spatial_fea_94e6b1f/">
+            CARTO
+          </a>
         </p>
       </div>
     );
