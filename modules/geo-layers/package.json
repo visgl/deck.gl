@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "9.0.0-alpha.7",
+  "version": "9.0.0-beta.1",
   "publishConfig": {
     "access": "public"
   },
@@ -40,7 +40,7 @@
     "@loaders.gl/terrain": "4.1.0-alpha.9",
     "@loaders.gl/tiles": "4.1.0-alpha.9",
     "@loaders.gl/wms": "4.1.0-alpha.9",
-    "@luma.gl/core": "9.0.0-alpha.54",
+    "@luma.gl/core": "9.0.0-beta.1",
     "@math.gl/core": "^4.0.0",
     "@math.gl/culling": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
@@ -54,8 +54,8 @@
     "@deck.gl/layers": "^9.0.0-alpha",
     "@deck.gl/mesh-layers": "^9.0.0-alpha",
     "@loaders.gl/core": "4.1.0-alpha.9",
-    "@luma.gl/core": "9.0.0-alpha.54",
-    "@luma.gl/shadertools": "9.0.0-alpha.54"
+    "@luma.gl/core": "9.0.0-beta.1",
+    "@luma.gl/shadertools": "9.0.0-beta.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

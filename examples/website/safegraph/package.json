@@ -11,8 +11,8 @@
   "dependencies": {
     "@loaders.gl/csv": "4.1.0-alpha.9",
     "d3-scale": "^2.0.0",
-    "deck.gl": "^8.8.0",
-    "mapbox-gl": "^1.13.0"
+    "deck.gl": "^9.0.0-alpha",
+    "mapbox-gl": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
