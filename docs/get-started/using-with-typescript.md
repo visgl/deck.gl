@@ -1,6 +1,15 @@
 # Using deck.gl with TypeScript
 
-Starting from v8.8, deck.gl publishes "public preview" TypeScript types via an opt-in only entry point. To use the official types in your application, find the following statements:
+Starting from v8.8, deck.gl publishes "public preview" TypeScript types via an opt-in only entry point.
+
+To use the official types in your application, install the appropriate subproject(s):
+
+```bash
+npm install @deck.gl/layers
+npm install @deck.gl/react
+```
+
+Then, find the following statements:
 
 ```js
 import DeckGL from '@deck.gl/react';
