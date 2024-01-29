@@ -2,6 +2,7 @@
   "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
+  "type": "module",
   "version": "9.0.0-beta.2",
   "publishConfig": {
     "access": "public"
@@ -16,13 +17,19 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "types": "typed/index.d.ts",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
