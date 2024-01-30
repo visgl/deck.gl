@@ -59,7 +59,14 @@ export {default as OrthographicViewport} from './viewports/orthographic-viewport
 export {default as FirstPersonViewport} from './viewports/first-person-viewport';
 
 // Shader modules
-export {picking, project, project32, gouraudLighting, phongLighting, shadow} from './shaderlib/index';
+export {
+  picking,
+  project,
+  project32,
+  gouraudLighting,
+  phongLighting,
+  shadow
+} from './shaderlib/index';
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
