@@ -378,13 +378,13 @@ export default class HeatmapLayer<
         ...TEXTURE_PROPS,
         width: textureSize,
         height: textureSize,
-        format,
+        format
       }),
       maxWeightsTexture: this.context.device.createTexture({
         ...TEXTURE_PROPS,
         width: 1,
         height: 1,
-        format,
+        format
       })
     });
   }
@@ -414,7 +414,7 @@ export default class HeatmapLayer<
     }
   }
 
-  _createWeightsTransform(shaders: {vs: string, fs?: string}) {
+  _createWeightsTransform(shaders: {vs: string; fs?: string}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     const attributeManager = this.getAttributeManager()!;
@@ -426,8 +426,8 @@ export default class HeatmapLayer<
     console.log({
       attributes,
       positions: getBufferData(positions, Float32Array),
-      weights: getBufferData(weights, Float32Array),
-    })
+      weights: getBufferData(weights, Float32Array)
+    });
 
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
@@ -461,7 +461,11 @@ export default class HeatmapLayer<
     const {device} = this.context;
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
 
-    const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
+    const weightsTransformShaders = this.getShaders({
+      vs: weightsVs,
+      fs: weightsFs,
+      modules: [project32]
+    });
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders({vs: maxVs, fs: maxFs});
@@ -495,14 +499,19 @@ export default class HeatmapLayer<
       maxWeightTransform,
       zoom: null,
       triPositionBuffer: device.createBuffer({byteLength: 48}),
-      triTexCoordBuffer: device.createBuffer({byteLength: 48}),
+      triTexCoordBuffer: device.createBuffer({byteLength: 48})
     });
   }
 
   // overwrite super class method to update transform model
   updateShaders(shaderOptions) {
     // shader params (modules, injects) changed, update model object
-    this._createWeightsTransform({vs: weightsVs, fs: weightsFs, ...shaderOptions});
+    this._createWeightsTransform({
+      vs: weightsVs,
+      fs: weightsFs,
+      modules: [project32],
+      ...shaderOptions
+    });
     // TODO: Does `maxWeightTransform` not also need to be updated?
   }
 
@@ -594,7 +603,7 @@ export default class HeatmapLayer<
         ...TEXTURE_PROPS,
         data: colors,
         width: colorRange.length,
-        height: 1,
+        height: 1
       });
     }
     this.setState({colorTexture});
@@ -627,7 +636,11 @@ export default class HeatmapLayer<
       commonBounds,
       worldBounds,
       textureWidth: textureSize,
-      weightsScale
+      weightsScale,
+
+      // TODO(v9) Don't hack in project_uniforms, should pick up from shader module
+      // @ts-ignore
+      ...project32.dependencies[0].getUniforms(this.context)
     };
     // TODO(donmccurdy): Comment below does not really make sense with v9 API,
     // rephrase this once it's working.
@@ -644,22 +657,26 @@ export default class HeatmapLayer<
     console.log({
       attributes,
       positions: getBufferData(positions, Float32Array),
-      weights: getBufferData(weights, Float32Array),
+      weights: getBufferData(weights, Float32Array)
     });
 
     console.log('weightsTransform.run'); // TODO(donmccurdy): debug
 
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
+    // @ts-ignore
     weightsTransform.model.setUniforms(uniforms);
     weightsTransform.run({
       // parameters: {viewport: this.context.viewport}, // TODO(donmccurdy): Needless?
       clearColor: [0, 0, 0, 0]
     });
-    
+
     // TODO(donmccurdy): debug
     debugFBO(this.state.weightsTexture!, {
-      id: 'heatmap-layer-weightsTexture', opaque: true, top: '420px', rgbaScale: 255
+      id: 'heatmap-layer-weightsTexture',
+      opaque: true,
+      top: '420px',
+      rgbaScale: 255
     });
 
     this._updateMaxWeightValue();
