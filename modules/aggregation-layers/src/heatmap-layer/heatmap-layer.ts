@@ -634,7 +634,6 @@ export default class HeatmapLayer<
     const uniforms = {
       radiusPixels,
       commonBounds,
-      worldBounds,
       textureWidth: textureSize,
       weightsScale,
 
@@ -665,7 +664,6 @@ export default class HeatmapLayer<
 
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
-    // @ts-ignore
     weightsTransform.model.setUniforms(uniforms);
     weightsTransform.model.updateModuleSettings(moduleSettings);
     weightsTransform.run({

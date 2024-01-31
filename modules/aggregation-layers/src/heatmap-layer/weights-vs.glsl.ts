@@ -7,7 +7,6 @@ out vec4 weightsTexture;
 uniform float radiusPixels;
 uniform float textureWidth;
 uniform vec4 commonBounds;
-uniform vec4 worldBounds;
 uniform float weightsScale;
 
 void main()
