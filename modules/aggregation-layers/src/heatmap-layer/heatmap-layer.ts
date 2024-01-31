@@ -686,12 +686,12 @@ export default class HeatmapLayer<
     });
 
     // TODO(donmccurdy): debug
-    // debugFBO(this.state.weightsTexture!, {
-    //   id: 'heatmap-layer-weightsTexture',
-    //   opaque: true,
-    //   top: '420px',
-    //   rgbaScale: 255
-    // });
+    debugFBO(this.state.weightsTexture!, {
+      id: 'heatmap-layer-weightsTexture',
+      opaque: true,
+      top: '420px',
+      rgbaScale: 255
+    });
 
     this._updateMaxWeightValue();
 

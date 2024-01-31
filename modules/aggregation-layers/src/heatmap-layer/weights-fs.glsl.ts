@@ -12,9 +12,9 @@ float gaussianKDE(float u){
 void main()
 {
   float dist = length(gl_PointCoord - vec2(0.5, 0.5));
-  // if (dist > 0.5) {
-  //   discard;
-  // }
+  if (dist > 0.5) {
+    discard;
+  }
   fragColor = weightsTexture * gaussianKDE(2. * dist);
   // fragColor = vec4(0.0, 0.5, 0.5, 1.0); // TODO(donmccurdy)
   DECKGL_FILTER_COLOR(fragColor, geometry);

@@ -46,9 +46,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   };
 
   getShaders() {
-    // TODO(donmccurdy): Including 'picking' fixes errors, but I'm not sure
-    // heatmap-layer really supports picking?
-    return {vs, fs, modules: [project32, picking]};
+    return {vs, fs, modules: [project32]};
   }
 
   initializeState({device}: LayerContext): void {
