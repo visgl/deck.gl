@@ -493,7 +493,7 @@ export default class HeatmapLayer<
           }
         : {
             // Correct
-            depthCompare: 'always',
+            depthWriteEnabled: false,
             blendColorOperation: 'max',
             blendAlphaOperation: 'max',
             blendColorSrcFactor: 'one',

@@ -34,7 +34,7 @@ export default function App({
       id: 'heatmap-layer',
       pickable: false,
       getPosition: d => [d[0], d[1]],
-      getWeight: d => 0.003 * d[2],
+      getWeight: d => d[2],
       radiusPixels,
       intensity,
       threshold
