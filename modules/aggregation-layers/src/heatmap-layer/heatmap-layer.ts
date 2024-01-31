@@ -482,15 +482,25 @@ export default class HeatmapLayer<
       targetTextureChannels: 4,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
-      parameters: {
-        depthCompare: 'always',
-        blendColorOperation: 'max',
-        blendAlphaOperation: 'max',
-        blendColorSrcFactor: 'one',
-        blendColorDstFactor: 'one',
-        blendAlphaSrcFactor: 'one',
-        blendAlphaDstFactor: 'one'
-      }
+      topology: 'point-list', // TODO(felix) why is this required? We have no attributes
+      parameters: true
+        ? {
+            // DEBUG blend color
+            depthCompare: 'always',
+            blendColorOperation: 'add',
+            blendColorSrcFactor: 'one',
+            blendColorDstFactor: 'one'
+          }
+        : {
+            // Correct
+            depthCompare: 'always',
+            blendColorOperation: 'max',
+            blendAlphaOperation: 'max',
+            blendColorSrcFactor: 'one',
+            blendColorDstFactor: 'one',
+            blendAlphaSrcFactor: 'one',
+            blendAlphaDstFactor: 'one'
+          }
     });
 
     this.setState({
@@ -516,9 +526,13 @@ export default class HeatmapLayer<
   }
 
   _updateMaxWeightValue() {
-    const {maxWeightTransform} = this.state;
+    const {maxWeightTransform, textureSize} = this.state;
     console.log('maxWeightTransform.run()');
-    maxWeightTransform!.run();
+
+    maxWeightTransform!.run({
+      parameters: {viewport: [0, 0, 1, 1]},
+      clearColor: [0, 0, 0, 0]
+    });
   }
 
   // Computes world bounds area that needs to be processed for generate heatmap
@@ -672,15 +686,21 @@ export default class HeatmapLayer<
     });
 
     // TODO(donmccurdy): debug
-    debugFBO(this.state.weightsTexture!, {
-      id: 'heatmap-layer-weightsTexture',
-      opaque: true,
-      top: '420px',
-      rgbaScale: 255
-    });
+    // debugFBO(this.state.weightsTexture!, {
+    //   id: 'heatmap-layer-weightsTexture',
+    //   opaque: true,
+    //   top: '420px',
+    //   rgbaScale: 255
+    // });
 
     this._updateMaxWeightValue();
 
+    debugFBO(this.state.maxWeightsTexture!, {
+      id: 'triangle-weightsTexture',
+      opaque: true,
+      top: '0px',
+      rgbaScale: 255
+    });
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
     // TODO v9 sampler support in luma.gl needs to improve
     // weightsTexture.setSampler({
