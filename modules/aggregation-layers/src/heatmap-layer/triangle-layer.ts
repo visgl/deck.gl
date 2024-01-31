@@ -23,7 +23,7 @@ import {Model} from '@luma.gl/engine';
 import {Layer, LayerContext, picking, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
-import { debugFBO, getBufferData } from './heatmap-layer-utils';
+import {getBufferData} from './heatmap-layer-utils';
 
 type _TriangleLayerProps = {
   colorDomain: number[];
@@ -41,8 +41,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   state!: {
     model: Model;
-    positions: Buffer,
-    texCoords: Buffer,
+    positions: Buffer;
+    texCoords: Buffer;
   };
 
   getShaders() {
@@ -68,13 +68,12 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       texCoords: {size: 2, noAlloc: true}
     });
 
-    debugFBO(weightsTexture, {id: 'triangle-weightsTexture', opaque: true, top: '0', rgbaScale: 255});
-
     // TODO(donmccurdy): cleanup.
     console.log({
       // weightsTexture: weightsTexture.
-      triangleAttributes: (Object.entries((data as any).attributes) as any)
-        .map(([name, buffer]: [string, Buffer]) => [name, getBufferData(buffer, Float32Array)])
+      triangleAttributes: (Object.entries((data as any).attributes) as any).map(
+        ([name, buffer]: [string, Buffer]) => [name, getBufferData(buffer, Float32Array)]
+      )
     });
 
     return new Model(device, {
@@ -84,10 +83,10 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       attributes: (data as any).attributes, // TODO(donmccurdy): types.
       bufferLayout: [
         {name: 'positions', format: 'float32x3'},
-        {name: 'texCoords', format: 'float32x2'},
+        {name: 'texCoords', format: 'float32x2'}
       ],
       topology: 'triangle-fan-webgl',
-      vertexCount,
+      vertexCount
 
       // TODO(donmccurdy): Equivalent?
       // geometry: new Geometry({
@@ -100,8 +99,15 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   draw({uniforms}): void {
     const {model} = this.state;
 
-    const {weightsTexture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
-      this.props;
+    const {
+      weightsTexture,
+      maxTexture,
+      colorTexture,
+      intensity,
+      threshold,
+      aggregationMode,
+      colorDomain
+    } = this.props;
 
     console.log('triangle:draw'); // TODO(donmccurdy)
 
