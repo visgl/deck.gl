@@ -651,6 +651,7 @@ export default class HeatmapLayer<
     const attributeManager = this.getAttributeManager()!;
 
     const attributes = attributeManager.getAttributes();
+    const moduleSettings = this.getModuleSettings();
     const positions = attributes.positions.buffer;
     const weights = attributes.weights.buffer;
 
@@ -666,8 +667,9 @@ export default class HeatmapLayer<
     weightsTransform.model.setVertexCount(this.getNumInstances());
     // @ts-ignore
     weightsTransform.model.setUniforms(uniforms);
+    weightsTransform.model.updateModuleSettings(moduleSettings);
     weightsTransform.run({
-      // parameters: {viewport: this.context.viewport}, // TODO(donmccurdy): Needless?
+      parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]
     });
 
