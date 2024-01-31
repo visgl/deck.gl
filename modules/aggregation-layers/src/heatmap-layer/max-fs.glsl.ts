@@ -5,5 +5,6 @@ out vec4 fragColor;
 void main() {
   fragColor = outTexture;
   fragColor.g = outTexture.r / max(1.0, outTexture.a);
+  // fragColor.b = outTexture.r * 10.0;
 }
 `;
