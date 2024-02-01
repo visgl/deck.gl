@@ -25,9 +25,7 @@ import {
   packVertices,
   scaleToAspectRatio,
   getTextureCoordinates,
-  getTextureFormat,
-  debugFBO,
-  getBufferData
+  getTextureFormat
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
@@ -423,18 +421,9 @@ export default class HeatmapLayer<
     const positions = attributes.positions.buffer;
     const weights = attributes.weights.buffer;
 
-    console.log({
-      attributes,
-      positions: getBufferData(positions, Float32Array),
-      weights: getBufferData(weights, Float32Array)
-    });
-
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      // attributes: this.getAttributes(), // TODO(donmccurdy): DO NOT SUBMIT.
-      // attributes: attributeManager.getAttributes(),
-      // attributes: {positions, weights},
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
@@ -448,7 +437,7 @@ export default class HeatmapLayer<
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       },
-      topology: 'point-list', // TODO(donmccurdy): right topology? match weights-vs.glsl.ts?
+      topology: 'point-list',
       ...shaders
     } as TextureTransformProps);
 
@@ -456,9 +445,6 @@ export default class HeatmapLayer<
   }
 
   _setupResources() {
-    // TODO(donmccurdy): DO NOT SUBMIT.
-    console.log('HeatmapLayer#_setupResources()');
-
     this._createTextures();
     const {device} = this.context;
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
@@ -511,7 +497,6 @@ export default class HeatmapLayer<
       modules: [project32],
       ...shaderOptions
     });
-    // TODO: Does `maxWeightTransform` not also need to be updated?
   }
 
   _updateMaxWeightValue() {
@@ -656,15 +641,6 @@ export default class HeatmapLayer<
     const moduleSettings = this.getModuleSettings();
     const positions = attributes.positions.buffer;
     const weights = attributes.weights.buffer;
-
-    console.log({
-      attributes,
-      positions: getBufferData(positions, Float32Array),
-      weights: getBufferData(weights, Float32Array)
-    });
-
-    console.log('weightsTransform.run'); // TODO(donmccurdy): debug
-
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
     weightsTransform.model.setUniforms(uniforms);
@@ -674,27 +650,7 @@ export default class HeatmapLayer<
       clearColor: [0, 0, 0, 0]
     });
 
-    // debugFBO(this.state.weightsTexture!, {
-    //   id: 'heatmap-layer-weightsTexture',
-    //   opaque: true,
-    //   top: '100px',
-    //   rgbaScale: 255
-    // });
-
     this._updateMaxWeightValue();
-
-    // debugFBO(this.state.maxWeightsTexture!, {
-    //   id: 'triangle-weightsTexture',
-    //   opaque: true,
-    //   top: '0px',
-    //   rgbaScale: 255
-    // });
-    // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
-    // TODO v9 sampler support in luma.gl needs to improve
-    // weightsTexture.setSampler({
-    //   magFilter: 'linear',
-    //   minFilter: 'linear'
-    // });
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {

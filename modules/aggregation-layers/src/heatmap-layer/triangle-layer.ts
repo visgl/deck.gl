@@ -20,12 +20,12 @@
 
 import type {Buffer, Device, Texture} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {Layer, LayerContext, picking, project32} from '@deck.gl/core';
+import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
-import {getBufferData} from './heatmap-layer-utils';
 
 type _TriangleLayerProps = {
+  data: {attributes: {positions: Buffer; texCoords: Buffer}};
   colorDomain: number[];
   aggregationMode: string;
   threshold: number;
@@ -50,65 +50,29 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   }
 
   initializeState({device}: LayerContext): void {
-    console.log('TriangleLayer#initializeState()'); // TODO(donmccurdy): DO NOT SUBMIT.
     this.setState({model: this._getModel(device)});
   }
 
   _getModel(device: Device): Model {
-    console.log('TriangleLayer#_getModel()'); // TODO(donmccurdy): DO NOT SUBMIT.
-
-    const attributeManager = this.getAttributeManager()!;
     const {vertexCount, data, weightsTexture, maxTexture, colorTexture} = this.props;
 
-    // TODO(donmccurdy): This is probably doing nothing unless passed to the Model?
-    attributeManager.add({
-      positions: {size: 3, noAlloc: true},
-      texCoords: {size: 2, noAlloc: true}
-    });
-
-    // TODO(donmccurdy): cleanup.
-    console.log({
-      // weightsTexture: weightsTexture.
-      triangleAttributes: (Object.entries((data as any).attributes) as any).map(
-        ([name, buffer]: [string, Buffer]) => [name, getBufferData(buffer, Float32Array)]
-      )
-    });
-
     return new Model(device, {
-      ...(this.getShaders() as any),
+      ...this.getShaders(),
       id: this.props.id,
-      bindings: {weightsTexture, maxTexture, colorTexture}, // TODO(donmccurdy): required?
-      attributes: (data as any).attributes, // TODO(donmccurdy): types.
+      bindings: {weightsTexture, maxTexture, colorTexture},
+      attributes: data.attributes,
       bufferLayout: [
         {name: 'positions', format: 'float32x3'},
         {name: 'texCoords', format: 'float32x2'}
       ],
       topology: 'triangle-fan-webgl',
       vertexCount
-
-      // TODO(donmccurdy): Equivalent?
-      // geometry: new Geometry({
-      //   topology: 'triangle-fan-webgl',
-      //   vertexCount
-      // })
     });
   }
 
   draw({uniforms}): void {
     const {model} = this.state;
-
-    const {
-      weightsTexture,
-      maxTexture,
-      colorTexture,
-      intensity,
-      threshold,
-      aggregationMode,
-      colorDomain
-    } = this.props;
-
-    console.log('triangle:draw'); // TODO(donmccurdy)
-
+    const {intensity, threshold, aggregationMode, colorDomain} = this.props;
     model.setUniforms({
       ...uniforms,
       intensity,
@@ -116,7 +80,6 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
       aggregationMode,
       colorDomain
     });
-    model.setBindings({weightsTexture, maxTexture, colorTexture});
     model.draw(this.context.renderPass);
   }
 }
