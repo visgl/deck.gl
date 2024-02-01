@@ -16,7 +16,6 @@ void main()
     discard;
   }
   fragColor = weightsTexture * gaussianKDE(2. * dist);
-  // fragColor = vec4(0.0, 0.5, 0.5, 1.0); // TODO(donmccurdy)
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

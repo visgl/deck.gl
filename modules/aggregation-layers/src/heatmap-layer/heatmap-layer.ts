@@ -24,13 +24,11 @@ import {
   boundsContain,
   packVertices,
   scaleToAspectRatio,
-  getTextureCoordinates,
-  getTextureFormat
+  getTextureCoordinates
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
-import {withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -44,8 +42,7 @@ import {
   log,
   Position,
   UpdateParameters,
-  DefaultProps,
-  project32
+  DefaultProps
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
@@ -417,18 +414,12 @@ export default class HeatmapLayer<
     const {weightsTexture} = this.state;
     const attributeManager = this.getAttributeManager()!;
 
-    const attributes = attributeManager.getAttributes();
-    const positions = attributes.positions.buffer;
-    const weights = attributes.weights.buffer;
-
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
       bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
       targetTexture: weightsTexture!,
-      targetTextureVarying: 'weightsTexture',
-      targetTextureChannels: 4,
       parameters: {
         depthWriteEnabled: false,
         blendColorOperation: 'add',
@@ -451,8 +442,7 @@ export default class HeatmapLayer<
 
     const weightsTransformShaders = this.getShaders({
       vs: weightsVs,
-      fs: weightsFs,
-      modules: [project32]
+      fs: weightsFs
     });
     this._createWeightsTransform(weightsTransformShaders);
 
@@ -462,8 +452,6 @@ export default class HeatmapLayer<
       bindings: {inTexture: weightsTexture},
       uniforms: {textureSize},
       targetTexture: maxWeightsTexture,
-      targetTextureVarying: 'outTexture',
-      targetTextureChannels: 4,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
       topology: 'point-list',
@@ -494,14 +482,12 @@ export default class HeatmapLayer<
     this._createWeightsTransform({
       vs: weightsVs,
       fs: weightsFs,
-      modules: [project32],
       ...shaderOptions
     });
   }
 
   _updateMaxWeightValue() {
     const {maxWeightTransform, textureSize} = this.state;
-    console.log('maxWeightTransform.run()');
 
     maxWeightTransform!.run({
       parameters: {viewport: [0, 0, 1, 1]},
@@ -561,8 +547,6 @@ export default class HeatmapLayer<
   }
 
   _updateTextureRenderingBounds() {
-    console.log('HeatmapLayer::_updateTextureRenderingBounds');
-
     // Just render visible portion of the texture
     const {triPositionBuffer, triTexCoordBuffer, normalizedCommonBounds, viewportCorners} =
       this.state;
@@ -619,27 +603,11 @@ export default class HeatmapLayer<
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
-    const uniforms = {
-      radiusPixels,
-      commonBounds,
-      textureWidth: textureSize,
-      weightsScale,
-
-      // TODO(v9) Don't hack in project_uniforms, should pick up from shader module
-      // @ts-ignore
-      ...project32.dependencies[0].getUniforms(this.context)
-    };
-    // TODO(donmccurdy): Comment below does not really make sense with v9 API,
-    // rephrase this once it's working.
-    // ---
-    // Attribute manager sets data array count as instaceCount on model
-    // we need to set that as elementCount on 'weightsTransform'
-
     const attributeManager = this.getAttributeManager()!;
-
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
     const positions = attributes.positions.buffer;
+    const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
     const weights = attributes.weights.buffer;
     weightsTransform.model.setAttributes({positions, weights});
     weightsTransform.model.setVertexCount(this.getNumInstances());
