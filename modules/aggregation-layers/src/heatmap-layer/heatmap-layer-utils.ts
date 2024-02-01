@@ -1,4 +1,11 @@
-import {Buffer, Device, Texture, TextureFormat, TypedArray, TypedArrayConstructor} from '@luma.gl/core';
+import {
+  Buffer,
+  Device,
+  Texture,
+  TextureFormat,
+  TypedArray,
+  TypedArrayConstructor
+} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {Framebuffer} from '@luma.gl/core';
 import {readPixelsToArray} from '@luma.gl/webgl';
@@ -115,36 +122,68 @@ export function getBufferData(
 // eslint-disable-next-line
 export const debugFBO = function (
   fbo: Framebuffer | Texture,
-  {id, minimap, opaque, top = '0', left = '0', rgbaScale = 1}: {id: string, minimap?: boolean; opaque?: boolean, top?: string, left?: string, rgbaScale?: number}
+  {
+    id,
+    minimap,
+    opaque,
+    top = '0',
+    left = '0',
+    rgbaScale = 1
+  }: {
+    id: string;
+    minimap?: boolean;
+    opaque?: boolean;
+    top?: string;
+    left?: string;
+    rgbaScale?: number;
+  }
 ) {
   const color = readPixelsToArray(fbo);
   let canvas = document.getElementById(id) as HTMLCanvasElement;
+  let canvasInfo = document.getElementById(`${id}-info`) as HTMLDivElement;
   const canvasHeight = (minimap ? 2 : 1) * fbo.height;
+  const singlePixel = fbo.width === 1 && fbo.height === 1;
   if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.id = id;
     canvas.title = id;
     canvas.style.zIndex = '100';
     canvas.style.position = 'absolute';
-    canvas.style.top = top; // ⚠️
-    canvas.style.left = left; // ⚠️
+    canvas.style.top = top;
+    canvas.style.left = left;
     canvas.style.border = 'blue 1px solid';
     canvas.style.transform = 'scaleY(-1)';
     document.body.appendChild(canvas);
+
+    if (singlePixel) {
+      canvasInfo = document.createElement('div');
+      canvasInfo.id = `${id}-info`;
+      canvasInfo.innerHTML = 'HI';
+      canvasInfo.style.zIndex = '100';
+      canvasInfo.style.position = 'absolute';
+      canvasInfo.style.top = top;
+      canvasInfo.style.left = left;
+      canvasInfo.style.padding = '4px';
+      canvasInfo.style.color = 'white';
+      canvasInfo.style['white-space'] = 'pre';
+      canvasInfo.style.fontSize = '10px';
+      canvasInfo.style.background = 'rgba(0,0,0,0.5)';
+      document.body.appendChild(canvasInfo);
+    }
   }
   if (canvas.width !== fbo.width || canvas.height !== canvasHeight) {
     canvas.width = fbo.width;
     canvas.height = canvasHeight;
-    canvas.style.width = '400px';
+    canvas.style.width = fbo.width < 100 ? '64px' : '400px';
   }
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.createImageData(canvas.width, canvas.height);
 
   // Minimap
   if (minimap) {
-    const zoom = 8; // Zoom factor for minimap
+    const zoom = 2; // Zoom factor for minimap
     const {width, height} = canvas;
-    for (let y = 0; y < height; y++) {
+    for (let y = 0; y < width; y++) {
       for (let x = 0; x < width; x++) {
         const d = 4 * (x + y * width); // destination pixel
         const s = 4 * (Math.floor(x / zoom) + Math.floor(y / zoom) * width); // source
@@ -159,7 +198,7 @@ export const debugFBO = function (
   // Full map
   const offset = minimap ? color.length : 0;
   console.log(`drawing FBO: ${id}`);
-  if (color.some((v) => v > 0)) {
+  if (color.some(v => v > 0)) {
     console.error('THERE IS NON-ZERO DATA IN THE FBO!');
   }
   for (let i = 0; i < color.length; i += 4) {
@@ -170,4 +209,8 @@ export const debugFBO = function (
   }
 
   ctx.putImageData(imageData, 0, 0);
+
+  if (singlePixel) {
+    canvasInfo.innerHTML = [...color].map(n => n.toFixed(8)).join('\n');
+  }
 };

@@ -441,10 +441,12 @@ export default class HeatmapLayer<
       targetTextureVarying: 'weightsTexture',
       targetTextureChannels: 4,
       parameters: {
-        depthCompare: 'always',
+        depthWriteEnabled: false,
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
-        blendColorDstFactor: 'one'
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
       },
       topology: 'point-list', // TODO(donmccurdy): right topology? match weights-vs.glsl.ts?
       ...shaders
@@ -689,7 +691,7 @@ export default class HeatmapLayer<
     debugFBO(this.state.weightsTexture!, {
       id: 'heatmap-layer-weightsTexture',
       opaque: true,
-      top: '420px',
+      top: '100px',
       rgbaScale: 255
     });
 
