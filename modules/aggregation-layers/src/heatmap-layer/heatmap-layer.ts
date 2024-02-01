@@ -678,22 +678,21 @@ export default class HeatmapLayer<
       clearColor: [0, 0, 0, 0]
     });
 
-    // TODO(donmccurdy): debug
-    debugFBO(this.state.weightsTexture!, {
-      id: 'heatmap-layer-weightsTexture',
-      opaque: true,
-      top: '100px',
-      rgbaScale: 255
-    });
+    // debugFBO(this.state.weightsTexture!, {
+    //   id: 'heatmap-layer-weightsTexture',
+    //   opaque: true,
+    //   top: '100px',
+    //   rgbaScale: 255
+    // });
 
     this._updateMaxWeightValue();
 
-    debugFBO(this.state.maxWeightsTexture!, {
-      id: 'triangle-weightsTexture',
-      opaque: true,
-      top: '0px',
-      rgbaScale: 255
-    });
+    // debugFBO(this.state.maxWeightsTexture!, {
+    //   id: 'triangle-weightsTexture',
+    //   opaque: true,
+    //   top: '0px',
+    //   rgbaScale: 255
+    // });
     // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
     // TODO v9 sampler support in luma.gl needs to improve
     // weightsTexture.setSampler({
