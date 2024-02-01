@@ -473,18 +473,14 @@ export default class HeatmapLayer<
     const maxWeightsTransformShaders = this.getShaders({vs: maxVs, fs: maxFs});
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
-      // TODO(donmccurdy): `inTexture` is a vertex attribute in the `max` shader, not a texture.
-      // That hasn't changed, and I'm not currently able to follow how this worked before...
-      // Luma is understandably warning about 'Unknown binding "inTexture"'.
       bindings: {inTexture: weightsTexture},
-      // attributes: {inTexture: weightsTexture},
-      // bufferLayout: [{name: 'inTexture', format: 'float32x4'}],
+      uniforms: {textureSize},
       targetTexture: maxWeightsTexture,
       targetTextureVarying: 'outTexture',
       targetTextureChannels: 4,
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
-      topology: 'point-list', // TODO(felix) why is this required? We have no attributes
+      topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
         blendColorOperation: 'max',
