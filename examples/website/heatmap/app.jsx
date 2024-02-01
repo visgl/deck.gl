@@ -11,7 +11,7 @@ const DATA_URL =
 const INITIAL_VIEW_STATE = {
   longitude: -73.75,
   latitude: 40.73,
-  zoom: 11,
+  zoom: 9,
   maxZoom: 16,
   pitch: 0,
   bearing: 0

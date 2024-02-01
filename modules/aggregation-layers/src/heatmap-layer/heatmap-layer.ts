@@ -62,8 +62,8 @@ const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
   mipmaps: false,
   sampler: {
-    minFilter: 'nearest',
-    magFilter: 'nearest',
+    minFilter: 'linear',
+    magFilter: 'linear',
     addressModeU: 'clamp-to-edge',
     addressModeV: 'clamp-to-edge'
   }
