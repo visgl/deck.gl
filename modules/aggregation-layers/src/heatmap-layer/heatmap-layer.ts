@@ -402,7 +402,7 @@ export default class HeatmapLayer<
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D as number);
     const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const format = getTextureFormat(device, floatTargetSupport);
+    const format: TextureFormat = floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {

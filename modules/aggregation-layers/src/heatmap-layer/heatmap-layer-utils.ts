@@ -1,6 +1,3 @@
-import {Buffer, Device, TextureFormat, TypedArray, TypedArrayConstructor} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
-
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
   const x = points.map(p => p[0]);
@@ -76,35 +73,4 @@ export function scaleToAspectRatio(boundingBox: number[], width: number, height:
 export function getTextureCoordinates(point: number[], bounds: number[]) {
   const [xMin, yMin, xMax, yMax] = bounds;
   return [(point[0] - xMin) / (xMax - xMin), (point[1] - yMin) / (yMax - yMin)];
-}
-
-// Returns format and type for creating texture objects
-export function getTextureFormat(device: Device, floatTargetSupport?: boolean): TextureFormat {
-  return floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
-}
-
-/******************************************************************************
- * DO NOT SUBMIT - debugging only
- */
-
-/** DO NOT SUBMIT - redundant */
-export function getBufferData(
-  buffer: Buffer,
-  TypedArray: TypedArrayConstructor,
-  byteOffset = 0,
-  byteLength = buffer.byteLength
-): TypedArray {
-  const _buffer = buffer as any;
-  _buffer.device.assertWebGL2();
-
-  const dstLength = byteLength / TypedArray.BYTES_PER_ELEMENT;
-  const dstArray = new TypedArray(dstLength);
-  const dstOffset = 0;
-
-  // Use GL.COPY_READ_BUFFER to avoid disturbing other targets and locking type
-  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, _buffer.handle);
-  _buffer.gl2.getBufferSubData(GL.COPY_READ_BUFFER, byteOffset, dstArray, dstOffset, dstLength);
-  _buffer.gl.bindBuffer(GL.COPY_READ_BUFFER, null);
-
-  return dstArray;
 }
