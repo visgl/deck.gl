@@ -25,7 +25,7 @@ export default `\
 precision highp float;
 
 uniform float opacity;
-uniform sampler2D texture;
+uniform sampler2D weightsTexture;
 uniform sampler2D colorTexture;
 uniform float aggregationMode;
 
@@ -43,7 +43,7 @@ vec4 getLinearColor(float value) {
 }
 
 void main(void) {
-  vec4 weights = texture(texture, vTexCoords);
+  vec4 weights = texture(weightsTexture, vTexCoords);
   float weight = weights.r;
 
   if (aggregationMode > 0.5) {

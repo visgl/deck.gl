@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import type {Device, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import type {Buffer, Device, Texture} from '@luma.gl/core';
+import {Model} from '@luma.gl/engine';
 import {Layer, LayerContext, project32} from '@deck.gl/core';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
 type _TriangleLayerProps = {
+  data: {attributes: {positions: Buffer; texCoords: Buffer}};
   colorDomain: number[];
   aggregationMode: string;
   threshold: number;
@@ -32,7 +33,7 @@ type _TriangleLayerProps = {
   vertexCount: number;
   colorTexture: Texture;
   maxTexture: Texture;
-  texture: Texture;
+  weightsTexture: Texture;
 };
 
 export default class TriangleLayer extends Layer<_TriangleLayerProps> {
@@ -40,6 +41,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   state!: {
     model: Model;
+    positions: Buffer;
+    texCoords: Buffer;
   };
 
   getShaders() {
@@ -47,40 +50,31 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   }
 
   initializeState({device}: LayerContext): void {
-    const attributeManager = this.getAttributeManager()!;
-    attributeManager.add({
-      positions: {size: 3, noAlloc: true},
-      texCoords: {size: 2, noAlloc: true}
-    });
-    this.setState({
-      model: this._getModel(device)
-    });
+    this.setState({model: this._getModel(device)});
   }
 
   _getModel(device: Device): Model {
-    const {vertexCount} = this.props;
+    const {vertexCount, data, weightsTexture, maxTexture, colorTexture} = this.props;
 
     return new Model(device, {
       ...this.getShaders(),
       id: this.props.id,
-      geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
-        vertexCount
-      })
+      bindings: {weightsTexture, maxTexture, colorTexture},
+      attributes: data.attributes,
+      bufferLayout: [
+        {name: 'positions', format: 'float32x3'},
+        {name: 'texCoords', format: 'float32x2'}
+      ],
+      topology: 'triangle-fan-webgl',
+      vertexCount
     });
   }
 
   draw({uniforms}): void {
     const {model} = this.state;
-
-    const {texture, maxTexture, colorTexture, intensity, threshold, aggregationMode, colorDomain} =
-      this.props;
-
+    const {intensity, threshold, aggregationMode, colorDomain} = this.props;
     model.setUniforms({
       ...uniforms,
-      texture,
-      maxTexture,
-      colorTexture,
       intensity,
       threshold,
       aggregationMode,
