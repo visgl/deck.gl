@@ -155,21 +155,19 @@ export const debugFBO = function (
     canvas.style.transform = 'scaleY(-1)';
     document.body.appendChild(canvas);
 
-    if (singlePixel) {
-      canvasInfo = document.createElement('div');
-      canvasInfo.id = `${id}-info`;
-      canvasInfo.innerHTML = 'HI';
-      canvasInfo.style.zIndex = '100';
-      canvasInfo.style.position = 'absolute';
-      canvasInfo.style.top = top;
-      canvasInfo.style.left = left;
-      canvasInfo.style.padding = '4px';
-      canvasInfo.style.color = 'white';
-      canvasInfo.style['white-space'] = 'pre';
-      canvasInfo.style.fontSize = '10px';
-      canvasInfo.style.background = 'rgba(0,0,0,0.5)';
-      document.body.appendChild(canvasInfo);
-    }
+    canvasInfo = document.createElement('div');
+    canvasInfo.id = `${id}-info`;
+    canvasInfo.innerHTML = 'HI';
+    canvasInfo.style.zIndex = '100';
+    canvasInfo.style.position = 'absolute';
+    canvasInfo.style.top = top;
+    canvasInfo.style.left = left;
+    canvasInfo.style.padding = '4px';
+    canvasInfo.style.color = 'white';
+    canvasInfo.style['white-space'] = 'pre';
+    canvasInfo.style.fontSize = '10px';
+    canvasInfo.style.background = 'rgba(0,0,0,0.5)';
+    document.body.appendChild(canvasInfo);
   }
   if (canvas.width !== fbo.width || canvas.height !== canvasHeight) {
     canvas.width = fbo.width;
@@ -196,6 +194,7 @@ export const debugFBO = function (
   }
 
   // Full map
+  const maxRGBA = [0, 0, 0, 0];
   const offset = minimap ? color.length : 0;
   console.log(`drawing FBO: ${id}`);
   if (color.some(v => v > 0)) {
@@ -206,11 +205,14 @@ export const debugFBO = function (
     imageData.data[offset + i + 1] = color[i + 1] * rgbaScale;
     imageData.data[offset + i + 2] = color[i + 2] * rgbaScale;
     imageData.data[offset + i + 3] = opaque ? 255 : color[i + 3] * rgbaScale;
+
+    for (let c = 0; c < 4; c++) {
+      maxRGBA[c] = Math.max(maxRGBA[c], color[i + c]);
+    }
   }
 
   ctx.putImageData(imageData, 0, 0);
 
-  if (singlePixel) {
-    canvasInfo.innerHTML = [...color].map(n => n.toFixed(8)).join('\n');
-  }
+  const debugInfo = singlePixel ? color : maxRGBA;
+  canvasInfo.innerHTML = [...debugInfo].map(n => n.toFixed(8)).join('\n');
 };
