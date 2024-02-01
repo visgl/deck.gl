@@ -151,6 +151,7 @@ export default class Map extends PureComponent {
           onHover={this._onHover}
           onClick={this._onClick}
           useDevicePixels={useDevicePixels}
+          debug={true}
           drawPickingColors={drawPickingColors}
           ContextProvider={MapContext.Provider}
           _onMetrics={this._onMetrics}
@@ -178,4 +179,3 @@ export default class Map extends PureComponent {
     );
   }
 }
-
