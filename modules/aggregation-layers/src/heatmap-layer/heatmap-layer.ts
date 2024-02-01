@@ -485,24 +485,15 @@ export default class HeatmapLayer<
       ...maxWeightsTransformShaders,
       vertexCount: textureSize * textureSize,
       topology: 'point-list', // TODO(felix) why is this required? We have no attributes
-      parameters: false
-        ? {
-            // DEBUG blend color
-            depthCompare: 'always',
-            blendColorOperation: 'add',
-            blendColorSrcFactor: 'one',
-            blendColorDstFactor: 'one'
-          }
-        : {
-            // Correct
-            depthWriteEnabled: false,
-            blendColorOperation: 'max',
-            blendAlphaOperation: 'max',
-            blendColorSrcFactor: 'one',
-            blendColorDstFactor: 'one',
-            blendAlphaSrcFactor: 'one',
-            blendAlphaDstFactor: 'one'
-          }
+      parameters: {
+        depthWriteEnabled: false,
+        blendColorOperation: 'max',
+        blendAlphaOperation: 'max',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      }
     });
 
     this.setState({
