@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "9.0.0-beta.1",
+  "version": "9.0.0-beta.2",
   "keywords": [
     "webgl",
     "visualization",
@@ -30,18 +30,18 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@deck.gl/aggregation-layers": "9.0.0-beta.1",
-    "@deck.gl/carto": "9.0.0-beta.1",
-    "@deck.gl/core": "9.0.0-beta.1",
-    "@deck.gl/extensions": "9.0.0-beta.1",
-    "@deck.gl/geo-layers": "9.0.0-beta.1",
-    "@deck.gl/google-maps": "9.0.0-beta.1",
-    "@deck.gl/json": "9.0.0-beta.1",
-    "@deck.gl/layers": "9.0.0-beta.1",
-    "@deck.gl/mapbox": "9.0.0-beta.1",
-    "@deck.gl/mesh-layers": "9.0.0-beta.1",
-    "@deck.gl/react": "9.0.0-beta.1",
-    "@deck.gl/widgets": "9.0.0-beta.1"
+    "@deck.gl/aggregation-layers": "9.0.0-beta.2",
+    "@deck.gl/carto": "9.0.0-beta.2",
+    "@deck.gl/core": "9.0.0-beta.2",
+    "@deck.gl/extensions": "9.0.0-beta.2",
+    "@deck.gl/geo-layers": "9.0.0-beta.2",
+    "@deck.gl/google-maps": "9.0.0-beta.2",
+    "@deck.gl/json": "9.0.0-beta.2",
+    "@deck.gl/layers": "9.0.0-beta.2",
+    "@deck.gl/mapbox": "9.0.0-beta.2",
+    "@deck.gl/mesh-layers": "9.0.0-beta.2",
+    "@deck.gl/react": "9.0.0-beta.2",
+    "@deck.gl/widgets": "9.0.0-beta.2"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
