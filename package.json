@@ -62,8 +62,8 @@
     "@babel/register": "^7.13.0",
     "@loaders.gl/csv": "4.1.0-alpha.9",
     "@loaders.gl/polyfills": "4.1.0-alpha.9",
-    "@luma.gl/test-utils": "9.0.0-beta.1",
-    "@luma.gl/webgpu": "9.0.0-beta.1",
+    "@luma.gl/test-utils": "9.0.0-beta.3",
+    "@luma.gl/webgpu": "9.0.0-beta.3",
     "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.4",
     "@probe.gl/test-utils": "^4.0.4",
@@ -91,7 +91,7 @@
   },
   "dependencies": {},
   "volta": {
-    "node": "16.19.1",
+    "node": "18.19.0",
     "yarn": "1.22.19"
   }
 }

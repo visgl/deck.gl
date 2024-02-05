@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {readPixelsToArray, clear, withGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
@@ -223,7 +222,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
-      clear(this.context.device, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
+      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
 
       filterModel.updateModuleSettings(params.moduleParameters);
       // @ts-expect-error filterValue and filterIndices should always have buffer value
@@ -231,8 +230,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         ...filterValues.getValue(),
         ...filterIndices?.getValue()
       });
-      withGLParameters(
-        filterModel.device,
+      filterModel.device.withParametersWebGL(
         {
           framebuffer: filterFBO,
           // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
@@ -243,7 +241,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
           filterModel.draw(this.context.renderPass);
         }
       );
-      const color = readPixelsToArray(filterFBO);
+      const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
         count += color[i];

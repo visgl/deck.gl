@@ -1,5 +1,5 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {WEBGLRenderbuffer, withGLParameters} from '@luma.gl/webgl';
+import {WEBGLRenderbuffer} from '@luma.gl/webgl';
 import {default as LayersPass} from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
@@ -47,8 +47,7 @@ export default class ShadowPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
-    withGLParameters(
-      this.device,
+    this.device.withParametersWebGL(
       {
         depthRange: [0, 1],
         depthTest: true,

@@ -4,7 +4,6 @@
 import type {Device, Framebuffer} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {setGLParameters, withGLParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
 
 type ScreenPassProps = {
@@ -34,11 +33,10 @@ export default class ScreenPass extends Pass {
     const [drawingBufferWidth, drawingBufferHeight] =
       // @ts-expect-error TODO - assuming WebGL context
       this.device.canvasContext.getDrawingBufferSize();
-    setGLParameters(this.device, {viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
+    this.device.setParametersWebGL({viewport: [0, 0, drawingBufferWidth, drawingBufferHeight]});
 
     // TODO change to device when luma.gl is fixed
-    withGLParameters(
-      this.device,
+    this.device.withParametersWebGL(
       {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]},
       () => this._renderPass(this.device, params)
     );
@@ -59,7 +57,7 @@ export default class ScreenPass extends Pass {
    */
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer} = options;
-    clear(this.device, {color: true});
+    this.device.clearWebGL({color: true});
     this.model.setShaderModuleProps(options.moduleSettings);
     this.model.setBindings({
       texture: inputBuffer.colorAttachments[0]
