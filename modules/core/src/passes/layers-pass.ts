@@ -1,5 +1,6 @@
 import type {Device} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import {clear} from '@luma.gl/webgl';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -59,6 +60,10 @@ export default class LayersPass extends Pass {
   render(options: LayersPassRenderOptions): any {
     // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+
+    // TODO why is this force-clear necessary when options.target not null?
+    const framebuffer = options.target ? options.target : undefined;
+    clear(this.device, {framebuffer, color: true});
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
