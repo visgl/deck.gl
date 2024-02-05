@@ -5,7 +5,8 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  DefaultProps
+  DefaultProps,
+  UpdateParameters
 } from '@deck.gl/core';
 import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
@@ -31,7 +32,9 @@ class RasterColumnLayer extends ColumnLayer {
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, vs};
+    const data = this.props.data as unknown as Raster & {length: number};
+    const BLOCK_WIDTH = data.blockWidth || Math.sqrt(data.length);
+    return {...shaders, defines: {...shaders.defines, BLOCK_WIDTH}, vs};
   }
 
   initializeState() {
