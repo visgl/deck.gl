@@ -50,7 +50,7 @@ export default class ScreenPass extends Pass {
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer, outputBuffer} = options;
     clear(this.device, {framebuffer: outputBuffer, color: true});
-    this.model.shaderInputs.setProps({vignette: options.moduleSettings});
+    this.model.shaderInputs.setProps(options.moduleSettings);
     this.model.setBindings({
       texSrc: inputBuffer.colorAttachments[0]
     });

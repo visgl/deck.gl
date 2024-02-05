@@ -38,7 +38,9 @@ export default class PostProcessEffect implements Effect {
       if (target !== undefined && index === this.passes.length - 1) {
         outputBuffer = target;
       }
-      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings: this.props});
+      const moduleSettings = {};
+      moduleSettings[this.module.name] = this.props;
+      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings});
       const switchBuffer = outputBuffer;
       outputBuffer = inputBuffer;
       inputBuffer = switchBuffer;
