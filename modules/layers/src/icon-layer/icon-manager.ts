@@ -1,6 +1,5 @@
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
-// import {copyToTexture} from '@luma.gl/webgl';
 // import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
