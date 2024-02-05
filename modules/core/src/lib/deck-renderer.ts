@@ -9,6 +9,7 @@ import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
+import {WEBGLRenderbuffer} from '@luma.gl/webgl';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
@@ -129,16 +130,32 @@ export default class DeckRenderer {
     const {renderBuffers} = this;
     const size = this.device!.canvasContext!.getDrawingBufferSize();
     if (renderBuffers.length === 0) {
-      renderBuffers.push(
-        this.device.createFramebuffer({
-          colorAttachments: ['rgba8unorm'],
-          depthStencilAttachment: 'depth16unorm'
-        }),
-        this.device.createFramebuffer({
-          colorAttachments: ['rgba8unorm'],
-          depthStencilAttachment: 'depth16unorm'
-        })
-      );
+      [0, 1].map(i => {
+        const texture = this.device.createTexture({
+          width: 1,
+          height: 1,
+          sampler: {
+            minFilter: 'linear',
+            magFilter: 'linear',
+            addressModeU: 'clamp-to-edge',
+            addressModeV: 'clamp-to-edge'
+          }
+        });
+        const depthBuffer = new WEBGLRenderbuffer(this.device as any, {
+          format: 'depth16unorm',
+          width: 1,
+          height: 1
+        });
+        renderBuffers.push(
+          this.device.createFramebuffer({
+            width: 1,
+            height: 1,
+            colorAttachments: [texture],
+            // @ts-expect-error Renderbuffer typing not solved in luma.gl
+            depthStencilAttachment: depthBuffer
+          })
+        );
+      });
     }
     for (const buffer of renderBuffers) {
       buffer.resize(size);

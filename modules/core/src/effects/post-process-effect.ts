@@ -94,7 +94,6 @@ void main() {
   vec2 texCoord = coordinate;
 
   fragColor = texture(texSrc, texCoord);
-  // fragColor = vec4(1.0, 0.0, 0.0, 1.0);
   fragColor = ${func}(fragColor, texSize, texCoord);
 }
 `;
