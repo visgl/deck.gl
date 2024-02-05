@@ -131,7 +131,7 @@ const GPU_GRID_LAYER_PROPS = {
 const HEAT_LAYER_PROPS = {
   getData: () => dataSamples.points,
   props: {
-    id: 'heatmp-layer',
+    id: 'heatmap-layer',
     opacity: 1,
     pickable: false,
     getPosition: d => d.COORDINATES
