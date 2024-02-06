@@ -61,10 +61,6 @@ export default class LayersPass extends Pass {
     // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
 
-    // TODO why is this force-clear necessary when options.target not null?
-    const framebuffer = options.target ? options.target : undefined;
-    clear(this.device, {framebuffer, color: true});
-
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters: {
