@@ -9,7 +9,6 @@ import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
-import {WEBGLRenderbuffer} from '@luma.gl/webgl';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
