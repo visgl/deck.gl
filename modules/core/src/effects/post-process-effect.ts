@@ -34,7 +34,6 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
     let outputBuffer: Framebuffer | null = params.swapBuffer;
 
     for (let index = 0; index < this.passes.length; index++) {
-      // if (target && index === this.passes.length - 1) {
       const isLastPass = target !== undefined && index === this.passes.length - 1;
       if (isLastPass) {
         outputBuffer = target;

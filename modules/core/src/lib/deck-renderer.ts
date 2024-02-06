@@ -128,7 +128,7 @@ export default class DeckRenderer {
 
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
-    const size = this.device!.canvasContext!.getDrawingBufferSize();
+    const size = this.device.canvasContext!.getDrawingBufferSize();
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
         const texture = this.device.createTexture({
@@ -148,6 +148,7 @@ export default class DeckRenderer {
         });
         renderBuffers.push(
           this.device.createFramebuffer({
+            id: `deck-render-buffer-${i}`,
             width: 1,
             height: 1,
             colorAttachments: [texture],
