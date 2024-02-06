@@ -22,7 +22,7 @@ import {registerLoaders} from '@loaders.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 
 import log from '../utils/log';
-import {register} from '../debug';
+import {register} from '../debug/index';
 import jsonLoader from '../utils/json-loader';
 
 declare global {
