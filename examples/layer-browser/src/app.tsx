@@ -24,7 +24,7 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
-import {ink, vignette} from '@luma.gl/shadertools';
+import {ink} from '@luma.gl/shadertools';
 
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],
@@ -54,10 +54,7 @@ const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
   DIRECTIONAL_LIGHT_SHADOW
 });
 
-const POST_PROCESS = [
-  new PostProcessEffect(ink, {strength: 0.9}),
-  new PostProcessEffect(vignette, {amount: 0.4, radius: 0.5})
-];
+const POST_PROCESS = new PostProcessEffect(ink, {strength: 0.5});
 
 const LAND_COVER = [
   [
@@ -80,7 +77,7 @@ export default class App extends PureComponent {
       },
       settings: {
         shadow: false,
-        postProcessing: true,
+        postProcessing: false,
         orthographic: false,
         multiview: false,
         infovis: false,
@@ -269,7 +266,7 @@ export default class App extends PureComponent {
 
     return [
       shadow ? GLOBAL_LIGHTING_WITH_SHADOW : GLOBAL_LIGHTING,
-      ...(postProcessing ? POST_PROCESS : [])
+      postProcessing && POST_PROCESS
     ].filter(Boolean);
   }
 
