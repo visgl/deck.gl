@@ -124,6 +124,7 @@ function resizeTexture(
 
   const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
   // @ts-expect-error TODO v9 import
+  // device.copyToTextureWebGL(texture, newTexture, {
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
