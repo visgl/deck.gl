@@ -1,7 +1,6 @@
 /* global document */
 
 import {Framebuffer} from '@luma.gl/core';
-import {readPixelsToArray} from '@luma.gl/webgl';
 
 /** Debug utility to draw FBO contents onto screen */
 // eslint-disable-next-line
@@ -9,7 +8,7 @@ export const debugFBO = function (
   fbo: Framebuffer,
   {minimap, opaque}: {minimap?: boolean; opaque?: boolean} = {}
 ) {
-  const color = readPixelsToArray(fbo);
+  const color = fbo.device.readPixelsToArrayWebGL(fbo);
   let canvas = document.getElementById('fbo-canvas') as HTMLCanvasElement;
   const canvasHeight = (minimap ? 2 : 1) * fbo.height;
   if (!canvas) {
