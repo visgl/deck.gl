@@ -132,28 +132,12 @@ export default class DeckRenderer {
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
         const texture = this.device.createTexture({
-          width: 1,
-          height: 1,
-          sampler: {
-            minFilter: 'linear',
-            magFilter: 'linear',
-            addressModeU: 'clamp-to-edge',
-            addressModeV: 'clamp-to-edge'
-          }
-        });
-        const depthBuffer = new WEBGLRenderbuffer(this.device as any, {
-          format: 'depth16unorm',
-          width: 1,
-          height: 1
+          sampler: {minFilter: 'linear', magFilter: 'linear'}
         });
         renderBuffers.push(
           this.device.createFramebuffer({
-            id: `deck-render-buffer-${i}`,
-            width: 1,
-            height: 1,
-            colorAttachments: [texture],
-            // @ts-expect-error Renderbuffer typing not solved in luma.gl
-            depthStencilAttachment: depthBuffer
+            id: `deck-renderbuffer-${i}`,
+            colorAttachments: [texture]
           })
         );
       });
