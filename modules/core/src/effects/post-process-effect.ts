@@ -7,7 +7,7 @@ import type {Effect, PostRenderOptions} from '../lib/effect';
 
 export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
-  props: any;
+  props: ShaderPassT['props'];
   module: ShaderPassT;
   passes?: ScreenPass[];
 
@@ -18,7 +18,7 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
     this.module = module;
   }
 
-  setProps(props: any) {
+  setProps(props: ShaderPassT['props']) {
     this.props = props;
   }
 
@@ -63,29 +63,14 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
 }
 
 function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
-  if (!module.passes) {
-    const fs = getFragmentShaderForRenderPass(module);
-    const pass = new ScreenPass(device, {
-      id,
-      module,
-      fs
-    });
-    return [pass];
-  }
-
   return module.passes.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
-
-    return new ScreenPass(device, {
-      id: idn,
-      module,
-      fs
-    });
+    return new ScreenPass(device, {id: idn, module, fs});
   });
 }
 
-const FILTER_FS_TEMPLATE = func => `\
+const FS_TEMPLATE_INPUTS = `\
 #version 300 es
 uniform sampler2D texSrc;
 uniform vec2 texSize;
@@ -95,34 +80,24 @@ in vec2 coordinate;
 in vec2 uv;
 
 out vec4 fragColor;
+`;
 
+const FILTER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  fragColor = texture(texSrc, texCoord);
-  fragColor = ${func}(fragColor, texSize, texCoord);
+  fragColor = texture(texSrc, coordinate);
+  fragColor = ${func}(fragColor, texSize, coordinate);
 }
 `;
 
-const SAMPLER_FS_TEMPLATE = func => `\
-#version 300 es
-uniform sampler2D texSrc;
-uniform vec2 texSize;
-
-in vec2 position;
-in vec2 coordinate;
-in vec2 uv;
-
-out vec4 fragColor;
-
+const SAMPLER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  fragColor = ${func}(texSrc, texSize, texCoord);
+  fragColor = ${func}(texSrc, texSize, coordinate);
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module): string {
+function getFragmentShaderForRenderPass(module: ShaderPass, pass: ShaderPass['passes'][0]): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);
