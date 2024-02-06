@@ -1,6 +1,6 @@
 import type {Device} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
-import debug from '../debug';
+import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 
