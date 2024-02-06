@@ -65,7 +65,8 @@ export class TerrainEffect implements Effect {
       return;
     }
 
-    const {viewports, isPicking = false} = opts;
+    const {viewports} = opts;
+    const isPicking = opts.pass.startsWith('picking');
     this.isPicking = isPicking;
     this.isDrapingEnabled = true;
 
