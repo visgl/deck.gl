@@ -9,7 +9,7 @@ import Pass from './pass';
 
 type ScreenPassProps = {
   module: ShaderModule;
-  fs?: string;
+  fs: string;
   id: string;
 };
 
@@ -26,8 +26,8 @@ export default class ScreenPass extends Pass {
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
     const {module, fs, id} = props;
-    // @ts-expect-error ClipSpace prototype
-    this.model = new ClipSpace(device, {id, fs, modules: [module]});
+    const parameters = {depthWriteEnabled: false, depthCompare: 'always' as const};
+    this.model = new ClipSpace(device, {id, fs, modules: [module], parameters});
   }
 
   render(params: ScreenPassRenderOptions): void {
@@ -49,25 +49,13 @@ export default class ScreenPass extends Pass {
    */
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer, outputBuffer} = options;
-    clear(this.device, {framebuffer: outputBuffer || undefined, color: true});
+    const texSize = [inputBuffer.width, inputBuffer.height];
     this.model.shaderInputs.setProps(options.moduleSettings);
-    this.model.setBindings({
-      texSrc: inputBuffer.colorAttachments[0]
-    });
-    this.model.setUniforms({
-      texSize: [inputBuffer.width, inputBuffer.height]
-    });
-    this.model.setParameters({
-      depthWriteEnabled: false,
-      depthCompare: 'always'
-    });
-
-    // const defaultRenderPass = this.device.getDefaultRenderPass();
+    this.model.setBindings({texSrc: inputBuffer.colorAttachments[0]});
+    this.model.setUniforms({texSize});
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
-      parameters: {
-        viewport: [0, 0, inputBuffer.width, inputBuffer.height]
-      },
+      parameters: {viewport: [0, 0, ...texSize]},
       clearColor: [0, 0, 0, 0],
       clearDepth: 1
     });
