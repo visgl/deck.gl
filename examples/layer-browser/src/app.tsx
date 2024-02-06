@@ -55,8 +55,8 @@ const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
 });
 
 const POST_PROCESS = [
-  new PostProcessEffect(ink, {strength: 0.9})
-  // new PostProcessEffect(vignette, {strength: 0.5})
+  new PostProcessEffect(ink, {strength: 0.9}),
+  new PostProcessEffect(vignette, {amount: 0.4, radius: 0.5})
 ];
 
 const LAND_COVER = [

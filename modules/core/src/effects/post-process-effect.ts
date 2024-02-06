@@ -5,13 +5,13 @@ import ScreenPass from '../passes/screen-pass';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
 
-export default class PostProcessEffect implements Effect {
+export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
   props: any;
-  module: ShaderPass;
+  module: ShaderPassT;
   passes?: ScreenPass[];
 
-  constructor(module: ShaderPass, props: any = {}) {
+  constructor(module: ShaderPassT, props: ShaderPassT['props']) {
     this.id = `${module.name}-pass`;
     this.props = props;
     normalizeShaderModule(module);
@@ -31,19 +31,22 @@ export default class PostProcessEffect implements Effect {
 
     const {target} = params;
     let inputBuffer = params.inputBuffer;
-    let outputBuffer = params.swapBuffer;
+    let outputBuffer: Framebuffer | null = params.swapBuffer;
 
     for (let index = 0; index < this.passes.length; index++) {
       // if (target && index === this.passes.length - 1) {
-      if (target !== undefined && index === this.passes.length - 1) {
+      const isLastPass = target !== undefined && index === this.passes.length - 1;
+      if (isLastPass) {
         outputBuffer = target;
       }
       const moduleSettings = {};
       moduleSettings[this.module.name] = this.props;
       this.passes[index].render({inputBuffer, outputBuffer, moduleSettings});
-      const switchBuffer = outputBuffer;
-      outputBuffer = inputBuffer;
-      inputBuffer = switchBuffer;
+      if (!isLastPass) {
+        const switchBuffer = outputBuffer as Framebuffer;
+        outputBuffer = inputBuffer;
+        inputBuffer = switchBuffer;
+      }
     }
     return inputBuffer;
   }

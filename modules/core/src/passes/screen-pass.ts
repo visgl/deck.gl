@@ -15,7 +15,7 @@ type ScreenPassProps = {
 
 type ScreenPassRenderOptions = {
   inputBuffer: Framebuffer;
-  outputBuffer: Framebuffer;
+  outputBuffer: Framebuffer | null;
   moduleSettings: any;
 };
 
@@ -49,7 +49,7 @@ export default class ScreenPass extends Pass {
    */
   protected _renderPass(device: Device, options: ScreenPassRenderOptions) {
     const {inputBuffer, outputBuffer} = options;
-    clear(this.device, {framebuffer: outputBuffer, color: true});
+    clear(this.device, {framebuffer: outputBuffer || undefined, color: true});
     this.model.shaderInputs.setProps(options.moduleSettings);
     this.model.setBindings({
       texSrc: inputBuffer.colorAttachments[0]
