@@ -1,6 +1,5 @@
 import type {Device} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
-// import {clear} from '@luma.gl/webgl';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
