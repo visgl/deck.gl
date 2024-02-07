@@ -234,7 +234,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   }
 
   // Translation is already added to the high parts
-  return project_offset_(position_world + project_uModelMatrix * vec4(position64Low, 0.0));
+  return project_offset_(position_world) + project_offset_(project_uModelMatrix * vec4(position64Low, 0.0));
 }
 
 vec4 project_position(vec4 position) {
