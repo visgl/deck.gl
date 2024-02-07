@@ -4,7 +4,6 @@
 import type {Device, Framebuffer} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {setGLParameters, withGLParameters, clear} from '@luma.gl/webgl';
 import Pass from './pass';
 
 type ScreenPassProps = {
