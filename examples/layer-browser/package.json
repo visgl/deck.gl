@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "start-local": "vite --config ../vite.config.local.mjs"
   },

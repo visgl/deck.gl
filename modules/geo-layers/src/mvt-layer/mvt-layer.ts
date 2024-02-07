@@ -25,7 +25,7 @@ import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
 import {
   urlType,
   Tileset2D,
@@ -34,7 +34,7 @@ import {
   URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
-} from '../tileset-2d';
+} from '../tileset-2d/index';
 
 const WORLD_SIZE = 512;
 

@@ -13,15 +13,15 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
 import {
   Tileset2D,
   Tile2DHeader,
   RefinementStrategy,
   STRATEGY_DEFAULT,
   Tileset2DProps
-} from '../tileset-2d';
-import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d';
+} from '../tileset-2d/index';
+import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,

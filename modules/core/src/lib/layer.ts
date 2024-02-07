@@ -29,7 +29,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import debug from '../debug';
+import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
