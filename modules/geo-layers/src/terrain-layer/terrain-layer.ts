@@ -142,7 +142,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   state!: {
     isTiled?: boolean;
-    terrain: MeshAttributes;
+    terrain?: MeshAttributes;
     zRange?: ZRange | null;
   };
 
@@ -347,6 +347,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           refinementStrategy
         }
       );
+    }
+
+    if (!elevationData) {
+      return null;
     }
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
