@@ -138,12 +138,12 @@ export function getCullBounds({
   /** Current viewport */
   viewport: Viewport;
   /** Current z range */
-  z: ZRange | number | undefined;
+  z: ZRange | number | null;
   /** Culling rectangle in screen space */
   cullRect: {x: number; y: number; width: number; height: number};
 }): [number, number, number, number][] {
   const subViewports = viewport.subViewports || [viewport];
-  return subViewports.map(v => getCullBoundsInViewport(v, z, cullRect));
+  return subViewports.map(v => getCullBoundsInViewport(v, z || 0, cullRect));
 }
 
 function getCullBoundsInViewport(
@@ -273,7 +273,7 @@ export function getTileIndices({
   viewport: Viewport;
   maxZoom?: number;
   minZoom?: number;
-  zRange: ZRange | undefined;
+  zRange: ZRange | null;
   extent?: Bounds;
   tileSize?: number;
   modelMatrix?: Matrix4;

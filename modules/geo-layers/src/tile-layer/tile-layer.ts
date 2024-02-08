@@ -153,6 +153,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
 
+  state!: {
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+  };
+
   initializeState() {
     this.state = {
       tileset: null,
@@ -165,8 +171,10 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles?.every(
-      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+    return Boolean(
+      this.state?.tileset?.selectedTiles?.every(
+        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+      )
     );
   }
 
@@ -194,7 +202,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         tileset.reloadAll();
       } else {
         // some render options changed, regenerate sub layers now
-        this.state.tileset.tiles.forEach(tile => {
+        tileset.tiles.forEach(tile => {
           tile.layers = null;
         });
       }
@@ -235,7 +243,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _updateTileset(): void {
-    const {tileset} = this.state;
+    const tileset = this.state.tileset!;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
@@ -260,7 +268,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles);
+      onViewportLoad(tileset!.selectedTiles!);
     }
   }
 
@@ -334,7 +342,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   renderLayers(): Layer | null | LayersList {
-    return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
+    return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded && !tile.content) {
@@ -371,6 +379,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return this.state.tileset.isTileVisible(tile, cullRect);
+    return this.state.tileset!.isTileVisible(tile, cullRect);
   }
 }
