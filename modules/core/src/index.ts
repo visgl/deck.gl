@@ -23,7 +23,7 @@
 export {VERSION} from './lib/init';
 
 // Import shaderlib to make sure shader modules are initialized
-export {getPipelineFactory, getShaderAssembler} from './shaderlib';
+export {getPipelineFactory, getShaderAssembler} from './shaderlib/index';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
@@ -59,7 +59,14 @@ export {default as OrthographicViewport} from './viewports/orthographic-viewport
 export {default as FirstPersonViewport} from './viewports/first-person-viewport';
 
 // Shader modules
-export {picking, project, project32, gouraudLighting, phongLighting, shadow} from './shaderlib';
+export {
+  picking,
+  project,
+  project32,
+  gouraudLighting,
+  phongLighting,
+  shadow
+} from './shaderlib/index';
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
@@ -129,10 +136,10 @@ export type {
 } from './types/layer-props';
 export type {FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
-export type {ConstructorOf as _ConstructorOf, ShaderModule as _ShaderModule} from './types/types';
+export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect, PreRenderOptions, PostRenderOptions} from './lib/effect';
-export type {PickingUniforms, ProjectUniforms} from './shaderlib';
+export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';

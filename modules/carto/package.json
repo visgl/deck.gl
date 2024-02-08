@@ -2,7 +2,8 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "9.0.0-alpha.6",
+  "type": "module",
+  "version": "9.0.0-beta.2",
   "publishConfig": {
     "access": "public"
   },
@@ -18,13 +19,19 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "types": "typed/index.d.ts",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
@@ -40,8 +47,8 @@
     "@loaders.gl/loader-utils": "4.1.0-alpha.9",
     "@loaders.gl/mvt": "4.1.0-alpha.9",
     "@loaders.gl/tiles": "4.1.0-alpha.9",
-    "@luma.gl/constants": "9.0.0-alpha.52",
-    "@luma.gl/core": "9.0.0-alpha.52",
+    "@luma.gl/constants": "9.0.0-beta.3",
+    "@luma.gl/core": "9.0.0-beta.3",
     "@math.gl/web-mercator": "^4.0.0",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
@@ -51,7 +58,7 @@
     "h3-js": "^4.1.0",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1",
-    "quadbin": "^0.1.9"
+    "quadbin": "^0.2.0"
   },
   "devDependencies": {
     "@loaders.gl/schema": "4.1.0-alpha.9",

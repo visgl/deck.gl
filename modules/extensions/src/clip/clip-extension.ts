@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, _ShaderModule as ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
+import {LayerExtension} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
 

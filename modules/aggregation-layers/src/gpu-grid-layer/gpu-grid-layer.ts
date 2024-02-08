@@ -189,7 +189,7 @@ export default class GPUGridLayer<
       dimensions: DIMENSIONS
     });
     this.setState({
-      gpuAggregation: true,
+      gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
       projectPoints: false, // aggregation in world space
       isSupported,
       weights: {

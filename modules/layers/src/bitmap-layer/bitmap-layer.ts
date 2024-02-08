@@ -33,7 +33,7 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Geometry, Model} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
 import type {Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
@@ -278,7 +278,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
-    if (moduleParameters.pickingActive && disablePicking) {
+    if (moduleParameters.picking.isActive && disablePicking) {
       return;
     }
 

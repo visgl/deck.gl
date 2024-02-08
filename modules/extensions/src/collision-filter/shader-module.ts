@@ -1,6 +1,6 @@
 import {Framebuffer, Texture} from '@luma.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 const vs = `
 #ifdef NON_INSTANCED_MODEL

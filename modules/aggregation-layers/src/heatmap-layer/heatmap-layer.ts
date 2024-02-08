@@ -24,13 +24,11 @@ import {
   boundsContain,
   packVertices,
   scaleToAspectRatio,
-  getTextureCoordinates,
-  getTextureParams
+  getTextureCoordinates
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
-import {withGLParameters} from '@luma.gl/webgl';
 import {
   Accessor,
   AccessorFunction,
@@ -51,16 +49,16 @@ import AggregationLayer, {AggregationLayerProps} from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
-import vsMax from './max-vs.glsl';
-import fsMax from './max-fs.glsl';
+import maxVs from './max-vs.glsl';
+import maxFs from './max-fs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
   mipmaps: false,
   sampler: {
-    minFilter: 'nearest',
-    magFilter: 'nearest',
+    minFilter: 'linear',
+    magFilter: 'linear',
     addressModeU: 'clamp-to-edge',
     addressModeV: 'clamp-to-edge'
   }
@@ -205,7 +203,6 @@ export default class HeatmapLayer<
     maxWeightTransform?: TextureTransform;
     textureSize: number;
     format: TextureFormat;
-    type: GL;
     weightsScale: number;
     visibleWorldBounds: number[];
     viewportCorners: number[][];
@@ -303,7 +300,7 @@ export default class HeatmapLayer<
         maxTexture: maxWeightsTexture,
         colorTexture,
         aggregationMode: AGGREGATION_MODE[aggregation] || 0,
-        texture: weightsTexture,
+        weightsTexture,
         intensity,
         threshold,
         colorDomain
@@ -369,17 +366,21 @@ export default class HeatmapLayer<
   }
 
   _createTextures() {
-    const {textureSize, format, type} = this.state;
+    const {textureSize, format} = this.state;
 
     this.setState({
       weightsTexture: this.context.device.createTexture({
+        ...TEXTURE_PROPS,
         width: textureSize,
         height: textureSize,
-        format,
-        type,
-        ...TEXTURE_PROPS
+        format
       }),
-      maxWeightsTexture: this.context.device.createTexture({format, type, ...TEXTURE_PROPS}) // 1 X 1 texture,
+      maxWeightsTexture: this.context.device.createTexture({
+        ...TEXTURE_PROPS,
+        width: 1,
+        height: 1,
+        format
+      })
     });
   }
 
@@ -398,61 +399,71 @@ export default class HeatmapLayer<
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D as number);
     const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const {format, type} = getTextureParams({device, floatTargetSupport});
+    const format: TextureFormat = floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
-    this.setState({textureSize, format, type, weightsScale});
+    this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {
       log.warn(
-        `HeatmapLayer: ${this.id} rendering to float texture not supported, fallingback to low precession format`
+        `HeatmapLayer: ${this.id} rendering to float texture not supported, falling back to low precision format`
       )();
     }
   }
 
-  getShaders(type) {
-    return super.getShaders(
-      type === 'max-weights-transform'
-        ? {
-            vs: vsMax,
-            _fs: fsMax
-          }
-        : {
-            vs: weightsVs,
-            _fs: weightsFs
-          }
-    );
-  }
-
-  _createWeightsTransform(shaders = {}) {
+  _createWeightsTransform(shaders: {vs: string; fs?: string}) {
     let {weightsTransform} = this.state;
-    weightsTransform?.delete();
+    const {weightsTexture} = this.state;
+    const attributeManager = this.getAttributeManager()!;
 
+    weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
+      bufferLayout: attributeManager.getBufferLayouts(),
       vertexCount: 1,
-      targetTexture: this.state.weightsTexture!,
-      targetTextureVarying: 'weightsTexture',
+      targetTexture: weightsTexture!,
+      parameters: {
+        depthWriteEnabled: false,
+        blendColorOperation: 'add',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      },
+      topology: 'point-list',
       ...shaders
     } as TextureTransformProps);
+
     this.setState({weightsTransform});
   }
 
   _setupResources() {
     this._createTextures();
+    const {device} = this.context;
     const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
 
-    const weightsTransformShaders = this.getShaders('weights-transform');
+    const weightsTransformShaders = this.getShaders({
+      vs: weightsVs,
+      fs: weightsFs
+    });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders('max-weights-transform');
-    const maxWeightTransform = new TextureTransform(this.context.device, {
+    const maxWeightsTransformShaders = this.getShaders({vs: maxVs, fs: maxFs});
+    const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
-      _sourceTextures: {
-        inTexture: weightsTexture
-      },
-      _targetTexture: maxWeightsTexture,
-      _targetTextureVarying: 'outTexture',
+      bindings: {inTexture: weightsTexture},
+      uniforms: {textureSize},
+      targetTexture: maxWeightsTexture,
       ...maxWeightsTransformShaders,
-      elementCount: textureSize * textureSize
+      vertexCount: textureSize * textureSize,
+      topology: 'point-list',
+      parameters: {
+        depthWriteEnabled: false,
+        blendColorOperation: 'max',
+        blendAlphaOperation: 'max',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'one',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one'
+      }
     });
 
     this.setState({
@@ -460,35 +471,27 @@ export default class HeatmapLayer<
       maxWeightsTexture,
       maxWeightTransform,
       zoom: null,
-      triPositionBuffer: this.context.device.createBuffer({
-        byteLength: 48,
-        // @ts-expect-error
-        accessor: {size: 3}
-      }),
-      triTexCoordBuffer: this.context.device.createBuffer({
-        byteLength: 48,
-        // @ts-expect-error
-        accessor: {size: 2}
-      })
+      triPositionBuffer: device.createBuffer({byteLength: 48}),
+      triTexCoordBuffer: device.createBuffer({byteLength: 48})
     });
   }
 
   // overwrite super class method to update transform model
   updateShaders(shaderOptions) {
-    // sahder params (modules, injects) changed, update model object
-    this._createWeightsTransform(shaderOptions);
+    // shader params (modules, injects) changed, update model object
+    this._createWeightsTransform({
+      vs: weightsVs,
+      fs: weightsFs,
+      ...shaderOptions
+    });
   }
 
   _updateMaxWeightValue() {
-    const {maxWeightTransform} = this.state;
+    const {maxWeightTransform, textureSize} = this.state;
+
     maxWeightTransform!.run({
-      parameters: {
-        // @ts-expect-error TODO(v9): Resolve errors.
-        blend: true,
-        depthTest: false,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.MAX
-      }
+      parameters: {viewport: [0, 0, 1, 1]},
+      clearColor: [0, 0, 0, 0]
     });
   }
 
@@ -563,18 +566,16 @@ export default class HeatmapLayer<
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture) {
-      // @ts-expect-error TODO - no longer supported in v9?
-      colorTexture.setImageData({
-        data: colors,
-        width: colorRange.length
-      });
+    if (colorTexture && colorTexture?.width === colorRange.length) {
+      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
+      (colorTexture as any).setSubImageData({data: colors});
     } else {
+      colorTexture?.destroy();
       colorTexture = this.context.device.createTexture({
+        ...TEXTURE_PROPS,
         data: colors,
         width: colorRange.length,
-        height: 1,
-        ...TEXTURE_PROPS
+        height: 1
       });
     }
     this.setState({colorTexture});
@@ -602,41 +603,22 @@ export default class HeatmapLayer<
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
 
-    const uniforms = {
-      radiusPixels,
-      commonBounds,
-      textureWidth: textureSize,
-      weightsScale
-    };
-    // Attribute manager sets data array count as instaceCount on model
-    // we need to set that as elementCount on 'weightsTransform'
-    weightsTransform.update({
-      elementCount: this.getNumInstances()
+    const attributeManager = this.getAttributeManager()!;
+    const attributes = attributeManager.getAttributes();
+    const moduleSettings = this.getModuleSettings();
+    const positions = attributes.positions.buffer;
+    const uniforms = {radiusPixels, commonBounds, textureWidth: textureSize, weightsScale};
+    const weights = attributes.weights.buffer;
+    weightsTransform.model.setAttributes({positions, weights});
+    weightsTransform.model.setVertexCount(this.getNumInstances());
+    weightsTransform.model.setUniforms(uniforms);
+    weightsTransform.model.updateModuleSettings(moduleSettings);
+    weightsTransform.run({
+      parameters: {viewport: [0, 0, textureSize, textureSize]},
+      clearColor: [0, 0, 0, 0]
     });
-    // Need to explictly specify clearColor as external context may have modified it
-    withGLParameters(this.context.gl, {clearColor: [0, 0, 0, 0]}, () => {
-      weightsTransform.run({
-        uniforms,
-        parameters: {
-          // @ts-expect-error TODO(v9): Resolve errors.
-          blend: true,
-          depthTest: false,
-          blendFunc: [GL.ONE, GL.ONE],
-          blendEquation: GL.FUNC_ADD
-        },
-        clearRenderTarget: true,
-        attributes: this.getAttributes(),
-        moduleSettings: this.getModuleSettings()
-      });
-    });
-    this._updateMaxWeightValue();
 
-    // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
-    // TODO v9 sampler support in luma.gl needs to improve
-    // weightsTexture.setSampler({
-    //   magFilter: 'linear',
-    //   minFilter: 'linear'
-    // });
+    this._updateMaxWeightValue();
   }
 
   _debouncedUpdateWeightmap(fromTimer = false) {

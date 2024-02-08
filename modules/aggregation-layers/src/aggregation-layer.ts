@@ -87,7 +87,9 @@ export default abstract class AggregationLayer<
     const moduleSettings = Object.assign(Object.create(this.props), {
       viewport,
       mousePosition,
-      pickingActive: 0,
+      picking: {
+        isActive: 0
+      },
       // @ts-expect-error TODO - assuming WebGL context
       devicePixelRatio: device.canvasContext.cssToDeviceRatio()
     });
