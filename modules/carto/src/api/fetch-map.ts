@@ -16,7 +16,7 @@ import {
   vectorQuerySource,
   vectorTableSource,
   vectorTilesetSource
-} from '../sources';
+} from '../sources/index';
 import {parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';

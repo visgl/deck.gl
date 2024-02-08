@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
     "@loaders.gl/ply": "4.1.0-alpha.9",
     "@loaders.gl/gltf": "4.1.0-alpha.9",
-    "@luma.gl/debug": "^8.5.2",
+    "@luma.gl/debug": "9.0.0-beta.3",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",

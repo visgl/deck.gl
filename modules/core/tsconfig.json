@@ -5,7 +5,7 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "typed"
+    "outDir": "dist"
   },
   "references": [
   ]

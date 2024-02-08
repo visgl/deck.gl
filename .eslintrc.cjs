@@ -3,6 +3,7 @@ const {getESLintConfig} = require('ocular-dev-tools/configuration');
 module.exports = getESLintConfig({
   react: '18.0.0',
   overrides: {
+    parser: '',
     parserOptions: {
       project: ['./tsconfig.json'],
       ecmaVersion: 2020
@@ -41,7 +42,7 @@ module.exports = getESLintConfig({
 
     overrides: [
       {
-        files: ['**/*.ts', '**/*.tsx', '**/*.d.ts'],
+        files: ['**/*.js', '**/*.ts', '**/*.tsx', '**/*.d.ts'],
         rules: {
           indent: 0,
           // For parquet module

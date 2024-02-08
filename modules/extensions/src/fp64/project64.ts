@@ -20,10 +20,11 @@
 
 /* eslint-disable camelcase */
 import {fp64} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shadertools';
 const {fp64ify, fp64ifyMatrix4} = fp64;
 import {project, _memoize as memoize} from '@deck.gl/core';
 
-import type {Viewport, _ShaderModule as ShaderModule} from '@deck.gl/core';
+import type {Viewport} from '@deck.gl/core';
 import project64Shader from './project64.glsl';
 
 type Project64ModuleSettings = {

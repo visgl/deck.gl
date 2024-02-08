@@ -20,11 +20,12 @@
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core';
 import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule, NumericArray} from '../../types/types';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
 import type {ProjectUniforms} from '../project/viewport-uniforms';
 

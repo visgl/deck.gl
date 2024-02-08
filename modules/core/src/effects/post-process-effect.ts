@@ -1,19 +1,17 @@
-import type {Device} from '@luma.gl/core';
-import {normalizeShaderModule} from '@luma.gl/shadertools';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
+import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {ShaderModule} from '../types/types';
 
 export default class PostProcessEffect implements Effect {
   id: string;
   props: any;
-  module: ShaderModule;
+  module: ShaderPass;
   passes?: ScreenPass[];
 
-  constructor(module: ShaderModule, props: any = {}) {
+  constructor(module: ShaderPass, props: any = {}) {
     this.id = `${module.name}-pass`;
     this.props = props;
     normalizeShaderModule(module);
@@ -29,8 +27,6 @@ export default class PostProcessEffect implements Effect {
 
   postRender(device: Device, params: PostRenderOptions): Framebuffer {
     const passes = this.passes || createPasses(device, this.module, this.id);
-    // TODO from v9 merge - remove
-    // const passes = this.passes || createPasses(device, this.module, this.id, this.props);
     this.passes = passes;
 
     const {target} = params;
@@ -59,8 +55,7 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-// function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
-function createPasses(device: Device, module: ShaderModule, id: string): ScreenPass[] {
+function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
   if (!module.passes) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(device, {
