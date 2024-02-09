@@ -65,7 +65,8 @@ export class TerrainEffect implements Effect {
       return;
     }
 
-    const {viewports, isPicking = false} = opts;
+    const {viewports} = opts;
+    const isPicking = opts.pass.startsWith('picking');
     this.isPicking = isPicking;
     this.isDrapingEnabled = true;
 
@@ -200,7 +201,12 @@ export class TerrainEffect implements Effect {
             devicePixelRatio: 1
           }
         });
-        terrainCover.isDirty = false;
+
+        if (!this.isPicking) {
+          // IsDirty refers to the normal fbo, not the picking fbo.
+          // Only mark it as not dirty if the normal fbo was updated.
+          terrainCover.isDirty = false;
+        }
       }
     } catch (err) {
       terrainLayer.raiseError(err as Error, `Error rendering terrain cover ${terrainCover.id}`);
