@@ -356,7 +356,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   }
 
   _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: any, channel: number) {
-    const categoryMap = this.state.categoryMap[channel];
+    const categoryMap = (this.state.categoryMap as Record<any, number>[])[channel];
     if (!(category in categoryMap)) {
       categoryMap[category] = Object.keys(categoryMap).length;
     }
