@@ -89,6 +89,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### deck.gl [9.0.0-alpha.1] - Nov 10 2023
 
+- Add widgets prop to Deck class (#8023)
+- add(widgets) fullscreen widget (#8024)
+- chore: Fix widget module publishing (#8178)
+- Fix widgets stylesheet.css (#8210)
 - chore: use node 18 (#8222)
 - chore: loaders.gl update to v4.0 (#8215)
 - chore: math.gl update to v4.0 (#8204)
