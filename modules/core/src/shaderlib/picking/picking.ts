@@ -1,18 +1,8 @@
-import {picking} from '@luma.gl/core';
-import type {ShaderModule} from '../../types/types';
-
-type PickingModuleSettings = {
-  /** Set to a picking color to visually highlight that item */
-  pickingSelectedColor?: [number, number, number] | null;
-  /** Color of the highlight */
-  pickingHighlightColor?: [number, number, number, number];
-  /** Set to true when rendering to off-screen "picking" buffer */
-  pickingActive?: boolean;
-  /** Set to true when picking an attribute value instead of object index */
-  pickingAttribute?: boolean;
-};
+import {picking} from '@luma.gl/shadertools';
 
 export default {
+  ...picking,
+  defaultUniforms: {...picking.defaultUniforms, useFloatColors: false},
   inject: {
     'vs:DECKGL_FILTER_GL_POSITION': `
     // for picking depth values
@@ -20,10 +10,6 @@ export default {
   `,
     'vs:DECKGL_FILTER_COLOR': `
   picking_setPickingColor(geometry.pickingColor);
-  `,
-    // TODO - this should be declared in the luma module
-    'fs:#decl': `
-uniform bool picking_uAttribute;
   `,
     'fs:DECKGL_FILTER_COLOR': {
       order: 99,
@@ -35,6 +21,5 @@ uniform bool picking_uAttribute;
   color = picking_filterPickingColor(color);
     `
     }
-  },
-  ...picking
-} as ShaderModule<PickingModuleSettings>;
+  }
+};

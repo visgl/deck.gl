@@ -1,12 +1,4 @@
-import {MapType, RequestType} from './maps-api-common';
-
-export type APIErrorContext = {
-  requestType: RequestType;
-  mapId?: string;
-  connection?: string;
-  source?: string;
-  type?: MapType;
-};
+import type {APIErrorContext} from './types';
 
 /**
  *

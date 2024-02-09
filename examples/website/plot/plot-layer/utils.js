@@ -1,6 +1,5 @@
 /* global document */
-import GL from '@luma.gl/constants';
-import {Texture2D} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 
 // helper for textMatrixToTexture
 function setTextStyle(ctx, fontSize) {
@@ -66,7 +65,7 @@ export function textMatrixToTexture(glContext, data, fontSize = 48) {
 
   return {
     columnWidths,
-    texture: new Texture2D(glContext, {
+    texture: glContext.device.createTexture({
       pixels: canvas,
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
     })

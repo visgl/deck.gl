@@ -34,10 +34,7 @@ export function isComponent(child: React.ReactNode): child is React.ReactElement
 }
 
 function isReactMap(child: React.ReactElement): boolean {
-  const componentClass = child.type;
-  // @ts-expect-error defaultProps is not defined on JSXElementConstructor
-  const componentProps = componentClass && componentClass.defaultProps;
-  return componentProps && componentProps.mapStyle;
+  return child.props?.mapStyle;
 }
 
 function needsDeckGLViewProps(child: React.ReactElement): boolean {

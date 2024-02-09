@@ -1,5 +1,4 @@
-import {_ShaderModule as ShaderModule} from '@deck.gl/core';
-
+import type {ShaderModule} from '@luma.gl/shadertools';
 import type {DataFilterExtensionProps} from './data-filter-extension';
 
 /*
@@ -25,16 +24,16 @@ uniform ivec4 filter_categoryBitMask;
   #define DATACATEGORY_ATTRIB instanceFilterCategoryValues
 #endif
 
-attribute DATAFILTER_TYPE DATAFILTER_ATTRIB;
+in DATAFILTER_TYPE DATAFILTER_ATTRIB;
 #ifdef DATAFILTER_DOUBLE
-  attribute DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
+  in DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
 
   uniform DATAFILTER_TYPE filter_min64High;
   uniform DATAFILTER_TYPE filter_max64High;
 #endif
-attribute DATACATEGORY_TYPE DATACATEGORY_ATTRIB;
+in DATACATEGORY_TYPE DATACATEGORY_ATTRIB;
 
-varying float dataFilter_value;
+out float dataFilter_value;
 
 float dataFilter_reduceValue(float value) {
   return value;
@@ -91,7 +90,7 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
 
 const fs = `
 uniform bool filter_transformColor;
-varying float dataFilter_value;
+in float dataFilter_value;
 `;
 
 type DataFilterModuleSettings = {

@@ -6,9 +6,10 @@ import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Buffer, Texture2D, Texture2DProps} from '@luma.gl/webgl';
+import type {Texture, TextureProps} from '@luma.gl/core';
+import type {Buffer} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {LightingModuleSettings} from '../shaderlib';
+import type {LightingModuleSettings} from '../shaderlib/index';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -66,9 +67,9 @@ export type Unit = 'meters' | 'common' | 'pixels';
 /** Rendering operation of the layer. */
 export type Operation = 'draw' | 'mask' | 'terrain';
 
-export type Texture =
-  | Texture2D
-  | Texture2DProps
+export type TextureSource =
+  | Texture
+  | TextureProps
   | HTMLImageElement
   | ImageData
   | HTMLCanvasElement

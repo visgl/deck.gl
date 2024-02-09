@@ -1,7 +1,8 @@
 import type {NumericArray} from '@math.gl/core';
-import {GLTFMaterialParser} from '@luma.gl/experimental';
-import {Model, pbr} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
+import {pbr} from '@luma.gl/shadertools';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
@@ -14,10 +15,16 @@ export type Mesh = {
   indices?: MeshAttribute;
 };
 
-function validateGeometryAttributes(attributes) {
+function validateGeometryAttributes(attributes: MeshAttributes) {
+  const positionAttribute = attributes.positions || attributes.POSITION;
+  const vertexCount = positionAttribute.value.length / positionAttribute.size;
   const hasColorAttribute = attributes.COLOR_0 || attributes.colors;
   if (!hasColorAttribute) {
-    attributes.colors = {constant: true, value: new Float32Array([1, 1, 1])};
+    attributes.colors = {
+      size: 4,
+      value: new Uint8Array(vertexCount * 4).fill(255),
+      normalized: true
+    };
   }
 }
 
@@ -27,7 +34,7 @@ const defaultProps: DefaultProps<MeshLayerProps> = {
 };
 
 /** All properties supported by MeshLayer. */
-export type MeshLayerProps<DataT = any> = _MeshLayerProps & SimpleMeshLayerProps<DataT>;
+export type MeshLayerProps<DataT = unknown> = _MeshLayerProps & SimpleMeshLayerProps<DataT>;
 
 /** Properties added by MeshLayer. */
 type _MeshLayerProps = {
@@ -92,7 +99,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
       // eslint-disable-next-line camelcase
-      u_Camera: this.state.model.getUniforms().project_uCameraPosition,
+      u_Camera: this.state.model.uniforms.project_uCameraPosition,
       pickFeatureIds: Boolean(featureIds)
     });
 
@@ -101,21 +108,22 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   protected getModel(mesh: Mesh): Model {
     const {id, pbrMaterial} = this.props;
-    const materialParser = this.parseMaterial(pbrMaterial, mesh);
-    // Keep material parser to explicitly remove textures
-    this.setState({materialParser});
+    const parsedPBRMaterial = this.parseMaterial(pbrMaterial, mesh);
+    // Keep material to explicitly remove textures
+    this.setState({parsedPBRMaterial});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
-    const model = new Model(this.context.gl, {
+    const model = new Model(this.context.device, {
       ...this.getShaders(),
       id,
       geometry: mesh,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       defines: {
         ...shaders.defines,
-        ...materialParser?.defines,
-        HAS_UV_REGIONS: mesh.attributes.uvRegions
+        ...parsedPBRMaterial?.defines,
+        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0
       },
-      parameters: materialParser?.parameters,
+      parameters: parsedPBRMaterial?.parameters,
       isInstanced: true
     });
 
@@ -126,28 +134,29 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     const {model} = this.state;
     if (model) {
       const {mesh} = this.props;
-      const materialParser = this.parseMaterial(pbrMaterial, mesh);
-      // Keep material parser to explicitly remove textures
-      this.setState({materialParser});
-      model.setUniforms(materialParser.uniforms);
+      const parsedPBRMaterial = this.parseMaterial(pbrMaterial, mesh as Mesh);
+      // Keep material to explicitly remove textures
+      this.setState({parsedPBRMaterial});
+      model.setBindings(parsedPBRMaterial.bindings);
+      model.setUniforms(parsedPBRMaterial.uniforms);
     }
   }
 
-  parseMaterial(pbrMaterial, mesh) {
+  parseMaterial(pbrMaterial, mesh: Mesh): ParsedPBRMaterial {
     const unlit = Boolean(
       pbrMaterial.pbrMetallicRoughness && pbrMaterial.pbrMetallicRoughness.baseColorTexture
     );
 
-    this.state.materialParser?.delete();
-
-    return new GLTFMaterialParser(this.context.gl, {
-      attributes: {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
-      material: {unlit, ...pbrMaterial},
-      pbrDebug: false,
-      imageBasedLightingEnvironment: null,
-      lights: true,
-      useTangents: false
-    });
+    return parsePBRMaterial(
+      this.context.device,
+      {unlit, ...pbrMaterial},
+      {NORMAL: mesh.attributes.normals, TEXCOORD_0: mesh.attributes.texCoords},
+      {
+        pbrDebug: false,
+        lights: true,
+        useTangents: false
+      }
+    );
   }
 
   calculateFeatureIdsPickingColors(attribute) {
@@ -169,7 +178,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.materialParser?.delete();
-    this.setState({materialParser: null});
+    this.state.parsedPBRMaterial?.generatedTextures.forEach(texture => texture.destroy());
+    this.setState({parsedPBRMaterial: null});
   }
 }

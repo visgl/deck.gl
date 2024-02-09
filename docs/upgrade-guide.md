@@ -1,5 +1,25 @@
 # Upgrade Guide
 
+## Upgrading to v9.0
+
+### Custom Layers
+
+Create models with device instead of gl.
+
+```typescript
+// luma.gl vp
+new Model(this.context.device, {opts});
+// luma.gl v8
+new Model(this.context.gl, {opts});
+```
+
+
+- drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select different topology when creating geometries.
+
+### Deck
+
+- `Deck.pickObjects` minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+
 ## Upgrading from deck.gl v8.8 to v8.9
 
 #### Breaking changes

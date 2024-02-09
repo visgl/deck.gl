@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
+import {Buffer, TypedArray} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -26,9 +28,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import debug from '../debug';
-import GL from '@luma.gl/constants';
-import {withParameters, setParameters} from '@luma.gl/core';
+import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
@@ -53,6 +53,8 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
+import {RenderPass} from '@luma.gl/core';
+import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -183,6 +185,10 @@ export type UpdateParameters<LayerT extends Layer> = {
   changeFlags: ChangeFlags;
 };
 
+type SharedLayerState = {
+  [key: string]: unknown;
+};
+
 export default abstract class Layer<PropsT extends {} = {}> extends Component<
   PropsT & Required<LayerProps>
 > {
@@ -200,7 +206,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
-  state!: Record<string, any>; // Will be set to the shared layer state object during layer matching
+  state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
 
@@ -319,13 +325,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Returns an array of models used by this layer, can be overriden by layer subclass */
   getModels(): Model[] {
-    return (this.state && (this.state.models || (this.state.model && [this.state.model]))) || [];
+    const state = this.state as {
+      models?: Model[];
+      model: Model;
+    };
+    return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
+  // TODO deprecate in favour of setShaderModuleProps
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
       model.updateModuleSettings(moduleParameters);
+    }
+  }
+
+  /** Update shader input parameters */
+  setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
+    for (const model of this.getModels()) {
+      model.shaderInputs.setProps(...props);
     }
   }
 
@@ -409,7 +427,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Second check if the layer has set its own value
     if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
+      return this.state.numInstances as number;
     }
 
     // Use container library to get a count for any ES6 container or object
@@ -428,7 +446,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Second check if the layer has set its own value
     if (this.state && this.state.startIndices) {
-      return this.state.startIndices;
+      return this.state.startIndices as NumericArray;
     }
 
     return null;
@@ -503,7 +521,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here. */
   finalizeState(context: LayerContext): void {
     for (const model of this.getModels()) {
-      model.delete();
+      model.destroy();
     }
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
@@ -547,7 +565,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** (Internal) Propagate an error event through the system */
   raiseError(error: Error, message: string): void {
     if (message) {
-      error.message = `${message}: ${error.message}`;
+      // Duplicating error message for backward compatibility, see #7986
+      // TODO - revisit in v9
+      error = new Error(`${message}: ${error.message}`, {cause: error});
     }
     if (!this.props.onError?.(error)) {
       this.context?.onError?.(error, this);
@@ -625,8 +645,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Send updated attributes to the WebGL model */
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
+    // If some buffer layout changed
+    let bufferLayoutChanged = false;
+    for (const id in changedAttributes) {
+      if (changedAttributes[id].layoutChanged()) {
+        bufferLayoutChanged = true;
+      }
+    }
+
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
     }
   }
 
@@ -692,7 +720,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
-    const cacheSize = Math.floor(pickingColorCache.length / 3);
+    const cacheSize = Math.floor(pickingColorCache.length / 4);
 
     // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
     // @ts-ignore (TS2531) internalState is always defined when this method is called
@@ -706,42 +734,71 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
 
       pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
-        size: 3,
+        size: 4,
         copy: true,
         maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
       });
 
       // If the attribute is larger than the cache, resize the cache and populate the missing chunk
-      const newCacheSize = Math.floor(pickingColorCache.length / 3);
+      const newCacheSize = Math.floor(pickingColorCache.length / 4);
       const pickingColor = [];
       for (let i = cacheSize; i < newCacheSize; i++) {
         this.encodePickingColor(i, pickingColor);
-        pickingColorCache[i * 3 + 0] = pickingColor[0];
-        pickingColorCache[i * 3 + 1] = pickingColor[1];
-        pickingColorCache[i * 3 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 0] = pickingColor[0];
+        pickingColorCache[i * 4 + 1] = pickingColor[1];
+        pickingColorCache[i * 4 + 2] = pickingColor[2];
       }
     }
 
-    attribute.value = pickingColorCache.subarray(0, numInstances * 3);
+    attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
-  /** Apply changed attributes to  */
+  /** Apply changed attributes to model */
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
       [id: string]: Attribute;
-    }
+    },
+    bufferLayoutChanged = false
   ) {
-    const attributeManager = this.getAttributeManager();
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData.excludeAttributes || {};
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const shaderAttributes = attributeManager.getShaderAttributes(
-      changedAttributes,
-      excludeAttributes
-    );
+    if (!Object.keys(changedAttributes).length) {
+      return;
+    }
 
-    model.setAttributes(shaderAttributes);
+    if (bufferLayoutChanged) {
+      // AttributeManager is always defined when this method is called
+      const attributeManager = this.getAttributeManager()!;
+      model.setBufferLayout(attributeManager.getBufferLayouts());
+      // All attributes must be reset after buffer layout change
+      changedAttributes = attributeManager.getAttributes();
+    }
+
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const attributeBuffers: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
+
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
+      }
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
+      }
+    }
+    // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
   }
 
   /** (Internal) Sets the picking color at the specified index to null picking color. Used for multi-depth picking.
@@ -788,11 +845,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const start = colors.getVertexOffset(objectIndex);
     const end = colors.getVertexOffset(objectIndex + 1);
 
-    // Fill the sub buffer with 0s
-    colors.buffer.subData({
-      data: new Uint8Array(end - start),
-      offset: start // 1 byte per element
-    });
+    // Fill the sub buffer with 0s, 1 byte per element
+    colors.buffer.write(new Uint8Array(end - start), start);
   }
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
@@ -831,7 +885,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       attributeManager.addInstanced({
         instancePickingColors: {
           type: GL.UNSIGNED_BYTE,
-          size: 3,
+          size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
           // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -938,7 +992,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const oldModels = this.getModels();
 
       // Safely call subclass lifecycle methods
-      if (context.gl) {
+      if (context.device) {
         this.updateState(updateParams);
       } else {
         try {
@@ -981,10 +1035,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Calculates uniforms
   _drawLayer({
+    renderPass,
     moduleParameters = null,
     uniforms = {},
     parameters = {}
   }: {
+    renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
     parameters: any;
@@ -1005,7 +1061,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
+        const {isActive, isAttribute} = moduleParameters.picking;
         this.setModuleParameters(moduleParameters);
+        this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1013,11 +1071,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setParameters(context.gl, {polygonOffset: offsets});
+      context.device.setParametersWebGL({polygonOffset: offsets});
 
       // Call subclass lifecycle method
-      withParameters(context.gl, parameters, () => {
-        const opts = {moduleParameters, uniforms, parameters, context};
+      context.device.withParametersWebGL(parameters, () => {
+        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
         for (const extension of this.props.extensions) {
@@ -1154,22 +1212,22 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const pickingModuleParameters: any = {
-      pickingSelectedColor: info.picked ? info.color : null
+    const picking: PickingProps = {
+      highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+      picking.highlightColor = highlightColor(info);
     }
-    this.setModuleParameters(pickingModuleParameters);
-    // setModuleParameters does not trigger redraw
+    this.setShaderModuleProps({picking});
+    // setShaderModuleProps does not trigger redraw
     this.setNeedsRedraw();
   }
 
   /** Create new attribute manager */
   protected _getAttributeManager(): AttributeManager | null {
     const context = this.context;
-    return new AttributeManager(context.gl, {
+    return new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
@@ -1187,7 +1245,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
-    const {model} = this.state;
+    const model = this.state.model as Model | undefined;
     model?.setInstanceCount(this.getNumInstances());
 
     // Set picking module parameters to match props
@@ -1198,24 +1256,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const parameters: any = {};
+      const picking: PickingProps = {};
       if (!autoHighlight) {
-        parameters.pickingSelectedColor = null;
+        picking.highlightedObjectColor = null;
       }
       if (Array.isArray(highlightColor)) {
-        parameters.pickingHighlightColor = highlightColor;
+        picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
-        parameters.pickingSelectedColor =
+        picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }
 
-      this.setModuleParameters(parameters);
+      this.setShaderModuleProps({picking});
     }
   }
 

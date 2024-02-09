@@ -18,21 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Timeline} from '@luma.gl/core';
+import type {Device, RenderPass} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/engine';
+import type {PipelineFactory} from '@luma.gl/engine';
+import {ShaderAssembler} from '@luma.gl/shadertools';
+import {getPipelineFactory, getShaderAssembler} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
-import debug from '../debug';
+import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 
 import Viewport from '../viewports/viewport';
-import {createProgramManager} from '../shaderlib';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
-import type {ProgramManager} from '@luma.gl/engine';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
@@ -41,18 +43,28 @@ export type LayerContext = {
   layerManager: LayerManager;
   resourceManager: ResourceManager;
   deck?: Deck;
-  gl: WebGLRenderingContext;
-  programManager: ProgramManager;
+  device: Device;
+  shaderAssembler: ShaderAssembler;
+  pipelineFactory: PipelineFactory;
+  renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
   timeline: Timeline;
   mousePosition: {x: number; y: number} | null;
   userData: any;
-  onError?: <PropsT>(error: Error, source: Layer<PropsT>) => void;
+  onError?: <PropsT extends {}>(error: Error, source: Layer<PropsT>) => void;
+  /** @deprecated Use context.device */
+  gl: WebGLRenderingContext;
 };
 
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
 
+export type LayerManagerProps = {
+  deck?: Deck;
+  stats?: Stats;
+  viewport?: Viewport;
+  timeline?: Timeline;
+};
 export default class LayerManager {
   layers: Layer[];
   context: LayerContext;
@@ -64,21 +76,14 @@ export default class LayerManager {
   private _nextLayers: LayersList | null = null;
   private _debug: boolean = false;
 
+  /**
+   * @param device
+   * @param param1
+   */
   // eslint-disable-next-line
-  constructor(
-    gl,
-    {
-      deck,
-      stats,
-      viewport,
-      timeline
-    }: {
-      deck?: Deck;
-      stats?: Stats;
-      viewport?: Viewport;
-      timeline?: Timeline;
-    } = {}
-  ) {
+  constructor(device: Device, props: LayerManagerProps) {
+    const {deck, stats, viewport, timeline} = props || {};
+
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -89,16 +94,20 @@ export default class LayerManager {
     // If it's the same across two React render calls, the diffing logic
     // will be skipped.
     this.layers = [];
-    this.resourceManager = new ResourceManager({gl, protocol: 'deck://'});
+    this.resourceManager = new ResourceManager({device, protocol: 'deck://'});
 
     this.context = {
       mousePosition: null,
       userData: {},
       layerManager: this,
-      gl,
+      device,
+      // @ts-expect-error
+      gl: device?.gl,
       deck,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      programManager: gl && createProgramManager(gl),
+      shaderAssembler: getShaderAssembler(),
+      pipelineFactory: (device && getPipelineFactory(device))!,
+      renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function

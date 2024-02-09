@@ -18,8 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -32,12 +33,12 @@ import type {
   AccessorFunction,
   Position,
   Color,
-  Texture,
   Unit,
   UpdateParameters,
   LayerContext,
   DefaultProps
 } from '@deck.gl/core';
+
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
 
 type _IconLayerProps<DataT> = {
@@ -109,7 +110,7 @@ type _IconLayerProps<DataT> = {
   textureParameters?: Record<number, number> | null;
 };
 
-export type IconLayerProps<DataT = any> = _IconLayerProps<DataT> & LayerProps;
+export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -123,8 +124,8 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', value: x => x.position},
-  getIcon: {type: 'accessor', value: x => x.icon},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getIcon: {type: 'accessor', value: (x: any) => x.icon},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
@@ -153,7 +154,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   initializeState() {
     this.state = {
-      iconManager: new IconManager(this.context.gl, {
+      iconManager: new IconManager(this.context.device, {
         onUpdate: this._onUpdate.bind(this),
         onError: this._onError.bind(this)
       })
@@ -225,6 +226,10 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {iconAtlas, iconMapping, data, getIcon, textureParameters} = props;
     const {iconManager} = this.state;
 
+    if (typeof iconAtlas === 'string') {
+      return;
+    }
+
     // internalState is always defined during updateState
     const prePacked = iconAtlas || this.internalState!.isAsyncPropLoading('iconAtlas');
     iconManager.setProps({
@@ -250,9 +255,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       attributeManager!.invalidateAll();
     }
   }
@@ -274,32 +278,34 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model
-        .setUniforms(uniforms)
-        .setUniforms({
-          iconsTexture,
-          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeUnits: UNIT[sizeUnits],
-          sizeScale,
-          sizeMinPixels,
-          sizeMaxPixels,
-          billboard,
-          alphaCutoff
-        })
-        .draw();
+      const model = this.state.model!;
+
+      model.setBindings({iconsTexture});
+      model.setUniforms(uniforms);
+      model.setUniforms({
+        iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+        sizeUnits: UNIT[sizeUnits],
+        sizeScale,
+        sizeMinPixels,
+        sizeMaxPixels,
+        billboard,
+        alphaCutoff
+      });
+      model.draw(this.context.renderPass);
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // The icon-layer vertex shader uses 2d positions
-    // specifed via: attribute vec2 positions;
-    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    // specifed via: in vec2 positions;
+    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-strip',
         attributes: {
           // The size must be explicitly passed here otherwise luma.gl
           // will default to assuming that positions are 3D (x,y,z)

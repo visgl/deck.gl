@@ -17,6 +17,102 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.0
+
+### deck.gl v9.0 Prereleases
+
+#### deck.gl [9.0.0-beta.2] - Feb 5 2024
+
+- [v9] HeatmapLayer (#8380)
+- Bump quadbin to 0.2.0 (#8462)
+- [v9] MapboxLayer (#8442)
+
+#### deck.gl [9.0.0-beta.1] - Jan 22 2024
+
+- chore(core): Remove getBufferData helper (#8425)
+- chore(lint): Fix lint errors (#8426)
+- CARTO: Only send baseUrl when request over max length (#8429)
+- [v9] Align picking module PickingProps with luma (#8405)
+- fix(aggregation-layers): Disable gpu aggregation by default (#8416)
+
+#### deck.gl [9.0.0-alpha.7] - Jan 16 2024
+
+- [v9] Remove ShaderModule type (#8406)
+- fix(aggregation-layers): Fix screen-grid-layer with CPU aggregation (#8401)
+- [chore] Bump to loaders-4.1.0-alpha.9 (#8402)
+- [v9] Port plot-layer shaders to glsl300 (#8398)
+- fix(core): Update AttributeTransitionUtils for Luma v9 (#8392)
+- [v9] Tile3DLayer (#8357)
+- Update extension shaders to GLSL 300 (#8394)
+- [v9] ScenegraphLayer (#8350)
+- [v9] Picking module with uniform buffers (#8334)
+- chore(luma): Upgrade to luma.gl v9 alpha-50 (#8379)
+- bump ocular-devtools and adapt to typescript, prettier & eslint upgrade (#8366)
+- Update remaining shaders to GLSL 300 (#8373)
+- Update BitmapLayer, IconLayer, PointCloudLayer, TripsLayer to GLSL 300 (#8372)
+- Update ArcLayer, LineLayer, PolygonLayer to GLSL 300 (#8371)
+- Update PathLayer to GLSL 300 (#8370)
+- Update Scatterplot to GLSL 300 (#8369)
+- [v9] Fix GoogleMapsOverlay by not clearing canvas (#8351)
+- Remove use of deprecated BufferWithAccessor (#8345)
+- carto/fetchMap: fix support for quantile color scale in numeric columns for static tilesets (#8347)
+- CARTO: Remove mapsUrl (#8308)
+
+#### deck.gl [9.0.0-alpha.6] - Nov 21 2023
+
+- [CARTO] User boundaries support (#8296)
+
+#### deck.gl [9.0.0-alpha.5] - Nov 20 2023
+
+- [chore] Bump peerDependencies to 9.0.0 (#8295)
+- Expose types at the package roots (#8293)
+
+#### deck.gl [9.0.0-alpha.4] - Nov 16 2023
+
+- CARTO: Handle empty 204 responses (#8286)
+- Improve Tile3DLayer#isLoaded (#8285)
+- v9 CollisionFilterExtension (#8255)
+- Pass clearColor to luma RenderPass from MaskPass
+- Always provide all the shadowMap bindings (#8246)
+- CARTO: Add queryParameters to stats requests in fetchMap
+- CARTO: QueryParameters should be optional for boundaries (#8282)
+
+#### deck.gl [9.0.0-alpha.3] - Nov 14 2023
+
+- Use vertexPositions in getBounds (#8247)
+
+#### deck.gl [9.0.0-alpha.2] - Nov 13 2023
+
+- [chore] Bump loaders 4.0.3 & luma 9.0.0-alpha.42 (#8262)
+- Use getStride() in bufferLayoutEqual() comparison (#8268)
+- Fix pickObjects when using binary data (#8216)
+
+#### deck.gl [9.0.0-alpha.1] - Nov 10 2023
+
+- chore: use node 18 (#8222)
+- chore: loaders.gl update to v4.0 (#8215)
+- chore: math.gl update to v4.0 (#8204)
+- Fix SimpleMeshLayer (#8201)
+- chore: luma.gl update to v9.0 (#8195)
+- Binary attribute support (#8153)
+- CARTO v9 API (#8269, #8265, #8259, #8239, #8238, #8228, #8233, #8225, #8224, #8218, #8217, #8214, #8168, #8192, #8191, #8167)
+- Add tensorflow example (#7931)
+- Update layers to luma v9 (#7901)
+
+## deck.gl v8.10
+
+### deck.gl v8.10 Prereleases
+
+#### deck.gl [8.10.0-alpha.2] - Jul 28 2023
+
+- add(modules) widget module (#8016)
+- Normalize h3 cluster polygons longitudes (#8010)
+- Add WidgetManager (#7947)
+
+#### deck.gl [8.10.0-alpha.1] - Jun 5 2023
+
+- update h3-js to v4 (#7913)
+
 ## deck.gl v8.9
 
 ### deck.gl v8.9 Prereleases
@@ -3002,13 +3098,13 @@ For Earlier Beta Releases see below
 
 ### deck.gl v4.2 Beta Releases
 
-#### [4.2.0-alpha.31] - Dec 14
+#### [4.2.0-alpha.32] - Dec 14
 - API Audit: remove initWebGLParameters and move pure-js example  (#1235)
 - Fix for invalid triggerName in attribute-manager.invalidate(triggerName) function (#1238)
 - Add polygonLayer geojsonLayer elevationScale prop to whats-new.md (#1237)
 - OrbitController pure-js support (#1234)
 
-#### [4.2.0-alpha.30] - Dec 12
+#### [4.2.0-alpha.32] - Dec 12
 - DOCS: updates to clarify what is experimental in 4.2, in "What's New" and "API Reference".
 - DOCS: New Roadmap doc, linking to RFCs.
 - DOCS: List experimental 4.2 features in Roadmap doc.

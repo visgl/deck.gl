@@ -9,7 +9,7 @@ import {
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
-import * as h3 from 'h3-js';
+import {gridDisk} from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {PLYLoader} from '@loaders.gl/ply';
@@ -73,7 +73,7 @@ const H3ClusterLayerExample = {
   layer: H3ClusterLayer,
   props: {
     data: ['882830829bfffff'],
-    getHexagons: d => h3.kRing(d, 6),
+    getHexagons: d => gridDisk(d, 6),
     getLineWidth: 100,
     stroked: true,
     filled: false
@@ -83,9 +83,9 @@ const H3ClusterLayerExample = {
 const H3HexagonLayerExample = {
   layer: H3HexagonLayer,
   props: {
-    // data: h3.kRing('891c0000003ffff', 4), // Pentagon sample, [-143.478, 50.103]
-    // data: h3.compact(h3.kRing('882830829bfffff', 8)), // Multi-resolution
-    data: h3.kRing('882830829bfffff', 4), // SF
+    // data: gridDisk('891c0000003ffff', 4), // Pentagon sample, [-143.478, 50.103]
+    // data: compactCells(gridDisk('882830829bfffff', 8)), // Multi-resolution
+    data: gridDisk('882830829bfffff', 4), // SF
     getHexagon: d => d,
     getFillColor: (d, {index}) => [255, index * 5, 0],
     getElevation: d => Math.random() * 1000

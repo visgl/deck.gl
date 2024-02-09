@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {GL} from '@luma.gl/constants';
+import type {Framebuffer} from '@luma.gl/core';
+import type {Model} from '@luma.gl/engine';
+import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
 import {shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
-import {readPixelsToArray, clear} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
-
-import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -197,9 +197,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       });
     }
 
-    const {gl} = this.context;
+    const {device} = this.context;
     if (attributeManager && extension.opts.countItems) {
-      const useFloatTarget = aggregator.supportsFloatTarget(gl);
+      const useFloatTarget = aggregator.supportsFloatTarget(device);
       // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
       // The vertex shader checks if a vertex has the same "index" as the previous vertex
       // so that we only write one count cross multiple vertices of the same object
@@ -224,9 +224,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         }
       });
 
-      const filterFBO = aggregator.getFramebuffer(gl, useFloatTarget);
+      const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
-        gl,
+        device,
         extension.getShaders.call(this, extension),
         useFloatTarget
       );
@@ -275,7 +275,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   }
 
   draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
-    const {filterFBO, filterModel, filterNeedsUpdate, categoryBitMaskNeedsUpdate} = this.state;
+    const filterFBO = this.state.filterFBO as Framebuffer;
+    const filterModel = this.state.filterModel as Model;
+    const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
+    const categoryBitMaskNeedsUpdate = this.state.categoryBitMaskNeedsUpdate as boolean;
+
     const {onFilteredItemsChange} = this.props;
 
     if (categoryBitMaskNeedsUpdate) {
@@ -287,25 +291,28 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       } = this.getAttributeManager()!;
       filterModel.setVertexCount(this.getNumInstances());
 
-      const {gl} = this.context;
-      clear(gl, {framebuffer: filterFBO, color: [0, 0, 0, 0]});
+      this.context.device.clearWebGL({framebuffer: filterFBO, color: [0, 0, 0, 0]});
 
-      filterModel
-        .updateModuleSettings(params.moduleParameters)
-        .setAttributes({
-          ...filterValues.getShaderAttributes(),
-          ...(filterCategoryValues && filterCategoryValues.getShaderAttributes()),
-          ...(filterIndices && filterIndices.getShaderAttributes())
-        })
-        .setUniforms(params.uniforms)
-        .draw({
+      filterModel.updateModuleSettings(params.moduleParameters);
+      // @ts-expect-error filterValue and filterIndices should always have buffer value
+      filterModel.setAttributes({
+        ...filterValues.getValue(),
+        ...filterCategoryValues?.getValue(),
+        ...filterIndices?.getValue()
+      });
+      filterModel.setUniforms(params.uniforms);
+      filterModel.device.withParametersWebGL(
+        {
           framebuffer: filterFBO,
-          parameters: {
-            ...aggregator.parameters,
-            viewport: [0, 0, filterFBO.width, filterFBO.height]
-          }
-        });
-      const color = readPixelsToArray(filterFBO);
+          // ts-ignore 'readonly' cannot be assigned to the mutable type '[GLBlendEquation, GLBlendEquation]'
+          ...(aggregator.parameters as any),
+          viewport: [0, 0, filterFBO.width, filterFBO.height]
+        },
+        () => {
+          filterModel.draw(this.context.renderPass);
+        }
+      );
+      const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
       let count = 0;
       for (let i = 0; i < color.length; i++) {
         count += color[i];
@@ -317,12 +324,12 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
   }
 
   finalizeState(this: Layer<DataFilterExtensionProps>) {
-    const {filterFBO, filterModel} = this.state;
-    if (filterFBO) {
-      filterFBO.color.delete();
-      filterFBO.delete();
-      filterModel.delete();
-    }
+    const filterFBO = this.state.filterFBO as Framebuffer;
+    const filterModel = this.state.filterModel as Model;
+
+    // filterFBO.color.delete();
+    filterFBO?.destroy();
+    filterModel?.destroy();
   }
 
   _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {

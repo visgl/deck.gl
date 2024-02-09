@@ -19,22 +19,23 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME path-layer-vertex-shader
 
-attribute vec2 positions;
+in vec2 positions;
 
-attribute float instanceTypes;
-attribute vec3 instanceStartPositions;
-attribute vec3 instanceEndPositions;
-attribute vec3 instanceLeftPositions;
-attribute vec3 instanceRightPositions;
-attribute vec3 instanceLeftPositions64Low;
-attribute vec3 instanceStartPositions64Low;
-attribute vec3 instanceEndPositions64Low;
-attribute vec3 instanceRightPositions64Low;
-attribute float instanceStrokeWidths;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
+in float instanceTypes;
+in vec3 instanceStartPositions;
+in vec3 instanceEndPositions;
+in vec3 instanceLeftPositions;
+in vec3 instanceRightPositions;
+in vec3 instanceLeftPositions64Low;
+in vec3 instanceStartPositions64Low;
+in vec3 instanceEndPositions64Low;
+in vec3 instanceRightPositions64Low;
+in float instanceStrokeWidths;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
 
 uniform float widthScale;
 uniform float widthMinPixels;
@@ -47,12 +48,12 @@ uniform int widthUnits;
 
 uniform float opacity;
 
-varying vec4 vColor;
-varying vec2 vCornerOffset;
-varying float vMiterLength;
-varying vec2 vPathPosition;
-varying float vPathLength;
-varying float vJointType;
+out vec4 vColor;
+out vec2 vCornerOffset;
+out float vMiterLength;
+out vec2 vPathPosition;
+out float vPathLength;
+out float vJointType;
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);

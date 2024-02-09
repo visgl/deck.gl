@@ -87,7 +87,9 @@ export {
   // Utilities
   Tesselator,
   fp64LowPart,
-  createIterable
+  createIterable,
+  getPipelineFactory,
+  getShaderAssembler
 } from '@deck.gl/core';
 
 //
@@ -136,7 +138,7 @@ export {
   GeohashLayer
 } from '@deck.gl/geo-layers';
 
-export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
+export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE
@@ -166,11 +168,12 @@ export type {
   Unit,
   Position,
   Color,
-  Texture,
+  TextureSource,
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect
+  Effect,
+  Widget
 } from '@deck.gl/core';
 
 export type {

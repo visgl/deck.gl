@@ -4,7 +4,6 @@ import {
   LayersPassRenderOptions,
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
-import {withParameters} from '@luma.gl/core';
 import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
@@ -54,8 +53,7 @@ export class TerrainPickingPass extends PickLayersPass {
     }
     target.resize(viewport);
 
-    withParameters(
-      this.gl,
+    this.device.withParametersWebGL(
       {
         depthTest: false
       },

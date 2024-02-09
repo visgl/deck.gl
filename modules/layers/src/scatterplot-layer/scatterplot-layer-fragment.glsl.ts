@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME scatterplot-layer-fragment-shader
 
 precision highp float;
@@ -27,11 +28,13 @@ uniform bool filled;
 uniform float stroked;
 uniform bool antialiasing;
 
-varying vec4 vFillColor;
-varying vec4 vLineColor;
-varying vec2 unitPosition;
-varying float innerUnitRadius;
-varying float outerRadiusPixels;
+in vec4 vFillColor;
+in vec4 vLineColor;
+in vec2 unitPosition;
+in float innerUnitRadius;
+in float outerRadiusPixels;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = unitPosition;
@@ -51,20 +54,20 @@ void main(void) {
       step(innerUnitRadius * outerRadiusPixels, distToCenter);
 
     if (filled) {
-      gl_FragColor = mix(vFillColor, vLineColor, isLine);
+      fragColor = mix(vFillColor, vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
         discard;
       }
-      gl_FragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
+      fragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (filled) {
-    gl_FragColor = vFillColor;
-  } else {
+  } else if (!filled) {
     discard;
+  } else {
+    fragColor = vFillColor;
   }
 
-  gl_FragColor.a *= inCircle;
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  fragColor.a *= inCircle;
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

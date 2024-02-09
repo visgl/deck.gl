@@ -27,7 +27,7 @@ import {ConstructorOf} from '../types/types';
 import type Viewport from '../viewports/viewport';
 
 import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
-import type {Timeline} from '@luma.gl/core';
+import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -329,7 +329,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     // Register/unregister events
     const isInteractive = Boolean(this.onViewStateChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
-    this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
+    // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
+    this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.TRIPLE_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_TAP, isInteractive && doubleClickZoom);
@@ -531,12 +532,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
-    event.srcEvent.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
     }
+    event.srcEvent.preventDefault();
 
     const {speed = 0.01, smooth = false} = this.scrollZoom === true ? {} : this.scrollZoom;
     const {delta} = event;

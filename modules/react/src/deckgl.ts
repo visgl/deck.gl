@@ -30,7 +30,7 @@ import {
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
-import extractJSXLayers from './utils/extract-jsx-layers';
+import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
@@ -58,7 +58,7 @@ export type DeckGLProps = Omit<
   Deck?: typeof Deck;
   width?: string | number;
   height?: string | number;
-  children?: React.ReactNode;
+  children?: React.ReactNode | DeckGLRenderCallback;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
 };
 

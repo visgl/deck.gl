@@ -1,5 +1,12 @@
 import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
-import {polyfill, geoToH3, h3GetResolution, h3ToGeoBoundary, h3ToParent, kRing} from 'h3-js';
+import {
+  polygonToCells,
+  latLngToCell,
+  getResolution,
+  cellToBoundary,
+  cellToParent,
+  gridDisk
+} from 'h3-js';
 
 export type H3TileIndex = {i: string};
 
@@ -9,7 +16,7 @@ function getHexagonsInBoundingBox(
 ): string[] {
   const longitudeSpan = Math.abs(east - west);
   if (longitudeSpan > 180) {
-    // This is a known issue in h3-js: polyfill does not work correctly
+    // This is a known issue in h3-js: polygonToCells does not work correctly
     // when longitude span is larger than 180 degrees.
     const nSegments = Math.ceil(longitudeSpan / 180);
     let h3Indices: string[] = [];
@@ -23,10 +30,10 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
-  // `polyfill()` fills based on hexagon center, which means tiles vanish
+  // `polygonToCells()` fills based on hexagon center, which means tiles vanish
   // prematurely. Get more accurate coverage by oversampling
   const oversample = 2;
-  const h3Indices = polyfill(
+  const h3Indices = polygonToCells(
     [
       [
         [west, north],
@@ -40,11 +47,11 @@ function getHexagonsInBoundingBox(
     true
   );
 
-  return oversample ? [...new Set(h3Indices.map(i => h3ToParent(i, resolution)))] : h3Indices;
+  return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
 }
 
 function tileToBoundingBox(index: string): GeoBoundingBox {
-  const coordinates = h3ToGeoBoundary(index);
+  const coordinates = cellToBoundary(index);
   const latitudes = coordinates.map(c => c[0]);
   const longitudes = coordinates.map(c => c[1]);
   const west = Math.min(...longitudes);
@@ -75,6 +82,7 @@ export default class H3Tileset2D extends Tileset2D {
    */
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
+    if (viewport.latitude === undefined) return [];
     const [east, south, west, north] = viewport.getBounds();
 
     let z = getHexagonResolution(viewport);
@@ -88,8 +96,8 @@ export default class H3Tileset2D extends Tileset2D {
 
       // Once we are at max zoom, getHexagonsInBoundingBox doesn't work, simply
       // get a ring centered on the hexagon in the viewport center
-      const center = geoToH3(viewport.latitude, viewport.longitude, maxZoom);
-      indices = kRing(center, 1);
+      const center = latLngToCell(viewport.latitude, viewport.longitude, maxZoom);
+      indices = gridDisk(center, 1);
     } else {
       indices = getHexagonsInBoundingBox({west, north, east, south}, z);
     }
@@ -109,13 +117,13 @@ export default class H3Tileset2D extends Tileset2D {
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileZoom({i}: H3TileIndex): number {
-    return h3GetResolution(i);
+    return getResolution(i);
   }
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getParentIndex(index: H3TileIndex): H3TileIndex {
-    const resolution = h3GetResolution(index.i);
-    const i = h3ToParent(index.i, resolution - 1);
+    const resolution = getResolution(index.i);
+    const i = cellToParent(index.i, resolution - 1);
     return {i};
   }
 }

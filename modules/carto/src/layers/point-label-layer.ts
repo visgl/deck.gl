@@ -56,7 +56,7 @@ const defaultProps: DefaultProps<PointLabelLayerProps> = {
 };
 
 /** All properties supported by PointLabelLayer. */
-export type PointLabelLayerProps<DataT = any> = _PointLabelLayerProps<DataT> &
+export type PointLabelLayerProps<DataT = unknown> = _PointLabelLayerProps<DataT> &
   TextLayerProps &
   CompositeLayerProps;
 

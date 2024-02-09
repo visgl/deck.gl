@@ -1,6 +1,6 @@
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 
-import * as h3 from 'h3-js';
+import {getRes0Cells, gridDisk} from 'h3-js';
 
 export default [
   {
@@ -14,7 +14,7 @@ export default [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3.kRing('882830829bfffff', 4),
+        data: gridDisk('882830829bfffff', 4),
         opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
@@ -34,7 +34,7 @@ export default [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3.kRing('891c0000003ffff', 4),
+        data: gridDisk('891c0000003ffff', 4),
         opacity: 0.8,
         getHexagon: d => d,
         getFillColor: (d, {index}) => [255, index * 5, 0],
@@ -54,7 +54,7 @@ export default [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3.kRing('882830829bfffff', 4),
+        data: gridDisk('882830829bfffff', 4),
         opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
@@ -77,7 +77,7 @@ export default [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3.kRing('882830829bfffff', 4),
+        data: gridDisk('882830829bfffff', 4),
         opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
@@ -101,7 +101,7 @@ export default [
     },
     layers: [
       new H3HexagonLayer({
-        data: h3.getRes0Indexes(),
+        data: getRes0Cells(),
         opacity: 0.8,
         getHexagon: d => d,
         extruded: false,
@@ -126,12 +126,35 @@ export default [
       new H3ClusterLayer({
         data: ['882830829bfffff'],
         opacity: 0.8,
-        getHexagons: d => h3.kRing(d, 6),
+        getHexagons: d => gridDisk(d, 6),
         getLineWidth: 100,
         stroked: true,
         filled: false
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
+  },
+  {
+    name: 'h3-cluster-layer-crossing-antimeridian',
+    viewState: {
+      latitude: 40,
+      longitude: -180,
+      zoom: 5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3ClusterLayer({
+        data: ['8432b61ffffffff'],
+        opacity: 0.8,
+        getHexagons: d => gridDisk(d, 5),
+        getLineWidth: 10_000,
+        lineWidthMinPixels: 1,
+        lineWidthMaxPixels: 5,
+        stroked: true,
+        filled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-cluster-crossing-antimeridan.png'
   }
 ];

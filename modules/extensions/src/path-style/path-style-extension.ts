@@ -19,10 +19,11 @@
 // THE SOFTWARE.
 
 import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
+import {vec3} from '@math.gl/core';
 import {dashShaders, offsetShaders} from './shaders.glsl';
-import {dist} from 'gl-matrix/vec3';
 
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
+import type {Model} from '@luma.gl/engine';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -116,16 +117,20 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
 
     if (extension.opts.dash) {
       attributeManager.addInstanced({
-        instanceDashArrays: {size: 2, accessor: 'getDashArray'}
-      });
-    }
-    if (extension.opts.highPrecisionDash) {
-      attributeManager.addInstanced({
-        instanceDashOffsets: {
-          size: 1,
-          accessor: 'getPath',
-          transform: extension.getDashOffsets.bind(this)
-        }
+        instanceDashArrays: {size: 2, accessor: 'getDashArray'},
+        instanceDashOffsets: extension.opts.highPrecisionDash
+          ? {
+              size: 1,
+              accessor: 'getPath',
+              transform: extension.getDashOffsets.bind(this)
+            }
+          : {
+              size: 1,
+              update: attribute => {
+                attribute.constant = true;
+                attribute.value = [0];
+              }
+            }
       });
     }
     if (extension.opts.offset) {
@@ -151,7 +156,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       uniforms.dashGapPickable = Boolean(this.props.dashGapPickable);
     }
 
-    this.state.model.setUniforms(uniforms);
+    (this.state.model as Model)?.setUniforms(uniforms);
   }
 
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
@@ -167,7 +172,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       p = this.projectPosition(p);
 
       if (i > 0) {
-        result[i] = result[i - 1] + dist(prevP, p);
+        result[i] = result[i - 1] + vec3.dist(prevP, p);
       }
 
       prevP = p;

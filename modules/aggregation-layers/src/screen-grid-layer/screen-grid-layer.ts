@@ -31,20 +31,20 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import type {Texture2D} from '@luma.gl/core';
+import type {Buffer, Texture} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
-import {getFloatTexture} from '../utils/resource-utils.js';
+import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...ScreenGridCellLayer.defaultProps,
-  getPosition: {type: 'accessor', value: d => d.position},
+  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps<unknown>>),
+  getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: true,
+  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
   aggregation: 'SUM'
 };
 
@@ -60,7 +60,7 @@ const DIMENSIONS = {
 };
 
 /** All properties supported by ScreenGridLayer. */
-export type ScreenGridLayerProps<DataT = any> = _ScreenGridLayerProps<DataT> &
+export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
@@ -151,12 +151,13 @@ export default class ScreenGridLayer<
     gpuGridAggregator?: any;
     gpuAggregation?: any;
     weights?: any;
-    maxTexture?: Texture2D;
+    maxTexture?: Texture;
+    aggregationBuffer?: Buffer;
+    maxBuffer?: Buffer;
   };
 
   initializeState() {
-    const {gl} = this.context;
-    if (!ScreenGridCellLayer.isSupported(gl)) {
+    if (!ScreenGridCellLayer.isSupported(this.context.device)) {
       // max aggregated value is sampled from a float texture
       this.setState({supported: false});
       log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
@@ -172,7 +173,7 @@ export default class ScreenGridLayer<
         size: 1,
         operation: AGGREGATION_OPERATION.SUM,
         needMax: true,
-        maxTexture: getFloatTexture(gl, {id: `${this.id}-max-texture`})
+        maxTexture: getFloatTexture(this.context.device, {id: `${this.id}-max-texture`})
       }
     };
     this.setState({
@@ -264,7 +265,7 @@ export default class ScreenGridLayer<
   updateResults({aggregationData, maxData}) {
     const {count} = this.state.weights;
     count.aggregationData = aggregationData;
-    count.aggregationBuffer.setData({data: aggregationData});
+    count.aggregationBuffer.write(aggregationData);
     count.maxData = maxData;
     count.maxTexture.setImageData({data: maxData});
   }
@@ -276,7 +277,7 @@ export default class ScreenGridLayer<
     const {viewportChanged} = opts.changeFlags;
     let gpuAggregation = opts.props.gpuAggregation;
     if (this.state.gpuAggregation !== opts.props.gpuAggregation) {
-      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.gl)) {
+      if (gpuAggregation && !GPUGridAggregator.isSupported(this.context.device)) {
         log.warn('GPU Grid Aggregation not supported, falling back to CPU')();
         gpuAggregation = false;
       }

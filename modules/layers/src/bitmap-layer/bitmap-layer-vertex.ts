@@ -1,12 +1,13 @@
-export default `
+export default `\
+#version 300 es
 #define SHADER_NAME bitmap-layer-vertex-shader
 
-attribute vec2 texCoords;
-attribute vec3 positions;
-attribute vec3 positions64Low;
+in vec2 texCoords;
+in vec3 positions;
+in vec3 positions64Low;
 
-varying vec2 vTexCoord;
-varying vec2 vTexPos;
+out vec2 vTexCoord;
+out vec2 vTexPos;
 
 uniform float coordinateConversion;
 

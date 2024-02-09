@@ -24,7 +24,8 @@ vec3 packUVsIntoRGB(vec2 uv) {
 }
 `;
 
-export default `
+export default `\
+#version 300 es
 #define SHADER_NAME bitmap-layer-fragment-shader
 
 #ifdef GL_ES
@@ -33,8 +34,10 @@ precision highp float;
 
 uniform sampler2D bitmapTexture;
 
-varying vec2 vTexCoord;
-varying vec2 vTexPos;
+in vec2 vTexCoord;
+in vec2 vTexPos;
+
+out vec4 fragColor;
 
 uniform float desaturate;
 uniform vec4 transparentColor;
@@ -109,16 +112,16 @@ void main(void) {
     vec2 commonPos = lnglat_to_mercator(vTexPos);
     uv = getUV(commonPos);
   }
-  vec4 bitmapColor = texture2D(bitmapTexture, uv);
+  vec4 bitmapColor = texture(bitmapTexture, uv);
 
-  gl_FragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
+  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
 
   geometry.uv = uv;
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 
-  if (picking_uActive && !picking_uAttribute) {
+  if (bool(picking.isActive) && !bool(picking.isAttribute)) {
     // Since instance information is not used, we can use picking color for pixel index
-    gl_FragColor.rgb = packUVsIntoRGB(uv);
+    fragColor.rgb = packUVsIntoRGB(uv);
   }
 }
 `;

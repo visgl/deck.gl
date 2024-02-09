@@ -6,7 +6,7 @@ import {log} from '@deck.gl/core';
 import {buildMapping, CharacterMapping} from './utils';
 import LRUCache from './lru-cache';
 
-import type {Texture} from '@deck.gl/core';
+// import type {Texture} from '@deck.gl/core';
 
 function getDefaultCharacterSet() {
   const charSet: string[] = [];
@@ -155,9 +155,14 @@ export default class FontAtlasManager {
   /** The current font atlas */
   private _atlas?: FontAtlas;
 
-  get texture(): Texture | undefined {
+  get atlas(): Readonly<FontAtlas> | undefined {
     return this._atlas;
   }
+
+  // TODO - cut during v9 porting as types reveal this is not correct
+  // get texture(): Texture | undefined {
+  //   return this._atlas;
+  // }
 
   get mapping(): CharacterMapping | undefined {
     return this._atlas && this._atlas.mapping;

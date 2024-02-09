@@ -69,7 +69,7 @@ export default class MyLayer extends Layer {
       id: this.props.id,
       geometry: new Geometry({
         id: this.props.id,
-        drawMode: gl.LINES
+        topology: 'line-list',
       }),
       vertexCount: 0,
       isIndexed: true

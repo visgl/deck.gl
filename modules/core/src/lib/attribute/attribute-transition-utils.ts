@@ -1,8 +1,10 @@
+import type {Device} from '@luma.gl/core';
+import type {Buffer} from '@luma.gl/core';
 import {padArray} from '../../utils/array-utils';
-import {NumericArray} from '../../types/types';
+import {NumericArray, TypedArray} from '../../types/types';
 import Attribute from './attribute';
 import type {BufferAccessor} from './data-column';
-import type {Buffer} from '@luma.gl/webgl';
+import {VertexFormat as LumaVertexFormat} from '@luma.gl/core';
 
 export interface TransitionSettings {
   type: string;
@@ -67,7 +69,7 @@ export function normalizeTransitionSettings(
 // (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
 // (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
 export function getSourceBufferAttribute(
-  gl: WebGLRenderingContext,
+  device: Device,
   attribute: Attribute
 ): [Buffer, BufferAccessor] | NumericArray {
   // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
@@ -90,6 +92,7 @@ export function getSourceBufferAttribute(
   return attribute.value as NumericArray;
 }
 
+/** Returns the GLSL attribute type for the given number of float32 components. */
 export function getAttributeTypeFromSize(size: number): string {
   switch (size) {
     case 1:
@@ -102,6 +105,22 @@ export function getAttributeTypeFromSize(size: number): string {
       return 'vec4';
     default:
       throw new Error(`No defined attribute type for size "${size}"`);
+  }
+}
+
+/** Returns the {@link VertexFormat} for the given number of float32 components. */
+export function getFloat32VertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
+  switch (size) {
+    case 1:
+      return 'float32';
+    case 2:
+      return 'float32x2';
+    case 3:
+      return 'float32x3';
+    case 4:
+      return 'float32x4';
+    default:
+      throw new Error('invalid type size');
   }
 }
 
@@ -122,6 +141,9 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
 // to a buffer layout of [4, 2], it should produce a buffer, using the transition setting's `enter`
 // function, that looks like this: [A1, A2, A3, A4 (user `enter` fn), B1, B2, 0]. Note: the final
 // 0 in this buffer is because we never shrink buffers, only grow them, for performance reasons.
+//
+// padBuffer may return either the original buffer, or a new buffer if the size of the original
+// was insufficient. Callers are responsible for disposing of the original buffer if needed.
 export function padBuffer({
   buffer,
   numInstances,
@@ -136,7 +158,7 @@ export function padBuffer({
   fromLength: number;
   fromStartIndices?: NumericArray | null;
   getData?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
-}): void {
+}): Buffer {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
   const precisionMultiplier =
@@ -150,12 +172,13 @@ export function padBuffer({
 
   // check if buffer needs to be padded
   if (!hasStartIndices && fromLength >= toLength) {
-    return;
+    return buffer;
   }
 
   const toData = isConstant
-    ? attribute.value
-    : (attribute.getBuffer() as Buffer).getData({srcByteOffset: byteOffset});
+    ? (attribute.value as TypedArray)
+    : // TODO(v9.1): Avoid non-portable synchronous reads.
+      toFloat32Array(attribute.getBuffer()!.readSyncWebGL2());
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
@@ -163,22 +186,31 @@ export function padBuffer({
 
   const getMissingData = isConstant
     ? (i, chunk) => getData(toData, chunk)
-    : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
+    : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
-  const source = buffer.getData({length: fromLength});
-  const data = new Float32Array(toLength);
+  // TODO(v9.1): Avoid non-portable synchronous reads.
+  const source = toFloat32Array(buffer.readSyncWebGL2());
+  const target = new Float32Array(toLength);
   padArray({
     source,
-    target: data,
+    target,
     sourceStartIndices: fromStartIndices,
     targetStartIndices: toStartIndices,
     size,
     getData: getMissingData
   });
 
-  // TODO: support offset in buffer.setData?
-  if (buffer.byteLength < data.byteLength + byteOffset) {
-    buffer.reallocate(data.byteLength + byteOffset);
+  if (buffer.byteLength < target.byteLength + byteOffset) {
+    buffer = buffer.device.createBuffer({byteLength: target.byteLength + byteOffset});
   }
-  buffer.subData({data, offset: byteOffset});
+  buffer.write(target, byteOffset);
+  return buffer;
+}
+
+function toFloat32Array(bytes: Uint8Array): Float32Array {
+  return new Float32Array(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.byteLength / Float32Array.BYTES_PER_ELEMENT
+  );
 }

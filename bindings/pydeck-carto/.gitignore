@@ -93,12 +93,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# =========================
 # Operating System Files
-# =========================
 
 # OSX
-# =========================
 
 .DS_Store
 .AppleDouble
@@ -123,7 +120,6 @@ Temporary Items
 .apdisk
 
 # Windows
-# =========================
 
 # Windows image file caches
 Thumbs.db

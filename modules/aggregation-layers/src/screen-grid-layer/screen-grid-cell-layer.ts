@@ -18,32 +18,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
-import {Model, Geometry, FEATURES, hasFeatures, Texture2D, DefaultProps} from '@luma.gl/core';
-import {Layer, LayerProps, log, picking, UpdateParameters} from '@deck.gl/core';
+import {Device, Texture} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
+import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import type {_ScreenGridLayerProps} from './screen-grid-layer';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
 const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
-  cellSizePixels: {value: 100, min: 1},
-  cellMarginPixels: {value: 2, min: 0, max: 5},
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange
 };
 
 /** All properties supported by ScreenGridCellLayer. */
-export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<DataT> & LayerProps;
+export type ScreenGridCellLayerProps<DataT = unknown> = _ScreenGridCellLayerProps<DataT> &
+  LayerProps;
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
-  maxTexture: Texture2D;
+  maxTexture: Texture;
 };
 
 export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
@@ -52,19 +54,19 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   static layerName = 'ScreenGridCellLayer';
   static defaultProps = defaultProps;
 
-  static isSupported(gl) {
-    return hasFeatures(gl, [FEATURES.TEXTURE_FLOAT]);
+  static isSupported(device: Device) {
+    return device.features.has('texture-formats-float32-webgl1');
   }
 
-  state!: Layer['state'] & {
-    model: Model;
+  state!: {
+    model?: Model;
   };
-  getShaders() {
-    return {vs, fs, modules: [picking]};
+
+  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
+    return {vs, fs, modules: [picking as ShaderModule]};
   }
 
   initializeState() {
-    const {gl} = this.context;
     const attributeManager = this.getAttributeManager()!;
     attributeManager.addInstanced({
       // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -72,7 +74,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
       instanceCounts: {size: 4, noAlloc: true}
     });
     this.setState({
-      model: this._getModel(gl)
+      model: this._getModel()
     });
   }
 
@@ -104,22 +106,23 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model} = this.state;
-    model
-      .setUniforms(uniforms)
-      .setUniforms({
-        minColor,
-        maxColor,
-        maxTexture,
-        colorDomain
-      })
-      .draw({
-        parameters: {
-          depthTest: false,
-          depthMask: false,
-          ...parameters
-        }
-      });
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
+    model.setBindings({
+      maxTexture
+    });
+    model.setUniforms({
+      minColor,
+      maxColor,
+      colorDomain
+    });
+    model.setParameters({
+      depthWriteEnabled: false,
+      // How to specify depth mask in WebGPU?
+      // depthMask: false,
+      ...parameters
+    });
+    model.draw(this.context.renderPass);
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -140,17 +143,25 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
 
   // Private Methods
 
-  _getModel(gl: WebGLRenderingContext): Model {
-    return new Model(gl, {
+  _getModel(): Model {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-list',
         attributes: {
-          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          // prettier-ignore
+          positions: new Float32Array([
+            0, 0, 0,
+            1, 0, 0,
+            1, 1, 0,
+            0, 0, 0,
+            1, 1, 0,
+            0, 1, 0,
+          ])
         }
-      }),
-      isInstanced: true
+      })
     });
   }
 
@@ -170,7 +181,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   _updateUniforms(oldProps, props, changeFlags): void {
-    const {model} = this.state;
+    const model = this.state.model!;
     if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
       model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
     }

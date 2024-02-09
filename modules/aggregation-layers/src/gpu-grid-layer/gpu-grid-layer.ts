@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Buffer} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   AccessorFunction,
@@ -37,7 +36,7 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
-import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
+import {pointToDensityGridDataCPU, GridHash} from './../cpu-grid-layer/grid-aggregator';
 import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregation-layer';
 import {getBoundingBox, getGridParams} from '../utils/grid-aggregation-utils';
 
@@ -58,7 +57,7 @@ const defaultProps: DefaultProps<GPUGridLayerProps> = {
   // grid
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   extruded: false,
 
   // Optional material for 'lighting' shader module
@@ -77,7 +76,7 @@ const DIMENSIONS = {
 const POSITION_ATTRIBUTE_NAME = 'positions';
 
 /** All properties supported by GPUGridLayer. */
-export type GPUGridLayerProps<DataT = any> = _GPUGridLayerProps<DataT> &
+export type GPUGridLayerProps<DataT = unknown> = _GPUGridLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by GPUGridLayer. */
@@ -176,8 +175,13 @@ export default class GPUGridLayer<
   static layerName = 'GPUGridLayer';
   static defaultProps = defaultProps;
 
-  initializeState({gl}: LayerContext): void {
-    const isSupported = GPUGridAggregator.isSupported(gl);
+  state!: GridAggregationLayer<DataT>['state'] & {
+    isSupported: boolean;
+    gridHash?: GridHash;
+  };
+
+  initializeState({device}: LayerContext): void {
+    const isSupported = GPUGridAggregator.isSupported(device);
     if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
@@ -185,7 +189,7 @@ export default class GPUGridLayer<
       dimensions: DIMENSIONS
     });
     this.setState({
-      gpuAggregation: true,
+      gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
       projectPoints: false, // aggregation in world space
       isSupported,
       weights: {
@@ -193,8 +197,9 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(gl, {
+          maxMinBuffer: device.createBuffer({
             byteLength: 4 * 4,
+            // @ts-expect-error webgl-legacy
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         },
@@ -202,8 +207,9 @@ export default class GPUGridLayer<
           needMin: true,
           needMax: true,
           combineMaxMin: true,
-          maxMinBuffer: new Buffer(gl, {
+          maxMinBuffer: device.createBuffer({
             byteLength: 4 * 4,
+            // @ts-expect-error
             accessor: {size: 4, type: GL.FLOAT, divisor: 1}
           })
         }
@@ -273,7 +279,7 @@ export default class GPUGridLayer<
     const {index} = info;
     let object: any = null;
     if (index >= 0) {
-      const {gpuGridAggregator} = this.state;
+      const gpuGridAggregator = this.state.gpuGridAggregator!;
       const position = this.getPositionForIndex(index);
       const colorInfo = GPUGridAggregator.getAggregationData({
         pixelIndex: index,
@@ -380,8 +386,8 @@ export default class GPUGridLayer<
     const {color, elevation} = this.state.weights;
     [color, elevation].forEach(weight => {
       const {aggregationBuffer, maxMinBuffer} = weight;
-      maxMinBuffer.delete();
-      aggregationBuffer?.delete();
+      maxMinBuffer?.destroy();
+      aggregationBuffer?.destroy();
     });
     super.finalizeState(context);
   }

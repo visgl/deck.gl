@@ -17,7 +17,7 @@ import {MVTWorkerLoader} from '@loaders.gl/mvt';
 import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatures} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
 import type {Feature} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -25,15 +25,16 @@ import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
 import {
   urlType,
   Tileset2D,
   Tile2DHeader,
   getURLFromTemplate,
+  URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
-} from '../tileset-2d';
+} from '../tileset-2d/index';
 
 const WORLD_SIZE = 512;
 
@@ -59,15 +60,17 @@ export type TileJson = {
   version?: string;
 };
 
-type ParsedMvtTile = Feature[] | BinaryFeatures;
+type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
 /** All props supported by the MVTLayer */
 export type MVTLayerProps = _MVTLayerProps &
   Omit<GeoJsonLayerProps, 'data'> &
-  TileLayerProps<ParsedMvtTile>;
+  Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
+  data: TileJson | URLTemplate;
+
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
 
@@ -75,7 +78,7 @@ export type _MVTLayerProps = {
   uniqueIdProperty?: string;
 
   /** A feature with ID corresponding to the supplied value will be highlighted. */
-  highlightedFeatureId?: string | null;
+  highlightedFeatureId?: string | number | null;
 
   /**
    * Use tile data in binary format.
@@ -102,6 +105,15 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
+  state!: TileLayer<ParsedMvtTile>['state'] & {
+    binary: boolean;
+    data: URLTemplate;
+    tileJSON: TileJson | null;
+    highlightColor?: number[];
+    hoveredFeatureId: number | string | null;
+    hoveredFeatureLayerName: string | null;
+  };
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
@@ -109,12 +121,14 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     this.setState({
       binary,
       data: null,
-      tileJSON: null
+      tileJSON: null,
+      hoveredFeatureId: null,
+      hoveredFeatureLayerName: null
     });
   }
 
   get isLoaded(): boolean {
-    return this.state && this.state.data && this.state.tileset && super.isLoaded;
+    return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -135,8 +149,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data: any = this.props.data;
-    let tileJSON: any = null;
+    let data = this.props.data;
+    let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
       const {onDataLoad, fetch} = this.props;
@@ -151,7 +165,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       if (onDataLoad) {
         onDataLoad(tileJSON, {propName: 'data', layer: this});
       }
-    } else if (data.tilejson) {
+    } else if (data && typeof data === 'object' && 'tilejson' in data) {
       tileJSON = data;
     }
 
@@ -164,19 +178,19 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   _getTilesetOptions(): Tileset2DProps {
     const opts = super._getTilesetOptions();
-    const tileJSON: TileJson | null | undefined = this.state.tileJSON;
+    const tileJSON: TileJson | null = this.state.tileJSON;
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
       if (Number.isFinite(tileJSON.minzoom) && (tileJSON.minzoom as number) > (minZoom as number)) {
-        opts.minZoom = tileJSON.minzoom as number;
+        opts.minZoom = tileJSON.minzoom;
       }
 
       if (
         Number.isFinite(tileJSON.maxzoom) &&
         (!Number.isFinite(maxZoom) || (tileJSON.maxzoom as number) < (maxZoom as number))
       ) {
-        opts.maxZoom = tileJSON.maxzoom as number;
+        opts.maxZoom = tileJSON.maxzoom;
       }
     }
     return opts;
@@ -258,8 +272,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
-    let newHoveredFeatureLayerName;
+    let newHoveredFeatureId: string | number | null = null;
+    let newHoveredFeatureLayerName: string | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
@@ -289,7 +303,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatures, {
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
@@ -323,7 +337,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return -1;
     }
 
-    const featureIdToHighlight = isHighlighted ? highlightedFeatureId : hoveredFeatureId;
+    const featureIdToHighlight = isHighlighted ? highlightedFeatureId! : hoveredFeatureId!;
 
     // Iterable data
     if (Array.isArray(data)) {
@@ -341,7 +355,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
         data,
         uniqueIdProperty,
         featureIdToHighlight,
-        isHighlighted ? '' : hoveredFeatureLayerName
+        isHighlighted ? '' : hoveredFeatureLayerName!
       );
     }
 
@@ -382,7 +396,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   private _setWGS84PropertyForTiles(): void {
     const propName = 'dataInWGS84';
-    const tileset: Tileset2D = this.state.tileset;
+    const tileset: Tileset2D = this.state.tileset!;
 
     // @ts-expect-error selectedTiles are always initialized when tile is being processed
     tileset.selectedTiles.forEach((tile: Tile2DHeader & ContentWGS84Cache) => {

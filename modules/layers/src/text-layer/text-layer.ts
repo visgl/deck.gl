@@ -197,7 +197,7 @@ type _TextLayerProps<DataT> = {
   backgroundColor?: Color;
 };
 
-export type TextLayerProps<DataT = any> = _TextLayerProps<DataT> & LayerProps;
+export type TextLayerProps<DataT = unknown> = _TextLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<TextLayerProps> = {
   billboard: true,
@@ -224,8 +224,8 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   wordBreak: 'break-word',
   maxWidth: {type: 'number', value: -1},
 
-  getText: {type: 'accessor', value: x => x.text},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getText: {type: 'accessor', value: (x: any) => x.text},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', value: 32},
   getAngle: {type: 'accessor', value: 0},
@@ -479,7 +479,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       startIndices,
       numInstances,
       getText,
-      fontAtlasManager: {scale, texture, mapping},
+      fontAtlasManager: {scale, atlas, mapping},
       styleVersion
     } = this.state;
 
@@ -581,7 +581,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
-          iconAtlas: texture,
+          iconAtlas: atlas,
           iconMapping: mapping,
 
           getPosition,

@@ -13,14 +13,15 @@
     {"path": "modules/extensions"},
     {"path": "modules/geo-layers"},
     {"path": "modules/google-maps"},
-    // {"path": "modules/json"},
+    {"path": "modules/json"},
     // {"path": "modules/jupyter-widget"},
     {"path": "modules/layers"},
     {"path": "modules/main"},
     {"path": "modules/mapbox"},
     {"path": "modules/mesh-layers"},
     {"path": "modules/react"},
-    // {"path": "modules/test-utils"}
+    // {"path": "modules/test-utils"},
+    {"path": "modules/widgets"}
   ],
   "include": [
     "modules/core/src"

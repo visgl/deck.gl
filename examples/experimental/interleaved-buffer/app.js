@@ -1,7 +1,6 @@
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
-import {Buffer} from '@luma.gl/core';
+import {GL} from '@luma.gl/constants';
 
 import data from './data';
 
@@ -14,11 +13,11 @@ const deck = new Deck({
     target: [6, 6, 0],
     zoom: 5
   },
-  onWebGLInitialized
+  onDeviceInitialized
 });
 
-function onWebGLInitialized(gl) {
-  const buffer = new Buffer(gl, data);
+function onDeviceInitialized(device) {
+  const buffer = device.createBuffer({data});
 
   const positions = {buffer, type: GL.FLOAT, size: 3, offset: 4, stride: 16};
   const colors = {buffer, type: GL.UNSIGNED_BYTE, size: 4, offset: 0, stride: 16};
@@ -38,8 +37,7 @@ function onWebGLInitialized(gl) {
       },
       pickable: true,
       autoHighlight: true,
-      _normalize: false, // this instructs SolidPolygonLayer to skip normalization and use the binary as is
-      getWidth: 0.5
+      _normalize: false // this instructs SolidPolygonLayer to skip normalization and use the binary as is
     }),
 
     new PathLayer({

@@ -1,5 +1,5 @@
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
 
 const cullBackParameters = {

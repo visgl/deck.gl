@@ -17,6 +17,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import type {Widget, WidgetPlacement} from './widget-manager';
+import type {PickingInfo} from './picking/pick-info';
+import type Viewport from '../viewports/viewport';
+import type Deck from './deck';
 
 /* global document */
 const defaultStyle: Partial<CSSStyleDeclaration> = {
@@ -41,23 +45,53 @@ export type TooltipContent =
       style?: Partial<CSSStyleDeclaration>;
     };
 
-export default class Tooltip {
-  private el: HTMLDivElement | null = null;
-
+export default class Tooltip implements Widget {
+  id = 'default-tooltip';
+  placement: WidgetPlacement = 'fill';
+  props = {};
   isVisible: boolean = false;
+  deck?: Deck;
+  element?: HTMLDivElement;
+  lastViewport?: Viewport;
 
-  constructor(canvas: HTMLCanvasElement) {
-    const canvasParent = canvas.parentElement;
-    if (canvasParent) {
-      this.el = document.createElement('div');
-      this.el.className = 'deck-tooltip';
-      Object.assign(this.el.style, defaultStyle);
-      canvasParent.appendChild(this.el);
+  onAdd({deck}: {deck: Deck}): HTMLDivElement {
+    const el = document.createElement('div');
+    el.className = 'deck-tooltip';
+    Object.assign(el.style, defaultStyle);
+
+    this.deck = deck;
+    this.element = el;
+
+    return el;
+  }
+
+  onRemove() {
+    this.deck = undefined;
+    this.element = undefined;
+  }
+
+  setProps() {}
+
+  onViewportChange(viewport: Viewport) {
+    if (this.isVisible && viewport.id === this.lastViewport?.id && viewport !== this.lastViewport) {
+      // Camera has moved, clear tooltip
+      this.setTooltip(null);
     }
   }
 
+  onHover(info: PickingInfo) {
+    const {deck} = this;
+    const getTooltip = deck && deck.props.getTooltip;
+    if (!getTooltip) {
+      return;
+    }
+    const displayInfo = getTooltip(info);
+    this.lastViewport = info.viewport;
+    this.setTooltip(displayInfo, info.x, info.y);
+  }
+
   setTooltip(displayInfo: TooltipContent, x?: number, y?: number): void {
-    const el = this.el;
+    const el = this.element;
     if (!el) {
       return;
     }
@@ -78,17 +112,13 @@ export default class Tooltip {
       if (displayInfo.className) {
         el.className = displayInfo.className;
       }
-      Object.assign(el.style, displayInfo.style);
     }
     this.isVisible = true;
     el.style.display = 'block';
     el.style.transform = `translate(${x}px, ${y}px)`;
-  }
 
-  remove(): void {
-    if (this.el) {
-      this.el.remove();
-      this.el = null;
+    if (displayInfo && typeof displayInfo === 'object' && 'style' in displayInfo) {
+      Object.assign(el.style, displayInfo.style);
     }
   }
 }

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
@@ -39,10 +39,11 @@ type _MultiIconLayerProps<DataT> = {
   outlineColor?: Color;
 };
 
-export type MultiIconLayerProps<DataT = any> = _MultiIconLayerProps<DataT> & IconLayerProps<DataT>;
+export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
+  IconLayerProps<DataT>;
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
-  getIconOffsets: {type: 'accessor', value: x => x.offsets},
+  getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
   alphaCutoff: 0.001,
   smoothing: 0.1,
   outlineWidth: 0,
@@ -123,9 +124,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     if (sdf && outlineWidth) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
+      const model = this.state.model!;
 
       if (iconsTexture) {
-        this.state.model.draw({uniforms: {outlineBuffer: DEFAULT_BUFFER}});
+        model.setUniforms({outlineBuffer: DEFAULT_BUFFER});
+        model.draw(this.context.renderPass);
       }
     }
   }

@@ -1,6 +1,7 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
@@ -36,7 +37,8 @@ type _TextBackgroundLayerProps<DataT> = {
   getLineWidth?: Accessor<DataT, number>;
 };
 
-export type TextBackgroundLayerProps<DataT = any> = _TextBackgroundLayerProps<DataT> & LayerProps;
+export type TextBackgroundLayerProps<DataT = unknown> = _TextBackgroundLayerProps<DataT> &
+  LayerProps;
 
 const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   billboard: true,
@@ -47,7 +49,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
 
   padding: {type: 'array', value: [0, 0, 0, 0]},
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getSize: {type: 'accessor', value: 1},
   getAngle: {type: 'accessor', value: 0},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
@@ -64,7 +66,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   static layerName = 'TextBackgroundLayer';
 
   state!: {
-    model: Model;
+    model?: Model;
   };
 
   getShaders() {
@@ -129,9 +131,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     super.updateState(params);
     const {changeFlags} = params;
     if (changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -145,29 +146,30 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       padding = [padding[0], padding[1], padding[0], padding[1]];
     }
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        billboard,
-        stroked: Boolean(getLineWidth),
-        padding,
-        sizeUnits: UNIT[sizeUnits],
-        sizeScale,
-        sizeMinPixels,
-        sizeMaxPixels
-      })
-      .draw();
+    const model = this.state.model!;
+    model.setUniforms(uniforms);
+    model.setUniforms({
+      billboard,
+      stroked: Boolean(getLineWidth),
+      padding,
+      sizeUnits: UNIT[sizeUnits],
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels
+    });
+    model.draw(this.context.renderPass);
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_FAN,
+        topology: 'triangle-fan-webgl',
         vertexCount: 4,
         attributes: {
           positions: {size: 2, value: new Float32Array(positions)}

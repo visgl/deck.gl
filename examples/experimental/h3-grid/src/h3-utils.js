@@ -1,4 +1,4 @@
-import {polyfill, getRes0Indexes, h3GetFaces, geoToH3} from 'h3-js';
+import {polygonToCells, getRes0Cells, getIcosahedronFaces, latLngToCell} from 'h3-js';
 
 // Number of hexagons at resolution 10 in tile x:497 y:505 z:10
 // This tile is close to the equator and includes a pentagon 8a7400000007fff
@@ -12,17 +12,17 @@ const RES_FACTOR = 7;
 
 export function getHexagonsInBoundingBox({west, north, east, south}, resolution) {
   if (resolution === 0) {
-    return getRes0Indexes();
+    return getRes0Cells();
   }
   if (east - west > 180) {
-    // This is a known issue in h3-js: polyfill does not work correctly
+    // This is a known issue in h3-js: polygonToCells does not work correctly
     // when longitude span is larger than 180 degrees.
     return getHexagonsInBoundingBox({west, north, east: 0, south}, resolution).concat(
       getHexagonsInBoundingBox({west: 0, north, east, south}, resolution)
     );
   }
 
-  return polyfill(
+  return polygonToCells(
     [
       [
         [west, north],
@@ -42,20 +42,20 @@ export function getTileInfo(tile, resolution) {
     const {west, north, east, south} = tile.bbox;
     const faces = [];
 
-    const NW = geoToH3(north, west, resolution);
-    faces.push(...h3GetFaces(NW));
+    const NW = latLngToCell(north, west, resolution);
+    faces.push(...getIcosahedronFaces(NW));
 
-    const NE = geoToH3(north, east, resolution);
-    faces.push(...h3GetFaces(NE));
+    const NE = latLngToCell(north, east, resolution);
+    faces.push(...getIcosahedronFaces(NE));
 
-    const SW = geoToH3(south, west, resolution);
-    faces.push(...h3GetFaces(SW));
+    const SW = latLngToCell(south, west, resolution);
+    faces.push(...getIcosahedronFaces(SW));
 
-    const SE = geoToH3(south, east, resolution);
-    faces.push(...h3GetFaces(SE));
+    const SE = latLngToCell(south, east, resolution);
+    faces.push(...getIcosahedronFaces(SE));
 
     tile.hasMultipleFaces = new Set(faces).size > 1;
-    tile.centerHexagon = geoToH3((north + south) / 2, (west + east) / 2, resolution);
+    tile.centerHexagon = latLngToCell((north + south) / 2, (west + east) / 2, resolution);
   }
 
   return tile;

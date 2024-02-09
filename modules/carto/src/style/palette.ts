@@ -1,5 +1,5 @@
 import * as cartoColors from 'cartocolor';
-import {assert} from './utils';
+import {assert} from '../utils';
 
 export type Color = [r: number, b: number, g: number, a?: number];
 

@@ -65,7 +65,7 @@ export default class PolygonTesselator extends Tesselator<
       ...opts,
       attributes: {
         positions: {size: 3, type: fp64 ? Float64Array : Float32Array},
-        vertexValid: {type: Uint8ClampedArray, size: 1},
+        vertexValid: {type: Uint16Array, size: 1},
         indices: {type: IndexType, size: 1}
       }
     });
@@ -161,9 +161,10 @@ export default class PolygonTesselator extends Tesselator<
         context.indexStart = this.indexStarts[context.geometryIndex + 1];
       }
     } else {
-      this._updateIndices(polygon, context);
-      this._updatePositions(polygon, context);
-      this._updateVertexValid(polygon, context);
+      const normalizedPolygon = polygon as NormalizedPolygonGeometry;
+      this._updateIndices(normalizedPolygon, context);
+      this._updatePositions(normalizedPolygon, context);
+      this._updateVertexValid(normalizedPolygon, context);
     }
   }
 

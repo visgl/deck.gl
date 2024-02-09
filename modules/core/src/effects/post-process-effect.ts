@@ -1,46 +1,53 @@
+import type {Device, Framebuffer} from '@luma.gl/core';
+import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
+
 import ScreenPass from '../passes/screen-pass';
-import {normalizeShaderModule} from '@luma.gl/core';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {Framebuffer} from '@luma.gl/webgl';
-import type {ShaderModule} from '../types/types';
 
-export default class PostProcessEffect implements Effect {
+export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
-  props: any;
-  module: ShaderModule;
+  props: ShaderPassT['props'];
+  module: ShaderPassT;
   passes?: ScreenPass[];
 
-  constructor(module: ShaderModule, props: any = {}) {
+  constructor(module: ShaderPassT, props: ShaderPassT['props']) {
     this.id = `${module.name}-pass`;
     this.props = props;
     normalizeShaderModule(module);
     this.module = module;
   }
 
-  setProps(props: any) {
+  setProps(props: ShaderPassT['props']) {
     this.props = props;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
-  postRender(gl: WebGLRenderingContext, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(gl, this.module, this.id);
+  postRender(device: Device, params: PostRenderOptions): Framebuffer {
+    const passes = this.passes || createPasses(device, this.module, this.id);
     this.passes = passes;
 
     const {target} = params;
     let inputBuffer = params.inputBuffer;
-    let outputBuffer = params.swapBuffer;
+    let outputBuffer: Framebuffer | null = params.swapBuffer;
 
     for (let index = 0; index < this.passes.length; index++) {
-      if (target && index === this.passes.length - 1) {
+      const isLastPass = index === this.passes.length - 1;
+      const renderToTarget = target !== undefined && isLastPass;
+      if (renderToTarget) {
         outputBuffer = target;
       }
-      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings: this.props});
-      const switchBuffer = outputBuffer;
-      outputBuffer = inputBuffer;
-      inputBuffer = switchBuffer;
+      const moduleSettings = {};
+      moduleSettings[this.module.name] = this.props;
+      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings});
+
+      if (!renderToTarget) {
+        const switchBuffer = outputBuffer as Framebuffer;
+        outputBuffer = inputBuffer;
+        inputBuffer = switchBuffer;
+      }
     }
     return inputBuffer;
   }
@@ -55,61 +62,42 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
-  if (!module.passes) {
-    const fs = getFragmentShaderForRenderPass(module);
-    const pass = new ScreenPass(gl, {
-      id,
-      module,
-      fs
-    });
-    return [pass];
-  }
-
+function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
   return module.passes.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
-
-    return new ScreenPass(gl, {
-      id: idn,
-      module,
-      fs
-    });
+    return new ScreenPass(device, {id: idn, module, fs});
   });
 }
 
-const FILTER_FS_TEMPLATE = func => `\
-uniform sampler2D texture;
+const FS_TEMPLATE_INPUTS = `\
+#version 300 es
+uniform sampler2D texSrc;
 uniform vec2 texSize;
 
-varying vec2 position;
-varying vec2 coordinate;
-varying vec2 uv;
+in vec2 position;
+in vec2 coordinate;
+in vec2 uv;
 
+out vec4 fragColor;
+`;
+
+const FILTER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  gl_FragColor = texture2D(texture, texCoord);
-  gl_FragColor = ${func}(gl_FragColor, texSize, texCoord);
+  fragColor = texture(texSrc, coordinate);
+  fragColor = ${func}(fragColor, texSize, coordinate);
 }
 `;
 
-const SAMPLER_FS_TEMPLATE = func => `\
-uniform sampler2D texture;
-uniform vec2 texSize;
-
-varying vec2 position;
-varying vec2 coordinate;
-varying vec2 uv;
-
+const SAMPLER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  gl_FragColor = ${func}(texture, texSize, texCoord);
+  fragColor = ${func}(texSrc, texSize, coordinate);
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module) {
+function getFragmentShaderForRenderPass(module: ShaderPass, pass: ShaderPass['passes'][0]): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);
@@ -121,5 +109,5 @@ function getFragmentShaderForRenderPass(module, pass = module) {
   }
 
   // console.error(`${module.name} no fragment shader generated`);
-  return null;
+  return '';
 }

@@ -1,6 +1,15 @@
 {
+  "ts-node": {
+    "include": [
+      "modules",
+      "test/modules"
+    ],
+    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
+    "transpileOnly": true
+  },
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2022",
+    "module": "es2020",
     "jsx": "react",
     "strict": true,
     "noImplicitAny": false,
@@ -33,10 +42,6 @@
       "deck.gl-test/*": ["test/*"]
     },
     "typeRoots" : ["./node_modules/@types"]
-  },
-  "ts-node": {
-    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
-    "transpileOnly": true
   },
   "include": [
     "modules",

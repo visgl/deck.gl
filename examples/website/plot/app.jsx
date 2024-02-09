@@ -28,12 +28,12 @@ export default function App({resolution = 200, showAxis = true, equation = EQUAT
     equation &&
       resolution &&
       new PlotLayer({
-        getPosition: (u, v) => {
+        getPosition: ([u, v]) => {
           const x = (u - 1 / 2) * Math.PI * 2;
           const y = (v - 1 / 2) * Math.PI * 2;
           return [x, y, equation(x, y)];
         },
-        getColor: (x, y, z) => [40, z * 128 + 128, 160],
+        getColor: ([x, y, z]) => [40, z * 128 + 128, 160],
         getXScale: getScale,
         getYScale: getScale,
         getZScale: getScale,

@@ -7,7 +7,8 @@ import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 // Data provided by the OpenSky Network, http://www.opensky-network.org
-const DATA_URL = 'https://opensky-network.org/api/states/all';
+// const DATA_URL = 'https://opensky-network.org/api/states/all';
+const DATA_URL = './all.json'; // Opensky API currently down
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const REFRESH_TIME = 30000;
@@ -112,10 +113,11 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
         d[DATA_INDEX.LATITUDE] || 0,
         d[DATA_INDEX.GEO_ALTITUDE] || 0
       ],
-      getOrientation: d => [verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90],
-      transitions: {
-        getPosition: REFRESH_TIME * 0.9
-      }
+      getOrientation: d => [verticalRateToAngle(d), -d[DATA_INDEX.TRUE_TRACK] || 0, 90]
+      // TODO(v9) Re-enable once attribute transitions working (#8392)
+      // transitions: {
+      //   getPosition: REFRESH_TIME * 0.9
+      // }
     });
 
   return (

@@ -3,7 +3,7 @@ import {MapboxLayer} from '@deck.gl/mapbox';
 import {ArcLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import {scaleLog} from 'd3-scale';
-import {h3ToGeo} from 'h3-js';
+import {cellToLatLng} from 'h3-js';
 
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
@@ -23,6 +23,7 @@ const colorScale = scaleLog()
 export function renderToDOM(container, data) {
   const map = new mapboxgl.Map({
     container,
+    useWebGL2: true,
     style: 'mapbox://styles/mapbox/light-v9',
     antialias: true,
     center: [-122.4034, 37.7845],
@@ -76,7 +77,7 @@ function renderLayers(map, data) {
   });
 
   const selectPOI = hex => {
-    const [lat, lng] = h3ToGeo(hex);
+    const [lat, lng] = cellToLatLng(hex);
     selectedPOICentroid = [lng, lat];
     arcLayer.setProps({
       data: data.filter(d => d.hex === hex)
@@ -130,5 +131,5 @@ export async function loadAndRender(container) {
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/safegraph/sf-pois.csv',
     CSVLoader
   );
-  renderToDOM(container, data);
+  renderToDOM(container, data.data);
 }

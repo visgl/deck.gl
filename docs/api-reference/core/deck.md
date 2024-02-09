@@ -587,6 +587,19 @@ Frees all resources associated with this `Deck` instance.
 
 `deck.finalize()`
 
+##### `getCanvas` {#getcanvas}
+
+Get the canvas element attached to this `Deck` instance.
+
+`deck.getCanvas()`
+
+Returns:
+
+* Either an `HTMLCanvasElement` or `null` if one isn't assigned.
+
+Notes:
+
+* See the [canvas](#canvas) prop for more information.
 
 ##### `setProps` {#setprops}
 
@@ -620,7 +633,7 @@ Parameters:
 Get the closest pickable and visible object at the given screen coordinate.
 
 ```js
-deck.pickObject({x, y, radius, layerIds})
+deck.pickObject({x, y, radius, layerIds, unproject3D})
 ```
 
 Parameters:
@@ -641,7 +654,7 @@ Returns:
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
 ```js
-deck.pickMultipleObjects({x, y, radius, layerIds, depth})
+deck.pickMultipleObjects({x, y, radius, layerIds, depth, unproject3D})
 ```
 
 Parameters:
@@ -667,7 +680,7 @@ Notes:
 Get all pickable and visible objects within a bounding box.
 
 ```js
-deck.pickObjects({x, y, width, height, layerIds})
+deck.pickObjects({x, y, width, height, layerIds, maxObjects})
 ```
 
 Parameters:

@@ -32,8 +32,9 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
+import {GL} from '@luma.gl/constants';
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
@@ -41,8 +42,8 @@ import fs from './line-layer-fragment.glsl';
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const defaultProps: DefaultProps<LineLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
-  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: (x: any) => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
 
@@ -53,7 +54,7 @@ const defaultProps: DefaultProps<LineLayerProps> = {
 };
 
 /** All properties supported by LineLayer. */
-export type LineLayerProps<DataT = any> = _LineLayerProps<DataT> & LayerProps;
+export type LineLayerProps<DataT = unknown> = _LineLayerProps<DataT> & LayerProps;
 
 /** Properties added by LineLayer. */
 type _LineLayerProps<DataT> = {
@@ -116,6 +117,10 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   static layerName = 'LineLayer';
   static defaultProps = defaultProps;
 
+  state!: {
+    model?: Model;
+  };
+
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
       'instanceSourcePositions',
@@ -173,38 +178,36 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      const {gl} = this.context;
-      this.state.model?.delete();
-      this.state.model = this._getModel(gl);
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const model = this.state.model!;
 
-    this.state.model
-      .setUniforms(uniforms)
-      .setUniforms({
-        widthUnits: UNIT[widthUnits],
-        widthScale,
-        widthMinPixels,
-        widthMaxPixels,
-        useShortestPath: wrapLongitude ? 1 : 0
-      })
-      .draw();
+    model.setUniforms(uniforms);
+    model.setUniforms({
+      widthUnits: UNIT[widthUnits],
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      useShortestPath: wrapLongitude ? 1 : 0
+    });
+    model.draw(this.context.renderPass);
 
     if (wrapLongitude) {
       // Render a second copy for the clipped lines at the 180th meridian
-      this.state.model
-        .setUniforms({
-          useShortestPath: -1
-        })
-        .draw();
+      model.setUniforms({
+        useShortestPath: -1
+      });
+      model.draw(this.context.renderPass);
     }
   }
 
-  protected _getModel(gl: WebGLRenderingContext): Model {
+  protected _getModel(): Model {
     /*
      *  (0, -1)-------------_(1, -1)
      *       |          _,-"  |
@@ -214,13 +217,14 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(gl, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        drawMode: GL.TRIANGLE_STRIP,
+        topology: 'triangle-strip',
         attributes: {
-          positions: new Float32Array(positions)
+          positions: {size: 3, value: new Float32Array(positions)}
         }
       }),
       isInstanced: true

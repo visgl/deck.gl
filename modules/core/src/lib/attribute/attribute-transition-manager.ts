@@ -1,13 +1,15 @@
-import {Transform} from '@luma.gl/core';
+// deck.gl, MIT license
+
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
 
-import type {TransitionSettings} from './attribute-transition-utils';
-import type Attribute from './attribute';
+import type {Device} from '@luma.gl/core';
 import type {Timeline} from '@luma.gl/engine';
 import type GPUTransition from '../../transitions/gpu-transition';
 import type {ConstructorOf} from '../../types/types';
+import type Attribute from './attribute';
+import type {TransitionSettings} from './attribute-transition-utils';
 
 const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
   interpolation: GPUInterpolationTransition,
@@ -18,7 +20,7 @@ export default class AttributeTransitionManager {
   id: string;
   isSupported: boolean;
 
-  private gl: WebGLRenderingContext;
+  private device: Device;
   private timeline?: Timeline;
 
   private transitions: {[id: string]: GPUTransition};
@@ -26,7 +28,7 @@ export default class AttributeTransitionManager {
   private numInstances: number;
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       id,
       timeline
@@ -35,15 +37,15 @@ export default class AttributeTransitionManager {
       timeline?: Timeline;
     }
   ) {
+    if (!device) throw new Error('AttributeTransitionManager is constructed without device');
     this.id = id;
-    this.gl = gl;
+    this.device = device;
     this.timeline = timeline;
 
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-
-    this.isSupported = Transform.isSupported(gl);
+    this.isSupported = device.features.has('transform-feedback-webgl2');
   }
 
   finalize(): void {
@@ -147,6 +149,7 @@ export default class AttributeTransitionManager {
     // previous buffers, currentLength, startIndices, etc, to be used as the starting point
     // for the next transition
     let isNew = !transition || transition.type !== settings.type;
+
     if (isNew) {
       if (!this.isSupported) {
         log.warn(
@@ -164,7 +167,7 @@ export default class AttributeTransitionManager {
         this.transitions[attributeName] = new TransitionType({
           attribute,
           timeline: this.timeline,
-          gl: this.gl
+          device: this.device
         });
       } else {
         log.error(`unsupported transition type '${settings.type}'`)();

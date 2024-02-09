@@ -48,7 +48,7 @@ type DeckGLProps = DeckProps & {
   /** DOM element to add deck.gl canvas to */
   container?: Element;
   /** base map library, mapboxgl or maplibregl */
-  map?: object;
+  map?: any;
 };
 
 /**
@@ -75,7 +75,6 @@ export default class DeckGL extends Deck {
 
     super({canvas: deckCanvas, ...props});
 
-    // @ts-expect-error map lib is not typed
     if (map && map.Map) {
       // Default create mapbox map
       this._map =
@@ -115,11 +114,13 @@ export default class DeckGL extends Deck {
     // Update the base map
     if (this._map) {
       const viewport = this.getViewports()[0];
-      this._map.setProps({
-        width: viewport.width,
-        height: viewport.height,
-        viewState: viewport
-      });
+      if (viewport) {
+        this._map.setProps({
+          width: viewport.width,
+          height: viewport.height,
+          viewState: viewport
+        });
+      }
     }
     super._drawLayers(redrawReason, options);
   }

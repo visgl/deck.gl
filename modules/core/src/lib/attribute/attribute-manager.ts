@@ -20,15 +20,15 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
-import {IShaderAttribute} from './shader-attribute';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
-import debug from '../../debug';
+import debug from '../../debug/index';
 import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
+import type {Device, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -64,7 +64,7 @@ export default class AttributeManager {
    * by offering the ability to "invalidate" each attribute separately.
    */
   id: string;
-  gl: WebGLRenderingContext;
+  device: Device;
   attributes: Record<string, Attribute>;
   updateTriggers: {[name: string]: string[]};
   needsRedraw: string | boolean;
@@ -75,7 +75,7 @@ export default class AttributeManager {
   private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
-    gl: WebGLRenderingContext,
+    device: Device,
     {
       id = 'attribute-manager',
       stats,
@@ -87,7 +87,7 @@ export default class AttributeManager {
     } = {}
   ) {
     this.id = id;
-    this.gl = gl;
+    this.device = device;
 
     this.attributes = {};
 
@@ -97,7 +97,7 @@ export default class AttributeManager {
     this.userData = {};
     this.stats = stats;
 
-    this.attributeTransitionManager = new AttributeTransitionManager(gl, {
+    this.attributeTransitionManager = new AttributeTransitionManager(device, {
       id: `${id}-transitions`,
       timeline
     });
@@ -308,21 +308,20 @@ export default class AttributeManager {
     return changedAttributes;
   }
 
-  // Returns shader attributes
-  getShaderAttributes(
+  getBufferLayouts(
     attributes?: {[id: string]: Attribute},
     excludeAttributes: Record<string, boolean> = {}
-  ): {[id: string]: IShaderAttribute} {
+  ): BufferLayout[] {
     if (!attributes) {
       attributes = this.getAttributes();
     }
-    const shaderAttributes = {};
+    const bufferMaps: BufferLayout[] = [];
     for (const attributeName in attributes) {
       if (!excludeAttributes[attributeName]) {
-        Object.assign(shaderAttributes, attributes[attributeName].getShaderAttributes());
+        bufferMaps.push(attributes[attributeName].getBufferLayout());
       }
     }
-    return shaderAttributes;
+    return bufferMaps;
   }
 
   // PRIVATE METHODS
@@ -351,7 +350,7 @@ export default class AttributeManager {
       divisor: extraProps.instanced ? 1 : attribute.divisor || 0
     };
 
-    return new Attribute(this.gl, props);
+    return new Attribute(this.device, props);
   }
 
   // build updateTrigger name to attribute name mapping
@@ -402,7 +401,8 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
-      attribute.setConstantValue(attribute.value as NumericArray);
+      // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
+      attribute.setConstantValue(attribute.value);
       return;
     }
 

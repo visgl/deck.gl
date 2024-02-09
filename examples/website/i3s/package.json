@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/i3s": "^3.4.2",
+    "@loaders.gl/i3s": "^4.1.0",
     "deck.gl": "^8.8.0"
   },
   "devDependencies": {
