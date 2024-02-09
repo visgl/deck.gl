@@ -79,7 +79,6 @@ export default class PickLayersPass extends LayersPass {
       {
         scissorTest: true,
         scissor: [x, y, width, height],
-        clearColor: [0, 0, 0, 0],
         // When used as Mapbox custom layer, the context state may be dirty
         // TODO - Remove when mapbox fixes this issue
         // https://github.com/mapbox/mapbox-gl-js/issues/7801
@@ -103,7 +102,8 @@ export default class PickLayersPass extends LayersPass {
           effects: effects?.filter(e => e.useInPicking),
           pass,
           isPicking: true,
-          moduleParameters
+          moduleParameters,
+          clearColor: [0, 0, 0, 0]
         })
     );
 

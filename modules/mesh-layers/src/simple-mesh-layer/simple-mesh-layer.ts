@@ -356,6 +356,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     model.draw(renderPass);
   }
 
+  get isLoaded(): boolean {
+    return Boolean(this.state?.model && super.isLoaded);
+  }
+
   protected getModel(mesh: Mesh): Model {
     const model = new Model(this.context.device, {
       ...this.getShaders(),

@@ -1,6 +1,7 @@
 /* eslint-env browser */
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
+import type {Layer} from '@deck.gl/core';
 
 export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
@@ -17,7 +18,7 @@ export class Tile2DHeader<DataT = any> {
   children: Tile2DHeader[] | null;
   content: DataT | null;
   state?: number;
-  layers?: any[] | null; // Layer[] | null
+  layers?: Layer[] | null;
 
   id!: string; // assigned _always_ with result of `getTileId`
   zoom!: number; // assigned _always_ with result of `getTileZoom`

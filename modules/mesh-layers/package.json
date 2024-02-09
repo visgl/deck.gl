@@ -42,12 +42,12 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@loaders.gl/gltf": "4.1.0-alpha.9",
-    "@luma.gl/constants": "9.0.0-beta.3",
-    "@luma.gl/core": "9.0.0-beta.3",
-    "@luma.gl/engine": "9.0.0-beta.3",
-    "@luma.gl/gltf": "9.0.0-beta.3",
-    "@luma.gl/shadertools": "9.0.0-beta.3"
+    "@loaders.gl/gltf": "^4.1.0",
+    "@luma.gl/constants": "9.0.0-beta.4",
+    "@luma.gl/core": "9.0.0-beta.4",
+    "@luma.gl/engine": "9.0.0-beta.4",
+    "@luma.gl/gltf": "9.0.0-beta.4",
+    "@luma.gl/shadertools": "9.0.0-beta.4"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
