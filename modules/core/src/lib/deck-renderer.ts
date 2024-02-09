@@ -82,6 +82,9 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+    if (this.lastPostProcessEffect) {
+      renderOpts.clearColor = [0, 0, 0, 0];
+    }
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
     if (renderOpts.effects) {
@@ -127,14 +130,22 @@ export default class DeckRenderer {
 
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
+    const size = this.device.canvasContext!.getDrawingBufferSize();
     if (renderBuffers.length === 0) {
-      renderBuffers.push(
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
-      );
+      [0, 1].map(i => {
+        const texture = this.device.createTexture({
+          sampler: {minFilter: 'linear', magFilter: 'linear'}
+        });
+        renderBuffers.push(
+          this.device.createFramebuffer({
+            id: `deck-renderbuffer-${i}`,
+            colorAttachments: [texture]
+          })
+        );
+      });
     }
     for (const buffer of renderBuffers) {
-      buffer.resize();
+      buffer.resize(size);
     }
   }
 
