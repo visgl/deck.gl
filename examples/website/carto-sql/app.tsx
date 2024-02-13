@@ -1,11 +1,11 @@
-import React, {useMemo, useState, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map, ViewState} from 'react-map-gl';
+import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
-import {TooltipContent} from '@deck.gl/core/typed/lib/tooltip';
+import { TooltipContent } from '@deck.gl/core/dist/lib/tooltip';
 
 const INITIAL_VIEW_STATE = {
   latitude: 35.7368521,
