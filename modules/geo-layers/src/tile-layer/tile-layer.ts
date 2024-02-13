@@ -13,15 +13,15 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
 import {
   Tileset2D,
   Tile2DHeader,
   RefinementStrategy,
   STRATEGY_DEFAULT,
   Tileset2DProps
-} from '../tileset-2d';
-import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d';
+} from '../tileset-2d/index';
+import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -175,12 +175,11 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    const selectedTiles = this.state?.tileset?.selectedTiles;
-    return selectedTiles
-      ? selectedTiles.every(
+    return Boolean(
+      this.state?.tileset?.selectedTiles?.every(
         tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
       )
-      : false;
+    );
   }
 
   shouldUpdateState({changeFlags}): boolean {
