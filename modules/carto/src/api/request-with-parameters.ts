@@ -42,7 +42,7 @@ export async function requestWithParameters<T = any>({
     /* global fetch */
     let response: Response;
     if (url.length > MAX_GET_LENGTH) {
-      response = await fetch(url, {method: 'POST', body: JSON.stringify(parameters), headers});
+      response = await fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers});
     } else {
       response = await fetch(url, {headers});
     }

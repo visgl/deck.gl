@@ -1,4 +1,4 @@
-import {SOURCE_DEFAULTS} from '../sources';
+import {SOURCE_DEFAULTS} from '../sources/index';
 import type {SourceOptions, QuerySourceOptions, QueryResult} from '../sources/types';
 import {buildQueryUrl} from './endpoints';
 import {requestWithParameters} from './request-with-parameters';

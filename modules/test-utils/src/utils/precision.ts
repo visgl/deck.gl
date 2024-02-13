@@ -1,17 +1,24 @@
+export function toLowPrecision(input: number, precision?: number): number;
+export function toLowPrecision(input: number[], precision?: number): number[];
+export function toLowPrecision(
+  input: Record<string, number>,
+  precision?: number
+): Record<string, number>;
+
 /**
  * Covert all numbers in a deep structure to a given precision, allowing
  * reliable float comparisons. Converts data in-place.
- * @param  {mixed} input      Input data
- * @param  {Number} [precision] Desired precision
- * @return {mixed}            Input data, with all numbers converted
  */
-export function toLowPrecision(input, precision = 11) {
+export function toLowPrecision(
+  input: number | number[] | Record<string, number>,
+  precision: number = 11
+): number | number[] | Record<string, number> {
   /* eslint-disable guard-for-in */
   if (typeof input === 'number') {
-    input = Number(input.toPrecision(precision));
+    return Number(input.toPrecision(precision));
   }
   if (Array.isArray(input)) {
-    input = input.map(item => toLowPrecision(item, precision));
+    return input.map(item => toLowPrecision(item, precision));
   }
   if (typeof input === 'object') {
     for (const key in input) {

@@ -1,4 +1,4 @@
-import {Deck, OrthographicView} from '@deck.gl/core/typed';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {SpectrogramLayer, SpectrogramSettings} from './layers/spectrogram-layer';
 
 const SETTINGS: SpectrogramSettings = {

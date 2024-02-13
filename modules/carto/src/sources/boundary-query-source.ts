@@ -1,4 +1,4 @@
-import {QueryParameters} from '../api';
+import {QueryParameters} from '../api/index';
 import {baseSource} from './base-source';
 import type {SourceOptions, TilejsonResult} from './types';
 

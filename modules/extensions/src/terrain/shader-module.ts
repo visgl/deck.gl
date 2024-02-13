@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -9,7 +9,7 @@ import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
-  pickingActive?: boolean;
+  picking: {isActive?: boolean};
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture;
@@ -130,7 +130,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         bounds = heightMapBounds!;
       } else if (terrainCover) {
         // This is a terrain layer
-        const isPicking = opts.pickingActive;
+        const isPicking = opts.picking?.isActive;
         // @ts-expect-error
         sampler = isPicking
           ? terrainCover.getPickingFramebuffer()
