@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "9.0.0-alpha.6",
+  "version": "9.0.0-beta.3",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -11,7 +11,7 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "ts-node ../scripts/write-heading-ids.ts"
+    "write-heading-ids": "node --loader ts-node/esm ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
     "@loaders.gl/i3s": "^4.1.0",
