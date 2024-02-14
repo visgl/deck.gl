@@ -3,7 +3,6 @@
 import type {Device} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import {withGLParameters} from '@luma.gl/webgl';
 
 import {Deck} from '@deck.gl/core';
 
@@ -90,8 +89,8 @@ export function render({gl, width, height, viewState}) {
   this.deckInstance.redraw('arcgis');
 
   // We overlay the texture on top of the map using the full-screen quad.
-  withGLParameters(
-    gl,
+  const device: Device = this.deckInstance.deck.device;
+  device.withParametersWebGL(
     {
       blend: true,
       blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],

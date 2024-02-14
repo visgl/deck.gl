@@ -24,7 +24,7 @@ export function getDeckInstance({
   deck
 }: {
   map: Map & {__deck?: Deck | null};
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   deck?: Deck;
 }): Deck {
   // Only create one deck instance per context

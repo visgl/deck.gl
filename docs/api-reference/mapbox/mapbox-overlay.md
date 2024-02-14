@@ -71,8 +71,8 @@ map.addControl(overlay);
 The following code demonstrates how to create a React component from `MapboxOverlay` with `react-map-gl@7.x` and Typescript:
 
 ```tsx
-import {ScatterplotLayer} from '@deck.gl/layers/typed';
-import {MapboxOverlay, MapboxOverlayProps} from '@deck.gl/mapbox/typed';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {MapboxOverlay, MapboxOverlayProps} from '@deck.gl/mapbox';
 import {useControl} from 'react-map-gl';
 
 import Map, {NavigationControl} from 'react-map-gl';

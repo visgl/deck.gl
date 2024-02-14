@@ -112,6 +112,17 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
 
+## Using with transparent layers
+
+The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
+
+A common issue is with the `IconLayer`, which [discards transparent pixels](https://deck.gl/docs/api-reference/layers/icon-layer#alphacutoff). To avoid this, use `alphaCutoff: -1`. A similar issue occurs when the anchor point of the `IconLayer` is too close to the edge of the image, to be safe include a few pixels of padding, e.g.
+
+```js
+iconMapping: {
+  marker: {x: 0, y: 0, width: 128, height: 128, anchorY: 124}
+}
+```
 
 ## Limitations
 

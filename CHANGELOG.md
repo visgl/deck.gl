@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.2] - Feb 5 2024
+
+- [v9] HeatmapLayer (#8380)
+- Bump quadbin to 0.2.0 (#8462)
+- [v9] MapboxLayer (#8442)
+
 #### deck.gl [9.0.0-beta.1] - Jan 22 2024
 
 - chore(core): Remove getBufferData helper (#8425)

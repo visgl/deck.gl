@@ -23,7 +23,7 @@ export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {CartoAPIError, fetchMap, query} from './api';
+export {CartoAPIError, fetchMap, query} from './api/index';
 export type {
   APIErrorContext,
   FetchMapOptions,
@@ -32,7 +32,7 @@ export type {
   RequestType,
   QueryParameters,
   QueryOptions
-} from './api';
+} from './api/index';
 
 import {
   boundaryQuerySource,
@@ -48,7 +48,7 @@ import {
   vectorTableSource,
   vectorTilesetSource,
   SOURCE_DEFAULTS
-} from './sources';
+} from './sources/index';
 
 const CARTO_SOURCES = {
   boundaryQuerySource,
@@ -98,4 +98,4 @@ export type {
   VectorTilesetSourceOptions,
   GeojsonResult,
   JsonResult
-} from './sources';
+} from './sources/index';
