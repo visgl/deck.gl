@@ -21,6 +21,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.3] - Feb 14 2024
+
+- chore(types): Remove remaining references to /typed entrypoints (#8481)
+- TerrainExtension: Support picking on draped layers (#8474)
+- Fix test-dist (#8484)
+- Fix test-utils typescript errors (#8483)
+- Fix typing in ColumnLayer (#8453)
+- chore: Bump to loaders@4.1.0 (#8480)
+- Use texture for depth attachment in CollisionFilterEffect (#8477)
+- v9 postprocessing (#8479)
+- fix(core): Ensure picking buffer is cleared before each pass (#8475)
+- v9 audit tile layer types (#8387)
+- Audit Layer#isLoaded implementations (#8386)
+- Improve projection for very high zoom levels (#8454)
+- chore: Remove webgl imports 2 (#8473)
+- chore: Reduce webgl module imports (#8472)
+- Move to ESM modules (#8460)
+
 #### deck.gl [9.0.0-beta.2] - Feb 5 2024
 
 - [v9] HeatmapLayer (#8380)
