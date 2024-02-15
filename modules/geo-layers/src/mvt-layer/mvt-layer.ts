@@ -38,8 +38,6 @@ import {
 
 const WORLD_SIZE = 512;
 
-type URLTemplateOrTileJSON = URLTemplate | TileJson;
-
 const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
   data: urlType,
@@ -71,7 +69,7 @@ export type MVTLayerProps = _MVTLayerProps &
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
-  data: URLTemplateOrTileJSON;
+  data: URLTemplate | TileJson;
 
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
@@ -100,7 +98,7 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-class _MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
+export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   ParsedMvtTile,
   Required<_MVTLayerProps> & ExtraProps
 > {
@@ -115,6 +113,12 @@ class _MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     hoveredFeatureId: number | string | null;
     hoveredFeatureLayerName: string | null;
   };
+
+  constructor(props: MVTLayerProps) {
+    // Force externally visible props type, as it is not possible modify via extension
+    // @ts-ignore
+    super(props);
+  }
 
   initializeState(): void {
     super.initializeState();
@@ -149,7 +153,7 @@ class _MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data = this.props.data as unknown as URLTemplateOrTileJSON;
+    let data = this.props.data as unknown as URLTemplate | TileJson
     let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
@@ -432,15 +436,6 @@ class _MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 }
 
-class MVTLayer<ExtraProps extends {} = {}> extends _MVTLayer< ExtraProps > {
-  constructor(props: MVTLayerProps) {
-    // @ts-ignore
-    super(props);
-  }
-}
-
-export default MVTLayer;
-
 // Test if types working (remove before landing)
 const tilejson: TileJson = {
   tilejson: '3.0.0',
@@ -456,7 +451,7 @@ function tests() {
   });
   const test2 = new MVTLayer({
     id: 'mvt',
-    data: tilejson
+    data: 123
   });
   const test3 = new MVTLayer({
     id: 'mvt',
