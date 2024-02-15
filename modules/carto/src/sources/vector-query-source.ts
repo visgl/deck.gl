@@ -6,6 +6,7 @@ export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
 type UrlParameters = {
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
+  tileResolution?: string;
   q: string;
   queryParameters?: string;
 };
@@ -13,8 +14,13 @@ type UrlParameters = {
 export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
+  const {spatialDataColumn = 'geom', sqlQuery, tileResolution = 1, queryParameters} = options;
+  const urlParameters: UrlParameters = {
+    spatialDataColumn,
+    spatialDataType: 'geo',
+    tileResolution: tileResolution.toString(),
+    q: sqlQuery
+  };
 
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);

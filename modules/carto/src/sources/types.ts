@@ -69,6 +69,11 @@ export type QuerySourceOptions = {
   sqlQuery: string;
 
   /**
+   * Relative resolution of a tile. Higher values increase density and data size. Default = 1.
+   */
+  tileResolution?: TileResolution;
+
+  /**
    * Values for named or positional paramteres in the query.
    *
    * The way query parameters are determined by data warehouse.
@@ -114,6 +119,11 @@ export type TableSourceOptions = {
    * If not present, defaults to `'geom'` for generic tables, `'quadbin'` for Quadbin sources and `'h3'` for H3 sources.
    */
   spatialDataColumn?: string;
+
+  /**
+   * Relative resolution of a tile. Higher values increase density and data size. Default = 1.
+   */
+  tileResolution?: TileResolution;
 };
 
 export type TilesetSourceOptions = {
@@ -128,6 +138,8 @@ export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
 export type TilejsonMapInstantiation = MapInstantiation & {
   tilejson: {url: string[]};
 };
+
+export type TileResolution = 0.25 | 0.5 | 1 | 2 | 4;
 
 export interface Tilejson {
   tilejson: string;
@@ -146,6 +158,10 @@ export interface Tilejson {
   center: [number, number, number];
   vector_layers: VectorLayer[];
   tilestats: Tilestats;
+  /** Relative resolution of a tile. Higher values increase density and data size. */
+  tile_resolution?: TileResolution;
+  /** Raster tiles are square, with 'blockSize' width and height in pixels. */
+  block_size?: number;
 }
 
 export interface Tilestats {
