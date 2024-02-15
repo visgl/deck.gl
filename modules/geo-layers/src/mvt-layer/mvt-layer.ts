@@ -436,33 +436,6 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   }
 }
 
-// Test if types working (remove before landing)
-const tilejson: TileJson = {
-  tilejson: '3.0.0',
-  tiles: ['123'],
-  vector_layers: []
-};
-
-const g: MVTLayerProps["data"] = null;
-function tests() {
-  const test1 = new MVTLayer({
-    id: 'mvt',
-    data: 'http://www.url.com'
-  });
-  const test2 = new MVTLayer({
-    id: 'mvt',
-    data: 123
-  });
-  const test3 = new MVTLayer({
-    id: 'mvt',
-    data: {
-      tilejson: '3.0.0',
-      tiles: ['123'],
-      vector_layers: []
-    }
-  });
-}
-
 function getFeatureUniqueId(feature: Feature, uniqueIdProperty: string | undefined) {
   if (feature.properties && uniqueIdProperty) {
     return feature.properties[uniqueIdProperty];
