@@ -99,14 +99,9 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
     } = this.props;
     if (!data || !tileIndex) return null;
 
-    const {blockWidth, blockHeight} = data as unknown as Raster;
-    assert(
-      blockWidth === blockHeight,
-      `blockWidth (${blockWidth}) must equal blockHeight (${blockHeight})`
-    );
-
+    const {blockSize} = data as unknown as Required<Raster>;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
-    const offset = [xOffset, yOffset, scale / blockWidth];
+    const offset = [xOffset, yOffset, scale / blockSize];
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
@@ -124,7 +119,7 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       {
         data: {
           data, // Pass through data for getSubLayerAccessor()
-          length: blockWidth * blockHeight
+          length: blockSize * blockSize
         },
         offset
       }
