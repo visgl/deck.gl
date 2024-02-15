@@ -25,7 +25,7 @@ import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d';
+import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
 import {
   urlType,
   Tileset2D,
@@ -34,7 +34,7 @@ import {
   URLTemplate,
   isGeoBoundingBox,
   isURLTemplate
-} from '../tileset-2d';
+} from '../tileset-2d/index';
 
 const WORLD_SIZE = 512;
 
@@ -69,7 +69,7 @@ export type MVTLayerProps = _MVTLayerProps &
 
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
-  data: URLTemplate | TileJson;
+  data: TileJson | URLTemplate;
 
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
   onDataLoad?: ((tilejson: TileJson | null) => void) | null;
@@ -108,8 +108,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   state!: TileLayer<ParsedMvtTile>['state'] & {
     binary: boolean;
     data: URLTemplate;
-    tileJSON: any;
-    highlightColor: number[];
+    tileJSON: TileJson | null;
+    highlightColor?: number[];
     hoveredFeatureId: number | string | null;
     hoveredFeatureLayerName: string | null;
   };
@@ -127,12 +127,14 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     this.setState({
       binary,
       data: null,
-      tileJSON: null
+      tileJSON: null,
+      hoveredFeatureId: null,
+      hoveredFeatureLayerName: null
     });
   }
 
   get isLoaded(): boolean {
-    return Boolean(this.state && this.state.data && this.state.tileset && super.isLoaded);
+    return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
@@ -153,7 +155,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data = this.props.data as unknown as URLTemplate | TileJson
+    let data = this.props.data;
     let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
@@ -169,7 +171,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       if (onDataLoad) {
         onDataLoad(tileJSON, {propName: 'data', layer: this});
       }
-    } else if (typeof data !== 'string' && !Array.isArray(data) && data?.tilejson) {
+    } else if (data && typeof data === 'object' && 'tilejson' in data) {
       tileJSON = data;
     }
 
@@ -182,7 +184,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   _getTilesetOptions(): Tileset2DProps {
     const opts = super._getTilesetOptions();
-    const tileJSON: TileJson | null | undefined = this.state.tileJSON;
+    const tileJSON: TileJson | null = this.state.tileJSON;
     const {minZoom, maxZoom} = this.props;
 
     if (tileJSON) {
@@ -276,8 +278,8 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
     const {hoveredFeatureId, hoveredFeatureLayerName} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
-    let newHoveredFeatureLayerName;
+    let newHoveredFeatureId: string | number | null = null;
+    let newHoveredFeatureLayerName: string | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = getFeatureUniqueId(hoveredFeature, uniqueIdProperty);
@@ -341,7 +343,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return -1;
     }
 
-    const featureIdToHighlight = isHighlighted ? highlightedFeatureId : hoveredFeatureId;
+    const featureIdToHighlight = isHighlighted ? highlightedFeatureId! : hoveredFeatureId!;
 
     // Iterable data
     if (Array.isArray(data)) {
@@ -358,7 +360,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       return findIndexBinary(
         data,
         uniqueIdProperty,
-        featureIdToHighlight!,
+        featureIdToHighlight,
         isHighlighted ? '' : hoveredFeatureLayerName!
       );
     }

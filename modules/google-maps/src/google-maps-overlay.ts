@@ -1,6 +1,5 @@
 /* global google */
-import {getGLParameters, setGLParameters, withGLParameters, GLParameters} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
+import {GL, GLParameters} from '@luma.gl/constants';
 import {
   createDeckInstance,
   destroyDeckInstance,
@@ -10,6 +9,7 @@ import {
 import {Deck} from '@deck.gl/core';
 
 import type {DeckProps} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE: GLParameters = {
@@ -167,12 +167,14 @@ export default class GoogleMapsOverlay {
 
     // By default, animationLoop._renderFrame invokes
     // animationLoop.onRender. We override this to wrap
-    // in withGLParameters so we don't modify the GL state
+    // in withParameters so we don't modify the GL state
     // @ts-ignore accessing protected member
     const animationLoop = deck.animationLoop!;
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-      withGLParameters(gl, {}, () => {
+      // @ts-expect-error accessing protected member
+      const device: Device = deck.device;
+      device.withParametersWebGL({}, () => {
         animationLoop.props.onRender(animationLoop.animationProps!);
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
@@ -236,16 +238,19 @@ export default class GoogleMapsOverlay {
     });
 
     if (deck.isInitialized) {
+      // @ts-expect-error
+      const device: Device = deck.device;
+
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck
-      const _framebuffer = getGLParameters(gl, GL.FRAMEBUFFER_BINDING);
+      const _framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+
       // @ts-expect-error
       deck.setProps({_framebuffer});
 
       // With external gl context, animation loop doesn't resize webgl-canvas and thus fails to
       // calculate corrext pixel ratio. Force this manually.
-      // @ts-expect-error
-      deck.device.canvasContext.resize();
+      device.getCanvasContext().resize();
 
       // Camera changed, will trigger a map repaint right after this
       // Clear any change flag triggered by setting viewState so that deck does not request
@@ -254,13 +259,13 @@ export default class GoogleMapsOverlay {
 
       // Workaround for bug in Google maps where viewport state is wrong
       // TODO remove once fixed
-      setGLParameters(gl, {
+      device.setParametersWebGL({
         viewport: [0, 0, gl.canvas.width, gl.canvas.height],
         scissor: [0, 0, gl.canvas.width, gl.canvas.height],
         stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
       });
 
-      withGLParameters(gl, GL_STATE, () => {
+      device.withParametersWebGL(GL_STATE, () => {
         deck._drawLayers('google-vector', {
           clearCanvas: false
         });

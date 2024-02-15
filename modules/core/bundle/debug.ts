@@ -1,11 +1,7 @@
-import {getLoggers} from '../src/debug/loggers';
+// @ts-nocheck
+import {getLoggers} from '@deck.gl/core/debug/loggers';
 
-/* global deck */
-declare global {
-  const deck: any;
-}
-
-const loggers = getLoggers(deck.log);
-deck._registerLoggers(loggers);
+const loggers = getLoggers(globalThis.deck.log);
+globalThis.deck._registerLoggers(loggers);
 
 export {loggers};
