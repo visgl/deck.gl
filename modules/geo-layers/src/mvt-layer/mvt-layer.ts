@@ -69,32 +69,6 @@ export type MVTLayerProps = _MVTLayerProps &
   Omit<GeoJsonLayerProps, 'data'> &
   Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
-// Test if types working (remove before landing)
-const tilejson: TileJson = {
-  tilejson: '3.0.0',
-  tiles: ['123'],
-  vector_layers: []
-};
-
-function tests() {
-  const test1 = new MVTLayer({
-    id: 'mvt',
-    data: 'http://www.url.com'
-  });
-  const test2 = new MVTLayer({
-    id: 'mvt',
-    data: tilejson
-  });
-  const test3 = new MVTLayer({
-    id: 'mvt',
-    data: {
-      tilejson: '3.0.0',
-      tiles: ['123'],
-      vector_layers: []
-    }
-  });
-}
-
 /** Props added by the MVTLayer  */
 export type _MVTLayerProps = {
   data: URLTemplateOrTileJSON;
@@ -126,7 +100,7 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
+class _MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
   ParsedMvtTile,
   Required<_MVTLayerProps> & ExtraProps
 > {
@@ -175,7 +149,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
 
   /* eslint-disable complexity */
   private async _updateTileData(): Promise<void> {
-    let data = this.props.data;
+    let data = this.props.data as unknown as URLTemplateOrTileJSON;
     let tileJSON: TileJson | null = null;
 
     if (typeof data === 'string' && !isURLTemplate(data)) {
@@ -456,6 +430,42 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
       }
     });
   }
+}
+
+class MVTLayer<ExtraProps extends {} = {}> extends _MVTLayer< ExtraProps > {
+  constructor(props: MVTLayerProps) {
+    // @ts-ignore
+    super(props);
+  }
+}
+
+export default MVTLayer;
+
+// Test if types working (remove before landing)
+const tilejson: TileJson = {
+  tilejson: '3.0.0',
+  tiles: ['123'],
+  vector_layers: []
+};
+
+const g: MVTLayerProps["data"] = null;
+function tests() {
+  const test1 = new MVTLayer({
+    id: 'mvt',
+    data: 'http://www.url.com'
+  });
+  const test2 = new MVTLayer({
+    id: 'mvt',
+    data: tilejson
+  });
+  const test3 = new MVTLayer({
+    id: 'mvt',
+    data: {
+      tilejson: '3.0.0',
+      tiles: ['123'],
+      vector_layers: []
+    }
+  });
 }
 
 function getFeatureUniqueId(feature: Feature, uniqueIdProperty: string | undefined) {

@@ -148,9 +148,7 @@ export type TiledPickingInfo<DataT = any> = PickingInfo & {
  * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
  */
 export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
-  ExtraPropsT extends {data: any}
-    ? Omit<Required<_TileLayerProps<DataT>>, 'data'> & ExtraPropsT
-    : Required<_TileLayerProps<DataT>> & ExtraPropsT
+  ExtraPropsT & Required<_TileLayerProps<DataT>>
 > {
   static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
