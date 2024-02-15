@@ -46,10 +46,10 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     mvt: boolean;
   };
 
-  constructor(props: VectorTileLayerProps) {
+  constructor(...propObjects: VectorTileLayerProps[]) {
     // Force externally visible props type, as it is not possible modify via extension
     // @ts-ignore
-    super(props);
+    super(...propObjects);
   }
 
   initializeState(): void {
