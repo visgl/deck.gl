@@ -123,7 +123,7 @@ export class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
-  private _zRange?: ZRange | null;
+  private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -162,6 +162,7 @@ export class Tileset2D {
 
     // Cache the last processed viewport
     this._viewport = null;
+    this._zRange = null;
     this._selectedTiles = null;
     this._frameNumber = 0;
 
@@ -226,7 +227,10 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange | null; modelMatrix?: NumericArray | null} = {}
+    {zRange, modelMatrix}: {zRange: ZRange | null; modelMatrix: NumericArray | null} = {
+      zRange: null,
+      modelMatrix: null
+    }
   ): number {
     const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
@@ -326,7 +330,7 @@ export class Tileset2D {
     viewport: Viewport;
     maxZoom?: number;
     minZoom?: number;
-    zRange?: ZRange | null;
+    zRange: ZRange | null;
     tileSize?: number;
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;

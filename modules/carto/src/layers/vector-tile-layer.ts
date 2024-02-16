@@ -35,7 +35,6 @@ type _VectorTileLayerProps = {
   data: null | TilejsonResult | Promise<TilejsonResult>;
 };
 
-// TODO Perhaps we can't subclass MVTLayer and keep types. Better to subclass TileLayer instead?
 // @ts-ignore
 export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
   Required<_VectorTileLayerProps> & ExtraProps
@@ -46,6 +45,12 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
   state!: MVTLayer['state'] & {
     mvt: boolean;
   };
+
+  constructor(...propObjects: VectorTileLayerProps[]) {
+    // Force externally visible props type, as it is not possible modify via extension
+    // @ts-ignore
+    super(...propObjects);
+  }
 
   initializeState(): void {
     super.initializeState();

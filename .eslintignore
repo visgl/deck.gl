@@ -2,7 +2,6 @@ dist/
 dist-es6/
 test/
 website/build/
-modules/*/typed
 node_modules/
 workers/
 dist.js
