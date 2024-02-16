@@ -5,8 +5,7 @@ import {
   CompositeLayerProps,
   Layer,
   LayersList,
-  DefaultProps,
-  UpdateParameters
+  DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
