@@ -135,6 +135,13 @@ To install dependencies specify that you explicitly need the arm64 version
 arch -arm64 brew install pkg-config cairo pango libpng jpeg giflib librsvg
 ```
 
+You also need a system-wide Python available (`python`). For example, it can be installed using Homebrew and then symlinked:
+
+```
+brew install python
+sudo ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
+```
+
 After this `yarn bootstrap` can be run with
 ```
 CPLUS_INCLUDE_PATH=/opt/homebrew/include yarn bootstrap
