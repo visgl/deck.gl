@@ -28,7 +28,8 @@ const defaultProps: DefaultProps<VectorTileLayerProps> = {
 };
 
 /** All properties supported by VectorTileLayer. */
-export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, 'data' | 'onDataLoad'>;
+export type VectorTileLayerProps = _VectorTileLayerProps &
+  Omit<MVTLayerProps, 'data' | 'onDataLoad'>;
 
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
