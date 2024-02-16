@@ -16,7 +16,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
 };
 
 /** All properties supported by GridLayer. */
-export type GridLayerProps<DataT = any> = _GridLayerProps<DataT> & CompositeLayerProps;
+export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
 
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = CPUGridLayerProps<DataT> &
@@ -47,13 +47,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   initializeState() {
     this.state = {
-      useGPUAggregation: true
+      useGPUAggregation: false // TODO(v9): Re-enable GPU aggregation.
     };
   }
 
   updateState({props}: UpdateParameters<this>) {
     this.setState({
-      useGPUAggregation: this.canUseGPUAggregation(props)
+      // TODO(v9): Re-enable GPU aggregation.
+      // useGPUAggregation: this.canUseGPUAggregation(props)
+      useGPUAggregation: false
     });
   }
 

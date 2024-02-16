@@ -2,6 +2,30 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v9.0.0-beta (In Development)
+
+deck.gl 9.0 development is actively ongoing with the goal of releasing a beta version as soon as possible.
+
+Target release date: end of January 2024
+
+### WebGPU enablement
+
+deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
+
+### Breaking Changes
+
+Changes should mostly impact custom layers that use luma.gl and GLSL shaders directly. More information about breaking changes and migration strategies will be provided as part of deck.gl v9 documentation.
+
+### Known Limitations
+
+The following issues are known and will be resolved before deck.gl v9.0 is officially released:
+
+- `@deck.gl/core` - Attribute transitions - first and last elements are not correctly transformed.
+- `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
+- `@deck.gl/google-maps` - `GoogleMapsOverlay` - always renders a vector map (which doesn't support 3D / perspective views).
+- `@deck.gl/mapbox` - `MapboxOverlay` - doesn't overlay deck.gl and mapbox graphics.
+- `@deck.gl/arcgis`- Broken, status TBD.
+
 ## deck.gl v8.9
 
 Release date: March 9, 2023
@@ -91,7 +115,7 @@ If you are using react-map-gl v7, this is the only solution to use deck.gl with 
 
 ### `@deck.gl/carto`
 
-CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/analytics-toolbox-bigquery/overview/spatial-indexes/#quadbin). More info [here](./api-reference/carto/carto-layer#spatial-index-data).
+CartoLayer includes native support to work with spatial indexes like [H3](https://h3geo.org) or [QuadBin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin). More info [here](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes).
 
 ### Enhancements
 

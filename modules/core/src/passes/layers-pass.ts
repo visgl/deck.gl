@@ -11,7 +11,7 @@ export type Rect = {x: number; y: number; width: number; height: number};
 
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
-  target?: Framebuffer;
+  target?: Framebuffer | null;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -23,6 +23,7 @@ export type LayersPassRenderOptions = {
   /** If true, recalculates render index (z) from 0. Set to false if a stack of layers are rendered in multiple passes. */
   clearStack?: boolean;
   clearCanvas?: boolean;
+  clearColor?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
@@ -56,6 +57,7 @@ export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
   render(options: LayersPassRenderOptions): any {
+    // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
 
     const renderPass = this.device.beginRenderPass({
@@ -64,7 +66,7 @@ export default class LayersPass extends Pass {
         viewport: [0, 0, width, height]
       },
       // clear depth and color buffers, restoring transparency
-      clearColor: options.clearCanvas ? [0, 0, 0, 0] : undefined,
+      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
       clearDepth: options.clearCanvas ? 1 : undefined
     });
 
@@ -83,8 +85,7 @@ export default class LayersPass extends Pass {
       viewports,
       views,
       onViewportActive,
-      clearStack = true,
-      clearCanvas = true
+      clearStack = true
     } = options;
     options.pass = options.pass || 'unknown';
 
@@ -258,7 +259,7 @@ export default class LayersPass extends Pass {
             parameters: layerParameters
           });
         } catch (err) {
-          layer.raiseError(err, `drawing ${layer} to ${pass}`);
+          layer.raiseError(err as Error, `drawing ${layer} to ${pass}`);
         }
       }
     }
@@ -327,6 +328,7 @@ export default class LayersPass extends Pass {
     pass: string,
     overrides: any
   ): any {
+    // @ts-expect-error TODO - assuming WebGL context
     const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
     const moduleParameters = Object.assign(
@@ -335,7 +337,9 @@ export default class LayersPass extends Pass {
         autoWrapLongitude: layer.wrapLongitude,
         viewport: layer.context.viewport,
         mousePosition: layer.context.mousePosition,
-        pickingActive: 0,
+        picking: {
+          isActive: 0
+        },
         devicePixelRatio
       }
     );
@@ -413,9 +417,11 @@ function getGLViewport(
 ): [number, number, number, number] {
   const pixelRatio =
     (moduleParameters && moduleParameters.devicePixelRatio) ||
+    // @ts-expect-error TODO - assuming WebGL context
     device.canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
+  // @ts-expect-error TODO - assuming WebGL context
   const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 

@@ -20,29 +20,28 @@
 
 import {Device, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import type {_ScreenGridLayerProps} from './screen-grid-layer';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_PROPS = ['minColor', 'maxColor', 'colorRange', 'colorDomain'];
 
 const defaultProps: DefaultProps<ScreenGridCellLayerProps> = {
-  // @ts-expect-error
-  cellSizePixels: {value: 100, min: 1},
-  // @ts-expect-error
-  cellMarginPixels: {value: 2, min: 0, max: 5},
+  cellSizePixels: {type: 'number', value: 100, min: 1},
+  cellMarginPixels: {type: 'number', value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange
 };
 
 /** All properties supported by ScreenGridCellLayer. */
-export type ScreenGridCellLayerProps<DataT = any> = _ScreenGridCellLayerProps<DataT> & LayerProps;
+export type ScreenGridCellLayerProps<DataT = unknown> = _ScreenGridCellLayerProps<DataT> &
+  LayerProps;
 
 /** Proprties added by ScreenGridCellLayer. */
 export type _ScreenGridCellLayerProps<DataT> = _ScreenGridLayerProps<DataT> & {
@@ -59,11 +58,12 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     return device.features.has('texture-formats-float32-webgl1');
   }
 
-  state!: Layer['state'] & {
-    model: Model;
+  state!: {
+    model?: Model;
   };
-  getShaders() {
-    return {vs, fs, modules: [picking]};
+
+  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
+    return {vs, fs, modules: [picking as ShaderModule]};
   }
 
   initializeState() {
@@ -106,7 +106,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model} = this.state;
+    const model = this.state.model!;
     model.setUniforms(uniforms);
     model.setBindings({
       maxTexture
@@ -147,14 +147,21 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-list',
         attributes: {
-          positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          // prettier-ignore
+          positions: new Float32Array([
+            0, 0, 0,
+            1, 0, 0,
+            1, 1, 0,
+            0, 0, 0,
+            1, 1, 0,
+            0, 1, 0,
+          ])
         }
-      }),
-      // @ts-expect-error TODO v9 API not as dynamic
-      isInstanced: true
+      })
     });
   }
 
@@ -174,7 +181,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   _updateUniforms(oldProps, props, changeFlags): void {
-    const {model} = this.state;
+    const model = this.state.model!;
     if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
       model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
     }

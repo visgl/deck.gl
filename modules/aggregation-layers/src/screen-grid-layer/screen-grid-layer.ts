@@ -31,7 +31,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import type {Buffer, Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
@@ -40,11 +40,11 @@ import GridAggregationLayer, {GridAggregationLayerProps} from '../grid-aggregati
 import {getFloatTexture} from '../utils/resource-utils';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
-  ...ScreenGridCellLayer.defaultProps,
-  getPosition: {type: 'accessor', value: d => d.position},
+  ...(ScreenGridCellLayer.defaultProps as DefaultProps<ScreenGridLayerProps<unknown>>),
+  getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: true,
+  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
   aggregation: 'SUM'
 };
 
@@ -60,7 +60,7 @@ const DIMENSIONS = {
 };
 
 /** All properties supported by ScreenGridLayer. */
-export type ScreenGridLayerProps<DataT = any> = _ScreenGridLayerProps<DataT> &
+export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
@@ -152,6 +152,8 @@ export default class ScreenGridLayer<
     gpuAggregation?: any;
     weights?: any;
     maxTexture?: Texture;
+    aggregationBuffer?: Buffer;
+    maxBuffer?: Buffer;
   };
 
   initializeState() {
@@ -263,7 +265,7 @@ export default class ScreenGridLayer<
   updateResults({aggregationData, maxData}) {
     const {count} = this.state.weights;
     count.aggregationData = aggregationData;
-    count.aggregationBuffer.setData({data: aggregationData});
+    count.aggregationBuffer.write(aggregationData);
     count.maxData = maxData;
     count.maxTexture.setImageData({data: maxData});
   }

@@ -1,12 +1,12 @@
 import {Framebuffer, Texture} from '@luma.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 const vs = `
 #ifdef NON_INSTANCED_MODEL
-attribute float collisionPriorities;
+in float collisionPriorities;
 #else
-attribute float instanceCollisionPriorities;
+in float instanceCollisionPriorities;
 #endif
 
 uniform sampler2D collision_texture;
@@ -19,7 +19,7 @@ vec2 collision_getCoords(vec4 position) {
 }
 
 float collision_match(vec2 tex, vec3 pickingColor) {
-  vec4 collision_pickingColor = texture2D(collision_texture, tex);
+  vec4 collision_pickingColor = texture(collision_texture, tex);
   float delta = dot(abs(collision_pickingColor.rgb - pickingColor), vec3(1.0));
   float e = 0.001;
   return step(delta, e);
@@ -89,7 +89,7 @@ type CollisionModuleSettings = {
 };
 
 /* eslint-disable camelcase */
-type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Framebuffer | Texture};
+type CollisionUniforms = {collision_sort?: boolean; collision_texture?: Texture};
 
 const getCollisionUniforms = (
   opts: CollisionModuleSettings | {},
@@ -101,7 +101,8 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
-    collision_texture: !drawToCollisionMap && collisionFBO ? collisionFBO : dummyCollisionMap
+    collision_texture:
+      !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
 };
 
@@ -112,4 +113,4 @@ export default {
   vs,
   inject,
   getUniforms: getCollisionUniforms
-} as ShaderModule;
+} as ShaderModule<CollisionModuleSettings>;

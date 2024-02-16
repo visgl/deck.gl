@@ -1,23 +1,23 @@
 import {Vector3} from '@math.gl/core';
 
 /* load data samples for display */
-import allPoints from '../data/sf.bike.parking.json';
+import allPoints from '../data/sf.bike.parking.json' assert { type: 'json' };
 import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
-import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.json';
+import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.json' assert { type: 'json' };
 
-import {default as choropleths} from '../data/sf.zip.geo.json';
-export {default as geojson} from '../data/sample.geo.json';
-export {default as geojsonHole} from '../data/hole.geo.json';
-export {default as geojsonLarge} from '../data/canada.geo.json';
-export {default as hexagons} from '../data/hexagons.json';
-export {default as routes} from '../data/sfmta.routes.json';
-export {default as trips} from '../data/trips.json';
-export {default as SFTrips} from '../data/sf.trips';
-export {default as iconAtlas} from '../data/icon-atlas.json';
-export {default as quadkeys} from '../data/sf.quadkeys.json';
-export {default as s2cells} from '../data/sf.s2cells.json';
-export {default as geohashes} from '../data/sf.geohashes.json';
+import {default as choropleths} from '../data/sf.zip.geo.json' assert { type: 'json' };
+export {default as geojson} from '../data/sample.geo.json' assert { type: 'json' };
+export {default as geojsonHole} from '../data/hole.geo.json' assert { type: 'json' };
+export {default as geojsonLarge} from '../data/canada.geo.json' assert { type: 'json' };
+export {default as hexagons} from '../data/hexagons.json' assert { type: 'json' };
+export {default as routes} from '../data/sfmta.routes.json' assert { type: 'json' };
+export {default as trips} from '../data/trips.json' assert { type: 'json' };
+export {default as SFTrips} from '../data/sf.trips.json' assert { type: 'json' };
+export {default as iconAtlas} from '../data/icon-atlas.json' assert { type: 'json' };
+export {default as quadkeys} from '../data/sf.quadkeys.json' assert { type: 'json' };
+export {default as s2cells} from '../data/sf.s2cells.json' assert { type: 'json' };
+export {default as geohashes} from '../data/sf.geohashes.json' assert { type: 'json' };
 export {choropleths};
 
 export const positionOrigin = [-122.42694203247012, 37.751537058389985];

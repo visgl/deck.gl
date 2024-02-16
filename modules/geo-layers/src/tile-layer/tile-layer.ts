@@ -13,21 +13,21 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d';
+import type {TileLoadProps, ZRange} from '../tileset-2d/index';
 import {
   Tileset2D,
   Tile2DHeader,
   RefinementStrategy,
   STRATEGY_DEFAULT,
   Tileset2DProps
-} from '../tileset-2d';
-import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d';
+} from '../tileset-2d/index';
+import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
   dataComparator: urlType.equal,
-  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
+  renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
   getTileData: {type: 'function', optional: true, value: null},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null},
@@ -48,7 +48,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
 };
 
 /** All props supported by the TileLayer */
-export type TileLayerProps<DataT = any> = CompositeLayerProps & _TileLayerProps<DataT>;
+export type TileLayerProps<DataT = unknown> = CompositeLayerProps & _TileLayerProps<DataT>;
 
 /** Props added by the TileLayer */
 type _TileLayerProps<DataT> = {
@@ -153,6 +153,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   static defaultProps: DefaultProps = defaultProps;
   static layerName = 'TileLayer';
 
+  state!: {
+    tileset: Tileset2D | null;
+    isLoaded: boolean;
+    frameNumber?: number;
+  };
+
   initializeState() {
     this.state = {
       tileset: null,
@@ -165,8 +171,10 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
-    return this.state?.tileset?.selectedTiles?.every(
-      tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+    return Boolean(
+      this.state?.tileset?.selectedTiles?.every(
+        tile => tile.isLoaded && tile.layers && tile.layers.every(layer => layer.isLoaded)
+      )
     );
   }
 
@@ -194,7 +202,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         tileset.reloadAll();
       } else {
         // some render options changed, regenerate sub layers now
-        this.state.tileset.tiles.forEach(tile => {
+        tileset.tiles.forEach(tile => {
           tile.layers = null;
         });
       }
@@ -235,7 +243,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _updateTileset(): void {
-    const {tileset} = this.state;
+    const tileset = this.state.tileset!;
     const {zRange, modelMatrix} = this.props;
     const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
     const {isLoaded} = tileset;
@@ -260,7 +268,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {onViewportLoad} = this.props;
 
     if (onViewportLoad) {
-      onViewportLoad(tileset.selectedTiles);
+      // This method can only be called when tileset is defined and updated
+      onViewportLoad(tileset!.selectedTiles!);
     }
   }
 
@@ -334,7 +343,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   renderLayers(): Layer | null | LayersList {
-    return this.state.tileset.tiles.map((tile: Tile2DHeader) => {
+    return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
       if (!tile.isLoaded && !tile.content) {
@@ -360,7 +369,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         subLayerProps &&
         tile.layers[0] &&
         Object.keys(subLayerProps).some(
-          propName => tile.layers[0].props[propName] !== subLayerProps[propName]
+          propName => tile.layers![0].props[propName] !== subLayerProps[propName]
         )
       ) {
         tile.layers = tile.layers.map(layer => layer.clone(subLayerProps));
@@ -371,6 +380,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   filterSubLayer({layer, cullRect}: FilterContext) {
     const {tile} = (layer as Layer<{tile: Tile2DHeader}>).props;
-    return this.state.tileset.isTileVisible(tile, cullRect);
+    return this.state.tileset!.isTileVisible(tile, cullRect);
   }
 }

@@ -3,17 +3,18 @@ import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 
 const AGGREGATE_VS = `\
+#version 300 es
 #define SHADER_NAME data-filter-vertex-shader
 
 #ifdef FLOAT_TARGET
-  attribute float filterIndices;
-  attribute float filterPrevIndices;
+  in float filterIndices;
+  in float filterPrevIndices;
 #else
-  attribute vec2 filterIndices;
-  attribute vec2 filterPrevIndices;
+  in vec2 filterIndices;
+  in vec2 filterPrevIndices;
 #endif
 
-varying vec4 vColor;
+out vec4 vColor;
 const float component = 1.0 / 255.0;
 
 void main() {
@@ -36,16 +37,19 @@ void main() {
 `;
 
 const AGGREGATE_FS = `\
+#version 300 es
 #define SHADER_NAME data-filter-fragment-shader
 precision highp float;
 
-varying vec4 vColor;
+in vec4 vColor;
+
+out vec4 fragColor;
 
 void main() {
   if (dataFilter_value < 0.5) {
     discard;
   }
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }
 `;
 
@@ -108,4 +112,4 @@ export const parameters = {
   blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
   blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
   depthTest: false
-};
+} as const;

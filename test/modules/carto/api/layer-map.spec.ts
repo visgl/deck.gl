@@ -91,6 +91,44 @@ const COLOR_TESTS = [
     data: [{v: 0}, {v: 1}, {v: 5}],
     d: {v: 0},
     expected: [134, 141, 145, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'quantile',
+    colorRange: {
+      colors
+    },
+    opacity: 1,
+    data: {
+      tilestats: {
+        layers: [
+          {
+            attributes: [{attribute: 'v', quantiles: {6: [1, 2, 3, 4, 5, 6]}}]
+          }
+        ]
+      }
+    },
+    d: {properties: {v: 1}},
+    expected: [90, 24, 70, 255]
+  },
+  {
+    colorField: {name: 'v'},
+    colorScale: 'quantile',
+    colorRange: {
+      colors
+    },
+    opacity: 1,
+    data: {
+      tilestats: {
+        layers: [
+          {
+            attributes: [{attribute: 'v', quantiles: {global: {6: [1, 2, 3, 4, 5, 6]}}}]
+          }
+        ]
+      }
+    },
+    d: {properties: {v: 3.5}},
+    expected: [227, 97, 28, 255]
   }
 ];
 

@@ -6,11 +6,11 @@ import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {normalizeLongitudes} from './h3-utils';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
-  getHexagons: {type: 'accessor', value: d => d.hexagons}
+  getHexagons: {type: 'accessor', value: (d: any) => d.hexagons}
 };
 
 /** All properties supported by H3ClusterLayer. */
-export type H3ClusterLayerProps<DataT = any> = _H3ClusterLayerProps<DataT> &
+export type H3ClusterLayerProps<DataT = unknown> = _H3ClusterLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by H3ClusterLayer. */
@@ -29,6 +29,10 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
 > {
   static layerName = 'H3ClusterLayer';
   static defaultProps = defaultProps;
+
+  state!: {
+    polygons: {polygon: number[][][]}[];
+  };
 
   initializeState(): void {
     H3HexagonLayer._checkH3Lib();

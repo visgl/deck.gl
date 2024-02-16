@@ -10,6 +10,7 @@ import type {
   TextureSource,
   UpdateParameters
 } from '@deck.gl/core';
+import type {Texture} from '@luma.gl/core';
 
 const defaultProps = {
   fillPatternEnabled: true,
@@ -107,7 +108,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const attributeManager = this.getAttributeManager();
 
     if (extension.opts.pattern) {
-      attributeManager.add({
+      attributeManager!.add({
         fillPatternFrames: {
           size: 4,
           accessor: 'getFillPattern',
@@ -183,7 +184,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
   }
 
   finalizeState(this: Layer<FillStyleExtensionProps>) {
-    const {emptyTexture} = this.state;
+    const emptyTexture = this.state.emptyTexture as Texture;
     emptyTexture?.delete();
   }
 

@@ -1,13 +1,13 @@
 import type {Device} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
-import debug from '../debug';
+import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
-import type {Effect} from './effect';
+import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
@@ -60,7 +60,7 @@ export default class DeckRenderer {
     views: {[viewId: string]: View};
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
@@ -82,6 +82,9 @@ export default class DeckRenderer {
     }
 
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+    if (this.lastPostProcessEffect) {
+      renderOpts.clearColor = [0, 0, 0, 0];
+    }
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
     if (renderOpts.effects) {
@@ -127,24 +130,31 @@ export default class DeckRenderer {
 
   private _resizeRenderBuffers() {
     const {renderBuffers} = this;
+    const size = this.device.canvasContext!.getDrawingBufferSize();
     if (renderBuffers.length === 0) {
-      renderBuffers.push(
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']}),
-        this.device.createFramebuffer({colorAttachments: ['rgba8unorm']})
-      );
+      [0, 1].map(i => {
+        const texture = this.device.createTexture({
+          sampler: {minFilter: 'linear', magFilter: 'linear'}
+        });
+        renderBuffers.push(
+          this.device.createFramebuffer({
+            id: `deck-renderbuffer-${i}`,
+            colorAttachments: [texture]
+          })
+        );
+      });
     }
     for (const buffer of renderBuffers) {
-      buffer.resize();
+      buffer.resize(size);
     }
   }
 
   private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
     const {renderBuffers} = this;
-    const params = {
+    const params: PostRenderOptions = {
       ...opts,
       inputBuffer: renderBuffers[0],
-      swapBuffer: renderBuffers[1],
-      target: null
+      swapBuffer: renderBuffers[1]
     };
     for (const effect of effects) {
       if (effect.postRender) {

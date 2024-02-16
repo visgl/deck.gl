@@ -1,7 +1,7 @@
 /* global document */
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
-import {h, render} from 'preact';
+import {render} from 'preact';
 import {IconButton} from './components';
 
 interface FullscreenWidgetProps {
@@ -49,7 +49,9 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     const el = document.createElement('div');
     el.classList.add('deck-widget', 'deck-widget-fullscreen');
     if (className) el.classList.add(className);
-    Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
+    if (style) {
+      Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
+    }
     this.deck = deck;
     this.element = el;
     this.update();
@@ -63,9 +65,13 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
   }
 
-  update() {
+  private update() {
     const {enterLabel, exitLabel} = this.props;
     const el = this.element;
+    if (!el) {
+      return;
+    }
+
     const ui = (
       <IconButton
         onClick={this.handleClick.bind(this)}
@@ -76,17 +82,25 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     render(ui, el);
   }
 
-  setProps(props: FullscreenWidgetProps) {
+  setProps(props: Partial<FullscreenWidgetProps>) {
     const oldProps = this.props;
     const el = this.element;
-    if (oldProps.className !== props.className) {
-      if (oldProps.className) el.classList.remove(oldProps.className);
-      if (props.className) el.classList.add(props.className);
-    }
+    if (el) {
+      if (oldProps.className !== props.className) {
+        if (oldProps.className) el.classList.remove(oldProps.className);
+        if (props.className) el.classList.add(props.className);
+      }
 
-    if (!deepEqual(oldProps.style, props.style, 1)) {
-      Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
-      Object.entries(props.style).map(([key, value]) => el.style.setProperty(key, value as string));
+      if (!deepEqual(oldProps.style, props.style, 1)) {
+        if (oldProps.style) {
+          Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
+        }
+        if (props.style) {
+          Object.entries(props.style).map(([key, value]) =>
+            el.style.setProperty(key, value as string)
+          );
+        }
+      }
     }
 
     Object.assign(this.props, props);
@@ -116,7 +130,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
   async requestFullscreen() {
     const container = this.getContainer();
-    if (container.requestFullscreen) {
+    if (container?.requestFullscreen) {
       await container.requestFullscreen({navigationUI: 'hide'});
     } else {
       this.togglePseudoFullscreen();
@@ -132,6 +146,6 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   }
 
   togglePseudoFullscreen() {
-    this.getContainer().classList.toggle('deck-pseudo-fullscreen');
+    this.getContainer()?.classList.toggle('deck-pseudo-fullscreen');
   }
 }

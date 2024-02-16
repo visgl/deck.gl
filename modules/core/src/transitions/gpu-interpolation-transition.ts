@@ -1,15 +1,15 @@
 import type {Device} from '@luma.gl/core';
-import {Timeline, Transform} from '@luma.gl/engine';
+import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
-  padBuffer,
   getAttributeTypeFromSize,
-  getSourceBufferAttribute,
   getAttributeBufferLength,
   cycleBuffers,
-  InterpolationTransitionSettings
+  InterpolationTransitionSettings,
+  padBuffer,
+  getFloat32VertexFormat
 } from '../lib/attribute/attribute-transition-utils';
 import Transition from './transition';
 
@@ -26,7 +26,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
   private transition: Transition;
   private currentStartIndices: NumericArray | null;
   private currentLength: number;
-  private transform: Transform;
+  private transform: BufferTransform;
   private buffers: Buffer[];
 
   constructor({
@@ -46,6 +46,9 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // `attribute.userData` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
     this.attributeInTransition = new Attribute(device, attribute.settings);
+    if (ArrayBuffer.isView(attribute.value)) {
+      this.attributeInTransition.setData(attribute.value);
+    }
     this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
@@ -53,7 +56,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.currentLength = 0;
     this.transform = getTransform(device, attribute);
     const bufferOpts = {
-      byteLength: 0,
+      byteLength: attribute.buffer.byteLength,
       usage: GL.DYNAMIC_COPY
     };
     this.buffers = [
@@ -78,7 +81,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
     }
     this.settings = transitionSettings;
 
-    const {device, buffers, attribute} = this;
+    const {buffers, attribute} = this;
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
     // And the other buffer is now the current buffer.
@@ -92,47 +95,52 @@ export default class GPUInterpolationTransition implements GPUTransition {
       getData: transitionSettings.enter
     };
 
-    for (const buffer of buffers) {
-      padBuffer({buffer, ...padBufferOpts});
+    for (const [index, buffer] of buffers.entries()) {
+      const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
+
+      if (buffer !== paddedBuffer) {
+        buffer.destroy();
+        buffers[index] = paddedBuffer;
+
+        // TODO(v9): While this probably isn't necessary as a user-facing warning, it is helpful
+        // for debugging buffer allocation during deck.gl v9 development.
+        console.warn(
+          `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
+            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
+        );
+      }
     }
 
     this.currentStartIndices = attribute.startIndices;
     this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.setData({
-      // @ts-expect-error BufferWithAccessor
       buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: attribute.value
+      value: attribute.value as NumericArray
     });
 
     this.transition.start(transitionSettings);
 
-    this.transform.update({
-      elementCount: Math.floor(this.currentLength / attribute.size),
-      sourceBuffers: {
-        aFrom: buffers[0],
-        // @ts-expect-error TODO - this looks like a real type mismatch!!!
-        aTo: getSourceBufferAttribute(device, attribute)
-      },
-      feedbackBuffers: {
-        vCurrent: buffers[1]
-      }
-    });
+    this.transform.model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    // TODO(v9): Best way to handle 'constant' attributes?
+    this.transform.model.setAttributes(
+      attribute.getBuffer() ? {aFrom: buffers[0], aTo: attribute.getBuffer()!} : {aFrom: buffers[0]}
+    );
+    this.transform.transformFeedback.setBuffers({vCurrent: buffers[1]});
   }
 
   update(): boolean {
     const updated = this.transition.update();
     if (updated) {
-      const {duration, easing} = this.settings;
+      const {duration, easing} = this.settings as InterpolationTransitionSettings;
       const {time} = this.transition;
       let t = time / duration;
       if (easing) {
         t = easing(t);
       }
-      this.transform.run({
-        uniforms: {time: t}
-      });
+      this.transform.model.setUniforms({time: t});
+      this.transform.run();
     }
     return updated;
   }
@@ -147,13 +155,14 @@ export default class GPUInterpolationTransition implements GPUTransition {
   }
 }
 
-const vs = `
+const vs = `\
+#version 300 es
 #define SHADER_NAME interpolation-transition-vertex-shader
 
 uniform float time;
-attribute ATTRIBUTE_TYPE aFrom;
-attribute ATTRIBUTE_TYPE aTo;
-varying ATTRIBUTE_TYPE vCurrent;
+in ATTRIBUTE_TYPE aFrom;
+in ATTRIBUTE_TYPE aTo;
+out ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
   vCurrent = mix(aFrom, aTo, time);
@@ -161,10 +170,15 @@ void main(void) {
 }
 `;
 
-function getTransform(device: Device, attribute: Attribute): Transform {
+function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  return new Transform(device, {
+  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
+  return new BufferTransform(device, {
     vs,
+    bufferLayout: [
+      {name: 'aFrom', format},
+      {name: 'aTo', format}
+    ],
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },

@@ -26,7 +26,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 };
 
 /** All properties supported by GreatCircleLayer. */
-export type GreatCircleLayerProps<DataT = any> = ArcLayerProps<DataT>;
+export type GreatCircleLayerProps<DataT = unknown> = ArcLayerProps<DataT>;
 
 // This layer has been merged into the core ArcLayer
 // Keeping for backward-compatibility

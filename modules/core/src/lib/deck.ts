@@ -35,7 +35,6 @@ import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
-import {setGLParameters} from '@luma.gl/webgl';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import type {Framebuffer} from '@luma.gl/core';
@@ -246,7 +245,7 @@ const defaultProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {},
+  deviceProps: {type: 'webgl' as const},
   gl: null,
   glOptions: {},
   canvas: null,
@@ -311,7 +310,7 @@ export default class Deck {
   protected eventManager: EventManager | null = null;
   protected widgetManager: WidgetManager | null = null;
   protected tooltip: Tooltip | null = null;
-  protected animationLoop: AnimationLoop;
+  protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
   protected viewState: any;
@@ -381,7 +380,7 @@ export default class Deck {
       this.device = WebGLDevice.attach(props.gl);
     }
 
-    let deviceOrPromise: Device | Promise<Device> = this.device;
+    let deviceOrPromise: Device | Promise<Device> | null = this.device;
     if (!deviceOrPromise) {
       // TODO v9 should we install WebGL backend as default for now?
       luma.registerDevices([WebGLDevice]);
@@ -410,11 +409,9 @@ export default class Deck {
   /** Stop rendering and dispose all resources */
   finalize() {
     this.animationLoop?.stop();
-    this.animationLoop = null;
-    this._lastPointerDownInfo = null;
-
     this.animationLoop?.destroy();
     this.animationLoop = null;
+    this._lastPointerDownInfo = null;
 
     this.layerManager?.finalize();
     this.layerManager = null;
@@ -484,18 +481,18 @@ export default class Deck {
     });
 
     // Update the animation loop
-    this.animationLoop.setProps(resolvedProps);
+    this.animationLoop?.setProps(resolvedProps);
 
     // If initialized, update sub manager props
     if (this.layerManager) {
-      this.viewManager.setProps(resolvedProps);
+      this.viewManager!.setProps(resolvedProps);
       // Make sure that any new layer gets initialized with the current viewport
       this.layerManager.activateViewport(this.getViewports()[0]);
       this.layerManager.setProps(resolvedProps);
-      this.effectManager.setProps(resolvedProps);
-      this.deckRenderer.setProps(resolvedProps);
-      this.deckPicker.setProps(resolvedProps);
-      this.widgetManager.setProps(resolvedProps);
+      this.effectManager!.setProps(resolvedProps);
+      this.deckRenderer!.setProps(resolvedProps);
+      this.deckPicker!.setProps(resolvedProps);
+      this.widgetManager!.setProps(resolvedProps);
     }
 
     this.stats.get('setProps Time').timeEnd();
@@ -527,10 +524,10 @@ export default class Deck {
       this._needsRedraw = false;
     }
 
-    const viewManagerNeedsRedraw = this.viewManager.needsRedraw(opts);
+    const viewManagerNeedsRedraw = this.viewManager!.needsRedraw(opts);
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw(opts);
-    const effectManagerNeedsRedraw = this.effectManager.needsRedraw(opts);
-    const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw(opts);
+    const effectManagerNeedsRedraw = this.effectManager!.needsRedraw(opts);
+    const deckRendererNeedsRedraw = this.deckRenderer!.needsRedraw(opts);
 
     redraw =
       redraw ||
@@ -656,7 +653,7 @@ export default class Deck {
     forceUpdate = false
   ) {
     for (const id in resources) {
-      this.layerManager.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
+      this.layerManager!.resourceManager.add({resourceId: id, data: resources[id], forceUpdate});
     }
   }
 
@@ -665,7 +662,7 @@ export default class Deck {
    */
   _removeResources(resourceIds: string[]) {
     for (const id of resourceIds) {
-      this.layerManager.resourceManager.remove(id);
+      this.layerManager!.resourceManager.remove(id);
     }
   }
 
@@ -673,7 +670,7 @@ export default class Deck {
    * Register a default effect. Effects will be sorted by order, those with a low order will be rendered first
    */
   _addDefaultEffect(effect: Effect) {
-    this.effectManager.addDefaultEffect(effect);
+    this.effectManager!.addDefaultEffect(effect);
   }
 
   // Private Methods
@@ -706,11 +703,11 @@ export default class Deck {
 
     const infos = this.deckPicker[method]({
       // layerManager, viewManager and effectManager are always defined if deckPicker is
-      layers: this.layerManager.getLayers(opts),
-      views: this.viewManager.getViews(),
+      layers: this.layerManager!.getLayers(opts),
+      views: this.viewManager!.getViews(),
       viewports: this.getViewports(opts),
-      onViewportActive: this.layerManager.activateViewport,
-      effects: this.effectManager.getEffects(),
+      onViewportActive: this.layerManager!.activateViewport,
+      effects: this.effectManager!.getEffects(),
       ...opts
     });
 
@@ -790,9 +787,9 @@ export default class Deck {
       // width,
       // height,
       gl,
-      deviceProps,
-      glOptions,
-      debug,
+      // deviceProps,
+      // glOptions,
+      // debug,
       onError,
       // onBeforeRender,
       // onAfterRender,
@@ -809,6 +806,7 @@ export default class Deck {
       onInitialize: context => this._setDevice(context.device),
 
       onRender: this._onRenderFrame.bind(this),
+      // @ts-expect-error typing mismatch: AnimationLoop does not accept onError:null
       onError
 
       // onBeforeRender,
@@ -901,7 +899,7 @@ export default class Deck {
       }
       if (!handled) {
         this.props.onHover?.(pickedInfo, _pickRequest.event);
-        this.widgetManager.onHover(pickedInfo, _pickRequest.event);
+        this.widgetManager!.onHover(pickedInfo, _pickRequest.event);
       }
 
       // Clear pending pickRequest
@@ -925,7 +923,7 @@ export default class Deck {
 
     // if external context...
     if (!this.canvas) {
-      this.canvas = this.device.canvasContext.canvas as HTMLCanvasElement;
+      this.canvas = this.device.canvasContext?.canvas as HTMLCanvasElement;
       // TODO v9
       // ts-expect-error - Currently luma.gl v9 does not expose these options
       // All WebGLDevice contexts are instrumented, but it seems the device
@@ -933,7 +931,7 @@ export default class Deck {
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
 
-    setGLParameters(this.device, {
+    this.device.setParametersWebGL({
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
       polygonOffsetFill: true,
@@ -950,7 +948,7 @@ export default class Deck {
     // timeline for transitions
     const timeline = new Timeline();
     timeline.play();
-    this.animationLoop.attachTimeline(timeline);
+    this.animationLoop!.attachTimeline(timeline);
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,
@@ -1021,20 +1019,20 @@ export default class Deck {
       clearCanvas?: boolean;
     }
   ) {
-    const {device, gl} = this.layerManager?.context;
+    const {device, gl} = this.layerManager!.context;
 
-    setGLParameters(device, this.props.parameters);
+    device.setParametersWebGL(this.props.parameters);
 
     this.props.onBeforeRender({device, gl});
 
     const opts = {
       target: this.props._framebuffer,
-      layers: this.layerManager?.getLayers(),
-      viewports: this.viewManager?.getViewports(),
-      onViewportActive: this.layerManager?.activateViewport,
-      views: this.viewManager?.getViews(),
+      layers: this.layerManager!.getLayers(),
+      viewports: this.viewManager!.getViewports(),
+      onViewportActive: this.layerManager!.activateViewport,
+      views: this.viewManager!.getViews(),
       pass: 'screen',
-      effects: this.effectManager.getEffects(),
+      effects: this.effectManager!.getEffects(),
       ...renderOptions
     };
     this.deckRenderer?.renderLayers(opts);
@@ -1042,7 +1040,7 @@ export default class Deck {
     if (opts.pass === 'screen') {
       // This method could be called when drawing to picking buffer, texture etc.
       // Only when drawing to screen, update all widgets (UI components)
-      this.widgetManager.onRedraw({
+      this.widgetManager!.onRedraw({
         viewports: opts.viewports,
         layers: opts.layers
       });
@@ -1074,7 +1072,7 @@ export default class Deck {
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
-    this.layerManager.updateLayers();
+    this.layerManager!.updateLayers();
 
     // Perform picking request if any
     this._pickAndCallback();
@@ -1124,7 +1122,7 @@ export default class Deck {
 
     // Reuse last picked object
     const layers = this.layerManager.getLayers();
-    const info = this.deckPicker.getLastPickedObject(
+    const info = this.deckPicker!.getLastPickedObject(
       {
         x: pos.x,
         y: pos.y,
@@ -1145,7 +1143,7 @@ export default class Deck {
     }
     if (!handled) {
       rootHandler?.(info, event);
-      this.widgetManager.onEvent(info, event);
+      this.widgetManager!.onEvent(info, event);
     }
   };
 
@@ -1166,7 +1164,7 @@ export default class Deck {
     stats.get('frameRate').timeStart();
 
     // Get individual stats from luma.gl so reset works
-    const animationLoopStats = this.animationLoop.stats;
+    const animationLoopStats = this.animationLoop!.stats;
     stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
     stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
   }

@@ -1,5 +1,5 @@
-import {BitmapLayer} from '@deck.gl/layers/typed';
-import type {GetPickingInfoParams, Texture} from '@deck.gl/core/typed';
+import {BitmapLayer} from '@deck.gl/layers';
+import type {GetPickingInfoParams, Texture} from '@deck.gl/core';
 import type {Texture2D} from '@luma.gl/webgl';
 
 export class Tensor2DLayer extends BitmapLayer<{
@@ -47,7 +47,7 @@ export class Tensor2DLayer extends BitmapLayer<{
         'fs:DECKGL_FILTER_COLOR': `
             float normalizedValue = (color.a - colorDomain.x) / (colorDomain.y - colorDomain.x);
             vec2 coord = vec2(normalizedValue, 0.5);
-            color = texture2D(colorScale, coord);
+            color = texture(colorScale, coord);
         `
       }
     };

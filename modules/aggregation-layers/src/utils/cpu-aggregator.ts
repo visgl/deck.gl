@@ -21,7 +21,7 @@ import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
 import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
-// @eslint-disable-next-line @typescript-eslint/no-empty-function
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const dimensionSteps = ['getBins', 'getDomain', 'getScaleFunc'];
@@ -123,7 +123,12 @@ const defaultDimensions = [
 ];
 const defaultGetCellSize = props => props.cellSize;
 export default class CPUAggregator {
-  state = {
+  state: {
+    layerData: {
+      data?: any[];
+    };
+    dimensions: Record<string, any>;
+  } = {
     layerData: {
       data: undefined
     },
@@ -142,8 +147,8 @@ export default class CPUAggregator {
       // }
     }
   };
-  changeFlags = {};
-  dimensionUpdaters = {};
+  changeFlags: Record<string, any> = {};
+  dimensionUpdaters: Record<string, any> = {};
 
   _getCellSize;
   _getAggregator;
@@ -316,9 +321,9 @@ export default class CPUAggregator {
     });
   }
 
-  getDimensionChanges(oldProps, props, changeFlags) {
+  getDimensionChanges(oldProps: any, props: any, changeFlags: any): Function[] | null {
     // const {dimensionUpdaters} = this.state;
-    const updaters = [];
+    const updaters: Function[] = [];
 
     // get dimension to be updated
     for (const key in this.dimensionUpdaters) {
@@ -357,7 +362,7 @@ export default class CPUAggregator {
 
       dimensionSteps.forEach(step => {
         Object.values(this.dimensionUpdaters[key][step].triggers).forEach(
-          ({prop, updateTrigger}) => {
+          ({prop, updateTrigger}: any) => {
             if (updateTrigger) {
               // if prop is based on updateTrigger e.g. getColorValue, getColorWeight
               // and updateTriggers is passed in from layer prop
@@ -466,6 +471,7 @@ export default class CPUAggregator {
     if (isPicked) {
       // const {sortedColorBins, sortedElevationBins} = this.state;
 
+      // @ts-expect-error
       const cell = this.state.layerData.data[info.index];
 
       const binInfo = {};

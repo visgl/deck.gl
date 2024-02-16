@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME icon-layer-fragment-shader
 
 precision highp float;
@@ -27,15 +28,17 @@ uniform float opacity;
 uniform sampler2D iconsTexture;
 uniform float alphaCutoff;
 
-varying float vColorMode;
-varying vec4 vColor;
-varying vec2 vTextureCoords;
-varying vec2 uv;
+in float vColorMode;
+in vec4 vColor;
+in vec2 vTextureCoords;
+in vec2 uv;
+
+out vec4 fragColor;
 
 void main(void) {
   geometry.uv = uv;
 
-  vec4 texColor = texture2D(iconsTexture, vTextureCoords);
+  vec4 texColor = texture(iconsTexture, vTextureCoords);
 
   // if colorMode == 0, use pixel color from the texture
   // if colorMode == 1 or rendering picking buffer, use texture as transparency mask
@@ -47,7 +50,7 @@ void main(void) {
     discard;
   }
 
-  gl_FragColor = vec4(color, a);
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  fragColor = vec4(color, a);
+  DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

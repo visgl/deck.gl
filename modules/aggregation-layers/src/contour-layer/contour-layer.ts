@@ -25,11 +25,11 @@ import {
   Accessor,
   AccessorFunction,
   Color,
-  Layer,
   log,
   Position,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  LayersList
 } from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
@@ -44,9 +44,9 @@ const DEFAULT_THRESHOLD = 1;
 const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
-  gpuAggregation: true,
+  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
   aggregation: 'SUM',
 
   // contour lines
@@ -73,7 +73,7 @@ const DIMENSIONS = {
 };
 
 /** All properties supported by ContourLayer. */
-export type ContourLayerProps<DataT = any> = _ContourLayerProps<DataT> &
+export type ContourLayerProps<DataT = unknown> = _ContourLayerProps<DataT> &
   GridAggregationLayerProps<DataT>;
 
 /** Properties added by ContourLayer. */
@@ -151,6 +151,21 @@ export default class ContourLayer<
   static layerName = 'ContourLayer';
   static defaultProps = defaultProps;
 
+  state!: GridAggregationLayer<DataT>['state'] & {
+    contourData: {
+      contourSegments: {
+        start: number[];
+        end: number[];
+        contour: any;
+      }[];
+      contourPolygons: {
+        vertices: number[][];
+        contour: any;
+      }[];
+    };
+    thresholdData: any;
+  };
+
   initializeState(): void {
     super.initializeAggregationLayer({
       dimensions: DIMENSIONS
@@ -194,7 +209,7 @@ export default class ContourLayer<
     }
   }
 
-  renderLayers(): Layer[] {
+  renderLayers(): LayersList {
     const {contourSegments, contourPolygons} = this.state.contourData;
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', LineLayer);
@@ -238,7 +253,7 @@ export default class ContourLayer<
   // Aggregation Overrides
 
   /* eslint-disable max-statements, complexity */
-  updateAggregationState(opts) {
+  updateAggregationState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     const {cellSize, coordinateSystem} = props;
     const {viewport} = this.context;
@@ -311,7 +326,7 @@ export default class ContourLayer<
 
   // Private (Aggregation)
 
-  private _updateAccessors(opts) {
+  private _updateAccessors(opts: UpdateParameters<this>) {
     const {getWeight, aggregation, data} = opts.props;
     const {count} = this.state.weights;
     if (count) {
@@ -335,7 +350,8 @@ export default class ContourLayer<
     const {count} = this.state.weights;
     let {aggregationData} = count;
     if (!aggregationData) {
-      aggregationData = count.aggregationBuffer.getData();
+      // @ts-ignore
+      aggregationData = count.aggregationBuffer!.readSyncWebGL2() as Float32Array;
       count.aggregationData = aggregationData;
     }
 

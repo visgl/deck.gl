@@ -19,13 +19,14 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME screen-grid-layer-vertex-shader
 #define RANGE_COUNT 6
 
-attribute vec3 positions;
-attribute vec3 instancePositions;
-attribute vec4 instanceCounts;
-attribute vec3 instancePickingColors;
+in vec3 positions;
+in vec3 instancePositions;
+in vec4 instanceCounts;
+in vec3 instancePickingColors;
 
 uniform float opacity;
 uniform vec3 cellScale;
@@ -36,8 +37,8 @@ uniform vec2 colorDomain;
 uniform bool shouldUseMinMax;
 uniform sampler2D maxTexture;
 
-varying vec4 vColor;
-varying float vSampleCount;
+out vec4 vColor;
+out float vSampleCount;
 
 vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
   vec4 outColor = vec4(0., 0., 0., 0.);
@@ -62,7 +63,7 @@ void main(void) {
   vSampleCount = instanceCounts.a;
 
   float weight = instanceCounts.r;
-  float maxWeight = texture2D(maxTexture, vec2(0.5)).r;
+  float maxWeight = texture(maxTexture, vec2(0.5)).r;
 
   float step = weight / maxWeight;
   vec4 minMaxColor = mix(minColor, maxColor, step) / 255.;

@@ -25,7 +25,7 @@ Q: If I wanted to, say, change the opacity of a layer, Is my only option to crea
 
 Yes. deck.gl is a "reactive" application architecture and is optimized to be used like this. The layer and its props are essentially only a "descriptor", deck.gl matches and "diffs" the layers under the hood and only does the necessary changes based on actual differences compared to last layer.
 
-This is a "functional" take on programming, and it parallels key ideas in the widely used React library. The reactive architecture has big benefits when writing larger prgrams, but these are not as evident when writing smaller scripts.
+This is a "functional" take on programming, and it parallels key ideas in the widely used React library. The reactive architecture has big benefits when writing larger programs, but these are not as evident when writing smaller scripts.
 
 If you are coming from a more "imperative" programming experience, it can initially seem a little counter-intuitive (especially from a performance perspective). But in spite of how the API looks, performance should be very good, if this is not the case you are likely doing something else wrong.
 

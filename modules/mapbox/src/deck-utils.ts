@@ -24,7 +24,7 @@ export function getDeckInstance({
   deck
 }: {
   map: Map & {__deck?: Deck | null};
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   deck?: Deck;
 }): Deck {
   // Only create one deck instance per context
@@ -231,7 +231,7 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
     const dy = cameraY - center[1];
     const cameraToCenterDistanceGround = Math.sqrt(dx * dx + dy * dy);
 
-    const pitchRadians = pitch * DEGREES_TO_RADIANS;
+    const pitchRadians = pitch! * DEGREES_TO_RADIANS;
     const altitudePixels = 1.5 * height;
     const scale =
       pitchRadians < 0.001
@@ -277,9 +277,7 @@ function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMerca
         0.02
       : // use deck.gl's own default
         0.1,
-    // @ts-expect-error Mapbox specific - extract near plane position
     nearZ: map.transform._nearZ / map.transform.height,
-    // @ts-expect-error Mapbox specific - extract far plane position
     farZ: map.transform._farZ / map.transform.height
   });
 }

@@ -9,7 +9,7 @@ import type {MjolnirEvent} from 'mjolnir.js';
 import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {LightingModuleSettings} from '../shaderlib';
+import type {LightingModuleSettings} from '../shaderlib/index';
 
 export type LayerData<T> =
   | Iterable<T>

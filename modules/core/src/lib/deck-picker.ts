@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/core';
-import {readPixelsToArray} from '@luma.gl/webgl';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -29,7 +28,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 
-import type {Framebuffer as LumaFramebuffer} from '@luma.gl/core';
+import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
@@ -65,8 +64,8 @@ type PickOperationContext = {
 /** Manages picking in a Deck context */
 export default class DeckPicker {
   device: Device;
-  pickingFBO?: LumaFramebuffer;
-  depthFBO?: LumaFramebuffer;
+  pickingFBO?: Framebuffer;
+  depthFBO?: Framebuffer;
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
 
@@ -197,6 +196,7 @@ export default class DeckPicker {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   } {
+    // @ts-expect-error TODO - assuming WebGL context
     const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
@@ -213,6 +213,7 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
+    // @ts-expect-error TODO - assuming WebGL context
     const devicePixelRange = this.device.canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
@@ -220,7 +221,7 @@ export default class DeckPicker {
     ];
 
     const deviceRadius = Math.round(radius * pixelRatio);
-    const {width, height} = this.pickingFBO;
+    const {width, height} = this.pickingFBO as Framebuffer;
     const deviceRect = this._getPickingRect({
       deviceX: devicePixel[0],
       deviceY: devicePixel[1],
@@ -278,8 +279,8 @@ export default class DeckPicker {
             viewports,
             onViewportActive,
             deviceRect: {
-              x: pickInfo.pickedX,
-              y: pickInfo.pickedY,
+              x: pickInfo.pickedX as number,
+              y: pickInfo.pickedY as number,
               width: 1,
               height: 1
             },
@@ -334,7 +335,7 @@ export default class DeckPicker {
       layer.restorePickingColors();
     }
 
-    return {result, emptyInfo: infos.get(null)};
+    return {result, emptyInfo: infos!.get(null) as PickingInfo};
   }
 
   /** Pick all objects within the given bounding box */
@@ -361,7 +362,9 @@ export default class DeckPicker {
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
+    // @ts-expect-error TODO - assuming WebGL context
     const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    // @ts-expect-error TODO - assuming WebGL context
     const leftTop = this.device.canvasContext.cssToDevicePixels([x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
@@ -369,6 +372,7 @@ export default class DeckPicker {
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
+    // @ts-expect-error TODO - assuming WebGL context
     const rightBottom = this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
@@ -394,13 +398,17 @@ export default class DeckPicker {
 
     const pickInfos = getUniqueObjects(pickedResult);
 
-    // Only return unique infos, identified by info.object
-    const uniqueInfos = new Map();
+    // `getUniqueObjects` dedup by picked color
+    // However different picked color may be linked to the same picked object, e.g. stroke and fill of the same polygon
+    // picked from different sub layers of a GeoJsonLayer
+    // Here after resolving the picked index with `layer.getPickingInfo`, we need to dedup again by unique picked objects
+    const uniquePickedObjects = new Map<string, Set<unknown>>();
+    const uniqueInfos: PickingInfo[] = [];
 
-    const isMaxObjects = Number.isFinite(maxObjects);
+    const limitMaxObjects = Number.isFinite(maxObjects);
 
     for (let i = 0; i < pickInfos.length; i++) {
-      if (isMaxObjects && maxObjects && uniqueInfos.size >= maxObjects) {
+      if (limitMaxObjects && uniqueInfos.length >= maxObjects!) {
         break;
       }
       const pickInfo = pickInfos[i];
@@ -414,13 +422,23 @@ export default class DeckPicker {
         pixelRatio
       };
 
-      info = getLayerPickingInfo({layer: pickInfo.pickedLayer, info, mode});
-      if (!uniqueInfos.has(info.object)) {
-        uniqueInfos.set(info.object, info);
+      info = getLayerPickingInfo({layer: pickInfo.pickedLayer as Layer, info, mode});
+      // info.layer is always populated because it's a picked pixel
+      const pickedLayerId = info.layer!.id;
+      if (!uniquePickedObjects.has(pickedLayerId)) {
+        uniquePickedObjects.set(pickedLayerId, new Set<unknown>());
+      }
+      const uniqueObjectsInLayer = uniquePickedObjects.get(pickedLayerId) as Set<unknown>;
+      // info.object may be null if the layer is using non-iterable data.
+      // Fall back to using index as identifier.
+      const pickedObjectKey = info.object ?? info.index;
+      if (!uniqueObjectsInLayer.has(pickedObjectKey)) {
+        uniqueObjectsInLayer.add(pickedObjectKey);
+        uniqueInfos.push(info);
       }
     }
 
-    return Array.from(uniqueInfos.values());
+    return uniqueInfos;
   }
 
   /** Renders layers into the picking buffer with picking colors and read the pixels. */
@@ -509,7 +527,7 @@ export default class DeckPicker {
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
     const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    readPixelsToArray(pickingFBO, {
+    this.device.readPixelsToArrayWebGL(pickingFBO as Framebuffer, {
       sourceX: x,
       sourceY: y,
       sourceWidth: width,

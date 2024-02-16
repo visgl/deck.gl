@@ -1,31 +1,33 @@
 export default `\
 #version 300 es
 
+#define SHADER_NAME scenegraph-layer-vertex-shader
+
 // Instance attributes
 in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceColors;
 in vec3 instancePickingColors;
-in mat3 instanceModelMatrix;
+in vec3 instanceModelMatrixCol0;
+in vec3 instanceModelMatrixCol1;
+in vec3 instanceModelMatrixCol2;
 in vec3 instanceTranslation;
 
-// Uniforms
+// Scale the model
 uniform float sizeScale;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
 uniform mat4 sceneModelMatrix;
 uniform bool composeModelMatrix;
 
-// Attributes
-in vec4 POSITION;
-
+// Primitive attributes
+in vec3 positions;
 #ifdef HAS_UV
-  in vec2 TEXCOORD_0;
+  in vec2 texCoords;
 #endif
-
 #ifdef MODULE_PBR
   #ifdef HAS_NORMALS
-    in vec4 NORMAL;
+    in vec3 normals;
   #endif
 #endif
 
@@ -42,24 +44,26 @@ out vec4 vColor;
 // Main
 void main(void) {
   #if defined(HAS_UV) && !defined(MODULE_PBR)
-    vTEXCOORD_0 = TEXCOORD_0;
-    geometry.uv = vTEXCOORD_0;
+    vTEXCOORD_0 = texCoords;
+    geometry.uv = texCoords;
   #endif
 
   geometry.worldPosition = instancePositions;
   geometry.pickingColor = instancePickingColors;
 
+  mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
+
   vec3 normal = vec3(0.0, 0.0, 1.0);
   #ifdef MODULE_PBR
     #ifdef HAS_NORMALS
-      normal = instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz;
+      normal = instanceModelMatrix * (sceneModelMatrix * vec4(normals, 0.0)).xyz;
     #endif
   #endif
 
   float originalSize = project_size_to_pixel(sizeScale);
   float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
+  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * vec4(positions, 1.0)).xyz) * sizeScale * (clampedSize / originalSize) + instanceTranslation;
   if(composeModelMatrix) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
@@ -85,7 +89,7 @@ void main(void) {
     #endif
 
     #ifdef HAS_UV
-      pbr_vUV = TEXCOORD_0;
+      pbr_vUV = texCoords;
     #else
       pbr_vUV = vec2(0., 0.);
     #endif

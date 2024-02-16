@@ -1,7 +1,7 @@
 import {Viewport} from '@deck.gl/core';
 
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-import {Matrix4, equals} from '@math.gl/core';
+import {Matrix4, equals, NumericArray} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';
 
@@ -123,7 +123,7 @@ export class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
-  private _zRange?: ZRange;
+  private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -162,6 +162,7 @@ export class Tileset2D {
 
     // Cache the last processed viewport
     this._viewport = null;
+    this._zRange = null;
     this._selectedTiles = null;
     this._frameNumber = 0;
 
@@ -191,10 +192,10 @@ export class Tileset2D {
   setOptions(opts: Tileset2DProps): void {
     Object.assign(this.opts, opts);
     if (Number.isFinite(opts.maxZoom)) {
-      this._maxZoom = Math.floor(opts.maxZoom);
+      this._maxZoom = Math.floor(opts.maxZoom as number);
     }
     if (Number.isFinite(opts.minZoom)) {
-      this._minZoom = Math.ceil(opts.minZoom);
+      this._minZoom = Math.ceil(opts.minZoom as number);
     }
   }
 
@@ -212,7 +213,7 @@ export class Tileset2D {
 
   reloadAll(): void {
     for (const id of this._cache.keys()) {
-      const tile = this._cache.get(id);
+      const tile = this._cache.get(id) as Tile2DHeader;
       if (!this._selectedTiles || !this._selectedTiles.includes(tile)) {
         this._cache.delete(id);
       } else {
@@ -226,9 +227,12 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange; modelMatrix?: Matrix4} = {}
+    {zRange, modelMatrix}: {zRange: ZRange | null; modelMatrix: NumericArray | null} = {
+      zRange: null,
+      modelMatrix: null
+    }
   ): number {
-    const modelMatrixAsMatrix4 = new Matrix4(modelMatrix);
+    const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
     if (
       !this._viewport ||
@@ -258,7 +262,7 @@ export class Tileset2D {
       }
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
-      this._selectedTiles = this._selectedTiles.map(tile => this._getTile(tile.index, true));
+      this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
     }
 
     // Update tile states
@@ -326,7 +330,7 @@ export class Tileset2D {
     viewport: Viewport;
     maxZoom?: number;
     minZoom?: number;
-    zRange: ZRange | undefined;
+    zRange: ZRange | null;
     tileSize?: number;
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;
@@ -359,7 +363,7 @@ export class Tileset2D {
   /** Returns additional metadata to add to tile, bbox by default */
   getTileMetadata(index: TileIndex): Record<string, any> {
     const {tileSize} = this.opts;
-    return {bbox: tileToBoundingBox(this._viewport, index.x, index.y, index.z, tileSize)};
+    return {bbox: tileToBoundingBox(this._viewport!, index.x, index.y, index.z, tileSize)};
   }
 
   /** Returns index of the parent tile */
@@ -383,7 +387,7 @@ export class Tileset2D {
       tile.isSelected = false;
       tile.isVisible = false;
     }
-    // TODO ts-expect-error called only when _selectedTiles is already defined
+    // @ts-expect-error called only when _selectedTiles is already defined
     for (const tile of this._selectedTiles) {
       tile.isSelected = true;
       tile.isVisible = true;
@@ -463,7 +467,7 @@ export class Tileset2D {
 
     const maxCacheSize =
       opts.maxCacheSize ||
-      // TODO ts-expect-error called only when selectedTiles is initialized
+      // @ts-expect-error called only when selectedTiles is initialized
       (opts.maxCacheByteSize ? Infinity : DEFAULT_CACHE_SCALE * this.selectedTiles.length);
     const maxCacheByteSize = opts.maxCacheByteSize || Infinity;
 
@@ -554,7 +558,7 @@ function updateTileStateDefault(allTiles: Tile2DHeader[]) {
     }
   }
   for (const tile of allTiles) {
-    tile.isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
+    tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
   }
 }
 
@@ -571,9 +575,9 @@ function updateTileStateReplace(allTiles: Tile2DHeader[]) {
   // Always process parents first
   const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.zoom - t2.zoom);
   for (const tile of sortedTiles) {
-    tile.isVisible = Boolean(tile.state & TILE_STATE_VISIBLE);
+    tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
 
-    if (tile.children && (tile.isVisible || tile.state & TILE_STATE_VISITED)) {
+    if (tile.children && (tile.isVisible || tile.state! & TILE_STATE_VISITED)) {
       // If the tile is rendered, or if the tile has been explicitly hidden, hide all of its children
       for (const child of tile.children) {
         child.state = TILE_STATE_VISITED;
@@ -589,7 +593,7 @@ function getPlaceholderInAncestors(startTile: Tile2DHeader) {
   let tile: Tile2DHeader | null = startTile;
   while (tile) {
     if (tile.isLoaded || tile.content) {
-      tile.state |= TILE_STATE_VISIBLE;
+      tile.state! |= TILE_STATE_VISIBLE;
       return true;
     }
     tile = tile.parent;
