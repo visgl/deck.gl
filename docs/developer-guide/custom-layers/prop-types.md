@@ -126,17 +126,18 @@ MyLayerClass.defaultProps = {
 
 ##### `image` {#image}
 
-One of: URL string, [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
+One of: URL string, [luma.gl Texture](https://luma.gl/docs/api-reference/core/resources/texture) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
 
 - Options:
-  + `parameters` (object, optional) - custom [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter) of the texture. If not specified, the following defaults are used:
+  + `parameters` (object, optional) - custom [sampler properties](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops) of the texture. If not specified, the following defaults are used:
 
   ```js
   {
-    [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-    [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-    [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-    [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+    minFilter: 'linear',
+    magFilter: 'linear',
+    mipmapFilter: 'linear',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge'
   }
   ```
 

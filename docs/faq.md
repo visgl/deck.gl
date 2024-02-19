@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
+deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL2/WebGPU) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
 
 
 ## Installing npm modules, learning React, it is just too much!
@@ -50,6 +50,6 @@ See the article about [debugging](./developer-guide/debugging.md).
 
 ## How do I **test** deck.gl applications?
 
-Q: It is hard to test webgl based applications, assuming deck.gl is no different?
+Q: It is hard to test WebGL2/WebGPU based applications, assuming deck.gl is no different?
 
 Check out `@deck.gl/test-utils`, which (among other things) supports visual regression testing.
