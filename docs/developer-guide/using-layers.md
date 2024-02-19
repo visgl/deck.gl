@@ -57,7 +57,7 @@ The accessor function receives two arguments:
 
 The accessor function is typically expected to return either a number or an array.
 
-Some accessors also support constant values instead of functions. When a constant value is provided, it is applied to all objects in the data stream. Unlike a functional value, which is called once for every data object to fill a WebGL buffer proportional to the data size, constant accessors have CPU and memory cost of `O(1)` and are much more performant.
+Some accessors also support constant values instead of functions. When a constant value is provided, it is applied to all objects in the data stream.
 
 
 ### Other Layer Props
@@ -107,13 +107,13 @@ deck.gl's architecture is based on the reactive programming paradigm:
 * In a reactive application, a complete UI description is "re-rendered" every time something in the application state changes (in the case of a deck.gl application, a new list of layers is created whenever something changes).
 * The UI framework (in this case, deck.gl) makes the choices about what to update, by comparing (or "diffing") the newly rendered UI description with the last rendered UI description.
 * The framework then the makes minimal necessary changes to account for the differences, and then redraws.
-* The required changes are made to "WebGL state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
+* The required changes are made to "GPU state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
 
 #### Creating Layer Instances Is Cheap
 
 The deck.gl model means that applications are expected to create a new set of layers every time application state changes, which can seem surprisingly inefficient to someone who hasn't done reactive programming before. The trick is that layers are just descriptor objects that are very cheap to instantiate, and internally, the new layers are efficiently matched against existing layers so that no updates are performed unless actually needed.
 
-So, even though the application creates new "layers", those layers are only "descriptors" containing props that specify what needs to be rendered and how. All calculated state (WebGL "programs", "vertex attributes" etc) are stored in a state object and this state object is moved forward to the newly matched layer on every render cycle.  The new layer ends up with the state of the old layer (and the props of the new layer), while the old layer is simply discarded for garbage collection.
+So, even though the application creates new "layers", those layers are only "descriptors" containing props that specify what needs to be rendered and how. All calculated state (WebGL2/WebGPU "programs", "vertex attributes" etc) are stored in a state object and this state object is moved forward to the newly matched layer on every render cycle.  The new layer ends up with the state of the old layer (and the props of the new layer), while the old layer is simply discarded for garbage collection.
 
 The application does not have to be aware about this, as long as it keeps rendering new layers with the same `id` they will be matched and the existing state of that layer will be updated accordingly.
 

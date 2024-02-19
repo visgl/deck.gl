@@ -7,7 +7,7 @@
 
 If you plan to work with binary data, you will want to make sure you are up to speed on JavaScript typed arrays as well as GPU buffers, both in terms of general concepts as well as a basic grasp of the API.
 
-JavaScript has a number of different ways to represent binary data (Browser `Blob`, Node.js Buffers, base64 etc), however deck.gl primarily accepts typed arrays. deck.gl should accept GPU buffers (`WebGLBuffer` or luma.gl `Buffer` instances).
+JavaScript has a number of different ways to represent binary data (Browser `Blob`, Node.js Buffers, base64 etc), however deck.gl primarily accepts typed arrays. deck.gl should accept GPU buffers (luma.gl `Buffer` instances).
 
 
 ### CPU vs GPU memory
