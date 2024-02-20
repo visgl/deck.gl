@@ -5,6 +5,7 @@ import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index
 import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
+import { DEFAULT_TILE_SIZE } from './constants';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -16,7 +17,8 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by QuadbinTileLayer. */
