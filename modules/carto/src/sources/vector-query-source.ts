@@ -8,9 +8,11 @@ import type {
   TilejsonResult
 } from './types';
 
-export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions & FilterOptions & {
-  columns?: string[]
-};
+export type VectorQuerySourceOptions = SourceOptions &
+  QuerySourceOptions &
+  FilterOptions & {
+    columns?: string[];
+  };
 type UrlParameters = {
   columns?: string;
   filters?: string;
