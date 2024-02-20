@@ -185,7 +185,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return changeFlags.somethingChanged;
   }
 
-  updateState({changeFlags}: UpdateParameters<this>) {
+  updateState({changeFlags, props, oldProps}: UpdateParameters<this>) {
     let {tileset} = this.state;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
