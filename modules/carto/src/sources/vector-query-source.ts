@@ -1,6 +1,12 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {FilterOptions, SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
+import type {
+  FilterOptions,
+  SourceOptions,
+  QuerySourceOptions,
+  SpatialDataType,
+  TilejsonResult
+} from './types';
 
 export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions & FilterOptions;
 type UrlParameters = {

@@ -1,12 +1,13 @@
 import {baseSource} from './base-source';
 import type {FilterOptions, SourceOptions, TilejsonResult} from './types';
 
-export type BoundaryTableSourceOptions = SourceOptions & FilterOptions & {
-  tilesetTableName: string;
-  columns?: string[];
-  matchingColumn?: string;
-  propertiesTableName: string;
-};
+export type BoundaryTableSourceOptions = SourceOptions &
+  FilterOptions & {
+    tilesetTableName: string;
+    columns?: string[];
+    matchingColumn?: string;
+    propertiesTableName: string;
+  };
 type UrlParameters = {
   filters?: string;
   tilesetTableName: string;

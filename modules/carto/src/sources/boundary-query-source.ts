@@ -2,12 +2,13 @@ import {QueryParameters} from '../api/index';
 import {baseSource} from './base-source';
 import type {FilterOptions, SourceOptions, TilejsonResult} from './types';
 
-export type BoundaryQuerySourceOptions = SourceOptions & FilterOptions & {
-  tilesetTableName: string;
-  matchingColumn?: string;
-  propertiesSqlQuery: string;
-  queryParameters?: QueryParameters;
-};
+export type BoundaryQuerySourceOptions = SourceOptions &
+  FilterOptions & {
+    tilesetTableName: string;
+    matchingColumn?: string;
+    propertiesSqlQuery: string;
+    queryParameters?: QueryParameters;
+  };
 type UrlParameters = {
   filters?: string;
   tilesetTableName: string;
@@ -19,7 +20,13 @@ type UrlParameters = {
 export const boundaryQuerySource = async function (
   options: BoundaryQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {filters, tilesetTableName, matchingColumn = 'id', propertiesSqlQuery, queryParameters} = options;
+  const {
+    filters,
+    tilesetTableName,
+    matchingColumn = 'id',
+    propertiesSqlQuery,
+    queryParameters
+  } = options;
   const urlParameters: UrlParameters = {
     tilesetTableName,
     matchingColumn,
