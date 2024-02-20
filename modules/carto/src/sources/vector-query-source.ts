@@ -1,9 +1,10 @@
 /* eslint-disable camelcase */
 import {baseSource} from './base-source';
-import type {SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
+import type {FilterOptions, SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
 
-export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
+export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions & FilterOptions;
 type UrlParameters = {
+  filters?: string;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   q: string;
@@ -13,9 +14,12 @@ type UrlParameters = {
 export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
+  const {filters, spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
   const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
 
+  if (filters) {
+    urlParameters.filters = JSON.stringify(filters);
+  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }

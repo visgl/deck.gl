@@ -1,13 +1,14 @@
 import {baseSource} from './base-source';
-import type {SourceOptions, TilejsonResult} from './types';
+import type {FilterOptions, SourceOptions, TilejsonResult} from './types';
 
-export type BoundaryTableSourceOptions = SourceOptions & {
+export type BoundaryTableSourceOptions = SourceOptions & FilterOptions & {
   tilesetTableName: string;
   columns?: string[];
   matchingColumn?: string;
   propertiesTableName: string;
 };
 type UrlParameters = {
+  filters?: string;
   tilesetTableName: string;
   columns?: string;
   matchingColumn: string;
@@ -17,7 +18,7 @@ type UrlParameters = {
 export const boundaryTableSource = async function (
   options: BoundaryTableSourceOptions
 ): Promise<TilejsonResult> {
-  const {tilesetTableName, columns, matchingColumn = 'id', propertiesTableName} = options;
+  const {filters, tilesetTableName, columns, matchingColumn = 'id', propertiesTableName} = options;
   const urlParameters: UrlParameters = {
     tilesetTableName,
     matchingColumn,
@@ -26,6 +27,9 @@ export const boundaryTableSource = async function (
 
   if (columns) {
     urlParameters.columns = columns.join(',');
+  }
+  if (filters) {
+    urlParameters.filters = JSON.stringify(filters);
   }
   return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
 };
