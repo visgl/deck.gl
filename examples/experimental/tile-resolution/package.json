@@ -5,8 +5,9 @@
   "scripts": {
     "start": "vite",
     "start-local": "vite --config ../../vite.config.local.mjs",
-    "build": "vite build --config ../../vite.config.local.mjs --outDir static",
+    "build": "vite build --config ../../vite.config.local.mjs --outDir dist",
     "preview": "vite preview",
+    "deploy": "vercel build --prod && vercel deploy --prebuilt --prod",
     "link-deck": "yarn link @deck.gl/core && yarn link @deck.gl/layers && yarn link @deck.gl/geo-layers && yarn link @deck.gl/mesh-layers && yarn link @deck.gl/aggregation-layers && yarn link @deck.gl/carto && yarn link @deck.gl/extensions",
     "unlink-deck": "yarn unlink @deck.gl/core && yarn link @deck.gl/layers && yarn link @deck.gl/geo-layers && yarn link @deck.gl/mesh-layers && yarn link @deck.gl/aggregation-layers && yarn link @deck.gl/carto && yarn link @deck.gl/extensions"
   },
