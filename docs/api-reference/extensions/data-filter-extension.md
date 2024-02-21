@@ -210,6 +210,8 @@ The maximum number of supported is determined by the `categorySize`:
 - If `categorySize` is `2`: 64 categories per dimension
 - If `categorySize` is `3` or `4`: 32 categories per dimension
 
+If this value is exceeded any categories beyond the limit will be ignored.
+
 ##### `filterTransformSize` (Boolean, optional) {#filtertransformsize}
 
 * Default: `true`

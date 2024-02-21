@@ -10,7 +10,6 @@ import {DATA, COLORS, SHAPE_NAMES, SIZES} from './data-sample';
 const dataFilterExtension = new DataFilterExtension({
   categorySize: 4,
   filterSize: 2,
-  softMargin: true,
   countItems: true
 });
 

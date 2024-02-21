@@ -100,12 +100,12 @@ type DataFilterExtensionOptions = {
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object.
    * @default 1
    */
-  categorySize: number;
+  categorySize: 1 | 2 | 3 | 4;
   /**
    * The size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object.
    * @default 1
    */
-  filterSize: number;
+  filterSize: 1 | 2 | 3 | 4;
   /**
    * Use 64-bit precision instead of 32-bit.
    * @default false
@@ -129,22 +129,6 @@ const DATA_TYPE_FROM_SIZE = {
 export default class DataFilterExtension extends LayerExtension<DataFilterExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'DataFilterExtension';
-
-  constructor({
-    categorySize = 1,
-    filterSize = 1,
-    fp64 = false,
-    countItems = false
-  }: Partial<DataFilterExtensionOptions> = {}) {
-    if (!DATA_TYPE_FROM_SIZE[categorySize]) {
-      throw new Error('categorySize out of range');
-    }
-    if (!DATA_TYPE_FROM_SIZE[filterSize]) {
-      throw new Error('filterSize out of range');
-    }
-
-    super({categorySize, filterSize, fp64, countItems});
-  }
 
   getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
     const {categorySize, filterSize, fp64} = extension.opts;
@@ -257,6 +241,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       }
     }
     if (attributeManager?.attributes.filterCategoryValues) {
+      // Update bitmask if accessor or selected categories has changed
       const categoryBitMaskNeedsUpdate =
         attributeManager.attributes.filterCategoryValues.needsUpdate() ||
         !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
@@ -264,6 +249,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         this.setState({categoryBitMaskNeedsUpdate});
       }
 
+      // Need to recreate category map if categorySize has changed
       const resetCategories = changeFlags.dataChanged;
       if (resetCategories) {
         this.setState({
@@ -334,7 +320,12 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     filterModel?.destroy();
   }
 
-  _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
+  /**
+   * Updates the bitmask used on the GPU to perform the filter based on the
+   * `filterCategories` prop. The mapping between categories and bit in the bitmask
+   * is performed by `_getCategoryKey()`
+   */
+  _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) : void {
     const {categorySize} = extension.opts;
     const {filterCategories} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
@@ -357,6 +348,10 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     this.state.categoryBitMaskNeedsUpdate = false;
   }
 
+  /**
+   * Returns an index of bit in the bitmask for a given category. If the category has
+   * not yet been assigned a bit, a new one is assigned.
+   */
   _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: FilterCategory, channel: number) {
     const categoryMap = (this.state.categoryMap as Record<FilterCategory, number>[])[channel];
     if (!(category in categoryMap)) {
