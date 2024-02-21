@@ -136,9 +136,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     return {
       modules: [fp64 ? shaderModule64 : shaderModule],
       defines: {
-        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize],
+        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize || 1],
         DATACATEGORY_CHANNELS: categorySize,
-        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize],
+        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize || 1],
         DATAFILTER_DOUBLE: Boolean(fp64)
       }
     };
