@@ -31,7 +31,9 @@ class RasterColumnLayer extends ColumnLayer {
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, vs};
+    const data = this.props.data as unknown as Raster & {length: number};
+    const BLOCK_WIDTH = data.blockWidth || Math.sqrt(data.length);
+    return {...shaders, defines: {...shaders.defines, BLOCK_WIDTH}, vs};
   }
 
   initializeState() {

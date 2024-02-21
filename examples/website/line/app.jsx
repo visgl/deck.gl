@@ -4,7 +4,6 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
-import GL from '@luma.gl/constants';
 
 // Source data CSV
 const DATA_URL = {
@@ -86,8 +85,12 @@ export default function App({
       controller={true}
       pickingRadius={5}
       parameters={{
-        blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
-        blendEquation: GL.FUNC_ADD
+        blendColorOperation: 'add',
+        blendColorSrcFactor: 'src-alpha',
+        blendColorDstFactor: 'one',
+        blendAlphaOperation: 'add',
+        blendAlphaSrcFactor: 'one-minus-dst-alpha',
+        blendAlphaDstFactor: 'one'
       }}
       getTooltip={getTooltip}
     >

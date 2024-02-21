@@ -19,14 +19,45 @@
 // THE SOFTWARE.
 
 /* global window */
-import TestRunner from './test-runner';
+import {TestRunner} from './test-runner';
 import {getBoundingBoxInPage} from './utils/dom';
+
+import type {DeckProps, Deck, Layer} from '@deck.gl/core';
+
+// TODO - export from probe.gl
+type ImageDiffOptions = {
+  saveOnFail?: boolean;
+  saveAs?: string;
+  threshold?: number; // 0.99,
+  createDiffImage?: boolean; // false,
+  tolerance?: number; // 0.1,
+  includeAA?: boolean; // false,
+  includeEmpty?: boolean; // true
+};
+
+type DiffImageResult = {
+  headless: boolean;
+  match: string | number;
+  matchPercentage: string;
+  success: boolean;
+  error: Error | string | null;
+};
+
+export type SnapshotTestCase = {
+  name: string;
+  props: DeckProps;
+  goldenImage: string;
+  onBeforeRender?: (params: {deck: Deck; layers: Layer[]}) => void;
+  onAfterRender?: (params: {deck: Deck; layers: Layer[]; done: () => void}) => void;
+  timeout?: number;
+  imageDiffOptions?: ImageDiffOptions;
+};
 
 const DEFAULT_TEST_OPTIONS = {
   imageDiffOptions: {}
 };
 
-const DEFAULT_TEST_CASE = {
+const DEFAULT_TEST_CASE: SnapshotTestCase = {
   name: 'Unnamed snapshot test',
   props: {},
   onBeforeRender: ({deck, layers}) => {
@@ -40,77 +71,78 @@ const DEFAULT_TEST_CASE = {
   goldenImage: ''
 };
 
-export default class SnapshotTestRunner extends TestRunner {
+export class SnapshotTestRunner extends TestRunner<
+  SnapshotTestCase,
+  DiffImageResult,
+  {imageDiffOptions: ImageDiffOptions}
+> {
+  private _isDiffing: boolean = false;
+
   constructor(props) {
-    super(props);
+    super(props, DEFAULT_TEST_OPTIONS);
 
-    this.isDiffing = false;
-
-    Object.assign(this.testOptions, DEFAULT_TEST_OPTIONS);
+    this._isDiffing = false;
   }
 
   get defaultTestCase() {
     return DEFAULT_TEST_CASE;
   }
 
-  initTestCase(testCase) {
+  initTestCase(testCase: SnapshotTestCase) {
     super.initTestCase(testCase);
     if (!testCase.goldenImage) {
       throw new Error(`Test case ${testCase.name} does not have golden image`);
     }
   }
 
-  runTestCase(testCase, onDone) {
-    const {deck} = this;
+  runTestCase(testCase: SnapshotTestCase) {
+    const deck = this.deck!;
 
-    deck.setProps({
-      ...this.props,
-      ...testCase,
-      onBeforeRender: () => {
-        testCase.onBeforeRender({
-          deck,
-          layers: deck.props.layers
-        });
-      },
-      onAfterRender: () => {
-        testCase.onAfterRender({
-          deck,
-          layers: deck.props.layers,
-          done: onDone
-        });
-      }
+    return new Promise<void>(resolve => {
+      deck.setProps({
+        ...this.props,
+        ...testCase,
+        onBeforeRender: () => {
+          testCase.onBeforeRender!({
+            deck,
+            // @ts-expect-error Accessing protected layerManager
+            layers: this.deck.layerManager.getLayers()
+          });
+        },
+        onAfterRender: () => {
+          testCase.onAfterRender!({
+            deck,
+            // @ts-expect-error Accessing protected layerManager
+            layers: this.deck.layerManager.getLayers(),
+            done: resolve
+          });
+        }
+      });
     });
   }
 
-  shouldRender() {
-    // wait for the current diffing to finish
-    return !this.isDiffing;
-  }
-
-  assert(testCase) {
-    if (this.isDiffing) {
+  async assert(testCase: SnapshotTestCase) {
+    if (this._isDiffing) {
       // already performing diffing
       return;
     }
-    this.isDiffing = true;
+    this._isDiffing = true;
 
     const diffOptions = {
       ...this.testOptions.imageDiffOptions,
       ...testCase.imageDiffOptions,
       goldenImage: testCase.goldenImage,
-      region: getBoundingBoxInPage(this.deck.canvas)
+      region: getBoundingBoxInPage(this.deck!.getCanvas()!)
     };
     // Take screenshot and compare
-    window.browserTestDriver_captureAndDiffScreen(diffOptions).then(result => {
-      // invoke user callback
-      if (result.success) {
-        this._pass(result);
-      } else {
-        this._fail(result);
-      }
+    const result = await window.browserTestDriver_captureAndDiffScreen(diffOptions);
+    // invoke user callback
+    if (result.success) {
+      this.pass(result);
+    } else {
+      this.fail(result);
+    }
 
-      this.isDiffing = false;
-      this._next();
-    });
+    this._isDiffing = false;
   }
 }

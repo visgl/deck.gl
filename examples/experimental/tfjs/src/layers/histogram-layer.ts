@@ -10,8 +10,8 @@ import {
   UpdateParameters,
   AttributeManager,
   _deepEqual
-} from '@deck.gl/core/typed';
-import {GridCellLayer} from '@deck.gl/layers/typed';
+} from '@deck.gl/core';
+import {GridCellLayer} from '@deck.gl/layers';
 import {Buffer} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
 
