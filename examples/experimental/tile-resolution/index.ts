@@ -2,6 +2,8 @@ import './style.css';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Deck } from '@deck.gl/core';
+import { PathLayer } from '@deck.gl/layers';
+import { TileLayer } from '@deck.gl/geo-layers';
 import { BASEMAP, vectorTableSource, VectorTileLayer } from '@deck.gl/carto';
 import GUI from 'lil-gui';
 
@@ -50,18 +52,18 @@ const searchParams = new URLSearchParams(location.search);
 
 const params = { 
   tileSize: Number(searchParams.get('tileSize')) || 1024,
-  tileResolution: Number(searchParams.get('tileResolution')) || 1
+  tileResolution: Number(searchParams.get('tileResolution')) || 1,
+  tileBorder: searchParams.has('tileBorder') ? Boolean(Number(searchParams.get('tileBorder'))) : true,
 };
 
 const gui = new GUI({width: 150});
 gui.add(params, 'tileSize', [128, 256, 512, 1024, 2048]);
 gui.add(params, 'tileResolution', [0.25, 0.5, 1, 2, 4]);
+gui.add(params, 'tileBorder');
 gui.onChange(render);
 
 ///////////////////////////////////////////////////////////////
 // RENDER
-
-let layer: VectorTileLayer;
 
 function render() {
   const source = vectorTableSource({
@@ -71,23 +73,53 @@ function render() {
     tileResolution: params.tileResolution
   });
 
-  layer = new VectorTileLayer({
-    id: 'roads',
-    data: source as any,
-    tileSize: params.tileSize,
-    uniqueIdProperty: 'geoid',
-    pointRadiusUnits: 'pixels',
-    lineWidthUnits: 'pixels',
-    lineWidthMinPixels: 2,
-    stroked: true,
-    filled: true,
-    pickable: false,
-  });
+  const layers = [
+    // data
+    new VectorTileLayer({
+      id: 'roads',
+      data: source as any,
+      tileSize: params.tileSize,
+      uniqueIdProperty: 'geoid',
+      pointRadiusUnits: 'pixels',
+      lineWidthUnits: 'pixels',
+      lineWidthMinPixels: 2,
+      stroked: true,
+      filled: true,
+      pickable: false,
+    }),
+    // borders
+    params.tileBorder && new TileLayer({
+      tileSize: params.tileSize,
+      renderSubLayers: props => {
+        const {boundingBox: [min, max]} = props.tile;
+        const [west, south] = min;
+        const [east, north] = max;
+        return [
+            new PathLayer({
+              id: `${props.id}-border`,
+              data: [
+                [
+                  [west, north],
+                  [west, south],
+                  [east, south],
+                  [east, north],
+                  [west, north]
+                ]
+              ],
+              getPath: d => d,
+              getColor: [155, 155, 155],
+              widthMinPixels: 2
+            })
+        ];
+      }
+    })
+  ];
 
-  deck.setProps({ layers: [layer] });
+  deck.setProps({ layers });
 
   searchParams.set('tileSize', params.tileSize + '');
   searchParams.set('tileResolution', params.tileResolution + '');
+  searchParams.set('tileBorder', params.tileBorder ? '1' : '0');
   history.replaceState(null, '', location.pathname + '?' + searchParams.toString())
 }
 
