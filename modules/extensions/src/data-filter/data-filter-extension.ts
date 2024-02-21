@@ -325,11 +325,17 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
    * `filterCategories` prop. The mapping between categories and bit in the bitmask
    * is performed by `_getCategoryKey()`
    */
-  _updateCategoryBitMask(this: Layer<DataFilterExtensionProps>, params: any, extension: this) : void {
+  _updateCategoryBitMask(
+    this: Layer<DataFilterExtensionProps>,
+    params: any,
+    extension: this
+  ): void {
     const {categorySize} = extension.opts;
     const {filterCategories} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
-    const categoryFilters = (categorySize === 1 ? [filterCategories] : filterCategories) as FilterCategory[][];
+    const categoryFilters = (
+      categorySize === 1 ? [filterCategories] : filterCategories
+    ) as FilterCategory[][];
     const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
     for (let c = 0; c < categoryFilters.length; c++) {
       const categoryFilter = categoryFilters[c];
@@ -352,7 +358,11 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
    * Returns an index of bit in the bitmask for a given category. If the category has
    * not yet been assigned a bit, a new one is assigned.
    */
-  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: FilterCategory, channel: number) {
+  _getCategoryKey(
+    this: Layer<DataFilterExtensionProps>,
+    category: FilterCategory,
+    channel: number
+  ) {
     const categoryMap = (this.state.categoryMap as Record<FilterCategory, number>[])[channel];
     if (!(category in categoryMap)) {
       categoryMap[category] = Object.keys(categoryMap).length;

@@ -50,7 +50,7 @@ export function featureGrid(N, bbox): GeoJSON {
     }
   }
 
-  return {type: "FeatureCollection", features};
+  return {type: 'FeatureCollection', features};
 }
 
 function pickRandom(obj) {

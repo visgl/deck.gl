@@ -38,7 +38,7 @@ type RootState = {
   labels: Record<string, boolean>;
   oddeven: Record<string, boolean>;
   sizes: Record<string, number>;
-}
+};
 
 class Root extends Component<any, RootState> {
   constructor(props) {
