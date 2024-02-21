@@ -83,6 +83,63 @@ test('DataFilterExtension', t => {
   t.end();
 });
 
+test('DataFilterExtension#categories', t => {
+  const data = [
+    {position: [-122.453, 37.782], field1: 'a', field2: 7},
+    {position: [-122.454, 37.781], field1: 'b', field2: 8}
+  ];
+  const testCases = [
+    {
+      props: {
+        data,
+        extensions: [new DataFilterExtension({categorySize: 2})],
+        getPosition: d => d.position,
+        getFilterCategory: d => [d.field1, d.field2],
+        filterCategories: [['a'], [8]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 0, 0, 2 ** 1, 0],
+          'has correct uniforms'
+        );
+      }
+    },
+    {
+      updateProps: {
+        filterCategories: [['b', 'c'], []]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 1 + 2 ** 2, 0, 0, 0],
+          'has correct uniforms'
+        );
+      }
+    },
+    {
+      updateProps: {
+        data: [...data],
+        filterCategories: [['d'], [5]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model.program;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 2, 0, 2 ** 2, 0],
+          'has correct uniforms'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
 

@@ -71,6 +71,7 @@ new DataFilterExtension({filterSize, fp64});
 ```
 
 * `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
+* `categorySize` (Number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Default `1`.
 * `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
 * `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
@@ -153,6 +154,63 @@ Format:
 * If `filterSize` is `1`: `[softMin, softMax]`
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
+##### `getFilterCategory` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
+
+* Default: `0`
+
+Called to retrieve the category for each object that it will be filtered by. Returns either a category as a number or string (if `categorySize: 1`) or an array.
+
+For example, consider data in the following format:
+
+```json
+[
+  {"industry": "retail", "coordinates": [-122.45, 37.78], "size": 10},
+  ...
+]
+```
+
+To filter by industry:
+
+```js
+new ScatterplotLayer({
+  data,
+  getPosition: d => d.coordinates,
+  getFilterCategory: d => d.industry,
+  filterCategories: ['retail', 'health'],
+  extensions: [new DataFilterExtension({categorySize: 1})]
+})
+```
+
+To filter by both industry and size:
+
+```js
+new ScatterplotLayer({
+  data,
+  getPosition: d => d.coordinates,
+  getFilterCategory: d => [d.industry, d.size],
+  filterCategories: [['retail', 'health'], [10, 20, 50]],
+  extensions: [new DataFilterExtension({categorySize: 2})]
+})
+```
+
+##### `filterCategories` (Array, optional) {#filtercategories}
+
+* Default: `[0]`
+
+The list of categories that should be rendered. If an object's filtered category is in the list, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
+
+Format:
+
+* If `categorySize` is `1`: `['category1', 'category2']`
+* If `categorySize` is `2` to `4`: `[['category1', 'category2', ...], ['category3', ...], ...]` for each filtered property, respectively.
+
+The maximum number of supported is determined by the `categorySize`:
+
+- If `categorySize` is `1`: 128 categories
+- If `categorySize` is `2`: 64 categories per dimension
+- If `categorySize` is `3` or `4`: 32 categories per dimension
+
+If this value is exceeded any categories beyond the limit will be ignored.
 
 ##### `filterTransformSize` (Boolean, optional) {#filtertransformsize}
 

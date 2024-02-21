@@ -2,7 +2,6 @@
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {scaleLog} from 'd3-scale';
-import GL from '@luma.gl/constants';
 
 import mapStyle from './map-style';
 
@@ -58,7 +57,10 @@ export async function renderToDOM(container, options = {}) {
   const overlay = new DeckOverlay({
     parameters: {
       // Additive blending
-      blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE, GL.ONE_MINUS_SRC_ALPHA]
+      blendColorSrcFactor: 'src-alpha',
+      blendColorDstFactor: 'one',
+      blendAlphaSrcFactor: 'one',
+      blendAlphaDstFactor: 'one-minus-dst-alpha'
     },
     layers: renderLayers(options),
     getTooltip
