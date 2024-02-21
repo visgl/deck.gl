@@ -39,6 +39,8 @@ const defaultProps = {
   filterTransformColor: true
 };
 
+type FilterCategory = number | string;
+
 export type DataFilterExtensionProps<DataT = any> = {
   /**
    * Accessor to retrieve the value for each object that it will be filtered by.
@@ -46,10 +48,10 @@ export type DataFilterExtensionProps<DataT = any> = {
    */
   getFilterValue?: Accessor<DataT, number | number[]>;
   /**
-   * Accessor to retrieve the category for each object that it will be filtered by.
-   * Returns either a number (if `filterSize: 1`) or an array of numbers.
+   * Accessor to retrieve the category (`number | string`) for each object that it will be filtered by.
+   * Returns either a single category (if `filterSize: 1`) or an array of categories.
    */
-  getFilterCategory?: Accessor<DataT, number | number[]>;
+  getFilterCategory?: Accessor<DataT, FilterCategory | FilterCategory[]>;
   /**
    * Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
    * @default true
@@ -81,7 +83,7 @@ export type DataFilterExtensionProps<DataT = any> = {
    * The categories which define whether an object should be rendered.
    * @default []
    */
-  filterCategories: [number, number] | [number, number][];
+  filterCategories: FilterCategory[] | FilterCategory[][];
   /**
    * Only called if the `countItems` option is enabled.
    */
@@ -336,7 +338,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     const {categorySize} = extension.opts;
     const {filterCategories} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
-    const categoryFilters = (categorySize === 1 ? [filterCategories] : filterCategories) as any[][];
+    const categoryFilters = (categorySize === 1 ? [filterCategories] : filterCategories) as FilterCategory[][];
     const maxCategories = categorySize === 1 ? 128 : categorySize === 2 ? 64 : 32;
     for (let c = 0; c < categoryFilters.length; c++) {
       const categoryFilter = categoryFilters[c];
@@ -355,8 +357,8 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     this.state.categoryBitMaskNeedsUpdate = false;
   }
 
-  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: any, channel: number) {
-    const categoryMap = (this.state.categoryMap as Record<any, number>[])[channel];
+  _getCategoryKey(this: Layer<DataFilterExtensionProps>, category: FilterCategory, channel: number) {
+    const categoryMap = (this.state.categoryMap as Record<FilterCategory, number>[])[channel];
     if (!(category in categoryMap)) {
       categoryMap[category] = Object.keys(categoryMap).length;
     }
