@@ -53,14 +53,30 @@ const searchParams = new URLSearchParams(location.search);
 const params = { 
   tileSize: Number(searchParams.get('tileSize')) || 1024,
   tileResolution: Number(searchParams.get('tileResolution')) || 1,
+  tileResolutionLocked: searchParams.has('tileResolutionLocked') ? Boolean(Number(searchParams.get('tileResolutionLocked'))) :  true,
   tileBorder: searchParams.has('tileBorder') ? Boolean(Number(searchParams.get('tileBorder'))) : true,
 };
 
 const gui = new GUI({width: 150});
-gui.add(params, 'tileSize', [128, 256, 512, 1024, 2048]);
-gui.add(params, 'tileResolution', [0.25, 0.5, 1, 2, 4]);
-gui.add(params, 'tileBorder');
-gui.onChange(render);
+const tileSizeCtrl = gui.add(params, 'tileSize', [256, 512, 1024, 2048, 4096]);
+const tileResCtrl = gui.add(params, 'tileResolution', [0.25, 0.5, 1, 2, 4]).name('tileRes').enable(!params.tileResolutionLocked).listen();
+const tileResLockCtrl = gui.add(params, 'tileResolutionLocked').name('tileResLock');
+const tileBorderCtrl = gui.add(params, 'tileBorder');
+
+tileSizeCtrl.onChange(() => {
+  params.tileResolution = params.tileSize / 1024;
+});
+
+tileResLockCtrl.onChange(() => {
+  tileResCtrl.enable(!params.tileResolutionLocked);
+  params.tileResolution = params.tileSize / 1024;
+});
+
+let timeout = -1;
+gui.onChange(() => {
+  clearTimeout(timeout);
+  timeout = setTimeout(render, 250) as unknown as number;
+});
 
 ///////////////////////////////////////////////////////////////
 // RENDER
@@ -119,6 +135,7 @@ function render() {
 
   searchParams.set('tileSize', params.tileSize + '');
   searchParams.set('tileResolution', params.tileResolution + '');
+  searchParams.set('tileResolutionLocked', params.tileResolutionLocked ? '1' : '0');
   searchParams.set('tileBorder', params.tileBorder ? '1' : '0');
   history.replaceState(null, '', location.pathname + '?' + searchParams.toString())
 }
