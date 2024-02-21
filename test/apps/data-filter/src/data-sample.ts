@@ -1,3 +1,5 @@
+import type {GeoJSON, Feature} from 'geojson';
+
 export const SHAPE_NAMES = {
   3: 'triangle',
   4: 'square',
@@ -25,7 +27,7 @@ export const SIZES = {
 };
 
 // generate points in a grid
-export function featureGrid(N, bbox) {
+export function featureGrid(N, bbox): GeoJSON {
   const dLon = bbox[2] - bbox[0];
   const dLat = bbox[3] - bbox[1];
   const aspectRatio = dLon / dLat;
@@ -36,7 +38,7 @@ export function featureGrid(N, bbox) {
   const stepY = dLat / sizeY;
   const radius = Math.min(stepX, stepY) / 4;
 
-  const features = Array(sizeX * sizeY);
+  const features: Feature[] = Array(sizeX * sizeY);
   let index = 0;
 
   for (let x = 0; x < sizeX; x++) {
@@ -48,7 +50,7 @@ export function featureGrid(N, bbox) {
     }
   }
 
-  return features;
+  return {type: "FeatureCollection", features};
 }
 
 function pickRandom(obj) {
@@ -57,7 +59,7 @@ function pickRandom(obj) {
   return keys[n];
 }
 
-function getPointFeature(coordinates, radius) {
+function getPointFeature(coordinates, radius): Feature {
   return {
     type: 'Feature',
     geometry: {type: 'Point', coordinates},
@@ -72,11 +74,11 @@ function getPointFeature(coordinates, radius) {
   };
 }
 
-function getPolygonFeature(centroid, radius) {
+function getPolygonFeature(centroid, radius): Feature {
   const sides = Math.round(Math.random() * 9 + 3);
   const size = pickRandom(SIZES);
 
-  const vertices = [];
+  const vertices: [number, number][] = [];
   for (let i = 0; i < sides; i++) {
     const angle = (i / sides) * 2 * Math.PI;
     vertices.push([

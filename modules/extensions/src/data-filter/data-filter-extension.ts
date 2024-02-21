@@ -100,22 +100,22 @@ type DataFilterExtensionOptions = {
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object.
    * @default 1
    */
-  categorySize: 1 | 2 | 3 | 4;
+  categorySize?: 1 | 2 | 3 | 4;
   /**
    * The size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object.
    * @default 1
    */
-  filterSize: 1 | 2 | 3 | 4;
+  filterSize?: 1 | 2 | 3 | 4;
   /**
    * Use 64-bit precision instead of 32-bit.
    * @default false
    */
-  fp64: boolean;
+  fp64?: boolean;
   /**
    * If `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback.
    * @default `false`.
    */
-  countItems: boolean;
+  countItems?: boolean;
 };
 
 const DATA_TYPE_FROM_SIZE = {

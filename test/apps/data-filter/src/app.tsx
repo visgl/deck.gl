@@ -13,7 +13,7 @@ const dataFilterExtension = new DataFilterExtension({
   countItems: true
 });
 
-const INITIAL_VIEW_STATE = {longitude: -122.45, latitude: 37.78, zoom: 12};
+const INITIAL_VIEW_STATE = {longitude: 0, latitude: 0, zoom: 12};
 
 const CONTROLS = {animate: false};
 const LABELS = {};
@@ -23,14 +23,24 @@ for (const shape of Object.values(SHAPE_NAMES)) {
 const ODDEVEN = {odd: true, even: true};
 
 const boxStyle = {
-  position: 'relative',
+  position: 'relative' as const,
   background: 'rgba(255, 255, 255, 0.9)',
   padding: 10,
   margin: 8,
   width: 110
 };
 
-class Root extends Component {
+type RootState = {
+  counts: Record<string, number>;
+  time: number;
+  controls: Record<string, boolean>;
+  colors: Record<string, number[]>;
+  labels: Record<string, boolean>;
+  oddeven: Record<string, boolean>;
+  sizes: Record<string, number>;
+}
+
+class Root extends Component<any, RootState> {
   constructor(props) {
     super(props);
 
@@ -79,13 +89,12 @@ class Root extends Component {
     return [
       new GeoJsonLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: [-122.45, 37.78],
         data: DATA,
 
         // Data accessors
-        getFillColor: f => COLORS[f.properties.color],
+        getFillColor: f => COLORS[f.properties!.color],
         getLineWidth: 10,
-        getPointRadius: f => SIZES[f.properties.size] * f.properties.radius,
+        getPointRadius: f => SIZES[f.properties!.size] * f.properties!.radius,
         getFilterValue: f => f.properties.centroid,
         getFilterCategory: ({properties}) => [
           properties.label,
