@@ -44,6 +44,30 @@ async function createMap(cartoMapId: string) {
 
 // Helper UI for dev
 const examples = [
+  
+  // These CARTO maps should live in the "Public" org (ac_lqe3zwgu) using the carto_dw connection
+
+  // new: vector
+  '3d72c6eb-9486-42ad-8b62-0f78dd9133eb', // Vector - Dynamic Tiling - 500k points fires worldwide
+  '8edfb83d-ede2-480d-bb56-42bba198d214', // Vector - Dynamic Tiling - 6k lines Galapagos contour
+  '542c40c5-2b15-46c7-933b-2586630af6ac', // Vector - Dynamic Tiling - 35k points with multiple labels airports
+  '84c3ad7a-1d46-4fce-a999-2812426c3015', // Vector - Dynamic Tiling - 42k polygons NYC extruded buildings
+  '4f5f8894-b895-460c-809d-769ae4e3fd30', // Vector - Tileset - 362M points COVID vaccination custom palette
+
+  // new: H3
+  '06e3898f-fd5e-40dd-bd33-5cd4104d29ee', // H3 - Dynamic Tiling - 12M Spatial Features USA extruded
+  '8046b5b7-dad4-4b0a-99f1-8e61490b01d4', // H3 — Tileset — 12M Spatial Features USA
+
+  // new: quadbin
+  'abfce395-d9ec-48d4-85ad-45ec7705a921', // Quadbin - Dynamic Tiling - 588k Spatial Features Spain
+  '8ead73bb-aa1f-4bf6-91fc-52a50c682938', // Quadbin — Tileset 14M Spatial Features USA
+
+  // These CARTO maps should live in the "Public" org (ac_lqe3zwgu) using other connections (to test other data warehouses)
+
+    // TO-DO: add examples with SF, RS...
+ 
+  // TO-DO: REMOVE BEFORE MERGING (and remove new from comments above)
+
   // Spatial index layers
   '202252d8-5647-424a-9317-9e392be59d65', // dynamic spatial index
   '907ee05f-b05c-4784-8226-c59e34773be5', // dynamic tiling
