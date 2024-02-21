@@ -5,7 +5,6 @@ import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  vectorTableSource,
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
@@ -91,8 +90,7 @@ function useBoundaryLayer(datasource) {
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor
@@ -159,8 +157,7 @@ function useVectorLayer(datasource) {
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor

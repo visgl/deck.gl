@@ -114,6 +114,12 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     hoveredFeatureLayerName: string | null;
   };
 
+  constructor(...propObjects: MVTLayerProps[]) {
+    // Force externally visible props type, as it is not possible modify via extension
+    // @ts-ignore
+    super(...propObjects);
+  }
+
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
