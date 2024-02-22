@@ -66,8 +66,8 @@ npm install deck.gl
 pip install pydeck
 ```
 
-- [Get started](https://pydeck.gl/installation.html)
-- [Examples](https://pydeck.gl/)
+- [Get started](https://deckgl.readthedocs.io/en/latest/installation.html)
+- [Examples](https://deckgl.readthedocs.io/en/latest/layer.html)
 
 ### Third-Party Goodies
 
