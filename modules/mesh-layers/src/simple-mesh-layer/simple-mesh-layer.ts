@@ -32,7 +32,7 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
 import {GL} from '@luma.gl/constants';
@@ -119,7 +119,7 @@ type _SimpleMeshLayerProps<DataT> = {
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -207,7 +207,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   // 4x4 matrix
   getTransformMatrix: {type: 'accessor', value: []},
 
-  textureParameters: {type: 'object', ignore: true}
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render a number of instances of an arbitrary 3D geometry. */
