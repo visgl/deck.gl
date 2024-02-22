@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 
@@ -107,7 +107,7 @@ type _IconLayerProps<DataT> = {
   onIconError?: ((context: LoadIconErrorContext) => void) | null;
 
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 };
 
 export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
@@ -133,7 +133,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
 
   onIconError: {type: 'function', value: null, optional: true},
 
-  textureParameters: {type: 'object', ignore: true}
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render raster icons at given coordinates. */
