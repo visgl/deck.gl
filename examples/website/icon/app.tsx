@@ -3,7 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import DeckGL from '@deck.gl/react';
-import {MapView} from '@deck.gl/core';
+import {MapView, PickingInfo} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
@@ -24,7 +24,10 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function renderTooltip(info) {
+function renderTooltip(info: PickingInfo & {objects: any} | null) {
+  if (!info?.object) {
+    return null;
+  }
   const {object, x, y} = info;
 
   if (info.objects) {
@@ -42,10 +45,6 @@ function renderTooltip(info) {
         })}
       </div>
     );
-  }
-
-  if (!object) {
-    return null;
   }
 
   return object.cluster ? (
@@ -67,27 +66,30 @@ export default function App({
   showCluster = true,
   mapStyle = MAP_STYLE
 }) {
-  const [hoverInfo, setHoverInfo] = useState({});
+  const [hoverInfo, setHoverInfo] = useState<PickingInfo | null>(null);
 
   const hideTooltip = () => {
-    setHoverInfo({});
+    setHoverInfo(null);
   };
   const expandTooltip = info => {
     if (info.picked && showCluster) {
       setHoverInfo(info);
     } else {
-      setHoverInfo({});
+      setHoverInfo(null);
     }
   };
 
-  const layerProps = {
+  const layerProps: Partial<IconLayer["props"]> = {
     data,
     pickable: true,
     getPosition: d => d.coordinates,
     iconAtlas,
     iconMapping,
-    onHover: !hoverInfo.objects && setHoverInfo
   };
+
+  if (hoverInfo) {
+    layerProps.onHover = setHoverInfo;
+  }
 
   const layer = showCluster
     ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 40})
@@ -99,7 +101,6 @@ export default function App({
         sizeScale: 2000,
         sizeMinPixels: 6
       });
-
   return (
     <DeckGL
       layers={[layer]}
