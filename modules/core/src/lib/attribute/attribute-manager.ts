@@ -23,7 +23,7 @@ import Attribute, {AttributeOptions} from './attribute';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
-import debug from '../../debug';
+import debug from '../../debug/index';
 import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';

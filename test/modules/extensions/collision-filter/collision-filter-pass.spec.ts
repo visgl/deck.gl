@@ -19,14 +19,14 @@ test('CollisionFilterPass#getModuleParameters', t => {
     `CollisionFilterPass has drawToCollisionMap module parameter`
   );
   t.equal(
-    moduleParameters.pickingActive,
+    moduleParameters.picking.isActive,
     1,
-    `CollisionFilterPass has pickingActive module parameter`
+    `CollisionFilterPass has picking.isActive module parameter`
   );
   t.equal(
-    moduleParameters.pickingAttribute,
+    moduleParameters.picking.isAttribute,
     false,
-    `CollisionFilterPass has pickingAttribute module parameter`
+    `CollisionFilterPass has picking.isAttribute module parameter`
   );
   t.deepEqual(
     moduleParameters.lightSources,

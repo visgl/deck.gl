@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import type {ShaderModule} from '@luma.gl/shadertools';
 import project from '../project/project';
-import type {ShaderModule} from '../../types/types';
 
 const vs = `
 vec4 project_position_to_clipspace(

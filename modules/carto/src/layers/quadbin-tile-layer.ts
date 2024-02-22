@@ -1,10 +1,10 @@
 import {CompositeLayer, CompositeLayerProps, Layer, LayersList, DefaultProps} from '@deck.gl/core';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import {hexToBigInt} from 'quadbin';
-import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -16,7 +16,6 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<QuadbinTileLayerProps> = {
-  aggregationResLevel: 6,
   data: TilejsonPropType
 };
 
@@ -25,10 +24,10 @@ export type QuadbinTileLayerProps<DataT = unknown> = _QuadbinTileLayerProps<Data
   CompositeLayerProps;
 
 /** Properties added by QuadbinTileLayer. */
-type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> & {
-  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
-  aggregationResLevel?: number;
-};
+type _QuadbinTileLayerProps<DataT> = Omit<QuadbinLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 export default class QuadbinTileLayer<
   DataT = any,
@@ -39,14 +38,14 @@ export default class QuadbinTileLayer<
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     injectAccessToken(loadOptions, tileJSON.accessToken);
     loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
     return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data, maxresolution: maxZoom} = tileJSON;

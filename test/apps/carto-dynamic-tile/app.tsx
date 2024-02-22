@@ -1,15 +1,14 @@
 /* global document */
 /* eslint-disable no-console */
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {
-  CartoTilejsonResult,
-  cartoVectorTableSource,
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
+  query,
   VectorTileLayer
 } from '@deck.gl/carto';
 import datasets from './datasets';
@@ -30,7 +29,9 @@ function Root() {
   const datasource = datasets[dataset];
   let layers: Layer[] = [];
 
-  if (dataset.includes('h3')) {
+  if (dataset.includes('boundary')) {
+    layers = [useBoundaryLayer(datasource)];
+  } else if (dataset.includes('h3')) {
     layers = [useH3Layer(datasource)];
   } else if (dataset.includes('raster')) {
     layers = [useRasterLayer(datasource)];
@@ -38,6 +39,8 @@ function Root() {
     layers = [useQuadbinLayer(datasource)];
   } else if (dataset.includes('vector')) {
     layers = [useVectorLayer(datasource)];
+  } else {
+    console.error('Unknown type of dataset', dataset);
   }
 
   return (
@@ -66,20 +69,45 @@ function Root() {
   );
 }
 
+function useBoundaryLayer(datasource) {
+  const {
+    getFillColor,
+    source,
+    tilesetTableName,
+    columns,
+    matchingColumn,
+    propertiesSqlQuery,
+    propertiesTableName
+  } = datasource;
+  const tilejson = source({
+    ...globalOptions,
+    tilesetTableName,
+    columns,
+    matchingColumn,
+    propertiesTableName,
+    propertiesSqlQuery
+  });
+
+  return new VectorTileLayer({
+    id: 'carto',
+    data: tilejson,
+    pickable: true,
+    pointRadiusMinPixels: 5,
+    getFillColor
+  });
+}
+
 function useH3Layer(datasource) {
   const {getFillColor, source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} =
     datasource;
-  // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return source({
-      ...globalOptions,
-      aggregationExp,
-      columns,
-      spatialDataColumn,
-      sqlQuery,
-      tableName
-    });
-  }, [source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
+  const tilejson = source({
+    ...globalOptions,
+    aggregationExp,
+    columns,
+    spatialDataColumn,
+    sqlQuery,
+    tableName
+  });
 
   return new H3TileLayer({
     id: 'carto',
@@ -92,10 +120,7 @@ function useH3Layer(datasource) {
 
 function useRasterLayer(datasource) {
   const {getFillColor, source, tableName} = datasource;
-  // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return source({...globalOptions, tableName});
-  }, [source, null, null, null, null, tableName]);
+  const tilejson = source({...globalOptions, tableName});
 
   return new RasterTileLayer({
     id: 'carto',
@@ -108,17 +133,14 @@ function useRasterLayer(datasource) {
 function useQuadbinLayer(datasource) {
   const {getFillColor, source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName} =
     datasource;
-  // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return source({
-      ...globalOptions,
-      aggregationExp,
-      columns,
-      spatialDataColumn,
-      sqlQuery,
-      tableName
-    });
-  }, [source, aggregationExp, columns, spatialDataColumn, sqlQuery, tableName]);
+  const tilejson = source({
+    ...globalOptions,
+    aggregationExp,
+    columns,
+    spatialDataColumn,
+    sqlQuery,
+    tableName
+  });
 
   return new QuadbinTileLayer({
     id: 'carto',
@@ -131,15 +153,11 @@ function useQuadbinLayer(datasource) {
 
 function useVectorLayer(datasource) {
   const {getFillColor, source, columns, spatialDataColumn, sqlQuery, tableName} = datasource;
-  // useMemo to avoid a map instantiation on every re-render
-  const tilejson = useMemo<Promise<CartoTilejsonResult>>(() => {
-    return source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
-  }, [source, null, columns, spatialDataColumn, sqlQuery, tableName]);
+  const tilejson = source({...globalOptions, columns, spatialDataColumn, sqlQuery, tableName});
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor
@@ -147,14 +165,11 @@ function useVectorLayer(datasource) {
 }
 
 async function fetchLayerData() {
-  const data = await cartoVectorTableSource({
+  const data = await query({
     ...globalOptions,
-    tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
-    format: 'geojson'
+    sqlQuery: 'select * from carto-demo-data.demo_tables.chicago_crime_sample'
   });
-  // console.log(data.tiles); // <- Typescript error
-  console.log(data.features); // <- type: GeoJSON
-  console.log(data);
+  console.log(data.rows[0]);
 }
 fetchLayerData();
 

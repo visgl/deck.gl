@@ -1,8 +1,7 @@
 import Viewport from '../viewports/viewport';
 
-import {Matrix4, clamp} from '@math.gl/core';
+import {Matrix4, clamp, vec2} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
-import * as vec2 from 'gl-matrix/vec2';
 
 import type {Padding} from './viewport';
 

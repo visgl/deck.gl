@@ -1,23 +1,23 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoTableSourceOptions, TypedSource} from './common';
+import {baseSource} from './base-source';
+import type {SourceOptions, SpatialDataType, TableSourceOptions, TilejsonResult} from './types';
 
-export type CartoVectorTableSourceOptions = CartoSourceOptions & CartoTableSourceOptions;
-type UrlParameters = {columns?: string; geo_column?: string; name: string};
+export type VectorTableSourceOptions = SourceOptions & TableSourceOptions;
+type UrlParameters = {
+  columns?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
+  name: string;
+};
 
-const cartoVectorTableSource: TypedSource<CartoVectorTableSourceOptions> = async function (
-  options: CartoVectorTableSourceOptions
-): Promise<any> {
-  const {columns, spatialDataColumn, tableName} = options;
-  const urlParameters: UrlParameters = {name: tableName};
+export const vectorTableSource = async function (
+  options: VectorTableSourceOptions
+): Promise<TilejsonResult> {
+  const {columns, spatialDataColumn = 'geom', tableName} = options;
+  const urlParameters: UrlParameters = {name: tableName, spatialDataColumn, spatialDataType: 'geo'};
 
   if (columns) {
     urlParameters.columns = columns.join(',');
   }
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
-  return cartoBaseSource<UrlParameters>('table', options, urlParameters);
+  return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {cartoVectorTableSource};
