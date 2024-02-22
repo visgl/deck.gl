@@ -1,16 +1,14 @@
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoTilesetSourceOptions, TilejsonSource} from './common';
+import {baseSource} from './base-source';
+import type {SourceOptions, TilejsonResult, TilesetSourceOptions} from './types';
 
-export type CartoQuadbinTilesetSourceOptions = CartoSourceOptions & CartoTilesetSourceOptions;
+export type QuadbinTilesetSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const cartoQuadbinTilesetSource: TilejsonSource<CartoQuadbinTilesetSourceOptions> = async function (
-  options: CartoQuadbinTilesetSourceOptions
-): Promise<any> {
+export const quadbinTilesetSource = async function (
+  options: QuadbinTilesetSourceOptions
+): Promise<TilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return cartoBaseSource<UrlParameters>('tileset', options, urlParameters);
+  return baseSource<UrlParameters>('tileset', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {cartoQuadbinTilesetSource};

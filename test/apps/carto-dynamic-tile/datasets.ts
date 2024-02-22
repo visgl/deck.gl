@@ -1,20 +1,47 @@
 import {
-  cartoH3TilesetSource,
-  cartoH3TableSource,
-  cartoH3QuerySource,
-  cartoRasterSource,
-  cartoQuadbinTableSource,
-  cartoQuadbinTilesetSource,
-  cartoQuadbinQuerySource,
-  cartoVectorTableSource,
-  cartoVectorTilesetSource,
-  cartoVectorQuerySource,
+  boundaryQuerySource,
+  boundaryTableSource,
+  h3TilesetSource,
+  h3TableSource,
+  h3QuerySource,
+  rasterSource,
+  quadbinTableSource,
+  quadbinTilesetSource,
+  quadbinQuerySource,
+  vectorTableSource,
+  vectorTilesetSource,
+  vectorQuerySource,
   colorBins
 } from '@deck.gl/carto';
 
 export default {
+  'boundary-query': {
+    source: boundaryQuerySource,
+    tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
+    matchingColumn: 'geoid',
+    propertiesSqlQuery:
+      'select * from `cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered`',
+    getFillColor: colorBins({
+      // TODO remove parseFloat, only needed as binary format encodes as strings
+      attr: d => parseFloat(d!.properties!['do_perimeter']),
+      domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
+      colors: 'Peach'
+    })
+  },
+  'boundary-table': {
+    source: boundaryTableSource,
+    tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
+    matchingColumn: 'geoid',
+    columns: ['do_label', 'do_perimeter'],
+    propertiesTableName: 'cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered',
+    getFillColor: colorBins({
+      attr: d => parseFloat(d!.properties!['do_perimeter']),
+      domain: [0, 1, 5, 10, 25, 50, 100].map(n => 10000 * n),
+      colors: 'Purp'
+    })
+  },
   'h3-query': {
-    source: cartoH3QuerySource,
+    source: h3QuerySource,
     sqlQuery:
       'select h3, population from carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
     aggregationExp: 'min(population) as population_min',
@@ -25,7 +52,7 @@ export default {
     })
   },
   'h3-table': {
-    source: cartoH3TableSource,
+    source: h3TableSource,
     tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2',
     aggregationExp: 'avg(population) as population_average',
     getFillColor: colorBins({
@@ -35,7 +62,7 @@ export default {
     })
   },
   'h3-tileset': {
-    source: cartoH3TilesetSource,
+    source: h3TilesetSource,
     tableName:
       'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_h3res8_v1_yearly_v2_tileset',
     getFillColor: colorBins({
@@ -45,7 +72,7 @@ export default {
     })
   },
   'quadbin-query': {
-    source: cartoQuadbinQuerySource,
+    source: quadbinQuerySource,
     sqlQuery:
       'select quadbin, population from carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
     aggregationExp: 'min(population) as population_min',
@@ -56,7 +83,7 @@ export default {
     })
   },
   'quadbin-table': {
-    source: cartoQuadbinTableSource,
+    source: quadbinTableSource,
     tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2',
     aggregationExp: 'avg(population) as population_average',
     getFillColor: colorBins({
@@ -66,7 +93,7 @@ export default {
     })
   },
   'quadbin-tileset': {
-    source: cartoQuadbinTilesetSource,
+    source: quadbinTilesetSource,
     tableName:
       'carto-demo-data.demo_tilesets.derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset',
     getFillColor: colorBins({
@@ -76,7 +103,7 @@ export default {
     })
   },
   raster: {
-    source: cartoRasterSource,
+    source: rasterSource,
     tableName: 'cartodb-data-engineering-team.jarroyo_raster.sdsc23_5_quadbin',
     getFillColor: colorBins({
       attr: 'band_1',
@@ -85,13 +112,13 @@ export default {
     })
   },
   'vector-query': {
-    source: cartoVectorQuerySource,
+    source: vectorQuerySource,
     sqlQuery:
       'select geom, district from carto-demo-data.demo_tables.chicago_crime_sample where year > 2016',
     getFillColor: [255, 0, 0]
   },
   'vector-table': {
-    source: cartoVectorTableSource,
+    source: vectorTableSource,
     tableName: 'carto-demo-data.demo_tables.chicago_crime_sample',
     columns: ['date', 'year'],
     getFillColor: colorBins({
@@ -101,13 +128,13 @@ export default {
     })
   },
   'vector-table-dynamic': {
-    source: cartoVectorTableSource,
+    source: vectorTableSource,
     tableName: 'carto-demo-data.demo_tables.osm_buildings_usa',
     spatialDataColumn: 'geog',
     getFillColor: [131, 44, 247]
   },
   'vector-tileset': {
-    source: cartoVectorTilesetSource,
+    source: vectorTilesetSource,
     tableName: 'carto-demo-data.demo_tilesets.sociodemographics_usa_blockgroup',
     getFillColor: colorBins({
       attr: 'income_per_capita',

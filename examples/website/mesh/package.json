@@ -9,8 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/obj": "^3.4.13",
-    "@math.gl/core": "4.0.0-alpha.4",
+    "@loaders.gl/obj": "^4.1.0",
+    "@math.gl/core": "^4.0.0",
     "deck.gl": "^8.8.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

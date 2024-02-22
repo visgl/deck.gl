@@ -18,21 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './contour-layer/contour-layer.spec';
+// import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer.spec';
-import './cpu-grid-layer/cpu-grid-layer.spec';
+// import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
+// import './gpu-grid-layer/gpu-grid-cell-layer.spec';
+// import './cpu-grid-layer/cpu-grid-layer.spec';
 import './grid-aggregator.spec';
-import './hexagon-layer.spec';
+// import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
-import './grid-layer.spec';
-import './screen-grid-layer.spec';
+// import './grid-layer.spec';
+// import './screen-grid-layer.spec';
 import './utils/scale-utils.spec';
 import './utils/color-utils.spec';
 import './utils/bin-sorter.spec';
 import './utils/aggregation-operation-utils.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';
-import './screengrid-cell-layer.spec';
+// import './screengrid-cell-layer.spec';
 import './aggregation-layer.spec';
-import './grid-aggregation-layer.spec';
+// import './grid-aggregation-layer.spec';

@@ -23,6 +23,7 @@ export type LayersPassRenderOptions = {
   /** If true, recalculates render index (z) from 0. Set to false if a stack of layers are rendered in multiple passes. */
   clearStack?: boolean;
   clearCanvas?: boolean;
+  clearColor?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
@@ -65,7 +66,7 @@ export default class LayersPass extends Pass {
         viewport: [0, 0, width, height]
       },
       // clear depth and color buffers, restoring transparency
-      clearColor: options.clearCanvas ? [0, 0, 0, 0] : undefined,
+      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
       clearDepth: options.clearCanvas ? 1 : undefined
     });
 
@@ -84,8 +85,7 @@ export default class LayersPass extends Pass {
       viewports,
       views,
       onViewportActive,
-      clearStack = true,
-      clearCanvas = true
+      clearStack = true
     } = options;
     options.pass = options.pass || 'unknown';
 
@@ -337,7 +337,9 @@ export default class LayersPass extends Pass {
         autoWrapLongitude: layer.wrapLongitude,
         viewport: layer.context.viewport,
         mousePosition: layer.context.mousePosition,
-        pickingActive: 0,
+        picking: {
+          isActive: 0
+        },
         devicePixelRatio
       }
     );

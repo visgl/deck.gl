@@ -1,16 +1,12 @@
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoTilesetSourceOptions, TypedSource} from './common';
+import {baseSource} from './base-source';
+import type {SourceOptions, TilejsonResult, TilesetSourceOptions} from './types';
 
-export type CartoRasterSourceOptions = CartoSourceOptions & CartoTilesetSourceOptions;
+export type RasterSourceOptions = SourceOptions & TilesetSourceOptions;
 type UrlParameters = {name: string};
 
-const cartoRasterSource: TypedSource<CartoRasterSourceOptions> = async function (
-  options: CartoRasterSourceOptions
-): Promise<any> {
+export const rasterSource = async function (options: RasterSourceOptions): Promise<TilejsonResult> {
   const {tableName} = options;
   const urlParameters: UrlParameters = {name: tableName};
 
-  return cartoBaseSource<UrlParameters>('raster', options, urlParameters);
+  return baseSource<UrlParameters>('raster', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {cartoRasterSource};

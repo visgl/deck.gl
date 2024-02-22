@@ -15,8 +15,8 @@ test('path-layer-vertex#flipIfTrue', t => {
 
   const inject = {
     'vs:#decl': `
-attribute float inFlag;
-varying float result;
+in float inFlag;
+out float result;
 `,
     'vs:#main-start': '  if (true) { result = flipIfTrue(bool(inFlag)); } else {\n',
     'vs:#main-end': '  }\n'

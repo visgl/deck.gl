@@ -1,6 +1,3 @@
-import {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
-
 export function getBounds(points: number[][]): number[] {
   // Now build bounding box in world space (aligned to world coordiante system)
   const x = points.map(p => p[0]);
@@ -76,24 +73,4 @@ export function scaleToAspectRatio(boundingBox: number[], width: number, height:
 export function getTextureCoordinates(point: number[], bounds: number[]) {
   const [xMin, yMin, xMax, yMax] = bounds;
   return [(point[0] - xMin) / (xMax - xMin), (point[1] - yMin) / (yMax - yMin)];
-}
-
-// Returns format and type for creating texture objects
-export function getTextureParams({
-  device,
-  floatTargetSupport
-}: {
-  device: Device;
-  floatTargetSupport?: boolean;
-}) {
-  return floatTargetSupport
-    ? {
-        // format:  should be RGBA32F on WebGL2 (float textures), RGBA in WebGL1 for float or non float textures
-        format: device.info.type === 'webgl2' ? GL.RGBA32F : GL.RGBA,
-        type: GL.FLOAT
-      }
-    : {
-        format: GL.RGBA,
-        type: GL.UNSIGNED_BYTE
-      };
 }

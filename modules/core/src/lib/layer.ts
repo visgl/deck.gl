@@ -21,7 +21,6 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
-import {withGLParameters, setGLParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -29,7 +28,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import debug from '../debug';
+import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
@@ -55,6 +54,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
+import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -332,10 +332,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
 
+  // TODO deprecate in favour of setShaderModuleProps
   /** Update shader module parameters */
   setModuleParameters(moduleParameters: any): void {
     for (const model of this.getModels()) {
       model.updateModuleSettings(moduleParameters);
+    }
+  }
+
+  /** Update shader input parameters */
+  setShaderModuleProps(...props: Parameters<Model['shaderInputs']['setProps']>): void {
+    for (const model of this.getModels()) {
+      model.shaderInputs.setProps(...props);
     }
   }
 
@@ -783,8 +791,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           } else {
             attributeBuffers[attributeName] = value;
           }
-        } else {
-          constantAttributes[attributeName] = value as TypedArray;
+        } else if (value) {
+          constantAttributes[attributeName] = value;
         }
       }
     }
@@ -837,11 +845,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const start = colors.getVertexOffset(objectIndex);
     const end = colors.getVertexOffset(objectIndex + 1);
 
-    // Fill the sub buffer with 0s
-    colors.buffer.subData({
-      data: new Uint8Array(end - start),
-      offset: start // 1 byte per element
-    });
+    // Fill the sub buffer with 0s, 1 byte per element
+    colors.buffer.write(new Uint8Array(end - start), start);
   }
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
@@ -1056,7 +1061,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
+        const {isActive, isAttribute} = moduleParameters.picking;
         this.setModuleParameters(moduleParameters);
+        this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
 
       // Apply polygon offset to avoid z-fighting
@@ -1064,10 +1071,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setGLParameters(context.device, {polygonOffset: offsets});
+      context.device.setParametersWebGL({polygonOffset: offsets});
 
       // Call subclass lifecycle method
-      withGLParameters(context.gl, parameters, () => {
+      context.device.withParametersWebGL(parameters, () => {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions
@@ -1205,15 +1212,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // TODO - simplify subclassing interface
   /** Update picking module parameters to highlight the hovered object */
   protected _updateAutoHighlight(info: PickingInfo): void {
-    const pickingModuleParameters: any = {
-      pickingSelectedColor: info.picked ? info.color : null
+    const picking: PickingProps = {
+      highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
     if (info.picked && typeof highlightColor === 'function') {
-      pickingModuleParameters.pickingHighlightColor = highlightColor(info);
+      picking.highlightColor = highlightColor(info);
     }
-    this.setModuleParameters(pickingModuleParameters);
-    // setModuleParameters does not trigger redraw
+    this.setShaderModuleProps({picking});
+    // setShaderModuleProps does not trigger redraw
     this.setNeedsRedraw();
   }
 
@@ -1249,24 +1256,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor
     ) {
-      const parameters: any = {};
+      const picking: PickingProps = {};
       if (!autoHighlight) {
-        parameters.pickingSelectedColor = null;
+        picking.highlightedObjectColor = null;
       }
       if (Array.isArray(highlightColor)) {
-        parameters.pickingHighlightColor = highlightColor;
+        picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
       if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
-        parameters.pickingSelectedColor =
+        picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
             : null;
       }
 
-      this.setModuleParameters(parameters);
+      this.setShaderModuleProps({picking});
     }
   }
 

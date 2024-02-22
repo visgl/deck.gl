@@ -1,28 +1,24 @@
 import {registerLoaders} from '@loaders.gl/core';
-import {DefaultProps, UpdateParameters} from '@deck.gl/core';
+import {DefaultProps} from '@deck.gl/core';
 import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
 registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
-import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
+import {TileLayer, _Tile2DHeader as Tile2DHeader, TileLayerProps} from '@deck.gl/geo-layers';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {
-  aggregationResLevel: 4
-};
+const defaultProps: DefaultProps<SpatialIndexTileLayerProps> = {};
 
 /** All properties supported by SpatialIndexTileLayer. */
 export type SpatialIndexTileLayerProps<DataT = unknown> = _SpatialIndexTileLayerProps &
-  TileLayer<DataT>;
+  TileLayerProps<DataT>;
 
 /** Properties added by SpatialIndexTileLayer. */
-type _SpatialIndexTileLayerProps = {
-  aggregationResLevel?: number;
-};
+type _SpatialIndexTileLayerProps = {};
 
 export default class SpatialIndexTileLayer<
   DataT = any,
@@ -32,24 +28,14 @@ export default class SpatialIndexTileLayer<
   static defaultProps = defaultProps;
 
   state!: TileLayer<DataT>['state'] & {
-    hoveredFeatureId: number | null;
+    hoveredFeatureId: BigInt | number | null;
     highlightColor: number[];
   };
-
-  updateState(params: UpdateParameters<this>) {
-    const {props, oldProps} = params;
-    if (props.aggregationResLevel !== oldProps.aggregationResLevel) {
-      // Tileset cache is invalid when resLevel changes
-      this.setState({tileset: null});
-    }
-
-    super.updateState(params);
-  }
 
   protected _updateAutoHighlight(info: PickingInfo): void {
     const {hoveredFeatureId} = this.state;
     const hoveredFeature = info.object;
-    let newHoveredFeatureId;
+    let newHoveredFeatureId: BigInt | number | null = null;
 
     if (hoveredFeature) {
       newHoveredFeatureId = hoveredFeature.id;
@@ -93,6 +79,7 @@ export default class SpatialIndexTileLayer<
   }
 
   _featureInTile(tile: Tile2DHeader, featureId: BigInt | number) {
+    // TODO: Tile2DHeader index should be generic for H3TileIndex or QuadbinTileIndex
     const tileset = this.state.tileset!;
     const tileZoom = tileset.getTileZoom(tile.index);
     // @ts-ignore

@@ -1,46 +1,46 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {
-  CartoAggregationOptions,
-  CartoQuerySourceOptions,
-  CartoSourceOptions,
-  TilejsonSource
-} from './common';
+import {baseSource} from './base-source';
+import type {
+  AggregationOptions,
+  QuerySourceOptions,
+  SourceOptions,
+  SpatialDataType,
+  TilejsonResult
+} from './types';
 
-export type CartoQuadbinQuerySourceOptions = CartoSourceOptions &
-  CartoQuerySourceOptions &
-  CartoAggregationOptions;
+export type QuadbinQuerySourceOptions = SourceOptions & QuerySourceOptions & AggregationOptions;
 
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
-  geo_column?: string;
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
   q: string;
   queryParameters?: string;
 };
 
-const cartoQuadbinQuerySource: TilejsonSource<CartoQuadbinQuerySourceOptions> = async function (
-  options: CartoQuadbinQuerySourceOptions
-): Promise<any> {
+export const quadbinQuerySource = async function (
+  options: QuadbinQuerySourceOptions
+): Promise<TilejsonResult> {
   const {
     aggregationExp,
     aggregationResLevel = 6,
     sqlQuery,
-    spatialDataColumn = 'quadbin:quadbin',
+    spatialDataColumn = 'quadbin',
     queryParameters
   } = options;
-  const urlParameters: UrlParameters = {aggregationExp, q: sqlQuery};
+  const urlParameters: UrlParameters = {
+    aggregationExp,
+    q: sqlQuery,
+    spatialDataColumn,
+    spatialDataType: 'quadbin'
+  };
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {cartoQuadbinQuerySource};

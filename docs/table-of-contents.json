@@ -224,9 +224,13 @@
         "label": "@deck.gl/carto",
         "items": [
           "api-reference/carto/overview",
-          "api-reference/carto/fetch-map",
-          "api-reference/carto/carto-layer",
           "api-reference/carto/basemap",
+          "api-reference/carto/fetch-map",
+          "api-reference/carto/data-sources",
+          "api-reference/carto/h3-tile-layer",
+          "api-reference/carto/quadbin-tile-layer",
+          "api-reference/carto/raster-tile-layer",
+          "api-reference/carto/vector-tile-layer",
           "api-reference/carto/styles"
         ]
       },

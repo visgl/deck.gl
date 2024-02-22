@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
-import App, {colorScale} from 'website-examples/ghcn/app';
+import App, {colorScale} from 'website-examples/orthographic/app';
 import {readableInteger} from '../utils/format-utils';
 
 import {makeExample} from '../components';
@@ -13,7 +13,7 @@ class OrthographicViewDemo extends Component {
     worker: '/workers/ghcn-data-decoder.js'
   };
 
-  static code = `${GITHUB_TREE}/examples/website/ghcn`;
+  static code = `${GITHUB_TREE}/examples/website/orthographic`;
 
   static parameters = {
     groupBy: {

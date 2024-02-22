@@ -21,7 +21,7 @@ import BinSorter from './bin-sorter';
 import {getScaleFunctionByScaleType} from './scale-utils';
 import {getValueFunc, wrapGetValueFunc} from './aggregation-operation-utils';
 
-// @eslint-disable-next-line @typescript-eslint/no-empty-function
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const dimensionSteps = ['getBins', 'getDomain', 'getScaleFunc'];

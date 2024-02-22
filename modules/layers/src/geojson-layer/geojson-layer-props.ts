@@ -1,7 +1,7 @@
-import {BinaryAttribute, LayerData, LayerProps} from '@deck.gl/core';
+import {LayerData, LayerProps} from '@deck.gl/core';
 import {PolygonLayerProps, ScatterplotLayerProps} from '..';
 import {calculatePickingColors} from './geojson-binary';
-import {BinaryFeatures} from '@loaders.gl/schema';
+import type {ExtendedBinaryFeatureCollection} from './geojson-binary';
 import {SeparatedGeometries} from './geojson';
 
 // TODO: PathLayer is not yet typed
@@ -12,10 +12,6 @@ export type SubLayersProps = {
   lines: Partial<PathLayerProps>;
   polygons: Partial<PolygonLayerProps>;
   polygonsOutline: Partial<PathLayerProps>;
-};
-
-type ExtendedBinaryFeatures = {
-  [P in keyof BinaryFeatures]: BinaryFeatures[P] & {attributes?: Record<string, BinaryAttribute>};
 };
 
 function createEmptyLayerProps(): SubLayersProps {
@@ -60,8 +56,8 @@ export function createLayerPropsFromFeatures(
 }
 
 export function createLayerPropsFromBinary(
-  geojsonBinary: Required<ExtendedBinaryFeatures>,
-  encodePickingColor
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
+  encodePickingColor: (id: number, result: number[]) => void
 ): SubLayersProps {
   // The binary data format is documented here
   // https://github.com/visgl/loaders.gl/blob/master/modules/gis/docs/api-reference/geojson-to-binary.md

@@ -2,8 +2,7 @@ import {Matrix4} from '@math.gl/core';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 
-import * as vec3 from 'gl-matrix/vec3';
-import * as vec4 from 'gl-matrix/vec4';
+import {vec3, vec4} from '@math.gl/core';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;

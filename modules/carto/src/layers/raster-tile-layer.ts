@@ -1,9 +1,9 @@
 import {CompositeLayer, CompositeLayerProps, DefaultProps, Layer, LayersList} from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
-import SpatialIndexTileLayer from './spatial-index-tile-layer';
-import {TilejsonPropType, CartoTilejsonResult} from '../sources/common';
-import {injectAccessToken} from './utils';
+import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
+import type {TilejsonResult} from '../sources/types';
+import {injectAccessToken, TilejsonPropType} from './utils';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -20,9 +20,10 @@ export type RasterTileLayerProps<DataT = unknown> = _RasterTileLayerProps<DataT>
   CompositeLayerProps;
 
 /** Properties added by RasterTileLayer. */
-type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> & {
-  data: null | CartoTilejsonResult | Promise<CartoTilejsonResult>;
-};
+type _RasterTileLayerProps<DataT> = Omit<RasterLayerProps<DataT>, 'data'> &
+  Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 export default class RasterTileLayer<
   DataT = any,
@@ -33,13 +34,13 @@ export default class RasterTileLayer<
 
   getLoadOptions(): any {
     const loadOptions = super.getLoadOptions() || {};
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     injectAccessToken(loadOptions, tileJSON.accessToken);
     return loadOptions;
   }
 
   renderLayers(): Layer | null | LayersList {
-    const tileJSON = this.props.data as CartoTilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
 
     const {tiles: data, minzoom: minZoom, maxzoom: maxZoom} = tileJSON;

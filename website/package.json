@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "0.0.0",
+  "version": "9.0.0-beta.3",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -11,13 +11,13 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "ts-node ../scripts/write-heading-ids.ts"
+    "write-heading-ids": "node --loader ts-node/esm ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
-    "@loaders.gl/i3s": "^3.4.13",
-    "@loaders.gl/las": "^3.4.13",
-    "@loaders.gl/obj": "^3.4.13",
-    "@loaders.gl/ply": "^3.4.13",
+    "@loaders.gl/i3s": "^4.1.0",
+    "@loaders.gl/las": "^4.1.0",
+    "@loaders.gl/obj": "^4.1.0",
+    "@loaders.gl/ply": "^4.1.0",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -42,6 +42,7 @@
     "@docusaurus/preset-classic": "^2.2.0",
     "@mdx-js/react": "^1.6.22",
     "babel-plugin-styled-components": "^2.0.0",
+    "babel-plugin-remove-glsl-comments": "^1.0.0",
     "prism-react-renderer": "^1.2.1",
     "ts-node": "~10.9.1"
   },

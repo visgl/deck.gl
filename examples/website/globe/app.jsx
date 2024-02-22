@@ -14,7 +14,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 

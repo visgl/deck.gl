@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
@@ -9,7 +9,7 @@ import type {TerrainCover} from './terrain-cover';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
-  pickingActive?: boolean;
+  picking: {isActive?: boolean};
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   dummyHeightMap: Texture;
@@ -47,7 +47,7 @@ export const terrainModule = {
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
 uniform vec4 terrain_bounds;
-varying vec3 commonPos;
+out vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
     'vs:#main-start': `
@@ -69,7 +69,7 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchorCommon = project_position(anchor);
   vec2 texCoords = (anchorCommon.xy - terrain_bounds.xy) / terrain_bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
-    float terrainZ = texture2D(terrain_map, texCoords).r;
+    float terrainZ = texture(terrain_map, texCoords).r;
     geometry.position.z += terrainZ;
     position = project_common_position_to_clipspace(geometry.position);
   }
@@ -79,19 +79,19 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
 uniform vec4 terrain_bounds;
-varying vec3 commonPos;
+in vec3 commonPos;
 ${TERRAIN_MODE_CONSTANTS}
     `,
     'fs:#main-start': `
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  gl_FragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
+  fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
     'fs:DECKGL_FILTER_COLOR': `
 if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
-  vec4 pixel = texture2D(terrain_map, texCoords);
+  vec4 pixel = texture(terrain_map, texCoords);
   if (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY) {
     color = pixel;
   } else {
@@ -130,7 +130,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         bounds = heightMapBounds!;
       } else if (terrainCover) {
         // This is a terrain layer
-        const isPicking = opts.pickingActive;
+        const isPicking = opts.picking?.isActive;
         // @ts-expect-error
         sampler = isPicking
           ? terrainCover.getPickingFramebuffer()

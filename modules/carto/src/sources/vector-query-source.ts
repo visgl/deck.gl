@@ -1,23 +1,23 @@
 /* eslint-disable camelcase */
-import {cartoBaseSource} from './base-source';
-import {CartoSourceOptions, CartoQuerySourceOptions, TypedSource} from './common';
+import {baseSource} from './base-source';
+import type {SourceOptions, QuerySourceOptions, SpatialDataType, TilejsonResult} from './types';
 
-export type CartoVectorQuerySourceOptions = CartoSourceOptions & CartoQuerySourceOptions;
-type UrlParameters = {geo_column?: string; q: string; queryParameters?: string};
+export type VectorQuerySourceOptions = SourceOptions & QuerySourceOptions;
+type UrlParameters = {
+  spatialDataType: SpatialDataType;
+  spatialDataColumn?: string;
+  q: string;
+  queryParameters?: string;
+};
 
-const cartoVectorQuerySource: TypedSource<CartoVectorQuerySourceOptions> = async function (
-  options: CartoVectorQuerySourceOptions
-): Promise<any> {
-  const {spatialDataColumn, sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {q: sqlQuery};
+export const vectorQuerySource = async function (
+  options: VectorQuerySourceOptions
+): Promise<TilejsonResult> {
+  const {spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
+  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
 
-  if (spatialDataColumn) {
-    urlParameters.geo_column = spatialDataColumn;
-  }
   if (queryParameters) {
     urlParameters.queryParameters = JSON.stringify(queryParameters);
   }
-  return cartoBaseSource<UrlParameters>('query', options, urlParameters);
+  return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
-
-export {cartoVectorQuerySource};

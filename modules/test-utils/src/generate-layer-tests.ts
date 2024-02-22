@@ -17,38 +17,60 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {_count as count} from '@deck.gl/core';
+import {_count as count, Layer} from '@deck.gl/core';
 
+import type {DefaultProps} from '@deck.gl/core';
+import type {LayerTestCase, LayerClass} from './lifecycle-test';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
-function defaultAssert(condition, comment) {
+function defaultAssert(condition: any, comment: string): void {
   if (!condition) {
     throw new Error(comment);
   }
 }
 
 // Automatically generate testLayer test cases
-export function generateLayerTests({
+export function generateLayerTests<LayerT extends Layer>({
   Layer,
   sampleProps = {},
   assert = defaultAssert,
   onBeforeUpdate = noop,
   onAfterUpdate = noop,
   runDefaultAsserts = true
-}) {
+}: {
+  Layer: LayerClass<LayerT>;
+  /**
+   * Override default props during the test
+   */
+  sampleProps?: Partial<LayerT['props']>;
+  assert?: (condition: any, comment: string) => void;
+  onBeforeUpdate: LayerTestCase<LayerT>['onBeforeUpdate'];
+  onAfterUpdate: LayerTestCase<LayerT>['onAfterUpdate'];
+
+  /**
+   * Test some typical assumptions after layer updates
+   * For primitive layers, assert that layer has model(s).
+   * For composite layers, assert that layer has sublayer(s).
+   * @default true
+   */
+  runDefaultAsserts?: boolean;
+}): LayerTestCase<LayerT>[] {
   assert(Layer.layerName, 'Layer should have display name');
 
-  function wrapTestCaseTitle(title) {
+  function wrapTestCaseTitle(title: string): string {
     return `${Layer.layerName}#${title}`;
   }
 
-  const testCases = [
+  const testCases: LayerTestCase<LayerT>[] = [
     {
       title: 'Empty props',
       props: {}
     },
     {
       title: 'Null data',
+      // @ts-expect-error null may not be an expected data type
       updateProps: {data: null}
     },
     {
@@ -61,14 +83,15 @@ export function generateLayerTests({
     // Calling constructor for the first time resolves default props
     // eslint-disable-next-line
     new Layer({});
-  } catch (error) {
-    assert(false, `Construct ${Layer.layerName} throws: ${error.message}`);
+  } catch (error: unknown) {
+    assert(false, `Construct ${Layer.layerName} throws: ${(error as Error).message}`);
   }
 
+  //  @ts-expect-error Access hidden properties
   const {_propTypes: propTypes, _mergedDefaultProps: defaultProps} = Layer;
 
   // Test alternative data formats
-  testCases.push(...makeAltDataTestCases(sampleProps, propTypes));
+  testCases.push(...makeAltDataTestCases<LayerT>(sampleProps, propTypes));
 
   for (const propName in Layer.defaultProps) {
     if (!(propName in sampleProps)) {
@@ -112,7 +135,19 @@ export function generateLayerTests({
   return testCases;
 }
 
-function makeAltPropTestCase({propName, propTypes, defaultProps, sampleProps, assert}) {
+function makeAltPropTestCase<LayerT extends Layer>({
+  propName,
+  propTypes,
+  defaultProps,
+  sampleProps,
+  assert
+}: {
+  propName: string;
+  propTypes: DefaultProps<LayerT['props']>;
+  defaultProps: LayerT['props'];
+  sampleProps: Partial<LayerT['props']>;
+  assert: (condition: any, comment: string) => void;
+}): LayerTestCase<LayerT>[] | null {
   const newProps = {...sampleProps};
   const propDef = propTypes[propName];
 
@@ -173,7 +208,7 @@ function makeAltPropTestCase({propName, propTypes, defaultProps, sampleProps, as
             updateTriggers: {
               [propName]: 'function+trigger'
             }
-          },
+          } as Partial<Layer['props']>,
           onBeforeUpdate,
           onAfterUpdate
         }
@@ -185,29 +220,34 @@ function makeAltPropTestCase({propName, propTypes, defaultProps, sampleProps, as
   }
 }
 
-function makeAltDataTestCases(props, propTypes) {
+function makeAltDataTestCases<LayerT extends Layer>(
+  props: Partial<LayerT['props']>,
+  propTypes: DefaultProps<LayerT['props']>
+): LayerTestCase<LayerT>[] {
   const originalData = props.data;
   if (!Array.isArray(originalData)) {
     return [];
   }
   // partial update
-  const partialUpdateProps = {
+  const partialUpdateProps: Partial<Layer['props']> = {
     data: originalData.slice(),
     _dataDiff: () => [{startRow: 0, endRow: 2}]
   };
   // data should support any iterable
-  const genIterableProps = {
+  const genIterableProps: Partial<Layer['props']> = {
     data: new Set(originalData),
     _dataDiff: null
   };
   // data in non-iterable form
-  const nonIterableProps = {
+  const nonIterableProps: Partial<Layer['props']> = {
     data: {
       length: originalData.length
     }
   };
   for (const propName in props) {
+    // @ts-ignore propName cannot be used as index
     if (propTypes[propName].type === 'accessor') {
+      // @ts-ignore propName cannot be used as index
       nonIterableProps[propName] = (_, info) => props[propName](originalData[info.index], info);
     }
   }

@@ -1,8 +1,6 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import type {GLParameters} from '@luma.gl/webgl';
 import type {Framebuffer} from '@luma.gl/core';
-import {withGLParameters} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
+import {GL, GLParameters} from '@luma.gl/constants';
 import log from '../utils/log';
 
 import type Viewport from '../viewports/viewport';
@@ -77,12 +75,10 @@ export default class PickLayersPass extends LayersPass {
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = withGLParameters(
-      this.device,
+    const renderStatus = this.device.withParametersWebGL(
       {
         scissorTest: true,
         scissor: [x, y, width, height],
-        clearColor: [0, 0, 0, 0],
         // When used as Mapbox custom layer, the context state may be dirty
         // TODO - Remove when mapbox fixes this issue
         // https://github.com/mapbox/mapbox-gl-js/issues/7801
@@ -106,7 +102,8 @@ export default class PickLayersPass extends LayersPass {
           effects: effects?.filter(e => e.useInPicking),
           pass,
           isPicking: true,
-          moduleParameters
+          moduleParameters,
+          clearColor: [0, 0, 0, 0]
         })
     );
 
@@ -118,13 +115,19 @@ export default class PickLayersPass extends LayersPass {
 
   shouldDrawLayer(layer: Layer): boolean {
     const {pickable, operation} = layer.props;
-    return (pickable && operation.includes('draw')) || operation.includes('terrain');
+    return (
+      (pickable && operation.includes('draw')) ||
+      operation.includes('terrain') ||
+      operation.includes('mask')
+    );
   }
 
   protected getModuleParameters() {
     return {
-      pickingActive: 1,
-      pickingAttribute: this.pickZ,
+      picking: {
+        isActive: 1,
+        isAttribute: this.pickZ
+      },
       // turn off lighting by adding empty light source object
       // lights shader module relies on the `lightSources` to turn on/off lighting
       lightSources: {}
