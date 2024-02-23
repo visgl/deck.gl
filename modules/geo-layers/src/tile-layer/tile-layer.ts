@@ -44,6 +44,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
+  delay: 0,
   zoomOffset: 0
 };
 
@@ -128,6 +129,8 @@ type _TileLayerProps<DataT> = {
    */
   maxRequests?: number;
 
+  delay?: number;
+
   /**
    * This offset changes the zoom level at which the tiles are fetched.
    *
@@ -190,6 +193,14 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
+    // DO NOT SUBMIT: If tileSize has changed, force a full reload.
+    const tileSizeChanged = props.tileSize !== oldProps.tileSize;
+    const delayChanged = props.delay !== oldProps.delay;
+    if (tileset && (tileSizeChanged || delayChanged)) {
+      tileset.finalize();
+      tileset = null;
+    }
+
     if (!tileset) {
       tileset = new this.props.TilesetClass(this._getTilesetOptions());
       this.setState({tileset});
@@ -221,7 +232,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxZoom,
       minZoom,
       maxRequests,
-      zoomOffset
+      delay,
+      zoomOffset,
     } = this.props;
 
     return {
@@ -233,6 +245,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       refinementStrategy,
       extent,
       maxRequests,
+      delay,
       zoomOffset,
 
       getTileData: this.getTileData.bind(this),
