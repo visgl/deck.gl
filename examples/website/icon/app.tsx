@@ -24,16 +24,15 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function renderTooltip(info: PickingInfo & {objects: any} | null) {
-  if (!info?.object) {
-    return null;
-  }
-  const {object, x, y} = info;
+type CustomPickingInfo = PickingInfo & {objects?: any} | null;
 
-  if (info.objects) {
+function renderTooltip(info: CustomPickingInfo) {
+  const {object, objects, x, y} = info || {};
+
+  if (objects) {
     return (
       <div className="tooltip interactive" style={{left: x, top: y}}>
-        {info.objects.map(({name, year, mass, class: meteorClass}) => {
+        {objects.map(({name, year, mass, class: meteorClass}) => {
           return (
             <div key={name}>
               <h5>{name}</h5>
@@ -45,6 +44,10 @@ function renderTooltip(info: PickingInfo & {objects: any} | null) {
         })}
       </div>
     );
+  }
+
+  if (!object) {
+    return null;
   }
 
   return object.cluster ? (
@@ -66,7 +69,7 @@ export default function App({
   showCluster = true,
   mapStyle = MAP_STYLE
 }) {
-  const [hoverInfo, setHoverInfo] = useState<PickingInfo | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<CustomPickingInfo>(null);
 
   const hideTooltip = () => {
     setHoverInfo(null);
@@ -87,7 +90,7 @@ export default function App({
     iconMapping,
   };
 
-  if (hoverInfo) {
+  if (hoverInfo === null || !hoverInfo.objects) {
     layerProps.onHover = setHoverInfo;
   }
 
