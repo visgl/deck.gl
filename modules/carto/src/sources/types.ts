@@ -1,5 +1,5 @@
 import type {Feature} from 'geojson';
-import type {Format, MapInstantiation, QueryParameters} from '../api/types';
+import type {Filters, Format, MapInstantiation, QueryParameters} from '../api/types';
 
 export type SourceRequiredOptions = {
   /** Carto platform access token. */
@@ -55,6 +55,13 @@ export type AggregationOptions = {
    * @default 6 for quadbin and 4 for h3 sources
    */
   aggregationResLevel?: number;
+};
+
+export type FilterOptions = {
+  /**
+   * Filters to apply to the data source on the server
+   */
+  filters: Filters;
 };
 
 export type QuerySourceOptions = {
