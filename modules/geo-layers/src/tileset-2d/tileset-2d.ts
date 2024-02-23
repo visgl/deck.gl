@@ -73,6 +73,7 @@ export type Tileset2DProps<DataT = any> = {
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
   maxRequests?: number;
+  delay?: number;
   /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
   zoomOffset?: number;
 
@@ -101,6 +102,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   refinementStrategy: 'best-available',
   zRange: null,
   maxRequests: 6,
+  delay: 0,
   zoomOffset: 0,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
@@ -140,6 +142,7 @@ export class Tileset2D {
    */
   constructor(opts: Tileset2DProps) {
     this.opts = {...DEFAULT_TILESET2D_PROPS, ...opts};
+    this.setOptions(this.opts);
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
@@ -150,9 +153,10 @@ export class Tileset2D {
     };
 
     this._requestScheduler = new RequestScheduler({
-      maxRequests: opts.maxRequests,
-      throttleRequests: Boolean(opts.maxRequests && opts.maxRequests > 0)
-    });
+      maxRequests: this.opts.maxRequests,
+      throttleRequests: Boolean(this.opts.maxRequests && this.opts.maxRequests > 0),
+      debounceMs: this.opts.delay
+    } as any);
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
@@ -168,8 +172,6 @@ export class Tileset2D {
 
     this._modelMatrix = new Matrix4();
     this._modelMatrixInverse = new Matrix4();
-
-    this.setOptions(opts);
   }
 
   /* Public API */
