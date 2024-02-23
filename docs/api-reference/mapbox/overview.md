@@ -2,7 +2,7 @@
 
 This module makes it easy to use deck.gl as native layers and controls in the Mapbox and Maplibre GL JS ecosystem. 
 
-> For brevity, the term 'mapbox-gl' will refer collectively to any library that is compatible with Mapbox GL JS, including but not limited to maplibre-gl. Known exceptions will be clearly marked.
+> For brevity, the term 'mapbox-gl' will refer collectively to any library that is compatible with Mapbox GL JS, including but not limited to maplibre-gl. Known exceptions will be clearly marked. For more, see [Compatibility with Mapbox GL JS forks](../../developer-guide/base-maps/using-with-mapbox.md#compatibility-with-mapbox-gl-js-forks)
 
 - It allows deck.gl to be used with other mapbox-gl controls such as `NavigationControl`, `GeolocateControl` and `mapbox-gl-geocoder`.
 - You may choose to interleave deck.gl layers with the base map layers, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
