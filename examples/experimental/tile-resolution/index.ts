@@ -55,13 +55,33 @@ const params = {
   tileResolution: Number(searchParams.get('tileResolution')) || 1,
   tileResolutionLocked: searchParams.has('tileResolutionLocked') ? Boolean(Number(searchParams.get('tileResolutionLocked'))) :  true,
   tileBorder: searchParams.has('tileBorder') ? Boolean(Number(searchParams.get('tileBorder'))) : true,
+  tileDelay: Number(searchParams.get('tileDelay')) || 0
 };
 
-const gui = new GUI({width: 150});
-const tileSizeCtrl = gui.add(params, 'tileSize', [256, 512, 1024, 2048, 4096]);
-const tileResCtrl = gui.add(params, 'tileResolution', [0.25, 0.5, 1, 2, 4]).name('tileRes').enable(!params.tileResolutionLocked).listen();
-const tileResLockCtrl = gui.add(params, 'tileResolutionLocked').name('tileResLock');
-const tileBorderCtrl = gui.add(params, 'tileBorder');
+const stats = {
+  tilesLoaded: 0,
+  reset: () => {
+    stats.tilesLoaded = 0 ;
+  },
+};
+
+const nav = {
+  toStart: () => {
+    const {zoom, latitude, longitude} = INITIAL_VIEW_STATE;
+    deck.setProps({ initialViewState: { zoom, latitude, longitude, transitionDuration: 1000 } })
+  },
+  toEnd: () => {
+    const {latitude, longitude} = INITIAL_VIEW_STATE;
+    deck.setProps({ initialViewState: { zoom: 6, latitude, longitude, transitionDuration: 1000 } })
+  },
+};
+
+const gui = new GUI({width: 250});
+const tileFolder = gui.addFolder('Tiles');
+const tileSizeCtrl = tileFolder.add(params, 'tileSize', [256, 512, 1024, 2048, 4096]);
+const tileResCtrl = tileFolder.add(params, 'tileResolution', [0.25, 0.5, 1, 2, 4]).name('tileRes').enable(!params.tileResolutionLocked).listen();
+const tileResLockCtrl = tileFolder.add(params, 'tileResolutionLocked').name('tileResLock');
+const tileBorderCtrl = tileFolder.add(params, 'tileBorder');
 
 tileSizeCtrl.onChange(() => {
   params.tileResolution = params.tileSize / 1024;
@@ -73,10 +93,22 @@ tileResLockCtrl.onChange(() => {
 });
 
 let timeout = -1;
-gui.onChange(() => {
+tileFolder.onChange(() => {
   clearTimeout(timeout);
   timeout = setTimeout(render, 250) as unknown as number;
 });
+
+const delayFolder = gui.addFolder('Delay');
+const tileDelayCtrl = delayFolder.add(params, 'tileDelay', 0, 2000, 100);
+tileDelayCtrl.onFinishChange(render);
+
+const navFolder = gui.addFolder('Navigation');
+navFolder.add(nav, 'toStart').name('to start');
+navFolder.add(nav, 'toEnd').name('to end');
+
+const statsFolder = gui.addFolder('Stats');
+const tileLoadedCounter = statsFolder.add(stats, 'tilesLoaded').disable().listen();
+statsFolder.add(stats, 'reset');
 
 ///////////////////////////////////////////////////////////////
 // RENDER
@@ -102,6 +134,9 @@ function render() {
       stroked: true,
       filled: true,
       pickable: false,
+      maxRequests: 100,
+      delay: params.tileDelay,
+      onTileLoad: () => (stats.tilesLoaded++)
     }),
     // borders
     params.tileBorder && new TileLayer({
@@ -137,6 +172,7 @@ function render() {
   searchParams.set('tileResolution', params.tileResolution + '');
   searchParams.set('tileResolutionLocked', params.tileResolutionLocked ? '1' : '0');
   searchParams.set('tileBorder', params.tileBorder ? '1' : '0');
+  searchParams.set('tileDelay', params.tileDelay + '');
   history.replaceState(null, '', location.pathname + '?' + searchParams.toString())
 }
 
