@@ -39,7 +39,7 @@
     "publish": "ocular-publish",
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
-    "test-ci": "ocular-lint && ocular-test browser-headless",
+    "test-ci": "ocular-lint && ocular-test node && ocular-test cover",
     "test-fast": "ocular-test fast",
     "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
