@@ -3,13 +3,12 @@
 import type {Device} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-
 import {Deck} from '@deck.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 
-export function initializeResources(device: Device) {
+export function initializeResources(this: any, device: Device) {
   // What is `this` referring to this function???
   this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
-
   this.model = new Model(device, {
     vs: `\
 #version 300 es
@@ -37,10 +36,20 @@ void main(void) {
       a_pos: this.buffer
     },
     vertexCount: 4,
-    drawMode: GL.TRIANGLE_STRIP
+    drawMode: GL.TRIANGLE_STRIP,
   });
-
-  this.deckFbo = device.createFramebuffer({width: 1, height: 1});
+  // TODO: colorAttachments are required and need to verify what should be passed through
+  this.deckFbo = device.createFramebuffer({
+    width: 1,
+    height: 1,
+    colorAttachments: [
+      device.createTexture({
+        format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
+        type: GL.FLOAT,
+        mipmaps: false
+      })
+    ]
+  });
 
   this.deckInstance = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
@@ -50,8 +59,7 @@ void main(void) {
     controller: false,
 
     // We use the same WebGL context as the ArcGIS API for JavaScript.
-    gl: device.gl,
-
+    gl: device.props.gl,
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
       depthTest: true
@@ -74,22 +82,19 @@ void main(void) {
   });
 }
 
-export function render({gl, width, height, viewState}) {
+export function render(this: any, {gl, width, height, viewState}) {
   const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-
   /* global window */
   const dpr = window.devicePixelRatio;
   width = Math.round(width * dpr);
   height = Math.round(height * dpr);
-
   this.deckFbo.resize({width, height});
-
   this.deckInstance.setProps({viewState});
   // redraw deck immediately into deckFbo
   this.deckInstance.redraw('arcgis');
 
   // We overlay the texture on top of the map using the full-screen quad.
-  const device: Device = this.deckInstance.deck.device;
+  const device: WebGLDevice = this.deckInstance.device;
   device.withParametersWebGL(
     {
       blend: true,
@@ -99,12 +104,14 @@ export function render({gl, width, height, viewState}) {
     },
     () => {
       // eslint-disable-next-line camelcase
+      // this.model.draw(this.context.renderPass);
+      // this.model.setBindings({texSrc: this.deckFbo.colorAttachments[0]}).draw(this.context.renderPass);
       this.model.setUniforms({u_texture: this.deckFbo}).draw(this.context.renderPass);
     }
   );
 }
 
-export function finalizeResources() {
+export function finalizeResources(this: any) {
   this.deckInstance?.finalize();
   this.deckInstance = null;
 
