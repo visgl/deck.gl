@@ -348,7 +348,7 @@ export default class IconManager {
     autoPacking?: boolean;
     iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
-    textureParameters?: Record<number, number> | null;
+    textureParameters?: SamplerProps | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
