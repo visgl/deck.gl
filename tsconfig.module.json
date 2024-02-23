@@ -18,6 +18,11 @@
         "transform": "ocular-dev-tools/ts-transform-append-extension",
         "extensions": [".js", ".glsl.js"],
         "after": true
+      },
+      {
+        "transform": "ocular-dev-tools/ts-transform-append-extension",
+        "extensions": [".js", ".glsl.js"],
+        "afterDeclarations": true
       }
     ]
   }
