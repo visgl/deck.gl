@@ -15,6 +15,10 @@
         "transform": "ocular-dev-tools/ts-transform-version-inline"
       },
       {
+        "transform": "ocular-dev-tools/ts-transform-remove-glsl-comments",
+        "pattern": ["**/*.glsl.ts"]
+      },
+      {
         "transform": "ocular-dev-tools/ts-transform-append-extension",
         "extensions": [".js", ".glsl.js"],
         "after": true

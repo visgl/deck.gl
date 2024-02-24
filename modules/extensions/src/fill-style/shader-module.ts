@@ -3,11 +3,12 @@ import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
+import {glsl} from '../utils/syntax-tags';
 
 /*
  * fill pattern shader module
  */
-const patternVs = `
+const patternVs = glsl`
 #ifdef NON_INSTANCED_MODEL
   #define FILL_PATTERN_FRAME_ATTRIB fillPatternFrames
   #define FILL_PATTERN_SCALE_ATTRIB fillPatternScales
@@ -30,7 +31,7 @@ out vec4 fill_patternBounds;
 out vec4 fill_patternPlacement;
 `;
 
-const patternFs = `
+const patternFs = glsl`
 uniform bool fill_patternEnabled;
 uniform bool fill_patternMask;
 uniform sampler2D fill_patternTexture;
@@ -45,11 +46,11 @@ const float FILL_UV_SCALE = 512.0 / 40000000.0;
 `;
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': `
+  'vs:DECKGL_FILTER_GL_POSITION': glsl`
     fill_uv = geometry.position.xy;
   `,
 
-  'vs:DECKGL_FILTER_COLOR': `
+  'vs:DECKGL_FILTER_COLOR': glsl`
     if (fill_patternEnabled) {
       fill_patternBounds = FILL_PATTERN_FRAME_ATTRIB / vec4(fill_patternTextureSize, fill_patternTextureSize);
       fill_patternPlacement.xy = FILL_PATTERN_OFFSET_ATTRIB;
@@ -57,7 +58,7 @@ const inject = {
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': `
+  'fs:DECKGL_FILTER_COLOR': glsl`
     if (fill_patternEnabled) {
       vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
       vec2 patternUV = mod(mod(fill_uvCoordinateOrigin, scale) + fill_uvCoordinateOrigin64Low + fill_uv, scale) / scale;
