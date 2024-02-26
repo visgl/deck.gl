@@ -1034,6 +1034,7 @@ export default class Deck {
       views: this.viewManager!.getViews(),
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
+      clearCanvas: true,
       ...renderOptions
     };
     this.deckRenderer?.renderLayers(opts);
