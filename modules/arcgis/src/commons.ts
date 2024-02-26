@@ -26,11 +26,13 @@ uniform sampler2D u_texture;
 in vec2 v_texcoord;
 out vec4 fragColor;
 void main(void) {
-    vec4 rgba = texture(u_texture, v_texcoord);
-    rgba.rgb *= rgba.a;
-    fragColor = rgba;
+    // vec4 rgba = texture(u_texture, v_texcoord);
+    // rgba.rgb *= rgba.a;
+    // fragColor = rgba;
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
     `,
+
     attributes: {
       // eslint-disable-next-line camelcase
       a_pos: this.buffer
@@ -95,6 +97,14 @@ export function render(this: any, {gl, width, height, viewState}) {
 
   // We overlay the texture on top of the map using the full-screen quad.
   const device: WebGLDevice = this.deckInstance.device;
+
+  const renderPass = device.beginRenderPass({
+    framebuffer: screenFbo,
+    parameters: {viewport: [0, 0, width, height]},
+    clearColor: [0, 1, 0, 1],
+    clearDepth: 1
+  });
+
   device.withParametersWebGL(
     {
       blend: true,
@@ -104,9 +114,8 @@ export function render(this: any, {gl, width, height, viewState}) {
     },
     () => {
       // eslint-disable-next-line camelcase
-      // this.model.draw(this.context.renderPass);
-      // this.model.setBindings({texSrc: this.deckFbo.colorAttachments[0]}).draw(this.context.renderPass);
-      this.model.setUniforms({u_texture: this.deckFbo}).draw(this.context.renderPass);
+      this.model.draw(renderPass);
+      // this.model.setUniforms({u_texture: this.deckFbo}).draw(renderPass);
     }
   );
 }
