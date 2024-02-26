@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { DEFAULT_AGGREGATION_RES_LEVEL_H3 } from '../constants';
 import {baseSource} from './base-source';
 import type {
   AggregationOptions,
@@ -23,7 +24,7 @@ export const h3QuerySource = async function (
 ): Promise<TilejsonResult> {
   const {
     aggregationExp,
-    aggregationResLevel = 4,
+    aggregationResLevel = DEFAULT_AGGREGATION_RES_LEVEL_H3,
     sqlQuery,
     spatialDataColumn = 'h3',
     queryParameters

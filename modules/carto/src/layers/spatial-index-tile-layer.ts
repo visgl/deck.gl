@@ -6,7 +6,7 @@ registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
 import {TileLayer, _Tile2DHeader as Tile2DHeader, TileLayerProps} from '@deck.gl/geo-layers';
-import { DEFAULT_TILE_SIZE } from './constants';
+import { DEFAULT_TILE_SIZE } from '../constants';
 
 function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';

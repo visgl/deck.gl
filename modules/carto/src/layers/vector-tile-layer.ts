@@ -20,7 +20,7 @@ import type {Feature} from 'geojson';
 
 import type {TilejsonResult} from '../sources/types';
 import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
-import { DEFAULT_TILE_SIZE } from './constants';
+import { DEFAULT_TILE_SIZE } from '../constants';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,

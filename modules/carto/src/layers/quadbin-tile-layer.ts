@@ -5,7 +5,7 @@ import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index
 import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
-import { DEFAULT_TILE_SIZE } from './constants';
+import { DEFAULT_TILE_SIZE } from '../constants';
 
 export const renderSubLayers = props => {
   const {data} = props;

@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { DEFAULT_AGGREGATION_RES_LEVEL_QUADBIN } from '../constants';
 import {baseSource} from './base-source';
 import type {
   AggregationOptions,
@@ -24,7 +25,7 @@ export const quadbinTableSource = async function (
 ): Promise<TilejsonResult> {
   const {
     aggregationExp,
-    aggregationResLevel = 6,
+    aggregationResLevel = DEFAULT_AGGREGATION_RES_LEVEL_QUADBIN,
     columns,
     spatialDataColumn = 'quadbin',
     tableName
