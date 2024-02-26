@@ -66,6 +66,7 @@ export default class MapboxOverlay implements IControl {
       position: 'absolute',
       left: 0,
       top: 0,
+      textAlign: 'initial',
       pointerEvents: 'none'
     });
     this._container = container;
