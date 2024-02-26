@@ -118,6 +118,13 @@ type DataFilterExtensionOptions = {
   countItems?: boolean;
 };
 
+const defaultOptions: Required<DataFilterExtensionOptions> = {
+  categorySize: 1,
+  filterSize: 1,
+  fp64: false,
+  countItems: false
+};
+
 const DATA_TYPE_FROM_SIZE = {
   1: 'float',
   2: 'vec2',
@@ -126,9 +133,15 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 /** Adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. */
-export default class DataFilterExtension extends LayerExtension<DataFilterExtensionOptions> {
+export default class DataFilterExtension extends LayerExtension<
+  Required<DataFilterExtensionOptions>
+> {
   static defaultProps = defaultProps;
   static extensionName = 'DataFilterExtension';
+
+  constructor(opts: DataFilterExtensionOptions) {
+    super({...defaultOptions, ...opts});
+  }
 
   getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
     const {categorySize, filterSize, fp64} = extension.opts;
@@ -136,9 +149,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     return {
       modules: [fp64 ? shaderModule64 : shaderModule],
       defines: {
-        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize || 1],
+        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize],
         DATACATEGORY_CHANNELS: categorySize,
-        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize || 1],
+        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize],
         DATAFILTER_DOUBLE: Boolean(fp64)
       }
     };
