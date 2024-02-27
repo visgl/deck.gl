@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Deck } from '@deck.gl/core';
 import { PathLayer } from '@deck.gl/layers';
 import { TileLayer } from '@deck.gl/geo-layers';
-import { BASEMAP, vectorTableSource, VectorTileLayer } from '@deck.gl/carto';
+import { BASEMAP, vectorTableSource, VectorTileLayer, quadbinTableSource, QuadbinTileLayer } from '@deck.gl/carto';
 import GUI from 'lil-gui';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -20,7 +20,7 @@ const cartoConfig = { apiBaseUrl, accessToken, connectionName };
 const INITIAL_VIEW_STATE = {
   latitude: 36.5210,
   longitude: -6.2805,
-  zoom: 14,
+  zoom: 8,
   minZoom: 1,
   pitch: 0,
   bearing: 0,
@@ -51,11 +51,12 @@ deck.setProps({
 const searchParams = new URLSearchParams(location.search);
 
 const params = { 
-  tileSize: Number(searchParams.get('tileSize')) || 1024,
+  tileSize: Number(searchParams.get('tileSize')) || 512,
   tileResolution: Number(searchParams.get('tileResolution')) || 1,
   tileResolutionLocked: searchParams.has('tileResolutionLocked') ? Boolean(Number(searchParams.get('tileResolutionLocked'))) :  true,
   tileBorder: searchParams.has('tileBorder') ? Boolean(Number(searchParams.get('tileBorder'))) : true,
-  tileDelay: Number(searchParams.get('tileDelay')) || 0
+  tileDelay: Number(searchParams.get('tileDelay')) || 0,
+  aggregationResLevel: 6,
 };
 
 const stats = {
@@ -85,6 +86,7 @@ const tileBorderCtrl = tileFolder.add(params, 'tileBorder');
 
 tileSizeCtrl.onChange(() => {
   params.tileResolution = params.tileSize / 1024;
+  params.aggregationResLevel = 6 - Math.log2(512 / params.tileSize);
 });
 
 tileResLockCtrl.onChange(() => {
@@ -97,6 +99,9 @@ tileFolder.onChange(() => {
   clearTimeout(timeout);
   timeout = setTimeout(render, 250) as unknown as number;
 });
+
+const aggFolder = gui.addFolder('Aggregation');
+const aggCtrl = aggFolder.add(params, 'aggregationResLevel').listen().disable();
 
 const delayFolder = gui.addFolder('Delay');
 const tileDelayCtrl = delayFolder.add(params, 'tileDelay', 0, 2000, 100);
@@ -113,6 +118,12 @@ statsFolder.add(stats, 'reset');
 ///////////////////////////////////////////////////////////////
 // RENDER
 
+const clamp = (v: number, lo: number, hi: number): number => {
+  if (v < lo) return lo;
+  if (v > hi) return hi;
+  return v;
+}
+
 function render() {
   const source = vectorTableSource({
     ...cartoConfig,
@@ -121,23 +132,42 @@ function render() {
     tileResolution: params.tileResolution
   });
 
+  const quadbinSource = quadbinTableSource({
+    ...cartoConfig,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_esp_quadbin15_v1_yearly_v2',
+    spatialDataColumn: 'quadbin',
+    aggregationExp: 'sum(population) as population_sum',
+    aggregationResLevel: params.aggregationResLevel,
+  });
+
   const layers = [
     // data
-    new VectorTileLayer({
-      id: 'roads',
-      data: source as any,
+    // new VectorTileLayer({
+    //   id: 'roads',
+    //   data: source as any,
+    //   tileSize: params.tileSize,
+    //   uniqueIdProperty: 'geoid',
+    //   pointRadiusUnits: 'pixels',
+    //   lineWidthUnits: 'pixels',
+    //   lineWidthMinPixels: 2,
+    //   stroked: true,
+    //   filled: true,
+    //   pickable: false,
+    //   maxRequests: 100,
+    //   delay: params.tileDelay,
+    //   onTileLoad: () => (stats.tilesLoaded++)
+    // }),
+
+    new QuadbinTileLayer({
+      id: 'quadbin',
+      data: quadbinSource as any,
       tileSize: params.tileSize,
-      uniqueIdProperty: 'geoid',
-      pointRadiusUnits: 'pixels',
-      lineWidthUnits: 'pixels',
-      lineWidthMinPixels: 2,
-      stroked: true,
-      filled: true,
-      pickable: false,
-      maxRequests: 100,
-      delay: params.tileDelay,
-      onTileLoad: () => (stats.tilesLoaded++)
+      getFillColor: (d) => {
+        const log = clamp(Math.log2(d.properties.population_sum) * 0.1, 0, 1);
+        return [log * 255, 0, 0, log * 255]
+      },
     }),
+
     // borders
     params.tileBorder && new TileLayer({
       tileSize: params.tileSize,
