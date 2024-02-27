@@ -1,10 +1,11 @@
 <html>
   <head>
-    <title>Interleaving deck.gl with Mapbox Layers</title>
-    <script src="https://unpkg.com/deck.gl@^8.8.0/dist.min.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
+    <title>Interleaving deck.gl with Mapbox Layers using MapboxLayer</title>
+    
+    <script src="https://unpkg.com/deck.gl@^9.0.0-beta.5/dist.min.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.js"></script>
 
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css" rel="stylesheet" />
+    <link href="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
   </head>
 
   <body style="margin:0"></body>
@@ -13,11 +14,9 @@
 
     const {MapboxLayer, ScatterplotLayer, ArcLayer} = deck;
 
-    mapboxgl.accessToken = '<mapbox-access-token>';
-
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: document.body,
-      style: 'mapbox://styles/mapbox/light-v9',
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [-122.4, 37.79],
       zoom: 15,
       pitch: 60
@@ -28,7 +27,7 @@
 
       map.addLayer({
         'id': '3d-buildings',
-        'source': 'composite',
+        'source': 'carto',
         'source-layer': 'building',
         'filter': ['==', 'extrude', 'true'],
         'type': 'fill-extrusion',
