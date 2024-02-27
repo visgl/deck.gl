@@ -1,5 +1,5 @@
 import mapboxgl from 'mapbox-gl';
-import {MapboxLayer} from '@deck.gl/mapbox';
+import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {ArcLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import {scaleLog} from 'd3-scale';
@@ -32,6 +32,10 @@ export function renderToDOM(container, data) {
     pitch: 60
   });
 
+  const deckOverlay = new DeckOverlay({
+    interleaved: true
+  })
+
   map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
   map.on('load', () => {
@@ -48,26 +52,27 @@ export function renderToDOM(container, data) {
       }
     });
 
-    renderLayers(map, data);
+    renderLayers(map, deckOverlay, data);
   });
 
+  map.addControl(deckOverlay)
+
   return {
-    update: newData => renderLayers(map, newData),
+    update: newData => renderLayers(map, deckOverlay, newData),
     remove: () => {
       map.remove();
     }
   };
 }
 
-function renderLayers(map, data) {
+function renderLayers(map, deckOverlay, data) {
   if (!data) {
     return;
   }
   let selectedPOICentroid;
 
-  const arcLayer = new MapboxLayer({
+  const arcLayer = new ArcLayer({
     id: 'deckgl-connections',
-    type: ArcLayer,
     data: [],
     getSourcePosition: d => selectedPOICentroid,
     getTargetPosition: d => [d.home_lng, d.home_lat],
@@ -79,14 +84,18 @@ function renderLayers(map, data) {
   const selectPOI = hex => {
     const [lat, lng] = cellToLatLng(hex);
     selectedPOICentroid = [lng, lat];
-    arcLayer.setProps({
-      data: data.filter(d => d.hex === hex)
-    });
+    deckOverlay.setProps({ 
+      layers: [
+        poiLayer, // TODO: This was written with an imperative pattern, which won't work for MapboxOverlay. poiLayer needs to be defined.
+        arcLayer.clone({
+          data: data.filter(d => d.hex === hex)
+        })
+      ]
+    })
   };
 
-  const poiLayer = new MapboxLayer({
+  const poiLayer = new H3HexagonLayer({
     id: 'deckgl-pois',
-    type: H3HexagonLayer,
     data: aggregateHexes(data),
     opacity: 0.4,
     pickable: true,
@@ -95,11 +104,11 @@ function renderLayers(map, data) {
     getHexagon: d => d.hex,
     getFillColor: d => colorScale(d.count),
     extruded: false,
-    stroked: false
+    stroked: false,
+    beforeId: getFirstLabelLayerId(map.getStyle())
   });
 
-  map.addLayer(poiLayer, getFirstLabelLayerId(map.getStyle()));
-  map.addLayer(arcLayer);
+  deckOverlay.setProps({ layers: [poiLayer, arcLayer]})
 
   selectPOI('8a283082aa17fff');
 }
