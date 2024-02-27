@@ -12,7 +12,7 @@
     "@deck.gl/core": "^9.0.0-beta.5",
     "@deck.gl/layers": "^9.0.0-beta.5",
     "@deck.gl/mapbox": "^9.0.0-beta.5",
-    "maplibre-gl": "^3.0.0"
+    "maplibre-gl": "^4.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"
