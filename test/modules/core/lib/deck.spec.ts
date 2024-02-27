@@ -56,6 +56,25 @@ test('Deck#constructor', t => {
   t.pass('Deck constructor did not throw');
 });
 
+test('Deck#abort', async t => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    onError: err => {
+      t.notOk(err, 'Deck encounters error');
+    }
+  });
+
+  deck.finalize();
+
+  await sleep(50);
+
+  t.pass('Deck initialization aborted');
+  t.end();
+});
+
 test('Deck#no views', t => {
   const deck = new Deck({
     device,
