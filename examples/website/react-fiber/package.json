@@ -1,0 +1,20 @@
+{
+  "name": "deckgl-examples-react-fiber",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.34.1",
+    "@turf/random": "^6.5.0",
+    "@turf/sample": "^6.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^4.0.0"
+  }
+}

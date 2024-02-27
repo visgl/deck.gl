@@ -146,6 +146,8 @@ export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 export {default, DeckGL} from '@deck.gl/react';
 
+export {DeckGL as DeckGLFiber} from '@deck.gl/react-fiber';
+
 /* Types */
 
 export type {

@@ -20,12 +20,10 @@
     {"path": "modules/mapbox"},
     {"path": "modules/mesh-layers"},
     {"path": "modules/react"},
+    {"path": "modules/react-fiber"},
     {"path": "modules/test-utils"},
     {"path": "modules/widgets"}
   ],
-  "include": [
-    "modules/core/src"
-  ],
-  "exclude": [
-  ]
+  "include": ["modules/core/src"],
+  "exclude": []
 }

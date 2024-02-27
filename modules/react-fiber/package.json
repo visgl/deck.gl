@@ -1,0 +1,51 @@
+{
+  "name": "@deck.gl/react-fiber",
+  "description": "React Fiber Renderer for deck.gl",
+  "license": "MIT",
+  "type": "module",
+  "version": "9.0.0-beta.5",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "overlay",
+    "layer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "typed"
+  ],
+  "scripts": {},
+  "dependencies": {
+    "its-fine": "1.1.1",
+    "react-reconciler": "0.29.0",
+    "zustand": "4.3.9"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^9.0.0-beta.5",
+    "@deck.gl/extensions": "^9.0.0-beta.5",
+    "@deck.gl/geo-layers": "^9.0.0-beta.5",
+    "@deck.gl/layers": "^9.0.0-beta.5",
+    "@deck.gl/mesh-layers": "^9.0.0-beta.5",
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

@@ -8,18 +8,10 @@
     "outDir": "dist"
   },
   "references": [
-    {"path": "../aggregation-layers"},
-    {"path": "../carto"},
     {"path": "../core"},
     {"path": "../extensions"},
-    {"path": "../geo-layers"},
-    {"path": "../google-maps"},
-    {"path": "../json"},
     {"path": "../layers"},
-    {"path": "../mapbox"},
     {"path": "../mesh-layers"},
-    {"path": "../react"},
-    {"path": "../react-fiber"},
-    {"path": "../widgets"}
+    {"path": "../geo-layers"}
   ]
 }
