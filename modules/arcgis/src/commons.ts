@@ -8,7 +8,18 @@ import {WebGLDevice} from '@luma.gl/webgl';
 
 export function initializeResources(this: any, device: Device) {
   // What is `this` referring to this function???
-  this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  const deckglTexture = device.createTexture({ width: 1, height: 1 })
+  this.buffer = device.createBuffer(new Int8Array([
+    // Triangle 1
+    -1, -1, // bottom left
+    1, -1, // bottom right
+    -1, 1, // top left
+    // Triangle 2
+    -1, 1,
+    1, 1,
+    1, -1
+  ]));
+
   this.model = new Model(device, {
     vs: `\
 #version 300 es
@@ -22,7 +33,7 @@ void main(void) {
     fs: `\
 #version 300 es
 precision mediump float;
-uniform sampler2D u_texture;
+uniform sampler2D deckglTexture;
 in vec2 v_texcoord;
 out vec4 fragColor;
 void main(void) {
@@ -30,27 +41,28 @@ void main(void) {
     // rgba.rgb *= rgba.a;
     // fragColor = rgba;
     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 rgba = texture(deckglTexture, v_texcoord);
+    rgba.rbg *= rgba.a;
+    fragColor = rgba;
+    // fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
 }
     `,
 
+    bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
+    bindings: { deckglTexture },
     attributes: {
       // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
-    vertexCount: 4,
+    vertexCount: 6,
     drawMode: GL.TRIANGLE_STRIP,
   });
   // TODO: colorAttachments are required and need to verify what should be passed through
   this.deckFbo = device.createFramebuffer({
-    width: 1,
-    height: 1,
-    colorAttachments: [
-      device.createTexture({
-        format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
-        type: GL.FLOAT,
-        mipmaps: false
-      })
-    ]
+    id: 'deckfbo',
+    width: 100,
+    height: 100,
+    colorAttachments: [ deckglTexture ]
   });
 
   this.deckInstance = new Deck({
@@ -101,7 +113,7 @@ export function render(this: any, {gl, width, height, viewState}) {
   const renderPass = device.beginRenderPass({
     framebuffer: screenFbo,
     parameters: {viewport: [0, 0, width, height]},
-    clearColor: [0, 1, 0, 1],
+    clearColor: [0, 0, 0, 0],
     clearDepth: 1
   });
 
@@ -114,6 +126,7 @@ export function render(this: any, {gl, width, height, viewState}) {
     },
     () => {
       // eslint-disable-next-line camelcase
+      this.model.setBindings({ 'deckglTexture': this.deckFbo.colorAttachments[0] });
       this.model.draw(renderPass);
       // this.model.setUniforms({u_texture: this.deckFbo}).draw(renderPass);
     }
