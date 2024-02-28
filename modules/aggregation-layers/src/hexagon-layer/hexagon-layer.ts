@@ -249,7 +249,7 @@ type _HexagonLayerProps<DataT = any> = {
 /** Aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains. */
 export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends AggregationLayer<
   DataT,
-  ExtraPropsT & Required<_HexagonLayerProps>
+  ExtraPropsT & Required<_HexagonLayerProps<DataT>>
 > {
   static layerName = 'HexagonLayer';
   static defaultProps = defaultProps;
