@@ -59,6 +59,7 @@ export default class LayersPass extends Pass {
   render(options: LayersPassRenderOptions): any {
     // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+    const clearCanvas = options.clearCanvas ?? true;
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
@@ -66,7 +67,7 @@ export default class LayersPass extends Pass {
         viewport: [0, 0, width, height]
       },
       // clear depth and color buffers, restoring transparency
-      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
+      clearColor: options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false),
       clearDepth: options.clearCanvas ? 1 : undefined
     });
 
