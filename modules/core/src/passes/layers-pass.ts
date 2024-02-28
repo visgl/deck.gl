@@ -62,7 +62,7 @@ export default class LayersPass extends Pass {
 
     // Unless specified as 'false', the render pass clears color and depth by default.
     let clearColor: number[] | false | undefined = options.clearColor;
-    let clearDepth: number | false | undefined = undefined;
+    let clearDepth: number | false | undefined;
     if (typeof options.clearCanvas === 'boolean') {
       clearColor = clearColor ?? options.clearCanvas ? [0, 0, 0, 0] : false;
       clearDepth = options.clearCanvas ? 1 : false;
