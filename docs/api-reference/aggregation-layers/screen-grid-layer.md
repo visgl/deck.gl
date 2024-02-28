@@ -132,8 +132,6 @@ NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRan
 
 When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 10 to 20 times faster depending upon number of points and number of cells.
 
-NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
-
 ##### `aggregation` (String, optional) {#aggregation}
 
 * Default: 'SUM'

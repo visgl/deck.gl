@@ -167,7 +167,7 @@ export type _GPUGridLayerProps<DataT> = {
   getElevationWeight?: Accessor<DataT, number>;
 };
 
-/** Aggregate data into a grid-based heatmap. Aggregation is performed on GPU (WebGL2 only). */
+/** Aggregate data into a grid-based heatmap. Aggregation is performed on GPU. */
 export default class GPUGridLayer<
   DataT = any,
   ExtraPropsT extends {} = {}

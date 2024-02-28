@@ -144,7 +144,7 @@ For more information on this syntax, see [DeckGL API](../api-reference/react/dec
 Frameworks such as `Next.js` and `Gatsby` leverage Server Side Rendering to improve page loading performance. Some of deck.gl's upstream dependencies, such as `d3`, have opted to become [ES modules](https://nodejs.org/api/packages.html) and no longer support `require()` from the default Node entry point. This will cause SSR to fail. Possible mitigations are:
 
 - If the framework provides such a config, you may be able to replace the offending commonjs entry point (e.g. `@deck.gl/layers`) with the corresponding ESM entry point (`@deck.gl/layers/dist/esm`).
-- Otherwise, isolate the deck.gl imports and exclude them from SSR. Since deck.gl renders into a WebGL context, it wouldn't benefit from SSR to begin with. Below is a minimal sample for `Next.js`:
+- Otherwise, isolate the deck.gl imports and exclude them from SSR. Since deck.gl renders into a WebGL2/WebGPU context, it wouldn't benefit from SSR to begin with. Below is a minimal sample for `Next.js`:
 
 ```jsx title="/src/components/map.js"
 import DeckGL, {TextLayer} from 'deck.gl';
@@ -174,16 +174,16 @@ More examples are discussed in [this issue](https://github.com/visgl/deck.gl/iss
 
 * To achive the overlay effect, the `DeckGL` component creates a transparent
   `canvas` DOM element, into which the deck.gl layers passed in the `layers`
-  prop will render (using WebGL). Since this canvas is transparent, any
+  prop will render (using WebGL2/WebGPU). Since this canvas is transparent, any
   other component you have underneath (typically a map) will visible behind
   the layers.
 
 * When the deck.gl layer list is drawn to screen, it matches the new Layer
   instances with the instances from the previous render call, intelligently
-  compares the new properties and only updates WebGL state when needed
+  compares the new properties and only updates GPU resources when needed
   (just like React does for DOM components).
 
-* Internally, the `DeckGL` component initializes a WebGL context
+* Internally, the `DeckGL` component initializes a WebGL2/WebGPU context
   attached to a canvas element, sets up the animation loop and calls provided
   callbacks on initial load and for each rendered frame. The `DeckGL`
   component also handles events propagation across layers, and prevents

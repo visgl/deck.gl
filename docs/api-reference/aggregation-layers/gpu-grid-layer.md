@@ -1,12 +1,12 @@
-# GPUGridLayer (WebGL2)
+# GPUGridLayer
 
 import {GPUGridLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <GPUGridLayerDemo />
 
-The `GPUGridLayer` aggregates data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains. This layer performs aggregation on GPU hence not supported in non WebGL2 browsers.
+The `GPUGridLayer` aggregates data into a grid-based heatmap. The color and height of a cell are determined based on the objects it contains.
 
-`GPUGridLayer` is one of the sublayers for [GridLayer](./grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](./grid-layer.md) is recommended.
+`GPUGridLayer` is one of the sublayers for [GridLayer](./grid-layer.md). It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](./grid-layer.md) is recommended.
 
 `GPUGridLayer` is a [CompositeLayer](../core/composite-layer.md).
 

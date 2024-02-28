@@ -9,11 +9,11 @@ deck.gl provides a hierarchy of `Viewport` classes. Unless an application needs 
 
 `Viewport` classes are focused on mathematical operations such as coordinate projection/unprojection and calculation of projection matrices and GLSL uniforms.
 
-As mentioned, the basic `Viewport` class is a generic geospatially enabled version of the typical 3D "camera" class you would find in most 3D/WebGL/OpenGL library, holding `view` and `projection` matrices and other uniforms needed by the WebGL vertex shaders.
+As mentioned, the basic `Viewport` class is a generic geospatially enabled version of the typical 3D "camera" class you would find in most 3D/WebGL2/OpenGL libraries, holding `view` and `projection` matrices and other uniforms needed by the vertex shaders.
 
 While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices. it is often preferable to use a `Viewport` subclass that takes higher level parameters, such as camera position and viewing direction, or map coordinates, rather than working directly with matrices.
 
-In addition to generating WebGL uniforms, the `Viewport` class also offers JavaScript functions to project and unproject as well as getting local distance scales.
+In addition to generating WebGL2/WebGPU uniforms, the `Viewport` class also offers JavaScript functions to project and unproject as well as getting local distance scales.
 
 
 ## Overview of Viewports
@@ -33,7 +33,7 @@ Like many things in deck.gl, Viewports can be positioned using a lng/lat "anchor
 
 ## Viewport Positioning
 
-Viewports allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). Viewport positions are specified in CSS coordinates (top left, non-retina, these coordinates are different from WebGL coordinates, see remarks below). It is expected that CSS coordinates are most natural to work with, as the rest of the UI layout with other HTML components is done in the CSS coordinate system.
+Viewports allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). Viewport positions are specified in CSS coordinates (top left, non-retina, these coordinates are different from GPU coordinates, see remarks below). It is expected that CSS coordinates are most natural to work with, as the rest of the UI layout with other HTML components is done in the CSS coordinate system.
 
 * **x,y coordinates** - Viewports allow specification of x,y coordinates in the viewport in addition to width and height. These are only used for positioning (and not for calculation of intrinsic viewport parameters).
 
