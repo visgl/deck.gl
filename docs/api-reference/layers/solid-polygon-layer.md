@@ -20,7 +20,7 @@ function App({data, viewState}) {
      */
     data,
     getPolygon: d => d.polygon,
-    getColor: [255, 0, 0],
+    getFillColor: [255, 0, 0],
     extruded: false
   });
 
