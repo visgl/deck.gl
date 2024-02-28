@@ -917,7 +917,8 @@ export default class Deck {
   private _setDevice(device: Device) {
     this.device = device;
 
-    if (this.layerManager) {
+    if (!this.animationLoop) {
+      // finalize() has been called
       return;
     }
 
@@ -948,7 +949,7 @@ export default class Deck {
     // timeline for transitions
     const timeline = new Timeline();
     timeline.play();
-    this.animationLoop!.attachTimeline(timeline);
+    this.animationLoop.attachTimeline(timeline);
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,

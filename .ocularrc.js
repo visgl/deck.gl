@@ -49,8 +49,8 @@ const config = {
     'deck.gl-test': join(packageRoot, './test')
   },
 
-  browserTest: {
-    server: {wait: 5000}
+  coverage: {
+    test: 'browser'
   },
 
   entry: {

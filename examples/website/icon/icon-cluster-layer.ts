@@ -1,5 +1,5 @@
 import {CompositeLayer} from '@deck.gl/core';
-import {IconLayer} from '@deck.gl/layers';
+import {IconLayer, IconLayerProps} from '@deck.gl/layers';
 import Supercluster from 'supercluster';
 
 function getIconName(size) {
@@ -19,7 +19,16 @@ function getIconSize(size) {
   return Math.min(100, size) / 100 + 1;
 }
 
-export default class IconClusterLayer extends CompositeLayer {
+export default class IconClusterLayer<ExtraProps extends {} = {}> extends CompositeLayer<
+  Required<IconLayerProps> & ExtraProps
+  >
+{
+  state!: {
+    data: any;
+    index: any;
+    z: number;
+  };
+
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
