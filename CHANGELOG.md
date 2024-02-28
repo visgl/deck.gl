@@ -19,7 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
-#### deck.gl [8.9.34] - Fri 19 2024
+#### deck.gl [8.9.35] - Feb 19 2024
+
+- Respect `DataT` on `TripsLayer` props (#8533)
+- Fix mapbox overlay alignment style (#8536)
+- TerrainExtension: Support picking on draped layers (#8474)
+- Improve projection for very high zoom levels (#8454)
+- audit tile layer types (#8291)
+
+#### deck.gl [8.9.34] - Jan 19 2024
 
 - CARTO: fetchLayerData to support columns prop for query sources (#8412)
 - v8 audit Layer#isLoaded implementations (#8290)
