@@ -59,7 +59,7 @@ const overlay = new GoogleMapsOverlay(props)
 overlay.setMap(map);
 ```
 
-Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL context; use `finalize()` if the overlay should be permanently removed.
+Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL2 context; use `finalize()` if the overlay should be permanently removed.
 
 ##### `setProps` {#setprops}
 

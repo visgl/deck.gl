@@ -28,7 +28,7 @@ You typically want the major and minor version of ` @deck.gl/test-utils` to matc
 
 Layer conformance tests are designed to verify deck.gl that layers update their internal state correctly in response to various props and prop changes. The layer update test support includes test drivers to initialize a layer and then run a sequence of successive updates, with facilities for validating the layer after each change, and also provides functions to initialize, update and render layers in a test environment.
 
-Note that internally in deck.gl, updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL environment than rendering tests described below and are thus easily integrated in traditional Node.js unit test suites (e.g. based on `tape`, `jest` or similar unit test frameworks).
+Note that internally in deck.gl, updates are handled by the deck.gl layer "lifecycle" and these tests are therefore also called "lifecycle tests". Lifecycle tests are less demanding of the WebGL2/WebGPU environment than rendering tests described below and are thus easily integrated in traditional Node.js unit test suites (e.g. based on `tape`, `jest` or similar unit test frameworks).
 
 
 ## Layer Rendering Tests

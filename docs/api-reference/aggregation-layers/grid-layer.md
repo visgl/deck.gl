@@ -407,7 +407,7 @@ The following table compares the performance between CPU and GPU aggregations us
 
 ### Fallback Cases
 
-This layer performs aggregation on GPU when the browser is using `WebGL2` and the `gpuAggregation` prop is set to `true`, but will fallback to CPU in the following cases:
+This layer performs aggregation on GPU when the `gpuAggregation` prop is set to `true`, but will fallback to CPU in the following cases:
 
 #### Percentile Props
 
