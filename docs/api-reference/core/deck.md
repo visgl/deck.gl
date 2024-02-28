@@ -72,7 +72,7 @@ The container to append the auto-created canvas to.
 
 * Default: `false`
 
-Flag to enable WebGL debug mode. Also requires an extra luma.gl import:
+Flag to enable GPU debug mode. Also requires an extra luma.gl import:
 
 ```js
 import '@luma.gl/debug';
@@ -141,7 +141,7 @@ Note:
 
 ##### `parameters` (Object) {#parameters}
 
-Expects an object with WebGL settings. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the WebGL context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
+Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
 
 ```js
 {
@@ -168,7 +168,7 @@ new Deck({
 
 Notes:
 
-- Any WebGL `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
+- Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
 - An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 
 ##### `layers` (Array) {#layers}

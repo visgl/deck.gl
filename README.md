@@ -15,12 +15,12 @@
 
 <h1 align="center">deck.gl | <a href="https://deck.gl">Website</a></h1>
 
-<h5 align="center"> WebGL2-powered, highly performant large-scale data visualization</h5>
+<h5 align="center"> GPU-powered, highly performant large-scale data visualization</h5>
 
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://visgl.github.io/deck.gl)
 
 
-deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
+deck.gl is designed to simplify high-performance, WebGL2/WebGPU based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
 
 deck.gl maps **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: e.g. map, first-person, orthographic.
 
