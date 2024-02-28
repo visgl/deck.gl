@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState, useTransition} from 'react';
+import React, {useCallback, useEffect, useState, useTransition} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Button,
@@ -9,12 +9,13 @@ import {
   LabeledValue,
   Provider
 } from '@adobe/react-spectrum';
-import {randomPoint} from '@turf/random';
-import sample from '@turf/sample';
 import {DeckGL} from '../../../modules/react-fiber/src';
+import {Metrics} from './metrics';
+import {BasemapLayer} from './basemap-layer';
+import {RandomPointLayer, RandomPointLayerMemo} from './random-point-layer';
 
 deck.log.enable();
-deck.log.level = 0;
+deck.log.level = 2;
 
 const INITIAL_VIEW_STATE = {
   longitude: -77.0369,
@@ -24,29 +25,19 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 20
 };
 
-const points = randomPoint(10000, {bbox: [-180, -90, 180, 90]});
+// Example passthrough component to showcase that you nest React components however you want
+function Parent(props) {
+  const {children} = props;
 
-function Metrics(props) {
-  const {data} = props;
-
-  const output = Object.entries(data).reduce((prev, next, i) => {
-    if (prev[i]) {
-      prev[i] = next;
-    } else {
-      prev.push(next);
-    }
-
-    return prev;
+  useEffect(() => {
+    console.log('logging <Parent /> effect');
   }, []);
 
   return (
-    <Flex direction="column" gap="size-100">
-      {output.map(pairs => {
-        return (
-          <LabeledValue key={pairs[0]} label={pairs[0]} value={pairs[1]} labelPosition="side" />
-        );
-      })}
-    </Flex>
+    <>
+      <BasemapLayer />
+      {children}
+    </>
   );
 }
 
@@ -61,7 +52,6 @@ function App() {
 
   const [i, setI] = useState(0);
   const [metrics, setMetrics] = useState({});
-  const [data, setData] = useState([]);
 
   const increment = useCallback(() => {
     setI(prev => prev + 1);
@@ -72,10 +62,6 @@ function App() {
 
     startTransition(() => {
       setMetrics(e);
-    });
-
-    startTransition(() => {
-      setData(sample(points, 1000));
     });
   }, []);
 
@@ -103,25 +89,10 @@ function App() {
             // initialViewState={INITIAL_VIEW_STATE}
           >
             <mapView controller={true} id="mapview" repeat>
-              <geoJsonLayer
-                id="basemap"
-                data="https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson"
-                stroked={true}
-                filled={true}
-                getFillColor={[30, 80, 120]}
-                getLineColor={[0, 255, 255]}
-                lineWidthMinPixels={1}
-              />
-              <scatterplotLayer
-                data={data.features}
-                getPosition={feature => {
-                  return feature.geometry.coordinates;
-                }}
-                radiusMinPixels={5}
-                filled={true}
-                getFillColor={[255, 255, 255]}
-                stroked={false}
-              />
+              <Parent>
+                <RandomPointLayer />
+                <RandomPointLayerMemo />
+              </Parent>
             </mapView>
           </DeckGL>
         </View>

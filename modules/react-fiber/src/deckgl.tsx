@@ -1,19 +1,13 @@
-import {Deck, type FilterContext, type Viewport, type DeckProps} from '@deck.gl/core';
+import {Deck, type DeckProps} from '@deck.gl/core';
 import {FiberProvider, useContextBridge} from 'its-fine';
-import React, {
-  forwardRef,
-  memo,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  type ReactNode
-} from 'react';
+import React, {forwardRef, memo, useImperativeHandle, useRef, type ReactNode} from 'react';
 import {ConcurrentRoot} from 'react-reconciler/constants';
 import {Provider} from './context';
 import {useIsomorphicLayoutEffect} from './react-utils';
 import {reconciler} from './reconciler';
-import {useStore as storeInstance, type Store, selectors} from './store';
+import {useStore as storeInstance, type Store} from './store';
 
+// NOTE: side effect to build out initial catalogue
 import './extend';
 
 type CanvasElement = HTMLCanvasElement;
@@ -67,6 +61,7 @@ function createRoot<TCanvas extends CanvasElement>(canvas: TCanvas): ReconcilerR
           ...props,
           canvas,
           layers: [],
+          onWebGLInitialized: state.setWebgl
           // TODO: investigate if we need
           // _customRender: reason => {
           //   console.log('reason', reason);
@@ -74,14 +69,13 @@ function createRoot<TCanvas extends CanvasElement>(canvas: TCanvas): ReconcilerR
           //     deckgl._drawLayers(reason);
           //   }
           // },
-          onWebGLInitialized: state.setWebgl
         });
 
         state.setDeckgl(deckgl);
       }
 
       // TODO: try and find another way to do this, only required for controlled viewState
-      if (state.deckgl && props.viewState) {
+      if (state.deckgl && props.viewState && props.onViewStateChange) {
         state.deckgl.setProps({viewState: props.viewState});
       }
 
@@ -98,27 +92,12 @@ function createRoot<TCanvas extends CanvasElement>(canvas: TCanvas): ReconcilerR
   };
 }
 
-function CanvasImplementation({children, layerFilter, ...rest}: DeckGLProps, forwardedRef: any) {
+function CanvasImplementation({children, ...rest}: DeckGLProps, forwardedRef: any) {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
   const outerRef = useRef<HTMLDivElement>(null!);
   const root = useRef<ReconcilerRoot<HTMLCanvasElement>>(null!);
   const Bridge = useContextBridge();
-  const viewport = useRef<Viewport>();
-  const setViewport = storeInstance(selectors.setViewport);
-
-  const handleLayerFilter = useCallback(
-    (context: FilterContext) => {
-      // TODO: potentially remove this or find another way to sync
-      if (!viewport.current || !context.viewport.equals(viewport.current)) {
-        viewport.current = context.viewport;
-        setViewport(context.viewport);
-      }
-
-      return layerFilter?.(context) ?? true;
-    },
-    [layerFilter, setViewport]
-  );
 
   useImperativeHandle(forwardedRef, () => canvasRef.current);
 
@@ -132,8 +111,7 @@ function CanvasImplementation({children, layerFilter, ...rest}: DeckGLProps, for
 
       // @ts-expect-error FIXME
       root.current.configure({
-        ...rest,
-        layerFilter: handleLayerFilter
+        ...rest
       });
 
       root.current.render(<Bridge>{children}</Bridge>);

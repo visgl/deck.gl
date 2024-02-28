@@ -1,8 +1,4 @@
-TODOs
-
-- [ ] It seems changing callback functions on props (hot reload) does not take affect
-
-Injecting a custom or third party layer:
+Injecting a custom Composite or third party Layer:
 
 ```jsx
 class MyCoolLayer extends CompositeLayer {
@@ -17,6 +13,8 @@ extend({ MyCoolLayer });
 ```
 
 ---
+
+⚠️ Not currently working/implemented
 
 If you declaratively add a View to your tree all layers under that view will by default only render in that view. Caveat is if you provide a custom `filterLayers` on the root DeckGL component this feature will be overridden with your own custom logic.
 

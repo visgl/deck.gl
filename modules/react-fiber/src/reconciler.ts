@@ -24,7 +24,8 @@ function nullReturn() {
 }
 
 const layerCache: Instance[] = [];
-// TODO: typing for value = deckgl View
+
+// TODO: tree structure for views and layers to auto filter
 const viewCache = new Map<string, any>();
 const filterCache = new Map<string, string[]>();
 
@@ -191,13 +192,14 @@ export const reconciler = Reconciler<
 
   finalizeInitialChildren: falseReturn,
 
-  // TODO: we could look at cleaning up deckgl here
+  // TODO: we could look at cleaning up deckgl here with the caveat that
+  // deck.finalize() is already called in the React component cleanup.
   clearContainer: falseReturn,
 
-  // NOTE: may need to attach handlers here?
+  // NOTE: may need to attach handlers here
   commitMount: noop,
 
-  // NOTE: this fires per instance, since deckgl cannot update layers
+  // NOTE: this fires per instance, since deckgl cannot update individual layers
   // atomically we skip doing any work in this function
   commitUpdate: noop,
 
@@ -228,11 +230,10 @@ export const reconciler = Reconciler<
     const state = container.getState();
 
     /**
-     * TODO: belongs to below todo regarding nested composite layers
+     * TODO: implicit view/layer filter logic
      * const existingLayerFilter = state.deckgl.props.layerFilter;
      * const hasDeclarativeViews = viewCache.size > 0;
      */
-    // state.deckgl._drawLayers('rerender');
 
     state.deckgl.setProps({
       // TODO: investigate why we need to spread the array here for deckgl to pick up layer changes
