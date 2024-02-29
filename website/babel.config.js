@@ -2,6 +2,7 @@ module.exports = {
   presets: [require.resolve('@docusaurus/core/lib/babel/preset')],
   plugins: [
     'version-inline',
+    "inline-webgl-constants",
     [
       'remove-glsl-comments',
       {

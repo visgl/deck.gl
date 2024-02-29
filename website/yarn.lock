@@ -2105,6 +2105,11 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
 
+"@luma.gl/constants@9.0.0-alpha.45":
+  version "9.0.0-alpha.45"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.0-alpha.45.tgz#f19c9c3c26b95e1dcf118cb1fbf2dbd93ffd8a1e"
+  integrity sha512-ZTLw0YMnPE1efXEoJ5FxUzwOwxTMNswfEUctu6liWM3EpI7s8kC33CX4M8Kr7xcaQLN09X836uKOmGRpyD8yVg==
+
 "@mapbox/geojson-rewind@^0.5.2":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-rewind/-/geojson-rewind-0.5.2.tgz#591a5d71a9cd1da1a0bf3420b3bea31b0fc7946a"
@@ -4383,6 +4388,13 @@ babel-plugin-extract-import-names@1.6.22:
   integrity sha512-yJ9BsJaISua7d8zNT7oRG1ZLBJCIdZ4PZqmH8qa9N5AK01ifk3fnkc98AXhtzE7UkfCsEumvoQWgoYLhOnJ7jQ==
   dependencies:
     "@babel/helper-plugin-utils" "7.10.4"
+
+babel-plugin-inline-webgl-constants@^2.0.0-alpha:
+  version "2.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-inline-webgl-constants/-/babel-plugin-inline-webgl-constants-2.0.0-alpha.1.tgz#a03ad8e9d650a1ea681b4fd46261d8659f54d274"
+  integrity sha512-VJqBM6hK5iq8BNZ7yoD3+fD8deFAKpnW/NNHRNtseActfksp26l6rdF/4HvoKoK5TmedQMlWzgNQH8jelcwzAg==
+  dependencies:
+    "@luma.gl/constants" "9.0.0-alpha.45"
 
 babel-plugin-polyfill-corejs2@^0.3.3:
   version "0.3.3"
