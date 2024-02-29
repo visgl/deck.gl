@@ -1,14 +1,17 @@
 /* eslint-disable no-invalid-this */
 
 import type {Device} from '@luma.gl/core';
-import {Model} from '@luma.gl/engine';
+import {loadImageBitmap} from '@luma.gl/core';
+import {Model, CubeGeometry} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Deck} from '@deck.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 
 export function initializeResources(this: any, device: Device) {
   // What is `this` referring to this function???
-  const deckglTexture = device.createTexture({ width: 1, height: 1 })
+  const deckglTexture = device.createTexture({ width: 1, height: 1 });
+  const imageTexture = device.createTexture({data: loadImageBitmap('https://i.imgflip.com/3ct7mt.jpg')});
+
   this.buffer = device.createBuffer(new Int8Array([
     // Triangle 1
     -1, -1, // bottom left
@@ -25,6 +28,7 @@ export function initializeResources(this: any, device: Device) {
 #version 300 es
 in vec2 a_pos;
 out vec2 v_texcoord;
+
 void main(void) {
     gl_Position = vec4(a_pos, 0.0, 1.0);
     v_texcoord = (a_pos + 1.0) / 2.0;
@@ -34,22 +38,33 @@ void main(void) {
 #version 300 es
 precision mediump float;
 uniform sampler2D deckglTexture;
+uniform sampler2D imageTexture;
 in vec2 v_texcoord;
 out vec4 fragColor;
+
 void main(void) {
-    // vec4 rgba = texture(u_texture, v_texcoord);
-    // rgba.rgb *= rgba.a;
-    // fragColor = rgba;
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 rgba2 = texture(imageTexture, v_texcoord);
+    fragColor += rgba2;
+    
     vec4 rgba = texture(deckglTexture, v_texcoord);
     rgba.rbg *= rgba.a;
     fragColor = rgba;
-    // fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
+    // this gives the gradient
+    fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
 }
     `,
 
     bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
-    bindings: { deckglTexture },
+    bindings: {
+      deckglTexture,
+      imageTexture
+    },
+    // TODO: well that's weird
+    // geometry: new CubeGeometry(),
+    parameters: {
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal'
+    },
     attributes: {
       // eslint-disable-next-line camelcase
       a_pos: this.buffer
@@ -57,7 +72,7 @@ void main(void) {
     vertexCount: 6,
     drawMode: GL.TRIANGLE_STRIP,
   });
-  // TODO: colorAttachments are required and need to verify what should be passed through
+
   this.deckFbo = device.createFramebuffer({
     id: 'deckfbo',
     width: 100,
@@ -95,7 +110,6 @@ void main(void) {
     }
   });
 }
-
 export function render(this: any, {gl, width, height, viewState}) {
   const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
   /* global window */
@@ -116,7 +130,7 @@ export function render(this: any, {gl, width, height, viewState}) {
     clearColor: [0, 0, 0, 0],
     clearDepth: 1
   });
-
+  console.log(this.model);
   device.withParametersWebGL(
     {
       blend: true,
@@ -126,9 +140,11 @@ export function render(this: any, {gl, width, height, viewState}) {
     },
     () => {
       // eslint-disable-next-line camelcase
-      this.model.setBindings({ 'deckglTexture': this.deckFbo.colorAttachments[0] });
+      this.model.setBindings({
+        'deckglTexture': this.deckFbo.colorAttachments[0],
+        'imageTexture': this.model.imageTexture,
+      });
       this.model.draw(renderPass);
-      // this.model.setUniforms({u_texture: this.deckFbo}).draw(renderPass);
     }
   );
 }
