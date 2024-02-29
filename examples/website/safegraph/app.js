@@ -52,7 +52,7 @@ export function renderToDOM(container, data) {
       }
     });
 
-    renderLayers(map, deckOverlay, data);
+    renderLayers(map, deckOverlay, data, '8a283082aa17fff');
   });
 
   map.addControl(deckOverlay)
@@ -65,15 +65,16 @@ export function renderToDOM(container, data) {
   };
 }
 
-function renderLayers(map, deckOverlay, data) {
+function renderLayers(map, deckOverlay, data, selectedPOI) {
   if (!data) {
     return;
   }
-  let selectedPOICentroid;
+  const [lat, lng] = cellToLatLng(selectedPOI);
+  let selectedPOICentroid = [lng, lat];
 
   const arcLayer = new ArcLayer({
     id: 'deckgl-connections',
-    data: [],
+    data: data.filter(d => d.hex === selectedPOI),
     getSourcePosition: d => selectedPOICentroid,
     getTargetPosition: d => [d.home_lng, d.home_lat],
     getSourceColor: [255, 0, 128],
@@ -81,26 +82,13 @@ function renderLayers(map, deckOverlay, data) {
     getWidth: d => Math.max(2, d.count / 15)
   });
 
-  const selectPOI = hex => {
-    const [lat, lng] = cellToLatLng(hex);
-    selectedPOICentroid = [lng, lat];
-    deckOverlay.setProps({ 
-      layers: [
-        poiLayer, // TODO: This was written with an imperative pattern, which won't work for MapboxOverlay. poiLayer needs to be defined.
-        arcLayer.clone({
-          data: data.filter(d => d.hex === hex)
-        })
-      ]
-    })
-  };
-
   const poiLayer = new H3HexagonLayer({
     id: 'deckgl-pois',
     data: aggregateHexes(data),
     opacity: 0.4,
     pickable: true,
     autoHighlight: true,
-    onClick: ({object}) => object && selectPOI(object.hex),
+    onClick: ({object}) => object && renderLayers(map, deckOverlay, data, object.hex),
     getHexagon: d => d.hex,
     getFillColor: d => colorScale(d.count),
     extruded: false,
@@ -109,8 +97,6 @@ function renderLayers(map, deckOverlay, data) {
   });
 
   deckOverlay.setProps({ layers: [poiLayer, arcLayer]})
-
-  selectPOI('8a283082aa17fff');
 }
 
 function aggregateHexes(data) {
