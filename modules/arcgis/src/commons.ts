@@ -2,7 +2,7 @@
 
 import type {Device} from '@luma.gl/core';
 import {loadImageBitmap} from '@luma.gl/core';
-import {Model, CubeGeometry} from '@luma.gl/engine';
+import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Deck} from '@deck.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
@@ -10,8 +10,9 @@ import {WebGLDevice} from '@luma.gl/webgl';
 export function initializeResources(this: any, device: Device) {
   // What is `this` referring to this function???
   const deckglTexture = device.createTexture({ width: 1, height: 1 });
-  const imageTexture = device.createTexture({data: loadImageBitmap('https://i.imgflip.com/3ct7mt.jpg')});
+  const imageTexture = device.createTexture({data: loadImageBitmap('https://as2.ftcdn.net/jpg/02/25/74/91/500_F_225749110_EF3DzP1hwjPyalkJkVRHAS8vggkM4Z19.jpg')});
 
+  this.imageTexture = imageTexture;
   this.buffer = device.createBuffer(new Int8Array([
     // Triangle 1
     -1, -1, // bottom left
@@ -43,14 +44,19 @@ in vec2 v_texcoord;
 out vec4 fragColor;
 
 void main(void) {
-    vec4 rgba2 = texture(imageTexture, v_texcoord);
-    fragColor += rgba2;
+    vec4 imageColor = texture(imageTexture, v_texcoord);
+    fragColor += imageColor;
     
-    vec4 rgba = texture(deckglTexture, v_texcoord);
-    rgba.rbg *= rgba.a;
-    fragColor = rgba;
+    vec4 deckglColor = texture(deckglTexture, v_texcoord);
+    deckglColor.rbg *= deckglColor.a;
+    fragColor = deckglColor;
     // this gives the gradient
-    fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
+    // fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
+    
+    // directly render textured data
+    // fragColor = vec4(imageColor.r, imageColor.g, imageColor.b,  1.0);
+    
+    fragColor = texture(deckglTexture, v_texcoord);
 }
     `,
 
@@ -59,8 +65,6 @@ void main(void) {
       deckglTexture,
       imageTexture
     },
-    // TODO: well that's weird
-    // geometry: new CubeGeometry(),
     parameters: {
       depthWriteEnabled: true,
       depthCompare: 'less-equal'
@@ -130,7 +134,7 @@ export function render(this: any, {gl, width, height, viewState}) {
     clearColor: [0, 0, 0, 0],
     clearDepth: 1
   });
-  console.log(this.model);
+
   device.withParametersWebGL(
     {
       blend: true,
@@ -142,7 +146,7 @@ export function render(this: any, {gl, width, height, viewState}) {
       // eslint-disable-next-line camelcase
       this.model.setBindings({
         'deckglTexture': this.deckFbo.colorAttachments[0],
-        'imageTexture': this.model.imageTexture,
+        'imageTexture': this.imageTexture,
       });
       this.model.draw(renderPass);
     }
