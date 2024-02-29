@@ -121,9 +121,6 @@ export type _ScreenGridLayerProps<DataT> = {
   /**
    * Perform aggregation is performed on GPU.
    *
-   * NOTE: GPU Aggregation requires WebGL2 support by the browser.
-   * When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
-   *
    * @default true
    */
   gpuAggregation?: boolean;

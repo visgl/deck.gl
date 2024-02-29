@@ -9,7 +9,7 @@ const {resolve} = require('path');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'deck.gl',
-  tagline: 'WebGL2-powered, highly performant large-scale data visualization',
+  tagline: 'GPU-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
   baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
   onBrokenLinks: 'throw',

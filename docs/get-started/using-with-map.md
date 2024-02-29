@@ -12,7 +12,7 @@ There are two types of integration between deck.gl and a base map renderer:
 
 ![Deck as overlay on top of the base map](https://miro.medium.com/max/1600/0*K3DVssEhnv5VaDCp)
 
-- **Interleaved**: Deck renders into the WebGL context of the base map. This allows for occlusion between deck.gl layers and the base map's labels and/or 3D features. The availability of this option depends on whether the base map solution exposes certain developer APIs, and may subject the user to bugs/limitations associated with such APIs.
+- **Interleaved**: Deck renders into the WebGL2 context of the base map. This allows for occlusion between deck.gl layers and the base map's labels and/or 3D features. The availability of this option depends on whether the base map solution exposes certain developer APIs, and may subject the user to bugs/limitations associated with such APIs.
 
 ![Deck interleaved with base map layers](https://miro.medium.com/max/1600/0*faYL1UbVD4af5qzy)
 
