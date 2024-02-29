@@ -71,7 +71,7 @@ export default function IndexPage() {
           <FeatureImage src={`${baseUrl}images/maps.jpg`} />
           <TextContainer>
             <h2>
-              deck.gl is a WebGL-powered framework for visual exploratory data analysis of large
+              deck.gl is a GPU-powered framework for visual exploratory data analysis of large
               datasets.
             </h2>
             <hr className="short" />
@@ -103,7 +103,7 @@ export default function IndexPage() {
             </h3>
             <p>
               deck.gl APIs are designed to reflect the reactive programming paradigm. Whether using
-              Vanilla JS or the React interface, it can handle efficient WebGL rendering under heavy
+              Vanilla JS or the React interface, it can handle efficient WebGL2/WebGPU rendering under heavy
               data load.
             </p>
 
