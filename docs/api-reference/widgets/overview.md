@@ -1,6 +1,6 @@
 # @deck.gl/widgets
 
-Widgets are UI components around the WebGL canvas to offer controls and information for a better user experience.
+Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and information for a better user experience.
 
 This module contains the following extensions:
 
