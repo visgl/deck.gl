@@ -1,4 +1,4 @@
-## Example: Use deck.gl with react-map-gl and Webpack
+## Example: Use deck.gl with react-map-gl and Maplibre
 
 Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 
