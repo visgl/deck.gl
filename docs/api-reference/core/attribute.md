@@ -53,7 +53,7 @@ The constructor for the Attribute class. Use this to create a new Attribute.
 
 ### delete
 
-Free WebGL resources associated with this attribute.
+Free GPU resources associated with this attribute.
 
 
 ### update

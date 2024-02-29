@@ -10,17 +10,17 @@ On 2015 MacBook Pros with dual graphics cards, most basic layers
 (like `ScatterplotLayer`) renders fluidly at 60 FPS during pan and zoom
 operations up to about 1M (one million) data items, with framerates dropping into low double digits (10-20FPS) when the data sets approach 10M items.
 
-Even if interactivity is not an issue, browser limitations on how big chunks of contiguous memory can be allocated (e.g. Chrome caps individual allocations at 1GB) will cause most layers to crash during WebGL buffer generation somewhere between 10M and 100M items. You would need to break up your data into chunks and use multiple deck.gl layers to get past this limit.
+Even if interactivity is not an issue, browser limitations on how big chunks of contiguous memory can be allocated (e.g. Chrome caps individual allocations at 1GB) will cause most layers to crash during GPU buffer generation somewhere between 10M and 100M items. You would need to break up your data into chunks and use multiple deck.gl layers to get past this limit.
 
 Modern phones (recent iPhones and higher-end Android phones) are surprisingly capable in terms of rendering performance, but are considerably more sensitive to memory pressure than laptops, resulting in browser restarts or page reloads. They also tend to load data significantly slower than desktop computers, so some tuning is usually needed to ensure a good overall user experience on mobile.
 
 ## Layer Update Performance
 
-Layer update happens when the layer is first created, or when some layer props change. During an update, deck.gl may load necessary resources (e.g. image textures), generate WebGL buffers, and upload them to the GPU, all of which may take some time to complete, depending on the number of items in your `data` prop. Therefore, the key to performant deck.gl applications is to minimize layer updates wherever possible.
+Layer update happens when the layer is first created, or when some layer props change. During an update, deck.gl may load necessary resources (e.g. image textures), generate GPU buffers, and upload them to the GPU, all of which may take some time to complete, depending on the number of items in your `data` prop. Therefore, the key to performant deck.gl applications is to minimize layer updates wherever possible.
 
 ### Minimize data changes
 
-When the `data` prop changes, the layer will recalculate all of its WebGL buffers. The time required for this is proportional to the number of items in your
+When the `data` prop changes, the layer will recalculate all of its GPU buffers. The time required for this is proportional to the number of items in your
 `data` prop.
 This step is the most expensive operation that a layer does - also on CPU - potentially affecting the responsiveness of the application. It may take
 multiple seconds for multi-million item layers, and if your `data` prop is updated
@@ -218,7 +218,7 @@ Some good places to check for performance improvements are:
 
 #### Favor layer visibility over addition and removal
 
-  Removing a layer will lose all of its internal states, including generated buffers. If the layer is added back later, all the WebGL resources need to be regenerated again. In the use cases where layers need to be toggled frequently (e.g. via a control panel), there might be a significant perf penalty:
+  Removing a layer will lose all of its internal states, including generated buffers. If the layer is added back later, all the GPU resources need to be regenerated again. In the use cases where layers need to be toggled frequently (e.g. via a control panel), there might be a significant perf penalty:
 
   ```js
   // Bad
@@ -520,7 +520,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
 
   While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it can become a major bottleneck in performance since it is done on CPU in the main thread. If the application needs to push many data changes frequently, for example to render animations, data updates can block rendering and user interaction. In this case, the application should consider precalculated attributes on the back end or in web workers. 
 
-  Deck.gl layers accepts external attributes as either a typed array or a WebGL buffer. Such attributes, if prepared carefully, can be directly utilized by the GPU, thus bypassing the CPU-bound attribute generation completely.
+  Deck.gl layers accepts external attributes as either a typed array or a luma.gl Buffers. Such attributes, if prepared carefully, can be directly utilized by the GPU, thus bypassing the CPU-bound attribute generation completely.
 
   This technique offers the maximum performance possible in terms of data throughput, and is commonly used in heavy-duty, performance-sensitive applications.
 

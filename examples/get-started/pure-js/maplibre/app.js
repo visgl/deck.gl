@@ -1,12 +1,13 @@
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import mapboxgl from 'mapbox-gl';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const map = new mapboxgl.Map({
+const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
   center: [0.45, 51.47],
@@ -48,4 +49,4 @@ const deckOverlay = new DeckOverlay({
 });
 
 map.addControl(deckOverlay);
-map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new maplibregl.NavigationControl());

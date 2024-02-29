@@ -1,10 +1,11 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import type {DataFilterExtensionProps} from './data-filter-extension';
+import {glsl} from '../utils/syntax-tags';
 
 /*
  * data filter shader module
  */
-const vs = `
+const vs = glsl`
 uniform DATAFILTER_TYPE filter_min;
 uniform DATAFILTER_TYPE filter_softMin;
 uniform DATAFILTER_TYPE filter_softMax;
@@ -88,7 +89,7 @@ void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFrom
 }
 `;
 
-const fs = `
+const fs = glsl`
 uniform bool filter_transformColor;
 in float dataFilter_value;
 `;
@@ -161,7 +162,7 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
 }
 
 const inject = {
-  'vs:#main-start': `
+  'vs:#main-start': glsl`
     #ifdef DATAFILTER_DOUBLE
       dataFilter_setValue(
         DATAFILTER_ATTRIB - filter_min64High + DATAFILTER_ATTRIB_64LOW,
@@ -173,19 +174,19 @@ const inject = {
     #endif
   `,
 
-  'vs:#main-end': `
+  'vs:#main-end': glsl`
     if (dataFilter_value == 0.0) {
       gl_Position = vec4(0.);
     }
   `,
 
-  'vs:DECKGL_FILTER_SIZE': `
+  'vs:DECKGL_FILTER_SIZE': glsl`
     if (filter_transformSize) {
       size = size * dataFilter_value;
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': `
+  'fs:DECKGL_FILTER_COLOR': glsl`
     if (dataFilter_value == 0.0) discard;
     if (filter_transformColor) {
       color.a *= dataFilter_value;

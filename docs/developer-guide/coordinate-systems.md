@@ -144,5 +144,5 @@ The conversion between common sizes and pixel sizes: 1 common unit equals `2 ** 
 If you are familiar with the traditional 3D graphics/game engine terminologies, here is how they map to deck.gl's coordinate spaces:
 
 - deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
-- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
+- deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL2/WebGPU, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
 - Zoom levels are applied by scaling the view matrix with `Math.pow(2, zoom)`.
