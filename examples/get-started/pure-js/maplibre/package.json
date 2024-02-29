@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-example-pure-js-mapbox",
+  "name": "deckgl-example-pure-js-maplibre",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0-beta.5",
-    "@deck.gl/layers": "^9.0.0-beta.5",
-    "@deck.gl/mapbox": "^9.0.0-beta.5",
+    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/layers": "^9.0.0-beta",
+    "@deck.gl/mapbox": "^9.0.0-beta",
     "maplibre-gl": "^3.0.0"
   },
   "devDependencies": {
