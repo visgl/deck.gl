@@ -1,13 +1,16 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map, NavigationControl, useControl} from 'react-map-gl/maplibre';
+import {Map, NavigationControl, useControl} from 'react-map-gl';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+
+  // Set your Mapbox API key here or via environment variable
+const MAPBOX_API_KEY = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
@@ -17,7 +20,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'mapbox://styles/mapbox/light-v9';
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
@@ -64,6 +67,7 @@ function Root() {
     <Map
       initialViewState={INITIAL_VIEW_STATE}
       mapStyle={MAP_STYLE}
+      mapboxAccessToken={MAPBOX_API_KEY}
     >
       <DeckGLOverlay layers={layers} />
       <NavigationControl position='top-left' />
