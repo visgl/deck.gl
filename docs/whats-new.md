@@ -109,7 +109,7 @@ Due to this generalization, there is a breaking change affecting indexing proper
 
 ### MapboxOverlay
 
-The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox/).
+The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/).
 
 If you are using react-map-gl v7, this is the only solution to use deck.gl with React map control components (`Navigationcontrol`, `GeolocateControl`, etc.). See [example](https://github.com/visgl/react-map-gl/blob/master/examples/deckgl-overlay/src/app.tsx).
 
