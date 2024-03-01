@@ -192,7 +192,7 @@ export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
     // @ts-expect-error TODO v9 This code is not portable to WebGPU
     const programHandle = model.pipeline.handle;
 
-    const gl = this.context.gl as WebGL2RenderingContext;
+    const gl = this.context.gl;
     const colorIndex = gl.getUniformBlockIndex(programHandle, 'ColorData');
     const elevationIndex = gl.getUniformBlockIndex(programHandle, 'ElevationData');
     gl.uniformBlockBinding(programHandle, colorIndex, COLOR_DATA_UBO_INDEX);
