@@ -1,4 +1,5 @@
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import {ArcLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
@@ -96,7 +97,7 @@ function renderLayers(map, deckOverlay, data, selectedPOI) {
     beforeId: getFirstLabelLayerId(map.getStyle())
   });
 
-  deckOverlay.setProps({ layers: [poiLayer, arcLayer]})
+  deckOverlay.setProps({ layers: [poiLayer, arcLayer] })
 }
 
 function aggregateHexes(data) {
