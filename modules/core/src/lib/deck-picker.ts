@@ -162,7 +162,7 @@ export default class DeckPicker {
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
+    const gl = this.device.gl as WebGL2RenderingContext;
     this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
     this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
   }
