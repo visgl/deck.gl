@@ -1,4 +1,4 @@
-## Example: Use deck.gl with Mapbox
+## Example: Use deck.gl with Maplibre
 
 Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 

@@ -2,14 +2,14 @@
 
 | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- |
-|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-layer) |
+|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/mapbox-layer) |
 
 [Mapbox GL JS](https://github.com/mapbox/mapbox-gl-js) is a powerful open-source map renderer from [Mapbox](https://mapbox.com). deck.gl's `MapView` is designed to sync perfectly with the camera of Mapbox, at every zoom level and rotation angle.
 
 When using deck.gl and Mapbox, there are three options you can choose from:
 
 - Using the Deck canvas as a overlay on top of the Mapbox map, and Deck as the root element. In this option, deck.gl handles all user input, and holds the source of truth of the camera state. The [React get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/mapbox/) illustrates the basic pattern. This is the most tested and robust use case, as you can find in all the [examples on this website](https://deck.gl/examples/website). It supports all the features of Deck.
-- Using the Deck canvas as a overlay on top of the Mapbox map, and Mapbox as the root element. In this option, mapbox-gl handles all user input, and holds the source of truth of the camera state. The [vanilla JS get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox/) illustrates this pattern. The `MapboxOverlay` class in [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) implements the mapbox-gl control interface to insert deck into the map container. This is favorable if you need to use other mapbox-gl controls and plugins in addition to deck.gl.
+- Using the Deck canvas as a overlay on top of the Mapbox map, and Mapbox as the root element. In this option, mapbox-gl handles all user input, and holds the source of truth of the camera state. The [vanilla JS get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/) illustrates this pattern. The `MapboxOverlay` class in [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) implements the mapbox-gl control interface to insert deck into the map container. This is favorable if you need to use other mapbox-gl controls and plugins in addition to deck.gl.
 - Using deck.gl layers interleaved with Mapbox layers in the same WebGL2 context, using either the `MapboxOverlay` or `MapboxLayer` from the [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) module. This allows you to mix deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature subjects to bugs and limitations of mapbox-gl's custom layer interface.
 
 ![deck.gl interleaved with Mapbox layers](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg)
@@ -38,7 +38,7 @@ If you are using react-map-gl, there are several ways to provide a token to your
 
 ## Compatibility with Mapbox GL JS forks
 
-As of v2.0, Mapbox GL JS [went proprietary](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#200) and requires a Mapbox account to use even if you don't load tiles from the Mapbox data service. Community forks of the v1 code base such as [MapLibre GL JS](https://maplibre.org) can generally be used as a drop-in replacement of mapbox-gl. If you are using react-map-gl, follow [these instructions](http://visgl.github.io/react-map-gl/docs/get-started/get-started#using-with-a-mapbox-gl-fork).
+As of v2.0, Mapbox GL JS [went proprietary](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#200) and requires a Mapbox account to use even if you don't load tiles from the Mapbox data service. Community forks of the v1 code base such as [MapLibre GL JS](https://maplibre.org) can generally be used as a drop-in replacement of mapbox-gl. If you are using react-map-gl, see [their Get Started guide](http://visgl.github.io/react-map-gl/docs/get-started) for more details.
 
 If the forked libraries and Mapbox API diverge in the future, compatibility issues may arise. deck.gl intends to support open source efforts wherever reasonable. Please report any issue on GitHub.
 
