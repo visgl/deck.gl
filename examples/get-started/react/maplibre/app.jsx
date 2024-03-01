@@ -17,7 +17,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
@@ -45,7 +45,8 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick
+      onClick,
+      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',
@@ -65,7 +66,7 @@ function Root() {
       initialViewState={INITIAL_VIEW_STATE}
       mapStyle={MAP_STYLE}
     >
-      <DeckGLOverlay layers={layers} />
+      <DeckGLOverlay layers={layers} /*interleaved*/ />
       <NavigationControl position='top-left' />
     </Map>
   );

@@ -21,6 +21,7 @@ const map = new mapboxgl.Map({
 });
 
 const deckOverlay = new DeckOverlay({
+  // interleaved: true,
   layers: [
     new GeoJsonLayer({
       id: 'airports',
@@ -36,7 +37,8 @@ const deckOverlay = new DeckOverlay({
       autoHighlight: true,
       onClick: info =>
         // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`),
+      // beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',
