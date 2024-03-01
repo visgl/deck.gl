@@ -245,10 +245,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   getShaders() {
     const {device} = this.context;
-    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
+    const useDerivatives = this.props.flatShading;
     if (useDerivatives) {
       defines.FLAT_SHADING = 1;
     }
@@ -256,7 +255,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       vs,
       fs,
       defines,
-      transpileToGLSL100,
       modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
     });
   }

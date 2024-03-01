@@ -75,7 +75,7 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
       height: 1,
       colorAttachments: [
         device.createTexture({
-          format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
+          format: 'rgba32float',
           type: GL.FLOAT,
           mipmaps: false
         })

@@ -192,7 +192,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !device || device.features.has('index-uint32-webgl1') ? Uint32Array : Uint16Array
+        IndexType: Uint32Array
       })
     });
 

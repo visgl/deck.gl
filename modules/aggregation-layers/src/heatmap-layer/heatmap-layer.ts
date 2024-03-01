@@ -83,14 +83,8 @@ const defaultProps: DefaultProps<HeatmapLayerProps> = {
   debounceTimeout: {type: 'number', min: 0, max: 1000, value: 500}
 };
 
-const REQUIRED_FEATURES: DeviceFeature[] = [
-  'blend-minmax-webgl1', // max weight calculation
-  'texture-formats-float32-webgl1' // weight-map as texture
-];
-
 const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
-  'texture-renderable-float32-webgl', // ability to render to float texture
-  'texture-blend-float-webgl1' // ability to blend when rendering to float texture
+  'texture-blend-float-webgl' // ability to blend when rendering to float texture
 ];
 
 const DIMENSIONS = {
@@ -187,7 +181,6 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    supported: boolean;
     colorDomain?: number[];
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
@@ -209,13 +202,8 @@ export default class HeatmapLayer<
   };
 
   initializeState() {
-    if (!REQUIRED_FEATURES.every(feature => this.context.device.features.has(feature))) {
-      this.setState({supported: false});
-      log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
-      return;
-    }
     super.initializeAggregationLayer(DIMENSIONS);
-    this.setState({supported: true, colorDomain: DEFAULT_COLOR_DOMAIN});
+    this.setState({colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
@@ -228,9 +216,6 @@ export default class HeatmapLayer<
 
   /* eslint-disable max-statements,complexity */
   updateState(opts: UpdateParameters<this>) {
-    if (!this.state.supported) {
-      return;
-    }
     super.updateState(opts);
     this._updateHeatmapState(opts);
   }
@@ -266,9 +251,6 @@ export default class HeatmapLayer<
   }
 
   renderLayers(): LayersList | Layer {
-    if (!this.state.supported) {
-      return [];
-    }
     const {
       weightsTexture,
       triPositionBuffer,
