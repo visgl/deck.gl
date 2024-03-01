@@ -22,9 +22,11 @@
       pitch: 60
     });
 
-    map.on('load', () => {
+    map.on('style.load', () => {
       const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
+      map.removeLayer('building')
+      map.removeLayer('building-top')
       map.addLayer({
         'id': '3d-buildings',
         'source': 'carto',
