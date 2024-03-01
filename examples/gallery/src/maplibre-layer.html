@@ -29,7 +29,6 @@
         'id': '3d-buildings',
         'source': 'carto',
         'source-layer': 'building',
-        'filter': ['==', 'extrude', 'true'],
         'type': 'fill-extrusion',
         'minzoom': 15,
         'paint': {
@@ -40,12 +39,12 @@
             'fill-extrusion-height': [
                 "interpolate", ["linear"], ["zoom"],
                 15, 0,
-                15.05, ["get", "height"]
+                15.05, ["get", "render_height"]
             ],
             'fill-extrusion-base': [
                 "interpolate", ["linear"], ["zoom"],
                 15, 0,
-                15.05, ["get", "min_height"]
+                15.05, ["get", "render_min_height"]
             ],
             'fill-extrusion-opacity': .6
         }
