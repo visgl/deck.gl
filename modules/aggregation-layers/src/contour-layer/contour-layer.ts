@@ -351,7 +351,7 @@ export default class ContourLayer<
     let {aggregationData} = count;
     if (!aggregationData) {
       // @ts-ignore
-      aggregationData = count.aggregationBuffer!.readSyncWebGL2() as Float32Array;
+      aggregationData = count.aggregationBuffer!.readSyncWebGL() as Float32Array;
       count.aggregationData = aggregationData;
     }
 

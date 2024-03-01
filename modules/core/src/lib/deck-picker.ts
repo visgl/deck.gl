@@ -151,7 +151,7 @@ export default class DeckPicker {
         const depthFBO = this.device.createFramebuffer({
           colorAttachments: [
             this.device.createTexture({
-              format: this.device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm'
+              format: 'rgba32float'
               // type: GL.FLOAT
             })
           ]
