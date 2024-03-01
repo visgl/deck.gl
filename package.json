@@ -72,7 +72,7 @@
     "gl": "6.0.2",
     "glsl-transpiler": "^1.8.6",
     "jsdom": "^20.0.0",
-    "ocular-dev-tools": "2.0.0-alpha.26",
+    "ocular-dev-tools": "2.0.0-alpha.27",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "puppeteer": "^22.0.0",
