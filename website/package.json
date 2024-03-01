@@ -42,8 +42,6 @@
     "@docusaurus/preset-classic": "^2.2.0",
     "@mdx-js/react": "^1.6.22",
     "babel-plugin-styled-components": "^2.0.0",
-    "babel-plugin-inline-webgl-constants": "^2.0.0-alpha",
-    "babel-plugin-remove-glsl-comments": "^1.0.0",
     "prism-react-renderer": "^1.2.1",
     "ts-node": "~10.9.1"
   },
