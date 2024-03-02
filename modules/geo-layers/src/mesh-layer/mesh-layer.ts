@@ -2,7 +2,6 @@ import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
 import {pbr} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
@@ -72,7 +71,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       // attributeManager is always defined in a primitive layer
       attributeManager!.add({
         featureIdsPickingColors: {
-          type: GL.UNSIGNED_BYTE,
+          type: 'uint8',
           size: 3,
           noAlloc: true,
           // eslint-disable-next-line @typescript-eslint/unbound-method

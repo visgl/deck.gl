@@ -20,7 +20,6 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {GL} from '@luma.gl/constants';
 import test from 'tape-promise/tape';
 import {device} from '@deck.gl/test-utils';
 
@@ -213,7 +212,7 @@ test('AttributeManager.update - external virtual buffers', t => {
 
   attributeManager.add({
     positions: {size: 2, update: dummyUpdate},
-    colors: {size: 3, type: GL.UNSIGNED_BYTE, update: dummyUpdate}
+    colors: {size: 3, type: 'uint8', update: dummyUpdate}
   });
 
   // First update, should autoalloc and update the value array
@@ -268,7 +267,7 @@ test('AttributeManager.update - external logical buffers', t => {
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
-    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]},
+    colors: {size: 4, type: 'uint8', accessor: 'getColor', defaultValue: [0, 0, 0, 255]},
     types: {size: 1, accessor: 'getType', transform: x => x - 65}
   });
 
@@ -313,7 +312,7 @@ test('AttributeManager.update - external logical buffers - variable width', t =>
 
   attributeManager.add({
     positions: {size: 2, accessor: 'getPosition'},
-    colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
+    colors: {size: 4, type: 'uint8', accessor: 'getColor', defaultValue: [0, 0, 0, 255]}
   });
 
   // First update, should autoalloc and update the value array

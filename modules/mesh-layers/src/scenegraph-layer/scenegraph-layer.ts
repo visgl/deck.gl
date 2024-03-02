@@ -23,7 +23,6 @@ import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
-import {GL} from '@luma.gl/constants';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -203,16 +202,15 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         accessor: 'getPosition',
         transition: true
       },
       instanceColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
-        normalized: true,
         defaultValue: DEFAULT_COLOR,
         transition: true
       },

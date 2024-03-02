@@ -37,7 +37,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -269,7 +268,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -281,16 +280,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR

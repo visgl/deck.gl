@@ -1,4 +1,3 @@
-import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   CompositeLayer,
@@ -48,16 +47,14 @@ class RasterColumnLayer extends ColumnLayer {
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: [255, 255, 255, 255]

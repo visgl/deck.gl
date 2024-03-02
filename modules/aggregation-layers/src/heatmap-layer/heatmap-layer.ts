@@ -27,7 +27,6 @@ import {
   getTextureCoordinates
 } from './heatmap-layer-utils';
 import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {
   Accessor,
@@ -370,7 +369,7 @@ export default class HeatmapLayer<
   _setupAttributes() {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'},
+      positions: {size: 3, type: 'float64', accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
     this.setState({positionAttributeName: 'positions'});
