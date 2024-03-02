@@ -23,7 +23,7 @@ export type BufferAccessor = {
   /** The number of elements per vertex attribute. */
   size?: number;
   /** 1 if instanced. */
-  divisor?: number;
+  divisor?: 1 | 0;
   /** Offset of the first vertex attribute into the buffer, in bytes. */
   offset?: number;
   /** The offset between the beginning of consecutive vertex attributes, in bytes. */
