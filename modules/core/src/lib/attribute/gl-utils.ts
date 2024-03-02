@@ -1,6 +1,5 @@
-import {GL} from '@luma.gl/constants';
 import {getTypedArrayFromDataType, getDataTypeFromTypedArray} from '@luma.gl/core';
-import type {BufferAttributeLayout, TypedArray, VertexType, VertexFormat} from '@luma.gl/core';
+import type {BufferAttributeLayout, VertexType, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings} from './data-column';
 
