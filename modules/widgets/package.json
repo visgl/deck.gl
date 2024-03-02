@@ -39,11 +39,10 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
     "preact": "^10.17.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0-alpha"
+    "@deck.gl/core": "^9.0.0-beta"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

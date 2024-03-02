@@ -40,7 +40,6 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
     "@loaders.gl/core": "^4.1.0",
     "@loaders.gl/images": "^4.1.0",
     "@luma.gl/constants": "9.0.0-beta.6",
