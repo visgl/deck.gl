@@ -16,6 +16,8 @@ deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU 
 
 Changes should mostly impact custom layers that use luma.gl and GLSL shaders directly. More information about breaking changes and migration strategies will be provided as part of deck.gl v9 documentation.
 
+- `@deck.gl/mapbox` - `MapboxLayer` has been remove. Use `MapboxOverlay` instead.
+
 ### Known Limitations
 
 The following issues are known and will be resolved before deck.gl v9.0 is officially released:
@@ -23,7 +25,6 @@ The following issues are known and will be resolved before deck.gl v9.0 is offic
 - `@deck.gl/core` - Attribute transitions - first and last elements are not correctly transformed.
 - `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
 - `@deck.gl/google-maps` - `GoogleMapsOverlay` - always renders a vector map (which doesn't support 3D / perspective views).
-- `@deck.gl/mapbox` - `MapboxOverlay` - doesn't overlay deck.gl and mapbox graphics.
 - `@deck.gl/arcgis`- Broken, status TBD.
 
 ## deck.gl v8.9

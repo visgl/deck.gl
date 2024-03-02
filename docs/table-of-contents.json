@@ -273,7 +273,6 @@
         "label": "@deck.gl/mapbox",
         "items": [
           "api-reference/mapbox/overview",
-          "api-reference/mapbox/mapbox-layer",
           "api-reference/mapbox/mapbox-overlay"
         ]
       },
