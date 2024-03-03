@@ -125,7 +125,7 @@ export default class DataColumn<Options, State> {
   value: NumericArray | null;
   doublePrecision: boolean;
 
-  protected _buffer: Buffer | null;
+  protected _buffer: Buffer | null = null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -184,9 +184,6 @@ export default class DataColumn<Options, State> {
       bounds: null,
       constant: false
     };
-
-    // TODO(v9): Can we pre-allocate the correct size, instead?
-    this._buffer = this._createBuffer(0);
   }
   /* eslint-enable max-statements */
 
@@ -415,7 +412,7 @@ export default class DataColumn<Options, State> {
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
       const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
-      if (buffer.byteLength < requiredBufferSize) {
+      if (!buffer || buffer.byteLength < requiredBufferSize) {
         buffer = this._createBuffer(requiredBufferSize);
       }
 
@@ -465,7 +462,7 @@ export default class DataColumn<Options, State> {
     const {byteOffset} = this;
     let {buffer} = this;
 
-    if (buffer.byteLength < value.byteLength + byteOffset) {
+    if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
       buffer = this._createBuffer(value.byteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
