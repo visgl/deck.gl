@@ -73,7 +73,7 @@ test('ScatterplotLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.getUniforms().radiusScale,
+        layer.getModels()[0].uniforms.radiusScale,
         layer.props.radiusScale,
         'should update radiusScale'
       );
@@ -113,7 +113,7 @@ test('PointCloudLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.getUniforms().pointSize,
+        layer.getModels()[0].uniforms.pointSize,
         layer.props.radiusPixels,
         'should update pointSize'
       );
@@ -215,7 +215,7 @@ test('PathLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.getUniforms().widthMinPixels,
+        layer.getModels()[0].uniforms.widthMinPixels,
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );
