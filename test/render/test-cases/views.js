@@ -42,8 +42,7 @@ export default [
         getFillColor: f => parseColor(f.properties.fill),
         getLineColor: f => parseColor(f.properties.stroke),
         extruded: true,
-        // TODO(v9) re-enable
-        // wireframe: true,
+        wireframe: true,
         getElevation: 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1
