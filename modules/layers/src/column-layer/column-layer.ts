@@ -247,15 +247,15 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const {device} = this.context;
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading;
-    if (useDerivatives) {
+    const {flatShading} = this.props;
+    if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
       vs,
       fs,
       defines,
-      modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking]
     });
   }
 

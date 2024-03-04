@@ -50,7 +50,10 @@ const ARRAY_BUFFER_MAP = {
   maxMinData: 'maxMinBuffer'
 };
 
-const REQUIRED_FEATURES: DeviceFeature[] = ['texture-blend-float-webgl'];
+const REQUIRED_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl',
+  'texture-blend-float-webgl'
+];
 
 export type GPUGridAggregatorProps = {
   id?: string;
@@ -162,6 +165,7 @@ export default class GPUGridAggregator {
 
   id: string;
   device: Device;
+  _hasGPUSupport: boolean;
 
   gridAggregationModel;
   allAggregationModel;
@@ -170,6 +174,15 @@ export default class GPUGridAggregator {
   constructor(device: Device, props: GPUGridAggregatorProps = {}) {
     this.id = props.id || 'gpu-grid-aggregator';
     this.device = device;
+
+    const REQUIRED_FEATURES: DeviceFeature[] = [
+      'float32-renderable-webgl' // render to float texture
+    ];
+
+    this._hasGPUSupport = REQUIRED_FEATURES.every(feature => device.features.has(feature));
+    if (this._hasGPUSupport) {
+      this._setupModels();
+    }
   }
 
   // Delete owned resources.

@@ -226,15 +226,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const defines: any = {};
-
-    defines.DERIVATIVES_AVAILABLE = 1;
-
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking],
-      defines
+      modules: [project32, phongLighting, picking]
     });
   }
 

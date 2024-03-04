@@ -84,6 +84,7 @@ const defaultProps: DefaultProps<HeatmapLayerProps> = {
 };
 
 const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl', // ability to render to float texture
   'texture-blend-float-webgl' // ability to blend when rendering to float texture
 ];
 

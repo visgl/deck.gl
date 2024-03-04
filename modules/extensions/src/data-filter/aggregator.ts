@@ -1,4 +1,4 @@
-import {Device, Framebuffer} from '@luma.gl/core';
+import {Device, DeviceFeature, Framebuffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 
@@ -53,18 +53,13 @@ void main() {
 }
 `;
 
-export function supportsFloatTarget(device: Device): boolean {
-  // @ts-expect-error
-  const gl = device.gl;
+const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl', // ability to render to float texture
+  'texture-blend-float-webgl' // ability to blend when rendering to float texture
+];
 
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
-  return Boolean(
-    gl.getExtension('EXT_float_blend') &&
-      // WebGL 2
-      (gl.getExtension('EXT_color_buffer_float') ||
-        // WebGL 1
-        gl.getExtension('WEBGL_color_buffer_float'))
-  );
+export function supportsFloatTarget(device: Device): boolean {
+  return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
