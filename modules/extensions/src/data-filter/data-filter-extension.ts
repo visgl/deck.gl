@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/constants';
 import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
@@ -165,7 +164,7 @@ export default class DataFilterExtension extends LayerExtension<
       attributeManager.add({
         filterValues: {
           size: filterSize,
-          type: fp64 ? GL.DOUBLE : GL.FLOAT,
+          type: fp64 ? 'float64' : 'float32',
           accessor: 'getFilterValue',
           shaderAttributes: {
             filterValues: {
@@ -178,7 +177,6 @@ export default class DataFilterExtension extends LayerExtension<
         },
         filterCategoryValues: {
           size: categorySize,
-          type: GL.FLOAT,
           accessor: 'getFilterCategory',
           transform:
             categorySize === 1
@@ -206,8 +204,7 @@ export default class DataFilterExtension extends LayerExtension<
         filterIndices: {
           size: useFloatTarget ? 1 : 2,
           vertexOffset: 1,
-          type: GL.UNSIGNED_BYTE,
-          normalized: true,
+          type: 'unorm8',
           accessor: (object, {index}) => {
             const i = object && object.__source ? object.__source.index : index;
             return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];

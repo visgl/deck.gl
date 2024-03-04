@@ -35,7 +35,6 @@ import {
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
-import {GL} from '@luma.gl/constants';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -267,16 +266,15 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributeManager!.addInstanced({
       instancePositions: {
         transition: true,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         size: 3,
         accessor: 'getPosition'
       },
       instanceColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         transition: true,
         size: this.props.colorFormat.length,
-        normalized: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },

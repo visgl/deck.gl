@@ -32,7 +32,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import type {Buffer, Texture} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -182,7 +181,7 @@ export default class ScreenGridLayer<
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions()
       },
       // this attribute is used in gpu aggregation path only
