@@ -194,7 +194,8 @@ export default [
         data: geojson,
         opacity: 0.8,
         extruded: true,
-        wireframe: true,
+        // TODO(v9) re-enable
+        // wireframe: true,
         getPointRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
         getFillColor: f => {
           const color = parseColor(f.properties.fill || f.properties['marker-color']);
