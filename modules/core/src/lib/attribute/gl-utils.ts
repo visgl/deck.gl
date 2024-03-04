@@ -1,13 +1,11 @@
 import {getTypedArrayFromDataType, getDataTypeFromTypedArray} from '@luma.gl/core';
-import type {BufferAttributeLayout, VertexType, VertexFormat} from '@luma.gl/core';
+import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
-import type {BufferAccessor, DataColumnSettings} from './data-column';
+import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
 
-export function typedArrayFromDataType(type: VertexType | 'float64'): TypedArrayConstructor {
+export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (type) {
-    case 'float16':
-      return Float32Array;
     case 'float64':
       return Float64Array;
     default:

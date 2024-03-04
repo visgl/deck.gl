@@ -14,13 +14,16 @@ import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
+export type DataType = Exclude<VertexType, 'float16'>;
+export type LogicalDataType = DataType | 'float64';
+
 export type BufferAccessor = {
   /** Vertex data type. */
-  type?: VertexType;
+  type?: DataType;
   /** The number of elements per vertex attribute. */
   size?: number;
   /** 1 if instanced. */
-  divisor?: 1 | 0;
+  divisor?: number;
   /** Offset of the first vertex attribute into the buffer, in bytes. */
   offset?: number;
   /** The offset between the beginning of consecutive vertex attributes, in bytes. */
@@ -93,17 +96,17 @@ export type DataColumnOptions<Options> = Options &
     /** Vertex data type.
      * @default 'float32'
      */
-    type?: VertexType | 'float64';
+    type?: LogicalDataType;
     /** Internal API, use `type` instead */
-    logicalType?: VertexType | 'float64';
+    logicalType?: LogicalDataType;
     isIndexed?: boolean;
     defaultValue?: number | number[];
   };
 
 export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
-  type: VertexType;
+  type: DataType;
   size: number;
-  logicalType?: VertexType | 'float64';
+  logicalType?: LogicalDataType;
   normalized: boolean;
   bytesPerElement: number;
   defaultValue: number[];
@@ -144,7 +147,7 @@ export default class DataColumn<Options, State> {
       ? [defaultValue]
       : defaultValue || new Array(this.size).fill(0);
 
-    let bufferType: VertexType;
+    let bufferType: DataType;
     if (doublePrecision) {
       bufferType = 'float32';
     } else if (!logicalType && opts.isIndexed) {
@@ -371,7 +374,7 @@ export default class DataColumn<Options, State> {
           accessor.type = 'float32';
         } else {
           const type = dataTypeFromTypedArray(opts.value);
-          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as VertexType) : type;
+          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as DataType) : type;
         }
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
