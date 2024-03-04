@@ -154,12 +154,6 @@ export default class ScreenGridLayer<
   };
 
   initializeState() {
-    if (!ScreenGridCellLayer.isSupported(this.context.device)) {
-      // max aggregated value is sampled from a float texture
-      this.setState({supported: false});
-      log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
-      return;
-    }
     super.initializeAggregationLayer({
       dimensions: DIMENSIONS,
       // @ts-expect-error

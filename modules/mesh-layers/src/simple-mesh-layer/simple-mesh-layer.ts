@@ -226,20 +226,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const transpileToGLSL100 = this.context.device.info.type !== 'webgl2';
-
-    const defines: any = {};
-
-    if (this.context.device.features.has('glsl-derivatives')) {
-      defines.DERIVATIVES_AVAILABLE = 1;
-    }
-
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking],
-      transpileToGLSL100,
-      defines
+      modules: [project32, phongLighting, picking]
     });
   }
 

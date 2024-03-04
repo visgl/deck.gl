@@ -146,7 +146,7 @@ export default class DataColumn<Options, State> {
     if (doublePrecision) {
       bufferType = GL.FLOAT;
     } else if (!logicalType && opts.isIndexed) {
-      bufferType = device.features.has('index-uint32-webgl1') ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+      bufferType = GL.UNSIGNED_INT;
     } else {
       bufferType = logicalType || GL.FLOAT;
     }

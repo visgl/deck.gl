@@ -93,7 +93,7 @@ type _ScenegraphLayerProps<DataT> = {
    */
   _imageBasedLightingEnvironment?:
     | PBREnvironment
-    | ((context: {gl: WebGLRenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
+    | ((context: {gl: WebGL2RenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;

@@ -192,7 +192,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !device || device.features.has('index-uint32-webgl1') ? Uint32Array : Uint16Array
+        IndexType: Uint32Array
       })
     });
 
@@ -459,28 +459,31 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         }
       });
 
+      const geometry = new Geometry({
+        topology: 'line-strip',
+        attributes: {
+          // top right - top left - bottom left - bottom right
+          positions: {
+            size: 2,
+            value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
+          }
+        }
+      });
       wireframeModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,
+        topology: 'line-strip',
         uniforms: {
           isWireframe: true
         },
-        geometry: new Geometry({
-          topology: 'line-strip',
-          attributes: {
-            // top right - top left - bottom left - bottom right
-            positions: {
-              size: 2,
-              value: new Float32Array([1, 0, 0, 0, 0, 1, 1, 1])
-            }
-          }
-        }),
+        // geometry, // TODO(v9) investigate why `setGeometry()` is needed
         isInstanced: 1,
         userData: {
           excludeAttributes: {indices: true}
         }
       });
+      wireframeModel.setGeometry(geometry);
     }
 
     return {
