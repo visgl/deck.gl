@@ -32,18 +32,19 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
     }
   }
   const baseUrl = buildSourceUrl(mergedOptions);
-  const {format} = mergedOptions;
+  const {clientId, format} = mergedOptions;
   const headers = {Authorization: `Bearer ${options.accessToken}`, ...options.headers};
+  const parameters = {client: clientId, ...urlParameters};
 
   const errorContext: APIErrorContext = {
     requestType: 'Map instantiation',
     connection: options.connectionName,
     type: endpoint,
-    source: JSON.stringify(urlParameters, undefined, 2)
+    source: JSON.stringify(parameters, undefined, 2)
   };
   const mapInstantiation = await requestWithParameters<TilejsonMapInstantiation>({
     baseUrl,
-    parameters: urlParameters,
+    parameters,
     headers,
     errorContext
   });
