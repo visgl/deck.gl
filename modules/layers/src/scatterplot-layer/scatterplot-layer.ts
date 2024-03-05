@@ -21,7 +21,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -193,7 +192,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -207,16 +206,14 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },

@@ -1,13 +1,12 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/core';
-import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+import {Buffer, BufferLayout, BufferAttributeLayout, VertexType} from '@luma.gl/core';
 
 import {
-  glArrayFromType,
+  typedArrayFromDataType,
   getBufferAttributeLayout,
   getStride,
-  getGLTypeFromTypedArray
+  dataTypeFromTypedArray
 } from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
@@ -15,9 +14,12 @@ import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
+export type DataType = Exclude<VertexType, 'float16'>;
+export type LogicalDataType = DataType | 'float64';
+
 export type BufferAccessor = {
-  /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
-  type?: number;
+  /** Vertex data type. */
+  type?: DataType;
   /** The number of elements per vertex attribute. */
   size?: number;
   /** 1 if instanced. */
@@ -26,9 +28,6 @@ export type BufferAccessor = {
   offset?: number;
   /** The offset between the beginning of consecutive vertex attributes, in bytes. */
   stride?: number;
-  /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
-  normalized?: boolean;
-  integer?: boolean;
 };
 
 export type ShaderAttributeOptions = Partial<BufferAccessor> & {
@@ -90,19 +89,25 @@ function resolveDoublePrecisionShaderAttributes(
 }
 
 export type DataColumnOptions<Options> = Options &
-  BufferAccessor & {
+  Omit<BufferAccessor, 'type'> & {
     id?: string;
     vertexOffset?: number;
     fp64?: boolean;
-    logicalType?: number;
+    /** Vertex data type.
+     * @default 'float32'
+     */
+    type?: LogicalDataType;
+    /** Internal API, use `type` instead */
+    logicalType?: LogicalDataType;
     isIndexed?: boolean;
     defaultValue?: number | number[];
   };
 
 export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
-  type: number;
+  type: DataType;
   size: number;
-  logicalType?: number;
+  logicalType?: LogicalDataType;
+  normalized: boolean;
   bytesPerElement: number;
   defaultValue: number[];
   defaultType: TypedArrayConstructor;
@@ -135,26 +140,26 @@ export default class DataColumn<Options, State> {
     this.size = opts.size || 1;
 
     const logicalType = opts.logicalType || opts.type;
-    const doublePrecision = logicalType === GL.DOUBLE;
+    const doublePrecision = logicalType === 'float64';
 
     let {defaultValue} = opts;
     defaultValue = Number.isFinite(defaultValue)
       ? [defaultValue]
       : defaultValue || new Array(this.size).fill(0);
 
-    let bufferType: number;
+    let bufferType: DataType;
     if (doublePrecision) {
-      bufferType = GL.FLOAT;
+      bufferType = 'float32';
     } else if (!logicalType && opts.isIndexed) {
-      bufferType = device.features.has('index-uint32-webgl1') ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+      bufferType = 'uint32';
     } else {
-      bufferType = logicalType || GL.FLOAT;
+      bufferType = logicalType || 'float32';
     }
 
     // This is the attribute type defined by the layer
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
-    let defaultType = glArrayFromType(logicalType || bufferType || GL.FLOAT);
+    let defaultType = typedArrayFromDataType(logicalType || bufferType);
     this.doublePrecision = doublePrecision;
 
     // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
@@ -172,6 +177,7 @@ export default class DataColumn<Options, State> {
       defaultValue: defaultValue as number[],
       logicalType,
       type: bufferType,
+      normalized: bufferType.includes('norm'),
       size: this.size,
       bytesPerElement: defaultType.BYTES_PER_ELEMENT
     };
@@ -358,8 +364,16 @@ export default class DataColumn<Options, State> {
     const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
 
     if (ArrayBuffer.isView(opts.value)) {
-      const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
-      accessor.type = opts.type || (is64Bit ? GL.FLOAT : getGLTypeFromTypedArray(opts.value));
+      if (!opts.type) {
+        // Deduce data type
+        const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
+        if (is64Bit) {
+          accessor.type = 'float32';
+        } else {
+          const type = dataTypeFromTypedArray(opts.value);
+          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as DataType) : type;
+        }
+      }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
     }
@@ -506,20 +520,20 @@ export default class DataColumn<Options, State> {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
   normalizeConstant(value: NumericArray): NumericArray {
     /* eslint-disable complexity */
-    switch (this.settings.type as GL) {
-      case GL.BYTE:
+    switch (this.settings.type) {
+      case 'snorm8':
         // normalize [-128, 127] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
 
-      case GL.SHORT:
+      case 'snorm16':
         // normalize [-32768, 32767] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 32768) / 65535) * 2 - 1);
 
-      case GL.UNSIGNED_BYTE:
+      case 'unorm8':
         // normalize [0, 255] to [0, 1]
         return new Float32Array(value).map(x => x / 255);
 
-      case GL.UNSIGNED_SHORT:
+      case 'unorm16':
         // normalize [0, 65535] to [0, 1]
         return new Float32Array(value).map(x => x / 65535);
 
@@ -593,7 +607,7 @@ export default class DataColumn<Options, State> {
       ...this._buffer?.props,
       id: this.id,
       usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
-      indexType: isIndexed ? ((type as GL) === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32') : undefined,
+      indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });
 
