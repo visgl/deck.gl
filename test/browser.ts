@@ -32,7 +32,7 @@ if (window.browserTestDriver_finish && window.browserTestDriver_fail) {
     window.browserTestDriver_fail();
   });
 } else {
-  console.warn('Use Google Chrome for Testing to report test completion.')
+  console.warn('Use Google Chrome for Testing to report test completion.');
 }
 
 // tap-browser-color alternative
