@@ -61,7 +61,7 @@ export type FilterOptions = {
   /**
    * Filters to apply to the data source on the server
    */
-  filters: Filters;
+  filters?: Filters;
 };
 
 export type QuerySourceOptions = {

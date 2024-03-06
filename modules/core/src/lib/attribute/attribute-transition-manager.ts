@@ -18,7 +18,6 @@ const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
 
 export default class AttributeTransitionManager {
   id: string;
-  isSupported: boolean;
 
   private device: Device;
   private timeline?: Timeline;
@@ -45,7 +44,6 @@ export default class AttributeTransitionManager {
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-    this.isSupported = device.features.has('transform-feedback-webgl2');
   }
 
   finalize(): void {
@@ -112,7 +110,7 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   run(): boolean {
-    if (!this.isSupported || this.numInstances === 0) {
+    if (this.numInstances === 0) {
       return false;
     }
 
@@ -151,13 +149,6 @@ export default class AttributeTransitionManager {
     let isNew = !transition || transition.type !== settings.type;
 
     if (isNew) {
-      if (!this.isSupported) {
-        log.warn(
-          `WebGL2 not supported by this browser. Transition for ${attributeName} is disabled.`
-        )();
-        return;
-      }
-
       if (transition) {
         this._removeTransition(attributeName);
       }

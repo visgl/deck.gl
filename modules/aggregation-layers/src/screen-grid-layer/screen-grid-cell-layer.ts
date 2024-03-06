@@ -54,10 +54,6 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   static layerName = 'ScreenGridCellLayer';
   static defaultProps = defaultProps;
 
-  static isSupported(device: Device) {
-    return device.features.has('texture-formats-float32-webgl1');
-  }
-
   state!: {
     model?: Model;
   };

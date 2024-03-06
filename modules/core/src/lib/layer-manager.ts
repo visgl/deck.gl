@@ -54,7 +54,7 @@ export type LayerContext = {
   userData: any;
   onError?: <PropsT extends {}>(error: Error, source: Layer<PropsT>) => void;
   /** @deprecated Use context.device */
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
 };
 
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
