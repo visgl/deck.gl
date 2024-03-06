@@ -20,7 +20,7 @@
 
 import './aggregation-layers';
 import './core';
-// import './carto';
+import './carto';
 // import './extensions';
 // import './geo-layers';
 import './google-maps';
