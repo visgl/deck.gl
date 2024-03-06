@@ -35,7 +35,6 @@ import {
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -147,7 +146,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       },
       positions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         update: attribute => (attribute.value = this.state.mesh.positions),
         noAlloc

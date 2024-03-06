@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.6] - Mar 5 2024
+
+- CARTO: Respect clientId property (#8581)
+- Change Attribute.type to VertexType from WebGL constants (#8572)
+- Cherry pick luma global exports in core bundle (#8574)
+- chore: Bump luma to 9.0.0-beta.6 (#8567)
+- CARTO: Mark filters parameter as optional (#8566)
+- fix(widgets): publish stylesheet (#8571)
+- chore(build): restore inline-webgl-constants transform (#8563)
+- Respect `DataT` on `TripsLayer` props (#8533)
+- chore(build): remove glsl comments (#8531)
+- fix(core): LayersPass#render should clear canvas by default (#8543)
+
 #### deck.gl [9.0.0-beta.5] - Feb 27 2024
 
 - Provide defaultOptions for DataFilterExtension (#8540)

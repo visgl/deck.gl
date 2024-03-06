@@ -36,7 +36,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -147,7 +146,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -160,8 +159,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
