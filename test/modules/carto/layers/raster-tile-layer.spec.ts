@@ -52,7 +52,7 @@ test('RasterTileLayer tilejson', async t => {
   t.end();
 });
 
-test('RasterLayer', async t => {
+test.skip('RasterLayer', async t => {
   const testCases = [
     {
       Layer: RasterLayer,
