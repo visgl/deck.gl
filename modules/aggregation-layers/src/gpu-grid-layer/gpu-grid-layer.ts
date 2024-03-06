@@ -221,7 +221,7 @@ export default class GPUGridLayer<
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions()
       },
       color: {size: 3, accessor: 'getColorWeight'},

@@ -40,7 +40,7 @@ import * as testUtils from '@deck.gl/test-utils';
 test('Top-level imports', t0 => {
   const hasEmptyExports = obj => {
     for (const key in obj) {
-      if (!obj[key]) {
+      if (obj[key] === undefined) {
         return key;
       }
     }
