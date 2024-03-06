@@ -1,4 +1,4 @@
-## Example: Use deck.gl with react-map-gl and Mapbox
+## Example: Use deck.gl with Mapbox
 
 Uses [Vite](https://vitejs.dev/) to bundle and serve files.
 
@@ -10,7 +10,7 @@ To run this example, you need a [Mapbox access token](https://docs.mapbox.com/he
 export MapboxAccessToken=<mapbox_access_token>
 ```
 
-Or set `MAPBOX_TOKEN` directly in `app.jsx`.
+Or set `MAPBOX_TOKEN` directly in `app.js`.
 
 Other options can be found at [using with Mapbox GL](../../../../docs/developer-guide/base-maps/using-with-mapbox.md).
 
