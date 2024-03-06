@@ -5,8 +5,7 @@ import configuration from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 import {gl} from '@deck.gl/test-utils';
 
-// TODO(v9): Re-check after PR#8334
-test.skip('JSONConverter#render', t => {
+test('JSONConverter#render', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
