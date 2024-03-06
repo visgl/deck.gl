@@ -1,5 +1,5 @@
 {
-  "name": "deckgl-example-react-map-gl-mapbox",
+  "name": "deckgl-example-pure-js-mapbox",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -9,11 +9,10 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "^9.0.0-beta",
-    "mapbox-gl": "^3.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-map-gl": "^7.0.0"
+    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/layers": "^9.0.0-beta",
+    "@deck.gl/mapbox": "^9.0.0-beta",
+    "mapbox-gl": "^3.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

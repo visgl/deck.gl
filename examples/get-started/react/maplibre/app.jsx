@@ -1,24 +1,38 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {Map, NavigationControl, useControl} from 'react-map-gl/maplibre';
+import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const map = new maplibregl.Map({
-  container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center: [0.45, 51.47],
+const INITIAL_VIEW_STATE = {
+  latitude: 51.47,
+  longitude: 0.45,
   zoom: 4,
   bearing: 0,
   pitch: 30
-});
+};
 
-const deckOverlay = new DeckOverlay({
-  // interleaved: true,
-  layers: [
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new DeckOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
+function Root() {
+  const onClick = info => {
+    if (info.object) {
+      // eslint-disable-next-line
+      alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
+    }
+  };
+
+  const layers = [
     new GeoJsonLayer({
       id: 'airports',
       data: AIR_PORTS,
@@ -31,9 +45,7 @@ const deckOverlay = new DeckOverlay({
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`),
+      onClick,
       // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
@@ -47,8 +59,19 @@ const deckOverlay = new DeckOverlay({
       getTargetColor: [200, 0, 80],
       getWidth: 1
     })
-  ]
-});
+  ];
 
-map.addControl(deckOverlay);
-map.addControl(new maplibregl.NavigationControl());
+  return (
+    <Map
+      initialViewState={INITIAL_VIEW_STATE}
+      mapStyle={MAP_STYLE}
+    >
+      <DeckGLOverlay layers={layers} /*interleaved*/ />
+      <NavigationControl position='top-left' />
+    </Map>
+  );
+}
+
+/* global document */
+const container = document.body.appendChild(document.createElement('div'));
+createRoot(container).render(<Root />);
