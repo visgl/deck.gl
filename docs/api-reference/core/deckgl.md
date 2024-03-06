@@ -45,11 +45,11 @@ Default: `window.mapboxgl || window.maplibregl`
 The scripting API offers out-of-the-box integration with [Mapbox GL JS](https://mapbox.com) or [MapLibre GL JS](https://maplibre.org). To add a base map to your visualization, you need to include the base map library and stylesheet:
 
 ```html
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet' />
+<script src="https://unpkg.com/mapbox-gl@^3.0.0/dist/mapbox-gl.js"></script>
+<link href="https://unpkg.com/mapbox-gl@^3.0.0/dist/mapbox-gl.css" rel="stylesheet" />
 <!-- or -->
-<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
 ```
 
 The above script adds `mapboxgl` or `maplibregl` to the global scope, which will be picked up by default. 
@@ -59,9 +59,9 @@ To disable the base map, simply exclude the mapbox script or set `map` to false.
 In some environments such as Observable, libraries cannot be imported into the global scope, in which case you need to manually pass the mapboxgl object to `map`:
 
 ```js
-mapboxgl = require('mapbox-gl@^1.13.0/dist/mapbox-gl.js');
+mapboxgl = require('mapbox-gl@^3.0.0/dist/mapbox-gl.js');
 // or
-maplibregl = require('maplibre-gl@^2.4.0/dist/maplibre-gl.js');
+maplibregl = require('maplibre-gl@^3.0.0/dist/maplibre-gl.js');
 ```
 
 And
