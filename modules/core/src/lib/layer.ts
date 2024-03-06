@@ -20,7 +20,6 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -884,7 +883,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // TODO - this slightly slows down non instanced layers
       attributeManager.addInstanced({
         instancePickingColors: {
-          type: GL.UNSIGNED_BYTE,
+          type: 'uint8',
           size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
