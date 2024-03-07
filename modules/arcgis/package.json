@@ -40,7 +40,7 @@
     "esri-loader": "^3.3.0"
   },
   "peerDependencies": {
-    "@arcgis/core": "^4.0.0",
+    "@arcgis/core": "^4.28.0",
     "@deck.gl/core": "^9.0.0-beta",
     "@luma.gl/core": "9.0.0-beta.8",
     "@luma.gl/engine": "9.0.0-beta.8"
