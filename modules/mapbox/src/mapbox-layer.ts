@@ -33,13 +33,7 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
-    if (gl instanceof WebGLRenderingContext) {
-      log.warn(
-        'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
-      )();
-      return;
-    }
+  onAdd(map: Map, gl: WebGL2RenderingContext): void {
     this.map = map;
     this.deck = getDeckInstance({map, gl, deck: this.props.deck});
     addLayer(this.deck, this);
