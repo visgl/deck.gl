@@ -47,7 +47,7 @@
     "@loaders.gl/mvt": "^4.1.0",
     "@loaders.gl/schema": "^4.1.0",
     "@loaders.gl/tiles": "^4.1.0",
-    "@luma.gl/constants": "9.0.0-beta.7",
+    "@luma.gl/constants": "9.0.0-beta.8",
     "@math.gl/web-mercator": "^4.0.0",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^1.4.2",
@@ -70,7 +70,7 @@
     "@deck.gl/geo-layers": "^9.0.0-beta",
     "@deck.gl/layers": "^9.0.0-beta",
     "@loaders.gl/core": "^4.1.0",
-    "@luma.gl/core": "^9.0.0-beta"
+    "@luma.gl/core": "9.0.0-beta.8"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
