@@ -18,5 +18,6 @@ export {SnapshotTestRunner} from './snapshot-test-runner';
 // A utility that emulates input events
 export {InteractionTestRunner} from './interaction-test-runner';
 
+export type {LayerTestCase} from './lifecycle-test';
 export type {SnapshotTestCase} from './snapshot-test-runner';
 export type {InteractionTestCase} from './interaction-test-runner';

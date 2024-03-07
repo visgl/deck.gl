@@ -150,7 +150,7 @@ type Spy = ReturnType<typeof makeSpy>;
 export type LayerClass<LayerT extends Layer> = {
   new (...args): LayerT;
   layerName: string;
-  defaultProps: Partial<LayerT['props']>;
+  defaultProps: any;
 };
 
 export type LayerTestCase<LayerT extends Layer> = {

@@ -43,7 +43,7 @@ class MapboxDemo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.data && !prevProps.data) {
+    if (this.props.data && !prevProps.data && this._view) {
       this._view.update(this.props.data);
     }
   }

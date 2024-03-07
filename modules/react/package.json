@@ -3,7 +3,7 @@
   "description": "React Components for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.6",
+  "version": "9.0.0-beta.7",
   "publishConfig": {
     "access": "public"
   },
@@ -34,8 +34,6 @@
   ],
   "sideEffects": false,
   "scripts": {},
-  "dependencies": {
-  },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-beta",
     "@types/react": "^18.2.0",

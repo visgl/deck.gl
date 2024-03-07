@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {testLayer} from '@deck.gl/test-utils';
-import {UNIT} from '@deck.gl/core';
+import {UNIT, Layer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -17,8 +17,8 @@ test('ScatterplotLayer points radiusUnits prop', t => {
       onAfterUpdate: ({subLayers}) => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
-        const scatterplotLayer = filteredLayers[0];
-        const uniforms = scatterplotLayer.getModels()[0].getUniforms();
+        const scatterplotLayer = filteredLayers[0] as Layer;
+        const uniforms = scatterplotLayer.getModels()[0].uniforms;
         t.is(uniforms.radiusUnits, UNIT.meters, 'radiusUnits "meters"');
       }
     },
@@ -31,8 +31,8 @@ test('ScatterplotLayer points radiusUnits prop', t => {
       onAfterUpdate: ({subLayers}) => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
-        const scatterplotLayer = filteredLayers[0];
-        const uniforms = scatterplotLayer.getModels()[0].getUniforms();
+        const scatterplotLayer = filteredLayers[0] as Layer;
+        const uniforms = scatterplotLayer.getModels()[0].uniforms;
         t.is(uniforms.radiusUnits, UNIT.pixels, 'radiusUnits "pixels"');
       }
     },
@@ -45,8 +45,8 @@ test('ScatterplotLayer points radiusUnits prop', t => {
       onAfterUpdate: ({subLayers}) => {
         const filteredLayers = subLayers.filter(l => l.id === 'GeoJsonLayer-points-circle');
 
-        const scatterplotLayer = filteredLayers[0];
-        const uniforms = scatterplotLayer.getModels()[0].getUniforms();
+        const scatterplotLayer = filteredLayers[0] as Layer;
+        const uniforms = scatterplotLayer.getModels()[0].uniforms;
         t.is(uniforms.radiusUnits, UNIT.common, 'radiusUnits "common"');
       }
     }

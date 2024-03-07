@@ -148,25 +148,27 @@ test.skip('GoogleMapsOverlay#style', t => {
 
   const overlay = new GoogleMapsOverlay({
     style: {zIndex: 10},
-    layers: []
+    layers: [],
+    onLoad: () => {
+      const deck = overlay._deck;
+
+      t.is(deck.props.parent.style.zIndex, '10', 'parent zIndex is set');
+      t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
+
+      overlay.setProps({
+        style: {zIndex: 5}
+      });
+      t.is(deck.props.parent.style.zIndex, '5', 'parent zIndex is set');
+      t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
+
+      overlay.finalize();
+
+      t.end();
+    }
   });
 
   overlay.setMap(map);
   map.emit({type: 'renderingtype_changed'});
-  const deck = overlay._deck;
-
-  t.is(deck.props.parent.style.zIndex, '10', 'parent zIndex is set');
-  t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
-
-  overlay.setProps({
-    style: {zIndex: 5}
-  });
-  t.is(deck.props.parent.style.zIndex, '5', 'parent zIndex is set');
-  t.is(deck.canvas.style.zIndex, '', 'canvas zIndex is not set');
-
-  overlay.finalize();
-
-  t.end();
 });
 
 function drawPickTest(renderingType) {

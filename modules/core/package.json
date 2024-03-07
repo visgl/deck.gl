@@ -3,7 +3,7 @@
   "description": "deck.gl core library",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.6",
+  "version": "9.0.0-beta.7",
   "publishConfig": {
     "access": "public"
   },
@@ -42,11 +42,11 @@
   "dependencies": {
     "@loaders.gl/core": "^4.1.0",
     "@loaders.gl/images": "^4.1.0",
-    "@luma.gl/constants": "9.0.0-beta.6",
-    "@luma.gl/core": "9.0.0-beta.6",
-    "@luma.gl/engine": "9.0.0-beta.6",
-    "@luma.gl/shadertools": "9.0.0-beta.6",
-    "@luma.gl/webgl": "9.0.0-beta.6",
+    "@luma.gl/constants": "9.0.0-beta.8",
+    "@luma.gl/core": "9.0.0-beta.8",
+    "@luma.gl/engine": "9.0.0-beta.8",
+    "@luma.gl/shadertools": "9.0.0-beta.8",
+    "@luma.gl/webgl": "9.0.0-beta.8",
     "@math.gl/core": "^4.0.0",
     "@math.gl/sun": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
