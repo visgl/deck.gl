@@ -10,7 +10,7 @@ function setTextStyle(ctx, fontSize) {
 
 /*
  * renders a matrix of text labels to texture2D.
- * @param {WebGLRenderingContext} glContext
+ * @param {WebGL2RenderingContext} glContext
  * @param {[[String]]} data: text to render, in array of columns (array of strings)
  * @param {Number} fontSize: size to render with
  * @returns {object} {texture, columnWidths}

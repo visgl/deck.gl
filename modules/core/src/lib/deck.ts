@@ -377,6 +377,9 @@ export default class Deck {
     if (props.device) {
       this.device = props.device;
     } else if (props.gl) {
+      if (props.gl instanceof WebGLRenderingContext) {
+        log.error('WebGL1 context not supported.')();
+      }
       this.device = WebGLDevice.attach(props.gl);
     }
 

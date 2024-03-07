@@ -35,7 +35,9 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   onAdd(map: Map, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     if (gl instanceof WebGLRenderingContext) {
-      log.warn('Use useWebGL2:true in mapboxgl.Map()')();
+      log.warn(
+        'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
+      )();
       return;
     }
     this.map = map;

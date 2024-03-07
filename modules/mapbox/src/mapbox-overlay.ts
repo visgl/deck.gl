@@ -97,7 +97,9 @@ export default class MapboxOverlay implements IControl {
     // @ts-ignore non-public map property
     const gl = map.painter.context.gl;
     if (gl instanceof WebGLRenderingContext) {
-      log.warn('Use useWebGL2:true in mapboxgl.Map()')();
+      log.warn(
+        'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
+      )();
       return document.createElement('div');
     }
     this._deck = getDeckInstance({
