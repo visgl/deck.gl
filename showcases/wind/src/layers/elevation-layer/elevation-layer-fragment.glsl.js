@@ -1,14 +1,11 @@
 export default `\
-#version 300 es
 #define SHADER_NAME elevation-layer-fragment-shader
 
 uniform vec2 elevationRange;
 
-in float lightWeight;
-in vec3 vNormal;
-in float vAltitude;
-
-out vec4 fragColor;
+varying float lightWeight;
+varying vec3 vNormal;
+varying float vAltitude;
 
 void main() {
   if (vAltitude < -90.0) {
@@ -17,6 +14,6 @@ void main() {
 
   float opacity = smoothstep(elevationRange.x, elevationRange.y / 2.0, vAltitude) * 1.;
 
-  fragColor = vec4(vec3(15./70., 26./70., 36./70.) * lightWeight, opacity);
+  gl_FragColor = vec4(vec3(15./70., 26./70., 36./70.) * lightWeight, opacity);
 }
 `;

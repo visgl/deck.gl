@@ -19,19 +19,18 @@
 // THE SOFTWARE.
 
 export default `\
-#version 300 es
 #define SHADER_NAME delaunay-cover-vertex-shader
 #define HEIGHT_FACTOR 25.
 
 uniform vec2 bounds;
 
-in vec3 positions;
-in vec3 next;
-in vec3 next2;
+attribute vec3 positions;
+attribute vec3 next;
+attribute vec3 next2;
 
-out vec4 vPosition;
-out vec4 vNormal;
-out vec4 vColor;
+varying vec4 vPosition;
+varying vec4 vNormal;
+varying vec4 vColor;
 
 vec4 getWorldSpacePos(vec3 positions) {
   vec2 pos = project_position(positions.xy);

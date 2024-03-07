@@ -3,22 +3,21 @@ import GL from '@luma.gl/constants';
 import {sortCharactersByBrightness} from './utils';
 
 const vs = `
-#version 300 es
 #define SHADER_NAME feedback-vertex-shader
 
 uniform sampler2D video;
 uniform sampler2D pixelMapTexture;
-in vec2 uv;
+attribute vec2 uv;
 
-out vec4 instanceIconFrames;
-out vec4 instanceColors;
+varying vec4 instanceIconFrames;
+varying vec4 instanceColors;
 
 float bitColor(float x) {
   return floor(x * 4. + 0.5) * 64.;
 }
 
 void main(void) {
-  vec4 pixel = texture(video, uv);
+  vec4 pixel = texture2D(video, uv);
   float luminance = 0.2126 * pixel.r + 0.7152 * pixel.g + 0.0722 * pixel.b;
 
   instanceColors = vec4(
@@ -28,24 +27,22 @@ void main(void) {
     255.0
   );
 
-  instanceIconFrames = texture(pixelMapTexture, vec2(luminance + 0.5 / 256., 0.5));
+  instanceIconFrames = texture2D(pixelMapTexture, vec2(luminance + 0.5 / 256., 0.5));
 
   gl_Position = vec4(0.0);
 }
 `;
 
 const fs = `
-#version 300 es
 #define SHADER_NAME feedback-fragment-shader
 
 precision highp float;
 
-in vec4 instanceIconFrames;
-in vec4 instanceColors;
-out vec4 fragColor;
+varying vec4 instanceIconFrames;
+varying vec4 instanceColors;
 
 void main(void) {
-  fragColor = vec4(0.0);
+  gl_FragColor = vec4(0.0);
 }
 `;
 

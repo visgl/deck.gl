@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 export default `\
-#version 300 es
 #define SHADER_NAME particle-layer-vertex-shader
 
 #define HEIGHT_FACTOR 25.
@@ -40,16 +39,16 @@ uniform vec4 elevationBounds;
 uniform vec2 elevationRange;
 uniform float zScale;
 
-in vec3 positions;
-in vec4 posFrom;
-// in vec3 vertices;
+attribute vec3 positions;
+attribute vec4 posFrom;
+// attribute vec3 vertices;
 
-out vec4 vColor;
-out float vAltitude;
+varying vec4 vColor;
+varying float vAltitude;
 
 float getAltitude(vec2 lngLat) {
   vec2 texCoords = (lngLat - elevationBounds.xy) / (elevationBounds.zw - elevationBounds.xy);
-  vec4 elevation = texture(elevationTexture, texCoords);
+  vec4 elevation = texture2D(elevationTexture, texCoords);
 
   return mix(elevationRange.x, elevationRange.y, elevation.r);
 }
@@ -59,7 +58,7 @@ void main(void) {
   float x = (posFrom.x - bbox.x) / (bbox.y - bbox.x);
   float y = (posFrom.y - bbox.z) / (bbox.w - bbox.z);
   vec2 coord = vec2(x, 1. - y);
-  vec4 texel = mix(texture(dataFrom, coord), texture(dataTo, coord), delta);
+  vec4 texel = mix(texture2D(dataFrom, coord), texture2D(dataTo, coord), delta);
 
   vAltitude = getAltitude(posFrom.xy);
   //float wind = (texel.y - bounds1.x) / (bounds1.y - bounds1.x);
