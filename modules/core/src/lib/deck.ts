@@ -245,7 +245,7 @@ const defaultProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {type: 'webgl' as const},
+  deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
   glOptions: {},
   canvas: null,
