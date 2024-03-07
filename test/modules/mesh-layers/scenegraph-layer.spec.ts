@@ -23,30 +23,33 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {CubeGeometry} from '@luma.gl/engine';
-import {GroupNode, ModelNode} from '@luma.gl/experimental';
+import {CubeGeometry, Model, GroupNode, ModelNode} from '@luma.gl/engine';
+import {GLTFAnimator} from '@luma.gl/gltf';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
 const fs = `\
-varying vec4 vColor;
+#version 300 es
+in vec4 vColor;
+out vec4 fragColor;
 
 void main(void) {
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }
 `;
 
 const vs = `\
+#version 300 es
 uniform float sizeScale;
 
-attribute vec3 positions;
+in vec3 positions;
 
-attribute vec3 instancePositions;
-attribute vec3 instancePositions64Low;
-attribute vec4 instanceColors;
-attribute vec3 instanceTranslation;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in vec4 instanceColors;
+in vec3 instanceTranslation;
 
-varying vec4 vColor;
+out vec4 vColor;
 
 void main(void) {
   vColor = instanceColors / 255.0;
@@ -59,18 +62,16 @@ void main(void) {
 }
 `;
 
-class MockGLTFAnimator {
+class MockGLTFAnimator extends GLTFAnimator {
   constructor() {
-    this.animation0 = {};
-    this.animation1 = {};
-    this.animation2 = {name: 'name'};
+    super({
+      animations: [
+        {channels: [], samplers: []},
+        {channels: [], samplers: []},
+        {channels: [], samplers: [], name: 'name'}
+      ]
+    });
   }
-
-  getAnimations() {
-    return [this.animation0, this.animation1, this.animation2];
-  }
-
-  animate() {}
 }
 
 test('ScenegraphLayer#tests', t => {
@@ -78,7 +79,7 @@ test('ScenegraphLayer#tests', t => {
     Layer: ScenegraphLayer,
     sampleProps: {
       data: FIXTURES.points,
-      getPosition: d => d.COORDINATES,
+      getPosition: d => (d as any).COORDINATES,
       getTranslation: d => [0, 0, 2],
       pickable: false,
       sizeScale: 50,
@@ -99,12 +100,13 @@ test('ScenegraphLayer#tests', t => {
       },
       getScene: (_scenegraph, {device}) => {
         return new GroupNode([
-          new ModelNode(device, {
-            geometry: new CubeGeometry(),
-            vs,
-            fs,
-            modules: [project32],
-            isInstanced: true
+          new ModelNode({
+            model: new Model(device!, {
+              geometry: new CubeGeometry(),
+              vs,
+              fs,
+              modules: [project32]
+            })
           })
         ]);
       },
@@ -116,9 +118,9 @@ test('ScenegraphLayer#tests', t => {
       if (layer.props.scenegraph) {
         t.ok(layer.state.scenegraph, 'State scenegraph');
         t.ok(layer.state.animator, 'State animator');
-        t.ok(layer.state.animator.animation0.speed === 10, 'Animator speed wildcard');
-        t.ok(layer.state.animator.animation1.speed === 20, 'Animator speed by index');
-        t.ok(layer.state.animator.animation2.speed === 30, 'Animator speed by name');
+        t.ok(layer.state.animator.getAnimations()[0].speed === 10, 'Animator speed wildcard');
+        t.ok(layer.state.animator.getAnimations()[1].speed === 20, 'Animator speed by index');
+        t.ok(layer.state.animator.getAnimations()[2].speed === 30, 'Animator speed by name');
       }
     },
     runDefaultAsserts: false

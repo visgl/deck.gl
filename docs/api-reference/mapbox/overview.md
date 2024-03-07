@@ -48,10 +48,7 @@ The Mapbox ecosystem offers many well-designed controls, from the basic function
 
 One major use case for interleaving deck.gl and Mapbox is that some important information in the Mapbox map could be hidden by a deck.gl visualization layer, and controlling opacity is not enough. A typical example of this is labels and roads, where it is desirable to have a deck.gl visualization layer render on top of the Mapbox geography, but where one might still want to see e.g. labels and/or roads. Alternatively, the deck.gl visualization should cover the ground, but not the roads and labels.
 
-To inject a deck layer into the Mapbox stack, either:
-
-- Add a `beforeId` prop to any layer passed to the [MapboxOverlay](./mapbox-overlay.md) control (recommended).
-- Create a [MapboxLayer](./mapbox-layer.md) and call the [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API.
+To inject a deck layer into the Mapbox stack add a `beforeId` prop to any layer passed to the [MapboxOverlay](./mapbox-overlay.md) control.
 
 Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of Mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).
 
@@ -76,6 +73,5 @@ Libraries utilizing WebGL1 cannot be interleaved with deck.gl. deck.gl has phase
 
 * When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction. See [using MapboxOverlay with multi-views](./mapbox-overlay.md#multi-view-usage) for details.
 * When using deck.gl as Mapbox layers or controls, `Deck` only receives a subset of user inputs delegated by `Map`. Therefore, certain interactive callbacks like `onDrag`, `onInteractionStateChange` are not available.
-* WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
 * Mapbox/Maplibre's terrain features are partially supported. When a terrain is used, the camera of deck.gl and the base map should synchronize, however the deck.gl data with z=0 are rendered at the sea level and not aligned with the terrain surface.
 

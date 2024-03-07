@@ -28,7 +28,7 @@
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.1",
     "expr-eval": "^2.0.2",
-    "mapbox-gl": "^2.0.0",
+    "mapbox-gl": "^3.0.0",
     "maplibre-gl": "^2.4.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
@@ -42,7 +42,6 @@
     "@docusaurus/preset-classic": "^2.2.0",
     "@mdx-js/react": "^1.6.22",
     "babel-plugin-styled-components": "^2.0.0",
-    "babel-plugin-remove-glsl-comments": "^1.0.0",
     "prism-react-renderer": "^1.2.1",
     "ts-node": "~10.9.1"
   },

@@ -34,8 +34,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {Texture} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -55,7 +54,7 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
   tintColor: {type: 'color', value: [255, 255, 255]},
 
-  textureParameters: {type: 'object', ignore: true}
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** All properties supported by BitmapLayer. */
@@ -110,7 +109,7 @@ type _BitmapLayerProps = {
   tintColor?: Color;
 
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 };
 
 /** Render a bitmap at specified boundaries. */
@@ -147,7 +146,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       },
       positions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         update: attribute => (attribute.value = this.state.mesh.positions),
         noAlloc

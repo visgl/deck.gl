@@ -1,7 +1,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
@@ -77,7 +76,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -105,16 +104,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceFillColors: {
         size: 4,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: 4,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },

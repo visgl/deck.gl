@@ -35,7 +35,6 @@ const config = {
       '@deck.gl/*': 'globalThis.deck',
       '@luma.gl/core': 'globalThis.luma',
       '@luma.gl/engine': 'globalThis.luma',
-      '@luma.gl/webgl': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
       'h3-js': 'globalThis.h3 || {}'
     }
@@ -49,8 +48,8 @@ const config = {
     'deck.gl-test': join(packageRoot, './test')
   },
 
-  browserTest: {
-    server: {wait: 5000}
+  coverage: {
+    test: 'browser'
   },
 
   entry: {

@@ -11,3 +11,4 @@ mapbox-gl.js
 .docusaurus
 examples/
 test/apps/
+bindings/

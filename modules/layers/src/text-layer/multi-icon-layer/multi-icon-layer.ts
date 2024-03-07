@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/constants';
 import {log} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
@@ -75,7 +74,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
         accessor: 'getIconOffsets'
       },
       instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         size: 3,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
