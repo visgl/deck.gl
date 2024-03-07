@@ -62,7 +62,7 @@ export default class LayersPass extends Pass {
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
-    const clearColor = options.clearColor ?? clearCanvas ? [0, 0, 0, 0] : false;
+    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     const clearDepth = clearCanvas ? 1 : false;
 
     const renderPass = this.device.beginRenderPass({
