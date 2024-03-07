@@ -1,10 +1,9 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {WEBGLRenderbuffer} from '@luma.gl/webgl';
 import {default as LayersPass} from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture;
-  depthBuffer: WEBGLRenderbuffer;
+  depthBuffer: Texture;
   fbo: Framebuffer;
 
   constructor(
@@ -45,7 +44,6 @@ export default class ShadowPass extends LayersPass {
       height: 1,
       colorAttachments: [this.shadowMap],
       // Depth attachment has to be specified for depth test to work
-      // @ts-expect-error Renderbuffer typing not solved in luma.gl
       depthStencilAttachment: this.depthBuffer
     });
   }
