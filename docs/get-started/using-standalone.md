@@ -55,8 +55,8 @@ import TabItem from '@theme/TabItem';
 ```html
 <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
 <!-- optional if mapbox base map is needed -->
-<script src="https://unpkg.com/mapbox-gl@^3.0.0/dist/mapbox-gl.js"></script>
-<link href="https://unpkg.com/mapbox-gl@^3.0.0/dist/mapbox-gl.css" rel="stylesheet" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
 <!-- Allow the map to render in full screen  -->
 <style>
   body {
