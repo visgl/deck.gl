@@ -100,7 +100,6 @@ export default class MapboxOverlay implements IControl {
       log.warn(
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
       )();
-      return document.createElement('div');
     }
     this._deck = getDeckInstance({
       map,
