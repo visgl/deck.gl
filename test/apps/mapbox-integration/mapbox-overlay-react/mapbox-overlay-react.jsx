@@ -2,8 +2,7 @@
 import React, {useState, useRef, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
-import {Map, useControl} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map, useControl} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
@@ -88,7 +87,6 @@ function App() {
       initialViewState={INITIAL_VIEW_STATE.mapbox}
       style={{position: 'absolute', width: '100%', height: '100%'}}
       mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-      mapLib={maplibregl}
       onLoad={onMapLoad}
     >
       <DeckGLOverlay

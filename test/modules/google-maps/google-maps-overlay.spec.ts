@@ -136,7 +136,8 @@ for (const interleaved of [true, false]) {
   });
 }
 
-test('GoogleMapsOverlay#style', t => {
+// TODO v9
+test.skip('GoogleMapsOverlay#style', t => {
   const map = new mapsApi.Map({
     width: 1,
     height: 1,

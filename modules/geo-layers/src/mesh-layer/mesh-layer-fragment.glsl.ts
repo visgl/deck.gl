@@ -31,15 +31,7 @@ void main(void) {
   vec3 normal;
   if (flatShading) {
 
-// NOTE(Tarek): This is necessary because
-// headless.gl reports the extension as
-// available but does not support it in
-// the shader.
-#ifdef DERIVATIVES_AVAILABLE
-    normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
-#else
-    normal = vec3(0.0, 0.0, 1.0);
-#endif
+  normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
   } else {
     normal = normals_commonspace;
   }

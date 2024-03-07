@@ -8,7 +8,7 @@ There are a couple of ways to build a layer in deck.gl, and it is helpful to con
 
 * **[Create a composite layer](./composite-layers.md)** - A composite layer is a special kind of layer that creates other layers. This allows you to build e.g. a "semantic layer" - a layer that presents a different interface (set of props) than an existing layer, transforms those props into a format that fits and existing layer, etc.
 * **[Subclass a layer](./subclassed-layers.md)** - Subclassed layer is a new layer created by subclassing another layers. This allows the developer to reuse all of the interfaces and implementations of an existing layer unless they are explicitly overridden.
-* **[Implement a layer from scratch](./primitive-layers.md)** - If you want to draw something completely different and you are comfortable with WebGL and shader programming, this option gives you the most flexibility. You have full control of the layer lifecycle, you can manage your own model(s) and directly manipulate the WebGL context.
+* **[Implement a layer from scratch](./primitive-layers.md)** - If you want to draw something completely different and you are comfortable with WebGL2/WebGPU and shader programming, this option gives you the most flexibility. You have full control of the layer lifecycle, you can manage your own model(s) and directly manipulate the WebGL2/WebGPU context.
 
 
 ## Creating The Layer class

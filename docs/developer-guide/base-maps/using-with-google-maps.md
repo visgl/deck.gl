@@ -20,7 +20,7 @@ Starting with v8.6, deck.gl added interleaving support on Google's vector map, u
 
 When a Deck instance is applied to the map, deck.gl detects whether it is an instance of the vector map, then automatically enables interleaving. For information on how to enable the Google's vector map for the web, see the [Maps JavaScript API documentation](https://developers.google.com/maps/documentation/javascript/vector-map). 
 
-By default, when a Deck instance is added to the map, deck.gl will detect if the map is an instance of the vector map and enable interleaved mode. If the vector map is not detected or the user's device does not support WebGL, deck.gl will automatically fallback to overlaid mode.
+By default, when a Deck instance is added to the map, deck.gl will detect if the map is an instance of the vector map and enable interleaved mode. If the vector map is not detected or the user's device does not support WebGL2, deck.gl will automatically fallback to overlaid mode.
 
 ## Using overlaid
 

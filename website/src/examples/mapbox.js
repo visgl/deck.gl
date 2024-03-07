@@ -1,13 +1,13 @@
 import React, {Component, createRef} from 'react';
 import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
-import {renderToDOM} from 'website-examples/safegraph/app';
+import {renderToDOM} from 'website-examples/mapbox/app';
 
 import {makeExample} from '../components';
 
 class MapboxDemo extends Component {
   static title = 'Who Is Visiting San Francisco?';
 
-  static code = `${GITHUB_TREE}/examples/website/safegraph`;
+  static code = `${GITHUB_TREE}/examples/website/mapbox`;
 
   static data = {
     url: `${DATA_URI}/safegraph.txt`,

@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import {MapboxLayer} from '@deck.gl/mapbox';
+import MapboxLayer from '../../../../modules/mapbox/src/mapbox-layer';
 
 import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from '../layers';
 

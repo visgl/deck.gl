@@ -1,6 +1,6 @@
 # Testing Layers and Applications
 
-Testing WebGL code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
+Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
 
 The [@deck.gl/test-utils](../api-reference/test-utils/overview.md) module is used to ensure the quality and stability of the deck.gl framework. It is also available for those who need to test their own custom layers and/or deck.gl applications.
 
@@ -80,7 +80,7 @@ test('GeoJsonLayer#tests', t => {
 
 ## Integration Tests
 
-While unit tests are good at capturing issues in layer initialization and prop updates, they do not guarantee that the layer will be correctly rendered to screen. Some issues in e.g. the WebGL shaders can only be spotted in an integration test.
+While unit tests are good at capturing issues in layer initialization and prop updates, they do not guarantee that the layer will be correctly rendered to screen. Some issues in e.g. the GPU shaders can only be spotted in an integration test.
 
 The `@deck.gl/test-utils` module offers a [SnapshotTestRunner](../api-reference/test-utils/snapshot-test-runner.md) that works with the [probe.gl](https://uber-web.github.io/probe.gl) library's [`BrowserTestDriver`](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/browser-test-driver) class to perform this task. Together, they enable the following scenario:
 
