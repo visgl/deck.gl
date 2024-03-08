@@ -1,6 +1,6 @@
 # MapboxLayer
 
-`MapboxLayer` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [CustomLayerInterface](https://docs.mapbox.com/mapbox-gl-js/api/properties/#customlayerinterface) API. By adding a `MapboxLayer` instance to an mapbox map, one can render any deck.gl layer inside the mapbox canvas / WebGL context. This is in contrast to the traditional deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas over the base map.
+`MapboxLayer` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [CustomLayerInterface](https://docs.mapbox.com/mapbox-gl-js/api/properties/#customlayerinterface) API. By adding a `MapboxLayer` instance to an mapbox map, one can render any deck.gl layer inside the mapbox canvas / WebGL2 context. This is in contrast to the traditional deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas over the base map.
 
 See the Mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API for how to add a layer to an existing layer stack.
 

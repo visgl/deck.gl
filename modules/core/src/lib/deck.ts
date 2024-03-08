@@ -135,7 +135,7 @@ export type DeckProps = {
   deviceProps?: DeviceProps;
 
   /** WebGL context @deprecated Use props.device */
-  gl?: WebGLRenderingContext | null;
+  gl?: WebGL2RenderingContext | null;
   /** Options used when creating a WebGL context. @deprecated Use props.deviceProps */
   glOptions?: WebGLContextAttributes;
 
@@ -188,7 +188,7 @@ export type DeckProps = {
   /** Called once the GPU Device has been initiated. */
   onDeviceInitialized?: (device: Device) => void;
   /** @deprecated Called once the WebGL context has been initiated. */
-  onWebGLInitialized?: (gl: WebGLRenderingContext) => void;
+  onWebGLInitialized?: (gl: WebGL2RenderingContext) => void;
   /** Called when the canvas resizes. */
   onResize?: (dimensions: {width: number; height: number}) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
@@ -196,9 +196,9 @@ export type DeckProps = {
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
-  onBeforeRender?: (context: {device: Device; gl: WebGLRenderingContext}) => void;
+  onBeforeRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
   /** Called right after the canvas rerenders. */
-  onAfterRender?: (context: {device: Device; gl: WebGLRenderingContext}) => void;
+  onAfterRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
   /** Called once after gl context and all Deck components are created. */
   onLoad?: () => void;
   /** Called if deck.gl encounters an error.
@@ -245,7 +245,7 @@ const defaultProps = {
   parameters: {},
   parent: null,
   device: null,
-  deviceProps: {type: 'webgl' as const},
+  deviceProps: {type: 'webgl'} as DeviceProps,
   gl: null,
   glOptions: {},
   canvas: null,
@@ -917,7 +917,8 @@ export default class Deck {
   private _setDevice(device: Device) {
     this.device = device;
 
-    if (this.layerManager) {
+    if (!this.animationLoop) {
+      // finalize() has been called
       return;
     }
 
@@ -948,7 +949,7 @@ export default class Deck {
     // timeline for transitions
     const timeline = new Timeline();
     timeline.play();
-    this.animationLoop!.attachTimeline(timeline);
+    this.animationLoop.attachTimeline(timeline);
 
     this.eventManager = new EventManager(this.props.parent || this.canvas, {
       touchAction: this.props.touchAction,

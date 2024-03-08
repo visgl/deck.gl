@@ -1,18 +1,29 @@
 /* eslint-disable no-invalid-this */
 
 import type {Device} from '@luma.gl/core';
-import {loadImageBitmap} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import {Deck} from '@deck.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 
-export function initializeResources(this: any, device: Device) {
-  // What is `this` referring to this function???
-  const deckglTexture = device.createTexture({ width: 1, height: 1 });
-  const imageTexture = device.createTexture({data: loadImageBitmap('https://as2.ftcdn.net/jpg/02/25/74/91/500_F_225749110_EF3DzP1hwjPyalkJkVRHAS8vggkM4Z19.jpg')});
+export function initializeResources(device: Device) {
+  // 'this' refers to the BaseLayerViewGL2D class from
+  // import BaseLayerViewGL2D from "@arcgis/core/views/2d/layers/BaseLayerViewGL2D.js";
 
-  this.imageTexture = imageTexture;
+  const deckglTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width: 1,
+    height: 1,
+    sampler: {
+      minFilter: 'linear',
+      magFilter: 'linear',
+      addressModeU: 'clamp-to-edge',
+      addressModeV: 'clamp-to-edge'
+    }
+  });
+
+  this.deckglTexture = deckglTexture;
+
   this.buffer = device.createBuffer(new Int8Array([
     // Triangle 1
     -1, -1, // bottom left
@@ -24,12 +35,12 @@ export function initializeResources(this: any, device: Device) {
     1, -1
   ]));
 
+
   this.model = new Model(device, {
     vs: `\
 #version 300 es
 in vec2 a_pos;
 out vec2 v_texcoord;
-
 void main(void) {
     gl_Position = vec4(a_pos, 0.0, 1.0);
     v_texcoord = (a_pos + 1.0) / 2.0;
@@ -39,48 +50,34 @@ void main(void) {
 #version 300 es
 precision mediump float;
 uniform sampler2D deckglTexture;
-uniform sampler2D imageTexture;
 in vec2 v_texcoord;
 out vec4 fragColor;
 
 void main(void) {
-    vec4 imageColor = texture(imageTexture, v_texcoord);
-    fragColor += imageColor;
-    
-    vec4 deckglColor = texture(deckglTexture, v_texcoord);
-    deckglColor.rbg *= deckglColor.a;
-    fragColor = deckglColor;
-    // this gives the gradient
-    // fragColor += vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
-    
-    // directly render textured data
-    // fragColor = vec4(imageColor.r, imageColor.g, imageColor.b,  1.0);
-    
-    fragColor = texture(deckglTexture, v_texcoord);
+    vec4 imageColor = texture(deckglTexture, v_texcoord);
+    imageColor.rgb *= imageColor.a;
+    fragColor = imageColor;
 }
     `,
-
     bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
     bindings: {
       deckglTexture,
-      imageTexture
     },
     parameters: {
       depthWriteEnabled: true,
       depthCompare: 'less-equal'
     },
     attributes: {
-      // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
     vertexCount: 6,
-    drawMode: GL.TRIANGLE_STRIP,
+    drawMode: GL.TRIANGLE_STRIP
   });
 
   this.deckFbo = device.createFramebuffer({
     id: 'deckfbo',
-    width: 100,
-    height: 100,
+    width: 1,
+    height: 1,
     colorAttachments: [ deckglTexture ]
   });
 
@@ -93,6 +90,7 @@ void main(void) {
 
     // We use the same WebGL context as the ArcGIS API for JavaScript.
     gl: device.props.gl,
+
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
       depthTest: true
@@ -114,13 +112,17 @@ void main(void) {
     }
   });
 }
-export function render(this: any, {gl, width, height, viewState}) {
+
+export function render({gl, width, height, viewState}) {
   const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+
   /* global window */
   const dpr = window.devicePixelRatio;
   width = Math.round(width * dpr);
   height = Math.round(height * dpr);
+
   this.deckFbo.resize({width, height});
+
   this.deckInstance.setProps({viewState});
   // redraw deck immediately into deckFbo
   this.deckInstance.redraw('arcgis');
@@ -128,7 +130,7 @@ export function render(this: any, {gl, width, height, viewState}) {
   // We overlay the texture on top of the map using the full-screen quad.
   const device: WebGLDevice = this.deckInstance.device;
 
-  const renderPass = device.beginRenderPass({
+  const textureToScreenPass = device.beginRenderPass({
     framebuffer: screenFbo,
     parameters: {viewport: [0, 0, width, height]},
     clearColor: [0, 0, 0, 0],
@@ -139,21 +141,18 @@ export function render(this: any, {gl, width, height, viewState}) {
     {
       blend: true,
       blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      framebuffer: screenFbo,
       viewport: [0, 0, width, height]
     },
     () => {
-      // eslint-disable-next-line camelcase
       this.model.setBindings({
         'deckglTexture': this.deckFbo.colorAttachments[0],
-        'imageTexture': this.imageTexture,
       });
-      this.model.draw(renderPass);
-    }
+      this.model.draw(textureToScreenPass);
+    },
   );
 }
 
-export function finalizeResources(this: any) {
+export function finalizeResources() {
   this.deckInstance?.finalize();
   this.deckInstance = null;
 

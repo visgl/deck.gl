@@ -10,6 +10,12 @@ MODE=$1
 WEBSITE_DIR=`pwd`
 OUTPUT_DIR=build
 
+# rebuild modules from source
+(
+  cd ..
+  yarn build
+)
+
 # clean up cache
 docusaurus clear
 

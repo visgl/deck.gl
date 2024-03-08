@@ -16,7 +16,7 @@ type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
   device: Device;
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;

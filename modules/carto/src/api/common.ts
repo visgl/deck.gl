@@ -4,7 +4,6 @@ export const V3_MINOR_VERSION = '3.3';
 export const MAX_GET_LENGTH = 8192;
 
 export const DEFAULT_PARAMETERS = {
-  client: DEFAULT_CLIENT,
   v: V3_MINOR_VERSION
 };
 

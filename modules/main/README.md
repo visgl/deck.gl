@@ -1,7 +1,7 @@
 
 # deck.gl
 
-A WebGL2-powered, highly performant framework for large-scale data visualization.
+A GPU-powered, highly performant framework for large-scale data visualization.
 
 [API Documentation](http://deck.gl/#/documentation)
 

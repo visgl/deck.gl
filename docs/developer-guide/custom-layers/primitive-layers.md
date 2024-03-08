@@ -1,21 +1,21 @@
 # Primitive Layers
 
-If you want to draw something completely different and you are comfortable around WebGL, you may consider implementing a new layer by directly extending the [`Layer`](../../api-reference/core/layer.md) class.
+If you want to draw something completely different and you are comfortable around WebGL2/WebGPU shaders, you may consider implementing a new layer by directly extending the [`Layer`](../../api-reference/core/layer.md) class.
 
 
 ## Implementing the Layer Lifecycle Functions
 
-To describe how a layer's properties relate to WebGL attributes and uniforms you need to implement the layer's [lifecycle functions](./layer-lifecycle.md).
+To describe how a layer's properties relate to shader attributes and uniforms you need to implement the layer's [lifecycle functions](./layer-lifecycle.md).
 
 
 ### Initializing Layer
 
-[`initializeState()`](../../api-reference/core/layer.md#initializestate) - This is the one method that you must implement to create any WebGL resources you need for rendering your layer.
+[`initializeState()`](../../api-reference/core/layer.md#initializestate) - This is the one method that you must implement to create any GPU resources you need for rendering your layer.
 
 
 #### Creating The Model
 
-A layer should create its model during this phase. A model is a [luma.gl](https://github.com/visgl/luma.gl) [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) instance that defines what will be drawn to the WebGL context.
+A layer should create its model during this phase. A model is a [luma.gl](https://github.com/visgl/luma.gl) [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) instance that defines what will be drawn to the WebGL2/WebGPU context.
 
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 
@@ -38,7 +38,7 @@ export default class CubeLayer extends Layer {
 }
 ```
 
-A choice to make is whether your WebGL primitives (draw calls) should be instanced, or use dynamic geometry:
+A choice to make is whether your GPU primitives (draw calls) should be instanced, or use dynamic geometry:
 
 * **Instanced layer** - This type of layer renders the same geometry many times. Usually the simplest way to go when creating a layer that renders a lot of similar objects (think ScatterplotLayer, ArcLayers etc).
 
@@ -107,11 +107,11 @@ initializeState() {
 
 [`updateState()`](../../api-reference/core/layer.md#updatestate) - This is the method that you may want to implement to handle property changes.
 
-The key to writing good, performant deck.gl layers lies in understanding how to minimize updates of any calculated data, such as WebGL.
+The key to writing good, performant deck.gl layers lies in understanding how to minimize updates of any calculated data, such as GPU buffers.
 
 The ideas used here are very similar to (and directly inspired by) those used in the React/Redux/Flux/Immutable.js communities, and learning more about those frameworks can be helpful as a way to get a better understanding of how to use these concepts in the best way.
 
-* `data` - Typically if a layer is re-rendered with a changed `data` prop, all WebGL attributes must be regenerated and the layer needs to be redrawn. The default is to do exactly that, but sometimes a layer can be smarter and limit updates, or more work needs to be done.
+* `data` - Typically if a layer is re-rendered with a changed `data` prop, all GPU attributes must be regenerated and the layer needs to be redrawn. The default is to do exactly that, but sometimes a layer can be smarter and limit updates, or more work needs to be done.
 
 * If the viewport has changed, the layer will automatically be re-rendered. Many layers can thus ignore viewport changes, however, if the layer has any dependencies on the viewport (such as a layer that calculates extents or positions in screen space rather than world space) it would need to update state or uniforms whenever the viewport changes.
 
@@ -127,7 +127,7 @@ Note: the reason that the supplied uniforms need to be passed on to your shaders
 
 ### Destroying Layer
 
-[`finalizeState()`](../../api-reference/core/layer.md#finalizestate) - If implemented, this method is called when your layer state is discarded. This is a good time to destroy non-shared WebGL resources directly, rather than waiting for the garbage collector to do it.
+[`finalizeState()`](../../api-reference/core/layer.md#finalizestate) - If implemented, this method is called when your layer state is discarded. This is a good time to destroy non-shared GPU resources directly, rather than waiting for the garbage collector to do it.
 
 
 ## Handling Coordinate Systems

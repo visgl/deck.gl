@@ -16,7 +16,7 @@ export MapboxAccessToken=<mapbox_access_token>
 
 Or set `MAPBOX_TOKEN` directly in `app.js`.
 
-Other options can be found at [using with Mapbox GL](../../../docs/get-started/using-with-mapbox-gl.md).
+Other options can be found at [using with Mapbox GL](../../../docs/developer-guide/base-maps/using-with-mapbox.md).
 
 ```bash
 # install dependencies
