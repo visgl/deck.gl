@@ -97,8 +97,8 @@ export class TerrainEffect implements Effect {
     const {terrainDrawMode} = layer.state;
 
     return {
-      // @ts-expect-error
-      heightMap: this.heightMap?.getRenderFramebuffer(),
+      picking: {isActive: false},
+      heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap!,
       terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
