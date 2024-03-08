@@ -33,12 +33,12 @@
     "typed"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "9.0.0-beta.8"
+    "@luma.gl/test-utils": "9.0.0-beta.9"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-beta",
-    "@luma.gl/core": "9.0.0-beta.8",
-    "@luma.gl/engine": "9.0.0-beta.8",
+    "@luma.gl/core": "9.0.0-beta.9",
+    "@luma.gl/engine": "9.0.0-beta.9",
     "@probe.gl/test-utils": "^4.0.0"
   },
   "scripts": {},
