@@ -230,7 +230,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       minZoom,
       maxRequests,
       debounceTime,
-      zoomOffset,
+      zoomOffset
     } = this.props;
 
     return {
