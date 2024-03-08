@@ -19,20 +19,21 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME bezier-curve-layer-vertex-shader
 
-attribute vec3 positions;
-attribute vec3 instanceSourcePositions;
-attribute vec3 instanceTargetPositions;
-attribute vec3 instanceControlPoints;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
+in vec3 positions;
+in vec3 instanceSourcePositions;
+in vec3 instanceTargetPositions;
+in vec3 instanceControlPoints;
+in vec4 instanceColors;
+in vec3 instancePickingColors;
 
 uniform float numSegments;
 uniform float strokeWidth;
 uniform float opacity;
 
-varying vec4 vColor;
+out vec4 vColor;
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
