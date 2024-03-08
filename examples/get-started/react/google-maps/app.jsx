@@ -49,8 +49,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick,
-      // beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
+      onClick
     }),
     new ArcLayer({
       id: 'arcs',
