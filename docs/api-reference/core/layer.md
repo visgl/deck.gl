@@ -556,7 +556,7 @@ Notes:
 
 The context object stores information that are shared by all layers.
 
-* `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext)) - WebGL context of the current canvas.
+* `gl` ([WebGL2RenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)) - WebGL context of the current canvas.
 * `viewport` ([Viewport](./viewport.md)) - The current viewport
 * `deck` ([Deck](./deck.md)) - The current deck.gl instance
 
@@ -625,7 +625,7 @@ This method is called only once for each layer to set up the initial state.
 `initializeState(context)`
 
 * `context` - The layer context is supplied as a parameter
-  - `context.gl` (`WebGLRenderingContext`) - gl context
+  - `context.gl` (`WebGL2RenderingContext`) - gl context
   - ...
 
 deck.gl will already have created the `state` object at this time, and added the `gl` context and the `attributeManager` state.
@@ -684,7 +684,7 @@ Parameters:
 
 * an object that contains all the [default unforms](../../developer-guide/custom-layers/writing-shaders.md#uniforms) to be passed to the shaders.
 * `context` - The layer context is supplied as a parameter
-  - `context.gl` (`WebGLRenderingContext`) - gl context
+  - `context.gl` (`WebGL2RenderingContext`) - gl context
   - ...
 
 The default implementation looks for a variable `model` in the layer's state (which is expected to be an instance of the luma.gl `Model` class) and calls `draw` on that model with the parameters.
