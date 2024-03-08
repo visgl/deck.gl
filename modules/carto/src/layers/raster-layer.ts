@@ -30,8 +30,8 @@ class RasterColumnLayer extends ColumnLayer {
 
   getShaders() {
     const shaders = super.getShaders();
-    const {data} = this.props.data as unknown as {data: Raster};
-    const BLOCK_WIDTH = data.blockSize;
+    const data = this.props.data as unknown as {data: Raster, length: number};
+    const BLOCK_WIDTH = data.data.blockSize ?? Math.sqrt(data.length);
     return {...shaders, defines: {...shaders.defines, BLOCK_WIDTH}, vs};
   }
 
@@ -93,10 +93,10 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       getLineWidth,
       tileIndex,
       updateTriggers
-    } = this.props;
+    } = this.props as typeof this.props & {data: Raster};
     if (!data || !tileIndex) return null;
 
-    const {blockSize} = data as unknown as Raster;
+    const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
     const offset = [xOffset, yOffset, scale / blockSize];
 
