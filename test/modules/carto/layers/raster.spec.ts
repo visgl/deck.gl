@@ -16,6 +16,10 @@ test('Parse Carto Raster Tile', async t => {
   t.ok(band_1, 'band_1 found in data');
   t.ok(band_1.value instanceof Uint8Array, 'band has correct type');
   t.equal(band_1.value.length, 65536, 'band has correct length');
-  t.deepEqual(band_1.value.slice(123, 127), new Uint8Array([35, 36, 36, 36]), 'band correctly decoded');
+  t.deepEqual(
+    band_1.value.slice(123, 127),
+    new Uint8Array([35, 36, 36, 36]),
+    'band correctly decoded'
+  );
   t.end();
 });
