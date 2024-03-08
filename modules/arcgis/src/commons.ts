@@ -55,7 +55,9 @@ out vec4 fragColor;
 
 void main(void) {
     vec4 imageColor = texture(deckglTexture, v_texcoord);
-    fragColor = vec4(imageColor.r, imageColor.g, imageColor.b,  1.0);
+    imageColor.rgb *= imageColor.a;
+    fragColor = imageColor;
+    // fragColor = vec4(imageColor.r, imageColor.g, imageColor.b,  1.0);
 }
     `,
     bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
@@ -96,7 +98,7 @@ void main(void) {
     },
 
     // This deck renders into an auxiliary framebuffer.
-    // _framebuffer: this.deckFbo,
+    _framebuffer: this.deckFbo,
 
     // To disable canvas resizing, since the FBO is owned by the ArcGIS API for JavaScript.
     width: null,
@@ -113,7 +115,7 @@ void main(void) {
 }
 
 export function render({gl, width, height, viewState}) {
-  // const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+  const screenFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
 
   /* global window */
   const dpr = window.devicePixelRatio;
@@ -130,7 +132,7 @@ export function render({gl, width, height, viewState}) {
   const device: WebGLDevice = this.deckInstance.device;
 
   const textureToScreenPass = device.beginRenderPass({
-    framebuffer: this.deckFbo,
+    framebuffer: screenFbo,
     parameters: {viewport: [0, 0, width, height]},
     clearColor: [0, 0, 0, 0],
     clearDepth: 1
