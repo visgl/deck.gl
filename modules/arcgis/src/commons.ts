@@ -12,8 +12,8 @@ export function initializeResources(device: Device) {
 
   const deckglTexture = device.createTexture({
     format: 'rgba8unorm',
-    width: 500,
-    height: 500,
+    width: 1,
+    height: 1,
     sampler: {
       minFilter: 'linear',
       magFilter: 'linear',
@@ -57,7 +57,6 @@ void main(void) {
     vec4 imageColor = texture(deckglTexture, v_texcoord);
     imageColor.rgb *= imageColor.a;
     fragColor = imageColor;
-    // fragColor = vec4(imageColor.r, imageColor.g, imageColor.b,  1.0);
 }
     `,
     bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
@@ -77,8 +76,8 @@ void main(void) {
 
   this.deckFbo = device.createFramebuffer({
     id: 'deckfbo',
-    width: 500,
-    height: 500,
+    width: 1,
+    height: 1,
     colorAttachments: [ deckglTexture ]
   });
 
