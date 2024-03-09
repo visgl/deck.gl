@@ -161,7 +161,7 @@ export default function App() {
   return (
     <>
       <DeckGL layers={layers} initialViewState={viewState} controller={true}>
-        <StaticMap reuseMaps mapStyle={MAP_STYLE} preventStyleDiffing={true} />
+        <StaticMap reuseMaps mapStyle={MAP_STYLE} />
       </DeckGL>
       <div style={{left: 200, position: 'absolute', background: 'white', padding: 10}}>
         <label>
