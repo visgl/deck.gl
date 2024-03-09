@@ -242,7 +242,7 @@ new DeckGL({
   `;
 
   gotoSource({
-    dependencies: dependencies.concat(['https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js']),
+    dependencies: dependencies.concat(['https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js']),
     title: `deck.gl ${Layer.layerName}`,
     source
   });
