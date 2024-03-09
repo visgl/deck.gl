@@ -1,7 +1,7 @@
 /* global fetch */
 import React, {useCallback, useState} from 'react';
 import {render} from 'react-dom';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
@@ -161,7 +161,7 @@ export default function App() {
   return (
     <>
       <DeckGL layers={layers} initialViewState={viewState} controller={true}>
-        <StaticMap reuseMaps mapStyle={MAP_STYLE} />
+        <Map mapStyle={MAP_STYLE} />
       </DeckGL>
       <div style={{left: 200, position: 'absolute', background: 'white', padding: 10}}>
         <label>

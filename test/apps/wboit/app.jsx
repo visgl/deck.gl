@@ -1,7 +1,6 @@
 import React, {PureComponent, Fragment} from 'react';
 import DeckGL from '@deck.gl/react';
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
-import {StaticMap} from 'react-map-gl';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import WBOITLayer from './wboit-layer/wboit-layer';
 
@@ -164,7 +163,6 @@ export default class App extends PureComponent {
           effects={[lightingEffect]}
           layers={layers}
         >
-          <StaticMap />
         </DeckGL>
         <div style={{position: 'fixed'}}>
           {mkButton('Opacity 25%', 'opacity', 0.25)}
