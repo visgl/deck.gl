@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "deck.gl": "^9.0.0-beta.2",
-    "maplibre-gl": "^2.4.0"
+    "maplibre-gl": "^3.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"
