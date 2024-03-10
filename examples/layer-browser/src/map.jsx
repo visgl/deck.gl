@@ -1,7 +1,7 @@
 /* global window */
 
 import React, {PureComponent} from 'react';
-import {StaticMap, _MapContext as MapContext, NavigationControl} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import autobind from 'react-autobind';
 
 import DeckGL from '@deck.gl/react';
@@ -10,10 +10,7 @@ import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 import LayerInfo from './components/layer-info';
 import {RenderMetrics} from './render-metrics';
 
-const NAVIGATION_CONTROL_STYLES = {
-  margin: 10,
-  position: 'absolute'
-};
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const VIEW_LABEL_STYLES = {
   padding: 5,
@@ -45,7 +42,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/s
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
-export default class Map extends PureComponent {
+export default class DeckMap extends PureComponent {
   constructor(props) {
     super(props);
     autobind(this);
@@ -153,11 +150,10 @@ export default class Map extends PureComponent {
           useDevicePixels={useDevicePixels}
           debug={true}
           drawPickingColors={drawPickingColors}
-          ContextProvider={MapContext.Provider}
           _onMetrics={this._onMetrics}
         >
           <View id="basemap">
-            <StaticMap key="map" mapStyle={MAP_STYLE} />
+            <Map key="map" mapStyle={MAP_STYLE} />
             <ViewportLabel key="label">Map View</ViewportLabel>
           </View>
 
@@ -168,10 +164,6 @@ export default class Map extends PureComponent {
           <View id="infovis">
             <ViewportLabel>Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
           </View>
-
-          <div style={NAVIGATION_CONTROL_STYLES}>
-            <NavigationControl />
-          </div>
 
           <LayerInfo hovered={hoveredItem} clicked={clickedItem} queried={queriedItems} />
         </DeckGL>
