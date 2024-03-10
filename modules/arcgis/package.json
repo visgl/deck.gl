@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@luma.gl/constants": "9.0.0-beta.10",
+    "@luma.gl/webgl": "9.0.0-beta.10",
     "esri-loader": "^3.3.0"
   },
   "peerDependencies": {
