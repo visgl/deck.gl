@@ -12,8 +12,8 @@
     "deck.gl": "8.9.0-beta.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "maplibre-gl": "^2.4.0",
-    "react-map-gl": "^7.0.0",
+    "maplibre-gl": "^3.0.0",
+    "react-map-gl": "^7.1.0",
     "@turf/turf": "6.5.0"
   },
   "devDependencies": {

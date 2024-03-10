@@ -22,11 +22,7 @@
     "vite": "process polyfill missing"
   },
   "resolutions": {
-    "@probe.gl/log": "4.0.6",
-    "@probe.gl/stats": "4.0.6",
-    "@probe.gl/env": "4.0.6",
-    "escaper": "3.0.6",
-    "vite": "^4.3.9"
+    "escaper": "3.0.6"
   },
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap",
@@ -41,8 +37,9 @@
     "test": "ocular-test",
     "test-ci": "ocular-lint && ocular-test node && ocular-test cover",
     "test-fast": "ocular-test fast",
-    "test-node": "ocular-test node",
+    "test-node": "ocular-test node | tap-spec",
     "test-browser": "ocular-test browser",
+    "test-browser-headless": "ocular-test browser-headless | tap-spec",
     "tsclean": "find . -name tsconfig.tsbuildinfo -exec rm {} \\;",
     "tsbuild": "tsc -b tsconfig.build.json",
     "bench": "ocular-test bench",
@@ -59,27 +56,28 @@
   "devDependencies": {
     "@arcgis/core": "^4.21.0",
     "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^4.1.0",
-    "@loaders.gl/polyfills": "^4.1.0",
+    "@loaders.gl/csv": "^4.2.0-alpha.5",
+    "@loaders.gl/polyfills": "^4.2.0-alpha.5",
     "@luma.gl/test-utils": "9.0.0-beta.8",
     "@luma.gl/webgpu": "9.0.0-beta.8",
     "@math.gl/proj4": "^4.0.0",
-    "@probe.gl/bench": "^4.0.6",
-    "@probe.gl/test-utils": "^4.0.6",
+    "@probe.gl/bench": "^4.0.9",
+    "@probe.gl/test-utils": "^4.0.9",
     "@types/react": "^18.2.0",
     "abortcontroller-polyfill": "^1.5.0",
     "babel-loader": "^8.0.0",
     "glsl-transpiler": "^1.8.6",
     "jsdom": "^20.0.0",
-    "ocular-dev-tools": "2.0.0-alpha.27",
+    "ocular-dev-tools": "2.0.0-alpha.29",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
-    "puppeteer": "^22.0.0",
+    "puppeteer": "^22.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-map-gl": "^5.1.0",
     "s2-geometry": "^1.2.10",
-    "tape-catch": "^1.0.6"
+    "tape-catch": "^1.0.6",
+    "tap-spec": "^5.0.0"
   },
   "pre-commit": [
     "test-fast",

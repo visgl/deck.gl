@@ -40,8 +40,8 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^4.1.0",
-    "@loaders.gl/images": "^4.1.0",
+    "@loaders.gl/core": "^4.2.0-alpha.5",
+    "@loaders.gl/images": "^4.2.0-alpha.5",
     "@luma.gl/constants": "9.0.0-beta.8",
     "@luma.gl/core": "9.0.0-beta.8",
     "@luma.gl/engine": "9.0.0-beta.8",
@@ -50,9 +50,9 @@
     "@math.gl/core": "^4.0.0",
     "@math.gl/sun": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
-    "@probe.gl/env": "^4.0.6",
-    "@probe.gl/log": "^4.0.6",
-    "@probe.gl/stats": "^4.0.6",
+    "@probe.gl/env": "^4.0.9",
+    "@probe.gl/log": "^4.0.9",
+    "@probe.gl/stats": "^4.0.9",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
     "mjolnir.js": "^2.7.0"

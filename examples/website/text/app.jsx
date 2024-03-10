@@ -2,8 +2,7 @@
 import React from 'react';
 import {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
@@ -86,7 +85,7 @@ export default function App({data, noOverlap = true, fontSize = 32, mapStyle = M
       onViewStateChange={onViewStateChange}
       controller={{dragRotate: false}}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

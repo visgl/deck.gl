@@ -233,7 +233,7 @@ test('Deck#resourceManager', async t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
+    // @ts-expect-error This is required because the jsdom canvas does not have client width/height
     autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
@@ -247,7 +247,7 @@ test('Deck#resourceManager', async t => {
     onError: () => null
   });
 
-  function update(props) {
+  function update(props = {}) {
     return new Promise(resolve => {
       deck.setProps({
         ...props,
@@ -257,6 +257,7 @@ test('Deck#resourceManager', async t => {
   }
 
   await update();
+  // @ts-expect-error Accessing private member
   const {resourceManager} = deck.layerManager;
   t.is(layer1.getNumInstances(), 0, 'layer subscribes to global data resource');
   t.ok(resourceManager.contains('cities.json'), 'data url is cached');

@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl//maplibre';
 import DeckGL from '@deck.gl/react';
 import {MapView, PickingInfo} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
@@ -113,7 +112,7 @@ export default function App({
       onViewStateChange={hideTooltip}
       onClick={expandTooltip}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
 
       {renderTooltip(hoverInfo)}
     </DeckGL>

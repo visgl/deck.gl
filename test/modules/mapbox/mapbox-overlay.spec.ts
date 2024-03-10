@@ -7,6 +7,12 @@ import {objectEqual} from './mapbox-layer.spec';
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS} from './fixtures';
 
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
 test('MapboxOverlay#overlaid', t => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
@@ -48,7 +54,7 @@ test('MapboxOverlay#overlaid', t => {
   map.setCenter({lng: 0.45, lat: 51.47});
   map.setZoom(4);
   map.triggerRepaint();
-  map.on('render', () => {
+  map.once('render', () => {
     t.ok(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -111,7 +117,7 @@ test('MapboxOverlay#overlaidNoIntitalLayers', t => {
   map.setCenter({lng: 0.45, lat: 51.47});
   map.setZoom(4);
   map.triggerRepaint();
-  map.on('render', () => {
+  map.once('render', () => {
     t.ok(
       objectEqual(deck.props.viewState, {
         longitude: 0.45,
@@ -155,7 +161,7 @@ test('MapboxOverlay#interleaved', t => {
 
   t.ok(overlay._deck, 'Deck instance is created');
 
-  map.on('render', () => {
+  map.once('render', async () => {
     const VIEW_STATE = {
       longitude: -122.45,
       latitude: 37.78,
@@ -187,11 +193,14 @@ test('MapboxOverlay#interleaved', t => {
     t.is(overlay._deck.props.useDevicePixels, 1, 'useDevicePixels is set correctly');
     t.is(overlay._props.useDevicePixels, 1, 'useDevicePixels are intact');
 
+    await sleep(100);
     t.ok(map.getLayer('poi'), 'MapboxLayer is added');
 
     overlay.setProps({
       layers: [new ScatterplotLayer({id: 'cities'})]
     });
+
+    await sleep(100);
     t.notOk(map.getLayer('poi'), 'MapboxLayer is removed');
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
@@ -245,7 +254,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
 
   t.ok(overlay._deck, 'Deck instance is created');
 
-  map.on('render', () => {
+  map.once('render', async () => {
     t.is(overlay._deck.props.layers.length, 0, 'Layers are empty');
     t.false('layers' in overlay._props, 'Overlay layers arent set');
 
@@ -264,6 +273,7 @@ test('MapboxOverlay#interleavedNoInitialLayers', t => {
         depthMask: false
       }
     });
+    await sleep(100);
     t.ok(map.getLayer('cities'), 'MapboxLayer is added');
 
     t.ok(
@@ -298,7 +308,7 @@ test('MapboxOverlay#interleavedFinalizeRemovesMoveHandler', t => {
   t.ok(overlay._deck, 'Deck instance is created');
   t.false('move' in map._listeners, 'No move listeners initially');
 
-  map.on('render', () => {
+  map.once('render', () => {
     t.true(map._listeners['move'].length === 1, 'One move listener attached by overlay');
 
     overlay.finalize();
