@@ -50,9 +50,9 @@
     "@math.gl/core": "^4.0.0",
     "@math.gl/sun": "^4.0.0",
     "@math.gl/web-mercator": "^4.0.0",
-    "@probe.gl/env": "^4.0.8",
-    "@probe.gl/log": "^4.0.8",
-    "@probe.gl/stats": "^4.0.8",
+    "@probe.gl/env": "^4.0.9",
+    "@probe.gl/log": "^4.0.9",
+    "@probe.gl/stats": "^4.0.9",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
     "mjolnir.js": "^2.7.0"
