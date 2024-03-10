@@ -162,8 +162,7 @@ export default class App extends PureComponent {
           controller={true}
           effects={[lightingEffect]}
           layers={layers}
-        >
-        </DeckGL>
+        ></DeckGL>
         <div style={{position: 'fixed'}}>
           {mkButton('Opacity 25%', 'opacity', 0.25)}
           {mkButton('Opacity 50%', 'opacity', 0.5)}

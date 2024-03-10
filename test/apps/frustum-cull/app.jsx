@@ -101,7 +101,10 @@ class Root extends Component {
         onViewStateChange={this._onViewStateChange}
       >
         <MapView id="main">
-          <Map key="map" mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json" />
+          <Map
+            key="map"
+            mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
+          />
         </MapView>
         <MapView id="minimap">
           <div style={MINIMAP_STYLE} />
