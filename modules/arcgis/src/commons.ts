@@ -2,13 +2,28 @@
 
 import type {Device} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
-
 import {Deck} from '@deck.gl/core';
+import {WebGLDevice} from '@luma.gl/webgl';
 
 export function initializeResources(device: Device) {
-  // What is `this` referring to this function???
-  this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  // 'this' refers to the BaseLayerViewGL2D class from
+  // import BaseLayerViewGL2D from "@arcgis/core/views/2d/layers/BaseLayerViewGL2D.js";
+
+  const deckglTexture = device.createTexture({
+    format: 'rgba8unorm',
+    width: 1,
+    height: 1,
+    sampler: {
+      minFilter: 'linear',
+      magFilter: 'linear',
+      addressModeU: 'clamp-to-edge',
+      addressModeV: 'clamp-to-edge'
+    }
+  });
+
+  this.deckglTexture = deckglTexture;
+
+  this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, 1, 1, -1]));
 
   this.model = new Model(device, {
     vs: `\
@@ -23,24 +38,38 @@ void main(void) {
     fs: `\
 #version 300 es
 precision mediump float;
-uniform sampler2D u_texture;
+uniform sampler2D deckglTexture;
 in vec2 v_texcoord;
 out vec4 fragColor;
+
 void main(void) {
-    vec4 rgba = texture(u_texture, v_texcoord);
-    rgba.rgb *= rgba.a;
-    fragColor = rgba;
+    vec4 imageColor = texture(deckglTexture, v_texcoord);
+    imageColor.rgb *= imageColor.a;
+    fragColor = imageColor;
 }
     `,
+    bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
+    bindings: {
+      deckglTexture
+    },
+    parameters: {
+      depthWriteEnabled: true,
+      depthCompare: 'less-equal'
+    },
     attributes: {
       // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
-    vertexCount: 4,
-    drawMode: GL.TRIANGLE_STRIP
+    vertexCount: 6,
+    topology: 'triangle-strip'
   });
 
-  this.deckFbo = device.createFramebuffer({width: 1, height: 1});
+  this.deckFbo = device.createFramebuffer({
+    id: 'deckfbo',
+    width: 1,
+    height: 1,
+    colorAttachments: [deckglTexture]
+  });
 
   this.deckInstance = new Deck({
     // The view state will be set dynamically to track the MapView current extent.
@@ -50,7 +79,7 @@ void main(void) {
     controller: false,
 
     // We use the same WebGL context as the ArcGIS API for JavaScript.
-    gl: device.gl,
+    gl: (device as WebGLDevice).gl,
 
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
@@ -89,17 +118,25 @@ export function render({gl, width, height, viewState}) {
   this.deckInstance.redraw('arcgis');
 
   // We overlay the texture on top of the map using the full-screen quad.
-  const device: Device = this.deckInstance.deck.device;
+  const device: WebGLDevice = this.deckInstance.device;
+
+  const textureToScreenPass = device.beginRenderPass({
+    framebuffer: screenFbo,
+    parameters: {viewport: [0, 0, width, height]},
+    clearColor: [0, 0, 0, 0],
+    clearDepth: 1
+  });
+
   device.withParametersWebGL(
     {
       blend: true,
-      blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      framebuffer: screenFbo,
-      viewport: [0, 0, width, height]
+      blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
     },
     () => {
-      // eslint-disable-next-line camelcase
-      this.model.setUniforms({u_texture: this.deckFbo}).draw(this.context.renderPass);
+      this.model.setBindings({
+        deckglTexture: this.deckFbo.colorAttachments[0]
+      });
+      this.model.draw(textureToScreenPass);
     }
   );
 }
@@ -111,4 +148,5 @@ export function finalizeResources() {
   this.model?.delete();
   this.buffer?.delete();
   this.deckFbo?.delete();
+  this.deckglTexture?.delete();
 }
