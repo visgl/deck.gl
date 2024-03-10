@@ -2,7 +2,6 @@
 
 import type {Device} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import {Deck} from '@deck.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 
@@ -24,17 +23,7 @@ export function initializeResources(device: Device) {
 
   this.deckglTexture = deckglTexture;
 
-  this.buffer = device.createBuffer(new Int8Array([
-    // Triangle 1
-    -1, -1, // bottom left
-    1, -1, // bottom right
-    -1, 1, // top left
-    // Triangle 2
-    -1, 1,
-    1, 1,
-    1, -1
-  ]));
-
+  this.buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, 1, 1, -1]));
 
   this.model = new Model(device, {
     vs: `\
@@ -61,24 +50,25 @@ void main(void) {
     `,
     bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
     bindings: {
-      deckglTexture,
+      deckglTexture
     },
     parameters: {
       depthWriteEnabled: true,
       depthCompare: 'less-equal'
     },
     attributes: {
+      // eslint-disable-next-line camelcase
       a_pos: this.buffer
     },
     vertexCount: 6,
-    drawMode: GL.TRIANGLE_STRIP
+    topology: 'triangle-strip'
   });
 
   this.deckFbo = device.createFramebuffer({
     id: 'deckfbo',
     width: 1,
     height: 1,
-    colorAttachments: [ deckglTexture ]
+    colorAttachments: [deckglTexture]
   });
 
   this.deckInstance = new Deck({
@@ -89,7 +79,7 @@ void main(void) {
     controller: false,
 
     // We use the same WebGL context as the ArcGIS API for JavaScript.
-    gl: device.props.gl,
+    gl: (device as WebGLDevice).gl,
 
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
@@ -140,15 +130,14 @@ export function render({gl, width, height, viewState}) {
   device.withParametersWebGL(
     {
       blend: true,
-      blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      viewport: [0, 0, width, height]
+      blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
     },
     () => {
       this.model.setBindings({
-        'deckglTexture': this.deckFbo.colorAttachments[0],
+        deckglTexture: this.deckFbo.colorAttachments[0]
       });
       this.model.draw(textureToScreenPass);
-    },
+    }
   );
 }
 
@@ -159,4 +148,5 @@ export function finalizeResources() {
   this.model?.delete();
   this.buffer?.delete();
   this.deckFbo?.delete();
+  this.deckglTexture?.delete();
 }

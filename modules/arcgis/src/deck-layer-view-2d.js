@@ -7,7 +7,7 @@ export default function createDeckLayerView2D(BaseLayerViewGL2D) {
       deckgl: {},
       deckFbo: {},
       model: {},
-      buffer: {},
+      buffer: {}
     },
 
     // Attach is called as soon as the layer view is ready to start rendering.
