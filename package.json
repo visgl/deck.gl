@@ -22,11 +22,7 @@
     "vite": "process polyfill missing"
   },
   "resolutions": {
-    "@probe.gl/log": "^4.0.8",
-    "@probe.gl/stats": "^4.0.8",
-    "@probe.gl/env": "^4.0.8",
-    "escaper": "3.0.6",
-    "vite": "^4.3.9"
+    "escaper": "3.0.6"
   },
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap",
@@ -65,8 +61,8 @@
     "@luma.gl/test-utils": "9.0.0-beta.8",
     "@luma.gl/webgpu": "9.0.0-beta.8",
     "@math.gl/proj4": "^4.0.0",
-    "@probe.gl/bench": "^4.0.8",
-    "@probe.gl/test-utils": "^4.0.8",
+    "@probe.gl/bench": "^4.0.9",
+    "@probe.gl/test-utils": "^4.0.9",
     "@types/react": "^18.2.0",
     "abortcontroller-polyfill": "^1.5.0",
     "babel-loader": "^8.0.0",
