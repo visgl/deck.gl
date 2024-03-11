@@ -5,14 +5,15 @@ import type {
   SourceOptions,
   QuerySourceOptions,
   SpatialDataType,
-  TilejsonResult
+  TilejsonResult,
+  ColumnsOption
 } from './types';
 
 export type VectorQuerySourceOptions = SourceOptions &
   QuerySourceOptions &
-  FilterOptions & {
-    columns?: string[];
-  };
+  FilterOptions &
+  ColumnsOption;
+
 type UrlParameters = {
   columns?: string;
   filters?: string;

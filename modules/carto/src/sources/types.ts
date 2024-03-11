@@ -109,13 +109,6 @@ export type TableSourceOptions = {
   tableName: string;
 
   /**
-   * Columns to retrieve from the table.
-   *
-   * If not present, all columns are returned.
-   */
-  columns?: string[];
-
-  /**
    * The column name and the type of geospatial support.
    *
    * If not present, defaults to `'geom'` for generic tables, `'quadbin'` for Quadbin sources and `'h3'` for H3 sources.
@@ -128,6 +121,15 @@ export type TilesetSourceOptions = {
    * Fully qualified name of tileset.
    */
   tableName: string;
+};
+
+export type ColumnsOption = {
+  /**
+   * Columns to retrieve from the table.
+   *
+   * If not present, all columns are returned.
+   */
+  columns?: string[];
 };
 
 export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
