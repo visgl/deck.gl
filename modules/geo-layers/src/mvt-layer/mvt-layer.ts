@@ -67,8 +67,10 @@ export type MVTLayerProps<FeaturePropertiesT = unknown> = _MVTLayerProps<Feature
   Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
 /** Props added by the MVTLayer  */
-export type _MVTLayerProps<FeaturePropertiesT> =
-  Omit<GeoJsonLayerProps<FeaturePropertiesT>, 'data'> & {
+export type _MVTLayerProps<FeaturePropertiesT> = Omit<
+  GeoJsonLayerProps<FeaturePropertiesT>,
+  'data'
+> & {
   data: TileJson | URLTemplate;
 
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
@@ -98,10 +100,10 @@ export type _MVTLayerProps<FeaturePropertiesT> =
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-export default class MVTLayer<FeaturePropertiesT, ExtraProps extends {} = {}> extends TileLayer<
-  ParsedMvtTile,
-  Required<_MVTLayerProps<FeaturePropertiesT>> & ExtraProps
-> {
+export default class MVTLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends TileLayer<ParsedMvtTile, Required<_MVTLayerProps<FeaturePropertiesT>> & ExtraProps> {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
@@ -113,12 +115,6 @@ export default class MVTLayer<FeaturePropertiesT, ExtraProps extends {} = {}> ex
     hoveredFeatureId: number | string | null;
     hoveredFeatureLayerName: string | null;
   };
-
-  constructor(...propObjects: MVTLayerProps[]) {
-    // Force externally visible props type, as it is not possible modify via extension
-    // @ts-ignore
-    super(...propObjects);
-  }
 
   initializeState(): void {
     super.initializeState();
