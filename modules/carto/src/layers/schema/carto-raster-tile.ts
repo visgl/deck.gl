@@ -36,11 +36,10 @@ export class BandReader {
 
 export class TileReader {
   static read(pbf, end) {
-    return pbf.readFields(TileReader._readField, {blockWidth: 0, blockHeight: 0, bands: []}, end);
+    return pbf.readFields(TileReader._readField, {blockSize: 0, bands: []}, end);
   }
   static _readField(this: void, tag, obj, pbf) {
-    if (tag === 1) obj.blockWidth = pbf.readVarint();
-    else if (tag === 2) obj.blockHeight = pbf.readVarint();
-    else if (tag === 3) obj.bands.push(BandReader.read(pbf, pbf.readVarint() + pbf.pos));
+    if (tag === 1) obj.blockSize = pbf.readVarint();
+    else if (tag === 2) obj.bands.push(BandReader.read(pbf, pbf.readVarint() + pbf.pos));
   }
 }
