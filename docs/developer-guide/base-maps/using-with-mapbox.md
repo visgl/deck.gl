@@ -107,7 +107,7 @@ When you choose the `DeckGL` React component as the root component, react-map-gl
 
 ## Using Mapbox basemap service (with Mapbox token)
 
-The mapbox-gl library is open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a [certain level](https://www.mapbox.com/pricing/) of traffic is exceeded.
+The mapbox-gl library is a popular commercial basemap with a free tier. To use Mapbox, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a [certain level](https://www.mapbox.com/pricing/) of traffic is exceeded.
 
 If you are using mapbox-gl without React, check out [Mapbox GL JS API](https://docs.mapbox.com/mapbox-gl-js/api/#accesstoken) for how to apply the token.
 
@@ -115,7 +115,7 @@ If you are using react-map-gl, there are several ways to provide a token to your
 
 * Set the `MapboxAccessToken` environment variable. You may need to add additional set up to the bundler ([example](https://webpack.js.org/plugins/environment-plugin/)) so that `process.env.MapboxAccessToken` is accessible at runtime.
 * Provide it in the URL, e.g `?access_token=TOKEN`
-* Pass it as a prop to the ReactMapGL instance `<ReactMapGL mapboxAccessToken={TOKEN} />`
+* Pass it as a prop to the react-map-gl `Map` instance `<Map mapboxAccessToken={TOKEN} />`
 
 ## Compatibility with Mapbox GL JS forks
 
@@ -127,7 +127,7 @@ If the forked libraries and Mapbox API diverge in the future, compatibility issu
 
 ## Using with other basemap services
 
-It is possible to use the map component without the Mapbox service, you need a URL that conforms to the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-js/style-spec) and pass it to `ReactMapGL` using the `mapStyle` prop.
+It is possible to use the map component without the Mapbox service, you need a URL that conforms to the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-js/style-spec) and pass it to the `mapStyle` prop in mapbox-gl `Map` constructor or react-map-gl `Map` component.
 
 You can use existing free vector tile services:
 
