@@ -4,10 +4,7 @@ import {initializeResources, render, finalizeResources} from './commons';
 export default function createDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
     properties: {
-      deckgl: {},
-      deckFbo: {},
-      model: {},
-      buffer: {}
+      resources: null
     },
 
     // Attach is called as soon as the layer view is ready to start rendering.
@@ -17,13 +14,13 @@ export default function createDeckLayerView2D(BaseLayerViewGL2D) {
       const gl = this.context;
       const device = WebGLDevice.attach(gl);
 
-      initializeResources.call(this, device);
+      this.resources = initializeResources.call(this, device);
 
       // Update deck props
-      this.layer.deck.on('change', props => this.deckInstance.setProps(props));
+      this.layer.deck.on('change', props => this.resources.deck.setProps(props));
 
       // We need to start drawing the deck.gl layer immediately.
-      this.deckInstance.setProps(this.layer.deck.toJSON());
+      this.resources.deck.setProps(this.layer.deck.toJSON());
     },
 
     redraw() {
@@ -32,7 +29,8 @@ export default function createDeckLayerView2D(BaseLayerViewGL2D) {
 
     // Called when the layer must be destroyed.
     detach() {
-      finalizeResources.call(this);
+      finalizeResources(this.resources);
+      this.resources = null;
     },
 
     // Called every time that the layer view must be rendered.
@@ -41,17 +39,14 @@ export default function createDeckLayerView2D(BaseLayerViewGL2D) {
       // The view state must be kept in-sync with the MapView of the ArcGIS API.
       const state = renderParameters.state;
 
-      render.call(this, {
-        gl: renderParameters.context,
+      render(this.resources, {
         width,
         height,
-        viewState: {
-          latitude: this.view.center.latitude,
-          longitude: this.view.center.longitude,
-          zoom: this.view.featuresTilingScheme.scaleToLevel(state.scale),
-          bearing: -state.rotation,
-          pitch: 0
-        }
+        latitude: this.view.center.latitude,
+        longitude: this.view.center.longitude,
+        zoom: this.view.featuresTilingScheme.scaleToLevel(state.scale),
+        bearing: -state.rotation,
+        pitch: 0
       });
     }
   });
