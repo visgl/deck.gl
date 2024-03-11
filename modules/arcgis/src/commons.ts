@@ -30,8 +30,6 @@ export function initializeResources(this: Renderer, device: Device): RenderResou
     }
   });
 
-  // const buffer = device.createBuffer(new Int8Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, 1, 1, -1]));
-
   const model = new Model(device, {
     vs: `\
 #version 300 es
@@ -55,7 +53,6 @@ void main(void) {
     fragColor = imageColor;
 }
     `,
-    // bufferLayout: [{name: 'a_pos', format: 'sint8x2'}],
     bindings: {
       deckglTexture: texture
     },
