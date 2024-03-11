@@ -71,6 +71,7 @@ test('TileLayer', async t => {
 
   const testCases = [
     {
+      title: 'default',
       props: {
         data: DUMMY_DATA
       },
@@ -87,6 +88,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'show z=2',
       props: {
         getTileData,
         renderSubLayers
@@ -109,6 +111,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'show z=3',
       viewport: testViewport2,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
@@ -124,6 +127,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'hide z=3',
       viewport: testViewport1,
       onAfterUpdate: ({layer, subLayers}) => {
         if (layer.isLoaded) {
@@ -139,6 +143,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers',
       updateProps: {
         renderSubLayers: renderNestedSubLayers
       },
@@ -147,6 +152,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers (invalidate)',
       updateProps: {
         minWidthPixels: 1
       },
@@ -155,6 +161,7 @@ test('TileLayer', async t => {
       }
     },
     {
+      title: 'cached sublayers (refetch)',
       updateProps: {
         updateTriggers: {
           getTileData: 1
@@ -186,10 +193,11 @@ test('TileLayer#MapView:repeat', async t => {
     repeat: true
   });
 
-  t.is(testViewport.subViewports.length, 3, 'Viewport has more than one sub viewports');
+  t.is(testViewport.subViewports!.length, 3, 'Viewport has more than one sub viewports');
 
   const testCases = [
     {
+      title: 'repeat',
       props: {
         data: DUMMY_DATA,
         renderSubLayers
@@ -224,6 +232,7 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
 
   const testCases = [
     {
+      title: 'case-1',
       props: {
         getTileData: () => sleep(10)
       },
@@ -232,6 +241,7 @@ test('TileLayer#AbortRequestsOnUpdateTrigger', async t => {
       }
     },
     {
+      title: 'case-2',
       updateProps: {
         updateTriggers: {
           getTileData: 1
@@ -265,6 +275,7 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
 
   const testCases = [
     {
+      title: 'case-1',
       props: {
         getTileData: () => sleep(10)
       },
@@ -273,6 +284,7 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
       }
     },
     {
+      title: 'case-2',
       props: {
         id: 'new-layer'
       },
