@@ -303,6 +303,30 @@ test('TileLayer#AbortRequestsOnNewLayer', async t => {
   t.end();
 });
 
+test('TileLayer#debounceTime', async t => {
+  const testViewport = new WebMercatorViewport({width: 1200, height: 400, zoom: 8});
+  const testCases = [
+    {
+      title: 'debounceTime = 0',
+      props: {debounceTime: 0, getTileData: () => sleep(10)},
+      onAfterUpdate: ({layer}) => {
+        t.is(layer.state.tileset.opts.debounceTime, 0, 'assigns tileset#debounceTime = 0');
+      }
+    },
+    {
+      title: 'debounceTime = 25',
+      props: {debounceTime: 25, getTileData: () => sleep(10)},
+      onAfterUpdate: ({layer}) => {
+        t.is(layer.state.tileset.opts.debounceTime, 25, 'assigns tileset#debounceTime = 25');
+      }
+    }
+  ];
+
+  testLayer({Layer: TileLayer, viewport: testViewport, testCases, onError: t.fail});
+
+  t.end();
+});
+
 function sleep(ms) {
   return new Promise(resolve => {
     /* global setTimeout */
