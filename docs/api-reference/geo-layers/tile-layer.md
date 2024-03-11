@@ -220,6 +220,18 @@ If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in th
 
 - Default: `6`
 
+##### `debounceTime` (Number, optional) {#debouncetime}
+
+Queue tile requests until no new tiles have been added for at least `debounceTime` milliseconds.
+
+If `debounceTime == 0`, tile requests are issued as quickly as the `maxRequests` concurrent request limit allows.
+
+If `debounceTime > 0`, tile requests are queued until a period of at least `debounceTime` milliseconds has passed without any new tiles being added to the queue. May reduce bandwidth usage and total loading time during interactive view transitions.
+
+If `maxRequests <= 0`, no throttling will occur, and `debounceTime` has no effect.
+
+- Default: `0`
+
 ### Render Options
 
 ##### `renderSubLayers` (Function, optional) {#rendersublayers}
