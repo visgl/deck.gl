@@ -21,6 +21,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.8] - Mar 11 2024
+
+- TerrainExtension: bind texture rather than FBO (#8611)
+- Remove dev dependency on react-map-gl v5 (#8618)
+- chore: Bump luma to beta.10 (#8610)
+- fix(arcgis): DeckGL rendering integration (#8545)
+- chore: bump probe.gl (#8617)
+- prevent js files in venv from being identified as part of deckgl module (#8609)
+- chore(deps): Update to loaders.gl v4.2.0-alpha.5 (#8604)
+- fix(core) warn and error when WebGL1 detected (#8548)
+- ignore bindings directory when running linter (#8598)
+- Correct operator precedence for clearColor in LayersPass (#8599)
+
 #### deck.gl [9.0.0-beta.7] - Mar 7 2024
 
 - chore: bump luma 9.0.0 beta.8 (#8586)
