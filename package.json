@@ -74,7 +74,6 @@
     "puppeteer": "^22.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-map-gl": "^5.1.0",
     "s2-geometry": "^1.2.10",
     "tape-catch": "^1.0.6",
     "tap-spec": "^5.0.0"

@@ -251,7 +251,7 @@ export default class MapboxOverlay implements IControl {
 
     switch (mockEvent.type) {
       case 'mousedown':
-        deck._onPointerDown(mockEvent as MjolnirGestureEvent);
+        deck._onPointerDown(mockEvent as MjolnirPointerEvent);
         this._lastMouseDownPoint = {
           ...event.point,
           clientX: event.originalEvent.clientX,
