@@ -1,11 +1,9 @@
 /* global window, document */
 /* eslint-disable max-statements, import/no-extraneous-dependencies */
-
-// react-map-gl is NOT a dependency of this package
-// This class is only supposed to be used via the pre-built bundle
-import Mapbox from 'react-map-gl/dist/esm/mapbox/mapbox';
+import {MapWrapper} from './map-wrapper';
 
 import Deck, {DeckProps} from '../lib/deck';
+import type WebMercatorViewport from '../viewports/web-mercator-viewport';
 
 const CANVAS_STYLE = {
   position: 'absolute',
@@ -59,7 +57,7 @@ type DeckGLProps = DeckProps & {
  */
 export default class DeckGL extends Deck {
   /** Base map instance */
-  private _map: any;
+  private _map: MapWrapper | false;
 
   constructor(props: DeckGLProps) {
     if (typeof document === 'undefined') {
@@ -79,11 +77,13 @@ export default class DeckGL extends Deck {
       // Default create mapbox map
       this._map =
         isMap &&
-        new Mapbox({
+        new MapWrapper({
           ...props,
+          width: 0,
+          height: 0,
           viewState,
           container: mapCanvas,
-          mapboxgl: map
+          mapLib: map
         });
     } else {
       this._map = map;
@@ -104,7 +104,7 @@ export default class DeckGL extends Deck {
 
   setProps(props) {
     if ('mapStyle' in props && this._map) {
-      this._map._map.setStyle(props.mapStyle);
+      this._map.setProps({mapStyle: props.mapStyle});
     }
 
     super.setProps(props);
@@ -113,7 +113,7 @@ export default class DeckGL extends Deck {
   _drawLayers(redrawReason: string, options: any) {
     // Update the base map
     if (this._map) {
-      const viewport = this.getViewports()[0];
+      const viewport = this.getViewports()[0] as WebMercatorViewport;
       if (viewport) {
         this._map.setProps({
           width: viewport.width,
