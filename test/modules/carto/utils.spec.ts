@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {createBinaryProxy, getWorkerUrl} from '@deck.gl/carto/utils';
+import {createBinaryProxy, getWorkerUrl, scaleIdentity} from '@deck.gl/carto/utils';
 
 test('createBinaryProxy', async t => {
   const binary = {
@@ -20,5 +20,37 @@ test('getWorkerUrl', async t => {
     getWorkerUrl('cartoTest', '1.2.3'),
     'https://unpkg.com/@deck.gl/carto@1.2.3/dist/cartoTest-worker.js'
   );
+  t.end();
+});
+
+test('scaleIdentity', async t => {
+  const scale = scaleIdentity();
+
+  // scale
+  t.equal(scale(null), undefined, 'scale(null)');
+  t.equal(scale(undefined), undefined, 'scale(undefined)');
+  t.equal(scale(123), 123, 'scale(123)');
+  t.equal(scale(Infinity), Infinity, 'scale(Infinity)');
+  t.true(isNaN(scale(NaN)), 'scale(NaN)');
+
+  // invert
+  t.equal(scale.invert, scale, 'scale.invert === scale');
+
+  // domain and range
+  t.equal(scale.domain(1), 1, 'domain');
+  t.equal(scale.range(1), 1, 'range');
+
+  // unknown
+  scale.unknown(-1);
+  t.equal(scale(null), -1, 'scale(null) (unknown = -1)');
+  t.equal(scale(123), 123, 'scale(123) (unknown = -1)');
+
+  // copy
+  const scaleCopy = scale.copy();
+  scaleCopy.unknown(-2);
+  t.equal(scaleCopy(123), 123, 'scaleCopy(123)');
+  t.equal(scaleCopy(null), -2, 'copies set "unknown"');
+  t.equal(scale(null), -1, 'copies do not affect "unknown" for original');
+
   t.end();
 });
