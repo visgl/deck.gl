@@ -19,48 +19,64 @@
 // THE SOFTWARE.
 
 /* global window */
-import TestRunner from './test-runner';
+import {TestRunner} from './test-runner';
+import type {Deck, Layer} from '@deck.gl/core';
 
-const DEFAULT_TEST_CASE = {
+type InteractionEvent =
+  | {
+      type: string;
+      [key: string]: any;
+    }
+  | {
+      wait: number;
+    };
+
+export type InteractionTestCase = {
+  name: string;
+  events: InteractionEvent[];
+  timeout?: number;
+  context?: any;
+  onBeforeEvents: (params: {deck: Deck}) => any;
+  onAfterEvents: (params: {deck: Deck; layers: Layer[]; context: any}) => void;
+};
+
+const DEFAULT_TEST_CASE: InteractionTestCase = {
   name: 'Unnamed interaction test',
   events: [],
   onBeforeEvents: ({deck}) => {},
   onAfterEvents: ({deck, layers, context}) => {}
 };
 
-function sleep(timeout) {
+function sleep(timeout: number): Promise<void> {
   return new Promise(resolve => window.setTimeout(resolve, timeout));
 }
 
-export default class InteractionTestRunner extends TestRunner {
+export class InteractionTestRunner extends TestRunner<InteractionTestCase, {}> {
   get defaultTestCase() {
     return DEFAULT_TEST_CASE;
   }
 
   // chain events
-  // TODO - switch to async/await
-  runTestCase(testCase, onDone) {
+  async runTestCase(testCase: InteractionTestCase) {
     testCase.context = testCase.onBeforeEvents({
-      deck: this.deck
+      deck: this.deck!
     });
 
-    let promise = Promise.resolve();
     for (const event of testCase.events) {
       if (event.wait) {
-        promise = promise.then(() => sleep(event.wait));
+        await sleep(event.wait);
       } else {
-        promise = promise.then(() => window.browserTestDriver_emulateInput(event));
+        await window.browserTestDriver_emulateInput(event);
       }
     }
-    return promise.then(onDone);
   }
 
-  assert(testCase) {
+  async assert(testCase) {
     testCase.onAfterEvents({
       deck: this.deck,
+      // @ts-expect-error Accessing protected layerManager
       layers: this.deck.layerManager.getLayers(),
       context: testCase.context
     });
-    this._next();
   }
 }

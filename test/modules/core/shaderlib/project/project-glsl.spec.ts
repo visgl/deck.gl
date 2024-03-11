@@ -21,7 +21,7 @@
 import test from 'tape-promise/tape';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
-import {project} from '@deck.gl/core/shaderlib';
+import project from '@deck.gl/core/shaderlib/project/project';
 import {Matrix4, Matrix3, Vector3, config, equals} from '@math.gl/core';
 import {device} from '@deck.gl/test-utils';
 import {fp64} from '@luma.gl/shadertools';
@@ -340,20 +340,12 @@ test.skip('project#vs', t => {
 
     testCase.tests.forEach(c => {
       const expected = c.output;
-      if (device.features.has('transform-feedback-webgl2')) {
-        config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
-        const feedbackBuffers = {outValue: OUT_BUFFER};
-        let actual = runOnGPU({device, uniforms, vs: c.vs, feedbackBuffers});
-        actual = c.mapResult ? c.mapResult(actual) : actual;
-        const name = `GPU: ${c.name}`;
-        verifyResult({t, name, actual, expected, sliceActual: true});
-      } else {
-        config.EPSILON = c.precision || 1e-7;
-        let actual = c.func(module);
-        actual = c.mapResult ? c.mapResult(actual) : actual;
-        const name = `CPU: ${c.name}`;
-        verifyResult({t, name, actual, expected});
-      }
+      config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
+      const feedbackBuffers = {outValue: OUT_BUFFER};
+      let actual = runOnGPU({device, uniforms, vs: c.vs, feedbackBuffers});
+      actual = c.mapResult ? c.mapResult(actual) : actual;
+      const name = `GPU: ${c.name}`;
+      verifyResult({t, name, actual, expected, sliceActual: true});
     });
   });
 

@@ -76,7 +76,7 @@ npm run start-local
 
 A family of NPM modules are published as part of the deck.gl framework. The following tree shows their scope and dependencies:
 
-- `@deck.gl/core` - Core module that handles the WebGL rendering pipeline, data management, and user interaction
+- `@deck.gl/core` - Core module that handles the GPU rendering pipeline, data management, and user interaction
   + `@deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
     * `@deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
     * `@deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.

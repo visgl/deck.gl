@@ -167,7 +167,7 @@ export type _GPUGridLayerProps<DataT> = {
   getElevationWeight?: Accessor<DataT, number>;
 };
 
-/** Aggregate data into a grid-based heatmap. Aggregation is performed on GPU (WebGL2 only). */
+/** Aggregate data into a grid-based heatmap. Aggregation is performed on GPU. */
 export default class GPUGridLayer<
   DataT = any,
   ExtraPropsT extends {} = {}
@@ -189,7 +189,7 @@ export default class GPUGridLayer<
       dimensions: DIMENSIONS
     });
     this.setState({
-      gpuAggregation: true,
+      gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
       projectPoints: false, // aggregation in world space
       isSupported,
       weights: {
@@ -221,7 +221,7 @@ export default class GPUGridLayer<
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions()
       },
       color: {size: 3, accessor: 'getColorWeight'},

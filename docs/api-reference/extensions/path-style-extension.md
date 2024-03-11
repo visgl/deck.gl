@@ -110,7 +110,7 @@ Only effective if `getDashArray` is specified. If `true`, gaps between solid str
 
 ### Limitations
 
-WebGL has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
+WebGL2 has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
 
 ### Tips on Rendering Dash Lines
 

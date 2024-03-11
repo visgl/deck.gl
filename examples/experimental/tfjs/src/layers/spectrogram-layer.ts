@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 
-import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core/typed';
+import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
 import {Tensor2DLayer} from './tensor-2d-layer';

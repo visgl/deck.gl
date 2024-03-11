@@ -1,26 +1,24 @@
-import type {Device} from '@luma.gl/core';
-import {normalizeShaderModule} from '@luma.gl/shadertools';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, Framebuffer} from '@luma.gl/core';
+import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
 import type {Effect, PostRenderOptions} from '../lib/effect';
-import type {ShaderModule} from '../types/types';
 
-export default class PostProcessEffect implements Effect {
+export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
-  props: any;
-  module: ShaderModule;
+  props: ShaderPassT['props'];
+  module: ShaderPassT;
   passes?: ScreenPass[];
 
-  constructor(module: ShaderModule, props: any = {}) {
+  constructor(module: ShaderPassT, props: ShaderPassT['props']) {
     this.id = `${module.name}-pass`;
     this.props = props;
     normalizeShaderModule(module);
     this.module = module;
   }
 
-  setProps(props: any) {
+  setProps(props: ShaderPassT['props']) {
     this.props = props;
   }
 
@@ -29,22 +27,27 @@ export default class PostProcessEffect implements Effect {
 
   postRender(device: Device, params: PostRenderOptions): Framebuffer {
     const passes = this.passes || createPasses(device, this.module, this.id);
-    // TODO from v9 merge - remove
-    // const passes = this.passes || createPasses(device, this.module, this.id, this.props);
     this.passes = passes;
 
     const {target} = params;
     let inputBuffer = params.inputBuffer;
-    let outputBuffer = params.swapBuffer;
+    let outputBuffer: Framebuffer | null = params.swapBuffer;
 
     for (let index = 0; index < this.passes.length; index++) {
-      if (target && index === this.passes.length - 1) {
+      const isLastPass = index === this.passes.length - 1;
+      const renderToTarget = target !== undefined && isLastPass;
+      if (renderToTarget) {
         outputBuffer = target;
       }
-      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings: this.props});
-      const switchBuffer = outputBuffer;
-      outputBuffer = inputBuffer;
-      inputBuffer = switchBuffer;
+      const moduleSettings = {};
+      moduleSettings[this.module.name] = this.props;
+      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings});
+
+      if (!renderToTarget) {
+        const switchBuffer = outputBuffer as Framebuffer;
+        outputBuffer = inputBuffer;
+        inputBuffer = switchBuffer;
+      }
     }
     return inputBuffer;
   }
@@ -59,33 +62,17 @@ export default class PostProcessEffect implements Effect {
   }
 }
 
-// function createPasses(gl: WebGLRenderingContext, module: ShaderModule, id: string): ScreenPass[] {
-function createPasses(device: Device, module: ShaderModule, id: string): ScreenPass[] {
-  if (!module.passes) {
-    const fs = getFragmentShaderForRenderPass(module);
-    const pass = new ScreenPass(device, {
-      id,
-      module,
-      fs
-    });
-    return [pass];
-  }
-
+function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
   return module.passes.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
-
-    return new ScreenPass(device, {
-      id: idn,
-      module,
-      fs
-    });
+    return new ScreenPass(device, {id: idn, module, fs});
   });
 }
 
-const FILTER_FS_TEMPLATE = func => `\
+const FS_TEMPLATE_INPUTS = `\
 #version 300 es
-uniform sampler2D texture;
+uniform sampler2D texSrc;
 uniform vec2 texSize;
 
 in vec2 position;
@@ -93,34 +80,24 @@ in vec2 coordinate;
 in vec2 uv;
 
 out vec4 fragColor;
+`;
 
+const FILTER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  fragColor = texture(texture, texCoord);
-  fragColor = ${func}(fragColor, texSize, texCoord);
+  fragColor = texture(texSrc, coordinate);
+  fragColor = ${func}(fragColor, texSize, coordinate);
 }
 `;
 
-const SAMPLER_FS_TEMPLATE = func => `\
-#version 300 es
-uniform sampler2D texture;
-uniform vec2 texSize;
-
-in vec2 position;
-in vec2 coordinate;
-in vec2 uv;
-
-out vec4 fragColor;
-
+const SAMPLER_FS_TEMPLATE = (func: string) => `\
+${FS_TEMPLATE_INPUTS}
 void main() {
-  vec2 texCoord = coordinate;
-
-  fragColor = ${func}(texture, texSize, texCoord);
+  fragColor = ${func}(texSrc, texSize, coordinate);
 }
 `;
 
-function getFragmentShaderForRenderPass(module, pass = module): string {
+function getFragmentShaderForRenderPass(module: ShaderPass, pass: ShaderPass['passes'][0]): string {
   if (pass.filter) {
     const func = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor`;
     return FILTER_FS_TEMPLATE(func);

@@ -17,9 +17,9 @@ test('gpu-grid-cell-layer-vertex#quantizeScale', t => {
   const vs = `\
 #define RANGE_COUNT 6
 #define ROUNDING_ERROR 0.00001
-attribute float inValue;
+in float inValue;
 uniform vec2 domain;
-varying vec4 outColor;
+out vec4 outColor;
 uniform vec4 colorRange[RANGE_COUNT];
 vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
   vec4 outColor = vec4(-1., 0., 0., 0.);

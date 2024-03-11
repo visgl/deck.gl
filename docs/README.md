@@ -39,7 +39,7 @@
 </p>
 
 
-deck.gl is designed to simplify high-performance, WebGL-based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
+deck.gl is designed to simplify high-performance, WebGL2/WebGPU based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
 
 deck.gl maps **data** (usually an array of JSON objects) into a stack of visual **layers** - e.g. icons, polygons, texts; and look at them with **views**: e.g. map, first-person, orthographic.
 
@@ -102,7 +102,7 @@ deck.gl is one of the main frameworks in the [vis.gl](http://vis.gl) framework s
 
 deck.gl is developed in parallel with a number of companion modules, including:
 
-* [luma.gl](https://luma.gl/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
+* [luma.gl](https://luma.gl/) - A general purpose WebGL2/WebGPU library designed to be interoperable both with the raw browser APIs and (as far as possible) with other WebGL2/WebGPU libraries. In particular, luma.gl does not claim ownership of the WebGL2/WebGPU context, and can work with any supplied context, including contexts created by the application or other libraries.
 * [loaders.gl](https://loaders.gl) - a suite of framework-independent loaders for file formats focused on visualization of big data, including point clouds, 3D geometries, images, geospatial formats as well as tabular data.
 * [react-map-gl](https://visgl.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
 * [nebula.gl](https://nebula.gl/) - A high-performance feature editing framework for deck.gl.
@@ -130,8 +130,8 @@ deck.gl is designed according to functional UI programming principles, populariz
 There is an impressive amount of information (documentation, blog posts, educational videos, etc.) on the reactive programming paradigm in relation to modern web frameworks such as React, Flux and Redux. Where to start depends mostly on your application architecture choices. Exploring such information will take you beyond what we can cover in the basic deck.gl developer guide article on Updates.
 
 
-### Understanding WebGL
+### Understanding WebGL2/WebGPU
 
-Knowledge of WebGL is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
+Knowledge of WebGL2 or WebGPU is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL2/WebGPU knowledge.
 
-There are many web resources for learning WebGL. [luma.gl](https://luma.gl/) can be a good start.
+There are many web resources for learning WebGL2/WebGPU. [luma.gl](https://luma.gl/) can be a good start.

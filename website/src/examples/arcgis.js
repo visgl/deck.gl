@@ -1,6 +1,6 @@
-import React, {Component, createRef} from 'react';
+import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
-import {renderToDOM} from 'website-examples/i3s/app';
+import App from 'website-examples/i3s/app';
 
 import {makeExample} from '../components';
 
@@ -30,27 +30,8 @@ class ArcGISDemo extends Component {
     );
   }
 
-  _containerRef = createRef();
-
-  componentDidMount() {
-    /* global document */
-    // Attach arcgis stylesheet
-    const style = document.createElement('link');
-    style.setAttribute('rel', 'stylesheet');
-    style.setAttribute('href', 'https://js.arcgis.com/4.16/esri/themes/light/main.css');
-    document.head.appendChild(style);
-
-    renderToDOM(this._containerRef.current).then(instance => (this._view = instance));
-  }
-
-  componentWillUnmount() {
-    if (this._view) {
-      this._view.remove();
-    }
-  }
-
   render() {
-    return <div ref={this._containerRef} style={{width: '100%', height: '100%'}} />;
+    return <App />;
   }
 }
 

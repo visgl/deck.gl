@@ -1,7 +1,7 @@
 /* global document */
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Deck, Widget, WidgetPlacement} from '@deck.gl/core';
-import {h, render} from 'preact';
+import {render} from 'preact';
 import {IconButton} from './components';
 
 interface FullscreenWidgetProps {

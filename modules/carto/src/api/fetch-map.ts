@@ -16,7 +16,7 @@ import {
   vectorQuerySource,
   vectorTableSource,
   vectorTilesetSource
-} from '../sources';
+} from '../sources/index';
 import {parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
@@ -130,8 +130,12 @@ async function _fetchTilestats(
   }
 
   const baseUrl = buildStatsUrl({attribute, apiBaseUrl, ...dataset});
+  const client = new URLSearchParams(data.tiles[0]).get('client');
   const headers = {Authorization: `Bearer ${accessToken}`};
   const parameters: Record<string, string> = {};
+  if (client) {
+    parameters.client = client;
+  }
   if (type === 'query') {
     parameters.q = source;
     if (queryParameters) {

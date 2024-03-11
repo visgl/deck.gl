@@ -30,6 +30,7 @@ import viewsTests from './views';
 import effectsTests from './effects';
 import collisionFilterExtensionTests from './collision-filter-extension';
 import transitionTests from './transitions';
+import dataFilterExtensionTests from './data-filter-extension';
 
 export default [].concat(
   // coreLayersTests, // TODO(v9): Re-check after PR#8334
@@ -58,6 +59,7 @@ export default [].concat(
   // effectsTests,
   // TODO - Broken in headless mode with Chrome 113
   // transitionTests,
-  terrainLayerTests
+  terrainLayerTests,
   // collisionFilterExtensionTests
+  dataFilterExtensionTests
 );

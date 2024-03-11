@@ -15,6 +15,7 @@ export default defineConfig(async () => {
         // Use root dependencies
         '@luma.gl': join(rootDir, './node_modules/@luma.gl'),
         '@math.gl': join(rootDir, './node_modules/@math.gl'),
+        '@arcgis/core': join(rootDir, './node_modules/@arcgis/core'),
         '@loaders.gl/core': join(rootDir, './node_modules/@loaders.gl/core')
       }
     },

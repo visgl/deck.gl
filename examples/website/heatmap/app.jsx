@@ -1,7 +1,6 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
@@ -29,7 +28,7 @@ export default function App({
   const layers = [
     new HeatmapLayer({
       data,
-      id: 'heatmp-layer',
+      id: 'heatmap-layer',
       pickable: false,
       getPosition: d => [d[0], d[1]],
       getWeight: d => d[2],
@@ -41,7 +40,7 @@ export default function App({
 
   return (
     <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

@@ -2,7 +2,8 @@
   "name": "@deck.gl/aggregation-layers",
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
-  "version": "9.0.0-alpha.6",
+  "type": "module",
+  "version": "9.0.0-beta.8",
   "publishConfig": {
     "access": "public"
   },
@@ -16,13 +17,19 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "types": "typed/index.d.ts",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
@@ -31,18 +38,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
-    "@luma.gl/constants": "9.0.0-alpha.52",
-    "@luma.gl/core": "9.0.0-alpha.52",
-    "@luma.gl/shadertools": "9.0.0-alpha.52",
+    "@luma.gl/constants": "9.0.0-beta.10",
+    "@luma.gl/shadertools": "9.0.0-beta.10",
     "@math.gl/web-mercator": "^4.0.0",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0-alpha",
-    "@deck.gl/layers": "^9.0.0-alpha",
-    "@luma.gl/core": "9.0.0-alpha.52",
-    "@luma.gl/engine": "9.0.0-alpha.52"
+    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/layers": "^9.0.0-beta",
+    "@luma.gl/core": "9.0.0-beta.10",
+    "@luma.gl/engine": "9.0.0-beta.10"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

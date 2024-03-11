@@ -37,7 +37,7 @@ From v8.6, the `GoogleMapsOverlay` class automatically detects at runtime which 
 
 - Shared 3D space: objects drawn by the `GoogleMapsOverlay` class appear inside the Google Maps scene, correctly intersecting with 3D buildings and behind the contextual labels drawn by Google Maps
 - Tilting and rotating the view is supported
-- Rendering uses the same WebGL context as Google Maps, improving performance
+- Rendering uses the same WebGL2 context as Google Maps, improving performance
 
 ## Supported Features and Limitations
 

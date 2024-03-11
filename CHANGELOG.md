@@ -21,6 +21,110 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.8] - Mar 11 2024
+
+- TerrainExtension: bind texture rather than FBO (#8611)
+- Remove dev dependency on react-map-gl v5 (#8618)
+- chore: Bump luma to beta.10 (#8610)
+- fix(arcgis): DeckGL rendering integration (#8545)
+- chore: bump probe.gl (#8617)
+- prevent js files in venv from being identified as part of deckgl module (#8609)
+- chore(deps): Update to loaders.gl v4.2.0-alpha.5 (#8604)
+- fix(core) warn and error when WebGL1 detected (#8548)
+- ignore bindings directory when running linter (#8598)
+- Correct operator precedence for clearColor in LayersPass (#8599)
+
+#### deck.gl [9.0.0-beta.7] - Mar 7 2024
+
+- chore: bump luma 9.0.0 beta.8 (#8586)
+- Audit module dependencies (#8573)
+- remove(mapbox) public MapboxLayer api (#8585)
+- Avoid creating empty buffer for attributes (#8576)
+
+#### deck.gl [9.0.0-beta.6] - Mar 5 2024
+
+- CARTO: Respect clientId property (#8581)
+- Change Attribute.type to VertexType from WebGL constants (#8572)
+- Cherry pick luma global exports in core bundle (#8574)
+- chore: Bump luma to 9.0.0-beta.6 (#8567)
+- CARTO: Mark filters parameter as optional (#8566)
+- fix(widgets): publish stylesheet (#8571)
+- chore(build): restore inline-webgl-constants transform (#8563)
+- Respect `DataT` on `TripsLayer` props (#8533)
+- chore(build): remove glsl comments (#8531)
+- fix(core): LayersPass#render should clear canvas by default (#8543)
+
+#### deck.gl [9.0.0-beta.5] - Feb 27 2024
+
+- Provide defaultOptions for DataFilterExtension (#8540)
+- Fix Deck error when finialize() is called before initialization (#8532)
+- Fix mapbox overlay alignment style (#8536)
+
+#### deck.gl [9.0.0-beta.4] - Feb 23 2024
+
+- Use SamplerProps type for textureParameters prop (#8520)
+- CARTO: Add filters to v9 sources (#8513)
+- transform d.ts files (#8505)
+- Category filtering in DataFilterExtension (#7915)
+- CARTO: Do not hardcode blockWidth in RasterLayer (#8498)
+- Bump ocular-dev-tools (#8478)
+- Support Tilejson in data prop for MVTLayer (#8432)
+
+#### deck.gl [9.0.0-beta.3] - Feb 14 2024
+
+- chore(types): Remove remaining references to /typed entrypoints (#8481)
+- TerrainExtension: Support picking on draped layers (#8474)
+- Fix test-dist (#8484)
+- Fix test-utils typescript errors (#8483)
+- Fix typing in ColumnLayer (#8453)
+- chore: Bump to loaders@4.1.0 (#8480)
+- Use texture for depth attachment in CollisionFilterEffect (#8477)
+- v9 postprocessing (#8479)
+- fix(core): Ensure picking buffer is cleared before each pass (#8475)
+- v9 audit tile layer types (#8387)
+- Audit Layer#isLoaded implementations (#8386)
+- Improve projection for very high zoom levels (#8454)
+- chore: Remove webgl imports 2 (#8473)
+- chore: Reduce webgl module imports (#8472)
+- Move to ESM modules (#8460)
+
+#### deck.gl [9.0.0-beta.2] - Feb 5 2024
+
+- [v9] HeatmapLayer (#8380)
+- Bump quadbin to 0.2.0 (#8462)
+- [v9] MapboxLayer (#8442)
+
+#### deck.gl [9.0.0-beta.1] - Jan 22 2024
+
+- chore(core): Remove getBufferData helper (#8425)
+- chore(lint): Fix lint errors (#8426)
+- CARTO: Only send baseUrl when request over max length (#8429)
+- [v9] Align picking module PickingProps with luma (#8405)
+- fix(aggregation-layers): Disable gpu aggregation by default (#8416)
+
+#### deck.gl [9.0.0-alpha.7] - Jan 16 2024
+
+- [v9] Remove ShaderModule type (#8406)
+- fix(aggregation-layers): Fix screen-grid-layer with CPU aggregation (#8401)
+- [chore] Bump to loaders-4.1.0-alpha.9 (#8402)
+- [v9] Port plot-layer shaders to glsl300 (#8398)
+- fix(core): Update AttributeTransitionUtils for Luma v9 (#8392)
+- [v9] Tile3DLayer (#8357)
+- Update extension shaders to GLSL 300 (#8394)
+- [v9] ScenegraphLayer (#8350)
+- [v9] Picking module with uniform buffers (#8334)
+- chore(luma): Upgrade to luma.gl v9 alpha-50 (#8379)
+- bump ocular-devtools and adapt to typescript, prettier & eslint upgrade (#8366)
+- Update remaining shaders to GLSL 300 (#8373)
+- Update BitmapLayer, IconLayer, PointCloudLayer, TripsLayer to GLSL 300 (#8372)
+- Update ArcLayer, LineLayer, PolygonLayer to GLSL 300 (#8371)
+- Update PathLayer to GLSL 300 (#8370)
+- Update Scatterplot to GLSL 300 (#8369)
+- [v9] Fix GoogleMapsOverlay by not clearing canvas (#8351)
+- Remove use of deprecated BufferWithAccessor (#8345)
+- carto/fetchMap: fix support for quantile color scale in numeric columns for static tilesets (#8347)
+- CARTO: Remove mapsUrl (#8308)
+
 #### deck.gl [9.0.0-alpha.6] - Nov 21 2023
 
 - [CARTO] User boundaries support (#8296)
@@ -52,6 +156,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### deck.gl [9.0.0-alpha.1] - Nov 10 2023
 
+- Add widgets prop to Deck class (#8023)
+- add(widgets) fullscreen widget (#8024)
+- chore: Fix widget module publishing (#8178)
+- Fix widgets stylesheet.css (#8210)
 - chore: use node 18 (#8222)
 - chore: loaders.gl update to v4.0 (#8215)
 - chore: math.gl update to v4.0 (#8204)

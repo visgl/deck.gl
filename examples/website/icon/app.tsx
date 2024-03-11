@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl//maplibre';
 import DeckGL from '@deck.gl/react';
-import {MapView} from '@deck.gl/core';
+import {MapView, PickingInfo} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
@@ -24,13 +23,15 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function renderTooltip(info) {
-  const {object, x, y} = info;
+type CustomPickingInfo = PickingInfo & {objects?: any} | null;
 
-  if (info.objects) {
+function renderTooltip(info: CustomPickingInfo) {
+  const {object, objects, x, y} = info || {};
+
+  if (objects) {
     return (
       <div className="tooltip interactive" style={{left: x, top: y}}>
-        {info.objects.map(({name, year, mass, class: meteorClass}) => {
+        {objects.map(({name, year, mass, class: meteorClass}) => {
           return (
             <div key={name}>
               <h5>{name}</h5>
@@ -67,27 +68,30 @@ export default function App({
   showCluster = true,
   mapStyle = MAP_STYLE
 }) {
-  const [hoverInfo, setHoverInfo] = useState({});
+  const [hoverInfo, setHoverInfo] = useState<CustomPickingInfo>(null);
 
   const hideTooltip = () => {
-    setHoverInfo({});
+    setHoverInfo(null);
   };
   const expandTooltip = info => {
     if (info.picked && showCluster) {
       setHoverInfo(info);
     } else {
-      setHoverInfo({});
+      setHoverInfo(null);
     }
   };
 
-  const layerProps = {
+  const layerProps: Partial<IconLayer["props"]> = {
     data,
     pickable: true,
     getPosition: d => d.coordinates,
     iconAtlas,
     iconMapping,
-    onHover: !hoverInfo.objects && setHoverInfo
   };
+
+  if (hoverInfo === null || !hoverInfo.objects) {
+    layerProps.onHover = setHoverInfo;
+  }
 
   const layer = showCluster
     ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 40})
@@ -99,7 +103,6 @@ export default function App({
         sizeScale: 2000,
         sizeMinPixels: 6
       });
-
   return (
     <DeckGL
       layers={[layer]}
@@ -109,7 +112,7 @@ export default function App({
       onViewStateChange={hideTooltip}
       onClick={expandTooltip}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
 
       {renderTooltip(hoverInfo)}
     </DeckGL>

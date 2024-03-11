@@ -66,7 +66,7 @@ into "primitive" layers.
 
 ### Rendering
 
-Rendering happens during each rendering cycle to draw the layer to the WebGL context.
+Rendering happens during each rendering cycle to draw the layer to the WebGL2/WebGPU context.
 
 For primitive layers, [`layer.draw()`](../../api-reference/core/layer.md#draw)
 is called at this stage, which invokes the layers' `model.render` calls.

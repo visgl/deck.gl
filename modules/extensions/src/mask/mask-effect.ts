@@ -1,6 +1,5 @@
 import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
-// import {readPixelsToArray} from '@luma.gl/webgl-legacy';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';

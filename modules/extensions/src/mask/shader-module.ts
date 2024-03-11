@@ -1,8 +1,9 @@
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
-import type {_ShaderModule as ShaderModule} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
+import {glsl} from '../utils/syntax-tags';
 
-const vs = `
+const vs = glsl`
 uniform vec4 mask_bounds;
 uniform bool mask_maskByInstance;
 vec2 mask_getCoords(vec4 position) {
@@ -10,7 +11,7 @@ vec2 mask_getCoords(vec4 position) {
 }
 `;
 
-const fs = `
+const fs = glsl`
 uniform sampler2D mask_texture;
 uniform int mask_channel;
 uniform bool mask_enabled;
@@ -40,10 +41,10 @@ bool mask_isInBounds(vec2 texCoords) {
 `;
 
 const inject = {
-  'vs:#decl': `
+  'vs:#decl': glsl`
 out vec2 mask_texCoords;
 `,
-  'vs:#main-end': `
+  'vs:#main-end': glsl`
    vec4 mask_common_position;
    if (mask_maskByInstance) {
      mask_common_position = project_position(vec4(geometry.worldPosition, 1.0));
@@ -52,10 +53,10 @@ out vec2 mask_texCoords;
    }
    mask_texCoords = mask_getCoords(mask_common_position);
 `,
-  'fs:#decl': `
+  'fs:#decl': glsl`
 in vec2 mask_texCoords;
 `,
-  'fs:#main-start': `
+  'fs:#main-start': glsl`
   if (mask_enabled) {
     bool mask = mask_isInBounds(mask_texCoords);
 

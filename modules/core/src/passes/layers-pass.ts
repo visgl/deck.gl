@@ -60,14 +60,18 @@ export default class LayersPass extends Pass {
     // @ts-expect-error TODO - assuming WebGL context
     const [width, height] = this.device.canvasContext.getDrawingBufferSize();
 
+    // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
+    const clearCanvas = options.clearCanvas ?? true;
+    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
+    const clearDepth = clearCanvas ? 1 : false;
+
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters: {
         viewport: [0, 0, width, height]
       },
-      // clear depth and color buffers, restoring transparency
-      clearColor: options.clearColor ?? (options.clearCanvas ? [0, 0, 0, 0] : false),
-      clearDepth: options.clearCanvas ? 1 : undefined
+      clearColor,
+      clearDepth
     });
 
     try {
@@ -337,7 +341,9 @@ export default class LayersPass extends Pass {
         autoWrapLongitude: layer.wrapLongitude,
         viewport: layer.context.viewport,
         mousePosition: layer.context.mousePosition,
-        pickingActive: 0,
+        picking: {
+          isActive: 0
+        },
         devicePixelRatio
       }
     );

@@ -1,5 +1,3 @@
-import {h, render} from 'preact';
-
 export const IconButton = props => {
   const {className, label, onClick} = props;
   return (

@@ -1,6 +1,5 @@
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
-// import {copyToTexture} from '@luma.gl/webgl';
 // import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
@@ -125,6 +124,7 @@ function resizeTexture(
 
   const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
   // @ts-expect-error TODO v9 import
+  // device.copyToTextureWebGL(texture, newTexture, {
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
@@ -348,7 +348,7 @@ export default class IconManager {
     autoPacking?: boolean;
     iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
-    textureParameters?: Record<number, number> | null;
+    textureParameters?: SamplerProps | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;

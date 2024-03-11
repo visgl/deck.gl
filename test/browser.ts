@@ -25,11 +25,15 @@ import {_enableDOMLogging as enableDOMLogging} from '@probe.gl/test-utils';
 // import '@luma.gl/debug';
 
 let failed = false;
-test.onFinish(window.browserTestDriver_finish);
-test.onFailure(() => {
-  failed = true;
-  window.browserTestDriver_fail();
-});
+if (window.browserTestDriver_finish && window.browserTestDriver_fail) {
+  test.onFinish(window.browserTestDriver_finish);
+  test.onFailure(() => {
+    failed = true;
+    window.browserTestDriver_fail();
+  });
+} else {
+  console.warn('Use Google Chrome for Testing to report test completion.');
+}
 
 // tap-browser-color alternative
 enableDOMLogging({
@@ -42,18 +46,5 @@ enableDOMLogging({
 });
 
 import './modules';
-
-// Tests currently only work in browser
-import './modules/json/json-render.spec';
-import './modules/main/bundle';
-// import './modules/aggregation-layers/utils/gpu-grid-aggregator.spec';
-// import './modules/aggregation-layers/gpu-cpu-aggregator.spec';
-// import './modules/aggregation-layers/gpu-grid-layer/gpu-grid-layer.spec';
-// import './modules/aggregation-layers/heatmap-layer/heatmap-layer.spec';
-// TODO disabled for v9, restore ASAP
-// import './modules/carto/layers/raster-tile-layer.spec';
-// import './modules/core/lib/pick-layers.spec';
-
 import './render';
-// TODO disabled for v9, restore ASAP
-// import './interaction';
+import './interaction';

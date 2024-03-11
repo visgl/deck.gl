@@ -22,10 +22,10 @@ import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import type {PipelineFactory} from '@luma.gl/engine';
 import {ShaderAssembler} from '@luma.gl/shadertools';
-import {getPipelineFactory, getShaderAssembler} from '../shaderlib';
+import {getPipelineFactory, getShaderAssembler} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
-import debug from '../debug';
+import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
@@ -54,7 +54,7 @@ export type LayerContext = {
   userData: any;
   onError?: <PropsT extends {}>(error: Error, source: Layer<PropsT>) => void;
   /** @deprecated Use context.device */
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
 };
 
 export type LayersList = (Layer | undefined | false | null | LayersList)[];

@@ -2,11 +2,20 @@ import createDeckProps from './deck-props';
 import createDeckLayer from './deck-layer';
 import createDeckLayerView2D from './deck-layer-view-2d';
 import createDeckRenderer from './deck-renderer';
-import {loadModules as esriLoaderLoadModules} from 'esri-loader';
+import {loadModules as esriLoaderLoadModules, ILoadScriptOptions} from 'esri-loader';
 
-let arcGIS = null;
+type LoadedModules = {
+  DeckLayer: any;
+  DeckRenderer: any;
+  modules?: unknown[];
+};
 
-export async function loadArcGISModules(modules, loadScriptOptions) {
+let arcGIS: LoadedModules;
+
+export async function loadArcGISModules(
+  modules: string[],
+  loadScriptOptions: ILoadScriptOptions
+): Promise<LoadedModules> {
   const namespace = Array.isArray(modules) ? null : modules;
   await loadArcGISModule(namespace, loadScriptOptions);
 
@@ -18,7 +27,10 @@ export async function loadArcGISModules(modules, loadScriptOptions) {
   return arcGIS;
 }
 
-function loadArcGISModule(esri, loadScriptOptions) {
+async function loadArcGISModule(
+  esri,
+  loadScriptOptions: ILoadScriptOptions
+): Promise<LoadedModules> {
   if (arcGIS) {
     // Already loaded
     return arcGIS;
@@ -34,7 +46,7 @@ function loadArcGISModule(esri, loadScriptOptions) {
     return initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers);
   }
 
-  return esriLoaderLoadModules(
+  const [Layer, Accessor, BaseLayerViewGL2D, externalRenderers] = await esriLoaderLoadModules(
     [
       'esri/layers/Layer',
       'esri/core/Accessor',
@@ -42,12 +54,11 @@ function loadArcGISModule(esri, loadScriptOptions) {
       'esri/views/3d/externalRenderers'
     ],
     loadScriptOptions
-  ).then(([Layer, Accessor, BaseLayerViewGL2D, externalRenderers]) => {
-    return initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers);
-  });
+  );
+  return initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers);
 }
 
-function initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers) {
+function initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers): LoadedModules {
   const DeckProps = createDeckProps(Accessor);
   const DeckLayerView2D = createDeckLayerView2D(BaseLayerViewGL2D);
   const DeckLayer = createDeckLayer(DeckProps, Layer, DeckLayerView2D);

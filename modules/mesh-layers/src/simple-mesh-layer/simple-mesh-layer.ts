@@ -32,10 +32,9 @@ import {
   LayerContext,
   Material
 } from '@deck.gl/core';
-import {Texture} from '@luma.gl/core';
+import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
-import {GL} from '@luma.gl/constants';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -119,7 +118,7 @@ type _SimpleMeshLayerProps<DataT> = {
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
-  textureParameters?: Record<number, number> | null;
+  textureParameters?: SamplerProps | null;
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -207,7 +206,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   // 4x4 matrix
   getTransformMatrix: {type: 'accessor', value: []},
 
-  textureParameters: {type: 'object', ignore: true}
+  textureParameters: {type: 'object', ignore: true, value: null}
 };
 
 /** Render a number of instances of an arbitrary 3D geometry. */
@@ -226,20 +225,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
-    const transpileToGLSL100 = this.context.device.info.type !== 'webgl2';
-
-    const defines: any = {};
-
-    if (this.context.device.features.has('glsl-derivatives')) {
-      defines.DERIVATIVES_AVAILABLE = 1;
-    }
-
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongLighting, picking],
-      transpileToGLSL100,
-      defines
+      modules: [project32, phongLighting, picking]
     });
   }
 
@@ -277,16 +266,15 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     attributeManager!.addInstanced({
       instancePositions: {
         transition: true,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         size: 3,
         accessor: 'getPosition'
       },
       instanceColors: {
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         transition: true,
         size: this.props.colorFormat.length,
-        normalized: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -354,6 +342,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       flatShading: !this.state.hasNormals
     });
     model.draw(renderPass);
+  }
+
+  get isLoaded(): boolean {
+    return Boolean(this.state?.model && super.isLoaded);
   }
 
   protected getModel(mesh: Mesh): Model {

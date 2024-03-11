@@ -6,16 +6,16 @@ export default class AnimatedArcLayer extends ArcLayer {
     shaders.inject = {
       'vs:#decl': `\
 uniform vec2 timeRange;
-attribute float instanceSourceTimestamp;
-attribute float instanceTargetTimestamp;
-varying float vTimestamp;
+in float instanceSourceTimestamp;
+in float instanceTargetTimestamp;
+out float vTimestamp;
 `,
       'vs:#main-end': `\
 vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
 `,
       'fs:#decl': `\
 uniform vec2 timeRange;
-varying float vTimestamp;
+in float vTimestamp;
 `,
       'fs:#main-start': `\
 if (vTimestamp < timeRange.x || vTimestamp > timeRange.y) {

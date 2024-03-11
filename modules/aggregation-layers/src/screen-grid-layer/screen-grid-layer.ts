@@ -32,7 +32,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import type {Buffer, Texture} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION, getValueFunc} from '../utils/aggregation-operation-utils';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -44,7 +43,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   getPosition: {type: 'accessor', value: (d: any) => d.position},
   getWeight: {type: 'accessor', value: 1},
 
-  gpuAggregation: true,
+  gpuAggregation: false, // TODO(v9): Re-enable GPU aggregation.
   aggregation: 'SUM'
 };
 
@@ -121,9 +120,6 @@ export type _ScreenGridLayerProps<DataT> = {
   /**
    * Perform aggregation is performed on GPU.
    *
-   * NOTE: GPU Aggregation requires WebGL2 support by the browser.
-   * When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
-   *
    * @default true
    */
   gpuAggregation?: boolean;
@@ -157,12 +153,6 @@ export default class ScreenGridLayer<
   };
 
   initializeState() {
-    if (!ScreenGridCellLayer.isSupported(this.context.device)) {
-      // max aggregated value is sampled from a float texture
-      this.setState({supported: false});
-      log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
-      return;
-    }
     super.initializeAggregationLayer({
       dimensions: DIMENSIONS,
       // @ts-expect-error
@@ -191,7 +181,7 @@ export default class ScreenGridLayer<
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions()
       },
       // this attribute is used in gpu aggregation path only

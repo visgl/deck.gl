@@ -141,17 +141,17 @@ new deck.IconLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-##### `iconAtlas` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#iconatlas}
+##### `iconAtlas` (String|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#iconatlas}
 
 A pre-packed image that contains all icons.
 
 - If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
 - One of the following, or a Promise that resolves to one of the following:
-  + One of the valid [pixel sources for WebGL texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
-  + A luma.gl [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) instance
-  + A plain object that can be passed to the `Texture2D` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
+  + One of the valid [pixel sources for WebGL2 texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
+  + A luma.gl [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) instance
+  + A plain object that can be passed to the `Texture` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
 
-The image data will be converted to a [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object. See `textureParameters` prop for advanced customization.
+The image data will be converted to a [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
 If you go with pre-packed strategy, this prop is required.
 
@@ -222,16 +222,17 @@ On top of the [default options](../core/layer.md#loadoptions), also accepts opti
 
 ##### `textureParameters` (Object) {#textureparameters}
 
-Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
+Customize the [texture parameters](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `iconAtlas`:
 
 ```js
 {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+  minFilter: 'linear',
+  magFilter: 'linear',
+  mipmapFilter: 'linear',
+  addressModeU: 'clamp-to-edge',
+  addressModeV: 'clamp-to-edge'
 }
 ```
 
