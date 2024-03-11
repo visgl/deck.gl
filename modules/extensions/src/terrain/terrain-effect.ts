@@ -93,11 +93,10 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): TerrainModuleSettings {
+  getModuleParameters(layer: Layer): Omit<TerrainModuleSettings, 'picking'> {
     const {terrainDrawMode} = layer.state;
 
     return {
-      picking: {isActive: false},
       heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
       heightMapBounds: this.heightMap?.bounds,
       dummyHeightMap: this.dummyHeightMap!,
