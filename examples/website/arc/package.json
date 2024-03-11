@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/d3-scale": "^4.0.0",
+    "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/geojson": "7946.0.14",
     "d3-scale": "^4.0.0",

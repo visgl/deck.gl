@@ -1,18 +1,21 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl//maplibre';
 import DeckGL from '@deck.gl/react';
-import {MapView, PickingInfo} from '@deck.gl/core';
+import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
 import IconClusterLayer from './icon-cluster-layer';
+import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type { IconLayerProps } from '@deck.gl/layers';
 
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
 
 const MAP_VIEW = new MapView({repeat: true});
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -35,
   latitude: 36.7,
   zoom: 1.8,
@@ -23,10 +26,16 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-type CustomPickingInfo = PickingInfo & {objects?: any} | null;
+type Meterite = {
+  coordinates: [longitude: number, latitude: number];
+  name: string;
+  class: string;
+  mass: number;
+  year: number;
+};
 
-function renderTooltip(info: CustomPickingInfo) {
-  const {object, objects, x, y} = info || {};
+function renderTooltip(info: IconClusterLayerPickingInfo<Meterite>) {
+  const {object, objects, x, y} = info;
 
   if (objects) {
     return (
@@ -49,7 +58,7 @@ function renderTooltip(info: CustomPickingInfo) {
     return null;
   }
 
-  return object.cluster ? (
+  return 'cluster' in object && object.cluster ? (
     <div className="tooltip" style={{left: x, top: y}}>
       {object.point_count} records
     </div>
@@ -68,20 +77,21 @@ export default function App({
   showCluster = true,
   mapStyle = MAP_STYLE
 }) {
-  const [hoverInfo, setHoverInfo] = useState<CustomPickingInfo>(null);
+  const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meterite> | null>(null);
 
-  const hideTooltip = () => {
+  const hideTooltip = useCallback(() => {
     setHoverInfo(null);
-  };
-  const expandTooltip = info => {
+  }, []);
+  const expandTooltip = useCallback((info: PickingInfo) => {
     if (info.picked && showCluster) {
       setHoverInfo(info);
     } else {
       setHoverInfo(null);
     }
-  };
+  }, []);
 
-  const layerProps: Partial<IconLayer["props"]> = {
+  const layerProps: IconLayerProps<Meterite> = {
+    id: 'icon',
     data,
     pickable: true,
     getPosition: d => d.coordinates,
@@ -114,11 +124,11 @@ export default function App({
     >
       <Map reuseMaps mapStyle={mapStyle} />
 
-      {renderTooltip(hoverInfo)}
+      {hoverInfo && renderTooltip(hoverInfo)}
     </DeckGL>
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
