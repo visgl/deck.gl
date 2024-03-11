@@ -119,7 +119,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler = dummyHeightMap as Texture;
+      let sampler: Texture | undefined = dummyHeightMap as Texture;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -132,10 +132,10 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       } else if (terrainCover) {
         // This is a terrain layer
         const isPicking = opts.picking?.isActive;
-        // @ts-expect-error
-        sampler = isPicking
+        const fbo = isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
+        sampler = fbo?.colorAttachments[0].texture;
         if (isPicking) {
           // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;

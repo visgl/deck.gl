@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {
   H3TileLayer,
@@ -57,7 +57,7 @@ function Root() {
             .join('');
         }}
       >
-        <StaticMap mapStyle={MAP_STYLE} />
+        <Map mapStyle={MAP_STYLE} />
       </DeckGL>
       <ObjectSelect
         title="dataset"

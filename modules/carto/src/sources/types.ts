@@ -76,6 +76,21 @@ export type QuerySourceOptions = {
   sqlQuery: string;
 
   /**
+   * Relative resolution of a tile. Higher values increase density and data size. At `tileResolution = 1`, tile geometry is
+   * quantized to a 1024x1024 grid. Increasing or decreasing the resolution will increase or decrease the dimensions of
+   * the quantization grid proportionately.
+   *
+   * Supported `tileResolution` values, with corresponding grid sizes:
+   *
+   * - 0.25: 256x256
+   * - 0.5: 512x512
+   * - 1: 1024x1024
+   * - 2: 2048x2048
+   * - 4: 4096x4096
+   */
+  tileResolution?: TileResolution;
+
+  /**
    * Values for named or positional paramteres in the query.
    *
    * The way query parameters are determined by data warehouse.
@@ -109,18 +124,26 @@ export type TableSourceOptions = {
   tableName: string;
 
   /**
-   * Columns to retrieve from the table.
-   *
-   * If not present, all columns are returned.
-   */
-  columns?: string[];
-
-  /**
    * The column name and the type of geospatial support.
    *
    * If not present, defaults to `'geom'` for generic tables, `'quadbin'` for Quadbin sources and `'h3'` for H3 sources.
    */
   spatialDataColumn?: string;
+
+  /**
+   * Relative resolution of a tile. Higher values increase density and data size. At `tileResolution = 1`, tile geometry is
+   * quantized to a 1024x1024 grid. Increasing or decreasing the resolution will increase or decrease the dimensions of
+   * the quantization grid proportionately.
+   *
+   * Supported `tileResolution` values, with corresponding grid sizes:
+   *
+   * - 0.25: 256x256
+   * - 0.5: 512x512
+   * - 1: 1024x1024
+   * - 2: 2048x2048
+   * - 4: 4096x4096
+   */
+  tileResolution?: TileResolution;
 };
 
 export type TilesetSourceOptions = {
@@ -130,11 +153,22 @@ export type TilesetSourceOptions = {
   tableName: string;
 };
 
+export type ColumnsOption = {
+  /**
+   * Columns to retrieve from the table.
+   *
+   * If not present, all columns are returned.
+   */
+  columns?: string[];
+};
+
 export type SpatialDataType = 'geo' | 'h3' | 'quadbin';
 
 export type TilejsonMapInstantiation = MapInstantiation & {
   tilejson: {url: string[]};
 };
+
+export type TileResolution = 0.25 | 0.5 | 1 | 2 | 4;
 
 export interface Tilejson {
   tilejson: string;
@@ -153,6 +187,7 @@ export interface Tilejson {
   center: [number, number, number];
   vector_layers: VectorLayer[];
   tilestats: Tilestats;
+  tileResolution?: TileResolution;
 }
 
 export interface Tilestats {

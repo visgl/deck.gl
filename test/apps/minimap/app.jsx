@@ -1,8 +1,7 @@
 /* global window */
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {View, MapView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -155,16 +154,12 @@ export class App extends Component {
       >
         <Map
           reuseMaps
-          mapLib={maplibregl}
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
-          preventStyleDiffing={true}
         />
         <View id="minimap">
           <Map
             reuseMaps
-            mapLib={maplibregl}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json"
-            preventStyleDiffing={true}
           />
         </View>
       </DeckGL>

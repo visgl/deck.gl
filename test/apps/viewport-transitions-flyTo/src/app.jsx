@@ -1,7 +1,6 @@
 /* global window */
 import React, {Component} from 'react';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL, {MapController, FlyToInterpolator, TRANSITION_EVENTS} from 'deck.gl';
 
 import ControlPanel from './control-panel';
@@ -94,7 +93,6 @@ export default class App extends Component {
           onViewStateChange={this._onViewStateChange}
         >
           <Map
-            mapLib={maplibregl}
             mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
             dragToRotate={false}
           />

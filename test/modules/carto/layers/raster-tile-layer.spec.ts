@@ -58,8 +58,7 @@ test.skip('RasterLayer', async t => {
       Layer: RasterLayer,
       props: {
         data: {
-          blockWidth: 256,
-          blockHeight: 256,
+          blockSize: 256,
           cells: {
             properties: [],
             numericProps: {band: {value: new Float32Array(256 * 256).fill(7)}}

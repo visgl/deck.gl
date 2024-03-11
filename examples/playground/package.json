@@ -9,19 +9,19 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^4.1.0",
-    "@loaders.gl/core": "^4.1.0",
-    "@loaders.gl/csv": "^4.1.0",
-    "@loaders.gl/draco": "^4.1.0",
-    "@loaders.gl/gltf": "^4.1.0",
-    "@luma.gl/constants": "9.0.0-beta.8",
+    "@loaders.gl/3d-tiles": "^4.2.0-alpha.5",
+    "@loaders.gl/core": "^4.2.0-alpha.5",
+    "@loaders.gl/csv": "^4.2.0-alpha.5",
+    "@loaders.gl/draco": "^4.2.0-alpha.5",
+    "@loaders.gl/gltf": "^4.2.0-alpha.5",
+    "@luma.gl/constants": "9.0.0-beta.10",
     "brace": "^0.11.1",
     "deck.gl": "^8.8.0",
-    "maplibre-gl": "^2.4.0",
+    "maplibre-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^7.0.0",
+    "react-map-gl": "^7.1.0",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
   "devDependencies": {

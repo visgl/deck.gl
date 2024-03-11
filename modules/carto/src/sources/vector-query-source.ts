@@ -1,23 +1,26 @@
 /* eslint-disable camelcase */
+import {DEFAULT_TILE_RESOLUTION} from '../constants';
 import {baseSource} from './base-source';
 import type {
   FilterOptions,
   SourceOptions,
   QuerySourceOptions,
   SpatialDataType,
-  TilejsonResult
+  TilejsonResult,
+  ColumnsOption
 } from './types';
 
 export type VectorQuerySourceOptions = SourceOptions &
   QuerySourceOptions &
-  FilterOptions & {
-    columns?: string[];
-  };
+  FilterOptions &
+  ColumnsOption;
+
 type UrlParameters = {
   columns?: string;
   filters?: string;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
+  tileResolution?: string;
   q: string;
   queryParameters?: string;
 };
@@ -25,8 +28,21 @@ type UrlParameters = {
 export const vectorQuerySource = async function (
   options: VectorQuerySourceOptions
 ): Promise<TilejsonResult> {
-  const {columns, filters, spatialDataColumn = 'geom', sqlQuery, queryParameters} = options;
-  const urlParameters: UrlParameters = {spatialDataColumn, spatialDataType: 'geo', q: sqlQuery};
+  const {
+    columns,
+    filters,
+    spatialDataColumn = 'geom',
+    sqlQuery,
+    tileResolution = DEFAULT_TILE_RESOLUTION,
+    queryParameters
+  } = options;
+
+  const urlParameters: UrlParameters = {
+    spatialDataColumn,
+    spatialDataType: 'geo',
+    tileResolution: tileResolution.toString(),
+    q: sqlQuery
+  };
 
   if (columns) {
     urlParameters.columns = columns.join(',');
