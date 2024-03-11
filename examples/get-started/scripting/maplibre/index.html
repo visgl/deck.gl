@@ -3,9 +3,9 @@
     <!-- deck.gl standalone bundle -->
     <script src="https://unpkg.com/deck.gl@^9.0.0-beta/dist.min.js"></script>
 
-    <!-- Mapbox dependencies -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
+    <!-- Maplibre dependencies -->
+    <script src='https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@3.0.0/dist/maplibre-gl.css' rel='stylesheet' />
 
     <style type="text/css">
       body {margin: 0; padding: 0;}
@@ -25,8 +25,7 @@ const AIR_PORTS =
 
 const deckgl = new deck.DeckGL({
   container: 'container',
-  // Set your Mapbox access token here
-  mapboxApiAccessToken: '<your mapbox token>',
+  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
 
   initialViewState: {
     latitude: 51.47,

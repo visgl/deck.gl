@@ -31,7 +31,6 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
-import {getBrowser} from '@probe.gl/env';
 import {luma, Device, DeviceProps} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
@@ -367,9 +366,6 @@ export default class Deck {
       log.warn(
         'View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.'
       )();
-    }
-    if (getBrowser() === 'IE') {
-      log.warn('IE 11 is not supported')();
     }
     this.viewState = props.initialViewState;
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import {useState, useMemo, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
@@ -228,7 +227,7 @@ export default function App({
       getTooltip={getTooltip}
     >
       <MapView id="main">
-        <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} />
+        <Map reuseMaps mapStyle={mapStyle} />
         <SearchBar data={data} onChange={onSelectStation} />
       </MapView>
       {showMinimap && (
