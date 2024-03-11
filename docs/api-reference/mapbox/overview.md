@@ -2,7 +2,7 @@
 
 This module integrates deck.gl into the Mapbox GL JS API-compatible ecosystem. 
 
-- It synchronises a deck.gl `MapView` with the [mapbox-gl camera](https://docs.mapbox.com/mapbox-gl-js/guides/#camera).
+- It synchronizes a deck.gl `MapView` with the [mapbox-gl camera](https://docs.mapbox.com/mapbox-gl-js/guides/#camera).
 - It allows deck.gl to be used with mapbox-gl [controls](https://docs.mapbox.com/mapbox-gl-js/api/markers) and [plugins](https://docs.mapbox.com/mapbox-gl-js/plugins/) such as `NavigationControl`, `GeolocateControl` and `mapbox-gl-geocoder`.
 - It adds the option to interleave deck.gl layers with the base map layers, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
 
@@ -41,7 +41,7 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 
 ### Camera Syncronization between deck.gl and Mapbox
 
-This module keeps a deck.gl `MapView` in sync with the mapbox-gl camera so that the base map and deck layers are always geospactially aligned. Some `Deck` props, such as `viewState`, are ignored or have different behavior. See `MapboxOverlay` constructor notes. Also, some camera features are unable to be fully syncronized due to mapbox-gl API limitations, see [limitations](#limitations).
+This module keeps a deck.gl `MapView` in sync with the mapbox-gl camera so that the base map and deck layers are always geospactially aligned. Some `Deck` props, such as `viewState`, are ignored or have different behavior. See `MapboxOverlay` constructor notes. Also, some camera features are unable to be fully synchronized due to mapbox-gl API limitations, see [limitations](#limitations).
 
 ### Using mapbox-gl controls and plugins with deck.gl
 
@@ -75,7 +75,7 @@ The following table details renderer support across different versions of mapbox
 
 ## Alternative Mapbox Integrations
 
-If you're using deck.gl in a React or Scripting environment and if you just want the base map as a back drop, and do not need mapbox-gl's UI controls or mixing deck.gl and Mapbox layers, it is recommended that you do not use this module and instead use deck.gl as the root HTML element. Visit [Using Deck.gl as the root HTML element](../../developer-guide/base-maps/using-with-mapbox.md#using-deckgl-as-the-root-html-element) for an example.
+If you're using deck.gl in a React or Scripting environment, you just want the base map as a back drop, and do not need mapbox-gl's UI controls or need to mix deck.gl and Mapbox layers, it is recommended that you do not use this module and instead use deck.gl as the root HTML element. Visit [Using Deck.gl as the root HTML element](../../developer-guide/base-maps/using-with-mapbox.md#using-deckgl-as-the-root-html-element) for an example.
 
 ## Limitations
 

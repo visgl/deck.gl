@@ -10,11 +10,11 @@
 
 When using deck.gl and Mapbox, there are three options you can choose from:
 
-1. All Deck.gl environments support deep integration with Mapbox features using the [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) module. This is recommended approach as it supports interleaved and overlaid rendering, as well as Mapbox controls and plugins. See [Inserting Deck.gl into the Mapbox container](#inserting-deckgl-into-the-mapbox-container).
-2. The Deck.gl React API supports an additional configuration when you just need a map backdrop and prefer to use the Deck API for [interactivity](../../developer-guide/interactivity.md). See [Inserting Mapbox into the Deck.gl container](#inserting-mapbox-into-the-deckgl-container).
-3. Finally, Deck.gl offers out-of-the-box integration with Mapbox when using the [Scripting API](https://deck.gl/docs/get-started/using-standalone#using-the-scripting-api).
+1. All deck.gl environments support deep integration with Mapbox features using the [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) module. This is recommended approach as it supports interleaved and overlaid rendering, as well as Mapbox controls and plugins. See [Inserting deck.gl into the Mapbox container](#inserting-deckgl-into-the-mapbox-container).
+2. The deck.gl React API supports an additional configuration when you just need a map backdrop and prefer to use the Deck API for [interactivity](../../developer-guide/interactivity.md). See [Inserting Mapbox into the deck.gl container](#inserting-mapbox-into-the-deckgl-container).
+3. Finally, deck.gl offers out-of-the-box integration with Mapbox when using the [Scripting API](https://deck.gl/docs/get-started/using-standalone#using-the-scripting-api).
 
-## Inserting Deck.gl into the Mapbox container
+## Inserting deck.gl into the Mapbox container
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -72,7 +72,7 @@ If want to use the base map as a backdrop, the recommended approach is to use th
 
 If you also need to mix deck.gl layers with base map layers, e.g. having deck.gl surfaces below text labels or objects occluding each other correctly in 3D, then you have to use deck.gl layers interleaved with Mapbox layers in the same WebGL2 context. In addition to using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) to insert Deck into the map container, you have to use interleaved mode (`interleaved: true`). Be cautious that this feature subjects to bugs and limitations of mapbox-gl's custom layer interface, and is only compatible with WebGL2 (See [interleaved renderer compatibility](../../api-reference/mapbox/overview#interleaved-renderer-compatibility)). The [pure js gallery example](https://github.com/visgl/deck.gl/blob/master/examples/gallery/src/mapbox-overlay.html) illustrates this pattern.
 
-## Inserting Mapbox into the Deck.gl container
+## Inserting Mapbox into the deck.gl container
 
 ```jsx
 import DeckGL from '@deck.gl/react';
@@ -99,7 +99,7 @@ If you're using deck.gl in a React environment and just need a map backdrop, the
 
 All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
 
-When you choose the react-map-gl `Map` React component as the root component, using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) with react-map-gl `useControl` works especially well to insert perfectly synchronized deckgl layers in the map container. 
+When you choose the react-map-gl `Map` React component as the root component, using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) with react-map-gl `useControl` works especially well to insert perfectly synchronized deck.gl layers in the map container. 
 
 When you choose the `DeckGL` React component as the root component, react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) as a child automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will still render as a synchronized geospatial overlay over the underlying map.
 
