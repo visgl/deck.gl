@@ -63,12 +63,12 @@ export type TileJson = {
 type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
 /** All props supported by the MVTLayer */
-export type MVTLayerProps = _MVTLayerProps &
-  Omit<GeoJsonLayerProps, 'data'> &
+export type MVTLayerProps<FeaturePropertiesT = unknown> = _MVTLayerProps<FeaturePropertiesT> &
   Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
 /** Props added by the MVTLayer  */
-export type _MVTLayerProps = {
+export type _MVTLayerProps<FeaturePropertiesT> =
+  Omit<GeoJsonLayerProps<FeaturePropertiesT>, 'data'> & {
   data: TileJson | URLTemplate;
 
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
@@ -98,9 +98,9 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
+export default class MVTLayer<FeaturePropertiesT, ExtraProps extends {} = {}> extends TileLayer<
   ParsedMvtTile,
-  Required<_MVTLayerProps> & ExtraProps
+  Required<_MVTLayerProps<FeaturePropertiesT>> & ExtraProps
 > {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
