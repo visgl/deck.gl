@@ -95,7 +95,8 @@ function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
   return arcs;
 }
 
-function getTooltip({object}: PickingInfo) {
+function getTooltip(info: PickingInfo) {
+  const object: County = info.object;
   return object && object.properties.name;
 }
 
