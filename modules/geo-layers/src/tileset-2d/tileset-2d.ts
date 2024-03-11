@@ -154,8 +154,8 @@ export class Tileset2D {
     };
 
     this._requestScheduler = new RequestScheduler({
+      throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
       maxRequests: this.opts.maxRequests,
-      throttleRequests: Boolean(this.opts.maxRequests && this.opts.maxRequests > 0),
       debounceTime: this.opts.debounceTime
     });
 

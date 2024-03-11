@@ -228,8 +228,6 @@ If `debounceTime == 0`, tile requests are issued as quickly as the `maxRequests`
 
 If `debounceTime > 0`, tile requests are queued until a period of at least `debounceTime` milliseconds has passed without any new tiles being added to the queue. May reduce bandwidth usage and total loading time during interactive view transitions.
 
-If `maxRequests <= 0`, no throttling will occur, and `debounceTime` has no effect.
-
 - Default: `0`
 
 ### Render Options
