@@ -2,13 +2,17 @@
 import {baseSource} from './base-source';
 import type {
   FilterOptions,
+  ColumnsOption,
   SourceOptions,
   SpatialDataType,
   TableSourceOptions,
   TilejsonResult
 } from './types';
 
-export type VectorTableSourceOptions = SourceOptions & TableSourceOptions & FilterOptions;
+export type VectorTableSourceOptions = SourceOptions &
+  TableSourceOptions &
+  FilterOptions &
+  ColumnsOption;
 type UrlParameters = {
   columns?: string;
   filters?: string;
