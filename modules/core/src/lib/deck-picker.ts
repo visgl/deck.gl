@@ -201,7 +201,7 @@ export default class DeckPicker {
 
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return {
         result: [],
         emptyInfo: getEmptyPickingInfo({viewports, x, y, pixelRatio})
