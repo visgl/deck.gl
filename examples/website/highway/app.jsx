@@ -138,9 +138,10 @@ export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle =
         getLineWidth: {year}
       },
 
+      // TODO(v9) Re-enable once attribute transitions working (#8392)
       transitions: {
-        getLineColor: 1000,
-        getLineWidth: 1000
+        // getLineColor: 1000, // <- broken
+        getLineWidth: 1000 // <- working
       }
     })
   ];
