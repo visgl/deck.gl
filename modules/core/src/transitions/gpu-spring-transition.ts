@@ -154,9 +154,8 @@ export default class GPUSpringTransition implements GPUTransition {
     cycleBuffers(buffers);
     this.attributeInTransition.setData({
       buffer: buffers[1],
-      // Hack: Float64Array is required for double-precision attributes
-      // to generate correct shader attributes
-      value: this.attribute.value as NumericArray
+      // Retain placeholder value to generate correct shader layout
+      value: this.attributeInTransition.value as NumericArray
     });
 
     const isTransitioning = this.device.readPixelsToArrayWebGL(framebuffer)[0] > 0;
