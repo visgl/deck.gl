@@ -7,12 +7,12 @@ import {
   getAttributeTypeFromSize,
   getAttributeBufferLength,
   getFloat32VertexFormat,
-  cycleBuffers,
-  SpringTransitionSettings
-} from '../lib/attribute/attribute-transition-utils';
+  cycleBuffers
+} from './gpu-transition-utils';
 import Attribute from '../lib/attribute/attribute';
 import Transition from './transition';
 
+import type {SpringTransitionSettings} from './transition-settings';
 import type {Timeline} from '@luma.gl/engine';
 import type {BufferTransform as LumaTransform} from '@luma.gl/engine';
 import type {
@@ -21,7 +21,7 @@ import type {
   Texture as LumaTexture2D
 } from '@luma.gl/core';
 import type {NumericArray} from '../types/types';
-import type GPUTransition from './gpu-transition';
+import type {GPUTransition} from './gpu-transition';
 
 export default class GPUSpringTransition implements GPUTransition {
   device: Device;

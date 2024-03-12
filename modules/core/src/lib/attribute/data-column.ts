@@ -502,7 +502,6 @@ export default class DataColumn<Options, State> {
     if (!ArrayBuffer.isView(value)) {
       throw new Error(`Attribute ${this.id} value is not TypedArray`);
     }
-    const ArrayType = this.settings.defaultType;
 
     let illegalArrayType = false;
     if (this.doublePrecision) {
@@ -512,9 +511,10 @@ export default class DataColumn<Options, State> {
     if (illegalArrayType) {
       throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
     }
-    if (!(value instanceof ArrayType) && this.settings.normalized && !('normalized' in opts)) {
-      log.warn(`Attribute ${this.id} is normalized`)();
-    }
+    // const ArrayType = this.settings.defaultType;
+    // if (!(value instanceof ArrayType) && this.settings.normalized && !('normalized' in opts)) {
+    //   log.warn(`Attribute ${this.id} is normalized`)();
+    // }
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer

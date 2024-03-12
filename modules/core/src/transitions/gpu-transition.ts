@@ -1,7 +1,7 @@
 import type Attribute from '../lib/attribute/attribute';
-import type {TransitionSettings} from '../lib/attribute/attribute-transition-utils';
+import type {TransitionSettings} from './transition-settings';
 
-export default interface GPUTransition {
+export interface GPUTransition {
   get type(): string;
   get inProgress(): boolean;
   get attributeInTransition(): Attribute;

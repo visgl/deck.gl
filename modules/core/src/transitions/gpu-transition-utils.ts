@@ -1,68 +1,9 @@
-import type {Device} from '@luma.gl/core';
-import type {Buffer} from '@luma.gl/core';
-import {padArray} from '../../utils/array-utils';
-import {NumericArray, TypedArray} from '../../types/types';
-import Attribute from './attribute';
-import type {BufferAccessor} from './data-column';
-import {VertexFormat as LumaVertexFormat} from '@luma.gl/core';
-
-export interface TransitionSettings {
-  type: string;
-  /** Callback to get the value that the entering vertices are transitioning from. */
-  enter?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
-  /** Callback when the transition is started */
-  onStart?: () => void;
-  /** Callback when the transition is done */
-  onEnd?: () => void;
-  /** Callback when the transition is interrupted */
-  onInterrupt?: () => void;
-}
-
-export type InterpolationTransitionSettings = TransitionSettings & {
-  type?: 'interpolation';
-  /** Duration of the transition animation, in milliseconds */
-  duration: number;
-  /** Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) */
-  easing?: (t: number) => number;
-};
-
-export type SpringTransitionSettings = TransitionSettings & {
-  type: 'spring';
-  /** "Tension" factor for the spring */
-  stiffness: number;
-  /** "Friction" factor that counteracts the spring's acceleration */
-  damping: number;
-};
-
-const DEFAULT_TRANSITION_SETTINGS = {
-  interpolation: {
-    duration: 0,
-    easing: t => t
-  },
-  spring: {
-    stiffness: 0.05,
-    damping: 0.5
-  }
-};
-
-export function normalizeTransitionSettings(
-  userSettings: number | InterpolationTransitionSettings | SpringTransitionSettings,
-  layerSettings?: boolean | Partial<TransitionSettings>
-): TransitionSettings | null {
-  if (!userSettings) {
-    return null;
-  }
-  if (Number.isFinite(userSettings)) {
-    userSettings = {type: 'interpolation', duration: userSettings as number};
-  }
-  const type = (userSettings as TransitionSettings).type || 'interpolation';
-  return {
-    ...DEFAULT_TRANSITION_SETTINGS[type],
-    ...(layerSettings as TransitionSettings),
-    ...(userSettings as TransitionSettings),
-    type
-  };
-}
+import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
+import {padArray} from '../utils/array-utils';
+import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
+import Attribute from '../lib/attribute/attribute';
+import type {BufferAccessor} from '../lib/attribute/data-column';
+import {GL} from '@luma.gl/constants';
 
 // NOTE: NOT COPYING OVER OFFSET OR STRIDE HERE BECAUSE:
 // (1) WE DON'T SUPPORT INTERLEAVED BUFFERS FOR TRANSITIONS
@@ -109,7 +50,7 @@ export function getAttributeTypeFromSize(size: number): string {
 }
 
 /** Returns the {@link VertexFormat} for the given number of float32 components. */
-export function getFloat32VertexFormat(size: 1 | 2 | 3 | 4): LumaVertexFormat {
+export function getFloat32VertexFormat(size: number): VertexFormat {
   switch (size) {
     case 1:
       return 'float32';
@@ -131,7 +72,17 @@ export function cycleBuffers(buffers: Buffer[]): void {
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
   const {doublePrecision, settings, value, size} = attribute;
   const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
-  return (settings.noAlloc ? (value as NumericArray).length : numInstances * size) * multiplier;
+  let maxVertexOffset = 0;
+  const {shaderAttributes} = attribute.settings;
+  if (shaderAttributes) {
+    for (const shaderAttribute of Object.values(shaderAttributes)) {
+      maxVertexOffset = Math.max(maxVertexOffset, shaderAttribute.vertexOffset ?? 0);
+    }
+  }
+  return (
+    (settings.noAlloc ? (value as NumericArray).length : (numInstances + maxVertexOffset) * size) *
+    multiplier
+  );
 }
 
 // This helper is used when transitioning attributes from a set of values in one buffer layout
@@ -146,16 +97,16 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
 // was insufficient. Callers are responsible for disposing of the original buffer if needed.
 export function padBuffer({
   buffer,
-  numInstances,
   attribute,
   fromLength,
+  toLength,
   fromStartIndices,
   getData = x => x
 }: {
   buffer: Buffer;
-  numInstances: number;
   attribute: Attribute;
   fromLength: number;
+  toLength: number;
   fromStartIndices?: NumericArray | null;
   getData?: (toValue: NumericArray, chunk?: NumericArray) => NumericArray;
 }): Buffer {
@@ -165,9 +116,12 @@ export function padBuffer({
     attribute.doublePrecision && attribute.value instanceof Float64Array ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const byteOffset = attribute.byteOffset;
+  const targetByteOffset =
+    attribute.settings.bytesPerElement < 4
+      ? (byteOffset / attribute.settings.bytesPerElement) * 4
+      : byteOffset;
   const toStartIndices = attribute.startIndices;
   const hasStartIndices = fromStartIndices && toStartIndices;
-  const toLength = getAttributeBufferLength(attribute, numInstances);
   const isConstant = attribute.isConstant;
 
   // check if buffer needs to be padded
@@ -175,21 +129,30 @@ export function padBuffer({
     return buffer;
   }
 
+  const ArrayType =
+    attribute.value instanceof Float64Array
+      ? Float32Array
+      : ((attribute.value as TypedArray).constructor as TypedArrayConstructor);
   const toData = isConstant
     ? (attribute.value as TypedArray)
     : // TODO(v9.1): Avoid non-portable synchronous reads.
-      toFloat32Array(attribute.getBuffer()!.readSyncWebGL());
+      new ArrayType(
+        attribute
+          .getBuffer()!
+          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer
+      );
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
   }
 
   const getMissingData = isConstant
-    ? (i, chunk) => getData(toData, chunk)
-    : (i, chunk) => getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
+    ? (i: number, chunk: NumericArray) => getData(toData, chunk)
+    : (i: number, chunk: NumericArray) =>
+        getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
-  const source = toFloat32Array(buffer.readSyncWebGL());
+  const source = new Float32Array(buffer.readSyncWebGL(0, fromLength * 4).buffer);
   const target = new Float32Array(toLength);
   padArray({
     source,
@@ -200,17 +163,12 @@ export function padBuffer({
     getData: getMissingData
   });
 
-  if (buffer.byteLength < target.byteLength + byteOffset) {
-    buffer = buffer.device.createBuffer({byteLength: target.byteLength + byteOffset});
+  if (buffer.byteLength < target.byteLength + targetByteOffset) {
+    buffer = buffer.device.createBuffer({
+      byteLength: target.byteLength + targetByteOffset,
+      usage: GL.DYNAMIC_COPY
+    });
   }
-  buffer.write(target, byteOffset);
+  buffer.write(target, targetByteOffset);
   return buffer;
-}
-
-function toFloat32Array(bytes: Uint8Array): Float32Array {
-  return new Float32Array(
-    bytes.buffer,
-    bytes.byteOffset,
-    bytes.byteLength / Float32Array.BYTES_PER_ELEMENT
-  );
 }

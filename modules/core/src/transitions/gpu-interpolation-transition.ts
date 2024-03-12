@@ -1,4 +1,4 @@
-import type {Device} from '@luma.gl/core';
+import type {Device, VertexFormat} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
@@ -7,14 +7,14 @@ import {
   getAttributeTypeFromSize,
   getAttributeBufferLength,
   cycleBuffers,
-  InterpolationTransitionSettings,
   padBuffer,
   getFloat32VertexFormat
-} from '../lib/attribute/attribute-transition-utils';
+} from './gpu-transition-utils';
 import Transition from './transition';
 
-import type {NumericArray} from '../types/types';
-import type GPUTransition from './gpu-transition';
+import type {InterpolationTransitionSettings} from './transition-settings';
+import type {NumericArray, TypedArray} from '../types/types';
+import type {GPUTransition} from './gpu-transition';
 
 export default class GPUInterpolationTransition implements GPUTransition {
   device: Device;
@@ -43,26 +43,20 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.attribute = attribute;
     // this is the attribute we return during the transition - note: if it is a constant
     // attribute, it will be converted and returned as a regular attribute
-    // `attribute.userData` is the original options passed when constructing the attribute.
+    // `attribute.settings` is the original options passed when constructing the attribute.
     // This ensures that we set the proper `doublePrecision` flag and shader attributes.
     this.attributeInTransition = new Attribute(device, attribute.settings);
-    if (ArrayBuffer.isView(attribute.value)) {
-      this.attributeInTransition.setData(attribute.value);
-    }
+    // Placeholder value - necessary for generating the correct buffer layout
+    this.attributeInTransition.setData(
+      attribute.value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0)
+    );
     this.currentStartIndices = attribute.startIndices;
     // storing currentLength because this.buffer may be larger than the actual length we want to use
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
     this.currentLength = 0;
     this.transform = getTransform(device, attribute);
-    const bufferOpts = {
-      byteLength: attribute.buffer.byteLength,
-      usage: GL.DYNAMIC_COPY
-    };
-    this.buffers = [
-      device.createBuffer(bufferOpts), // from
-      device.createBuffer(bufferOpts) // current
-    ];
+    this.buffers = [device.createBuffer({byteLength: 0})];
   }
 
   get inProgress(): boolean {
@@ -87,59 +81,67 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // And the other buffer is now the current buffer.
     cycleBuffers(buffers);
 
+    const toLength = getAttributeBufferLength(attribute, numInstances);
     const padBufferOpts = {
       numInstances,
       attribute,
       fromLength: this.currentLength,
+      toLength,
       fromStartIndices: this.currentStartIndices,
       getData: transitionSettings.enter
     };
 
-    for (const [index, buffer] of buffers.entries()) {
-      const paddedBuffer = padBuffer({buffer, ...padBufferOpts});
-
-      if (buffer !== paddedBuffer) {
-        buffer.destroy();
-        buffers[index] = paddedBuffer;
-
-        // TODO(v9): While this probably isn't necessary as a user-facing warning, it is helpful
-        // for debugging buffer allocation during deck.gl v9 development.
-        console.warn(
-          `[GPUInterpolationTransition] Replaced buffer ${buffer.id} (${buffer.byteLength} bytes) → ` +
-            `${paddedBuffer.id} (${paddedBuffer.byteLength} bytes)`
-        );
-      }
+    const fromBuffer = padBuffer({buffer: buffers[0], ...padBufferOpts});
+    if (fromBuffer !== buffers[0]) {
+      buffers[0].destroy();
+      buffers[0] = fromBuffer;
+    }
+    if (!buffers[1] || buffers[1].byteLength < fromBuffer.byteLength) {
+      buffers[1]?.destroy();
+      buffers[1] = this.device.createBuffer({
+        byteLength: fromBuffer.byteLength,
+        usage: fromBuffer.usage
+      });
     }
 
     this.currentStartIndices = attribute.startIndices;
-    this.currentLength = getAttributeBufferLength(attribute, numInstances);
+    this.currentLength = toLength;
     this.attributeInTransition.setData({
       buffer: buffers[1],
-      // Hack: Float64Array is required for double-precision attributes
-      // to generate correct shader attributes
-      value: attribute.value as NumericArray
+      // Retain placeholder value to generate correct shader layout
+      value: this.attributeInTransition.value as NumericArray
     });
 
     this.transition.start(transitionSettings);
 
-    this.transform.model.setVertexCount(Math.floor(this.currentLength / attribute.size));
-    // TODO(v9): Best way to handle 'constant' attributes?
-    this.transform.model.setAttributes(
-      attribute.getBuffer() ? {aFrom: buffers[0], aTo: attribute.getBuffer()!} : {aFrom: buffers[0]}
-    );
+    const {model} = this.transform;
+    model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    if (attribute.isConstant) {
+      model.setAttributes({aFrom: buffers[0]});
+      model.setConstantAttributes({aTo: attribute.value as TypedArray});
+    } else {
+      model.setAttributes({
+        aFrom: buffers[0],
+        aTo: attribute.getBuffer()!
+      });
+    }
     this.transform.transformFeedback.setBuffers({vCurrent: buffers[1]});
   }
 
   update(): boolean {
     const updated = this.transition.update();
     if (updated) {
-      const {duration, easing} = this.settings as InterpolationTransitionSettings;
+      const {duration, easing} = this.settings!;
       const {time} = this.transition;
       let t = time / duration;
       if (easing) {
         t = easing(t);
       }
-      this.transform.model.setUniforms({time: t});
+      const {model} = this.transform;
+      model.setUniforms({time: t});
+      // TODO - why is this needed?
+      model.setAttributes({aFrom: this.buffers[0]});
+
       this.transform.run();
     }
     return updated;
@@ -147,9 +149,9 @@ export default class GPUInterpolationTransition implements GPUTransition {
 
   cancel(): void {
     this.transition.cancel();
-    this.transform.delete();
+    this.transform.destroy();
     for (const buffer of this.buffers) {
-      buffer.delete();
+      buffer.destroy();
     }
     this.buffers.length = 0;
   }
@@ -172,12 +174,12 @@ void main(void) {
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
   const attributeType = getAttributeTypeFromSize(attribute.size);
-  const format = getFloat32VertexFormat(attribute.size as 1 | 2 | 3 | 4);
   return new BufferTransform(device, {
+    id: `${attribute.id}-transition`,
     vs,
     bufferLayout: [
-      {name: 'aFrom', format},
-      {name: 'aTo', format}
+      {name: 'aFrom', format: getFloat32VertexFormat(attribute.size)},
+      {name: 'aTo', format: attribute.getBufferLayout().attributes![0].format}
     ],
     defines: {
       ATTRIBUTE_TYPE: attributeType
