@@ -1,7 +1,5 @@
-import type {Device, VertexFormat} from '@luma.gl/core';
+import type {Device, Buffer} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {Buffer} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
   getAttributeTypeFromSize,
@@ -82,16 +80,15 @@ export default class GPUInterpolationTransition implements GPUTransition {
     cycleBuffers(buffers);
 
     const toLength = getAttributeBufferLength(attribute, numInstances);
-    const padBufferOpts = {
-      numInstances,
+
+    const fromBuffer = padBuffer({
+      buffer: buffers[0],
       attribute,
       fromLength: this.currentLength,
       toLength,
       fromStartIndices: this.currentStartIndices,
       getData: transitionSettings.enter
-    };
-
-    const fromBuffer = padBuffer({buffer: buffers[0], ...padBufferOpts});
+    });
     if (fromBuffer !== buffers[0]) {
       buffers[0].destroy();
       buffers[0] = fromBuffer;
@@ -115,7 +112,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
     this.transition.start(transitionSettings);
 
     const {model} = this.transform;
-    model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    model.setVertexCount(Math.floor(toLength / attribute.size));
     if (attribute.isConstant) {
       model.setAttributes({aFrom: buffers[0]});
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
