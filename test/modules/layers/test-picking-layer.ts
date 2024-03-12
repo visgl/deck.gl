@@ -1,7 +1,12 @@
 import {device} from '@deck.gl/test-utils';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
-import LayerManager from '@deck.gl/core/lib/layer-manager';
-import type {Layer, Viewport, PickingInfo} from '@deck.gl/core';
+import {
+  type Layer,
+  type Viewport,
+  type PickingInfo,
+  type CompositeLayer,
+  LayerManager
+} from '@deck.gl/core';
 
 // Test getPickingInfo and updateAutoHighlight methods
 // @param layer {Layer} - a layer instance
@@ -63,15 +68,15 @@ export async function testPickingLayer({
 
     onAfterUpdate({
       layer,
-      subLayers: layer.isComposite && layer.getSubLayers(),
-      info: Array.from(infos.values()).pop()
+      subLayers: (layer.isComposite && (layer as CompositeLayer).getSubLayers()) || [],
+      info: Array.from(infos.values()).pop() as PickingInfo
     });
   }
 
   layerManager.finalize();
 }
 
-async function updateAll(layerManager) {
+async function updateAll(layerManager): Promise<void> {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
       if (layerManager.needsUpdate()) {
