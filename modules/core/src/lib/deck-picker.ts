@@ -354,7 +354,7 @@ export default class DeckPicker {
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return [];
     }
 
