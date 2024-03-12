@@ -136,8 +136,12 @@ export default class GPUInterpolationTransition implements GPUTransition {
       }
       const {model} = this.transform;
       model.setUniforms({time: t});
-      // TODO - why is this needed?
-      model.setAttributes({aFrom: this.buffers[0]});
+      // @ts-ignore
+      const gl = model.device.gl as WebGL2RenderingContext
+      // Work around for [.WebGL-0x12804417100]
+      // GL_INVALID_OPERATION: A transform feedback buffer that would be written to is also bound to a non-transform-feedback target
+      // TODO - luma should clean up after Model.setAttributes?
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
       this.transform.run();
     }
