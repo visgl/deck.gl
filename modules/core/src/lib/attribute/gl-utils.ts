@@ -8,12 +8,11 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
   switch (type) {
     case 'float64':
       return Float64Array;
+    case 'uint8':
+    case 'unorm8':
+      return Uint8ClampedArray;
     default:
-      const typedArray = getTypedArrayFromDataType(type);
-      if (typedArray === Uint8Array) {
-        return Uint8ClampedArray;
-      }
-      return typedArray;
+      return getTypedArrayFromDataType(type);
   }
 }
 
