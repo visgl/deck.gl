@@ -1,5 +1,4 @@
 import test from 'tape-catch';
-import UNSUPPORTED_LAYER_TYPE_VISSTATE_DATA from '../data/unsupportedLayerTypeVisState.json';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3TileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
