@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {Layer, fp64LowPart, picking} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './bezier-curve-layer-vertex.glsl';
@@ -63,7 +62,7 @@ export default class BezierCurveLayer extends Layer {
       },
       instanceColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         transition: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]

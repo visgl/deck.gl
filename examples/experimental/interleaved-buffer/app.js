@@ -1,6 +1,5 @@
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/constants';
 
 import data from './data';
 
@@ -19,8 +18,8 @@ const deck = new Deck({
 function onDeviceInitialized(device) {
   const buffer = device.createBuffer({data});
 
-  const positions = {buffer, type: GL.FLOAT, size: 3, offset: 4, stride: 16};
-  const colors = {buffer, type: GL.UNSIGNED_BYTE, size: 4, offset: 0, stride: 16};
+  const positions = {buffer, type: 'float32', size: 3, offset: 4, stride: 16};
+  const colors = {buffer, type: 'uint8', size: 4, offset: 0, stride: 16};
   const indices = new Uint16Array([0, 1, 2, 3, 4, 5, 4, 5, 6]);
 
   const layers = [

@@ -23,17 +23,18 @@ export async function requestWithParameters<T = any>({
   headers: Record<string, string>;
   errorContext: APIErrorContext;
 }): Promise<T> {
-  const key = JSON.stringify({baseUrl, parameters, customHeaders});
+  const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
   if (REQUEST_CACHE.has(key)) {
     return REQUEST_CACHE.get(key);
   }
 
   let url = baseUrl;
   if (parameters) {
-    const allParameters = {...DEFAULT_PARAMETERS, ...parameters};
-    const encodedParameters = Object.entries(allParameters).map(([key, value]) => {
-      return encodeParameter(key, value);
-    });
+    const encodedParameters = Object.entries({...DEFAULT_PARAMETERS, ...parameters}).map(
+      ([key, value]) => {
+        return encodeParameter(key, value);
+      }
+    );
     url += `?${encodedParameters.join('&')}`;
   }
 
@@ -65,4 +66,14 @@ export async function requestWithParameters<T = any>({
   } catch (error) {
     throw new CartoAPIError(error as Error, errorContext);
   }
+}
+
+function createCacheKey(
+  baseUrl: string,
+  parameters: Record<string, string>,
+  headers: Record<string, string>
+): string {
+  const parameterEntries = Object.entries(parameters).sort(([a], [b]) => (a > b ? 1 : -1));
+  const headerEntries = Object.entries(headers).sort(([a], [b]) => (a > b ? 1 : -1));
+  return JSON.stringify({baseUrl, parameters: parameterEntries, headers: headerEntries});
 }
