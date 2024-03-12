@@ -9,7 +9,11 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
     case 'float64':
       return Float64Array;
     default:
-      return getTypedArrayFromDataType(type);
+      const typedArray = getTypedArrayFromDataType(type);
+      if (typedArray === Uint8Array) {
+        return Uint8ClampedArray;
+      }
+      return typedArray;
   }
 }
 
