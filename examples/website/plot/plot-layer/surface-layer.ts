@@ -82,11 +82,11 @@ export default class SurfaceLayer<
       colors: {
         size: 4,
         accessor: ['getPosition', 'getColor'],
-        type: WebGL2RenderingContext.UNSIGNED_BYTE,
+        type: 'uint8',
         update: this.calculateColors,
         noAlloc
       },
-      pickingColors: {size: 3, type: WebGL2RenderingContext.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
+      pickingColors: {size: 3, type: 'uint8', update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
 
