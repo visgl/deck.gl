@@ -76,6 +76,11 @@ export default class MaskEffect implements Effect {
     const channelMap = this._sortMaskChannels(maskLayers);
     // TODO - support multiple views
     const viewport = viewports[0];
+
+    // Rare case no viewpoint exists (e.g. https://github.com/visgl/deck.gl/issues/8059)
+    if (viewport === undefined) {
+      return {didRender};
+    }
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
     if (viewport.resolution !== undefined) {
