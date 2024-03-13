@@ -83,15 +83,14 @@ export type TextureSource =
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
  * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
  * * `string` - a URL to load data from
- * * `null` or `undefined` - empty data
+ * * `null` - empty data
  */
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | AsyncIterable<DataType[]>
   | Promise<LayerData<DataType>>
-  | null
-  | undefined;
+  | null;
 
 /**
  * Base Layer prop types
