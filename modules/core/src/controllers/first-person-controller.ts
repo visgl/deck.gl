@@ -301,12 +301,12 @@ class FirstPersonState extends ViewState<
     });
   }
 
-  zoomIn(speed: number = 2): FirstPersonState {
-    return this.zoom({pos: [0, 0], scale: speed});
+  zoomIn(speed: number = MOVEMENT_SPEED): FirstPersonState {
+    return this._move(new Vector3(0, 0, 1), speed);
   }
 
-  zoomOut(speed: number = 2): FirstPersonState {
-    return this.zoom({pos: [0, 0], scale: 1 / speed});
+  zoomOut(speed: number = MOVEMENT_SPEED): FirstPersonState {
+    return this._move(new Vector3(0, 0, -1), speed);
   }
 
   // shortest path between two view states
