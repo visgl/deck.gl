@@ -94,10 +94,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     // TODO - remove after https://github.com/visgl/luma.gl/pull/2023
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-    this.transform.run({
-      clearColor: false,
-      clearDepth: false
-    });
+    this.transform.run({discard: true});
   }
 
   override delete() {
