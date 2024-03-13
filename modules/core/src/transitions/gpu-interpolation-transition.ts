@@ -137,7 +137,7 @@ export default class GPUInterpolationTransition implements GPUTransition {
       const {model} = this.transform;
       model.setUniforms({time: t});
       // @ts-ignore
-      const gl = model.device.gl as WebGL2RenderingContext
+      const gl = model.device.gl as WebGL2RenderingContext;
       // TODO - remove after https://github.com/visgl/luma.gl/pull/2023
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
 

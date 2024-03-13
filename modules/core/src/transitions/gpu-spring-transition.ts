@@ -1,8 +1,5 @@
 /* eslint-disable complexity, max-statements, max-params */
-import type {Device,
-  Buffer,
-  Framebuffer,
-  Texture} from '@luma.gl/core';
+import type {Device, Buffer, Framebuffer, Texture} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {
   padBuffer,
@@ -61,10 +58,7 @@ export default class GPUSpringTransition implements GPUTransition {
     this.currentLength = 0;
     this.texture = getTexture(device);
     this.framebuffer = getFramebuffer(device, this.texture);
-    this.buffers = [
-      device.createBuffer({byteLength: 0}),
-      device.createBuffer({byteLength: 0})
-    ];
+    this.buffers = [device.createBuffer({byteLength: 0}), device.createBuffer({byteLength: 0})];
     this.transform = getTransform(device, attribute);
   }
 

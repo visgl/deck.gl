@@ -85,6 +85,7 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
   );
 }
 
+/* eslint-disable complexity */
 // This helper is used when transitioning attributes from a set of values in one buffer layout
 // to a set of values in a different buffer layout. (Buffer layouts are used when attribute values
 // within a buffer should be grouped for drawElements, like the Polygon layer.) For example, a
