@@ -1,17 +1,21 @@
 /* eslint-disable no-unused-vars */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, OrbitView, LinearInterpolator} from '@deck.gl/core';
+import {OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASWorkerLoader} from '@loaders.gl/las';
+import type {OrbitViewState} from '@deck.gl/core';
+
+// TODO - export from loaders?
+type LASMesh = (typeof LASWorkerLoader)['dataType'];
 
 // Data source: kaarta.com
 const LAZ_SAMPLE =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: OrbitViewState = {
   target: [0, 0, 0],
   rotationX: 0,
   rotationOrbit: 0,
@@ -22,9 +26,11 @@ const INITIAL_VIEW_STATE = {
 
 const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
-export default function App({onLoad}) {
-  const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
-  const [isLoaded, setIsLoaded] = useState(false);
+export default function App({onLoad}: {
+  onLoad?: (data: {count: number; progress: number;}) => void;
+}) {
+  const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -33,7 +39,7 @@ export default function App({onLoad}) {
     const rotateCamera = () => {
       updateViewState(v => ({
         ...v,
-        rotationOrbit: v.rotationOrbit + 120,
+        rotationOrbit: v.rotationOrbit! + 120,
         transitionDuration: 2400,
         transitionInterpolator,
         onTransitionEnd: rotateCamera
@@ -42,7 +48,8 @@ export default function App({onLoad}) {
     rotateCamera();
   }, [isLoaded]);
 
-  const onDataLoad = ({header}) => {
+  const onDataLoad = useCallback((data: any) => {
+    const header = (data as LASMesh)!.header!;
     if (header.boundingBox) {
       const [mins, maxs] = header.boundingBox;
       // File contains bounding box info
@@ -58,14 +65,13 @@ export default function App({onLoad}) {
     if (onLoad) {
       onLoad({count: header.vertexCount, progress: 1});
     }
-  };
+  }, []);
 
   const layers = [
-    new PointCloudLayer({
+    new PointCloudLayer<LASMesh>({
       id: 'laz-point-cloud-layer',
       data: LAZ_SAMPLE,
       onDataLoad,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       getNormal: [0, 1, 0],
       getColor: [255, 255, 255],
       opacity: 0.5,
@@ -77,10 +83,10 @@ export default function App({onLoad}) {
 
   return (
     <DeckGL
-      views={new OrbitView({orbitAxis: 'Y', fov: 50})}
+      views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
       viewState={viewState}
       controller={true}
-      onViewStateChange={v => updateViewState(v.viewState)}
+      onViewStateChange={v => updateViewState(v.viewState as OrbitViewState)}
       layers={layers}
       parameters={{
         clearColor: [0.93, 0.86, 0.81, 1]
@@ -89,6 +95,6 @@ export default function App({onLoad}) {
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
