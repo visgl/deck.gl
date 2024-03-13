@@ -121,6 +121,8 @@ export function padBuffer({
     attribute.doublePrecision && attribute.value instanceof Float64Array ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const byteOffset = attribute.byteOffset;
+  // Transform feedback can only write to float varyings
+  // Attributes of format unorm8/uint8 (1 byte per element) etc will be padded to float32 (4 bytes per element)
   const targetByteOffset =
     attribute.settings.bytesPerElement < 4
       ? (byteOffset / attribute.settings.bytesPerElement) * 4
