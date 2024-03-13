@@ -121,7 +121,7 @@ class FirstPersonState extends ViewState<
     if (!pos) {
       return this;
     }
-    const {startPanPos, startPanPosition} = this.getState();
+    const {startPanPos = [0, 0], startPanPosition = [0, 0]} = this.getState();
     const {width, height, bearing, pitch} = this.getViewportProps();
     const deltaScaleX = (PAN_SPEED * (pos[0] - startPanPos[0])) / width;
     const deltaScaleY = (PAN_SPEED * (pos[1] - startPanPos[1])) / height;
