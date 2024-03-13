@@ -7,7 +7,7 @@ import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, PathLayer} from '@deck.gl/layers';
 
 import type {Position, MapViewState} from '@deck.gl/core';
-import type {TiledPickingInfo} from '@deck.gl/geo-layers';
+import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 47.65,
@@ -36,7 +36,7 @@ const LINK_STYLE: React.CSSProperties = {
 /* global window */
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
-function getTooltip({tile}: TiledPickingInfo) {
+function getTooltip({tile}: TileLayerPickingInfo) {
   if (tile) {
     const {x, y, z} = tile.index;
     return `tile: x: ${x}, y: ${y}, z: ${z}`;
@@ -48,7 +48,7 @@ export default function App({showBorder = false, onTilesLoad}: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
 }) {
-  const tileLayer = new TileLayer({
+  const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
     data: [
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
