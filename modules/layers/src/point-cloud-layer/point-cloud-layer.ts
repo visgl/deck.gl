@@ -73,7 +73,8 @@ function normalizeData(data) {
     attributes.instanceNormals = attributes.NORMAL;
   }
   if (attributes.COLOR_0) {
-    attributes.instanceColors = attributes.COLOR_0;
+    const {size, value} = attributes.COLOR_0;
+    attributes.instanceColors = {size, type: 'unorm8', value};
   }
 }
 
