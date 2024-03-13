@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import {DEFAULT_AGGREGATION_RES_LEVEL_H3} from '../constants';
 import {baseSource} from './base-source';
 import type {
   AggregationOptions,
@@ -13,7 +14,6 @@ export type H3TableSourceOptions = SourceOptions & TableSourceOptions & Aggregat
 type UrlParameters = {
   aggregationExp: string;
   aggregationResLevel?: string;
-  columns?: string;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   name: string;
@@ -24,8 +24,7 @@ export const h3TableSource = async function (
 ): Promise<TilejsonResult> {
   const {
     aggregationExp,
-    aggregationResLevel = 4,
-    columns,
+    aggregationResLevel = DEFAULT_AGGREGATION_RES_LEVEL_H3,
     spatialDataColumn = 'h3',
     tableName
   } = options;
@@ -38,9 +37,6 @@ export const h3TableSource = async function (
 
   if (aggregationResLevel) {
     urlParameters.aggregationResLevel = String(aggregationResLevel);
-  }
-  if (columns) {
-    urlParameters.columns = columns.join(',');
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };

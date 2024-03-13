@@ -2,10 +2,9 @@
 /* eslint-disable no-console */
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {StaticMap} from 'react-map-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {
-  vectorTableSource,
   H3TileLayer,
   RasterTileLayer,
   QuadbinTileLayer,
@@ -58,7 +57,7 @@ function Root() {
             .join('');
         }}
       >
-        <StaticMap mapStyle={MAP_STYLE} />
+        <Map mapStyle={MAP_STYLE} />
       </DeckGL>
       <ObjectSelect
         title="dataset"
@@ -91,8 +90,7 @@ function useBoundaryLayer(datasource) {
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor
@@ -159,8 +157,7 @@ function useVectorLayer(datasource) {
 
   return new VectorTileLayer({
     id: 'carto',
-    // @ts-ignore
-    data: tilejson, // TODO how to correctly specify data type?
+    data: tilejson,
     pickable: true,
     pointRadiusMinPixels: 5,
     getFillColor

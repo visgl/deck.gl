@@ -1,7 +1,6 @@
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
@@ -94,7 +93,7 @@ export default function App({
       onLoad={rotateCamera}
       onViewStateChange={v => updateViewState(v.viewState)}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

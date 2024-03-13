@@ -20,32 +20,41 @@ import type {Feature} from 'geojson';
 
 import type {TilejsonResult} from '../sources/types';
 import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
   data: TilejsonPropType,
-  dataComparator: TilejsonPropType.equal
+  dataComparator: TilejsonPropType.equal,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by VectorTileLayer. */
-export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, 'data'>;
+export type VectorTileLayerProps<FeaturePropertiesT = unknown> = _VectorTileLayerProps &
+  Omit<MVTLayerProps<FeaturePropertiesT>, 'data'>;
 
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
   data: null | TilejsonResult | Promise<TilejsonResult>;
 };
 
-// TODO Perhaps we can't subclass MVTLayer and keep types. Better to subclass TileLayer instead?
 // @ts-ignore
-export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
-  Required<_VectorTileLayerProps> & ExtraProps
-> {
+export default class VectorTileLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends MVTLayer<FeaturePropertiesT, Required<_VectorTileLayerProps> & ExtraProps> {
   static layerName = 'VectorTileLayer';
   static defaultProps = defaultProps;
 
   state!: MVTLayer['state'] & {
     mvt: boolean;
   };
+
+  constructor(...propObjects: VectorTileLayerProps<FeaturePropertiesT>[]) {
+    // Force externally visible props type, as it is not possible modify via extension
+    // @ts-ignore
+    super(...propObjects);
+  }
 
   initializeState(): void {
     super.initializeState();

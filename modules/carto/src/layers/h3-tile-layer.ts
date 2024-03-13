@@ -4,6 +4,7 @@ import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -18,7 +19,8 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<H3TileLayerProps> = {
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by H3TileLayer. */

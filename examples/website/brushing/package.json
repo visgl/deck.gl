@@ -11,10 +11,10 @@
   "dependencies": {
     "d3-scale": "^2.0.0",
     "deck.gl": "^8.8.0",
-    "maplibre-gl": "^2.4.0",
+    "maplibre-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^7.0.0"
+    "react-map-gl": "^7.1.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

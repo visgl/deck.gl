@@ -1,10 +1,11 @@
 /* global Headers */
-import test from 'tape-catch';
-import {API_VERSIONS, setDefaultCredentials} from '@deck.gl/carto';
 
 // See test/modules/carto/responseToJson for details for creating test data
 import binaryTileData from './data/binaryTile.json';
 const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
+
+const fetch = globalThis.fetch;
+type MockFetchCall = {url: string; headers: Record<string, unknown>};
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
@@ -45,42 +46,18 @@ export const TILESTATS_RESPONSE = {
   type: 'Number'
 };
 
-export const MAPS_API_V1_RESPONSE = {
-  metadata: {
-    tilejson: {
-      vector: TILEJSON_RESPONSE
-    }
-  }
-};
+async function setupMockFetchMapsV3(
+  cacheKey = btoa(Math.random().toFixed(4))
+): Promise<MockFetchCall[]> {
+  const calls: MockFetchCall[] = [];
 
-function mockFetchMapsV1() {
-  const fetch = globalThis.fetch;
-  globalThis.fetch = url =>
-    Promise.resolve({
-      json: () => MAPS_API_V1_RESPONSE,
-      ok: true
-    });
-  return fetch;
-}
+  const mockFetch = (url: string, {headers}) => {
+    calls.push({url, headers});
 
-function mockFetchMapsV2() {
-  const fetch = globalThis.fetch;
-
-  globalThis.fetch = url => {
-    return Promise.resolve({
-      json: () => TILEJSON_RESPONSE,
-      ok: true
-    });
-  };
-  return fetch;
-}
-
-export function mockFetchMapsV3() {
-  const fetch = globalThis.fetch;
-  globalThis.fetch = (url, {headers}) => {
     if (url.indexOf('formatTiles=binary') !== -1) {
       headers = {...headers, 'Content-Type': 'application/vnd.carto-vector-tile'};
     }
+
     return Promise.resolve({
       json: () => {
         if (url.indexOf('format=tilejson') !== -1) {
@@ -93,7 +70,7 @@ export function mockFetchMapsV3() {
         if (url.indexOf('tileset') !== -1) {
           return {
             tilejson: {
-              url: ['https://xyz.com?format=tilejson&cache=12345678']
+              url: [`https://xyz.com?format=tilejson&cache=${cacheKey}`]
             }
           };
         }
@@ -103,10 +80,10 @@ export function mockFetchMapsV3() {
         if (url.indexOf('query') !== -1 || url.indexOf('table')) {
           return {
             tilejson: {
-              url: ['https://xyz.com?format=tilejson&cache=12345678']
+              url: [`https://xyz.com?format=tilejson&cache=${cacheKey}`]
             },
             geojson: {
-              url: ['https://xyz.com?format=geojson&cache=12345678']
+              url: [`https://xyz.com?format=geojson&cache=${cacheKey}`]
             }
           };
         }
@@ -119,37 +96,23 @@ export function mockFetchMapsV3() {
       headers: new Headers(headers)
     });
   };
-  return fetch;
+
+  globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+  return calls;
 }
 
-export function restoreFetch(fetch) {
+function teardownMockFetchMaps() {
   globalThis.fetch = fetch;
 }
 
-export function mockedV1Test(name, testFunc) {
-  test(name, async t => {
-    const fetchMock = mockFetchMapsV1();
-    await testFunc(t);
-    restoreFetch(fetchMock);
-    t.end();
-  });
-}
-
-export function mockedV2Test(name, testFunc) {
-  test(name, async t => {
-    const fetchMock = mockFetchMapsV2();
-    setDefaultCredentials({apiVersion: API_VERSIONS.V2});
-    await testFunc(t);
-    restoreFetch(fetchMock);
-    t.end();
-  });
-}
-
-export function mockedV3Test(name, testFunc) {
-  test(name, async t => {
-    const fetchMock = mockFetchMapsV3();
-    await testFunc(t);
-    restoreFetch(fetchMock);
-    t.end();
-  });
+export async function withMockFetchMapsV3(
+  testFunc: (calls: {url: string; headers: Record<string, unknown>}[]) => Promise<void>
+): Promise<void> {
+  try {
+    const calls = await setupMockFetchMapsV3();
+    await testFunc(calls);
+  } finally {
+    teardownMockFetchMaps();
+  }
 }

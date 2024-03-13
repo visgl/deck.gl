@@ -7,7 +7,7 @@
 Create models with device instead of gl.
 
 ```typescript
-// luma.gl vp
+// luma.gl v9
 new Model(this.context.device, {opts});
 // luma.gl v8
 new Model(this.context.gl, {opts});
@@ -19,6 +19,22 @@ new Model(this.context.gl, {opts});
 ### Deck
 
 - `Deck.pickObjects` minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+
+### @deck.gl.mapbox
+
+`MapboxLayer` has been remove. Use `MapboxOverlay` instead.
+
+```typescript
+// deck.gl v9
+import {DeckOverlay} from '@deck.gl/mapbox'
+map.addControl(new DeckOverlay({
+  interleaved: true,
+  layers: [new ArcLayer({...})]
+}))
+// deck.gl v8
+import {MapboxLayer} from '@deck.gl/mapbox'
+map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
+```
 
 ## Upgrading from deck.gl v8.8 to v8.9
 

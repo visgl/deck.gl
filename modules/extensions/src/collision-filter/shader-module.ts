@@ -1,8 +1,9 @@
 import {Framebuffer, Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project} from '@deck.gl/core';
+import {glsl} from '../utils/syntax-tags';
 
-const vs = `
+const vs = glsl`
 #ifdef NON_INSTANCED_MODEL
 in float collisionPriorities;
 #else
@@ -54,10 +55,10 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 `;
 
 const inject = {
-  'vs:#decl': `
+  'vs:#decl': glsl`
   float collision_fade = 1.0;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': `
+  'vs:DECKGL_FILTER_GL_POSITION': glsl`
   if (collision_sort) {
     #ifdef NON_INSTANCED_MODEL
     float collisionPriority = collisionPriorities;
@@ -77,7 +78,7 @@ const inject = {
     }
   }
   `,
-  'vs:DECKGL_FILTER_COLOR': `
+  'vs:DECKGL_FILTER_COLOR': glsl`
   color.a *= collision_fade;
   `
 };
@@ -101,6 +102,7 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
+    // @ts-ignore (v9 not sure why this isn't allowed now)
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };

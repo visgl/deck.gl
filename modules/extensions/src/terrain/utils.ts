@@ -13,7 +13,7 @@ export function createRenderTarget(
     colorAttachments: [
       device.createTexture({
         ...(opts.float && {
-          format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
+          format: 'rgba32float',
           type: GL.FLOAT
         }),
         mipmaps: false,
