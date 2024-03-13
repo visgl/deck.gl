@@ -6,7 +6,10 @@ import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, PathLayer} from '@deck.gl/layers';
 
-const INITIAL_VIEW_STATE = {
+import type {Position, MapViewState} from '@deck.gl/core';
+import type {TiledPickingInfo} from '@deck.gl/geo-layers';
+
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
@@ -15,7 +18,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const COPYRIGHT_LICENSE_STYLE = {
+const COPYRIGHT_LICENSE_STYLE: React.CSSProperties = {
   position: 'absolute',
   right: 0,
   bottom: 0,
@@ -24,7 +27,7 @@ const COPYRIGHT_LICENSE_STYLE = {
   font: '12px/20px Helvetica Neue,Arial,Helvetica,sans-serif'
 };
 
-const LINK_STYLE = {
+const LINK_STYLE: React.CSSProperties = {
   textDecoration: 'none',
   color: 'rgba(0,0,0,.75)',
   cursor: 'grab'
@@ -33,7 +36,7 @@ const LINK_STYLE = {
 /* global window */
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
-function getTooltip({tile}) {
+function getTooltip({tile}: TiledPickingInfo) {
   if (tile) {
     const {x, y, z} = tile.index;
     return `tile: x: ${x}, y: ${y}, z: ${z}`;
@@ -41,7 +44,10 @@ function getTooltip({tile}) {
   return null;
 }
 
-export default function App({showBorder = false, onTilesLoad = null}) {
+export default function App({showBorder = false, onTilesLoad}: {
+  showBorder?: boolean;
+  onTilesLoad?: () => void;
+}) {
   const tileLayer = new TileLayer({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
     data: [
@@ -62,18 +68,16 @@ export default function App({showBorder = false, onTilesLoad = null}) {
     tileSize: 256,
     zoomOffset: devicePixelRatio === 1 ? -1 : 0,
     renderSubLayers: props => {
-      const {
-        bbox: {west, south, east, north}
-      } = props.tile;
+      const [[west, south], [east, north]] = props.tile.boundingBox;
+      const {data, ...otherProps} = props;
 
       return [
-        new BitmapLayer(props, {
-          data: null,
-          image: props.data,
+        new BitmapLayer(otherProps, {
+          image: data,
           bounds: [west, south, east, north]
         }),
         showBorder &&
-          new PathLayer({
+          new PathLayer<Position[]>({
             id: `${props.id}-border`,
             data: [
               [
@@ -110,6 +114,6 @@ export default function App({showBorder = false, onTilesLoad = null}) {
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
