@@ -1,34 +1,24 @@
-/* eslint-disable complexity, max-statements, max-params */
-import type {Device, Buffer, Framebuffer, Texture} from '@luma.gl/core';
+import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {
   padBuffer,
+  matchBuffer,
   getAttributeTypeFromSize,
-  getAttributeBufferLength,
   getFloat32VertexFormat,
   cycleBuffers
 } from './gpu-transition-utils';
 import Attribute from '../lib/attribute/attribute';
-import Transition from './transition';
+import {GPUTransitionBase} from './gpu-transition';
 
-import type {SpringTransitionSettings} from './transition-settings';
-import type {NumericArray, TypedArray} from '../types/types';
-import type {GPUTransition} from './gpu-transition';
+import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
+import type {TypedArray} from '../types/types';
 
-export default class GPUSpringTransition implements GPUTransition {
-  device: Device;
+export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
   type = 'spring';
-  attributeInTransition: Attribute;
 
-  private settings?: SpringTransitionSettings;
-  private attribute: Attribute;
-  private transition: Transition;
-  private currentStartIndices: NumericArray | null;
-  private currentLength: number;
   private texture: Texture;
   private framebuffer: Framebuffer;
   private transform: BufferTransform;
-  private buffers: Buffer[];
 
   constructor({
     device,
@@ -39,81 +29,40 @@ export default class GPUSpringTransition implements GPUTransition {
     attribute: Attribute;
     timeline: Timeline;
   }) {
-    this.device = device;
-    this.transition = new Transition(timeline);
-    this.attribute = attribute;
-    // this is the attribute we return during the transition - note: if it is a constant
-    // attribute, it will be converted and returned as a regular attribute
-    // `attribute.settings` is the original options passed when constructing the attribute.
-    // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(device, attribute.settings);
-    // Placeholder value - necessary for generating the correct buffer layout
-    this.attributeInTransition.setData(
-      attribute.value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0)
-    );
-    this.currentStartIndices = attribute.startIndices;
-    // storing currentLength because this.buffer may be larger than the actual length we want to use
-    // this is because we only reallocate buffers when they grow, not when they shrink,
-    // due to performance costs
-    this.currentLength = 0;
+    super({device, attribute, timeline});
     this.texture = getTexture(device);
     this.framebuffer = getFramebuffer(device, this.texture);
-    this.buffers = [device.createBuffer({byteLength: 0}), device.createBuffer({byteLength: 0})];
     this.transform = getTransform(device, attribute);
   }
 
-  get inProgress(): boolean {
-    return this.transition.inProgress;
-  }
+  override start(transitionSettings: SpringTransitionSettings, numInstances: number): void {
+    const prevLength = this.currentLength;
+    const prevStartIndices = this.currentStartIndices;
+    super.start(transitionSettings, numInstances);
 
-  // this is called when an attribute's values have changed and
-  // we need to start animating towards the new values
-  // this also correctly resizes / pads the transform's buffers
-  // in case the attribute's buffer has changed in length or in
-  // startIndices
-  start(transitionSettings: SpringTransitionSettings, numInstances: number): void {
-    this.settings = transitionSettings;
     const {buffers, attribute} = this;
-    const toLength = getAttributeBufferLength(attribute, numInstances);
 
     for (let i = 0; i < 2; i++) {
-      const paddedBuffer = padBuffer({
+      buffers[i] = padBuffer({
+        device: this.device,
         buffer: buffers[i],
         attribute,
-        fromLength: this.currentLength,
-        toLength,
-        fromStartIndices: this.currentStartIndices,
+        fromLength: prevLength,
+        toLength: this.currentLength,
+        fromStartIndices: prevStartIndices,
         getData: transitionSettings.enter
       });
-      if (paddedBuffer !== buffers[i]) {
-        buffers[i].destroy();
-        buffers[i] = paddedBuffer;
-      }
     }
-    if (!buffers[2] || buffers[2].byteLength < buffers[0].byteLength) {
-      buffers[2]?.destroy();
-      buffers[2] = this.device.createBuffer({
-        byteLength: buffers[0].byteLength,
-        usage: buffers[0].usage
-      });
-    }
-
-    this.currentStartIndices = attribute.startIndices;
-    this.currentLength = toLength;
-    this.attributeInTransition.setData({
-      buffer: buffers[1],
-      // Retain placeholder value to generate correct shader layout
-      value: this.attributeInTransition.value as NumericArray
+    buffers[2] = matchBuffer({
+      device: this.device,
+      source: buffers[0],
+      target: buffers[2]
     });
 
-    // when an attribute changes values, a new transition is started. These
-    // are properties that we have to store on this.transition but can change
-    // when new transitions are started, so we have to keep them up-to-date.
-    // this.transition.start() takes the latest settings and updates them.
-    this.transition.start({...transitionSettings, duration: Infinity});
+    this.setBuffer(buffers[1]);
 
     const {model} = this.transform;
-    model.setVertexCount(Math.floor(toLength / attribute.size));
+    model.setVertexCount(Math.floor(this.currentLength / attribute.size));
     if (attribute.isConstant) {
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
     } else {
@@ -121,19 +70,16 @@ export default class GPUSpringTransition implements GPUTransition {
     }
   }
 
-  update() {
+  onUpdate() {
     const {buffers, transform, framebuffer, transition} = this;
-    const updated = transition.update();
-    if (!updated) {
-      return false;
-    }
+
     const settings = this.settings as SpringTransitionSettings;
 
     transform.model.setAttributes({
       aPrev: buffers[0],
       aCur: buffers[1]
     });
-    this.transform.transformFeedback.setBuffers({vNext: buffers[2]});
+    transform.transformFeedback.setBuffers({vNext: buffers[2]});
     transform.model.setUniforms({
       stiffness: settings.stiffness,
       damping: settings.damping
@@ -146,28 +92,18 @@ export default class GPUSpringTransition implements GPUTransition {
     });
 
     cycleBuffers(buffers);
-    this.attributeInTransition.setData({
-      buffer: buffers[1],
-      // Retain placeholder value to generate correct shader layout
-      value: this.attributeInTransition.value as NumericArray
-    });
+    this.setBuffer(buffers[1]);
 
     const isTransitioning = this.device.readPixelsToArrayWebGL(framebuffer)[0] > 0;
 
     if (!isTransitioning) {
       transition.end();
     }
-
-    return true;
   }
 
-  cancel() {
-    this.transition.cancel();
+  override delete() {
+    super.delete();
     this.transform.destroy();
-    for (const buffer of this.buffers) {
-      buffer.destroy();
-    }
-    this.buffers.length = 0;
     this.texture.destroy();
     this.framebuffer.destroy();
   }

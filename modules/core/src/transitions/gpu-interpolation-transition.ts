@@ -1,31 +1,22 @@
-import type {Device, Buffer} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import Attribute from '../lib/attribute/attribute';
 import {
   getAttributeTypeFromSize,
-  getAttributeBufferLength,
   cycleBuffers,
   padBuffer,
+  matchBuffer,
   getFloat32VertexFormat
 } from './gpu-transition-utils';
-import Transition from './transition';
+import {GPUTransitionBase} from './gpu-transition';
 
-import type {InterpolationTransitionSettings} from './transition-settings';
-import type {NumericArray, TypedArray} from '../types/types';
-import type {GPUTransition} from './gpu-transition';
+import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
+import type {TypedArray} from '../types/types';
 
-export default class GPUInterpolationTransition implements GPUTransition {
-  device: Device;
+export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
   type = 'interpolation';
-  attributeInTransition: Attribute;
 
-  private settings?: InterpolationTransitionSettings;
-  private attribute: Attribute;
-  private transition: Transition;
-  private currentStartIndices: NumericArray | null;
-  private currentLength: number;
   private transform: BufferTransform;
-  private buffers: Buffer[];
 
   constructor({
     device,
@@ -36,42 +27,20 @@ export default class GPUInterpolationTransition implements GPUTransition {
     attribute: Attribute;
     timeline: Timeline;
   }) {
-    this.device = device;
-    this.transition = new Transition(timeline);
-    this.attribute = attribute;
-    // this is the attribute we return during the transition - note: if it is a constant
-    // attribute, it will be converted and returned as a regular attribute
-    // `attribute.settings` is the original options passed when constructing the attribute.
-    // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-    this.attributeInTransition = new Attribute(device, attribute.settings);
-    // Placeholder value - necessary for generating the correct buffer layout
-    this.attributeInTransition.setData(
-      attribute.value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0)
-    );
-    this.currentStartIndices = attribute.startIndices;
-    // storing currentLength because this.buffer may be larger than the actual length we want to use
-    // this is because we only reallocate buffers when they grow, not when they shrink,
-    // due to performance costs
-    this.currentLength = 0;
+    super({device, attribute, timeline});
     this.transform = getTransform(device, attribute);
-    this.buffers = [device.createBuffer({byteLength: 0})];
   }
 
-  get inProgress(): boolean {
-    return this.transition.inProgress;
-  }
+  override start(transitionSettings: InterpolationTransitionSettings, numInstances: number): void {
+    const prevLength = this.currentLength;
+    const prevStartIndices = this.currentStartIndices;
 
-  // this is called when an attribute's values have changed and
-  // we need to start animating towards the new values
-  // this also correctly resizes / pads the transform's buffers
-  // in case the attribute's buffer has changed in length or in
-  // startIndices
-  start(transitionSettings: InterpolationTransitionSettings, numInstances: number): void {
+    super.start(transitionSettings, numInstances, transitionSettings.duration);
+
     if (transitionSettings.duration <= 0) {
       this.transition.cancel();
       return;
     }
-    this.settings = transitionSettings;
 
     const {buffers, attribute} = this;
     // Alternate between two buffers when new transitions start.
@@ -79,40 +48,26 @@ export default class GPUInterpolationTransition implements GPUTransition {
     // And the other buffer is now the current buffer.
     cycleBuffers(buffers);
 
-    const toLength = getAttributeBufferLength(attribute, numInstances);
-
-    const fromBuffer = padBuffer({
+    buffers[0] = padBuffer({
+      device: this.device,
       buffer: buffers[0],
       attribute,
-      fromLength: this.currentLength,
-      toLength,
-      fromStartIndices: this.currentStartIndices,
+      fromLength: prevLength,
+      toLength: this.currentLength,
+      fromStartIndices: prevStartIndices,
       getData: transitionSettings.enter
     });
-    if (fromBuffer !== buffers[0]) {
-      buffers[0].destroy();
-      buffers[0] = fromBuffer;
-    }
-    if (!buffers[1] || buffers[1].byteLength < fromBuffer.byteLength) {
-      buffers[1]?.destroy();
-      buffers[1] = this.device.createBuffer({
-        byteLength: fromBuffer.byteLength,
-        usage: fromBuffer.usage
-      });
-    }
-
-    this.currentStartIndices = attribute.startIndices;
-    this.currentLength = toLength;
-    this.attributeInTransition.setData({
-      buffer: buffers[1],
-      // Retain placeholder value to generate correct shader layout
-      value: this.attributeInTransition.value as NumericArray
+    buffers[1] = matchBuffer({
+      device: this.device,
+      source: buffers[0],
+      target: buffers[1]
     });
 
-    this.transition.start(transitionSettings);
+    this.setBuffer(buffers[1]);
 
-    const {model} = this.transform;
-    model.setVertexCount(Math.floor(toLength / attribute.size));
+    const {transform} = this;
+    const model = transform.model;
+    model.setVertexCount(Math.floor(this.currentLength / attribute.size));
     if (attribute.isConstant) {
       model.setAttributes({aFrom: buffers[0]});
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
@@ -122,37 +77,32 @@ export default class GPUInterpolationTransition implements GPUTransition {
         aTo: attribute.getBuffer()!
       });
     }
-    this.transform.transformFeedback.setBuffers({vCurrent: buffers[1]});
+    transform.transformFeedback.setBuffers({vCurrent: buffers[1]});
   }
 
-  update(): boolean {
-    const updated = this.transition.update();
-    if (updated) {
-      const {duration, easing} = this.settings!;
-      const {time} = this.transition;
-      let t = time / duration;
-      if (easing) {
-        t = easing(t);
-      }
-      const {model} = this.transform;
-      model.setUniforms({time: t});
-      // @ts-ignore
-      const gl = model.device.gl as WebGL2RenderingContext;
-      // TODO - remove after https://github.com/visgl/luma.gl/pull/2023
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-      this.transform.run();
+  onUpdate() {
+    const {duration, easing} = this.settings!;
+    const {time} = this.transition;
+    let t = time / duration;
+    if (easing) {
+      t = easing(t);
     }
-    return updated;
+    const {model} = this.transform;
+    model.setUniforms({time: t});
+    // @ts-ignore
+    const gl = model.device.gl as WebGL2RenderingContext;
+    // TODO - remove after https://github.com/visgl/luma.gl/pull/2023
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    this.transform.run({
+      clearColor: false,
+      clearDepth: false
+    });
   }
 
-  cancel(): void {
-    this.transition.cancel();
+  override delete() {
+    super.delete();
     this.transform.destroy();
-    for (const buffer of this.buffers) {
-      buffer.destroy();
-    }
-    this.buffers.length = 0;
   }
 }
 

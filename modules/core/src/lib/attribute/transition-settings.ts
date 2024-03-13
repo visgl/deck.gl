@@ -1,4 +1,4 @@
-import {NumericArray} from '../types/types';
+import {NumericArray} from '../../types/types';
 
 export interface TransitionSettings {
   type: string;

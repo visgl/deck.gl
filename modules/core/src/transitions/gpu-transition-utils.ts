@@ -2,35 +2,18 @@ import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
 import Attribute from '../lib/attribute/attribute';
-import type {BufferAccessor} from '../lib/attribute/data-column';
 import {GL} from '@luma.gl/constants';
 
-// NOTE: NOT COPYING OVER OFFSET OR STRIDE HERE BECAUSE:
-// (1) WE DON'T SUPPORT INTERLEAVED BUFFERS FOR TRANSITIONS
-// (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
-// (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
-export function getSourceBufferAttribute(
-  device: Device,
-  attribute: Attribute
-): [Buffer, BufferAccessor] | NumericArray {
-  // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
-  // so we create a copy of the attribute (with divisor=0) to use when running
-  // transform feedback
-  const buffer = attribute.getBuffer();
-  if (buffer) {
-    return [
-      buffer,
-      {
-        divisor: 0,
-        size: attribute.size,
-        normalized: attribute.settings.normalized
-      } as BufferAccessor
-    ];
-  }
-  // constant
-  // don't pass normalized here because the `value` from a normalized attribute is
-  // already normalized
-  return attribute.value as NumericArray;
+/** Create a new empty attribute with the same settings: type, shader layout etc. */
+export function cloneAttribute(attribute: Attribute): Attribute {
+  // `attribute.settings` is the original options passed when constructing the attribute.
+  // This ensures that we set the proper `doublePrecision` flag and shader attributes.
+  const newAttribute = new Attribute(attribute.device, attribute.settings);
+  // Placeholder value - necessary for generating the correct buffer layout
+  newAttribute.setData(
+    attribute.value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0)
+  );
+  return newAttribute;
 }
 
 /** Returns the GLSL attribute type for the given number of float32 components. */
@@ -85,6 +68,25 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
   );
 }
 
+export function matchBuffer({
+  device,
+  source,
+  target
+}: {
+  device: Device;
+  source: Buffer;
+  target?: Buffer;
+}): Buffer {
+  if (!target || target.byteLength < source.byteLength) {
+    target?.destroy();
+    target = device.createBuffer({
+      byteLength: source.byteLength,
+      usage: source.usage
+    });
+  }
+  return target;
+}
+
 /* eslint-disable complexity */
 // This helper is used when transitioning attributes from a set of values in one buffer layout
 // to a set of values in a different buffer layout. (Buffer layouts are used when attribute values
@@ -97,6 +99,7 @@ export function getAttributeBufferLength(attribute: Attribute, numInstances: num
 // padBuffer may return either the original buffer, or a new buffer if the size of the original
 // was insufficient. Callers are responsible for disposing of the original buffer if needed.
 export function padBuffer({
+  device,
   buffer,
   attribute,
   fromLength,
@@ -104,7 +107,8 @@ export function padBuffer({
   fromStartIndices,
   getData = x => x
 }: {
-  buffer: Buffer;
+  device: Device;
+  buffer?: Buffer;
   attribute: Attribute;
   fromLength: number;
   toLength: number;
@@ -126,7 +130,7 @@ export function padBuffer({
   const isConstant = attribute.isConstant;
 
   // check if buffer needs to be padded
-  if (!hasStartIndices && fromLength >= toLength) {
+  if (!hasStartIndices && buffer && fromLength >= toLength) {
     return buffer;
   }
 
@@ -153,7 +157,9 @@ export function padBuffer({
         getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
-  const source = new Float32Array(buffer.readSyncWebGL(0, fromLength * 4).buffer);
+  const source = buffer
+    ? new Float32Array(buffer.readSyncWebGL(targetByteOffset, fromLength * 4).buffer)
+    : new Float32Array(0);
   const target = new Float32Array(toLength);
   padArray({
     source,
@@ -164,8 +170,9 @@ export function padBuffer({
     getData: getMissingData
   });
 
-  if (buffer.byteLength < target.byteLength + targetByteOffset) {
-    buffer = buffer.device.createBuffer({
+  if (!buffer || buffer.byteLength < target.byteLength + targetByteOffset) {
+    buffer?.destroy();
+    buffer = device.createBuffer({
       byteLength: target.byteLength + targetByteOffset,
       usage: GL.DYNAMIC_COPY
     });

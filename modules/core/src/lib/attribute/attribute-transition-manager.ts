@@ -9,7 +9,7 @@ import type {Timeline} from '@luma.gl/engine';
 import type {GPUTransition} from '../../transitions/gpu-transition';
 import type {ConstructorOf} from '../../types/types';
 import type Attribute from './attribute';
-import type {TransitionSettings} from '../../transitions/transition-settings';
+import type {TransitionSettings} from './transition-settings';
 
 const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
   interpolation: GPUInterpolationTransition,
@@ -129,7 +129,7 @@ export default class AttributeTransitionManager {
 
   /* Private methods */
   private _removeTransition(attributeName: string): void {
-    this.transitions[attributeName].cancel();
+    this.transitions[attributeName].delete();
     delete this.transitions[attributeName];
   }
 

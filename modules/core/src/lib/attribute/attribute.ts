@@ -10,10 +10,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
-import {
-  normalizeTransitionSettings,
-  TransitionSettings
-} from '../../transitions/transition-settings';
+import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
