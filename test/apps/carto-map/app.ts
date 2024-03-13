@@ -44,7 +44,6 @@ async function createMap(cartoMapId: string) {
 
 // Helper UI for dev
 const examples = [
-  
   // These CARTO maps should live in the "Public" org (ac_lqe3zwgu) using the carto_dw, public_snowflake or public_redshift connection
 
   // Vector
@@ -63,7 +62,6 @@ const examples = [
   // Quadbin
   'abfce395-d9ec-48d4-85ad-45ec7705a921', // Quadbin - Table - 588k Spatial Features Spain
   '8ead73bb-aa1f-4bf6-91fc-52a50c682938' // Quadbin — Tileset 14M Spatial Features USA
-
 ];
 const params = new URLSearchParams(location.search.slice(1));
 const id = params.has('id') ? params.get('id')! : examples[0];
