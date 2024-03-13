@@ -58,7 +58,7 @@ export default [].concat(
   viewsTests,
   // effectsTests,
   // TODO - Broken in headless mode with Chrome 113
-  // transitionTests,
+  transitionTests,
   terrainLayerTests,
   // collisionFilterExtensionTests
   dataFilterExtensionTests
