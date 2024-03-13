@@ -112,6 +112,23 @@ type _BitmapLayerProps = {
   textureParameters?: SamplerProps | null;
 };
 
+export type BitmapLayerPickingInfo = PickingInfo<
+  null,
+  {
+    bitmap: {
+      /** Size of the original image */
+      size: {
+        width: number;
+        height: number;
+      };
+      /** Hovered pixel uv in 0-1 range */
+      uv: [number, number];
+      /** Hovered pixel in the original image */
+      pixel: [number, number];
+    } | null;
+  }
+>;
+
 /** Render a bitmap at specified boundaries. */
 export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_BitmapLayerProps>
@@ -184,18 +201,13 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
   }
 
-  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
+  getPickingInfo(params: GetPickingInfoParams): BitmapLayerPickingInfo {
     const {image} = this.props;
-    const info: PickingInfo & {bitmap?: any} = params.info;
+    const info = params.info as BitmapLayerPickingInfo;
 
     if (!info.color || !image) {
       info.bitmap = null;
       return info;
-    }
-
-    // TODO shouldn't happen, this is an async prop...
-    if (typeof image === 'string') {
-      throw new Error('string');
     }
 
     const {width, height} = image as Texture;
@@ -206,12 +218,10 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // Calculate uv and pixel in bitmap
     const uv = unpackUVsFromRGB(info.color);
 
-    const pixel = [Math.floor(uv[0] * width), Math.floor(uv[1] * height)];
-
     info.bitmap = {
-      size: {width, height}, // Size of bitmap
-      uv, // Floating point precision in 0-1 range
-      pixel // Truncated to integer and scaled to pixel size
+      size: {width, height},
+      uv,
+      pixel: [Math.floor(uv[0] * width), Math.floor(uv[1] * height)]
     };
 
     return info;
@@ -337,7 +347,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
  * @returns {number[]} uvs
  * https://stackoverflow.com/questions/30242013/glsl-compressing-packing-multiple-0-1-colours-var4-into-a-single-var4-variab
  */
-function unpackUVsFromRGB(color) {
+function unpackUVsFromRGB(color: Uint8Array): [number, number] {
   const [u, v, fracUV] = color;
   const vFrac = (fracUV & 0xf0) / 256;
   const uFrac = (fracUV & 0x0f) / 16;

@@ -295,7 +295,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
     // because `TextLayer` assign the same pickingInfoIndex for one text label,
     // here info.index refers the index of text label in props.data
-    info.object = info.index >= 0 ? this.props.data[info.index] : null;
+    info.object = info.index >= 0 ? (this.props.data as any[])[info.index] : null;
     return info;
   }
 
