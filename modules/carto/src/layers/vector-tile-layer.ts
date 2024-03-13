@@ -16,7 +16,7 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature} from 'geojson';
+import type {Feature, Geometry} from 'geojson';
 
 import type {TilejsonResult} from '../sources/types';
 import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
@@ -153,7 +153,7 @@ export default class VectorTileLayer<
       const {data} = params.sourceLayer!.props;
       info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
-      }) as Feature;
+      }) as Feature<Geometry, FeaturePropertiesT>;
     }
 
     return info;
