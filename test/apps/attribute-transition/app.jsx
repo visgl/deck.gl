@@ -77,7 +77,7 @@ function Root() {
       getPosition: d => d.position,
       getFillColor: d => d.color,
       getRadius: d => d.radius,
-      // transitions: scatterplotTransitionsByType[transitionType]
+      transitions: scatterplotTransitionsByType[transitionType]
     }),
     new PolygonLayer({
       data: polygons,
