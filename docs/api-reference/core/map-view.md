@@ -66,6 +66,7 @@ To render, `MapView` needs to be used together with a `viewState` with the follo
 - `minZoom` (Number, optional) - min zoom level. Default `0`.
 - `maxPitch` (Number, optional) - max pitch angle. Default `60`.
 - `minPitch` (Number, optional) - min pitch angle. Default `0`.
+- `position` (Array, optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
 
 ## Controller
 
