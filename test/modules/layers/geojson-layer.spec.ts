@@ -256,15 +256,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Point', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 1 : 0,
+              uniforms.picking.isHighlightActive,
+              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [1, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -283,15 +283,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Point', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 1 : 0,
+              uniforms.picking.isHighlightActive,
+              subLayer.id === 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [2, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -310,15 +310,15 @@ test('GeoJsonLayer#picking', async t => {
           t.is(info.object.geometry.type, 'Polygon', 'info.object populated');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              subLayer.id === 'geojson-points-circle' ? 0 : 1,
+              uniforms.picking.isHighlightActive,
+              subLayer.id !== 'geojson-points-circle',
               `auto highlight is set for ${subLayer.id}`
             );
-            if (uniforms.picking_uSelectedColorValid) {
+            if (uniforms.picking.isHighlightActive) {
               t.deepEqual(
-                uniforms.picking_uSelectedColor,
+                uniforms.picking.highlightedObjectColor,
                 [6, 0, 0],
                 'highlighted index is set correctly'
               );
@@ -336,10 +336,10 @@ test('GeoJsonLayer#picking', async t => {
           t.notOk(info.object, 'info.object is null');
 
           for (const subLayer of subLayers) {
-            const uniforms = subLayer.getModels()[0].getUniforms();
+            const uniforms = subLayer.getModels()[0].shaderInputs.getUniformValues();
             t.is(
-              uniforms.picking_uSelectedColorValid,
-              0,
+              uniforms.picking.isHighlightActive,
+              false,
               `auto highlight is set for ${subLayer.id}`
             );
           }

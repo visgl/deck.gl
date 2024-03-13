@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/constants';
 import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
@@ -118,6 +117,13 @@ type DataFilterExtensionOptions = {
   countItems?: boolean;
 };
 
+const defaultOptions: Required<DataFilterExtensionOptions> = {
+  categorySize: 1,
+  filterSize: 1,
+  fp64: false,
+  countItems: false
+};
+
 const DATA_TYPE_FROM_SIZE = {
   1: 'float',
   2: 'vec2',
@@ -126,9 +132,15 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 /** Adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. */
-export default class DataFilterExtension extends LayerExtension<DataFilterExtensionOptions> {
+export default class DataFilterExtension extends LayerExtension<
+  Required<DataFilterExtensionOptions>
+> {
   static defaultProps = defaultProps;
   static extensionName = 'DataFilterExtension';
+
+  constructor(opts: DataFilterExtensionOptions) {
+    super({...defaultOptions, ...opts});
+  }
 
   getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
     const {categorySize, filterSize, fp64} = extension.opts;
@@ -136,9 +148,9 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
     return {
       modules: [fp64 ? shaderModule64 : shaderModule],
       defines: {
-        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize || 1],
+        DATACATEGORY_TYPE: DATA_TYPE_FROM_SIZE[categorySize],
         DATACATEGORY_CHANNELS: categorySize,
-        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize || 1],
+        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize],
         DATAFILTER_DOUBLE: Boolean(fp64)
       }
     };
@@ -152,7 +164,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
       attributeManager.add({
         filterValues: {
           size: filterSize,
-          type: fp64 ? GL.DOUBLE : GL.FLOAT,
+          type: fp64 ? 'float64' : 'float32',
           accessor: 'getFilterValue',
           shaderAttributes: {
             filterValues: {
@@ -165,7 +177,6 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         },
         filterCategoryValues: {
           size: categorySize,
-          type: GL.FLOAT,
           accessor: 'getFilterCategory',
           transform:
             categorySize === 1
@@ -193,8 +204,7 @@ export default class DataFilterExtension extends LayerExtension<DataFilterExtens
         filterIndices: {
           size: useFloatTarget ? 1 : 2,
           vertexOffset: 1,
-          type: GL.UNSIGNED_BYTE,
-          normalized: true,
+          type: 'unorm8',
           accessor: (object, {index}) => {
             const i = object && object.__source ? object.__source.index : index;
             return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];

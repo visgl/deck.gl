@@ -16,6 +16,8 @@ deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU 
 
 Changes should mostly impact custom layers that use luma.gl and GLSL shaders directly. More information about breaking changes and migration strategies will be provided as part of deck.gl v9 documentation.
 
+- `@deck.gl/mapbox` - `MapboxLayer` has been remove. Use `MapboxOverlay` instead.
+
 ### Known Limitations
 
 The following issues are known and will be resolved before deck.gl v9.0 is officially released:
@@ -23,7 +25,6 @@ The following issues are known and will be resolved before deck.gl v9.0 is offic
 - `@deck.gl/core` - Attribute transitions - first and last elements are not correctly transformed.
 - `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
 - `@deck.gl/google-maps` - `GoogleMapsOverlay` - always renders a vector map (which doesn't support 3D / perspective views).
-- `@deck.gl/mapbox` - `MapboxOverlay` - doesn't overlay deck.gl and mapbox graphics.
 - `@deck.gl/arcgis`- Broken, status TBD.
 
 ## deck.gl v8.9
@@ -109,7 +110,7 @@ Due to this generalization, there is a breaking change affecting indexing proper
 
 ### MapboxOverlay
 
-The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox/).
+The `@deck.gl/mapbox` module now exports a new class [MapboxOverlay](./api-reference/mapbox/mapbox-overlay.md). The class implements Mapbox GL JS's [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](./get-started/using-with-map.md) rendering modes. See the new [get started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/).
 
 If you are using react-map-gl v7, this is the only solution to use deck.gl with React map control components (`Navigationcontrol`, `GeolocateControl`, etc.). See [example](https://github.com/visgl/react-map-gl/blob/master/examples/deckgl-overlay/src/app.tsx).
 

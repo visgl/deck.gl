@@ -51,7 +51,11 @@ export function scaleIdentity() {
     return unknown;
   };
 
-  scale.copy = () => scaleIdentity().unknown(unknown);
+  scale.copy = () => {
+    const scaleCopy = scaleIdentity();
+    scaleCopy.unknown(unknown);
+    return scaleCopy;
+  };
 
   return scale;
 }

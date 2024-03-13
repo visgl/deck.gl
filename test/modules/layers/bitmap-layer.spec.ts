@@ -24,6 +24,7 @@ test('BitmapLayer#constructor', t => {
         props: {id: 'null', data: null}
       },
       {
+        title: 'positions from 3D bounds',
         updateProps: {
           bounds: [
             [2, 4, 1],
@@ -35,20 +36,21 @@ test('BitmapLayer#constructor', t => {
         onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.deepEqual(
-            layer.getAttributeManager().attributes.positions.value,
+            layer.getAttributeManager()!.attributes.positions.value,
             positionsWithZ,
             'should update positions'
           );
         }
       },
       {
+        title: 'positions from 2D bounds',
         updateProps: {
           bounds: [2, 4, 16, 8]
         },
         onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.deepEqual(
-            layer.getAttributeManager().attributes.positions.value,
+            layer.getAttributeManager()!.attributes.positions.value,
             positions,
             'should update positions'
           );
@@ -68,36 +70,33 @@ test('BitmapLayer#imageCoordinateSystem', t => {
     onError: t.notOk,
     testCases: [
       {
+        title: 'MapView + default imageCoordinateSystem',
         props: {
           bounds: [-180, -90, 180, 90]
         },
         onAfterUpdate({layer}) {
-          t.comment('MapView + default imageCoordinateSystem');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, 0, 'No coordinate conversion');
           t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
         }
       },
       {
+        title: 'MapView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
           _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
         },
         onAfterUpdate({layer}) {
-          t.comment('MapView + imageCoordinateSystem: CARTESIAN');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, 0, 'No coordinate conversion');
           t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
         }
       },
       {
+        title: 'MapView + imageCoordinateSystem: LNGLAT',
         updateProps: {
           _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
         },
         onAfterUpdate({layer}) {
-          t.comment('MapView + imageCoordinateSystem: LNGLAT');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, -1, 'Convert image coordinate from LNGLAT');
           t.deepEqual(bounds, [-180, -90, 180, 90], 'Generated LNGLAT bounds');
@@ -112,36 +111,33 @@ test('BitmapLayer#imageCoordinateSystem', t => {
     viewport: new GlobeViewport({width: 800, height: 600, latitude: 0, longitude: 0, zoom: 1}),
     testCases: [
       {
+        title: 'GlobeView + default imageCoordinateSystem',
         props: {
           bounds: [0, -30, 45, 0]
         },
         onAfterUpdate({layer}) {
-          t.comment('GlobeView + default imageCoordinateSystem');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, 0, 'No coordinate conversion');
           t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
         }
       },
       {
+        title: 'GlobeView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
           _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
         },
         onAfterUpdate({layer}) {
-          t.comment('GlobeView + imageCoordinateSystem: CARTESIAN');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, 1, 'Convert image coordinates from WebMercator');
           t.deepEqual(bounds, [256, 211.23850847154438, 320, 256], 'Generated bounds');
         }
       },
       {
+        title: 'GlobeView + imageCoordinateSystem: LNGLAT',
         updateProps: {
           _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
         },
         onAfterUpdate({layer}) {
-          t.comment('GlobeView + imageCoordinateSystem: LNGLAT');
-
           const {coordinateConversion, bounds} = layer.state;
           t.is(coordinateConversion, 0, 'No coordinate conversion');
           t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
@@ -215,10 +211,10 @@ test('BitmapLayer#picking', async t => {
             },
             'info.bitmap populated'
           );
-          const uniforms = layer.getModels()[0].getUniforms();
-          t.is(uniforms.picking_uSelectedColorValid, 1, `auto highlight is set`);
+          const uniforms = layer.getModels()[0].shaderInputs.getUniformValues();
+          t.is(uniforms.picking.isHighlightActive, true, `auto highlight is set`);
           t.deepEqual(
-            uniforms.picking_uSelectedColor,
+            uniforms.picking.highlightedObjectColor,
             [1, 0, 0],
             'highlighted index is set correctly'
           );
@@ -230,8 +226,8 @@ test('BitmapLayer#picking', async t => {
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
           t.notOk(info.bitmap, 'info.bitmap not populated');
-          const uniforms = layer.getModels()[0].getUniforms();
-          t.is(uniforms.picking_uSelectedColorValid, 0, `auto highlight is cleared`);
+          const uniforms = layer.getModels()[0].shaderInputs.getUniformValues();
+          t.is(uniforms.picking.isHighlightActive, false, `auto highlight is cleared`);
         }
       }
     ]

@@ -39,7 +39,7 @@ test('PointCloudLayer#loaders.gl support', t => {
         sizeUnits: 'meters'
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.state.model.getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.ok(uniforms.sizeUnits, UNIT.meters, 'sizeUnits uniform "meters"');
       }
     },
@@ -48,7 +48,7 @@ test('PointCloudLayer#loaders.gl support', t => {
         sizeUnits: 'pixels'
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.state.model.getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.is(uniforms.sizeUnits, UNIT.pixels, 'sizeUnits uniform "pixels"');
       }
     }

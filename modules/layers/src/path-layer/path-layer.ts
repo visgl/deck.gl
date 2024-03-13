@@ -21,7 +21,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
@@ -171,7 +170,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 3,
         // Start filling buffer from 1 vertex in
         vertexOffset: 1,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
@@ -195,7 +194,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       },
       instanceTypes: {
         size: 1,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateSegmentTypes,
         noAlloc
@@ -208,15 +207,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         accessor: 'getColor',
         transition: ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
@@ -279,24 +277,24 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = (data as any[]).find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
   /** Override base Layer method */
   disablePickingIndex(objectIndex: number) {
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < (data as any[]).length; i++) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }

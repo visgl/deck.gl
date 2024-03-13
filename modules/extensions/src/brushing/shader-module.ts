@@ -23,6 +23,7 @@ import {project} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 
 import type {BrushingExtensionProps} from './brushing-extension';
+import {glsl} from '../utils/syntax-tags';
 
 type BrushingModuleSettings = {
   // From layer context
@@ -30,7 +31,7 @@ type BrushingModuleSettings = {
   mousePosition?: {x: number; y: number};
 } & BrushingExtensionProps;
 
-const vs = `
+const vs = glsl`
   uniform bool brushing_enabled;
   uniform int brushing_target;
   uniform vec2 brushing_mousePos;
@@ -64,7 +65,7 @@ const vs = `
   }
 `;
 
-const fs = `
+const fs = glsl`
   uniform bool brushing_enabled;
   in float brushing_isVisible;
 `;
@@ -77,7 +78,7 @@ const TARGET = {
 };
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': `
+  'vs:DECKGL_FILTER_GL_POSITION': glsl`
     vec2 brushingTarget;
     vec2 brushingSource;
     if (brushing_target == 3) {

@@ -51,6 +51,10 @@ const overlay = new GoogleMapsOverlay(props)
 - `onAfterRender`
 - `onLoad`
 
+The constructor additionally accepts the following option:
+
+- `interleaved` (Boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
+
 ## Methods
 
 ##### `setMap` {#setmap}
@@ -59,7 +63,7 @@ const overlay = new GoogleMapsOverlay(props)
 overlay.setMap(map);
 ```
 
-Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL context; use `finalize()` if the overlay should be permanently removed.
+Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL2 context; use `finalize()` if the overlay should be permanently removed.
 
 ##### `setProps` {#setprops}
 
@@ -88,3 +92,7 @@ overlay.finalize();
 ```
 
 Remove the overlay and release all underlying resources.
+
+##### getCanvas
+
+See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.

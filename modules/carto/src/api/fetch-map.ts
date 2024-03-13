@@ -80,19 +80,24 @@ async function _fetchMapDataset(
       if (type === 'table') {
         dataset.data = await vectorTableSource({...options, columns, tableName: source});
       } else if (type === 'query') {
-        dataset.data = await vectorQuerySource({...options, sqlQuery: source, queryParameters});
+        dataset.data = await vectorQuerySource({
+          ...options,
+          columns,
+          sqlQuery: source,
+          queryParameters
+        });
       }
     } else if (spatialDataType === 'h3') {
       const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
       if (type === 'table') {
-        dataset.data = await h3TableSource({...options, columns, tableName: source});
+        dataset.data = await h3TableSource({...options, tableName: source});
       } else if (type === 'query') {
         dataset.data = await h3QuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'quadbin') {
       const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
       if (type === 'table') {
-        dataset.data = await quadbinTableSource({...options, columns, tableName: source});
+        dataset.data = await quadbinTableSource({...options, tableName: source});
       } else if (type === 'query') {
         dataset.data = await quadbinQuerySource({...options, sqlQuery: source, queryParameters});
       }
@@ -125,8 +130,12 @@ async function _fetchTilestats(
   }
 
   const baseUrl = buildStatsUrl({attribute, apiBaseUrl, ...dataset});
+  const client = new URLSearchParams(data.tiles[0]).get('client');
   const headers = {Authorization: `Bearer ${accessToken}`};
   const parameters: Record<string, string> = {};
+  if (client) {
+    parameters.client = client;
+  }
   if (type === 'query') {
     parameters.q = source;
     if (queryParameters) {

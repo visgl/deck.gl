@@ -21,6 +21,55 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.8] - Mar 11 2024
+
+- TerrainExtension: bind texture rather than FBO (#8611)
+- Remove dev dependency on react-map-gl v5 (#8618)
+- chore: Bump luma to beta.10 (#8610)
+- fix(arcgis): DeckGL rendering integration (#8545)
+- chore: bump probe.gl (#8617)
+- prevent js files in venv from being identified as part of deckgl module (#8609)
+- chore(deps): Update to loaders.gl v4.2.0-alpha.5 (#8604)
+- fix(core) warn and error when WebGL1 detected (#8548)
+- ignore bindings directory when running linter (#8598)
+- Correct operator precedence for clearColor in LayersPass (#8599)
+
+#### deck.gl [9.0.0-beta.7] - Mar 7 2024
+
+- chore: bump luma 9.0.0 beta.8 (#8586)
+- Audit module dependencies (#8573)
+- remove(mapbox) public MapboxLayer api (#8585)
+- Avoid creating empty buffer for attributes (#8576)
+
+#### deck.gl [9.0.0-beta.6] - Mar 5 2024
+
+- CARTO: Respect clientId property (#8581)
+- Change Attribute.type to VertexType from WebGL constants (#8572)
+- Cherry pick luma global exports in core bundle (#8574)
+- chore: Bump luma to 9.0.0-beta.6 (#8567)
+- CARTO: Mark filters parameter as optional (#8566)
+- fix(widgets): publish stylesheet (#8571)
+- chore(build): restore inline-webgl-constants transform (#8563)
+- Respect `DataT` on `TripsLayer` props (#8533)
+- chore(build): remove glsl comments (#8531)
+- fix(core): LayersPass#render should clear canvas by default (#8543)
+
+#### deck.gl [9.0.0-beta.5] - Feb 27 2024
+
+- Provide defaultOptions for DataFilterExtension (#8540)
+- Fix Deck error when finialize() is called before initialization (#8532)
+- Fix mapbox overlay alignment style (#8536)
+
+#### deck.gl [9.0.0-beta.4] - Feb 23 2024
+
+- Use SamplerProps type for textureParameters prop (#8520)
+- CARTO: Add filters to v9 sources (#8513)
+- transform d.ts files (#8505)
+- Category filtering in DataFilterExtension (#7915)
+- CARTO: Do not hardcode blockWidth in RasterLayer (#8498)
+- Bump ocular-dev-tools (#8478)
+- Support Tilejson in data prop for MVTLayer (#8432)
+
 #### deck.gl [9.0.0-beta.3] - Feb 14 2024
 
 - chore(types): Remove remaining references to /typed entrypoints (#8481)

@@ -46,8 +46,8 @@ export function generateLayerTests<LayerT extends Layer>({
    */
   sampleProps?: Partial<LayerT['props']>;
   assert?: (condition: any, comment: string) => void;
-  onBeforeUpdate: LayerTestCase<LayerT>['onBeforeUpdate'];
-  onAfterUpdate: LayerTestCase<LayerT>['onAfterUpdate'];
+  onBeforeUpdate?: LayerTestCase<LayerT>['onBeforeUpdate'];
+  onAfterUpdate?: LayerTestCase<LayerT>['onAfterUpdate'];
 
   /**
    * Test some typical assumptions after layer updates

@@ -214,6 +214,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         // no value was assigned during update
       } else if (
         this.constant ||
+        !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
         this.setData({

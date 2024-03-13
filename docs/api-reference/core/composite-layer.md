@@ -100,7 +100,7 @@ A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-l
 
 ##### `draw` {#draw}
 
-A composite layer does not render directly into the WebGL context. The `draw` method inherited from the base class is therefore never called.
+A composite layer does not render directly into the WebGL2/WebGPU context. The `draw` method inherited from the base class is therefore never called.
 
 ##### `renderLayers` {#renderlayers}
 

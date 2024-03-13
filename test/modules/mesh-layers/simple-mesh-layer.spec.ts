@@ -22,7 +22,7 @@ import test from 'tape-promise/tape';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {SimpleMeshLayer} from 'deck.gl';
-import {CylinderGeometry} from '@luma.gl/engine';
+import {TruncatedConeGeometry} from '@luma.gl/engine';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -31,9 +31,8 @@ test('SimpleMeshLayer#tests', t => {
     Layer: SimpleMeshLayer,
     sampleProps: {
       data: FIXTURES.points,
-      getPosition: d => d.COORDINATES,
-      mesh: new CylinderGeometry({
-        radius: 1,
+      getPosition: d => (d as any).COORDINATES,
+      mesh: new TruncatedConeGeometry({
         topRadius: 1,
         bottomRadius: 1,
         topCap: true,

@@ -29,7 +29,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/constants';
 
 import {defaultColorRange} from '../utils/color-utils';
 
@@ -249,7 +248,7 @@ type _HexagonLayerProps<DataT = unknown> = {
 /** Aggregates data into a hexagon-based heatmap. The color and height of a hexagon are determined based on the objects it contains. */
 export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends AggregationLayer<
   DataT,
-  ExtraPropsT & Required<_HexagonLayerProps>
+  ExtraPropsT & Required<_HexagonLayerProps<DataT>>
 > {
   static layerName = 'HexagonLayer';
   static defaultProps = defaultProps;
@@ -272,7 +271,7 @@ export default class HexagonLayer<DataT, ExtraPropsT extends {} = {}> extends Ag
     };
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'}
+      positions: {size: 3, type: 'float64', accessor: 'getPosition'}
     });
     // color and elevation attributes can't be added as attributes
     // they are calculated using 'getValue' accessor that takes an array of pints.

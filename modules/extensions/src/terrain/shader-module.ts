@@ -6,6 +6,7 @@ import {project} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
+import {glsl} from '../utils/syntax-tags';
 
 /** Module parameters expected by the terrain shader module */
 export type TerrainModuleSettings = {
@@ -43,20 +44,20 @@ export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
   inject: {
-    'vs:#decl': `
+    'vs:#decl':
+      glsl`
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
 uniform vec4 terrain_bounds;
 out vec3 commonPos;
-${TERRAIN_MODE_CONSTANTS}
-    `,
-    'vs:#main-start': `
+` + TERRAIN_MODE_CONSTANTS,
+    'vs:#main-start': glsl`
 if (terrain_mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
   return;
 }
 `,
-    'vs:DECKGL_FILTER_GL_POSITION': `
+    'vs:DECKGL_FILTER_GL_POSITION': glsl`
 commonPos = geometry.position.xyz;
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
@@ -75,20 +76,20 @@ if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   }
 }
     `,
-    'fs:#decl': `
+    'fs:#decl':
+      glsl`
 uniform float terrain_mode;
 uniform sampler2D terrain_map;
 uniform vec4 terrain_bounds;
 in vec3 commonPos;
-${TERRAIN_MODE_CONSTANTS}
-    `,
-    'fs:#main-start': `
+` + TERRAIN_MODE_CONSTANTS,
+    'fs:#main-start': glsl`
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   fragColor = vec4(commonPos.z, 0.0, 0.0, 1.0);
   return;
 }
     `,
-    'fs:DECKGL_FILTER_COLOR': `
+    'fs:DECKGL_FILTER_COLOR': glsl`
 if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_USE_COVER_ONLY)) {
   vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
   vec4 pixel = texture(terrain_map, texCoords);
@@ -118,7 +119,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
-      let sampler = dummyHeightMap as Texture;
+      let sampler: Texture | undefined = dummyHeightMap as Texture;
       // height map bounds if case USE_HEIGHT_MAP, terrain cover bounds if USE_COVER, otherwise null
       let bounds: number[] | null = null;
       if (drawToTerrainHeightMap) {
@@ -131,10 +132,10 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
       } else if (terrainCover) {
         // This is a terrain layer
         const isPicking = opts.picking?.isActive;
-        // @ts-expect-error
-        sampler = isPicking
+        const fbo = isPicking
           ? terrainCover.getPickingFramebuffer()
           : terrainCover.getRenderFramebuffer();
+        sampler = fbo?.colorAttachments[0].texture;
         if (isPicking) {
           // Never render the layer itself in picking pass
           mode = TERRAIN_MODE.SKIP;
