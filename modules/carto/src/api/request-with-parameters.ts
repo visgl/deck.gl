@@ -39,12 +39,12 @@ export async function requestWithParameters<T = any>({
 
   let response: Response | undefined;
   const jsonPromise: Promise<T> = fetchPromise
-    .then(async (_response: Response) => {
+    .then((_response: Response) => {
       response = _response;
       return response.json();
     })
     .then((json: any) => {
-      if (!response!.ok) {
+      if (!response || !response.ok) {
         throw new Error(json.error);
       }
       if (accessToken) {
