@@ -3,13 +3,17 @@ import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import DeckGL from '@deck.gl/react';
-import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 import {clamp} from '@math.gl/core';
 
-const INITIAL_VIEW_STATE = {
+import type {OrthographicViewState} from '@deck.gl/core';
+import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
+
+const INITIAL_VIEW_STATE: OrthographicViewState = {
   target: [13000, 13000, 0],
   zoom: -7
 };
@@ -17,7 +21,7 @@ const INITIAL_VIEW_STATE = {
 const ROOT_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/image-tiles/moon.image';
 
-function getTooltip({tile, bitmap}) {
+function getTooltip({tile, bitmap}: TileLayerPickingInfo<ImageBitmap, BitmapLayerPickingInfo>) {
   if (tile && bitmap) {
     const {x, y, z} = tile.index;
     return `\
@@ -27,8 +31,11 @@ function getTooltip({tile, bitmap}) {
   return null;
 }
 
-export default function App({autoHighlight = true, onTilesLoad}) {
-  const [dimensions, setDimensions] = useState(null);
+export default function App({autoHighlight = true, onTilesLoad}: {
+  autoHighlight?: boolean;
+  onTilesLoad?: () => void;
+}) {
+  const [dimensions, setDimensions] = useState<{width: number; height: number; tileSize: number;}>();
 
   useEffect(() => {
     const getMetaData = async () => {
@@ -37,14 +44,14 @@ export default function App({autoHighlight = true, onTilesLoad}) {
       const xmlText = await response.text();
       const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
 
-      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.Overlap.value) !== 0) {
+      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('Overlap')?.value) !== 0) {
         // eslint-disable-next-line no-undef, no-console
         console.warn('Overlap parameter is nonzero and should be 0');
       }
       setDimensions({
-        height: Number(dziXML.getElementsByTagName('Size')[0].attributes.Height.value),
-        width: Number(dziXML.getElementsByTagName('Size')[0].attributes.Width.value),
-        tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.TileSize.value)
+        height: Number(dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Height')?.value),
+        width: Number(dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Width')?.value),
+        tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('TileSize')?.value)
       });
     };
     getMetaData();
@@ -52,28 +59,25 @@ export default function App({autoHighlight = true, onTilesLoad}) {
 
   const tileLayer =
     dimensions &&
-    new TileLayer({
+    new TileLayer<ImageBitmap>({
       pickable: autoHighlight,
       tileSize: dimensions.tileSize,
       autoHighlight,
       highlightColor: [60, 60, 60, 100],
       minZoom: -7,
       maxZoom: 0,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       extent: [0, 0, dimensions.width, dimensions.height],
       getTileData: ({index}) => {
         const {x, y, z} = index;
-        return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`);
+        return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`) as Promise<ImageBitmap>;
       },
       onViewportLoad: onTilesLoad,
 
       renderSubLayers: props => {
-        const {
-          bbox: {left, bottom, right, top}
-        } = props.tile;
+        const [[left, bottom], [right, top]] = props.tile.boundingBox;
         const {width, height} = dimensions;
-        return new BitmapLayer(props, {
-          data: null,
+        const {data, ...otherProps} = props;
+        return new BitmapLayer(otherProps, {
           image: props.data,
           bounds: [
             clamp(left, 0, width),
@@ -96,6 +100,6 @@ export default function App({autoHighlight = true, onTilesLoad}) {
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
