@@ -14,7 +14,7 @@ package.json, bundler config etc) examples of how to get deck.gl and a base
 map working together.
 
 * **[Pure JS](./get-started/pure-js)** Applications without depending any additional framework. Bundled and served with [Vite](https://vitejs.dev).
-* **[React](./get-started/react)** React exmples using `@deck.gl/react` and `react-map-gl`. Bundled and served with [Vite](https://vitejs.dev).
+* **[React](./get-started/react)** React examples using `@deck.gl/react` and `react-map-gl`. Bundled and served with [Vite](https://vitejs.dev).
 * **[Scripting](./get-started/scripting)** HTML single-file examples that can be opened directly in a browser.
 
 
