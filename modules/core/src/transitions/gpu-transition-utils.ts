@@ -8,11 +8,13 @@ import {GL} from '@luma.gl/constants';
 export function cloneAttribute(attribute: Attribute): Attribute {
   // `attribute.settings` is the original options passed when constructing the attribute.
   // This ensures that we set the proper `doublePrecision` flag and shader attributes.
-  const newAttribute = new Attribute(attribute.device, attribute.settings);
+  const {device, settings, value} = attribute;
+  const newAttribute = new Attribute(device, settings);
   // Placeholder value - necessary for generating the correct buffer layout
-  newAttribute.setData(
-    attribute.value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0)
-  );
+  newAttribute.setData({
+    value: value instanceof Float64Array ? new Float64Array(0) : new Float32Array(0),
+    normalized: settings.normalized
+  });
   return newAttribute;
 }
 

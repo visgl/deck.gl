@@ -82,6 +82,7 @@ export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
   protected setBuffer(buffer: Buffer) {
     this.attributeInTransition.setData({
       buffer,
+      normalized: this.attribute.settings.normalized,
       // Retain placeholder value to generate correct shader layout
       value: this.attributeInTransition.value as NumericArray
     });
