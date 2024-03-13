@@ -21,6 +21,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.9] - Mar 13 2024
+
+- Mask Extension: Handle case when no viewport exists (#8627)
+- Clamp Uint8Arrays in typedArrayFromDataType (#8631)
+- Type improvements (#8628)
+- chore: Upgrade to luma.gl@^9.0.0 (#8642)
+- feat(carto): Sort params in request cache key (#8638)
+- PointCloudLayer colors attribute type use 'unorm8' (#8633)
+- feat(geo-layers): Add .debounceTime option to Tileset2D, TileLayer (#8589)
+- feat(carto): Add 'tileResolution' and 'blockSize' (#8502)
+- feat(layers): specify feature properties type for GeoJsonLayer (#8623)
+- carto: columns support cleanup (#8413)
+- fix(arcgis) reenable build (#8622)
+
 #### deck.gl [9.0.0-beta.8] - Mar 11 2024
 
 - TerrainExtension: bind texture rather than FBO (#8611)
