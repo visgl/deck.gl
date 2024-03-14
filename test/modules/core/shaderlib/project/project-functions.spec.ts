@@ -20,12 +20,12 @@
 
 import test from 'tape-promise/tape';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
-import project from '@deck.gl/core/shaderlib/project/project';
+import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicViewport, project} from '@deck.gl/core';
+import {fp64} from '@luma.gl/shadertools';
+const {fp64LowPart} = fp64;
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {equals, config} from '@math.gl/core';
-
-import {compileVertexShader} from '../shaderlib-test-utils';
+import {runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -62,13 +62,11 @@ const TEST_CASES = [
     title: 'CARTESIAN:IDENTITY',
     position: [-10, 10, 10],
     params: {
-      viewport: new OrthographicView().makeViewport({
+      viewport: new OrthographicViewport({
         width: 1,
         height: 1,
-        viewState: {
-          target: [3.1416, 2.7183, 0],
-          zoom: 4
-        }
+        target: [3.1416, 2.7183, 0],
+        zoom: 4
       }),
       coordinateSystem: COORDINATE_SYSTEM.DEFAULT
     },
@@ -151,26 +149,44 @@ test('project#projectPosition', t => {
   t.end();
 });
 
-test('project#projectPosition vs project_position', t => {
+test('project#projectPosition vs project_position', async t => {
   config.EPSILON = 1e-5;
 
-  const vsSource = `${
-    project.dependencies.map(dep => dep.vs).join('')
-    // for setting test context
-  }void set_geometry(vec3 pos) {geometry.worldPosition = pos;}\n${project.vs}`;
-  const projectVS = compileVertexShader(vsSource);
+  const vs = `\
+#version 300 es
 
-  TEST_CASES.filter(testCase => !testCase.params.fromCoordinateSystem).forEach(testCase => {
-    const uniforms = project.getUniforms(testCase.params);
-    const module = projectVS(uniforms);
-    module.set_geometry(testCase.position);
+uniform vec3 uPos;
+uniform vec3 uPos64Low;
 
-    const cpuResult = projectPosition(testCase.position, testCase.params);
-    const shaderResult = module.project_position_vec3(testCase.position);
+out vec4 outValue;
 
-    t.comment(`Comparing ${cpuResult} to ${shaderResult}`);
-    t.ok(equals(cpuResult, shaderResult), testCase.title);
-  });
+void main()
+{
+  geometry.worldPosition = uPos;
+  outValue = project_position(vec4(uPos, 1.0), uPos64Low);
+}
+`;
+
+  for (const {title, position, params} of TEST_CASES.filter(
+    testCase => !testCase.params.fromCoordinateSystem
+  )) {
+    const uniforms = project.getUniforms(params);
+
+    const cpuResult = projectPosition(position, params);
+    const shaderResult = await runOnGPU({
+      vs,
+      varying: 'outValue',
+      modules: [project],
+      vertexCount: 1,
+      uniforms: {
+        ...uniforms,
+        uPos: position,
+        uPos64Low: position.map(fp64LowPart)
+      }
+    });
+
+    t.is(verifyGPUResult(shaderResult, cpuResult), true, title);
+  }
 
   t.end();
 });
