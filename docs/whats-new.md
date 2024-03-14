@@ -2,30 +2,55 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v9.0.0-beta (In Development)
+## deck.gl v9.0.0
 
 deck.gl 9.0 development is actively ongoing with the goal of releasing a beta version as soon as possible.
 
-Target release date: end of January 2024
+Release date: March 15, 2024
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/collision-filter-extension.gif?raw=true" />
+        <p><i>WebGPU ready</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/terrain-extension.gif?raw=true" />
+        <p><i>Category filtering</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/wms-layer.gif?raw=true" />
+        <p><i>FirstPersonController</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### WebGPU enablement
 
 deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
 
+### Category filtering in DataFilterExtension
+
+The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has been enhanced to support filtering based on categories. A new accessor, [getFilterCategory](./api-reference/extensions/data-filter-extension), is added which allows filtering using the new [filterCategories](./api-reference/extensions/data-filter-extension#filtercategories).
+
+### FirstPersonController
+
+The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
+
 ### Breaking Changes
 
 Changes should mostly impact custom layers that use luma.gl and GLSL shaders directly. More information about breaking changes and migration strategies will be provided as part of deck.gl v9 documentation.
 
-- `@deck.gl/mapbox` - `MapboxLayer` has been remove. Use `MapboxOverlay` instead.
+- `@deck.gl/mapbox` - `MapboxLayer` has been removed. Use `MapboxOverlay` instead.
+- `@deck.gl/carto` - `CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
 
 ### Known Limitations
 
-The following issues are known and will be resolved before deck.gl v9.0 is officially released:
+The following issues are known and will be resolved in a  v9.0 patch release:
 
-- `@deck.gl/core` - Attribute transitions - first and last elements are not correctly transformed.
 - `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
-- `@deck.gl/google-maps` - `GoogleMapsOverlay` - always renders a vector map (which doesn't support 3D / perspective views).
-- `@deck.gl/arcgis`- Broken, status TBD.
 
 ## deck.gl v8.9
 
