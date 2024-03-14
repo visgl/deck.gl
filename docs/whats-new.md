@@ -48,7 +48,7 @@ Changes should mostly impact custom layers that use luma.gl and GLSL shaders dir
 
 ### Known Limitations
 
-The following issues are known and will be resolved in a  v9.0 patch release:
+The following issues are known and will be resolved in a v9.0 patch release:
 
 - `@deck.gl/aggregation-layers` (`ScreenGridLayer`, ...) performance - aggregation layers temporarily use CPU fallbacks which are less performant.
 
