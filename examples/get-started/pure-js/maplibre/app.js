@@ -1,7 +1,7 @@
 /* global document */
 
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import {ArcLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -19,38 +19,6 @@ map.on('style.load', () => {
 
   map.removeLayer('building');
   map.removeLayer('building-top');
-  map.addLayer(
-    {
-      id: '3d-buildings',
-      source: 'carto',
-      'source-layer': 'building',
-      type: 'fill-extrusion',
-      minzoom: 15,
-      paint: {
-        'fill-extrusion-color': '#aaa',
-        'fill-extrusion-height': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          15,
-          0,
-          15.05,
-          ['get', 'render_height']
-        ],
-        'fill-extrusion-base': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          15,
-          0,
-          15.05,
-          ['get', 'render_min_height']
-        ],
-        'fill-extrusion-opacity': 0.6
-      }
-    },
-    firstLabelLayerId
-  );
 
   const deckOverlay = new MapboxOverlay({
     interleaved: true,
@@ -63,20 +31,6 @@ map.on('style.load', () => {
         getRadius: d => d.radius,
         opacity: 0.3,
         beforeId: firstLabelLayerId
-      }),
-      new ArcLayer({
-        id: 'deckgl-arc',
-        data: [
-          {
-            source: [-122.3998664, 37.7883697],
-            target: [-122.400068, 37.7900503]
-          }
-        ],
-        getSourcePosition: d => d.source,
-        getTargetPosition: d => d.target,
-        getSourceColor: [255, 208, 0],
-        getTargetColor: [0, 128, 255],
-        getWidth: 8
       })
     ]
   });
