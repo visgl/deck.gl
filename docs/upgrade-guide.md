@@ -49,6 +49,7 @@ const data = vectorQuerySource({
   sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
 });
 const layer = new VectorTileLayer({data, ...styleProps});
+
 // deck.gl v8
 import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
 setDefaultCredentials({accessToken: 'XXX'});
