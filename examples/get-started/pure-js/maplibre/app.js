@@ -1,54 +1,85 @@
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+/* global document */
+
+import {MapboxOverlay} from '@deck.gl/mapbox';
+import {ArcLayer, ScatterplotLayer} from '@deck.gl/layers';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const AIR_PORTS =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
-
 const map = new maplibregl.Map({
-  container: 'map',
+  container: document.querySelector('#map'),
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center: [0.45, 51.47],
-  zoom: 4,
-  bearing: 0,
-  pitch: 30
+  center: [-122.4, 37.79],
+  zoom: 15,
+  pitch: 60,
+  antialias: true
 });
 
-const deckOverlay = new DeckOverlay({
-  // interleaved: true,
-  layers: [
-    new GeoJsonLayer({
-      id: 'airports',
-      data: AIR_PORTS,
-      // Styles
-      filled: true,
-      pointRadiusMinPixels: 2,
-      pointRadiusScale: 2000,
-      getPointRadius: f => 11 - f.properties.scalerank,
-      getFillColor: [200, 0, 80, 180],
-      // Interactive props
-      pickable: true,
-      autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`),
-      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
-    }),
-    new ArcLayer({
-      id: 'arcs',
-      data: AIR_PORTS,
-      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-      // Styles
-      getSourcePosition: f => [-0.4531566, 51.4709959], // London
-      getTargetPosition: f => f.geometry.coordinates,
-      getSourceColor: [0, 128, 200],
-      getTargetColor: [200, 0, 80],
-      getWidth: 1
-    })
-  ]
-});
+map.on('style.load', () => {
+  const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
-map.addControl(deckOverlay);
-map.addControl(new maplibregl.NavigationControl());
+  map.removeLayer('building');
+  map.removeLayer('building-top');
+  map.addLayer(
+    {
+      id: '3d-buildings',
+      source: 'carto',
+      'source-layer': 'building',
+      type: 'fill-extrusion',
+      minzoom: 15,
+      paint: {
+        'fill-extrusion-color': '#aaa',
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15,
+          0,
+          15.05,
+          ['get', 'render_height']
+        ],
+        'fill-extrusion-base': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15,
+          0,
+          15.05,
+          ['get', 'render_min_height']
+        ],
+        'fill-extrusion-opacity': 0.6
+      }
+    },
+    firstLabelLayerId
+  );
+
+  const deckOverlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [
+      new ScatterplotLayer({
+        id: 'deckgl-circle',
+        data: [{position: [-122.402, 37.79], color: [255, 0, 0], radius: 1000}],
+        getPosition: d => d.position,
+        getFillColor: d => d.color,
+        getRadius: d => d.radius,
+        opacity: 0.3,
+        beforeId: firstLabelLayerId
+      }),
+      new ArcLayer({
+        id: 'deckgl-arc',
+        data: [
+          {
+            source: [-122.3998664, 37.7883697],
+            target: [-122.400068, 37.7900503]
+          }
+        ],
+        getSourcePosition: d => d.source,
+        getTargetPosition: d => d.target,
+        getSourceColor: [255, 208, 0],
+        getTargetColor: [0, 128, 255],
+        getWidth: 8
+      })
+    ]
+  });
+
+  map.addControl(deckOverlay);
+});
