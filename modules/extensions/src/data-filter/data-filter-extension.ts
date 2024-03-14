@@ -138,7 +138,7 @@ export default class DataFilterExtension extends LayerExtension<
   static defaultProps = defaultProps;
   static extensionName = 'DataFilterExtension';
 
-  constructor(opts: DataFilterExtensionOptions) {
+  constructor(opts: DataFilterExtensionOptions = {}) {
     super({...defaultOptions, ...opts});
   }
 

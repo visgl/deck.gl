@@ -33,7 +33,7 @@ test('FillStyleExtension#PolygonLayer', t => {
         const fillLayer = subLayers.find(l => l.id.includes('fill'));
 
         t.ok(fillLayer.state.emptyTexture, 'should be enabled in composite layer');
-        let uniforms = fillLayer.getModels()[0].getUniforms();
+        let uniforms = fillLayer.getModels()[0].uniforms;
         t.ok(uniforms.fill_patternMask, 'has fill_patternMask uniform');
         t.deepEqual(
           fillLayer.getAttributeManager().getAttributes().fillPatternScales.value,
@@ -46,7 +46,7 @@ test('FillStyleExtension#PolygonLayer', t => {
           'fillPatternFrames attribute is populated'
         );
 
-        uniforms = strokeLayer.getModels()[0].getUniforms();
+        uniforms = strokeLayer.getModels()[0].uniforms;
         t.notOk(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer');
         t.notOk('fill_patternMask' in uniforms, 'should not be enabled in PathLayer');
       }

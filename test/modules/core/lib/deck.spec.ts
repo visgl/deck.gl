@@ -96,8 +96,7 @@ test('Deck#no views', t => {
   t.pass('Deck constructor did not throw');
 });
 
-// TODO v9
-test.skip('Deck#rendering, picking, logging', t => {
+test('Deck#rendering, picking, logging', t => {
   // Test logging functionalities
   log.priority = 4;
 

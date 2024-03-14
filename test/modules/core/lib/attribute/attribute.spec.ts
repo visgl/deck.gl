@@ -178,15 +178,7 @@ test('Attribute#setConstantValue', t => {
   t.end();
 });
 
-// TODO v9 re-enable
-test.skip('Attribute#allocate - partial', t => {
-  if (device.info.type !== 'webgl2') {
-    // buffer.getData() is WebGL2 only
-    t.comment('This test requires WebGL2');
-    t.end();
-    return;
-  }
-
+test('Attribute#allocate - partial', async t => {
   let positions = new Attribute(device, {
     id: 'positions',
     update: attr => {
@@ -196,19 +188,24 @@ test.skip('Attribute#allocate - partial', t => {
     size: 2
   });
 
+  const readDataFromBuffer = async () => {
+    const bytes = await positions.buffer.readAsync();
+    return new Float32Array(bytes.buffer);
+  };
+
   positions.allocate(1);
   let value = positions.value;
   value[0] = 180;
   value[1] = 90;
   // make sure buffer is created
   positions.updateBuffer({});
-  t.deepEqual(positions.buffer.getData().slice(0, 2), [180, 90], 'value uploaded to buffer');
+  t.deepEqual((await readDataFromBuffer()).slice(0, 2), [180, 90], 'value uploaded to buffer');
 
   positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
   positions.allocate(value.length / 2 + 1); // array might be overallocated
   t.notEqual(positions.value, value, 'a new value array is allocated');
   t.deepEqual(positions.value.slice(0, 2), [180, 90], 'old value is copied to new array');
-  t.deepEqual(positions.buffer.getData().slice(0, 2), [180, 90], 'old value is copied to buffer');
+  t.deepEqual((await readDataFromBuffer()).slice(0, 2), [180, 90], 'old value is copied to buffer');
 
   positions.delete();
 
@@ -228,7 +225,7 @@ test.skip('Attribute#allocate - partial', t => {
   // make sure buffer is created
   positions.updateBuffer({});
   t.deepEqual(
-    positions.buffer.getData().slice(0, 4),
+    (await readDataFromBuffer()).slice(0, 4),
     [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
     'value uploaded to buffer'
   );
@@ -238,7 +235,7 @@ test.skip('Attribute#allocate - partial', t => {
   t.notEqual(positions.value, value, 'a new value array is allocated');
   t.deepEqual(positions.value.slice(0, 2), [179.9, 89.9], 'old value is copied to new array');
   t.deepEqual(
-    positions.buffer.getData().slice(0, 4),
+    (await readDataFromBuffer()).slice(0, 4),
     [179.89999389648438, 89.9000015258789, 0.00000610351571594947, -0.0000015258789289873675],
     'old value is copied to buffer'
   );
@@ -292,8 +289,7 @@ test('Attribute#shaderAttributes', t => {
   t.end();
 });
 
-// TODO v9 re-enable
-test.skip('Attribute#updateBuffer', t => {
+test('Attribute#updateBuffer', t => {
   const TEST_PROPS = {
     data: [
       {id: 'A', value: 10, color: [255, 0, 0]},
@@ -1034,12 +1030,6 @@ test('Attribute#doublePrecision', t0 => {
     attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
     t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
     validateShaderAttributes(t, attribute, true);
-
-    // TODO(v9): Buffer has no inherent type, unclear what should happen here.
-    // const buffer = device.createBuffer({byteLength: 12});
-    // attribute.setExternalBuffer(buffer);
-    // validateShaderAttributes(t, attribute, true);
-    // buffer.delete();
 
     attribute.delete();
     t.end();

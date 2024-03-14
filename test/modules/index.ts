@@ -21,12 +21,12 @@
 import './aggregation-layers';
 import './core';
 import './carto';
-// import './extensions';
+import './extensions';
 import './geo-layers';
 import './google-maps';
 import './imports-spec';
 import './json';
-// import './jupyter-widget';
+import './jupyter-widget';
 import './layers';
 import './mapbox';
 import './mesh-layers';
