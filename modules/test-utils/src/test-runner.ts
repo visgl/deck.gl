@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global window, console */
+/* global window, console, setTimeout */
 /* eslint-disable no-console */
 import {Deck, DeckProps, MapView} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';

@@ -29,12 +29,15 @@ import type View from '../views/view';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
+import type {AnyViewState} from '../views/types';
+
+export type ViewStateMap = AnyViewState | {[viewId: string]: AnyViewState};
 
 export default class ViewManager {
   width: number;
   height: number;
   views: View[];
-  viewState: any;
+  viewState: ViewStateMap;
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
 
@@ -56,8 +59,8 @@ export default class ViewManager {
     onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
     // Props
-    views?: View[];
-    viewState?: any;
+    views: View[];
+    viewState: ViewStateMap;
     width?: number;
     height?: number;
   }) {
@@ -161,7 +164,7 @@ export default class ViewManager {
     2. view.id
     3. root viewState
     then applies the view's filter if any */
-  getViewState(viewOrViewId: string | View): any {
+  getViewState(viewOrViewId: string | View): AnyViewState {
     const view: View | undefined =
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
@@ -199,7 +202,7 @@ export default class ViewManager {
   }
 
   /** Update the manager with new Deck props */
-  setProps(props: {views?: View[]; viewState?: any; width?: number; height?: number}) {
+  setProps(props: {views?: View[]; viewState?: ViewStateMap; width?: number; height?: number}) {
     if (props.views) {
       this._setViews(props.views);
     }
@@ -264,7 +267,7 @@ export default class ViewManager {
     this.views = views;
   }
 
-  private _setViewState(viewState: any): void {
+  private _setViewState(viewState: ViewStateMap): void {
     if (viewState) {
       // depth = 3 when comparing viewStates: viewId.position.0
       const viewStateChanged = !deepEqual(viewState, this.viewState, 3);
@@ -310,7 +313,7 @@ export default class ViewManager {
 
   private _updateController(
     view: View,
-    viewState: any,
+    viewState: ViewStateMap,
     viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {

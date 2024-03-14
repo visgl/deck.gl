@@ -31,12 +31,12 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
-import {luma, Device, DeviceProps} from '@luma.gl/core';
+import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -56,6 +56,8 @@ import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
+import type {ViewStateMap} from './view-manager';
+import type {AnyViewState} from '../views/types';
 
 /* global document */
 
@@ -111,9 +113,7 @@ export type DeckProps = {
    */
   pickingRadius?: number;
 
-  /** WebGL parameters to be set before each frame is rendered.
-   * @see https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md#parameters
-   */
+  /** WebGL parameters to be set before each frame is rendered. */
   parameters?: any;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
@@ -157,12 +157,12 @@ export type DeckProps = {
    * An object that describes the view state for each view in the `views` prop.
    * Use if the camera state should be managed external to the `Deck` instance.
    */
-  viewState?: any;
+  viewState?: ViewStateMap | null;
   /**
    * If provided, the `Deck` instance will track camera state changes automatically,
    * with `initialViewState` as its initial settings.
    */
-  initialViewState?: any;
+  initialViewState?: ViewStateMap | null;
 
   /** Allow browser default touch actions.
    * @default `'none'`
@@ -191,7 +191,7 @@ export type DeckProps = {
   /** Called when the canvas resizes. */
   onResize?: (dimensions: {width: number; height: number}) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
-  onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => any;
+  onViewStateChange?: (params: ViewStateChangeParameters<AnyViewState> & {viewId: string}) => any;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
@@ -312,7 +312,7 @@ export default class Deck {
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
-  protected viewState: any;
+  protected viewState: ViewStateMap | null;
   protected cursorState: CursorState = {
     isHovering: false,
     isDragging: false
@@ -367,7 +367,7 @@ export default class Deck {
         'View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.'
       )();
     }
-    this.viewState = props.initialViewState;
+    this.viewState = this.props.initialViewState;
 
     // See if we already have a device
     if (props.device) {
@@ -470,7 +470,7 @@ export default class Deck {
       width: number;
       height: number;
       views: View[];
-      viewState: Record<string, any>;
+      viewState: ViewStateMap;
     } = Object.create(this.props);
     Object.assign(resolvedProps, {
       views: this._getViews(),
@@ -815,8 +815,8 @@ export default class Deck {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  private _getViewState(): Record<string, any> {
-    return this.props.viewState || this.viewState;
+  private _getViewState(): ViewStateMap {
+    return this.props.viewState || this.viewState || {};
   }
 
   // Get the view descriptor list
@@ -1051,7 +1051,7 @@ export default class Deck {
 
   // Callbacks
 
-  private _onRenderFrame(animationProps: any) {
+  private _onRenderFrame() {
     this._getFrameStats();
 
     // Log perf stats every second
