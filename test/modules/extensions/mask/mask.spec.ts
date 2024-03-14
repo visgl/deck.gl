@@ -28,7 +28,7 @@ test('MaskExtension', t => {
         }
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.ok(uniforms.mask_enabled, 'mask_enabled in uniforms');
         t.equal(uniforms.mask_inverted, false, 'mask_inverted defaults to false in uniforms');
         t.ok(uniforms.mask_maskByInstance, 'mask_maskByInstance in uniforms');
@@ -40,7 +40,7 @@ test('MaskExtension', t => {
         maskInverted: true
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.ok(uniforms.mask_inverted, 'mask_inverted true in uniforms');
       }
     },
@@ -49,7 +49,7 @@ test('MaskExtension', t => {
         maskId: 'mask2'
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.notOk(uniforms.mask_enabled, 'mask disabled for invalid maskId');
       }
     }
@@ -62,7 +62,7 @@ test('MaskExtension', t => {
 
 test('MaskExtension#maskByInstance', t => {
   const checkLayer = (layer, expectedMaskByInstance) => {
-    const uniforms = layer.getModels()[0].getUniforms();
+    const uniforms = layer.getModels()[0].uniforms;
     t.is(
       uniforms.mask_maskByInstance,
       expectedMaskByInstance,

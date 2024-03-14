@@ -22,7 +22,7 @@ test('Fp64Extension', t => {
         extensions: [new Fp64Extension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.ok(uniforms.project_uViewProjectionMatrixFP64, 'has fp64 uniforms');
       }
     }
