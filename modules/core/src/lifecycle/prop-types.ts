@@ -192,8 +192,22 @@ const TYPE_DEFINITIONS = {
   },
   data: {
     transform: (value, propType: DataPropType, component) => {
+      if (!value) {
+        return value;
+      }
       const {dataTransform} = component.props;
-      return dataTransform && value ? dataTransform(value) : value;
+      if (dataTransform) {
+        return dataTransform(value);
+      }
+      // Detect loaders.gl v4 table format
+      if (
+        typeof value.shape === 'string' &&
+        value.shape.endsWith('-table') &&
+        Array.isArray(value.data)
+      ) {
+        return value.data;
+      }
+      return value;
     }
   },
   image: {
