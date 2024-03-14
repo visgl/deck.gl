@@ -18,12 +18,12 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature} from 'geojson';
+import type {Feature, Geometry} from 'geojson';
 
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
 
-import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
+import TileLayer, {TileLayerPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
 import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
 import {
@@ -61,6 +61,11 @@ export type TileJson = {
 };
 
 type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
+
+export type MVTLayerPickingInfo<FeaturePropertiesT = {}> = TileLayerPickingInfo<
+  ParsedMvtTile,
+  PickingInfo<Feature<Geometry, FeaturePropertiesT>>
+>;
 
 /** All props supported by the MVTLayer */
 export type MVTLayerProps<FeaturePropertiesT = unknown> = _MVTLayerProps<FeaturePropertiesT> &
@@ -298,7 +303,7 @@ export default class MVTLayer<
     }
   }
 
-  getPickingInfo(params: GetPickingInfoParams): TiledPickingInfo {
+  getPickingInfo(params: GetPickingInfoParams): MVTLayerPickingInfo<FeaturePropertiesT> {
     const info = super.getPickingInfo(params);
 
     const isWGS84 = Boolean(this.context.viewport.resolution);

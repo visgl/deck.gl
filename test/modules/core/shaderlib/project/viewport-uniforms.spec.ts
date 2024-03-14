@@ -20,42 +20,35 @@
 
 import test from 'tape-promise/tape';
 
-import {COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {project} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
-  map: new MapView().makeViewport({
+  map: new WebMercatorViewport({
     width: 800,
     height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11,
-      bearing: -30,
-      pitch: 40
-    }
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11,
+    bearing: -30,
+    pitch: 40
   }),
-  mapHighZoom: new MapView().makeViewport({
+  mapHighZoom: new WebMercatorViewport({
     width: 800,
     height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 13,
-      bearing: -30,
-      pitch: 40
-    }
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 13,
+    bearing: -30,
+    pitch: 40
   }),
-  infoVis: new OrbitView().makeViewport({
+  infoVis: new OrbitViewport({
     width: 800,
     height: 600,
-    viewState: {
-      rotationX: -30,
-      rotationOrbit: 40,
-      target: [10.285714285714, -3.14159265359],
-      zoom: 8
-    }
+    rotationX: -30,
+    rotationOrbit: 40,
+    target: [10.285714285714, -3.14159265359, 0],
+    zoom: 8
   })
 };
 

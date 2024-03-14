@@ -344,6 +344,8 @@ export default class DataColumn<Options, State> {
           constant?: boolean;
           value?: NumericArray;
           buffer?: Buffer;
+          /** Set to `true` if supplying float values to a unorm attribute */
+          normalized?: boolean;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;

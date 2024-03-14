@@ -146,8 +146,14 @@ type _TileLayerProps<DataT> = {
   zoomOffset?: number;
 };
 
-export type TiledPickingInfo<DataT = any> = PickingInfo & {
+export type TileLayerPickingInfo<
+  DataT = any,
+  SubLayerPickingInfo = PickingInfo
+> = SubLayerPickingInfo & {
+  /** The picked tile */
   tile?: Tile2DHeader<DataT>;
+  /** the tile that emitted the picking event */
+  sourceTile: Tile2DHeader<DataT>;
 };
 
 /**
@@ -334,12 +340,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
-    const sourceTile = (sourceLayer as any).props.tile;
+  getPickingInfo(params: GetPickingInfoParams): TileLayerPickingInfo<DataT> {
+    const sourceTile: Tile2DHeader<DataT> = (params.sourceLayer as any).props.tile;
+    const info = params.info as TileLayerPickingInfo<DataT>;
     if (info.picked) {
-      (info as any).tile = sourceTile;
+      info.tile = sourceTile;
     }
-    (info as any).sourceTile = sourceTile;
+    info.sourceTile = sourceTile;
     return info;
   }
 
