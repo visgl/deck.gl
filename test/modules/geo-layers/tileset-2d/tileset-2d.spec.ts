@@ -147,8 +147,7 @@ test('Tileset2D#maxCacheSize', t => {
   t.end();
 });
 
-// TODO v9
-test.skip('Tileset2D#maxCacheByteSize', async t => {
+test('Tileset2D#maxCacheByteSize', async t => {
   const tileset = new Tileset2D({
     getTileData: () => Promise.resolve({byteLength: 100}),
     maxCacheByteSize: 150,
@@ -159,6 +158,9 @@ test.skip('Tileset2D#maxCacheByteSize', async t => {
   tileset.update(testViewport);
   t.equal(tileset._cache.size, 1, 'expected cache size');
   t.ok(tileset._cache.get('1171-1566-12'), 'expected tile is in cache');
+
+  // Wait for the tile to load
+  await sleep(100);
 
   // load another viewport. The previous cached tiles shouldn't be visible
   tileset.update(
@@ -172,6 +174,7 @@ test.skip('Tileset2D#maxCacheByteSize', async t => {
 
   t.equal(tileset._cache.size, 2, 'new tile added to cache');
 
+  // Wait for the new tile to load
   await sleep(100);
 
   t.equal(tileset._cache.size, 1, 'cache is resized after tile data is loaded');
