@@ -121,6 +121,8 @@ export class TerrainEffect implements Effect {
       terrainCover.delete();
     }
     this.terrainCovers.clear();
+
+    getShaderAssembler().removeDefaultModule(terrainModule);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {
