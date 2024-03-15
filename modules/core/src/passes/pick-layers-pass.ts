@@ -11,6 +11,16 @@ const PICKING_PARAMETERS: GLParameters = {
   blendEquation: GL.FUNC_ADD
 };
 
+// TODO (v9) migrate to string constants
+// const PICKING_PARAMETERS: RenderPipelineParameters = {
+//   blendColorOperation: 'add',
+//   blendColorSrcFactor: 'one',
+//   blendColorDstFactor: 'zero',
+//   blendAlphaOperation: 'add',
+//   blendAlphaSrcFactor: 'constant-alpha', // <- Not yet implemented in luma
+//   blendAlphaDstFactor: 'zero'
+// };
+
 type PickLayersPassRenderOptions = LayersPassRenderOptions & {
   pickingFBO: Framebuffer;
   deviceRect: Rect;
@@ -76,6 +86,8 @@ export default class PickLayersPass extends LayersPass {
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
     const renderStatus = this.device.withParametersWebGL(
+      // TODO (v9) should move parameters to getLayerParameters(), but first need
+      // luma to support BlendFactor 'constant-alpha'
       {
         scissorTest: true,
         scissor: [x, y, width, height],

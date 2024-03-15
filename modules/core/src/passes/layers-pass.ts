@@ -181,7 +181,10 @@ export default class LayersPass extends Pass {
           pass,
           moduleParameters
         );
-        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex, viewport);
+        layerParam.layerParameters = {
+          ...layer.context.deck?.props.parameters,
+          ...this.getLayerParameters(layer, layerIndex, viewport)
+        };
       }
       drawLayerParams[layerIndex] = layerParam;
     }

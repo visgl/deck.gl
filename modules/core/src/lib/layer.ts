@@ -1072,6 +1072,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       context.device.setParametersWebGL({polygonOffset: offsets});
 
+      // TODO (v9) remove pickingActive check once pick-layers-pass removes GL parameters
+      const pickingActive = moduleParameters.picking?.isActive === 1;
+      for (const model of this.getModels()) {
+        model.setParameters(pickingActive ? {} : parameters);
+      }
+
       // Call subclass lifecycle method
       context.device.withParametersWebGL(parameters, () => {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
