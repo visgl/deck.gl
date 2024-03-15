@@ -100,7 +100,7 @@ export default abstract class View<
   }
 
   /** Make viewport from canvas dimensions and view state */
-  makeViewport({width, height, viewState}: {width: number; height: number; viewState: any}) {
+  makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 
     // Resolve relative viewport dimensions

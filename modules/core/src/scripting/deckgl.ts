@@ -48,8 +48,6 @@ type DeckGLProps = DeckProps & {
   container?: Element;
   /** base map library, mapboxgl or maplibregl */
   map?: any;
-  viewState?: MapViewState | null;
-  initialViewState?: MapViewState | null;
 };
 
 /**
@@ -70,12 +68,7 @@ export default class DeckGL extends Deck {
 
     const {mapCanvas, deckCanvas} = createCanvas(props);
 
-    const viewState = props.viewState ||
-      props.initialViewState || {
-        longitude: 0,
-        latitude: 0,
-        zoom: 0
-      };
+    const viewState = (props.viewState || props.initialViewState) as MapViewState;
     const isMap = Number.isFinite(viewState && viewState.latitude);
     const {map = globalThis.mapboxgl || globalThis.maplibregl} = props;
 
