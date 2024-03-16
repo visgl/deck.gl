@@ -12,7 +12,7 @@ The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. 
 
 Quick summary:
 
-- All direct references to `gl: WebGLRenderingContext` should be replaced with `device: Device` references. `impoert {Device} from '@luma.gl/core'`.
+- All direct references to `gl: WebGLRenderingContext` should be replaced with `device: Device` references. `import {Device} from '@luma.gl/core'`.
 - GPU resource classes should no longer be created directly. Use `device.createBuffer()`, `device.createTexture()` etc.
 - luma.gl no longer uses `GL` constants for GPU parameters, but instead uses (WebGPU style) string constants. Applications should no longer import `@luma.gl/constants`.
 
