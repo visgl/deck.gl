@@ -50,6 +50,7 @@ While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to ena
 
 - deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
 - drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
+- The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
 
 ## Upgrading from deck.gl v8.8 to v8.9
 
