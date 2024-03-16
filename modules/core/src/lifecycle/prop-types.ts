@@ -4,6 +4,7 @@ import {deepEqual} from '../utils/deep-equal';
 import type Component from './component';
 import type {Color, TextureSource} from '../types/layer-props';
 import type Layer from '../lib/layer';
+import type {SamplerProps} from '@luma.gl/core';
 
 type BasePropType<ValueT> = {
   value: ValueT;
@@ -83,7 +84,7 @@ type DataPropType<T = any> = BasePropType<T> & {
 };
 type ImagePropType = BasePropType<TextureSource | null> & {
   type: 'image';
-  parameters?: Record<number, number>;
+  parameters?: SamplerProps;
 };
 type ObjectPropType<T = any> = BasePropType<T> & {
   type: 'object';
