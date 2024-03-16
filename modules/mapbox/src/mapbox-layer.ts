@@ -1,5 +1,6 @@
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
 import type {Map, CustomLayerInterface} from 'mapbox-gl';
+import {log} from '@deck.gl/core';
 import type {Deck, Layer} from '@deck.gl/core';
 
 export type MapboxLayerProps<LayerT extends Layer> = Partial<LayerT['props']> & {
@@ -32,7 +33,7 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
 
   /* Mapbox custom layer methods */
 
-  onAdd(map: Map, gl: WebGLRenderingContext): void {
+  onAdd(map: Map, gl: WebGL2RenderingContext): void {
     this.map = map;
     this.deck = getDeckInstance({map, gl, deck: this.props.deck});
     addLayer(this.deck, this);
@@ -54,6 +55,6 @@ export default class MapboxLayer<LayerT extends Layer> implements CustomLayerInt
   }
 
   render() {
-    drawLayer(this.deck, this.map, this);
+    drawLayer(this.deck!, this.map, this);
   }
 }

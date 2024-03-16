@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
+deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL2/WebGPU) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
 
 
 ## Installing npm modules, learning React, it is just too much!
@@ -25,7 +25,7 @@ Q: If I wanted to, say, change the opacity of a layer, Is my only option to crea
 
 Yes. deck.gl is a "reactive" application architecture and is optimized to be used like this. The layer and its props are essentially only a "descriptor", deck.gl matches and "diffs" the layers under the hood and only does the necessary changes based on actual differences compared to last layer.
 
-This is a "functional" take on programming, and it parallels key ideas in the widely used React library. The reactive architecture has big benefits when writing larger prgrams, but these are not as evident when writing smaller scripts.
+This is a "functional" take on programming, and it parallels key ideas in the widely used React library. The reactive architecture has big benefits when writing larger programs, but these are not as evident when writing smaller scripts.
 
 If you are coming from a more "imperative" programming experience, it can initially seem a little counter-intuitive (especially from a performance perspective). But in spite of how the API looks, performance should be very good, if this is not the case you are likely doing something else wrong.
 
@@ -50,6 +50,6 @@ See the article about [debugging](./developer-guide/debugging.md).
 
 ## How do I **test** deck.gl applications?
 
-Q: It is hard to test webgl based applications, assuming deck.gl is no different?
+Q: It is hard to test WebGL2/WebGPU based applications, assuming deck.gl is no different?
 
 Check out `@deck.gl/test-utils`, which (among other things) supports visual regression testing.

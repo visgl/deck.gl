@@ -3,11 +3,18 @@ set -e
 
 node scripts/validate-token.js
 npm run write-heading-ids
+npm pkg set version=$(node -p "require('../modules/core/package.json').version")
 
 # staging or prod
 MODE=$1
 WEBSITE_DIR=`pwd`
 OUTPUT_DIR=build
+
+# rebuild modules from source
+(
+  cd ..
+  yarn build
+)
 
 # clean up cache
 docusaurus clear

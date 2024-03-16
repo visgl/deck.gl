@@ -1,16 +1,15 @@
 // deck.gl, MIT license
 
-import type {Device} from '@luma.gl/core';
-import {Transform} from '@luma.gl/engine';
 import GPUInterpolationTransition from '../../transitions/gpu-interpolation-transition';
 import GPUSpringTransition from '../../transitions/gpu-spring-transition';
 import log from '../../utils/log';
 
-import type {TransitionSettings} from './attribute-transition-utils';
-import type Attribute from './attribute';
+import type {Device} from '@luma.gl/core';
 import type {Timeline} from '@luma.gl/engine';
-import type GPUTransition from '../../transitions/gpu-transition';
+import type {GPUTransition} from '../../transitions/gpu-transition';
 import type {ConstructorOf} from '../../types/types';
+import type Attribute from './attribute';
+import type {TransitionSettings} from './transition-settings';
 
 const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
   interpolation: GPUInterpolationTransition,
@@ -19,7 +18,6 @@ const TRANSITION_TYPES: Record<string, ConstructorOf<GPUTransition>> = {
 
 export default class AttributeTransitionManager {
   id: string;
-  isSupported: boolean;
 
   private device: Device;
   private timeline?: Timeline;
@@ -38,6 +36,7 @@ export default class AttributeTransitionManager {
       timeline?: Timeline;
     }
   ) {
+    if (!device) throw new Error('AttributeTransitionManager is constructed without device');
     this.id = id;
     this.device = device;
     this.timeline = timeline;
@@ -45,7 +44,6 @@ export default class AttributeTransitionManager {
     this.transitions = {};
     this.needsRedraw = false;
     this.numInstances = 1;
-    this.isSupported = Transform.isSupported(device);
   }
 
   finalize(): void {
@@ -112,7 +110,7 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   run(): boolean {
-    if (!this.isSupported || this.numInstances === 0) {
+    if (this.numInstances === 0) {
       return false;
     }
 
@@ -131,7 +129,7 @@ export default class AttributeTransitionManager {
 
   /* Private methods */
   private _removeTransition(attributeName: string): void {
-    this.transitions[attributeName].cancel();
+    this.transitions[attributeName].delete();
     delete this.transitions[attributeName];
   }
 
@@ -149,14 +147,8 @@ export default class AttributeTransitionManager {
     // previous buffers, currentLength, startIndices, etc, to be used as the starting point
     // for the next transition
     let isNew = !transition || transition.type !== settings.type;
-    if (isNew) {
-      if (!this.isSupported) {
-        log.warn(
-          `WebGL2 not supported by this browser. Transition for ${attributeName} is disabled.`
-        )();
-        return;
-      }
 
+    if (isNew) {
       if (transition) {
         this._removeTransition(attributeName);
       }

@@ -18,57 +18,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {equals} from '@math.gl/core';
-import {Transform} from '@luma.gl/engine';
-import {project32} from '@deck.gl/core';
-import {project64} from '@deck.gl/extensions';
+import {equals, NumericArray} from '@math.gl/core';
+import type {UniformValue} from '@luma.gl/core';
+import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
+import {device} from '@deck.gl/test-utils';
 
 export function getPixelOffset(p1, p2) {
   return [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2], 1];
 }
 
-export function clipspaceToScreen(viewport, coords) {
-  return [
-    ((coords[0] / coords[3] + 1) / 2) * viewport.width,
-    ((1 - coords[1] / coords[3]) / 2) * viewport.height,
-    coords[2] / coords[3]
-  ];
-}
+const OUT_BUFFER = device.createBuffer({byteLength: 4 * 16});
 
-export function runOnGPU({
-  device,
+export async function runOnGPU({
   uniforms,
-  vs,
-  sourceBuffers,
-  feedbackBuffers,
-  elementCount,
-  usefp64 = true
-}) {
-  const modules = usefp64 ? [project64] : [project32];
-  // const modules = usefp64 ? ['project64'] : [];
-  const transform = new Transform(device, {
-    // TODO: remove sourceBuffers after https://github.com/visgl/luma.gl/pull/733
-    sourceBuffers,
-    feedbackBuffers,
-    vs,
-    varyings: ['outValue'],
-    modules,
-    elementCount: elementCount || 1
+  varying,
+  ...transformProps
+}: BufferTransformProps & {
+  uniforms: Record<string, UniformValue>;
+  varying: string;
+}): Promise<Float32Array> {
+  const transform = new BufferTransform(device, {
+    ...transformProps,
+    feedbackBuffers: {[varying]: OUT_BUFFER},
+    varyings: [varying]
   });
-  transform.run({uniforms});
-  return feedbackBuffers.outValue.getData();
+  transform.model.setUniforms(uniforms);
+  transform.run({
+    discard: true
+  });
+
+  const result: Uint8Array = await OUT_BUFFER.readAsync();
+  return new Float32Array(result.buffer);
 }
 
-export function verifyResult({t, name, actual, expected, sliceActual = false}) {
-  actual = Number.isFinite(actual) ? [actual] : actual;
-  expected = Array.isArray(expected) ? expected : [expected];
-  // Convert TypedArray to regular array
-  // TODO: remove after https://github.com/uber-web/math.gl/pull/29
-  actual = sliceActual ? Array.from(actual.slice(0, expected.length)) : actual;
+export function verifyGPUResult(
+  actual: Float32Array,
+  expected: number | NumericArray
+): string | true {
+  const expectedArr: NumericArray = typeof expected === 'number' ? [expected] : expected;
+  // truncate buffer to match expected length
+  const actualArr = actual.slice(0, expectedArr.length);
 
-  if (equals(actual, expected)) {
-    t.pass(`${name} returns correct result`);
+  if (equals(actualArr, expectedArr)) {
+    return true;
   } else {
-    t.fail(`${name} returns ${actual}, expecting ${expected}`);
+    return `returns ${actualArr}, expecting ${expectedArr}`;
   }
 }

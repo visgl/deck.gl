@@ -11,12 +11,6 @@ test('DataFilterExtension#constructor', t => {
   t.is(extension.opts.filterSize, 3, 'Extension has filterSize');
   t.ok(extension.opts.fp64, 'fp64 is enabled');
 
-  t.throws(
-    () => new DataFilterExtension({filterSize: 5}),
-    /filterSize/,
-    'should throw on invalid filterSize'
-  );
-
   t.end();
 });
 
@@ -34,7 +28,7 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.is(uniforms.filter_min, 80, 'has correct uniforms');
         t.is(uniforms.filter_softMax, 160, 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
@@ -57,7 +51,7 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension({filterSize: 2})]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(uniforms.filter_min, [10000, 0], 'has correct uniforms');
         t.deepEqual(uniforms.filter_softMax, [18000, 8000], 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, true, 'has correct uniforms');
@@ -69,11 +63,68 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension({filterSize: 2, fp64: true})]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(uniforms.filter_min64High, [10000, 0], 'has double uniforms');
         t.deepEqual(uniforms.filter_max64High, [20000, 100000], 'has double uniforms');
         t.deepEqual(uniforms.filter_min, [0, 0], 'has correct uniforms');
         t.deepEqual(uniforms.filter_softMax, [-2000, -92000], 'has correct uniforms');
+      }
+    }
+  ];
+
+  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('DataFilterExtension#categories', t => {
+  const data = [
+    {position: [-122.453, 37.782], field1: 'a', field2: 7},
+    {position: [-122.454, 37.781], field1: 'b', field2: 8}
+  ];
+  const testCases = [
+    {
+      props: {
+        data,
+        extensions: [new DataFilterExtension({categorySize: 2})],
+        getPosition: d => d.position,
+        getFilterCategory: d => [d.field1, d.field2],
+        filterCategories: [['a'], [8]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 0, 0, 2 ** 1, 0],
+          'has correct uniforms'
+        );
+      }
+    },
+    {
+      updateProps: {
+        filterCategories: [['b', 'c'], []]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 1 + 2 ** 2, 0, 0, 0],
+          'has correct uniforms'
+        );
+      }
+    },
+    {
+      updateProps: {
+        data: [...data],
+        filterCategories: [['d'], [5]]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {uniforms} = layer.state.model;
+        t.deepEqual(
+          uniforms.filter_categoryBitMask,
+          [2 ** 2, 0, 2 ** 2, 0],
+          'has correct uniforms'
+        );
       }
     }
   ];

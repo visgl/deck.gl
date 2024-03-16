@@ -71,8 +71,8 @@ map.addControl(overlay);
 The following code demonstrates how to create a React component from `MapboxOverlay` with `react-map-gl@7.x` and Typescript:
 
 ```tsx
-import {ScatterplotLayer} from '@deck.gl/layers/typed';
-import {MapboxOverlay, MapboxOverlayProps} from '@deck.gl/mapbox/typed';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {MapboxOverlay, MapboxOverlayProps} from '@deck.gl/mapbox';
 import {useControl} from 'react-map-gl';
 
 import Map, {NavigationControl} from 'react-map-gl';
@@ -133,7 +133,7 @@ new MapboxOverlay(props);
 
 The constructor additionally accepts the following option:
 
-- `interleaved` (Boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same WebGLRenderingContext as the base map. Default is `false`.
+- `interleaved` (Boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same `WebGL2RenderingContext` as the base map. Default is `false`. Note that interleaving with basemaps such as mapbox-gl-js v1 that only support WebGL 1 is not supported, see [compatibility](./overview#compatibility).
 
 When using `interleaved: true`, you may optionally add a `beforeId` prop to a layer to specify its position in the Mapbox layer stack. If multiple deck.gl layers have the same `beforeId`, they are rendered in the order that is passed into the `layers` array.
 
@@ -173,6 +173,9 @@ See [Deck.pickMultipleObjects](../core/deck.md#pickmultipleobjects).
 
 Removes the control and deletes all resources.
 
+##### getCanvas
+
+See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.
 
 ## Remarks
 

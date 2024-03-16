@@ -7,7 +7,7 @@
 Create models with device instead of gl.
 
 ```typescript
-// luma.gl vp
+// luma.gl v9
 new Model(this.context.device, {opts});
 // luma.gl v8
 new Model(this.context.gl, {opts});
@@ -15,6 +15,51 @@ new Model(this.context.gl, {opts});
 
 
 - drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select different topology when creating geometries.
+
+### Deck
+
+- `Deck.pickObjects` minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+
+### @deck.gl/mapbox
+
+`MapboxLayer` has been removed. Use `MapboxOverlay` instead.
+
+```typescript
+// deck.gl v9
+import {DeckOverlay} from '@deck.gl/mapbox'
+map.addControl(new DeckOverlay({
+  interleaved: true,
+  layers: [new ArcLayer({...})]
+}))
+// deck.gl v8
+import {MapboxLayer} from '@deck.gl/mapbox'
+map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
+```
+
+### @deck.gl/carto
+
+`CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
+
+```typescript
+// deck.gl v9
+import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+const data = vectorQuerySource({
+  accessToken: 'XXX',
+  connectionName: 'carto_dw',
+  sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
+});
+const layer = new VectorTileLayer({data, ...styleProps});
+
+// deck.gl v8
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
+setDefaultCredentials({accessToken: 'XXX'});
+const layer = new CartoLayer({
+  type: MAP_TYPES.QUERY,
+  connection: 'carto_dw',
+  data: 'SELECT * FROM cartobq.testtables.points_10k',
+  ...styleProps
+});
+```
 
 ## Upgrading from deck.gl v8.8 to v8.9
 

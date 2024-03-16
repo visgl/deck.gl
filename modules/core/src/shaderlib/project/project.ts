@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from '@luma.gl/shadertools';
+import {fp32, ShaderModule} from '@luma.gl/shadertools';
 import geometry from '../misc/geometry';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
 import type {ProjectModuleSettings} from './viewport-uniforms';
-import type {ShaderModule} from '../../types/types';
 
 const INITIAL_MODULE_OPTIONS = {};
 

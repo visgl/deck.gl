@@ -21,7 +21,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -40,7 +39,7 @@ import type {
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 /** All props supported by the ScatterplotLayer */
-export type ScatterplotLayerProps<DataT = any> = _ScatterplotLayerProps<DataT> & LayerProps;
+export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
 
 /** Props added by the ScatterplotLayer */
 type _ScatterplotLayerProps<DataT> = {
@@ -162,7 +161,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -181,6 +180,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   static defaultProps = defaultProps;
   static layerName: string = 'ScatterplotLayer';
 
+  state!: {
+    model?: Model;
+  };
+
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
   }
@@ -189,7 +192,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -203,16 +206,14 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
-        normalized: true,
-        type: GL.UNSIGNED_BYTE,
+        type: 'unorm8',
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]
       },
@@ -250,9 +251,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
+    const model = this.state.model!;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       stroked: stroked ? 1 : 0,
       filled,
       billboard,
@@ -266,7 +268,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
@@ -275,7 +277,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

@@ -22,7 +22,6 @@ import defaultTypedArrayManager from './typed-array-manager';
 import assert from './assert';
 
 import {Buffer} from '@luma.gl/core';
-import {BufferWithAccessor} from '@luma.gl/webgl';
 
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {TypedArray} from '../types/types';
@@ -105,10 +104,10 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (!normalize) {
         // skip packing and set attribute value directly
         // TODO - avoid mutating user-provided object
-        buffers.positions = geometryBuffer;
+        buffers.vertexPositions = geometryBuffer;
       }
     }
-    this.geometryBuffer = buffers.positions;
+    this.geometryBuffer = buffers.vertexPositions;
 
     if (Array.isArray(dataChanged)) {
       // is partial update
@@ -234,8 +233,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       if (ArrayBuffer.isView(geometryBuffer)) {
         instanceCount = instanceCount || geometryBuffer.length / this.positionSize;
       } else if (geometryBuffer instanceof Buffer) {
-        const classicBuffer = geometryBuffer as BufferWithAccessor;
-        const byteStride = classicBuffer.accessor.stride || this.positionSize * 4;
+        const byteStride = this.positionSize * 4;
         instanceCount = instanceCount || geometryBuffer.byteLength / byteStride;
       } else if (geometryBuffer.buffer) {
         const byteStride = geometryBuffer.stride || this.positionSize * 4;
@@ -262,9 +260,7 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
     this._forEachGeometry(
       (geometry: GeometryT | null, dataIndex: number) => {
         const normalizedGeometry =
-          normalizedData[dataIndex] ||
-          // @ts-expect-error (2352) GeometryT cannot be casted to NormalizedGeometryT. We are assuming the user passed already normalized data if opts.normalize is set to false.
-          (geometry as NormalizedGeometryT);
+          normalizedData[dataIndex] || (geometry as unknown as NormalizedGeometryT);
         context.vertexStart = vertexStarts[dataIndex];
         context.indexStart = indexStarts[dataIndex];
         const vertexEnd =

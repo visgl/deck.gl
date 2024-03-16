@@ -2,7 +2,8 @@
   "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "type": "module",
+  "version": "9.0.0-beta.9",
   "publishConfig": {
     "access": "public"
   },
@@ -16,12 +17,19 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
@@ -30,12 +38,12 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/core": "9.0.0-alpha.35",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
-    "@types/mapbox-gl": "^2.6.3"
+    "@luma.gl/constants": "^9.0.3",
+    "@math.gl/web-mercator": "^4.0.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^8.0.0"
+    "@deck.gl/core": "^9.0.0-beta",
+    "@luma.gl/core": "^9.0.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

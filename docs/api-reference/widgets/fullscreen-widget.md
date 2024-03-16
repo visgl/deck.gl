@@ -2,43 +2,49 @@
 
 ## Props
 
-### `id` (String)
+### `id` (String) {#id}
 
 Default: `'fullscreen'`
 
 Unique identifier of the widget.
 
-### `viewId` (String, optional)
+### `viewId` (String, optional) {#viewid}
 
 Default: `null`
 
-The view id that this widget is being attached to. If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+The view id that this widget is being attached to. If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
 
-### `placement` (String, optional)
+### `placement` (String, optional) {#placement}
 
 Default: `'top-left'`
 
 Widget position within the view relatitive to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
 
-### `container` (HTMLElement, optional)
+### `container` (HTMLElement, optional) {#container}
 
 Default: `undefined`
 
 A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
 
-### `label` (String, optional)
+### `enterLabel` (String, optional) {#enterlabel}
 
-Hovering a mouse over the widget will display the label as a tooltip.
+Toolip message displayed while hovering a mouse over the widget when out of fullscreen.
 
-Default: `'Toggle Fullscreen'`
+Default: `'Enter Fullscreen'`
 
-### `style` (Object, optional)
+### `exitLabel` (String, optional) {#exitlabel}
+
+Toolip message displayed while hovering a mouse over the widget when fullscreen.
+
+Default: `'Exit Fullscreen'`
+
+### `style` (Object, optional) {#style}
 
 Default: `{}`
 
 Additional CSS styles for the canvas.
 
-### `className` (String, optional)
+### `className` (String, optional) {#classname}
 
 Default: `undefined`
 

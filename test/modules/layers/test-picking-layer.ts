@@ -1,6 +1,12 @@
 import {device} from '@deck.gl/test-utils';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
-import LayerManager from '@deck.gl/core/lib/layer-manager';
+import {
+  type Layer,
+  type Viewport,
+  type PickingInfo,
+  type CompositeLayer,
+  LayerManager
+} from '@deck.gl/core';
 
 // Test getPickingInfo and updateAutoHighlight methods
 // @param layer {Layer} - a layer instance
@@ -9,7 +15,20 @@ import LayerManager from '@deck.gl/core/lib/layer-manager';
 // @param testCase.pickedLayerId {String} - picked layer id
 // @param testCase.mode {String} - default 'hover'
 // @param testCase.onAfterUpdate {Function} - callback after picking
-export async function testPickingLayer({layer, viewport, testCases}) {
+export async function testPickingLayer({
+  layer,
+  viewport,
+  testCases
+}: {
+  layer: Layer;
+  viewport?: Viewport;
+  testCases: {
+    pickedColor: Uint8Array;
+    pickedLayerId: string | null;
+    mode: 'hover' | 'click';
+    onAfterUpdate: (params: {layer: Layer; subLayers: Layer[]; info: PickingInfo}) => void;
+  }[];
+}) {
   // Initialize layer
   const layerManager = new LayerManager(device, {viewport});
   layerManager.setLayers([layer]);
@@ -49,15 +68,15 @@ export async function testPickingLayer({layer, viewport, testCases}) {
 
     onAfterUpdate({
       layer,
-      subLayers: layer.isComposite && layer.getSubLayers(),
-      info: Array.from(infos.values()).pop()
+      subLayers: (layer.isComposite && (layer as CompositeLayer).getSubLayers()) || [],
+      info: Array.from(infos.values()).pop() as PickingInfo
     });
   }
 
   layerManager.finalize();
 }
 
-async function updateAll(layerManager) {
+async function updateAll(layerManager): Promise<void> {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
       if (layerManager.needsUpdate()) {

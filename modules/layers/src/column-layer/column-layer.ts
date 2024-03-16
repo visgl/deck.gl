@@ -37,7 +37,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -65,7 +64,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: {type: 'accessor', value: (x: any) => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
@@ -75,7 +74,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
 };
 
 /** All properties supported by ColumnLayer. */
-export type ColumnLayerProps<DataT = any> = _ColumnLayerProps<DataT> & LayerProps;
+export type ColumnLayerProps<DataT = unknown> = _ColumnLayerProps<DataT> & LayerProps;
 
 /** Properties added by ColumnLayer. */
 type _ColumnLayerProps<DataT> = {
@@ -102,7 +101,7 @@ type _ColumnLayerProps<DataT> = {
    * Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one.
    * @default null
    */
-  vertices: Position[] | null;
+  vertices?: Position[] | null;
 
   /**
    * Disk offset from the position, relative to the radius.
@@ -239,25 +238,23 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     fillModel?: Model;
     wireframeModel?: Model;
     models?: Model[];
-    fillVertexCount?: number;
-    edgeDistance?: number;
+    fillVertexCount: number;
+    edgeDistance: number;
   };
 
   getShaders() {
     const {device} = this.context;
-    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
-    if (useDerivatives) {
+    const {flatShading} = this.props;
+    if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
       vs,
       fs,
       defines,
-      transpileToGLSL100,
-      modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking]
     });
   }
 
@@ -271,7 +268,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -283,16 +280,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
@@ -320,8 +315,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     const instanceCount = this.getNumInstances();
-    this.state.fillModel.setInstanceCount(instanceCount);
-    this.state.wireframeModel.setInstanceCount(instanceCount);
+    this.state.fillModel!.setInstanceCount(instanceCount);
+    this.state.wireframeModel!.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
@@ -360,7 +355,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager().getBufferLayouts();
+    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
 
     const fillModel = new Model(this.context.device, {
       ...shaders,
@@ -389,7 +384,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       fillVertexCount: geometry.attributes.POSITION.value.length / 3
     });
 
-    const {fillModel, wireframeModel} = this.state;
+    const fillModel = this.state.fillModel!;
+    const wireframeModel = this.state.wireframeModel!;
     fillModel.setGeometry(geometry);
     fillModel.setTopology('triangle-strip');
     // Disable indices
@@ -416,7 +412,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       radius,
       angle
     } = this.props;
-    const {fillModel, wireframeModel, fillVertexCount, edgeDistance} = this.state;
+    const fillModel = this.state.fillModel!;
+    const wireframeModel = this.state.wireframeModel!;
+    const {fillVertexCount, edgeDistance} = this.state;
 
     const renderUniforms = {
       ...uniforms,

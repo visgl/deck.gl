@@ -1,6 +1,5 @@
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
-// import {copyToTexture} from '@luma.gl/webgl';
 // import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
@@ -125,6 +124,7 @@ function resizeTexture(
 
   const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
   // @ts-expect-error TODO v9 import
+  // device.copyToTextureWebGL(texture, newTexture, {
   copyToTexture(texture, newTexture, {
     targetY: 0,
     width: oldWidth,
@@ -348,7 +348,7 @@ export default class IconManager {
     autoPacking?: boolean;
     iconAtlas?: Texture | null;
     iconMapping?: IconMapping | null;
-    textureParameters?: Record<number, number> | null;
+    textureParameters?: SamplerProps | null;
   }) {
     if (loadOptions) {
       this._loadOptions = loadOptions;
@@ -436,9 +436,9 @@ export default class IconManager {
     })[]
   ): void {
     // This method is only called in the auto packing case, where _canvas is defined
-    const ctx = this._canvas.getContext('2d', {
+    const ctx = this._canvas!.getContext('2d', {
       willReadFrequently: true
-    });
+    }) as CanvasRenderingContext2D;
 
     for (const icon of icons) {
       this._pendingCount++;
@@ -449,7 +449,12 @@ export default class IconManager {
           const iconDef = this._mapping[id];
           const {x, y, width: maxWidth, height: maxHeight} = iconDef;
 
-          const {data, width, height} = resizeImage(ctx, imageData, maxWidth, maxHeight);
+          const {data, width, height} = resizeImage(
+            ctx,
+            imageData as ImageBitmap,
+            maxWidth,
+            maxHeight
+          );
 
           // @ts-expect-error TODO v9 API not yet clear
           this._texture.setSubImageData({

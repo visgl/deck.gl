@@ -2,7 +2,8 @@
   "name": "@deck.gl/carto",
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
-  "version": "8.10.0-alpha.2",
+  "type": "module",
+  "version": "9.0.0-beta.9",
   "publishConfig": {
     "access": "public"
   },
@@ -18,12 +19,19 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "src",
-    "typed",
     "dist.min.js"
   ],
   "sideEffects": false,
@@ -34,37 +42,35 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
-    "@loaders.gl/gis": "^3.4.13",
-    "@loaders.gl/loader-utils": "^3.4.13",
-    "@loaders.gl/mvt": "^3.4.13",
-    "@loaders.gl/tiles": "^3.4.13",
-    "@luma.gl/core": "9.0.0-alpha.35",
-    "@luma.gl/constants": "^8.5.20",
-    "@math.gl/web-mercator": "4.0.0-alpha.4",
+    "@loaders.gl/gis": "^4.2.0-alpha.5",
+    "@loaders.gl/loader-utils": "^4.2.0-alpha.5",
+    "@loaders.gl/mvt": "^4.2.0-alpha.5",
+    "@loaders.gl/schema": "^4.2.0-alpha.5",
+    "@loaders.gl/tiles": "^4.2.0-alpha.5",
+    "@luma.gl/constants": "^9.0.3",
+    "@math.gl/web-mercator": "^4.0.0",
+    "@types/d3-array": "^3.0.2",
+    "@types/d3-color": "^1.4.2",
+    "@types/d3-scale": "^3.0.0",
     "cartocolor": "^4.0.2",
     "d3-array": "^3.2.0",
     "d3-color": "^3.1.0",
     "d3-format": "^3.1.0",
     "d3-scale": "^4.0.0",
+    "earcut": "^2.2.4",
     "h3-js": "^4.1.0",
     "moment-timezone": "^0.5.33",
     "pbf": "^3.2.1",
-    "quadbin": "^0.1.9"
-  },
-  "devDependencies": {
-    "@loaders.gl/schema": "^3.4.13",
-    "@types/d3-array": "^3.0.2",
-    "@types/d3-color": "^1.4.2",
-    "@types/d3-scale": "^3.0.0"
+    "quadbin": "^0.2.0"
   },
   "peerDependencies": {
-    "@deck.gl/aggregation-layers": "^8.0.0",
-    "@deck.gl/core": "^8.0.0",
-    "@deck.gl/extensions": "^8.0.0",
-    "@deck.gl/geo-layers": "^8.0.0",
-    "@deck.gl/layers": "^8.0.0",
-    "@loaders.gl/core": "^3.4.13"
+    "@deck.gl/aggregation-layers": "^9.0.0-beta",
+    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/extensions": "^9.0.0-beta",
+    "@deck.gl/geo-layers": "^9.0.0-beta",
+    "@deck.gl/layers": "^9.0.0-beta",
+    "@loaders.gl/core": "^4.2.0-alpha.5",
+    "@luma.gl/core": "^9.0.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

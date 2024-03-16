@@ -1,5 +1,5 @@
-const {execSync} = require('child_process');
-const {readFileSync} = require('fs');
+import {execSync} from 'child_process';
+import {readFileSync} from 'fs';
 
 // Get the latest tag
 const tag = getGitTag();

@@ -19,8 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable complexity, camelcase */
 
-import * as mat4 from 'gl-matrix/mat4';
-import * as vec4 from 'gl-matrix/vec4';
+import {mat4, vec4} from '@math.gl/core';
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
 
@@ -86,6 +85,7 @@ export function getOffsetOrigin(
     case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
       if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         // viewport center in world space
+        // @ts-expect-error when using LNGLAT coordinates, we expect the viewport to be geospatial, in which case geospatialOrigin is defined
         shaderCoordinateOrigin = geospatialOrigin;
       } else if (coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
         // viewport center in common space

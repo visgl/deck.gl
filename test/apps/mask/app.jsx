@@ -1,8 +1,7 @@
 /* global fetch */
 import React, {useState, useMemo, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
@@ -39,6 +38,11 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+
+function getTooltip({object}) {
+  if (!object || object.geometry?.type === 'Polygon') return null;
+  return object.name;
+}
 
 /* eslint-disable  max-nested-callbacks */
 function getLayerData(data) {
@@ -224,7 +228,7 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         },
         autoHighlight: true,
         highlightColor: [255, 255, 255, 150],
-        radiusScale: 3000,
+        radiusScale: 15000,
         getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [new MaskExtension()],
         maskId: maskEnabled && 'mask2',
@@ -251,8 +255,9 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}) {
         layers={showLayers ? layers : []}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
+        getTooltip={getTooltip}
       >
-        <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+        <Map reuseMaps mapStyle={mapStyle} />
       </DeckGL>
       <div style={{position: 'absolute', background: 'white', padding: 10, userSelect: 'none'}}>
         <label>

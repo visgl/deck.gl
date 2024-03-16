@@ -17,7 +17,7 @@ test('BrushingExtension', t => {
         extensions: [new BrushingExtension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.ok(uniforms.brushing_radius, 'has correct uniforms');
         t.is(uniforms.brushing_enabled, false, 'has correct uniforms');
         t.is(uniforms.brushing_target, 0, 'has correct uniforms');
@@ -35,7 +35,7 @@ test('BrushingExtension', t => {
         layer.context.mousePosition = {x: 1, y: 1};
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.is(uniforms.brushing_radius, 5e6, 'has correct uniforms');
         t.is(uniforms.brushing_enabled, true, 'has correct uniforms');
         t.is(uniforms.brushing_target, 2, 'has correct uniforms');

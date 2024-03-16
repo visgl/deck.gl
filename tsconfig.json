@@ -9,8 +9,9 @@
   },
   "compilerOptions": {
     "target": "es2022",
+    "module": "es2020",
     "jsx": "react",
-    "strict": false,
+    "strict": true,
     "noImplicitAny": false,
     "allowJs": true,
     "checkJs": false,

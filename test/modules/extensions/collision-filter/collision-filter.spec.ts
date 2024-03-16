@@ -21,7 +21,7 @@ test('CollisionFilterExtension', t => {
     {
       props,
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         const attributes = layer.getAttributeManager().getAttributes();
         t.ok(uniforms.collision_enabled, 'collision_enabled in uniforms');
         t.equal(uniforms.collision_sort, false, 'collision_sort in disabled when reading');
@@ -34,7 +34,7 @@ test('CollisionFilterExtension', t => {
         collisionFBO: null
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.equal(uniforms.collision_enabled, false, 'collision_enabled is disabled');
         t.equal(uniforms.collision_sort, false, 'collision_sort in disabled when reading');
         t.equal(
@@ -50,7 +50,7 @@ test('CollisionFilterExtension', t => {
         drawToCollisionMap: true
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.ok(uniforms.collision_enabled, 'collision_enabled in uniforms');
         t.equal(uniforms.collision_sort, true, 'collision_sort enabled when drawing');
         t.equal(
@@ -65,7 +65,7 @@ test('CollisionFilterExtension', t => {
         getCollisionPriority: d => d.priority
       },
       onAfterUpdate: ({layer}) => {
-        const uniforms = layer.getModels()[0].getUniforms();
+        const uniforms = layer.getModels()[0].uniforms;
         t.ok(uniforms.collision_enabled, 'collision_enabled in uniforms');
         t.ok(uniforms.collision_sort, 'collision_sort enabled when getCollisionPriority set');
       }

@@ -9,7 +9,7 @@ import type {MjolnirEvent} from 'mjolnir.js';
 import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
-import type {LightingModuleSettings} from '../shaderlib';
+import type {LightingModuleSettings} from '../shaderlib/index';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -83,12 +83,14 @@ export type TextureSource =
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
  * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
  * * `string` - a URL to load data from
+ * * `null` - empty data
  */
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | AsyncIterable<DataType[]>
-  | Promise<LayerData<DataType>>;
+  | Promise<LayerData<DataType>>
+  | null;
 
 /**
  * Base Layer prop types

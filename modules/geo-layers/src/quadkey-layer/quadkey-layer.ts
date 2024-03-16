@@ -3,11 +3,12 @@ import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
 const defaultProps: DefaultProps<QuadkeyLayerProps> = {
-  getQuadkey: {type: 'accessor', value: d => d.quadkey}
+  getQuadkey: {type: 'accessor', value: (d: any) => d.quadkey}
 };
 
 /** All properties supported by QuadkeyLayer. */
-export type QuadkeyLayerProps<DataT = any> = _QuadkeyLayerProps<DataT> & GeoCellLayerProps<DataT>;
+export type QuadkeyLayerProps<DataT = unknown> = _QuadkeyLayerProps<DataT> &
+  GeoCellLayerProps<DataT>;
 
 /** Properties added by QuadkeyLayer. */
 type _QuadkeyLayerProps<DataT> = {

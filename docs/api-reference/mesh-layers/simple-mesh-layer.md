@@ -102,7 +102,7 @@ The geometry to render for each data object. One of:
   + `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (String|Texture2D|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#texture}
+##### `texture` (String|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#texture}
 
 - Default `null`.
 
@@ -110,27 +110,28 @@ The texture of the geometries.
 
 - If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
 - One of the following, or a Promise that resolves to one of the following:
-  + One of the valid [pixel sources for WebGL texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
-  + A luma.gl [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) instance
-  + A plain object that can be passed to the `Texture2D` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
+  + One of the valid [pixel sources for WebGL2 texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
+  + A luma.gl [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) instance
+  + A plain object that can be passed to the `Texture` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
 
-The image data will be converted to a [Texture2D](https://github.com/visgl/luma.gl/blob/8.5-release/modules/webgl/docs/api-reference/texture-2d.md) object. See `textureParameters` prop for advanced customization.
+The image data will be converted to a [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 
 
 ##### `textureParameters` (Object) {#textureparameters}
 
-Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter).
+Customize the [texture parameters](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `texture`:
 
 ```js
 {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+  minFilter: 'linear',
+  magFilter: 'linear',
+  mipmapFilter: 'linear',
+  addressModeU: 'clamp-to-edge',
+  addressModeV: 'clamp-to-edge'
 }
 ```
 
@@ -156,14 +157,6 @@ Whether to render the mesh in wireframe mode.
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
 
-##### `_useMeshColors` (Boolean, optional) {#_usemeshcolors}
-
-- Default: `false`
-
-Whether to color pixels using vertex colors supplied in the mesh (the `COLOR_0` or `colors` attribute). If set to `true`, vertex colors will be used. If set to `false` (default) vertex colors will be ignored.
-
-Remarks:
-- In the next major release of deck.gl, vertex colors are expected to always be used when supplied with a mesh. This property will then likely be removed and effectively default to true.
 
 ### Data Accessors
 

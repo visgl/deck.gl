@@ -19,18 +19,19 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME gpu-aggregation-to-grid-vs
 
-attribute vec3 positions;
-attribute vec3 positions64Low;
-attribute vec3 weights;
+in vec3 positions;
+in vec3 positions64Low;
+in vec3 weights;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
 uniform bool projectPoints;
 uniform vec2 translation;
 uniform vec3 scaling;
 
-varying vec3 vWeights;
+out vec3 vWeights;
 
 vec2 project_to_pixel(vec4 pos) {
   vec4 result;

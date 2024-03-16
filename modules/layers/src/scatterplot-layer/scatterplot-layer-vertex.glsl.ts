@@ -19,17 +19,18 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME scatterplot-layer-vertex-shader
 
-attribute vec3 positions;
+in vec3 positions;
 
-attribute vec3 instancePositions;
-attribute vec3 instancePositions64Low;
-attribute float instanceRadius;
-attribute float instanceLineWidths;
-attribute vec4 instanceFillColors;
-attribute vec4 instanceLineColors;
-attribute vec3 instancePickingColors;
+in vec3 instancePositions;
+in vec3 instancePositions64Low;
+in float instanceRadius;
+in float instanceLineWidths;
+in vec4 instanceFillColors;
+in vec4 instanceLineColors;
+in vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusScale;
@@ -45,11 +46,11 @@ uniform bool billboard;
 uniform int radiusUnits;
 uniform int lineWidthUnits;
 
-varying vec4 vFillColor;
-varying vec4 vLineColor;
-varying vec2 unitPosition;
-varying float innerUnitRadius;
-varying float outerRadiusPixels;
+out vec4 vFillColor;
+out vec4 vLineColor;
+out vec2 unitPosition;
+out float innerUnitRadius;
+out float outerRadiusPixels;
 
 
 void main(void) {

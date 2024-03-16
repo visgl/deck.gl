@@ -1,6 +1,4 @@
 /* global document */
-import GL from '@luma.gl/constants';
-import {Texture2D} from '@luma.gl/core';
 
 // helper for textMatrixToTexture
 function setTextStyle(ctx, fontSize) {
@@ -12,7 +10,7 @@ function setTextStyle(ctx, fontSize) {
 
 /*
  * renders a matrix of text labels to texture2D.
- * @param {WebGLRenderingContext} glContext
+ * @param {WebGL2RenderingContext} glContext
  * @param {[[String]]} data: text to render, in array of columns (array of strings)
  * @param {Number} fontSize: size to render with
  * @returns {object} {texture, columnWidths}
@@ -66,9 +64,9 @@ export function textMatrixToTexture(glContext, data, fontSize = 48) {
 
   return {
     columnWidths,
-    texture: new Texture2D(glContext, {
+    texture: glContext.device.createTexture({
       pixels: canvas,
-      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+      magFilter: 'linear'
     })
   };
 }

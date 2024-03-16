@@ -1,30 +1,33 @@
 /* eslint-disable complexity */
 import type {Device} from '@luma.gl/core';
-import {Buffer, BufferLayout} from '@luma.gl/core';
-import {BufferWithAccessor} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/constants';
+import {Buffer, BufferLayout, BufferAttributeLayout, VertexType} from '@luma.gl/core';
 
-import {glArrayFromType, getBufferAttributeLayout} from './gl-utils';
+import {
+  typedArrayFromDataType,
+  getBufferAttributeLayout,
+  getStride,
+  dataTypeFromTypedArray
+} from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
 import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
+export type DataType = Exclude<VertexType, 'float16'>;
+export type LogicalDataType = DataType | 'float64';
+
 export type BufferAccessor = {
-  /** A WebGL data type, see [vertexAttribPointer](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer#parameters). */
-  type?: number;
+  /** Vertex data type. */
+  type?: DataType;
   /** The number of elements per vertex attribute. */
   size?: number;
   /** 1 if instanced. */
-  divisor?: number;
+  divisor?: 1 | 0;
   /** Offset of the first vertex attribute into the buffer, in bytes. */
   offset?: number;
   /** The offset between the beginning of consecutive vertex attributes, in bytes. */
   stride?: number;
-  /** Whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default. */
-  normalized?: boolean;
-  integer?: boolean;
 };
 
 export type ShaderAttributeOptions = Partial<BufferAccessor> & {
@@ -33,10 +36,6 @@ export type ShaderAttributeOptions = Partial<BufferAccessor> & {
   vertexOffset?: number;
   elementOffset?: number;
 };
-
-function getStride(accessor: DataColumnSettings<any>): number {
-  return accessor.stride || accessor.size * accessor.bytesPerElement;
-}
 
 function resolveShaderAttribute(
   baseAccessor: DataColumnSettings<any>,
@@ -90,26 +89,32 @@ function resolveDoublePrecisionShaderAttributes(
 }
 
 export type DataColumnOptions<Options> = Options &
-  BufferAccessor & {
+  Omit<BufferAccessor, 'type'> & {
     id?: string;
     vertexOffset?: number;
     fp64?: boolean;
-    logicalType?: number;
+    /** Vertex data type.
+     * @default 'float32'
+     */
+    type?: LogicalDataType;
+    /** Internal API, use `type` instead */
+    logicalType?: LogicalDataType;
     isIndexed?: boolean;
     defaultValue?: number | number[];
   };
 
-type DataColumnSettings<Options> = DataColumnOptions<Options> & {
-  type: number;
+export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
+  type: DataType;
   size: number;
-  logicalType?: number;
+  logicalType?: LogicalDataType;
+  normalized: boolean;
   bytesPerElement: number;
   defaultValue: number[];
   defaultType: TypedArrayConstructor;
 };
 
 type DataColumnInternalState<Options, State> = State & {
-  externalBuffer: BufferWithAccessor | null;
+  externalBuffer: Buffer | null;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -125,7 +130,7 @@ export default class DataColumn<Options, State> {
   value: NumericArray | null;
   doublePrecision: boolean;
 
-  protected _buffer: BufferWithAccessor | null;
+  protected _buffer: Buffer | null = null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -135,26 +140,26 @@ export default class DataColumn<Options, State> {
     this.size = opts.size || 1;
 
     const logicalType = opts.logicalType || opts.type;
-    const doublePrecision = logicalType === GL.DOUBLE;
+    const doublePrecision = logicalType === 'float64';
 
     let {defaultValue} = opts;
     defaultValue = Number.isFinite(defaultValue)
       ? [defaultValue]
       : defaultValue || new Array(this.size).fill(0);
 
-    let bufferType: number;
+    let bufferType: DataType;
     if (doublePrecision) {
-      bufferType = GL.FLOAT;
+      bufferType = 'float32';
     } else if (!logicalType && opts.isIndexed) {
-      bufferType = device.features.has('index-uint32-webgl1') ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+      bufferType = 'uint32';
     } else {
-      bufferType = logicalType || GL.FLOAT;
+      bufferType = logicalType || 'float32';
     }
 
     // This is the attribute type defined by the layer
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
-    let defaultType = glArrayFromType(logicalType || bufferType || GL.FLOAT);
+    let defaultType = typedArrayFromDataType(logicalType || bufferType);
     this.doublePrecision = doublePrecision;
 
     // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
@@ -172,6 +177,7 @@ export default class DataColumn<Options, State> {
       defaultValue: defaultValue as number[],
       logicalType,
       type: bufferType,
+      normalized: bufferType.includes('norm'),
       size: this.size,
       bytesPerElement: defaultType.BYTES_PER_ELEMENT
     };
@@ -184,7 +190,6 @@ export default class DataColumn<Options, State> {
       bounds: null,
       constant: false
     };
-    this._buffer = null;
   }
   /* eslint-enable max-statements */
 
@@ -192,25 +197,8 @@ export default class DataColumn<Options, State> {
     return this.state.constant;
   }
 
-  get buffer(): BufferWithAccessor {
-    if (!this._buffer) {
-      const {isIndexed, type} = this.settings;
-      if (isIndexed) {
-        // @ts-expect-error This returns a classic buffer under the hood
-        this._buffer = this.device.createBuffer({
-          id: this.id,
-          usage: Buffer.INDEX,
-          indexType: type === GL.UNSIGNED_SHORT ? 'uint16' : 'uint32'
-        });
-      } else {
-        // @ts-expect-error This returns a classic buffer under the hood
-        this._buffer = this.device.createBuffer({
-          id: this.id,
-          usage: Buffer.VERTEX
-        });
-      }
-    }
-    return this._buffer;
+  get buffer(): Buffer {
+    return this._buffer!;
   }
 
   get byteOffset(): number {
@@ -237,23 +225,34 @@ export default class DataColumn<Options, State> {
     typedArrayManager.release(this.state.allocatedValue);
   }
 
-  getBuffer(): BufferWithAccessor | null {
+  getBuffer(): Buffer | null {
     if (this.state.constant) {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
   }
 
-  getValue(attributeName: string = this.id): Record<string, Buffer | NumericArray | null> {
-    const result: Record<string, Buffer | NumericArray | null> = {};
+  getValue(
+    attributeName: string = this.id,
+    options: Partial<ShaderAttributeOptions> | null = null
+  ): Record<string, Buffer | TypedArray | null> {
+    const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
-      result[this.id] = this.value;
+      const value = this.value as TypedArray;
+      if (options) {
+        const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
+        const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
+        const size = shaderAttributeDef.size || this.size;
+        result[attributeName] = value.subarray(offset, offset + size);
+      } else {
+        result[attributeName] = value;
+      }
     } else {
-      result[this.id] = this.getBuffer();
+      result[attributeName] = this.getBuffer();
     }
     if (this.doublePrecision) {
       if (this.value instanceof Float64Array) {
-        result[`${attributeName}64Low`] = result[this.id];
+        result[`${attributeName}64Low`] = result[attributeName];
       } else {
         // Disable fp64 low part
         result[`${attributeName}64Low`] = new Float32Array(this.size);
@@ -267,10 +266,11 @@ export default class DataColumn<Options, State> {
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
     const accessor = this.getAccessor();
+    const attributes: BufferAttributeLayout[] = [];
     const result: BufferLayout = {
       name: this.id,
       byteStride: getStride(accessor),
-      attributes: []
+      attributes
     };
 
     if (this.doublePrecision) {
@@ -278,7 +278,7 @@ export default class DataColumn<Options, State> {
         accessor,
         options || {}
       );
-      result.attributes.push(
+      attributes.push(
         getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
         getBufferAttributeLayout(`${attributeName}64Low`, {
           ...accessor,
@@ -287,13 +287,17 @@ export default class DataColumn<Options, State> {
       );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
-      result.attributes.push(
+      attributes.push(
         getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
       );
     } else {
-      result.attributes.push(getBufferAttributeLayout(attributeName, accessor));
+      attributes.push(getBufferAttributeLayout(attributeName, accessor));
     }
     return result;
+  }
+
+  setAccessor(accessor: DataColumnSettings<Options>) {
+    this.state.bufferAccessor = accessor;
   }
 
   getAccessor(): DataColumnSettings<Options> {
@@ -335,11 +339,13 @@ export default class DataColumn<Options, State> {
   setData(
     data:
       | TypedArray
-      | BufferWithAccessor
+      | Buffer
       | ({
           constant?: boolean;
           value?: NumericArray;
-          buffer?: BufferWithAccessor;
+          buffer?: Buffer;
+          /** Set to `true` if supplying float values to a unorm attribute */
+          normalized?: boolean;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -347,7 +353,7 @@ export default class DataColumn<Options, State> {
     let opts: {
       constant?: boolean;
       value?: NumericArray;
-      buffer?: BufferWithAccessor;
+      buffer?: Buffer;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
@@ -358,7 +364,22 @@ export default class DataColumn<Options, State> {
     }
 
     const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
-    state.bufferAccessor = accessor;
+
+    if (ArrayBuffer.isView(opts.value)) {
+      if (!opts.type) {
+        // Deduce data type
+        const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
+        if (is64Bit) {
+          accessor.type = 'float32';
+        } else {
+          const type = dataTypeFromTypedArray(opts.value);
+          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as DataType) : type;
+        }
+      }
+      accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
+      accessor.stride = getStride(accessor);
+    }
+
     state.bounds = null; // clear cached bounds
 
     if (opts.constant) {
@@ -381,14 +402,6 @@ export default class DataColumn<Options, State> {
       state.externalBuffer = buffer;
       state.constant = false;
       this.value = opts.value || null;
-      const isBuffer64Bit = opts.value instanceof Float64Array;
-
-      // Copy the type of the buffer into the accessor
-      // @ts-ignore
-      accessor.type = opts.type || buffer.accessor.type;
-      // @ts-ignore
-      accessor.bytesPerElement = buffer.accessor.BYTES_PER_ELEMENT * (isBuffer64Bit ? 2 : 1);
-      accessor.stride = getStride(accessor);
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
 
@@ -397,27 +410,32 @@ export default class DataColumn<Options, State> {
       state.constant = false;
       this.value = value;
 
-      accessor.bytesPerElement = value.BYTES_PER_ELEMENT;
-      accessor.stride = getStride(accessor);
-
-      const {buffer, byteOffset} = this;
+      let {buffer} = this;
+      const stride = getStride(accessor);
+      const byteOffset = (accessor.vertexOffset || 0) * stride;
 
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, accessor);
       }
+      if (this.settings.isIndexed) {
+        const ArrayType = this.settings.defaultType;
+        if (value.constructor !== ArrayType) {
+          // Cast the index buffer to expected type
+          value = new ArrayType(value);
+        }
+      }
 
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
-      const requiredBufferSize = value.byteLength + byteOffset + accessor.stride * 2;
-      if (buffer.byteLength < requiredBufferSize) {
-        buffer.reallocate(requiredBufferSize);
+      const requiredBufferSize = value.byteLength + byteOffset + stride * 2;
+      if (!buffer || buffer.byteLength < requiredBufferSize) {
+        buffer = this._createBuffer(requiredBufferSize);
       }
-      // Hack: force Buffer to infer data type
-      buffer.setAccessor(null);
-      buffer.subData({data: value, offset: byteOffset});
-      // @ts-ignore
-      accessor.type = opts.type || buffer.accessor.type;
+
+      buffer.write(value, byteOffset);
     }
+
+    this.setAccessor(accessor);
 
     return true;
   }
@@ -432,17 +450,16 @@ export default class DataColumn<Options, State> {
 
     const value = this.value as TypedArray;
     const {startOffset = 0, endOffset} = opts;
-    this.buffer.subData({
-      data:
-        this.doublePrecision && value instanceof Float64Array
-          ? toDoublePrecisionArray(value, {
-              size: this.size,
-              startIndex: startOffset,
-              endIndex: endOffset
-            })
-          : value.subarray(startOffset, endOffset),
-      offset: startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
-    });
+    this.buffer.write(
+      this.doublePrecision && value instanceof Float64Array
+        ? toDoublePrecisionArray(value, {
+            size: this.size,
+            startIndex: startOffset,
+            endIndex: endOffset
+          })
+        : value.subarray(startOffset, endOffset),
+      startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
+    );
   }
 
   allocate(numInstances: number, copy: boolean = false): boolean {
@@ -458,27 +475,26 @@ export default class DataColumn<Options, State> {
 
     this.value = value;
 
-    const {buffer, byteOffset} = this;
+    const {byteOffset} = this;
+    let {buffer} = this;
 
-    if (buffer.byteLength < value.byteLength + byteOffset) {
-      buffer.reallocate(value.byteLength + byteOffset);
-
+    if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
+      buffer = this._createBuffer(value.byteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.
         // TODO - copy old buffer to new buffer on the GPU
-        buffer.subData({
-          data:
-            oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
-          offset: byteOffset
-        });
+        buffer.write(
+          oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
+          byteOffset
+        );
       }
     }
 
     state.allocatedValue = value;
     state.constant = false;
     state.externalBuffer = null;
-    state.bufferAccessor = this.settings;
+    this.setAccessor(this.settings);
     return true;
   }
 
@@ -505,20 +521,21 @@ export default class DataColumn<Options, State> {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
   normalizeConstant(value: NumericArray): NumericArray {
+    /* eslint-disable complexity */
     switch (this.settings.type) {
-      case GL.BYTE:
+      case 'snorm8':
         // normalize [-128, 127] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
 
-      case GL.SHORT:
+      case 'snorm16':
         // normalize [-32768, 32767] to [-1, 1]
         return new Float32Array(value).map(x => ((x + 32768) / 65535) * 2 - 1);
 
-      case GL.UNSIGNED_BYTE:
+      case 'unorm8':
         // normalize [0, 255] to [0, 1]
         return new Float32Array(value).map(x => x / 255);
 
-      case GL.UNSIGNED_SHORT:
+      case 'unorm16':
         // normalize [0, 65535] to [0, 1]
         return new Float32Array(value).map(x => x / 65535);
 
@@ -580,5 +597,22 @@ export default class DataColumn<Options, State> {
       }
     }
     return true;
+  }
+
+  protected _createBuffer(byteLength: number): Buffer {
+    if (this._buffer) {
+      this._buffer.destroy();
+    }
+
+    const {isIndexed, type} = this.settings;
+    this._buffer = this.device.createBuffer({
+      ...this._buffer?.props,
+      id: this.id,
+      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+      indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
+      byteLength
+    });
+
+    return this._buffer;
   }
 }

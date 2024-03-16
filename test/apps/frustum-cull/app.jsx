@@ -1,11 +1,10 @@
 /* global window */
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL, {MapView, SimpleMeshLayer, LineLayer, WebMercatorViewport} from 'deck.gl';
 
-import {SphereGeometry} from '@luma.gl/core';
+import {SphereGeometry} from '@luma.gl/engine';
 
 import {getCulling, getFrustumBounds} from './frustum-utils';
 
@@ -102,7 +101,10 @@ class Root extends Component {
         onViewStateChange={this._onViewStateChange}
       >
         <MapView id="main">
-          <Map key="map" mapLib={maplibregl} mapStyle="mapbox://styles/mapbox/light-v9" />
+          <Map
+            key="map"
+            mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
+          />
         </MapView>
         <MapView id="minimap">
           <div style={MINIMAP_STYLE} />

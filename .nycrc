@@ -7,6 +7,7 @@
     "modules/**/src/**/*.ts"
   ],
   "exclude": [
-    "modules/test-utils/"
+    "modules/test-utils/",
+    "modules/**/types.ts"
   ]
 }

@@ -22,21 +22,21 @@ import type Layer from '../layer';
 import type Viewport from '../../viewports/viewport';
 import type {PickedPixel} from './query-object';
 
-export interface PickingInfo {
+export type PickingInfo<DataT = any, ExtraInfo = {}> = ExtraInfo & {
   color: Uint8Array | null;
   layer: Layer | null;
   sourceLayer?: Layer | null;
   viewport?: Viewport;
   index: number;
   picked: boolean;
-  object?: any;
+  object?: DataT;
   x: number;
   y: number;
   pixel?: [number, number];
   coordinate?: number[];
   devicePixel?: [number, number];
   pixelRatio: number;
-}
+};
 
 export interface GetPickingInfoParams {
   info: PickingInfo;
@@ -89,7 +89,9 @@ export function getEmptyPickingInfo({
     pixel: [x, y],
     coordinate,
     devicePixel:
-      pickInfo && 'pickedX' in pickInfo ? [pickInfo.pickedX, pickInfo.pickedY] : undefined,
+      pickInfo && 'pickedX' in pickInfo
+        ? [pickInfo.pickedX as number, pickInfo.pickedY as number]
+        : undefined,
     pixelRatio
   };
 }
@@ -163,7 +165,7 @@ export function processPickInfo(opts: {
     }
 
     info = getLayerPickingInfo({layer, info, mode});
-    const rootLayer = info.layer;
+    const rootLayer = info.layer as Layer;
 
     if (layer === pickedLayer && mode === 'hover') {
       lastPickedInfo.info = info;
@@ -203,7 +205,7 @@ export function getLayerPickingInfo({
     // object to function properly. So the layer referenced here
     // must be the "current" layer, not an "out-dated" / "invalidated" layer
     info = layer.getPickingInfo({info, mode, sourceLayer});
-    layer = layer.parent;
+    layer = layer.parent as Layer;
   }
   return info;
 }

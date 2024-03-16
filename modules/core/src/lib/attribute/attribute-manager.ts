@@ -23,7 +23,7 @@ import Attribute, {AttributeOptions} from './attribute';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
-import debug from '../../debug';
+import debug from '../../debug/index';
 import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
@@ -275,7 +275,7 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes(): {[id: string]: Attribute} {
-    return this.attributes;
+    return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
   }
 
   /**
@@ -401,6 +401,7 @@ export default class AttributeManager {
     if (attribute.constant) {
       // The attribute is flagged as constant outside of an update cycle
       // Skip allocation and updater call
+      // @ts-ignore value can be set to an array by user but always cast to typed array during attribute update
       attribute.setConstantValue(attribute.value);
       return;
     }

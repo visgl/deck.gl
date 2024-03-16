@@ -20,7 +20,7 @@ export class TerrainEffect implements Effect {
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
-  private dummyHeightMap: Texture;
+  private dummyHeightMap?: Texture;
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
@@ -65,7 +65,8 @@ export class TerrainEffect implements Effect {
       return;
     }
 
-    const {viewports, isPicking = false} = opts;
+    const {viewports} = opts;
+    const isPicking = opts.pass.startsWith('picking');
     this.isPicking = isPicking;
     this.isDrapingEnabled = true;
 
@@ -92,14 +93,13 @@ export class TerrainEffect implements Effect {
     this._updateTerrainCovers(terrainLayers, drapeLayers, viewport, opts);
   }
 
-  getModuleParameters(layer: Layer): TerrainModuleSettings {
+  getModuleParameters(layer: Layer): Omit<TerrainModuleSettings, 'picking'> {
     const {terrainDrawMode} = layer.state;
 
     return {
-      // @ts-expect-error
-      heightMap: this.heightMap?.getRenderFramebuffer(),
+      heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
       heightMapBounds: this.heightMap?.bounds,
-      dummyHeightMap: this.dummyHeightMap,
+      dummyHeightMap: this.dummyHeightMap!,
       terrainCover: this.isDrapingEnabled ? this.terrainCovers.get(layer.id) : null,
       useTerrainHeightMap: terrainDrawMode === 'offset',
       terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
@@ -121,6 +121,8 @@ export class TerrainEffect implements Effect {
       terrainCover.delete();
     }
     this.terrainCovers.clear();
+
+    getShaderAssembler().removeDefaultModule(terrainModule);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {
@@ -201,7 +203,12 @@ export class TerrainEffect implements Effect {
             devicePixelRatio: 1
           }
         });
-        terrainCover.isDirty = false;
+
+        if (!this.isPicking) {
+          // IsDirty refers to the normal fbo, not the picking fbo.
+          // Only mark it as not dirty if the normal fbo was updated.
+          terrainCover.isDirty = false;
+        }
       }
     } catch (err) {
       terrainLayer.raiseError(err as Error, `Error rendering terrain cover ${terrainCover.id}`);

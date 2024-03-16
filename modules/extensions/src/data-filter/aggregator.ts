@@ -1,19 +1,20 @@
-import {Device, Framebuffer} from '@luma.gl/core';
+import {Device, DeviceFeature, Framebuffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 
 const AGGREGATE_VS = `\
+#version 300 es
 #define SHADER_NAME data-filter-vertex-shader
 
 #ifdef FLOAT_TARGET
-  attribute float filterIndices;
-  attribute float filterPrevIndices;
+  in float filterIndices;
+  in float filterPrevIndices;
 #else
-  attribute vec2 filterIndices;
-  attribute vec2 filterPrevIndices;
+  in vec2 filterIndices;
+  in vec2 filterPrevIndices;
 #endif
 
-varying vec4 vColor;
+out vec4 vColor;
 const float component = 1.0 / 255.0;
 
 void main() {
@@ -36,31 +37,29 @@ void main() {
 `;
 
 const AGGREGATE_FS = `\
+#version 300 es
 #define SHADER_NAME data-filter-fragment-shader
 precision highp float;
 
-varying vec4 vColor;
+in vec4 vColor;
+
+out vec4 fragColor;
 
 void main() {
   if (dataFilter_value < 0.5) {
     discard;
   }
-  gl_FragColor = vColor;
+  fragColor = vColor;
 }
 `;
 
-export function supportsFloatTarget(device: Device): boolean {
-  // @ts-expect-error
-  const gl = device.gl;
+const FLOAT_TARGET_FEATURES: DeviceFeature[] = [
+  'float32-renderable-webgl', // ability to render to float texture
+  'texture-blend-float-webgl' // ability to blend when rendering to float texture
+];
 
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#Support_for_float_textures_doesnt_mean_you_can_render_into_them!
-  return Boolean(
-    gl.getExtension('EXT_float_blend') &&
-      // WebGL 2
-      (gl.getExtension('EXT_color_buffer_float') ||
-        // WebGL 1
-        gl.getExtension('WEBGL_color_buffer_float'))
-  );
+export function supportsFloatTarget(device: Device): boolean {
+  return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
 }
 
 // A 1x1 framebuffer object that encodes the total count of filtered items
@@ -71,7 +70,7 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
       height: 1,
       colorAttachments: [
         device.createTexture({
-          format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
+          format: 'rgba32float',
           type: GL.FLOAT,
           mipmaps: false
         })
@@ -108,4 +107,4 @@ export const parameters = {
   blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
   blendEquation: [GL.FUNC_ADD, GL.FUNC_ADD],
   depthTest: false
-};
+} as const;

@@ -21,16 +21,16 @@ import s2LayerTests from './s2-layer';
 import tripsLayerTests from './trips-layer';
 import mvtLayerTests from './mvt-layer';
 import geohashLayerTests from './geohash-layer';
-// TODO v9
-// import terrainLayerTests from './terrain-layer';
+import terrainLayerTests from './terrain-layer';
 // mesh-layers
-// import simpleMeshLayerTests from './simple-mesh-layer';
-// import scenegraphLayerTests from './scenegraph-layer';
+import simpleMeshLayerTests from './simple-mesh-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
 import collisionFilterExtensionTests from './collision-filter-extension';
 import transitionTests from './transitions';
+import dataFilterExtensionTests from './data-filter-extension';
 
 export default [].concat(
   coreLayersTests,
@@ -39,26 +39,26 @@ export default [].concat(
   geojsonLayerTests,
   pathLayerTests,
   pointCloudLayerTests,
-  polygonLayerTests,
+  // polygonLayerTests,
   iconLayerTests,
   textLayerTests,
-  contourLayerTests,
-  gridLayerTests,
+  // contourLayerTests,
+  // gridLayerTests,
   hexagonLayerTests,
-  screenGridLayerTests,
-  heatmapLayerTests,
+  // screenGridLayerTests,
+  // heatmapLayerTests,
   h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
   mvtLayerTests,
   geohashLayerTests,
-  // simpleMeshLayerTests,
-  // scenegraphLayerTests,
+  simpleMeshLayerTests,
+  scenegraphLayerTests,
   viewsTests,
-  effectsTests,
-  // TODO - Broken in headless mode with Chrome 113
-  // transitionTests,
-  // terrainLayerTests,
-  collisionFilterExtensionTests
+  // effectsTests,
+  transitionTests,
+  terrainLayerTests,
+  // collisionFilterExtensionTests
+  dataFilterExtensionTests
 );

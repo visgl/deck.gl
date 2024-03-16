@@ -1,7 +1,6 @@
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
@@ -153,7 +152,7 @@ export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle =
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
 
       {renderTooltip({incidents, fatalities, year, hoverInfo})}
     </DeckGL>

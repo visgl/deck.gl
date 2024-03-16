@@ -36,7 +36,6 @@ import {
 
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -44,8 +43,8 @@ import fs from './arc-layer-fragment.glsl';
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
-  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: (x: any) => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
@@ -62,7 +61,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 };
 
 /** All properties supported by ArcLayer. */
-export type ArcLayerProps<DataT = any> = _ArcLayerProps<DataT> & LayerProps;
+export type ArcLayerProps<DataT = unknown> = _ArcLayerProps<DataT> & LayerProps;
 
 /** Properties added by ArcLayer. */
 type _ArcLayerProps<DataT> = {
@@ -153,7 +152,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   static layerName = 'ArcLayer';
   static defaultProps = defaultProps;
 
-  state!: Layer['state'] & {
+  state!: {
     model?: Model;
   };
 
@@ -180,30 +179,28 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getTargetPosition'
       },
       instanceSourceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
         defaultValue: DEFAULT_COLOR
@@ -244,9 +241,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   draw({uniforms}) {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
       this.props;
+    const model = this.state.model!;
 
-    this.state.model.setUniforms(uniforms);
-    this.state.model.setUniforms({
+    model.setUniforms(uniforms);
+    model.setUniforms({
       greatCircle,
       widthUnits: UNIT[widthUnits],
       widthScale,
@@ -254,7 +252,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       useShortestPath: wrapLongitude
     });
-    this.state.model.draw(this.context.renderPass);
+    model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
@@ -274,7 +272,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager().getBufferLayouts(),
+      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

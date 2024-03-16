@@ -13,10 +13,10 @@ Projects worldspace coordinates to clipspace coordinates.
 
 ```glsl
 // instanced geometry
-attribute vec3 positions;
+in vec3 positions;
 // instance attributes
-attribute vec3 instanceCenter;
-attribute float instanceSize;
+in vec3 instanceCenter;
+in float instanceSize;
 
 void main(void) {
   vec3 center = project_position(instanceCenter);

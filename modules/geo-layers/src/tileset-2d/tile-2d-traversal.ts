@@ -183,7 +183,7 @@ class OSMNode {
 export function getOSMTileIndices(
   viewport: Viewport,
   maxZ: number,
-  zRange: ZRange | undefined,
+  zRange: ZRange | null,
   bounds?: Bounds
 ): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =

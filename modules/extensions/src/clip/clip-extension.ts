@@ -18,9 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerExtension, _ShaderModule as ShaderModule} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
+import {LayerExtension} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
+import {glsl} from '../utils/syntax-tags';
 
 const defaultProps = {
   clipBounds: [0, 0, 1, 1],
@@ -39,7 +41,7 @@ export type ClipExtensionProps = {
   clipByInstance?: boolean;
 };
 
-const shaderFunction = `
+const shaderFunction = glsl`
 uniform vec4 clip_bounds;
 
 bool clip_isInBounds(vec2 position) {
@@ -57,16 +59,16 @@ const shaderModuleVs: ShaderModule = {
 };
 
 const injectionVs = {
-  'vs:#decl': `
-varying float clip_isVisible;
+  'vs:#decl': glsl`
+out float clip_isVisible;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': `
+  'vs:DECKGL_FILTER_GL_POSITION': glsl`
   clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
 `,
-  'fs:#decl': `
-varying float clip_isVisible;
+  'fs:#decl': glsl`
+in float clip_isVisible;
 `,
-  'fs:DECKGL_FILTER_COLOR': `
+  'fs:DECKGL_FILTER_COLOR': glsl`
   if (clip_isVisible < 0.5) discard;
 `
 };
@@ -81,16 +83,16 @@ const shaderModuleFs: ShaderModule = {
 };
 
 const injectionFs = {
-  'vs:#decl': `
-varying vec2 clip_commonPosition;
+  'vs:#decl': glsl`
+out vec2 clip_commonPosition;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': `
+  'vs:DECKGL_FILTER_GL_POSITION': glsl`
   clip_commonPosition = geometry.position.xy;
 `,
-  'fs:#decl': `
-varying vec2 clip_commonPosition;
+  'fs:#decl': glsl`
+in vec2 clip_commonPosition;
 `,
-  'fs:DECKGL_FILTER_COLOR': `
+  'fs:DECKGL_FILTER_COLOR': glsl`
   if (!clip_isInBounds(clip_commonPosition)) discard;
 `
 };
@@ -105,7 +107,7 @@ export default class ClipExtension extends LayerExtension {
     // Otherwise, the object is trimmed by the clip bounds (done by fragment shader)
 
     // Default behavior: consider a layer instanced if it has attribute `instancePositions`
-    let clipByInstance = 'instancePositions' in this.getAttributeManager().attributes;
+    let clipByInstance = 'instancePositions' in this.getAttributeManager()!.attributes;
     // Users can override by setting the `clipByInstance` prop
     if (this.props.clipByInstance !== undefined) {
       clipByInstance = Boolean(this.props.clipByInstance);
