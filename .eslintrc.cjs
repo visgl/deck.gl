@@ -115,7 +115,8 @@ module.exports = getESLintConfig({
         files: ['modules/widgets/**/*.tsx'],
         rules: {
           // For widgets module. Disable React-style JSX linting since they conflict with Preact JSX.
-          'react/react-in-jsx-scope': 0
+          'react/react-in-jsx-scope': 0,
+          'no-unused-expressions': ['error', { 'allowShortCircuit': true }]
         }
       }
     ],

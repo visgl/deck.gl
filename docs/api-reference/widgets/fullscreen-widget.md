@@ -8,12 +8,6 @@ Default: `'fullscreen'`
 
 Unique identifier of the widget.
 
-### `viewId` (String, optional) {#viewid}
-
-Default: `null`
-
-The view id that this widget is being attached to. If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
-
 ### `placement` (String, optional) {#placement}
 
 Default: `'top-left'`

@@ -1,6 +1,7 @@
+/* global document */
 import {FlyToInterpolator} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
-import {h, render} from 'preact';
+import {render} from 'preact';
 
 interface ZoomWidgetProps {
   id: string;
@@ -13,12 +14,12 @@ interface ZoomWidgetProps {
   className?: string;
 }
 
-class ZoomWidget implements Widget<ZoomWidgetProps> {
+export class ZoomWidget implements Widget<ZoomWidgetProps> {
   id = 'zoom';
   props: ZoomWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  viewId = null;
-  viewport: Viewport;
+  viewId?: string | null = null;
+  viewport?: Viewport;
   deck?: Deck;
   element?: HTMLDivElement;
 
@@ -36,11 +37,13 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const {style, className} = this.props;
     const element = document.createElement('div');
-    element.classList.add('deckgl-widget', 'deckgl-widget-zoom');
+    element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
-    Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+    if (style) {
+      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+    }
     const ui = (
-      <div className="deckgl-widget-button-group">
+      <div className="deck-widget-button-group">
         <Button onClick={() => this.handleZoomIn()} label={this.props.zoomInLabel}>
           <path d="M12 4.5v15m7.5-7.5h-15" />
         </Button>
@@ -62,7 +65,7 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.element = undefined;
   }
 
-  setProps(props: ZoomWidgetProps) {
+  setProps(props: Partial<ZoomWidgetProps>) {
     Object.assign(this.props, props);
   }
 
@@ -83,19 +86,19 @@ class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    this.handleZoom(this.viewport.zoom + 1);
+    this.viewport && this.handleZoom(this.viewport.zoom + 1);
   }
 
   handleZoomOut() {
-    this.handleZoom(this.viewport.zoom - 1);
+    this.viewport && this.handleZoom(this.viewport.zoom - 1);
   }
 }
 
 const Button = props => {
   const {label, onClick} = props;
   return (
-    <div className="deckgl-widget-button-border">
-      <button className="deckgl-widget-button" type="button" onClick={onClick} title={label}>
+    <div className="deck-widget-button-border">
+      <button className="deck-widget-button" type="button" onClick={onClick} title={label}>
         <svg
           fill="none"
           width="100%"
@@ -110,5 +113,3 @@ const Button = props => {
     </div>
   );
 };
-
-export default ZoomWidget;

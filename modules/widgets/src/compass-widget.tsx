@@ -1,6 +1,7 @@
+/* global document */
 import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
-import {h, render} from 'preact';
+import {render} from 'preact';
 
 interface CompassWidgetProps {
   id: string;
@@ -12,12 +13,12 @@ interface CompassWidgetProps {
   className?: string;
 }
 
-class CompassWidget implements Widget<CompassWidgetProps> {
+export class CompassWidget implements Widget<CompassWidgetProps> {
   id = 'compass';
   props: CompassWidgetProps;
   placement: WidgetPlacement = 'top-left';
-  viewId = null;
-  viewport: Viewport;
+  viewId?: string | null = null;
+  viewport?: Viewport;
   deck?: Deck;
   element?: HTMLDivElement;
 
@@ -31,7 +32,7 @@ class CompassWidget implements Widget<CompassWidgetProps> {
     this.props = props;
   }
 
-  setProps(props: CompassWidgetProps) {
+  setProps(props: Partial<CompassWidgetProps>) {
     Object.assign(this.props, props);
   }
 
@@ -43,9 +44,11 @@ class CompassWidget implements Widget<CompassWidgetProps> {
   onAdd({deck}: {deck: Deck}): HTMLDivElement {
     const {style, className} = this.props;
     const element = document.createElement('div');
-    element.classList.add('deckgl-widget', 'deckgl-widget-compass');
+    element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
-    Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+    if (style) {
+      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+    }
     this.deck = deck;
     this.element = element;
     this.update();
@@ -63,9 +66,13 @@ class CompassWidget implements Widget<CompassWidgetProps> {
 
   update() {
     const [rz, rx] = this.getRotation();
+    const element = this.element;
+    if (!element) {
+      return;
+    }
     const ui = (
-      <div className="deckgl-widget-button">
-        <div className="deckgl-widget-button-border" style={{perspective: 100}}>
+      <div className="deck-widget-button">
+        <div className="deck-widget-button-border" style={{perspective: 100}}>
           <button
             type="button"
             onClick={() => this.handleCompassReset()}
@@ -85,7 +92,7 @@ class CompassWidget implements Widget<CompassWidgetProps> {
         </div>
       </div>
     );
-    render(ui, this.element);
+    render(ui, element);
   }
 
   onRemove() {
@@ -108,5 +115,3 @@ class CompassWidget implements Widget<CompassWidgetProps> {
     }
   }
 }
-
-export default CompassWidget;
