@@ -6,6 +6,10 @@
 
 - `Deck.pickObjects()`  -  minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
 
+### Typescript
+
+Typescript is now enabled on all modules. The `'@deck.gl/xxx/typed'` packages are removed. 
+
 ### luma.gl v9 Updates
 
 The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not define its own custom layers.
