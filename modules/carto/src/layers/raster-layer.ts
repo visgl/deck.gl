@@ -1,4 +1,3 @@
-import {GL} from '@luma.gl/constants';
 import {
   Accessor,
   CompositeLayer,
@@ -11,7 +10,7 @@ import {ColumnLayer, ColumnLayerProps} from '@deck.gl/layers';
 import {quadbinToOffset} from './quadbin-utils';
 import {Raster} from './schema/carto-raster-tile-loader';
 import vs from './raster-layer-vertex.glsl';
-import {assert, createBinaryProxy} from '../utils';
+import {createBinaryProxy} from '../utils';
 
 const defaultProps: DefaultProps<RasterLayerProps> = {
   ...ColumnLayer.defaultProps,
@@ -31,7 +30,9 @@ class RasterColumnLayer extends ColumnLayer {
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, vs};
+    const data = this.props.data as unknown as {data: Raster; length: number};
+    const BLOCK_WIDTH = data.data.blockSize ?? Math.sqrt(data.length);
+    return {...shaders, defines: {...shaders.defines, BLOCK_WIDTH}, vs};
   }
 
   initializeState() {
@@ -46,16 +47,14 @@ class RasterColumnLayer extends ColumnLayer {
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: [255, 255, 255, 255]
@@ -94,17 +93,12 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       getLineWidth,
       tileIndex,
       updateTriggers
-    } = this.props;
+    } = this.props as typeof this.props & {data: Raster};
     if (!data || !tileIndex) return null;
 
-    const {blockWidth, blockHeight} = data as unknown as Raster;
-    assert(
-      blockWidth === blockHeight,
-      `blockWidth (${blockWidth}) must equal blockHeight (${blockHeight})`
-    );
-
+    const blockSize = data.blockSize ?? 0;
     const [xOffset, yOffset, scale] = quadbinToOffset(tileIndex);
-    const offset = [xOffset, yOffset, scale / blockWidth];
+    const offset = [xOffset, yOffset, scale / blockSize];
 
     // Filled Column Layer
     const CellLayer = this.getSubLayerClass('column', RasterColumnLayer);
@@ -122,7 +116,7 @@ export default class RasterLayer<DataT = any, ExtraProps = {}> extends Composite
       {
         data: {
           data, // Pass through data for getSubLayerAccessor()
-          length: blockWidth * blockHeight
+          length: blockSize * blockSize
         },
         offset
       }

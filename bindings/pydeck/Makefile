@@ -32,6 +32,8 @@ setup-env:
 	test `command -v yarn` || echo Please install yarn
 	test `command -v python3` && test `command -v yarn`
 	python3 -m venv env
+# 	avoid conflict between any js code in the env that in the root
+	echo '{"type": "commonjs"}' > env/package.json
 
 prepare-jupyter:
 	# Enable the notebook extension

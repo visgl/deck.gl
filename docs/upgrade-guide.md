@@ -56,6 +56,47 @@ While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to ena
 - drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
 - The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
 
+### @deck.gl/mapbox
+
+`MapboxLayer` has been removed. Use `MapboxOverlay` instead.
+
+```typescript
+// deck.gl v9
+import {DeckOverlay} from '@deck.gl/mapbox'
+map.addControl(new DeckOverlay({
+  interleaved: true,
+  layers: [new ArcLayer({...})]
+}))
+// deck.gl v8
+import {MapboxLayer} from '@deck.gl/mapbox'
+map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
+```
+
+### @deck.gl/carto
+
+`CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
+
+```typescript
+// deck.gl v9
+import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+const data = vectorQuerySource({
+  accessToken: 'XXX',
+  connectionName: 'carto_dw',
+  sqlQuery: 'SELECT * FROM cartobq.testtables.points_10k',
+});
+const layer = new VectorTileLayer({data, ...styleProps});
+
+// deck.gl v8
+import {CartoLayer, setDefaultCredentials, MAP_TYPES} from '@deck.gl/carto';
+setDefaultCredentials({accessToken: 'XXX'});
+const layer = new CartoLayer({
+  type: MAP_TYPES.QUERY,
+  connection: 'carto_dw',
+  data: 'SELECT * FROM cartobq.testtables.points_10k',
+  ...styleProps
+});
+```
+
 ## Upgrading from deck.gl v8.8 to v8.9
 
 #### Breaking changes

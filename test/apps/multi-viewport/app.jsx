@@ -1,8 +1,7 @@
 /* global document */
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 
 import DeckGL, {
   COORDINATE_SYSTEM,
@@ -126,7 +125,6 @@ class Root extends Component {
         {...viewState}
         width={width}
         height={height}
-        mapLib={maplibregl}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json"
       />
     );

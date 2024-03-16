@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import type {Device} from '@luma.gl/core';
-import {readPixelsToArray} from '@luma.gl/webgl';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
 import {
@@ -152,7 +151,7 @@ export default class DeckPicker {
         const depthFBO = this.device.createFramebuffer({
           colorAttachments: [
             this.device.createTexture({
-              format: this.device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm'
+              format: 'rgba32float'
               // type: GL.FLOAT
             })
           ]
@@ -163,7 +162,7 @@ export default class DeckPicker {
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
+    const gl = this.device.gl as WebGL2RenderingContext;
     this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
     this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
   }
@@ -202,7 +201,7 @@ export default class DeckPicker {
 
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return {
         result: [],
         emptyInfo: getEmptyPickingInfo({viewports, x, y, pixelRatio})
@@ -355,7 +354,7 @@ export default class DeckPicker {
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return [];
     }
 
@@ -528,7 +527,7 @@ export default class DeckPicker {
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
     const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
-    readPixelsToArray(pickingFBO as Framebuffer, {
+    this.device.readPixelsToArrayWebGL(pickingFBO as Framebuffer, {
       sourceX: x,
       sourceY: y,
       sourceWidth: width,

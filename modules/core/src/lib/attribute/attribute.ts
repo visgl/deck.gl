@@ -10,7 +10,7 @@ import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils'
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
-import {normalizeTransitionSettings, TransitionSettings} from './attribute-transition-utils';
+import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
 import type {NumericArray, TypedArray} from '../../types/types';
@@ -214,6 +214,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         // no value was assigned during update
       } else if (
         this.constant ||
+        !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
         this.setData({

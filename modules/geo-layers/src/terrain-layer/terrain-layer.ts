@@ -35,8 +35,14 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
-import type {Bounds, GeoBoundingBox, TileBoundingBox, TileLoadProps, ZRange} from '../tileset-2d';
-import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d';
+import type {
+  Bounds,
+  GeoBoundingBox,
+  TileBoundingBox,
+  TileLoadProps,
+  ZRange
+} from '../tileset-2d/index';
+import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
 
@@ -136,7 +142,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   state!: {
     isTiled?: boolean;
-    terrain: MeshAttributes;
+    terrain?: MeshAttributes;
     zRange?: ZRange | null;
   };
 
@@ -341,6 +347,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           refinementStrategy
         }
       );
+    }
+
+    if (!elevationData) {
+      return null;
     }
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);

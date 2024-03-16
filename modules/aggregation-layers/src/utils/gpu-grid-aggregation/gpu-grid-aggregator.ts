@@ -21,7 +21,6 @@
 import type {Device, DeviceFeature} from '@luma.gl/core';
 import {Model, TextureTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
-import {readPixelsToBuffer, withGLParameters, clear} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/constants';
 import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
@@ -52,11 +51,8 @@ const ARRAY_BUFFER_MAP = {
 };
 
 const REQUIRED_FEATURES: DeviceFeature[] = [
-  'webgl2',
-  'blend-minmax-webgl1',
-  'texture-renderable-float32-webgl',
-  'texture-blend-float-webgl1',
-  'texture-formats-float32-webgl1'
+  'float32-renderable-webgl',
+  'texture-blend-float-webgl'
 ];
 
 export type GPUGridAggregatorProps = {
@@ -180,15 +176,10 @@ export default class GPUGridAggregator {
     this.device = device;
 
     const REQUIRED_FEATURES: DeviceFeature[] = [
-      'blend-minmax-webgl1', // set min/max blend modes
-      'texture-renderable-float32-webgl', // render to float texture
-      'texture-formats-float32-webgl1' // sample from a float texture
+      'float32-renderable-webgl' // render to float texture
     ];
 
-    // gl_InstanceID usage in min/max calculation shaders
-    this._hasGPUSupport =
-      this.device.info.type === 'webgl2' &&
-      REQUIRED_FEATURES.every(feature => device.features.has(feature));
+    this._hasGPUSupport = REQUIRED_FEATURES.every(feature => device.features.has(feature));
     if (this._hasGPUSupport) {
       this._setupModels();
     }
@@ -227,9 +218,6 @@ export default class GPUGridAggregator {
     // reset results
     this.setState({results: {}});
     const aggregationParams = this._normalizeAggregationParams(opts);
-    if (!this._hasGPUSupport) {
-      log.log(1, 'GPUGridAggregator: not supported')();
-    }
     return this._runAggregation(aggregationParams);
   }
 
@@ -302,26 +290,26 @@ export default class GPUGridAggregator {
       results[id] = {};
       const {needMin, needMax, combineMaxMin} = weights[id];
       results[id].aggregationTexture = textures[id];
-      results[id].aggregationBuffer = readPixelsToBuffer(framebuffers[id], {
+      results[id].aggregationBuffer = this.device.readPixelsToBufferWebGL(framebuffers[id], {
         target: weights[id].aggregationBuffer, // update if a buffer is provided
         sourceType: GL.FLOAT
       });
       if (needMin && needMax && combineMaxMin) {
-        results[id].maxMinBuffer = readPixelsToBuffer(maxMinFramebuffers[id], {
+        results[id].maxMinBuffer = this.device.readPixelsToBufferWebGL(maxMinFramebuffers[id], {
           target: weights[id].maxMinBuffer, // update if a buffer is provided
           sourceType: GL.FLOAT
         });
         results[id].maxMinTexture = resources[`${id}-maxMinTexture`];
       } else {
         if (needMin) {
-          results[id].minBuffer = readPixelsToBuffer(minFramebuffers[id], {
+          results[id].minBuffer = this.device.readPixelsToBufferWebGL(minFramebuffers[id], {
             target: weights[id].minBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
           results[id].minTexture = resources[`${id}-minTexture`];
         }
         if (needMax) {
-          results[id].maxBuffer = readPixelsToBuffer(maxFramebuffers[id], {
+          results[id].maxBuffer = this.device.readPixelsToBufferWebGL(maxFramebuffers[id], {
             target: weights[id].maxBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
@@ -413,15 +401,14 @@ export default class GPUGridAggregator {
     const {framebuffers} = this.state;
     const {allAggregationModel} = this;
 
-    withGLParameters(
-      this.device,
+    this.device.withParametersWebGL(
       {
         ...clearParams,
         framebuffer: minOrMaxFb,
         viewport: [0, 0, gridSize[0], gridSize[1]]
       },
       () => {
-        clear(this.device, {color: true});
+        this.device.clearWebGL({color: true});
 
         // allAggregationModel.setParameters(parameters);
         allAggregationModel.setUniforms({gridSize, combineMaxMin});
@@ -444,15 +431,14 @@ export default class GPUGridAggregator {
       operation === AGGREGATION_OPERATION.MIN
         ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
         : [0, 0, 0, 0];
-    withGLParameters(
-      this.device,
+    this.device.withParametersWebGL(
       {
         framebuffer: framebuffers[id],
         viewport: [0, 0, gridSize[0], gridSize[1]],
         clearColor
       },
       () => {
-        clear(this.device, {color: true});
+        this.device.clearWebGL({color: true});
 
         const attributes = {weights: weightAttributes[id]};
         gridAggregationModel.draw({
@@ -483,7 +469,7 @@ export default class GPUGridAggregator {
         }
       });
 
-      // update framebuffer with mean results so readPixelsToBuffer returns mean values
+      // update framebuffer with mean results so device.readPixelsToBufferWebGL returns mean values
       framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: textures[id]});
     }
   }
@@ -607,7 +593,7 @@ export default class GPUGridAggregator {
       if (results[id]) {
         for (const bufferName of BUFFER_NAMES) {
           if (results[id][bufferName] && weights[id][bufferName] !== results[id][bufferName]) {
-            // No result buffer is provided in weights object, `readPixelsToBuffer` has created a new Buffer object
+            // No result buffer is provided in weights object, `device.readPixelsToBufferWebGL` has created a new Buffer object
             // collect the new buffer for garabge collection
             const name = `gpu-result-${id}-${bufferName}`;
             if (resources[name]) {

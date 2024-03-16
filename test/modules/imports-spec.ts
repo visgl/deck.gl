@@ -32,6 +32,7 @@ import * as meshLayers from '@deck.gl/mesh-layers';
 
 import * as core from '@deck.gl/core';
 import * as json from '@deck.gl/json';
+import * as arcgis from '@deck.gl/arcgis';
 import * as googleMaps from '@deck.gl/google-maps';
 import * as mapbox from '@deck.gl/mapbox';
 import * as react from '@deck.gl/react';
@@ -40,7 +41,7 @@ import * as testUtils from '@deck.gl/test-utils';
 test('Top-level imports', t0 => {
   const hasEmptyExports = obj => {
     for (const key in obj) {
-      if (!obj[key]) {
+      if (obj[key] === undefined) {
         return key;
       }
     }
@@ -67,6 +68,7 @@ test('Top-level imports', t0 => {
 
   t0.test('import utilities', t => {
     t.notOk(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json');
+    t.notOk(hasEmptyExports(arcgis), 'No empty top-level export in @deck.gl/arcgis');
     t.notOk(hasEmptyExports(googleMaps), 'No empty top-level export in @deck.gl/google-maps');
     t.notOk(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox');
     t.notOk(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react');

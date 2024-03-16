@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/constants';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
 import {
@@ -185,7 +184,7 @@ export default class ContourLayer<
       [POSITION_ATTRIBUTE_NAME]: {
         size: 3,
         accessor: 'getPosition',
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions()
       },
       // this attribute is used in gpu aggregation path only
@@ -351,7 +350,7 @@ export default class ContourLayer<
     let {aggregationData} = count;
     if (!aggregationData) {
       // @ts-ignore
-      aggregationData = count.aggregationBuffer!.readSyncWebGL2() as Float32Array;
+      aggregationData = count.aggregationBuffer!.readSyncWebGL() as Float32Array;
       count.aggregationData = aggregationData;
     }
 

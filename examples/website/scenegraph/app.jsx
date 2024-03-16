@@ -1,14 +1,12 @@
 /* global fetch, setTimeout, clearTimeout */
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 // Data provided by the OpenSky Network, http://www.opensky-network.org
-// const DATA_URL = 'https://opensky-network.org/api/states/all';
-const DATA_URL = './all.json'; // Opensky API currently down
+const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const REFRESH_TIME = 30000;
@@ -127,7 +125,7 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}) 
       controller={true}
       getTooltip={getTooltip}
     >
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

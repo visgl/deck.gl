@@ -9,7 +9,7 @@ function encodeParameter(name: string, value: string | boolean | number): string
   return `${name}=${encodeURIComponent(value)}`;
 }
 
-const REQUEST_CACHE = new Map();
+const REQUEST_CACHE = new Map<string, Promise<unknown>>();
 export async function requestWithParameters<T = any>({
   accessToken,
   baseUrl,
@@ -23,46 +23,59 @@ export async function requestWithParameters<T = any>({
   headers: Record<string, string>;
   errorContext: APIErrorContext;
 }): Promise<T> {
-  const key = JSON.stringify({baseUrl, parameters, customHeaders});
+  const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
   if (REQUEST_CACHE.has(key)) {
-    return REQUEST_CACHE.get(key);
+    return REQUEST_CACHE.get(key) as Promise<T>;
   }
 
-  let url = baseUrl;
-  if (parameters) {
-    const allParameters = {...DEFAULT_PARAMETERS, ...parameters};
-    const encodedParameters = Object.entries(allParameters).map(([key, value]) => {
-      return encodeParameter(key, value);
-    });
-    url += `?${encodedParameters.join('&')}`;
-  }
-
+  const url = parameters ? createURLWithParameters(baseUrl, parameters) : baseUrl;
   const headers = {...DEFAULT_HEADERS, ...customHeaders};
-  try {
-    /* global fetch */
-    let response: Response;
-    if (url.length > MAX_GET_LENGTH) {
-      response = await fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers});
-    } else {
-      response = await fetch(url, {headers});
-    }
-    let json: any;
-    try {
-      json = await response.json();
+
+  /* global fetch */
+  const fetchPromise =
+    url.length > MAX_GET_LENGTH
+      ? fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers})
+      : fetch(url, {headers});
+
+  let response: Response | undefined;
+  const jsonPromise: Promise<T> = fetchPromise
+    .then((_response: Response) => {
+      response = _response;
+      return response.json();
+    })
+    .then((json: any) => {
+      if (!response || !response.ok) {
+        throw new Error(json.error);
+      }
       if (accessToken) {
         json.accessToken = accessToken;
       }
-    } catch {
-      json = {error: ''};
-    }
-    if (!response.ok) {
+      return json;
+    })
+    .catch((error: Error) => {
       REQUEST_CACHE.delete(key);
-      throw new CartoAPIError(json.error, errorContext, response);
-    }
+      throw new CartoAPIError(error, errorContext, response);
+    });
 
-    REQUEST_CACHE.set(key, json);
-    return json;
-  } catch (error) {
-    throw new CartoAPIError(error as Error, errorContext);
-  }
+  REQUEST_CACHE.set(key, jsonPromise);
+  return jsonPromise;
+}
+
+function createCacheKey(
+  baseUrl: string,
+  parameters: Record<string, string>,
+  headers: Record<string, string>
+): string {
+  const parameterEntries = Object.entries(parameters).sort(([a], [b]) => (a > b ? 1 : -1));
+  const headerEntries = Object.entries(headers).sort(([a], [b]) => (a > b ? 1 : -1));
+  return JSON.stringify({baseUrl, parameters: parameterEntries, headers: headerEntries});
+}
+
+function createURLWithParameters(baseUrl: string, parameters: Record<string, string>): string {
+  const encodedParameters = Object.entries({...DEFAULT_PARAMETERS, ...parameters}).map(
+    ([key, value]) => {
+      return encodeParameter(key, value);
+    }
+  );
+  return `${baseUrl}?${encodedParameters.join('&')}`;
 }

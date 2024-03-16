@@ -20,8 +20,6 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, TypedArray} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
-import {withGLParameters, setGLParameters} from '@luma.gl/webgl';
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute/attribute-manager';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -29,7 +27,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import debug from '../debug';
+import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {mergeShaders} from '../utils/shader';
@@ -885,7 +883,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // TODO - this slightly slows down non instanced layers
       attributeManager.addInstanced({
         instancePickingColors: {
-          type: GL.UNSIGNED_BYTE,
+          type: 'uint8',
           size: 4,
           noAlloc: true,
           // Updaters are always called with `this` pointing to the layer
@@ -1072,10 +1070,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const {getPolygonOffset} = this.props;
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
-      setGLParameters(context.device, {polygonOffset: offsets});
+      context.device.setParametersWebGL({polygonOffset: offsets});
 
       // Call subclass lifecycle method
-      withGLParameters(context.gl, parameters, () => {
+      context.device.withParametersWebGL(parameters, () => {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
         // extensions

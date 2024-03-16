@@ -7,7 +7,7 @@ export type ResourceManagerContext = {
   device: Device;
   resourceManager: ResourceManager;
   /** @deprecated */
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
 };
 
 type Consumer = Record<string, ResourceSubscriber & {resourceId: string}>;

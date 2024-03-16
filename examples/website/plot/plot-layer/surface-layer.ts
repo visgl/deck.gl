@@ -8,7 +8,6 @@ import type {
   LayerDataSource,
   LayerProps
 } from '@deck.gl/core';
-import {GL} from '@luma.gl/constants';
 import {Model} from '@luma.gl/engine';
 import {ScaleLinear} from 'd3-scale';
 
@@ -83,11 +82,11 @@ export default class SurfaceLayer<
       colors: {
         size: 4,
         accessor: ['getPosition', 'getColor'],
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         update: this.calculateColors,
         noAlloc
       },
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
+      pickingColors: {size: 3, type: 'uint8', update: this.calculatePickingColors, noAlloc}
     });
     /* eslint-enable max-len */
 

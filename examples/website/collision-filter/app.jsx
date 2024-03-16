@@ -1,8 +1,7 @@
 /* global fetch */
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'react-map-gl//maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
@@ -77,7 +76,7 @@ export default function App({
 
   return (
     <DeckGL layers={layers} initialViewState={initialViewState} controller={true}>
-      <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
+      <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

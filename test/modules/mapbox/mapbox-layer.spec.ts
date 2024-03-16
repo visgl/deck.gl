@@ -2,7 +2,7 @@ import test from 'tape-promise/tape';
 
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {MapboxLayer} from '@deck.gl/mapbox';
+import MapboxLayer from '@deck.gl/mapbox/mapbox-layer';
 import {device} from '@deck.gl/test-utils';
 import {equals} from '@math.gl/core';
 

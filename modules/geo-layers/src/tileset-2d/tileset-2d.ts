@@ -73,6 +73,8 @@ export type Tileset2DProps<DataT = any> = {
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
   maxRequests?: number;
+  /** Queue tile requests until no new tiles have been requested for at least `debounceTime` milliseconds. @default 0 */
+  debounceTime?: number;
   /** Changes the zoom level at which the tiles are fetched. Needs to be an integer. @default 0 */
   zoomOffset?: number;
 
@@ -101,6 +103,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
   refinementStrategy: 'best-available',
   zRange: null,
   maxRequests: 6,
+  debounceTime: 0,
   zoomOffset: 0,
 
   // onTileLoad: (tile: Tile2DHeader) => void,  // onTileUnload: (tile: Tile2DHeader) => void,  // onTileError: (error: any, tile: Tile2DHeader) => void,  /** Called when all tiles in the current viewport are loaded. */
@@ -123,7 +126,7 @@ export class Tileset2D {
 
   private _cacheByteSize: number;
   private _viewport: Viewport | null;
-  private _zRange?: ZRange | null;
+  private _zRange: ZRange | null;
   private _selectedTiles: Tile2DHeader[] | null;
   private _frameNumber: number;
   private _modelMatrix: Matrix4;
@@ -140,6 +143,7 @@ export class Tileset2D {
    */
   constructor(opts: Tileset2DProps) {
     this.opts = {...DEFAULT_TILESET2D_PROPS, ...opts};
+    this.setOptions(this.opts);
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
@@ -150,8 +154,9 @@ export class Tileset2D {
     };
 
     this._requestScheduler = new RequestScheduler({
-      maxRequests: opts.maxRequests,
-      throttleRequests: Boolean(opts.maxRequests && opts.maxRequests > 0)
+      throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
+      maxRequests: this.opts.maxRequests,
+      debounceTime: this.opts.debounceTime
     });
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
@@ -162,13 +167,12 @@ export class Tileset2D {
 
     // Cache the last processed viewport
     this._viewport = null;
+    this._zRange = null;
     this._selectedTiles = null;
     this._frameNumber = 0;
 
     this._modelMatrix = new Matrix4();
     this._modelMatrixInverse = new Matrix4();
-
-    this.setOptions(opts);
   }
 
   /* Public API */
@@ -226,7 +230,10 @@ export class Tileset2D {
    */
   update(
     viewport: Viewport,
-    {zRange, modelMatrix}: {zRange?: ZRange | null; modelMatrix?: NumericArray | null} = {}
+    {zRange, modelMatrix}: {zRange: ZRange | null; modelMatrix: NumericArray | null} = {
+      zRange: null,
+      modelMatrix: null
+    }
   ): number {
     const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
     const isModelMatrixNew = !modelMatrixAsMatrix4.equals(this._modelMatrix);
@@ -326,7 +333,7 @@ export class Tileset2D {
     viewport: Viewport;
     maxZoom?: number;
     minZoom?: number;
-    zRange?: ZRange | null;
+    zRange: ZRange | null;
     tileSize?: number;
     modelMatrix?: Matrix4;
     modelMatrixInverse?: Matrix4;

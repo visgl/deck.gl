@@ -1,10 +1,9 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {WEBGLRenderbuffer, withGLParameters} from '@luma.gl/webgl';
 import {default as LayersPass} from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture;
-  depthBuffer: WEBGLRenderbuffer;
+  depthBuffer: Texture;
   fbo: Framebuffer;
 
   constructor(
@@ -27,10 +26,16 @@ export default class ShadowPass extends LayersPass {
       }
     });
 
-    this.depthBuffer = new WEBGLRenderbuffer(device as any, {
+    // @ts-ignore
+    this.depthBuffer = device.createTexture({
       format: 'depth16unorm',
       width: 1,
-      height: 1
+      height: 1,
+      mipmaps: false,
+
+      // TODO fix getWebGLTextureParameters() in luma to avoid passing deprecated parameters
+      dataFormat: 6402, // gl.DEPTH_COMPONENT
+      type: 5125 // gl.UNSIGNED_INT
     });
 
     this.fbo = device.createFramebuffer({
@@ -39,7 +44,6 @@ export default class ShadowPass extends LayersPass {
       height: 1,
       colorAttachments: [this.shadowMap],
       // Depth attachment has to be specified for depth test to work
-      // @ts-expect-error Renderbuffer typing not solved in luma.gl
       depthStencilAttachment: this.depthBuffer
     });
   }
@@ -47,8 +51,7 @@ export default class ShadowPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
-    withGLParameters(
-      this.device,
+    this.device.withParametersWebGL(
       {
         depthRange: [0, 1],
         depthTest: true,

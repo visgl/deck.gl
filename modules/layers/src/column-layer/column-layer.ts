@@ -37,7 +37,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import ColumnGeometry from './column-geometry';
 
 import vs from './column-layer-vertex.glsl';
@@ -102,7 +101,7 @@ type _ColumnLayerProps<DataT> = {
    * Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one.
    * @default null
    */
-  vertices: Position[] | null;
+  vertices?: Position[] | null;
 
   /**
    * Disk offset from the position, relative to the radius.
@@ -245,19 +244,17 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   getShaders() {
     const {device} = this.context;
-    const transpileToGLSL100 = device.info.type !== 'webgl2';
     const defines: Record<string, any> = {};
 
-    const useDerivatives = this.props.flatShading && device.features.has('glsl-derivatives');
-    if (useDerivatives) {
+    const {flatShading} = this.props;
+    if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
       vs,
       fs,
       defines,
-      transpileToGLSL100,
-      modules: [project32, useDerivatives ? phongLighting : gouraudLighting, picking]
+      modules: [project32, flatShading ? phongLighting : gouraudLighting, picking]
     });
   }
 
@@ -271,7 +268,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -283,16 +280,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR

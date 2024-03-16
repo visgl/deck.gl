@@ -17,17 +17,24 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import type {NumericArray, TypedArray} from '../types/types';
 
 /*
  * Helper function for padArray
  */
 function padArrayChunk(options: {
-  source;
-  target;
-  start?: number;
-  end?: number;
+  /** original data */
+  source: TypedArray;
+  /** output data */
+  target: TypedArray;
+  /** length per datum */
   size: number;
-  getData;
+  /** callback to get new data when source is short */
+  getData: (index: number, context: NumericArray) => NumericArray;
+  /** start index */
+  start?: number;
+  /** end index */
+  end?: number;
 }): void {
   const {source, target, start = 0, size, getData} = options;
   const end = options.end || target.length;
@@ -62,15 +69,29 @@ function padArrayChunk(options: {
    The arrays can have internal structures (like the attributes of PathLayer and
    SolidPolygonLayer), defined by the optional sourceStartIndices and targetStartIndices parameters.
    If the target array is larger, the getData callback is used to fill in the blanks.
- * @params {TypedArray} source - original data
- * @params {TypedArray} target - output data
- * @params {Number} size - length per datum
- * @params {Function} getData - callback to get new data when source is short
- * @params {Array<Number>} [sourceStartIndices] - subdivision of the original data in [object0StartIndex, object1StartIndex, ...]
- * @params {Array<Number>} [targetStartIndices] - subdivision of the output data in [object0StartIndex, object1StartIndex, ...]
  */
-export function padArray({source, target, size, getData, sourceStartIndices, targetStartIndices}) {
-  if (!Array.isArray(targetStartIndices)) {
+export function padArray({
+  source,
+  target,
+  size,
+  getData,
+  sourceStartIndices,
+  targetStartIndices
+}: {
+  /** original data */
+  source: TypedArray;
+  /** output data */
+  target: TypedArray;
+  /** length per datum */
+  size: number;
+  /** callback to get new data when source is short */
+  getData: (index: number, context: NumericArray) => NumericArray;
+  /** subdivision of the original data in [object0StartIndex, object1StartIndex, ...] */
+  sourceStartIndices?: NumericArray | null;
+  /** subdivision of the output data in [object0StartIndex, object1StartIndex, ...] */
+  targetStartIndices?: NumericArray | null;
+}): TypedArray {
+  if (!sourceStartIndices || !targetStartIndices) {
     // Flat arrays
     padArrayChunk({
       source,
@@ -107,6 +128,7 @@ export function padArray({source, target, size, getData, sourceStartIndices, tar
 
   if (targetIndex < target.length) {
     padArrayChunk({
+      // @ts-ignore
       source: [],
       target,
       start: targetIndex,

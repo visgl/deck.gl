@@ -5,8 +5,7 @@ import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils';
 
-// TODO v9 re-enable
-test.skip('PickLayersPass#drawPickingBuffer', t => {
+test('PickLayersPass#drawPickingBuffer', t => {
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
   // Resize it to current canvas size (this is a noop if size hasn't changed)

@@ -24,19 +24,20 @@ import geohashLayerTests from './geohash-layer';
 import terrainLayerTests from './terrain-layer';
 // mesh-layers
 import simpleMeshLayerTests from './simple-mesh-layer';
-// import scenegraphLayerTests from './scenegraph-layer';
+import scenegraphLayerTests from './scenegraph-layer';
 // other
 import viewsTests from './views';
 import effectsTests from './effects';
 import collisionFilterExtensionTests from './collision-filter-extension';
 import transitionTests from './transitions';
+import dataFilterExtensionTests from './data-filter-extension';
 
 export default [].concat(
-  // coreLayersTests, // TODO(v9): Re-check after PR#8334
+  coreLayersTests,
   arcLayersTests,
-  // columnLayerTests, // TODO(v9): Re-check after PR#8334
+  columnLayerTests,
   geojsonLayerTests,
-  // pathLayerTests, // TODO(v9): Re-check after PR#8334
+  pathLayerTests,
   pointCloudLayerTests,
   // polygonLayerTests,
   iconLayerTests,
@@ -46,18 +47,18 @@ export default [].concat(
   hexagonLayerTests,
   // screenGridLayerTests,
   // heatmapLayerTests,
-  // h3LayersTests, // TODO(v9): Re-check after PR#8334
+  h3LayersTests,
   quadkeyLayerTests,
   s2LayerTests,
   tripsLayerTests,
-  // mvtLayerTests, // TODO(v9): Re-check after PR#8334
+  mvtLayerTests,
   geohashLayerTests,
   simpleMeshLayerTests,
-  // scenegraphLayerTests,
+  scenegraphLayerTests,
   viewsTests,
   // effectsTests,
-  // TODO - Broken in headless mode with Chrome 113
-  // transitionTests,
-  terrainLayerTests
+  transitionTests,
+  terrainLayerTests,
   // collisionFilterExtensionTests
+  dataFilterExtensionTests
 );

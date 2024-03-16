@@ -17,7 +17,7 @@ new LayerManager(gl, {eventManager: ...}})`
 
 Parameters:
 
-* `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
+* `gl` ([WebGL2RenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext))
 
 
 ## Methods

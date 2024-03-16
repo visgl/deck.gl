@@ -4,6 +4,7 @@ import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 export const renderSubLayers = props => {
   const tileIndex = props.tile?.index?.q;
@@ -12,7 +13,8 @@ export const renderSubLayers = props => {
 };
 
 const defaultProps: DefaultProps<RasterTileLayerProps> = {
-  data: TilejsonPropType
+  data: TilejsonPropType,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by RasterTileLayer. */

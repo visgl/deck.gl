@@ -33,9 +33,9 @@ Starting v8.0, deck.gl no longer bundles the debugging module in production mode
 <script src="https://unpkg.com/@deck.gl/core@^8.0.0/debug.min.js"></script>
 ```
 
-## WebGL debugging using luma.gl
+## WebGL2/WebGPU debugging using luma.gl
 
-For lower level debugging, including debugging of layer rendering and picking, deck.gl is built on luma.gl which has extensive debugging and instrumentation support for WebGL level code and GPU input values (shader uniforms and attributes). To enable debug logging simply issue the following commands in your browser console:
+For lower level debugging, including debugging of layer rendering and picking, deck.gl is built on luma.gl which has extensive debugging and instrumentation support for WebGL2/WebGPU level code and GPU input values (shader uniforms and attributes). To enable debug logging simply issue the following commands in your browser console:
 
 ```js
 luma.log.enable()
@@ -46,7 +46,7 @@ The following features are available:
 
 * Automatic sanity checks are performed on uniforms and attributes. Passing an `undefined` value to a uniform is a common JavaScript mistake that will immediately generate a descriptive exception in deck.gl. This can be tracked from the console output.
 
-* The `Deck` class and `DeckGL` react component have a debug flag which instructs luma.gl to instruments the gl context (with a performance cost) which allows tracing all WebGL call errors, see below on luma debug log levels. It also generates exceptions immediately when a WebGL operation fails, allowing you to pinpoint exactly where in the code the issue happened. Due to the asynchronous nature of the GPU, some WebGL execution errors are surfaced and caught later than the calls that generate them.
+* The `Deck` class and `DeckGL` react component have a debug flag which instructs luma.gl to instruments the WebGL2/WebGPU context (with a performance cost) which allows tracing all GPU call errors, see below on luma debug log levels. It also generates exceptions immediately when a GPU operation fails, allowing you to pinpoint exactly where in the code the issue happened. Due to the asynchronous nature of the GPU, some GPU execution errors are surfaced and caught later than the calls that generate them.
 
 In the browser console, setting `luma.log.level` to various values will enable increasing levels of debugging.
 

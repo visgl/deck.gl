@@ -4,9 +4,11 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@babel/preset-react": "^7.6.3",
     "@deck.gl/core": "^8.4.0",
-    "@deck.gl/layers": "^8.4.0"
+    "@deck.gl/layers": "^8.4.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

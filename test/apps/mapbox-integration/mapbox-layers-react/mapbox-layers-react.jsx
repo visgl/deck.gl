@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client';
 import DeckGL, {ScatterplotLayer, ArcLayer, TextLayer} from 'deck.gl';
 import {Map} from 'react-map-gl';
 
-import {MapboxLayer} from '@deck.gl/mapbox';
+import MapboxLayer from '../../../../modules/mapbox/src/mapbox-layer';
 
 import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer, deckTextLayer} from '../layers';
 import {MapView, OrthographicView} from '@deck.gl/core';
