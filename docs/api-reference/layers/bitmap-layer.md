@@ -64,10 +64,10 @@ The image to display.
 - If a string is supplied, it is interpreted as a URL or a [Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
 - One of the following, or a Promise that resolves to one of the following:
   + One of the valid [pixel sources for WebGL2 texture](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D)
-  + A luma.gl [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) instance
+  + A luma.gl [Texture](https://luma.gl/docs/api-reference/core/resources/texture) instance
   + A plain object that can be passed to the `Texture` constructor, e.g. `{width: <number>, height: <number>, data: <Uint8Array>}`. Note that whenever this object shallowly changes, a new texture will be created.
 
-The image data will be converted to a [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
+The image data will be converted to a [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
 ##### `bounds` (Array) {#bounds}
 
@@ -87,7 +87,7 @@ On top of the [default options](../core/layer.md#loadoptions), also accepts opti
 
 ##### `textureParameters` (Object) {#textureparameters}
 
-Customize the [texture parameters](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
+Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `image`:
 

@@ -126,10 +126,10 @@ MyLayerClass.defaultProps = {
 
 ##### `image` {#image}
 
-One of: URL string, luma.gl [Texture](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/texture) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
+One of: URL string, luma.gl [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object, `Image`, `HTMLCanvasElement`, `HTMLVideoElement`, `ImageBitmap` or `ImageData`.
 
 - Options:
-  + `parameters` (object, optional) - custom [texture parameters](https://felixpalmer.github.io/luma.gl/docs/api-reference/core/resources/sampler#samplerprops) of the texture. If not specified, the following defaults are used:
+  + `parameters` (object, optional) - custom [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops) of the texture. If not specified, the following defaults are used:
 
   ```js
   {
