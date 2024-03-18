@@ -173,43 +173,43 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/polygon-globe.png'
+  },
+  {
+    name: 'polygon-globe-extruded',
+    views: [new GlobeView()],
+    viewState: {
+      latitude: 0,
+      longitude: 50,
+      zoom: 0
+    },
+    layers: [
+      new PolygonLayer({
+        id: 'polygon-globe',
+        data: [
+          [
+            [
+              [60, 40],
+              [30, -30],
+              [-60, -40],
+              [-30, 30]
+            ],
+            [
+              [10, 10],
+              [20, -20],
+              [-10, -10],
+              [-20, 20]
+            ]
+          ]
+        ],
+        getPolygon: d => d,
+        extruded: true,
+        wireframe: true,
+        getElevation: 1e6,
+        getLineColor: [0, 0, 0],
+        getFillColor: [160, 160, 0],
+        widthMinPixels: 4
+      })
+    ],
+    goldenImage: './test/render/golden-images/polygon-globe-extruded.png'
   }
-  // {
-  //   name: 'polygon-globe-extruded',
-  //   views: [new GlobeView()],
-  //   viewState: {
-  //     latitude: 0,
-  //     longitude: 50,
-  //     zoom: 0
-  //   },
-  //   layers: [
-  //     new PolygonLayer({
-  //       id: 'polygon-globe',
-  //       data: [
-  //         [
-  //           [
-  //             [60, 40],
-  //             [30, -30],
-  //             [-60, -40],
-  //             [-30, 30]
-  //           ],
-  //           [
-  //             [10, 10],
-  //             [20, -20],
-  //             [-10, -10],
-  //             [-20, 20]
-  //           ]
-  //         ]
-  //       ],
-  //       getPolygon: d => d,
-  //       extruded: true,
-  //       wireframe: true,
-  //       getElevation: 1e6,
-  //       getLineColor: [0, 0, 0],
-  //       getFillColor: [160, 160, 0],
-  //       widthMinPixels: 4
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/polygon-globe-extruded.png'
-  // }
 ];
