@@ -206,20 +206,16 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    // TODO v9 - since clearing is done in renderPass construction in luma.gl v9
-    // we have a choice
+    // TODO v9 - remove WebGL specific logic
     if (view && view.props.clear) {
-      console.warn(`${view.id}: Per view clearing not yet implemented in deck.gl v9`);
-
-      // const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      // withGLParameters(
-      //   device,
-      //   {
-      //     scissorTest: true,
-      //     scissor: glViewport
-      //   },
-      //   () => clear(device, clearOpts)
-      // );
+      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
+      this.device.withParametersWebGL(
+        {
+          scissorTest: true,
+          scissor: glViewport
+        },
+        () => this.device.clearWebGL(clearOpts)
+      );
     }
 
     // render layers in normal colors

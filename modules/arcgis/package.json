@@ -46,5 +46,8 @@
     "@luma.gl/core": "^9.0.4",
     "@luma.gl/engine": "^9.0.4"
   },
+  "devDependencies": {
+    "@arcgis/core": "^4.21.0"
+  },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
