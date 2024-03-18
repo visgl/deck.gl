@@ -126,8 +126,8 @@ export default class PickLayersPass extends LayersPass {
       ...layer.props.parameters,
       scissorTest: true,
       scissor: [x, y, width, height],
-      // When used as Mapbox custom layer, the context state may be dirty
-      // TODO - Remove when mapbox fixes this issue
+      // TODO - When used as a custom layer in older Mapbox versions, context
+      // state was dirty. Mapbox fixed that; we should test and remove the workaround.
       // https://github.com/mapbox/mapbox-gl-js/issues/7801
       depthMask: true,
       depthTest: true,
