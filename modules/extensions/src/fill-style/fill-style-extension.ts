@@ -5,6 +5,7 @@ import {patternShaders} from './shader-module';
 import type {
   Layer,
   LayerContext,
+  DefaultProps,
   Accessor,
   AccessorFunction,
   TextureSource,
@@ -12,14 +13,16 @@ import type {
 } from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
-const defaultProps = {
+const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
     type: 'image',
     value: null,
     async: true,
     parameters: {
-      minFilter: 'linear'
+      // Override default mipmap filter 'linear', i.e. set MIN_FILTER to LINEAR instead of LINEAR_MIPMAP_LINEAR
+      // @ts-expect-error invalid value for type `SamplerProps` - luma.gl should allow unset
+      mipmapFilter: ''
     }
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
