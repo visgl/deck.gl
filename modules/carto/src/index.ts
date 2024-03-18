@@ -101,5 +101,5 @@ export type {
   QuadbinTilesetSourceOptions,
   VectorQuerySourceOptions,
   VectorTableSourceOptions,
-  VectorTilesetSourceOptions,
+  VectorTilesetSourceOptions
 } from './sources/index';
