@@ -71,6 +71,7 @@ new Deck({
   ],
   widgets: [
     new ZoomWidget({style: widgetTheme}),
+    new ZoomWidget({style: widgetTheme, orientation: 'horizontal'}),
     new CompassWidget({style: widgetTheme}),
 
     new FullscreenWidget({}),

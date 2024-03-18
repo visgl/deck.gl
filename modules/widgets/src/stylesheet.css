@@ -2,11 +2,10 @@
   margin: var(--widget-margin, 12px);
 }
 
+/* button */
 .deck-widget-button-border {
   width: var(--button-size, 28px);
   height: var(--button-size, 28px);
-  box-sizing: border-box;
-  flex-shrink: 0;
 
   background: var(--button-stroke, rgba(255, 255, 255, 0.3));
   border-radius: var(--button-corner-radius, 8px);
@@ -17,12 +16,28 @@
   justify-content: center;
 }
 
+.deck-widget-button-group {
+  width: calc(var(--button-size, 28px) - 2);
+  height: calc((var(--button-size, 28px) * 2) - 1);
+  display: inline-flex;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 1px;
+  gap: 1px;
+
+  background: var(--button-stroke, rgba(255, 255, 255, 0.3));
+  border-radius: var(--button-corner-radius, 8px);
+  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
+}
+
+
+.deck-widget-button-group button,
 .deck-widget-button-border button {
   width: calc(var(--button-size, 28px) - 2px);
   height: calc(var(--button-size, 28px) - 2px);
-  box-sizing: border-box;
-  flex-shrink: 0;
 
+  box-sizing: border-box;
   background: var(--button-background, #fff);
   backdrop-filter: var(--button-backdrop-filter, unset);
   border: var(--button-inner-stroke, unset);
@@ -34,8 +49,45 @@
   padding: 0;
 }
 
+.deck-widget-button-group.horizontal {
+  flex-direction: row;
+}
+
+.deck-widget-button-group > div {
+  display: inherit;
+}
+
+.deck-widget-button-group > *:not(:last-child),
+.deck-widget-button-group > *:not(:last-child) > button {
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.deck-widget-button-group > *:not(:first-child),
+.deck-widget-button-group > *:not(:first-child) > button {
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.deck-widget-button-group.horizontal > *:not(:last-child),
+.deck-widget-button-group.horizontal > *:not(:last-child) > button {
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.deck-widget-button-group.horizontal > *:not(:first-child),
+.deck-widget-button-group.horizontal > *:not(:first-child) > button {
+  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* icon */
 .deck-widget button .deck-widget-icon {
-  background-color: var(--button-icon-idle, rgba(97, 97, 102, 1));
+  background-color: var(--button-icon-idle, #616166);
   background-position: 50%;
   background-repeat: no-repeat;
   display: block;
@@ -44,7 +96,7 @@
 }
 
 .deck-widget button .deck-widget-icon:hover {
-  background-color: var(--button-icon-hover, rgba(24, 24, 26, 1));
+  background-color: var(--button-icon-hover, rgb(24, 24, 26));
 }
 
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-enter .deck-widget-icon {
@@ -78,19 +130,24 @@
   z-index: 99999;
 }
 
-.deck-widget-button-group {
-  display: flex;
-  flex-direction: column;
+.deck-widget.deck-widget-zoom button.deck-widget-zoom-in .deck-widget-icon {
+  mask-image: var(
+    --icon-zoom-in,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"><path d="M12.1029 13.8971H7.89332C7.64334 13.8971 7.43196 13.8105 7.25918 13.6373C7.08639 13.4641 7 13.2521 7 13.0014C7 12.7508 7.08639 12.5396 7.25918 12.368C7.43196 12.1963 7.64334 12.1105 7.89332 12.1105H12.1029V7.90097C12.1029 7.65161 12.1895 7.43912 12.3627 7.26348C12.5359 7.08783 12.7479 7 12.9986 7C13.2492 7 13.4604 7.08783 13.632 7.26348C13.8037 7.43912 13.8895 7.65161 13.8895 7.90097V12.1105H18.099C18.3484 12.1105 18.5609 12.1971 18.7365 12.3703C18.9122 12.5436 19 12.7555 19 13.0062C19 13.2569 18.9122 13.468 18.7365 13.6397C18.5609 13.8113 18.3484 13.8971 18.099 13.8971H13.8895V18.1067C13.8895 18.3567 13.8029 18.568 13.6297 18.7408C13.4564 18.9136 13.2445 19 12.9938 19C12.7431 19 12.532 18.9136 12.3603 18.7408C12.1887 18.568 12.1029 18.3567 12.1029 18.1067V13.8971Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-zoom-in,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"><path d="M12.1029 13.8971H7.89332C7.64334 13.8971 7.43196 13.8105 7.25918 13.6373C7.08639 13.4641 7 13.2521 7 13.0014C7 12.7508 7.08639 12.5396 7.25918 12.368C7.43196 12.1963 7.64334 12.1105 7.89332 12.1105H12.1029V7.90097C12.1029 7.65161 12.1895 7.43912 12.3627 7.26348C12.5359 7.08783 12.7479 7 12.9986 7C13.2492 7 13.4604 7.08783 13.632 7.26348C13.8037 7.43912 13.8895 7.65161 13.8895 7.90097V12.1105H18.099C18.3484 12.1105 18.5609 12.1971 18.7365 12.3703C18.9122 12.5436 19 12.7555 19 13.0062C19 13.2569 18.9122 13.468 18.7365 13.6397C18.5609 13.8113 18.3484 13.8971 18.099 13.8971H13.8895V18.1067C13.8895 18.3567 13.8029 18.568 13.6297 18.7408C13.4564 18.9136 13.2445 19 12.9938 19C12.7431 19 12.532 18.9136 12.3603 18.7408C12.1887 18.568 12.1029 18.3567 12.1029 18.1067V13.8971Z"/></svg>')
+  );
 }
 
-.deck-widget-button-group > *:not(:last-child),
-.deck-widget-button-group > *:not(:last-child) > button {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.deck-widget-button-group > *:not(:first-child),
-.deck-widget-button-group > *:not(:first-child) > button {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+.deck-widget.deck-widget-zoom button.deck-widget-zoom-out .deck-widget-icon {
+  mask-image: var(
+    --icon-zoom-out,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"> wBox="0 0 26 26" fill="none"><path d="M7.89332 13.8866C7.64334 13.8866 7.43196 13.8 7.25918 13.6268C7.08639 13.4535 7 13.2416 7 12.9909C7 12.7403 7.08639 12.5291 7.25918 12.3575C7.43196 12.1858 7.64334 12.1 7.89332 12.1H18.099C18.349 12.1 18.5617 12.1866 18.737 12.3598C18.9123 12.5331 19 12.745 19 12.9957C19 13.2463 18.9123 13.4575 18.737 13.6291C18.5617 13.8008 18.349 13.8866 18.099 13.8866H7.89332Z"/></svg>')
+  );
+  -webkit-mask-image: var(
+    --icon-zoom-out,
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 26 26" fill="black"> wBox="0 0 26 26" fill="none"><path d="M7.89332 13.8866C7.64334 13.8866 7.43196 13.8 7.25918 13.6268C7.08639 13.4535 7 13.2416 7 12.9909C7 12.7403 7.08639 12.5291 7.25918 12.3575C7.43196 12.1858 7.64334 12.1 7.89332 12.1H18.099C18.349 12.1 18.5617 12.1866 18.737 12.3598C18.9123 12.5331 19 12.745 19 12.9957C19 13.2463 18.9123 13.4575 18.737 13.6291C18.5617 13.8008 18.349 13.8866 18.099 13.8866H7.89332Z"/></svg>')
+  );
 }

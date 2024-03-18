@@ -7,6 +7,7 @@ interface ZoomWidgetProps {
   id: string;
   viewId?: string | null;
   placement?: WidgetPlacement;
+  orientation?: 'vertical' | 'horizontal';
   zoomInLabel?: string;
   zoomOutLabel?: string;
   transitionDuration?: number;
@@ -18,6 +19,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   id = 'zoom';
   props: ZoomWidgetProps;
   placement: WidgetPlacement = 'top-left';
+  orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
   viewport?: Viewport;
   deck?: Deck;
@@ -27,6 +29,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.id = props.id || 'zoom';
     this.viewId = props.viewId || null;
     this.placement = props.placement || 'top-left';
+    this.orientation = props.orientation || 'vertical';
     props.transitionDuration = props.transitionDuration || 200;
     props.zoomInLabel = props.zoomInLabel || 'Zoom In';
     props.zoomOutLabel = props.zoomOutLabel || 'Zoom Out';
@@ -43,13 +46,17 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
       Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
     }
     const ui = (
-      <div className="deck-widget-button-group">
-        <Button onClick={() => this.handleZoomIn()} label={this.props.zoomInLabel}>
-          <path d="M12 4.5v15m7.5-7.5h-15" />
-        </Button>
-        <Button onClick={() => this.handleZoomOut()} label={this.props.zoomOutLabel}>
-          <path d="M19.5 12h-15" />
-        </Button>
+      <div className={`deck-widget-button-group ${this.orientation}`}>
+        <IconButton
+          onClick={() => this.handleZoomIn()}
+          label={this.props.zoomInLabel}
+          className="deck-widget-zoom-in"
+        />
+        <IconButton
+          onClick={() => this.handleZoomOut()}
+          label={this.props.zoomOutLabel}
+          className="deck-widget-zoom-out"
+        />
       </div>
     );
     render(ui, element);
@@ -94,22 +101,16 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 }
 
-const Button = props => {
-  const {label, onClick} = props;
+const IconButton = props => {
+  const {className, label, onClick} = props;
   return (
-    <div className="deck-widget-button-border">
-      <button className="deck-widget-button" type="button" onClick={onClick} title={label}>
-        <svg
-          fill="none"
-          width="100%"
-          height="100%"
-          viewBox="0 0 24 24"
-          style="stroke-width: 2px"
-          stroke="currentColor"
-        >
-          {props.children}
-        </svg>
-      </button>
-    </div>
+    <button
+      className={`deck-widget-button ${className}`}
+      type="button"
+      onClick={onClick}
+      title={label}
+    >
+      <div className="deck-widget-icon" />
+    </button>
   );
 };
