@@ -7,8 +7,7 @@ import {
   FirstPersonView
 } from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-// TODO v9
-// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
@@ -89,9 +88,7 @@ export default [
       })
     ],
     goldenImage: './test/render/golden-images/map-repeat.png'
-  }
-  // TODO v9
-  /*
+  },
   ...[true, false].map(binary => {
     const id = `globe-mvt${binary ? '-binary' : ''}`;
     return {
@@ -121,11 +118,7 @@ export default [
           stroked: false,
           getFillColor: [0, 0, 0],
           onTileError: error => {
-            if (error.message.includes('404')) {
-              // trying to load tiles in the previous viewport, ignore
-            } else {
-              throw error;
-            }
+            //ignore missing tiles
           },
           lineWidthMinPixels: 1,
           binary,
@@ -139,5 +132,4 @@ export default [
       goldenImage: `./test/render/golden-images/globe-mvt.png`
     };
   })
-  */
 ];

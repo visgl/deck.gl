@@ -5,7 +5,7 @@
 
 ### Per Layer Control of GPU parameters
 
-The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of GPU parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering.
+The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of GPU parameters such as blending mode, depth testing etc. This can provide significant extra control over rendering.
 
 ```js
 const layer = new ScatterplotLayer({

@@ -83,7 +83,13 @@ export {
 };
 
 export type {
+  GeojsonResult,
+  JsonResult,
   TilejsonResult,
+  SourceOptions,
+  QuerySourceOptions,
+  TableSourceOptions,
+  TilesetSourceOptions,
   BoundaryQuerySourceOptions,
   BoundaryTableSourceOptions,
   H3QuerySourceOptions,
@@ -95,7 +101,5 @@ export type {
   QuadbinTilesetSourceOptions,
   VectorQuerySourceOptions,
   VectorTableSourceOptions,
-  VectorTilesetSourceOptions,
-  GeojsonResult,
-  JsonResult
+  VectorTilesetSourceOptions
 } from './sources/index';
