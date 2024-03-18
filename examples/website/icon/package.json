@@ -9,12 +9,14 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "^8.8.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "deck.gl": "^9.0.0-beta",
     "maplibre-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-map-gl": "^7.1.0",
-    "supercluster": "^6.0.1"
+    "supercluster": "^8.0.1"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

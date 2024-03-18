@@ -26,7 +26,7 @@
     "d3-color": "^3.1.0",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
-    "d3-scale": "^3.2.1",
+    "d3-scale": "^4.0.0",
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^3.0.0",
     "maplibre-gl": "^3.0.0",
@@ -34,8 +34,8 @@
     "react-ace": "^6.1.4",
     "react-dom": "^18.0.0",
     "react-map-gl": "^7.1.0",
-    "react-virtualized-auto-sizer": "^1.0.2",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "supercluster": "^8.0.1"
   },
   "devDependencies": {
     "@docusaurus/core": "^2.2.0",

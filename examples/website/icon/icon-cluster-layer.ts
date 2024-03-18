@@ -2,7 +2,15 @@ import {CompositeLayer} from '@deck.gl/core';
 import {IconLayer, IconLayerProps} from '@deck.gl/layers';
 import Supercluster from 'supercluster';
 
-function getIconName(size) {
+import type {PointFeature, ClusterFeature, ClusterProperties} from 'supercluster';
+import type {UpdateParameters, PickingInfo} from '@deck.gl/core';
+
+export type IconClusterLayerPickingInfo<DataT> = PickingInfo<
+  DataT | (DataT & ClusterProperties),
+  {objects?: DataT[];}
+>;
+
+function getIconName(size: number): string {
   if (size === 0) {
     return '';
   }
@@ -15,32 +23,33 @@ function getIconName(size) {
   return 'marker-100';
 }
 
-function getIconSize(size) {
+function getIconSize(size: number): number {
   return Math.min(100, size) / 100 + 1;
 }
 
-export default class IconClusterLayer<ExtraProps extends {} = {}> extends CompositeLayer<
-  Required<IconLayerProps> & ExtraProps
+export default class IconClusterLayer<DataT extends {[key: string]: any} = any, ExtraProps extends {} = {}> extends CompositeLayer<
+  Required<IconLayerProps<DataT>> & ExtraProps
   >
 {
   state!: {
-    data: any;
-    index: any;
+    data: (PointFeature<DataT> | ClusterFeature<DataT>)[];
+    index: Supercluster<DataT, DataT>;
     z: number;
   };
 
-  shouldUpdateState({changeFlags}) {
+  shouldUpdateState({changeFlags}: UpdateParameters<this>) {
     return changeFlags.somethingChanged;
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
     const rebuildIndex = changeFlags.dataChanged || props.sizeScale !== oldProps.sizeScale;
 
     if (rebuildIndex) {
-      const index = new Supercluster({maxZoom: 16, radius: props.sizeScale * Math.sqrt(2)});
+      const index = new Supercluster<DataT, DataT>({maxZoom: 16, radius: props.sizeScale * Math.sqrt(2)});
       index.load(
-        props.data.map(d => ({
-          geometry: {coordinates: props.getPosition(d)},
+        // @ts-ignore Supercluster expects proper GeoJSON feature
+        (props.data as DataT[]).map(d => ({
+          geometry: {coordinates: (props.getPosition as Function)(d)},
           properties: d
         }))
       );
@@ -56,33 +65,35 @@ export default class IconClusterLayer<ExtraProps extends {} = {}> extends Compos
     }
   }
 
-  getPickingInfo({info, mode}) {
-    const pickedObject = info.object && info.object.properties;
+  getPickingInfo({info, mode}: {info: PickingInfo<PointFeature<DataT> | ClusterFeature<DataT>>; mode: string;}): IconClusterLayerPickingInfo<DataT> {
+    const pickedObject = info.object?.properties;
     if (pickedObject) {
+      let objects: DataT[] | undefined;
       if (pickedObject.cluster && mode !== 'hover') {
-        info.objects = this.state.index
+        objects = this.state.index
           .getLeaves(pickedObject.cluster_id, 25)
           .map(f => f.properties);
       }
-      info.object = pickedObject;
+      return {...info, object: pickedObject, objects};
     }
-    return info;
+    return {...info, object: undefined};
   }
 
   renderLayers() {
     const {data} = this.state;
     const {iconAtlas, iconMapping, sizeScale} = this.props;
 
-    return new IconLayer(
+    return new IconLayer<PointFeature<DataT> | ClusterFeature<DataT>>({
+      data,
+      iconAtlas,
+      iconMapping,
+      sizeScale,
+      getPosition: d => d.geometry.coordinates as [number, number],
+      getIcon: d => getIconName(d.properties.cluster ? d.properties.point_count : 1),
+      getSize: d => getIconSize(d.properties.cluster ? d.properties.point_count : 1)
+    },
       this.getSubLayerProps({
         id: 'icon',
-        data,
-        iconAtlas,
-        iconMapping,
-        sizeScale,
-        getPosition: d => d.geometry.coordinates,
-        getIcon: d => getIconName(d.properties.cluster ? d.properties.point_count : 1),
-        getSize: d => getIconSize(d.properties.cluster ? d.properties.point_count : 1)
       })
     );
   }

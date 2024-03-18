@@ -11,7 +11,7 @@ To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.
 export MapboxAccessToken=<mapbox_access_token>	
 ```	
 
-Or set `MAPBOX_TOKEN` directly in `app.jsx`.
+Or set `MAPBOX_TOKEN` directly in `app.tsx`.
 
 ```bash
 # install dependencies

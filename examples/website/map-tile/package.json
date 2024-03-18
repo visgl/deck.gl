@@ -9,7 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "deck.gl": "^8.8.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "deck.gl": "^9.0.0-beta",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

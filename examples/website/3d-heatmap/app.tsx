@@ -7,6 +7,8 @@ import DeckGL from '@deck.gl/react';
 
 import {csv} from 'd3-request';
 
+import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
@@ -30,14 +32,7 @@ const pointLight2 = new PointLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight1, pointLight2});
 
-const material = {
-  ambient: 0.64,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [51, 51, 51]
-};
-
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -1.415727,
   latitude: 52.232395,
   zoom: 6.6,
@@ -49,7 +44,7 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-export const colorRange = [
+export const colorRange: Color[] = [
   [1, 152, 189],
   [73, 227, 206],
   [216, 254, 181],
@@ -58,7 +53,7 @@ export const colorRange = [
   [209, 55, 78]
 ];
 
-function getTooltip({object}) {
+function getTooltip({object}: PickingInfo) {
   if (!object) {
     return null;
   }
@@ -72,16 +67,23 @@ function getTooltip({object}) {
     ${count} Accidents`;
 }
 
-/* eslint-disable react/no-deprecated */
+type DataPoint = [longitude: number, latitude: number];
+
 export default function App({
-  data,
+  data = null,
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
   coverage = 1
+}: {
+  data?: DataPoint[] | null;
+  mapStyle?: string;
+  radius?: number;
+  upperPercentile?: number;
+  coverage?: number;
 }) {
   const layers = [
-    new HexagonLayer({
+    new HexagonLayer<DataPoint>({
       id: 'heatmap',
       colorRange,
       coverage,
@@ -93,7 +95,12 @@ export default function App({
       pickable: true,
       radius,
       upperPercentile,
-      material,
+      material: {
+        ambient: 0.64,
+        diffuse: 0.6,
+        shininess: 32,
+        specularColor: [51, 51, 51]
+      },
 
       transitions: {
         elevationScale: 3000
@@ -114,13 +121,13 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
   csv(DATA_URL, (error, response) => {
     if (!error) {
-      const data = response.map(d => [Number(d.lng), Number(d.lat)]);
+      const data: DataPoint[] = response.map(d => [Number(d.lng), Number(d.lat)]);
       root.render(<App data={data} />);
     }
   });

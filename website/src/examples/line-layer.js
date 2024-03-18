@@ -60,7 +60,7 @@ class LineDemo extends Component {
         {...otherProps}
         flightPaths={data && data[0]}
         airports={data && data[1]}
-        getWidth={params.width.value}
+        lineWidth={params.width.value}
       />
     );
   }

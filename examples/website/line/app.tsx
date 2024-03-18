@@ -4,6 +4,8 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
+import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+
 // Source data CSV
 const DATA_URL = {
   AIRPORTS:
@@ -12,7 +14,21 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
 };
 
-const INITIAL_VIEW_STATE = {
+type Airport = {
+  type: 'major' | 'mid' | 'small';
+  name: string;
+  abbrev: string; // airport code
+  coordinates: [longitude: number, latitude: number];
+};
+
+type FlightPath = {
+  start: [longitude: number, latitude: number, altitude: number];
+  end: [longitude: number, latitude: number, altitude: number];
+  country: string;
+  name: string; // tail number
+};
+
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
@@ -23,28 +39,12 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function getColor(d) {
-  const z = d.start[2];
-  const r = z / 10000;
-
-  return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
-}
-
-function getSize(type) {
-  if (type.search('major') >= 0) {
-    return 100;
-  }
-  if (type.search('small') >= 0) {
-    return 30;
-  }
-  return 60;
-}
-
-function getTooltip({object}) {
+function getTooltip(info: PickingInfo) {
+  const object = info.object as Airport | FlightPath;
   return (
     object &&
     `\
-  ${object.country || object.abbrev || ''}
+  ${(object as FlightPath).country || (object as Airport).abbrev || ''}
   ${object.name.indexOf('0x') >= 0 ? '' : object.name}`
   );
 }
@@ -52,27 +52,44 @@ function getTooltip({object}) {
 export default function App({
   airports = DATA_URL.AIRPORTS,
   flightPaths = DATA_URL.FLIGHT_PATHS,
-  getWidth = 3,
+  lineWidth = 3,
   mapStyle = MAP_STYLE
+}: {
+  airports?: string | Airport[];
+  flightPaths?: string | FlightPath[];
+  lineWidth?: number;
+  mapStyle?: string;
 }) {
   const layers = [
-    new ScatterplotLayer({
+    new ScatterplotLayer<Airport>({
       id: 'airports',
       data: airports,
       radiusScale: 20,
       getPosition: d => d.coordinates,
       getFillColor: [255, 140, 0],
-      getRadius: d => getSize(d.type),
+      getRadius: d => {
+        if (d.type.search('major') >= 0) {
+          return 100;
+        }
+        if (d.type.search('small') >= 0) {
+          return 30;
+        }
+        return 60;
+      },
       pickable: true
     }),
-    new LineLayer({
+    new LineLayer<FlightPath>({
       id: 'flight-paths',
       data: flightPaths,
       opacity: 0.8,
       getSourcePosition: d => d.start,
       getTargetPosition: d => d.end,
-      getColor,
-      getWidth,
+      getColor: d => {
+        const z = d.start[2];
+        const r = z / 10000;
+        return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
+      },
+      getWidth: lineWidth,
       pickable: true
     })
   ];
@@ -98,6 +115,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
