@@ -97,6 +97,15 @@ const layer = new CartoLayer({
 });
 ```
 
+### loaders.gl
+
+loaders.gl dependencies are updated to v4. Although most version differences are handled internal to deck.gl, some changes may be required for applications that work directly with loaders:
+
+- If an application imports `@loaders.gl/*` sub packages to load specific data formats, they should be upgraded from v3.x to v4.x.
+- If the layer prop `dataTransform` is used to pre-process data, the loaded data object might have changed. For example, `CSVLoader` now yields [a new table format](https://loaders.gl/docs/specifications/category-table). 
+- For a complete list of breaking changes and improvements, see [loaders.gl 4.0 upgrade guide](https://loaders.gl/docs/upgrade-guide#upgrading-to-v40).
+
+
 ## Upgrading from deck.gl v8.8 to v8.9
 
 #### Breaking changes

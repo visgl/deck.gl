@@ -47,7 +47,7 @@ So, what bundle size impact should you expect? When do you know if you have set 
 
 Notes:
 
-* Numbers represent the bundle size of a minimal application, bundled with Webpack 4, which means that the untransipiled and the ESM distribution results benefit from some tree shaking.
+* Numbers represent the bundle size of a minimal application, bundled with Webpack 4, which means that the untranspiled and the ESM distribution results benefit from some tree shaking.
 * The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your gzipped bundle to get by adding deck.gl as a dependency to your application.
 
 
