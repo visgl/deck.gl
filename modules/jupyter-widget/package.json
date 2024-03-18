@@ -39,7 +39,7 @@
     "@loaders.gl/3d-tiles": "^4.2.0-alpha.5",
     "@loaders.gl/core": "^4.2.0-alpha.5",
     "@loaders.gl/csv": "^4.2.0-alpha.5",
-    "@luma.gl/core": "^9.0.3",
+    "@luma.gl/core": "^9.0.4",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2"
   },
