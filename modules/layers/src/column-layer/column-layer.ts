@@ -243,7 +243,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   };
 
   getShaders() {
-    const {device} = this.context;
     const defines: Record<string, any> = {};
 
     const {flatShading} = this.props;
