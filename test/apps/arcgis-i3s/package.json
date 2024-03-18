@@ -6,7 +6,7 @@
   "dependencies": {
     "@deck.gl/core": "^8.1.0",
     "@deck.gl/layers": "^8.1.0",
-    "@loaders.gl/i3s": "^4.2.0-alpha.5"
+    "@loaders.gl/i3s": "^4.1.4"
   },
   "devDependencies": {
     "vite": "^4.0.0"

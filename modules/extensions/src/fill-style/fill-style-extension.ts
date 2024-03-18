@@ -19,11 +19,7 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
     type: 'image',
     value: null,
     async: true,
-    parameters: {
-      // Override default mipmap filter 'linear', i.e. set MIN_FILTER to LINEAR instead of LINEAR_MIPMAP_LINEAR
-      // @ts-expect-error invalid value for type `SamplerProps` - luma.gl should allow unset
-      mipmapFilter: ''
-    }
+    parameters: {lodMaxClamp: 0}
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,

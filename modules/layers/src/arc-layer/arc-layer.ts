@@ -231,7 +231,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     super.updateState(opts);
     const {props, oldProps, changeFlags} = opts;
     // Re-generate model if geometry changed
-    if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+    if (changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
