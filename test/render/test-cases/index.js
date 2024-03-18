@@ -39,7 +39,7 @@ export default [].concat(
   geojsonLayerTests,
   pathLayerTests,
   pointCloudLayerTests,
-  // polygonLayerTests,
+  polygonLayerTests,
   iconLayerTests,
   textLayerTests,
   // contourLayerTests,
