@@ -2,6 +2,7 @@
 import {FlyToInterpolator} from '@deck.gl/core';
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
+import {ButtonGroup, GroupedIconButton} from './components';
 
 interface ZoomWidgetProps {
   id: string;
@@ -46,18 +47,18 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
       Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
     }
     const ui = (
-      <div className={`deck-widget-button-group ${this.orientation}`}>
-        <IconButton
+      <ButtonGroup orientation={this.orientation}>
+        <GroupedIconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
           className="deck-widget-zoom-in"
         />
-        <IconButton
+        <GroupedIconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
           className="deck-widget-zoom-out"
         />
-      </div>
+      </ButtonGroup>
     );
     render(ui, element);
 
@@ -100,17 +101,3 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.viewport && this.handleZoom(this.viewport.zoom - 1);
   }
 }
-
-const IconButton = props => {
-  const {className, label, onClick} = props;
-  return (
-    <button
-      className={`deck-widget-button ${className}`}
-      type="button"
-      onClick={onClick}
-      title={label}
-    >
-      <div className="deck-widget-icon" />
-    </button>
-  );
-};

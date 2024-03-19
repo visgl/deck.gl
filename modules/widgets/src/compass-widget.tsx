@@ -71,25 +71,20 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
       return;
     }
     const ui = (
-      <div className="deck-widget-button">
-        <div className="deck-widget-button-border" style={{perspective: 100}}>
-          <button
-            type="button"
-            onClick={() => this.handleCompassReset()}
-            label={this.props.label}
-            style={{transform: `rotateX(${rx}deg)`}}
-          >
-            <svg fill="none" width="100%" height="100%" viewBox={'0 0 16 16'}>
-              <g transform={`rotate(${rz},8,8)`}>
-                <path d="M5 8.00006L7.99987 0L10.9997 8.00006H5Z" fill="#F05C44" />
-                <path
-                  d="M11.0002 7.99994L8.00038 16L5.00051 7.99994L11.0002 7.99994Z"
-                  fill="#ccc"
-                />
-              </g>
-            </svg>
-          </button>
-        </div>
+      <div className="deck-widget-button" style={{perspective: 100}}>
+        <button
+          type="button"
+          onClick={() => this.handleCompassReset()}
+          label={this.props.label}
+          style={{transform: `rotateX(${rx}deg)`}}
+        >
+          <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
+            <g transform={`rotate(${rz},13,13)`}>
+              <path d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z" fill="#F05C44" />
+              <path d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z" fill="#C2C2CC" />
+            </g>
+          </svg>
+        </button>
       </div>
     );
     render(ui, element);

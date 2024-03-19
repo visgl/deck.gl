@@ -2,11 +2,9 @@
   margin: var(--widget-margin, 12px);
 }
 
-/* button */
-.deck-widget-button-border {
-  width: var(--button-size, 28px);
-  height: var(--button-size, 28px);
-
+/* Common button container styles */
+.deck-widget-button,
+.deck-widget-button-group {
   background: var(--button-stroke, rgba(255, 255, 255, 0.3));
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
@@ -16,24 +14,30 @@
   justify-content: center;
 }
 
+/* Single button */
+.deck-widget-button {
+  width: var(--button-size, 28px);
+  height: var(--button-size, 28px);
+}
+
+/* Button group */
 .deck-widget-button-group {
   width: calc(var(--button-size, 28px) - 2);
   height: calc((var(--button-size, 28px) * 2) - 1);
-  display: inline-flex;
-  align-items: center;
-  flex-direction: column;
-
+  
+  flex-direction: row;
   padding: 1px;
   gap: 1px;
-
-  background: var(--button-stroke, rgba(255, 255, 255, 0.3));
-  border-radius: var(--button-corner-radius, 8px);
-  box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
 }
 
+.deck-widget-button-group.vertical {
+  display: inline-flex;
+  flex-direction: column;
+}
 
+/* Common button styles */
 .deck-widget-button-group button,
-.deck-widget-button-border button {
+.deck-widget-button button {
   width: calc(var(--button-size, 28px) - 2px);
   height: calc(var(--button-size, 28px) - 2px);
 
@@ -49,43 +53,33 @@
   padding: 0;
 }
 
-.deck-widget-button-group.horizontal {
-  flex-direction: row;
-}
-
-.deck-widget-button-group > div {
-  display: inherit;
-}
-
-.deck-widget-button-group > *:not(:last-child),
-.deck-widget-button-group > *:not(:last-child) > button {
-  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+/* Border radius adjustments for grouped buttons */
+.deck-widget-button-group.vertical > *:not(:last-child),
+.deck-widget-button-group.vertical > *:not(:last-child) > button {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.deck-widget-button-group > *:not(:first-child),
-.deck-widget-button-group > *:not(:first-child) > button {
-  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
+.deck-widget-button-group.vertical > *:not(:first-child),
+.deck-widget-button-group.vertical > *:not(:first-child) > button {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
+
 .deck-widget-button-group.horizontal > *:not(:last-child),
 .deck-widget-button-group.horizontal > *:not(:last-child) > button {
-  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .deck-widget-button-group.horizontal > *:not(:first-child),
 .deck-widget-button-group.horizontal > *:not(:first-child) > button {
-  border-radius: calc(var(--button-corner-radius, 8px) - 1px);
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-/* icon */
+/* Icon button styles */
 .deck-widget button .deck-widget-icon {
   background-color: var(--button-icon-idle, #616166);
   background-position: 50%;
@@ -99,6 +93,7 @@
   background-color: var(--button-icon-hover, rgb(24, 24, 26));
 }
 
+/* Fullscreen styles */
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-enter .deck-widget-icon {
   mask-image: var(
     --icon-fullscreen-enter,
@@ -130,6 +125,7 @@
   z-index: 99999;
 }
 
+/* Zoom styles */
 .deck-widget.deck-widget-zoom button.deck-widget-zoom-in .deck-widget-icon {
   mask-image: var(
     --icon-zoom-in,
