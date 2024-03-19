@@ -94,10 +94,14 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    this.viewport && this.handleZoom(this.viewport.zoom + 1);
+    if (this.viewport) {
+      this.handleZoom(this.viewport.zoom + 1);
+    }
   }
 
   handleZoomOut() {
-    this.viewport && this.handleZoom(this.viewport.zoom - 1);
+    if (this.viewport) {
+      this.handleZoom(this.viewport.zoom - 1);
+    }
   }
 }
