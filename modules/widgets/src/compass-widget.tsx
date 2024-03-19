@@ -5,11 +5,26 @@ import {render} from 'preact';
 
 interface CompassWidgetProps {
   id: string;
-  viewId?: string | null; // required for multi-view
   placement?: WidgetPlacement;
+  /**
+   * View to attach to and interact with. Required when using multiple views.
+   */
+  viewId?: string | null;
+  /**
+   * Tooltip message.
+   */
   label?: string;
+  /**
+   * Bearing and pitch reset transition duration in ms.
+   */
   transitionDuration?: number;
+  /**
+   * CSS inline style overrides.
+   */
   style?: Partial<CSSStyleDeclaration>;
+  /**
+   * Additional CSS class.
+   */
   className?: string;
 }
 

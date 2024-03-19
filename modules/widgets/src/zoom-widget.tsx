@@ -6,13 +6,34 @@ import {ButtonGroup, GroupedIconButton} from './components';
 
 interface ZoomWidgetProps {
   id: string;
-  viewId?: string | null; // required for multi-view
   placement?: WidgetPlacement;
+  /**
+   * View to attach to and interact with. Required when using multiple views.
+   */
+  viewId?: string | null;
+  /**
+   * Button orientation.
+   */
   orientation?: 'vertical' | 'horizontal';
+  /**
+   * Tooltip message on zoom in button.
+   */
   zoomInLabel?: string;
+  /**
+   * Tooltip message on zoom out button.
+   */
   zoomOutLabel?: string;
+  /**
+   * Zoom transition duration in ms.
+   */
   transitionDuration?: number;
+  /**
+   * CSS inline style overrides.
+   */
   style?: Partial<CSSStyleDeclaration>;
+  /**
+   * Additional CSS class.
+   */
   className?: string;
 }
 

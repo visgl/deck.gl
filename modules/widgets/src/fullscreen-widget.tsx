@@ -21,7 +21,13 @@ interface FullscreenWidgetProps {
    * Tooltip message when fullscreen.
    */
   exitLabel?: string;
+  /**
+   * CSS inline style overrides.
+   */
   style?: Partial<CSSStyleDeclaration>;
+  /**
+   * Additional CSS class.
+   */
   className?: string;
 }
 

@@ -5,6 +5,9 @@ Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and 
 This module contains the following extensions:
 
 - [FullscreenWidget](./fullscreen-widget.md)
+- [ZoomWidget](./zoom-widget.md)
+- [CompassWidget](./compass-widget.md)
+
 
 ## Installation
 
@@ -44,7 +47,7 @@ Customizing the appearance of widgets can be achieved using CSS variables. This 
 
 ### Global Theming
 
-Apply to all wigdets with the `.deck-widget` selector.
+Apply to all widgets with the `.deck-widget` selector.
 
 ```css
 .deck-widget {
@@ -94,7 +97,7 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
-| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
+| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
 | `--widget-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
 
 ### Color
@@ -114,6 +117,8 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | ---- | ---- | ------- |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
+| `--icon-zoom-in` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Add](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40) |
+| `--icon-zoom-out` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Remove](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40) |
 
 #### Replacing Icons
 
