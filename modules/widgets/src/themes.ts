@@ -5,7 +5,9 @@ export const LightTheme = {
   '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
-  '--button-icon-hover': 'rgba(24, 24, 26, 1)'
+  '--button-icon-hover': 'rgba(24, 24, 26, 1)',
+  '--icon-compass-north-color': '#F05C44',
+  '--icon-compass-south-color': '#C2C2CC'
 };
 
 export const DarkTheme = {
@@ -15,7 +17,9 @@ export const DarkTheme = {
   '--button-shadow': '0px 0px 8px 0px rgba(0, 0, 0, 0.25)',
   '--button-backdrop-filter': 'unset',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
-  '--button-icon-hover': 'rgba(215, 214, 229, 1)'
+  '--button-icon-hover': 'rgba(215, 214, 229, 1)',
+  '--icon-compass-north-color': '#F05C44',
+  '--icon-compass-south-color': '#C2C2CC'
 };
 
 export const LightGlassTheme = {
@@ -26,7 +30,9 @@ export const LightGlassTheme = {
     '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(97, 97, 102, 1)',
-  '--button-icon-hover': 'rgba(24, 24, 26, 1)'
+  '--button-icon-hover': 'rgba(24, 24, 26, 1)',
+  '--icon-compass-north-color': '#F05C44',
+  '--icon-compass-south-color': '#C2C2CC'
 };
 
 export const DarkGlassTheme = {
@@ -37,5 +43,7 @@ export const DarkGlassTheme = {
     '0px 0px 8px 0px rgba(0, 0, 0, 0.25), 0px 0px 8px 0px rgba(0, 0, 0, 0.1) inset',
   '--button-backdrop-filter': 'blur(4px)',
   '--button-icon-idle': 'rgba(158, 157, 168, 1)',
-  '--button-icon-hover': 'rgba(215, 214, 229, 1)'
+  '--button-icon-hover': 'rgba(215, 214, 229, 1)',
+  '--icon-compass-north-color': '#F05C44',
+  '--icon-compass-south-color': '#C2C2CC'
 };

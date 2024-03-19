@@ -95,8 +95,14 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
         >
           <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
             <g transform={`rotate(${rz},13,13)`}>
-              <path d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z" fill="#F05C44" />
-              <path d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z" fill="#C2C2CC" />
+              <path
+                d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
+                fill="var(--icon-compass-north-color, #F05C44)"
+              />
+              <path
+                d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
+                fill="var(--icon-compass-south-color, #C2C2CC)"
+              />
             </g>
           </svg>
         </button>

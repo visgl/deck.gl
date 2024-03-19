@@ -109,8 +109,10 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--button-inner-stroke` | [Border](https://developer.mozilla.org/en-US/docs/Web/CSS/border) | `unset` |
 | `--button-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
-| `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)`
-| `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)`
+| `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
+| `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+| `--icon-compass-north-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#F05C44` |
+| `--icon-compass-south-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#C2C2CC` |
 
 ### Icon
 | Name | Type | Default |
