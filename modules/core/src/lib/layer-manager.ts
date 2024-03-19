@@ -74,6 +74,8 @@ export default class LayerManager {
   private _needsUpdate: string | false = false;
   private _nextLayers: LayersList | null = null;
   private _debug: boolean = false;
+  // This flag is sepaprate from _needsUpdate because it can be set during an update and should trigger another full update
+  private _defaultShaderModulesChanged: boolean = false;
 
   /**
    * @param device
@@ -153,6 +155,9 @@ export default class LayerManager {
     if (this._nextLayers && this._nextLayers !== this._lastRenderedLayers) {
       // New layers array may be the same as the old one if `setProps` is called by React
       return 'layers changed';
+    }
+    if (this._defaultShaderModulesChanged) {
+      return 'shader modules changed';
     }
     return this._needsUpdate;
   }
@@ -245,10 +250,7 @@ export default class LayerManager {
     const {defaultShaderModules} = this.context;
     if (!defaultShaderModules.find(m => m.name === module.name)) {
       defaultShaderModules.push(module);
-      for (const layer of this.layers) {
-        layer.setNeedsUpdate();
-        layer.setChangeFlags({extensionsChanged: true});
-      }
+      this._defaultShaderModulesChanged = true;
     }
   }
 
@@ -258,10 +260,7 @@ export default class LayerManager {
     const i = defaultShaderModules.findIndex(m => m.name === module.name);
     if (i >= 0) {
       defaultShaderModules.splice(i, 1);
-      for (const layer of this.layers) {
-        layer.setNeedsUpdate();
-        layer.setChangeFlags({extensionsChanged: true});
-      }
+      this._defaultShaderModulesChanged = true;
     }
   }
 
@@ -281,6 +280,14 @@ export default class LayerManager {
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
       }
+    }
+
+    if (this._defaultShaderModulesChanged) {
+      for (const layer of oldLayers) {
+        layer.setNeedsUpdate();
+        layer.setChangeFlags({extensionsChanged: true});
+      }
+      this._defaultShaderModulesChanged = false;
     }
 
     // Allocate array for generated layers
