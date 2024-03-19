@@ -59,6 +59,6 @@ export default [].concat(
   effectsTests,
   transitionTests,
   terrainLayerTests,
-  // collisionFilterExtensionTests
+  collisionFilterExtensionTests,
   dataFilterExtensionTests
 );
