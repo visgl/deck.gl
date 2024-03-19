@@ -1,4 +1,4 @@
-import {Device, Texture} from '@luma.gl/core';
+import {Texture} from '@luma.gl/core';
 import {log, getShaderAssembler} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
@@ -7,7 +7,7 @@ import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
 import {HeightMapBuilder} from './height-map-builder';
 
-import type {Effect, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
+import type {Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
 /** Class to manage terrain effect */
 export class TerrainEffect implements Effect {
@@ -28,7 +28,7 @@ export class TerrainEffect implements Effect {
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
-  initialize(device: Device) {
+  setup({device}: EffectContext) {
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -46,18 +46,7 @@ export class TerrainEffect implements Effect {
     getShaderAssembler().addDefaultModule(terrainModule);
   }
 
-  preRender(device: Device, opts: PreRenderOptions): void {
-    if (!this.dummyHeightMap) {
-      // First time this effect is in use, initialize resources and register the shader module
-      this.initialize(device);
-      for (const layer of opts.layers) {
-        // Force the terrain layer (and its descendents) to rebuild their models with the new shader
-        if (layer.props.operation.includes('terrain')) {
-          layer.setChangeFlags({extensionsChanged: true});
-        }
-      }
-    }
-
+  preRender(opts: PreRenderOptions): void {
     // @ts-expect-error pickZ only defined in picking pass
     if (opts.pickZ) {
       // Do not update if picking attributes

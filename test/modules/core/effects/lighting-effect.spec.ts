@@ -25,6 +25,7 @@ test('LightingEffect#getModuleParameters', t => {
   const cameraLight = new CameraLight();
   const pointLight = new PointLight();
   const lightingEffect = new LightingEffect({cameraLight, pointLight});
+  lightingEffect.setup({device});
 
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
@@ -39,7 +40,7 @@ test('LightingEffect#getModuleParameters', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(device, {
+  lightingEffect.preRender({
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
@@ -58,6 +59,7 @@ test('LightingEffect#getModuleParameters', t => {
   t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getGLParameters is ok');
 
   lightingEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });
 
@@ -77,6 +79,7 @@ test('LightingEffect#preRender, cleanup', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight0, dirLight1});
+  lightingEffect.setup({device});
 
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
@@ -89,7 +92,7 @@ test('LightingEffect#preRender, cleanup', t => {
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.preRender(device, {
+  lightingEffect.preRender({
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
@@ -100,6 +103,7 @@ test('LightingEffect#preRender, cleanup', t => {
   t.ok(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map');
 
   lightingEffect.cleanup();
+  layerManager.finalize();
   t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect creates shadow passes');
   t.notOk(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map');
   t.end();
@@ -114,8 +118,9 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
+  lightingEffect.setup({device});
   const pipelineFactory = getShaderAssembler();
-  lightingEffect.preRender(device, {
+  lightingEffect.preRender({
     layers: [],
     viewports: [testViewport],
     onViewportActive: () => {},

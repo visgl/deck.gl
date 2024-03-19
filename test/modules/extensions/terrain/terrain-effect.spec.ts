@@ -8,11 +8,14 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
 import {makeSpy} from '@probe.gl/test-utils';
+import {device} from '@deck.gl/test-utils';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
 
 test('TerrainEffect', async t => {
   const terrainEffect = new TerrainEffect();
+  terrainEffect.setup({device});
+
   const terrainLayer = new TerrainLayer({
     elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     loaders: [TerrainLoader],
@@ -75,17 +78,17 @@ test('TerrainEffect', async t => {
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
-  let uniforms = meshLayer.state.model.getUniforms();
+  let uniforms = meshLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER, 'TERRAIN_MODE.USE_COVER');
   t.is(uniforms.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
-  uniforms = scatterplotLayer.state.model.getUniforms();
+  uniforms = scatterplotLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(uniforms.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
-  uniforms = pathLayer.state.model.getUniforms();
+  uniforms = pathLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(uniforms.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
@@ -96,7 +99,7 @@ test('TerrainEffect', async t => {
   t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
   renderTerrainCover.reset();
 
-  uniforms = meshLayer.state.model.getUniforms();
+  uniforms = meshLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.NONE, 'TERRAIN_MODE.NONE');
   t.is(uniforms.terrain_map?.width, 1, 'Terrain cover using empty texture');
 
@@ -107,6 +110,8 @@ test('TerrainEffect', async t => {
 
 test('TerrainEffect#without draw operation', async t => {
   const terrainEffect = new TerrainEffect();
+  terrainEffect.setup({device});
+
   const terrainLayer = new TerrainLayer({
     elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     loaders: [TerrainLoader],
@@ -169,17 +174,17 @@ test('TerrainEffect#without draw operation', async t => {
 
   // moduleUniforms
   const meshLayer = terrainLayer.getSubLayers()[0].getSubLayers()[0];
-  let uniforms = meshLayer.state.model.getUniforms();
+  let uniforms = meshLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_COVER_ONLY, 'TERRAIN_MODE.USE_COVER_ONLY');
   t.is(uniforms.terrain_map?.width, 1024, 'Terrain cover used as sampler');
 
   const scatterplotLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('points-circle'));
-  uniforms = scatterplotLayer.state.model.getUniforms();
+  uniforms = scatterplotLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.USE_HEIGHT_MAP, 'TERRAIN_MODE.USE_HEIGHT_MAP');
   t.is(uniforms.terrain_map?.id, 'height-map', 'Height map used as sampler');
 
   const pathLayer = geoLayer.getSubLayers().find(l => l.id.endsWith('linestrings'));
-  uniforms = pathLayer.state.model.getUniforms();
+  uniforms = pathLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(uniforms.terrain_map?.width, 1, 'Dummy height map used as sampler');
 
@@ -190,7 +195,7 @@ test('TerrainEffect#without draw operation', async t => {
   t.is(renderTerrainCover.callCount, 4, 'Terrain covers are redrawn');
   renderTerrainCover.reset();
 
-  uniforms = meshLayer.state.model.getUniforms();
+  uniforms = meshLayer.state.model.uniforms;
   t.is(uniforms.terrain_mode, TERRAIN_MODE.SKIP, 'TERRAIN_MODE.SKIP');
   t.is(uniforms.terrain_map?.width, 1, 'Terrain cover using empty texture');
 

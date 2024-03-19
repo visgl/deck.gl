@@ -26,11 +26,12 @@ test('PostProcessEffect#constructor', t => {
 
 test('PostProcessEffect#postRender', t => {
   const effect = new PostProcessEffect(testModule);
-  effect.preRender(device);
+  effect.setup({device});
+  effect.preRender();
   const inputBuffer = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
   const outputBuffer = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
 
-  const buffer1 = effect.postRender(device, {inputBuffer, swapBuffer: outputBuffer});
+  const buffer1 = effect.postRender({inputBuffer, swapBuffer: outputBuffer});
   t.ok(effect.passes, 'post-processing pass created');
 
   t.ok(buffer1, 'post-processing effect rendered without throwing');
@@ -39,7 +40,7 @@ test('PostProcessEffect#postRender', t => {
   const testFbo = device.createFramebuffer({
     colorAttachments: [device.createTexture({width: 1, height: 1})]
   });
-  const buffer2 = effect.postRender(device, {
+  const buffer2 = effect.postRender({
     inputBuffer,
     swapBuffer: outputBuffer,
     target: testFbo

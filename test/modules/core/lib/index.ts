@@ -29,7 +29,7 @@ import './deck-picker.spec';
 // import './tooltip.spec';
 // import './transition-manager.spec';
 // import './uniform-transition-manager.spec';
-// import './effect-manager.spec';
+import './effect-manager.spec';
 // import './pick-layers.spec';
 // import './picking.spec';
 // import './view-manager.spec';

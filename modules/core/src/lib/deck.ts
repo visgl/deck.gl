@@ -992,7 +992,10 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       timeline
     });
 
-    this.effectManager = new EffectManager();
+    this.effectManager = new EffectManager({
+      deck: this,
+      device: this.device
+    });
 
     this.deckRenderer = new DeckRenderer(this.device);
 

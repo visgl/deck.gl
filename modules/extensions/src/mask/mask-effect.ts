@@ -1,5 +1,13 @@
-import {Layer, Viewport, Effect, PreRenderOptions, CoordinateSystem, log} from '@deck.gl/core';
-import type {Device, Texture} from '@luma.gl/core';
+import {
+  Layer,
+  Viewport,
+  Effect,
+  EffectContext,
+  PreRenderOptions,
+  CoordinateSystem,
+  log
+} from '@deck.gl/core';
+import type {Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
 import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
@@ -42,17 +50,25 @@ export default class MaskEffect implements Effect {
   private maskMap?: Texture;
   private lastViewport?: Viewport;
 
-  preRender(
-    device: Device,
-    {layers, layerFilter, viewports, onViewportActive, views, isPicking}: PreRenderOptions
-  ): MaskPreRenderStats {
+  setup({device}: EffectContext) {
+    this.dummyMaskMap = device.createTexture({
+      width: 1,
+      height: 1
+    });
+
+    this.maskPass = new MaskPass(device, {id: 'default-mask'});
+    this.maskMap = this.maskPass.maskMap;
+  }
+
+  preRender({
+    layers,
+    layerFilter,
+    viewports,
+    onViewportActive,
+    views,
+    isPicking
+  }: PreRenderOptions): MaskPreRenderStats {
     let didRender = false;
-    if (!this.dummyMaskMap) {
-      this.dummyMaskMap = device.createTexture({
-        width: 1,
-        height: 1
-      });
-    }
 
     if (isPicking) {
       // Do not update on picking pass
@@ -66,11 +82,6 @@ export default class MaskEffect implements Effect {
       return {didRender};
     }
     this.masks = {};
-
-    if (!this.maskPass) {
-      this.maskPass = new MaskPass(device, {id: 'default-mask'});
-      this.maskMap = this.maskPass.maskMap;
-    }
 
     // Map layers to channels
     const channelMap = this._sortMaskChannels(maskLayers);
