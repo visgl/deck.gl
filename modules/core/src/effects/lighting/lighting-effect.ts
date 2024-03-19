@@ -1,5 +1,4 @@
 import type {Device} from '@luma.gl/core';
-import {ShaderAssembler} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';
 import {DirectionalLight} from './directional-light';
@@ -42,7 +41,6 @@ export default class LightingEffect implements Effect {
   private shadowPasses: ShadowPass[] = [];
   private shadowMaps: Texture[] = [];
   private dummyShadowMap: Texture | null = null;
-  private shaderAssembler?: ShaderAssembler;
   private shadowMatrices?: Matrix4[];
 
   constructor(props: LightingEffectProps = {}) {
@@ -51,12 +49,12 @@ export default class LightingEffect implements Effect {
 
   setup(context: EffectContext) {
     this.context = context;
-    const {device} = context;
+    const {device, deck} = context;
 
     if (this.shadow && !this.dummyShadowMap) {
       this._createShadowPasses(device);
-      this.shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
-      this.shaderAssembler.addDefaultModule(shadow);
+
+      deck._addDefaultShaderModule(shadow);
 
       this.dummyShadowMap = device.createTexture({
         width: 1,
@@ -154,7 +152,7 @@ export default class LightingEffect implements Effect {
     return parameters;
   }
 
-  cleanup(): void {
+  cleanup(context: EffectContext): void {
     for (const shadowPass of this.shadowPasses) {
       shadowPass.delete();
     }
@@ -164,11 +162,7 @@ export default class LightingEffect implements Effect {
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
-    }
-
-    if (this.shaderAssembler) {
-      this.shaderAssembler.removeDefaultModule(shadow);
-      this.shaderAssembler = null!;
+      context.deck._removeDefaultShaderModule(shadow);
     }
   }
 

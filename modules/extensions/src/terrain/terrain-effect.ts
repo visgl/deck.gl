@@ -1,5 +1,5 @@
 import {Texture} from '@luma.gl/core';
-import {log, getShaderAssembler} from '@deck.gl/core';
+import {log} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleSettings} from './shader-module';
 import {TerrainCover} from './terrain-cover';
@@ -28,7 +28,7 @@ export class TerrainEffect implements Effect {
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
-  setup({device}: EffectContext) {
+  setup({device, deck}: EffectContext) {
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -43,7 +43,7 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
-    getShaderAssembler().addDefaultModule(terrainModule);
+    deck._addDefaultShaderModule(terrainModule);
   }
 
   preRender(opts: PreRenderOptions): void {
@@ -95,7 +95,7 @@ export class TerrainEffect implements Effect {
     };
   }
 
-  cleanup(): void {
+  cleanup({deck}: EffectContext): void {
     if (this.dummyHeightMap) {
       this.dummyHeightMap.delete();
       this.dummyHeightMap = undefined;
@@ -111,7 +111,7 @@ export class TerrainEffect implements Effect {
     }
     this.terrainCovers.clear();
 
-    getShaderAssembler().removeDefaultModule(terrainModule);
+    deck._removeDefaultShaderModule(terrainModule);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {

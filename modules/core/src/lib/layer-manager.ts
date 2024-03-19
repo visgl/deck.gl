@@ -20,9 +20,8 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {PipelineFactory} from '@luma.gl/engine';
-import {ShaderAssembler} from '@luma.gl/shadertools';
-import {getPipelineFactory, getShaderAssembler} from '../shaderlib/index';
+import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import {getShaderAssembler} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -45,7 +44,7 @@ export type LayerContext = {
   deck?: Deck;
   device: Device;
   shaderAssembler: ShaderAssembler;
-  pipelineFactory: PipelineFactory;
+  defaultShaderModules: ShaderModule[];
   renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
@@ -104,9 +103,8 @@ export default class LayerManager {
       // @ts-expect-error
       gl: device?.gl,
       deck,
-      // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderAssembler: getShaderAssembler(),
-      pipelineFactory: (device && getPipelineFactory(device))!,
+      defaultShaderModules: [],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
@@ -241,6 +239,31 @@ export default class LayerManager {
       this.context.viewport = viewport;
     }
   };
+
+  /** Register a default shader module */
+  addDefaultShaderModule(module: ShaderModule) {
+    const {defaultShaderModules} = this.context;
+    if (!defaultShaderModules.find(m => m.name === module.name)) {
+      defaultShaderModules.push(module);
+      for (const layer of this.layers) {
+        layer.setNeedsUpdate();
+        layer.setChangeFlags({extensionsChanged: true});
+      }
+    }
+  }
+
+  /** Deregister a default shader module */
+  removeDefaultShaderModule(module: ShaderModule) {
+    const {defaultShaderModules} = this.context;
+    const i = defaultShaderModules.findIndex(m => m.name === module.name);
+    if (i >= 0) {
+      defaultShaderModules.splice(i, 1);
+      for (const layer of this.layers) {
+        layer.setNeedsUpdate();
+        layer.setChangeFlags({extensionsChanged: true});
+      }
+    }
+  }
 
   private _handleError(stage: string, error: Error, layer: Layer) {
     layer.raiseError(error, `${stage} of ${layer}`);

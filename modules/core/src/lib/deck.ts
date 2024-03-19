@@ -37,6 +37,7 @@ import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -672,6 +673,14 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
    */
   _addDefaultEffect(effect: Effect) {
     this.effectManager!.addDefaultEffect(effect);
+  }
+
+  _addDefaultShaderModule(module: ShaderModule) {
+    this.layerManager!.addDefaultShaderModule(module);
+  }
+
+  _removeDefaultShaderModule(module: ShaderModule) {
+    this.layerManager?.removeDefaultShaderModule(module);
   }
 
   // Private Methods

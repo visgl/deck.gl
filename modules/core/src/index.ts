@@ -23,7 +23,7 @@
 export {VERSION} from './lib/init';
 
 // Import shaderlib to make sure shader modules are initialized
-export {getPipelineFactory, getShaderAssembler} from './shaderlib/index';
+export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';

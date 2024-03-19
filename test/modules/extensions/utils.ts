@@ -5,10 +5,18 @@ import {device} from '@deck.gl/test-utils';
 // TODO - move to test-utils?
 export class LifecycleTester {
   constructor() {
-    this.layerManager = new LayerManager(device, {});
+    const layerManager = new LayerManager(device, {});
+    this.layerManager = layerManager;
     this.deckRenderer = new DeckRenderer(device);
     this.viewport = this.layerManager.context.viewport;
     this.effects = [];
+    this.effectContext = {
+      device,
+      deck: {
+        _addDefaultShaderModule: layerManager.addDefaultShaderModule.bind(layerManager),
+        _removeDefaultShaderModule: layerManager.removeDefaultShaderModule.bind(layerManager)
+      }
+    };
     this.layerManager.setProps({
       onError: error => {
         throw error;
@@ -27,6 +35,9 @@ export class LifecycleTester {
     }
     if (effects) {
       this.effects = effects;
+      for (const effect of effects) {
+        effect.setup(this.effectContext);
+      }
     }
     if (layers) {
       layerManager.setLayers(layers);
@@ -52,6 +63,9 @@ export class LifecycleTester {
   finalize() {
     this.layerManager.finalize();
     this.deckRenderer.finalize();
+    for (const effect of this.effects) {
+      effect.cleanup(this.effectContext);
+    }
   }
 
   async _update() {
