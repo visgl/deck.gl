@@ -1,3 +1,5 @@
+import type {MapViewState} from '../views/map-view';
+
 export type MapProps = {
   /** mapboxgl, maplibregl, or compatible library */
   mapLib: {
@@ -11,15 +13,7 @@ export type MapProps = {
   mapOptions?: any;
   width: number;
   height: number;
-  viewState: ViewState;
-};
-
-export type ViewState = {
-  longitude: number;
-  latitude: number;
-  zoom: number;
-  pitch: number;
-  bearing: number;
+  viewState: MapViewState;
 };
 
 /** A small wrapper that turns mapbox-gl or maplibre-gl Map into a stateless component
@@ -138,11 +132,11 @@ export class MapWrapper {
   }
 }
 
-function viewStateToMapboxProps(viewState: ViewState) {
+function viewStateToMapboxProps(viewState: MapViewState) {
   return {
     center: [viewState.longitude, viewState.latitude],
     zoom: viewState.zoom,
-    bearing: viewState.bearing,
-    pitch: viewState.pitch
+    bearing: viewState.bearing ?? 0,
+    pitch: viewState.pitch ?? 0
   };
 }

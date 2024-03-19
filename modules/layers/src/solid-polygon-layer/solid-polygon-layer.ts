@@ -167,7 +167,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {device, viewport} = this.context;
+    const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {

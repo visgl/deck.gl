@@ -29,12 +29,37 @@ import type View from '../views/view';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
+import type MapView from '../views/map-view';
 
-export default class ViewManager {
+export type ViewOrViews = View | View[] | null;
+type ViewStatOf<ViewT extends View> = ReturnType<ViewT['filterViewState']>;
+type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
+  ? MapView
+  : ViewsT extends readonly (infer ViewT)[]
+  ? ViewT
+  : ViewsT;
+export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStatOf<OneOfViews<ViewsT>>;
+export type ViewStateMap<ViewsT extends ViewOrViews> =
+  | AnyViewStateOf<ViewsT>
+  | {[viewId: string]: AnyViewStateOf<ViewsT>};
+
+/** ViewManager props directly supplied by the user */
+type ViewManagerProps<ViewsT extends ViewOrViews> = {
+  views: ViewsT;
+  viewState: ViewStateMap<ViewsT>;
+  onViewStateChange?: (
+    params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>> & {viewId: string}
+  ) => void;
+  onInteractionStateChange?: (state: InteractionState) => void;
+  width?: number;
+  height?: number;
+};
+
+export default class ViewManager<ViewsT extends View[]> {
   width: number;
   height: number;
   views: View[];
-  viewState: any;
+  viewState: ViewStateMap<ViewsT>;
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
 
@@ -49,18 +74,13 @@ export default class ViewManager {
     onInteractionStateChange?: (state: InteractionState) => void;
   };
 
-  constructor(props: {
-    // Initial options
-    timeline: Timeline;
-    eventManager: EventManager;
-    onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
-    onInteractionStateChange?: (state: InteractionState) => void;
-    // Props
-    views?: View[];
-    viewState?: any;
-    width?: number;
-    height?: number;
-  }) {
+  constructor(
+    props: ViewManagerProps<ViewsT> & {
+      // Initial options
+      timeline: Timeline;
+      eventManager: EventManager;
+    }
+  ) {
     // List of view descriptors, gets re-evaluated when width/height changes
     this.views = [];
     this.width = 100;
@@ -161,7 +181,7 @@ export default class ViewManager {
     2. view.id
     3. root viewState
     then applies the view's filter if any */
-  getViewState(viewOrViewId: string | View): any {
+  getViewState(viewOrViewId: string | View): AnyViewStateOf<ViewsT> {
     const view: View | undefined =
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
@@ -199,7 +219,7 @@ export default class ViewManager {
   }
 
   /** Update the manager with new Deck props */
-  setProps(props: {views?: View[]; viewState?: any; width?: number; height?: number}) {
+  setProps(props: Partial<ViewManagerProps<ViewsT>>) {
     if (props.views) {
       this._setViews(props.views);
     }
@@ -264,7 +284,7 @@ export default class ViewManager {
     this.views = views;
   }
 
-  private _setViewState(viewState: any): void {
+  private _setViewState(viewState: ViewStateMap<ViewsT>): void {
     if (viewState) {
       // depth = 3 when comparing viewStates: viewId.position.0
       const viewStateChanged = !deepEqual(viewState, this.viewState, 3);
@@ -310,7 +330,7 @@ export default class ViewManager {
 
   private _updateController(
     view: View,
-    viewState: any,
+    viewState: ViewStateMap<ViewsT>,
     viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {

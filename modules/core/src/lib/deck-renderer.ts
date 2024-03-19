@@ -159,10 +159,14 @@ export default class DeckRenderer {
     for (const effect of effects) {
       if (effect.postRender) {
         if (effect.id === this.lastPostProcessEffect) {
+          // Ready to render to final target
           params.target = opts.target;
           effect.postRender(this.device, params);
           break;
         }
+        // If not the last post processing effect, unset the target so that
+        // it only renders between the swap buffers
+        params.target = undefined;
         const buffer = effect.postRender(this.device, params);
         params.inputBuffer = buffer;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];

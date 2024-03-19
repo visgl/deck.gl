@@ -39,7 +39,7 @@ export default [].concat(
   geojsonLayerTests,
   pathLayerTests,
   pointCloudLayerTests,
-  // polygonLayerTests,
+  polygonLayerTests,
   iconLayerTests,
   textLayerTests,
   // contourLayerTests,
@@ -56,7 +56,7 @@ export default [].concat(
   simpleMeshLayerTests,
   scenegraphLayerTests,
   viewsTests,
-  // effectsTests,
+  effectsTests,
   transitionTests,
   terrainLayerTests,
   // collisionFilterExtensionTests

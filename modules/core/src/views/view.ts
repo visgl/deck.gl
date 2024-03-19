@@ -1,7 +1,6 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, Position} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
-import assert from '../utils/assert';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
@@ -42,9 +41,6 @@ type CommonViewProps<ViewState> = {
     | (ControllerOptions & {
         type?: ConstructorOf<Controller<any>>;
       });
-
-  /** @deprecated Directly wrap a viewport instance */
-  viewportInstance?: Viewport;
 };
 
 export default abstract class View<
@@ -55,7 +51,6 @@ export default abstract class View<
   abstract get ViewportType(): ConstructorOf<Viewport>;
   protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
-  private viewportInstance?: Viewport;
   private _x: Position;
   private _y: Position;
   private _width: Position;
@@ -67,21 +62,10 @@ export default abstract class View<
     bottom: Position;
   } | null;
 
-  readonly props: ViewProps & CommonViewProps<ViewState>;
+  readonly props: Partial<ViewProps> & CommonViewProps<ViewState>;
 
-  constructor(props: ViewProps & CommonViewProps<ViewState>) {
-    const {
-      id,
-      x = 0,
-      y = 0,
-      width = '100%',
-      height = '100%',
-      padding = null,
-      viewportInstance
-    } = props || {};
-
-    assert(!viewportInstance || viewportInstance instanceof Viewport);
-    this.viewportInstance = viewportInstance;
+  constructor(props: Partial<ViewProps> & CommonViewProps<ViewState> = {}) {
+    const {id, x = 0, y = 0, width = '100%', height = '100%', padding = null} = props;
 
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
@@ -111,22 +95,12 @@ export default abstract class View<
       return true;
     }
 
-    // if `viewportInstance` is set, it is the only prop that is used
-    // Delegate to `Viewport.equals`
-    if (this.viewportInstance) {
-      return view.viewportInstance ? this.viewportInstance.equals(view.viewportInstance) : false;
-    }
-
     // To correctly compare padding use depth=2
     return this.ViewportType === view.ViewportType && deepEqual(this.props, view.props, 2);
   }
 
   /** Make viewport from canvas dimensions and view state */
-  makeViewport({width, height, viewState}: {width: number; height: number; viewState: any}) {
-    if (this.viewportInstance) {
-      return this.viewportInstance;
-    }
-
+  makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 
     // Resolve relative viewport dimensions

@@ -111,13 +111,13 @@ export type InteractionState = {
 }
 
 /** Parameters passed to the onViewStateChange callback */
-export type ViewStateChangeParameters = {
+export type ViewStateChangeParameters<ViewStateT = any> = {
   /** The next view state, either from user input or transition */
-  viewState: Record<string, any>;
+  viewState: ViewStateT;
   /** Object describing the nature of the view state change */
   interactionState: InteractionState;
   /** The current view state */
-  oldViewState?: Record<string, any>;
+  oldViewState?: ViewStateT;
 }
 
 const pinchEventWorkaround: any = {};
