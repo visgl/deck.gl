@@ -1,12 +1,7 @@
 {
-  "name": "deckgl-example-pure-js-basic",
-  "version": "0.0.0",
-  "private": true,
-  "license": "MIT",
   "scripts": {
     "start": "vite --open",
-    "start-local": "vite --config ../../../vite.config.local.mjs",
-    "build": "vite build"
+    "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "^9.0.0-beta",

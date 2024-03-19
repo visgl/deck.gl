@@ -1,9 +1,9 @@
 export const IconButton = props => {
   const {className, label, onClick} = props;
   return (
-    <div className="deck-widget-button-border">
+    <div className="deck-widget-button">
       <button
-        className={`deck-widget-button ${className}`}
+        className={`deck-widget-icon-button ${className}`}
         type="button"
         onClick={onClick}
         title={label}
@@ -11,5 +11,24 @@ export const IconButton = props => {
         <div className="deck-widget-icon" />
       </button>
     </div>
+  );
+};
+
+export const ButtonGroup = props => {
+  const {children, orientation} = props;
+  return <div className={`deck-widget-button-group ${orientation}`}>{children}</div>;
+};
+
+export const GroupedIconButton = props => {
+  const {className, label, onClick} = props;
+  return (
+    <button
+      className={`deck-widget-icon-button ${className}`}
+      type="button"
+      onClick={onClick}
+      title={label}
+    >
+      <div className="deck-widget-icon" />
+    </button>
   );
 };
