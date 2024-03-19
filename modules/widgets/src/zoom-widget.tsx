@@ -6,7 +6,7 @@ import {ButtonGroup, GroupedIconButton} from './components';
 
 interface ZoomWidgetProps {
   id: string;
-  viewId?: string | null;
+  viewId?: string | null; // required for multi-view
   placement?: WidgetPlacement;
   orientation?: 'vertical' | 'horizontal';
   zoomInLabel?: string;

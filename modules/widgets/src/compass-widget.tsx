@@ -5,7 +5,7 @@ import {render} from 'preact';
 
 interface CompassWidgetProps {
   id: string;
-  viewId?: string | null;
+  viewId?: string | null; // required for multi-view
   placement?: WidgetPlacement;
   label?: string;
   transitionDuration?: number;
