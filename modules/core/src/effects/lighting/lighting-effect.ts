@@ -90,12 +90,11 @@ export default class LightingEffect implements Effect {
     }
     this._applyDefaultLights();
 
-    const useShadow = this.directionalLights.some(light => light.shadow);
-    if (useShadow !== this.shadow && this.context) {
+    this.shadow = this.directionalLights.some(light => light.shadow);
+    if (this.context) {
       // Create resources if necessary
       this.setup(this.context);
     }
-    this.shadow = useShadow;
     this.props = props;
   }
 

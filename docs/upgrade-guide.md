@@ -105,6 +105,9 @@ loaders.gl dependencies are updated to v4. Although most version differences are
 - If the layer prop `dataTransform` is used to pre-process data, the loaded data object might have changed. For example, `CSVLoader` now yields [a new table format](https://loaders.gl/docs/specifications/category-table). 
 - For a complete list of breaking changes and improvements, see [loaders.gl 4.0 upgrade guide](https://loaders.gl/docs/upgrade-guide#upgrading-to-v40).
 
+### Others
+
+- Custom effects: the `Effect` interface has changed. `preRender` and `postRender` no longer receives device/context as an argument, implement the `setup()` lifecycle method instead.
 
 ## Upgrading from deck.gl v8.8 to v8.9
 
