@@ -78,9 +78,12 @@ test('H3Tileset2D#tileSize', async t => {
     ],
     'indices @ 512px'
   );
-
-  t.deepEqual(indices1024, [{i: '8075fffffffffff'}], 'indices @ 1024px');
+  t.deepEqual(indices1024, [{i: '81757ffffffffff'}], 'indices @ 1024px');
   t.deepEqual(indices2048, [{i: '8075fffffffffff'}], 'indices @ 2048px');
+
+  t.equal(tileset512.getTileZoom(indices512[0]), 2, 'zoom @ 512px');
+  t.equal(tileset1024.getTileZoom(indices1024[0]), 1, 'zoom @ 1024px');
+  t.equal(tileset2048.getTileZoom(indices2048[0]), 0, 'zoom @ 2048px');
 
   t.end();
 });
