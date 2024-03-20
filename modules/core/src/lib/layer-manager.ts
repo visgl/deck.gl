@@ -74,7 +74,7 @@ export default class LayerManager {
   private _needsUpdate: string | false = false;
   private _nextLayers: LayersList | null = null;
   private _debug: boolean = false;
-  // This flag is sepaprate from _needsUpdate because it can be set during an update and should trigger another full update
+  // This flag is separate from _needsUpdate because it can be set during an update and should trigger another full update
   private _defaultShaderModulesChanged: boolean = false;
 
   /**
