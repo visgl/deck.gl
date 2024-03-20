@@ -6,7 +6,7 @@ type MaskPassRenderOptions = LayersPassRenderOptions & {
   channel: number;
 };
 
-const MASK_PARAMETERS: RenderPipelineParameters = {
+const MASK_BLENDING: RenderPipelineParameters = {
   blendColorOperation: 'subtract',
   blendColorSrcFactor: 'zero',
   blendColorDstFactor: 'one',
@@ -56,7 +56,7 @@ export default class MaskPass extends LayersPass {
       ...layer.props.parameters,
       blend: true,
       depthTest: false,
-      ...MASK_PARAMETERS
+      ...MASK_BLENDING
     };
   }
 

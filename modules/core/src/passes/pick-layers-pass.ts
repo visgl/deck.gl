@@ -5,7 +5,7 @@ import log from '../utils/log';
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS: RenderPipelineParameters = {
+const PICKING_BLENDING: RenderPipelineParameters = {
   blendColorOperation: 'add',
   blendColorSrcFactor: 'one',
   blendColorDstFactor: 'zero',
@@ -134,7 +134,7 @@ export default class PickLayersPass extends LayersPass {
       depthRange: [0, 1],
       colorMask: [true, true, true, true],
       // Blending
-      ...PICKING_PARAMETERS,
+      ...PICKING_BLENDING,
       blend: !this.pickZ
     };
     const {pickable, operation} = layer.props;
@@ -142,7 +142,7 @@ export default class PickLayersPass extends LayersPass {
     if (!this._colorEncoderState) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
-      Object.assign(pickParameters, PICKING_PARAMETERS);
+      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
     }
