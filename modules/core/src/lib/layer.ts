@@ -462,6 +462,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    shaders = mergeShaders(shaders, {
+      modules: this.context.defaultShaderModules
+    });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }

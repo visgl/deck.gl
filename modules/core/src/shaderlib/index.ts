@@ -50,12 +50,6 @@ export function getShaderAssembler() {
   return shaderAssembler;
 }
 
-// TODO - is this really needed now that modules are registered on the ShaderAssembler
-export function getPipelineFactory(device: Device) {
-  const pipelineFactory = PipelineFactory.getDefaultPipelineFactory(device);
-  return pipelineFactory;
-}
-
 export {picking, project, project32, gouraudLighting, phongLighting, shadow};
 
 // Useful for custom shader modules

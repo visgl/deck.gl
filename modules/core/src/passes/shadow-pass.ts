@@ -55,8 +55,7 @@ export default class ShadowPass extends LayersPass {
       {
         depthRange: [0, 1],
         depthTest: true,
-        blend: false,
-        clearColor: [1, 1, 1, 1]
+        blend: false
       },
       () => {
         // @ts-expect-error TODO - assuming WebGL context
@@ -69,7 +68,7 @@ export default class ShadowPass extends LayersPass {
           target.resize({width, height});
         }
 
-        super.render({...params, target, pass: 'shadow'});
+        super.render({...params, target, pass: 'shadow', clearColor: [1, 1, 1, 1]});
       }
     );
   }

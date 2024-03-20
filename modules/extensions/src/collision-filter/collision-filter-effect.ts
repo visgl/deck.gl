@@ -69,7 +69,7 @@ export default class CollisionFilterEffect implements Effect {
     }
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
-    const effects = allEffects?.filter(e => e.constructor === MaskEffect);
+    const effects = allEffects?.filter(e => e.useInPicking && preRenderStats[e.id]);
     const maskEffectRendered = (preRenderStats['mask-effect'] as MaskPreRenderStats)?.didRender;
 
     // Collect layers to render
