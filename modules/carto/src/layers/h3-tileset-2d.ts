@@ -71,11 +71,15 @@ export function getHexagonResolution(viewport: {
   latitude: number;
   tileSize: number;
 }): number {
-  const hexagonScaleFactor = (2 / 3) * (viewport.zoom - 2 * Math.log2(viewport.tileSize / 512));
+  const hexagonScaleFactor = (2 / 3) * viewport.zoom;
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
+  const tileSizeScaleFactor = Math.log2(512 / viewport.tileSize);
 
   // Clip and bias
-  return Math.max(0, Math.floor(hexagonScaleFactor + latitudeScaleFactor - BIAS));
+  return Math.max(
+    0,
+    Math.floor(hexagonScaleFactor + latitudeScaleFactor + tileSizeScaleFactor - BIAS)
+  );
 }
 
 export default class H3Tileset2D extends Tileset2D {
