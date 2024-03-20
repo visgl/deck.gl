@@ -1,4 +1,4 @@
-import type {Device} from '@luma.gl/core';
+import type {Device, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -25,6 +25,7 @@ export type LayersPassRenderOptions = {
   clearCanvas?: boolean;
   clearColor?: number[];
   colorMask?: boolean[];
+  scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
@@ -67,12 +68,17 @@ export default class LayersPass extends Pass {
     const clearDepth = clearCanvas ? 1 : false;
     const colorMask = options.colorMask ?? [true, true, true, true];
 
+    const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
+    if (options.colorMask) {
+      parameters.colorMask = options.colorMask;
+    }
+    if (options.scissorRect) {
+      parameters.scissorRect = options.scissorRect;
+    }
+
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
-      parameters: {
-        viewport: [0, 0, width, height],
-        colorMask
-      },
+      parameters,
       clearColor,
       clearDepth
     });
