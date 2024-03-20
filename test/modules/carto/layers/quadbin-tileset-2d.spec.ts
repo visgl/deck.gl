@@ -147,5 +147,9 @@ test('QuadbinTileset2D#tileSize', async t => {
     'indices @ 2048px'
   );
 
+  t.equal(tileset512.getTileZoom(indices512[0]), 6, 'zoom @ 512px');
+  t.equal(tileset1024.getTileZoom(indices1024[0]), 5, 'zoom @ 1024px');
+  t.equal(tileset2048.getTileZoom(indices2048[0]), 4, 'zoom @ 2048px');
+
   t.end();
 });
