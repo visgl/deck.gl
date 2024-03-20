@@ -1,5 +1,4 @@
 import type {Device, Framebuffer, RenderPipelineParameters, Texture} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
 import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
