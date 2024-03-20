@@ -1,9 +1,18 @@
-import {GL} from '@luma.gl/constants';
+import {RenderPipelineParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
 
 export type TerrainPassRenderOptions = LayersPassRenderOptions;
+
+const TERRAIN_BLENDING: RenderPipelineParameters = {
+  blendColorOperation: 'max',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one',
+  blendAlphaOperation: 'max',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one'
+};
 
 /** Renders textures used by the TerrainEffect render pass */
 export class TerrainPass extends LayersPass {
@@ -32,24 +41,15 @@ export class TerrainPass extends LayersPass {
 
     target.resize(viewport);
 
-    this.device.withParametersWebGL(
-      {
-        clearColor: [0, 0, 0, 0],
-        blend: true,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.MAX,
-        depthTest: false
-      },
-      () =>
-        this.render({
-          ...opts,
-          target,
-          pass: 'terrain-height-map',
-          layers: opts.layers!,
-          viewports: [viewport],
-          effects: []
-        })
-    );
+    this.render({
+      ...opts,
+      target,
+      pass: 'terrain-height-map',
+      layers: opts.layers!,
+      viewports: [viewport],
+      effects: [],
+      clearColor: [0, 0, 0, 0]
+    });
   }
 
   renderTerrainCover(terrainCover: TerrainCover, opts: Partial<TerrainPassRenderOptions>) {
@@ -64,20 +64,23 @@ export class TerrainPass extends LayersPass {
     const layers = terrainCover.filterLayers(opts.layers!);
     target.resize(viewport);
 
-    this.device.withParametersWebGL(
-      {
-        clearColor: [0, 0, 0, 0],
-        depthTest: false
-      },
-      () =>
-        this.render({
-          ...opts,
-          target,
-          pass: `terrain-cover-${terrainCover.id}`,
-          layers,
-          effects: [],
-          viewports: [viewport]
-        })
-    );
+    this.render({
+      ...opts,
+      target,
+      pass: `terrain-cover-${terrainCover.id}`,
+      layers,
+      effects: [],
+      viewports: [viewport],
+      clearColor: [0, 0, 0, 0]
+    });
+  }
+
+  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+    return {
+      ...layer.props.parameters,
+      blend: true,
+      depthTest: false,
+      ...TERRAIN_BLENDING
+    };
   }
 }
