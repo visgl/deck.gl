@@ -24,6 +24,7 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  colorMask?: boolean[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
@@ -64,11 +65,13 @@ export default class LayersPass extends Pass {
     const clearCanvas = options.clearCanvas ?? true;
     const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     const clearDepth = clearCanvas ? 1 : false;
+    const colorMask = options.colorMask ?? [true, true, true, true];
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
       parameters: {
-        viewport: [0, 0, width, height]
+        viewport: [0, 0, width, height],
+        colorMask
       },
       clearColor,
       clearDepth

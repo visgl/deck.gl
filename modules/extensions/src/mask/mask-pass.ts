@@ -1,10 +1,19 @@
-import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import type {Device, Framebuffer, RenderPipelineParameters, Texture} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
-import {_LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
   /** The channel to render into, 0:red, 1:green, 2:blue, 3:alpha */
   channel: number;
+};
+
+const MASK_PARAMETERS: RenderPipelineParameters = {
+  blendColorOperation: 'subtract',
+  blendColorSrcFactor: 'zero',
+  blendColorDstFactor: 'one',
+  blendAlphaOperation: 'subtract',
+  blendAlphaSrcFactor: 'zero',
+  blendAlphaDstFactor: 'one'
 };
 
 export default class MaskPass extends LayersPass {
@@ -40,17 +49,16 @@ export default class MaskPass extends LayersPass {
     const colorMask = [false, false, false, false];
     colorMask[options.channel] = true;
     const clearColor = [255, 255, 255, 255];
+    super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
+  }
 
-    return this.device.withParametersWebGL(
-      {
-        blend: true,
-        blendFunc: [GL.ZERO, GL.ONE],
-        blendEquation: GL.FUNC_SUBTRACT,
-        colorMask,
-        depthTest: false
-      },
-      () => super.render({...options, clearColor, target: this.fbo, pass: 'mask'})
-    );
+  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+    return {
+      ...layer.props.parameters,
+      blend: true,
+      depthTest: false,
+      ...MASK_PARAMETERS
+    };
   }
 
   shouldDrawLayer(layer) {
