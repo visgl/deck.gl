@@ -1,4 +1,4 @@
-import type {Device, Shader} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import {Texture} from '@luma.gl/core';
 import {AmbientLight} from './ambient-light';

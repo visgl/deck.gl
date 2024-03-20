@@ -4,6 +4,7 @@ import {MapWrapper} from './map-wrapper';
 
 import Deck, {DeckProps} from '../lib/deck';
 import type WebMercatorViewport from '../viewports/web-mercator-viewport';
+import type {MapViewState} from '../views/map-view';
 
 const CANVAS_STYLE = {
   position: 'absolute',
@@ -67,7 +68,7 @@ export default class DeckGL extends Deck {
 
     const {mapCanvas, deckCanvas} = createCanvas(props);
 
-    const viewState = props.viewState || props.initialViewState;
+    const viewState = (props.viewState || props.initialViewState) as MapViewState;
     const isMap = Number.isFinite(viewState && viewState.latitude);
     const {map = globalThis.mapboxgl || globalThis.maplibregl} = props;
 

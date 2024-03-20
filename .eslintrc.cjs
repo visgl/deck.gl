@@ -27,7 +27,7 @@ module.exports = getESLintConfig({
       'import/no-unresolved': 0,
       'import/no-extraneous-dependencies': 0, // ['warn'],
       'no-console': 1,
-      'no-continue': ['warn'],
+      'no-continue': 0,
       'callback-return': 0,
       'max-depth': ['warn', 4],
       complexity: ['warn'],
@@ -67,7 +67,7 @@ module.exports = getESLintConfig({
           // '@typescript-eslint/no-floating-promises': ['warn'],
           // '@typescript-eslint/await-thenable': ['warn'],
           // '@typescript-eslint/no-misused-promises': ['warn'],
-          '@typescript-eslint/no-empty-function': ['warn', {allow: ['arrowFunctions']}],
+          '@typescript-eslint/no-empty-function': 0,
           // We use function hoisting
           '@typescript-eslint/no-use-before-define': 0,
           // We always want explicit typing, e.g `field: string = ''`

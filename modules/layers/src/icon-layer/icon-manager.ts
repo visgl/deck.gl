@@ -1,6 +1,5 @@
 /* global document */
 import {Device, Texture, SamplerProps} from '@luma.gl/core';
-// import {ImageLoader} from '@loaders.gl/images';
 import {load} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 
@@ -119,19 +118,19 @@ function resizeTexture(
   height: number,
   sampler: SamplerProps
 ): Texture {
-  const oldWidth = texture.width;
-  const oldHeight = texture.height;
+  const {width: oldWidth, height: oldHeight, device} = texture;
 
-  const newTexture = texture.device.createTexture({format: 'rgba8unorm', width, height, sampler});
-  // @ts-expect-error TODO v9 import
-  // device.copyToTextureWebGL(texture, newTexture, {
-  copyToTexture(texture, newTexture, {
-    targetY: 0,
+  const newTexture = device.createTexture({format: 'rgba8unorm', width, height, sampler});
+  const commandEncoder = device.createCommandEncoder();
+  commandEncoder.copyTextureToTexture({
+    source: texture,
+    destination: newTexture,
     width: oldWidth,
     height: oldHeight
   });
+  commandEncoder.finish();
 
-  texture.delete();
+  texture.destroy();
   return newTexture;
 }
 
