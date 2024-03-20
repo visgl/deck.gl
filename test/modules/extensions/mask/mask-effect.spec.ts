@@ -32,14 +32,15 @@ test('MaskEffect#constructor', t => {
   t.end();
 });
 
-test('MaskEffect#cleanup', t => {
+test('MaskEffect#setup, cleanup', t => {
   const maskEffect = new MaskEffect();
 
   const layerManager = new LayerManager(device, {viewport: testViewport});
   layerManager.setLayers([TEST_MASK_LAYER, TEST_LAYER]);
   layerManager.updateLayers();
 
-  maskEffect.preRender(device, {
+  maskEffect.setup({device});
+  maskEffect.preRender({
     pass: 'screen',
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
@@ -58,12 +59,14 @@ test('MaskEffect#cleanup', t => {
   t.notOk(maskEffect.maskPass, 'Mask pass is deleted');
   t.notOk(maskEffect.maskMap, 'Mask map is deleted');
 
+  layerManager.finalize();
   t.end();
 });
 
 /* eslint-disable max-statements */
 test('MaskEffect#update', t => {
   const maskEffect = new MaskEffect();
+  maskEffect.setup({device});
 
   const TEST_MASK_LAYER2 = TEST_MASK_LAYER.clone({id: 'test-mask-layer-2'});
   const TEST_MASK_LAYER2_ALT = TEST_MASK_LAYER.clone({
@@ -78,8 +81,7 @@ test('MaskEffect#update', t => {
     t.comment(description);
     layerManager.setLayers(layers);
     layerManager.updateLayers();
-
-    maskEffect.preRender(device, {
+    maskEffect.preRender({
       pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
@@ -129,11 +131,13 @@ test('MaskEffect#update', t => {
   t.is(mask?.index, 0, 'New mask is rendered in channel 0');
 
   maskEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });
 
 test('MaskEffect#coordinates', t => {
   const maskEffect = new MaskEffect();
+  maskEffect.setup({device});
 
   const TEST_MASK_LAYER_CARTESIAN = TEST_MASK_LAYER.clone({
     coordinateOrigin: [1, 2, 3],
@@ -147,7 +151,7 @@ test('MaskEffect#coordinates', t => {
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    maskEffect.preRender(device, {
+    maskEffect.preRender({
       pass: 'screen',
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
@@ -170,5 +174,6 @@ test('MaskEffect#coordinates', t => {
   t.is(mask?.coordinateSystem, COORDINATE_SYSTEM.CARTESIAN, 'Mask has correct coordinate system');
 
   maskEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });

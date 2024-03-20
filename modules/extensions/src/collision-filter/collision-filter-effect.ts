@@ -1,7 +1,7 @@
 import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
-import type {Effect, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
+import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
 import MaskEffect, {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
@@ -27,28 +27,32 @@ export default class CollisionFilterEffect implements Effect {
   useInPicking = true;
   order = 1;
 
+  private context?: EffectContext;
   private channels: Record<string, RenderInfo> = {};
   private collisionFilterPass?: CollisionFilterPass;
   private collisionFBOs: Record<string, Framebuffer> = {};
   private dummyCollisionMap?: Texture;
   private lastViewport?: Viewport;
 
-  preRender(
-    device: Device,
-    {
-      effects: allEffects,
-      layers,
-      layerFilter,
-      viewports,
-      onViewportActive,
-      views,
-      isPicking,
-      preRenderStats = {}
-    }: PreRenderOptions
-  ): void {
-    if (!this.dummyCollisionMap) {
-      this.dummyCollisionMap = device.createTexture({width: 1, height: 1});
-    }
+  setup(context: EffectContext) {
+    this.context = context;
+    const {device} = context;
+    this.dummyCollisionMap = device.createTexture({width: 1, height: 1});
+    this.collisionFilterPass = new CollisionFilterPass(device, {id: 'default-collision-filter'});
+  }
+
+  preRender({
+    effects: allEffects,
+    layers,
+    layerFilter,
+    viewports,
+    onViewportActive,
+    views,
+    isPicking,
+    preRenderStats = {}
+  }: PreRenderOptions): void {
+    // This can only be called in preRender() after setup() where context is populated
+    const {device} = this.context!;
 
     if (isPicking) {
       // Do not update on picking pass
@@ -62,10 +66,6 @@ export default class CollisionFilterEffect implements Effect {
     if (collisionLayers.length === 0) {
       this.channels = {};
       return;
-    }
-
-    if (!this.collisionFilterPass) {
-      this.collisionFilterPass = new CollisionFilterPass(device, {id: 'default-collision-filter'});
     }
 
     // Detect if mask has rendered. TODO: better dependency system for Effects
