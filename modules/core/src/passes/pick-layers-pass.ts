@@ -72,6 +72,7 @@ export default class PickLayersPass extends LayersPass {
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
+    const scissorRect = [x, y, width, height];
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
@@ -90,7 +91,8 @@ export default class PickLayersPass extends LayersPass {
       pass,
       isPicking: true,
       moduleParameters,
-      clearColor: [0, 0, 0, 0]
+      clearColor: [0, 0, 0, 0],
+      scissorRect
     });
 
     // Clear the temp field
@@ -124,8 +126,6 @@ export default class PickLayersPass extends LayersPass {
     const {x, y, width, height} = viewport;
     const pickParameters = {
       ...layer.props.parameters,
-      scissorTest: true,
-      scissor: [x, y, width, height],
       // When used as Mapbox custom layer, the context state may be dirty
       // TODO - Remove when mapbox fixes this issue
       // https://github.com/mapbox/mapbox-gl-js/issues/7801
