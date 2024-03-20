@@ -92,6 +92,7 @@ export default class PickLayersPass extends LayersPass {
       isPicking: true,
       moduleParameters,
       clearColor: [0, 0, 0, 0],
+      colorMask: [true, true, true, true],
       scissorRect
     });
 
@@ -131,7 +132,6 @@ export default class PickLayersPass extends LayersPass {
       depthMask: true,
       depthTest: true,
       depthRange: [0, 1],
-      colorMask: [true, true, true, true],
       ...layer.props.parameters,
       // Blending
       ...PICKING_BLENDING,
