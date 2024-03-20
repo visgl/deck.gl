@@ -49,6 +49,42 @@ test('H3Tileset2D', async t => {
   t.end();
 });
 
+test('H3Tileset2D#tileSize', async t => {
+  const tileset512 = new H3Tileset2D({tileSize: 512});
+  const tileset1024 = new H3Tileset2D({tileSize: 1024});
+  const tileset2048 = new H3Tileset2D({tileSize: 2048});
+
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 6,
+    width: 300,
+    height: 200
+  });
+
+  const indicesSort = (a, b) => parseInt(a.i, 16) - parseInt(b.i, 16);
+  const indices512 = tileset512.getTileIndices({viewport}).sort(indicesSort);
+  const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
+  const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
+
+  t.deepEqual(
+    indices512,
+    [
+      {i: '8274effffffffff'},
+      {i: '827547fffffffff'},
+      {i: '82754ffffffffff'},
+      {i: '82755ffffffffff'},
+      {i: '82756ffffffffff'}
+    ],
+    'indices @ 512px'
+  );
+
+  t.deepEqual(indices1024, [{i: '8075fffffffffff'}], 'indices @ 1024px');
+  t.deepEqual(indices2048, [{i: '8075fffffffffff'}], 'indices @ 2048px');
+
+  t.end();
+});
+
 test('H3Tileset2D res0', async t => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
