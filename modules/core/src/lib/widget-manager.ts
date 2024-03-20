@@ -14,7 +14,7 @@ export interface Widget<PropsT = any> {
   props: PropsT;
   /**
    * The view id that this widget is being attached to. Default `null`.
-   * If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+   * If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
    */
   viewId?: string | null;
   /** Widget positioning within the view. Default 'top-left'. */

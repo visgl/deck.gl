@@ -1,5 +1,7 @@
 # FullscreenWidget
 
+This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
+
 ## Props
 
 ### `id` (String) {#id}
@@ -12,7 +14,7 @@ Unique identifier of the widget.
 
 Default: `'top-left'`
 
-Widget position within the view relatitive to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
 
 ### `container` (HTMLElement, optional) {#container}
 
@@ -22,13 +24,13 @@ A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Elem
 
 ### `enterLabel` (String, optional) {#enterlabel}
 
-Toolip message displayed while hovering a mouse over the widget when out of fullscreen.
+Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
 Default: `'Enter Fullscreen'`
 
 ### `exitLabel` (String, optional) {#exitlabel}
 
-Toolip message displayed while hovering a mouse over the widget when fullscreen.
+Tooltip message displayed while hovering a mouse over the widget when fullscreen.
 
 Default: `'Exit Fullscreen'`
 

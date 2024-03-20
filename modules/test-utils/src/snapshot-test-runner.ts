@@ -64,7 +64,11 @@ const DEFAULT_TEST_CASE: SnapshotTestCase = {
     // eslint-disable-line
   },
   onAfterRender: ({deck, layers, done}) => {
-    if (layers.every(layer => layer.isLoaded)) {
+    if (
+      // @ts-expect-error accessing private
+      !deck.layerManager?.needsUpdate() &&
+      layers.every(layer => layer.isLoaded)
+    ) {
       done(); // eslint-disable-line
     }
   },

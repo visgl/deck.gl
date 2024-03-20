@@ -12,6 +12,7 @@ export function createRenderTarget(
     id: opts.id,
     colorAttachments: [
       device.createTexture({
+        id: opts.id,
         ...(opts.float && {
           format: 'rgba32float',
           type: GL.FLOAT

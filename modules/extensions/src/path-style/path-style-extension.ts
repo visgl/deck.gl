@@ -177,6 +177,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
 
       prevP = p;
     }
+    result[geometrySize - 1] = 0;
     return result;
   }
 }

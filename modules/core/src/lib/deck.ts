@@ -37,6 +37,7 @@ import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
 import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -674,6 +675,14 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
     this.effectManager!.addDefaultEffect(effect);
   }
 
+  _addDefaultShaderModule(module: ShaderModule) {
+    this.layerManager!.addDefaultShaderModule(module);
+  }
+
+  _removeDefaultShaderModule(module: ShaderModule) {
+    this.layerManager?.removeDefaultShaderModule(module);
+  }
+
   // Private Methods
 
   private _pick(
@@ -992,7 +1001,10 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       timeline
     });
 
-    this.effectManager = new EffectManager();
+    this.effectManager = new EffectManager({
+      deck: this,
+      device: this.device
+    });
 
     this.deckRenderer = new DeckRenderer(this.device);
 

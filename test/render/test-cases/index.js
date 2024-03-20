@@ -58,7 +58,8 @@ export default [].concat(
   viewsTests,
   effectsTests,
   transitionTests,
-  terrainLayerTests,
-  // collisionFilterExtensionTests
-  dataFilterExtensionTests
+  collisionFilterExtensionTests,
+  dataFilterExtensionTests,
+  /* It is important to run this last for now - TerrainEffect once added cannot be removed */
+  terrainLayerTests
 );
