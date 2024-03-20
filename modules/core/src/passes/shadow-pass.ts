@@ -1,6 +1,7 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {Layer, Viewport} from '@deck.gl/core';
-import {default as LayersPass} from './layers-pass';
+import type Layer from '../lib/layer';
+import type Viewport from '../viewports/viewport';
+import LayersPass from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture;

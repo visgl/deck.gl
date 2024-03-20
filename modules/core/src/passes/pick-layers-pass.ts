@@ -124,7 +124,6 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    const {x, y, width, height} = viewport;
     const pickParameters = {
       // TODO - When used as a custom layer in older Mapbox versions, context
       // state was dirty. Mapbox fixed that; we should test and remove the workaround.

@@ -80,7 +80,7 @@ export class TerrainPass extends LayersPass {
       ...layer.props.parameters,
       blend: true,
       depthTest: false,
-      ...TERRAIN_BLENDING
+      ...(layer.props.operation.includes('terrain') && TERRAIN_BLENDING)
     };
   }
 }

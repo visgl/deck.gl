@@ -70,7 +70,7 @@ export default class LayersPass extends Pass {
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
     if (options.colorMask) {
-      parameters.colorMask = options.colorMask;
+      parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect;
