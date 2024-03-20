@@ -142,7 +142,6 @@ export default class PickLayersPass extends LayersPass {
     if (!this._colorEncoderState) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
-      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
     }
