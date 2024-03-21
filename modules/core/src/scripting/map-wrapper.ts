@@ -75,12 +75,13 @@ export class MapWrapper {
   }
 
   private _initialize(props: MapProps) {
-    const {mapLib} = props;
+    const {mapLib, container} = props;
 
     // Creation only props
     mapLib.accessToken = props.mapboxApiAccessToken || '';
 
     this.map = new props.mapLib.Map({
+      container,
       maxZoom: 24,
       ...props.mapOptions,
       ...viewStateToMapboxProps(props.viewState),
@@ -92,7 +93,6 @@ export class MapWrapper {
     // Hijack dimension properties
     // This eliminates the timing issue between calling resize() and DOM update
     /* eslint-disable accessor-pairs */
-    const {container} = props;
     Object.defineProperty(container, 'offsetWidth', {get: () => this.width});
     Object.defineProperty(container, 'clientWidth', {get: () => this.width});
     Object.defineProperty(container, 'offsetHeight', {
