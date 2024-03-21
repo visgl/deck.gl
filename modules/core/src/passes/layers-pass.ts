@@ -24,7 +24,7 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
-  colorMask?: boolean[];
+  colorMask?: number;
   scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
@@ -66,21 +66,27 @@ export default class LayersPass extends Pass {
     const clearCanvas = options.clearCanvas ?? true;
     const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     const clearDepth = clearCanvas ? 1 : false;
-    const colorMask = options.colorMask ?? [true, true, true, true];
+    const colorMask = options.colorMask ?? 0xf;
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
+    const hack: any = {};
     if (options.colorMask) {
-      parameters.colorMask = colorMask;
+      const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8];
+      hack.colorMask = COLOR_CHANNELS.map(channel => Boolean(channel & options.colorMask!));
+      // parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect;
     }
 
-    const renderPass = this.device.beginRenderPass({
-      framebuffer: options.target,
-      parameters,
-      clearColor,
-      clearDepth
+    let renderPass;
+    this.device.withParametersWebGL(hack, () => {
+      renderPass = this.device.beginRenderPass({
+        framebuffer: options.target,
+        parameters,
+        clearColor,
+        clearDepth
+      });
     });
 
     try {

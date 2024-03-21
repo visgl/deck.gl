@@ -92,7 +92,7 @@ export default class PickLayersPass extends LayersPass {
       isPicking: true,
       moduleParameters,
       clearColor: [0, 0, 0, 0],
-      colorMask: [true, true, true, true],
+      colorMask: 0xf,
       scissorRect
     });
 

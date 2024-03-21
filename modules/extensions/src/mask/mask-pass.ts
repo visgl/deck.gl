@@ -3,7 +3,7 @@ import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} fro
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
   /** The channel to render into, 0:red, 1:green, 2:blue, 3:alpha */
-  channel: number;
+  channel: 0 | 1 | 2 | 3;
 };
 
 const MASK_BLENDING: RenderPipelineParameters = {
@@ -45,8 +45,7 @@ export default class MaskPass extends LayersPass {
   }
 
   render(options: MaskPassRenderOptions) {
-    const colorMask = [false, false, false, false];
-    colorMask[options.channel] = true;
+    const colorMask = 2 ** options.channel + 1;
     const clearColor = [255, 255, 255, 255];
     super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
   }
