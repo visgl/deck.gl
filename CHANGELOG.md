@@ -21,6 +21,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0] - Mar 21 2024
+
+- bump dependencies to production release
+- Remove withParametersWebGL method in Pass classes (#8636)
+- Bug fix: Update scorecard to v2.3.1 (#8688)
+- Register default shader module with Deck (#8682)
+- Update Effect interface (#8681)
+- fix(extensions): PathStyleExtension random artifact (#8683)
+- chore: upgrade luma.gl to 9.0.5 (#8684)
+
 #### deck.gl [9.0.0-beta.10] - Mar 20 2024
 
 - Add Zoom and Compass widgets (#8072)
