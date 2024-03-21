@@ -1,38 +1,51 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset='UTF-8' />
-    <title>CartoMap PoC</title>
-    <style>
-      body {
-        padding: 0;
-        margin: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-      }
-      #container {
-        position: relative;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      }
-      #container > * {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
-  </head>
-  <body>
-    <div id="container">
-      <div id="map"></div>
-      <canvas id="deck-canvas"></canvas>
-    </div>
-    <script type="module" src='app.ts'></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <title>CartoMap PoC</title>
+        <style>
+            body {
+                padding: 0;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+            }
+            #container {
+                position: relative;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+            #container > * {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            .textfield-wrap {
+                display: none;
+            }
+        </style>
+        <link
+            href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div id="container">
+            <div id="map"></div>
+            <canvas id="deck-canvas"></canvas>
+            <div class="textfield-wrap">
+                <label id="textfield" class="textfield"></label>
+                <label id="textfield2" class="textfield"></label>
+                <label id="textfield3" class="textfield"></label>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+        <script src="https://unpkg.com/h3-js@3.7.2"></script>
+        <script type="module" src="app.ts"></script>
+    </body>
 </html>
