@@ -1,4 +1,4 @@
-import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
+import {fetchMap, FetchMapOptions, getHexagonResolution} from '@deck.gl/carto';
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {H3HexagonLayer, TileLayer} from '@deck.gl/geo-layers';
@@ -103,24 +103,6 @@ mapContainer.style.height = 'calc(50% - 26px)';
 mapContainer.style.margin = '5px';
 
 createMap(id);
-
-// Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
-const BIAS = 2;
-export function getHexagonResolution(
-  viewport: {zoom: number; latitude: number},
-  tileSize: number
-): number {
-  const zoomOffset = 0; // Math.log2(tileSize / 512);
-  const hexagonScaleFactor = (2 / 3) * (viewport.zoom - zoomOffset);
-  const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
-  const tileSizeScaleFactor = Math.log2(512 / tileSize);
-
-  // Clip and bias
-  return Math.max(
-    0,
-    Math.floor(hexagonScaleFactor + latitudeScaleFactor + tileSizeScaleFactor - BIAS)
-  );
-}
 
 // Support h3 v3/v4 (https://h3geo.org/docs/library/migration-3.x/functions)
 const kRing = h3.kRing || h3.gridDisk;

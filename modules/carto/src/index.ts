@@ -18,6 +18,7 @@ export {
   RasterTileLayer,
   VectorTileLayer
 };
+export {getHexagonResolution} from './layers/h3-tileset-2d';
 
 export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
