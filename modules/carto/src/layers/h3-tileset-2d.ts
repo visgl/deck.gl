@@ -66,14 +66,13 @@ function tileToBoundingBox(index: string): GeoBoundingBox {
 // similar
 // Relative scale factor (0 = no biasing, 2 = a few hexagons cover view)
 const BIAS = 2;
-export function getHexagonResolution(viewport: {
-  zoom: number;
-  latitude: number;
-  tileSize: number;
-}): number {
+export function getHexagonResolution(
+  viewport: {zoom: number; latitude: number},
+  tileSize: number
+): number {
   const hexagonScaleFactor = (2 / 3) * viewport.zoom;
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
-  const tileSizeScaleFactor = Math.log2(512 / viewport.tileSize);
+  const tileSizeScaleFactor = Math.log2(512 / tileSize);
 
   // Clip and bias
   return Math.max(
@@ -94,7 +93,7 @@ export default class H3Tileset2D extends Tileset2D {
     const [east, south, west, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
-    let z = getHexagonResolution({...viewport, tileSize});
+    let z = getHexagonResolution(viewport, tileSize);
     let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
       // TODO support `extent` prop
