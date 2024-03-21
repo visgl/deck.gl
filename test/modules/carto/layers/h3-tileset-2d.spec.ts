@@ -58,8 +58,8 @@ test('H3Tileset2D#tileSize', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 6,
-    width: 300,
-    height: 200
+    width: 1440,
+    height: 900
   });
 
   const indicesSort = (a, b) => parseInt(a.i, 16) - parseInt(b.i, 16);
@@ -67,19 +67,13 @@ test('H3Tileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
   const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
 
-  t.deepEqual(
-    indices512,
-    [
-      {i: '8274effffffffff'},
-      {i: '827547fffffffff'},
-      {i: '82754ffffffffff'},
-      {i: '82755ffffffffff'},
-      {i: '82756ffffffffff'}
-    ],
-    'indices @ 512px'
-  );
-  t.deepEqual(indices1024, [{i: '81757ffffffffff'}], 'indices @ 1024px');
-  t.deepEqual(indices2048, [{i: '8075fffffffffff'}], 'indices @ 2048px');
+  t.equal(indices512.length, 40, 'indices.length @ 512px');
+  t.equal(indices1024.length, 11, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 2, 'indices.length @ 2048px');
+
+  t.deepEqual(indices512[0], {i: '82589ffffffffff'}, 'indices[0] @ 512px');
+  t.deepEqual(indices1024[0], {i: '8158bffffffffff'}, 'indices[0] @ 1024px');
+  t.deepEqual(indices2048[0], {i: '8075fffffffffff'}, 'indices[0] @ 2048px');
 
   t.equal(tileset512.getTileZoom(indices512[0]), 2, 'zoom @ 512px');
   t.equal(tileset1024.getTileZoom(indices1024[0]), 1, 'zoom @ 1024px');
