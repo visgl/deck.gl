@@ -101,8 +101,8 @@ test('QuadbinTileset2D#tileSize', async t => {
     latitude: 0,
     longitude: 0,
     zoom: 6,
-    width: 300,
-    height: 200
+    width: 1440,
+    height: 900
   });
 
   // Required for getTileMetadata to function
@@ -114,13 +114,21 @@ test('QuadbinTileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport});
   const indices2048 = tileset2048.getTileIndices({viewport});
 
+  t.equal(indices512.length, 8, 'indices.length @ 512px');
+  t.equal(indices1024.length, 4, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 4, 'indices.length @ 2048px');
+
   t.deepEqual(
     indices512,
     [
+      {q: 5216293168890249215n, i: '4863feffffffffff'},
       {q: 5216294268401876991n, i: '4863ffffffffffff'},
+      {q: 5217795101773791231n, i: '486954ffffffffff'},
       {q: 5217796201285419007n, i: '486955ffffffffff'},
       {q: 5217045234843647999n, i: '4866aaffffffffff'},
-      {q: 5218547167727190015n, i: '486c00ffffffffff'}
+      {q: 5217046334355275775n, i: '4866abffffffffff'},
+      {q: 5218547167727190015n, i: '486c00ffffffffff'},
+      {q: 5218548267238817791n, i: '486c01ffffffffff'}
     ],
     'indices @ 512px'
   );
