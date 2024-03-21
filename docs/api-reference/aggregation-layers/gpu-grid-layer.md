@@ -210,4 +210,4 @@ When picking mode is `hover`, only the elevation value, color value of selected 
 
 ## Source
 
-[modules/aggregation-layers/src/gpu-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/gpu-grid-layer)
+[modules/aggregation-layers/src/gpu-grid-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/aggregation-layers/src/gpu-grid-layer)

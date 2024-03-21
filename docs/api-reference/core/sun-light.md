@@ -30,4 +30,4 @@ const sunLight = new SunLight({timestamp, color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/sun-light.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/sun-light.ts)
+[/modules/core/src/effects/lighting/sun-light.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/effects/lighting/sun-light.ts)

@@ -12,7 +12,7 @@ An in-depth view into the technical details and architectural decisions behind d
 
 ## Live Demos
 
-The sources of deck.gl [website demos](https://deck.gl/examples) can be found in the repo's [examples](https://github.com/visgl/deck.gl/tree/master/examples) directory. Most of the applications use React, although non-React templates are provided for developers from other ecosystems.
+The sources of deck.gl [website demos](https://deck.gl/examples) can be found in the repo's [examples](https://github.com/visgl/deck.gl/tree/9.0-release/examples) directory. Most of the applications use React, although non-React templates are provided for developers from other ecosystems.
 
 ## Prototyping & Sharing
 

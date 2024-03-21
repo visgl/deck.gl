@@ -364,4 +364,4 @@ const quadkeyTileLayer = new TileLayer({
 
 ## Source
 
-[modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
+[modules/geo-layers/src/tile-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/geo-layers/src/tile-layer)

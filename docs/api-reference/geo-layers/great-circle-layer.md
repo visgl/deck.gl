@@ -93,4 +93,4 @@ Inherits from all [Base Layer](../core/layer.md) and [ArcLayer](../layers/arc-la
 
 ## Source
 
-[great-circle-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/great-circle-layer)
+[great-circle-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/geo-layers/src/great-circle-layer)

@@ -516,4 +516,4 @@ lines: {
 
 ## Source
 
-[modules/layers/src/geojson-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/geojson-layer)
+[modules/layers/src/geojson-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/layers/src/geojson-layer)

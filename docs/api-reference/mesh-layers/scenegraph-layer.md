@@ -216,4 +216,4 @@ The maximum size in pixels for one unit of the scene.
 
 ## Source
 
-[modules/mesh-layers/src/scenegraph-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
+[modules/mesh-layers/src/scenegraph-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/mesh-layers/src/scenegraph-layer)

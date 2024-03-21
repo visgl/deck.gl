@@ -109,4 +109,4 @@ Called to retrieve an arbitrary position for each object that it will be filtere
 
 ## Source
 
-[modules/extensions/src/brushing](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/brushing)
+[modules/extensions/src/brushing](https://github.com/visgl/deck.gl/tree/9.0-release/modules/extensions/src/brushing)

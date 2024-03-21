@@ -37,4 +37,4 @@ const directionalLight = new DirectionalLight({color, intensity, direction});
 
 ## Source
 
-[/modules/core/src/effects/lighting/directional-light.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/lighting/directional-light.ts)
+[/modules/core/src/effects/lighting/directional-light.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/effects/lighting/directional-light.ts)

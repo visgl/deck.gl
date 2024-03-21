@@ -68,4 +68,4 @@ Supported format: `[left, bottom, right, top]`
 
 ## Source
 
-[modules/extensions/src/clip](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/clip)
+[modules/extensions/src/clip](https://github.com/visgl/deck.gl/tree/9.0-release/modules/extensions/src/clip)

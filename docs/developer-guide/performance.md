@@ -606,7 +606,7 @@ Some deck.gl applications use web workers to load data and generate attributes t
   });
   ```
 
-  See full example in [examples/experimental/interleaved-buffer](https://github.com/visgl/deck.gl/tree/master/examples/experimental/interleaved-buffer).
+  See full example in [examples/experimental/interleaved-buffer](https://github.com/visgl/deck.gl/tree/9.0-release/examples/experimental/interleaved-buffer).
 
   Note that external attributes only work with primitive layers, not composite layers, because composite layers often need to preprocess the data before passing it to the sub layers. Some layers that deal with variable-width data, such as `PathLayer`, `SolidPolygonLayer`, require additional information passed along with `data.attributes`. Consult each layer's documentation before use.
 

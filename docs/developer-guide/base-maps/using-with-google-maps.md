@@ -2,7 +2,7 @@
 
 | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- |
-| ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) |
+| ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/pure-js/google-maps) | [example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-tripslayer) |
 
 ![deck.gl as a Google Maps overlay](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/google-maps.jpg)
 
@@ -26,4 +26,4 @@ By default, when a Deck instance is added to the map, deck.gl will detect if the
 
 Starting with v7.0, deck.gl added support to overlay visualizations on Google's raster map using the Maps JavaScript API [OverlayView class](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView).
 
-In this mode, the Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/google-maps), and 3D features like tilt, rotation, and interleaving are not supported.
+In this mode, the Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/pure-js/google-maps), and 3D features like tilt, rotation, and interleaving are not supported.

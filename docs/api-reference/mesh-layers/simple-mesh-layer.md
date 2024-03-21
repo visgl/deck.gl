@@ -218,4 +218,4 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 ## Source
 
-[modules/mesh-layers/src/simple-mesh-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/simple-mesh-layer)
+[modules/mesh-layers/src/simple-mesh-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/mesh-layers/src/simple-mesh-layer)

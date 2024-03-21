@@ -184,4 +184,4 @@ We do recommend you to use the pure JavaScript version of deck.gl if you are mor
 
 ## Source
 
-[modules/react/src/deckgl.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/deckgl.ts)
+[modules/react/src/deckgl.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/react/src/deckgl.ts)

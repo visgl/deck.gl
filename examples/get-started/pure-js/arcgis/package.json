@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@arcgis/core": "^4.28.0",
-    "@deck.gl/arcgis": "^9.0.0-beta.2",
-    "@deck.gl/core": "^9.0.0-beta.2",
-    "@deck.gl/layers": "^9.0.0-beta.2"
+    "@deck.gl/arcgis": "^9.0.0",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

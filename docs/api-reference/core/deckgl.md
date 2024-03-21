@@ -93,4 +93,4 @@ Returns the mapbox-gl or maplibre-gl [Map](https://www.mapbox.com/mapbox-gl-js/a
 
 ## Source
 
-[modules/main/bundle.ts](https://github.com/visgl/deck.gl/blob/master/modules/main/bundle.ts)
+[modules/main/bundle.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/main/bundle.ts)

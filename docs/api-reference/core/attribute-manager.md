@@ -171,4 +171,4 @@ The following `type` values are supported for attribute definitions:
 
 ## Source
 
-[modules/core/src/lib/attribute-manager.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/attribute/attribute-manager.ts)
+[modules/core/src/lib/attribute-manager.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/lib/attribute/attribute-manager.ts)

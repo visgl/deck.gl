@@ -191,4 +191,4 @@ if (outDir) {
 
 ## Source
 
-[modules/core/src/viewports/viewport.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/viewport.ts)
+[modules/core/src/viewports/viewport.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/viewports/viewport.ts)

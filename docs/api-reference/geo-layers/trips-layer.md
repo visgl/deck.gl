@@ -128,4 +128,4 @@ Because timestamps are stored as 32-bit floating numbers, raw unix epoch time ca
 
 # Source
 
-[modules/geo-layers/src/trips-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/trips-layer)
+[modules/geo-layers/src/trips-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/geo-layers/src/trips-layer)

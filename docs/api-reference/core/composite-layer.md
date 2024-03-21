@@ -317,4 +317,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/lib/composite-layer.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/composite-layer.ts)
+[modules/core/src/lib/composite-layer.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/lib/composite-layer.ts)

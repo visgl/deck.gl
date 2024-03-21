@@ -386,4 +386,4 @@ The CPUGridLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/cpu-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/cpu-grid-layer)
+[modules/aggregation-layers/src/cpu-grid-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/aggregation-layers/src/cpu-grid-layer)

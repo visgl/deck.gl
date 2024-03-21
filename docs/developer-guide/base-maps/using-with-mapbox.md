@@ -2,7 +2,7 @@
 
 | Pure JS | React | Overlaid | Interleaved |
 | ----- | ----- | ----- | ----- |
-|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-overlay) |
+|  ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-overlay) |
 
 ![deck.gl interleaved with Mapbox layers](https://raw.github.com/visgl/deck.gl-data/master/images/whats-new/mapbox-layers.jpg)
 
@@ -66,11 +66,11 @@ There are two renderers to pick from, overlaid or interleaved.
 
 ### Overlaid
 
-If want to use the base map as a backdrop, the recommended approach is to use the Deck canvas as a overlay on top of the Mapbox map using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay) in its default mode (overlaid, which corresponds to `interleaved: false`). The [react get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/mapbox/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox/) illustrates this pattern.
+If want to use the base map as a backdrop, the recommended approach is to use the Deck canvas as a overlay on top of the Mapbox map using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay) in its default mode (overlaid, which corresponds to `interleaved: false`). The [react get-started example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/react/mapbox/) and [pure js get-started example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/pure-js/mapbox/) illustrates this pattern.
 
 ### Interleaved
 
-If you also need to mix deck.gl layers with base map layers, e.g. having deck.gl surfaces below text labels or objects occluding each other correctly in 3D, then you have to use deck.gl layers interleaved with Mapbox layers in the same WebGL2 context. In addition to using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) to insert Deck into the map container, you have to use interleaved mode (`interleaved: true`). Be cautious that this feature subjects to bugs and limitations of mapbox-gl's custom layer interface, and is only compatible with WebGL2 (See [interleaved renderer compatibility](../../api-reference/mapbox/overview#interleaved-renderer-compatibility)). The [pure js gallery example](https://github.com/visgl/deck.gl/blob/master/examples/gallery/src/mapbox-overlay.html) illustrates this pattern.
+If you also need to mix deck.gl layers with base map layers, e.g. having deck.gl surfaces below text labels or objects occluding each other correctly in 3D, then you have to use deck.gl layers interleaved with Mapbox layers in the same WebGL2 context. In addition to using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) to insert Deck into the map container, you have to use interleaved mode (`interleaved: true`). Be cautious that this feature subjects to bugs and limitations of mapbox-gl's custom layer interface, and is only compatible with WebGL2 (See [interleaved renderer compatibility](../../api-reference/mapbox/overview#interleaved-renderer-compatibility)). The [pure js gallery example](https://github.com/visgl/deck.gl/tree/9.0-release/examples/gallery/src/mapbox-overlay.html) illustrates this pattern.
 
 ## Inserting Mapbox into the deck.gl container
 
@@ -97,7 +97,7 @@ If you're using deck.gl in a React environment and just need a map backdrop, the
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around mapbox-gl. If you'd like to use deck.gl with React, this component is the recommended companion.
 
-All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
+All the [examples on this website](https://github.com/visgl/deck.gl/tree/9.0-release/examples/website) are implemented using the React integration.
 
 When you choose the react-map-gl `Map` React component as the root component, using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) with react-map-gl `useControl` works especially well to insert perfectly synchronized deck.gl layers in the map container. 
 
@@ -121,7 +121,7 @@ If you are using react-map-gl, there are several ways to provide a token to your
 
 As of v2.0, Mapbox GL JS [went proprietary](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#200) and requires a Mapbox account to use even if you don't load tiles from the Mapbox data service. Community forks of the v1 code base such as [MapLibre GL JS](https://maplibre.org) can generally be used as a drop-in replacement of mapbox-gl. If you are using react-map-gl, see [their Get Started guide](http://visgl.github.io/react-map-gl/docs/get-started) for more details.
 
-We provide get-started examples with Maplibre GL JS for [pure js](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre/) and [react](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/maplibre/), and an interleaved rendering example in our [gallery](https://github.com/visgl/deck.gl/blob/master/examples/gallery/src/maplibre-overlay.html).
+We provide get-started examples with Maplibre GL JS for [pure js](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/pure-js/maplibre/) and [react](https://github.com/visgl/deck.gl/tree/9.0-release/examples/get-started/react/maplibre/), and an interleaved rendering example in our [gallery](https://github.com/visgl/deck.gl/tree/9.0-release/examples/gallery/src/maplibre-overlay.html).
 
 If the forked libraries and Mapbox API diverge in the future, compatibility issues may arise. deck.gl intends to support open source efforts wherever reasonable. Please report any issue on GitHub.
 

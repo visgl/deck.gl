@@ -133,4 +133,4 @@ Note that the following events are always toggled on/off by user options:
 
 ## Source
 
-[modules/core/src/controllers/controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/controller.ts)
+[modules/core/src/controllers/controller.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/controllers/controller.ts)

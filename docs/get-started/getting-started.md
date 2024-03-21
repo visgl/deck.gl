@@ -19,7 +19,7 @@ The [deck.gl](https://www.npmjs.com/package/deck.gl) module includes all deck.gl
 
 ## Running the Examples
 
-The deck.gl repository contains an [examples folder](https://github.com/visgl/deck.gl/tree/master/examples) with a selection of small, standalone examples that could be good starting points for your application.
+The deck.gl repository contains an [examples folder](https://github.com/visgl/deck.gl/tree/9.0-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
 
 You should be able to copy these folders to your preferred locations, and get them running simply as follows:
 

@@ -69,4 +69,4 @@ See the `Controller` class [documentation](./controller.md#methods) for the meth
 
 ## Source
 
-[modules/core/src/controllers/map-controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/map-controller.ts)
+[modules/core/src/controllers/map-controller.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/controllers/map-controller.ts)

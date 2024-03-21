@@ -266,4 +266,4 @@ new SolidPolygonLayer({
 
 ## Source
 
-[modules/layers/src/solid-polygon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/solid-polygon-layer)
+[modules/layers/src/solid-polygon-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/layers/src/solid-polygon-layer)

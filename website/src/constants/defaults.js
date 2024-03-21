@@ -10,4 +10,4 @@ export const MAPBOX_STYLES = {
 };
 
 export const DATA_URI = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website';
-export const GITHUB_TREE = 'https://github.com/visgl/deck.gl/tree/master';
+export const GITHUB_TREE = 'https://github.com/visgl/deck.gl/tree/9.0-release';

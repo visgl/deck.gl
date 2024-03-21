@@ -307,4 +307,4 @@ The PolygonLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/polygon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/polygon-layer)
+[modules/layers/src/polygon-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/layers/src/polygon-layer)

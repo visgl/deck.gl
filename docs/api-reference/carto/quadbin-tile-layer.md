@@ -83,4 +83,4 @@ Called for each data object to retrieve the quadbin bigint identifier.
 
 ## Source
 
-[modules/carto/src/layers/quadbin-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/quadbin-tile-layer.ts)
+[modules/carto/src/layers/quadbin-tile-layer.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/carto/src/layers/quadbin-tile-layer.ts)

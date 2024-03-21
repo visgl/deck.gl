@@ -139,4 +139,4 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 
 ## Source
 
-[modules/layers/src/line-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/line-layer)
+[modules/layers/src/line-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/layers/src/line-layer)

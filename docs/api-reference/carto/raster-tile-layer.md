@@ -72,4 +72,4 @@ Use the [rasterTilesetSource](./data-sources.md#rastertilesetsource) to fetch th
 
 ## Source
 
-[modules/carto/src/layers/raster-tile-layer.ts](https://github.com/visgl/deck.gl/tree/master/modules/carto/src/layers/raster-tile-layer.ts)
+[modules/carto/src/layers/raster-tile-layer.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/carto/src/layers/raster-tile-layer.ts)

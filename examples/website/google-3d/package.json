@@ -11,7 +11,7 @@
   "dependencies": {
     "@turf/rhumb-bearing": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",
-    "deck.gl": "^8.8.0"
+    "deck.gl": "^9.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

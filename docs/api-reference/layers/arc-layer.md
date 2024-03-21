@@ -172,4 +172,4 @@ In degrees, can be positive or negative (`-90 to +90`).
 
 ## Source
 
-[modules/layers/src/arc-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/arc-layer)
+[modules/layers/src/arc-layer](https://github.com/visgl/deck.gl/tree/9.0-release/modules/layers/src/arc-layer)

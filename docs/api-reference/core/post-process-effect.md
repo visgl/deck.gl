@@ -45,4 +45,4 @@ const deckgl = new Deck({
 
 ## Source
 
-[/modules/core/src/effects/post-process-effect.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/post-process-effect.ts)
+[/modules/core/src/effects/post-process-effect.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/effects/post-process-effect.ts)
