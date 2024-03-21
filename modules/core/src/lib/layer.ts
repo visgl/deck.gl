@@ -1078,18 +1078,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       for (const model of this.getModels()) {
         model.setParameters(parameters);
       }
+      if (parameters.blendColor) {
+        context.renderPass.setParameters({blendConstant: parameters.blendColor});
+      }
 
       // Call subclass lifecycle method
-      context.device.withParametersWebGL(parameters, () => {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+      const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
-        // extensions
-        for (const extension of this.props.extensions) {
-          extension.draw.call(this, opts, extension);
-        }
+      // extensions
+      for (const extension of this.props.extensions) {
+        extension.draw.call(this, opts, extension);
+      }
 
-        this.draw(opts);
-      });
+      this.draw(opts);
     } finally {
       this.props = currentProps;
     }
