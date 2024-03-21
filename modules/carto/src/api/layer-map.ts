@@ -127,7 +127,10 @@ const defaultProps = {
   lineWidthUnits: 'pixels',
   pointRadiusUnits: 'pixels',
   rounded: true,
-  wrapLongitude: false
+  wrapLongitude: false,
+  tileSize: 1024,
+  debounceTime: 200
+  // refinementStrategy: 'never'
 };
 
 function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {}) {
@@ -231,7 +234,7 @@ function getTileLayer(dataset: MapDataset, basePropMap) {
     defaultProps: {
       ...defaultProps,
       ...(aggregationExp && {aggregationExp}),
-      ...(aggregationResLevel && {aggregationResLevel}),
+      ...(aggregationResLevel && {aggregationResLevel: aggregationResLevel + 1}),
       uniqueIdProperty: 'geoid'
     }
   };

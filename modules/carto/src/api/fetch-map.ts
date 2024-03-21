@@ -66,7 +66,8 @@ async function _fetchMapDataset(
     clientId,
     connectionName,
     format,
-    headers
+    headers,
+    tileResolution: 1
   };
 
   if (type === 'tileset') {
@@ -88,14 +89,26 @@ async function _fetchMapDataset(
         });
       }
     } else if (spatialDataType === 'h3') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp,
+        // aggregationResLevel,
+        aggregationResLevel: aggregationResLevel + 1,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await h3TableSource({...options, tableName: source});
       } else if (type === 'query') {
         dataset.data = await h3QuerySource({...options, sqlQuery: source, queryParameters});
       }
     } else if (spatialDataType === 'quadbin') {
-      const options = {...globalOptions, aggregationExp, aggregationResLevel, spatialDataColumn};
+      const options = {
+        ...globalOptions,
+        aggregationExp,
+        // aggregationResLevel,
+        aggregationResLevel: aggregationResLevel + 1,
+        spatialDataColumn
+      };
       if (type === 'table') {
         dataset.data = await quadbinTableSource({...options, tableName: source});
       } else if (type === 'query') {
