@@ -15,7 +15,7 @@ import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/p
 
 type Mask = {
   /** The channel index */
-  index: number;
+  index: 0 | 1 | 2 | 3;
   bounds: Bounds;
   coordinateOrigin: [number, number, number];
   coordinateSystem: CoordinateSystem;
@@ -23,7 +23,7 @@ type Mask = {
 
 type Channel = {
   id: string;
-  index: number;
+  index: 0 | 1 | 2 | 3;
   layers: Layer[];
   bounds: Bounds | null;
   maskBounds: Bounds;

@@ -1,5 +1,7 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import {default as LayersPass} from './layers-pass';
+import type Layer from '../lib/layer';
+import type Viewport from '../viewports/viewport';
+import LayersPass from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture;
@@ -51,26 +53,22 @@ export default class ShadowPass extends LayersPass {
   render(params) {
     const target = this.fbo;
 
-    this.device.withParametersWebGL(
-      {
-        depthRange: [0, 1],
-        depthTest: true,
-        blend: false
-      },
-      () => {
-        // @ts-expect-error TODO - assuming WebGL context
-        const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    // @ts-expect-error TODO - assuming WebGL context
+    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
 
-        const viewport = params.viewports[0];
-        const width = viewport.width * pixelRatio;
-        const height = viewport.height * pixelRatio;
-        if (width !== target.width || height !== target.height) {
-          target.resize({width, height});
-        }
+    const viewport = params.viewports[0];
+    const width = viewport.width * pixelRatio;
+    const height = viewport.height * pixelRatio;
+    const clearColor = [1, 1, 1, 1];
+    if (width !== target.width || height !== target.height) {
+      target.resize({width, height});
+    }
 
-        super.render({...params, target, pass: 'shadow', clearColor: [1, 1, 1, 1]});
-      }
-    );
+    super.render({...params, clearColor, target, pass: 'shadow'});
+  }
+
+  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+    return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
   }
 
   shouldDrawLayer(layer) {

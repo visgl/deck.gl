@@ -53,33 +53,29 @@ export class TerrainPickingPass extends PickLayersPass {
     }
     target.resize(viewport);
 
-    this.device.withParametersWebGL(
-      {
-        depthTest: false
-      },
-      () =>
-        this.render({
-          ...opts,
-          pickingFBO: target,
-          pass: `terrain-cover-picking-${terrainCover.id}`,
-          layers,
-          effects: [],
-          viewports: [viewport],
-          // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
-          // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
-          cullRect: undefined,
-          deviceRect: viewport,
-          pickZ: false
-        })
-    );
+    this.render({
+      ...opts,
+      pickingFBO: target,
+      pass: `terrain-cover-picking-${terrainCover.id}`,
+      layers,
+      effects: [],
+      viewports: [viewport],
+      // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
+      // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
+      cullRect: undefined,
+      deviceRect: viewport,
+      pickZ: false
+    });
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+    let parameters: any;
     if (this.drawParameters[layer.id]) {
-      return this.drawParameters[layer.id];
+      parameters = this.drawParameters[layer.id];
+    } else {
+      parameters = super.getLayerParameters(layer, layerIndex, viewport);
+      parameters.blend = true;
     }
-    const parameters = super.getLayerParameters(layer, layerIndex, viewport);
-    parameters.blend = true;
-    return parameters;
+    return {...parameters, depthTest: false};
   }
 }

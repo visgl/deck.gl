@@ -1075,6 +1075,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       context.device.setParametersWebGL({polygonOffset: offsets});
 
+      for (const model of this.getModels()) {
+        model.setParameters(parameters);
+      }
+
       // Call subclass lifecycle method
       context.device.withParametersWebGL(parameters, () => {
         const opts = {renderPass, moduleParameters, uniforms, parameters, context};
