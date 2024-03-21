@@ -69,24 +69,18 @@ export default class LayersPass extends Pass {
     const colorMask = options.colorMask ?? 0xf;
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
-    const hack: any = {};
     if (options.colorMask) {
-      const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8];
-      hack.colorMask = COLOR_CHANNELS.map(channel => Boolean(channel & options.colorMask!));
-      // parameters.colorMask = colorMask;
+      parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect;
     }
 
-    let renderPass;
-    this.device.withParametersWebGL(hack, () => {
-      renderPass = this.device.beginRenderPass({
-        framebuffer: options.target,
-        parameters,
-        clearColor,
-        clearDepth
-      });
+    const renderPass = this.device.beginRenderPass({
+      framebuffer: options.target,
+      parameters,
+      clearColor,
+      clearDepth
     });
 
     try {

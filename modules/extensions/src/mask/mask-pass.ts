@@ -45,7 +45,7 @@ export default class MaskPass extends LayersPass {
   }
 
   render(options: MaskPassRenderOptions) {
-    const colorMask = 2 ** options.channel + 1;
+    const colorMask = 2 ** options.channel;
     const clearColor = [255, 255, 255, 255];
     super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
   }
