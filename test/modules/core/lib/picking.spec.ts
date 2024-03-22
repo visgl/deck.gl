@@ -164,7 +164,7 @@ test('processPickInfo', async t => {
       size: 1,
       info: {layer: null, index: -1, picked: false, x: 100, coordinate: [-122, 38]},
       lastPickedInfo: {layerId: null, index: -1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -177,7 +177,7 @@ test('processPickInfo', async t => {
       size: 2,
       info: {layer: testLayer, object: 'a', index: 0, picked: true, x: 100, coordinate: [-122, 38]},
       lastPickedInfo: {layerId: 'test-layer', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 1, picking_uSelectedColor: [1, 0, 0]}
+      testLayerPickingUniforms: {isHighlightActive: true, highlightedObjectColor: [1, 0, 0]}
     },
     {
       pickInfo: {
@@ -190,7 +190,7 @@ test('processPickInfo', async t => {
       size: 2,
       info: {layer: testLayer, object: 'b'},
       lastPickedInfo: {layerId: 'test-layer', index: 1},
-      testLayerUniforms: {picking_uSelectedColorValid: 1, picking_uSelectedColor: [2, 0, 0]}
+      testLayerPickingUniforms: {isHighlightActive: true, highlightedObjectColor: [2, 0, 0]}
     },
     {
       pickInfo: {
@@ -211,11 +211,11 @@ test('processPickInfo', async t => {
         coordinate: [-122, 38]
       },
       lastPickedInfo: {layerId: 'test-layer-with-callback', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 0},
-      currentLayerUniforms: {
-        picking_uSelectedColorValid: 1,
-        picking_uSelectedColor: [1, 0, 0],
-        picking_uHighlightColor: [0, 1, 0, 1]
+      testLayerPickingUniforms: {isHighlightActive: false},
+      currentLayerPickingUniforms: {
+        isHighlightActive: true,
+        highlightedObjectColor: [1, 0, 0],
+        highlightColor: [0, 1, 0, 1]
       }
     },
     {
@@ -230,11 +230,11 @@ test('processPickInfo', async t => {
       size: 2,
       info: {layer: testLayerWithCallback, object: 'b'},
       lastPickedInfo: {layerId: 'test-layer-with-callback', index: 1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0},
-      currentLayerUniforms: {
-        picking_uSelectedColorValid: 1,
-        picking_uSelectedColor: [2, 0, 0],
-        picking_uHighlightColor: [1, 0, 0, 1]
+      testLayerPickingUniforms: {isHighlightActive: false},
+      currentLayerPickingUniforms: {
+        isHighlightActive: true,
+        highlightedObjectColor: [2, 0, 0],
+        highlightColor: [1, 0, 0, 1]
       }
     },
     {
@@ -251,7 +251,7 @@ test('processPickInfo', async t => {
         object: {type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}}
       },
       lastPickedInfo: {layerId: 'test-composite-layer-points-circle', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -273,7 +273,7 @@ test('processPickInfo', async t => {
       },
       highlightedObjectIndex: 0,
       lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -295,7 +295,7 @@ test('processPickInfo', async t => {
       },
       highlightedObjectIndex: 1,
       lastPickedInfo: {layerId: 'test-mvt-layer-0-0-1-points-circle', index: 1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -317,7 +317,7 @@ test('processPickInfo', async t => {
       },
       highlightedObjectIndex: 0,
       lastPickedInfo: {layerId: 'test-mvt-layer-binary-0-0-1-points-circle', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -339,7 +339,7 @@ test('processPickInfo', async t => {
       },
       highlightedObjectIndex: 1,
       lastPickedInfo: {layerId: 'test-mvt-layer-binary-0-0-1-points-circle', index: 1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0}
+      testLayerPickingUniforms: {isHighlightActive: false}
     },
     {
       pickInfo: {
@@ -352,7 +352,7 @@ test('processPickInfo', async t => {
       size: 2,
       info: {layer: testLayer, object: 'a', index: 0, picked: true, x: 300, coordinate: [-100, 40]},
       lastPickedInfo: {layerId: 'test-layer', index: 0},
-      testLayerUniforms: {picking_uSelectedColorValid: 1, picking_uSelectedColor: [1, 0, 0]}
+      testLayerPickingUniforms: {isHighlightActive: true, highlightedObjectColor: [1, 0, 0]}
     },
     {
       pickInfo: {
@@ -366,7 +366,7 @@ test('processPickInfo', async t => {
       size: 3,
       info: {layer: testLayerWithCallback, object: 'b', x: 300, coordinate: [-122, 38]},
       lastPickedInfo: {layerId: 'test-layer-with-callback', index: 1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0, picking_uSelectedColor: [1, 0, 0]}
+      testLayerPickingUniforms: {isHighlightActive: false, highlightedObjectColor: [1, 0, 0]}
     },
     {
       pickInfo: {
@@ -379,15 +379,14 @@ test('processPickInfo', async t => {
       size: 2,
       info: {layer: testLayerWithCallback, x: -1, viewport: parameters.viewports[0]},
       lastPickedInfo: {layerId: null, index: -1},
-      testLayerUniforms: {picking_uSelectedColorValid: 0, picking_uSelectedColor: [1, 0, 0]}
+      testLayerPickingUniforms: {isHighlightActive: false, highlightedObjectColor: [1, 0, 0]}
     }
   ];
 
   const lastPickedInfo = {};
   parameters.lastPickedInfo = lastPickedInfo;
 
-  const testLayerUniforms = testLayer.getModels()[0].getUniforms();
-  let currentLayerUniforms;
+  let testLayerPickingUniforms, currentLayerPickingUniforms;
 
   for (const testCase of TEST_CASES) {
     parameters.pickInfo = testCase.pickInfo;
@@ -409,12 +408,18 @@ test('processPickInfo', async t => {
     for (const key in testCase.lastPickedInfo) {
       t.deepEqual(lastPickedInfo[key], testCase.lastPickedInfo[key], `lastPickedInfo.${key}`);
     }
-    t.notOk(validateUniforms(testLayerUniforms, testCase.testLayerUniforms), 'testLayerUniforms');
-    if (testCase.currentLayerUniforms) {
-      currentLayerUniforms = testCase.pickInfo.pickedLayer.getModels()[0].getUniforms();
+    testLayerPickingUniforms = testLayer.getModels()[0].shaderInputs.getUniformValues().picking;
+    t.notOk(
+      validateUniforms(testLayerPickingUniforms, testCase.testLayerPickingUniforms),
+      'testLayerPickingUniforms'
+    );
+    if (testCase.currentLayerPickingUniforms) {
+      currentLayerPickingUniforms = testCase.pickInfo.pickedLayer
+        .getModels()[0]
+        .shaderInputs.getUniformValues().picking;
       t.notOk(
-        validateUniforms(currentLayerUniforms, testCase.currentLayerUniforms),
-        'currentLayerUniforms'
+        validateUniforms(currentLayerPickingUniforms, testCase.currentLayerPickingUniforms),
+        'currentLayerPickingUniforms'
       );
     }
 
