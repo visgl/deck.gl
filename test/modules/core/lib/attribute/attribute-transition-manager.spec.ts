@@ -155,11 +155,7 @@ test('AttributeTransitionManager#transition', async t => {
   timeline.setTime(1500);
   manager.run();
   let actual = await readArray(manager.getAttributes().instanceSizes.getBuffer());
-  t.deepEquals(
-    actual.slice(0, 4).map(Math.round), // TODO(v9): Confirm rounding 1.75 → 2 is valid?
-    [2, 2, 2, 2],
-    'attribute in transition'
-  );
+  t.deepEquals(actual.slice(0, 4), [2, 2, 2, 2], 'attribute in transition');
 
   attributes.instanceSizes.setData({value: new Float32Array(4).fill(4)});
   attributes.instanceSizes.setNeedsRedraw('update');
@@ -172,11 +168,7 @@ test('AttributeTransitionManager#transition', async t => {
   timeline.setTime(2000);
   manager.run();
   actual = await readArray(manager.getAttributes().instanceSizes.getBuffer());
-  t.deepEquals(
-    actual.slice(0, 4).map(Math.round), // TODO(v9): Confirm rounding 2.875 → 3 is valid?
-    [3, 3, 3, 3],
-    'attribute in transition'
-  );
+  t.deepEquals(actual.slice(0, 4), [3, 3, 3, 3], 'attribute in transition');
 
   timeline.setTime(2500);
   manager.run();

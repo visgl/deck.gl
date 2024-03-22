@@ -137,7 +137,6 @@ test('DataFilterExtension#categories', t => {
 test('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
 
-  // TODO - counter does not seem to work in headless-gl
   const testCases = [
     {
       props: {
