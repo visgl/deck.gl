@@ -10,7 +10,7 @@ function encodeParameter(name: string, value: string | boolean | number): string
 }
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
-export async function requestWithParameters<T = any>({
+export async function requestWithParameters<T extends {accessToken?: string}>({
   accessToken,
   baseUrl,
   parameters,
@@ -25,7 +25,11 @@ export async function requestWithParameters<T = any>({
 }): Promise<T> {
   const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
   if (REQUEST_CACHE.has(key)) {
-    return REQUEST_CACHE.get(key) as Promise<T>;
+    // Cached requests do not share access tokens.
+    return (REQUEST_CACHE.get(key) as Promise<T>).then(json => ({
+      ...json,
+      ...(accessToken && {accessToken})
+    }));
   }
 
   const url = parameters ? createURLWithParameters(baseUrl, parameters) : baseUrl;
@@ -47,9 +51,6 @@ export async function requestWithParameters<T = any>({
       if (!response || !response.ok) {
         throw new Error(json.error);
       }
-      if (accessToken) {
-        json.accessToken = accessToken;
-      }
       return json;
     })
     .catch((error: Error) => {
@@ -58,7 +59,9 @@ export async function requestWithParameters<T = any>({
     });
 
   REQUEST_CACHE.set(key, jsonPromise);
-  return jsonPromise;
+
+  // Cached requests do not share access tokens.
+  return jsonPromise.then(json => ({...json, ...(accessToken && {accessToken})}));
 }
 
 function createCacheKey(
