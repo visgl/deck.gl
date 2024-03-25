@@ -1,10 +1,10 @@
 import {getResolution} from 'quadbin';
 
 import {SolidPolygonLayer} from '@deck.gl/layers';
-import {QuadbinTileLayer} from '@deck.gl/carto';
 
-import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
 import {heatmap} from './heatmap';
+import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
+import QuadbinTileLayer from './quadbin-tile-layer';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {

@@ -26,9 +26,9 @@ interface IPostProcessLayer {
 }
 
 type Constructor<T> = (new (...args: any[]) => T) & {layerName: string};
-type DrawableLayer = Layer & {
-  initializeState(context: LayerContext): void;
-};
+// type DrawableLayer = Layer & {
+//   initializeState(context: LayerContext): void;
+// };
 type DrawableCompositeLayer = CompositeLayer & {
   renderLayers(): Layer<{}> | null | LayersList;
 };
@@ -39,14 +39,12 @@ type DrawableCompositeLayer = CompositeLayer & {
 class DrawCallbackLayer extends Layer {
   static layerName = 'DrawCallbackLayer';
 
-  initializeState(): void {
-    let layer: Layer = this;
-    layer.id = `draw-callback-${layer.root.props.id}`;
+  initializeState(this: DrawCallbackLayer): void {
+    this.id = `draw-callback-${this.root.props.id}`;
   }
 
-  _drawLayer() {
-    let layer: Layer = this;
-    (layer.root as unknown as IPostProcessLayer).applyPostProcess();
+  _drawLayer(this: DrawCallbackLayer) {
+    (this.root as unknown as IPostProcessLayer).applyPostProcess();
   }
 }
 

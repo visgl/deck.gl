@@ -93,7 +93,7 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
 `;
 
 function getPalette(paletteName?: string, rgb = true) {
-  let [colors, offsetString] = paletteName ? paletteName.split('-') : ['Prism'];
+  const [colors, offsetString] = paletteName ? paletteName.split('-') : ['Prism'];
   const n = 6;
   const offset = parseInt(offsetString || '0');
   const domain = Array(n + offset)
@@ -118,7 +118,7 @@ export function getPaletteGradient(paletteName: string) {
     gradient += `${color} ${position}%,`;
   }
 
-  return gradient.slice(0, -1) + ')';
+  return `${gradient.slice(0, -1)})`;
 }
 
 export type HeatmapProps = {

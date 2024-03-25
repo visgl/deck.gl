@@ -70,7 +70,8 @@
     "@deck.gl/geo-layers": "^9.0.0-beta",
     "@deck.gl/layers": "^9.0.0-beta",
     "@loaders.gl/core": "^4.1.0",
-    "@luma.gl/core": "^9.0.0"
+    "@luma.gl/core": "^9.0.0",
+    "@luma.gl/shadertools": "^9.0.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
