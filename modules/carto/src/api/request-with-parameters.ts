@@ -24,44 +24,49 @@ export async function requestWithParameters<T extends {accessToken?: string}>({
   errorContext: APIErrorContext;
 }): Promise<T> {
   const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
-  if (REQUEST_CACHE.has(key)) {
-    // Cached requests do not share access tokens.
-    return (REQUEST_CACHE.get(key) as Promise<T>).then(json => ({
-      ...json,
-      ...(accessToken && {accessToken})
-    }));
+
+  if (!REQUEST_CACHE.has(key)) {
+    const url = parameters ? createURLWithParameters(baseUrl, parameters) : baseUrl;
+    const headers = {...DEFAULT_HEADERS, ...customHeaders};
+
+    /* global fetch */
+    const fetchPromise =
+      url.length > MAX_GET_LENGTH
+        ? fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers})
+        : fetch(url, {headers});
+
+    let response: Response | undefined;
+    const jsonPromise: Promise<T> = fetchPromise
+      .then((_response: Response) => {
+        response = _response;
+        return response.json();
+      })
+      .then((json: any) => {
+        if (!response || !response.ok) {
+          throw new Error(json.error);
+        }
+        return json;
+      })
+      .catch((error: Error) => {
+        REQUEST_CACHE.delete(key);
+        throw new CartoAPIError(error, errorContext, response);
+      });
+
+    REQUEST_CACHE.set(key, jsonPromise);
   }
 
-  const url = parameters ? createURLWithParameters(baseUrl, parameters) : baseUrl;
-  const headers = {...DEFAULT_HEADERS, ...customHeaders};
-
-  /* global fetch */
-  const fetchPromise =
-    url.length > MAX_GET_LENGTH
-      ? fetch(baseUrl, {method: 'POST', body: JSON.stringify(parameters), headers})
-      : fetch(url, {headers});
-
-  let response: Response | undefined;
-  const jsonPromise: Promise<T> = fetchPromise
-    .then((_response: Response) => {
-      response = _response;
-      return response.json();
-    })
-    .then((json: any) => {
-      if (!response || !response.ok) {
-        throw new Error(json.error);
-      }
-      return json;
-    })
+  // Cached requests do not share access tokens and error context.
+  return (REQUEST_CACHE.get(key) as Promise<T>)
+    .then(json => ({
+      ...json,
+      ...(accessToken && {accessToken})
+    }))
     .catch((error: Error) => {
-      REQUEST_CACHE.delete(key);
-      throw new CartoAPIError(error, errorContext, response);
+      if (error instanceof CartoAPIError) {
+        throw new CartoAPIError(error.error, errorContext, error.response);
+      }
+      throw new CartoAPIError(error, errorContext);
     });
-
-  REQUEST_CACHE.set(key, jsonPromise);
-
-  // Cached requests do not share access tokens.
-  return jsonPromise.then(json => ({...json, ...(accessToken && {accessToken})}));
 }
 
 function createCacheKey(

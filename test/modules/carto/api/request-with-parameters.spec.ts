@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import {requestWithParameters} from '@deck.gl/carto/api/request-with-parameters';
 import {withMockFetchMapsV3} from '../mock-fetch';
+import {CartoAPIError} from '@deck.gl/carto';
 
 test('requestWithParameters#cacheBaseURL', async t => {
   await withMockFetchMapsV3(async calls => {
@@ -59,7 +60,7 @@ test('requestWithParameters#cacheParameters', async t => {
   t.end();
 });
 
-test('requestWithParameters#cacheAccessToken', async t => {
+test('requestWithParameters#nocacheAccessToken', async t => {
   await withMockFetchMapsV3(async calls => {
     t.equals(calls.length, 0, '0 initial calls');
 
@@ -84,10 +85,52 @@ test('requestWithParameters#cacheAccessToken', async t => {
 
     t.equals(calls.length, 1, '1 unique request');
     t.equals(responses.length, 4, '4 responses');
-    t.equals(responses[0].accessToken, '<TOKEN#1>', 'response 1');
-    t.equals(responses[1].accessToken, '<TOKEN#2>', 'response 2');
-    t.equals(responses[2].accessToken, '<TOKEN#3>', 'response 3');
-    t.equals(responses[3].accessToken, undefined, 'response 4');
+    t.equals(responses[0].accessToken, '<TOKEN#1>', 'response #1');
+    t.equals(responses[1].accessToken, '<TOKEN#2>', 'response #2');
+    t.equals(responses[2].accessToken, '<TOKEN#3>', 'response #3');
+    t.equals(responses[3].accessToken, undefined, 'response #4');
   });
+  t.end();
+});
+
+test('requestWithParameters#nocacheErrorContext', async t => {
+  await withMockFetchMapsV3(
+    async calls => {
+      t.equals(calls.length, 0, '0 initial calls');
+
+      let error1: Error | undefined;
+      let error2: Error | undefined;
+
+      try {
+        await requestWithParameters({
+          baseUrl: 'https://example.com/v1/errorContext',
+          errorContext: {requestType: 'Map data'}
+        });
+        t.fail('request #1 should fail, but did not');
+      } catch (error) {
+        error1 = error as Error;
+      }
+
+      try {
+        await requestWithParameters({
+          baseUrl: 'https://example.com/v1/errorContext',
+          errorContext: {requestType: 'SQL'}
+        });
+        t.fail('request #2 should fail, but did not');
+      } catch (error) {
+        error2 = error as Error;
+      }
+
+      t.equals(calls.length, 2, '2 unique requests, failures not cached');
+      t.true(error1 instanceof CartoAPIError, 'error #1 type');
+      t.is((error1 as CartoAPIError).errorContext.requestType, 'Map data', 'error #1 context');
+      t.true(error2 instanceof CartoAPIError, 'error #2 type');
+      t.is((error2 as CartoAPIError).errorContext.requestType, 'SQL', 'error #2 context');
+    },
+    // @ts-ignore
+    (url: string, headers: HeadersInit) => {
+      return Promise.reject(new Error('404 Not Found'));
+    }
+  );
   t.end();
 });
