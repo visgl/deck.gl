@@ -10,7 +10,7 @@ function encodeParameter(name: string, value: string | boolean | number): string
 }
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
-export async function requestWithParameters<T extends {accessToken?: string}>({
+export async function requestWithParameters<T = any>({
   accessToken,
   baseUrl,
   parameters,
