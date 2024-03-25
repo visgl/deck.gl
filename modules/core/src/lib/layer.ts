@@ -463,6 +463,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   getShaders(shaders: any): any {
     shaders = mergeShaders(shaders, {
+      disableWarnings: true,
       modules: this.context.defaultShaderModules
     });
     for (const extension of this.props.extensions) {
