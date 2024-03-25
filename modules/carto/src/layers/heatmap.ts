@@ -176,6 +176,6 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     };
   },
   dependencies: [random],
-  fs: fs,
+  fs,
   passes: [{sampler: true}]
 };
