@@ -10,12 +10,12 @@ import DeckGL from '@deck.gl/react';
 import RangeInput from './range-input';
 
 const PALETTES = {
-'Prism': 'Prism',
-'Prism 1': 'Prism-1',
-'Prism 2': 'Prism-2',
-'Vivid': 'Vivid',
-'Sunset': 'Sunset',
-'Temps': 'Temps'
+  Prism: 'Prism',
+  'Prism 1': 'Prism-1',
+  'Prism 2': 'Prism-2',
+  Vivid: 'Vivid',
+  Sunset: 'Sunset',
+  Temps: 'Temps'
 };
 
 const INITIAL_VIEW_STATE = {
@@ -34,11 +34,7 @@ function getTooltip(info?: PickingInfo): any {
   return info.object.properties.name;
 }
 
-export default function App({
-  layers,
-  initialViewState = INITIAL_VIEW_STATE,
-  mapStyle = MAP_STYLE,
-}) {
+export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapStyle = MAP_STYLE}) {
   const [palette, setPalette] = useState(Object.values(PALETTES)[0]);
   const [rangeScale, setRangeScale] = useState(300);
   const [radius, setRadius] = useState(20);
@@ -47,7 +43,7 @@ export default function App({
 
   layers = layers.map((l: any) => {
     const {layerName} = l.constructor;
-    if(!['QuadbinTileLayer'].includes(layerName)) {
+    if (!['QuadbinTileLayer'].includes(layerName)) {
       return l;
     }
 
@@ -79,7 +75,17 @@ export default function App({
         <Map reuseMaps mapLib={maplibregl} mapStyle={mapStyle} preventStyleDiffing={true} />
       </DeckGL>
       <ObjectSelect title="palette" obj={PALETTES} value={palette} onSelect={setPalette} />
-      <div style={{position: 'absolute', top: 33, right: 3, width: 192, height: 20, background: linearGradient, border: '3px solid white'}}></div>
+      <div
+        style={{
+          position: 'absolute',
+          top: 33,
+          right: 3,
+          width: 192,
+          height: 20,
+          background: linearGradient,
+          border: '3px solid white'
+        }}
+      ></div>
       <RangeInput
         bottom={60}
         min={10}
@@ -132,5 +138,5 @@ function ObjectSelect({title, obj, value, onSelect}) {
 }
 
 function formatLabel(n: number, label: string) {
-  return `${label ? label + ": " : ""}` + Math.round(n);
+  return `${label ? label + ': ' : ''}` + Math.round(n);
 }

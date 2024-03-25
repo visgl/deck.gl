@@ -11,7 +11,7 @@ class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
   getShaders(type) {
     const shaders = super.getShaders(type);
     shaders.inject = {
-      'vs:#decl': `uniform float cellResolution;`,
+      'vs:#decl': 'uniform float cellResolution;',
       'vs:DECKGL_FILTER_COLOR': `
   const vec3 RGB = vec3(256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
   float value = dot(RGB, color.rgb);
