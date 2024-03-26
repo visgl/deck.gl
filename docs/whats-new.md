@@ -59,6 +59,13 @@ The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has 
 
 The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
 
+### `@deck.gl/carto`
+
+- New CARTO module architecture: Sources and Layers replace the CartoLayer. Read more in the [Upgrade Guide](./upgrade-guide.md#deckglcarto).
+
+- Public preview for Boundary Sources (experimental): easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+
+
 ### Known Limitations
 
 The following issues are known and will be resolved in a v9.0 patch release:
