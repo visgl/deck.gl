@@ -57,7 +57,7 @@ test('H3Tileset2D#tileSize', async t => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
-    zoom: 6,
+    zoom: 10,
     width: 1440,
     height: 900
   });
@@ -67,17 +67,17 @@ test('H3Tileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
   const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
 
-  t.equal(indices512.length, 40, 'indices.length @ 512px');
-  t.equal(indices1024.length, 11, 'indices.length @ 1024px');
-  t.equal(indices2048.length, 2, 'indices.length @ 2048px');
+  t.equal(indices512.length, 13, 'indices.length @ 512px');
+  t.equal(indices1024.length, 4, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 1, 'indices.length @ 2048px');
 
-  t.deepEqual(indices512[0], {i: '82589ffffffffff'}, 'indices[0] @ 512px');
-  t.deepEqual(indices1024[0], {i: '8158bffffffffff'}, 'indices[0] @ 1024px');
-  t.deepEqual(indices2048[0], {i: '8075fffffffffff'}, 'indices[0] @ 2048px');
+  t.deepEqual(indices512[0], {i: '8475481ffffffff'}, 'indices[0] @ 512px');
+  t.deepEqual(indices1024[0], {i: '837548fffffffff'}, 'indices[0] @ 1024px');
+  t.deepEqual(indices2048[0], {i: '82754ffffffffff'}, 'indices[0] @ 2048px');
 
-  t.equal(tileset512.getTileZoom(indices512[0]), 2, 'zoom @ 512px');
-  t.equal(tileset1024.getTileZoom(indices1024[0]), 1, 'zoom @ 1024px');
-  t.equal(tileset2048.getTileZoom(indices2048[0]), 0, 'zoom @ 2048px');
+  t.equal(tileset512.getTileZoom(indices512[0]), 4, 'zoom @ 512px');
+  t.equal(tileset1024.getTileZoom(indices1024[0]), 3, 'zoom @ 1024px');
+  t.equal(tileset2048.getTileZoom(indices2048[0]), 2, 'zoom @ 2048px');
 
   t.end();
 });
