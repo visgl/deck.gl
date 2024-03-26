@@ -10,16 +10,16 @@ Release date: March 21, 2024
   <tbody>
     <tr>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/collision-filter-extension.gif?raw=true" />
-        <p><i>WebGPU ready</i></p>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>Widgets</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/terrain-extension.gif?raw=true" />
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/7ae2d0c7-47a7-409c-92a6-2259d97dfad1" />
+        <p><i>Typescript</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/e05863e2-777f-46fa-a04a-1bf4aa0625e2" />
         <p><i>Category filtering</i></p>
-      </td>
-      <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/wms-layer.gif?raw=true" />
-        <p><i>FirstPersonController</i></p>
       </td>
     </tr>
   </tbody>
