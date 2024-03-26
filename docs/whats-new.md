@@ -4,9 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.0.0
 
-deck.gl 9.0 development is actively ongoing with the goal of releasing a beta version as soon as possible.
-
-Release date: March 15, 2024
+Release date: March 21, 2024
 
 <table style={{border: 0}} align="center">
   <tbody>
@@ -30,6 +28,28 @@ Release date: March 15, 2024
 ### WebGPU enablement
 
 deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
+
+WebGPU is the next generation API for accessing GPU capabilities on the web. Unlike the incremental transition from WebGL to WebGL2, the shift to WebGPU completely changes the way the browser will interact with the GPU. The new (v9) version of [luma.gl](https://luma.gl/) has been rewritten to adopt a WebGPU-compatible interface, while maintaining full support for WebGL2. deck.gl v9 has been extensively refactored on top of the new luma.gl API, but the deck.gl API itself includes minimal changes. This should allow applications to smoothly update to the latest version.
+
+While the v9 luma.gl release is feature-complete and well-tested for the WebGL2 adapter, work is still required to provide full WebGPU support. The team is planning to follow the v9 releases soon with v9.1, which will provide the WebGPU implementation in luma.gl along with the complimentary updates in deck.gl.
+
+
+### Development experience
+
+Typescript types, which was provided as an opt-in in 8.9, has now been enabled by default in v9.
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr style={{borderTop: 0}}>
+      <td style={{border: 0, padding: 0}}>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/d92fb611-8e86-428a-a524-e9cc313c7252" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+All the deck.gl packages are now published as fully ESM-compatible.
+
 
 ### Category filtering in DataFilterExtension
 
