@@ -1,19 +1,11 @@
 from ._version import __version__
-from .layer import (
-    MapType,
-    CartoConnection,
-    GeoColumnType,
-    register_carto_layer,
-    get_layer_credentials,
-)
+from .layer import register_layers
+from . import sources
 from . import styles
 
 __all__ = [
     "__version__",
-    "MapType",
-    "CartoConnection",
-    "GeoColumnType",
-    "register_carto_layer",
-    "get_layer_credentials",
+    "register_layers",
+    "sources",
     "styles",
 ]
