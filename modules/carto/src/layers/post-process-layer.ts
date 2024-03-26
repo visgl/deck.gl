@@ -87,11 +87,7 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
       super.initializeState(context);
 
       this._createTextures();
-      this.internalState.postProcess = new PostProcessEffect(
-        effect,
-        {radius: 10, rangeScale: 1},
-        {clearTarget: false}
-      );
+      this.internalState.postProcess = new PostProcessEffect(effect, {radius: 10, rangeScale: 1});
       this.internalState.postProcess.setup(context);
     }
 
