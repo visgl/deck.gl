@@ -70,14 +70,16 @@ export function getHexagonResolution(
   viewport: {zoom: number; latitude: number},
   tileSize: number
 ): number {
-  const hexagonScaleFactor = (2 / 3) * viewport.zoom;
+  // Difference in given tile size compared to deck's internal 512px tile size,
+  // expressed as an offset to the viewport zoom.
+  const zoomOffset = Math.log2(tileSize / 512);
+  const hexagonScaleFactor = (2 / 3) * (viewport.zoom - zoomOffset);
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
-  const tileSizeScaleFactor = Math.log2(512 / tileSize);
 
   // Clip and bias
   return Math.max(
     0,
-    Math.floor(hexagonScaleFactor + latitudeScaleFactor + tileSizeScaleFactor - BIAS)
+    Math.floor(hexagonScaleFactor + latitudeScaleFactor - (BIAS + zoomOffset / 3))
   );
 }
 
