@@ -36,7 +36,7 @@ While the v9 luma.gl release is feature-complete and well-tested for the WebGL2 
 
 ### Development experience
 
-Typescript types, which was provided as an opt-in in 8.9, has now been enabled by default in v9.
+Typescript types, which were provided as an opt-in in 8.9, has now been enabled by default in v9.
 
 <table style={{border: 0}} align="center">
   <tbody>
@@ -58,13 +58,6 @@ The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has 
 ### FirstPersonController
 
 The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
-
-### Breaking Changes
-
-Changes should mostly impact custom layers that use luma.gl and GLSL shaders directly. More information about breaking changes and migration strategies will be provided as part of deck.gl v9 documentation.
-
-- `@deck.gl/mapbox` - `MapboxLayer` has been removed. Use `MapboxOverlay` instead.
-- `@deck.gl/carto` - `CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
 
 ### Known Limitations
 
