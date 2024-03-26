@@ -110,12 +110,6 @@ export default [
         extensions: [new FillStyleExtension({pattern: true})]
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      const fillLayer = layers[0].getSubLayers()[0];
-      if (fillLayer.state.patternTexture && fillLayer.state.patternMapping) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/polygon-pattern-mask.png'
   },
   {
@@ -143,12 +137,6 @@ export default [
         extensions: [new FillStyleExtension({pattern: true})]
       })
     ],
-    onAfterRender: ({layers, done}) => {
-      const fillLayer = layers[0].getSubLayers()[0];
-      if (fillLayer.state.patternTexture && fillLayer.state.patternMapping) {
-        done();
-      }
-    },
     goldenImage: './test/render/golden-images/polygon-pattern.png'
   },
   {

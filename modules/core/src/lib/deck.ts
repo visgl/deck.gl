@@ -31,12 +31,13 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
-import {luma, Device, DeviceProps} from '@luma.gl/core';
+import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Framebuffer} from '@luma.gl/core';
+import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -56,6 +57,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
+import type {ViewStateMap, AnyViewStateOf, ViewOrViews} from './view-manager';
 
 /* global document */
 
@@ -88,7 +90,7 @@ type CursorState = {
   isDragging: boolean;
 };
 
-export type DeckProps = {
+export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.
@@ -111,9 +113,7 @@ export type DeckProps = {
    */
   pickingRadius?: number;
 
-  /** WebGL parameters to be set before each frame is rendered.
-   * @see https://github.com/visgl/luma.gl/blob/8.5-release/modules/gltools/docs/api-reference/parameter-setting.md#parameters
-   */
+  /** WebGL parameters to be set before each frame is rendered. */
   parameters?: any;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
@@ -148,7 +148,7 @@ export type DeckProps = {
   /** A single View instance, or an array of `View` instances.
    * @default `new MapView()`
    */
-  views?: View | View[] | null;
+  views?: ViewsT;
   /** Options for viewport interactivity, e.g. pan, rotate and zoom with mouse, touch and keyboard.
    * This is a shorthand for defining interaction with the `views` prop if you are using the default view (i.e. a single `MapView`)
    */
@@ -157,12 +157,12 @@ export type DeckProps = {
    * An object that describes the view state for each view in the `views` prop.
    * Use if the camera state should be managed external to the `Deck` instance.
    */
-  viewState?: any;
+  viewState?: ViewStateMap<ViewsT> | null;
   /**
    * If provided, the `Deck` instance will track camera state changes automatically,
    * with `initialViewState` as its initial settings.
    */
-  initialViewState?: any;
+  initialViewState?: ViewStateMap<ViewsT> | null;
 
   /** Allow browser default touch actions.
    * @default `'none'`
@@ -191,7 +191,9 @@ export type DeckProps = {
   /** Called when the canvas resizes. */
   onResize?: (dimensions: {width: number; height: number}) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
-  onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => any;
+  onViewStateChange?: <ViewStateT extends AnyViewStateOf<ViewsT>>(
+    params: ViewStateChangeParameters<ViewStateT> & {viewId: string}
+  ) => ViewStateT | null | void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
@@ -286,13 +288,13 @@ const defaultProps = {
 };
 
 /* eslint-disable max-statements */
-export default class Deck {
+export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
   static defaultProps = defaultProps;
   // This is used to defeat tree shaking of init.js
   // https://github.com/visgl/deck.gl/issues/3213
   static VERSION = VERSION;
 
-  readonly props: Required<DeckProps>;
+  readonly props: Required<DeckProps<ViewsT>>;
   readonly width: number = 0;
   readonly height: number = 0;
   // Allows attaching arbitrary data to the instance
@@ -301,7 +303,7 @@ export default class Deck {
   protected device: Device | null = null;
 
   protected canvas: HTMLCanvasElement | null = null;
-  protected viewManager: ViewManager | null = null;
+  protected viewManager: ViewManager<View[]> | null = null;
   protected layerManager: LayerManager | null = null;
   protected effectManager: EffectManager | null = null;
   protected deckRenderer: DeckRenderer | null = null;
@@ -312,7 +314,7 @@ export default class Deck {
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
-  protected viewState: any;
+  protected viewState: ViewStateMap<ViewsT> | null;
   protected cursorState: CursorState = {
     isHovering: false,
     isDragging: false
@@ -358,7 +360,8 @@ export default class Deck {
    */
   private _lastPointerDownInfo: PickingInfo | null = null;
 
-  constructor(props: DeckProps) {
+  constructor(props: DeckProps<ViewsT>) {
+    // @ts-ignore views
     this.props = {...defaultProps, ...props};
     props = this.props;
 
@@ -367,7 +370,7 @@ export default class Deck {
         'View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.'
       )();
     }
-    this.viewState = props.initialViewState;
+    this.viewState = this.props.initialViewState;
 
     // See if we already have a device
     if (props.device) {
@@ -441,7 +444,7 @@ export default class Deck {
   }
 
   /** Partially update props */
-  setProps(props: DeckProps): void {
+  setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
 
     if ('onLayerHover' in props) {
@@ -470,7 +473,7 @@ export default class Deck {
       width: number;
       height: number;
       views: View[];
-      viewState: Record<string, any>;
+      viewState: ViewStateMap<ViewsT>;
     } = Object.create(this.props);
     Object.assign(resolvedProps, {
       views: this._getViews(),
@@ -672,6 +675,14 @@ export default class Deck {
     this.effectManager!.addDefaultEffect(effect);
   }
 
+  _addDefaultShaderModule(module: ShaderModule) {
+    this.layerManager!.addDefaultShaderModule(module);
+  }
+
+  _removeDefaultShaderModule(module: ShaderModule) {
+    this.layerManager?.removeDefaultShaderModule(module);
+  }
+
   // Private Methods
 
   private _pick(
@@ -716,7 +727,7 @@ export default class Deck {
   }
 
   /** Resolve props.canvas to element */
-  private _createCanvas(props: DeckProps): HTMLCanvasElement {
+  private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement {
     let canvas = props.canvas;
 
     // TODO EventManager should accept element id
@@ -738,7 +749,7 @@ export default class Deck {
   }
 
   /** Updates canvas width and/or height, if provided as props */
-  private _setCanvasSize(props: Required<DeckProps>): void {
+  private _setCanvasSize(props: Required<DeckProps<ViewsT>>): void {
     if (!this.canvas) {
       return;
     }
@@ -780,7 +791,7 @@ export default class Deck {
 
   private _createAnimationLoop(
     deviceOrPromise: Device | Promise<Device>,
-    props: DeckProps
+    props: DeckProps<ViewsT>
   ): AnimationLoop {
     const {
       // width,
@@ -815,20 +826,24 @@ export default class Deck {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  private _getViewState(): Record<string, any> {
-    return this.props.viewState || this.viewState;
+  private _getViewState(): ViewStateMap<ViewsT> {
+    return this.props.viewState || this.viewState || {};
   }
 
   // Get the view descriptor list
   private _getViews(): View[] {
-    // Default to a full screen map view port
-    let views = this.props.views || [new MapView({id: 'default-view'})];
-    views = Array.isArray(views) ? views : [views];
-    if (views.length && this.props.controller) {
+    const {views} = this.props;
+    const normalizedViews: View[] = Array.isArray(views)
+      ? views
+      : // If null, default to a full screen map view port
+      views
+      ? [views]
+      : [new MapView({id: 'default-view'})];
+    if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      views[0].props.controller = this.props.controller;
+      normalizedViews[0].props.controller = this.props.controller;
     }
-    return views;
+    return normalizedViews;
   }
 
   private _onContextLost() {
@@ -986,7 +1001,10 @@ export default class Deck {
       timeline
     });
 
-    this.effectManager = new EffectManager();
+    this.effectManager = new EffectManager({
+      deck: this,
+      device: this.device
+    });
 
     this.deckRenderer = new DeckRenderer(this.device);
 
@@ -1021,8 +1039,6 @@ export default class Deck {
   ) {
     const {device, gl} = this.layerManager!.context;
 
-    device.setParametersWebGL(this.props.parameters);
-
     this.props.onBeforeRender({device, gl});
 
     const opts = {
@@ -1051,7 +1067,7 @@ export default class Deck {
 
   // Callbacks
 
-  private _onRenderFrame(animationProps: any) {
+  private _onRenderFrame() {
     this._getFrameStats();
 
     // Log perf stats every second

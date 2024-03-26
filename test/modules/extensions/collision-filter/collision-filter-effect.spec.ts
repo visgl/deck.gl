@@ -64,7 +64,8 @@ test('CollisionFilterEffect#cleanup', t => {
   layerManager.setLayers([TEST_LAYER]);
   layerManager.updateLayers();
 
-  collisionFilterEffect.preRender(device, {
+  collisionFilterEffect.setup({device});
+  collisionFilterEffect.preRender({
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     ...PRERENDEROPTIONS
@@ -83,11 +84,13 @@ test('CollisionFilterEffect#cleanup', t => {
   t.deepEqual(collisionFilterEffect.channels, {}, 'Channels are removed');
   t.notOk(collisionFilterEffect.lastViewport, 'Last viewport is deleted');
 
+  layerManager.finalize();
   t.end();
 });
 
 test('CollisionFilterEffect#update', t => {
   const collisionFilterEffect = new CollisionFilterEffect();
+  collisionFilterEffect.setup({device});
 
   const TEST_LAYER_2 = TEST_LAYER.clone({id: 'test-layer-2'});
   const TEST_LAYER_DIFFERENT_GROUP = TEST_LAYER.clone({
@@ -102,7 +105,7 @@ test('CollisionFilterEffect#update', t => {
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    collisionFilterEffect.preRender(device, {
+    collisionFilterEffect.preRender({
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       ...PRERENDEROPTIONS
@@ -139,12 +142,15 @@ test('CollisionFilterEffect#update', t => {
   t.ok(parameters.dummyCollisionMap, 'dummy collision map is in parameters');
 
   collisionFilterEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });
 
 // Render test using makeSpy to check CollisionFilterPass.render is called including with didRender from Mask
 test('CollisionFilterEffect#render', t => {
   const collisionFilterEffect = new CollisionFilterEffect();
+  collisionFilterEffect.setup({device});
+
   const layerManager = new LayerManager(device, {viewport: testViewport});
   const TEST_LAYER_2 = TEST_LAYER.clone({id: 'test-layer-2'});
 
@@ -153,7 +159,7 @@ test('CollisionFilterEffect#render', t => {
     layerManager.setLayers(layers);
     layerManager.updateLayers();
 
-    collisionFilterEffect.preRender(device, {
+    collisionFilterEffect.preRender({
       layers: layerManager.getLayers(),
       onViewportActive: layerManager.activateViewport,
       ...PRERENDEROPTIONS,
@@ -197,5 +203,6 @@ test('CollisionFilterEffect#render', t => {
   t.equal(spy.callCount, 5, 'Should not render when mask effect does not render');
 
   collisionFilterEffect.cleanup();
+  layerManager.finalize();
   t.end();
 });

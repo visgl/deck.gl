@@ -1,6 +1,6 @@
 # Using deck.gl with React
 
-While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/) based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/) based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based applications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
 
 
 ## The DeckGL React Component
@@ -172,7 +172,7 @@ More examples are discussed in [this issue](https://github.com/visgl/deck.gl/iss
   but could be rendered as a child of any React component that you want to
   overlay your layers on top of.
 
-* To achive the overlay effect, the `DeckGL` component creates a transparent
+* To achieve the overlay effect, the `DeckGL` component creates a transparent
   `canvas` DOM element, into which the deck.gl layers passed in the `layers`
   prop will render (using WebGL2/WebGPU). Since this canvas is transparent, any
   other component you have underneath (typically a map) will visible behind

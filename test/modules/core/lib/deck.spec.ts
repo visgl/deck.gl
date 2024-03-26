@@ -16,8 +16,6 @@ test('Deck#constructor', t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -80,7 +78,6 @@ test('Deck#no views', t => {
     device,
     width: 1,
     height: 1,
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {longitude: 0, latitude: 0, zoom: 0},
     views: [],
@@ -96,8 +93,7 @@ test('Deck#no views', t => {
   t.pass('Deck constructor did not throw');
 });
 
-// TODO v9
-test.skip('Deck#rendering, picking, logging', t => {
+test('Deck#rendering, picking, logging', t => {
   // Test logging functionalities
   log.priority = 4;
 
@@ -105,8 +101,6 @@ test.skip('Deck#rendering, picking, logging', t => {
     device,
     width: 1,
     height: 1,
-    // This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,
@@ -147,10 +141,6 @@ test('Deck#auto view state', t => {
     device,
     width: 1,
     height: 1,
-
-    // This is required because the jsdom canvas does not have client width/height
-    // TODO v9 does not seem supported
-    // autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     views: [
       new MapView({id: 'default'}),
@@ -233,8 +223,6 @@ test('Deck#resourceManager', async t => {
     device,
     width: 1,
     height: 1,
-    // @ts-expect-error This is required because the jsdom canvas does not have client width/height
-    autoResizeDrawingBuffer: device.canvasContext.canvas.clientWidth > 0,
 
     viewState: {
       longitude: 0,

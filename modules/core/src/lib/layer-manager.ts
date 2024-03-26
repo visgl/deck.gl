@@ -20,9 +20,8 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {PipelineFactory} from '@luma.gl/engine';
-import {ShaderAssembler} from '@luma.gl/shadertools';
-import {getPipelineFactory, getShaderAssembler} from '../shaderlib/index';
+import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import {getShaderAssembler} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -45,7 +44,7 @@ export type LayerContext = {
   deck?: Deck;
   device: Device;
   shaderAssembler: ShaderAssembler;
-  pipelineFactory: PipelineFactory;
+  defaultShaderModules: ShaderModule[];
   renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
@@ -75,6 +74,8 @@ export default class LayerManager {
   private _needsUpdate: string | false = false;
   private _nextLayers: LayersList | null = null;
   private _debug: boolean = false;
+  // This flag is separate from _needsUpdate because it can be set during an update and should trigger another full update
+  private _defaultShaderModulesChanged: boolean = false;
 
   /**
    * @param device
@@ -104,9 +105,8 @@ export default class LayerManager {
       // @ts-expect-error
       gl: device?.gl,
       deck,
-      // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderAssembler: getShaderAssembler(),
-      pipelineFactory: (device && getPipelineFactory(device))!,
+      defaultShaderModules: [],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
@@ -155,6 +155,9 @@ export default class LayerManager {
     if (this._nextLayers && this._nextLayers !== this._lastRenderedLayers) {
       // New layers array may be the same as the old one if `setProps` is called by React
       return 'layers changed';
+    }
+    if (this._defaultShaderModulesChanged) {
+      return 'shader modules changed';
     }
     return this._needsUpdate;
   }
@@ -242,6 +245,25 @@ export default class LayerManager {
     }
   };
 
+  /** Register a default shader module */
+  addDefaultShaderModule(module: ShaderModule) {
+    const {defaultShaderModules} = this.context;
+    if (!defaultShaderModules.find(m => m.name === module.name)) {
+      defaultShaderModules.push(module);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
+  /** Deregister a default shader module */
+  removeDefaultShaderModule(module: ShaderModule) {
+    const {defaultShaderModules} = this.context;
+    const i = defaultShaderModules.findIndex(m => m.name === module.name);
+    if (i >= 0) {
+      defaultShaderModules.splice(i, 1);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
   private _handleError(stage: string, error: Error, layer: Layer) {
     layer.raiseError(error, `${stage} of ${layer}`);
   }
@@ -258,6 +280,14 @@ export default class LayerManager {
       } else {
         oldLayerMap[oldLayer.id] = oldLayer;
       }
+    }
+
+    if (this._defaultShaderModulesChanged) {
+      for (const layer of oldLayers) {
+        layer.setNeedsUpdate();
+        layer.setChangeFlags({extensionsChanged: true});
+      }
+      this._defaultShaderModulesChanged = false;
     }
 
     // Allocate array for generated layers

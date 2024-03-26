@@ -501,7 +501,7 @@ test('Layer#calculateInstancePickingColors', t => {
         t.ok(instancePickingColors.state.constant, 'instancePickingColors is set to constant');
         t.deepEquals(
           instancePickingColors.value,
-          [0, 0, 0],
+          [0, 0, 0, 0],
           'instancePickingColors is set to constant'
         );
       }
@@ -514,8 +514,8 @@ test('Layer#calculateInstancePickingColors', t => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
         t.notOk(instancePickingColors.state.constant, 'instancePickingColors is enabled');
         t.deepEquals(
-          instancePickingColors.value.subarray(0, 6),
-          [1, 0, 0, 2, 0, 0],
+          instancePickingColors.value.subarray(0, 8),
+          [1, 0, 0, 0, 2, 0, 0, 0],
           'instancePickingColors is populated'
         );
       }
@@ -529,8 +529,8 @@ test('Layer#calculateInstancePickingColors', t => {
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
         t.deepEquals(
-          instancePickingColors.value.subarray(0, 9),
-          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          instancePickingColors.value.subarray(0, 12),
+          [1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0],
           'instancePickingColors is populated'
         );
       }
@@ -546,8 +546,8 @@ test('Layer#calculateInstancePickingColors', t => {
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
         t.deepEquals(
-          instancePickingColors.value.subarray(0, 9),
-          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          instancePickingColors.value.subarray(0, 12),
+          [1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0],
           'instancePickingColors is populated'
         );
       }
@@ -562,7 +562,7 @@ test('Layer#calculateInstancePickingColors', t => {
         const {length} = instancePickingColors.value;
         t.deepEquals(
           length,
-          (2 ** 24 + 100) * 3,
+          (2 ** 24 + 100) * 4,
           `no over allocation for instancePickingColors buffer after 2**24 elements`
         );
       }
@@ -611,6 +611,7 @@ test('Layer#updateModules', async t => {
 
       const {props, oldProps} = params;
       if (props.modelId !== oldProps.modelId) {
+        this.state.model?.destroy();
         this.setState({model: this._getModel()});
       }
     }
@@ -618,14 +619,17 @@ test('Layer#updateModules', async t => {
     _getModel() {
       return new Model(this.context.device, {
         vs: `\
+  #version 300 es
   void main() {
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
   }
         `,
         fs: `\
+  #version 300 es
   precision highp float;
+  out vec4 fragColor;
   void main(void) {
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
   }
         `,
         modules: [picking]
@@ -647,15 +651,15 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.props.uniforms;
+          let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.deepEqual(
-            modelUniforms.picking_uHighlightColor,
+            modelUniforms.picking.highlightColor,
             [0, 0, HALF_BYTE, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            0,
+            modelUniforms.picking.isHighlightActive,
+            false,
             'model selectedColor uniform is disabled'
           );
 
@@ -665,10 +669,10 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.props.uniforms;
+          modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            0,
+            modelUniforms.picking.isHighlightActive,
+            false,
             'model selectedColor uniform is disabled (autoHighlight: false)'
           );
         }
@@ -682,19 +686,19 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.props.uniforms;
+          let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.deepEqual(
-            modelUniforms.picking_uHighlightColor,
+            modelUniforms.picking.highlightColor,
             [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
           );
@@ -705,14 +709,14 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.props.uniforms;
+          modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
           );
@@ -727,14 +731,14 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.props.uniforms;
+          let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
           );
@@ -745,14 +749,14 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.props.uniforms;
+          modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [2, 0, 0],
             'model selectedColor uniform is set from highlightedObjectIndex'
           );
@@ -767,10 +771,10 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          let modelUniforms = layer.state.model.props.uniforms;
+          let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            0,
+            modelUniforms.picking.isHighlightActive,
+            false,
             'model selectedColor uniform is unset (highlightedObjectIndex changed)'
           );
 
@@ -780,14 +784,14 @@ test('Layer#updateModules', async t => {
             color: [3, 0, 0]
           });
 
-          modelUniforms = layer.state.model.props.uniforms;
+          modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [3, 0, 0],
             'model selectedColor uniform is set from hovered object index'
           );
@@ -801,14 +805,14 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.props.uniforms;
+          const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            1,
+            modelUniforms.picking.isHighlightActive,
+            true,
             'model selectedColor uniform is enabled'
           );
           t.deepEqual(
-            modelUniforms.picking_uSelectedColor,
+            modelUniforms.picking.highlightedObjectColor,
             [3, 0, 0],
             'model selectedColor uniform is set from hovered object index'
           );
@@ -822,15 +826,15 @@ test('Layer#updateModules', async t => {
         },
 
         onAfterUpdate: ({layer}) => {
-          const modelUniforms = layer.state.model.props.uniforms;
+          const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           t.deepEqual(
-            modelUniforms.picking_uHighlightColor,
+            modelUniforms.picking.highlightColor,
             [1, 0, 0, HALF_BYTE],
             'model highlightColor uniform is populated'
           );
           t.is(
-            modelUniforms.picking_uSelectedColorValid,
-            0,
+            modelUniforms.picking.isHighlightActive,
+            false,
             'model selectedColor uniform is disabled (model reset)'
           );
         }

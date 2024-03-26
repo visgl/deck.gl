@@ -5,6 +5,7 @@ import {patternShaders} from './shader-module';
 import type {
   Layer,
   LayerContext,
+  DefaultProps,
   Accessor,
   AccessorFunction,
   TextureSource,
@@ -12,15 +13,13 @@ import type {
 } from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
-const defaultProps = {
+const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
     type: 'image',
     value: null,
     async: true,
-    parameters: {
-      minFilter: 'linear'
-    }
+    parameters: {lodMaxClamp: 0}
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,

@@ -1,6 +1,6 @@
 import {deepEqual} from '../utils/deep-equal';
 import LightingEffect from '../effects/lighting/lighting-effect';
-import type {Effect} from './effect';
+import type {Effect, EffectContext} from './effect';
 
 const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 
@@ -17,9 +17,11 @@ export default class EffectManager {
   /** Effect instances and order preference pairs, sorted by order */
   private _defaultEffects: Effect[] = [];
   private _needsRedraw: false | string;
+  private _context: EffectContext;
 
-  constructor() {
+  constructor(context: EffectContext) {
     this.effects = [];
+    this._context = context;
     this._needsRedraw = 'Initial render';
     this._setEffects([]);
   }
@@ -36,6 +38,7 @@ export default class EffectManager {
       } else {
         defaultEffects.splice(index, 0, effect);
       }
+      effect.setup(this._context);
       this._setEffects(this.effects);
     }
   }
@@ -70,21 +73,22 @@ export default class EffectManager {
     const nextEffects: Effect[] = [];
     for (const effect of effects) {
       const oldEffect = oldEffectsMap[effect.id];
+      let effectToAdd = effect;
       if (oldEffect && oldEffect !== effect) {
         if (oldEffect.setProps) {
           oldEffect.setProps(effect.props);
-          nextEffects.push(oldEffect);
+          effectToAdd = oldEffect;
         } else {
-          oldEffect.cleanup();
-          nextEffects.push(effect);
+          oldEffect.cleanup(this._context);
         }
-      } else {
-        nextEffects.push(effect);
+      } else if (!oldEffect) {
+        effect.setup(this._context);
       }
+      nextEffects.push(effectToAdd);
       delete oldEffectsMap[effect.id];
     }
     for (const removedEffectId in oldEffectsMap) {
-      oldEffectsMap[removedEffectId].cleanup();
+      oldEffectsMap[removedEffectId].cleanup(this._context);
     }
     this.effects = nextEffects;
 
@@ -98,7 +102,7 @@ export default class EffectManager {
 
   finalize() {
     for (const effect of this._resolvedEffects) {
-      effect.cleanup();
+      effect.cleanup(this._context);
     }
 
     this.effects.length = 0;

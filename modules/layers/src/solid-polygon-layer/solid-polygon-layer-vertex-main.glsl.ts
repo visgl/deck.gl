@@ -49,7 +49,7 @@ vec3 project_offset_normal(vec3 vector) {
 void calculatePosition(PolygonProps props) {
   vec3 pos = props.positions;
   vec3 pos64Low = props.positions64Low;
-  vec3 normal;
+  vec3 normal = props.normal;
   vec4 colors = isWireframe ? props.lineColors : props.fillColors;
 
   geometry.worldPosition = props.positions;
@@ -63,7 +63,12 @@ void calculatePosition(PolygonProps props) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   if (extruded) {
-    geometry.normal = props.normal;
+  #ifdef IS_SIDE_VERTEX
+    normal = project_offset_normal(normal);
+  #else
+    normal = project_normal(normal);
+  #endif
+    geometry.normal = normal;
     vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, colors.a * opacity);
   } else {

@@ -21,6 +21,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.10] - Mar 20 2024
+
+- Add Zoom and Compass widgets (#8072)
+- fix(extensions): Use lodMaxClamp to disable m ips (#8677)
+- chore(*): Use stable '@loaders.gl/*' (#8679)
+- View and view state types improvements (#8663)
+- Fix PostProcessEffect render to framebuffer (#8661)
+- Fix IconManager upsizing auto-packed icon atlas (#8673)
+- feat(carto): Export types for generic source options (#8651)
+- chore: Bump luma to 9.0.4 (#8676)
+- Fix SolidPolygonLayer lighting (#8669)
+- Fix FillStyleExtension artifact (#8668)
+- Support loaders.gl v4 Table object (#8664)
+- fix(core): support view.clear (#8665)
+- Clean up dev dependencies (#8653)
+- Remove terrainModule from ShaderAssembler on cleanup (#8666)
+- Chore: Bump luma to 9.0.3 (#8659)
+- feat(carto): Cache pending requests (#8648)
+- Implement panning in FirstPersonController (#8166)
+- feat(geo-layers): add TileLayerPickingInfo type (#8645)
+- fix(react): move types to devDependencies (#8644)
+- Fix attribute transition (#8643)
+
 #### deck.gl [9.0.0-beta.9] - Mar 13 2024
 
 - Mask Extension: Handle case when no viewport exists (#8627)

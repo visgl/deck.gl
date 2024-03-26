@@ -462,6 +462,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    shaders = mergeShaders(shaders, {
+      disableWarnings: true,
+      modules: this.context.defaultShaderModules
+    });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
@@ -1071,6 +1075,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
 
       context.device.setParametersWebGL({polygonOffset: offsets});
+
+      for (const model of this.getModels()) {
+        model.setParameters(parameters);
+      }
 
       // Call subclass lifecycle method
       context.device.withParametersWebGL(parameters, () => {

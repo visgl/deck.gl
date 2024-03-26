@@ -3,7 +3,7 @@
   "description": "deck.gl core layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.9",
+  "version": "9.0.0-beta.10",
   "publishConfig": {
     "access": "public"
   },
@@ -37,8 +37,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/images": "^4.2.0-alpha.5",
-    "@loaders.gl/schema": "^4.2.0-alpha.5",
+    "@loaders.gl/images": "^4.1.4",
+    "@loaders.gl/schema": "^4.1.4",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^4.0.0",
     "@math.gl/polygon": "^4.0.0",
@@ -47,7 +47,7 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-beta",
-    "@loaders.gl/core": "^4.2.0-alpha.5",
+    "@loaders.gl/core": "^4.1.0",
     "@luma.gl/core": "^9.0.0",
     "@luma.gl/engine": "^9.0.0"
   },

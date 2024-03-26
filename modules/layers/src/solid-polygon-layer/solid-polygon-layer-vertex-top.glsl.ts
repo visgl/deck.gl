@@ -42,7 +42,7 @@ void main(void) {
   props.fillColors = fillColors;
   props.lineColors = lineColors;
   props.pickingColors = pickingColors;
-  props.normal = project_normal(vec3(0.0, 0.0, 1.0));
+  props.normal = vec3(0.0, 0.0, 1.0);
 
   calculatePosition(props);
 }

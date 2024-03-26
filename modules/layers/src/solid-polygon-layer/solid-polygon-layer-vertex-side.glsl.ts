@@ -23,6 +23,7 @@ import main from './solid-polygon-layer-vertex-main.glsl';
 export default `\
 #version 300 es
 #define SHADER_NAME solid-polygon-layer-vertex-shader-side
+#define IS_SIDE_VERTEX
 
 in vec2 positions;
 
@@ -66,11 +67,10 @@ void main(void) {
   props.positions = mix(pos, nextPos, positions.x);
   props.positions64Low = mix(pos64Low, nextPos64Low, positions.x);
 
-  vec3 normal = vec3(
+  props.normal = vec3(
     pos.y - nextPos.y + (pos64Low.y - nextPos64Low.y),
     nextPos.x - pos.x + (nextPos64Low.x - pos64Low.x),
     0.0);
-  props.normal = project_offset_normal(normal);
 
   props.elevations = instanceElevations * positions.y;
   props.fillColors = instanceFillColors;

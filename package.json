@@ -47,28 +47,19 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@arcgis/core": "^4.21.0",
-    "@babel/register": "^7.13.0",
-    "@loaders.gl/csv": "^4.2.0-alpha.5",
-    "@loaders.gl/polyfills": "^4.2.0-alpha.5",
-    "@luma.gl/test-utils": "^9.0.0",
-    "@luma.gl/webgpu": "^9.0.0",
+    "@loaders.gl/csv": "^4.1.4",
+    "@loaders.gl/polyfills": "^4.1.4",
+    "@luma.gl/webgpu": "^9.0.7",
     "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.9",
-    "@probe.gl/test-utils": "^4.0.9",
-    "@types/react": "^18.2.0",
-    "abortcontroller-polyfill": "^1.5.0",
-    "babel-loader": "^8.0.0",
     "jsdom": "^20.0.0",
     "ocular-dev-tools": "2.0.0-alpha.29",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "puppeteer": "^22.4.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "s2-geometry": "^1.2.10",
-    "tape-catch": "^1.0.6",
-    "tap-spec": "^5.0.0"
+    "tap-spec": "^5.0.0",
+    "tape-catch": "^1.0.6"
   },
   "pre-commit": [
     "test-fast",
