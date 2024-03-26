@@ -11,13 +11,11 @@ function encodeParameter(name: string, value: string | boolean | number): string
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
 export async function requestWithParameters<T = any>({
-  accessToken,
   baseUrl,
   parameters,
   headers: customHeaders,
   errorContext
 }: {
-  accessToken?: string;
   baseUrl: string;
   parameters?: Record<string, string>;
   headers: Record<string, string>;
@@ -56,17 +54,12 @@ export async function requestWithParameters<T = any>({
   }
 
   // Cached requests do not share access tokens and error context.
-  return (REQUEST_CACHE.get(key) as Promise<T>)
-    .then(json => ({
-      ...json,
-      ...(accessToken && {accessToken})
-    }))
-    .catch((error: Error) => {
-      if (error instanceof CartoAPIError) {
-        throw new CartoAPIError(error.error, errorContext, error.response);
-      }
-      throw new CartoAPIError(error, errorContext);
-    });
+  return (REQUEST_CACHE.get(key) as Promise<T>).catch((error: Error) => {
+    if (error instanceof CartoAPIError) {
+      throw new CartoAPIError(error.error, errorContext, error.response);
+    }
+    throw new CartoAPIError(error, errorContext);
+  });
 }
 
 function createCacheKey(
