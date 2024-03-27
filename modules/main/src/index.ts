@@ -56,6 +56,7 @@ export {
   OrthographicController,
   _GlobeController,
   // For custom layers
+  Attribute,
   AttributeManager,
   // Shader modules
   picking,
