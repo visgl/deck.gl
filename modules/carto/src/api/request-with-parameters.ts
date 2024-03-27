@@ -11,13 +11,11 @@ function encodeParameter(name: string, value: string | boolean | number): string
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
 export async function requestWithParameters<T = any>({
-  accessToken,
   baseUrl,
   parameters,
   headers: customHeaders,
   errorContext
 }: {
-  accessToken?: string;
   baseUrl: string;
   parameters?: Record<string, string>;
   headers: Record<string, string>;
@@ -46,9 +44,6 @@ export async function requestWithParameters<T = any>({
     .then((json: any) => {
       if (!response || !response.ok) {
         throw new Error(json.error);
-      }
-      if (accessToken) {
-        json.accessToken = accessToken;
       }
       return json;
     })
