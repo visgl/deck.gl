@@ -25,6 +25,18 @@ Release date: March 21, 2024
   </tbody>
 </table>
 
+### New module: @deck.gl/widgets
+
+You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
+
+This module initially contains the following widgets:
+
+- [FullscreenWidget](./api-reference/widgets/fullscreen-widget.md)
+- [ZoomWidget](./api-reference/widgets/zoom-widget.md)
+- [CompassWidget](./api-reference/widgets/compass-widget.md)
+
+You can also create your own widget by implementing the [`Widget`](./api-reference/core/widget.md) interface.
+
 ### WebGPU enablement
 
 deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
@@ -58,6 +70,16 @@ The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has 
 ### FirstPersonController
 
 The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr style={{borderTop: 0}}>
+      <td style={{border: 0, padding: 0}}>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/2461547/ea476da0-6943-4a08-9c3d-aa86f13629a8" />
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### `@deck.gl/carto`
 
