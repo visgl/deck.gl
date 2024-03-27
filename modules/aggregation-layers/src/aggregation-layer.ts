@@ -24,7 +24,8 @@ import {
   LayerDataSource,
   _compareProps as compareProps,
   UpdateParameters,
-  CompositeLayerProps
+  CompositeLayerProps,
+  Attribute
 } from '@deck.gl/core';
 import {filterProps} from './utils/prop-utils';
 
@@ -75,7 +76,7 @@ export default abstract class AggregationLayer<
     this.setState({changedAttributes});
   }
 
-  getAttributes() {
+  getAttributes(): {[id: string]: Attribute} {
     return this.getAttributeManager()!.getAttributes();
   }
 

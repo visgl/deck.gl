@@ -33,7 +33,7 @@
     "typed"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.0.6"
+    "@luma.gl/test-utils": "^9.0.7"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-beta",
