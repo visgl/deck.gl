@@ -1,0 +1,252 @@
+{
+    "id": "3ab94591-b2be-4737-8d60-cd1907dde9ae",
+    "demo": null,
+    "title": "Spatial Index Test",
+    "token": "$TOKEN",
+    "views": 0,
+    "ownerId": "google-oauth2|100942829150283066611",
+    "privacy": "public",
+    "accountId": "ac_47uunmeg",
+    "createdAt": "2024-03-19T17:18:38.384Z",
+    "updatedAt": "2024-03-20T15:20:32.794Z",
+    "description": null,
+    "collaborative": false,
+    "keplerMapConfig": {
+        "config": {
+            "filters": {
+                "44525a9f-fba9-4bf1-96f8-c971e47327c9": {}
+            },
+            "uiState": {
+                "descriptionOpen": false,
+                "controlsPaneOpen": false,
+                "descriptionPreview": false
+            },
+            "widgets": [],
+            "mapState": {
+                "zoom": 5.287818705547088,
+                "pitch": 0,
+                "bearing": 0,
+                "isSplit": false,
+                "latitude": 39.71104216882717,
+                "longitude": -3.7551996152283746,
+                "dragRotate": false
+            },
+            "mapStyle": {
+                "mapStyles": {},
+                "styleType": "positron",
+                "topLayerGroups": {},
+                "visibleLayerGroups": {
+                    "land": true,
+                    "road": true,
+                    "label": true,
+                    "water": true,
+                    "border": false,
+                    "building": true
+                },
+                "threeDBuildingColor": [
+                    209,
+                    206,
+                    199
+                ]
+            },
+            "visState": {
+                "layers": [
+                    {
+                        "id": "dra6ahl",
+                        "type": "h3",
+                        "config": {
+                            "color": [
+                                30,
+                                150,
+                                190
+                            ],
+                            "label": "H3 Urbanity",
+                            "dataId": "44525a9f-fba9-4bf1-96f8-c971e47327c9",
+                            "hidden": false,
+                            "columns": {},
+                            "isVisible": true,
+                            "textLabel": [
+                                {
+                                    "size": 12,
+                                    "color": [
+                                        44,
+                                        48,
+                                        50
+                                    ],
+                                    "field": null,
+                                    "anchor": "start",
+                                    "offset": [
+                                        0,
+                                        0
+                                    ],
+                                    "alignment": "center",
+                                    "outlineColor": [
+                                        255,
+                                        255,
+                                        255
+                                    ]
+                                }
+                            ],
+                            "visConfig": {
+                                "filled": true,
+                                "radius": 2,
+                                "opacity": 0.8,
+                                "stroked": true,
+                                "enable3d": false,
+                                "sizeRange": [
+                                    0,
+                                    10
+                                ],
+                                "thickness": 1,
+                                "wireframe": false,
+                                "colorRange": {
+                                    "name": "Pastel @CARTOColors",
+                                    "type": "qualitative",
+                                    "colors": [
+                                        "#66C5CC",
+                                        "#F6CF71",
+                                        "#F89C74",
+                                        "#DCB0F2",
+                                        "#87C55F",
+                                        "#9EB9F3"
+                                    ],
+                                    "category": "CARTO"
+                                },
+                                "heightRange": [
+                                    0,
+                                    500
+                                ],
+                                "radiusRange": [
+                                    0,
+                                    50
+                                ],
+                                "strokeColor": [
+                                    130,
+                                    154,
+                                    227
+                                ],
+                                "customMarkers": false,
+                                "strokeOpacity": 0.8,
+                                "elevationScale": 5,
+                                "colorAggregation": "mode",
+                                "customMarkersUrl": "",
+                                "strokeColorRange": {
+                                    "name": "Global Warming",
+                                    "type": "sequential",
+                                    "colors": [
+                                        "#5A1846",
+                                        "#900C3F",
+                                        "#C70039",
+                                        "#E3611C",
+                                        "#F1920E",
+                                        "#FFC300"
+                                    ],
+                                    "category": "Uber"
+                                },
+                                "heightAggregation": "average"
+                            },
+                            "highlightColor": [
+                                252,
+                                242,
+                                26,
+                                255
+                            ],
+                            "visibilityByZoom": {
+                                "max": 21,
+                                "min": 0
+                            }
+                        },
+                        "legendSettings": {},
+                        "visualChannels": {
+                            "sizeField": null,
+                            "undefined": [
+                                0,
+                                1
+                            ],
+                            "colorField": {
+                                "name": "urbanity",
+                                "type": "string"
+                            },
+                            "colorScale": "ordinal",
+                            "heightField": null,
+                            "radiusField": null,
+                            "rotationField": null,
+                            "strokeColorField": null,
+                            "customMarkersField": null
+                        }
+                    }
+                ],
+                "filters": [],
+                "splitMaps": [],
+                "layerBlending": "normal",
+                "animationConfig": {
+                    "speed": 1,
+                    "currentTime": null
+                },
+                "interactionConfig": {
+                    "brush": {
+                        "size": 0.5,
+                        "enabled": false
+                    },
+                    "tooltip": {
+                        "enabled": true,
+                        "compareMode": false,
+                        "compareType": "absolute",
+                        "fieldsToShow": {
+                            "44525a9f-fba9-4bf1-96f8-c971e47327c9": []
+                        }
+                    },
+                    "geocoder": {
+                        "enabled": false
+                    },
+                    "coordinate": {
+                        "enabled": false
+                    }
+                }
+            },
+            "mapSettings": {
+                "cacheTime": 0,
+                "scrollWheelZoom": true,
+                "addressSearchBar": false,
+                "controlCacheTime": false,
+                "exportViewportData": false,
+                "showTitlePublicMap": false,
+                "featureSelectionTool": false,
+                "showMyLocationButton": false,
+                "sqlParameterControls": false,
+                "showMeasureDistanceTool": false,
+                "showPerformanceWarnings": false
+            },
+            "popupSettings": {
+                "layers": {}
+            },
+            "spatialFilter": null,
+            "sqlParameters": []
+        },
+        "version": "v1"
+    },
+    "datasets": [
+        {
+            "id": "44525a9f-fba9-4bf1-96f8-c971e47327c9",
+            "name": null,
+            "type": "table",
+            "color": "#7F3C8D",
+            "label": "derived_spatialfeatures_esp_h3res8_v1_yearly_v2",
+            "format": "tilejson",
+            "source": "carto-demo-data.demo_tables.derived_spatialfeatures_esp_h3res8_v1_yearly_v2",
+            "columns": null,
+            "geoColumn": "h3:h3",
+            "providerId": "bigquery",
+            "connectionId": "be3b11c3-fa9e-43df-b219-02e46fc0b005",
+            "spatialIndex": null,
+            "queryTemplate": null,
+            "aggregationExp": "APPROX_TOP_COUNT(urbanity, 1)[OFFSET(0)].value as urbanity_mode",
+            "connectionName": "carto_dw",
+            "queryParameters": null,
+            "uniqueIdProperty": null,
+            "aggregationResLevel": 3,
+            "exportToBucketAvailable": true
+        }
+    ],
+    "thumbnailUrl": "https://storage.googleapis.com/carto-tnt-gcp-us-east1-thumbnails-storage/thumbnails/ac_47uunmeg/3ab94591-b2be-4737-8d60-cd1907dde9ae.png?cache=2024-03-20T15:20:32.794Z"
+}
