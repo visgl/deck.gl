@@ -2,7 +2,7 @@
 
 Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and information for a better user experience.
 
-This module contains the following extensions:
+This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
 - [ZoomWidget](./zoom-widget.md)
