@@ -45,6 +45,7 @@ export {default as _PickLayersPass} from './passes/pick-layers-pass';
 export {default as Deck} from './lib/deck';
 
 export {default as LayerManager} from './lib/layer-manager';
+export {default as Attribute} from './lib/attribute/attribute';
 export {default as AttributeManager} from './lib/attribute/attribute-manager';
 export {default as Layer} from './lib/layer';
 export {default as CompositeLayer} from './lib/composite-layer';
