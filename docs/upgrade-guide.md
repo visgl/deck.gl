@@ -50,7 +50,7 @@ Model creation needs to adapt to the [luma.gl v9 API](https://luma.gl/docs/upgra
 
 **WebGPU preparation**
 
-While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl applications beyond the upgrades listed above. Again, these changes mostly affect customer layers.
+While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl applications beyond the upgrades listed above. Again, these changes mostly affect custom layers.
 
 - deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
 - drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
