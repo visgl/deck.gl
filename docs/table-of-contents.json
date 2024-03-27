@@ -80,7 +80,8 @@
         "label": "Core Classes",
         "items": [
           "api-reference/core/deck",
-          "api-reference/core/attribute-manager"
+          "api-reference/core/attribute-manager",
+          "api-reference/core/widget"
         ]
       },
       {
@@ -291,6 +292,16 @@
           "api-reference/test-utils/generate-layer-tests",
           "api-reference/test-utils/test-layer",
           "api-reference/test-utils/snapshot-test-runner"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@deck.gl/widgets",
+        "items": [
+          "api-reference/widgets/overview",
+          "api-reference/widgets/zoom-widget",
+          "api-reference/widgets/compass-widget",
+          "api-reference/widgets/fullscreen-widget"
         ]
       }
     ]
