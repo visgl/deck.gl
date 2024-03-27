@@ -1,7 +1,10 @@
 {
   "scripts": {
     "start": "vite --open",
-    "start-local": "vite --config ../vite.config.local.mjs"
+    "start-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build --config ../vite.config.local.mjs --outDir dist",
+    "preview": "vite preview",
+    "deploy": "vercel build --prod && vercel deploy --prebuilt --prod"
   },
   "dependencies": {
     "@deck.gl/carto": "^8.6.0",
