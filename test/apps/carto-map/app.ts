@@ -55,7 +55,7 @@ async function createMap() {
     h3TableSource({
       ...defaultTableProps,
       aggregationResLevel: rightParams.aggregationResLevel,
-      tileResolution: TILE_SIZE_TO_RESOLUTION[rightParams.tileSize]
+      tileResolution: TILE_SIZE_TO_RESOLUTION[rightParams.tileSize],
     });
 
   ///////////////////////////////////////////////////////////////////////////////
