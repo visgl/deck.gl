@@ -44,4 +44,4 @@ Additional CSS styles for the canvas.
 
 Default: `undefined`
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-fullscreen-widget`.
+Class name to attach to the widget element. The element has the default class name of `deck-widget deck-compass-widget`.
