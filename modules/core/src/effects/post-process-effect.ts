@@ -38,12 +38,14 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
 
     for (let index = 0; index < passes.length; index++) {
       const isLastPass = index === passes.length - 1;
-      if (target !== undefined && isLastPass) {
+      const renderToTarget = target !== undefined && isLastPass;
+      if (renderToTarget) {
         outputBuffer = target;
       }
+      const clearCanvas = !renderToTarget || Boolean(params.clearCanvas);
       const moduleSettings = {};
       moduleSettings[this.module.name] = this.props;
-      passes[index].render({inputBuffer, outputBuffer, moduleSettings});
+      passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleSettings});
 
       const switchBuffer = outputBuffer as Framebuffer;
       outputBuffer = inputBuffer;
