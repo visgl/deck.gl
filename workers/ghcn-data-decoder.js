@@ -1,12 +1,10 @@
-"use strict";
-
 importScripts('./util.js');
-var result = [];
-var countries = {};
-var vertices = 0;
+let result = [];
+const countries = {};
+let vertices = 0;
 
-onmessage = function onmessage(e) {
-  var lines = e.data.text.split('\n');
+onmessage = function (e) {
+  const lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
@@ -17,14 +15,14 @@ onmessage = function onmessage(e) {
       return;
     }
 
-    var parts = line.split('\t');
-    var startYear = decodeNumber(parts[3], 90, 32);
-    var meanTemp = [];
+    const parts = line.split('\t');
+    const startYear = decodeNumber(parts[3], 90, 32);
+    const meanTemp = [];
 
-    for (var i = 4; i < parts.length; i++) {
+    for (let i = 4; i < parts.length; i++) {
       if (parts[i]) {
-        var year = startYear + i - 4;
-        var value = usePrecision(40 - decodeNumber(parts[i], 90, 32) / 100, 2);
+        const year = startYear + i - 4;
+        const value = usePrecision(40 - decodeNumber(parts[i], 90, 32) / 100, 2);
         meanTemp.push([year, value]);
         vertices++;
       }
@@ -36,7 +34,7 @@ onmessage = function onmessage(e) {
       name: parts[0].slice(11),
       latitude: usePrecision(decodeNumber(parts[1], 90, 32) / 1e4 - 90, 4),
       altitude: usePrecision(decodeNumber(parts[2], 90, 32) / 10 - 500, 1),
-      meanTemp: meanTemp
+      meanTemp
     });
   });
 
@@ -54,13 +52,13 @@ function flush() {
     data: result,
     meta: {
       stations: result.length,
-      vertices: vertices
+      vertices
     }
   });
   result = [];
 }
 
 function usePrecision(x, precision) {
-  var m = Math.pow(10, precision);
+  const m = Math.pow(10, precision);
   return Math.round(x * m) / m;
 }

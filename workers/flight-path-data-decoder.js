@@ -1,13 +1,11 @@
-"use strict";
-
 importScripts('./util.js');
-var FLUSH_LIMIT = 20000;
-var result = [];
-var index = 0;
-var count = 0;
+const FLUSH_LIMIT = 20000;
+let result = [];
+let index = 0;
+let count = 0;
 
-onmessage = function onmessage(e) {
-  var lines = e.data.text.split('\n');
+onmessage = function (e) {
+  const lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
@@ -54,7 +52,7 @@ function flush() {
     action: 'add',
     data: result,
     meta: {
-      count: count
+      count
     }
   });
   result = [];

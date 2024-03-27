@@ -1,22 +1,21 @@
-"use strict";
-
 importScripts('./util.js');
-var FLUSH_LIMIT = 20000;
-var result = [];
-var count = 0;
-var triangleCount = 0;
+const FLUSH_LIMIT = 20000;
+let result = [];
+let count = 0;
+let triangleCount = 0;
 
-onmessage = function onmessage(e) {
-  var lines = e.data.text.split('\n');
+onmessage = function (e) {
+  const lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
 
-    var parts = line.split('\x01');
-    var height = decodeNumber(parts[0], 90, 32);
+    const parts = line.split('\x01');
+    const height = decodeNumber(parts[0], 90, 32); // footprints
+
     parts.slice(1).forEach(function (str) {
-      var coords = decodePolyline(str);
+      const coords = decodePolyline(str);
       triangleCount += coords.length * 3 - 2;
       coords.push(coords[0]);
       result.push({

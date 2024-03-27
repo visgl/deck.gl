@@ -1,14 +1,12 @@
-"use strict";
-
 importScripts('./util.js');
-var FLUSH_LIMIT = 100000;
-var COORDINATE_PRECISION = 7;
-var sequence;
-var result = [];
-var count = 0;
+const FLUSH_LIMIT = 100000;
+const COORDINATE_PRECISION = 7;
+let sequence;
+let result = [];
+let count = 0;
 
-onmessage = function onmessage(e) {
-  var lines = e.data.text.split('\n');
+onmessage = function (e) {
+  const lines = e.data.text.split('\n');
   lines.forEach(function (l, i) {
     if (!l.length) {
       return;
@@ -19,12 +17,12 @@ onmessage = function onmessage(e) {
       return;
     }
 
-    var bbox = decodeBbox(l.slice(0, 20));
-    var bitmap = decodeBitmap(l.slice(20));
+    const bbox = decodeBbox(l.slice(0, 20));
+    const bitmap = decodeBitmap(l.slice(20));
 
     for (var i = 0; i < bitmap.length; i++) {
       if (bitmap[i] > 0) {
-        var point = [bbox[0] + (bbox[2] - bbox[0]) * sequence[i * 2], bbox[1] + (bbox[3] - bbox[1]) * sequence[i * 2 + 1], Number(bitmap[i])];
+        const point = [bbox[0] + (bbox[2] - bbox[0]) * sequence[i * 2], bbox[1] + (bbox[3] - bbox[1]) * sequence[i * 2 + 1], Number(bitmap[i])];
         result.push(point);
         count++;
       }
@@ -55,12 +53,12 @@ function flush() {
 }
 
 function decodeSequence(str) {
-  var seq = [];
-  var tokens = str.split(/([A-Z])/).map(function (v) {
+  const seq = [];
+  const tokens = str.split(/([A-Z])/).map(function (v) {
     return parseInt(v, 36);
   });
 
-  for (var i = 0; i < tokens.length - 1; i += 2) {
+  for (let i = 0; i < tokens.length - 1; i += 2) {
     seq.push(tokens[i] / Math.pow(2, tokens[i + 1] - 10));
   }
 
@@ -68,21 +66,21 @@ function decodeSequence(str) {
 }
 
 function decodeBbox(str) {
-  var multiplyer = Math.pow(10, COORDINATE_PRECISION);
+  const multiplyer = Math.pow(10, COORDINATE_PRECISION);
   return decodeNumberArr(str, 90, 32, 5).map(function (x) {
     return x / multiplyer - 180;
   });
 }
 
 function decodeBitmap(str) {
-  var chunkSize = 4;
-  var match = '';
+  const chunkSize = 4;
+  let match = '';
 
-  for (var i = 0; i < str.length; i++) {
-    var seg = (str.charCodeAt(i) - 32).toString(3);
+  for (let i = 0; i < str.length; i++) {
+    let seg = (str.charCodeAt(i) - 32).toString(3);
 
     while (seg.length < chunkSize) {
-      seg = "0".concat(seg);
+      seg = `0${seg}`;
     }
 
     match += seg;
