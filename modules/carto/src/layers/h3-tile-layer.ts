@@ -20,7 +20,8 @@ export const renderSubLayers = props => {
 
 const defaultProps: DefaultProps<H3TileLayerProps> = {
   data: TilejsonPropType,
-  tileSize: DEFAULT_TILE_SIZE
+  tileSize: DEFAULT_TILE_SIZE,
+  bias: 2,
 };
 
 /** All properties supported by H3TileLayer. */
@@ -30,6 +31,7 @@ export type H3TileLayerProps<DataT = unknown> = _H3TileLayerProps<DataT> & Compo
 type _H3TileLayerProps<DataT> = Omit<H3HexagonLayerProps<DataT>, 'data'> &
   Omit<SpatialIndexTileLayerProps<DataT>, 'data'> & {
     data: null | TilejsonResult | Promise<TilejsonResult>;
+    bias?: number;
   };
 
 export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
@@ -50,6 +52,11 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return loadOptions;
   }
 
+  _getTilesetOptions() {
+    const options = super._getTilesetOptions();
+    return {...options, bias: this.props.bias };
+  }
+
   renderLayers(): Layer | null | LayersList {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
@@ -61,13 +68,13 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     if (this.props.minZoom) {
       minresolution = Math.max(
         minresolution,
-        getHexagonResolution({zoom: this.props.minZoom, latitude: 0}, this.props.tileSize)
+        getHexagonResolution({zoom: this.props.minZoom, latitude: 0}, this.props.tileSize, this.props.bias)
       );
     }
     if (this.props.maxZoom) {
       maxresolution = Math.min(
         maxresolution,
-        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0}, this.props.tileSize)
+        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0}, this.props.tileSize, this.props.bias)
       );
     }
 

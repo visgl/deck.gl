@@ -1,108 +1,176 @@
-import {fetchMap, FetchMapOptions, getHexagonResolution} from '@deck.gl/carto';
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {H3TileLayer, getHexagonResolution, h3TableSource} from '@deck.gl/carto';
+import {Deck, MapView, WebMercatorViewport} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {H3HexagonLayer, TileLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer, PathLayer} from '@deck.gl/layers';
 import mapboxgl from 'mapbox-gl';
+import fetchMapResponse from './carto-map-3ab94591-b2be-4737-8d60-cd1907dde9ae.json';
+import {GUI} from 'lil-gui';
 
-// // Simplest instantiation
-const cartoMapId = '3ab94591-b2be-4737-8d60-cd1907dde9ae';
-// fetchMap({cartoMapId}).then(map => new Deck(map));
+const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
-// const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
+const TILE_SIZE_TO_RESOLUTION: Record<256 | 512 | 1024 | 2048, 0.25 | 0.5 | 1 | 2> = {
+  256: 0.25,
+  512: 0.5,
+  1024: 1,
+  2048: 2
+};
 
-async function createMap(cartoMapId: string) {
-  const deck = new Deck({canvas: 'deck-canvas'});
-  const options: FetchMapOptions = {apiBaseUrl, cartoMapId};
+async function createMap() {
+  const initialViewState = fetchMapResponse.keplerMapConfig.config.mapState;
+  const mapStyle = fetchMapResponse.keplerMapConfig.config.mapStyle;
+  const layerConfigs = fetchMapResponse.keplerMapConfig.config.visState.layers;
+  const layerProps = layerConfigs[0].config.visConfig;
 
-  // Auto-refresh (optional)
-  const autoRefresh = false;
-  if (autoRefresh) {
-    // Autorefresh the data every 5 seconds
-    options.autoRefresh = 5;
-    options.onNewData = ({layers}) => {
-      deck.setProps({layers});
-    };
-  }
+  const leftParams = {
+    tileSize: 512,
+    aggregationResLevel: 3,
+    bias: 2
+  };
+  const rightParams = {
+    tileSize: 1024,
+    aggregationResLevel: 4,
+    bias: 2.333
+  };
 
-  // Get map info from CARTO and update deck
-  const {initialViewState, mapStyle, layers} = await fetchMap(options);
-  deck.setProps({initialViewState, layers});
+  ///////////////////////////////////////////////////////////////////////////////
+  // DATA
+  //
 
-  // Mapbox basemap (optional)
-  const {label} = mapStyle.visibleLayerGroups;
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}${
-    label ? '' : '-nolabels'
-  }-gl-style/style.json`;
-  const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
-  deck.setProps({
-    controller: true,
+  const defaultTableProps = {
+    apiBaseUrl,
+    accessToken,
+    tableName: 'carto-demo-data.demo_tables.derived_spatialfeatures_esp_h3res8_v1_yearly_v2',
+    aggregationExp: 'APPROX_TOP_COUNT(urbanity, 1)[OFFSET(0)].value as urbanity_mode',
+    connectionName: 'carto_dw'
+  };
+  const createLeftData = () =>
+    h3TableSource({
+      ...defaultTableProps,
+      aggregationResLevel: leftParams.aggregationResLevel,
+      tileResolution: TILE_SIZE_TO_RESOLUTION[leftParams.tileSize]
+    });
+  const createRightData = () =>
+    h3TableSource({
+      ...defaultTableProps,
+      aggregationResLevel: rightParams.aggregationResLevel,
+      tileResolution: TILE_SIZE_TO_RESOLUTION[rightParams.tileSize]
+    });
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // LAYERS
+  //
+
+  const baseLayerProps = {
+    lineMiterLimit: 2,
+    lineWidthUnits: 'pixels',
+    pointRadiusUnits: 'pixels',
+    rounded: true,
+    aggregationExp: 'APPROX_TOP_COUNT(urbanity, 1)[OFFSET(0)].value as urbanity_mode',
+    uniqueIdProperty: 'geoid',
+    autoHighlight: true,
+    visible: true,
+    cartoLabel: 'H3 Urbanity',
+    extruded: false,
+    elevationScale: 5,
+    filled: true,
+    getFillColor: [0, 0, 0, 0],
+    getLineColor: [130, 154, 227, 230],
+    stroked: true,
+    getLineWidth: 1,
+    getPointRadius: 2,
+    highlightColor: [252, 242, 26, 255]
+  } as any;
+
+  const createLeftLayer = () =>
+    new H3TileLayer({
+      ...baseLayerProps,
+      id: 'left',
+      data: createLeftData(),
+      tileSize: leftParams.tileSize,
+      aggregationResLevel: leftParams.aggregationResLevel,
+      bias: leftParams.bias,
+      getLineColor: [200, 128, 0, 230],
+    });
+
+  const createRightLayer = () =>
+    new H3TileLayer({
+      ...baseLayerProps,
+      id: 'right',
+      data: createRightData(),
+      tileSize: rightParams.tileSize,
+      aggregationResLevel: rightParams.aggregationResLevel,
+      bias: rightParams.bias,
+      getLineColor: [128, 200, 0, 230],
+    });
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // DECK
+  //
+
+  const deck = new Deck({
+    canvas: 'deck-canvas',
+    initialViewState,
+    views: [
+      new MapView({id: 'left', x: 0, y: 0, width: '50%', height: '100%', controller: true}),
+      new MapView({id: 'right', x: '50%', y: 0, width: '50%', height: '100%', controller: true})
+    ],
+    layers: [createLeftLayer(), createRightLayer()],
+    layerFilter: ({layer, viewport}) => viewport.id === layer.id,
     onViewStateChange: ({viewState}) => {
-      const {longitude, latitude, ...rest} = viewState;
-      map.jumpTo({center: [longitude, latitude], ...rest});
       deck.setProps({
-        layers: [...layers, ...createHexagonLayers(viewState)]
+        viewState
+        // layers: [...layers, ...createHexagonLayers(viewState)]
       });
     }
   });
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // GUI
+  //
+
+  const leftGUI = new GUI({
+    width: 200,
+    container: document.querySelector<HTMLElement>('.gui.-left')!
+  });
+  const rightGUI = new GUI({
+    width: 200,
+    container: document.querySelector<HTMLElement>('.gui.-right')!
+  });
+
+  const guiList = [
+    [leftGUI, leftParams],
+    [rightGUI, rightParams]
+  ] as const;
+
+  for (const [gui, params] of guiList) {
+    gui.add(params, 'tileSize', [256, 512, 1024, 2048]);
+    gui.add(params, 'aggregationResLevel', [2, 3, 4, 5]);
+    gui.add(params, 'bias');
+    gui.onChange(() => {
+      deck.setProps({layers: [createLeftLayer(), createRightLayer()]});
+    });
+  }
 }
 
+createMap();
+
+///////////////////////////////////////////////////////////////////////////////
+// PRODUCTION COMPARISON
+//
+
 // Helper UI for dev
-const examples = [
-  // These CARTO maps should live in the "Public" org (ac_lqe3zwgu) using the carto_dw, public_snowflake or public_redshift connection
-
-  // Mine
-  '3ab94591-b2be-4737-8d60-cd1907dde9ae', // H3
-
-  // Vector
-  '3d72c6eb-9486-42ad-8b62-0f78dd9133eb', // Vector - Table - 500k points fires worldwide
-  '8edfb83d-ede2-480d-bb56-42bba198d214', // Vector - Table - 6k lines Galapagos contour
-  '542c40c5-2b15-46c7-933b-2586630af6ac', // Vector - Table - 35k points with multiple labels airports
-  '84c3ad7a-1d46-4fce-a999-2812426c3015', // Vector - Table - 42k polygons NYC extruded buildings
-  'b8abc46c-3c7f-489f-b16f-0664872ad82a', // Vector - Table - Snowflake - 74k bike accidents France
-  'c638e42a-a305-4a48-8f7c-b9aa86b31be1', // Vector - Table - Redshift - 45 store points size based on revenue
-  '4f5f8894-b895-460c-809d-769ae4e3fd30', // Vector - Tileset - 362M points COVID vaccination custom palette
-
-  // H3
-  '06e3898f-fd5e-40dd-bd33-5cd4104d29ee', // H3 - Table - 12M Spatial Features USA extruded
-  '8046b5b7-dad4-4b0a-99f1-8e61490b01d4', // H3 — Tileset — 12M Spatial Features USA
-
-  // Quadbin
-  'abfce395-d9ec-48d4-85ad-45ec7705a921', // Quadbin - Table - 588k Spatial Features Spain
-  '8ead73bb-aa1f-4bf6-91fc-52a50c682938' // Quadbin — Tileset 14M Spatial Features USA
-];
-const params = new URLSearchParams(location.search.slice(1));
-const id = params.has('id') ? params.get('id')! : examples[0];
-
+const id = '3ab94591-b2be-4737-8d60-cd1907dde9ae';
 const iframe = document.createElement('iframe');
 iframe.style.width = '100%';
-iframe.style.height = 'calc(50% + 20px)';
+iframe.style.height = '50vh';
 iframe.src = `${apiBaseUrl.replace('api', 'app')}/map/${id}`;
 document.body.appendChild(iframe);
 
-for (const e of examples) {
-  const btn = document.createElement('button');
-  btn.innerHTML = e.slice(0, 4);
-  btn.style.position = 'relative';
-  btn.style.bottom = '80px';
-  btn.style.padding = '8px 0px';
-  btn.style.opacity = '0.8';
-  btn.style.width = '40px';
-  if (e === id) {
-    btn.style.background = '#e3f6ff';
-  }
-  btn.onclick = () => {
-    window.location.assign(`?id=${e}`);
-  };
-  document.body.appendChild(btn);
-}
-
 const mapContainer = document.getElementById('container')!;
-mapContainer.style.height = 'calc(50% - 26px)';
+mapContainer.style.height = 'calc(50vh - 4px)';
 mapContainer.style.margin = '5px';
-
-createMap(id);
 
 // Support h3 v3/v4 (https://h3geo.org/docs/library/migration-3.x/functions)
 const kRing = h3.kRing || h3.gridDisk;
@@ -134,8 +202,6 @@ function createHexagonLayers(viewState) {
   const resolution1024 = getHexagonResolution(viewState, 1024);
   const hexagons512 = getHexagonsInView(viewState, Math.floor(resolution512));
   const hexagons1024 = getHexagonsInView(viewState, Math.floor(resolution1024));
-
-  console.log(`512: ${hexagons512.length}, 1024: ${hexagons1024.length}`);
 
   // Stats display
   // const totalHex = 122 * Math.pow(7, r); // estimate

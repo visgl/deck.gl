@@ -28,6 +28,55 @@
             .textfield-wrap {
                 display: none;
             }
+            .divider {
+                display: block;
+                position: absolute;
+                top: 0;
+                background: #9a9a9a;
+                content: "";
+            }
+            .divider.-hr {
+                left: calc(50vw - 1px);
+                width: 2px;
+                height: 50vh;
+            }
+            .divider.-vr {
+                top: calc(50vh - 1px);
+                left: 0;
+                width: 100vw;
+                height: 2px;
+            }
+            .vertical-label {
+               position: fixed;
+               top: 1em;
+               font-family: monospace;
+            }
+            .vertical-label.-left {
+                text-align: left;
+                left: 1em;
+            }
+            .vertical-label.-right {
+                text-align: right;
+                right: 1em;
+            }
+            .vertical-label.-center {
+                text-align: left;
+                left: 1em;
+                top: calc(50vh + 1em);
+            }
+            .gui {
+                position: fixed;
+                top: calc(50vh - 100px);
+            }
+            .gui.-left {
+                left: 0;
+            }
+            .gui.-right {
+                right: 0;
+            }
+            .lil-gui .controller .widget {
+                justify-content: flex-end;
+            }
         </style>
         <link
             href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css"
@@ -44,6 +93,14 @@
                 <label id="textfield3" class="textfield"></label>
             </div>
         </div>
+        <div class="divider -hr"></div>
+        <div class="divider -vr"></div>
+        <div class="vertical-label -left">default</div>
+        <div class="vertical-label -right">reduced queries</div>
+        <div class="vertical-label -center">production</div>
+        <div class="gui -left"></div>
+        <div class="gui -right"></div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
         <script src="https://unpkg.com/h3-js@3.7.2"></script>
         <script type="module" src="app.ts"></script>

@@ -68,7 +68,8 @@ function tileToBoundingBox(index: string): GeoBoundingBox {
 const BIAS = 2;
 export function getHexagonResolution(
   viewport: {zoom: number; latitude: number},
-  tileSize: number
+  tileSize: number,
+  bias: number,
 ): number {
   // Difference in given tile size compared to deck's internal 512px tile size,
   // expressed as an offset to the viewport zoom.
@@ -77,7 +78,7 @@ export function getHexagonResolution(
   const latitudeScaleFactor = Math.log(1 / Math.cos((Math.PI * viewport.latitude) / 180));
 
   // Clip and bias
-  return Math.max(0, Math.floor(hexagonScaleFactor + latitudeScaleFactor - BIAS));
+  return Math.max(0, Math.floor(hexagonScaleFactor + latitudeScaleFactor - bias));
 }
 
 export default class H3Tileset2D extends Tileset2D {
@@ -92,7 +93,7 @@ export default class H3Tileset2D extends Tileset2D {
     const [east, south, west, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
-    let z = getHexagonResolution(viewport, tileSize);
+    let z = getHexagonResolution(viewport, tileSize, (this.opts as any).bias || BIAS);
     let indices: string[];
     if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
       // TODO support `extent` prop

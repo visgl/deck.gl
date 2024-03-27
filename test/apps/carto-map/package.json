@@ -8,7 +8,8 @@
     "@deck.gl/core": "^8.6.0",
     "@deck.gl/geo-layers": "^8.6.0",
     "@deck.gl/layers": "^8.6.0",
-    "@deck.gl/mesh-layers": "^8.6.0"
+    "@deck.gl/mesh-layers": "^8.6.0",
+    "lil-gui": "^0.19.2"
   },
   "devDependencies": {
     "vite": "^4.0.0"

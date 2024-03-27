@@ -250,12 +250,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxRequests,
       debounceTime,
       zoomOffset,
+      bias: (this.props as any).bias,
 
       getTileData: this.getTileData.bind(this),
       onTileLoad: this._onTileLoad.bind(this),
       onTileError: this._onTileError.bind(this),
       onTileUnload: this._onTileUnload.bind(this)
-    };
+    } as any;
   }
 
   private _updateTileset(): void {
