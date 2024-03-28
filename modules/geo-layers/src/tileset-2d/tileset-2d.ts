@@ -118,7 +118,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileDat
  * and only creates new tiles if they are present.
  */
 export class Tileset2D {
-  private opts: Required<Tileset2DProps>;
+  protected opts: Required<Tileset2DProps>;
   private _requestScheduler: RequestScheduler;
   private _cache: Map<string, Tile2DHeader>;
   private _dirty: boolean;
