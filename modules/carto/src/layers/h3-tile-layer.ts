@@ -52,11 +52,6 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return loadOptions;
   }
 
-  _getTilesetOptions() {
-    const options = super._getTilesetOptions();
-    return {...options, bias: this.props.bias };
-  }
-
   renderLayers(): Layer | null | LayersList {
     const tileJSON = this.props.data as TilejsonResult;
     if (!tileJSON) return null;
