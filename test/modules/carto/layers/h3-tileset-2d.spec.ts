@@ -57,7 +57,7 @@ test('H3Tileset2D#tileSize', async t => {
   const viewport = new WebMercatorViewport({
     latitude: 0,
     longitude: 0,
-    zoom: 10,
+    zoom: 9,
     width: 1440,
     height: 900
   });
@@ -67,9 +67,9 @@ test('H3Tileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
   const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
 
-  t.equal(indices512.length, 13, 'indices.length @ 512px');
-  t.equal(indices1024.length, 4, 'indices.length @ 1024px');
-  t.equal(indices2048.length, 1, 'indices.length @ 2048px');
+  t.equal(indices512.length, 34, 'indices.length @ 512px');
+  t.equal(indices1024.length, 6, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 2, 'indices.length @ 2048px');
 
   t.deepEqual(indices512[0], {i: '8475481ffffffff'}, 'indices[0] @ 512px');
   t.deepEqual(indices1024[0], {i: '837548fffffffff'}, 'indices[0] @ 1024px');

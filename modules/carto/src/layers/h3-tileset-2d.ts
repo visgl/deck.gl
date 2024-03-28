@@ -79,7 +79,7 @@ export function getHexagonResolution(
   // Clip and bias
   return Math.max(
     0,
-    Math.floor(hexagonScaleFactor + latitudeScaleFactor - (BIAS + zoomOffset / 3))
+    Math.floor(hexagonScaleFactor + latitudeScaleFactor - BIAS)
   );
 }
 
