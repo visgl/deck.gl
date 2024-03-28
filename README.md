@@ -86,7 +86,7 @@ pip install pydeck
 * [deck.gl Codepen demos](https://codepen.io/vis-gl/)
 * [deck.gl Observable demos](https://beta.observablehq.com/@pessimistress)
 * [vis.gl Medium blog](https://medium.com/vis-gl)
-* [deck.gl Slack workspace](https://join.slack.com/t/deckgl/shared_invite/zt-7oeoqie8-NQqzSp5SLTFMDeNSPxi7eg)
+* [deck.gl Slack workspace](https://slack-invite.openjsf.org/)
 
 ## Contributing
 
