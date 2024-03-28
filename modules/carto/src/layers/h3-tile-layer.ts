@@ -61,13 +61,13 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     if (this.props.minZoom) {
       minresolution = Math.max(
         minresolution,
-        getHexagonResolution({zoom: this.props.minZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.minZoom, latitude: 0}, this.props.tileSize)
       );
     }
     if (this.props.maxZoom) {
       maxresolution = Math.min(
         maxresolution,
-        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0})
+        getHexagonResolution({zoom: this.props.maxZoom, latitude: 0}, this.props.tileSize)
       );
     }
 

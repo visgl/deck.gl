@@ -49,6 +49,39 @@ test('H3Tileset2D', async t => {
   t.end();
 });
 
+test('H3Tileset2D#tileSize', async t => {
+  const tileset512 = new H3Tileset2D({tileSize: 512});
+  const tileset1024 = new H3Tileset2D({tileSize: 1024});
+  const tileset2048 = new H3Tileset2D({tileSize: 2048});
+
+  const viewport = new WebMercatorViewport({
+    latitude: 0,
+    longitude: 0,
+    zoom: 9,
+    width: 1440,
+    height: 900
+  });
+
+  const indicesSort = (a, b) => parseInt(a.i, 16) - parseInt(b.i, 16);
+  const indices512 = tileset512.getTileIndices({viewport}).sort(indicesSort);
+  const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
+  const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
+
+  t.equal(indices512.length, 34, 'indices.length @ 512px');
+  t.equal(indices1024.length, 6, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 2, 'indices.length @ 2048px');
+
+  t.deepEqual(indices512[0], {i: '8475481ffffffff'}, 'indices[0] @ 512px');
+  t.deepEqual(indices1024[0], {i: '837548fffffffff'}, 'indices[0] @ 1024px');
+  t.deepEqual(indices2048[0], {i: '82754ffffffffff'}, 'indices[0] @ 2048px');
+
+  t.equal(tileset512.getTileZoom(indices512[0]), 4, 'zoom @ 512px');
+  t.equal(tileset1024.getTileZoom(indices1024[0]), 3, 'zoom @ 1024px');
+  t.equal(tileset2048.getTileZoom(indices2048[0]), 2, 'zoom @ 2048px');
+
+  t.end();
+});
+
 test('H3Tileset2D res0', async t => {
   const tileset = new H3Tileset2D({});
   const viewport = new WebMercatorViewport({
