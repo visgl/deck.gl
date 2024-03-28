@@ -493,59 +493,52 @@ Remarks:
 
 * Default: `{}`
 
-When creating layers, animation can be enabled by supplying an `transitions` prop. Animation parameters are defined per attribute by using attribute names or accessor names as keys:
+When a layer prop updates, if the `transitions` prop is configured, the prop value may animate smoothly from the old value to the new value. Animation parameters are defined per prop by using the prop names as keys:
 
-```js
-new Layer({
+```ts
+new ScatterplotLayer({
+  // ...
   transitions: {
-    getPositions: 600,
-    getColors: {
+    getPosition: 600,
+    getFillColor: {
       duration: 300,
       easing: d3.easeCubicInOut,
-      enter: value => [value[0], value[1], value[2], 0] // fade in
+      enter: ([r, g, b]) => [r, g, b, 0] // fade in
     },
-    getRadius: {
+    radiusScale: {
       type: 'spring',
       stiffness: 0.01,
-      damping: 0.15,
-      enter: value => [0] // grow from size 0
+      damping: 0.15
     }
   }
 });
 ```
 
-Each accessor name is mapped to an object that is the transition setting. The object may contain the following fields:
+Each prop name is mapped to a number or an object that is the transition setting. As a shorthand, if a prop name maps to a number, then the number is assigned to the `duration` parameter with an `interpolation` type transition. If an object is supplied, it may contain the following fields:
 
 | Key           | Type       | Default     | Description |
 | ------------- | --------   | ----------- | ----------- |
-| `type`        | `String`   | `'interpolation'` | Type of the transition (either `'interpolation'` or `'spring'`) |
-| `enter`       | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
-| `onStart`     | `Function` | `null`      | Callback when the transition is started |
-| `onEnd`       | `Function` | `null`      | Callback when the transition is done |
-| `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
+| `type`        | `'interpolation' | 'spring'`   | `'interpolation'` | Type of the transition |
+| `enter`       | `(toValue: TypedArray, fromChunk?: TypedArray) => number[] | TypedArray` | `value => value` | Callback to get the value that the entering vertices are transitioning from |
+| `onStart`     | `() => void` | `null`      | Callback when the transition is started |
+| `onEnd`       | `() => void` | `null`      | Callback when the transition is done |
+| `onInterrupt` | `() => void` | `null`      | Callback when the transition is interrupted |
 
-Additional fields for `type: 'interpolation'`:
+- Additional fields for `type: 'interpolation'`:
 
-| Key           | Type       | Default     | Description |
-| ------------- | --------   | ----------- | ----------- |
-| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
-| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) |
+    | Key           | Type       | Default     | Description |
+    | ------------- | --------   | ----------- | ----------- |
+    | `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
+    | `easing`      | `(t: number) => number` | `t => t` | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) |
 
-Additional fields for `type: 'spring'`:
+- Additional fields for `type: 'spring'`:
 
-| Key           | Type       | Default     | Description |
-| ------------- | --------   | ----------- | ----------- |
-| `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring |
-| `damping`     | `Number`   | `0.5`       | "Friction" factor that counteracts the spring's acceleration |
+    | Key           | Type       | Default     | Description |
+    | ------------- | --------   | ----------- | ----------- |
+    | `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring |
+    | `damping`     | `Number`   | `0.5`       | "Friction" factor that counteracts the spring's acceleration |
 
-Notes:
-
-* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter, and an `interpolation` transition is used.
-* Attribute transition is performed between the values at the same index. If the new data is larger, `enter` callback is called for each new vertex to backfill the values to transition from.
-* `enter` should return the value to transition from. for the current vertex. It receives two arguments:
-  - `toValue` (TypedArray) - the new value to transition to, for the current vertex
-  - `fromChunk` (Array | TypedArray) - the existing value to transition from, for the chunk that the current vertex belongs to. A "chunk" is a group of vertices that help the callback determine the context of this transition. For most layers, all objects are in one chunk. For PathLayer and PolygonLayer, each path/polygon is a chunk.
-
+The [Animations and Transitions](../../developer-guide/animations-and-transitions.md#layer-prop-transitions) developer guide provides a deeper dive into the behavior and performance considerations of this feature.
 
 ## Members
 

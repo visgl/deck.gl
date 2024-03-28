@@ -155,7 +155,7 @@ Whether to render the mesh in wireframe mode.
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+Check [the lighting guide](../../developer-guide/effects.md#material-settings) for configurable settings.
 
 
 ### Data Accessors
