@@ -6,20 +6,95 @@ import {BitmapLayerDemo} from '@site/src/doc-demos/layers';
 
 The `BitmapLayer` renders a bitmap at specified boundaries.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
-function App({data, viewState}) {
+const layer = new BitmapLayer({
+  id: 'BitmapLayer',
+  bounds: [-122.519, 37.7045, -122.355, 37.829],
+  image: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-districts.png',
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({bitmap}) => bitmap && `${bitmap.pixel}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {BitmapLayer, BitmapLayerPickingInfo} from '@deck.gl/layers';
+
+const layer = new BitmapLayer({
+  id: 'BitmapLayer',
+  bounds: [-122.519, 37.7045, -122.355, 37.829],
+  image: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-districts.png',
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({bitmap}: BitmapLayerPickingInfo) => bitmap && `${bitmap.pixel}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {BitmapLayer} from '@deck.gl/layers';
+import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
+
+function App() {
   const layer = new BitmapLayer({
-    id: 'bitmap-layer',
-    bounds: [-122.5190, 37.7045, -122.355, 37.829],
-    image: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-districts.png'
+    id: 'BitmapLayer',
+    bounds: [-122.519, 37.7045, -122.355, 37.829],
+    image: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-districts.png',
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({bitmap}: BitmapLayerPickingInfo) => bitmap && `${bitmap.pixel}`}
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
 
 
 ## Installation
@@ -32,18 +107,20 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {BitmapLayer} from '@deck.gl/layers';
-new BitmapLayer({});
+import type {BitmapLayerProps, BitmapBoundingBox, BitmapLayerPickingInfo} from '@deck.gl/layers';
+
+new BitmapLayer(...props: BitmapLayerProps);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -55,7 +132,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (String|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object) {#image}
+##### `image` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object) {#image}
 
 - Default `null`.
 
@@ -69,7 +146,7 @@ The image to display.
 
 The image data will be converted to a [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
-##### `bounds` (Array) {#bounds}
+##### `bounds` (number[4]|Position[4]) {#bounds}
 
 Supported formats:
 
@@ -79,19 +156,19 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
-##### `loadOptions` (Object, optional) {#loadoptions}
+##### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `image` prop is an URL
 
-##### `textureParameters` (Object) {#textureparameters}
+##### `textureParameters` (object) {#textureparameters}
 
 Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `image`:
 
-```js
+```ts
 {
   minFilter: 'linear',
   magFilter: 'linear',
@@ -103,11 +180,9 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 For example, to remove smoothing and achieve a pixelated appearance:
 
-```js
-import GL from '@luma.gl/constants';
-
+```ts
 new BitmapLayer({
-  ...
+  // ...
   textureParameters: {
     minFilter: 'nearest',
     magFilter: 'nearest'
@@ -117,7 +192,7 @@ new BitmapLayer({
 
 This prop is only used when `image` initially loads or changes.
 
-##### `_imageCoordinateSystem` (Number, optional) {#_imagecoordinatesystem}
+##### `_imageCoordinateSystem` (number, optional) {#_imagecoordinatesystem}
 
 > Note: this prop is experimental.
 
@@ -137,19 +212,19 @@ See the article on [Coordinate Systems](../../developer-guide/coordinate-systems
 
 ### Render Options
 
-##### `desaturate` (Number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#desaturate}
+##### `desaturate` (number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#desaturate}
 
 - Default `0`
 
 The desaturation of the bitmap. Between `[0, 1]`. `0` being the original color and `1` being grayscale.
 
-##### `transparentColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#transparentcolor}
+##### `transparentColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#transparentcolor}
 
 - Default `[0, 0, 0, 0]`
 
 The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in the `[0, 255]` range. Equivalent to overlaying the image over a background in this color.
 
-##### `tintColor` (Array) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#tintcolor}
+##### `tintColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#tintcolor}
 
 - Default `[255, 255, 255]`
 
@@ -157,33 +232,32 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 
 ## Pixel Picking
 
-(From v8.4) The [picking info](../../developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
+The [picking info](../../developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
 
 - `bitmap`
-  + `pixel` ([number, number])  Integer coordinates into the bitmap
+  + `pixel` ([x: number, y: number])  Integer coordinates into the bitmap
   + `size` ({width: number; height: number})  Size of bitmap in pixels
-  + `uv` ([number, number]) Normalized (0-1) floating point coordinates
+  + `uv` ([u: number, v: number]) Normalized (0-1) floating point coordinates
 
 Note that the `bitmap` field can be `null` if on mouse leave or if the bitmap has not yet loaded.
 
 The following code reads the picked pixel color from the bitmap when the layer is clicked:
 
-```js
-import {readPixelsToArray} from '@luma.gl/core';
-
+```ts
 new BitmapLayer({
   image: './my-image.png',
   bounds: [-122.45, 37.75, -122.43, 37.78],
   pickable: true,
   onClick: ({bitmap, layer}) => {
     if (bitmap) {
-      const pixelColor = readPixelsToArray(layer.props.image, {
+      const {device} = layer.context;
+      const pixelColor = device.readPixelsToArrayWebGL(layer.props.image, {
         sourceX: bitmap.pixel[0],
         sourceY: bitmap.pixel[1],
         sourceWidth: 1,
         sourceHeight: 1
-      })
-      console.log('Color at picked pixel:', pixelColor)
+      });
+      console.log('Color at picked pixel:', pixelColor);
     }
   }
 })

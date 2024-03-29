@@ -7,48 +7,32 @@ If you intend to implement a layer that generates other layers, you should exten
 For more information consult the [Composite Layers](../../developer-guide/custom-layers/composite-layers.md) article.
 
 
-## Usage
-
-Define a composite layer that renders a set of sublayers, one of them conditionally
-
-```js
-class MyCompositeLayer extends CompositeLayer {
-  renderLayers() {
-    return [
-      this._renderGroupOfSubLayers(), // returns an array of layers
-      this.props.showScatterplot && new ScatterplotLayer(...)
-    ];
-  }
-}
-```
-
-
 ## Constructor
 
-```js
+```ts
 new CompositeLayer(...props);
 ```
 
 Parameters:
 
-* `props` (Object) - `Layer` properties.
+* `props` (object) - `Layer` properties.
 
 
 ## Properties
 
 Inherits from all [Base Layer](./layer.md) properties.
 
-##### `_subLayerProps` (Object) **EXPERIMENTAL** {#_sublayerprops}
+##### `_subLayerProps` (object) **EXPERIMENTAL** {#_sublayerprops}
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
 Example: make only the point features in a GeoJsonLayer respond to hover and click
 
-```js
+```ts
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-new GeoJsonLayer({
-  // ...other props
+const layer = new GeoJsonLayer({
+  // ...
   pickable: false,
   _subLayerProps: {
     points: {
@@ -58,24 +42,20 @@ new GeoJsonLayer({
 });
 ```
 
-Example: use IconLayer instead of ScatterplotLayer to render the point features in a GeoJsonLayer
+Example: use `ColumnLayer` instead of `ScatterplotLayer` to render the point features in a GeoJsonLayer
 
-```js
-import {IconLayer, GeoJsonLayer} from '@deck.gl/layers';
+```ts
+import {ColumnLayer, GeoJsonLayer} from '@deck.gl/layers';
 
-new GeoJsonLayer({
+const layer = new GeoJsonLayer({
   // ...other props
   _subLayerProps: {
     points: {
-      type: IconLayer,
-      iconAtlas: './icon-atlas.png',
-      iconMapping: './icon-mapping.json',
-      getIcon: d => d.sourceFeature.feature.properties.marker,
-      getColor: [255, 200, 0],
-      getSize: 32,
-      updateTriggers: {
-        getIcon: triggerValue
-      }
+      type: ColumnLayer,
+      diskResolution: 12,
+      radius: 50,
+      extruded: true,
+      getElevation: d => d.sourceFeature.feature.properties.value
     }
   }
 });
@@ -83,15 +63,15 @@ new GeoJsonLayer({
 
 ## Members
 
-##### `isComposite` {#iscomposite}
+##### `isComposite` (boolean) {#iscomposite}
 
 Always `true`.
 
-##### `isLoaded` {#isloaded}
+##### `isLoaded` (boolean) {#isloaded}
 
 `true` if all asynchronous assets are loaded, and all sublayers are also loaded.
 
-##### `parent` {#parent}
+##### `parent` (Layer|null) {#parent}
 
 A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-layer.md)
 
@@ -124,8 +104,8 @@ Receives arguments:
 
 - `layer` (Layer) - the sub layer to be drawn
 - `viewport` (Viewport) - the current viewport
-- `isPicking` (Boolean) - whether this is a picking pass
-- `renderPass` (String) - the name of the current render pass. See [layerFilter](./deck.md#layerfilter) for possible values.
+- `isPicking` (boolean) - whether this is a picking pass
+- `renderPass` (string) - the name of the current render pass. See [layerFilter](./deck.md#layerfilter) for possible values.
 
 Returns:
 
@@ -135,11 +115,7 @@ This method achieves the same result as toggling sub layers' `visible` prop in `
 
 An example of leveraging this method is to switch sub layers on viewport change:
 
-```js
-/*
- * A layer that renders different dataset based on zoom level
- */
-// Implementation A
+```ts title="Implementation A"
 class LODLayer extends CompositeLayer {
   
   // Force update layer and re-render sub layers when viewport changes
@@ -164,8 +140,9 @@ class LODLayer extends CompositeLayer {
     ]
   }
 }
+```
 
-// Implementation B
+```ts title="Implementation B"
 class LODLayer extends CompositeLayer {
   renderSubLayers() {
     const {lowResData, hiResData} = this.props;
@@ -200,28 +177,14 @@ that will be passed to the callbacks.
 
 Parameters:
 
-* `pickParams` (Object)
-  + `pickParams.info` (Object) - The current `info` object. By default it contains the
-  following fields:
-
-    - `x` (Number) - Mouse position x relative to the viewport.
-    - `y` (Number) - Mouse position y relative to the viewport.
-    - `coordinate` ([Number, Number]) - Mouse position in world coordinates. Only applies if the
-      [`coordinateSystem`](./layer.md#coordinatesystem)
-      prop is set to `COORDINATE_SYSTEM.LNGLAT`.
-    - `color` (Number[4]) - The color of the pixel that is being picked. It represents a
-      "picking color" that is encoded by
-      [`layer.encodePickingColor()`](./layer.md#encodepickingcolor).
-    - `index` (Number) - The index of the object that is being picked. It is the returned
-      value of
-      [`layer.decodePickingColor()`](./layer.md#decodepickingcolor).
-    - `picked` (Boolean) - `true` if `index` is not `-1`.
-  + `pickParams.mode` (String) - One of `hover` and `click`
-  + `pickParams.sourceLayer` (Layer) - the sublayer instance where this event originates from.
+* `pickParams` (object)
+  + `info` ([PickingInfo](../../developer-guide/interactivity.md#the-pickinginfo-object))
+  + `mode` (string) - the reason for picking, e.g. `'hover'`, `'click'` or `'query'`
+  + `sourceLayer` (Layer) - the sublayer instance where this event originates from.
 
 Returns:
 
-* An `info` object with optional fields about what was picked. This object will be passed to the layer's `onHover` or `onClick` callbacks.
+* An updated `info` object with optional fields about what was picked. This object will be passed to the layer's `onHover` or `onClick` callbacks.
 * `null`, if the corresponding event should be cancelled with no callback functions called.
 
 The default implementation returns `pickParams.info` without any change.
@@ -233,9 +196,9 @@ This utility method helps create sublayers that properly inherit a composite lay
 
 Parameters:
 
-* `subLayerProps` (Object)
-  + `id` (String, required) - an id that is unique among all the sublayers generated by this composite layer.
-  + `updateTriggers` (Object) - the sublayer's update triggers.
+* `subLayerProps` (object)
+  + `id` (string, required) - an id that is unique among all the sublayers generated by this composite layer.
+  + `updateTriggers` (object) - the sublayer's update triggers.
   + Any additional props are optional.
 
 Returns a properties object used to generate a sublayer, with the following keys:
@@ -267,7 +230,7 @@ A composite layer can override this method to change the default behavior.
 
 Parameters:
 
-* `id` (String) - the sublayer id
+* `id` (string) - the sublayer id
 * `data` (Array) - the sublayer data
 
 Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if `data` is not empty.
@@ -280,7 +243,7 @@ A composite layer can override this method to change the default behavior.
 
 Parameters:
 
-* `id` (String) - the sublayer id
+* `id` (string) - the sublayer id
 * `DefaultLayerClass` - the default constructor used for this sublayer.
 
 Returns:
@@ -293,9 +256,9 @@ Used by [adapter layers](../../developer-guide/custom-layers/composite-layers.md
 
 Parameters:
 
-* `row` (Object) - a custom data object to pass to a sublayer.
-* `sourceObject` (Object) - the original data object provided by the user
-* `sourceObjectIndex` (Object) - the index of the original data object provided by the user
+* `row` (object) - a custom data object to pass to a sublayer.
+* `sourceObject` (object) - the original data object provided by the user
+* `sourceObjectIndex` (object) - the index of the original data object provided by the user
 
 Returns:
 

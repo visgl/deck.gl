@@ -94,7 +94,7 @@ The accessor function receives two arguments:
 
 The accessor function is typically expected to return either a number or an array.
 
-Some accessors also support constant values instead of functions. When a constant value is provided, it is applied to all objects in the data stream.
+If an accessor prop is set to a constant value, the value is applied to all objects in the data stream.
 
 
 ### Other Layer Props
