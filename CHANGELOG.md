@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.3] - Mar 29 2024
+
+- Bump luma.gl to 9.0.8 (#8719)
+
 #### deck.gl [9.0.2] - Mar 29 2024
 
 - feat(carto): Support .tileSize prop in H3Tileset2D (#8687)
