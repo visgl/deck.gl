@@ -2,7 +2,7 @@
 
 Performs "fly to" style interpolation between two geospatial view states. Implements [TransitionInterpolator](./transition-interpolator.md).
 
-See [View State Transitions](../../developer-guide/view-state-transitions.md) for usage examples.
+See [View State Transitions](../../developer-guide/animations-and-transitions.md#camera-transitions) for usage examples.
 
 
 ## Constructor

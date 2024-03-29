@@ -1,6 +1,6 @@
 # TransitionInterpolator
 
-Base interpolator class that provides common functionality required to interpolate between two [View States](../../developer-guide/views.md). This class is not intended to be used directly. See [View State Transitions](../../developer-guide/view-state-transitions.md) for backgrounds.
+Base interpolator class that provides common functionality required to interpolate between two [View States](../../developer-guide/views.md). This class is not intended to be used directly. See [View State Transitions](../../developer-guide/animations-and-transitions.md#camera-transitions) for backgrounds.
 
 ## Example
 

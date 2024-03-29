@@ -144,6 +144,89 @@ Returns:
 
 * New `WebMercatorViewport` fit around the given bounding box.
 
+Example zooming to layer when it's loaded:
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+const layer = new ScatterplotLayer({...});
+
+const deckInstance = new Deck({
+  initialViewState: {
+    longitude: -100,
+    latitude: 40,
+    zoom: 4
+  },
+  controller: true,
+  layers: [layer],
+  onAfterRender
+});
+
+let hasLoaded = false;
+function onAfterRender() {
+  if (!hasLoaded && layer.isLoaded) {
+    hasLoaded = true;
+
+    const viewport = layer.context.viewport as WebMercatorViewport;
+    const {longitude, latitude, zoom} = viewport.fitBounds(layer.getBounds());
+    deckInstance.setProps({
+      initialViewState: {longitude, latitude, zoom}
+    });
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState, useEffect} from 'react';
+import DeckGL from '@deck.gl/react';
+import {WebMercatorViewport, MapViewState} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+function App() {
+  const [initialViewState, setInitialViewState] = useState<MapViewState>({
+    longitude: -100,
+    latitude: 40,
+    zoom: 4
+  });
+  const [hasLoaded, setHasLoaded] = useState<boolean>(false);
+
+  const layer = new ScatterplotLayer({...});
+
+  const onAfterRender = () => {
+    if (!hasLoaded && layer.isLoaded) {
+      setHasLoaded(true);
+
+      const viewport = layer.context.viewport as WebMercatorViewport;
+      const {longitude, latitude, zoom} = viewport.fitBounds(layer.getBounds());
+      setInitialViewState({longitude, latitude, zoom});
+    }
+  };
+
+  return <DeckGL
+    initialViewState={initialViewState}
+    controller
+    layers={[layer]}
+    onAfterRender
+  />;
+}
+```
+
+  </TabItem>
+</Tabs>
+
+
+
 ## Remarks
 
 * Because `WebMercatorViewport` a subclass of `Viewport`, an application can implement support for generic 3D `Viewport`s and automatically get the ability to accept web mercator style map coordinates.

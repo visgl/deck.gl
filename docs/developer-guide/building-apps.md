@@ -1,62 +1,48 @@
 # Building Apps
 
-This article contains additional information on options for how to build deck.gl.
+This article discusses considerations in building and deploying applications that contain deck.gl.
 
 
-## Optimizing for Bundle Size
+## Package Format
 
-deck.gl and luma.gl provide a lot of functionality and the amount of code these libraries contain will of course impact the size of your application bundle and your startup load time.
+Starting from v9.0, deck.gl is fully [ES module](https://nodejs.org/api/packages.html) compliant with support for both ESM-style `import` and CommonJS-style `require()`.
 
-There are multiple techniques used in JavaScript.
+When installed from npm, each submodule provides the following entry points:
 
-
-### Choosing an entry point
-
-When installed from npm, deck.gl and related libraries come with two separate distributions.
-
-| Directory     | `mainField` | Description   |
+| Entry     | Type | Description   |
 | ---        | ---         | --- |
-| `dist/es5` | `main`      | All code is transpiled to be compatible with the most commonly adopted evergreen browsers (see below). Exports/imports are transpiled into `commonjs` requires. The main reason to use this distribution is under Node.js (e.g. unit tests), or if your bundler does not support tree-shaking using `import`/`export`. |
-| `dist/esm` | `module`    | Same as `dist/es5`, except `export` and `import` statements are left untranspiled to enable tree shaking. |
+| `dist/index.js` | ESM (import)      | Code is only lightly transpiled to target ES2020. Tree-shakable. |
+| `dist/index.cjs` | CommonJS (require)    | Code is bundled without dependencies, and transpiled to target Node16. Not tree-shakable. |
+| `dist.min.js` | UMD (script tag) | Code is bundled with dependencies, and transpiled to target `['chrome110', 'firefox110', 'safari15']` then minified. |
+| `dist/dist.dev.js` | UMD (script tag) | Same as above, but not minified. |
 
-You will have to check the documentation of your particular bundler to see what configuration options are available. Webpack picks `module` main field over `main` if it is available. You can also explicitly choose one distribution by specifying a `resolve.mainFields` array.
+Although the packages are designed to work with the widest range of use cases, it's going to be much easier if you work with an up-to-date development framework.
 
-The transpilation target is set to `>0.2%, maintained node versions, not ie 11, not dead, not chrome 49` resolved by [browserslist](https://github.com/browserslist/browserslist). To support older or less common browsers, you may use `@babel/preset-ev` in your babel settings and include `node_modules`.
+### Known issues
 
-
-### About Tree-Shaking
-
-deck.gl was designed from the start to leverage tree-shaking. This technique has been talked about for quite some time but has been slow in actually providing the expected benefits. With the combination of webpack 4 and babel 7 we are finally starting to see significant results, so you may want to experiment with upgrading your bundler if you are not getting results.
-
-Note that tree-shaking still has limitations:
-
-* At least in webpack, tree shaking is done by the uglifier, which is typically only run on production builds, so it is typically not possible to assess the benefits of tree shaking during development. In addition, this makes it even harder to make statements about bundle size impact from looking at bundle sizes in development builds. The recommendation is to always measure impact on your final production builds.
-* Static dependency analyzers err on the side of safety and will still include any symbol it is not sure will never be used.
-* This is compounded by the fact that there are side effects in various language feature that complicate or defeat current static dependency analysis techniques, causing "dead code" to still be bundled. The good news is that the analyzers are getting better.
-* Naturally, an application that uses all the functionality offered by the library will benefit little from tree shaking, whereas a small app that only uses a few layers should expect bigger savings.
+- Some older bundlers may not support the latest syntax featuers (e.g. Webpack 4 does not recognize optional chaining). You need to use a Babel plugin  and tell it to include `node_modules` with `@babel/preset-ev`.
+- Frameworks such as `Next.js` and `Gatsby` leverage Server Side Rendering to improve page loading performance. For projects that do not use `type: "module"` in their package.json, SSR may fail with an error message `Error: require() of ES Module 'xxx'`. This is because some of deck.gl's upstream dependencies, such as `d3`, have opted to become ESM-only and no longer support `require()`. See [possible solutions](https://github.com/visgl/deck.gl/issues/7735).
+- Although enormous efforts have been put into converting the deck.gl and its upstream libraries' code base into TypeScript, some part of the legacy code paths may not meet strict type requirements, such as `noImplicitAny` and `strictNullChecks`. You may need to set `skipLibCheck: true` in your project's `tsconfig` to unblock compilation.
 
 
-### Bundle Size Numbers
+## Bundle Size
 
-So, what bundle size impact should you expect? When do you know if you have set up your bundler optimally. To help answer these questions, we provide some numbers you can compare against. deck.gl has scripts that measure the size of a minified bundle after each build, which allows us to provide comparison numbers between releases.
+deck.gl provides a lot of functionality and the amount of code these libraries contain will unsurprisingly impact the size of your application bundle and your startup load time.
 
-| Entry point | 8.5 Bundle (Compressed) | 8.4 Bundle (Compressed) | Comments |
-| ---  | ---                     | ---                 | ---                 |
-| esm  | 398 KB (115 KB)         | 485 KB (128 KB)     | Transpiled, tree-shaking enabled   |
-| es5  | 686 KB (178 KB)         | 812 KB (197 KB)     | Transpiled, no tree-shaking |
+deck.gl is designed from the ground up to be highly extensible. Visualization types are supported by different layers; additional layer features can be added by layer extensions; more data formats can be supported by loaders.gl submodules. The core is fairly lean, and each functionality is self-contained, so that applications do not have to bundle things that they don't need. Because modern build tools support tree shaking, most new features added do not have a visible size impact on existing applications.
 
-Notes:
+deck.gl maintainers are conscious about how design decisions and code changes impact bundle size. The test harness has a script that evaluates the size of a minified bundle after each build. The following numbers are offered for your reference.
 
-* Numbers represent the bundle size of a minimal application, bundled with Webpack 4, which means that the untranspiled and the ESM distribution results benefit from some tree shaking.
-* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your gzipped bundle to get by adding deck.gl as a dependency to your application.
+| Imports        | Bundle size | Compressed | Comments |
+| ---            | ---         | ---        | ---      |
+| Deck + Layer   | 501.2 kb    | 145.3 kb   | Minimal core; baseline      |
+| DeckGL (React) | 10.9 kb     | 3.84 kb    |          |
+| HexagonLayer   | 39.1 kb     | 11.3 kb    |          |
+| GeoJsonLayer   | 97.9 kb     | 27.7 kb    | Includes the most commonly used primitive layers:<br/> ScatterplotLayer, IconLayer, TextLayer, PathLayer, PolygonLayer  |
+| MVTLayer       | 180.9 kb    | 52.6 kb    | GeoJsonLayer + TileLayer + MVT loader  |
+| Tile3DLayer    | 253.9 kb    | 75.1 kb    | ScenegraphLayer + SimpleMeshLayer + GLTF loader + 3D tiles loader   |
 
-
-### Future Work
-
-This is not the final word on deck.gl bundle size. More work is being done to reduce the size of deck.gl and we are confident that even as future releases will have more functionality, we will be able to keep the library code from growing and, more importantly, make deck.gl even more "tree shakeable", with the intention that apps should only "pay for what they use".
-
-
-## Remarks
-
-* **Optimizing for minified code** - Due to inclusion of sourcemaps etc, the bundle size impact of deck.gl tends to look more significant in development builds than in the final production builds. While reducing the size of the development libraries is also desirable, the current goal is to ensure the impact of adding deck.gl on the final, minified/uglified application bundle is as small as possible.
+* Numbers measured using v9.0.1
+* Bundled and minified by esbuild targeting evergreen browsers.
+* All rows after the first are incremental impact on top of the minimal core
 * Compressed bundle sizes are calculated using `gzip -9`. Consider using slower `brotli` compression for static assets, it typically provides an additional 20% reduction.
