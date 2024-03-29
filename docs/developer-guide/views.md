@@ -407,7 +407,7 @@ let currentViewState = {
 
 function onViewStateChange({viewId, viewState}) {
   if (viewId === 'main') {
-    // When user moves the camera in the FPV, the minimap should follow
+    // When user moves the camera in the first-person view, the minimap should follow
     currentViewState = {
       main: viewState,
       minimap: {
@@ -468,7 +468,7 @@ function onViewStateChange({viewId, viewState}: {
   viewState: MapViewState;
 }) {
   if (viewId === 'main') {
-    // When user moves the camera in the FPV, the minimap should follow
+    // When user moves the camera in the first-person view, the minimap should follow
     currentViewState = {
       main: viewState,
       minimap: {
@@ -532,7 +532,7 @@ function App() {
     viewState: MapViewState;
   }) => {
     if (viewId === 'main') {
-      // When user moves the camera in the FPV, the minimap should follow
+      // When user moves the camera in the first-person view, the minimap should follow
       setViewStates(currentViewStates => ({
         main: viewState,
         minimap: {
@@ -615,10 +615,17 @@ function updateCar(carPose) {
       })
     ],
     viewState: {
-      longitude: carPos.longitude,
-      latitude: carPos.latitude,
-      bearing: carPos.heading,
-      zoom: 10
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
     }
   });
 }
@@ -669,10 +676,17 @@ function updateCar(carPose: CarPos) {
       })
     ],
     viewState: {
-      longitude: carPos.longitude,
-      latitude: carPos.latitude,
-      bearing: carPos.heading,
-      zoom: 10
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
     }
   });
 }
@@ -729,10 +743,17 @@ function App({carPose}: {
   return <DeckGL
     views={views}
     viewState={{
-      longitude: carPos.longitude,
-      latitude: carPos.latitude,
-      bearing: carPos.heading,
-      zoom: 10
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
     }}
     layers={layers}
     layerFilter={layerFilter}

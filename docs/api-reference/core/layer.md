@@ -519,7 +519,7 @@ Each prop name is mapped to a number or an object that is the transition setting
 | Key           | Type       | Default     | Description |
 | ------------- | --------   | ----------- | ----------- |
 | `type`        | `'interpolation' | 'spring'`   | `'interpolation'` | Type of the transition |
-| `enter`       | `(toValue: TypedArray, fromChunk?: TypedArray) => number[] | TypedArray` | `value => value` | Callback to get the value that the entering vertices are transitioning from |
+| `enter`       | `(toValue: TypedArray, fromChunk?: TypedArray) => number[]` | `value => value` | Callback to get the value that the entering vertices are transitioning from. See [attribute backfilling](../../developer-guide/animations-and-transitions.md#attribute-backfilling) |
 | `onStart`     | `() => void` | `null`      | Callback when the transition is started |
 | `onEnd`       | `() => void` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `() => void` | `null`      | Callback when the transition is interrupted |

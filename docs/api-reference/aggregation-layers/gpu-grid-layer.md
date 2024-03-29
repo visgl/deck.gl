@@ -143,7 +143,7 @@ Whether to enable cell elevation. If set to false, all cell will be flat.
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](../../developer-guide/effects.md#material-settings) for configurable settings.
+Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
 

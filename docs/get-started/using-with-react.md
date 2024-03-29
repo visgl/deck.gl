@@ -70,7 +70,8 @@ function App() {
   return (
     <DeckGL
       initialViewState={INITIAL_VIEW_STATE}
-      controller >
+      controller
+    >
       <LineLayer
         id="line-layer"
         data="/path/to/data.json"
@@ -88,6 +89,13 @@ function App() {
 ```
 
 For more information on this syntax and its limitations, see [DeckGL API](../api-reference/react/deckgl.md).
+
+
+## Performance Remarks
+
+- Comparing to the `Deck` class in vanilla JavaScript, the `DeckGL` React component is a thin wrapper and in itself does not add any significant performance overhead. However, applications should be mindful that callbacks such as `onHover`, `onViewStateChange` etc. could potentially be invoked on every animation frame, and updating app states within these callbacks will trigger React to rerender (at least part of) the component tree. Therefore, apps should be diligent in following React best practices in general, such as avoiding expensive recalculation with `useMemo` hooks.
+
+- When the component containing `DeckGL` indeed needs to rerender, there is no performance concern in recreating the deck.gl layer instances, even if their props are not changed. When deck.gl receives new layer instances, it compares them with the existing layers, and only updates GPU resources when needed, just like React does for DOM components. Learn more about how it works in this [FAQ](../developer-guide/using-layers.md#should-i-be-creating-new-layers-on-every-render).
 
 
 ## Using deck.gl with SSR

@@ -433,7 +433,11 @@ deck.gl includes a powerful picking engine that enables the application to preci
 
 ### What can be Picked?
 
-The "picking engine" identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](../api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](../api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
+The picking engine identifies which object in which layer is at the given coordinates. While usually intuitive, what constitutes a pickable "object" is defined by each layer. Typically, it corresponds to one of the data entries that is passed in via `prop.data`. For example, in [Scatterplot Layer](../api-reference/layers/scatterplot-layer.md), an object is an element in the `props.data` array that is used to render one circle. In [GeoJson Layer](../api-reference/layers/geojson-layer.md), an object is a GeoJSON feature in the `props.data` feature collection that is used to render one point, path or polygon.
+
+Because the picking engine uses 8-bit RGBA colors to encode object and layer index, there is a limit of `255 - 1` layers and `255 * 255 * 255 - 1` objects per layer that can be picked at the same time. While deck.gl can easily create more than 254 layers (e.g. with tiled data), the picking process is smart about excluding layers that do not overlap with the queried pixel, so this limit is unlikely a problem in normal circumstances. If your app does hit this limit, it can be circumvented by [calling the picking engine directly](#calling-the-picking-engine-directly) with multiple batches of layers.
+
+At the moment, the picking mechanism does not work for objects that are offscreen.
 
 ### Enabling Picking
 
@@ -606,6 +610,7 @@ Remarks:
 
 - Specific deck.gl layers, such as the `BitmapLayer` and `TileLayer`, may add additional fields to the picking info object. Check the documentation of each layer.
 - Limitation when using multiple views: `viewport` could potentially be misidentified if two views that contain the picked layer also overlap with each other and do not clear the background.
+
 
 ### Example: Display a Tooltip for Hovered Object
 
@@ -1006,17 +1011,19 @@ import {PickingInfo} from '@deck.gl/core';
 function App() {
   const deckRef = useRef<DeckGL>();
 
-  const onClick = useCallback(({x, y}: PickingInfo) => {
+  const onClick = useCallback((evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    // Get mouse position relative to the containing div
+    const containerRect = evt.currentTarget.getBoundingClientRect();
+    const x = evt.clientX - containerRect.left;
+    const y = evt.clientY = containerRect.top;
     // Query up to 5 overlapping objects under the pointer
     const pickInfos: PickingInfo[] = deckRef.current?.pickMultipleObjects({x, y, radius: 1, depth: 5});
     console.log(pickInfo);
   }, [])
 
-  return <DeckGL
-    // ...
-    ref={deckRef}
-    onClick={onClick}
-  />;
+  return <div onClick={onClick}>
+    <DeckGL ref={deckRef} ... />
+  </div>;
 }
 ```
 
