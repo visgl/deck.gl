@@ -36,8 +36,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.0.7",
-    "@luma.gl/webgl": "^9.0.7",
+    "@luma.gl/constants": "^9.0.8",
+    "@luma.gl/webgl": "^9.0.8",
     "esri-loader": "^3.3.0"
   },
   "peerDependencies": {
