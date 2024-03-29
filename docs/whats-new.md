@@ -1357,7 +1357,7 @@ Attribute transitions enable applications to simultaneously animate changes in p
 
 #### View State Transitions
 
-View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](./developer-guide/view-state-transitions.md) documentation.
+View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](./developer-guide/animations-and-transitions.md#camera-transitions) documentation.
 
 
 #### ScreenGridLayer: GPU accelerated aggregation

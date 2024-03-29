@@ -84,6 +84,7 @@ A family of NPM modules are published as part of the deck.gl framework. The foll
   + `@deck.gl/json` - Declarative interface that supports specifying deck.gl layers and views using a JSON format.
   + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](../api-reference/mapbox/overview.md) API.
   + `@deck.gl/react` - React wrapper of deck.gl.
+  + `@deck.gl/widgets` - Useful UI components.
   + `@deck.gl/test-utils` - Testing utilities.
 
 For example, to render a `PointCloudLayer`, you may install:
