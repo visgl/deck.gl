@@ -49,7 +49,7 @@
   "devDependencies": {
     "@loaders.gl/csv": "^4.1.4",
     "@loaders.gl/polyfills": "^4.1.4",
-    "@luma.gl/webgpu": "^9.0.7",
+    "@luma.gl/webgpu": "^9.0.8",
     "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.9",
     "jsdom": "^20.0.0",
