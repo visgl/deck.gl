@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.2] - Mar 29 2024
+
+- feat(carto): Support .tileSize prop in H3Tileset2D (#8687)
+- fix(carto): Clean up and add unit tests for requestWithParameters cache (#8707)
+- Do not clear when rendering to target in PostProcessEffect (#8705)
+- fix(aggregation-layers): Fix missing types export (#8713)
+- Disable excessive console warnings (#8696)
+
 #### deck.gl [9.0.1] - Mar 21 2024
 
 - fix(core): base map creation error in DeckGL scripting interface (#8691)
