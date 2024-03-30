@@ -258,7 +258,7 @@ new Deck({
 
 When using multiple views, the `viewState` is a map from each view id to its respective view state object. See [example](../../developer-guide/views.md#using-multiple-views-with-view-states).
 
-Transitions between two viewState objects can also be achieved by providing set of fields to `viewState` prop, for more details check [ViewState Transitions](../../developer-guide/view-state-transitions.md)).
+Transitions between two viewState objects can also be achieved by providing set of fields to `viewState` prop, for more details check [ViewState Transitions](../../developer-guide/animations-and-transitions.md#camera-transitions)).
 
 Notes:
 

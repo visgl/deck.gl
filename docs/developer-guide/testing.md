@@ -1,4 +1,4 @@
-# Testing Layers and Applications
+# Testing
 
 Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
 

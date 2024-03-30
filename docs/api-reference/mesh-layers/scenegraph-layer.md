@@ -134,7 +134,7 @@ Only triggers when scenegraph property changes.
 - `pbr` Uses `glTF` PBR model. Works well with `glTF` models.
 
 Only read when scenegraph property changes.
-Uses [global light configuration](../../developer-guide/using-lighting.md) from deck.
+Uses [global light configuration](../../developer-guide/using-effects.md#lighting) from deck.
 
 ##### `_imageBasedLightingEnvironment` (Function or GLTFEnvironment, optional) {#_imagebasedlightingenvironment}
 

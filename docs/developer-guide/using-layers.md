@@ -1,23 +1,30 @@
 # Using Layers
 
-The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, extrusions, etc., and renders them on a map.
+The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, shapes, extrusions, etc., and renders them on a map.
 
 deck.gl provides an extensive [layer catalog](../api-reference/layers/README.md) and is designed to compose many layers together to form complex visuals.
 
 
 ## Constructing a Layer Instance
 
-A layer is instantiated with a `properties` object:
+A layer is instantiated with one or more "properties" object:
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import {ScatterplotLayer} from 'deck.gl';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const layer = new ScatterplotLayer({
   id: 'bart-stations',
   data: [
     {name: 'Colma', passengers: 4214, coordinates: [-122.466233, 37.684638]},
     {name: 'Civic Center', passengers: 24798, coordinates: [-122.413756,37.779528]},
-    ...
+    // ...
   ],
   stroked: false,
   filled: true,
@@ -27,7 +34,37 @@ const layer = new ScatterplotLayer({
 });
 ```
 
-The `properties` are settings that the layer uses to build the visualization. Users of a layer typically specify the following types of props:
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+type BartStation = {
+  name: string;
+  passengers: number;
+  coordinates: [longitude: number, latitude: number];
+};
+
+const layer = new ScatterplotLayer<BartStation>({
+  id: 'bart-stations',
+  data: [
+    {name: 'Colma', passengers: 4214, coordinates: [-122.466233, 37.684638]},
+    {name: 'Civic Center', passengers: 24798, coordinates: [-122.413756,37.779528]},
+    // ...
+  ],
+  stroked: false,
+  filled: true,
+  getPosition: (d: BartStation) => d.coordinates,
+  getRadius: (d: BartStation) => Math.sqrt(d.passengers),
+  getFillColor: [255, 200, 0]
+});
+```
+
+  </TabItem>
+</Tabs>
+
+The properties, or "props" for short, are settings that the layer uses to build the visualization. Users of a layer typically pass the following types of props to the layer's constructor:
 
 ### Layer ID
 
@@ -39,7 +76,7 @@ It is recommend that this prop is set explicitly to avoid collision.
 
 The `data` prop specifies data source of this layer's visualization. The value is expected to be a collection (typically a JavaScript array) of data objects with similar structure, such as rows in a table. deck.gl layers are able to handle millions of data objects very efficiently.
 
-The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to a JSON array. See [data prop](../api-reference/core/layer.md#data) documentation for details.
+The value of this prop can be `Array`, `Map`, `Set`, any object that contains a `length` field, a `Promise` that resolves to any of the above, or an URL to load such an object from. See [data prop](../api-reference/core/layer.md#data) documentation for details.
 
 ### Accessors
 
@@ -67,34 +104,317 @@ The rest of the props are typically numeric or boolean values that apply to the 
 
 ## Rendering Layers
 
-deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances and deck.gl will render them in order (and handle interactivity when hovering clicking etc).
+deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](../api-reference/core/deck.md) class (pure JS) or [DeckGL](../api-reference/react/deckgl.md) component (React) and they will be rendered in order.
 
 This allows you to compose visualizations using several primitive layers.
 
-```js
-import {PathLayer, ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
-
-// A layers array contains deck.gl layer instances. It can also be nested, or contain empty objects
-const layers = [
-  new PathLayer({id: 'paths', data: ...}),
-  shouldRenderPoints ? [
-    new ScatterplotLayer({id: 'big-points', data: ...}),
-    new ScatterplotLayer({id: 'small-points', data: ...})
-  ] : null,
-  new ArcLayer({id: 'arcs', data: ...})
-];
-```
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-// Use with pure JS
 import {Deck} from '@deck.gl/core';
-const deck = new Deck({...});
-deck.setProps({layers});
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
-// Use with React
-import DeckGL from '@deck.gl/react';
-<DeckGL ... layers={layers} />
+// a JSON file of flight locations in the shape of [{lon: -122.39, lat: 37.62, alt: 1800, callSign: 'SKW 3342'}, ...]
+const flights = '/path/to/data.json';
+
+const layers = [
+  new ScatterplotLayer({
+    id: 'circles',
+    data: flights,
+    getPosition: d => [d.lon, d.lat, d.alt],
+    getFillColor: [255, 255, 255],
+    getRadius: 3,
+    radiusUnits: 'pixels'
+  }),
+  new TextLayer({
+    id: 'labels',
+    data: flights,
+    getText: d => d.callSign,
+    getPosition: d => [d.lon, d.lat, d.alt],
+    getSize: 12
+  })
+];
+
+const deckInstance = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  },
+  controller: true
+  layers
+});
 ```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, LayersList} from '@deck.gl/core';
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+
+type Flight = {
+  callSign: string;
+  lon: number;
+  lat: number;
+  alt: number;
+};
+
+// a JSON file of flight locations in the shape of Flight[]
+const flights = '/path/to/data.json';
+
+const layers: LayersList = [
+  new ScatterplotLayer<Flight>({
+    id: 'circles',
+    data: flights,
+    getPosition:  (d: Flight) => [d.lng, d.lat, d.alt],
+    getFillColor: [255, 255, 255],
+    getRadius: 3,
+    radiusUnits: 'pixels'
+  }),
+  new TextLayer<Flight>({
+    id: 'labels',
+    data: flights,
+    getText: (d: Flight) => d.callSign,
+    getPosition: (d: Flight) => [d.lng, d.lat, d.alt],
+    getSize: 12
+  })
+];
+
+const deckInstance = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  },
+  controller: true
+  layers
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {LayersList} from '@deck.gl/core';
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+
+type Flight = {
+  callSign: string;
+  lon: number;
+  lat: number;
+  alt: number;
+};
+
+function App() {
+  // a JSON file of flight locations in the shape of Flight[]
+  const flights = '/path/to/data.json';
+
+  const layers: LayersList = [
+    new ScatterplotLayer<Flight>({
+      id: 'circles',
+      data: flights,
+      getPosition:  (d: Flight) => [d.lng, d.lat, d.alt],
+      getFillColor: [255, 255, 255],
+      getRadius: 3,
+      radiusUnits: 'pixels'
+    }),
+    new TextLayer<Flight>({
+      id: 'labels',
+      data: flights,
+      getText: (d: Flight) => d.callSign,
+      getPosition: (d: Flight) => [d.lng, d.lat, d.alt],
+      getSize: 12
+    })
+  ];
+
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 8
+    }}
+    controller
+    layers={layers} />
+}
+```
+
+  </TabItem>
+</Tabs>
+
+### Updating Layers
+
+Once a layer is instantiated, its props cannot be modified. Some prop (such as `data`) may be a deeply nested object, but even if you change one of its nested elements, the change is not monitored. To update an existing layer, you create a new layer instance of the same id, and provide this new instance to the `layers` prop of the `Deck` class or `DeckGL` component.
+
+The following example updates its layers' `data` regularly by polling a server:
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+
+const deckInstance = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  },
+  controller: true
+});
+
+update();
+
+async function update() {
+  // `queryServer` is a hypothetical function that contacts a server to fetch a list of flight locations
+  // in the shape of [{lon: -122.39, lat: 37.62, alt: 1800, callSign: 'SKW 3342'}, ...]
+  const flights = await queryServer({time: Date.now()});
+
+  deckInstance.setProps({
+    layers: [
+      new ScatterplotLayer({
+        id: 'circles',
+        data: flights,
+        getPosition: d => [d.lng, d.lat, d.alt],
+        getFillColor: [255, 0, 0],
+        getRadius: 3,
+        radiusUnits: 'pixels'
+      }),
+      new TextLayer({
+        id: 'labels',
+        data: flights,
+        getText: d => d.callSign,
+        getPosition: d => [d.lon, d.lat, d.alt],
+        getSize: 12
+      })
+    ]
+  });
+
+  // refresh again after 60 seconds
+  setTimeout(update, 60000);
+}
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, LayersList} from '@deck.gl/core';
+import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+
+type Flight = {
+  callSign: string;
+  lon: number;
+  lat: number;
+  alt: number;
+};
+
+const deckInstance = new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  },
+  controller: true
+});
+
+update();
+
+async function update() {
+  // `queryServer` is a hypothetical function that contacts a server to fetch a list of flight locations
+  const flights: Flight[] = await queryServer({time: Date.now()});
+
+  deckInstance.setProps({
+    layers: [
+      new ScatterplotLayer<Flight>({
+        id: 'circles',
+        data: flights,
+        getPosition: (d: Flight) => [d.lng, d.lat, d.alt],
+        getFillColor: [255, 0, 0],
+        getRadius: 3,
+        radiusUnits: 'pixels'
+      }),
+      new TextLayer<Flight>({
+        id: 'labels',
+        data: flights,
+        getText: (d: Flight) => d.callSign,
+        getPosition: (d: Flight) => [d.lng, d.lat, d.alt],
+        getSize: 12
+      })
+    ]
+  });
+
+  // refresh again after 60 seconds
+  setTimeout(update, 60000);
+}
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState, useEffect} from 'react';
+import DeckGL from '@deck.gl/react';
+import {LayersList} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+type Flight = {
+  callSign: string;
+  lon: number;
+  lat: number;
+  alt: number;
+};
+
+function App() {
+  const [flights, setFlights] = useState<Flight[]>([]);
+
+  useEffect(() => {
+    const update = async () => {
+      // `queryServer` is a hypothetical function that contacts a server to fetch a list of flight locations
+      const newFlights: Flight[] = await queryServer({time: Date.now()});
+      setFlight(newFlights);
+      // refresh again after 60 seconds
+      setTimeout(update, 60000);
+    };
+
+    update();
+  }, []);
+
+  const layers: LayersList = [
+    new ScatterplotLayer<Flight>({
+      id: 'circles',
+      data: flights,
+      getPosition:  (d: Flight) => [d.lng, d.lat, d.alt],
+      getFillColor: [255, 0, 0],
+      getRadius: 3,
+      radiusUnits: 'pixels'
+    }),
+    new TextLayer<Flight>({
+      id: 'labels',
+      data: flights,
+      getText: (d: Flight) => d.callSign,
+      getPosition: (d: Flight) => [d.lng, d.lat, d.alt],
+      getSize: 12
+    })
+  ];
+
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 8
+    }}
+    controller
+    layers={layers} />
+}
+```
+
+  </TabItem>
+</Tabs>
 
 ## FAQ
 

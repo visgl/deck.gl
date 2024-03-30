@@ -34,15 +34,23 @@
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
           "developer-guide/views",
-          "developer-guide/view-state-transitions",
+          "developer-guide/animations-and-transitions",
           "developer-guide/loading-data",
-          "developer-guide/using-lighting",
+          "developer-guide/using-effects",
           "developer-guide/performance",
-          "developer-guide/fp64",
           "developer-guide/tips-and-tricks",
           "developer-guide/building-apps",
           "developer-guide/debugging",
           "developer-guide/testing"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Supported Base Maps",
+        "items": [
+          "developer-guide/base-maps/using-with-arcgis",
+          "developer-guide/base-maps/using-with-google-maps",
+          "developer-guide/base-maps/using-with-mapbox"
         ]
       },
       {
@@ -58,15 +66,6 @@
           "developer-guide/custom-layers/prop-types",
           "developer-guide/custom-layers/attribute-management",
           "developer-guide/custom-layers/writing-shaders"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "Using with Supported Base Maps",
-        "items": [
-          "developer-guide/base-maps/using-with-arcgis",
-          "developer-guide/base-maps/using-with-google-maps",
-          "developer-guide/base-maps/using-with-mapbox"
         ]
       }
     ]

@@ -25,18 +25,6 @@ Release date: March 21, 2024
   </tbody>
 </table>
 
-### New module: @deck.gl/widgets
-
-You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
-
-This module initially contains the following widgets:
-
-- [FullscreenWidget](./api-reference/widgets/fullscreen-widget.md)
-- [ZoomWidget](./api-reference/widgets/zoom-widget.md)
-- [CompassWidget](./api-reference/widgets/compass-widget.md)
-
-You can also create your own widget by implementing the [`Widget`](./api-reference/core/widget.md) interface.
-
 ### WebGPU enablement
 
 deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU in future releases, however it does cause some unavoidable breaking changes.
@@ -44,7 +32,6 @@ deck.gl v9 adopts the luma.gl v9 API. This will enable deck.gl to run on WebGPU 
 WebGPU is the next generation API for accessing GPU capabilities on the web. Unlike the incremental transition from WebGL to WebGL2, the shift to WebGPU completely changes the way the browser will interact with the GPU. The new (v9) version of [luma.gl](https://luma.gl/) has been rewritten to adopt a WebGPU-compatible interface, while maintaining full support for WebGL2. deck.gl v9 has been extensively refactored on top of the new luma.gl API, but the deck.gl API itself includes minimal changes. This should allow applications to smoothly update to the latest version.
 
 While the v9 luma.gl release is feature-complete and well-tested for the WebGL2 adapter, work is still required to provide full WebGPU support. The team is planning to follow the v9 releases soon with v9.1, which will provide the WebGPU implementation in luma.gl along with the complimentary updates in deck.gl.
-
 
 ### Development experience
 
@@ -62,12 +49,7 @@ Typescript types, which were provided as an opt-in in 8.9, has now been enabled 
 
 All the deck.gl packages are now published as fully ESM-compatible.
 
-
-### Category filtering in DataFilterExtension
-
-The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has been enhanced to support filtering based on categories. A new accessor, [getFilterCategory](./api-reference/extensions/data-filter-extension), is added which allows filtering using the new [filterCategories](./api-reference/extensions/data-filter-extension#filtercategories).
-
-### FirstPersonController
+### Improved FirstPersonController
 
 The behavior of the [FirstPersonController](./api-reference/core/first-person-controller) has been modified to more accurately reflect the motion of a human, making it more intuitive to navigate a 3D space. In addition, panning is supported.
 
@@ -80,6 +62,24 @@ The behavior of the [FirstPersonController](./api-reference/core/first-person-co
     </tr>
   </tbody>
 </table>
+
+### Category filtering in DataFilterExtension
+
+The [DataFilterExtension](./api-reference/extensions/data-filter-extension) has been enhanced to support filtering based on categories. A new accessor, [getFilterCategory](./api-reference/extensions/data-filter-extension), is added which allows filtering using the new [filterCategories](./api-reference/extensions/data-filter-extension#filtercategories).
+
+
+### `@deck.gl/widgets` (New module)
+
+You can now add UI components to deck.gl. This new module lets apps add controls and information that can interact with deck.gl's cameras and layers for a better user experience. To get started, check out [the example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/widgets) and [the documentation](./api-reference/widgets/overview.md).
+
+This module initially contains the following widgets:
+
+- [FullscreenWidget](./api-reference/widgets/fullscreen-widget.md)
+- [ZoomWidget](./api-reference/widgets/zoom-widget.md)
+- [CompassWidget](./api-reference/widgets/compass-widget.md)
+
+You can also create your own widget by implementing the [`Widget`](./api-reference/core/widget.md) interface.
+
 
 ### `@deck.gl/carto`
 
@@ -1357,7 +1357,7 @@ Attribute transitions enable applications to simultaneously animate changes in p
 
 #### View State Transitions
 
-View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](./developer-guide/view-state-transitions.md) documentation.
+View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](./developer-guide/animations-and-transitions.md#camera-transitions) documentation.
 
 
 #### ScreenGridLayer: GPU accelerated aggregation
