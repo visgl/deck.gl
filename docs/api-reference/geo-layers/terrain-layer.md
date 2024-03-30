@@ -67,7 +67,7 @@ When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. F
 
 ### Data Options
 
-##### `elevationData` (String|Array, required) {#elevationdata}
+##### `elevationData` (string|Array, required) {#elevationdata}
 
 Image URL that encodes height data.
 
@@ -76,20 +76,20 @@ Image URL that encodes height data.
 - If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
 
 
-##### `texture` (String|Null, optional) {#texture}
+##### `texture` (string|Null, optional) {#texture}
 
 Image URL to use as the surface texture. Same schema as `elevationData`.
 
 - Default: `null`
 
 
-##### `meshMaxError` (Number, optional) {#meshmaxerror}
+##### `meshMaxError` (number, optional) {#meshmaxerror}
 
 Martini error tolerance in meters, smaller number results in more detailed mesh..
 
 - Default: `4.0`
 
-##### `elevationDecoder` (Object) {#elevationdecoder}
+##### `elevationDecoder` (object) {#elevationdecoder}
 
 Parameters used to convert a pixel to elevation in meters.
 An object containing the following fields:
@@ -130,7 +130,7 @@ The default value of `elevationDecoder` decodes a grayscale image:
 ```
 
 
-##### `bounds` (Array, optional) {#bounds}
+##### `bounds` (number[4], optional) {#bounds}
 
 Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`.
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
@@ -141,7 +141,7 @@ Must be supplied when using non-tiled elevation data.
 - Default: `null`
 
 
-##### `loadOptions` (Object, optional) {#loadoptions}
+##### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
@@ -159,13 +159,13 @@ Color to use if `texture` is unavailable. Forwarded to `SimpleMeshLayer`'s `getC
 
 - Default: `[255, 255, 255]`
 
-##### `wireframe` (Boolean, optional) {#wireframe}
+##### `wireframe` (boolean, optional) {#wireframe}
 
 Forwarded to `SimpleMeshLayer`'s `wireframe` prop.
 
 - Default: `false`
 
-##### `material` (Object, optional) {#material}
+##### `material` (Material, optional) {#material}
 
 Forwarded to `SimpleMeshLayer`'s `material` prop.
 

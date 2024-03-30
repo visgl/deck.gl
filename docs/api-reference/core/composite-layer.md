@@ -231,7 +231,7 @@ A composite layer can override this method to change the default behavior.
 Parameters:
 
 * `id` (string) - the sublayer id
-* `data` (Array) - the sublayer data
+* `data` (object[]) - the sublayer data
 
 Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if `data` is not empty.
 

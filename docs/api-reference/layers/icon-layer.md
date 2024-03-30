@@ -305,7 +305,7 @@ new deck.IconLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-##### `iconAtlas` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object, optional) {#iconatlas}
+##### `iconAtlas` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|object, optional) {#iconatlas}
 
 A pre-packed image that contains all icons.
 
@@ -461,7 +461,7 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-##### `getPixelOffset` ([Accessor&lt;[number, number]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+##### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 - Default: `[0, 0]`
 

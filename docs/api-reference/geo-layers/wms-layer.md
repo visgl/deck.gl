@@ -161,7 +161,7 @@ If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` ot
 
 Receives arguments:
 
-- `metadata` (Object) - The metadata for the image services has been loaded. 
+- `metadata` (object) - The metadata for the image services has been loaded. 
 
 Note that metadata will not be loaded when `props.serviceType` is set to `'template`.
 

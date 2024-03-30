@@ -42,15 +42,15 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `resolution` (Number, optional) {#resolution}
+##### `resolution` (number, optional) {#resolution}
 
 The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
-##### `nearZMultiplier` (Number, optional) {#nearzmultiplier}
+##### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
 Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter.
 
-##### `farZMultiplier` (Number, optional) {#farzmultiplier}
+##### `farZMultiplier` (number, optional) {#farzmultiplier}
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
@@ -59,11 +59,11 @@ Scaler for the far plane, 1 unit equals to the distance from the camera to the e
 
 To render, `GlobeView` needs to be used together with a `viewState` with the following parameters:
 
-- `longitude` (Number) - longitude at the viewport center
-- `latitude` (Number) - latitude at the viewport center
-- `zoom` (Number) - zoom level
-- `maxZoom` (Number, optional) - max zoom level. Default `20`.
-- `minZoom` (Number, optional) - min zoom level. Default `0`.
+- `longitude` (number) - longitude at the viewport center
+- `latitude` (number) - latitude at the viewport center
+- `zoom` (number) - zoom level
+- `maxZoom` (number, optional) - max zoom level. Default `20`.
+- `minZoom` (number, optional) - min zoom level. Default `0`.
 
 
 ## Controller

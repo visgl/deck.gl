@@ -9,21 +9,21 @@ A controller class can be passed to either the `Deck` class's [controller](./dec
 
 The base Controller class supports the following options:
 
-* `scrollZoom` (Boolean|Object) - enable zooming with mouse wheel. Default `true`. If an object is supplied, it may contain the following fields to customize the zooming behavior:
-  + `speed` (Number) - scaler that translates wheel delta to the change of viewport scale. Default `0.01`.
-  + `smooth` (Boolean) - smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`.
-* `dragPan` (Boolean) - enable panning with pointer drag. Default `true`
-* `dragRotate` (Boolean) - enable rotating with pointer drag. Default `true`
-* `doubleClickZoom` (Boolean) - enable zooming with double click. Default `true`
-* `touchZoom` (Boolean) - enable zooming with multi-touch. Default `true`
-* `touchRotate` (Boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
-* `keyboard` (Boolean|Object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
-    * `zoomSpeed` (Number) - speed of zoom using +/- keys. Default `2`.
-    * `moveSpeed` (Number) - speed of movement using arrow keys, in pixels.
-    * `rotateSpeedX` (Number) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
-    * `rotateSpeedY` (Number) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
-* `dragMode` (String) - drag behavior without pressing function keys, one of `pan` and `rotate`.
-* `inertia` (Boolean|Number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
+* `scrollZoom` (boolean|object) - enable zooming with mouse wheel. Default `true`. If an object is supplied, it may contain the following fields to customize the zooming behavior:
+  + `speed` (number) - scaler that translates wheel delta to the change of viewport scale. Default `0.01`.
+  + `smooth` (boolean) - smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`.
+* `dragPan` (boolean) - enable panning with pointer drag. Default `true`
+* `dragRotate` (boolean) - enable rotating with pointer drag. Default `true`
+* `doubleClickZoom` (boolean) - enable zooming with double click. Default `true`
+* `touchZoom` (boolean) - enable zooming with multi-touch. Default `true`
+* `touchRotate` (boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
+* `keyboard` (boolean|object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
+    * `zoomSpeed` (number) - speed of zoom using +/- keys. Default `2`.
+    * `moveSpeed` (number) - speed of movement using arrow keys, in pixels.
+    * `rotateSpeedX` (number) - speed of rotation using shift + left/right arrow keys, in degrees. Default `15`.
+    * `rotateSpeedY` (number) - speed of rotation using shift + up/down arrow keys, in degrees. Default `10`.
+* `dragMode` (string) - drag behavior without pressing function keys, one of `pan` and `rotate`.
+* `inertia` (boolean|Number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 
 ## Methods
 
@@ -43,7 +43,7 @@ class MyController extends Controller {
 
 The constructor takes one argument:
 
-* `props` (Object) - contains the following options: 
+* `props` (object) - contains the following options: 
   * `eventManager`- handles events subscriptions
   * `makeViewPort (viewState)` - creates new `Viewport` based on provided `ViewState`, and current view's `width` and `height`
   * `onStateChange` callback function

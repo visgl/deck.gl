@@ -13,16 +13,16 @@ Camera transitions provide smooth and visually appealing transitions when `viewS
 
 Transitions are performed when setting `Deck`'s `viewState` or `initialViewState` prop to a new value with the following additional fields:
 
-* `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two view states. The choices are:
+* `transitionInterpolator` (object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two view states. The choices are:
 
   - [LinearInterpolator](../api-reference/core/linear-interpolator.md) - a generic interpolator that works with all view types. This is the default.
   - [FlyToInterpolator](../api-reference/core/fly-to-interpolator.md) - a "fly to" style camera transition for geospatial views. This is pretty useful when the camera center changes by long distance.
   - Implement a custom interpolator. See [TransitionInterpolator](../api-reference/core/transition-interpolator.md).
 
-* `transitionDuration` (Number|String, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
+* `transitionDuration` (number|string, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
 When using `FlyToInterpolator`, it can also be set to `'auto'` where actual duration is calculated based on the distance between the start and end states, and the `speed` option.
 * `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)   
-* `transitionInterruption` (Enum, optional, default: `TRANSITION_EVENTS.BREAK`) - This field controls how to process a new view state change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
+* `transitionInterruption` (number, optional, default: `TRANSITION_EVENTS.BREAK`) - This field controls how to process a new view state change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
     | `TRANSITION_EVENTS` | Result |
     | ---------------   | ------ |
@@ -416,11 +416,11 @@ In the `transitions` object, each prop name is mapped to a number or an object t
 
 | Key           | Type       | Default     | Description |
 | ------------- | --------   | ----------- | ----------- |
-| `type`        | `'interpolation' | 'spring'`   | `'interpolation'` | Type of the transition |
-| `enter`       | `(toValue: TypedArray, fromChunk?: TypedArray) => number[] | TypedArray` | `value => value` | Callback to get the value that the entering vertices are transitioning from. See "attribute backfilling" below |
-| `onStart`     | `() => void` | `null`      | Callback when the transition is started |
-| `onEnd`       | `() => void` | `null`      | Callback when the transition is done |
-| `onInterrupt` | `() => void` | `null`      | Callback when the transition is interrupted |
+| `type`        | string   | `'interpolation'` | Type of the transition |
+| `enter`       | Function | `value => value` | Callback to get the value that the entering vertices are transitioning from. See "attribute backfilling" below |
+| `onStart`     | Function | `null`      | Callback when the transition is started |
+| `onEnd`       | Function | `null`      | Callback when the transition is done |
+| `onInterrupt` | Function | `null`      | Callback when the transition is interrupted |
 
 - Additional fields for `type: 'interpolation'`:
 

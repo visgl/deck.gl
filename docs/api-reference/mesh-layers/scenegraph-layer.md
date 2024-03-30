@@ -74,7 +74,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Mesh
 
-##### `scenegraph` (URL|Object|Promise) {#scenegraph}
+##### `scenegraph` (URL|object|Promise) {#scenegraph}
 
 The geometry to render for each data object.
 Can be a URL of an object. You need to provide the `fetch` function to load the object.
@@ -82,7 +82,7 @@ Can also be a luma.gl [ScenegraphNode](https://github.com/visgl/luma.gl/blob/8.5
 The layer calls _delete()_ on _scenegraph_ when a new one is provided or the layer is finalized.
 
 
-##### `loadOptions` (Object, optional) {#loadoptions}
+##### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
@@ -91,13 +91,13 @@ On top of the [default options](../core/layer.md#loadoptions), also accepts opti
 
 ### Render Options
 
-##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
+##### `sizeScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default `1`.
 
 Multiplier to scale each geometry by.
 
-##### `_animations` (Object, optional) {#_animations}
+##### `_animations` (object, optional) {#_animations}
 
 - Default `undefined`. (No animations are running).
 
@@ -106,9 +106,9 @@ An object used to configure animations playing. _keys_ can be one of the followi
 - _name_ for animation name
 - `*` to affect all animations
 Each value is an object with:
-- `playing` (Boolean) default `true`
-- `speed` (Number) speed multiplier, default `1`.
-- `startTime` (Number) start time, default `0`.
+- `playing` (boolean) default `true`
+- `speed` (number) speed multiplier, default `1`.
+- `startTime` (number) start time, default `0`.
 Animations are parsed automatically from `glTF` files.
 
 ##### `getScene` (Function, optional) {#getscene}
@@ -125,7 +125,7 @@ Only triggers when scenegraph property changes.
 Return `null` to disable animation or provide your custom animator.
 Only triggers when scenegraph property changes.
 
-##### `_lighting` (String, optional) {#_lighting}
+##### `_lighting` (string, optional) {#_lighting}
 
 - Default: `flat`
 
@@ -149,14 +149,14 @@ Only read when scenegraph property changes.
 ### Data Accessors
 
 
-##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
 
-##### `getColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -165,7 +165,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getOrientation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getorientation}
+##### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
 
 - Default: `[0, 0, 0]`
 
@@ -174,7 +174,7 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
 
-##### `getScale` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#getscale}
+##### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getscale}
 
 - Default: `[1, 1, 1]`
 
@@ -183,7 +183,7 @@ Scaling factor on the mesh along each axis.
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
 
-##### `getTranslation` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettranslation}
+##### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettranslation}
 
 - Default: `[0, 0, 0]`
 
@@ -192,7 +192,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-##### `getTransformMatrix` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) {#gettransformmatrix}
+##### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettransformmatrix}
 
 - Default: `null`
 
@@ -202,13 +202,13 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
-##### `sizeMinPixels` (Number, optional) {#sizeminpixels}
+##### `sizeMinPixels` (number, optional) {#sizeminpixels}
 
 * Default: `0`
 
 The minimum size in pixels for one unit of the scene.
 
-##### `sizeMaxPixels` (Number, optional) {#sizemaxpixels}
+##### `sizeMaxPixels` (number, optional) {#sizemaxpixels}
 
 * Default: `Number.MAX_SAFE_INTEGER`
 

@@ -198,7 +198,7 @@ If `true`, the text always faces camera. Otherwise the text faces up (z).
 
 Whether to render background for the text blocks.
 
-##### `backgroundPadding` (number[], optional) {#backgroundpadding}
+##### `backgroundPadding` (number[4], optional) {#backgroundpadding}
 
 - Default `[0, 0, 0, 0]`
 
@@ -343,7 +343,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
-##### `getPixelOffset` ([Accessor&lt;[number, number]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+##### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 * Default: `[0, 0]`
 

@@ -38,7 +38,7 @@ Default: `document.body`
 
 The container in which deck.gl should append its canvas. Can be either a HTMLDivElement or the element id. The deck.gl canvas is resized to fill the container.
 
-##### `map` (Object, optional) {#map}
+##### `map` (object, optional) {#map}
 
 Default: `window.mapboxgl || window.maplibregl`
 
@@ -73,11 +73,11 @@ new deck.DeckGL({
 });
 ```
 
-##### `mapStyle` (Object | String) {#mapstyle}
+##### `mapStyle` (object | String) {#mapstyle}
 
 The style JSON or URL for the Mapbox map.
 
-##### `mapboxApiAccessToken` (String) {#mapboxapiaccesstoken}
+##### `mapboxApiAccessToken` (string) {#mapboxapiaccesstoken}
 
 The API access token to use Mapbox tiles. See [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api) documentation for how to use Mapbox.
 

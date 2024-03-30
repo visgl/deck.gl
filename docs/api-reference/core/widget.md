@@ -58,17 +58,17 @@ A `Widget` implements the following members.
 
 Unique identifier of the widget.
 
-##### `props` (Object) {#props}
+##### `props` (object) {#props}
 
 Any options for the widget, as passed into the constructor and can be updated with `setProps`.
 
-##### `viewId` (String | null) {#viewid}
+##### `viewId` (string | null) {#viewid}
 
 * Default: `null`
 
 The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
 
-##### `placement` (String, optional) {#placement}
+##### `placement` (string, optional) {#placement}
 
 * Default: `'top-left'`
 
@@ -88,9 +88,9 @@ Required. Called when the widget is added to a Deck instance.
 
 Receives the following arguments:
 
-- `context` (Object)
+- `context` (object)
   + `deck` (Deck) - the Deck instance that this widget is being attached to.
-  + `viewId` (String | null) - the view id that this widget is being attached to.
+  + `viewId` (string | null) - the view id that this widget is being attached to.
 
 Returns an optional UI element that should be appended to the Deck container.
 

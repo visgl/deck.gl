@@ -183,7 +183,7 @@ Disk rotation, counter-clockwise in degrees.
 
 Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one. The length of the array must be at least `diskResolution`. Each vertex is a point `[x, y]` that is the offset from the instance position, relative to the radius.
 
-##### `offset` ([number, number], optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#offset}
+##### `offset` (number[2], optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#offset}
 
 * Default: `[0, 0]`
 

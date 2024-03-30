@@ -66,7 +66,7 @@ new CollisionFilterExtension();
 
 When added to a layer via the `extensions` prop, the `CollisionFilterExtension` adds the following properties to the layer:
 
-##### `collisionEnabled` (Boolean, optional) {#collisionenabled}
+##### `collisionEnabled` (boolean, optional) {#collisionenabled}
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
@@ -96,7 +96,7 @@ const layers = [
 ];
   ```
 
-##### `collisionTestProps` (Object, optional) {#collisiontestprops}
+##### `collisionTestProps` (object, optional) {#collisiontestprops}
 
 Props to override when computing collisions. A common use case is to increase the size of the features when computing collisions to provide greater spacing between visible features. For the `ScatterplotLayer` this would be done by:
 
@@ -104,7 +104,7 @@ Props to override when computing collisions. A common use case is to increase th
 collisionTestProps: {radiusScale: 2}
 ```
 
-##### `getCollisionPriority` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
+##### `getCollisionPriority` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getcollisionpriority}
 
 The collision priority of each object. Features with higher values are shown preferentially.
 The priority is a number in the range -1000 -> 1000, values outside will be clamped. 

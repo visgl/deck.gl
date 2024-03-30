@@ -104,13 +104,13 @@ Along with other options as below,
 
 ### Render Options
 
-##### `opacity` (Number, Optional) {#opacity}
+##### `opacity` (number, Optional) {#opacity}
 
 - Default `1.0`
 
 The opacity of the layer. The same as defined in [layer](../core/layer.md).
 
-##### `pointSize` (Number, Optional) {#pointsize}
+##### `pointSize` (number, Optional) {#pointsize}
 
 - Default `1.0`
 
@@ -119,17 +119,17 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Data Properties
 
-##### `data` (String) {#data}
+##### `data` (string) {#data}
 
 - A URL to fetch tiles entry point of `3D Tiles` [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or `Indexed 3D Scene Layer` file [I3S](https://github.com/Esri/i3s-spec).
 
-##### `loader` (Object) {#loader}
+##### `loader` (object) {#loader}
 
 - Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader)
 
 A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`,`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
-##### `loadOptions` (Object, Optional) {#loadoptions}
+##### `loadOptions` (object, Optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also support the following keys:
 
@@ -154,7 +154,7 @@ const layer = new Tile3DLayer({
 })
 ```
 
-##### `pickable` (Boolean, Optional) {#pickable}
+##### `pickable` (boolean, Optional) {#pickable}
 
 - Default: false
 

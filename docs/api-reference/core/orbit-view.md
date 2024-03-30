@@ -22,29 +22,29 @@ const view = new OrbitView({id, ...});
 
 `OrbitView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `orbitAxis` (String, optional) {#orbitaxis}
+##### `orbitAxis` (string, optional) {#orbitaxis}
 
 Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
 
-##### `projectionMatrix` (Array[16], optional) {#projectionmatrix}
+##### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (Number, optional) {#fovy}
+##### `fovy` (number, optional) {#fovy}
 
 Field of view covered by camera, in the perspective case. In degrees. Default `50`.
 
-##### `near` (Number, optional) {#near}
+##### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (Number, optional) {#far}
+##### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
-##### `orthographic` (Boolean) {#orthographic}
+##### `orthographic` (boolean) {#orthographic}
 
 Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 
@@ -53,14 +53,14 @@ Whether to create an orthographic or perspective projection matrix. Default is `
 
 To render, `OrbitView` needs to be used together with a `viewState` with the following parameters:
 
-* `target` (Number[3], optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
-* `rotationOrbit` (Number, optional) - Rotating angle around orbit axis. Default `0`.
-* `rotationX` (Number, optional) - Rotating angle around X axis. Default `0`.
-* `zoom` (Number, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
-* `minZoom` (Number, optional) - The min zoom level of the viewport. Default `-Infinity`.
-* `maxZoom` (Number, optional) - The max zoom level of the viewport. Default `Infinity`.
-* `minRotationX` (Number, optional) - The min rotating angle around X axis. Default `-90`.
-* `maxRotationX` (Number, optional) - The max rotating angle around X axis. Default `90`.
+* `target` (number[3], optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `rotationOrbit` (number, optional) - Rotating angle around orbit axis. Default `0`.
+* `rotationX` (number, optional) - Rotating angle around X axis. Default `0`.
+* `zoom` (number, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
+* `minZoom` (number, optional) - The min zoom level of the viewport. Default `-Infinity`.
+* `maxZoom` (number, optional) - The max zoom level of the viewport. Default `Infinity`.
+* `minRotationX` (number, optional) - The min rotating angle around X axis. Default `-90`.
+* `maxRotationX` (number, optional) - The max rotating angle around X axis. Default `90`.
 
 
 ## Controller

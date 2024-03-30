@@ -48,7 +48,7 @@ const layers = layerManager.getLayers({layerIds = []});
 
 Parameters:
 
-* `layerIds` (String[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
+* `layerIds` (string[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
 
 Returns:
 

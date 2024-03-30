@@ -53,13 +53,14 @@ new ClipExtension();
 ## Layer Properties
 
 When added to a layer via the `extensions` prop, the `ClipExtension` adds the following properties to the layer:
-##### `clipBounds` (Array) {#clipbounds}
+
+##### `clipBounds` (number[4]) {#clipbounds}
 
 Rectangular bounds to be used for clipping the rendered region.
 
 Supported format: `[left, bottom, right, top]`
 
-##### `clipByInstance` (Boolean, optional) {#clipbyinstance}
+##### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
 `clipByInstance` controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon). If not specified, it is deduced from whether there is an attribute called `instancePositions`. This behavior can be overridden if:
 

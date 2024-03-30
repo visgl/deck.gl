@@ -32,26 +32,26 @@ new WebMercatorViewport({width, height, longitude, latitude, zoom, pitch, bearin
 
 Parameters:
 
-* `opts` (Object) - Web Mercator viewport options
+* `opts` (object) - Web Mercator viewport options
 
-  + `width` (Number) - Width of the viewport.
-  + `height` (Number) - Height of the viewport.
+  + `width` (number) - Width of the viewport.
+  + `height` (number) - Height of the viewport.
 
   web mercator style arguments:
 
-  + `latitude` (Number, optional) - Latitude of the viewport center on map. Default to `0`.
-  + `longitude` (Number, optional) - Longitude of the viewport center on map. Default to `0`.
-  + `zoom` (Number, optional) - Map zoom (scale is calculated as `2^zoom`). Default to `11`.
-  + `pitch` (Number, optional) - The pitch (tilt) of the map from the screen, in degrees (0 is straight down). Default to `0`.
-  + `bearing` (Number, optional) - The bearing (rotation) of the map from north, in degrees counter-clockwise (0 means north is up). Default to `0`.
-  + `altitude` (Number, optional) - Altitude of camera in screen units. Default to `1.5`.
+  + `latitude` (number, optional) - Latitude of the viewport center on map. Default to `0`.
+  + `longitude` (number, optional) - Longitude of the viewport center on map. Default to `0`.
+  + `zoom` (number, optional) - Map zoom (scale is calculated as `2^zoom`). Default to `11`.
+  + `pitch` (number, optional) - The pitch (tilt) of the map from the screen, in degrees (0 is straight down). Default to `0`.
+  + `bearing` (number, optional) - The bearing (rotation) of the map from north, in degrees counter-clockwise (0 means north is up). Default to `0`.
+  + `altitude` (number, optional) - Altitude of camera in screen units. Default to `1.5`.
 
   projection matrix arguments:
 
-  + `nearZMultiplier` (Number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
-  + `farZMultiplier` (Number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`.
-  + `orthographic` (Boolean, optional) - Default `false`.
-  + `projectionMatrix` (Array, optional) - Optional 16-element 4x4 projection matrix, that overrides the matrix created from the parameters above.
+  + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
+  + `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`.
+  + `orthographic` (boolean, optional) - Default `false`.
+  + `projectionMatrix` (number[16], optional) - Optional 16-element 4x4 projection matrix, that overrides the matrix created from the parameters above.
 
 Remarks:
 
@@ -73,9 +73,9 @@ Projects world coordinates to pixel coordinates on screen.
 
 Parameters:
 
-* `coordinates` (Array) - `[longitude, latitude, altitude]`. `altitude` is in meters and default to `0` if not supplied.
-* `opts` (Object)
-  + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+* `coordinates` (number[]) - `[longitude, latitude, altitude]`. `altitude` is in meters and default to `0` if not supplied.
+* `opts` (object)
+  + `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
@@ -90,10 +90,10 @@ Unproject pixel coordinates on screen into world coordinates.
 
 Parameters:
 
-* `pixels` (Array) - `[x, y, z]` in pixel coordinates. Passing a `z` is optional.
-* `opts` (Object)
-  + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
-  + `targetZ` (Number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
+* `pixels` (number[]) - `[x, y, z]` in pixel coordinates. Passing a `z` is optional.
+* `opts` (object)
+  + `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
+  + `targetZ` (number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
 
 Returns:
 
@@ -118,8 +118,8 @@ Add a meter delta to a base lnglat coordinate using linear approximation. For in
 
 Parameters:
 
-* `lngLatZ` (Array) - Base coordinate in `[longitude, latitude, altitude]`. Passing a `altitude` is optional.
-* `xyz` (Array) - Array of `[x, y, z]` in meter deltas. Passing a `z` is optional.
+* `lngLatZ` (number[]) - Base coordinate in `[longitude, latitude, altitude]`. Passing a `altitude` is optional.
+* `xyz` (number[]) - Array of `[x, y, z]` in meter deltas. Passing a `z` is optional.
 
 Returns:
 
@@ -131,14 +131,14 @@ Returns a new viewport that fit around the given bounding box. Viewport `width` 
 
 Parameters:
 
-* `bounds` (Array) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
-* `opts` (Object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
-  + `width` (Number) - If not supplied, will use the current width of the viewport (default `1`)
-  + `height` (Number) - If not supplied, will use the current height of the viewport (default `1`)
-  + `minExtent` (Number) - In degrees, 0.01 would be about 1000 meters
-  + `maxZoom` (Number) - Max zoom level
-  + `padding` (Number) - The amount of padding in pixels to add to the given bounds.
-  + `offset` (Array) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
+* `bounds` (number[2][2]) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
+* `opts` (object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
+  + `width` (number) - If not supplied, will use the current width of the viewport (default `1`)
+  + `height` (number) - If not supplied, will use the current height of the viewport (default `1`)
+  + `minExtent` (number) - In degrees, 0.01 would be about 1000 meters
+  + `maxZoom` (number) - Max zoom level
+  + `padding` (number) - The amount of padding in pixels to add to the given bounds.
+  + `offset` (number[2]) - The center in `[x, y]` of the given bounds relative to the map's center measured in pixels.
   
 Returns: 
 

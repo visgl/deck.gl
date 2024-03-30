@@ -201,7 +201,7 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 Method called to retrieve the position of each object.
 
-##### `getNormal` ([Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
+##### `getNormal` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
 
 * Default: `[0, 0, 1]`
 

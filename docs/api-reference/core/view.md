@@ -22,32 +22,32 @@ const view = new View({id, x, y, width, height, ...});
 
 Parameters:
 
-##### `id` (String, optional) {#id}
+##### `id` (string, optional) {#id}
 
 A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view.
 
-##### `x` (String|Number, optional) {#x}
+##### `x` (string|Number, optional) {#x}
 
 A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
 
-##### `y` (String|Number, optional) {#y}
+##### `y` (string|Number, optional) {#y}
 
 A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
-##### `width` (String|Number, optional) {#width}
+##### `width` (string|Number, optional) {#width}
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `height` (String|Number, optional) {#height}
+##### `height` (string|Number, optional) {#height}
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `padding` (Object, optional) {#padding}
+##### `padding` (object, optional) {#padding}
 
 Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
-##### `controller` (Function|Boolean|Object, optional) {#controller}
+##### `controller` (Function|boolean|object, optional) {#controller}
 
 Options for viewport interactivity.
 
@@ -61,7 +61,7 @@ Options for viewport interactivity.
 Default `null`.
 
 
-##### `viewState` (String|Object, optional) {#viewstate}
+##### `viewState` (string|object, optional) {#viewstate}
 
 The optional `viewState` property enables a `View` to specify, select or select-and-modify its view state.
 
@@ -81,13 +81,13 @@ The `viewState` property is intended to support a number of use cases:
 * Overriding a partial set of view state properties from a selected view state.
 
 
-##### `clear` (Boolean|Object, optional) {#clear}
+##### `clear` (boolean|object, optional) {#clear}
 
 Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as an argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controlled by the following fields:
 
-* `color` (Boolean or Array) - if not `false`, clears all active color buffers with either the provided color or the currently set clear color.
-* `depth` (Boolean)  - if `true`, clears the depth buffer.
-* `stencil` (Boolean) - if `true` clears the stencil buffer.
+* `color` (boolean or Array) - if not `false`, clears all active color buffers with either the provided color or the currently set clear color.
+* `depth` (boolean)  - if `true`, clears the depth buffer.
+* `stencil` (boolean) - if `true` clears the stencil buffer.
 
 Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only specify the `clear` property if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
 

@@ -53,7 +53,7 @@ const overlay = new GoogleMapsOverlay(props)
 
 The constructor additionally accepts the following option:
 
-- `interleaved` (Boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
+- `interleaved` (boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
 
 ## Methods
 

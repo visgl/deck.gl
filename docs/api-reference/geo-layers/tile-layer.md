@@ -91,7 +91,7 @@ If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/
 
 ### Data Options
 
-##### `data` (String|Array, optional) {#data}
+##### `data` (string|Array, optional) {#data}
 
 - Default: `[]`
 
@@ -108,11 +108,11 @@ If the value is an array: multiple URL templates. Each endpoint must return the 
 
 If supplied, `getTileData` is called to retrieve the data of each tile. It receives one argument `tile` which contains the following fields:
 
-- `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
-- `id` (String) - unique string representation of index.
-- `url` (String) - resolved url of the tile if the `data` prop is provided, otherwise `null`
-- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `signal` (Object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
+- `index` (object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
+- `id` (string) - unique string representation of index.
+- `url` (string) - resolved url of the tile if the `data` prop is provided, otherwise `null`
+- `bbox` (object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+- `signal` (object) - an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) that may be signalled if there are too many queued requests. Note: only tiles that aren't visible will be aborted.
 
 It should return either the tile data or a Promise that resolves to the tile data.
 
@@ -136,7 +136,7 @@ if (signal.aborted) {
 
 Tileset class that `TileLayer` uses for tile indexing. Extend [Tileset2D](#tileset2d) to implement a custom indexing scheme.
 
-##### `tileSize` (Number, optional) {#tilesize}
+##### `tileSize` (number, optional) {#tilesize}
 
 The pixel dimension of the tiles, usually a power of 2.
 
@@ -146,32 +146,32 @@ For non-geospatial viewports, the tile size should correspond to the true pixel 
 
 - Default: `512`
 
-##### `zoomOffset` (Number, optional) {#zoomoffset}
+##### `zoomOffset` (number, optional) {#zoomoffset}
 
 This offset changes the zoom level at which the tiles are fetched.  Needs to be an integer.
 
 - Default: `0`
 
-##### `maxZoom` (Number|Null, optional) {#maxzoom}
+##### `maxZoom` (number|Null, optional) {#maxzoom}
 
 The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`), tiles from this level will be displayed.
 
 - Default: `null`
 
-##### `minZoom` (Number, optional) {#minzoom}
+##### `minZoom` (number, optional) {#minzoom}
 
 The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests.
 
 - Default: 0
 
-##### `extent` (Array, optional) {#extent}
+##### `extent` (number[4], optional) {#extent}
 
 The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
 
 - Default: `null`
 
 
-##### `maxCacheSize` (Number, optional) {#maxcachesize}
+##### `maxCacheSize` (number, optional) {#maxcachesize}
 
 The maximum number of tiles that can be cached. The tile cache keeps loaded tiles in memory even if they are no longer visible. It reduces the need to re-download the same data over and over again when the user pan/zooms around the map, providing a smoother experience.
 
@@ -180,14 +180,14 @@ If not supplied, the `maxCacheSize` is calculated as `5` times the number of til
 - Default: `null`
 
 
-##### `maxCacheByteSize` (Number, optional) {#maxcachebytesize}
+##### `maxCacheByteSize` (number, optional) {#maxcachebytesize}
 
 The maximum memory used for caching tiles. If this limit is supplied, `getTileData` must return an object that contains a `byteLength` field.
 
 - Default: `null`
 
 
-##### `refinementStrategy` (String|Function, optional) {#refinementstrategy}
+##### `refinementStrategy` (string|Function, optional) {#refinementstrategy}
 
 How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
 
@@ -206,7 +206,7 @@ Apps may define a custom `refinementStrategy` by supplying its own callback func
 
 When called, the function receives an array of [Tile](#tile) instances representing every tile that is currently in the cache. It is an opportunity to manipulate `tile.isVisible` before sub layers are rendered. `isVisible` is initially set to the value of `isSelected` (equivalent to `refinementStrategy: 'never'`).
 
-##### `maxRequests` (Number, optional) {#maxrequests}
+##### `maxRequests` (number, optional) {#maxrequests}
 
 The maximum number of concurrent `getTileData` calls.
 
@@ -220,7 +220,7 @@ If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in th
 
 - Default: `6`
 
-##### `debounceTime` (Number, optional) {#debouncetime}
+##### `debounceTime` (number, optional) {#debouncetime}
 
 Queue tile requests until no new tiles have been added for at least `debounceTime` milliseconds.
 
@@ -247,7 +247,7 @@ Note that the following sub layer props are overridden by `TileLayer` internally
 - `visible` (toggled based on tile visibility)
 - `highlightedObjectIndex` (set based on the parent layer's highlight state)
 
-##### `zRange` (Array, optional) {#zrange}
+##### `zRange` (number[2], optional) {#zrange}
 
 An array representing the height range of the content in the tiles, as `[minZ, maxZ]`. This is designed to support tiles with 2.5D content, such as buildings or terrains. At high pitch angles, such a tile may "extrude into" the viewport even if its 2D bounding box is out of view. Therefore, it is necessary to provide additional information for the layer to behave correctly. The value of this prop is used for two purposes: 1) to determine the necessary tiles to load and/or render; 2) to determine the possible intersecting tiles during picking.
 
@@ -279,7 +279,7 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 Receives arguments:
 
-- `tile` (Object) - the [tile](#tile) that has been loaded.
+- `tile` (object) - the [tile](#tile) that has been loaded.
 
 ##### `onTileError` (Function, optional) {#ontileerror}
 
@@ -299,7 +299,7 @@ Receives arguments:
 
 Receives arguments:
 
-- `tile` (Object) - the [tile](#tile) that has been cleared from cache.
+- `tile` (object) - the [tile](#tile) that has been cleared from cache.
 
 ## Tile
 
@@ -307,16 +307,16 @@ Class to hold the reading of a single tile
 
 Properties:
 
-- `index` (Object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
-- `id` (String) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
-- `bbox` (Object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
-- `content` (Object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
-- `data` (Object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
+- `index` (object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
+- `id` (string) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
+- `bbox` (object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+- `content` (object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
+- `data` (object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
 - `parent` (Tile) - the nearest ancestor tile (a tile on a lower `z` that contains this tile), if present in the cache
 - `children` (Tile[]) - the nearest sub tiles (tiles on higher `z` that are contained by this tile), if present in the cache
-- `isSelected` (Boolean) - if the tile is expected to show up in the current viewport
-- `isVisible` (Boolean) - if the tile should be rendered
-- `isLoaded` (Boolean) - if the content of the tile has been loaded
+- `isSelected` (boolean) - if the tile is expected to show up in the current viewport
+- `isVisible` (boolean) - if the tile should be rendered
+- `isLoaded` (boolean) - if the content of the tile has been loaded
 
 ## Tileset2D
 

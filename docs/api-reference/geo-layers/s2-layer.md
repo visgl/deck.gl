@@ -84,7 +84,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-##### `getS2Token` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
+##### `getS2Token` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
 
 Called for each data object to retrieve the identifier of the S2 cell. May return one of the following:
 

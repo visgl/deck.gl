@@ -132,7 +132,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|Object) {#image}
+##### `image` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|object) {#image}
 
 - Default `null`.
 

@@ -4,7 +4,7 @@ import {ContourLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 <ContourLayerDemo />
 
-The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
+The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
 
 ```js
@@ -76,7 +76,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+##### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
@@ -88,7 +88,7 @@ Size of each cell in meters
 
 When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
 
-##### `aggregation` (String, optional) {#aggregation}
+##### `aggregation` (string, optional) {#aggregation}
 
 * Default: 'SUM'
 
@@ -100,26 +100,26 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 * MAX : Grid cell contains maximum of all weights that fall into it.
 
 
-##### `contours` (Array, optional) {#contours}
+##### `contours` (object[], optional) {#contours}
 
 * Default: `[{threshold: 1}]`
 
 Array of objects with following keys
 
-* `threshold` (Number or Array) :
+* `threshold` (number|number[2]) :
 
-  - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
-  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
+  - Isolines: `threshold` value must be a single number, Isolines are generated based on this threshold value.
+  - Isobands: `threshold` value must be an array of two numbers. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
 
-* `color` (Array, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
+* `color` (Color, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
 
-* `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
+* `strokeWidth` (number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
-* `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
+* `zIndex` (number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
 NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
 
-##### `zOffset` (Number, optional) {#zoffset}
+##### `zOffset` (number, optional) {#zoffset}
 
 * Default: `0.005`
 
@@ -127,13 +127,13 @@ A very small z offset that is added for each vertex of a contour (Isoline or Iso
 
 ### Data Accessors
 
-##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+##### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 

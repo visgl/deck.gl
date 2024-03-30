@@ -55,7 +55,7 @@ Remarks:
 
 deck.gl layers typically expect `data` to be one of the following types:
 
-- `Array`: a JavaScript array of data objects.
+- A JavaScript array of data objects.
 - An object that implements the [iterable protocol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols), for example `Map` and `Set`. Represents a collection of data objects.
 - Any non-iterable object that contains a `length` field. deck.gl will not attempt to interpret its format, but simply call each accessor `length` times. (See remark below)
 - `String`: an URL pointing to the data source. deck.gl will attempt to fetch the remote content and parse it as JSON. The resulting object is then used as the value of the `data` prop.
@@ -233,7 +233,7 @@ Requires `pickable` to be true.
 
 Normally only used when the application wants to work with coordinates that are not Web Mercator projected longitudes/latitudes.
 
-##### `coordinateSystem` (Enum, optional) {#coordinatesystem}
+##### `coordinateSystem` (number, optional) {#coordinatesystem}
 
 * Default: `COORDINATE_SYSTEM.DEFAULT`
 
@@ -503,7 +503,7 @@ Note:
 * change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](./layer.md#datacomparator) prop.
 
 
-##### `loaders` (Array, optional) {#loaders}
+##### `loaders` (Loader[], optional) {#loaders}
 
 - Default: `[]`
 
@@ -544,8 +544,8 @@ The function receives the following arguments:
 - `context` (object)
   + `layer` (Layer) - the current layer
   + `propName` (string) - the name of the prop that is making the request
-  + `loaders` (Array?) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
-  + `loadOptions` (Object?) - loader options for this request, default to `props.loadOptions`.
+  + `loaders` (Loader[]|undefined) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
+  + `loadOptions` (object|undefined) - loader options for this request, default to `props.loadOptions`.
   + `signal` ([AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)?) - the signal to abort the request
 
 The function is expected to return a Promise that resolves to loaded data.
@@ -616,11 +616,11 @@ Each prop name is mapped to a number or an object that is the transition setting
 
 | Key           | Type       | Default     | Description |
 | ------------- | --------   | ----------- | ----------- |
-| `type`        | `'interpolation' | 'spring'`   | `'interpolation'` | Type of the transition |
-| `enter`       | `(toValue: TypedArray, fromChunk?: TypedArray) => number[]` | `value => value` | Callback to get the value that the entering vertices are transitioning from. See [attribute backfilling](../../developer-guide/animations-and-transitions.md#attribute-backfilling) |
-| `onStart`     | `() => void` | `null`      | Callback when the transition is started |
-| `onEnd`       | `() => void` | `null`      | Callback when the transition is done |
-| `onInterrupt` | `() => void` | `null`      | Callback when the transition is interrupted |
+| `type`        | string   | `'interpolation'` | Type of the transition |
+| `enter`       | Function | `value => value` | Callback to get the value that the entering vertices are transitioning from. See [attribute backfilling](../../developer-guide/animations-and-transitions.md#attribute-backfilling) |
+| `onStart`     | Function | `null`      | Callback when the transition is started |
+| `onEnd`       | Function | `null`      | Callback when the transition is done |
+| `onInterrupt` | Function | `null`      | Callback when the transition is interrupted |
 
 - Additional fields for `type: 'interpolation'`:
 
@@ -792,7 +792,7 @@ Parameters:
 
     + `x` (number) - Mouse position x relative to the viewport.
     + `y` (number) - Mouse position y relative to the viewport.
-    + `coordinate` ([number, number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](./layer.md#coordinatesystem) is `COORDINATE_SYSTEM.LNGLAT`.
+    + `coordinate` (number[2]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](./layer.md#coordinatesystem) is `COORDINATE_SYSTEM.LNGLAT`.
     + `color` (number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](./layer.md#encodepickingcolor).
     + `index` (number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](./layer.md#decodepickingcolor).
     + `picked` (boolean) - `true` if `index` is not `-1`.
@@ -820,7 +820,7 @@ Projects a map coordinate to screen coordinate, using the current viewport setti
 
 Parameters:
 
-* `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
+* `coordinates` (number[]) - `[x, y, z]` in this layer's coordinate system.
 
 Returns:
 
@@ -832,7 +832,7 @@ Unprojects a screen coordinate using the current viewport settings.
 
 Parameters:
 
-* `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
+* `pixels` (number[]) - `[x, y, z]` Passing a `z` is optional.
 
 Returns:
 
@@ -844,7 +844,7 @@ Projects a map coordinate to world coordinate using the current viewport setting
 
 Parameters:
 
-* `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
+* `coordinates` (number[]) - `[x, y, z]` in this layer's coordinate system.
 * `params` (object, optional) - Projection parameters override. It accepts the following fields:
   - `viewport` (Viewport) - defaults to `this.context.viewport`.
   - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.

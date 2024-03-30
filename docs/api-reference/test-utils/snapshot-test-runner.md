@@ -81,20 +81,20 @@ new SnapshotTestRunner(deckProps)
 
 Create a SnapshotTestRunner instance. The `deckProps` argument is passed to the [Deck](../core/deck.md) constructor.
 
-### add(testCase: Array|Object)
+### add(testCase: Array|object)
 
 Add one or a list of test cases. Each test case may contain the following fields:
  
-* `name` (String) - name of the test case.
-* `goldenImage` (String) - path to the golden image, relative to the root where the node script is executed.
-* `timeout` (Number) - time to wait for this test case to resolve (by calling the `done` callback) before aborting, in milliseconds. If not provided, fallback to the shared option that is passed to `SnapshotTestRunner.run`.
-* `imageDiffOptions` (Object, optional) - image diffing options for this test case. See "Image Diff Options" section below.
+* `name` (string) - name of the test case.
+* `goldenImage` (string) - path to the golden image, relative to the root where the node script is executed.
+* `timeout` (number) - time to wait for this test case to resolve (by calling the `done` callback) before aborting, in milliseconds. If not provided, fallback to the shared option that is passed to `SnapshotTestRunner.run`.
+* `imageDiffOptions` (object, optional) - image diffing options for this test case. See "Image Diff Options" section below.
 * `onBeforeRender` (Function, optional) - callback before each time deck rerenders. Receives the following arguments:
   - `deck` (Deck) - the `Deck` instance.
-  - `layers` (Array) - the list of layers that were rendered.
+  - `layers` (Layer[]) - the list of layers that were rendered.
 * `onAfterRender` (Function, optional) - callback after each time deck rerenders. Receives the following arguments:
   - `deck` (Deck) - the `Deck` instance.
-  - `layers` (Array) - the list of layers that were rendered.
+  - `layers` (Layer[]) - the list of layers that were rendered.
   - `done` (Function) - must be called when the test case is done rendering and ready for screen capture and comparison.
   
   The default `onAfterRender` calls `done` immediately, i.e. takes screenshot as soon as the canvas is rendered for the first time. If some resources are loaded asynchronously, you may need to provide an implementation of this callback to check whether all layers are fully loaded.
@@ -106,8 +106,8 @@ Run all test cases.
 
 Options:
 
-* `timeout` (Number) - time to wait for each test case to resolve (by calling the `done` callback) before aborting, in milliseconds. Default `2000`.
-* `imageDiffOptions` (Object) - image diffing options for all test cases. This will be overridden if a test case defines its own `imageDiffOptions`. See "Image Diff Options" section below.
+* `timeout` (number) - time to wait for each test case to resolve (by calling the `done` callback) before aborting, in milliseconds. Default `2000`.
+* `imageDiffOptions` (object) - image diffing options for all test cases. This will be overridden if a test case defines its own `imageDiffOptions`. See "Image Diff Options" section below.
 * `onTestStart` (Function) - callback when a test starts. Receives the current test case. Default logs the test name to console.
 * `onTestPass` (Function) - callback when a test passes. Receives the current test case and the diffing result. Default logs the pixel matching percentage to console.
 * `onTestFail` (Function) - callback when a test fails, either because the matching rate is below threshold or a critical error. Receives the current test case. Default logs the error message or the pixel matching percentage to console.

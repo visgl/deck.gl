@@ -85,31 +85,31 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSizePixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsizepixels}
+##### `cellSizePixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsizepixels}
 
 * Default: `100`
 
 Unit width/height of the bins.
 
-##### `cellMarginPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellmarginpixels}
+##### `cellMarginPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellmarginpixels}
 
 * Default: `2`, gets clamped to [0, 5]
 
 Cell margin size in pixels.
 
-##### `minColor` (Number[4], optional) **DEPRECATED** {#mincolor}
+##### `minColor` (number[4], optional) **DEPRECATED** {#mincolor}
 
 * Default: `[0, 0, 0, 255]`
 
 Expressed as an rgba array, minimal color that could be rendered by a tile. This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `maxColor` (Number[4], optional) **DEPRECATED** {#maxcolor}
+##### `maxColor` (number[4], optional) **DEPRECATED** {#maxcolor}
 
 * Default: `[0, 255, 0, 255]`
 
 Expressed as an rgba array, maximal color that could be rendered by a tile.  This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `colorDomain` (Array, optional) {#colordomain}
+##### `colorDomain` (number[2], optional) {#colordomain}
 
 * Default: `[1, max(weight)]`
 
@@ -117,7 +117,7 @@ Color scale input domain. The color scale maps continues numeric domain into
 discrete color range. If not provided, the layer will set `colorDomain` to [1, max-of-all-cell-weights], You can control how the color of cells mapped
 to value of its weight by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Array, optional) {#colorrange}
+##### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -132,7 +132,7 @@ NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRan
 
 When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 10 to 20 times faster depending upon number of points and number of cells.
 
-##### `aggregation` (String, optional) {#aggregation}
+##### `aggregation` (string, optional) {#aggregation}
 
 * Default: 'SUM'
 
@@ -146,13 +146,13 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 
 ### Data Accessors
 
-##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+##### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 

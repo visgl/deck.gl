@@ -22,15 +22,15 @@ const view = new OrthographicView({id, ...});
 
 `OrthographicView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `flipY` (Boolean) {#flipy}
+##### `flipY` (boolean) {#flipy}
 
 Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`.
 
-##### `near` (Number, optional) {#near}
+##### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (Number, optional) {#far}
+##### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
@@ -39,10 +39,10 @@ Distance of far clipping plane. Default `1000`.
 
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
-* `target` (Number[3], optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
-* `zoom` (Number|Number[2], optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. For example `zoom: 1` is 2x the original size, `zoom: 2` is 4x, `zoom: 3` is 8x etc.. To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`.
-* `minZoom` (Number, optional) - The min zoom level of the viewport. Default `-Infinity`.
-* `maxZoom` (Number, optional) - The max zoom level of the viewport. Default `Infinity`.
+* `target` (number[3], optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `zoom` (number|Number[2], optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. For example `zoom: 1` is 2x the original size, `zoom: 2` is 4x, `zoom: 3` is 8x etc.. To apply independent zoom levels to the X and Y axes, supply an array `[zoomX, zoomY]`. Default `0`.
+* `minZoom` (number, optional) - The min zoom level of the viewport. Default `-Infinity`.
+* `maxZoom` (number, optional) - The max zoom level of the viewport. Default `Infinity`.
 
 
 ## Controller

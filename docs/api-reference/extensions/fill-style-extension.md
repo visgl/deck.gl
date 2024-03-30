@@ -71,7 +71,7 @@ new deck.FillStyleExtension({});
 new FillStyleExtension({pattern});
 ```
 
-* `pattern` (Boolean) - if `true`, adds the ability to tile the filled area with a pattern.
+* `pattern` (boolean) - if `true`, adds the ability to tile the filled area with a pattern.
 
 
 ## Layer Properties
@@ -88,23 +88,23 @@ The following properties are available if the `pattern` option is enabled.
 Sprite image url or texture that packs all your patterns into one layout.
 You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker).
 
-##### `fillPatternEnabled` (Boolean) {#fillpatternenabled}
+##### `fillPatternEnabled` (boolean) {#fillpatternenabled}
 
 - Default: `true`
 
 Whether to use pattern fill. If `false`, then the extension has no effect.
 
-##### `fillPatternMapping` (Object | String) {#fillpatternmapping}
+##### `fillPatternMapping` (object | String) {#fillpatternmapping}
 
 Pattern names mapped to pattern definitions. Each pattern is defined with the following values:
 
-- `x` (Number, required): x position of pattern on the atlas image
-- `y` (Number, required): y position of pattern on the atlas image
-- `width` (Number, required): width of pattern on the atlas image
-- `height` (Number, required): height of pattern on the atlas image
+- `x` (number, required): x position of pattern on the atlas image
+- `y` (number, required): y position of pattern on the atlas image
+- `width` (number, required): width of pattern on the atlas image
+- `height` (number, required): height of pattern on the atlas image
 
 
-##### `fillPatternMask` (Boolean) {#fillpatternmask}
+##### `fillPatternMask` (boolean) {#fillpatternmask}
 
 - Default: `true`
  
@@ -113,12 +113,12 @@ Whether to treat the patterns as transparency masks.
 + If `false`, pixel color from the image is applied.
 
 
-##### `getFillPattern` ([Function](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
+##### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
 
 Called to retrieve the name of the pattern. Returns a string key from the `fillPatternMapping` object.
 
 
-##### `getFillPatternScale` ([Function](../../developer-guide/using-layers.md#accessors)|Number) {#getfillpatternscale}
+##### `getFillPatternScale` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternscale}
 
 - Default: `1`
 
@@ -128,7 +128,7 @@ The scale of the pattern, relative to the original size. If the pattern is 24 x 
 - If a function is provided, it is called on each object to retrieve its pattern scale.
 
 
-##### `getFillPatternOffset` ([Function](../../developer-guide/using-layers.md#accessors)|Array) {#getfillpatternoffset}
+##### `getFillPatternOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternoffset}
 
 - Default: `[0, 0]`
 

@@ -78,7 +78,7 @@ Inherits from all [Base Layer](../core/layer.md) and [PathLayer](../layers/path-
 
 ### Render Options
 
-##### `currentTime` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#currenttime}
+##### `currentTime` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#currenttime}
 
 - Default: `0`
 
@@ -86,7 +86,7 @@ The current time of the frame, i.e. the playhead of the animation.
 
 This value should be in the same units as the timestamps from `getPath`.
 
-##### `fadeTrail` (Boolean, optional) {#fadetrail}
+##### `fadeTrail` (boolean, optional) {#fadetrail}
 
 - Default: `true`
 
@@ -94,7 +94,7 @@ Whether or not the path fades out.
 
 If `false`, `trailLength` has no effect.
 
-##### `trailLength` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#traillength}
+##### `trailLength` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#traillength}
 
 - Default: `120`
 
@@ -104,7 +104,7 @@ This value should be in the same units as the timestamps from `getPath`.
 
 ### Data Accessors
 
-##### `getPath` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getpath}
+##### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getpath}
 
 - Default: `d => d.path`
 
@@ -113,7 +113,7 @@ Returns an array of navigation points on a single path.
 
 See [PathLayer](../layers/path-layer.md) documentation for supported path formats.
 
-##### `getTimestamps` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#gettimestamps}
+##### `getTimestamps` ([Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettimestamps}
 
 - Default: `d => d.timestamps`
 
