@@ -26,20 +26,20 @@ Parameters:
 
 A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view.
 
-##### `x` (string|Number, optional) {#x}
+##### `x` (string | number, optional) {#x}
 
 A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
 
-##### `y` (string|Number, optional) {#y}
+##### `y` (string | number, optional) {#y}
 
 A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
-##### `width` (string|Number, optional) {#width}
+##### `width` (string | number, optional) {#width}
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `height` (string|Number, optional) {#height}
+##### `height` (string | number, optional) {#height}
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
@@ -47,7 +47,7 @@ A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
 Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
-##### `controller` (Function|boolean|object, optional) {#controller}
+##### `controller` (Function | boolean | object, optional) {#controller}
 
 Options for viewport interactivity.
 
@@ -61,7 +61,7 @@ Options for viewport interactivity.
 Default `null`.
 
 
-##### `viewState` (string|object, optional) {#viewstate}
+##### `viewState` (string | object, optional) {#viewstate}
 
 The optional `viewState` property enables a `View` to specify, select or select-and-modify its view state.
 
@@ -81,7 +81,7 @@ The `viewState` property is intended to support a number of use cases:
 * Overriding a partial set of view state properties from a selected view state.
 
 
-##### `clear` (boolean|object, optional) {#clear}
+##### `clear` (boolean | object, optional) {#clear}
 
 Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as an argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controlled by the following fields:
 

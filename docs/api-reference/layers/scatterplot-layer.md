@@ -140,7 +140,7 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {ScatterplotLayerProps} from '@deck.gl/layers';
 

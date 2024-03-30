@@ -6,37 +6,129 @@ import {ScenegraphLayerDemo} from '@site/src/doc-demos/mesh-layers';
 
 The `ScenegraphLayer` renders a number of instances of a complete glTF scenegraph.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {name: 'Colma (COLM)', address: '365 D Street, Colma CA 94014', exits: 4214, coordinates: [-122.466233, 37.684638]},
-   *   ...
-   * ]
-   */
-  const layer = new ScenegraphLayer({
-    id: 'scenegraph-layer',
-    data,
-    pickable: true,
+const layer = new ScenegraphLayer({
+  id: 'ScenegraphLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+  
+  getPosition: d => d.coordinates,
+  getOrientation: d => [0, Math.random() * 180, 90],
+  scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb',
+  sizeScale: 500,
+  _animations: {
+    '*': {speed: 5}
+  },
+  _lighting: 'pbr',
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && object.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
+
+const layer = new ScenegraphLayer<BartStation>({
+  id: 'ScenegraphLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+  
+  getPosition: (d: BartStation) => d.coordinates,
+  getOrientation: (d: BartStation) => [0, Math.random() * 180, 90],
+  scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb',
+  sizeScale: 500,
+  _animations: {
+    '*': {speed: 5}
+  },
+  _lighting: 'pbr',
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BartStation>) => object && object.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type BartStation = {
+  name: string;
+  coordinates: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new ScenegraphLayer<BartStation>({
+    id: 'ScenegraphLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+    
+    getPosition: (d: BartStation) => d.coordinates,
+    getOrientation: (d: BartStation) => [0, Math.random() * 180, 90],
     scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb',
-    getPosition: d => d.coordinates,
-    getOrientation: d => [0, Math.random() * 180, 90],
+    sizeScale: 500,
     _animations: {
       '*': {speed: 5}
     },
-    sizeScale: 500,
-    _lighting: 'pbr'
+    _lighting: 'pbr',
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BartStation>) => object && object.name}
     layers={[layer]}
-    getTooltip={({object}) => object && `${object.name}\n${object.address}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -48,9 +140,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/mesh-layers
 ```
 
-```js
+```ts
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-new ScenegraphLayer({});
+import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
+
+new ScenegraphLayer<DataT>(...props: ScenegraphLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -74,7 +168,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Mesh
 
-##### `scenegraph` (URL|object|Promise) {#scenegraph}
+##### `scenegraph` (string | object | Promise) {#scenegraph}
 
 The geometry to render for each data object.
 Can be a URL of an object. You need to provide the `fetch` function to load the object.
@@ -136,7 +230,7 @@ Only triggers when scenegraph property changes.
 Only read when scenegraph property changes.
 Uses [global light configuration](../../developer-guide/using-effects.md#lighting) from deck.
 
-##### `_imageBasedLightingEnvironment` (Function or GLTFEnvironment, optional) {#_imagebasedlightingenvironment}
+##### `_imageBasedLightingEnvironment` (Function | GLTFEnvironment, optional) {#_imagebasedlightingenvironment}
 
 - Default: `null`
 

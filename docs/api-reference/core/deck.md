@@ -108,13 +108,13 @@ new Deck({
 
 ### Rendering Configuration
 
-##### `width` (number|string) {#width}
+##### `width` (number | string) {#width}
 
 * Default: `'100%'`
 
 Width of the canvas, a number in pixels or a valid CSS string.
 
-##### `height` (number|string) {#height}
+##### `height` (number | string) {#height}
 
 * Default: `'100%'`
 
@@ -124,7 +124,7 @@ Height of the canvas, a number in pixels or a valid CSS string.
 
 Additional CSS styles for the canvas.
 
-##### `useDevicePixels` (boolean|Number) {#usedevicepixels}
+##### `useDevicePixels` (boolean | number) {#usedevicepixels}
 
 * Default: `true`
 
@@ -230,7 +230,7 @@ Notes:
 - `layerFilter` does not override the visibility if the layer is disabled via `visible: false` or `pickable: false` props.
 - All the lifecycle methods other than `draw` are still triggered even a if a layer is filtered out using this method.
 
-##### `views` (object|Array) {#views}
+##### `views` (View | View[]) {#views}
 
 * Default: `new MapView()`
 

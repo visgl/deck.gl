@@ -53,11 +53,11 @@ new DataFilterExtension({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -120,7 +120,7 @@ new ScatterplotLayer({
 Note that all filtered values are uploaded as 32-bit floating numbers, so certain values e.g. raw unix epoch time may not be accurately represented. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
 
-##### `filterRange` (number[2]|number[2][]) {#filterrange}
+##### `filterRange` (number[2] | number[2][]) {#filterrange}
 
 The bounds which defines whether an object should be rendered. If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
 
@@ -130,7 +130,7 @@ Format:
 * If `filterSize` is `2` to `4`: `[[min0, max0], [min1, max1], ...]` for each filtered property, respectively.
 
 
-##### `filterSoftRange` (number[2]|number[2][], optional) {#filtersoftrange}
+##### `filterSoftRange` (number[2] | number[2][], optional) {#filtersoftrange}
 
 * Default: `null`
 
@@ -154,7 +154,7 @@ Format:
 * If `filterSize` is `1`: `[softMin, softMax]`
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
-##### `getFilterCategory` ([Accessor&lt;number|string&gt;|Accessor&lt;(number|string)[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
+##### `getFilterCategory` ([Accessor&lt;number | string&gt;|Accessor&lt;(number | string)[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
 
 * Default: `0`
 

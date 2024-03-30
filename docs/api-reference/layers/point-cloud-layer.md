@@ -148,7 +148,7 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {PointCloudLayer} from '@deck.gl/layers';
 import type {PointCloudLayerProps} from '@deck.gl/layers';
 

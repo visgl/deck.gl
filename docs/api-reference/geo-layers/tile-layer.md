@@ -11,36 +11,127 @@ Users have the option to load each tile from a unique URL, defined by a template
 The layer can also supply a callback `getTileData` that does custom fetching when a tile is requested.
 The loaded tile data is then rendered with the layer(s) returned by `renderSubLayers`.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
-import DeckGL from '@deck.gl/react';
-import {BitmapLayer} from '@deck.gl/layers';
+import {Deck} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 
-function App({viewState}) {
-  const layer = new TileLayer({
-    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+const layer = new TileLayer({
+  id: 'TileLayer',
+  data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  maxZoom: 19,
+  minZoom: 0,
 
-    minZoom: 0,
+  renderSubLayers: props => {
+    const {boundingBox} = props.tile;
+
+    return new BitmapLayer(props, {
+      data: null,
+      image: props.data,
+      bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]]
+    });
+  },
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({tile}) => tile && `x:${tile.index.x}, y:${tile.index.y}, z:${tile.index.z}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {TileLayer, TileLayerPickingInfo} from '@deck.gl/geo-layers';
+
+const layer = new TileLayer({
+  id: 'TileLayer',
+  data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  maxZoom: 19,
+  minZoom: 0,
+
+  renderSubLayers: props => {
+    const {boundingBox} = props.tile;
+
+    return new BitmapLayer(props, {
+      data: null,
+      image: props.data,
+      bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]]
+    });
+  },
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({tile}: TileLayerPickingInfo) => tile && `x:${tile.index.x}, y:${tile.index.y}, z:${tile.index.z}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {TileLayer} from '@deck.gl/geo-layers';
+import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
+
+function App() {
+  const layer = new TileLayer({
+    id: 'TileLayer',
+    data: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
     maxZoom: 19,
-    tileSize: 256,
+    minZoom: 0,
 
     renderSubLayers: props => {
-      const {
-        bbox: {west, south, east, north}
-      } = props.tile;
+      const {boundingBox} = props.tile;
 
       return new BitmapLayer(props, {
         data: null,
         image: props.data,
-        bounds: [west, south, east, north]
+        bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]]
       });
-    }
+    },
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({tile}: TileLayerPickingInfo) => tile && `x:${tile.index.x}, y:${tile.index.y}, z:${tile.index.z}`}
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -53,9 +144,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {TileLayer} from '@deck.gl/geo-layers';
-new TileLayer({});
+import type {TileLayerProps, TileLayerPickingInfo} from '@deck.gl/geo-layers';
+
+new TileLayer<TileDataT>(...props: TileLayerProps<TileDataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -91,7 +184,7 @@ If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/
 
 ### Data Options
 
-##### `data` (string|Array, optional) {#data}
+##### `data` (string | string[], optional) {#data}
 
 - Default: `[]`
 
@@ -120,14 +213,15 @@ This prop is not required if `data` points to a supported format (JSON or image 
 
 It is recommended to pass `signal` to any `fetch` calls and check its `aborted` property before doing any expensive computation. If `signal` is aborted, then throw or return falsy from `getTileData` so the data is not cached; do not return incomplete data. If `signal` is aborted, but `getTileData` still returns a truthy response, then its data will be cached.
 
-```js
-const {signal} = tile;
-const data = fetch(url, {signal});
+```ts
+getTileData: ({url, signal}) => {
+  const data = fetch(url, {signal});
 
-if (signal.aborted) {
-   return null;
+  if (signal.aborted) {
+    return null;
+  }
+  // Expensive computation on returned data
 }
-// Expensive computation on returned data
 ```
 
 ##### `TilesetClass` (class, optional) {#tilesetclass}
@@ -152,7 +246,7 @@ This offset changes the zoom level at which the tiles are fetched.  Needs to be 
 
 - Default: `0`
 
-##### `maxZoom` (number|Null, optional) {#maxzoom}
+##### `maxZoom` (number | null, optional) {#maxzoom}
 
 The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`), tiles from this level will be displayed.
 
@@ -187,7 +281,7 @@ The maximum memory used for caching tiles. If this limit is supplied, `getTileDa
 - Default: `null`
 
 
-##### `refinementStrategy` (string|Function, optional) {#refinementstrategy}
+##### `refinementStrategy` (string | Function, optional) {#refinementstrategy}
 
 How the tile layer refines the visibility of tiles. When zooming in and out, if the layer only shows tiles from the current zoom level, then the user may observe undesirable flashing while new data is loading. By setting `refinementStrategy` the layer can attempt to maintain visual continuity by displaying cached data from a different zoom level before data is available.
 
@@ -236,9 +330,9 @@ If `debounceTime > 0`, tile requests are queued until a period of at least `debo
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
 
-* `id`: An unique id for this sublayer
-* `data`: Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
-* `tile`: An object containing `index`, `bbox`, and `id` of the tile.
+* `id` (string): An unique id for this sublayer
+* `data` (TileDataT): Resolved from `getTileData`. As of deck.gl 8.2, this prop is always the data resolved from the Promise and is never a Promise itself.
+* `tile` ([Tile](#tile))
 
 - Default: `props => new GeoJsonLayer(props)`
 
@@ -309,9 +403,9 @@ Properties:
 
 - `index` (object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
 - `id` (string) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
-- `bbox` (object) - bounding box of the tile. When used with a geospatial view, `bbox` is in the shape of `{west: <longitude>, north: <latitude>, east: <longitude>, south: <latitude>}`. When used with a non-geospatial view, `bbox` is in the shape of `{left, top, right, bottom}`.
+- `boundingBox` (number[2][2]) - bounding box of the tile in the shape of `[[minX, minY], [maxX, maxY]]`.
 - `content` (object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
-- `data` (object|Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
+- `data` (object | Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
 - `parent` (Tile) - the nearest ancestor tile (a tile on a lower `z` that contains this tile), if present in the cache
 - `children` (Tile[]) - the nearest sub tiles (tiles on higher `z` that are contained by this tile), if present in the cache
 - `isSelected` (boolean) - if the tile is expected to show up in the current viewport
@@ -328,11 +422,11 @@ To implement a custom indexing scheme, extend `Tileset2D` and implement the foll
 - `getTileId(index)` - returns unique string key for a tile index.
 - `getParentIndex(index)` - returns the index of the parent tile.
 - `getTileZoom(index)` - returns a zoom level for a tile index.
-- `getTileMetadata(index)` - returns additional metadata to add to tile.  This must be an object that contains a bounding box as `bbox` in the format `{west: number, south: number, east: number, north: number}`.
+- `getTileMetadata(index)` - returns additional metadata to add to tile.
 
 For example, to index using [quadkeys](https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system#tile-coordinates-and-quadkeys):
 
-```js
+```ts
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 class QuadkeyTileset2D extends Tileset2D {
   getTileIndices(opts) {

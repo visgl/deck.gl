@@ -6,52 +6,140 @@ import {SimpleMeshLayerDemo} from '@site/src/doc-demos/mesh-layers';
 
 The `SimpleMeshLayer` renders a number of instances of an arbitrary 3D geometry. For example, it can be used to visualize a fleet of 3d cars each with a position and an orientation over the map.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
+import {Deck} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {OBJLoader} from '@deck.gl/obj';
+
+const layer = new SimpleMeshLayer({
+  id: 'SimpleMeshLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+  
+  getColor: d => [Math.sqrt(d.exits), 140, 0],
+  getOrientation: d => [0, Math.random() * 180, 0],
+  getPosition: d => d.coordinates,
+  mesh: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/humanoid_quad.obj',
+  sizeScale: 30,
+  pickable: true,
+  loaders: [OBJLoader]
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && object.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {OBJLoader} from '@deck.gl/obj';
+
+type BartStation = {
+  name: string;
+  entries: number;
+  exits: number;
+  coordinates: [longitude: number, latitude: number];
+};
+
+const layer = new SimpleMeshLayer<BartStation>({
+  id: 'SimpleMeshLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+  
+  getColor: (d: BartStation) => [Math.sqrt(d.exits), 140, 0],
+  getOrientation: (d: BartStation) => [0, Math.random() * 180, 0],
+  getPosition: (d: BartStation) => d.coordinates,
+  mesh: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/humanoid_quad.obj',
+  sizeScale: 30,
+  pickable: true,
+  loaders: [OBJLoader]
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BartStation>) => object && object.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {CubeGeometry} from '@luma.gl/core'
+import {OBJLoader} from '@deck.gl/obj';
+import type {PickingInfo} from '@deck.gl/core';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {
-   *     position: [-122.45, 37.7],
-   *     angle: 0,
-   *     color: [255, 0, 0]
-   *   },
-   *   {
-   *     position: [-122.46, 37.73],
-   *     angle: 90,
-   *     color: [0, 255, 0]
-   *   },
-   *   ...
-   * ]
-   */
-  const layer = new SimpleMeshLayer({
-    id: 'mesh-layer',
-    data,
-    texture: 'texture.png',
-    mesh: new CubeGeometry(),
-    getPosition: d => d.position,
-    getColor: d => d.color,
-    getOrientation: d => [0, d.angle, 0]
+type BartStation = {
+  name: string;
+  entries: number;
+  exits: number;
+  coordinates: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new SimpleMeshLayer<BartStation>({
+    id: 'SimpleMeshLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
+    
+    getColor: (d: BartStation) => [Math.sqrt(d.exits), 140, 0],
+    getOrientation: (d: BartStation) => [0, Math.random() * 180, 0],
+    getPosition: (d: BartStation) => d.coordinates,
+    mesh: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/humanoid_quad.obj',
+    sizeScale: 30,
+    pickable: true,
+    loaders: [OBJLoader]
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BartStation>) => object && object.name}
+    layers={[layer]}
+  />;
 }
 ```
 
-`loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading meshes from standard formats. For example, the following code adds support for OBJ files:
+  </TabItem>
+</Tabs>
 
-```js
+
+`loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading meshes from standard formats. For example, the following code adds support for PLY files:
+
+```ts
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {OBJLoader} from '@loaders.gl/obj';
+import {PLYLoader} from '@loaders.gl/ply';
 
 new SimpleMeshLayer({
-  ...
-  mesh: 'path/to/model.obj',
-  loaders: [OBJLoader]
+  mesh: 'path/to/model.ply',
+  loaders: [PLYLoader]
 });
 ```
 
@@ -65,9 +153,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/mesh-layers
 ```
 
-```js
+```ts
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-new SimpleMeshLayer({});
+import type {SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
+
+new SimpleMeshLayer<DataT>(...props: SimpleMeshLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -90,7 +180,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Mesh
 
-##### `mesh` (string|Geometry|object) {#mesh}
+##### `mesh` (string | object) {#mesh}
 
 The geometry to render for each data object. One of:
 
@@ -102,7 +192,7 @@ The geometry to render for each data object. One of:
   + `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|object, optional) {#texture}
+##### `texture` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#texture}
 
 - Default `null`.
 
@@ -125,7 +215,7 @@ Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resou
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `texture`:
 
-```js
+```ts
 {
   minFilter: 'linear',
   magFilter: 'linear',

@@ -106,7 +106,7 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 
 Array of objects with following keys
 
-* `threshold` (number|number[2]) :
+* `threshold` (number | number[2]) :
 
   - Isolines: `threshold` value must be a single number, Isolines are generated based on this threshold value.
   - Isobands: `threshold` value must be an array of two numbers. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.

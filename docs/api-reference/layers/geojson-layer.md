@@ -531,7 +531,7 @@ data.lines = {
 
 Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies the vertex index where each polygon starts. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array.
 
-```js
+```ts
 import type {BinaryPolygonFeature} from '@loaders.gl/schema';
 
 data.polygons = {

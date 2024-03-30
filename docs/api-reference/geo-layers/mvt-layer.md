@@ -10,20 +10,166 @@ Data is loaded from URL templates in the `data` property.
 
 This layer also handles feature clipping so that there are no features divided by tile divisions.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {MVTLayer} from '@deck.gl/geo-layers';
 
-function App({viewState}) {
-  const layer = new MVTLayer({
-    data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
+const layer = new MVTLayer({
+  id: 'MVTLayer',
+  data: [
+    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
+  ],
+  minZoom: 0,
+  maxZoom: 14,
+  getFillColor: f => {
+    switch (f.properties.layerName) {
+      case 'poi':
+        return [255, 0, 0];
+      case 'water':
+        return [120, 150, 180];
+      case 'building':
+        return [218, 218, 218];
+      default:
+        return [240, 240, 240];
+    }
+  },
+  getLineWidth: f => {
+    switch (f.properties.class) {
+      case 'street':
+        return 6;
+      case 'motorway':
+        return 10;
+      default:
+        return 1;
+    }
+  },
+  getLineColor: [192, 192, 192],
+  getPointRadius: 2,
+  pointRadiusUnits: 'pixels',
+  stroked: false,
+  picking: true
+});
 
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && (object.properties.name || object.properties.layerName),
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {MVTLayer, MVTLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {Feature, Geometry} from 'geojson';
+
+type PropertiesType = {
+  name?: string;
+  rank: number;
+  layerName: string;
+  class: string;
+};
+
+const layer = new MVTLayer<PropertiesType>({
+  id: 'MVTLayer',
+  data: [
+    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
+  ],
+  minZoom: 0,
+  maxZoom: 14,
+  getFillColor: (f: Feature<Geometry, PropertiesType>) => {
+    switch (f.properties.layerName) {
+      case 'poi':
+        return [255, 0, 0];
+      case 'water':
+        return [120, 150, 180];
+      case 'building':
+        return [218, 218, 218];
+      default:
+        return [240, 240, 240];
+    }
+  },
+  getLineWidth: (f: Feature<Geometry, PropertiesType>) => {
+    switch (f.properties.class) {
+      case 'street':
+        return 6;
+      case 'motorway':
+        return 10;
+      default:
+        return 1;
+    }
+  },
+  getLineColor: [192, 192, 192],
+  getPointRadius: 2,
+  pointRadiusUnits: 'pixels',
+  stroked: false,
+  picking: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName),
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {MVTLayer} from '@deck.gl/geo-layers';
+import type {MVTLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {Feature, Geometry} from 'geojson';
+
+type PropertiesType = {
+  name?: string;
+  rank: number;
+  layerName: string;
+  class: string;
+};
+
+function App() {
+  const layer = new MVTLayer<PropertiesType>({
+    id: 'MVTLayer',
+    data: [
+      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
+    ],
     minZoom: 0,
-    maxZoom: 23,
-    getLineColor: [192, 192, 192],
-    getFillColor: [140, 170, 180],
-
-    getLineWidth: f => {
+    maxZoom: 14,
+    getFillColor: (f: Feature<Geometry, PropertiesType>) => {
+      switch (f.properties.layerName) {
+        case 'poi':
+          return [255, 0, 0];
+        case 'water':
+          return [120, 150, 180];
+        case 'building':
+          return [218, 218, 218];
+        default:
+          return [240, 240, 240];
+      }
+    },
+    getLineWidth: (f: Feature<Geometry, PropertiesType>) => {
       switch (f.properties.class) {
         case 'street':
           return 6;
@@ -33,12 +179,29 @@ function App({viewState}) {
           return 1;
       }
     },
-    lineWidthMinPixels: 1
+    getLineColor: [192, 192, 192],
+    getPointRadius: 2,
+    pointRadiusUnits: 'pixels',
+    stroked: false,
+    picking: true
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
 
 
 ## Installation
@@ -51,9 +214,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/extensions @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {MVTLayer} from '@deck.gl/geo-layers';
-new MVTLayer({});
+import type {MVTLayerProps, MVTLayerPickingInfo} from '@deck.gl/geo-layers';
+
+new MVTLayer<FeaturePropertiesT>(...props: MVTLayerProps<FeaturePropertiesT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -78,31 +243,29 @@ Inherits all properties from [`TileLayer`](./tile-layer.md) and [base `Layer`](.
 If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/geojson-layer.md) properties to style features.
 
 
-##### `data` (string | Array | JSON) {#data}
+##### `data` (string | string[] | object) {#data}
 
-Required. It defines the remote data for the MVT layer.
+The remote data for the MVT layer.
 
 - String: Either a URL template or a [TileJSON](https://github.com/mapbox/tilejson-spec) URL. 
-
 - Array: an array of URL templates. It allows to balance the requests across different tile endpoints. For example, if you define an array with 4 urls and 16 tiles need to be loaded, each endpoint is responsible to server 16/4 tiles.
-
 - JSON: A valid [TileJSON object](https://github.com/mapbox/tilejson-spec/tree/master/2.2.0).
 
 See `TileLayer`'s `data` prop documentation for the URL template syntax.
 
 The `getTileData` prop from the `TileLayer` class will not be called.
 
-##### `uniqueIdProperty` (string) {#uniqueidproperty}
+##### `uniqueIdProperty` (string, optional) {#uniqueidproperty}
 
-Optional. Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
+Needed for highlighting a feature split across two or more tiles if no [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) is provided.
 
 An string pointing to a tile attribute containing a unique identifier for features across tiles.
 
-##### `highlightedFeatureId` (number | String) {#highlightedfeatureid}
+##### `highlightedFeatureId` (number | string, optional) {#highlightedfeatureid}
 
 * Default: `null`
 
-Optional. When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
+When provided, a feature with ID corresponding to the supplied value will be highlighted with `highlightColor`.
 
 If `uniqueIdProperty` is provided, value within that feature property will be used for ID comparison. If not, [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) will be used.
 

@@ -109,7 +109,7 @@ npm install @deck.gl/core @deck.gl/layers
 
 ```ts
 import {BitmapLayer} from '@deck.gl/layers';
-import type {BitmapLayerProps, BitmapBoundingBox, BitmapLayerPickingInfo} from '@deck.gl/layers';
+import type {BitmapLayerProps, BitmapLayerPickingInfo} from '@deck.gl/layers';
 
 new BitmapLayer(...props: BitmapLayerProps);
 ```
@@ -132,7 +132,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|object) {#image}
+##### `image` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object) {#image}
 
 - Default `null`.
 
@@ -146,7 +146,7 @@ The image to display.
 
 The image data will be converted to a [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
-##### `bounds` (number[4]|Position[4]) {#bounds}
+##### `bounds` (number[4] | Position[4]) {#bounds}
 
 Supported formats:
 

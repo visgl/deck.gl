@@ -280,7 +280,7 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {IconLayer} from '@deck.gl/layers';
 import type {IconLayerProps} from '@deck.gl/layers';
 
@@ -305,7 +305,7 @@ new deck.IconLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-##### `iconAtlas` (string|Texture|Image|ImageData|HTMLCanvasElement|HTMLVideoElement|ImageBitmap|Promise|object, optional) {#iconatlas}
+##### `iconAtlas` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#iconatlas}
 
 A pre-packed image that contains all icons.
 
@@ -321,7 +321,7 @@ If you go with pre-packed strategy, this prop is required.
 
 If you choose to use auto packing, this prop should be left empty.
 
-##### `iconMapping` (object|string, optional) {#iconmapping}
+##### `iconMapping` (object | string, optional) {#iconmapping}
 
 Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. Each icon is defined with the following values:
 
@@ -390,7 +390,7 @@ Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resou
 
 If not specified, the layer uses the following defaults to create a linearly smoothed texture from `iconAtlas`:
 
-```js
+```ts
 {
   minFilter: 'linear',
   magFilter: 'linear',

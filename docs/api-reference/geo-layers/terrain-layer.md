@@ -8,11 +8,81 @@ The `TerrainLayer` reconstructs mesh surfaces from height map images, e.g. [Mapz
 
 When `elevationData` is supplied with a URL template, i.e. a string containing `'{x}'` and `'{y}'`, it loads terrain tiles on demand using a `TileLayer` and renders a mesh for each tile. If `elevationData` is an absolute URL, a single mesh is used, and the `bounds` prop is required to position it into the world space.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
+import {Deck} from '@deck.gl/core';
+import {TerrainLayer} from '@deck.gl/geo-layers';
+
+const layer = new TerrainLayer({
+  elevationDecoder: {
+    rScaler: 2,
+    gScaler: 0,
+    bScaler: 0,
+    offset: 0
+  },
+  // Digital elevation model from https://www.usgs.gov/
+  elevationData: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain.png',
+  texture: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain-mask.png',
+  bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {TerrainLayer} from '@deck.gl/geo-layers';
+
+const layer = new TerrainLayer({
+  elevationDecoder: {
+    rScaler: 2,
+    gScaler: 0,
+    bScaler: 0,
+    offset: 0
+  },
+  // Digital elevation model from https://www.usgs.gov/
+  elevationData: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain.png',
+  texture: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/terrain-mask.png',
+  bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 
-function App({viewState}) {
+function App() {
   const layer = new TerrainLayer({
     elevationDecoder: {
       rScaler: 2,
@@ -26,9 +96,21 @@ function App({viewState}) {
     bounds: [-122.5233, 37.6493, -122.3566, 37.8159],
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -40,9 +122,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/mesh-layers @deck.gl/geo-layers
 ```
 
-```js
+```ts
 import {TerrainLayer} from '@deck.gl/geo-layers';
-new TerrainLayer({});
+import type {TerrainLayerProps} from '@deck.gl/geo-layers';
+
+new TerrainLayer(...props: TerrainLayerProps[]);
 ```
 
 To use pre-bundled scripts:
@@ -67,7 +151,7 @@ When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. F
 
 ### Data Options
 
-##### `elevationData` (string|Array, required) {#elevationdata}
+##### `elevationData` (string | string[], required) {#elevationdata}
 
 Image URL that encodes height data.
 
@@ -76,7 +160,7 @@ Image URL that encodes height data.
 - If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
 
 
-##### `texture` (string|Null, optional) {#texture}
+##### `texture` (string | null, optional) {#texture}
 
 Image URL to use as the surface texture. Same schema as `elevationData`.
 
@@ -89,7 +173,7 @@ Martini error tolerance in meters, smaller number results in more detailed mesh.
 
 - Default: `4.0`
 
-##### `elevationDecoder` (object) {#elevationdecoder}
+##### `elevationDecoder` (object, optional) {#elevationdecoder}
 
 Parameters used to convert a pixel to elevation in meters.
 An object containing the following fields:
@@ -109,7 +193,7 @@ height = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
 
 The corresponding `elevationDecoder` is:
 
-```
+```ts
 {
   "rScaler": 6553.6,
   "gScaler": 25.6,
@@ -120,7 +204,7 @@ The corresponding `elevationDecoder` is:
 
 The default value of `elevationDecoder` decodes a grayscale image:
 
-```
+```ts
 {
   "rScaler": 1,
   "gScaler": 0,

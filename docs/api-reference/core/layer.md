@@ -203,7 +203,7 @@ If this callback returns a truthy value, the `dragend` event is marked as handle
 
 Requires `pickable` to be true.
 
-##### `highlightColor` (Color|Function, optional) {#highlightcolor}
+##### `highlightColor` (Color | Function, optional) {#highlightcolor}
 
 * Default: `[0, 0, 128, 128]`
 
@@ -212,7 +212,7 @@ RGBA color to blend with the highlighted object (either the hovered over object 
 - If an array is supplied, it is used for the object that is currently highlighted.
 - If a function is supplied, it is called with a [pickingInfo](../../developer-guide/interactivity.md#the-picking-info-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
 
-##### `highlightedObjectIndex` (number|null, optional) {#highlightedobjectindex}
+##### `highlightedObjectIndex` (number | null, optional) {#highlightedobjectindex}
 
 * Default: `null`
 
@@ -544,8 +544,8 @@ The function receives the following arguments:
 - `context` (object)
   + `layer` (Layer) - the current layer
   + `propName` (string) - the name of the prop that is making the request
-  + `loaders` (Loader[]|undefined) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
-  + `loadOptions` (object|undefined) - loader options for this request, default to `props.loadOptions`.
+  + `loaders` (Loader[]) - an array of [loaders.gl loaders](https://loaders.gl/docs/developer-guide/using-loaders) to parse this request with, default to `props.loaders`.
+  + `loadOptions` (object) - loader options for this request, default to `props.loadOptions`.
   + `signal` ([AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)?) - the signal to abort the request
 
 The function is expected to return a Promise that resolves to loaded data.
@@ -666,7 +666,7 @@ The state object allows a layer to store persistent information cross rendering 
 
 `true` if all asynchronous assets are loaded.
 
-##### `parent` (Layer|null) {#parent}
+##### `parent` (Layer | null) {#parent}
 
 A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-layer.md)
 

@@ -71,7 +71,7 @@ Always `true`.
 
 `true` if all asynchronous assets are loaded, and all sublayers are also loaded.
 
-##### `parent` (Layer|null) {#parent}
+##### `parent` (Layer | null) {#parent}
 
 A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-layer.md)
 
@@ -271,7 +271,7 @@ Used by [adapter layers](../../developer-guide/custom-layers/composite-layers.md
 
 Parameters:
 
-* `accessor` (Function|Any) - the accessor provided to the current layer.
+* `accessor` (any) - the accessor provided to the current layer.
 
 Returns:
 

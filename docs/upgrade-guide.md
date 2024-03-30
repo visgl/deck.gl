@@ -676,7 +676,7 @@ Deprecations:
 
 #### React
 
-If you are using DeckGL with react-map-gl, ` @deck.gl/react@^7.0.0` no longer works with react-map-gl v3.x.
+If you are using DeckGL with react-map-gl, ` @deck.gl/react@^9.0.0` no longer works with react-map-gl v3.x.
 
 
 ## Upgrading from deck.gl v6.3 to v6.4
