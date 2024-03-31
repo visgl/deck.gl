@@ -1,5 +1,11 @@
 import {RenderPipelineParameters} from '@luma.gl/core';
-import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
+import {
+  Layer,
+  Viewport,
+  _LayersPass as LayersPass,
+  LayerParameters,
+  LayersPassRenderOptions
+} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
 
@@ -75,11 +81,13 @@ export class TerrainPass extends LayersPass {
     });
   }
 
-  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
     return {
-      ...layer.props.parameters,
-      blend: true,
-      depthTest: false,
+      depthCompare: 'always',
       ...(layer.props.operation.includes('terrain') && TERRAIN_BLENDING)
     };
   }

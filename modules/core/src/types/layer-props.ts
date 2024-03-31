@@ -6,7 +6,7 @@ import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
-import type {Texture, TextureProps} from '@luma.gl/core';
+import type {Texture, TextureProps, Parameters} from '@luma.gl/core';
 import type {Buffer} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
@@ -185,7 +185,7 @@ export type LayerProps = {
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
-  parameters?: any;
+  parameters?: Parameters;
   /**
    * Create smooth transitions when prop values update.
    */

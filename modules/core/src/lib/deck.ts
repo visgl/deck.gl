@@ -35,8 +35,7 @@ import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
-import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -114,7 +113,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   pickingRadius?: number;
 
   /** WebGL parameters to be set before each frame is rendered. */
-  parameters?: any;
+  parameters?: Parameters;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -945,14 +944,6 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       // should have a method to start state tracking even if not enabled?
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
-
-    this.device.setParametersWebGL({
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthTest: true,
-      depthFunc: GL.LEQUAL
-    });
 
     this.props.onDeviceInitialized(this.device);
     if (this.device instanceof WebGLDevice) {

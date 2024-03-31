@@ -2,7 +2,8 @@ import {
   Layer,
   Viewport,
   LayersPassRenderOptions,
-  _PickLayersPass as PickLayersPass
+  _PickLayersPass as PickLayersPass,
+  LayerParameters
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
 
@@ -68,14 +69,17 @@ export class TerrainPickingPass extends PickLayersPass {
     });
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    let parameters: any;
+  protected getLayerParameters(
+    layer: Layer,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
+    let parameters: LayerParameters;
     if (this.drawParameters[layer.id]) {
       parameters = this.drawParameters[layer.id];
     } else {
       parameters = super.getLayerParameters(layer, layerIndex, viewport);
-      parameters.blend = true;
     }
-    return {...parameters, depthTest: false};
+    return {...parameters, depthCompare: 'always'};
   }
 }

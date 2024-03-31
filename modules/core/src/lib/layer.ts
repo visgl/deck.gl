@@ -52,7 +52,7 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
-import {RenderPass} from '@luma.gl/core';
+import type {RenderPass, Parameters as DeviceParameters} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
@@ -1046,7 +1046,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
-    parameters: any;
+    parameters: DeviceParameters;
   }): void {
     this._updateAttributeTransition();
 
@@ -1069,28 +1069,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
 
-      // Apply polygon offset to avoid z-fighting
-      // TODO - move to draw-layers
-      const {getPolygonOffset} = this.props;
-      const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-
-      context.device.setParametersWebGL({polygonOffset: offsets});
-
       for (const model of this.getModels()) {
         model.setParameters(parameters);
       }
 
       // Call subclass lifecycle method
-      context.device.withParametersWebGL(parameters, () => {
-        const opts = {renderPass, moduleParameters, uniforms, parameters, context};
+      const opts = {renderPass, moduleParameters, uniforms, parameters, context};
 
-        // extensions
-        for (const extension of this.props.extensions) {
-          extension.draw.call(this, opts, extension);
-        }
+      // extensions
+      for (const extension of this.props.extensions) {
+        extension.draw.call(this, opts, extension);
+      }
 
-        this.draw(opts);
-      });
+      this.draw(opts);
     } finally {
       this.props = currentProps;
     }

@@ -94,6 +94,7 @@ export default function App({data = DATA_URL, mapStyle = MAP_STYLE}) {
     new GeoJsonLayer({
       id: 'geojson',
       data,
+      autoHighlight: true,
       opacity: 0.8,
       stroked: false,
       filled: true,
