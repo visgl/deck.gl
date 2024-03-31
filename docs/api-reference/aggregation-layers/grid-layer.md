@@ -10,33 +10,124 @@ This layer renders either a [GPUGridLayer](./gpu-grid-layer.md) or a [CPUGridLay
 
 `GridLayer` is a [CompositeLayer](../core/composite-layer.md).
 
-```js
-import DeckGL from '@deck.gl/react';
-import {GridLayer} from '@deck.gl/aggregation-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {COORDINATES: [-122.42177834, 37.78346622]},
-   *   ...
-   * ]
-   */
-  const layer = new GridLayer({
-    id: 'new-grid-layer',
-    data,
-    pickable: true,
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {GridLayer} from '@deck.gl/geo-layers';
+
+const layer = new GridLayer({
+  id: 'GridLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  extruded: true,
+  getPosition: d => d.COORDINATES,
+  getColorWeight: d => d.SPACES,
+  getElevationWeight: d => d.SPACES,
+  elevationScale: 4,
+  cellSize: 200,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `Count: ${object.elevationValue}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {GridLayer} from '@deck.gl/geo-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+const layer = new GridLayer<BikeRack>({
+  id: 'GridLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  extruded: true,
+  getPosition: (d: BikeRack) => d.COORDINATES,
+  getColorWeight: (d: BikeRack) => d.SPACES,
+  getElevationWeight: (d: BikeRack) => d.SPACES,
+  elevationScale: 4,
+  cellSize: 200,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BikeRack>) => object && `Count: ${object.elevationValue}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {GridLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new GridLayer<BikeRack>({
+    id: 'GridLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
     extruded: true,
-    cellSize: 200,
+    getPosition: (d: BikeRack) => d.COORDINATES,
+    getColorWeight: (d: BikeRack) => d.SPACES,
+    getElevationWeight: (d: BikeRack) => d.SPACES,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES
+    cellSize: 200,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BikeRack>) => object && `Count: ${object.elevationValue}`}
     layers={[layer]}
-    getTooltip={({object}) => object && `${object.position.join(', ')}\nCount: ${object.count}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 **Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
@@ -51,9 +142,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
-```js
+```ts
 import {GridLayer} from '@deck.gl/aggregation-layers';
-new GridLayer({});
+import type {GridLayerProps} from '@deck.gl/aggregation-layers';
+
+new GridLayer<DataT>(...props: GridLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -173,7 +266,7 @@ Scaling function used to determine the color of the grid cell, default value is 
 
 Whether the aggregation should be performed in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-#### `gpuAggregation` (bool, optional) {#gpuaggregation}
+#### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
 * Default: `false`
 
@@ -191,64 +284,46 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 #### `colorAggregation` (string, optional) {#coloraggregation}
 
-* Default: 'SUM'
+* Default: `'SUM'`
 
-Defines the operation used to aggregate all data object weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's color value. Valid values are `'SUM'`, `'MEAN'`, `'MIN'` and `'MAX'`. `'SUM'` is used when an invalid value is provided.
 
 `getColorWeight` and `colorAggregation` together determine the elevation value of each cell. If the `getColorValue` prop is supplied, they will be ignored. Note that supplying `getColorValue` disables GPU aggregation.
 
-###### Example 1 : Using count of data elements that fall into a cell to encode the its color
+##### Example: Color by the count of data elements
 
-* Using `getColorValue`
-```js
-
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getColorValue: points => points.length,
-  ...
+```ts title="Option A: use getColorValue (CPU only)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getColorValue: (points: BikeRack[]) => points.length,
 });
 ```
 
-* Using `getColorWeight` and `colorAggregation`
-```js
-
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getColorWeight: point => 1,
+```ts title="Option B: use getColorWeight and colorAggregation (GPU or CPU)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getColorWeight: (d: BikeRack) => 1,
   colorAggregation: 'SUM'
-  ...
 });
 ```
 
-###### Example 2 : Using mean value of 'SPACES' field of data elements to encode the color of the cell
+##### Example: Color by the mean value of 'SPACES' field
 
-* Using `getColorValue`
-```js
-function getMean(points) {
-  return points.reduce((sum, p) => sum += p.SPACES, 0) / points.length;
-}
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getColorValue: getMean,
-  ...
+```ts title="Option A: use getColorValue (CPU only)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getColorValue: (points: BikeRack[]) => {
+    // Calculate mean value
+    return points.reduce((sum: number, p: BikeRack) => sum += p.SPACES, 0) / points.length;
+  }
 });
 ```
 
-* Using `getColorWeight` and `colorAggregation`
-```js
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getColorWeight: point => point.SPACES,
+```ts title="Option B: use getColorWeight and colorAggregation (GPU or CPU)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getColorWeight: (point: BikeRack) => point.SPACES,
   colorAggregation: 'SUM'
-  ...
 });
 ```
 
@@ -257,63 +332,46 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 #### `elevationAggregation` (string, optional) {#elevationaggregation}
 
-* Default: 'SUM'
+* Default: `'SUM'`
 
-Defines the operation used to aggregate all data object weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's elevation value. Valid values are `'SUM'`, `'MEAN'`, `'MIN'` and `'MAX'`. `'SUM'` is used when an invalid value is provided.
 
 `getElevationWeight` and `elevationAggregation` together determine the elevation value of each cell. If the `getElevationValue` prop is supplied, they will be ignored. Note that supplying `getElevationValue` disables GPU aggregation.
 
-###### Example 1 : Using count of data elements that fall into a cell to encode the its elevation
+##### Example: Elevation by the count of data elements
 
-* Using `getElevationValue`
-
-```js
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getElevationValue: points => points.length
-  ...
+```ts title="Option A: use getElevationValue (CPU only)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getElevationValue: (points: BikeRack[]) => points.length
 });
 ```
 
-* Using `getElevationWeight` and `elevationAggregation`
-```js
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getElevationWeight: point => 1,
+```ts title="Option B: use getElevationWeight and elevationAggregation (GPU or CPU)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getElevationWeight: (point: BikeRack) => 1,
   elevationAggregation: 'SUM'
-  ...
 });
 ```
 
-###### Example 2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the cell
+##### Example: Elevation by the maximum value of 'SPACES' field
 
-* Using `getElevationValue`
-```js
-function getMax(points) {
-  return points.reduce((max, p) => p.SPACES > max ? p.SPACES : max, -Infinity);
-}
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getElevationValue: getMax,
-  ...
+```ts title="Option A: use getElevationValue (CPU only)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getElevationValue: (points: BikeRack[]) => {
+    // Calculate max value
+    return points.reduce((max: number, p: BikeRack) => p.SPACES > max ? p.SPACES : max, -Infinity);
+  }
 });
 ```
 
-* Using `getElevationWeight` and `elevationAggregation`
-```js
-...
-const layer = new CPUGridLayer({
-  id: 'my-grid-layer',
-  ...
-  getElevationWeight: point => point.SPACES,
+```ts title="Option B: use getElevationWeight and elevationAggregation (GPU or CPU)"
+const layer = new GridLayer<BikeRack>({
+  // ...
+  getElevationWeight: (point: BikeRack) => point.SPACES,
   elevationAggregation: 'MAX'
-  ...
 });
 ```
 

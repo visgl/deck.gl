@@ -7,37 +7,132 @@ import {ContourLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 The `ContourLayer` aggregates data into iso-lines or iso-bands for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
+import {Deck} from '@deck.gl/core';
+import {ContourLayer} from '@deck.gl/geo-layers';
+
+const layer = new ContourLayer({
+  id: 'ContourLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  cellSize: 200,
+  contours: [
+    {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+    {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+    {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+    {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+  ],
+  getPosition: d => d.COORDINATES,
+  getWeight: d => d.SPACES,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `threshold: ${object.contour.threshold}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {ContourLayer} from '@deck.gl/geo-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+const layer = new ContourLayer<BikeRack>({
+  id: 'ContourLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  cellSize: 200,
+  contours: [
+    {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+    {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+    {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+    {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+  ],
+  getPosition: (d: BikeRack) => d.COORDINATES,
+  getWeight: (d: BikeRack) => d.SPACES,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BikeRack>) => object && `threshold: ${object.contour.threshold}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {ContourLayer} from '@deck.gl/aggregation-layers';
+import {ContourLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
 
-const CONTOURS = [
-  {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
-  {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
-  {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
-];
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {COORDINATES: [-122.42177834, 37.78346622]},
-   *   ...
-   * ]
-   */
-  const layer = new ContourLayer({
-    id: 'contourLayer',
-    // Three contours are rendered.
-    contours: CONTOURS,
+function App() {
+  const layer = new ContourLayer<BikeRack>({
+    id: 'ContourLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
     cellSize: 200,
-    getPosition: d => d.COORDINATES,
+    contours: [
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+      {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+      {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
+    ],
+    getPosition: (d: BikeRack) => d.COORDINATES,
+    getWeight: (d: BikeRack) => d.SPACES,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BikeRack>) => object && `threshold: ${object.contour.threshold}`}
     layers={[layer]}
-    getTooltip={({object}) => object && object.name} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -50,9 +145,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
-```js
+```ts
 import {ContourLayer} from '@deck.gl/aggregation-layers';
-new ContourLayer({});
+import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
+
+new ContourLayer<DataT>(...props: ContourLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
@@ -82,7 +179,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 Size of each cell in meters
 
-#### `gpuAggregation` (bool, optional) {#gpuaggregation}
+#### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
 * Default: true
 

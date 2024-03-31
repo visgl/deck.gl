@@ -6,29 +6,111 @@ import {HeatmapLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
 `HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel%20%28statistics%29#Kernel_functions_in_common_use) to render heatmaps. Note that this layer does not support all platforms; see "limitations" section below.
 
-```js
-import DeckGL from '@deck.gl/react';
-import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {COORDINATES: [-122.42177834, 37.78346622], WEIGHT: 10},
-   *   ...
-   * ]
-   */
-  const layer = new HeatmapLayer({
-    id: 'heatmapLayer',
-    data,
-    getPosition: d => d.COORDINATES,
-    getWeight: d => d.WEIGHT,
-    aggregation: 'SUM'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {HeatmapLayer} from '@deck.gl/geo-layers';
+
+const layer = new HeatmapLayer({
+  id: 'HeatmapLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  aggregation: 'SUM',
+  getPosition: d => d.COORDINATES,
+  getWeight: d => d.SPACES,
+  radiusPixels: 25
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {HeatmapLayer} from '@deck.gl/geo-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+const layer = new HeatmapLayer<BikeRack>({
+  id: 'HeatmapLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  aggregation: 'SUM',
+  getPosition: (d: BikeRack) => d.COORDINATES,
+  getWeight: (d: BikeRack) => d.SPACES,
+  radiusPixels: 25
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {HeatmapLayer} from '@deck.gl/geo-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new HeatmapLayer<BikeRack>({
+    id: 'HeatmapLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+    aggregation: 'SUM',
+    getPosition: (d: BikeRack) => d.COORDINATES,
+    getWeight: (d: BikeRack) => d.SPACES,
+    radiusPixels: 25
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -41,9 +123,11 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
-```js
+```ts
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
-new HeatmapLayer({});
+import type {HeatmapLayerProps} from '@deck.gl/aggregation-layers';
+
+new HeatmapLayer<DataT>(...props: HeatmapLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:

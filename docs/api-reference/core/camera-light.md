@@ -31,7 +31,7 @@ const cameraLight = new CameraLight({color, intensity});
 ```
 
 * `color` - (*array*)  RGB color of camera light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of camera light source, default value is `1.0`.
+* `intensity` - (number) Strength of camera light source, default value is `1.0`.
 
 ## Source
 

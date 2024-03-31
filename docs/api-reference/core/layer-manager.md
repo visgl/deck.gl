@@ -32,7 +32,7 @@ layerManager.needsRedraw({clearRedrawFlags = false});
 
 Parameters:
 
-* `clearRedrawFlags` (Bool) - Reset the needs redraw status
+* `clearRedrawFlags` (boolean) - Reset the needs redraw status
 
 Returns:
 

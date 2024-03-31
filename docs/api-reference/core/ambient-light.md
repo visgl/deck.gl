@@ -30,4 +30,4 @@ const ambientLight = new AmbientLight({color, intensity});
 ```
 
 * `color` - (*array*,)  RGB color of ambient light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of ambient light source, default value is `1.0`.
+* `intensity` - (number) Strength of ambient light source, default value is `1.0`.
