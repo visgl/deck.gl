@@ -145,16 +145,15 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
-      this.pickingFBO = this.device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+      this.pickingFBO = this.device.createFramebuffer({
+        colorAttachments: ['rgba8unorm'],
+        depthStencilAttachment: 'depth16unorm'
+      });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
         const depthFBO = this.device.createFramebuffer({
-          colorAttachments: [
-            this.device.createTexture({
-              format: 'rgba32float'
-              // type: GL.FLOAT
-            })
-          ]
+          colorAttachments: ['rgba32float'],
+          depthStencilAttachment: 'depth16unorm'
         });
         this.depthFBO = depthFBO;
       }
