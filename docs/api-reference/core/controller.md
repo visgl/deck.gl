@@ -51,7 +51,7 @@ The constructor takes one argument:
   * `timeline` - an instance of `luma.gl` [animation timeline class](https://github.com/visgl/luma.gl/blob/d5bd93ef6bd0a0ff4af7880424286bda269e29a8/dev-docs/RFCs/v7.1/animation-timeline-rfc.md)
 
 
-##### `handleEvent(event)` {#handleevent}
+#### `handleEvent(event)` {#handleevent}
 
 Called by the event manager to handle pointer events. This method delegate to the following methods to handle the default events:
 
@@ -71,29 +71,29 @@ Called by the event manager to handle pointer events. This method delegate to th
 See [Event object documentation](https://uber-web.github.io/mjolnir.js/docs/api-reference/event).
 
 
-##### `setProps(props)` {#setprops}
+#### `setProps(props)` {#setprops}
 
 Called by the view when the view state updates. This method handles adding/removing event listeners based on user options.
 
-##### `updateViewport(newMapState, extraProps, interactionState)` {#updateviewport}
+#### `updateViewport(newMapState, extraProps, interactionState)` {#updateviewport}
 
 Called by the event handlers, this method updates internal state, and invokes `onViewStateChange` callback with a new map state.
 
-##### `getCenter(event)` {#getcenter}
+#### `getCenter(event)` {#getcenter}
 
 Utility used by the event handlers, returns pointer position `[x, y]` from any event.
 
-##### `isFunctionKeyPressed(event)` {#isfunctionkeypressed}
+#### `isFunctionKeyPressed(event)` {#isfunctionkeypressed}
 
 Utility used by the event handlers, returns `true` if ctrl/alt/meta key is pressed during any event.
 
-##### `isPointInBounds(pos, [event])` {#ispointinbounds}
+#### `isPointInBounds(pos, [event])` {#ispointinbounds}
 
 Utility used by the event handlers, returns `true` if a pointer position `[x, y]` is inside the current view.
 
 If `event` is provided, returns `false` if the event is already handled, and mark the event as handled if the point is in bounds. This can be used to make sure that certain events are only handled by one controller, when there are overlapping viewports.
 
-##### `isDragging()` {#isdragging}
+#### `isDragging()` {#isdragging}
 
 Returns `true` if the user is dragging the view.
 

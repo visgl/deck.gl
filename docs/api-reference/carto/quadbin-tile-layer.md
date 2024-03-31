@@ -61,7 +61,7 @@ new deck.carto.QuadbinTileLayer({});
 Inherits all properties from [`QuadkeyLayer`](../geo-layers/quadkey-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
 
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 
@@ -73,7 +73,7 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 
 ### Data Accessors
 
-##### `getQuadbin` ([Accessor&lt;BigInt&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getquadbin}
+#### `getQuadbin` ([Accessor&lt;BigInt&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getquadbin}
 
 _Note that the [`getQuadkey` accessor](../geo-layers/quadkey-layer#getquadkey) is replaced with `getQuadbin`_.
 

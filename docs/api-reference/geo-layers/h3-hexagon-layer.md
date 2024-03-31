@@ -164,7 +164,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Render Options
 
-##### `highPrecision` (boolean, optional) {#highprecision}
+#### `highPrecision` (boolean, optional) {#highprecision}
 
 * Default: `'auto'`
 
@@ -182,7 +182,7 @@ Possible values:
 * `true`: Always use high-precision rendering.
 * `false`: Always use instanced rendering, regardless of the characteristics of the data.
 
-##### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
@@ -191,7 +191,7 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 ### Data Accessors
 
-##### `getHexagon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagon}
+#### `getHexagon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagon}
 
 * Default: `object => object.hexagon`
 

@@ -164,59 +164,59 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `widthUnits` (string, optional) {#widthunits}
+#### `widthUnits` (string, optional) {#widthunits}
 
 * Default: `'meters'`
 
 The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `widthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthscale}
+#### `widthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthscale}
 
 * Default: `1`
 
 The path width multiplier that multiplied to all paths.
 
-##### `widthMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthminpixels}
+#### `widthMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthminpixels}
 
 * Default: `0`
 
 The minimum path width in pixels. This prop can be used to prevent the path from getting too thin when zoomed out.
 
-##### `widthMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthmaxpixels}
+#### `widthMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#widthmaxpixels}
 
 * Default: Number.MAX_SAFE_INTEGER
 
 The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 
-##### `capRounded` (boolean, optional) {#caprounded}
+#### `capRounded` (boolean, optional) {#caprounded}
 
 * Default: `false`
 
 Type of caps. If `true`, draw round caps. Otherwise draw square caps.
 
 
-##### `jointRounded` (boolean, optional) {#jointrounded}
+#### `jointRounded` (boolean, optional) {#jointrounded}
 
 * Default: `false`
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
-##### `billboard` (boolean, optional) {#billboard}
+#### `billboard` (boolean, optional) {#billboard}
 
 * Default: `false`
 
 If `true`, extrude the path in screen space (width always faces the camera).
 If `false`, the width always faces up.
 
-##### `miterLimit` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#miterlimit}
+#### `miterLimit` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#miterlimit}
 
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `jointRounded` is `false`.
 
-##### `_pathType` (object, optional) {#_pathtype}
+#### `_pathType` (object, optional) {#_pathtype}
 
 * Default: `null`
 
@@ -230,7 +230,7 @@ When normalization is disabled, paths must be specified in the format of flat ar
 
 ### Data Accessors
 
-##### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpath}
+#### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpath}
 
 * Default: `object => object.path`
 
@@ -248,7 +248,7 @@ new PathLayer<{vertices: Float32Array}>({
 })
 ```
 
-##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default `[0, 0, 0, 255]`
 
@@ -257,7 +257,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
+#### `getWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
 
 * Default: `1`
 

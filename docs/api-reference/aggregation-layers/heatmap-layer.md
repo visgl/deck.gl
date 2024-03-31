@@ -67,13 +67,13 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 ### Render Options
 
-##### `radiusPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radiuspixels}
+#### `radiusPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radiuspixels}
 
 * Default: `30`
 
 Radius of the circle in pixels, to which the weight of an object is distributed.
 
-##### `colorRange` (Color[], optional) {#colorrange}
+#### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -81,13 +81,13 @@ The color palette used in the heatmap, as an array of colors [color1, color2, ..
 
 See the `colorDomain` section below for how weight values are mapped to colors in `colorRange`.
 
-##### `intensity` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#intensity}
+#### `intensity` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#intensity}
 
 * Default: `1`
 
 Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
 
-##### `threshold` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#threshold}
+#### `threshold` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#threshold}
 
 * Default: `0.05`
 
@@ -97,7 +97,7 @@ The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight 
 
 `threshold` is ignored when `colorDomain` is specified.
 
-##### `colorDomain` (number[2], optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#colordomain}
+#### `colorDomain` (number[2], optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#colordomain}
 
 * Default: `null`
 
@@ -111,7 +111,7 @@ When `colorDomain` is specified, a pixel with `minValue` is assigned the first c
 When this prop is not specified, the maximum value is automatically determined from the current viewport, and the domain is set to [`maxValue * threshold`, `maxValue`]. This default behavior ensures that the colors are distributed somewhat reasonably regardless of the data in display. However, as a result, the color at a specific location is dependent on the current viewport and any other data points within view. To obtain a stable color mapping (e.g. for displaying a legend), you need to provide a custom `colorDomain`.
 
 
-##### `aggregation` (string, optional) {#aggregation}
+#### `aggregation` (string, optional) {#aggregation}
 
 * Default: `'SUM'`
 
@@ -119,13 +119,13 @@ Operation used to aggregate all data point weights to calculate a pixel's color 
 
 The weight of each data object is distributed to all the pixels in a circle centered at the object position. The weight that a pixel receives is inversely proportional to its distance from the center. In `'SUM'` mode, pixels that fall into multiple circles will have the sum of all weights. In `'MEAN'` mode, pixels that fall into multiple circles will have their weight calculated as the weighted average from all the neighboring data points. And the weight of the pixel determines its color. 
 
-##### `weightsTextureSize` (number, optional) {#weightstexturesize}
+#### `weightsTextureSize` (number, optional) {#weightstexturesize}
 
 * Default: `2048`
 
 `weightsTextureSize` specifies the size of weight texture. Smaller texture sizes can improve rendering performance. Heatmap aggregation calculates the maximum weight value in the texture and the process can take 50-100 ms for 2048x2048 texture, but only 5-7ms for 512x512 texture. Smaller texture sizes lead to visible pixelation.
 
-##### `debounceTimeout` (number, optional) {#debouncetimeout}
+#### `debounceTimeout` (number, optional) {#debouncetimeout}
 
 * Default: `500`
 
@@ -133,13 +133,13 @@ The weight of each data object is distributed to all the pixels in a circle cent
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each point.
 
-##### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+#### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 

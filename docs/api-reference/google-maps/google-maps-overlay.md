@@ -57,7 +57,7 @@ The constructor additionally accepts the following option:
 
 ## Methods
 
-##### `setMap` {#setmap}
+#### `setMap` {#setmap}
 
 ```js
 overlay.setMap(map);
@@ -65,7 +65,7 @@ overlay.setMap(map);
 
 Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL2 context; use `finalize()` if the overlay should be permanently removed.
 
-##### `setProps` {#setprops}
+#### `setProps` {#setprops}
 
 ```js
 overlay.setProps(props);
@@ -73,19 +73,19 @@ overlay.setProps(props);
 
 Update (partial) props.
 
-##### `pickObject` {#pickobject}
+#### `pickObject` {#pickobject}
 
 Equivalent of [deck.pickObject](../core/deck.md).
 
-##### `pickObjects` {#pickobjects}
+#### `pickObjects` {#pickobjects}
 
 Equivalent of [deck.pickObjects](../core/deck.md).
 
-##### `pickMultipleObjects` {#pickmultipleobjects}
+#### `pickMultipleObjects` {#pickmultipleobjects}
 
 Equivalent of [deck.pickMultipleObjects](../core/deck.md).
 
-##### `finalize` {#finalize}
+#### `finalize` {#finalize}
 
 ```js
 overlay.finalize();

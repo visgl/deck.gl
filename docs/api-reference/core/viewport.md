@@ -62,7 +62,7 @@ If `projectionMatrix` is not supplied, an attempt is made to build from the rema
 
 ## Methods
 
-##### `equals` {#equals}
+#### `equals` {#equals}
 
 Parameters:
 
@@ -73,7 +73,7 @@ Returns:
 * `true` if the given viewport is identical to the current one.
 
 
-##### `project` {#project}
+#### `project` {#project}
 
 Projects world coordinates to pixel coordinates on screen.
 
@@ -90,7 +90,7 @@ Returns:
   + If input is `[X, Y, Z]`: returns `[x, y, z]`.
 
 
-##### `unproject` {#unproject}
+#### `unproject` {#unproject}
 
 Unproject pixel coordinates on screen into world coordinates.
 
@@ -109,7 +109,7 @@ Returns:
   + If input is `[x, y, z]`: returns `[X, Y, Z]`.
 
 
-##### `projectPosition` {#projectposition}
+#### `projectPosition` {#projectposition}
 
 Projects latitude, longitude (and altitude) to coordinates in the [common space](./project.md).
 
@@ -122,7 +122,7 @@ Returns:
 * `[x, y, z]` in WebMercator coordinates.
 
 
-##### `unprojectPosition` {#unprojectposition}
+#### `unprojectPosition` {#unprojectposition}
 
 Projects a coordinate from the [common space](./project.md) to latitude, longitude and altitude.
 
@@ -135,7 +135,7 @@ Returns:
 * `[longitude, latitude, altitude]`
 
 
-##### `getBounds` {#getbounds}
+#### `getBounds` {#getbounds}
 
 Extracts the axis-aligned bounding box of the current visible area.
 
@@ -146,7 +146,7 @@ Returns:
 * `[minX, minY, maxX, maxY]` that defines the smallest orthogonal bounds that encompasses the visible region.
 
 
-##### `getFrustumPlanes` {#getfrustumplanes}
+#### `getFrustumPlanes` {#getfrustumplanes}
 
 Extract view frustum planes of the current camera. Each plane is defined by its normal `normal` and distance from
 the origin `distance` (such that point `x` is on the plane if `dot(normal, x) === distance`) in the [common space](./project.md).

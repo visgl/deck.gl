@@ -22,33 +22,33 @@ const view = new MapView({id, ...});
 
 `MapView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `repeat` (boolean, optional) {#repeat}
+#### `repeat` (boolean, optional) {#repeat}
 
 Whether to render multiple copies of the map at low zoom levels. Default `false`.
 
-##### `nearZMultiplier` (number, optional) {#nearzmultiplier}
+#### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
 Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter.
 
-##### `farZMultiplier` (number, optional) {#farzmultiplier}
+#### `farZMultiplier` (number, optional) {#farzmultiplier}
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter.
 
-##### `projectionMatrix` (number[16], optional) {#projectionmatrix}
+#### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (number, optional) {#fovy}
+#### `fovy` (number, optional) {#fovy}
 
 Field of view covered by the camera, in the perspective case. In degrees. If not supplied, will be calculated from `altitude`.
 
-##### `altitude` (number, optional) {#altitude}
+#### `altitude` (number, optional) {#altitude}
 
 Distance of the camera relative to viewport height. Default `1.5`.
 
-##### `orthographic` (boolean) {#orthographic}
+#### `orthographic` (boolean) {#orthographic}
 
 Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 

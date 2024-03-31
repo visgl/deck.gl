@@ -58,7 +58,7 @@ Inherits all [Viewport methods](./viewport.md#methods).
 
 Inherits all methods from [Viewport](./viewport.md).
 
-##### `project` {#project}
+#### `project` {#project}
 
 Projects world coordinates to pixel coordinates on screen.
 
@@ -75,7 +75,7 @@ Returns:
   + If input is `[longitude, latitude: altitude]`: returns `[x, y, z]`.
 
 
-##### `unproject` {#unproject}
+#### `unproject` {#unproject}
 
 Unproject pixel coordinates on screen into world coordinates.
 

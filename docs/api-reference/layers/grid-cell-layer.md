@@ -165,20 +165,20 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+#### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each grid cell in meters
 
-##### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Cell size scale factor. The size of cell is calculated by
 `cellSize * coverage`.
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -186,13 +186,13 @@ Elevation multiplier. The elevation of cell is calculated by
 `elevationScale * getElevation(d)`. `elevationScale` is a handy property
 to scale all cell elevations without updating the data.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `true`
 
 Whether to enable grid elevation. If set to false, all grid will be flat.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -201,14 +201,14 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `x => x.position`
 
 Method called to retrieve the bottom-left corner (`[minX, minY]`) of each cell.
 
 
-##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[255, 0, 255, 255]`
 
@@ -217,7 +217,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 

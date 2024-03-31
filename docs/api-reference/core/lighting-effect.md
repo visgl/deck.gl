@@ -23,13 +23,13 @@ Parameters:
 
 ### Light Sources
 
-##### `ambientLight` (AmbientLight, optional) {#ambientlight}
+#### `ambientLight` (AmbientLight, optional) {#ambientlight}
 
 An [AmbientLight](./ambient-light.md) source which illuminates all the objects equally.
 
 * Default: ambient light source with color = `[255, 255, 255]` and intensity = `1.0`
 
-##### `directionalLights` (DirectionalLight[], optional) {#directionallights}
+#### `directionalLights` (DirectionalLight[], optional) {#directionallights}
 
 Array of [DirectionalLight](./directional-light.md) source which emits from a specific directions.
 
@@ -42,7 +42,7 @@ Array of [DirectionalLight](./directional-light.md) source which emits from a sp
 
 * For rendering experimental shadow effect, `_shadow` prop of [DirectionalLight](./directional-light.md) must be set to `true`. The effect can be toggled on and off for a layer by setting layer's `shadowEnabled` prop.
 
-##### `pointLights` (PointLight[], optional) {#pointlights}
+#### `pointLights` (PointLight[], optional) {#pointlights}
 
 Array of [PointLight](./point-light.md) source which emits from a point in all directions.
 

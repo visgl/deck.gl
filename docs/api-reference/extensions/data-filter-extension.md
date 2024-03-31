@@ -80,7 +80,7 @@ new DataFilterExtension({filterSize, fp64});
 
 When added to a layer via the `extensions` prop, the `DataFilterExtension` adds the following properties to the layer:
 
-##### `getFilterValue` ([Accessor&lt;number&gt;|Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfiltervalue}
+#### `getFilterValue` ([Accessor&lt;number&gt;|Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfiltervalue}
 
 Called to retrieve the value for each object that it will be filtered by. Returns either a number (if `filterSize: 1`) or an array.
 
@@ -120,7 +120,7 @@ new ScatterplotLayer({
 Note that all filtered values are uploaded as 32-bit floating numbers, so certain values e.g. raw unix epoch time may not be accurately represented. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
 
-##### `filterRange` (number[2] | number[2][]) {#filterrange}
+#### `filterRange` (number[2] | number[2][]) {#filterrange}
 
 The bounds which defines whether an object should be rendered. If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
 
@@ -130,7 +130,7 @@ Format:
 * If `filterSize` is `2` to `4`: `[[min0, max0], [min1, max1], ...]` for each filtered property, respectively.
 
 
-##### `filterSoftRange` (number[2] | number[2][], optional) {#filtersoftrange}
+#### `filterSoftRange` (number[2] | number[2][], optional) {#filtersoftrange}
 
 * Default: `null`
 
@@ -154,7 +154,7 @@ Format:
 * If `filterSize` is `1`: `[softMin, softMax]`
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
-##### `getFilterCategory` ([Accessor&lt;number | string&gt;|Accessor&lt;(number | string)[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
+#### `getFilterCategory` ([Accessor&lt;number | string&gt;|Accessor&lt;(number | string)[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
 
 * Default: `0`
 
@@ -193,7 +193,7 @@ new ScatterplotLayer({
 })
 ```
 
-##### `filterCategories` (string[] | string[][], optional) {#filtercategories}
+#### `filterCategories` (string[] | string[][], optional) {#filtercategories}
 
 * Default: `[0]`
 
@@ -212,27 +212,27 @@ The maximum number of supported is determined by the `categorySize`:
 
 If this value is exceeded any categories beyond the limit will be ignored.
 
-##### `filterTransformSize` (boolean, optional) {#filtertransformsize}
+#### `filterTransformSize` (boolean, optional) {#filtertransformsize}
 
 * Default: `true`
 
 When an object is "faded", manipulate its size so that it appears smaller or thinner. Only works if `filterSoftRange` is specified.
 
 
-##### `filterTransformColor` (boolean, optional) {#filtertransformcolor}
+#### `filterTransformColor` (boolean, optional) {#filtertransformcolor}
 
 * Default: `true`
 
 When an object is "faded", manipulate its opacity so that it appears more translucent. Only works if `filterSoftRange` is specified.
 
 
-##### `filterEnabled` (boolean, optional) {#filterenabled}
+#### `filterEnabled` (boolean, optional) {#filterenabled}
 
 * Default: `true`
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
 
-##### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
+#### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
 Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
 

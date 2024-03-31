@@ -72,7 +72,7 @@ new PathStyleExtension({dash});
 When added to a layer via the `extensions` prop, the `PathStyleExtension` adds the following properties to the layer:
 
 
-##### `getDashArray` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getdasharray}
+#### `getDashArray` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getdasharray}
 
 Must be specified if the `dash` option is enabled.
 
@@ -83,14 +83,14 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 * If this accessor is not specified, all paths are drawn as solid lines.
 
 
-##### `dashJustified` (boolean, optional) {#dashjustified}
+#### `dashJustified` (boolean, optional) {#dashjustified}
 
 * Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends. Overrides the effect of `highPrecisionDash`.
 
 
-##### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}
+#### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}
 
 Must be specified if the `offset` option is enabled.
 
@@ -100,7 +100,7 @@ The offset to draw each path with, relative to the width of the path. Negative o
 * If a function is provided, it is called on each path to retrieve its offset.
 
 
-##### `dashGapPickable` (boolean, optional) {#dashgappickable}
+#### `dashGapPickable` (boolean, optional) {#dashgappickable}
 
 * Default `false`
 

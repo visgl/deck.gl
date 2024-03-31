@@ -88,7 +88,7 @@ new TerrainExtension();
 
 When added to a layer via the `extensions` prop, the `TerrainExtension` adds the following properties to the layer:
 
-##### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
+#### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
 
 How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 

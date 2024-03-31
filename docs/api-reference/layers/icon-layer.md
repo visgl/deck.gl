@@ -305,7 +305,7 @@ new deck.IconLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) properties.
 
-##### `iconAtlas` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#iconatlas}
+#### `iconAtlas` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#iconatlas}
 
 A pre-packed image that contains all icons.
 
@@ -321,7 +321,7 @@ If you go with pre-packed strategy, this prop is required.
 
 If you choose to use auto packing, this prop should be left empty.
 
-##### `iconMapping` (object | string, optional) {#iconmapping}
+#### `iconMapping` (object | string, optional) {#iconmapping}
 
 Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. Each icon is defined with the following values:
 
@@ -340,51 +340,51 @@ If you go with pre-packed strategy, this prop is required.
 
 If you choose to use auto packing, this prop should be left empty.
 
-##### `sizeScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
+#### `sizeScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default: `1`
 
 Icon size multiplier.
 
-##### `sizeUnits` (string, optional) {#sizeunits}
+#### `sizeUnits` (string, optional) {#sizeunits}
 
 * Default: `pixels`
 
 The units of the size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `sizeMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizeminpixels}
+#### `sizeMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizeminpixels}
 
 * Default: `0`
 
 The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
 
-##### `sizeMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizemaxpixels}
+#### `sizeMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizemaxpixels}
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too big when zoomed in.
 
-##### `billboard` (boolean, optional) {#billboard}
+#### `billboard` (boolean, optional) {#billboard}
 
 - Default: `true`
 
 If `true`, the icon always faces camera. Otherwise the icon faces up (z).
 
-##### `alphaCutoff` (number, optional) {#alphacutoff}
+#### `alphaCutoff` (number, optional) {#alphacutoff}
 
 - Default: `0.05`
 
 Discard pixels whose opacity is below this threshold. A discarded pixel would create a "hole" in the icon that is not considered part of the object. This is useful for customizing picking behavior, e.g. setting `alphaCutoff: 0, autoHighlight` will highlight an object whenever the cursor moves into its bounding box, instead of over the visible pixels.
 
 
-##### `loadOptions` (object, optional) {#loadoptions}
+#### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `iconAtlas` prop is an URL, or if `getIcon` returns URLs for auto-packing
 
 
-##### `textureParameters` (object) {#textureparameters}
+#### `textureParameters` (object) {#textureparameters}
 
 Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
@@ -402,7 +402,7 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Data Accessors
 
-##### `getIcon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#geticon}
+#### `getIcon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#geticon}
 
 - Default: `d => d.icon`
 
@@ -425,14 +425,14 @@ the following properties.
 The image loaded from `url` is always resized to fit the box defined by `[width, height]` while preserving its aspect ratio.
 
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `d => d.position`
 
 Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 
-##### `getSize` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
+#### `getSize` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
 
 - Default: `1`
 
@@ -442,7 +442,7 @@ The height of each object, in units specified by `sizeUnits` (default pixels).
 - If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -452,7 +452,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 - If a function is provided, it is called on each object to retrieve its color.
 - If `mask` = false, only the alpha component will be used to control the opacity of the icon.
 
-##### `getAngle` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
+#### `getAngle` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
 
 - Default: `0`
 
@@ -461,7 +461,7 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-##### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 - Default: `[0, 0]`
 
@@ -472,7 +472,7 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 ### Callbacks
 
-##### `onIconError` (Function) {#oniconerror}
+#### `onIconError` (Function) {#oniconerror}
 
 * Default: `null`
 

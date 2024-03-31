@@ -44,31 +44,31 @@ See the [Properties](#properties) section.
 
 The following properties are used to initialize a `Deck` instance. Any custom value should always be provided to the `Deck` constructor. Changing them with `setProps` afterwards will have no effect.
 
-##### `canvas` (HTMLCanvasElement | String, optional) {#canvas}
+#### `canvas` (HTMLCanvasElement | String, optional) {#canvas}
 
 The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
 
-##### `gl` (WebGLContext) {#gl}
+#### `gl` (WebGLContext) {#gl}
 
 WebGL context. Will be auto-created if not supplied.
 
-##### `glOptions` (object) {#gloptions}
+#### `glOptions` (object) {#gloptions}
 
 Additional options used when creating the WebGLContext. See [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext).
 
-##### `id` (string) {#id}
+#### `id` (string) {#id}
 
 * Default: `'deckgl-overlay'`
 
 ID assigned to the canvas that is created by this `Deck` instance, to allow style customization in CSS.
 
-##### `parent` (HTMLElement) {#parent}
+#### `parent` (HTMLElement) {#parent}
 
 * Default: `document.body`
 
 The container to append the auto-created canvas to.
 
-##### `debug` (boolean) {#debug}
+#### `debug` (boolean) {#debug}
 
 * Default: `false`
 
@@ -88,7 +88,7 @@ Notes:
 
 - Debug mode is slower as it will use synchronous operations to keep track of GPU state.
 
-##### `_typedArrayManagerProps` (object) {#_typedarraymanagerprops}
+#### `_typedArrayManagerProps` (object) {#_typedarraymanagerprops}
 
 * Default: {}
 
@@ -108,23 +108,23 @@ new Deck({
 
 ### Rendering Configuration
 
-##### `width` (number | string) {#width}
+#### `width` (number | string) {#width}
 
 * Default: `'100%'`
 
 Width of the canvas, a number in pixels or a valid CSS string.
 
-##### `height` (number | string) {#height}
+#### `height` (number | string) {#height}
 
 * Default: `'100%'`
 
 Height of the canvas, a number in pixels or a valid CSS string.
 
-##### `style` (object) {#style}
+#### `style` (object) {#style}
 
 Additional CSS styles for the canvas.
 
-##### `useDevicePixels` (boolean | number) {#usedevicepixels}
+#### `useDevicePixels` (boolean | number) {#usedevicepixels}
 
 * Default: `true`
 
@@ -139,7 +139,7 @@ Note:
 * Consider setting to `false` or to a number <=1 if better rendering performance is needed.
 * When it is set to a high Number (like, 4 or more), it is possible to hit the system limit for allocating drawing buffer, such cases will log a warning and fallback to system allowed resolution.
 
-##### `parameters` (object) {#parameters}
+#### `parameters` (object) {#parameters}
 
 Expects an object with GPU parameters. Before each frame is rendered, this object will be passed to luma.gl's `setParameters` function to reset the GPU context parameters, e.g. to disable depth testing, change blending modes etc. The default parameters set by `Deck` on initialization are the following:
 
@@ -171,7 +171,7 @@ Notes:
 - Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
 - An alternative way to set `parameters`  is to instead define the `onWebGLInitialized` callback (it receives the `gl` context as parameter) and call the luma.gl `setParameters` method inside it.
 
-##### `layers` (LayersList) {#layers}
+#### `layers` (LayersList) {#layers}
 
 * Default: `[]`
 
@@ -190,7 +190,7 @@ new Deck({
 // layers is in the shape of [[<layer>, <layer>], null, [<layer>, <layer>], ...]
 ```
 
-##### `layerFilter` (Function) {#layerfilter}
+#### `layerFilter` (Function) {#layerfilter}
 
 * Default: `null`
 
@@ -230,7 +230,7 @@ Notes:
 - `layerFilter` does not override the visibility if the layer is disabled via `visible: false` or `pickable: false` props.
 - All the lifecycle methods other than `draw` are still triggered even a if a layer is filtered out using this method.
 
-##### `views` (View | View[]) {#views}
+#### `views` (View | View[]) {#views}
 
 * Default: `new MapView()`
 
@@ -239,7 +239,7 @@ A single [`View`](./view.md) instance, or an array of `View` instances.
 `View`s represent the "camera(s)" (essentially viewport dimensions and projection matrices) that you look at your data with. deck.gl offers multiple view types for both geospatial and non-geospatial use cases. Read the [Views and Projections](../../developer-guide/views.md) guide for the concept and examples.
 
 
-##### `viewState` (object) {#viewstate}
+#### `viewState` (object) {#viewstate}
 
 An object that describes the [view state](../../developer-guide/views.md#view-state) for each view in the `views` prop. For example, the default view's view state is described [here](./map-view.md#view-state):
 
@@ -264,7 +264,7 @@ Notes:
 
 - If you supply this prop, you are responsible of managing the changes to the view state upon user interaction. This prop is therefore usually used together with the `onViewStateChange` callback ([example](../../developer-guide/interactivity.md#externally-manage-view-state)). For `Deck` to update view states automatically, use the `initialViewState` prop instead.
 
-##### `initialViewState` (object) {#initialviewstate}
+#### `initialViewState` (object) {#initialviewstate}
 
 If `initialViewState` is provided, the `Deck` component will track view state changes from any attached `controller` using internal state, with `initialViewState` as its initial view state. This is the easiest way to [control the camera](../../developer-guide/interactivity.md).
 
@@ -277,18 +277,18 @@ Notes:
 * In simple applications, use of the `initialViewState` prop can avoid the need to track the view state in the application.
 * One drawback of using `initialViewState` for reactive/functional applications is that the `Deck` component becomes more stateful.
 
-##### `effects` (Effect[]) {#effects}
+#### `effects` (Effect[]) {#effects}
 
 The array of effects to be rendered. A lighting effect will be added if an empty array is supplied. Refer to effect's documentation to see details:
 
 * [LightingEffect](./lighting-effect.md)
 * [PostProcessEffect](./post-process-effect.md)
 
-##### `_framebuffer` (object) {#_framebuffer}
+#### `_framebuffer` (object) {#_framebuffer}
 
 (Experimental) Render to a custom frame buffer other than to screen.
 
-##### `_animate` (boolean) {#_animate}
+#### `_animate` (boolean) {#_animate}
 
 * Default: `false`
 
@@ -297,7 +297,7 @@ The array of effects to be rendered. A lighting effect will be added if an empty
 
 ### Interaction Settings
 
-##### `controller` (Function | Boolean | Object) {#controller}
+#### `controller` (Function | Boolean | Object) {#controller}
 
 * Default: `null`
 
@@ -334,7 +334,7 @@ new Deck({
   + Other options supported by the controller type. Consult the documentation of [Controller](./controller.md#options).
 
 
-##### `getCursor` (Function) {#getcursor}
+#### `getCursor` (Function) {#getcursor}
 
 * Default: `({isDragging}) => isDragging ? 'grabbing' : 'grab'`
 
@@ -354,7 +354,7 @@ Remarks:
 
 * It is worth noting that when supplying a custom image for the cursor icon, Chrome requires a fallback option to be supplied, otherwise the custom image will not be loaded; e.g. `getCursor={() => 'url(images/custom.png), auto'}`
 
-##### `getTooltip` (Function) {#gettooltip}
+#### `getTooltip` (Function) {#gettooltip}
 
 Callback that takes a hovered-over point and renders a tooltip. If the prop is not specified, the tooltip is always hidden.
 
@@ -382,12 +382,12 @@ background-color: #29323c;
 padding: 10px;
 ```
 
-##### `pickingRadius` (number) {#pickingradius}
+#### `pickingRadius` (number) {#pickingradius}
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
 
 
-##### `touchAction` (string) {#touchaction}
+#### `touchAction` (string) {#touchaction}
 
 * Default: `none`.
 
@@ -395,7 +395,7 @@ Allow browser default touch actions. See [hammer.js documentation](http://hammer
 
 By default, the deck canvas captures all touch interactions. This prop is useful for mobile applications to unblock default scrolling behavior. For example, use the combination `controller: {dragPan: false}` and `touchAction: 'pan-y'` to allow vertical page scroll when dragging over the canvas.
 
-##### `eventRecognizerOptions` (object) {#eventrecognizeroptions}
+#### `eventRecognizerOptions` (object) {#eventrecognizeroptions}
 
 - default: `{}`
 
@@ -419,7 +419,7 @@ new Deck({
 })
 ```
 
-##### `_pickable` (boolean) {#_pickable}
+#### `_pickable` (boolean) {#_pickable}
 
 * Default: `true`
 
@@ -428,7 +428,7 @@ new Deck({
 
 ### Event Callbacks
 
-##### `onWebGLInitialized` (Function) {#onwebglinitialized}
+#### `onWebGLInitialized` (Function) {#onwebglinitialized}
 
 Called once the WebGL context has been initiated.
 
@@ -436,7 +436,7 @@ Receives arguments:
 
 * `gl` - the WebGL context.
 
-##### `onViewStateChange` (Function) {#onviewstatechange}
+#### `onViewStateChange` (Function) {#onviewstatechange}
 
 Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
 
@@ -459,7 +459,7 @@ A view state object that is used to update `Deck`'s internally tracked view stat
 
 If no value is returned, it's equivalent to `(viewState) => viewState`.
 
-##### `onInteractionStateChange` (Function) {#oninteractionstatechange}
+#### `onInteractionStateChange` (Function) {#oninteractionstatechange}
 
 Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
 
@@ -478,7 +478,7 @@ Note:
 * `onInteractionStateChange` may be fired without `onViewStateChange`. For example, when the pointer is released at the end of a drag-pan, `isDragging` is reset to `false`, without the viewport's `longitude` and `latitude` changing.
 
 
-##### `onHover` (Function) {#onhover}
+#### `onHover` (Function) {#onhover}
 
 Called when the pointer moves over the canvas.
 
@@ -487,7 +487,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
 * `event` - the original gesture event
 
-##### `onClick` (Function) {#onclick}
+#### `onClick` (Function) {#onclick}
 
 Called when clicking on the canvas.
 
@@ -496,7 +496,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being clicked.
 * `event` - the original gesture event
 
-##### `onDragStart` (Function) {#ondragstart}
+#### `onDragStart` (Function) {#ondragstart}
 
 Called when the user starts dragging on the canvas.
 
@@ -505,7 +505,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDrag` (Function) {#ondrag}
+#### `onDrag` (Function) {#ondrag}
 
 Called when dragging the canvas.
 
@@ -514,7 +514,7 @@ Receives arguments:
 * `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
-##### `onDragEnd` (Function) {#ondragend}
+#### `onDragEnd` (Function) {#ondragend}
 
 Called when the user releases from dragging the canvas.
 
@@ -524,12 +524,12 @@ Receives arguments:
 * `event` - the original gesture event
 
 
-##### `onLoad` (Function) {#onload}
+#### `onLoad` (Function) {#onload}
 
 Called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. It is safe to trigger viewport transitions after this event.
 
 
-##### `onResize` (Function) {#onresize}
+#### `onResize` (Function) {#onresize}
 
 Called when the canvas resizes.
 
@@ -540,7 +540,7 @@ Receives arguments:
   - `height` (number) - the new height of the deck canvas, in client pixels
 
 
-##### `onBeforeRender` (Function) {#onbeforerender}
+#### `onBeforeRender` (Function) {#onbeforerender}
 
 Called just before the canvas rerenders.
 
@@ -549,7 +549,7 @@ Receives arguments:
 * `gl` - the WebGL context.
 
 
-##### `onAfterRender` (Function) {#onafterrender}
+#### `onAfterRender` (Function) {#onafterrender}
 
 Called right after the canvas rerenders.
 
@@ -558,7 +558,7 @@ Receives arguments:
 * `gl` - the WebGL context.
 
 
-##### `onError` (Function) {#onerror}
+#### `onError` (Function) {#onerror}
 
 * Default: `console.error`
 
@@ -570,7 +570,7 @@ Receives arguments:
 * `layer` (Layer?) - the layer where the error is originated, if applicable
 
 
-##### `_onMetrics` (Function) {#_onmetrics}
+#### `_onMetrics` (Function) {#_onmetrics}
 
 (Experimental) Called once every second with performance metrics.
 
@@ -581,13 +581,13 @@ Receives arguments:
 
 ## Methods
 
-##### `finalize` {#finalize}
+#### `finalize` {#finalize}
 
 Frees all resources associated with this `Deck` instance.
 
 `deck.finalize()`
 
-##### `getCanvas` {#getcanvas}
+#### `getCanvas` {#getcanvas}
 
 Get the canvas element attached to this `Deck` instance.
 
@@ -601,7 +601,7 @@ Notes:
 
 * See the [canvas](#canvas) prop for more information.
 
-##### `setProps` {#setprops}
+#### `setProps` {#setprops}
 
 Updates (partial) properties.
 
@@ -613,7 +613,7 @@ Parameters:
 
 * One or more properties to update, as described in the "Properties" section on this page.
 
-##### `redraw` {#redraw}
+#### `redraw` {#redraw}
 
 Attempt to draw immediately, rather than waiting for the next draw cycle. By default, deck flushes all changes to the canvas on each animation frame. This behavior might cause the deck canvas to fall out of sync with other components if synchronous updates are required.
 
@@ -628,7 +628,7 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
-##### `pickObject` {#pickobject}
+#### `pickObject` {#pickobject}
 
 Get the closest pickable and visible object at the given screen coordinate.
 
@@ -649,7 +649,7 @@ Returns:
 * a single [`info`](../../developer-guide/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
 
-##### `pickMultipleObjects` {#pickmultipleobjects}
+#### `pickMultipleObjects` {#pickmultipleobjects}
 
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
@@ -675,7 +675,7 @@ Notes:
 * Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
 
 
-##### `pickObjects` {#pickobjects}
+#### `pickObjects` {#pickobjects}
 
 Get all pickable and visible objects within a bounding box.
 
@@ -704,11 +704,11 @@ Notes:
 
 ## Member Variables
 
-##### `isInitialized` {#isinitialized}
+#### `isInitialized` {#isinitialized}
 
 Flag indicating that the Deck instance has initialized its resources. It is safe to call public methods when `isInitialized` is `true`.
 
-##### `metrics` {#metrics}
+#### `metrics` {#metrics}
 
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
 

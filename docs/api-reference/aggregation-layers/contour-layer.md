@@ -76,19 +76,19 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+#### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters
 
-##### `gpuAggregation` (bool, optional) {#gpuaggregation}
+#### `gpuAggregation` (bool, optional) {#gpuaggregation}
 
 * Default: true
 
 When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
 
-##### `aggregation` (string, optional) {#aggregation}
+#### `aggregation` (string, optional) {#aggregation}
 
 * Default: 'SUM'
 
@@ -100,7 +100,7 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 * MAX : Grid cell contains maximum of all weights that fall into it.
 
 
-##### `contours` (object[], optional) {#contours}
+#### `contours` (object[], optional) {#contours}
 
 * Default: `[{threshold: 1}]`
 
@@ -119,7 +119,7 @@ Array of objects with following keys
 
 NOTE: Like any other layer prop, a shallow comparison is performed on `contours` prop to determine if it is changed. This prop should be set to an array object, that changes only when contours need to be changed.
 
-##### `zOffset` (number, optional) {#zoffset}
+#### `zOffset` (number, optional) {#zoffset}
 
 * Default: `0.005`
 
@@ -127,13 +127,13 @@ A very small z offset that is added for each vertex of a contour (Isoline or Iso
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+#### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
 
 * Default: `1`
 

@@ -161,7 +161,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-##### `getQuadkey` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getquadkey}
+#### `getQuadkey` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getquadkey}
 
 Called for each data object to retrieve the quadkey string identifier.
 

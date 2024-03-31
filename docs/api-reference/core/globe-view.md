@@ -42,15 +42,15 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `resolution` (number, optional) {#resolution}
+#### `resolution` (number, optional) {#resolution}
 
 The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
-##### `nearZMultiplier` (number, optional) {#nearzmultiplier}
+#### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
 Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter.
 
-##### `farZMultiplier` (number, optional) {#farzmultiplier}
+#### `farZMultiplier` (number, optional) {#farzmultiplier}
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 

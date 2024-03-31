@@ -151,7 +151,7 @@ When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. F
 
 ### Data Options
 
-##### `elevationData` (string | string[], required) {#elevationdata}
+#### `elevationData` (string | string[], required) {#elevationdata}
 
 Image URL that encodes height data.
 
@@ -160,20 +160,20 @@ Image URL that encodes height data.
 - If the value is an array: multiple URL templates. See `TileLayer`'s `data` prop documentation for use cases.
 
 
-##### `texture` (string | null, optional) {#texture}
+#### `texture` (string | null, optional) {#texture}
 
 Image URL to use as the surface texture. Same schema as `elevationData`.
 
 - Default: `null`
 
 
-##### `meshMaxError` (number, optional) {#meshmaxerror}
+#### `meshMaxError` (number, optional) {#meshmaxerror}
 
 Martini error tolerance in meters, smaller number results in more detailed mesh..
 
 - Default: `4.0`
 
-##### `elevationDecoder` (object, optional) {#elevationdecoder}
+#### `elevationDecoder` (object, optional) {#elevationdecoder}
 
 Parameters used to convert a pixel to elevation in meters.
 An object containing the following fields:
@@ -214,7 +214,7 @@ The default value of `elevationDecoder` decodes a grayscale image:
 ```
 
 
-##### `bounds` (number[4], optional) {#bounds}
+#### `bounds` (number[4], optional) {#bounds}
 
 Bounds of the image to fit x,y coordinates into. In `[left, bottom, right, top]`.
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
@@ -225,7 +225,7 @@ Must be supplied when using non-tiled elevation data.
 - Default: `null`
 
 
-##### `loadOptions` (object, optional) {#loadoptions}
+#### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
@@ -237,19 +237,19 @@ Note that by default, the `TerrainLoader` parses data using web workers, with co
 
 ### Render Options
 
-##### `color` (Color, optional) {#color}
+#### `color` (Color, optional) {#color}
 
 Color to use if `texture` is unavailable. Forwarded to `SimpleMeshLayer`'s `getColor` prop.
 
 - Default: `[255, 255, 255]`
 
-##### `wireframe` (boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 Forwarded to `SimpleMeshLayer`'s `wireframe` prop.
 
 - Default: `false`
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 Forwarded to `SimpleMeshLayer`'s `material` prop.
 

@@ -79,17 +79,17 @@ new MaskExtension();
 
 When added to a layer via the `extensions` prop, the `MaskExtension` adds the following properties to the layer:
 
-##### `maskId` (string) {#maskid}
+#### `maskId` (string) {#maskid}
 
 Id of the layer that defines the mask. The mask layer must use the prop `operation: 'mask'`. Masking is disabled if `maskId` is empty or no valid mask layer with the specified id is found.
 
-##### `maskByInstance` (boolean, optional) {#maskbyinstance}
+#### `maskByInstance` (boolean, optional) {#maskbyinstance}
 
 `maskByInstance` controls whether an object is clipped by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon). If not specified, it is automatically deduced from the layer type.
 
 ![maskByInstance](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/mask-by-instance.png)
 
-##### `maskInverted` (boolean, optional) {#maskinverted}
+#### `maskInverted` (boolean, optional) {#maskinverted}
 
 When `maskInverted` is true the result of the masking operation is inverted. Inversion is applied when reading the mask, thus it is possible to use the same mask normally on some layers and inverted on other layers. Defaults to `false`.
 

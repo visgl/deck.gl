@@ -222,13 +222,13 @@ Along with other options as below,
 
 ### Render Options
 
-##### `opacity` (number, Optional) {#opacity}
+#### `opacity` (number, Optional) {#opacity}
 
 - Default `1.0`
 
 The opacity of the layer. The same as defined in [layer](../core/layer.md).
 
-##### `pointSize` (number, Optional) {#pointsize}
+#### `pointSize` (number, Optional) {#pointsize}
 
 - Default `1.0`
 
@@ -237,17 +237,17 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Data Properties
 
-##### `data` (string) {#data}
+#### `data` (string) {#data}
 
 - A URL to fetch tiles entry point of `3D Tiles` [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file or `Indexed 3D Scene Layer` file [I3S](https://github.com/Esri/i3s-spec).
 
-##### `loader` (object) {#loader}
+#### `loader` (object) {#loader}
 
 Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader)
 
 A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`](https://loaders.gl/docs/modules/3d-tiles/api-reference/cesium-ion-loader), [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
 
-##### `loadOptions` (object, Optional) {#loadoptions}
+#### `loadOptions` (object, Optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also support the following keys:
 
@@ -273,7 +273,7 @@ const layer = new Tile3DLayer({
 })
 ```
 
-##### `pickable` (boolean, Optional) {#pickable}
+#### `pickable` (boolean, Optional) {#pickable}
 
 - Default: false
 
@@ -281,7 +281,7 @@ When [`picking`](../../developer-guide/custom-layers/picking.md) is enabled, `in
 
 ### Data Accessors
 
-##### `getPointColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), Optional) {#getpointcolor}
+#### `getPointColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), Optional) {#getpointcolor}
 
 - Default `[0, 0, 0, 255]`
 
@@ -290,24 +290,24 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 ### Callbacks
 
-##### `onTilesetLoad` (Function, optional) {#ontilesetload}
+#### `onTilesetLoad` (Function, optional) {#ontilesetload}
 `onTilesetLoad` is a function that is called when Tileset JSON file is loaded. [Tileset](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) object is passed in the callback.
 
 - Default: `onTilesetLoad: (tileset) => {}`
 
-##### `onTileLoad` (Function, optional) {#ontileload}
+#### `onTileLoad` (Function, optional) {#ontileload}
 
 `onTileLoad` is a function that is called when a tile in the tileset hierarchy is loaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileLoad: (tileHeader) => {}`
 
-##### `onTileUnload` (Function, optional) {#ontileunload}
+#### `onTileUnload` (Function, optional) {#ontileunload}
 
 `onTileUnload` is a function that is called when a tile is unloaded. [Tile3D](https://loaders.gl/modules/3d-tiles/modules/3d-tiles/docs/api-reference/tile-3d) object is passed in the callback.
 
 - Default: `onTileUnload: (tileHeader) => {}`
 
-##### `onTileError` (Function, optional) {#ontileerror}
+#### `onTileError` (Function, optional) {#ontileerror}
 
 `onTileError` is a function that is called when a tile failed to load.
 
@@ -315,7 +315,7 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
   - `url`: the url of the failed tile.
   - `message`: the error message.
 
-##### `_getMeshColor` (Function, optional) {#_getmeshcolor}
+#### `_getMeshColor` (Function, optional) {#_getmeshcolor}
 `_getMeshColor` is a function which allows to change color of mesh based on properties of [tileHeader](https://loaders.gl/docs/specifications/category-3d-tiles#tileheader-fields) object.
 It recieves `tileHeader` object as argument and return type is array of [r, g, b] values in the 0-255 range.
 This value is only applied when tile format is `mesh`.

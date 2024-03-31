@@ -77,13 +77,13 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 ### Render Options
 
-##### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+#### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters
 
-##### `colorDomain` (number[2], optional) {#colordomain}
+#### `colorDomain` (number[2], optional) {#colordomain}
 
 * Default: `[min(colorWeight), max(colorWeight)]`
 
@@ -91,7 +91,7 @@ Color scale domain, default is set to the extent of aggregated weights in each c
 You can control how the colors of cells are mapped to weights by passing in an arbitrary color domain.
 This is useful when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Color[], optional) {#colorrange}
+#### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -99,14 +99,14 @@ Specified as an array of colors [color1, color2, ...]. Each color is an array of
 
 `colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
-##### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Cell size multiplier, clamped between 0 - 1. The displayed size of cell is calculated by `coverage * cellSize`.
 Note: coverage does not affect how objects are binned.
 
-##### `elevationDomain` (number[2], optional) {#elevationdomain}
+#### `elevationDomain` (number[2], optional) {#elevationdomain}
 
 * Default: `[0, max(elevationWeight)]`
 
@@ -114,60 +114,60 @@ Elevation scale input domain, default is set to between 0 and the max of aggrega
 You can control how the elevations of cells are mapped to weights by passing in an arbitrary elevation domain.
 This is useful when you want to render different data input with the same elevation scale for comparison.
 
-##### `elevationRange` (number[2], optional) {#elevationrange}
+#### `elevationRange` (number[2], optional) {#elevationrange}
 
 * Default: `[0, 1000]`
 
 Elevation scale output range
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
 Cell elevation multiplier.
 This is a handy property to scale all cells without updating the data.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `true`
 
 Whether to enable cell elevation. If set to false, all cell will be flat.
 
-##### `upperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
+#### `upperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
 
 * Default: `100`
 
 Filter cells and re-calculate color by `upperPercentile`. Cells with value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
+#### `lowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
 
 * Default: `0`
 
 Filter cells and re-calculate color by `lowerPercentile`. Cells with value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
+#### `elevationUpperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
 
 * Default: `100`
 
 Filter cells and re-calculate elevation by `elevationUpperPercentile`. Cells with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
+#### `elevationLowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
 
 * Default: `0`
 
 Filter cells and re-calculate elevation by `elevationLowerPercentile`. Cells with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
-##### `colorScaleType` (string, optional) {#colorscaletype}
+#### `colorScaleType` (string, optional) {#colorscaletype}
 
 * Default: 'quantize'
 
 Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -175,7 +175,7 @@ This is an object that contains material props for [lighting effect](../core/lig
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
-##### `colorAggregation` (string, optional) {#coloraggregation}
+#### `colorAggregation` (string, optional) {#coloraggregation}
 
 * Default: 'SUM'
 
@@ -241,7 +241,7 @@ const layer = new CPUGridLayer({
 If your use case requires aggregating using an operation that is not one of 'SUM', 'MEAN', 'MAX' and 'MIN', `getColorValue` should be used to define such custom aggregation function.
 
 
-##### `elevationAggregation` (string, optional) {#elevationaggregation}
+#### `elevationAggregation` (string, optional) {#elevationaggregation}
 
 * Default: 'SUM'
 
@@ -308,14 +308,14 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
 
-##### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
+#### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
 
 * Default: `1`
 
@@ -325,7 +325,7 @@ The weight of a data object used to calculate the color value for a cell.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
+#### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
 
 * Default: `null`
 
@@ -339,7 +339,7 @@ Arguments:
   + `data` - the value of the `data` prop.
 
 
-##### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
+#### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
 
 * Default: `1`
 
@@ -349,7 +349,7 @@ The weight of a data object used to calculate the elevation value for a cell.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
+#### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
 
 * Default: `null`
 
@@ -365,13 +365,13 @@ Arguments:
 
 ### Callbacks
 
-##### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
+#### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
 
 * Default: `([min, max]) => {}`
 
 This callback will be called when cell color domain has been calculated.
 
-##### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
+#### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
 
 * Default: `([min, max]) => {}`
 

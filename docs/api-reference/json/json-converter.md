@@ -35,7 +35,7 @@ deck.setProps(jsonConverter.convert(json));
 ## Properties
 
 
-##### `json` (object | string) {#json}
+#### `json` (object | string) {#json}
 
 A JSON string or a parsed JSON structure.
 All properties in this object, after processing, are passed to a [Deck](../core/deck.md) instance as props.

@@ -29,7 +29,6 @@ The constructor for the `PointLight` class. Use this to create a new `PointLight
 ```js
 const pointLight = new PointLight({color, intensity, position});
 ```
-#### Parameters
 
 * `color` - (*array*,)  RGB color of point light source, default value is `[255, 255, 255]`.
 * `intensity` - (*number*) Strength of point light source, default value is `1.0`.

@@ -22,25 +22,25 @@ new FirstPersonView({id, ...});
 
 `FirstPersonView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `projectionMatrix` (number[16], optional) {#projectionmatrix}
+#### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (number, optional) {#fovy}
+#### `fovy` (number, optional) {#fovy}
 
 Field of view covered by camera, in the perspective case. In degrees. Default `75`.
 
-##### `near` (number, optional) {#near}
+#### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (number, optional) {#far}
+#### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
-##### `focalDistance` (number, optional) {#focaldistance}
+#### `focalDistance` (number, optional) {#focaldistance}
 
 Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 

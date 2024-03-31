@@ -180,7 +180,7 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Mesh
 
-##### `mesh` (string | object) {#mesh}
+#### `mesh` (string | object) {#mesh}
 
 The geometry to render for each data object. One of:
 
@@ -192,7 +192,7 @@ The geometry to render for each data object. One of:
   + `texCoords` (Float32Array) - 2d texture coordinates
 
 
-##### `texture` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#texture}
+#### `texture` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object, optional) {#texture}
 
 - Default `null`.
 
@@ -209,7 +209,7 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 
 
-##### `textureParameters` (object) {#textureparameters}
+#### `textureParameters` (object) {#textureparameters}
 
 Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
@@ -228,19 +228,19 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Render Options
 
-##### `sizeScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
+#### `sizeScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#sizescale}
 
 - Default `1`.
 
 Multiplier to scale each geometry by.
 
-##### `wireframe` (boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 - Default: `false`
 
 Whether to render the mesh in wireframe mode.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -251,14 +251,14 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 ### Data Accessors
 
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
 
-##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
@@ -269,7 +269,7 @@ The color is in the format of `[r, g, b, [a]]`. Each channel is a number between
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
+#### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
 
 - Default: `[0, 0, 0]`
 
@@ -278,7 +278,7 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
 
-##### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getscale}
+#### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getscale}
 
 - Default: `[1, 1, 1]`
 
@@ -287,7 +287,7 @@ Scaling factor on the mesh along each axis.
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
 
-##### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettranslation}
+#### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettranslation}
 
 - Default: `[0, 0, 0]`
 
@@ -296,7 +296,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-##### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettransformmatrix}
+#### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettransformmatrix}
 
 - Default: `null`
 

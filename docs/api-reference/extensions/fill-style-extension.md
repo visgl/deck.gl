@@ -83,18 +83,18 @@ When added to a layer via the `extensions` prop, the `FillStyleExtension` adds t
 The following properties are available if the `pattern` option is enabled.
 
 
-##### `fillPatternAtlas` (Texture2D | String) {#fillpatternatlas}
+#### `fillPatternAtlas` (Texture2D | String) {#fillpatternatlas}
 
 Sprite image url or texture that packs all your patterns into one layout.
 You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker).
 
-##### `fillPatternEnabled` (boolean) {#fillpatternenabled}
+#### `fillPatternEnabled` (boolean) {#fillpatternenabled}
 
 - Default: `true`
 
 Whether to use pattern fill. If `false`, then the extension has no effect.
 
-##### `fillPatternMapping` (object | String) {#fillpatternmapping}
+#### `fillPatternMapping` (object | String) {#fillpatternmapping}
 
 Pattern names mapped to pattern definitions. Each pattern is defined with the following values:
 
@@ -104,7 +104,7 @@ Pattern names mapped to pattern definitions. Each pattern is defined with the fo
 - `height` (number, required): height of pattern on the atlas image
 
 
-##### `fillPatternMask` (boolean) {#fillpatternmask}
+#### `fillPatternMask` (boolean) {#fillpatternmask}
 
 - Default: `true`
  
@@ -113,12 +113,12 @@ Whether to treat the patterns as transparency masks.
 + If `false`, pixel color from the image is applied.
 
 
-##### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
+#### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
 
 Called to retrieve the name of the pattern. Returns a string key from the `fillPatternMapping` object.
 
 
-##### `getFillPatternScale` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternscale}
+#### `getFillPatternScale` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternscale}
 
 - Default: `1`
 
@@ -128,7 +128,7 @@ The scale of the pattern, relative to the original size. If the pattern is 24 x 
 - If a function is provided, it is called on each object to retrieve its pattern scale.
 
 
-##### `getFillPatternOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternoffset}
+#### `getFillPatternOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternoffset}
 
 - Default: `[0, 0]`
 

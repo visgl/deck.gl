@@ -67,7 +67,7 @@ Inherits all [Viewport methods](./viewport.md#methods).
 
 Inherits all methods from [Viewport](./viewport.md).
 
-##### `project` {#project}
+#### `project` {#project}
 
 Projects world coordinates to pixel coordinates on screen.
 
@@ -84,7 +84,7 @@ Returns:
   + If input is `[longitude, latitude: altitude]`: returns `[x, y, z]`.
 
 
-##### `unproject` {#unproject}
+#### `unproject` {#unproject}
 
 Unproject pixel coordinates on screen into world coordinates.
 
@@ -103,7 +103,7 @@ Returns:
   + If input is `[x, y, z]`: returns `[longitude, latitude, altitude]`.
 
 
-##### `getDistanceScales` {#getdistancescales}
+#### `getDistanceScales` {#getdistancescales}
 
 Returns an object with scale values supporting first order (linear) and second order (quadratic) approximations of the local Web Mercator projection scale around the viewport center. Error increases with distance from viewport center (very roughly 1% per 100km in linear mode, quadratic approximation does significantly better).
 
@@ -112,7 +112,7 @@ Returns:
 * An object with precalculated distance scales allowing conversion between lnglat deltas, meters and pixels.
 
 
-##### `addMetersToLngLat` {#addmeterstolnglat}
+#### `addMetersToLngLat` {#addmeterstolnglat}
 
 Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](#-getdistancescales-).
 
@@ -125,7 +125,7 @@ Returns:
 
 * New coordinate array in `[longitude, latitude]` or `[longitude, latitude, altitude]` if `z` is provided.
 
-##### `fitBounds` {#fitbounds}
+#### `fitBounds` {#fitbounds}
 
 Returns a new viewport that fit around the given bounding box. Viewport `width` and `height` must be either set or provided as options. Only supports non-perspective mode.
 

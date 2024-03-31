@@ -187,7 +187,7 @@ new deck.GeoJsonLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
-##### `data` {#data}
+#### `data` {#data}
 
 The `GeoJSONLayer` accepts any of the following formats passed to the `data` prop:
 
@@ -196,7 +196,7 @@ The `GeoJSONLayer` accepts any of the following formats passed to the `data` pro
 * An URL or Promise that resolves to the above formats.
 * loaders.gl's [flat GeoJSON format](https://loaders.gl/modules/gis/docs/api-reference/geojson-to-binary).
 
-##### `pointType` (string, optional) {#pointtype}
+#### `pointType` (string, optional) {#pointtype}
 
 * Default: `'circle'`
 
@@ -213,7 +213,7 @@ To use more than one type, join the names with `+`, for example `pointType: 'ico
 The following props control the solid fill of `Polygon` and `MultiPolygon`
 features, and the `Point` and `MultiPoint` features if `pointType` is `'circle'`.
 
-##### `filled` (boolean, optional) {#filled}
+#### `filled` (boolean, optional) {#filled}
 
 * Default: `true`
 
@@ -222,7 +222,7 @@ only the area between the outer polygon and any holes will be filled. This
 prop is effective only when the polygon is NOT extruded.
 
 
-##### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -239,7 +239,7 @@ The following props control the `LineString` and `MultiLineString` features,
 the outline for `Polygon` and `MultiPolygon` features, and the outline for `Point` and `MultiPoint` features if `pointType` is `'circle'`.
 
 
-##### `stroked` (boolean, optional) {#stroked}
+#### `stroked` (boolean, optional) {#stroked}
 
 * Default: `true`
 
@@ -248,7 +248,7 @@ for complex polygons, both the outer polygon as well the outlines of
 any holes will be drawn.
 
 
-##### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -258,7 +258,7 @@ The rgba color of a line is in the format of `[r, g, b, [a]]`. Each channel is a
 * If a function is provided, it is called on each feature to retrieve its line color.
 
 
-##### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
+#### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
 * Default: `1`
 
@@ -268,50 +268,50 @@ The width of a line, in units specified by `lineWidthUnits` (default meters).
 * If a function is provided, it is called on each feature to retrieve its line width.
 
 
-##### `lineWidthUnits` (string, optional) {#linewidthunits}
+#### `lineWidthUnits` (string, optional) {#linewidthunits}
 
 * Default: `'meters'`
 
 The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `lineWidthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
+#### `lineWidthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
 
 * Default: `1`
 
 A multiplier that is applied to all line widths.
 
-##### `lineWidthMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthminpixels}
+#### `lineWidthMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthminpixels}
 
 * Default: `0`
 
 The minimum line width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
 
-##### `lineWidthMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthmaxpixels}
+#### `lineWidthMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthmaxpixels}
 
 * Default: Number.MAX_SAFE_INTEGER
 
 The maximum line width in pixels. This prop can be used to prevent the line from getting too thick when zoomed in.
 
-##### `lineCapRounded` (boolean, optional) {#linecaprounded}
+#### `lineCapRounded` (boolean, optional) {#linecaprounded}
 
 * Default: `false`
 
 Type of line caps. If `true`, draw round caps. Otherwise draw square caps.
 
-##### `lineJointRounded` (boolean, optional) {#linejointrounded}
+#### `lineJointRounded` (boolean, optional) {#linejointrounded}
 
 * Default: `false`
 
 Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 
-##### `lineMiterLimit` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linemiterlimit}
+#### `lineMiterLimit` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linemiterlimit}
 
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
-##### `lineBillboard` (boolean, optional) {#linebillboard}
+#### `lineBillboard` (boolean, optional) {#linebillboard}
 
 * Default: `false`
 
@@ -322,14 +322,14 @@ If `false`, the width always faces up.
 
 The following props control the extrusion of `Polygon` and `MultiPolygon` features.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 Extrude Polygon and MultiPolygon features along the z-axis if set to
 true. The height of the drawn features is obtained using the `getElevation` accessor.
 
 * Default: `false`
 
-##### `wireframe` (boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 * Default: `false`
 
@@ -345,7 +345,7 @@ Remarks:
 * This is only effective if the `extruded` prop is set to true.
 
 
-##### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -358,7 +358,7 @@ otherwise will be in unit coordinates.
 * If a function is provided, it is called on each polygon feature to retrieve its elevation.
 
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -367,7 +367,7 @@ Elevation multiplier. The final elevation is calculated by
 all polygon elevation without updating the data.
 
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -375,7 +375,7 @@ This is an object that contains material props for [lighting effect](../core/lig
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
-##### `_full3d` (boolean, optional) {#_full3d}
+#### `_full3d` (boolean, optional) {#_full3d}
 
 * Default: `false`
 

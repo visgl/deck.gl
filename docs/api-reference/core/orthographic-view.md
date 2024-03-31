@@ -22,15 +22,15 @@ const view = new OrthographicView({id, ...});
 
 `OrthographicView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `flipY` (boolean) {#flipy}
+#### `flipY` (boolean) {#flipy}
 
 Whether to use top-left coordinates (`true`) or bottom-left coordinates (`false`). Default `true`.
 
-##### `near` (number, optional) {#near}
+#### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (number, optional) {#far}
+#### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 

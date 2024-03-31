@@ -22,7 +22,7 @@ Parameters:
 
 ## Methods
 
-##### `needsRedraw` {#needsredraw}
+#### `needsRedraw` {#needsredraw}
 
 Checks if layers need to be redrawn.
 
@@ -38,7 +38,7 @@ Returns:
 
 * `true` if redraw is needed.
 
-##### `getLayers` {#getlayers}
+#### `getLayers` {#getlayers}
 
 Returns an list of layers, optionally be filtered by a list of layer ids.
 
@@ -61,7 +61,7 @@ Notes:
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
 
-##### `setLayers` {#setlayers}
+#### `setLayers` {#setlayers}
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 
@@ -72,7 +72,7 @@ layerManager.updateLayers({newLayers});
 * `newLayers` (Layer[]) - Array of layers
 
 
-##### `updateLayers` {#updatelayers}
+#### `updateLayers` {#updatelayers}
 
 Updates the current list of layers.
 

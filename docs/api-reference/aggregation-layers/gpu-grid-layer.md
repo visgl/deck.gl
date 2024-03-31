@@ -81,13 +81,13 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 ### Render Options
 
-##### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
+#### `cellSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsize}
 
 * Default: `1000`
 
 Size of each cell in meters. Must be greater than `0`.
 
-##### `colorDomain` (number[2], optional) {#colordomain}
+#### `colorDomain` (number[2], optional) {#colordomain}
 
 * Default: `[min(colorWeight), max(colorWeight)]`
 
@@ -96,7 +96,7 @@ You can control how the colors of cells are mapped to weights by passing in an a
 This is useful when you want to render different data input with the same color mapping for comparison.
 
 
-##### `colorRange` (Color[], optional) {#colorrange}
+#### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -104,14 +104,14 @@ Specified as an array of colors [color1, color2, ...]. Each color is an array of
 
 `colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
-##### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Cell size multiplier, clamped between 0 - 1. The displayed size of cell is calculated by `coverage * cellSize`.
 Note: coverage does not affect how objects are binned.
 
-##### `elevationDomain` (number[2], optional) {#elevationdomain}
+#### `elevationDomain` (number[2], optional) {#elevationdomain}
 
 * Default: `[0, max(elevationWeight)]`
 
@@ -119,26 +119,26 @@ Elevation scale input domain, default is set to between 0 and the max of aggrega
 You can control how the elevations of cells are mapped to weights by passing in an arbitrary elevation domain.
 This is useful when you want to render different data input with the same elevation scale for comparison.
 
-##### `elevationRange` (number[2], optional) {#elevationrange}
+#### `elevationRange` (number[2], optional) {#elevationrange}
 
 * Default: `[0, 1000]`
 
 Elevation scale output range
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
 Cell elevation multiplier.
 This is a handy property to scale the height of all cells without updating the data.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `true`
 
 Whether to enable cell elevation. If set to false, all cell will be flat.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -147,7 +147,7 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 
 
-##### `colorAggregation` (string, optional) {#coloraggregation}
+#### `colorAggregation` (string, optional) {#coloraggregation}
 
 * Default: 'SUM'
 
@@ -155,7 +155,7 @@ Defines the operation used to aggregate all data object weights to calculate a c
 
 `getColorWeight` and `colorAggregation` together determine the elevation value of each cell.
 
-##### `elevationAggregation` (string, optional) {#elevationaggregation}
+#### `elevationAggregation` (string, optional) {#elevationaggregation}
 
 * Default: 'SUM'
 
@@ -166,14 +166,14 @@ Defines the operation used to aggregate all data object weights to calculate a c
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
 
-##### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
+#### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
 
 * Default: `1`
 
@@ -183,7 +183,7 @@ The weight of a data object used to calculate the color value for a cell.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
+#### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
 
 * Default: `1`
 

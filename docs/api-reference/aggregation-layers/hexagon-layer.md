@@ -73,13 +73,13 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 ### Render Options
 
-##### `radius` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radius}
+#### `radius` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radius}
 
 * Default: `1000`
 
 Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
 
-##### `hexagonAggregator` (Function, optional) {#hexagonaggregator}
+#### `hexagonAggregator` (Function, optional) {#hexagonaggregator}
 
 * Default: `d3-hexbin`
 
@@ -94,7 +94,7 @@ By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
 see `modules/layers/src/point-density-hexagon-layer/hexagon-aggregator`
 
-##### `colorDomain` (number[2], optional) {#colordomain}
+#### `colorDomain` (number[2], optional) {#colordomain}
 
 * Default: `[min(colorWeight), max(colorWeight)]`
 
@@ -104,7 +104,7 @@ extent of aggregated weights in each hexagon.
 You can control how the colors of hexagons are mapped to weights by passing in an arbitrary color domain.
 This is useful when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Color[], optional) {#colorrange}
+#### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -112,14 +112,14 @@ Specified as an array of colors [color1, color2, ...]. Each color is an array of
 
 `colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
-##### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Hexagon radius multiplier, clamped between 0 - 1. The displayed radius of hexagon is calculated by `coverage * radius`.
 Note: coverage does not affect how objects are binned.
 
-##### `elevationDomain` (number[2], optional) {#elevationdomain}
+#### `elevationDomain` (number[2], optional) {#elevationdomain}
 
 * Default: `[0, max(elevationWeight)]`
 
@@ -130,13 +130,13 @@ You can control how the elevations of hexagons are mapped to weights by passing 
 This property is useful when you want to render different data input
 with the same elevation scale for comparison.
 
-##### `elevationRange` (number[2], optional) {#elevationrange}
+#### `elevationRange` (number[2], optional) {#elevationrange}
 
 * Default: `[0, 1000]`
 
 Elevation scale output range
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -144,47 +144,47 @@ Hexagon elevation multiplier. The actual elevation is calculated by
   `elevationScale * getElevationValue(d)`. `elevationScale` is a handy property to scale
 all hexagons without updating the data.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `false`
 
 Whether to enable cell elevation. If set to false, all cells will be flat.
 
-##### `upperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
+#### `upperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
 
 * Default: `100`
 
 Filter bins and re-calculate color by `upperPercentile`. Hexagons with color value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
+#### `lowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
 
 * Default: `0`
 
 Filter bins and re-calculate color by `lowerPercentile`. Hexagons with color value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
+#### `elevationUpperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
 
 * Default: `100`
 
 Filter bins and re-calculate elevation by `elevationUpperPercentile`. Hexagons with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
+#### `elevationLowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
 
 * Default: `0`
 
 Filter bins and re-calculate elevation by `elevationLowerPercentile`. Hexagons with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
-##### `colorScaleType` (string, optional) {#colorscaletype}
+#### `colorScaleType` (string, optional) {#colorscaletype}
 
 * Default: 'quantize'
 
 Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'quantile' and 'ordinal'.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -192,7 +192,7 @@ This is an object that contains material props for [lighting effect](../core/lig
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
-##### `colorAggregation` (string, optional) {#coloraggregation}
+#### `colorAggregation` (string, optional) {#coloraggregation}
 
 * Default: 'SUM'
 
@@ -256,7 +256,7 @@ const layer = new HexagonLayer({
 If your use case requires aggregating using an operation that is not one of 'SUM', 'MEAN', 'MAX' and 'MIN', `getColorValue` should be used to define such custom aggregation function.
 
 
-##### `elevationAggregation` (string, optional) {#elevationaggregation}
+#### `elevationAggregation` (string, optional) {#elevationaggregation}
 
 * Default: 'SUM'
 
@@ -323,14 +323,14 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
 
-##### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
+#### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
 
 * Default: `1`
 
@@ -340,7 +340,7 @@ The weight of a data object used to calculate the color value for a bin.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
+#### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
 
 * Default: `null`
 
@@ -354,7 +354,7 @@ Arguments:
   + `data` - the value of the `data` prop.
 
 
-##### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
+#### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
 
 * Default: `1`
 
@@ -364,7 +364,7 @@ The weight of a data object used to calculate the elevation value for a bin.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
+#### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
 
 * Default: `null`
 
@@ -380,13 +380,13 @@ Arguments:
 
 ### Callbacks
 
-##### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
+#### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
 
 * Default: `([min, max]) => {}`
 
 This callback will be called when bin color domain has been calculated.
 
-##### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
+#### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
 
 * Default: `([min, max]) => {}`
 

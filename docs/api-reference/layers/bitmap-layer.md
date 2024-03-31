@@ -132,7 +132,7 @@ new deck.BitmapLayer({});
 
 ### Data
 
-##### `image` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object) {#image}
+#### `image` (string | Texture | Image | ImageData | HTMLCanvasElement | HTMLVideoElement | ImageBitmap | Promise | object) {#image}
 
 - Default `null`.
 
@@ -146,7 +146,7 @@ The image to display.
 
 The image data will be converted to a [Texture](https://luma.gl/docs/api-reference/core/resources/texture) object. See `textureParameters` prop for advanced customization.
 
-##### `bounds` (number[4] | Position[4]) {#bounds}
+#### `bounds` (number[4] | Position[4]) {#bounds}
 
 Supported formats:
 
@@ -156,13 +156,13 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
-##### `loadOptions` (object, optional) {#loadoptions}
+#### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
 
 - [ImageLoader](https://loaders.gl/modules/images/docs/api-reference/image-loader) if the `image` prop is an URL
 
-##### `textureParameters` (object) {#textureparameters}
+#### `textureParameters` (object) {#textureparameters}
 
 Customize the [texture parameters](https://luma.gl/docs/api-reference/core/resources/sampler#samplerprops).
 
@@ -192,7 +192,7 @@ new BitmapLayer({
 
 This prop is only used when `image` initially loads or changes.
 
-##### `_imageCoordinateSystem` (number, optional) {#_imagecoordinatesystem}
+#### `_imageCoordinateSystem` (number, optional) {#_imagecoordinatesystem}
 
 > Note: this prop is experimental.
 
@@ -212,19 +212,19 @@ See the article on [Coordinate Systems](../../developer-guide/coordinate-systems
 
 ### Render Options
 
-##### `desaturate` (number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#desaturate}
+#### `desaturate` (number) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#desaturate}
 
 - Default `0`
 
 The desaturation of the bitmap. Between `[0, 1]`. `0` being the original color and `1` being grayscale.
 
-##### `transparentColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#transparentcolor}
+#### `transparentColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#transparentcolor}
 
 - Default `[0, 0, 0, 0]`
 
 The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in the `[0, 255]` range. Equivalent to overlaying the image over a background in this color.
 
-##### `tintColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#tintcolor}
+#### `tintColor` (Color) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#tintcolor}
 
 - Default `[255, 255, 255]`
 

@@ -22,29 +22,29 @@ const view = new OrbitView({id, ...});
 
 `OrbitView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `orbitAxis` (string, optional) {#orbitaxis}
+#### `orbitAxis` (string, optional) {#orbitaxis}
 
 Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
 
-##### `projectionMatrix` (number[16], optional) {#projectionmatrix}
+#### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (number, optional) {#fovy}
+#### `fovy` (number, optional) {#fovy}
 
 Field of view covered by camera, in the perspective case. In degrees. Default `50`.
 
-##### `near` (number, optional) {#near}
+#### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (number, optional) {#far}
+#### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
-##### `orthographic` (boolean) {#orthographic}
+#### `orthographic` (boolean) {#orthographic}
 
 Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 

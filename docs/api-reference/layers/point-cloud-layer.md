@@ -174,19 +174,19 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `sizeUnits` (string, optional) {#sizeunits}
+#### `sizeUnits` (string, optional) {#sizeunits}
 
 * Default: `'pixels'`
 
 The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `pointSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#pointsize}
+#### `pointSize` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#pointsize}
 
 * Default: `10`
 
 Global radius of all points, in units specified by `sizeUnits` (default pixels).
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
@@ -195,13 +195,13 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 ### Data Accessors
 
-##### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getNormal` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
+#### `getNormal` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
 
 * Default: `[0, 0, 1]`
 
@@ -211,7 +211,7 @@ The normal of each object, in `[nx, ny, nz]`.
 * If a function is provided, it is called on each object to retrieve its normal.
 
 
-##### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[0, 0, 0, 255]`
 

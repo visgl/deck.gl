@@ -163,14 +163,14 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `filled` (boolean, optional) {#filled}
+#### `filled` (boolean, optional) {#filled}
 
 * Default: `true`
 
 Whether to fill the polygons (based on the color provided by the
 `getFillColor` accessor.
 
-##### `extruded` (boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `false`
 
@@ -178,7 +178,7 @@ Whether to extrude the polygons (based on the elevations provided by the
 `getElevation` accessor. If set to false, all polygons will be flat, this
 generates less geometry and is faster than simply returning `0` from `getElevation`.
 
-##### `wireframe` (boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 * Default: `false`
 
@@ -186,7 +186,7 @@ Whether to generate a line wireframe of the polygon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-##### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -200,14 +200,14 @@ all elevation without updating the data.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
-##### `material` (Material, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
-##### `_normalize` (boolean, optional) {#_normalize}
+#### `_normalize` (boolean, optional) {#_normalize}
 
 * Default: `true`
 
@@ -217,7 +217,7 @@ If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disa
 
 When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical). The winding order of rings must be consistent with that defined by `_windingOrder`. See `getPolygon` below for details.
 
-##### `_windingOrder` (string, optional) {#_windingorder}
+#### `_windingOrder` (string, optional) {#_windingorder}
 
 * Default: `'CW'`
 
@@ -230,7 +230,7 @@ This prop is only effective with `_normalize: false`. It specifies the winding o
 
 The proper value depends on the source of your data. Most geometry formats [enforce a specific winding order](https://gis.stackexchange.com/a/147971). Incorrectly set winding order will cause an extruded polygon's surfaces to be flipped, affecting culling and the lighting effect.
 
-##### `_full3d` (boolean, optional) {#_full3d}
+#### `_full3d` (boolean, optional) {#_full3d}
 
 * Default: `false`
 
@@ -245,7 +245,7 @@ Remarks:
 
 ### Data Accessors
 
-##### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
+#### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * Default: `object => object.polygon`
 
@@ -261,7 +261,7 @@ A polygon can be one of the following formats:
   - `holeIndices` (number[]) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
 
-##### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -270,7 +270,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -280,7 +280,7 @@ Only applies if `extruded: true`.
 * If an array is provided, it is used as the stroke color for all polygons.
 * If a function is provided, it is called on each object to retrieve its stroke color.
 
-##### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 

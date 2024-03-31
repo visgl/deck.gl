@@ -160,7 +160,7 @@ WMS services sometimes provide a mechanism to query a specific pixel. This is su
 
 ## Methods
 
-##### `getFeatureInfoText` {#getfeatureinfotext}
+#### `getFeatureInfoText` {#getfeatureinfotext}
 
 This is a method on the layer that can be called to retrieve additional information from the image service about the map near the specified pixel.
 
@@ -180,7 +180,7 @@ Inherits all properties from [base `Layer`](../core/layer.md).
 
 ### Data Options
 
-##### `data` (string) {#data}
+#### `data` (string) {#data}
 
 A base URL to a well-known service type, or a full URL template from which the map images should be loaded.
 
@@ -195,13 +195,13 @@ If [serviceType](#servicetype) is set to `'template'`, data is expected to be a 
 - `{layers}` - replaced with a string built from the content of [layers](#layers). The array of layer name strings will be joined by commas (`,`) into a single string.
 
 
-##### `serviceType` (string, optional) {#servicetype}
+#### `serviceType` (string, optional) {#servicetype}
 
 - Default: `'auto'`
 
 Specifies the type of service at the URL supplied in `data`. Currently accepts either `'wms'` or `'template'`. The default `'auto'` setting will try to autodetect service from the URL.
 
-##### `layers` (string\[\], optional) {#layers}
+#### `layers` (string\[\], optional) {#layers}
 
 - Default: `[]`
 
@@ -209,7 +209,7 @@ Specifies names of layers that should be visualized from the image service.
 
 > Note that WMS services will typically not display anything unless at least one valid layer name is provided.
 
-##### `srs` (string, optional) {#srs}
+#### `srs` (string, optional) {#srs}
 
 - Default: `'auto'`
 
@@ -220,7 +220,7 @@ If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` ot
 
 ### Callbacks
 
-##### `onMetadataLoad` (Function, optional) {#onmetadataload}
+#### `onMetadataLoad` (Function, optional) {#onmetadataload}
 
 `onMetadataLoad` called when the metadata of the image source successfully loads.
 
@@ -232,7 +232,7 @@ Receives arguments:
 
 Note that metadata will not be loaded when [serviceType](#servicetype) is set to `'template`.
 
-##### `onMetadataLoadError` (Function, optional) {#onmetadataloaderror}
+#### `onMetadataLoadError` (Function, optional) {#onmetadataloaderror}
 
 `onMetadataLoadError` called when metadata failed to load.
 
@@ -242,7 +242,7 @@ Receives arguments:
 
 - `error` (`Error`)
 
-##### `onImageLoadStart` (Function, optional) {#onimageloadstart}
+#### `onImageLoadStart` (Function, optional) {#onimageloadstart}
 
 `onImageLoadStart` is a function that is called when the `WMSLayer` starts loading metadata after a new image source has been specified.
 
@@ -252,7 +252,7 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoad` (Function, optional) {#onimageload}
+#### `onImageLoad` (Function, optional) {#onimageload}
 
 `onImageLoad` called when an image successfully loads.
 
@@ -262,7 +262,7 @@ Receives arguments:
 
 - `requestId` (`number`) - Allows tracking of specific requests
 
-##### `onImageLoadError` (Function, optional) {#onimageloaderror}
+#### `onImageLoadError` (Function, optional) {#onimageloaderror}
 
 `onImageLoadError` called when an image failed to load.
 
