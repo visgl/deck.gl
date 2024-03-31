@@ -43,7 +43,6 @@ import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
-import type {LayerParameters} from '../passes/layers-pass';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
@@ -53,7 +52,7 @@ import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
-import {RenderPass} from '@luma.gl/core';
+import type {RenderPass, Parameters as DeviceParameters} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
@@ -1047,7 +1046,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
-    parameters: LayerParameters;
+    parameters: DeviceParameters;
   }): void {
     this._updateAttributeTransition();
 

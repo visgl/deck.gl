@@ -35,7 +35,7 @@ import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -53,7 +53,6 @@ import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from '
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
-import type {LayerParameters} from '../passes/layers-pass';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
@@ -114,7 +113,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   pickingRadius?: number;
 
   /** WebGL parameters to be set before each frame is rendered. */
-  parameters?: LayerParameters;
+  parameters?: Parameters;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
