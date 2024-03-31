@@ -1,4 +1,9 @@
-import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
+import LayersPass, {
+  LayersPassRenderOptions,
+  LayerParameters,
+  RenderStats,
+  Rect
+} from './layers-pass';
 import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
@@ -123,24 +128,25 @@ export default class PickLayersPass extends LayersPass {
     };
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    const pickParameters = {
+  protected getLayerParameters(
+    layer: Layer,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
+    const pickParameters: LayerParameters = {
       // TODO - When used as a custom layer in older Mapbox versions, context
       // state was dirty. Mapbox fixed that; we should test and remove the workaround.
       // https://github.com/mapbox/mapbox-gl-js/issues/7801
-      depthMask: true,
-      depthTest: true,
-      depthRange: [0, 1],
+      depthCompare: 'less-equal',
       ...layer.props.parameters
     };
     const {pickable, operation} = layer.props;
 
     if (!this._colorEncoderState || operation.includes('terrain')) {
-      pickParameters.blend = false;
+      pickParameters.blendColorOperation = 'none';
     } else if (pickable && operation.includes('draw')) {
       Object.assign(pickParameters, PICKING_BLENDING);
-      pickParameters.blend = true;
-      pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
+      pickParameters.blendConstant = encodeColor(this._colorEncoderState, layer, viewport);
     }
 
     return pickParameters;

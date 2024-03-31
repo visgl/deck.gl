@@ -135,7 +135,7 @@ export type {
   TextureSource,
   Material
 } from './types/layer-props';
-export type {FilterContext} from './passes/layers-pass';
+export type {FilterContext, LayerParameters} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';

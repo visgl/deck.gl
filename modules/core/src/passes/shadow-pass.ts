@@ -1,7 +1,7 @@
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import type Layer from '../lib/layer';
 import type Viewport from '../viewports/viewport';
-import LayersPass from './layers-pass';
+import LayersPass, {LayerParameters} from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
   shadowMap: Texture;
@@ -67,8 +67,12 @@ export default class ShadowPass extends LayersPass {
     super.render({...params, clearColor, target, pass: 'shadow'});
   }
 
-  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
-    return {...layer.props.parameters, blend: false, depthRange: [0, 1], depthTest: true};
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
+    return {...layer.props.parameters, blendColorOperation: 'none', depthCompare: 'less-equal'};
   }
 
   shouldDrawLayer(layer) {

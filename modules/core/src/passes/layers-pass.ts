@@ -1,4 +1,4 @@
-import type {Device, RenderPassParameters} from '@luma.gl/core';
+import type {Device, RenderPassParameters, Parameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -8,6 +8,8 @@ import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
 
 export type Rect = {x: number; y: number; width: number; height: number};
+
+export type LayerParameters = Parameters & RenderPassParameters;
 
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
@@ -36,7 +38,7 @@ type DrawLayerParameters = {
   shouldDrawLayer: boolean;
   layerRenderIndex?: number;
   moduleParameters?: any;
-  layerParameters?: any;
+  layerParameters?: LayerParameters;
 };
 
 export type FilterContext = {
@@ -71,9 +73,6 @@ export default class LayersPass extends Pass {
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
     if (options.colorMask) {
       parameters.colorMask = colorMask;
-    }
-    if (options.scissorRect) {
-      parameters.scissorRect = options.scissorRect;
     }
 
     const renderPass = this.device.beginRenderPass({
@@ -125,6 +124,7 @@ export default class LayersPass extends Pass {
             target,
             moduleParameters,
             viewport: subViewport,
+            scissorRect: options.scissorRect,
             view,
             pass: options.pass,
             layers: options.layers
@@ -206,26 +206,14 @@ export default class LayersPass extends Pass {
   /* eslint-disable max-depth, max-statements */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view},
-    drawLayerParams
+    {layers, moduleParameters: globalModuleParameters, pass, target, viewport, view, scissorRect},
+    drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
       moduleParameters: globalModuleParameters,
       target,
       viewport
     });
-
-    // TODO v9 - remove WebGL specific logic
-    if (view && view.props.clear) {
-      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      this.device.withParametersWebGL(
-        {
-          scissorTest: true,
-          scissor: glViewport
-        },
-        () => this.device.clearWebGL(clearOpts)
-      );
-    }
 
     // render layers in normal colors
     const renderStatus = {
@@ -235,7 +223,11 @@ export default class LayersPass extends Pass {
       pickableCount: 0
     };
 
-    renderPass.setParameters({viewport: glViewport});
+    renderPass.setParameters({viewport: glViewport, scissorRect: scissorRect || glViewport});
+    if (view?.props.clear) {
+      // @ts-expect-error WEBGLRenderPass protected method
+      renderPass.clear?.();
+    }
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -252,8 +244,10 @@ export default class LayersPass extends Pass {
       } else if (shouldDrawLayer) {
         // Draw the layer
         renderStatus.visibleCount++;
+        // layerParameters and layerRenderIndex are always present in this context
+        renderPass.setParameters(layerParameters!);
 
-        this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex);
+        this._lastRenderIndex = Math.max(this._lastRenderIndex, layerRenderIndex!);
 
         // overwrite layer.context.viewport with the sub viewport
         moduleParameters.viewport = viewport;
@@ -289,7 +283,11 @@ export default class LayersPass extends Pass {
     return null;
   }
 
-  protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
+  protected getLayerParameters(
+    layer: Layer,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
     return layer.props.parameters;
   }
 

@@ -1,5 +1,11 @@
 import type {Device, Framebuffer, RenderPipelineParameters, Texture} from '@luma.gl/core';
-import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} from '@deck.gl/core';
+import {
+  Layer,
+  _LayersPass as LayersPass,
+  LayerParameters,
+  LayersPassRenderOptions,
+  Viewport
+} from '@deck.gl/core';
 
 type MaskPassRenderOptions = LayersPassRenderOptions & {
   /** The channel to render into, 0:red, 1:green, 2:blue, 3:alpha */
@@ -50,11 +56,14 @@ export default class MaskPass extends LayersPass {
     super.render({...options, clearColor, colorMask, target: this.fbo, pass: 'mask'});
   }
 
-  protected getLayerParameters(layer: Layer<{}>, layerIndex: number, viewport: Viewport) {
+  protected getLayerParameters(
+    layer: Layer<{}>,
+    layerIndex: number,
+    viewport: Viewport
+  ): LayerParameters {
     return {
       ...layer.props.parameters,
-      blend: true,
-      depthTest: false,
+      depthCompare: 'less-equal',
       ...MASK_BLENDING
     };
   }
