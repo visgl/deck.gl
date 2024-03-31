@@ -88,7 +88,7 @@ void main(void) {
 
     // We need depth testing in general; we don't know what layers might be added to the deck.
     parameters: {
-      depthTest: true
+      depthCompare: 'less-equal'
     },
 
     // This deck renders into an auxiliary framebuffer.
