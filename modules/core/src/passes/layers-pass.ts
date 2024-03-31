@@ -56,6 +56,14 @@ export type RenderStats = {
   pickableCount: number;
 };
 
+const DEFAULT_PARAMETERS: LayerParameters = {
+  blendColorSrcFactor: 'src-alpha',
+  blendColorDstFactor: 'one-minus-src-alpha',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha',
+  depthCompare: 'less-equal'
+};
+
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
@@ -191,7 +199,9 @@ export default class LayersPass extends Pass {
           moduleParameters
         );
         layerParam.layerParameters = {
+          ...DEFAULT_PARAMETERS,
           ...layer.context.deck?.props.parameters,
+          ...layer.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
@@ -262,7 +272,7 @@ export default class LayersPass extends Pass {
             renderPass,
             moduleParameters,
             uniforms: {layerIndex: layerRenderIndex},
-            parameters: layerParameters
+            parameters: layerParameters!
           });
         } catch (err) {
           layer.raiseError(err as Error, `drawing ${layer} to ${pass}`);
@@ -288,7 +298,10 @@ export default class LayersPass extends Pass {
     layerIndex: number,
     viewport: Viewport
   ): LayerParameters {
-    return layer.props.parameters;
+    const {getPolygonOffset} = layer.props;
+    const offsets = (getPolygonOffset && getPolygonOffset({layerIndex})) || [0, 0];
+
+    return {depthBias: offsets[0], depthBiasSlopeScale: offsets[1]};
   }
 
   /* Private */

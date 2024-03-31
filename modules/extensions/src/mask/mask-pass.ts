@@ -61,11 +61,7 @@ export default class MaskPass extends LayersPass {
     layerIndex: number,
     viewport: Viewport
   ): LayerParameters {
-    return {
-      ...layer.props.parameters,
-      depthCompare: 'less-equal',
-      ...MASK_BLENDING
-    };
+    return {depthCompare: 'less-equal', ...MASK_BLENDING};
   }
 
   shouldDrawLayer(layer) {

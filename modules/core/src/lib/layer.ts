@@ -43,6 +43,7 @@ import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
+import type {LayerParameters} from '../passes/layers-pass';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
@@ -1046,7 +1047,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     renderPass: RenderPass;
     moduleParameters: any;
     uniforms: any;
-    parameters: any;
+    parameters: LayerParameters;
   }): void {
     this._updateAttributeTransition();
 
@@ -1068,13 +1069,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         this.setModuleParameters(moduleParameters);
         this.setShaderModuleProps({picking: {isActive, isAttribute}});
       }
-
-      // Apply polygon offset to avoid z-fighting
-      // TODO - move to draw-layers
-      const {getPolygonOffset} = this.props;
-      const offsets = (getPolygonOffset && getPolygonOffset(uniforms)) || [0, 0];
-
-      context.device.setParametersWebGL({polygonOffset: offsets});
 
       for (const model of this.getModels()) {
         model.setParameters(parameters);

@@ -133,13 +133,7 @@ export default class PickLayersPass extends LayersPass {
     layerIndex: number,
     viewport: Viewport
   ): LayerParameters {
-    const pickParameters: LayerParameters = {
-      // TODO - When used as a custom layer in older Mapbox versions, context
-      // state was dirty. Mapbox fixed that; we should test and remove the workaround.
-      // https://github.com/mapbox/mapbox-gl-js/issues/7801
-      depthCompare: 'less-equal',
-      ...layer.props.parameters
-    };
+    const pickParameters: LayerParameters = super.getLayerParameters(layer, layerIndex, viewport);
     const {pickable, operation} = layer.props;
 
     if (!this._colorEncoderState || operation.includes('terrain')) {

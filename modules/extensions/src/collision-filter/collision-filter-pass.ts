@@ -23,7 +23,7 @@ export default class CollisionFilterPass extends LayersPass {
     layerIndex: number,
     viewport: Viewport
   ): LayerParameters {
-    return {...layer.props.parameters, blendColorOperation: 'none', depthCompare: 'less-equal'};
+    return {blendColorOperation: 'none', depthCompare: 'less-equal'};
   }
 
   getModuleParameters() {

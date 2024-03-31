@@ -35,7 +35,6 @@ import {luma} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
@@ -54,6 +53,7 @@ import type {RecognizerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from '
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type {PickingInfo} from './picking/pick-info';
+import type {LayerParameters} from '../passes/layers-pass';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
@@ -114,7 +114,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   pickingRadius?: number;
 
   /** WebGL parameters to be set before each frame is rendered. */
-  parameters?: any;
+  parameters?: LayerParameters;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -945,14 +945,6 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       // should have a method to start state tracking even if not enabled?
       // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
     }
-
-    this.device.setParametersWebGL({
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthTest: true,
-      depthFunc: GL.LEQUAL
-    });
 
     this.props.onDeviceInitialized(this.device);
     if (this.device instanceof WebGLDevice) {
