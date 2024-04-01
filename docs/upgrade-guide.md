@@ -12,55 +12,52 @@ Typescript is now enabled on all modules. The `'@deck.gl/xxx/typed'` packages ar
 
 ### luma.gl v9 Updates
 
-The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not define its own custom layers.
+The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. Fortunately, deck.gl encapsulates most of the luma.gl API so the changes to deck.gl applications should be limited, in particular if the application does not directly interact with GPU resources.
 
 Quick summary:
 
-- All direct references to `gl: WebGLRenderingContext` should be replaced with `device: Device` references. `import {Device} from '@luma.gl/core'`.
-- GPU resource classes should no longer be created directly. Use `device.createBuffer()`, `device.createTexture()` etc.
-- luma.gl no longer uses `GL` constants for GPU parameters, but instead uses (WebGPU style) string constants. Applications should no longer import `@luma.gl/constants`.
+- All references to `gl: WebGLRenderingContext` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
+- Layer props `parameters` and `textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
+- Deck class prop `onWebGLInitialized` is now `onDeviceInitialized`.
+- When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
+- GPU resources should no longer be initiated from classes. For example, instead of `new Buffer()` use `device.createBuffer()`, instead of `new Texture()` use `device.createTexture()`. See [Device methods](https://luma.gl/docs/api-reference/core/device#methods).
 
-For details, refer to the [luma.gl v9 Upgrade Guide](https://luma.gl/docs/upgrade-guide)
+#### Custom Layers
 
-**Deck**
+Model creation needs to adapt to the [luma.gl v9 API](https://luma.gl/docs/upgrade-guide):
 
-| v8 API                          | v9 API                        | Description |
-| ------------------------------- | ----------------------------- | ----------- |
-| `props.onWebGLInitialized(...)` | `props.onDeviceInitialized()` |             |
+```ts
+class MyLayer {
+  getModel() {
+    return new Model(
+      // Replaces this.context.gl
+      this.context.device,
+      {
+        // GLSL 1.00 shaders no longer supported, must be updated to GLSL 3.00
+        vs,
+        fs,
+        // New in v9 Model API
+        bufferLayout: this.getAttributeManager().getBufferLayouts(),
+        // Replaces GL constant `drawMode`
+        topology: 'triangle-strip'
+      }
+    );
+  }
+}
+```
 
 
-**Layer**
-
-| v8 API                             | v9 API                                 | Description               |
-| ---------------------------------- | -------------------------------------- | ------------------------- |
-| `props.parameters: {GL constants}` | `props.parameters({string constants})` | Use new string constants. |
-
-
-**Custom Layers**
-
-Model creation needs to adapt to the [luma.gl v9 API](https://luma.gl/docs/upgrade-guide).
-
-| v8 API                               | v9 API                                   | Description                                   |
-| ------------------------------------ | ---------------------------------------- | --------------------------------------------- |
-| `new Model(this.context.gl, {opts})` | `new Model(this.context.device, {opts})` | Create models with `device`` instead of `gl`. |
-
-**Custom Shaders**
-
-- deck.gl no longer supports GLSL 1.00 shaders. All shaders must be updated to GLSL 3.00.
-
-**WebGPU preparation**
-
-While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl applications beyond the upgrades listed above. Again, these changes mostly affect custom layers.
+While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl curtom layers:
 
 - deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
-- drawModes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
+- WebGL draw modes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
 - The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
 
 ### @deck.gl/mapbox
 
 `MapboxLayer` has been removed. Use `MapboxOverlay` instead.
 
-```typescript
+```ts
 // deck.gl v9
 import {DeckOverlay} from '@deck.gl/mapbox'
 map.addControl(new DeckOverlay({
@@ -76,7 +73,7 @@ map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
 
 `CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
 
-```typescript
+```ts
 // deck.gl v9
 import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
 const data = vectorQuerySource({

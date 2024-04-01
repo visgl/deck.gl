@@ -428,13 +428,13 @@ new Deck({
 
 ### Event Callbacks
 
-#### `onWebGLInitialized` (Function) {#onwebglinitialized}
+#### `onDeviceInitialized` (Function) {#ondeviceinitialized}
 
-Called once the WebGL context has been initiated.
+Called once the [Device](https://luma.gl/docs/api-reference/core/device) context has been initiated.
 
 Receives arguments:
 
-* `gl` - the WebGL context.
+* `device` (Device) - a `WEBGLDevice` or `WebGPUDevice`.
 
 #### `onViewStateChange` (Function) {#onviewstatechange}
 

@@ -30,7 +30,7 @@ The constructor for the `CameraLight` class. Use this to create a new `CameraLig
 const cameraLight = new CameraLight({color, intensity});
 ```
 
-* `color` - (*array*)  RGB color of camera light source, default value is `[255, 255, 255]`.
+* `color` - (number[3])  RGB color of camera light source, default value is `[255, 255, 255]`.
 * `intensity` - (number) Strength of camera light source, default value is `1.0`.
 
 ## Source

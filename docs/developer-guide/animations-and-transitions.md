@@ -416,7 +416,7 @@ In the `transitions` object, each prop name is mapped to a number or an object t
 
 | Key           | Type       | Default     | Description |
 | ------------- | --------   | ----------- | ----------- |
-| `type`        | string   | `'interpolation'` | Type of the transition |
+| `type`        | string   | `'interpolation'` | Type of the transition, currently supports `'interpolation'` and `'spring'` |
 | `enter`       | Function | `value => value` | Callback to get the value that the entering vertices are transitioning from. See "attribute backfilling" below |
 | `onStart`     | Function | `null`      | Callback when the transition is started |
 | `onEnd`       | Function | `null`      | Callback when the transition is done |
