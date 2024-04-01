@@ -144,8 +144,13 @@ export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';
+export type {LightingEffectProps} from './effects/lighting/lighting-effect';
+export type {AmbientLightOptions} from './effects/lighting/ambient-light';
+export type {DirectionalLightOptions} from './effects/lighting/directional-light';
+export type {PointLightOptions} from './effects/lighting/point-light';
+export type {SunLightOptions} from './effects/lighting/sun-light';
 
-// INTERNAL, DO NOT USER
+// INTERNAL, DO NOT USE
 // @deprecated internal do not use
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use
