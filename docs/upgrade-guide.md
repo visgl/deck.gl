@@ -2,9 +2,11 @@
 
 ## Upgrading to v9.0
 
-### General changes
+**Before you upgrade: known issues**
 
-- `Deck.pickObjects()`  -  minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
+The following issues are known and can be expected to resolve in a 9.0 patch:
+
+- GPU aggregation is not working for the following layers: `ScreenGridLayer`, `GPUGridLayer`, `GridLayer`
 
 ### Typescript
 
@@ -104,6 +106,7 @@ loaders.gl dependencies are updated to v4. Although most version differences are
 
 ### Others
 
+- `Deck.pickObjects()`  -  minor breaking change: if the same `data` is used by multiple top-level layers (e.g. a `ScatterplotLayer` and a `TextLayer`) that are visible in the picking bounds, `pickObjects` will yield one result for each picked object+layer combination, instead of one result for each picked object in previous versions.
 - Custom effects: the `Effect` interface has changed. `preRender` and `postRender` no longer receives device/context as an argument, implement the `setup()` lifecycle method instead.
 
 ## Upgrading from deck.gl v8.8 to v8.9
