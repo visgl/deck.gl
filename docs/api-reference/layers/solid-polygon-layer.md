@@ -1,32 +1,130 @@
 # SolidPolygonLayer
 
-The `SolidPolygonLayer` renders filled and/or extruded polygons.
+import {SolidPolygonLayerDemo} from '@site/src/doc-demos/layers';
+
+<SolidPolygonLayerDemo />
+
+The `SolidPolygonLayer` renders filled and/or extruded polygons. This is the primitive layer rendered by [PolygonLayer](./polygon-layer.md) as the "fill" part of the polygons.
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
-function App({data, viewState}) {
-  const layer = new SolidPolygonLayer({
-    /*
-     * Data format:
-     * [
-     *   {polygon: [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]},   // Simple polygon (array of coords)
-     *   {polygon: [                                            // Complex polygon with one hole
-     *     [[0, 0], [0, 2], [2, 2], [2, 0], [0, 0]],            // (array of array of coords)
-     *     [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]
-     *   ]}
-     * ]
-     */
-    data,
-    getPolygon: d => d.polygon,
-    getFillColor: [255, 0, 0],
-    extruded: false
+const layer = new SolidPolygonLayer({
+  id: 'SolidPolygonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-zipcodes.json',
+
+  extruded: true,
+  wireframe: true,
+  getPolygon: d => d.contour,
+  getElevation: d => d.population / d.area / 10,
+  getFillColor: d => [d.population / d.area / 60, 140, 0],
+  getLineColor: [80, 80, 80],
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `${object.zipcode}\nPopulation: ${object.population}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {SolidPolygonLayer} from '@deck.gl/layers';
+
+type ZipCode = {
+  zipcode: number;
+  population: number;
+  area: number;
+  contour: [longitude: number, latitude: number][];
+};
+
+const layer = new SolidPolygonLayer<ZipCode>({
+  id: 'SolidPolygonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-zipcodes.json',
+
+  extruded: true,
+  wireframe: true,
+  getPolygon: (d: ZipCode) => d.contour,
+  getElevation: (d: ZipCode) => d.population / d.area / 10,
+  getFillColor: (d: ZipCode) => [d.population / d.area / 60, 140, 0],
+  getLineColor: [80, 80, 80],
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<ZipCode>) => object && `${object.zipcode}\nPopulation: ${object.population}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {SolidPolygonLayer} from '@deck.gl/layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type ZipCode = {
+  zipcode: number;
+  population: number;
+  area: number;
+  contour: [longitude: number, latitude: number][];
+};
+
+function App() {
+  const layer = new SolidPolygonLayer<ZipCode>({
+    id: 'SolidPolygonLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-zipcodes.json',
+
+    extruded: true,
+    wireframe: true,
+    getPolygon: (d: ZipCode) => d.contour,
+    getElevation: (d: ZipCode) => d.population / d.area / 10,
+    getFillColor: (d: ZipCode) => [d.population / d.area / 60, 140, 0],
+    getLineColor: [80, 80, 80],
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState} layers={[layer]} />;
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<ZipCode>) => object && `${object.zipcode}\nPopulation: ${object.population}`}
+    layers={[layer]}
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -39,18 +137,20 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {SolidPolygonLayer} from '@deck.gl/layers';
-new SolidPolygonLayer({});
+import type {SolidPolygonLayerProps} from '@deck.gl/layers';
+
+new SolidPolygonLayer<DataT>(...props: SolidPolygonLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -63,14 +163,14 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 ### Render Options
 
-##### `filled` (Boolean, optional) {#filled}
+#### `filled` (boolean, optional) {#filled}
 
 * Default: `true`
 
 Whether to fill the polygons (based on the color provided by the
 `getFillColor` accessor.
 
-##### `extruded` (Boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `false`
 
@@ -78,7 +178,7 @@ Whether to extrude the polygons (based on the elevations provided by the
 `getElevation` accessor. If set to false, all polygons will be flat, this
 generates less geometry and is faster than simply returning `0` from `getElevation`.
 
-##### `wireframe` (Boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 * Default: `false`
 
@@ -86,7 +186,7 @@ Whether to generate a line wireframe of the polygon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -100,14 +200,14 @@ all elevation without updating the data.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
-##### `material` (Object, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
-##### `_normalize` (Object, optional) {#_normalize}
+#### `_normalize` (boolean, optional) {#_normalize}
 
 * Default: `true`
 
@@ -117,7 +217,7 @@ If `false`, will skip normalizing the coordinates returned by `getPolygon`. Disa
 
 When normalization is disabled, polygons must be specified in the format of flat array or `{positions, holeIndices}`. Rings must be closed (i.e. the first and last vertices must be identical). The winding order of rings must be consistent with that defined by `_windingOrder`. See `getPolygon` below for details.
 
-##### `_windingOrder` (String, optional) {#_windingorder}
+#### `_windingOrder` (string, optional) {#_windingorder}
 
 * Default: `'CW'`
 
@@ -130,7 +230,7 @@ This prop is only effective with `_normalize: false`. It specifies the winding o
 
 The proper value depends on the source of your data. Most geometry formats [enforce a specific winding order](https://gis.stackexchange.com/a/147971). Incorrectly set winding order will cause an extruded polygon's surfaces to be flipped, affecting culling and the lighting effect.
 
-##### `_full3d` (Boolean, optional) {#_full3d}
+#### `_full3d` (boolean, optional) {#_full3d}
 
 * Default: `false`
 
@@ -145,7 +245,7 @@ Remarks:
 
 ### Data Accessors
 
-##### `getPolygon` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
+#### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * Default: `object => object.polygon`
 
@@ -157,11 +257,11 @@ A polygon can be one of the following formats:
 * An array of rings. The first ring is the exterior boundary and the following rings are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
 * A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single ring. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
 * An object of shape `{positions, holeIndices}`.
-  - `positions` (Array|TypedArray) - a flat array of coordinates. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
-  - `holeIndices` (Array) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
+  - `positions` (number[] | TypedArray) - a flat array of coordinates. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
+  - `holeIndices` (number[]) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
 
-##### `getFillColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -170,7 +270,7 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -180,7 +280,7 @@ Only applies if `extruded: true`.
 * If an array is provided, it is used as the stroke color for all polygons.
 * If a function is provided, it is called on each object to retrieve its stroke color.
 
-##### `getElevation` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -205,8 +305,7 @@ To truly realize the performance gain from using binary data, the app likely wan
 
 Example use case:
 
-```js
-// USE PLAIN JSON OBJECTS
+```ts title="Use plain JSON array"
 const POLYGON_DATA = [
   {
      contour: [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
@@ -223,10 +322,9 @@ new SolidPolygonLayer({
 })
 ```
 
-Convert to using binary attributes:
+The equivalent binary attributes would be:
 
-```js
-// USE BINARY
+```ts title="Use binary attributes"
 // Flatten the polygon vertices
 // [-122.4, 37.7, -122.4, 37.8, -122.5, 37.8, -122.5, 37.7, -122.4, 37.7, ...]
 const positions = new Float64Array(POLYGON_DATA.map(d => d.contour).flat(2));

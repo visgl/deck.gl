@@ -53,11 +53,11 @@ new DataFilterExtension({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -70,17 +70,17 @@ new deck.DataFilterExtension({});
 new DataFilterExtension({filterSize, fp64});
 ```
 
-* `filterSize` (Number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
-* `categorySize` (Number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Default `1`.
-* `fp64` (Boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
-* `countItems` (Boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
+* `filterSize` (number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
+* `categorySize` (number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Default `1`.
+* `fp64` (boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
+* `countItems` (boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
 
 ## Layer Properties
 
 When added to a layer via the `extensions` prop, the `DataFilterExtension` adds the following properties to the layer:
 
-##### `getFilterValue` ([Function](../../developer-guide/using-layers.md#accessors)) {#getfiltervalue}
+#### `getFilterValue` ([Accessor&lt;number&gt;|Accessor&lt;number[]&gt;](../../developer-guide/using-layers.md#accessors)) {#getfiltervalue}
 
 Called to retrieve the value for each object that it will be filtered by. Returns either a number (if `filterSize: 1`) or an array.
 
@@ -120,7 +120,7 @@ new ScatterplotLayer({
 Note that all filtered values are uploaded as 32-bit floating numbers, so certain values e.g. raw unix epoch time may not be accurately represented. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
 
 
-##### `filterRange` (Array) {#filterrange}
+#### `filterRange` (number[2] | number[2][]) {#filterrange}
 
 The bounds which defines whether an object should be rendered. If an object's filtered value is within the bounds, the object will be rendered; otherwise it will be hidden. This prop can be updated on user input or animation with very little cost.
 
@@ -130,7 +130,7 @@ Format:
 * If `filterSize` is `2` to `4`: `[[min0, max0], [min1, max1], ...]` for each filtered property, respectively.
 
 
-##### `filterSoftRange` (Array, optional) {#filtersoftrange}
+#### `filterSoftRange` (number[2] | number[2][], optional) {#filtersoftrange}
 
 * Default: `null`
 
@@ -154,7 +154,7 @@ Format:
 * If `filterSize` is `1`: `[softMin, softMax]`
 * If `filterSize` is `2` to `4`: `[[softMin0, softMax0], [softMin1, softMax1], ...]` for each filtered property, respectively.
 
-##### `getFilterCategory` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
+#### `getFilterCategory` ([Accessor&lt;number | string&gt;|Accessor&lt;(number | string)[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getfiltercategory}
 
 * Default: `0`
 
@@ -193,7 +193,7 @@ new ScatterplotLayer({
 })
 ```
 
-##### `filterCategories` (Array, optional) {#filtercategories}
+#### `filterCategories` (string[] | string[][], optional) {#filtercategories}
 
 * Default: `[0]`
 
@@ -212,33 +212,33 @@ The maximum number of supported is determined by the `categorySize`:
 
 If this value is exceeded any categories beyond the limit will be ignored.
 
-##### `filterTransformSize` (Boolean, optional) {#filtertransformsize}
+#### `filterTransformSize` (boolean, optional) {#filtertransformsize}
 
 * Default: `true`
 
 When an object is "faded", manipulate its size so that it appears smaller or thinner. Only works if `filterSoftRange` is specified.
 
 
-##### `filterTransformColor` (Boolean, optional) {#filtertransformcolor}
+#### `filterTransformColor` (boolean, optional) {#filtertransformcolor}
 
 * Default: `true`
 
 When an object is "faded", manipulate its opacity so that it appears more translucent. Only works if `filterSoftRange` is specified.
 
 
-##### `filterEnabled` (Boolean, optional) {#filterenabled}
+#### `filterEnabled` (boolean, optional) {#filterenabled}
 
 * Default: `true`
 
 Enable/disable the data filter. If the data filter is disabled, all objects are rendered.
 
-##### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
+#### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
 Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
 
-- `event` (Object)
-  + `id` (String) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
-  + `count` (Number) - the number of data objects that pass the filter.
+- `event` (object)
+  + `id` (string) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
+  + `count` (number) - the number of data objects that pass the filter.
 
 ## Remarks
 

@@ -27,7 +27,7 @@ export const GreatCircleLayerDemo = makeLayerDemo({
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: [64, 255, 0],
     getTargetColor: [0, 128, 200],
-    widthMinPixels: 5,
+    getWidth: 5,
     pickable: true
   }`
 });
@@ -116,7 +116,7 @@ export const H3ClusterLayerDemo = makeLayerDemo({
 
 export const TileLayerDemo = makeLayerDemo({
   Layer: TileLayer,
-  getTooltip: '({tile}) => tile && `x:${tile.x}, y:${tile.y}, z:${tile.z}`',
+  getTooltip: '({tile}) => tile && `x:${tile.index.x}, y:${tile.index.y}, z:${tile.index.z}`',
   imports: {BitmapLayer},
   mapStyle: null,
   props: `{
@@ -126,14 +126,12 @@ export const TileLayerDemo = makeLayerDemo({
     maxZoom: 19,
 
     renderSubLayers: props => {
-      const {
-        bbox: {west, south, east, north}
-      } = props.tile;
+      const {boundingBox} = props.tile;
 
       return new BitmapLayer(props, {
         data: null,
         image: props.data,
-        bounds: [west, south, east, north]
+        bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]]
       });
     }
   }`
@@ -175,6 +173,7 @@ export const TerrainLayerDemo = makeLayerDemo({
 export const MVTLayerDemo = makeLayerDemo({
   Layer: MVTLayer,
   mapStyle: null,
+  getTooltip: '({object}) => object && (object.properties.name || object.properties.layerName)',
   props: `{
     data: [
       'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
@@ -208,14 +207,14 @@ export const MVTLayerDemo = makeLayerDemo({
           return 1;
       }
     },
-    lineWidthMinPixels: 1
+    lineWidthMinPixels: 1,
+    pickable: true
   }`
 });
 
 export const WMSLayerDemo = makeLayerDemo({
   Layer: WMSLayer,
   isExperimental: true,
-  getTooltip: '({bitmap}) => bitmap && `x:${bitmap.x}, y:${bitmap.y}`',
   mapStyle: null,
   initialViewState: {
     longitude: -122.4,
@@ -227,7 +226,6 @@ export const WMSLayerDemo = makeLayerDemo({
   props: `{
     data: 'https://ows.terrestris.de/osm/service',
     serviceType: 'wms',
-    layers: ['OSM-WMS'],
-    pickable: true
+    layers: ['OSM-WMS']
   }`
 });
