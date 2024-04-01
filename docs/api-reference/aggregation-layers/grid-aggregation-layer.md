@@ -42,5 +42,5 @@ When aggregation performed on CPU, aggregation result is in JS Array objects. Su
 ## allocateResources()
 
 Called with following arguments to allocated resources required to hold aggregation results.
-  * `numRow` (*Number*) - Number of rows in the grid.
-  * `numCol` (*Number*) - Number of columns in the grid.
+  * `numRow` (number) - Number of rows in the grid.
+  * `numCol` (number) - Number of columns in the grid.

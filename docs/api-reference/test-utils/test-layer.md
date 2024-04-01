@@ -54,13 +54,13 @@ testLayer({Layer, spies, testCases, onError});
 await testLayerAsync({Layer, spies, testCases, onError});
 ```
 
-* `Layer` (Object) - the layer component class to test
+* `Layer` (object) - the layer component class to test
 * `testCases` (Array) - a list of test cases, as described below.
 * `viewport` (`Viewport`, Optional) - a viewport instance to use for the tests.
 * `spies` (Array, Optional) - names of layer class methods to spy on.
 * `onError` (Function, Optional) - callback after each operation with potential errors. Called with two arguments:
   - `error` (`Error`|`null`)
-  - `title` (String) - name of the operation.
+  - `title` (string) - name of the operation.
 
 
 ### Test Cases
@@ -69,21 +69,21 @@ Test cases specified as objects and are run sequentially. Each test case provide
 
 A test case is an object with the following fields:
 
-* `title` (String) - title of the test case
-* `props` (Object) - specifies a complete new set of props
-* `updateProps` (Object) - specifies an incremental prop change (overrides props from previous test case)
-* `spies` (Array, Optional) - names of layer class methods to spy on. Overrides the list that was sent to `testLayer`.
+* `title` (string) - title of the test case
+* `props` (object) - specifies a complete new set of props
+* `updateProps` (object) - specifies an incremental prop change (overrides props from previous test case)
+* `spies` (string[], Optional) - names of layer class methods to spy on. Overrides the list that was sent to `testLayer`.
 * `onBeforeUpdate` (Function, Optional) - callback invoked before the layer props are updated. Receives a single argument `info`:
-  - `info.testCase` (Object) - the current test case
-  - `info.layer` (`Layer`) - the old layer
+  - `info.testCase` (object) - the current test case
+  - `info.layer` (Layer) - the old layer
 * `onAfterUpdate` (Function, Optional) - callback invoked after the layer props have been updated. This allows the test case to verify that the layer's state has been correctly updated, or that certain functions (spies) have been called etc. Receives a single argument `info`:
 `{layer, oldState, subLayers, subLayer, spies: spyMap}`.
-  - `info.testCase` (Object) - the current test case
-  - `info.layer` (`Layer`) - the updated layer
-  - `info.oldState` (Object) - layer state before the update
-  - `info.subLayers` (Array) - sub layers rendered, if the layer is composite
-  - `info.subLayer` (`Layer`) - the first sub layer rendered, if the layer is composite
-  - `info.spies` (Object) - key are layer method names and values are [spies](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/make-spy).
+  - `info.testCase` (object) - the current test case
+  - `info.layer` (Layer) - the updated layer
+  - `info.oldState` (object) - layer state before the update
+  - `info.subLayers` (Layer[]) - sub layers rendered, if the layer is composite
+  - `info.subLayer` (Layer) - the first sub layer rendered, if the layer is composite
+  - `info.spies` (object) - key are layer method names and values are [spies](https://uber-web.github.io/probe.gl/docs/api-reference/test-utils/make-spy).
 
 
 Note that `onAfterUpdate` is called immediately after the props are updated. If the layer contains asynchronous props, they may not have been loaded at this point.

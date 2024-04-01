@@ -29,11 +29,10 @@ The constructor for the `PointLight` class. Use this to create a new `PointLight
 ```js
 const pointLight = new PointLight({color, intensity, position});
 ```
-#### Parameters
 
-* `color` - (*array*,)  RGB color of point light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of point light source, default value is `1.0`.
-* `position` - (*array*,)  Location of point light source, default value is `[0, 0, 1]`.The coordinate system of the position depends on the current [view](./deck.md#views): `[longitude, latitude, altitude]` in geospatial views and world position in non-geospatial views.
+* `color` - (number[3],)  RGB color of point light source, default value is `[255, 255, 255]`.
+* `intensity` - (number) Strength of point light source, default value is `1.0`.
+* `position` - (number[3])  Location of point light source, default value is `[0, 0, 1]`.The coordinate system of the position depends on the current [view](./deck.md#views): `[longitude, latitude, altitude]` in geospatial views and world position in non-geospatial views.
 
 ## Source
 

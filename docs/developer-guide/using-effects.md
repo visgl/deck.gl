@@ -124,7 +124,7 @@ A material is a plain JavaScript object with the following fiields:
 - `ambient` (number) Between 0-1. Default `0.35`.
 - `diffuse` (number) Between 0-1. Default `0.6`.
 - `shininess` (number) Larger than 0. Default `32`.
-- `specularColor` (number[]). RGB color, each channel in 0-1 range. Default `[0.15, 0.15, 0.15]`.
+- `specularColor` (number[3]). RGB color, each channel in 0-1 range. Default `[0.15, 0.15, 0.15]`.
 
 Setting a material property to the value `true` will set all properties to their defaults.
 

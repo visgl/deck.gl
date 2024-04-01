@@ -16,7 +16,7 @@ For more information consult the [Attribute Management](../../developer-guide/cu
 
 ## Static Methods
 
-##### `setDefaultLogFunctions` {#setdefaultlogfunctions}
+#### `setDefaultLogFunctions` {#setdefaultlogfunctions}
 
 Sets log functions to help trace or time attribute updates.
 Default logging uses the deck.gl logger.
@@ -39,12 +39,12 @@ new AttributeManager({id: 'attribute-manager'});
 
 Parameters:
 
-* `id` (String, optional) - identifier (for debugging)
+* `id` (string, optional) - identifier (for debugging)
 
 
 ## Methods
 
-##### `add` {#add}
+#### `add` {#add}
 
 Adds attribute descriptions to the AttributeManager that describe
 the attributes that should be auto-calculated.
@@ -61,67 +61,67 @@ Takes a single parameter as a map of attribute descriptor objects:
 * keys are attribute names
 * values are objects with attribute definitions:
   - luma.gl [accessor parameters](https://luma.gl/docs/api-reference-legacy/classes/accessor):
-    * `type` (Enum, optional) - data type of the attribute, see "Remarks" section below.
-    * `size` (Number) - number of elements per vertex
-    * `normalized` (Boolean) - default `false`
-    * `integer` (Boolean) - WebGL2 only, default `false`
-    * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
+    * `type` (string, optional) - data type of the attribute, see "Remarks" section below.
+    * `size` (number) - number of elements per vertex
+    * `normalized` (boolean) - default `false`
+    * `integer` (boolean) - WebGL2 only, default `false`
+    * `divisor` (boolean, optional) - `1` if this is an instanced attribute
       (a.k.a. divisor). Default to `0`.
   - deck.gl attribute configurations:
-    * `isIndexed` (Boolean, optional) - if this is an index attribute
+    * `isIndexed` (boolean, optional) - if this is an index attribute
       (a.k.a. indices). Default to `false`.
-    * `accessor` (String | Array of strings | Function) - accessor name(s) that will
+    * `accessor` (string | string[] | Function) - accessor name(s) that will
       trigger an update of this attribute when changed. Used with
       [`updateTriggers`](./layer.md#updatetriggers).
     * `transform` (Function, optional) - callback to process the result returned by `accessor`.
     * `update` (Function, optional) - the function to be called when data changes. If not supplied, the attribute will be auto-filled with `accessor`.
-    * `defaultValue` (Number | Array of numbers, optional) - Default `[0, 0, 0, 0]`.
-    * `noAlloc` (Boolean, optional) - if this attribute should not be
+    * `defaultValue` (number | number[], optional) - Default `[0, 0, 0, 0]`.
+    * `noAlloc` (boolean, optional) - if this attribute should not be
       automatically allocated. Default to `false`.
-  - `shaderAttributes` (Object, optional) - If this attribute maps to multiple
+  - `shaderAttributes` (object, optional) - If this attribute maps to multiple
     attributes in the vertex shader, that mapping can be defined here. All
     `shaderAttributes` will share a single buffer created based on the `size`
     parameter. This can be used to interleave attributes. Each shader attribute object may contain any of the following:
-    * `size` (Number) - number of elements per vertex
-    * `vertexOffset` (Number) - offset of the attribute by vertex (stride). Default `0`.
-    * `elementOffset` (Number) - offset of the attribute by element. default `0`.
-    * `divisor` (Boolean, optional) - `1` if this is an instanced attribute
+    * `size` (number) - number of elements per vertex
+    * `vertexOffset` (number) - offset of the attribute by vertex (stride). Default `0`.
+    * `elementOffset` (number) - offset of the attribute by element. default `0`.
+    * `divisor` (boolean, optional) - `1` if this is an instanced attribute
       (a.k.a. divisor). Default to `0`.
 
-##### `addInstanced` {#addinstanced}
+#### `addInstanced` {#addinstanced}
 
 Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
 
 
-##### `remove` {#remove}
+#### `remove` {#remove}
 
 Removes defined attributes.
 
 Parameters:
 
-* `attributeNames` (Array) - Array of attribute names to be removed
+* `attributeNames` (string[]) - Array of attribute names to be removed
 
 
-##### `invalidate` {#invalidate}
+#### `invalidate` {#invalidate}
 
 Mark an attribute as need update.
 
 Parameters:
 
-* `name` (String) - Either the name of the attribute, or the name of an accessor. If an name of accessor is provided, all attributes with that accessor are invalidated.
-* `dataRange` (Object, optional) - A partial range of the attribute to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attribute for all data.
+* `name` (string) - Either the name of the attribute, or the name of an accessor. If an name of accessor is provided, all attributes with that accessor are invalidated.
+* `dataRange` (object, optional) - A partial range of the attribute to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attribute for all data.
 
 
-##### `invalidateAll` {#invalidateall}
+#### `invalidateAll` {#invalidateall}
 
 Mark all attributes as need update.
 
 Parameters:
 
-* `dataRange` (Object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
+* `dataRange` (object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
 
 
-##### `update` {#update}
+#### `update` {#update}
 
 Ensure all attribute buffers are updated from props or data.
 
@@ -141,11 +141,11 @@ attributeManager.update({
 
 Parameters:
 
-* `data` (Object) - data (iterable object)
-* `numInstances` (Number) - count of data
-* `buffers` (Object) - pre-allocated buffers
-* `props` (Object) - passed to updaters
-* `context` (Object) - Used as "this" context for updaters
+* `data` (object) - data (iterable object)
+* `numInstances` (number) - count of data
+* `buffers` (object) - pre-allocated buffers
+* `props` (object) - passed to updaters
+* `context` (object) - Used as "this" context for updaters
 
 Notes:
 

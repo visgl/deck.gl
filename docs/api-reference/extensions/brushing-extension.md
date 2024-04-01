@@ -51,11 +51,11 @@ new BrushingExtension();
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,12 +74,12 @@ new BrushingExtension();
 When added to a layer via the `extensions` prop, the `BrushingExtension` adds the following properties to the layer:
 
 
-##### `brushingRadius` (Number) {#brushingradius}
+#### `brushingRadius` (number) {#brushingradius}
 
 The brushing radius centered at the pointer, in meters. If a data object is within this circle, it is rendered; otherwise it is hidden.
 
 
-##### `brushingEnabled` (Boolean, optional) {#brushingenabled}
+#### `brushingEnabled` (boolean, optional) {#brushingenabled}
 
 * Default: `true`
 
@@ -88,7 +88,7 @@ Enable/disable brushing. If brushing is disabled, all objects are rendered.
 Brushing is always disabled when the pointer leaves the current viewport.
 
 
-##### `brushingTarget` (Enum, optional) {#brushingtarget}
+#### `brushingTarget` (string, optional) {#brushingtarget}
 
 * Default: `source`
 
@@ -100,7 +100,7 @@ The position used to filter each object by. One of the following:
 - `'custom'`: Some layers may not describe their data objects with one or two coordinates, for example `PathLayer` and `PolygonLayer`. Use this option with the `getBrushingTarget` prop to provide a custom position that each object should be filtered by.
 
 
-##### `getBrushingTarget` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getbrushingtarget}
+#### `getBrushingTarget` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getbrushingtarget}
 
 * Default: `null`
 

@@ -22,25 +22,25 @@ new FirstPersonView({id, ...});
 
 `FirstPersonView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-##### `projectionMatrix` (Array[16], optional) {#projectionmatrix}
+#### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
 
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
-##### `fovy` (Number, optional) {#fovy}
+#### `fovy` (number, optional) {#fovy}
 
 Field of view covered by camera, in the perspective case. In degrees. Default `75`.
 
-##### `near` (Number, optional) {#near}
+#### `near` (number, optional) {#near}
 
 Distance of near clipping plane. Default `0.1`.
 
-##### `far` (Number, optional) {#far}
+#### `far` (number, optional) {#far}
 
 Distance of far clipping plane. Default `1000`.
 
-##### `focalDistance` (Number, optional) {#focaldistance}
+#### `focalDistance` (number, optional) {#focaldistance}
 
 Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 
@@ -49,13 +49,13 @@ Modifier of viewport scale. Corresponds to the number of pixels per meter. Defau
 
 To render, a `FirstPersonView` needs to be combined with a `viewState` object with the following parameters:
 
-- `longitude` (Number, optional) - longitude of the camera
-- `latitude` (Number, optional) - latitude of the camera
-* `position` (Number[3], optional) - meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`.
-* `bearing` (Number, optional) - bearing angle in degrees. Default `0` (north).
-* `pitch` (Number, optional) - pitch angle in degrees. Default `0` (horizontal).
-- `maxPitch` (Number, optional) - max pitch angle. Default `90` (down).
-- `minPitch` (Number, optional) - min pitch angle. Default `-90` (up).
+- `longitude` (number, optional) - longitude of the camera
+- `latitude` (number, optional) - latitude of the camera
+* `position` (number[3], optional) - meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`.
+* `bearing` (number, optional) - bearing angle in degrees. Default `0` (north).
+* `pitch` (number, optional) - pitch angle in degrees. Default `0` (horizontal).
+- `maxPitch` (number, optional) - max pitch angle. Default `90` (down).
+- `minPitch` (number, optional) - min pitch angle. Default `-90` (up).
 
 
 ## Controller

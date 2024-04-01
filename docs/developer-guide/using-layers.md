@@ -87,14 +87,14 @@ If an accessor prop is set to a function, when the layer is about to be drawn on
 The accessor function receives two arguments:
 
 - `object` - the current element in the data stream. If `data` is an array or an iterable, the element of the current iteration is used. If `data` is a non-iterable object, this argument is always `null`.
-- `objectInfo` (Object) - contextual information of the current element. Contains the following fields:
-  + `index` (Number) - the index of the current iteration
+- `objectInfo` (object) - contextual information of the current element. Contains the following fields:
+  + `index` (number) - the index of the current iteration
   + `data` - the value of the `data` prop
-  + `target` (Array) - a pre-allocated array. The accessor function can optionally fill data into this array and return it, instead of creating a new array for every object. In some browsers this improves performance significantly by reducing garbage collection.
+  + `target` (number[]) - a pre-allocated array. The accessor function can optionally fill data into this array and return it, instead of creating a new array for every object. In some browsers this improves performance significantly by reducing garbage collection.
 
 The accessor function is typically expected to return either a number or an array.
 
-Some accessors also support constant values instead of functions. When a constant value is provided, it is applied to all objects in the data stream.
+If an accessor prop is set to a constant value, the value is applied to all objects in the data stream.
 
 
 ### Other Layer Props
