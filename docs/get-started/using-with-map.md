@@ -6,7 +6,7 @@ While deck.gl works independently without any map component, when visualizing ge
 
 deck.gl has been designed to work in tandem with popular JavaScript base map providers. Depending on your tech stack, deck.gl's support for a particular base map solution may come with different level of compatibility and limitations.
 
-There are three types of integration between deck.gl and a base map renderer:
+There are two types of integration between deck.gl and a base map renderer:
 
 ### Overlaid
 
