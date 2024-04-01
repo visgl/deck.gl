@@ -49,7 +49,7 @@ const App = (data) => (
 
 ### React Context
 
-##### `ContextProvider` (React.Component, optional) {#contextprovider}
+#### `ContextProvider` (React.Component, optional) {#contextprovider}
 
 A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
 

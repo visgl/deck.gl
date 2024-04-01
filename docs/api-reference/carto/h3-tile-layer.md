@@ -60,7 +60,7 @@ new deck.carto.H3TileLayer({});
 
 Inherits all properties from [`H3HexagonLayer`](../geo-layers/h3-hexagon-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 

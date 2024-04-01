@@ -93,8 +93,9 @@
           "api-reference/layers/arc-layer",
           "api-reference/layers/bitmap-layer",
           "api-reference/layers/column-layer",
-          "api-reference/aggregation-layers/cpu-grid-layer",
           "api-reference/aggregation-layers/contour-layer",
+          "api-reference/aggregation-layers/cpu-grid-layer",
+          "api-reference/geo-layers/geohash-layer",
           "api-reference/layers/geojson-layer",
           "api-reference/aggregation-layers/gpu-grid-layer",
           "api-reference/geo-layers/great-circle-layer",
@@ -105,13 +106,11 @@
           "api-reference/aggregation-layers/heatmap-layer",
           "api-reference/aggregation-layers/hexagon-layer",
           "api-reference/layers/icon-layer",
-          "api-reference/geo-layers/wms-layer",
           "api-reference/layers/line-layer",
           "api-reference/geo-layers/mvt-layer",
           "api-reference/layers/path-layer",
           "api-reference/layers/point-cloud-layer",
           "api-reference/layers/polygon-layer",
-          "api-reference/geo-layers/geohash-layer",
           "api-reference/geo-layers/quadkey-layer",
           "api-reference/geo-layers/s2-layer",
           "api-reference/layers/scatterplot-layer",
@@ -123,7 +122,8 @@
           "api-reference/layers/text-layer",
           "api-reference/geo-layers/tile-layer",
           "api-reference/geo-layers/tile-3d-layer",
-          "api-reference/geo-layers/trips-layer"
+          "api-reference/geo-layers/trips-layer",
+          "api-reference/geo-layers/wms-layer"
         ]
       },
       {

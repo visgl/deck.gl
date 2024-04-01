@@ -33,15 +33,15 @@ In this example, using `Teal` of length `domain.length + 1`, the range/color equ
 
 ### Arguments
 
-#### `attr` (String) {#attr}
+#### `attr` (string) {#attr}
 
 Attribute or column to symbolize by.
 
-#### `domain` (Array) {#domain}
+#### `domain` (number[]) {#domain}
 
 Assign manual class break values.
 
-#### `colors` (String | Array, optional) {#colors}
+#### `colors` (string | Color[], optional) {#colors}
 
 Color assigned to each domain value.
 
@@ -50,7 +50,7 @@ Color assigned to each domain value.
 
 Default: `PurpOr`
 
-#### `nullColor` (Array, optional) {#nullcolor}
+#### `nullColor` (number[3], optional) {#nullcolor}
 
 Color for null values.
 
@@ -76,15 +76,15 @@ new CartoLayer({
 
 ### Arguments
 
-#### `attr` (String) {#attr}
+#### `attr` (string) {#attr}
 
 Attribute or column to symbolize by.
 
-#### `domain` (Array) {#domain}
+#### `domain` (string[]) {#domain}
 
 Category list. Must be a valid list of categories.
 
-#### `colors` (String | Array, optional) {#colors}
+#### `colors` (string | Color[], optional) {#colors}
 
 Color assigned to each domain value.
 
@@ -93,13 +93,13 @@ Color assigned to each domain value.
 
 Default: `PurpOr`
 
-#### `nullColor` (Array, optional) {#nullcolor}
+#### `nullColor` (number[3], optional) {#nullcolor}
 
 Color for null values.
 
 Default: `[204, 204, 204]`
 
-#### `othersColor` (Array, optional) {#otherscolor}
+#### `othersColor` (number[3], optional) {#otherscolor}
 
 Fallback color for a category not correctly assigned.
 
@@ -125,15 +125,15 @@ new CartoLayer({
 
 ### Arguments
 
-#### `attr` (String) {#attr}
+#### `attr` (string) {#attr}
 
 Attribute or column to symbolize by.
 
-#### `domain` (Array) {#domain}
+#### `domain` (number[]) {#domain}
 
 Attribute domain to define the data range.
 
-#### `colors` (String | Array, optional) {#colors}
+#### `colors` (string | Color[], optional) {#colors}
 
 Color assigned to each domain value.
 
@@ -142,7 +142,7 @@ Color assigned to each domain value.
 
 Default: `PurpOr`
 
-#### `nullColor` (Array, optional) {#nullcolor}
+#### `nullColor` (number[3], optional) {#nullcolor}
 
 Color for null values.
 

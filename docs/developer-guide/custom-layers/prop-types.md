@@ -70,7 +70,7 @@ Each prop in `defaultProps` may be an object in the following shape:
   + `value` - the new value of this prop
   + `oldValue` - the previous value of this prop
   + `propType` - this prop type definition
-- `deprecatedFor` (string|array, optional) - mark this prop as deprecated. The value is the new prop name(s) that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
+- `deprecatedFor` (string | string[], optional) - mark this prop as deprecated. The value is the new prop name(s) that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
 - Any additional options, see individual types below.
 
 ### Built-in Types
@@ -150,7 +150,7 @@ An array of objects.
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
   + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
-  + `compare` (boolean|number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+  + `compare` (boolean | number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
 - Default `validate`: value is an array
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
 
@@ -170,7 +170,7 @@ An arbitrary object.
 - Options:
   + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
   + `ignore` (boolean, optional) - if `true`, prop comparison is disabled. Default `false`.
-  + `compare` (boolean|number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
+  + `compare` (boolean | number, optional) - compare deeply during prop comparison. Default `false`. If a number is supplied, indicates the maximum depth to deep-compare, where 0 is shallow comparison and -1 is infinite depth. `true` is equivalent to `1`.
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
 
 ```js

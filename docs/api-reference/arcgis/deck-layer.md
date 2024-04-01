@@ -67,7 +67,7 @@ Property names that start with `deck.` are forwarded to a `Deck` instance. The f
 
 ## Members
 
-##### `deck` {#deck}
+#### `deck` {#deck}
 
 An ArcGIS [Accessor](https://developers.arcgis.com/javascript/latest/api-reference/esri-core-Accessor.html) that stores Deck props. The props can be updated after the layer construction:
 

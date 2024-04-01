@@ -53,11 +53,11 @@ const overlay = new GoogleMapsOverlay(props)
 
 The constructor additionally accepts the following option:
 
-- `interleaved` (Boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
+- `interleaved` (boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
 
 ## Methods
 
-##### `setMap` {#setmap}
+#### `setMap` {#setmap}
 
 ```js
 overlay.setMap(map);
@@ -65,7 +65,7 @@ overlay.setMap(map);
 
 Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL2 context; use `finalize()` if the overlay should be permanently removed.
 
-##### `setProps` {#setprops}
+#### `setProps` {#setprops}
 
 ```js
 overlay.setProps(props);
@@ -73,19 +73,19 @@ overlay.setProps(props);
 
 Update (partial) props.
 
-##### `pickObject` {#pickobject}
+#### `pickObject` {#pickobject}
 
 Equivalent of [deck.pickObject](../core/deck.md).
 
-##### `pickObjects` {#pickobjects}
+#### `pickObjects` {#pickobjects}
 
 Equivalent of [deck.pickObjects](../core/deck.md).
 
-##### `pickMultipleObjects` {#pickmultipleobjects}
+#### `pickMultipleObjects` {#pickmultipleobjects}
 
 Equivalent of [deck.pickMultipleObjects](../core/deck.md).
 
-##### `finalize` {#finalize}
+#### `finalize` {#finalize}
 
 ```js
 overlay.finalize();

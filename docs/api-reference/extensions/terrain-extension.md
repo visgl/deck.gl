@@ -68,10 +68,10 @@ new TerrainExtension();
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.7.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/extensions@^8.7.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -88,7 +88,7 @@ new TerrainExtension();
 
 When added to a layer via the `extensions` prop, the `TerrainExtension` adds the following properties to the layer:
 
-##### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
+#### `terrainDrawMode` ('offset' | 'drape') {#terraindrawmode}
 
 How data should be fitted to the terrain surface. If not specified, will be automatically determined from the layer type.
 

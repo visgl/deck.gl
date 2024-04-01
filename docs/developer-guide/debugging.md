@@ -30,7 +30,7 @@ Starting v8.0, deck.gl no longer bundles the debugging module in production mode
 <!-- the bundle that contains deck.gl -->
 <script src="app.js"></script>
 <!-- the debug module -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/debug.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/debug.min.js"></script>
 ```
 
 ## WebGL2/WebGPU debugging using luma.gl
