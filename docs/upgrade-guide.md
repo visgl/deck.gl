@@ -73,7 +73,11 @@ map.addLayer(new MapboxLayer({type: ArcLayer, ...}))
 
 ### @deck.gl/carto
 
-`CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
+While upgrading to deck.gl v9, make sure yo
+
+- `CartoLayer` has been removed. Use a [Data Source](./api-reference/carto/data-sources) in combination with an [appropriate Layer](./api-reference/carto/overview#custom-layers-connected-to-carto-datasource) instead.
+- `setDefaultCredentials` has been removed. Authentication is now passed to the [Data Source](./api-reference/carto/data-sources).
+- `fetchLayerData` has been replaced by `query`. Find [a working example here](./api-reference/carto/overview)
 
 ```ts
 // deck.gl v9
