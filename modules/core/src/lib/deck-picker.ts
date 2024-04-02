@@ -100,11 +100,10 @@ export default class DeckPicker {
 
   finalize() {
     if (this.pickingFBO) {
-      this.pickingFBO.delete();
+      this.pickingFBO.destroy();
     }
     if (this.depthFBO) {
-      this.depthFBO.colorAttachments[0].delete();
-      this.depthFBO.delete();
+      this.depthFBO.destroy();
     }
   }
 
