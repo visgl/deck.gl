@@ -9,8 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0-beta.2",
-    "@deck.gl/layers": "^9.0.0-beta.2",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "deck.gl-leaflet": "^1.1.1",
     "leaflet": "^1.7.1"
   },

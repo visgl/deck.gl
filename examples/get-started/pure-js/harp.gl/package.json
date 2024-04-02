@@ -8,8 +8,8 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0-beta.2",
-    "@deck.gl/layers": "^9.0.0-beta.2",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "@here/harp-datasource-protocol": "^0.14.0",
     "@here/harp-geoutils": "^0.14.0",
     "@here/harp-mapview": "^0.14.0",
