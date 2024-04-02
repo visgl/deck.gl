@@ -4,6 +4,7 @@
 export {Device, Buffer, Texture, Framebuffer} from '@luma.gl/core';
 export {
   Model,
+  BufferTransform,
   TextureTransform,
 
   // Geometry
