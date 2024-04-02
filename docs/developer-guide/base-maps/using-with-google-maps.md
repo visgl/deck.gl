@@ -21,7 +21,7 @@ Interleaving is supported by using [GoogleMapsOverlay](../../api-reference/googl
 
 The [overlaid](../../get-started/using-with-map.md#overlaid) mode renders deck.gl in a separate canvas inside the Maps' controls container, using the Maps JavaScript API [OverlayView class](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView).
 
-This is supported by using [GoogleMapsOverlay](../../api-reference/google-maps/google-maps-overlay.md) with Google's [raster map](https://developers.google.com/maps/documentation/javascript/vector-map). When a deck.gl overlay instance is added to the map, if a vector map is not detected or the user's device does not support WebGL2, it will automatically fallback to overlaid mode. In this mode, 3D features like tilt, rotation, fraction zoom are not supported.
+This is supported by using [GoogleMapsOverlay](../../api-reference/google-maps/google-maps-overlay.md) with Google's [raster map](https://developers.google.com/maps/documentation/javascript/vector-map). When a deck.gl overlay instance is added to the map, if a vector map is not detected or the user's device does not support WebGL2, it will automatically fallback to overlaid mode. You can also explicitly use this mode by setting the option `interleaved` to false when creating the GoogleMapsOverlay. In this mode, 3D features like tilt, rotation, and fractional zoom are not supported.
 
 ### Reverse Controlled
 
