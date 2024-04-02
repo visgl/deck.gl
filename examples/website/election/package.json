@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "d3-scale": "^2.0.0",
-    "deck.gl": "^8.8.0"
+    "deck.gl": "^9.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
