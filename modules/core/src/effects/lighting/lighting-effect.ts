@@ -25,7 +25,7 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
 
-type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
+export type LightingEffectProps = Record<string, PointLight | DirectionalLight | AmbientLight>;
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect implements Effect {
