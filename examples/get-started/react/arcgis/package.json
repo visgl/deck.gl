@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@arcgis/core": "^4.25.0",
-    "@deck.gl/arcgis": "^9.0.0-beta.2",
+    "@deck.gl/arcgis": "^9.0.0",
     "@esri/react-arcgis": "^5.2.0",
-    "deck.gl": "^9.0.0-beta.2",
+    "deck.gl": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

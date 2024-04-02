@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@vis.gl/react-google-maps": "^0.7.1",
-    "deck.gl": "^9.0.0-beta.2",
+    "deck.gl": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
