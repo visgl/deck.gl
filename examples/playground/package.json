@@ -16,7 +16,7 @@
     "@loaders.gl/gltf": "^4.1.4",
     "@luma.gl/constants": "^9.0.4",
     "brace": "^0.11.1",
-    "deck.gl": "^8.8.0",
+    "deck.gl": "^9.0.0",
     "maplibre-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
