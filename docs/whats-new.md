@@ -10,12 +10,16 @@ Release date: March 21, 2024
   <tbody>
     <tr>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
-        <p><i>Widgets</i></p>
+        <img style={{maxHeight:200}} src="https://www.w3.org/2023/02/webgpu-logos/webgpu-notext.svg" />
+        <p><i>WebGPU</i></p>
       </td>
       <td>
-        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/7ae2d0c7-47a7-409c-92a6-2259d97dfad1" />
+        <img style={{maxHeight:200}} src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/480px-Typescript_logo_2020.svg.png" />
         <p><i>Typescript</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/f1a10ffd-d403-4ea5-958d-3bc8fea412fe" />
+        <p><i>Widgets</i></p>
       </td>
       <td>
         <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl/assets/453755/e05863e2-777f-46fa-a04a-1bf4aa0625e2" />
