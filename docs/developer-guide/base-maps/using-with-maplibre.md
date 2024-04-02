@@ -47,35 +47,35 @@ import TabItem from '@theme/TabItem';
 ```ts
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import maplibregl from 'maplibre-gl';
+import {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const map = new maplibregl.Map({
+const map = new Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   center: [0.45, 51.47],
   zoom: 11
 });
 
-map.once('load', () => {
-  const deckOverlay = new MapboxOverlay({
-    interleaved: true,
-    layers: [
-      new ScatterplotLayer({
-        id: 'deckgl-circle',
-        data: [
-          {position: [0.45, 51.47]}
-        ],
-        getPosition: d => d.position,
-        getFillColor: [255, 0, 0, 100],
-        getRadius: 1000,
-        beforeId: 'watername_ocean' // In interleaved mode render the layer under map labels
-      })
-    ]
-  });
+await map.once('load');
 
-  map.addControl(deckOverlay);
+const deckOverlay = new MapboxOverlay({
+  interleaved: true,
+  layers: [
+    new ScatterplotLayer({
+      id: 'deckgl-circle',
+      data: [
+        {position: [0.45, 51.47]}
+      ],
+      getPosition: d => d.position,
+      getFillColor: [255, 0, 0, 100],
+      getRadius: 1000,
+      beforeId: 'watername_ocean' // In interleaved mode render the layer under map labels
+    })
+  ]
 });
+
+map.addControl(deckOverlay);
 ```
 
   </TabItem>
@@ -140,12 +140,10 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 
 ```js
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.js"></script>
-<link href="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@^4.0.0/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@^4.0.0/dist/maplibre-gl.css" rel="stylesheet" />
 <script type="text/javascript">
   const {DeckGL, ScatterplotLayer} = deck;
-
-  maplibregl.accessToken = '<mapbox_access_token>';
 
   new DeckGL({
     mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -229,9 +227,9 @@ When you choose the reverse-controlled option, the `DeckGL` React component cats
 
 ### Choosing a map tile service
 
-There are paid map tile servers such as [MapTiler](https://www.maptiler.com/) and [AWS Location Service](https://docs.aws.amazon.com/location/latest/developerguide/map-concepts.html).
+There are paid map tile servers such as [MapTiler](https://www.maptiler.com/), [Stadia Maps](https://stadiamaps.com/), and [AWS Location Service](https://docs.aws.amazon.com/location/latest/developerguide/map-concepts.html).
 
-deck.gl public demos use [CARTO free basemaps](https://carto.com/basemaps) as a non commercial application. Checkout [this guide](../../api-reference/carto/basemap.md) to start using it.
+deck.gl public demos use [CARTO free basemaps](https://carto.com/basemaps) as a non-commercial application. Checkout [this guide](../../api-reference/carto/basemap.md) to start using it.
 
 If you host your own map tiles, you will need a custom map style JSON that points to your own [vector tile source](https://maplibre.org/maplibre-style-spec/), this custom style must match the schema of your tile source.
 
@@ -241,7 +239,7 @@ Open source tile schemas include:
 - [OpenMapTiles schema ](https://openmaptiles.org/schema/)
 - [Mapbox Vector Tile Spec](https://www.mapbox.com/developers/vector-tiles/)
 
-Some useful resources for creating your own map service:
+Some useful resources for hosting your own map tiles:
 
 - [Martin](https://github.com/maplibre/martin), a tile server from the Maplibre organization
 - [Open source tools](https://github.com/mapbox/awesome-vector-tiles)
