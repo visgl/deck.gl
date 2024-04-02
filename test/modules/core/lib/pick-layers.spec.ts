@@ -24,6 +24,7 @@ import test from 'tape-promise/tape';
 import {
   MapView,
   ScatterplotLayer,
+  ColumnLayer,
   Deck,
   PolygonLayer,
   PathLayer,
@@ -32,6 +33,8 @@ import {
 } from 'deck.gl';
 import {MaskExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
+import type {DeckProps} from '@deck.gl/core';
+import {equals} from '@math.gl/core';
 
 const VIEW_STATE = {
   latitude: 37.751537058389985,
@@ -41,7 +44,7 @@ const VIEW_STATE = {
   bearing: 0
 };
 
-const DECK_PROPS = {
+const DECK_PROPS: DeckProps = {
   width: 500,
   height: 550,
   views: [new MapView()],
@@ -750,16 +753,11 @@ const TEST_CASES = [
   }
 ];
 
-test(`pickingTest`, t => {
-  const deck = new Deck();
-  t.ok(deck, 'Deck should be constructed');
+test(`pickingTest`, async t => {
+  const deck = new Deck(DECK_PROPS);
 
-  const len = TEST_CASES.length;
-  let index = 0;
-  let testCase;
-
-  function runTests() {
-    testCase = TEST_CASES[index++];
+  for (const testCase of TEST_CASES) {
+    await updateDeckProps(deck, testCase.props);
     const pickingMethods = testCase.pickingMethods;
 
     let pickInfos;
@@ -794,13 +792,43 @@ test(`pickingTest`, t => {
         // }
       }
     }
-    if (index === len) {
-      deck.finalize();
-      t.end();
-    } else {
-      deck.setProps({...DECK_PROPS, ...TEST_CASES[index].props});
-    }
   }
-
-  deck.setProps({...DECK_PROPS, ...TEST_CASES[0].props, onAfterRender: runTests});
+  t.end();
 });
+
+test('pickingTest#unproject3D', async t => {
+  const deck = new Deck(DECK_PROPS);
+
+  await updateDeckProps(deck, {
+    layers: [
+      new ColumnLayer({
+        data: [VIEW_STATE],
+        getPosition: d => [d.longitude, d.latitude],
+        radius: 100,
+        extruded: true,
+        getElevation: 1000,
+        getColor: [255, 0, 0],
+        pickable: true
+      })
+    ]
+  });
+
+  let pickInfo = deck.pickObject({x: 250, y: 275, unproject3D: true});
+  t.is(pickInfo.object, VIEW_STATE, 'object is picked');
+  t.ok(
+    equals(pickInfo.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 1e-7),
+    'unprojects to 3D coordinate'
+  );
+
+  t.end();
+});
+
+function updateDeckProps(deck: Deck, props: DeckProps): Promise<void> {
+  return new Promise(resolve => {
+    deck.setProps({
+      ...DECK_PROPS,
+      ...props,
+      onAfterRender: () => resolve()
+    });
+  });
+}
