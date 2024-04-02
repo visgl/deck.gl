@@ -22,11 +22,7 @@ export async function renderToDOM(
     showPaths: true
   }
 ) {
-  const loader = new Loader({
-    apiKey: GOOGLE_MAPS_API_KEY,
-    version: "quarterly"
-  });
-  
+  const loader = new Loader({apiKey: GOOGLE_MAPS_API_KEY});
   const googlemaps = await loader.importLibrary('maps');
 
   const resp = await fetch(DATA_URL);

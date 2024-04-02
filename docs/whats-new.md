@@ -137,7 +137,7 @@ The new experimental [`WMSLayer`](./api-reference/geo-layers/wms-layer.md) simpl
 
 ### Other Enhancements
 
-- [Maplibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deck.md#map).
+- [MapLibre GL](https://maplibre.org/) basemap is now supported out-of-the-box by the [scripting interface](./api-reference/core/deck.md#map).
 - `BitmapLayer` now mixes translucent pixels correctly (Note: [breaking change](./upgrade-guide.md))
 - `TextLayer` handles text outlines better in sdf mode. Outlines are no longer clipped and responds to `outlineWidth` as expected.
 - `TextLayer`'s `maxWidth` is changed to use a more intuitive unit. See upgrade guide for details.
