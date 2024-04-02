@@ -652,7 +652,7 @@ Breaking Changes:
 #### Lighting
 
 The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/visgl/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](./api-reference/core/lighting-effect.md) with the [effects prop of Deck](./api-reference/core/deck.md#effects).
-Check [Using Lighting](./developer-guide/using-lighting.md) in developer guide for more details.
+Check [Using Lighting](./developer-guide/using-effects.md) in developer guide for more details.
 
 #### Views
 

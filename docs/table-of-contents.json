@@ -16,9 +16,9 @@
     "items": [
       "get-started/getting-started",
       "get-started/using-standalone",
-      "get-started/using-with-map",
       "get-started/using-with-react",
       "get-started/using-with-typescript",
+      "get-started/using-with-map",
       "get-started/learning-resources"
     ]
   },
@@ -50,7 +50,8 @@
         "items": [
           "developer-guide/base-maps/using-with-arcgis",
           "developer-guide/base-maps/using-with-google-maps",
-          "developer-guide/base-maps/using-with-mapbox"
+          "developer-guide/base-maps/using-with-mapbox",
+          "developer-guide/base-maps/using-with-maplibre"
         ]
       },
       {

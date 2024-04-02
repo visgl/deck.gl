@@ -17,11 +17,8 @@ function DeckGLOverlay(props) {
   const overlay = useMemo(() => new DeckOverlay(props));
 
   useEffect(() => {
-    if (map) {
-      overlay.setMap(map);
-      return () => overlay.setMap(null);
-    }
-    return undefined;
+    overlay.setMap(map);
+    return () => overlay.setMap(null);
   }, [map])
 
   overlay.setProps(props);
