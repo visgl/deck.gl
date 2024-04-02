@@ -19,6 +19,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.4] - Apr 2 2024
+
+- fix(core): picking bugs (#8730)
+- add generic data types in GetPickingInfoParams (#8709)
+- Export BufferTransform from luma.gl (#8726)
+- fix(build): inlined version off by 1 (#8741)
+- fix (TypeScript): add missing exports for effects types (#8728)
+- fix(core): Type props.parameters (#8732)
+
 #### deck.gl [9.0.3] - Mar 29 2024
 
 - Bump luma.gl to 9.0.8 (#8719)
