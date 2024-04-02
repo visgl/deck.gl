@@ -793,6 +793,7 @@ test(`pickingTest`, async t => {
       }
     }
   }
+  deck.finalize();
   t.end();
 });
 
@@ -807,7 +808,7 @@ test('pickingTest#unproject3D', async t => {
         radius: 100,
         extruded: true,
         getElevation: 1000,
-        getColor: [255, 0, 0],
+        getFillColor: [255, 0, 0],
         pickable: true
       })
     ]
@@ -820,6 +821,7 @@ test('pickingTest#unproject3D', async t => {
     'unprojects to 3D coordinate'
   );
 
+  deck.finalize();
   t.end();
 });
 
