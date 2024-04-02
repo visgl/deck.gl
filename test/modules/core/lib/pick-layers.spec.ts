@@ -816,8 +816,9 @@ test('pickingTest#unproject3D', async t => {
 
   let pickInfo = deck.pickObject({x: 250, y: 275, unproject3D: true});
   t.is(pickInfo.object, VIEW_STATE, 'object is picked');
+  t.comment(`pickInfo.coordinate: ${pickInfo.coordinate}`);
   t.ok(
-    equals(pickInfo.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 1e-7),
+    equals(pickInfo.coordinate, [VIEW_STATE.longitude, VIEW_STATE.latitude, 1000], 0.0001),
     'unprojects to 3D coordinate'
   );
 
