@@ -7,40 +7,13 @@
   </a>
   Looking for an old version?
   <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.9-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.8-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.8-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.7-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.7-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.6-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.6-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.5-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.5-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.4-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.4-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.3-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.2-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v8.x-brightgreen.svg?style=flat-square" />
   </a>
   <a href="https://github.com/visgl/deck.gl/blob/7.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v7.3-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v7.x-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/visgl/deck.gl/blob/6.4-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v6.4-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v6.x-green.svg?style=flat-square" />
   </a>
 </p>
 
