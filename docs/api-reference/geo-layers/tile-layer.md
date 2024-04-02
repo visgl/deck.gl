@@ -21,6 +21,7 @@ import TabItem from '@theme/TabItem';
 ```js
 import {Deck} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
+import {BitmapLayer} from '@deck.gl/layers';
 
 const layer = new TileLayer({
   id: 'TileLayer',
@@ -58,6 +59,7 @@ new Deck({
 ```ts
 import {Deck} from '@deck.gl/core';
 import {TileLayer, TileLayerPickingInfo} from '@deck.gl/geo-layers';
+import {BitmapLayer} from '@deck.gl/layers';
 
 const layer = new TileLayer({
   id: 'TileLayer',
@@ -96,6 +98,7 @@ new Deck({
 import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
+import {BitmapLayer} from '@deck.gl/layers';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 
 function App() {
