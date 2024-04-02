@@ -231,7 +231,7 @@ All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/
 
 When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#using-with-react-map-gl) is used with react-map-gl's `useControl` hook. 
 
-When you choose the reverse-controlled option, the `DeckGL` React component cats as the root component, and the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) is a child. In this case, `Map` will automatically interpret the deck.gl view state (i.e. latitude, longitude, zoom etc), so that deck.gl layers will render as a synchronized geospatial overlay over the underlying map.
+When you choose the reverse-controlled option, the `DeckGL` React component acts as the root component, and the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) is a child. In this case, `Map` will automatically interpret the deck.gl view state (i.e. latitude, longitude, zoom etc), so that deck.gl layers will render as a synchronized geospatial overlay over the underlying map.
 
 
 ### Mapbox Token
@@ -251,4 +251,4 @@ If you are using react-map-gl, there are several ways to provide a token to your
 As of v2.0, Mapbox GL JS [went proprietary](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#200) and requires a Mapbox account to use even if you don't load tiles from the Mapbox server. If you do not wish to use the Mapbox service, you may also consider:
 
 - mapbox-gl v1.13, the last release before the license change. Interleaving is not supported by this version.
-- [MapLibre GL JS](https://maplibre.org), a community-supported WebGL map library. maplibre-gl can generally be used as a drop-in replacement of mapbox-gl, with some of its own features and APIs. More information can be found in [using with Maplibre](./using-with-maplibre.md).
+- [MapLibre GL JS](https://maplibre.org), a community-supported WebGL map library. maplibre-gl can generally be used as a drop-in replacement of mapbox-gl, with some of its own features and APIs. More information can be found in [using with MapLibre](./using-with-maplibre.md).

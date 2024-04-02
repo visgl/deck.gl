@@ -13,38 +13,34 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {Loader} from "@googlemaps/js-api-loader";
+import {Loader} from '@googlemaps/js-api-loader';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-const loader = new Loader({
-  apiKey: '<google_maps_api_key>',
-  version: "quarterly"
+const loader = new Loader({apiKey: '<google_maps_api_key>'});
+const googlemaps = await loader.importLibrary('maps');
+
+const map = new googlemaps.Map(document.getElementById('map'), {
+  center: {lat: 51.47, lng: 0.45},
+  zoom: 11,
+  mapId: '<google_map_id>'
 });
 
-loader.importLibrary('maps').then((googlemaps) => {
-  const map = new googlemaps.Map(document.getElementById('map'), {
-    center: {lat: 51.47, lng: 0.45},
-    zoom: 5,
-    mapId: '<google_map_id>'
-  });
-
-  const overlay = new GoogleMapsOverlay({
-    layers: [
-      new ScatterplotLayer({
-        id: 'deckgl-circle',
-        data: [
-          {position: [0.45, 51.47]}
-        ],
-        getPosition: d => d.position,
-        getFillColor: [255, 0, 0, 100],
-        getRadius: 1000
-      })
-    ]
-  });
-
-  overlay.setMap(map);
+const overlay = new GoogleMapsOverlay({
+  layers: [
+    new ScatterplotLayer({
+      id: 'deckgl-circle',
+      data: [
+        {position: [0.45, 51.47]}
+      ],
+      getPosition: d => d.position,
+      getFillColor: [255, 0, 0, 100],
+      getRadius: 1000
+    })
+  ]
 });
+
+overlay.setMap(map);
 ```
 
   </TabItem>
@@ -62,11 +58,8 @@ function DeckGLOverlay(props: DeckProps) {
   const overlay = useMemo(() => new GoogleMapsOverlay(props));
 
   useEffect(() => {
-    if (map) {
-      overlay.setMap(map);
-      return () => overlay.setMap(null);
-    }
-    return undefined;
+    overlay.setMap(map);
+    return () => overlay.setMap(null);
   }, [map])
 
   overlay.setProps(props);
@@ -89,7 +82,7 @@ function App() {
   return <APIProvider apiKey="<google_maps_api_key>">
     <Map
       defaultCenter={{lat: 51.47, lng: 0.45}}
-      defaultZoom={4}
+      defaultZoom={11}
       mapId="<google_maps_id>" >
       <DeckGLOverlay layers={layers} />
     </Map>

@@ -46,7 +46,7 @@ function App() {
 
 The vis.gl community maintains two React libraries that seamlessly work with deck.gl.
 
-- `react-map-gl` - a React wrapper for [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides) and [Maplibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). Several integration options are discussed in [using with Mapbox](../developer-guide/base-maps/using-with-mapbox.md).
+- `react-map-gl` - a React wrapper for [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides) and [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). Several integration options are discussed in [using with Mapbox](../developer-guide/base-maps/using-with-mapbox.md).
 - `@vis.gl/react-google-maps` - a React wrapper for [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript). See [using with Google Maps](../developer-guide/base-maps/using-with-google-maps.md).
 
 ## Using JSX Layers and Views

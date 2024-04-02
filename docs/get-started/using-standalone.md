@@ -1,6 +1,6 @@
 # Using deck.gl Standalone
 
-The deck.gl core library and layers have no dependencies on React, Mapbox GL, or Maplibre GL and can be used by any JavaScript application.
+The deck.gl core library and layers have no dependencies on React, Mapbox GL, or MapLibre GL and can be used by any JavaScript application.
 
 Our [get-started examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started) contains vanilla JavaScript templates that serve as a starting point for your application.
 
@@ -111,7 +111,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 ```
 
   </TabItem>
-  <TabItem value="maplibre" label="Maplibre">
+  <TabItem value="maplibre" label="MapLibre">
 
 ```html
 <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
@@ -133,7 +133,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
-The scripting API's [DeckGL](../api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox or Maplibre integration.
+The scripting API's [DeckGL](../api-reference/core/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox or MapLibre integration.
 
 <Tabs groupId="map-library">
   <TabItem value="mapbox" label="Mapbox">
@@ -165,7 +165,7 @@ new DeckGL({
 ```
 
   </TabItem>
-  <TabItem value="maplibre" label="Maplibre">
+  <TabItem value="maplibre" label="MapLibre">
 
 ```js
 //This example renders a scatterplot with DeckGL, on top of a basemap rendered with maplibre-gl, using a map style JSON from Carto.
