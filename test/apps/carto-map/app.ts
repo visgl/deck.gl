@@ -8,12 +8,13 @@ import { getHexagonsInView } from './h3-utils';
 const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-type TileSize = 256 | 512 | 1024 | 2048;
+type TileSize = 256 | 512 | 1024 | 1448 | 2048;
 type TileResolution = 0.25 | 0.5 | 1 | 2;
 const TILE_SIZE_TO_RESOLUTION: Record<TileSize, TileResolution> = {
   256: 0.25,
   512: 0.5,
   1024: 1,
+  1448: 1,
   2048: 2
 };
 
@@ -163,7 +164,7 @@ async function createMap() {
   ] as const;
 
   for (const [gui, params] of guiList) {
-    gui.add(params, 'tileSize', [256, 512, 1024, 2048]);
+    gui.add(params, 'tileSize', [256, 512, 1024, 1448, 2048] as TileSize[]);
     gui.add(params, 'aggregationResLevel', [2, 3, 4, 5]);
     gui.add(params, 'bias');
     gui.onChange(() => {
