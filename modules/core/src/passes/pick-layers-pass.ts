@@ -131,21 +131,16 @@ export default class PickLayersPass extends LayersPass {
       depthMask: true,
       depthTest: true,
       depthRange: [0, 1],
-      ...layer.props.parameters,
-      // Blending
-      ...PICKING_BLENDING,
-      blend: !this.pickZ
+      ...layer.props.parameters
     };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState) {
+    if (!this._colorEncoderState || operation.includes('terrain')) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
+      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
-    }
-    if (operation.includes('terrain')) {
-      pickParameters.blend = false;
     }
 
     return pickParameters;
