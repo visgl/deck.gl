@@ -245,4 +245,4 @@ Some useful resources for creating your own map service:
 
 - [Martin](https://github.com/maplibre/martin), a tile server from the Maplibre organization
 - [Open source tools](https://github.com/mapbox/awesome-vector-tiles)
-- [Maputnik Style editor](https://maputnik.github.io)
+- [Maputnik Style editor](https://maplibre.org/maputnik/)
