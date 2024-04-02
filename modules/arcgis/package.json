@@ -37,8 +37,7 @@
   },
   "dependencies": {
     "@luma.gl/constants": "^9.0.9",
-    "@luma.gl/webgl": "^9.0.9",
-    "esri-loader": "^3.3.0"
+    "esri-loader": "^3.7.0"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
