@@ -14,6 +14,7 @@
     "write-heading-ids": "node --loader ts-node/esm ../scripts/write-heading-ids.ts"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.0",
     "@loaders.gl/i3s": "^4.1.4",
     "@loaders.gl/las": "^4.1.4",
     "@loaders.gl/obj": "^4.1.4",
