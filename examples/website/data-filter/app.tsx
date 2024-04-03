@@ -1,14 +1,16 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
+import {load} from '@loaders.gl/core';
 import RangeInput from './range-input';
-import {useMemo} from 'react';
 
-import {csv} from 'd3-request';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {DataFilterExtensionProps} from '@deck.gl/extensions';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -19,11 +21,12 @@ const DATA_URL =
 // circles at the depth of the earthquakes, i.e. below sea level, we need to
 // push the far plane away to avoid clipping them.
 const MAP_VIEW = new MapView({
+  repeat: true,
   // 1 is the distance between the camera and the ground
   farZMultiplier: 100
 });
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 36.5,
   longitude: -120,
   zoom: 5.5,
@@ -35,6 +38,14 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/s
 
 const MS_PER_DAY = 8.64e7;
 
+type Earthquake = {
+  timestamp: number;
+  latitude: number;
+  longitude: number;
+  depth: number;
+  magnitude: number;
+};
+
 const dataFilter = new DataFilterExtension({
   filterSize: 1,
   // Enable for higher precision, e.g. 1 second granularity
@@ -42,12 +53,12 @@ const dataFilter = new DataFilterExtension({
   fp64: false
 });
 
-function formatLabel(t) {
-  const date = new Date(t);
+function formatLabel(timestamp: number) {
+  const date = new Date(timestamp);
   return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
 }
 
-function getTimeRange(data) {
+function getTimeRange(data?: Earthquake[]): [minTime: number, maxTime: number] | null {
   if (!data) {
     return null;
   }
@@ -62,7 +73,7 @@ function getTimeRange(data) {
   );
 }
 
-function getTooltip({object}) {
+function getTooltip({object}: PickingInfo<Earthquake>) {
   return (
     object &&
     `\
@@ -73,15 +84,18 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data, mapStyle = MAP_STYLE}) {
-  const [filter, setFilter] = useState(null);
+export default function App({data, mapStyle = MAP_STYLE}: {
+  data?: Earthquake[];
+  mapStyle?: string;
+}) {
+  const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 
   const timeRange = useMemo(() => getTimeRange(data), [data]);
   const filterValue = filter || timeRange;
 
   const layers = [
-    data &&
-      new ScatterplotLayer({
+    filterValue &&
+      new ScatterplotLayer<Earthquake, DataFilterExtensionProps<Earthquake>>({
         id: 'earthquakes',
         data,
         opacity: 0.8,
@@ -134,19 +148,18 @@ export default function App({data, mapStyle = MAP_STYLE}) {
   );
 }
 
-export function renderToDOM(container) {
+export async function renderToDOM(container) {
   const root = createRoot(container);
   root.render(<App />);
-  csv(DATA_URL, (error, response) => {
-    if (!error) {
-      const data = response.map(row => ({
-        timestamp: new Date(`${row.DateTime} UTC`).getTime(),
-        latitude: Number(row.Latitude),
-        longitude: Number(row.Longitude),
-        depth: Number(row.Depth),
-        magnitude: Number(row.Magnitude)
-      }));
-      root.render(<App data={data} />);
-    }
-  });
+
+  const data = (await load(DATA_URL, CSVLoader)).data;
+
+  const earthquakes = data.map(row => ({
+    timestamp: new Date(`${row.DateTime} UTC`).getTime(),
+    latitude: row.Latitude,
+    longitude: row.Longitude,
+    depth: row.Depth,
+    magnitude: row.Magnitude
+  }));
+  root.render(<App data={earthquakes} />);
 }

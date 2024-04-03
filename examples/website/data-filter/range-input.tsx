@@ -29,9 +29,18 @@ const SliderInput = withStyles({
   }
 })(Slider);
 
-export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}) {
+export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}: {
+  min: number;
+  max: number;
+  value: [start: number, end: number];
+  animationSpeed: number;
+  onChange: (value: [start: number, end: number]) => void;
+  formatLabel: (value: number) => string;
+}) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [animation] = useState({});
+  const [animation] = useState<{
+    id?: number;
+  }>({});
 
   // prettier-ignore
   useEffect(() => {
@@ -54,14 +63,14 @@ export default function RangeInput({min, max, value, animationSpeed, onChange, f
 
   return (
     <PositionContainer>
-      <Button color="primary" disabled={!isButtonEnabled} onClick={() => setIsPlaying(!isPlaying)}>
-        {isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
+      <Button color="primary" disabled={!isButtonEnabled} onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? 'Stop' : 'Animate'}>
+        {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </Button>
       <SliderInput
         min={min}
         max={max}
         value={value}
-        onChange={(event, newValue) => onChange(newValue)}
+        onChange={(_, newValue: [number, number]) => onChange(newValue)}
         valueLabelDisplay="auto"
         valueLabelFormat={formatLabel}
       />

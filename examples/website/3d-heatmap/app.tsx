@@ -4,8 +4,8 @@ import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
-
-import {csv} from 'd3-request';
+import {CSVLoader} from '@loaders.gl/csv';
+import {load} from '@loaders.gl/core';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
@@ -121,14 +121,11 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  csv(DATA_URL, (error, response) => {
-    if (!error) {
-      const data: DataPoint[] = response.map(d => [Number(d.lng), Number(d.lat)]);
-      root.render(<App data={data} />);
-    }
-  });
+  const data = (await load(DATA_URL, CSVLoader)).data;
+  const points: DataPoint[] = data.map(d => [d.lng, d.lat]);
+  root.render(<App data={points} />);
 }
