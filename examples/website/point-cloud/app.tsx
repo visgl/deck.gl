@@ -49,7 +49,7 @@ export default function App({onLoad}: {
   }, [isLoaded]);
 
   const onDataLoad = useCallback((data: any) => {
-    const header = (data as LASMesh)!.header!;
+    const header = (data as LASMesh).header!;
     if (header.boundingBox) {
       const [mins, maxs] = header.boundingBox;
       // File contains bounding box info
@@ -84,13 +84,9 @@ export default function App({onLoad}: {
   return (
     <DeckGL
       views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
-      viewState={viewState}
+      initialViewState={viewState}
       controller={true}
-      onViewStateChange={v => updateViewState(v.viewState as OrbitViewState)}
       layers={layers}
-      parameters={{
-        clearColor: [0.93, 0.86, 0.81, 1]
-      }}
     />
   );
 }
