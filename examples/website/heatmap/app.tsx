@@ -4,10 +4,12 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
+import type {MapViewState} from '@deck.gl/core';
+
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -73.75,
   latitude: 40.73,
   zoom: 9,
@@ -18,15 +20,23 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
+type DataPoint = [longitude: number, latitude: number, count: number];
+
 export default function App({
   data = DATA_URL,
   intensity = 1,
   threshold = 0.03,
   radiusPixels = 30,
   mapStyle = MAP_STYLE
+}: {
+  data?: string | DataPoint[];
+  intensity?: number;
+  threshold?: number;
+  radiusPixels?: number;
+  mapStyle?: string;
 }) {
   const layers = [
-    new HeatmapLayer({
+    new HeatmapLayer<DataPoint>({
       data,
       id: 'heatmap-layer',
       pickable: false,
@@ -45,6 +55,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
