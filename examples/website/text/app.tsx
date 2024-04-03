@@ -109,11 +109,10 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  load(DATA_URL, CSVLoader).then((data: any) => {
-    root.render(<App data={data} />);
-  });
+  const cities = (await load(DATA_URL, CSVLoader)).data;
+  root.render(<App data={cities} />);
 }
