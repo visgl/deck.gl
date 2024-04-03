@@ -4,17 +4,20 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
+import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
+
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/contour/covid-by-county.json'; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -100,
   latitude: 40,
   zoom: 3,
   maxZoom: 10
 };
 
-export const BANDS = [
+export const BANDS: ContourLayerProps["contours"] = [
   {threshold: [0.1, 1], color: [255, 255, 178]},
   {threshold: [1, 10], color: [254, 204, 92]},
   {threshold: [10, 100], color: [253, 141, 60]},
@@ -23,7 +26,7 @@ export const BANDS = [
   {threshold: [2000, 10000], color: [159, 0, 80]}
 ];
 
-export const LINES = [
+export const LINES: ContourLayerProps["contours"] = [
   {threshold: 1, color: [255, 255, 178], strokeWidth: 2},
   {threshold: 10, color: [254, 204, 92], strokeWidth: 2},
   {threshold: 100, color: [253, 141, 60], strokeWidth: 2},
@@ -34,15 +37,30 @@ export const LINES = [
 
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
+type CaseReport = {
+  state: string;
+  county: string;
+  longitude: number;
+  latitude: number;
+  population: number;
+  casesByWeek: {[week: number]: number};
+};
+
 export default function App({
   data = DATA_URL,
   week = 35,
   contours = BANDS,
   cellSize = 60000,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+}: {
+  data?: string | CaseReport[];
+  week?: number;
+  contours?: ContourLayerProps["contours"];
+  cellSize?: number;
+  mapStyle?: string;
 }) {
   const layers = [
-    new ContourLayer({
+    new ContourLayer<CaseReport>({
       data,
       id: 'contour-layer',
       getPosition: d => [d.longitude, d.latitude],
@@ -57,7 +75,7 @@ export default function App({
     })
   ];
 
-  const getTooltip = info => {
+  const getTooltip = (info: PickingInfo) => {
     if (!info.object) {
       return null;
     }
@@ -90,6 +108,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

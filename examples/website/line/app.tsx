@@ -4,7 +4,7 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
-import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -39,8 +39,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function getTooltip(info: PickingInfo) {
-  const object = info.object as Airport | FlightPath;
+function getTooltip({object}: PickingInfo) {
   return (
     object &&
     `\

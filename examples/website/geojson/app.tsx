@@ -70,8 +70,7 @@ type BlockProperties = {
   growth: number;
 };
 
-function getTooltip(info: PickingInfo) {
-  const object: Feature<Geometry, BlockProperties> = info.object;
+function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
   return (
     object && {
       html: `\

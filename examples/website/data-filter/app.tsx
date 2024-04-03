@@ -148,7 +148,7 @@ export default function App({data, mapStyle = MAP_STYLE}: {
   );
 }
 
-export async function renderToDOM(container) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
