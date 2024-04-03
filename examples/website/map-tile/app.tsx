@@ -6,7 +6,7 @@ import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, PathLayer} from '@deck.gl/layers';
 
-import type {Position, MapViewState} from '@deck.gl/core';
+import type {Position, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE: MapViewState = {

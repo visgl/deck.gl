@@ -50,17 +50,15 @@ type CountyProperties = {
   /** county index -> net flow */
   flows: Record<string, number>;
   /** geographical centroid */
-  centroid: [number, number];
+  centroid: [lon: number, lat: number];
 };
 
 type County = Feature<Polygon|MultiPolygon, CountyProperties>;
 
 type MigrationFlow = {
-  /** from county centroid */
-  source: [number, number];
-  /** to county centroid */
-  target: [number, number];
-  /** net gain */
+  source: County;
+  target: County;
+  /** Number of migrants */
   value: number;
   quantile: number;
 }
@@ -72,13 +70,13 @@ function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
   if (!selectedCounty) {
     selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA')!;
   }
-  const {flows, centroid} = selectedCounty.properties;
+  const {flows} = selectedCounty.properties;
 
   const arcs: MigrationFlow[] = Object.keys(flows).map(toId => {
     const f = data[Number(toId)];
     return {
-      source: centroid,
-      target: f.properties.centroid,
+      source: selectedCounty,
+      target: f,
       value: flows[toId],
       quantile: 0
     };
@@ -95,8 +93,7 @@ function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
   return arcs;
 }
 
-function getTooltip(info: PickingInfo) {
-  const object: County = info.object;
+function getTooltip({object}: PickingInfo<County>) {
   return object && object.properties.name;
 }
 
@@ -123,8 +120,8 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}: {
     new ArcLayer<MigrationFlow>({
       id: 'arc',
       data: arcs,
-      getSourcePosition: d => d.source,
-      getTargetPosition: d => d.target,
+      getSourcePosition: d => d.source.properties.centroid,
+      getTargetPosition: d => d.target.properties.centroid,
       getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
       getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
       getWidth: strokeWidth

@@ -9,7 +9,7 @@ import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 import {clamp} from '@math.gl/core';
 
-import type {OrthographicViewState} from '@deck.gl/core';
+import type {PickingInfo, OrthographicViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
 

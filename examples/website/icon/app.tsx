@@ -8,7 +8,7 @@ import {IconLayer} from '@deck.gl/layers';
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
-import type { IconLayerProps } from '@deck.gl/layers';
+import type {IconLayerProps} from '@deck.gl/layers';
 
 // Source data CSV
 const DATA_URL =
