@@ -21,7 +21,7 @@
 import {Layer, project32, picking, log} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 import {pbr} from '@luma.gl/shadertools';
-import {ScenegraphNode, GroupNode, ModelNode} from '@luma.gl/engine';
+import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
@@ -183,7 +183,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   state!: {
     scenegraph: GroupNode;
     animator: GLTFAnimator;
-    attributesAvailable?: boolean;
+    models: Model[];
   };
 
   getShaders() {
@@ -225,13 +225,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (props.scenegraph !== oldProps.scenegraph) {
       this._updateScenegraph();
     } else if (props._animations !== oldProps._animations) {
-      this._applyAnimationsProp(this.state.scenegraph, this.state.animator, props._animations);
+      this._applyAnimationsProp(this.state.animator, props._animations);
     }
   }
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this._deleteScenegraph();
+    this.state.scenegraph?.destroy();
   }
 
   get isLoaded(): boolean {
@@ -265,33 +265,26 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const animator = props.getAnimator(scenegraphData, options);
 
     if (scenegraph instanceof GroupNode) {
-      this._deleteScenegraph();
-      this._applyAllAttributes(scenegraph);
-      this._applyAnimationsProp(scenegraph, animator, props._animations);
-      this.setState({scenegraph, animator});
+      this.state.scenegraph?.destroy();
+
+      this._applyAnimationsProp(animator, props._animations);
+
+      const models: Model[] = [];
+      scenegraph.traverse(node => {
+        if (node instanceof ModelNode) {
+          models.push(node.model);
+        }
+      });
+
+      this.setState({scenegraph, animator, models});
+      this.getAttributeManager()!.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
     }
   }
 
-  private _applyAllAttributes(scenegraph: GroupNode): void {
-    if (this.state.attributesAvailable) {
-      // attributeManager is always defined for primitive layers
-      const allAttributes = this.getAttributeManager()!.getAttributes();
-      scenegraph.traverse(node => {
-        if (node instanceof ModelNode) {
-          this._setModelAttributes(node.model, allAttributes, false);
-        }
-      });
-    }
-  }
-
-  private _applyAnimationsProp(
-    scenegraph: GroupNode,
-    animator: GLTFAnimator,
-    animationsProp: any
-  ): void {
-    if (!scenegraph || !animator || !animationsProp) {
+  private _applyAnimationsProp(animator: GLTFAnimator, animationsProp: any): void {
+    if (!animator || !animationsProp) {
       return;
     }
 
@@ -329,13 +322,6 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       });
   }
 
-  private _deleteScenegraph(): void {
-    const {scenegraph} = this.state;
-    if (scenegraph instanceof ScenegraphNode) {
-      scenegraph.delete();
-    }
-  }
-
   private _getModelOptions(): GLTFInstantiatorOptions {
     const {_imageBasedLightingEnvironment} = this.props;
 
@@ -361,26 +347,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
   }
 
-  updateAttributes(changedAttributes) {
-    this.setState({attributesAvailable: true});
-    if (!this.state.scenegraph) return;
-
-    // If some buffer layout changed
-    let bufferLayoutChanged = false;
-    for (const id in changedAttributes) {
-      if (changedAttributes[id].layoutChanged()) {
-        bufferLayoutChanged = true;
-      }
-    }
-
-    this.state.scenegraph.traverse(node => {
-      if (node instanceof ModelNode) {
-        this._setModelAttributes(node.model, changedAttributes, bufferLayoutChanged);
-      }
-    });
-  }
-
-  draw({moduleParameters = null, parameters = {}, context}) {
+  draw({context}) {
     if (!this.state.scenegraph) return;
 
     if (this.props._animations && this.state.animator) {
@@ -390,14 +357,12 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const {viewport, renderPass} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, opacity, coordinateSystem} = this.props;
+
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
         model.setInstanceCount(numInstances);
-        if (moduleParameters) {
-          model.updateModuleSettings(moduleParameters);
-        }
         model.setUniforms({
           sizeScale,
           opacity,
