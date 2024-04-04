@@ -4,11 +4,13 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
+import type {Color, MapViewState} from '@deck.gl/core';
+
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -73.75,
   latitude: 40.73,
   zoom: 9.6,
@@ -19,7 +21,7 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const colorRange = [
+const colorRange: Color[] = [
   [255, 255, 178, 25],
   [254, 217, 118, 85],
   [254, 178, 76, 127],
@@ -28,16 +30,23 @@ const colorRange = [
   [189, 0, 38, 255]
 ];
 
+type DataPoint = [longitude: number, latitude: number, count: number];
+
 export default function App({
   data = DATA_URL,
   cellSize = 20,
   gpuAggregation = false, // TODO(v9): Re-enable GPU aggregation.
   aggregation = 'SUM',
-  disableGPUAggregation,
   mapStyle = MAP_STYLE
+}: {
+  data?: string | DataPoint[];
+  cellSize?: number;
+  gpuAggregation?: boolean;
+  aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+  mapStyle?: string;
 }) {
   const layers = [
-    new ScreenGridLayer({
+    new ScreenGridLayer<DataPoint>({
       id: 'grid',
       data,
       opacity: 0.8,
@@ -50,20 +59,10 @@ export default function App({
     })
   ];
 
-  const onInitialized = device => {
-    if (!device.features.has('webgl2')) {
-      console.warn('GPU aggregation is not supported'); // eslint-disable-line
-      if (disableGPUAggregation) {
-        disableGPUAggregation();
-      }
-    }
-  };
-
   return (
     <DeckGL
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
-      onDeviceInitialized={onInitialized}
       controller={true}
     >
       <Map reuseMaps mapStyle={mapStyle} />
@@ -71,6 +70,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

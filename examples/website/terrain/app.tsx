@@ -2,12 +2,13 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 
-import {TerrainLayer} from '@deck.gl/geo-layers';
+import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
+import type {MapViewState} from '@deck.gl/core';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 46.24,
   longitude: -122.18,
   zoom: 11.5,
@@ -21,7 +22,7 @@ const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x
 
 // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
 // Note - the elevation rendered by this example is greatly exagerated!
-const ELEVATION_DECODER = {
+const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
   rScaler: 6553.6,
   gScaler: 25.6,
   bScaler: 0.1,
@@ -32,6 +33,10 @@ export default function App({
   texture = SURFACE_IMAGE,
   wireframe = false,
   initialViewState = INITIAL_VIEW_STATE
+}: {
+  texture?: string;
+  wireframe?: boolean;
+  initialViewState?: MapViewState;
 }) {
   const layer = new TerrainLayer({
     id: 'terrain',
@@ -48,6 +53,6 @@ export default function App({
   return <DeckGL initialViewState={initialViewState} controller={true} layers={[layer]} />;
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

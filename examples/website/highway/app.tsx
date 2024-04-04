@@ -4,8 +4,11 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
+import {CSVLoader} from '@loaders.gl/csv';
+import {load} from '@loaders.gl/core';
 
-import {csv} from 'd3-request';
+import {Feature, LineString, MultiLineString} from 'geojson';
+import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Source data GeoJSON
 const DATA_URL = {
@@ -14,11 +17,7 @@ const DATA_URL = {
   ROADS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json'
 };
 
-function getKey({state, type, id}) {
-  return `${state}-${type}-${id}`;
-}
-
-export const COLOR_SCALE = scaleThreshold()
+export const COLOR_SCALE = scaleThreshold<number, Color>()
   .domain([0, 4, 8, 12, 20, 32, 52, 84, 136, 220])
   .range([
     [26, 152, 80],
@@ -35,7 +34,7 @@ export const COLOR_SCALE = scaleThreshold()
 
 const WIDTH_SCALE = scaleLinear().clamp(true).domain([0, 200]).range([10, 2000]);
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 38,
   longitude: -100,
   zoom: 4,
@@ -45,29 +44,56 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-function aggregateAccidents(accidents) {
-  const incidents = {};
-  const fatalities = {};
+type Accident = {
+  state: string;
+  type: string;
+  id: string;
+  year: number;
+  incidents: number;
+  fatalities: number;
+};
+
+type RoadProperties = {
+  state: string;
+  type: string;
+  id: string;
+  name: string;
+  length: number;
+};
+
+type Road = Feature<LineString | MultiLineString, RoadProperties>;
+
+function getKey({state, type, id}: Accident | RoadProperties) {
+  return `${state}-${type}-${id}`;
+}
+
+function aggregateAccidents(accidents?: Accident[]) {
+  const incidents: {[year: number]: Record<string, number>} = {};
+  const fatalities: {[year: number]: Record<string, number>} = {};
 
   if (accidents) {
-    accidents.forEach(a => {
+    for (const a of accidents) {
       const r = (incidents[a.year] = incidents[a.year] || {});
       const f = (fatalities[a.year] = fatalities[a.year] || {});
       const key = getKey(a);
       r[key] = a.incidents;
       f[key] = a.fatalities;
-    });
+    }
   }
   return {incidents, fatalities};
 }
 
-function renderTooltip({fatalities, incidents, year, hoverInfo}) {
-  const {object, x, y} = hoverInfo;
-
-  if (!object) {
+function renderTooltip({fatalities, incidents, year, hoverInfo}: {
+  fatalities: {[year: number]: Record<string, number>};
+  incidents: {[year: number]: Record<string, number>};
+  year: number;
+  hoverInfo?: PickingInfo<Road>;
+}) {
+  if (!hoverInfo?.object) {
     return null;
   }
 
+  const {object, x, y} = hoverInfo;
   const props = object.properties;
   const key = getKey(props);
   const f = fatalities[year][key];
@@ -94,41 +120,43 @@ function renderTooltip({fatalities, incidents, year, hoverInfo}) {
   );
 }
 
-export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle = MAP_STYLE}) {
-  const [hoverInfo, setHoverInfo] = useState({});
+export default function App({
+  roads = DATA_URL.ROADS,
+  year,
+  accidents,
+  mapStyle = MAP_STYLE
+}: {
+  roads?: string | Road[];
+  accidents?: Accident[];
+  year?: number;
+  mapStyle?: string;
+}) {
+  const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
   const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
 
-  const getLineColor = f => {
-    if (!fatalities[year]) {
-      return [200, 200, 200];
-    }
-    const key = getKey(f.properties);
-    const fatalitiesPer1KMile = ((fatalities[year][key] || 0) / f.properties.length) * 1000;
-    return COLOR_SCALE(fatalitiesPer1KMile);
-  };
-
-  const getLineWidth = f => {
-    if (!incidents[year]) {
-      return 10;
-    }
-    const key = getKey(f.properties);
-    const incidentsPer1KMile = ((incidents[year][key] || 0) / f.properties.length) * 1000;
-    return WIDTH_SCALE(incidentsPer1KMile);
-  };
 
   const layers = [
-    new GeoJsonLayer({
+    new GeoJsonLayer<RoadProperties>({
       id: 'geojson',
       data: roads,
-      stroked: false,
-      filled: false,
       lineWidthMinPixels: 0.5,
-      parameters: {
-        depthTest: false
-      },
 
-      getLineColor,
-      getLineWidth,
+      getLineColor: (f: Road) => {
+        if (!fatalities[year]) {
+          return [200, 200, 200];
+        }
+        const key = getKey(f.properties);
+        const fatalitiesPer1KMile = ((fatalities[year][key] || 0) / f.properties.length) * 1000;
+        return COLOR_SCALE(fatalitiesPer1KMile);
+      },
+      getLineWidth: (f: Road) => {
+        if (!incidents[year]) {
+          return 10;
+        }
+        const key = getKey(f.properties);
+        const incidentsPer1KMile = ((incidents[year][key] || 0) / f.properties.length) * 1000;
+        return WIDTH_SCALE(incidentsPer1KMile);
+      },
 
       pickable: true,
       onHover: setHoverInfo,
@@ -159,19 +187,11 @@ export default function App({roads = DATA_URL.ROADS, year, accidents, mapStyle =
   );
 }
 
-export function renderToDOM(container) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const formatRow = d => ({
-    ...d,
-    incidents: Number(d.incidents),
-    fatalities: Number(d.fatalities)
-  });
+  const accidents = (await load(DATA_URL.ACCIDENTS, CSVLoader)).data;
 
-  csv(DATA_URL.ACCIDENTS, formatRow, (error, response) => {
-    if (!error) {
-      root.render(<App accidents={response} year={response[0].year} />);
-    }
-  });
+  root.render(<App accidents={accidents} year={accidents[0].year} />);
 }

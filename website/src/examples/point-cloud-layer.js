@@ -30,7 +30,9 @@ class PointCloudDemo extends Component {
   };
 
   render() {
-    return <App onLoad={this._onLoad} />;
+    return <div style={{width: '100%', height: '100%', background: '#ecdbce'}}>
+      <App onLoad={this._onLoad} />
+    </div>;
   }
 }
 

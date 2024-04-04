@@ -3,15 +3,17 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+
+import type {MapViewState} from '@deck.gl/core';
+import type {Tileset3D} from '@loaders.gl/tiles';
 
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3NjEwMjA4Ni00YmVkLTQyMjgtYjRmZS1lY2M3ZWFiMmFmNTYiLCJpZCI6MjYxMzMsImlhdCI6MTY3NTM2ODY4NX0.chGkGL6DkDNv5wYJQDMzWIvi9iDoVa27dgng_5ARDmo';
 const TILESET_URL = `https://assets.ion.cesium.com/${ION_ASSET_ID}/tileset.json`;
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 40,
   longitude: -75,
   pitch: 45,
@@ -25,10 +27,13 @@ const INITIAL_VIEW_STATE = {
 export default function App({
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   updateAttributions
+}: {
+  mapStyle?: string;
+  updateAttributions?: (attributions: any) => void;
 }) {
   const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
-  const onTilesetLoad = tileset => {
+  const onTilesetLoad = (tileset: Tileset3D) => {
     // Recenter view to cover the new tileset
     const {cartographicCenter, zoom} = tileset;
     setInitialViewState({
@@ -59,6 +64,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
