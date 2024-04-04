@@ -3,7 +3,11 @@ import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
-const INITIAL_VIEW_STATE = {
+import type {MapViewState} from '@deck.gl/core';
+import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
+import type {ImageSourceMetadata} from '@loaders.gl/loader-utils';
+
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -122.4,
   latitude: 37.74,
   zoom: 9,
@@ -35,8 +39,18 @@ export default function App({
   initialViewState = INITIAL_VIEW_STATE,
   onMetadataLoad = console.log, // eslint-disable-line
   onMetadataLoadError = console.error // eslint-disable-line
+}: {
+  serviceUrl?: string;
+  layers?: string[];
+  initialViewState?: MapViewState;
+  onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
+  onMetadataLoadError?: (error: Error) => void;
 }) {
-  const [selection, setSelection] = useState(null);
+  const [selection, setSelection] = useState<{
+    x: number;
+    y: number;
+    featureInfo: string;
+  } | null>(null);
 
   const layer = new WMSLayer({
     data: serviceUrl,
@@ -47,12 +61,13 @@ export default function App({
     onMetadataLoad,
     onMetadataLoadError,
 
-    onClick: async ({bitmap}) => {
+    onClick: ({bitmap}: BitmapLayerPickingInfo) => {
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
-        const featureInfo = await layer.getFeatureInfoText(x, y);
-        setSelection({x, y, featureInfo});
+        layer.getFeatureInfoText(x, y).then(featureInfo => {
+          setSelection({x, y, featureInfo});
+        });
       }
     }
   });
@@ -73,6 +88,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
