@@ -6,6 +6,9 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
+import {animate} from 'popmotion';
+
+import type {Position, Color, Material, MapViewState} from '@deck.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -27,22 +30,28 @@ const pointLight = new PointLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight});
 
-const material = {
-  ambient: 0.1,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [60, 64, 70]
+type Theme = {
+  buildingColor: Color;
+  trailColor0: Color;
+  trailColor1: Color;
+  material: Material;
+  effects: [LightingEffect]
 };
 
-const DEFAULT_THEME = {
+const DEFAULT_THEME: Theme = {
   buildingColor: [74, 80, 87],
   trailColor0: [253, 128, 93],
   trailColor1: [23, 184, 190],
-  material,
+  material: {
+    ambient: 0.1,
+    diffuse: 0.6,
+    shininess: 32,
+    specularColor: [60, 64, 70]
+  },
   effects: [lightingEffect]
 };
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -74,
   latitude: 40.72,
   zoom: 13,
@@ -52,7 +61,7 @@ const INITIAL_VIEW_STATE = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const landCover = [
+const landCover: Position[][] = [
   [
     [-74.0, 40.7],
     [-74.02, 40.7],
@@ -60,6 +69,17 @@ const landCover = [
     [-74.0, 40.72]
   ]
 ];
+
+type Building = {
+  polygon: Position[];
+  height: number;
+};
+
+type Trip = {
+  vendor: number;
+  path: Position[];
+  timestamps: number[];
+};
 
 export default function App({
   buildings = DATA_URL.BUILDINGS,
@@ -70,30 +90,39 @@ export default function App({
   theme = DEFAULT_THEME,
   loopLength = 1800, // unit corresponds to the timestamp in source data
   animationSpeed = 1
+}: {
+  buildings?: string | Building[];
+  trips?: string | Trip[];
+  trailLength?: number;
+  loopLength?: number;
+  animationSpeed?: number;
+  initialViewState?: MapViewState;
+  mapStyle?: string;
+  theme?: Theme;
 }) {
   const [time, setTime] = useState(0);
-  const [animation] = useState({});
-
-  const animate = () => {
-    setTime(t => (t + animationSpeed) % loopLength);
-    animation.id = window.requestAnimationFrame(animate);
-  };
 
   useEffect(() => {
-    animation.id = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(animation.id);
-  }, [animation]);
+    const animation = animate({
+      from: 0,
+      to: loopLength,
+      duration: loopLength * 60 / animationSpeed,
+      repeat: Infinity,
+      onUpdate: setTime
+    });
+    return () => animation.stop();
+  }, [loopLength, animationSpeed]);
 
   const layers = [
     // This is only needed when using shadow effects
-    new PolygonLayer({
+    new PolygonLayer<Position[]>({
       id: 'ground',
       data: landCover,
       getPolygon: f => f,
       stroked: false,
       getFillColor: [0, 0, 0, 0]
     }),
-    new TripsLayer({
+    new TripsLayer<Trip>({
       id: 'trips',
       data: trips,
       getPath: d => d.path,
@@ -107,7 +136,7 @@ export default function App({
 
       shadowEnabled: false
     }),
-    new PolygonLayer({
+    new PolygonLayer<Building>({
       id: 'buildings',
       data: buildings,
       extruded: true,
@@ -132,6 +161,6 @@ export default function App({
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

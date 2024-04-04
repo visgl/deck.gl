@@ -31,6 +31,7 @@
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^3.0.0",
     "maplibre-gl": "^3.0.0",
+    "popmotion": "^11.0.0",
     "react": "^18.0.0",
     "react-ace": "^6.1.4",
     "react-dom": "^18.0.0",
