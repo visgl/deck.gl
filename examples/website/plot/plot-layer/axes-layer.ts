@@ -1,98 +1,52 @@
-import {Color, DefaultProps, Layer, LayerDataSource, LayerProps} from '@deck.gl/core';
+import {Color, DefaultProps, Layer, UpdateParameters, Attribute, LayerProps} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Texture} from '@luma.gl/core';
-import {ScaleLinear} from 'd3-scale';
 
 import {textMatrixToTexture} from './utils';
 
-import fragmentShader from './axes-fragment.glsl';
+import gridFragment from './grid-fragment.glsl';
 import gridVertex from './grid-vertex.glsl';
 import labelVertex from './label-vertex.glsl';
 import labelFragment from './label-fragment.glsl';
-import {Axis, Tick, TickFormat, Vec2, Vec3} from './types';
+import {Axis, TickFormat, Vec3} from './types';
 
-/* Constants */
-const DEFAULT_FONT_SIZE = 48;
-const DEFAULT_TICK_COUNT = 6;
-const DEFAULT_TICK_FORMAT = (x: number) => x.toFixed(2);
-const DEFAULT_COLOR: Color = [0, 0, 0, 255];
+type Tick = {
+  axis: 'x' | 'y' | 'z';    
+  value: string;
+  position: [number, number];
+  text: string;
+};
 
 interface LabelTexture {
   labelHeight: number;
   labelWidths: number[];
-  labelTextureDim: Vec2;
   labelTexture: Texture;
-}
+};
 
 const defaultProps: DefaultProps<AxesLayerProps> = {
-  data: [],
   fontSize: 12,
-  xScale: undefined,
-  yScale: undefined,
-  zScale: undefined,
-  xTicks: DEFAULT_TICK_COUNT,
-  yTicks: DEFAULT_TICK_COUNT,
-  zTicks: DEFAULT_TICK_COUNT,
-  xTickFormat: DEFAULT_TICK_FORMAT as TickFormat,
-  yTickFormat: DEFAULT_TICK_FORMAT as TickFormat,
-  zTickFormat: DEFAULT_TICK_FORMAT as TickFormat,
+  tickFormat: {type: 'function', value: (x: number) => x.toFixed(2)},
   padding: 0,
-  color: DEFAULT_COLOR,
-  xTitle: 'x',
-  yTitle: 'y',
-  zTitle: 'z'
+  color: {type: 'color', value: [0, 0, 0, 255]}
 };
 
 /** All props supported by AxesLayer. */
-export type AxesLayerProps<DataT = unknown> = _AxesLayerProps<DataT> & LayerProps;
+export type AxesLayerProps = _AxesLayerProps & LayerProps;
 
-type _AxesLayerProps<DataT> = {
-  data: LayerDataSource<DataT>;
-  fontSize: number;
-  xScale: ScaleLinear<number, number>;
-  yScale: ScaleLinear<number, number>;
-  zScale: ScaleLinear<number, number>;
-  xTicks: number;
-  yTicks: number;
-  zTicks: number;
-  xTickFormat: TickFormat<DataT>;
-  yTickFormat: TickFormat<DataT>;
-  zTickFormat: TickFormat<DataT>;
-  padding: 0;
-  color: Color;
-  xTitle: string;
-  yTitle: string;
-  zTitle: string;
+type _AxesLayerProps = {
+  xAxis: Axis;
+  yAxis: Axis;
+  zAxis: Axis;
+  fontSize?: number;
+  tickFormat?: TickFormat;
+  padding?: number;
+  color?: Color;
 };
 
 /*
- * @classdesc
  * A layer that plots a surface based on a z=f(x,y) equation.
- *
- * @class
- * @param {Object} [props]
- * @param {Integer} [props.ticksCount] - number of ticks along each axis, see
-      https://github.com/d3/d3-axis/blob/master/README.md#axis_ticks
- * @param {Number} [props.padding] - amount to set back grids from the plot,
-      relative to the size of the bounding box
- * @param {d3.scale} [props.xScale] - a d3 scale for the x axis
- * @param {d3.scale} [props.yScale] - a d3 scale for the y axis
- * @param {d3.scale} [props.zScale] - a d3 scale for the z axis
- * @param {Number | [Number]} [props.xTicks] - either tick counts or an array of tick values
- * @param {Number | [Number]} [props.yTicks] - either tick counts or an array of tick values
- * @param {Number | [Number]} [props.zTicks] - either tick counts or an array of tick values
- * @param {Function} [props.xTickFormat] - returns a string from value
- * @param {Function} [props.yTickFormat] - returns a string from value
- * @param {Function} [props.zTickFormat] - returns a string from value
- * @param {String} [props.xTitle] - x axis title
- * @param {String} [props.yTitle] - y axis title
- * @param {String} [props.zTitle] - z axis title
- * @param {Number} [props.fontSize] - size of the labels
- * @param {Array} [props.color] - color of the gridlines, in [r,g,b,a]
  */
-export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
-  ExtraPropsT & Required<_AxesLayerProps<DataT>>
-> {
+export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
   static layerName = 'AxesLayer';
   static defaultProps = defaultProps;
 
@@ -100,50 +54,43 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     models: [Model, Model];
     modelsByName: {grids: Model; labels: Model};
     numInstances: number;
-    ticks: [Tick[], Tick[], Tick[]];
+    ticks: Tick[];
     gridDims: Vec3;
     gridCenter: Vec3;
     labelTexture: LabelTexture | null;
   };
 
   initializeState() {
-    const {gl} = this.context;
     const attributeManager = this.getAttributeManager()!;
 
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions, noAlloc: true},
       instanceNormals: {size: 3, update: this.calculateInstanceNormals, noAlloc: true},
-      instanceIsTitle: {size: 1, update: this.calculateInstanceIsTitle, noAlloc: true}
+      instanceOffsets: {size: 1, update: this.calculateInstanceOffsets, noAlloc: true}
     });
 
-    this.setState(Object.assign({numInstances: 0}, this._getModels(gl)));
+    this.setState(Object.assign({numInstances: 0}, this._getModels()));
   }
 
-  updateState({oldProps, props, changeFlags}) {
+  updateState({oldProps, props}: UpdateParameters<this>) {
     const attributeManager = this.getAttributeManager()!;
 
     if (
-      oldProps.xScale !== props.xScale ||
-      oldProps.yScale !== props.yScale ||
-      oldProps.zScale !== props.zScale ||
-      oldProps.xTicks !== props.xTicks ||
-      oldProps.yTicks !== props.yTicks ||
-      oldProps.zTicks !== props.zTicks ||
-      oldProps.xTickFormat !== props.xTickFormat ||
-      oldProps.yTickFormat !== props.yTickFormat ||
-      oldProps.zTickFormat !== props.zTickFormat
+      oldProps.xAxis !== props.xAxis ||
+      oldProps.yAxis !== props.yAxis ||
+      oldProps.zAxis !== props.zAxis
     ) {
-      const {xScale, yScale, zScale} = props;
+      const {xAxis, yAxis, zAxis, tickFormat} = props;
 
       const ticks = [
-        getTicks({...props, axis: 'x'}),
-        getTicks({...props, axis: 'z'}),
-        getTicks({...props, axis: 'y'})
+        ...getTicks(xAxis, tickFormat),
+        ...getTicks(yAxis, tickFormat),
+        ...getTicks(zAxis, tickFormat)
       ];
 
-      const xRange = xScale.range();
-      const yRange = yScale.range();
-      const zRange = zScale.range();
+      const xRange = getRange(xAxis);
+      const yRange = getRange(yAxis);
+      const zRange = getRange(zAxis);
 
       this.setState({
         ticks,
@@ -177,18 +124,20 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       modelsByName.grids.setInstanceCount(numInstances);
       modelsByName.labels.setInstanceCount(numInstances);
 
-      modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms));
+      modelsByName.grids.setUniforms({...uniforms, ...baseUniforms});
       modelsByName.labels.setBindings({labelTexture});
-      modelsByName.labels.setUniforms(
-        Object.assign({}, uniforms, baseUniforms, labelTextureUniforms)
-      );
+      modelsByName.labels.setUniforms({
+        ...uniforms, 
+        ...baseUniforms, 
+        ...labelTextureUniforms
+      });
 
       modelsByName.grids.draw(this.context.renderPass);
       modelsByName.labels.draw(this.context.renderPass);
     }
   }
 
-  _getModels(gl) {
+  _getModels() {
     /* grids:
      * for each x tick, draw rectangle on yz plane around the bounding box.
      * for each y tick, draw rectangle on zx plane around the bounding box.
@@ -230,11 +179,12 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // bottom edge
       0, -1, 0, 0, -1, 0
     ];
+    const {device} = this.context;
 
-    const grids = new Model(gl.device, {
+    const grids = new Model(device, {
       id: `${this.props.id}-grids`,
       vs: gridVertex,
-      fs: fragmentShader,
+      fs: gridFragment,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'line-list',
@@ -280,7 +230,7 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     }
 
-    const labels = new Model(gl.device, {
+    const labels = new Model(device, {
       id: `${this.props.id}-labels`,
       vs: labelVertex,
       fs: labelFragment,
@@ -302,57 +252,71 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     };
   }
 
-  calculateInstancePositions(attribute) {
+  calculateInstancePositions(attribute: Attribute) {
     const {ticks} = this.state;
 
-    const positions = ticks.map(axisTicks => axisTicks.map((t, i) => [t.position, i]));
+    const positions = ticks.flatMap(t => t.position);
+    attribute.value = new Float32Array(positions);
 
-    const value = new Float32Array(flatten(positions));
-    attribute.value = value;
-
-    this.setState({numInstances: value.length / attribute.size});
+    this.setState({numInstances: ticks.length});
   }
 
-  calculateInstanceNormals(attribute) {
-    const {
-      ticks: [xTicks, zTicks, yTicks]
-    } = this.state;
-
-    const normals = [
-      xTicks.map(t => [1, 0, 0]),
-      zTicks.map(t => [0, 1, 0]),
-      yTicks.map(t => [0, 0, 1])
-    ];
-
-    attribute.value = new Float32Array(flatten(normals));
-  }
-
-  calculateInstanceIsTitle(attribute) {
+  calculateInstanceNormals(attribute: Attribute) {
     const {ticks} = this.state;
 
-    const isTitle = ticks.map(axisTicks => {
-      const ticksCount = axisTicks.length - 1;
-      return axisTicks.map((t, i) => (i < ticksCount ? 0 : 1));
+    const normals = ticks.flatMap(t => {
+      switch (t.axis) {
+        case 'x':
+          return [1, 0, 0];
+        case 'z':
+          // Flip y and z
+          return [0, 1, 0];
+        case 'y':
+          return [0, 0, 1];
+      }
+    })
+    attribute.value = new Float32Array(normals);
+  }
+
+  calculateInstanceOffsets(attribute: Attribute) {
+    const {ticks} = this.state;
+    const {fontSize} = this.props;
+
+    const offsets = ticks.flatMap(t => {
+      return t.value === 'title' ? 2 : 0.5;
     });
-
-    attribute.value = new Float32Array(flatten(isTitle));
+    attribute.value = new Float32Array(offsets);
   }
 
-  renderLabelTexture(ticks): LabelTexture | null {
+  renderLabelTexture(ticks: Tick[]): LabelTexture | null {
     if (this.state.labelTexture) {
       this.state.labelTexture.labelTexture.destroy();
     }
 
+    const labelsbyAxis: [x: string[], z: string[], y: string[]] = [[], [], []];
+    for (const t of ticks) {
+      switch (t.axis) {
+        case 'x':
+          labelsbyAxis[0].push(t.text);
+          break;
+        case 'z':
+          labelsbyAxis[1].push(t.text);
+          break;
+        case 'y':
+          labelsbyAxis[2].push(t.text);
+          break;
+      }
+    }
+
     // attach a 2d texture of all the label texts
-    const textureInfo = textMatrixToTexture(this.context.gl, ticks, DEFAULT_FONT_SIZE);
+    const textureInfo = textMatrixToTexture(this.context.device, labelsbyAxis);
     if (textureInfo) {
       // success
-      const {columnWidths, texture} = textureInfo;
+      const {rowHeight, columnWidths, texture} = textureInfo;
 
       return {
-        labelHeight: DEFAULT_FONT_SIZE,
+        labelHeight: rowHeight,
         labelWidths: columnWidths,
-        labelTextureDim: [texture.width, texture.height],
         labelTexture: texture
       };
     }
@@ -360,37 +324,31 @@ export default class AxesLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 }
 
-/* Utils */
-function flatten(arrayOfArrays) {
-  const flatArray = arrayOfArrays.reduce((acc, arr) => acc.concat(arr), []);
-  if (Array.isArray(flatArray[0])) {
-    return flatten(flatArray);
+function getRange(axis: Axis): [number, number] {
+  const {min, max, scale} = axis;
+  if (scale) {
+    return [scale(min), scale(max)];
   }
-  return flatArray;
+  return [min, max];
 }
 
-function getTicks(props: AxesLayerProps<number> & {axis: Axis}): Tick[] {
-  const {axis} = props;
-  let ticks = props[`${axis}Ticks`] as number | number[];
-  const scale = props[`${axis}Scale`];
-  const tickFormat = props[`${axis}TickFormat`];
-
-  if (!Array.isArray(ticks)) {
-    ticks = scale.ticks(ticks) as number[];
-  }
-
-  const titleTick = {
-    value: props[`${axis}Title`],
-    position: (scale.range()[0] + scale.range()[1]) / 2,
-    text: props[`${axis}Title`]
-  };
+function getTicks(axis: Axis, tickFormat: TickFormat): Tick[] {
+  const {min, max} = axis;
+  const ticks = axis.ticks ?? [min, max];
+  const scale = axis.scale ?? (x => x);
 
   return [
-    ...ticks.map(t => ({
+    ...ticks.map((t, i) => ({
+      axis: axis.name,
       value: String(t),
-      position: scale(t),
+      position: [scale(t), i],
       text: tickFormat(t, axis)
-    })),
-    titleTick
+    }) as Tick),
+    {
+      axis: axis.name,
+      value: 'title',
+      position: [(scale(min) + scale(max)) / 2, ticks.length],
+      text: axis.title ?? axis.name
+    }
   ];
 }

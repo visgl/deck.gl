@@ -27,7 +27,7 @@ in vec3 normals;
 in vec2 texCoords;
 in vec2 instancePositions;
 in vec3 instanceNormals;
-in float instanceIsTitle;
+in float instanceOffsets;
 
 uniform vec3 gridDims;
 uniform vec3 gridCenter;
@@ -35,13 +35,10 @@ uniform float gridOffset;
 uniform vec3 labelWidths;
 uniform float fontSize;
 uniform float labelHeight;
-uniform vec2 labelTextureDim;
+uniform sampler2D labelTexture;
 
 out vec2 vTexCoords;
 out float shouldDiscard;
-
-const float LABEL_OFFSET = 0.02;
-const float TITLE_OFFSET = 0.06;
 
 float sum2(vec2 v) {
   return v.x + v.y;
@@ -93,21 +90,20 @@ void main(void) {
     sum3(vec3(0.0, labelWidths.x, sum2(labelWidths.xy)) * instanceNormals),
     instancePositions.y * labelHeight
   );
-  vec2 textureSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
-
-  vTexCoords = (textureOrigin + textureSize * texCoords) / labelTextureDim;
+  vec2 labelSize = vec2(sum3(labelWidths * instanceNormals), labelHeight);
+  vTexCoords = (textureOrigin + labelSize * texCoords) / vec2(textureSize(labelTexture, 0));
 
   vec3 position_modelspace = vec3(instancePositions.x) *
     instanceNormals + gridVertexOffset * gridDims / 2.0 + gridCenter * abs(gridVertexOffset);
 
   // apply offsets
   position_modelspace += gridOffset * gridLineNormal;
-  position_modelspace += (LABEL_OFFSET + (instanceIsTitle * TITLE_OFFSET)) * gridVertexOffset;
+  position_modelspace += project_pixel_size(fontSize * instanceOffsets) * gridVertexOffset;
 
   vec3 position_commonspace = project_position(position_modelspace);
   vec4 position_clipspace = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
-  vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * textureSize;
+  vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * labelSize;
   // project to clipspace
   labelVertexOffset = project_pixel_size_to_clipspace(labelVertexOffset).xy;
   // scale label to be constant size in pixels

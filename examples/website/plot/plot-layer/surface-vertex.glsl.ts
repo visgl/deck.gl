@@ -22,9 +22,10 @@ export default `\
 #version 300 es
 #define SHADER_NAME graph-layer-vertex-shader
 
-in vec4 positions;
+in vec3 positions;
+in vec3 positions64Low;
 in vec4 colors;
-in vec3 pickingColors;
+in vec4 pickingColors;
 
 uniform float lightStrength;
 uniform float opacity;
@@ -33,9 +34,7 @@ out vec4 vColor;
 out float shouldDiscard;
 
 void main(void) {
-
-  // fit into a unit cube that centers at [0, 0, 0]
-  vec3 position_commonspace = project_position(positions.xyz);
+  vec3 position_commonspace = project_position(positions, positions64Low);
   gl_Position = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
   // cheap way to produce believable front-lit effect.
@@ -46,8 +45,8 @@ void main(void) {
 
   vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;;
 
-  picking_setPickingColor(pickingColors);
+  picking_setPickingColor(pickingColors.xyz);
 
-  shouldDiscard = positions.w;
+  shouldDiscard = pickingColors.a;
 }
 `;
