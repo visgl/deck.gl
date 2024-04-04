@@ -1,26 +1,33 @@
-import {WebGLDevice} from '@luma.gl/webgl';
 import {initializeResources, render, finalizeResources} from './commons';
 
 export default function createDeckLayerView2D(BaseLayerViewGL2D) {
   return BaseLayerViewGL2D.createSubclass({
     properties: {
+      cancelInitialization: null,
       resources: null
     },
 
     // Attach is called as soon as the layer view is ready to start rendering.
-    attach() {
+    async attach() {
       // We use a full-screen quad and shaders to composite the frame rendered
       // with deck.gl on top of the MapView. Composition uses the MapView context.
       const gl = this.context;
-      const device = WebGLDevice.attach(gl);
 
-      this.resources = initializeResources.call(this, device);
+      let cancelled = false;
+      this.cancelInitialization = () => (cancelled = true);
+      const resources = await initializeResources.call(this, gl);
+      // If the layer got detached while awaiting, do not proceed
+      if (cancelled) {
+        finalizeResources(resources);
+        return;
+      }
+      this.resources = resources;
 
       // Update deck props
-      this.layer.deck.on('change', props => this.resources.deck.setProps(props));
+      this.layer.deck.on('change', props => resources.deck.setProps(props));
 
       // We need to start drawing the deck.gl layer immediately.
-      this.resources.deck.setProps(this.layer.deck.toJSON());
+      resources.deck.setProps(this.layer.deck.toJSON());
     },
 
     redraw() {
@@ -29,12 +36,19 @@ export default function createDeckLayerView2D(BaseLayerViewGL2D) {
 
     // Called when the layer must be destroyed.
     detach() {
-      finalizeResources(this.resources);
-      this.resources = null;
+      this.cancelInitialization?.();
+      if (this.resources) {
+        finalizeResources(this.resources);
+        this.resources = null;
+      }
     },
 
     // Called every time that the layer view must be rendered.
     render(renderParameters) {
+      if (!this.resources) {
+        return;
+      }
+
       const [width, height] = this.view.state.size;
       // The view state must be kept in-sync with the MapView of the ArcGIS API.
       const state = renderParameters.state;

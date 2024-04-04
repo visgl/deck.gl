@@ -1,5 +1,4 @@
 /* eslint-disable no-invalid-this */
-import {WebGLDevice} from '@luma.gl/webgl';
 import {initializeResources, render, finalizeResources, RenderResources} from './commons';
 
 import SceneView from '@arcgis/core/views/SceneView';
@@ -18,16 +17,24 @@ export default function createDeckRenderer(DeckProps, externalRenderers) {
     view: SceneView;
     deck: any;
     resources: RenderResources | null = null;
+    cancelInitialization: (() => void) | null = null;
 
     constructor(view: SceneView, props: DeckProps) {
       this.view = view;
       this.deck = new DeckProps(props);
     }
 
-    setup(context) {
+    async setup(context) {
       const gl = context.gl;
-      const device = WebGLDevice.attach(gl);
-      const resources = initializeResources.call(this, device);
+
+      let cancelled = false;
+      this.cancelInitialization = () => (cancelled = true);
+      const resources = await initializeResources.call(this, gl);
+      // If the renderer got disposed while awaiting, do not proceed
+      if (cancelled) {
+        finalizeResources(resources);
+        return;
+      }
 
       this.deck.on('change', props => resources.deck.setProps(props));
 
@@ -36,6 +43,7 @@ export default function createDeckRenderer(DeckProps, externalRenderers) {
     }
 
     dispose() {
+      this.cancelInitialization?.();
       if (this.resources) {
         finalizeResources(this.resources);
       }
