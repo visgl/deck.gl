@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.5] - Apr 4 2024
+
+- fix(mesh-layers): ScenegraphLayer picking (#8752)
+- fix(arcgis): remove dependency on @luma.gl/webgl (#8747)
+
 #### deck.gl [9.0.4] - Apr 2 2024
 
 - fix(core): picking bugs (#8730)
