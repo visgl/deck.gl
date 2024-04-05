@@ -4,14 +4,27 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl//maplibre';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
-import {CollisionFilterExtension} from '@deck.gl/extensions';
-import calculateLabels from './calculateLabels';
+import {CollisionFilterExtension, CollisionFilterExtensionProps} from '@deck.gl/extensions';
+import {calculateLabels, Label} from './calculate-labels';
+
+import type {MapViewState} from '@deck.gl/core';
+import type {FeatureCollection, Geometry} from 'geojson';
 
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads_mexico.json';
-const LINE_COLOR = [0, 173, 230];
 
-const initialViewState = {longitude: -100, latitude: 24, zoom: 5, minZoom: 5, maxZoom: 12};
+const INITIAL_VIEW_STATE: MapViewState = {
+  longitude: -100,
+  latitude: 24,
+  zoom: 5,
+  minZoom: 5,
+  maxZoom: 12
+};
+
+type RoadProperties = {
+  name: string;
+  scalerank: number;
+};
 
 export default function App({
   url = DATA_URL,
@@ -19,38 +32,40 @@ export default function App({
   sizeScale = 10,
   collisionEnabled = true,
   pointSpacing = 5
+}: {
+  url?: string;
+  mapStyle?: string;
+  sizeScale?: number;
+  collisionEnabled?: boolean;
+  pointSpacing?: number
 }) {
-  const [roads, setRoads] = useState({type: 'FeatureCollection', features: []});
-  useEffect(() => {
-    fetch(url)
-      .then(r => r.json())
-      .then(data => setRoads(data));
-  }, [url]);
+  const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 
-  const dataLabels = useMemo(() => calculateLabels(roads, pointSpacing), [roads, pointSpacing]);
+  const dataLabels = useMemo(() => calculateLabels(roads, d => d.name, d => d.scalerank, pointSpacing), [roads, pointSpacing]);
 
   const layers = [
     new GeoJsonLayer({
       id: 'roads-outline',
-      data: roads,
+      data: url,
       lineWidthMinPixels: 4,
       parameters: {depthTest: false},
       getLineColor: [255, 255, 255]
     }),
     new GeoJsonLayer({
       id: 'roads',
-      data: roads,
-      lineWidthMinPixels: 2.5,
+      data: url,
+      onDataLoad: data => setRoads(data as FeatureCollection<Geometry, RoadProperties>),
+      lineWidthMinPixels: 2,
       parameters: {depthTest: false},
-      getLineColor: LINE_COLOR
+      getLineColor: [0, 173, 230]
     }),
-    new TextLayer({
+    new TextLayer<Label, CollisionFilterExtensionProps>({
       id: 'text-layer',
       data: dataLabels,
       getColor: [0, 0, 0],
-      getBackgroundColor: LINE_COLOR,
-      getBorderColor: [10, 16, 29],
-      getBorderWidth: 2,
+      getBackgroundColor: [0, 173, 230],
+      getBorderColor: [255, 255, 255],
+      getBorderWidth: 1,
       getSize: 18,
       billboard: false,
       getAngle: d => d.angle,
@@ -75,12 +90,12 @@ export default function App({
   ];
 
   return (
-    <DeckGL layers={layers} initialViewState={initialViewState} controller={true}>
+    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

@@ -5,13 +5,17 @@ import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
+import type {Color, MapViewState, PickingInfo} from '@deck.gl/core';
+import type {Feature, Geometry} from 'geojson';
+import type {TerrainLayerProps} from '@deck.gl/geo-layers';
+
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain/tour_de_france_2023_mountain_stages.json'; // eslint-disable-line
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 43.09822,
   longitude: -0.6194,
   zoom: 10,
@@ -26,16 +30,22 @@ const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x
 
 // https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
 // Note - the elevation rendered by this example is greatly exagerated!
-const ELEVATION_DECODER = {
+const ELEVATION_DECODER: TerrainLayerProps["elevationDecoder"] = {
   rScaler: 6553.6,
   gScaler: 25.6,
   bScaler: 0.1,
   offset: -10000
 };
 
-const COLOR_SCHEME = [255, 255, 0]; // yellow
+const COLOR_SCHEME: Color = [255, 255, 0];
 
-function getTooltip({object}) {
+type FeatureProperties = {
+  name: string;
+  location: string;
+  tooltip?: string;
+};
+
+function getTooltip({object}: PickingInfo<Feature<Geometry, FeatureProperties>>) {
   return (
     object && {
       html: `\
@@ -46,7 +56,9 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({initialViewState = INITIAL_VIEW_STATE}) {
+export default function App({initialViewState = INITIAL_VIEW_STATE}: {
+  initialViewState?: MapViewState;
+}) {
   const layers = [
     new TerrainLayer({
       id: 'terrain',
@@ -59,7 +71,7 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       color: [255, 255, 255],
       operation: 'terrain+draw'
     }),
-    new GeoJsonLayer({
+    new GeoJsonLayer<FeatureProperties>({
       id: 'gpx-routes',
       data: DATA_URL,
       getFillColor: COLOR_SCHEME,
@@ -72,7 +84,6 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
       // text properties
       pointType: 'text',
       getText: d => d.properties.location,
-      getPosition: d => d.geometry.coordinates,
       getTextColor: d => (d.properties.tooltip ? [255, 255, 255] : COLOR_SCHEME),
       getTextSize: d => (d.properties.tooltip ? 16 : 17),
       getTextPixelOffset: [0, -45],
@@ -96,6 +107,6 @@ export default function App({initialViewState = INITIAL_VIEW_STATE}) {
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
