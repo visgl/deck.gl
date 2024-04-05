@@ -80,18 +80,19 @@ class TerrainExtensionDemo extends Component {
   }
 
   render() {
-    const {params, data, ...otherProps} = this.props;
-    const {location} = params;
+    const {location} = this.props.params;
 
-    const initialViewState = LOCATIONS[location.value];
-    initialViewState.pitch = 45;
-    initialViewState.bearing = 10 * initialViewState.longitude;
-    initialViewState.transitionDuration = 3000;
-    initialViewState.transitionInterpolator = new FlyToInterpolator();
+    const initialViewState = {
+      ...LOCATIONS[location.value],
+      pitch: 45,
+      maxPitch: 89,
+      transitionDuration: 3000,
+      transitionInterpolator: new FlyToInterpolator()
+    };
 
     return (
       <div style={{background: '#111', width: '100%', height: '100%', position: 'absolute'}}>
-        <App {...otherProps} data={data} initialViewState={initialViewState} />
+        <App initialViewState={initialViewState} />
       </div>
     );
   }

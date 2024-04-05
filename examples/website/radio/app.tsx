@@ -6,6 +6,7 @@ import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import DeckGL from '@deck.gl/react';
+import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
 import SearchBar from './search-bar';
@@ -119,25 +120,26 @@ function getTooltipText(stationMap: {[callSign: string]: Station}, object: Featu
 
 /* eslint-disable react/no-deprecated */
 export default function App({
-  data = DATA_URL.STATIONS,
+  data,
   mapStyle = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   showMinimap = true
 }: {
-  data?: string | Station[];
+  data?: Station[];
   mapStyle?: string;
   showMinimap?: boolean;
 }) {
-  const [stations, setStations] = useState<Station[]>([]);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [highlight, setHighlight] = useState(null);
 
   const stationMap: {[callSign: string]: Station} = useMemo(() => {
+    if (!data) return null;
+
     const result = {};
-    for (const station of stations) {
+    for (const station of data) {
       result[station.callSign] = station;
     }
     return result;
-  }, [stations]);
+  }, [data]);
 
   const onViewStateChange: DeckProps<MapView[]>["onViewStateChange"] = useCallback(({viewState: newViewState}) => {
     setViewState(() => ({
@@ -183,7 +185,7 @@ export default function App({
   const getTooltip = useCallback(({object}: PickingInfo) => getTooltipText(stationMap, object), [stationMap]);
 
   const layers = [
-    new MVTLayer<ServiceContour>({
+    data && new MVTLayer<ServiceContour>({
       id: 'service-contours',
       data: DATA_URL.CONTOURS,
       maxZoom: 8,
@@ -205,16 +207,10 @@ export default function App({
     new ScatterplotLayer<Station>({
       id: 'stations',
       data,
-      onDataLoad: (arr) => setStations(arr as Station[]),
       getPosition: d => [d.longitude, d.latitude],
       getFillColor: [40, 40, 40, 128],
       getRadius: 20,
       radiusMinPixels: 2,
-
-      loaders: [CSVLoader],
-      loadOptions: {
-        csv: {delimitersToGuess: '\t', skipEmptyLines: true}
-      }
     }),
 
     new H3HexagonLayer<{hex: string; count: number;}>({
@@ -250,7 +246,7 @@ export default function App({
     >
       <MapView id="main">
         <Map reuseMaps mapStyle={mapStyle} key="map" />
-        <SearchBar data={stations} onChange={onSelectStation} />
+        <SearchBar data={data} onChange={onSelectStation} />
       </MapView>
       {showMinimap && (
         <MapView id="minimap" >
@@ -264,4 +260,10 @@ export default function App({
 export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
+
+  const stations = (await load(DATA_URL.STATIONS, CSVLoader, {
+    csv: {delimitersToGuess: '\t', skipEmptyLines: true}
+  })).data;
+
+  root.render(<App data={stations} />);
 }

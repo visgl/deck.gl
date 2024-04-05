@@ -12,6 +12,7 @@ const PositionContainer = styled('div')({
   bottom: '40px',
   width: '100%',
   display: 'flex',
+  color: '#f5f1d8',
   justifyContent: 'center',
   alignItems: 'center'
 });

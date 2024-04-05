@@ -7,11 +7,11 @@ import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, CollisionFilterExtensionProps} from '@deck.gl/extensions';
 import {calculateLabels, Label} from './calculate-labels';
 
-import type {MapViewState} from '@deck.gl/core';
+import type {Position, MapViewState} from '@deck.gl/core';
 import type {FeatureCollection, Geometry} from 'geojson';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads_mexico.json';
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads.json';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -100,
@@ -27,13 +27,11 @@ type RoadProperties = {
 };
 
 export default function App({
-  url = DATA_URL,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 10,
   collisionEnabled = true,
   pointSpacing = 5
 }: {
-  url?: string;
   mapStyle?: string;
   sizeScale?: number;
   collisionEnabled?: boolean;
@@ -41,44 +39,47 @@ export default function App({
 }) {
   const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 
-  const dataLabels = useMemo(() => calculateLabels(roads, d => d.name, d => d.scalerank, pointSpacing), [roads, pointSpacing]);
+  useEffect(() => {
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(setRoads);
+  }, []);
+
+  const roadLabels = useMemo(() => calculateLabels(roads, d => d.name !== null, pointSpacing), [roads, pointSpacing]);
 
   const layers = [
     new GeoJsonLayer({
       id: 'roads-outline',
-      data: url,
-      lineWidthMinPixels: 4,
-      parameters: {depthTest: false},
-      getLineColor: [255, 255, 255]
+      data: roads,
+      getLineWidth: f => f.properties.scalerank + 2,
+      lineWidthScale: 40,
+      lineWidthMinPixels: 3,
+      getLineColor: [0, 173, 230]
     }),
     new GeoJsonLayer({
       id: 'roads',
-      data: url,
-      onDataLoad: data => setRoads(data as FeatureCollection<Geometry, RoadProperties>),
-      lineWidthMinPixels: 2,
-      parameters: {depthTest: false},
-      getLineColor: [0, 173, 230]
+      data: roads,
+      getLineWidth: f => f.properties.scalerank,
+      lineWidthScale: 40,
+      lineWidthMinPixels: 1,
+      parameters: {depthCompare: 'always'},
+      getLineColor: [255, 255, 255]
     }),
-    new TextLayer<Label, CollisionFilterExtensionProps>({
-      id: 'text-layer',
-      data: dataLabels,
+    new TextLayer<Label<RoadProperties>, CollisionFilterExtensionProps>({
+      id: 'labels',
+      data: roadLabels,
       getColor: [0, 0, 0],
-      getBackgroundColor: [0, 173, 230],
-      getBorderColor: [255, 255, 255],
+      getBackgroundColor: [255, 255, 255],
+      getBorderColor: [0, 173, 230],
       getBorderWidth: 1,
-      getSize: 18,
-      billboard: false,
+      getPosition: d => d.position as Position,
+      getText: d => d.parent.name,
+      getSize: d => Math.max(d.parent.scalerank * 2, 10),
       getAngle: d => d.angle,
-      getTextAnchor: 'middle',
-      getAlignmentBaseline: 'center',
+      billboard: false,
       background: true,
       backgroundPadding: [4, 1],
-      outlineWidth: 0,
-      outlineColor: [255, 255, 0],
-      fontSettings: {
-        sdf: true
-      },
-      characterSet: '0123456789ABCD',
+      characterSet: 'auto',
       fontFamily: 'monospace',
 
       // CollisionFilterExtension props

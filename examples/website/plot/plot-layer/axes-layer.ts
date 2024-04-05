@@ -185,6 +185,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
       id: `${this.props.id}-grids`,
       vs: gridVertex,
       fs: gridFragment,
+      disableWarnings: true,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'line-list',
@@ -235,6 +236,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
       vs: labelVertex,
       fs: labelFragment,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      disableWarnings: true,
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {

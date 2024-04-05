@@ -149,9 +149,10 @@ export default class PlotLayer extends CompositeLayer<Required<_PlotLayerProps>>
     } = this.props;
 
     return [
-      new SurfaceLayer(
+      new SurfaceLayer<Vec3>(
         {
           data: samples,
+          getPosition: p => p,
           getColor,
           uCount,
           vCount,
