@@ -12,17 +12,33 @@ import {CSVLoader} from '@loaders.gl/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
+import type {MapViewState} from '@deck.gl/core';
+import type {AnimatedArcLayerProps} from './animated-arc-layer';
 
 // Data source
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe/2020-01-14.csv';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -40,
   latitude: 40,
   zoom: 2,
   maxZoom: 6
+};
+
+type Flight = {
+  // Departure
+  time1: number;
+  lon1: number;
+  lat1: number;
+  alt1: number;
+
+  // Arrival
+  time2: number;
+  lon2: number;
+  lat2: number;
+  alt2: number;
 };
 
 /* eslint-disable react/no-deprecated */
@@ -32,6 +48,12 @@ export default function App({
   showFlights = true,
   timeWindow = 30,
   animationSpeed = 3
+}: {
+  data?: Flight[];
+  mapStyle?: string;
+  showFlights?: boolean;
+  timeWindow?: number;
+  animationSpeed?: number;
 }) {
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -68,7 +90,7 @@ export default function App({
     []
   );
 
-  const flightLayerProps = {
+  const flightLayerProps: Partial<AnimatedArcLayerProps<Flight>> = {
     data,
     greatCircle: true,
     getSourcePosition: d => [d.lon1, d.lat1],
@@ -80,7 +102,7 @@ export default function App({
 
   const flightPathsLayer =
     showFlights &&
-    new AnimatedArcLayer({
+    new AnimatedArcLayer<Flight>({
       ...flightLayerProps,
       id: 'flight-paths',
       timeRange: [currentTime - 600, currentTime], // 10 minutes
@@ -90,10 +112,10 @@ export default function App({
       widthUnits: 'common',
       getSourceColor: [180, 232, 255],
       getTargetColor: [180, 232, 255],
-      parameters: {depthTest: false}
+      parameters: {depthCompare: 'always'}
     });
 
-  const flightMaskLayer = new AnimatedArcLayer({
+  const flightMaskLayer = new AnimatedArcLayer<Flight>({
     ...flightLayerProps,
     id: 'flight-mask',
     timeRange: [currentTime - timeWindow * 60, currentTime],
@@ -125,18 +147,17 @@ export default function App({
   );
 }
 
-function formatTimeLabel(seconds) {
+function formatTimeLabel(seconds: number) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor(seconds / 60) % 60;
   const s = seconds % 60;
   return [h, m, s].map(x => x.toString().padStart(2, '0')).join(':');
 }
 
-export function renderToDOM(container) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  load(DATA_URL, CSVLoader).then(flights => {
-    root.render(<App data={flights} showFlights />);
-  });
+  const flights = (await load(DATA_URL, CSVLoader)).data;
+  root.render(<App data={flights} showFlights />);
 }
