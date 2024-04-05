@@ -3,8 +3,7 @@ import {createRoot} from 'react-dom/client';
 
 import DeckGL from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
-import {TileLayer} from '@deck.gl/geo-layers';
-import {BitmapLayer, PathLayer} from '@deck.gl/layers';
+import {PMTLayer} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE = {
   latitude: 47.65,
@@ -42,55 +41,7 @@ function getTooltip({tile}) {
 }
 
 export default function App({showBorder = false, onTilesLoad = null}) {
-  const tileLayer = new TileLayer({
-    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    data: [
-      'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-    ],
-
-    // Since these OSM tiles support HTTP/2, we can make many concurrent requests
-    // and we aren't limited by the browser to a certain number per domain.
-    maxRequests: 20,
-
-    pickable: true,
-    onViewportLoad: onTilesLoad,
-    autoHighlight: showBorder,
-    highlightColor: [60, 60, 60, 40],
-    // https://wiki.openstreetmap.org/wiki/Zoom_levels
-    minZoom: 0,
-    maxZoom: 19,
-    tileSize: 256,
-    zoomOffset: devicePixelRatio === 1 ? -1 : 0,
-    renderSubLayers: props => {
-      const {
-        bbox: {west, south, east, north}
-      } = props.tile;
-
-      return [
-        new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: [west, south, east, north]
-        }),
-        showBorder &&
-          new PathLayer({
-            id: `${props.id}-border`,
-            data: [
-              [
-                [west, north],
-                [west, south],
-                [east, south],
-                [east, north],
-                [west, north]
-              ]
-            ],
-            getPath: d => d,
-            getColor: [255, 0, 0],
-            widthMinPixels: 4
-          })
-      ];
-    }
-  });
+  const tileLayer = new PMTLayer({url: "https://r2-public.protomaps.com/protomaps-sample-datasets/protomaps-basemap-opensource-20230408.pmtiles"});
 
   return (
     <DeckGL

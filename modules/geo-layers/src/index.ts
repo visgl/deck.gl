@@ -30,6 +30,7 @@ export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
 export {default as Tile3DLayer} from './tile-3d-layer/tile-3d-layer';
 export {default as TerrainLayer} from './terrain-layer/terrain-layer';
 export {default as MVTLayer} from './mvt-layer/mvt-layer';
+export {default as PMTLayer} from './pmt-layer/pmt-layer';
 export {default as GeohashLayer} from './geohash-layer/geohash-layer';
 
 export {default as _GeoCellLayer} from './geo-cell-layer/GeoCellLayer';
@@ -46,6 +47,7 @@ export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
 export type {Tile3DLayerProps} from './tile-3d-layer/tile-3d-layer';
 export type {MVTLayerProps, MVTLayerPickingInfo} from './mvt-layer/mvt-layer';
+export type {PMTLayerProps} from './pmt-layer/pmt-layer';
 export type {GeoCellLayerProps as _GeoCellLayerProps} from './geo-cell-layer/GeoCellLayer';
 
 // Tileset2D

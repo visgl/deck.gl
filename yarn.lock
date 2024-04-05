@@ -2478,7 +2478,7 @@
     "@loaders.gl/loader-utils" "4.1.4"
     "@math.gl/core" "^4.0.0"
 
-"@loaders.gl/mvt@^4.1.4":
+"@loaders.gl/mvt@4.1.4", "@loaders.gl/mvt@^4.1.4":
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/@loaders.gl/mvt/-/mvt-4.1.4.tgz#76c41ae9952d80a96a33cc8a89af00447f250151"
   integrity sha512-eg2x0q2EJuWxvW4gOeFwD/4LUfMuHgubzXldrsgPSowIbH1fAOHm0sMjyiXLM99Q0mTkjY+vKiM4f2XvoWBB4w==
@@ -2489,6 +2489,17 @@
     "@loaders.gl/schema" "4.1.4"
     "@math.gl/polygon" "^4.0.0"
     pbf "^3.2.1"
+
+"@loaders.gl/pmtiles@^4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/pmtiles/-/pmtiles-4.1.4.tgz#a288ae1174186fb932bf1210c9f692b81e5e7fee"
+  integrity sha512-YCKlGOCKVpQrBxPgfKn/bwnEhOZlOvOcwVg/V2vNy7Dzmrh1+Cv2STiB3uhH6k+ED8V0ZSm/YawPwB01FXz+8A==
+  dependencies:
+    "@loaders.gl/images" "4.1.4"
+    "@loaders.gl/loader-utils" "4.1.4"
+    "@loaders.gl/mvt" "4.1.4"
+    "@loaders.gl/schema" "4.1.4"
+    pmtiles "^2.7.2"
 
 "@loaders.gl/polyfills@^4.1.4":
   version "4.1.4"
@@ -6166,6 +6177,11 @@ fflate@0.7.4:
   resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.7.4.tgz#61587e5d958fdabb5a9368a302c25363f4f69f50"
   integrity sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==
 
+fflate@^0.8.0:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.8.2.tgz#fc8631f5347812ad6028bbe4a2308b2792aa1dea"
+  integrity sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==
+
 figgy-pudding@^3.4.1, figgy-pudding@^3.5.1:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.2.tgz#b4eee8148abb01dcf1d1ac34367d59e12fa61d6e"
@@ -9496,6 +9512,13 @@ plur@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/plur/-/plur-1.0.0.tgz#db85c6814f5e5e5a3b49efc28d604fec62975156"
   integrity sha512-qSnKBSZeDY8ApxwhfVIwKwF36KVJqb1/9nzYYq3j3vdwocULCXT8f8fQGkiw1Nk9BGfxiDagEe/pwakA+bOBqw==
+
+pmtiles@^2.7.2:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/pmtiles/-/pmtiles-2.11.0.tgz#53aac29408e001a73b15b1c8cad0b17c944ab7bd"
+  integrity sha512-dU9SzzaqmCGpdEuTnIba6bDHT6j09ZJFIXxwGpvkiEnce3ZnBB1VKt6+EOmJGueriweaZLAMTUmKVElU2CBe0g==
+  dependencies:
+    fflate "^0.8.0"
 
 pngjs-nozlib@^1.0.0:
   version "1.0.0"

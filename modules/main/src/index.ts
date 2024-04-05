@@ -135,6 +135,7 @@ export {
   Tile3DLayer,
   TerrainLayer,
   MVTLayer,
+  PMTLayer,
   GeohashLayer
 } from '@deck.gl/geo-layers';
 
@@ -204,6 +205,11 @@ export type {
   ScreenGridLayerProps
 } from '@deck.gl/aggregation-layers';
 
-export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+export type {
+  MVTLayerProps,
+  PMTLayerProps,
+  QuadkeyLayerProps,
+  TileLayerProps
+} from '@deck.gl/geo-layers';
 
 export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';

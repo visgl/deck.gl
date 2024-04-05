@@ -42,6 +42,7 @@
     "@loaders.gl/gis": "^4.1.4",
     "@loaders.gl/loader-utils": "^4.1.4",
     "@loaders.gl/mvt": "^4.1.4",
+    "@loaders.gl/pmtiles": "^4.1.4",
     "@loaders.gl/schema": "^4.1.4",
     "@loaders.gl/terrain": "^4.1.4",
     "@loaders.gl/tiles": "^4.1.4",
