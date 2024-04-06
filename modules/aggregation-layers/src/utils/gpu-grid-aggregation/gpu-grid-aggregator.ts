@@ -22,7 +22,7 @@ import type {Device, DeviceFeature} from '@luma.gl/core';
 import {Model, TextureTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {GL} from '@luma.gl/constants';
-import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
+import {project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
@@ -397,7 +397,7 @@ export default class GPUGridAggregator {
 
   // render all aggregated grid-cells to generate Min, Max or MaxMin data texture
   _renderToMaxMinTexture(opts) {
-    const {id, parameters, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
+    const {id, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
     const {framebuffers} = this.state;
     const {allAggregationModel} = this;
 

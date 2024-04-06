@@ -3,7 +3,7 @@ import {equals} from '@math.gl/core';
 import {_deepEqual as deepEqual} from '@deck.gl/core';
 import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
-import MaskEffect, {MaskPreRenderStats} from '../mask/mask-effect';
+import {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
 
 type CollisionFilterExtensionProps = {
