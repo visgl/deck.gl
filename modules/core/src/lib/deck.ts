@@ -57,7 +57,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
-import type {ViewStateMap, AnyViewStateOf, ViewOrViews} from './view-manager';
+import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
 
 /* global document */
 
@@ -90,7 +90,7 @@ type CursorState = {
   isDragging: boolean;
 };
 
-export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
+export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.
@@ -288,7 +288,7 @@ const defaultProps = {
 };
 
 /* eslint-disable max-statements */
-export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
+export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
   // This is used to defeat tree shaking of init.js
   // https://github.com/visgl/deck.gl/issues/3213
@@ -314,7 +314,7 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
-  protected viewState: ViewStateMap<ViewsT> | null;
+  protected viewState: ViewStateObject<ViewsT> | null;
   protected cursorState: CursorState = {
     isHovering: false,
     isDragging: false
@@ -473,7 +473,7 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       width: number;
       height: number;
       views: View[];
-      viewState: ViewStateMap<ViewsT>;
+      viewState: ViewStateObject<ViewsT> | null;
     } = Object.create(this.props);
     Object.assign(resolvedProps, {
       views: this._getViews(),
@@ -826,8 +826,8 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  private _getViewState(): ViewStateMap<ViewsT> {
-    return this.props.viewState || this.viewState || {};
+  private _getViewState(): ViewStateObject<ViewsT> | null {
+    return this.props.viewState || this.viewState;
   }
 
   // Get the view descriptor list

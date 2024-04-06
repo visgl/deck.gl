@@ -22,9 +22,6 @@ async function createDeckInstance(gl: WebGL2RenderingContext): Promise<{
 }> {
   return new Promise(resolve => {
     const deckInstance = new Deck({
-      // The view state will be set dynamically to track the MapView current extent.
-      viewState: {},
-
       // Input is handled by the ArcGIS API for JavaScript.
       controller: false,
 

@@ -116,8 +116,8 @@ export type {OrbitViewState, OrbitViewProps} from './views/orbit-view';
 export type {OrthographicViewState, OrthographicViewProps} from './views/orthographic-view';
 export type {GlobeViewState, GlobeViewProps} from './views/globe-view';
 export type {ChangeFlags} from './lib/layer-state';
-export type {LayersList} from './lib/layer-manager';
-export type {LayerContext} from './lib/layer-manager';
+export type {LayersList, LayerContext} from './lib/layer-manager';
+export type {ViewStateMap} from './lib/view-manager';
 export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
 export type {
