@@ -70,7 +70,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _needsUpdate: string | false;
   private _eventManager: EventManager;
   private _eventCallbacks: {
-    onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
+    onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
 
@@ -299,12 +299,6 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
-  private _onViewStateChange(viewId: string, event: ViewStateChangeParameters) {
-    if (this._eventCallbacks.onViewStateChange) {
-      this._eventCallbacks.onViewStateChange({...event, viewId});
-    }
-  }
-
   private _createController(
     view: View,
     props: {id: string; type: ConstructorOf<Controller<any>>}
@@ -315,7 +309,7 @@ export default class ViewManager<ViewsT extends View[]> {
       timeline: this.timeline,
       eventManager: this._eventManager,
       // Set an internal callback that calls the prop callback if provided
-      onViewStateChange: this._onViewStateChange.bind(this, props.id),
+      onViewStateChange: this._eventCallbacks.onViewStateChange,
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
         this.getView(view.id)?.makeViewport({
