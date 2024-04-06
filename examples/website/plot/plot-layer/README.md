@@ -27,24 +27,30 @@ Color of the surface.
 If a function is supplied, it is called for each `[x, y, z]` position to retreive surface color.
 Returns an array in the form of `[r, g, b, a]`. If the alpha component is not supplied, it is default to `255`.
 
-##### `getAxis` (Function, optional)
+##### `onAxesChange` (Function, optional)
 
-- Default: `(axis: Axis) => axis`
+- Default: `(axes: Axes) => void`
 
 Called to get optional settings for each axis.
 Default to identity.
 
 Arguments:
-- `axis` (Axis)
-  + `axis` (string) - one of `'x'`, `'y'` or `'z'`
-  + `min` (number) - lower bound of the values on this axis
-  + `max` (number) - upper bound of the values on this axis
+- `axes` (Axes)
+  + `x` (Axis)
+  + `y` (Axis)
+  + `z` (Axis)
 
-Expected to return a modified Axis object with one or more of the following fields:
-- `axis` (Axis)
-  + `title` (string)
-  + `scale` (Function) - remaps values in the model space
-  + `ticks` (number[]) - list of values at which to display grid/labels
+Each Axis object contains the following fields:
+
+- `name` (string) - one of `'x'`, `'y'` or `'z'`
+- `min` (number) - lower bound of the values on this axis
+- `max` (number) - upper bound of the values on this axis
+
+The callback offers an oportunity to populate an axis with some optional fields:
+
+- `title` (string)
+- `scale` (Function) - remaps values in the model space
+- `ticks` (number[]) - list of values at which to display grid/labels
 
 ##### `uCount` (number, optional)
 
@@ -81,7 +87,7 @@ Font size of the labels.
 
 - Default: `value => value.toFixed(2)`
 
-Format a tick value on x axis to text string.
+Format a tick value on an axis to text string.
 
 ##### `axesPadding` (number, optional)
 

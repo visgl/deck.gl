@@ -40,8 +40,13 @@ if (vTimestamp < timeRange.x || vTimestamp > timeRange.y) {
   discard;
 }
 `,
+      // Shape trail into teardrop
       'fs:DECKGL_FILTER_COLOR': `\
-color.a *= (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
+float f = (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
+color.a *= pow(f, 5.0);
+float cap = 10.0 * (f - 0.9);
+float w = pow(f, 4.0) - smoothstep(0.89, 0.91, f) * pow(cap, 4.0);
+color.a *= smoothstep(1.1 * w, w, abs(geometry.uv.y));
 `
     };
     return shaders;

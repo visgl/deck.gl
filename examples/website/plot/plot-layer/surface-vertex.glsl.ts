@@ -20,7 +20,7 @@
 
 export default `\
 #version 300 es
-#define SHADER_NAME graph-layer-vertex-shader
+#define SHADER_NAME surface-layer-vertex-shader
 
 in vec3 positions;
 in vec3 positions64Low;
