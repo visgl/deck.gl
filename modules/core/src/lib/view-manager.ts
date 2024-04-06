@@ -47,9 +47,7 @@ export type ViewStateMap<ViewsT extends ViewOrViews> =
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
   views: ViewsT;
   viewState: ViewStateMap<ViewsT>;
-  onViewStateChange?: (
-    params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>> & {viewId: string}
-  ) => void;
+  onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
   width?: number;
   height?: number;
