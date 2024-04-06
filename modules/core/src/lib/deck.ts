@@ -391,9 +391,6 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
         ...props.deviceProps,
         canvas: this._createCanvas(props)
       });
-      deviceOrPromise.then(device => {
-        this.device = device;
-      });
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);

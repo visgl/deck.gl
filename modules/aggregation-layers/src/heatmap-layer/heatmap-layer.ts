@@ -469,7 +469,7 @@ export default class HeatmapLayer<
   }
 
   _updateMaxWeightValue() {
-    const {maxWeightTransform, textureSize} = this.state;
+    const {maxWeightTransform} = this.state;
 
     maxWeightTransform!.run({
       parameters: {viewport: [0, 0, 1, 1]},
