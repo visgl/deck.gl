@@ -80,6 +80,7 @@ export default class VectorTileLayer<
     return loadOptions;
   }
 
+  /* eslint-disable camelcase */
   async getTileData(tile: TileLoadProps) {
     const tileJSON = this.props.data as TilejsonResult;
     const {tiles, properties_tiles} = tileJSON;
@@ -115,6 +116,7 @@ export default class VectorTileLayer<
 
     return attributes ? mergeBoundaryData(geometry, attributes) : geometry;
   }
+  /* eslint-enable camelcase */
 
   renderSubLayers(
     props: TileLayer['props'] & {

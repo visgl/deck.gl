@@ -255,9 +255,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
       scenegraphData = {gltf: processedGLTF, ...gltfObjects};
 
-      waitForGLTFAssets(gltfObjects).then(() => {
-        this.setNeedsRedraw();
-      }); // eslint-disable-line @typescript-eslint/no-floating-promises
+      waitForGLTFAssets(gltfObjects)
+        .then(() => {
+          this.setNeedsRedraw();
+        })
+        .catch(ex => {
+          this.raiseError(ex, 'loading glTF');
+        });
     }
 
     const options = {layer: this, device: this.context.device};
