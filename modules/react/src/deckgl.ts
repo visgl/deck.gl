@@ -117,7 +117,10 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
   return deck;
 }
 
-function DeckGL<ViewsT extends ViewOrViews = null>(props: DeckGLProps<ViewsT>) {
+function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
+  props: DeckGLProps<ViewsT>,
+  ref: React.Ref<DeckGLRef<ViewsT>>
+) {
   // A mechanism to force redraw
   const [version, setVersion] = useState(0);
   // A reference to persistent states
@@ -221,7 +224,7 @@ function DeckGL<ViewsT extends ViewOrViews = null>(props: DeckGLProps<ViewsT>) {
     }
   });
 
-  useImperativeHandle(props.ref, () => getRefHandles(thisRef), []);
+  useImperativeHandle(ref, () => getRefHandles(thisRef), []);
 
   const currentViewports =
     thisRef.deck && thisRef.deck.isInitialized ? thisRef.deck.getViewports() : undefined;
@@ -273,6 +276,8 @@ function DeckGL<ViewsT extends ViewOrViews = null>(props: DeckGLProps<ViewsT>) {
   return thisRef.control;
 }
 
-DeckGL.defaultProps = Deck.defaultProps;
+const DeckGL = React.forwardRef(DeckGLWithRef) as <ViewsT extends ViewOrViews>(
+  props: DeckGLProps<ViewsT>
+) => React.ReactElement;
 
 export default DeckGL;
