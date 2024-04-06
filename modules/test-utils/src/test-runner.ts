@@ -23,7 +23,7 @@
 import {Deck, DeckProps, MapView} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
-const DEFAULT_DECK_PROPS: DeckProps = {
+const DEFAULT_DECK_PROPS: DeckProps<any> = {
   ...Deck.defaultProps,
   id: 'deckgl-render-test',
   width: 800,
@@ -63,8 +63,8 @@ const DEFAULT_TEST_OPTIONS: TestOptions<TestCase, unknown> = {
 };
 
 export abstract class TestRunner<TestCaseT extends TestCase, ResultT, ExtraOptions = {}> {
-  deck: Deck | null = null;
-  props: DeckProps;
+  deck: Deck<any> | null = null;
+  props: DeckProps<any>;
   isHeadless: boolean;
   isRunning: boolean = false;
   testOptions: TestOptions<TestCaseT, ResultT> & ExtraOptions;

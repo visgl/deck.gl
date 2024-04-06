@@ -27,7 +27,19 @@ const defaultProps = {
   interleaved: true
 };
 
-export type GoogleMapsOverlayProps = DeckProps & {
+export type GoogleMapsOverlayProps = Omit<
+  DeckProps,
+  | 'width'
+  | 'height'
+  | 'gl'
+  | 'glOptions'
+  | 'parent'
+  | 'canvas'
+  | '_customRender'
+  | 'viewState'
+  | 'initialViewState'
+  | 'controller'
+> & {
   interleaved?: boolean;
 };
 
