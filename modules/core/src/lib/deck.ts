@@ -192,7 +192,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   onResize?: (dimensions: {width: number; height: number}) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onViewStateChange?: <ViewStateT extends AnyViewStateOf<ViewsT>>(
-    params: ViewStateChangeParameters<ViewStateT> & {viewId: string}
+    params: ViewStateChangeParameters<ViewStateT>
   ) => ViewStateT | null | void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;

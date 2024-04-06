@@ -1,4 +1,4 @@
-import View, {CommonViewState} from './view';
+import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
 import GlobeController from '../controllers/globe-controller';
 
@@ -15,7 +15,7 @@ export type GlobeViewState = {
   maxZoom?: number;
 } & CommonViewState;
 
-type GlobeViewProps = {
+export type GlobeViewProps = {
   /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`. */
   resolution?: number;
   /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter. */
@@ -24,10 +24,14 @@ type GlobeViewProps = {
   farZMultiplier?: number;
   /** Distance of the camera relative to viewport height. Default `1.5`. */
   altitude?: number;
-};
+} & CommonViewProps<GlobeViewState>;
 
 export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
   static displayName = 'GlobeView';
+
+  constructor(props: GlobeViewProps = {}) {
+    super(props);
+  }
 
   get ViewportType() {
     return GlobeViewport;

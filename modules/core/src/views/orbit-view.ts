@@ -1,4 +1,4 @@
-import View, {CommonViewState} from './view';
+import View, {CommonViewState, CommonViewProps} from './view';
 import OrbitViewport from '../viewports/orbit-viewport';
 import OrbitController from '../controllers/orbit-controller';
 
@@ -21,7 +21,7 @@ export type OrbitViewState = {
   maxRotationX?: number;
 } & CommonViewState;
 
-type OrbitViewProps = {
+export type OrbitViewProps = {
   /** Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`. */
   orbitAxis?: 'Y' | 'Z';
   /** Custom projection matrix */
@@ -34,7 +34,7 @@ type OrbitViewProps = {
   far?: number;
   /** Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection). */
   orthographic?: boolean;
-};
+} & CommonViewProps<OrbitViewState>;
 
 export default class OrbitView extends View<OrbitViewState, OrbitViewProps> {
   static displayName = 'OrbitView';

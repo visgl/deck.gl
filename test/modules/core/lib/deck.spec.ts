@@ -165,13 +165,15 @@ test('Deck#auto view state', t => {
     },
 
     onLoad: () => {
-      deck.viewManager._onViewStateChange('default', {
+      deck._onViewStateChange({
+        viewId: 'default',
         viewState: {longitude: 0, latitude: 0, zoom: 11}
       });
       t.is(onViewStateChangeCalled, 1, 'onViewStateChange is called');
       t.is(deck.getViewports()[0].longitude, 0, 'default view state should not change');
 
-      deck.viewManager._onViewStateChange('map', {
+      deck._onViewStateChange({
+        viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
       t.is(onViewStateChangeCalled, 2, 'onViewStateChange is called');
@@ -181,7 +183,8 @@ test('Deck#auto view state', t => {
       t.is(deck.getViewports()[2].longitude, 1, 'minimap longitude is updated');
       t.is(deck.getViewports()[2].zoom, 12, 'minimap zoom should not change');
 
-      deck.viewManager._onViewStateChange('minimap', {
+      deck._onViewStateChange({
+        viewId: 'minimap',
         viewState: {longitude: 2, latitude: 2, zoom: 12}
       });
       t.is(onViewStateChangeCalled, 3, 'onViewStateChange is called');
@@ -189,7 +192,8 @@ test('Deck#auto view state', t => {
       t.is(deck.getViewports()[2].longitude, 1, 'minimap state should not change');
 
       deck.setProps({viewState: {longitude: 3, latitude: 3, zoom: 12}});
-      deck.viewManager._onViewStateChange('map', {
+      deck._onViewStateChange({
+        viewId: 'map',
         viewState: {longitude: 1, latitude: 1, zoom: 11}
       });
       t.is(deck.getViewports()[0].longitude, 3, 'external viewState should override internal');
