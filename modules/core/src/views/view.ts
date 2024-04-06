@@ -27,6 +27,8 @@ export type CommonViewProps<ViewState> = {
     top?: number | string;
     bottom?: number | string;
   } | null;
+  /** When using multiple views, set this flag to wipe the pixels drawn by other overlaping views */
+  clear?: boolean;
   /** State of the view */
   viewState?:
     | string
