@@ -125,6 +125,7 @@ export function getInterleavedProps(currProps: DeckProps) {
       blendEquation: GL.FUNC_ADD,
       ...currProps.parameters
     } as any,
+    // @ts-ignore views prop is hidden by the types because it is not expected to work the same way as in standalone Deck, see documentation
     views: currProps.views || [new MapView({id: 'mapbox'})]
   };
 

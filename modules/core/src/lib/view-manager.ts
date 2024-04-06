@@ -29,27 +29,35 @@ import type View from '../views/view';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
-import type MapView from '../views/map-view';
+import type {default as MapView, MapViewState} from '../views/map-view';
 
 export type ViewOrViews = View | View[] | null;
-type ViewStatOf<ViewT extends View> = ReturnType<ViewT['filterViewState']>;
+type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : never;
 type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapView
-  : ViewsT extends readonly (infer ViewT)[]
-  ? ViewT
+  : ViewsT extends View[]
+  ? ViewsT[number]
   : ViewsT;
-export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStatOf<OneOfViews<ViewsT>>;
-export type ViewStateMap<ViewsT extends ViewOrViews> =
+export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
+export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
+  ? MapViewState
+  : ViewsT extends View
+  ? ViewStateOf<ViewsT>
+  : {[viewId: string]: AnyViewStateOf<ViewsT>};
+
+/** This is a very lose type of all "acceptable" viewState
+ * It's not good for type hinting but matches what may exist internally
+ */
+export type ViewStateObject<ViewsT extends ViewOrViews> =
+  | ViewStateMap<ViewsT>
   | AnyViewStateOf<ViewsT>
   | {[viewId: string]: AnyViewStateOf<ViewsT>};
 
 /** ViewManager props directly supplied by the user */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
   views: ViewsT;
-  viewState: ViewStateMap<ViewsT>;
-  onViewStateChange?: (
-    params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>> & {viewId: string}
-  ) => void;
+  viewState: ViewStateObject<ViewsT> | null;
+  onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
   width?: number;
   height?: number;
@@ -59,7 +67,7 @@ export default class ViewManager<ViewsT extends View[]> {
   width: number;
   height: number;
   views: View[];
-  viewState: ViewStateMap<ViewsT>;
+  viewState: ViewStateObject<ViewsT>;
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
 
@@ -70,7 +78,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _needsUpdate: string | false;
   private _eventManager: EventManager;
   private _eventCallbacks: {
-    onViewStateChange?: (params: ViewStateChangeParameters & {viewId: string}) => void;
+    onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
 
@@ -85,7 +93,7 @@ export default class ViewManager<ViewsT extends View[]> {
     this.views = [];
     this.width = 100;
     this.height = 100;
-    this.viewState = {};
+    this.viewState = {} as any;
     this.controllers = {};
     this.timeline = props.timeline;
 
@@ -284,7 +292,7 @@ export default class ViewManager<ViewsT extends View[]> {
     this.views = views;
   }
 
-  private _setViewState(viewState: ViewStateMap<ViewsT>): void {
+  private _setViewState(viewState: ViewStateObject<ViewsT>): void {
     if (viewState) {
       // depth = 3 when comparing viewStates: viewId.position.0
       const viewStateChanged = !deepEqual(viewState, this.viewState, 3);
@@ -299,12 +307,6 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
-  private _onViewStateChange(viewId: string, event: ViewStateChangeParameters) {
-    if (this._eventCallbacks.onViewStateChange) {
-      this._eventCallbacks.onViewStateChange({...event, viewId});
-    }
-  }
-
   private _createController(
     view: View,
     props: {id: string; type: ConstructorOf<Controller<any>>}
@@ -315,7 +317,7 @@ export default class ViewManager<ViewsT extends View[]> {
       timeline: this.timeline,
       eventManager: this._eventManager,
       // Set an internal callback that calls the prop callback if provided
-      onViewStateChange: this._onViewStateChange.bind(this, props.id),
+      onViewStateChange: this._eventCallbacks.onViewStateChange,
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
         this.getView(view.id)?.makeViewport({
@@ -330,7 +332,7 @@ export default class ViewManager<ViewsT extends View[]> {
 
   private _updateController(
     view: View,
-    viewState: ViewStateMap<ViewsT>,
+    viewState: AnyViewStateOf<ViewsT>,
     viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {

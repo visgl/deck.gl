@@ -41,7 +41,7 @@ const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 export type LayerContext = {
   layerManager: LayerManager;
   resourceManager: ResourceManager;
-  deck?: Deck;
+  deck?: Deck<any>;
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
@@ -59,7 +59,7 @@ export type LayerContext = {
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
 
 export type LayerManagerProps = {
-  deck?: Deck;
+  deck?: Deck<any>;
   stats?: Stats;
   viewport?: Viewport;
   timeline?: Timeline;

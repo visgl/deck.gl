@@ -36,7 +36,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
   props: FullscreenWidgetProps;
   placement: WidgetPlacement = 'top-left';
 
-  deck?: Deck;
+  deck?: Deck<any>;
   element?: HTMLDivElement;
 
   fullscreen: boolean = false;
@@ -50,7 +50,7 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     this.props = props;
   }
 
-  onAdd({deck}: {deck: Deck}): HTMLDivElement {
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const {style, className} = this.props;
     const el = document.createElement('div');
     el.classList.add('deck-widget', 'deck-widget-fullscreen');
