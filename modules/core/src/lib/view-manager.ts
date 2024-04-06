@@ -29,19 +29,21 @@ import type View from '../views/view';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
-import type MapView from '../views/map-view';
+import type {default as MapView, MapViewState} from '../views/map-view';
 
 export type ViewOrViews = View | View[] | null;
-type ViewStatOf<ViewT extends View> = ReturnType<ViewT['filterViewState']>;
+type ViewStateOf<ViewT> = ViewT extends View<infer ViewStateT> ? ViewStateT : never;
 type OneOfViews<ViewsT extends ViewOrViews> = ViewsT extends null
   ? MapView
-  : ViewsT extends readonly (infer ViewT)[]
-  ? ViewT
+  : ViewsT extends View[]
+  ? ViewsT[number]
   : ViewsT;
-export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStatOf<OneOfViews<ViewsT>>;
-export type ViewStateMap<ViewsT extends ViewOrViews> =
-  | AnyViewStateOf<ViewsT>
-  | {[viewId: string]: AnyViewStateOf<ViewsT>};
+export type AnyViewStateOf<ViewsT extends ViewOrViews> = ViewStateOf<OneOfViews<ViewsT>>;
+export type ViewStateMap<ViewsT extends ViewOrViews> = ViewsT extends null
+  ? MapViewState
+  : ViewsT extends View
+  ? ViewStateOf<ViewsT>
+  : {[viewId: string]: AnyViewStateOf<ViewsT>};
 
 /** ViewManager props directly supplied by the user */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
@@ -83,7 +85,7 @@ export default class ViewManager<ViewsT extends View[]> {
     this.views = [];
     this.width = 100;
     this.height = 100;
-    this.viewState = {};
+    this.viewState = {} as any;
     this.controllers = {};
     this.timeline = props.timeline;
 
@@ -184,6 +186,7 @@ export default class ViewManager<ViewsT extends View[]> {
       typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     // Backward compatibility: view state for single view
     const viewState = (view && this.viewState[view.getViewStateId()]) || this.viewState;
+    // @ts-expect-error we are assuming viewState can be used as fallback but it is not guaranteed
     return view ? view.filterViewState(viewState) : viewState;
   }
 
@@ -322,7 +325,7 @@ export default class ViewManager<ViewsT extends View[]> {
 
   private _updateController(
     view: View,
-    viewState: ViewStateMap<ViewsT>,
+    viewState: AnyViewStateOf<ViewsT>,
     viewport: Viewport | null,
     controller?: Controller<any> | null
   ): Controller<any> | null {

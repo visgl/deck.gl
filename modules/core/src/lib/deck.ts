@@ -288,7 +288,7 @@ const defaultProps = {
 };
 
 /* eslint-disable max-statements */
-export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
+export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
   // This is used to defeat tree shaking of init.js
   // https://github.com/visgl/deck.gl/issues/3213
