@@ -112,6 +112,7 @@ export type InteractionState = {
 
 /** Parameters passed to the onViewStateChange callback */
 export type ViewStateChangeParameters<ViewStateT = any> = {
+  viewId: string;
   /** The next view state, either from user input or transition */
   viewState: ViewStateT;
   /** Object describing the nature of the view state change */
@@ -385,13 +386,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (changed) {
       const oldViewState = this.controllerState && this.controllerState.getViewportProps();
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState});
+        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState, viewId: this.props.id});
       }
     }
   }
 
   private _onTransition(params: {viewState: Record<string, any>, oldViewState: Record<string, any>}) {
-    this.onViewStateChange({...params, interactionState: this._interactionState});
+    this.onViewStateChange({...params, interactionState: this._interactionState, viewId: this.props.id});
   }
 
   private _setInteractionState(newStates: InteractionState) {
