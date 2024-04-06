@@ -11,7 +11,7 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
 import SearchBar from './search-bar';
 
-import type {Color, DeckProps, MapViewState, PickingInfo} from '@deck.gl/core';
+import type {Color, ViewStateChangeParameters, MapViewState, PickingInfo, FilterContext} from '@deck.gl/core';
 import type {Feature, Geometry} from 'geojson';
 
 // Data source
@@ -90,7 +90,7 @@ type ServiceContour = {
   callSign: string;
 };
 
-const layerFilter: DeckProps["layerFilter"] = ({layer, viewport}) => {
+function layerFilter({layer, viewport}: FilterContext) {
   const shouldDrawInMinimap =
     layer.id.startsWith('coverage') || layer.id.startsWith('viewport-bounds');
   if (viewport.id === 'minimap') return shouldDrawInMinimap;
@@ -141,7 +141,7 @@ export default function App({
     return result;
   }, [data]);
 
-  const onViewStateChange: DeckProps<MapView[]>["onViewStateChange"] = useCallback(({viewState: newViewState}) => {
+  const onViewStateChange = useCallback(({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
     setViewState(() => ({
       main: newViewState,
       minimap: {
