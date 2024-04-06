@@ -44,7 +44,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   orientation: 'vertical' | 'horizontal' = 'vertical';
   viewId?: string | null = null;
   viewport?: Viewport;
-  deck?: Deck;
+  deck?: Deck<any>;
   element?: HTMLDivElement;
 
   constructor(props: ZoomWidgetProps) {
@@ -59,7 +59,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     this.props = props;
   }
 
-  onAdd({deck}: {deck: Deck}): HTMLDivElement {
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const {style, className} = this.props;
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-zoom');

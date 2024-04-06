@@ -34,7 +34,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   placement: WidgetPlacement = 'top-left';
   viewId?: string | null = null;
   viewport?: Viewport;
-  deck?: Deck;
+  deck?: Deck<any>;
   element?: HTMLDivElement;
 
   constructor(props: CompassWidgetProps) {
@@ -56,7 +56,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     this.update();
   }
 
-  onAdd({deck}: {deck: Deck}): HTMLDivElement {
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const {style, className} = this.props;
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
