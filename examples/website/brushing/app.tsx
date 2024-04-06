@@ -38,14 +38,14 @@ type CountyProperties = {
   centroid: [lon: number, lat: number];
 };
 
-type County = Feature<Polygon|MultiPolygon, CountyProperties>;
+type County = Feature<Polygon | MultiPolygon, CountyProperties>;
 
 type MigrationFlow = {
   source: County;
   target: County;
   /** Number of migrants */
   value: number;
-}
+};
 
 type MigrationDestination = {
   county: County;
@@ -64,29 +64,30 @@ function getLayerData(data?: County[]): {
     return null;
   }
   const arcs: MigrationFlow[] = [];
-  const points: MigrationDestination[] = data.map((county, fromId) => {
-    const {flows} = county.properties;
-    let netGain = 0;
+  const points: MigrationDestination[] = data
+    .map((county, fromId) => {
+      const {flows} = county.properties;
+      let netGain = 0;
 
-    Object.keys(flows).forEach(key => {
-      const toId = Number(key);
-      const value = flows[toId];
-      netGain -= value;
+      Object.keys(flows).forEach(key => {
+        const toId = Number(key);
+        const value = flows[toId];
+        netGain -= value;
 
-      // if number too small, ignore it
-      if (value >= 50) {
-        arcs.push({
-          source: county,
-          target: data[toId],
-          value
-        });
-      }
-    });
+        // if number too small, ignore it
+        if (value >= 50) {
+          arcs.push({
+            source: county,
+            target: data[toId],
+            value
+          });
+        }
+      });
 
-    return {county, netGain};
-  })
-  // sort points by radius large -> small
-  .sort((a, b) => Math.abs(b.netGain) - Math.abs(a.netGain));
+      return {county, netGain};
+    })
+    // sort points by radius large -> small
+    .sort((a, b) => Math.abs(b.netGain) - Math.abs(a.netGain));
 
   return {arcs, points};
 }
@@ -118,72 +119,75 @@ export default function App({
 }) {
   const layerData = useMemo(() => getLayerData(data), [data]);
   const radiusScale = useMemo(() => {
-    return layerData && scaleSqrt()
-      .domain([0, Math.abs(layerData.points[0].netGain)])
-      .range([1, 20]);
+    return (
+      layerData &&
+      scaleSqrt()
+        .domain([0, Math.abs(layerData.points[0].netGain)])
+        .range([1, 20])
+    );
   }, [layerData]);
 
   const layers = layerData && [
-      new ScatterplotLayer<MigrationFlow, BrushingExtensionProps<MigrationFlow>>({
-        id: 'sources-with-gain',
-        data: layerData.arcs,
-        brushingRadius: brushRadius,
-        brushingEnabled: enableBrushing,
-        brushingTarget: 'custom',
-        getPosition: d => d.target.properties.centroid,
-        getRadius: d => radiusScale(d.value),
-        getBrushingTarget: d => d.source.properties.centroid,
-        getFillColor: inFlowColor,
-        // only show source points when brushing
-        visible: enableBrushing,
-        radiusScale: 3000,
-        extensions: [brushingExtension]
-      }),
-      new ScatterplotLayer<MigrationFlow, BrushingExtensionProps<MigrationFlow>>({
-        id: 'sources-with-loss',
-        data: layerData.arcs,
-        brushingRadius: brushRadius,
-        brushingEnabled: enableBrushing,
-        brushingTarget: 'custom',
-        getPosition: d => d.source.properties.centroid,
-        getRadius: d => radiusScale(d.value),
-        getBrushingTarget: d => d.target.properties.centroid,
-        getFillColor: outFlowColor,
-        // only show source points when brushing
-        visible: enableBrushing,
-        radiusScale: 3000,
-        extensions: [brushingExtension]
-      }),
-      new ScatterplotLayer<MigrationDestination, BrushingExtensionProps>({
-        id: 'destinations',
-        data: layerData.points,
-        brushingRadius: brushRadius,
-        lineWidthMinPixels: 2,
-        stroked: true,
-        pickable: true,
-        brushingEnabled: enableBrushing,
-        radiusScale: 3000,
-        getPosition: d => d.county.properties.centroid,
-        getLineColor: d => d.netGain > 0 ? inFlowColor : outFlowColor,
-        getFillColor: [0, 0, 0, 0],
-        getRadius: d => radiusScale(d.netGain) + 4,
-        extensions: [brushingExtension]
-      }),
-      new ArcLayer<MigrationFlow, BrushingExtensionProps>({
-        id: 'arc',
-        data: layerData.arcs,
-        getWidth: strokeWidth,
-        opacity,
-        brushingRadius: brushRadius,
-        brushingEnabled: enableBrushing,
-        brushingTarget: 'source_target',
-        getSourcePosition: d => d.source.properties.centroid,
-        getTargetPosition: d => d.target.properties.centroid,
-        getSourceColor: outFlowColor,
-        getTargetColor: inFlowColor,
-        extensions: [brushingExtension]
-      })
-    ];
+    new ScatterplotLayer<MigrationFlow, BrushingExtensionProps<MigrationFlow>>({
+      id: 'sources-with-gain',
+      data: layerData.arcs,
+      brushingRadius: brushRadius,
+      brushingEnabled: enableBrushing,
+      brushingTarget: 'custom',
+      getPosition: d => d.target.properties.centroid,
+      getRadius: d => radiusScale(d.value),
+      getBrushingTarget: d => d.source.properties.centroid,
+      getFillColor: inFlowColor,
+      // only show source points when brushing
+      visible: enableBrushing,
+      radiusScale: 3000,
+      extensions: [brushingExtension]
+    }),
+    new ScatterplotLayer<MigrationFlow, BrushingExtensionProps<MigrationFlow>>({
+      id: 'sources-with-loss',
+      data: layerData.arcs,
+      brushingRadius: brushRadius,
+      brushingEnabled: enableBrushing,
+      brushingTarget: 'custom',
+      getPosition: d => d.source.properties.centroid,
+      getRadius: d => radiusScale(d.value),
+      getBrushingTarget: d => d.target.properties.centroid,
+      getFillColor: outFlowColor,
+      // only show source points when brushing
+      visible: enableBrushing,
+      radiusScale: 3000,
+      extensions: [brushingExtension]
+    }),
+    new ScatterplotLayer<MigrationDestination, BrushingExtensionProps>({
+      id: 'destinations',
+      data: layerData.points,
+      brushingRadius: brushRadius,
+      lineWidthMinPixels: 2,
+      stroked: true,
+      pickable: true,
+      brushingEnabled: enableBrushing,
+      radiusScale: 3000,
+      getPosition: d => d.county.properties.centroid,
+      getLineColor: d => (d.netGain > 0 ? inFlowColor : outFlowColor),
+      getFillColor: [0, 0, 0, 0],
+      getRadius: d => radiusScale(d.netGain) + 4,
+      extensions: [brushingExtension]
+    }),
+    new ArcLayer<MigrationFlow, BrushingExtensionProps>({
+      id: 'arc',
+      data: layerData.arcs,
+      getWidth: strokeWidth,
+      opacity,
+      brushingRadius: brushRadius,
+      brushingEnabled: enableBrushing,
+      brushingTarget: 'source_target',
+      getSourcePosition: d => d.source.properties.centroid,
+      getTargetPosition: d => d.target.properties.centroid,
+      getSourceColor: outFlowColor,
+      getTargetColor: inFlowColor,
+      extensions: [brushingExtension]
+    })
+  ];
 
   return (
     <DeckGL
@@ -197,13 +201,11 @@ export default function App({
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  fetch(DATA_URL)
-    .then(response => response.json())
-    .then(({features}) => {
-      root.render(<App data={features} />);
-    });
+  const resp = await fetch(DATA_URL);
+  const {features} = await resp.json();
+  root.render(<App data={features} />);
 }

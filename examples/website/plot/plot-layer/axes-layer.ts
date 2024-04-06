@@ -21,7 +21,7 @@ interface LabelTexture {
   labelHeight: number;
   labelWidths: number[];
   labelTexture: Texture;
-};
+}
 
 const defaultProps: DefaultProps<AxesLayerProps> = {
   fontSize: 12,
@@ -62,11 +62,13 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
   initializeState() {
     const attributeManager = this.getAttributeManager()!;
 
+    /* eslint-disable @typescript-eslint/unbound-method */
     attributeManager.addInstanced({
       instancePositions: {size: 2, update: this.calculateInstancePositions, noAlloc: true},
       instanceNormals: {size: 3, update: this.calculateInstanceNormals, noAlloc: true},
       instanceOffsets: {size: 1, update: this.calculateInstanceOffsets, noAlloc: true}
     });
+    /* eslint-enable @typescript-eslint/unbound-method */
 
     this.setState(this._getModels());
   }
@@ -271,6 +273,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
           // Flip y and z
           return [0, 1, 0];
         case 'y':
+        default:
           return [0, 0, 1];
       }
     });
@@ -301,6 +304,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
           labelsbyAxis[1].push(t.text);
           break;
         case 'y':
+        default:
           labelsbyAxis[2].push(t.text);
           break;
       }
@@ -336,12 +340,15 @@ function getTicks(axis: Axis, tickFormat: TickFormat): Tick[] {
   const scale = axis.scale ?? (x => x);
 
   return [
-    ...ticks.map((t, i) => ({
-      axis: axis.name,
-      value: String(t),
-      position: [scale(t), i],
-      text: tickFormat(t, axis)
-    }) as Tick),
+    ...ticks.map(
+      (t, i) =>
+        ({
+          axis: axis.name,
+          value: String(t),
+          position: [scale(t), i],
+          text: tickFormat(t, axis)
+        }) as Tick
+    ),
     {
       axis: axis.name,
       value: 'title',

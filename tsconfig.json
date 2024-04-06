@@ -45,8 +45,11 @@
   },
   "include": [
     "modules",
-    "test"
+    "test",
+    "examples"
   ],
   "exclude": [
+    "**/node_modules",
+    "**/dist"
   ]
 }

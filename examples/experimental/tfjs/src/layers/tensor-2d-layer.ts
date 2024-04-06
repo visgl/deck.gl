@@ -1,9 +1,9 @@
-import {BitmapLayer} from '@deck.gl/layers';
-import type {GetPickingInfoParams, Texture} from '@deck.gl/core';
+import {BitmapLayer, BitmapLayerPickingInfo} from '@deck.gl/layers';
+import type {GetPickingInfoParams, TextureSource} from '@deck.gl/core';
 import type {Texture2D} from '@luma.gl/webgl';
 
 export class Tensor2DLayer extends BitmapLayer<{
-  colorScale: string | Texture | null;
+  colorScale: string | TextureSource | null;
   colorDomain?: [min: number, max: number];
   uv?: number[][] | number[];
 }> {
@@ -19,11 +19,9 @@ export class Tensor2DLayer extends BitmapLayer<{
   getPickingInfo(params: GetPickingInfoParams) {
     const info = super.getPickingInfo(params);
 
-    // @ts-expect-error bitmap is not defined on PickingInfo
     if (info.bitmap) {
       const {
         pixel: [x, y]
-        // @ts-expect-error
       } = info.bitmap;
       const {image} = this.props;
       // @ts-expect-error
@@ -78,6 +76,6 @@ export class Tensor2DLayer extends BitmapLayer<{
     params.uniforms.colorScale = colorScale;
     params.uniforms.colorDomain = colorDomain;
 
-    return super.draw(params);
+    super.draw(params);
   }
 }

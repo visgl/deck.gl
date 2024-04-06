@@ -26,8 +26,10 @@ const INITIAL_VIEW_STATE: OrbitViewState = {
 
 const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
-export default function App({onLoad}: {
-  onLoad?: (data: {count: number; progress: number;}) => void;
+export default function App({
+  onLoad
+}: {
+  onLoad?: (data: {count: number; progress: number}) => void;
 }) {
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);

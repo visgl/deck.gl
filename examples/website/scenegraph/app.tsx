@@ -17,7 +17,7 @@ const MODEL_URL =
 const REFRESH_TIME_SECONDS = 60;
 const DROP_IF_OLDER_THAN_SECONDS = 120;
 
-const ANIMATIONS: ScenegraphLayerProps["_animations"] = {
+const ANIMATIONS: ScenegraphLayerProps['_animations'] = {
   '*': {speed: 1}
 };
 
@@ -69,7 +69,7 @@ const DATA_INDEX = {
 
 async function fetchData(): Promise<Aircraft[]> {
   const resp = await fetch(DATA_URL);
-  const {time, states} = await resp.json() as {time: number; states: Aircraft[]};
+  const {time, states} = (await resp.json()) as {time: number; states: Aircraft[]};
   // make lastContact timestamp relative to response time
   for (const a of states) {
     a[DATA_INDEX.LAST_CONTACT] -= time;
@@ -89,7 +89,11 @@ function getTooltip({object}: PickingInfo<Aircraft>) {
   );
 }
 
-export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}: {
+export default function App({
+  sizeScale = 25,
+  onDataLoad,
+  mapStyle = MAP_STYLE
+}: {
   sizeScale?: number;
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
@@ -99,29 +103,31 @@ export default function App({sizeScale = 25, onDataLoad, mapStyle = MAP_STYLE}: 
 
   useEffect(() => {
     timer.id++;
-    fetchData().then((newData) => {
-      if (timer.id === null) {
-        // Component has unmounted
-        return;
-      }
-      // In order to keep the animation smooth we need to always return the same
-      // object at a given index. This function will discard new objects
-      // and only update existing ones.
-      if (data) {
-        const dataById: Record<string, Aircraft> = {};
-        newData.forEach(entry => (dataById[entry[DATA_INDEX.UNIQUE_ID]] = entry));
-        newData = data.map(entry => dataById[entry[DATA_INDEX.UNIQUE_ID]] || entry);
-      }
+    fetchData()
+      .then(newData => {
+        if (timer.id === null) {
+          // Component has unmounted
+          return;
+        }
+        // In order to keep the animation smooth we need to always return the same
+        // object at a given index. This function will discard new objects
+        // and only update existing ones.
+        if (data) {
+          const dataById: Record<string, Aircraft> = {};
+          newData.forEach(entry => (dataById[entry[DATA_INDEX.UNIQUE_ID]] = entry));
+          newData = data.map(entry => dataById[entry[DATA_INDEX.UNIQUE_ID]] || entry);
+        }
 
-      setData(newData);
+        setData(newData);
 
-      if (onDataLoad) {
-        onDataLoad(newData.length);
-      }
-    }).finally(() => {
-      const timeoutId = window.setTimeout(() => setTimer({id: timeoutId}), REFRESH_TIME_SECONDS * 1000);
-      timer.id = timeoutId;
-    });
+        if (onDataLoad) {
+          onDataLoad(newData.length);
+        }
+      })
+      .finally(() => {
+        const timeoutId = setTimeout(() => setTimer({id: timeoutId}), REFRESH_TIME_SECONDS * 1000);
+        timer.id = timeoutId;
+      });
 
     return () => {
       clearTimeout(timer.id);

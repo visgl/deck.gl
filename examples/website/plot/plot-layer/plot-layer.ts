@@ -14,7 +14,7 @@ import {Axes, TickFormat, Vec3, PlotLayerPickingInfo} from './types';
 /** All props supported by PlotLayer. */
 export type PlotLayerProps = _PlotLayerProps & CompositeLayerProps;
 
-type _PlotLayerProps= {
+type _PlotLayerProps = {
   // SurfaceLayer props
   /** Function called to get surface coordinate [x, y, z] from [u, v] */
   getPosition: (uv: [u: number, v: number]) => [x: number, y: number, z: number];
@@ -44,7 +44,7 @@ type _PlotLayerProps= {
 
 const defaultProps: DefaultProps<PlotLayerProps> = {
   // SurfaceLayer props
-  getPosition: {type: 'function', value: (uv) => [0, 0, 0]},
+  getPosition: {type: 'function', value: uv => [0, 0, 0]},
   getColor: {type: 'accessor', value: [128, 128, 128, 255]},
   onAxesChange: {type: 'function', value: axes => axes},
   uCount: 100,
@@ -66,7 +66,7 @@ export default class PlotLayer extends CompositeLayer<Required<_PlotLayerProps>>
   static layerName = 'PlotLayer';
   static defaultProps = defaultProps;
 
-  state!: CompositeLayer['state'] & {
+  state!: {
     axes: Axes;
     samples: Vec3[];
   };
@@ -80,9 +80,11 @@ export default class PlotLayer extends CompositeLayer<Required<_PlotLayerProps>>
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
-    if (props.uCount !== oldProps.uCount ||
+    if (
+      props.uCount !== oldProps.uCount ||
       props.vCount !== oldProps.vCount ||
-      (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getPosition)) {
+      (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getPosition)
+    ) {
       this.getSamples();
     }
   }
@@ -134,7 +136,10 @@ export default class PlotLayer extends CompositeLayer<Required<_PlotLayerProps>>
   }
 
   renderLayers() {
-    const {axes: {x: xAxis, y: yAxis, z: zAxis}, samples} = this.state;
+    const {
+      axes: {x: xAxis, y: yAxis, z: zAxis},
+      samples
+    } = this.state;
     const {
       getColor,
       uCount,

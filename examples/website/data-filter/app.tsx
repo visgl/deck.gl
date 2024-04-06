@@ -84,7 +84,10 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
   );
 }
 
-export default function App({data, mapStyle = MAP_STYLE}: {
+export default function App({
+  data,
+  mapStyle = MAP_STYLE
+}: {
   data?: Earthquake[];
   mapStyle?: string;
 }) {

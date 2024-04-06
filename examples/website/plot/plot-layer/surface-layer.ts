@@ -52,7 +52,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
   initializeState() {
     const attributeManager = this.getAttributeManager()!;
     attributeManager.remove(['instancePickingColors']);
-    /* eslint-disable max-len */
+    /* eslint-disable @typescript-eslint/unbound-method */
     attributeManager.add({
       indices: {
         size: 1,
@@ -61,7 +61,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
         noAlloc: true
       },
       positions: {
-        size: 3, 
+        size: 3,
         type: 'float64',
         accessor: 'getPosition',
         transform: this.getPosition
@@ -79,7 +79,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
         transform: this.getPickingColor
       }
     });
-    /* eslint-enable max-len */
+    /* eslint-enable @typescript-eslint/unbound-method */
 
     this.state.model = this.getModel();
   }
@@ -214,5 +214,4 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
     attribute.value = indices;
     this.state.model.setVertexCount(indicesCount);
   }
-
 }

@@ -1,5 +1,5 @@
 /* global document */
-import type {Device} from "@luma.gl/core";
+import type {Device} from '@luma.gl/core';
 
 // helper for textMatrixToTexture
 function setTextStyle(ctx, fontSize) {

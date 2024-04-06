@@ -42,9 +42,7 @@ export class CustomTFContext {
 
     if (this.lastContextState) {
       setParameters(gl, this.lastContextState);
-      (gl as WebGL2RenderingContext).bindVertexArray(
-        this.lastContextState[GL.VERTEX_ARRAY_BINDING]
-      );
+      gl.bindVertexArray(this.lastContextState[GL.VERTEX_ARRAY_BINDING]);
       gl.bindBuffer(
         GL.ELEMENT_ARRAY_BUFFER,
         this.lastContextState[GL.ELEMENT_ARRAY_BUFFER_BINDING]

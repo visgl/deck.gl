@@ -6,7 +6,7 @@ import {MapView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, PathLayer} from '@deck.gl/layers';
 
-import type {Position, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Position, MapViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -44,15 +44,16 @@ function getTooltip({tile}: TileLayerPickingInfo) {
   return null;
 }
 
-export default function App({showBorder = false, onTilesLoad}: {
+export default function App({
+  showBorder = false,
+  onTilesLoad
+}: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
 }) {
   const tileLayer = new TileLayer<ImageBitmap>({
     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    data: [
-      'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-    ],
+    data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
 
     // Since these OSM tiles support HTTP/2, we can make many concurrent requests
     // and we aren't limited by the browser to a certain number per domain.

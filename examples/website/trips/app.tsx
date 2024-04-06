@@ -1,4 +1,3 @@
-/* global window */
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
@@ -35,7 +34,7 @@ type Theme = {
   trailColor0: Color;
   trailColor1: Color;
   material: Material;
-  effects: [LightingEffect]
+  effects: [LightingEffect];
 };
 
 const DEFAULT_THEME: Theme = {
@@ -106,7 +105,7 @@ export default function App({
     const animation = animate({
       from: 0,
       to: loopLength,
-      duration: loopLength * 60 / animationSpeed,
+      duration: (loopLength * 60) / animationSpeed,
       repeat: Infinity,
       onUpdate: setTime
     });
