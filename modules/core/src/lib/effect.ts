@@ -10,7 +10,7 @@ export type PostRenderOptions = LayersPassRenderOptions & {
   swapBuffer: Framebuffer;
 };
 export type EffectContext = {
-  deck: Deck;
+  deck: Deck<any>;
   device: Device;
 };
 
