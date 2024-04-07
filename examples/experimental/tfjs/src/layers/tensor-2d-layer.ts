@@ -1,4 +1,4 @@
-import {BitmapLayer, BitmapLayerPickingInfo} from '@deck.gl/layers';
+import {BitmapLayer} from '@deck.gl/layers';
 import type {GetPickingInfoParams, TextureSource} from '@deck.gl/core';
 import type {Texture2D} from '@luma.gl/webgl';
 

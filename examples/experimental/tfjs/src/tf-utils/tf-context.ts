@@ -1,7 +1,7 @@
 import {pushContextState, popContextState, getParameters, setParameters} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';
 import * as tfgl from '@tensorflow/tfjs-backend-webgl';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 /** Helper class for sharing WebGL context between Deck and tfjs */
 export class CustomTFContext {
