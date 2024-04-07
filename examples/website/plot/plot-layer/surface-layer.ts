@@ -45,7 +45,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
   static layerName: string = 'SurfaceLayer';
 
   state!: {
-    model?: Model;
+    model: Model;
     vertexCount: number;
   };
 
@@ -158,11 +158,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
   }
 
   getPosition([x, y, z]: Vec3) {
-    const {
-      xAxis,
-      yAxis,
-      zAxis
-    } = this.props;
+    const {xAxis, yAxis, zAxis} = this.props;
 
     return [
       xAxis.scale?.(x) ?? x,
@@ -176,10 +172,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
     const info = opts.info as PlotLayerPickingInfo;
 
     if (info && info.index !== -1) {
-      info.uv = [
-        (info.index & 255) / 255,
-        (info.index >> 8) / 255
-      ];
+      info.uv = [(info.index & 255) / 255, (info.index >> 8) / 255];
     }
 
     return info;
@@ -219,7 +212,7 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
     }
 
     attribute.value = indices;
-    this.state.model!.setVertexCount(indicesCount);
+    this.state.model.setVertexCount(indicesCount);
   }
 
 }

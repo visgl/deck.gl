@@ -151,28 +151,11 @@ function getDate(data: DailyFlights[], t: number) {
   return new Date(timestamp);
 }
 
-export function renderToDOM(container: HTMLDivElement) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  async function loadData(dates: string[]) {
-    const data: DailyFlights[] = [];
-    for (const date of dates) {
-      const url = `${DATA_URL}/${date}.csv`;
-      const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
-
-      // Join flight data from multiple dates into one continuous animation
-      const offset = SEC_PER_DAY * data.length;
-      for (const f of flights) {
-        f.time1 += offset;
-        f.time2 += offset;
-      }
-      data.push({flights, date});
-      root.render(<App data={data} />);
-    }
-  }
-
-  loadData([
+  const dates = [
     '2020-01-14',
     '2020-02-11',
     '2020-03-10',
@@ -185,5 +168,20 @@ export function renderToDOM(container: HTMLDivElement) {
     '2020-10-13',
     '2020-11-10',
     '2020-12-08'
-  ]);
+  ];
+
+  const data: DailyFlights[] = [];
+  for (const date of dates) {
+    const url = `${DATA_URL}/${date}.csv`;
+    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
+
+    // Join flight data from multiple dates into one continuous animation
+    const offset = SEC_PER_DAY * data.length;
+    for (const f of flights) {
+      f.time1 += offset;
+      f.time2 += offset;
+    }
+    data.push({flights, date});
+    root.render(<App data={data} />);
+  }
 }

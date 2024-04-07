@@ -11,7 +11,7 @@ import labelFragment from './label-fragment.glsl';
 import {Axis, TickFormat, Vec3} from './types';
 
 type Tick = {
-  axis: 'x' | 'y' | 'z';    
+  axis: 'x' | 'y' | 'z';
   value: string;
   position: [number, number];
   text: string;
@@ -50,10 +50,9 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
   static layerName = 'AxesLayer';
   static defaultProps = defaultProps;
 
-  state!: Layer['state'] & {
+  state!: {
     models: [Model, Model];
     modelsByName: {grids: Model; labels: Model};
-    numInstances: number;
     ticks: Tick[];
     gridDims: Vec3;
     gridCenter: Vec3;
@@ -69,7 +68,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
       instanceOffsets: {size: 1, update: this.calculateInstanceOffsets, noAlloc: true}
     });
 
-    this.setState(Object.assign({numInstances: 0}, this._getModels()));
+    this.setState(this._getModels());
   }
 
   updateState({oldProps, props}: UpdateParameters<this>) {
@@ -108,7 +107,7 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
   }
 
   draw({uniforms}) {
-    const {gridDims, gridCenter, modelsByName, numInstances} = this.state;
+    const {gridDims, gridCenter, modelsByName, ticks} = this.state;
     const {labelTexture, ...labelTextureUniforms} = this.state.labelTexture!;
     const {fontSize, color, padding} = this.props;
 
@@ -121,14 +120,14 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
         strokeColor: color
       };
 
-      modelsByName.grids.setInstanceCount(numInstances);
-      modelsByName.labels.setInstanceCount(numInstances);
+      modelsByName.grids.setInstanceCount(ticks.length);
+      modelsByName.labels.setInstanceCount(ticks.length);
 
       modelsByName.grids.setUniforms({...uniforms, ...baseUniforms});
       modelsByName.labels.setBindings({labelTexture});
       modelsByName.labels.setUniforms({
-        ...uniforms, 
-        ...baseUniforms, 
+        ...uniforms,
+        ...baseUniforms,
         ...labelTextureUniforms
       });
 
@@ -259,8 +258,6 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
 
     const positions = ticks.flatMap(t => t.position);
     attribute.value = new Float32Array(positions);
-
-    this.setState({numInstances: ticks.length});
   }
 
   calculateInstanceNormals(attribute: Attribute) {
@@ -276,13 +273,12 @@ export default class AxesLayer extends Layer<Required<_AxesLayerProps>> {
         case 'y':
           return [0, 0, 1];
       }
-    })
+    });
     attribute.value = new Float32Array(normals);
   }
 
   calculateInstanceOffsets(attribute: Attribute) {
     const {ticks} = this.state;
-    const {fontSize} = this.props;
 
     const offsets = ticks.flatMap(t => {
       return t.value === 'title' ? 2 : 0.5;
