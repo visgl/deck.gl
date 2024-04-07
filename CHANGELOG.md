@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.6] - Apr 7 2024
+
+- fix(extensions): picking over draped terrain (#8761)
+- fix(react) component default size (#8766)
+- chore: fix lint warnings (#8764)
+- Improve view types (#8763)
+- feat(core): export useful types (#8762)
+
 #### deck.gl [9.0.5] - Apr 4 2024
 
 - fix(mesh-layers): ScenegraphLayer picking (#8752)
