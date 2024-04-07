@@ -229,7 +229,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   const currentViewports =
     thisRef.deck && thisRef.deck.isInitialized ? thisRef.deck.getViewports() : undefined;
 
-  const {ContextProvider, width, height, id, style} = props;
+  const {ContextProvider, width = '100%', height = '100%', id, style} = props;
 
   const {containerStyle, canvasStyle} = useMemo(
     () => extractStyles({width, height, style}),
