@@ -45,7 +45,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick,
+      onClick
       // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
@@ -62,12 +62,9 @@ function Root() {
   ];
 
   return (
-    <Map
-      initialViewState={INITIAL_VIEW_STATE}
-      mapStyle={MAP_STYLE}
-    >
-      <DeckGLOverlay layers={layers} /*interleaved*/ />
-      <NavigationControl position='top-left' />
+    <Map initialViewState={INITIAL_VIEW_STATE} mapStyle={MAP_STYLE}>
+      <DeckGLOverlay layers={layers} /* interleaved*/ />
+      <NavigationControl position="top-left" />
     </Map>
   );
 }

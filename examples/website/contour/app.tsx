@@ -17,7 +17,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxZoom: 10
 };
 
-export const BANDS: ContourLayerProps["contours"] = [
+export const BANDS: ContourLayerProps['contours'] = [
   {threshold: [0.1, 1], color: [255, 255, 178]},
   {threshold: [1, 10], color: [254, 204, 92]},
   {threshold: [10, 100], color: [253, 141, 60]},
@@ -26,7 +26,7 @@ export const BANDS: ContourLayerProps["contours"] = [
   {threshold: [2000, 10000], color: [159, 0, 80]}
 ];
 
-export const LINES: ContourLayerProps["contours"] = [
+export const LINES: ContourLayerProps['contours'] = [
   {threshold: 1, color: [255, 255, 178], strokeWidth: 2},
   {threshold: 10, color: [254, 204, 92], strokeWidth: 2},
   {threshold: 100, color: [253, 141, 60], strokeWidth: 2},
@@ -55,7 +55,7 @@ export default function App({
 }: {
   data?: string | CaseReport[];
   week?: number;
-  contours?: ContourLayerProps["contours"];
+  contours?: ContourLayerProps['contours'];
   cellSize?: number;
   mapStyle?: string;
 }) {

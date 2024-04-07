@@ -1,8 +1,8 @@
-/* global document, google, fetch, requestAnimationFrame, cancelAnimationFrame */
+/* global fetch, requestAnimationFrame, cancelAnimationFrame */
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {PathLayer} from '@deck.gl/layers';
-import {Loader} from "@googlemaps/js-api-loader";
+import {Loader} from '@googlemaps/js-api-loader';
 
 import TripBuilder from './trip-builder';
 

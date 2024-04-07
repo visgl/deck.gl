@@ -20,7 +20,7 @@ const useLocalLuma = false;
 /** @type {OcularConfig} */
 const config = {
   lint: {
-    paths: ['modules', 'test']
+    paths: ['modules', 'test', 'examples']
     // paths: ['modules', 'test', 'examples', 'website']
   },
 

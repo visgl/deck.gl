@@ -11,7 +11,13 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
 import SearchBar from './search-bar';
 
-import type {Color, ViewStateChangeParameters, MapViewState, PickingInfo, FilterContext} from '@deck.gl/core';
+import type {
+  Color,
+  ViewStateChangeParameters,
+  MapViewState,
+  PickingInfo,
+  FilterContext
+} from '@deck.gl/core';
 import type {Feature, Geometry} from 'geojson';
 
 // Data source
@@ -95,9 +101,12 @@ function layerFilter({layer, viewport}: FilterContext) {
     layer.id.startsWith('coverage') || layer.id.startsWith('viewport-bounds');
   if (viewport.id === 'minimap') return shouldDrawInMinimap;
   return !shouldDrawInMinimap;
-};
+}
 
-function getTooltipText(stationMap: {[callSign: string]: Station}, object: Feature<Geometry, ServiceContour> | Station) {
+function getTooltipText(
+  stationMap: {[callSign: string]: Station},
+  object: Feature<Geometry, ServiceContour> | Station
+) {
   if (!object) {
     return null;
   }
@@ -141,16 +150,19 @@ export default function App({
     return result;
   }, [data]);
 
-  const onViewStateChange = useCallback(({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
-    setViewState(() => ({
-      main: newViewState,
-      minimap: {
-        ...INITIAL_VIEW_STATE.minimap,
-        longitude: newViewState.longitude,
-        latitude: newViewState.latitude
-      }
-    }));
-  }, []);
+  const onViewStateChange = useCallback(
+    ({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
+      setViewState(() => ({
+        main: newViewState,
+        minimap: {
+          ...INITIAL_VIEW_STATE.minimap,
+          longitude: newViewState.longitude,
+          latitude: newViewState.latitude
+        }
+      }));
+    },
+    []
+  );
 
   const onSelectStation = useCallback((station: Station) => {
     if (station) {
@@ -182,27 +194,31 @@ export default function App({
     return [[topLeft, topRight, bottomRight, bottomLeft, topLeft]];
   }, [viewState]);
 
-  const getTooltip = useCallback(({object}: PickingInfo) => getTooltipText(stationMap, object), [stationMap]);
+  const getTooltip = useCallback(
+    ({object}: PickingInfo) => getTooltipText(stationMap, object),
+    [stationMap]
+  );
 
   const layers = [
-    data && new MVTLayer<ServiceContour>({
-      id: 'service-contours',
-      data: DATA_URL.CONTOURS,
-      maxZoom: 8,
-      onTileError: () => {},
-      pickable: true,
-      autoHighlight: true,
-      highlightColor: [255, 200, 0, 100],
-      uniqueIdProperty: 'callSign',
-      highlightedFeatureId: highlight,
-      opacity: 0.2,
-      lineWidthMinPixels: 2,
-      getLineColor: f => {
-        const {type, frequency} = stationMap[f.properties.callSign];
-        return type === 'AM' ? amColorScale(frequency) : fmColorScale(frequency);
-      },
-      getFillColor: [255, 255, 255, 0]
-    }),
+    data &&
+      new MVTLayer<ServiceContour>({
+        id: 'service-contours',
+        data: DATA_URL.CONTOURS,
+        maxZoom: 8,
+        onTileError: () => {},
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 200, 0, 100],
+        uniqueIdProperty: 'callSign',
+        highlightedFeatureId: highlight,
+        opacity: 0.2,
+        lineWidthMinPixels: 2,
+        getLineColor: f => {
+          const {type, frequency} = stationMap[f.properties.callSign];
+          return type === 'AM' ? amColorScale(frequency) : fmColorScale(frequency);
+        },
+        getFillColor: [255, 255, 255, 0]
+      }),
 
     new ScatterplotLayer<Station>({
       id: 'stations',
@@ -210,10 +226,10 @@ export default function App({
       getPosition: d => [d.longitude, d.latitude],
       getFillColor: [40, 40, 40, 128],
       getRadius: 20,
-      radiusMinPixels: 2,
+      radiusMinPixels: 2
     }),
 
-    new H3HexagonLayer<{hex: string; count: number;}>({
+    new H3HexagonLayer<{hex: string; count: number}>({
       id: 'coverage',
       data: DATA_URL.COVERAGE,
       getHexagon: d => d.hex,
@@ -249,7 +265,7 @@ export default function App({
         <SearchBar data={data} onChange={onSelectStation} />
       </MapView>
       {showMinimap && (
-        <MapView id="minimap" >
+        <MapView id="minimap">
           <div style={minimapBackgroundStyle} />
         </MapView>
       )}
@@ -261,9 +277,11 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const stations = (await load(DATA_URL.STATIONS, CSVLoader, {
-    csv: {delimitersToGuess: '\t', skipEmptyLines: true}
-  })).data;
+  const stations = (
+    await load(DATA_URL.STATIONS, CSVLoader, {
+      csv: {delimitersToGuess: '\t', skipEmptyLines: true}
+    })
+  ).data;
 
   root.render(<App data={stations} />);
 }

@@ -16,7 +16,7 @@ const INITIAL_VIEW_STATE: OrbitViewState = {
   rotationX: 30,
   rotationOrbit: -30,
   /* global window */
-  zoom: typeof window !== `undefined` ? Math.log2(window.innerHeight / MAX_SIZE) + 1 : 1
+  zoom: typeof window !== 'undefined' ? Math.log2(window.innerHeight / MAX_SIZE) + 1 : 1
 };
 
 function onAxesChange(axes: Axes) {

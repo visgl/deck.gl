@@ -47,10 +47,7 @@ function filterOptions(options: Station[], {inputValue}: {inputValue: string}) {
   return result;
 }
 
-function SearchBar(props: {
-  data: Station[];
-  onChange: (selectedStation: Station) => void;
-}) {
+function SearchBar(props: {data: Station[]; onChange: (selectedStation: Station) => void}) {
   const classes = useStyles();
 
   return (

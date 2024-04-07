@@ -73,18 +73,20 @@ function getTooltip({object}: PickingInfo<Station>) {
   const minYear = meanTemp[minIndex(meanTemp, d => d[1])];
   const maxYear = meanTemp[maxIndex(meanTemp, d => d[1])];
 
-  return (`\
+  return `\
   ${name}
   ${country}
   Latitude: ${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}
   Altitude: ${altitude === null ? 'N/A' : altitude}
   Lowest: ${minYear[1]}°C in ${minYear[0]}
   Highest: ${maxYear[1]}°C in ${maxYear[0]}
-  `
-  );
+  `;
 }
 
-export default function App({data, groupBy = 'Country'}: {
+export default function App({
+  data,
+  groupBy = 'Country'
+}: {
   data?: Station[];
   groupBy?: 'Country' | 'Latitude';
 }) {
@@ -142,7 +144,7 @@ export default function App({data, groupBy = 'Country'}: {
       getColor: [255, 255, 255],
       wireframe: true
     }),
-    new TextLayer<{plotIndex: number, y: number}>({
+    new TextLayer<{plotIndex: number; y: number}>({
       id: 'y-labels',
       data: yLabels,
       getPosition: d => {
@@ -156,7 +158,7 @@ export default function App({data, groupBy = 'Country'}: {
       sizeMaxPixels: 28,
       getTextAnchor: 'end'
     }),
-    new TextLayer<{plotIndex: number, x: number}>({
+    new TextLayer<{plotIndex: number; x: number}>({
       id: 'x-labels',
       data: xLabels,
       getPosition: d => {

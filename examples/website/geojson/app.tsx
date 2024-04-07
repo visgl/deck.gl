@@ -84,7 +84,10 @@ function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
   );
 }
 
-export default function App({data = DATA_URL, mapStyle = MAP_STYLE}: {
+export default function App({
+  data = DATA_URL,
+  mapStyle = MAP_STYLE
+}: {
   data?: string | Feature<Geometry, BlockProperties>[];
   mapStyle?: string;
 }) {

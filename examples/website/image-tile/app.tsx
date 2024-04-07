@@ -9,7 +9,7 @@ import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 import {clamp} from '@math.gl/core';
 
-import type {PickingInfo, OrthographicViewState} from '@deck.gl/core';
+import type {OrthographicViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
 import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
 
@@ -31,11 +31,14 @@ function getTooltip({tile, bitmap}: TileLayerPickingInfo<ImageBitmap, BitmapLaye
   return null;
 }
 
-export default function App({autoHighlight = true, onTilesLoad}: {
+export default function App({
+  autoHighlight = true,
+  onTilesLoad
+}: {
   autoHighlight?: boolean;
   onTilesLoad?: () => void;
 }) {
-  const [dimensions, setDimensions] = useState<{width: number; height: number; tileSize: number;}>();
+  const [dimensions, setDimensions] = useState<{width: number; height: number; tileSize: number}>();
 
   useEffect(() => {
     const getMetaData = async () => {
@@ -44,14 +47,24 @@ export default function App({autoHighlight = true, onTilesLoad}: {
       const xmlText = await response.text();
       const dziXML = new DOMParser().parseFromString(xmlText, 'text/xml');
 
-      if (Number(dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('Overlap')?.value) !== 0) {
+      if (
+        Number(
+          dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('Overlap')?.value
+        ) !== 0
+      ) {
         // eslint-disable-next-line no-undef, no-console
         console.warn('Overlap parameter is nonzero and should be 0');
       }
       setDimensions({
-        height: Number(dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Height')?.value),
-        width: Number(dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Width')?.value),
-        tileSize: Number(dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('TileSize')?.value)
+        height: Number(
+          dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Height')?.value
+        ),
+        width: Number(
+          dziXML.getElementsByTagName('Size')[0].attributes.getNamedItem('Width')?.value
+        ),
+        tileSize: Number(
+          dziXML.getElementsByTagName('Image')[0].attributes.getNamedItem('TileSize')?.value
+        )
       });
     };
     getMetaData();
@@ -69,7 +82,9 @@ export default function App({autoHighlight = true, onTilesLoad}: {
       extent: [0, 0, dimensions.width, dimensions.height],
       getTileData: ({index}) => {
         const {x, y, z} = index;
-        return load(`${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`) as Promise<ImageBitmap>;
+        return load(
+          `${ROOT_URL}/moon.image_files/${15 + z}/${x}_${y}.jpeg`
+        ) as Promise<ImageBitmap>;
       },
       onViewportLoad: onTilesLoad,
 

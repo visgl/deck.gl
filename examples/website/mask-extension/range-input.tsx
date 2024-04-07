@@ -32,7 +32,14 @@ const SliderInput = withStyles({
   }
 })(Slider);
 
-export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}: {
+export default function RangeInput({
+  min,
+  max,
+  value,
+  animationSpeed,
+  onChange,
+  formatLabel
+}: {
   min: number;
   max: number;
   value: number;
@@ -61,7 +68,11 @@ export default function RangeInput({min, max, value, animationSpeed, onChange, f
 
   return (
     <PositionContainer>
-      <Button color="inherit" onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? 'Stop' : 'Animate'}>
+      <Button
+        color="inherit"
+        onClick={() => setIsPlaying(!isPlaying)}
+        title={isPlaying ? 'Stop' : 'Animate'}
+      >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </Button>
       <SliderInput
