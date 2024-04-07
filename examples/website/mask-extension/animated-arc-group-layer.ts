@@ -13,7 +13,9 @@ type ArcsGroup<DataT> = {
  * Data is divided into smaller groups, and one sub layer is rendered for each group.
  * This allows us to cheaply cull invisible arcs by turning layers off and on.
  */
-export default class AnimatedArcGroupLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<ExtraProps & Required<AnimatedArcLayerProps<DataT>>> {
+export default class AnimatedArcGroupLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<
+  ExtraProps & Required<AnimatedArcLayerProps<DataT>>
+> {
   layerName = 'AnimatedArcGroupLayer';
   defaultProps = AnimatedArcLayer.defaultProps;
 

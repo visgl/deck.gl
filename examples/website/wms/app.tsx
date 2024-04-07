@@ -24,7 +24,7 @@ const CONTROLLER = {
 };
 
 const SAMPLE_SERVICE = {
-  serviceUrl: `https://ows.terrestris.de/osm/service`,
+  serviceUrl: 'https://ows.terrestris.de/osm/service',
   layers: ['OSM-WMS']
 };
 

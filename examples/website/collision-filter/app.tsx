@@ -35,7 +35,7 @@ export default function App({
   mapStyle?: string;
   sizeScale?: number;
   collisionEnabled?: boolean;
-  pointSpacing?: number
+  pointSpacing?: number;
 }) {
   const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 
@@ -45,7 +45,10 @@ export default function App({
       .then(setRoads);
   }, []);
 
-  const roadLabels = useMemo(() => calculateLabels(roads, d => d.name !== null, pointSpacing), [roads, pointSpacing]);
+  const roadLabels = useMemo(
+    () => calculateLabels(roads, d => d.name !== null, pointSpacing),
+    [roads, pointSpacing]
+  );
 
   const layers = [
     new GeoJsonLayer({

@@ -14,7 +14,6 @@ import usMap from './us-map.json';
 import dotText from './dot-text.json';
 
 export default {
-  'website/Scatterplot (ScatterplotLayer)': scatterplot,
   // WEBSITE EXAMPLES AS JSON PAYLOADS
   'website/3D Heatmap (HexagonLayer)': heatmap,
   'website/3D Heatmap (wth Minimap)': heatmapMinimap,

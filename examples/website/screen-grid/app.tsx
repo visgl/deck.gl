@@ -60,11 +60,7 @@ export default function App({
   ];
 
   return (
-    <DeckGL
-      layers={layers}
-      initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
-    >
+    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );

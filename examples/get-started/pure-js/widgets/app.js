@@ -3,14 +3,15 @@ import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
   ZoomWidget,
-  FullscreenWidget, 
-  DarkGlassTheme, 
+  FullscreenWidget,
+  DarkGlassTheme,
   LightGlassTheme
 } from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =

@@ -53,7 +53,7 @@ type CountyProperties = {
   centroid: [lon: number, lat: number];
 };
 
-type County = Feature<Polygon|MultiPolygon, CountyProperties>;
+type County = Feature<Polygon | MultiPolygon, CountyProperties>;
 
 type MigrationFlow = {
   source: County;
@@ -61,7 +61,7 @@ type MigrationFlow = {
   /** Number of migrants */
   value: number;
   quantile: number;
-}
+};
 
 function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
   if (!data || !data.length) {
@@ -98,7 +98,11 @@ function getTooltip({object}: PickingInfo<County>) {
 }
 
 /* eslint-disable react/no-deprecated */
-export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}: {
+export default function App({
+  data,
+  strokeWidth = 1,
+  mapStyle = MAP_STYLE
+}: {
   data?: County[];
   strokeWidth?: number;
   mapStyle?: string;
@@ -140,13 +144,11 @@ export default function App({data, strokeWidth = 1, mapStyle = MAP_STYLE}: {
   );
 }
 
-export function renderToDOM(container: HTMLDivElement) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  fetch(DATA_URL)
-    .then(response => response.json())
-    .then(({features}) => {
-      root.render(<App data={features} />);
-    });
+  const resp = await fetch(DATA_URL);
+  const {features} = await resp.json();
+  root.render(<App data={features} />);
 }

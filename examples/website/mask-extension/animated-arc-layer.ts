@@ -1,7 +1,8 @@
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 import {Accessor, DefaultProps} from '@deck.gl/core';
 
-export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> & ArcLayerProps<DataT>;
+export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> &
+  ArcLayerProps<DataT>;
 
 type _AnimatedArcLayerProps<DataT = any> = {
   getSourceTimestamp?: Accessor<DataT, number>;
@@ -15,7 +16,10 @@ const defaultProps: DefaultProps<_AnimatedArcLayerProps> = {
   timeRange: {type: 'array', compare: true, value: [0, 1]}
 };
 
-export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcLayer<DataT, ExtraProps & Required<_AnimatedArcLayerProps>> {
+export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
+  DataT,
+  ExtraProps & Required<_AnimatedArcLayerProps>
+> {
   layerName = 'AnimatedArcLayer';
   defaultProps = defaultProps;
 

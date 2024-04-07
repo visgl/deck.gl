@@ -1,3 +1,4 @@
+/* global document */
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {SpectrogramLayer, SpectrogramSettings} from './layers/spectrogram-layer';
 
@@ -62,7 +63,7 @@ function update() {
   const spectrogramLayer = new SpectrogramLayer({
     id: 'frequency-domain-data',
     data: byteBuffer,
-    sampleRate: sampleRate,
+    sampleRate,
     bounds: [-256, -256, 256, 256],
     pickable: !isPlaying,
     settings: SETTINGS,

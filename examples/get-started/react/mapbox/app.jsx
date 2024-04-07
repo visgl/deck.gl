@@ -48,7 +48,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick,
+      onClick
       // beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
     }),
     new ArcLayer({
@@ -70,8 +70,8 @@ function Root() {
       mapStyle={MAP_STYLE}
       mapboxAccessToken={MAPBOX_TOKEN}
     >
-      <DeckGLOverlay layers={layers} /*interleaved*/ />
-      <NavigationControl position='top-left' />
+      <DeckGLOverlay layers={layers} /* interleaved*/ />
+      <NavigationControl position="top-left" />
     </Map>
   );
 }

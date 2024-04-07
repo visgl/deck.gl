@@ -66,9 +66,7 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-export default function App({data}: {
-  data?: DailyFlights[]
-}) {
+export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];

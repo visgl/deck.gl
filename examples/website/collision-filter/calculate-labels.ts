@@ -18,7 +18,10 @@ export function calculateLabels<FeatureProperties>(
 
   const result: Label<FeatureProperties>[] = [];
 
-  function addLabelsAlongLineString(coordinates: LineString["coordinates"], properties: FeatureProperties) {
+  function addLabelsAlongLineString(
+    coordinates: LineString['coordinates'],
+    properties: FeatureProperties
+  ) {
     // Add labels to minimize overlaps, pick odd values from each level
     //        1       <- depth 1
     //    1   2   3   <- depth 2
@@ -30,7 +33,9 @@ export function calculateLabels<FeatureProperties>(
     while (delta > pointSpacing) {
       for (let i = 1; i < 2 ** depth; i += 2) {
         const label = getLabelAtPoint(feature, lineLength, i * delta, 100 - depth); // Top levels have highest priority
-        result.push(label);
+        if (label) {
+          result.push(label);
+        }
       }
       depth++;
       delta /= 2;
@@ -53,7 +58,7 @@ export function calculateLabels<FeatureProperties>(
         break;
 
       default:
-        // ignore
+      // ignore
     }
   });
 
@@ -69,7 +74,7 @@ function getLabelAtPoint<FeatureProperties>(
   const offset = dAlong + 1 < lineLength ? 1 : -1;
   const point = along(line, dAlong);
   const nextPoint = along(line, dAlong + offset);
-  if (booleanEqual(point, nextPoint)) return;
+  if (booleanEqual(point, nextPoint)) return null;
 
   let angle = 90 - rhumbBearing(point, nextPoint);
   if (Math.abs(angle) > 90) angle += 180;

@@ -96,7 +96,7 @@ export default function App({
     pickable: true,
     getPosition: d => d.coordinates,
     iconAtlas,
-    iconMapping,
+    iconMapping
   };
 
   if (hoverInfo === null || !hoverInfo.objects) {

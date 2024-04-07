@@ -1,3 +1,5 @@
+/* global console */
+/* eslint-disable no-console */
 import * as tf from '@tensorflow/tfjs';
 import {
   CompositeLayer,
@@ -55,7 +57,7 @@ export class HistogramLayer<DataT = any> extends CompositeLayer<
 
   initializeState() {
     const context = this.context;
-    const attributeManager = new AttributeManager(context.gl, {
+    const attributeManager = new AttributeManager(context.device, {
       id: this.props.id,
       stats: context.stats,
       timeline: context.timeline
@@ -162,7 +164,7 @@ export class HistogramLayer<DataT = any> extends CompositeLayer<
         .floorDiv(binSize);
 
       const min = binIds.min();
-      const binsToCount = binIds.sub(min) as tf.Tensor1D;
+      const binsToCount = binIds.sub(min);
 
       const minBin = min.arraySync() as number;
       const maxBin = binIds.max().arraySync() as number;

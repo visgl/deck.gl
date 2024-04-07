@@ -83,7 +83,12 @@ function aggregateAccidents(accidents?: Accident[]) {
   return {incidents, fatalities};
 }
 
-function renderTooltip({fatalities, incidents, year, hoverInfo}: {
+function renderTooltip({
+  fatalities,
+  incidents,
+  year,
+  hoverInfo
+}: {
   fatalities: {[year: number]: Record<string, number>};
   incidents: {[year: number]: Record<string, number>};
   year: number;
@@ -133,7 +138,6 @@ export default function App({
 }) {
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
   const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
-
 
   const layers = [
     new GeoJsonLayer<RoadProperties>({
