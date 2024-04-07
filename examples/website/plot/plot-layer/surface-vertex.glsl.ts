@@ -20,25 +20,33 @@
 
 export default `\
 #version 300 es
-#define SHADER_NAME graph-layer-fragment-shader
+#define SHADER_NAME surface-layer-vertex-shader
 
-precision highp float;
+in vec3 positions;
+in vec3 positions64Low;
+in vec4 colors;
+in vec4 pickingColors;
 
-uniform sampler2D labelTexture;
+uniform float lightStrength;
+uniform float opacity;
 
-in vec2 vTexCoords;
-in float shouldDiscard;
-
-out vec4 fragColor;
+out vec4 vColor;
+out float shouldDiscard;
 
 void main(void) {
-  if (shouldDiscard > 0.0) {
-    discard;
-  }
-  vec4 color = texture(labelTexture, vTexCoords);
-  if (color.a == 0.0) {
-    discard;
-  }
-  fragColor = color;
+  vec3 position_commonspace = project_position(positions, positions64Low);
+  gl_Position = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
+
+  // cheap way to produce believable front-lit effect.
+  // Note: clipsspace depth is nonlinear and deltaZ depends on the near and far values
+  // when creating the perspective projection matrix.
+  vec4 position_vector = project_common_position_to_clipspace(vec4(position_commonspace, 0.0));
+  float fadeFactor = 1.0 - position_vector.z * lightStrength;
+
+  vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;;
+
+  picking_setPickingColor(pickingColors.xyz);
+
+  shouldDiscard = pickingColors.a;
 }
 `;

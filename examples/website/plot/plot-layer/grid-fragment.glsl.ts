@@ -20,7 +20,7 @@
 
 export default `\
 #version 300 es
-#define SHADER_NAME graph-layer-fragment-shader
+#define SHADER_NAME axes-layer-grid-fragment-shader
 
 precision highp float;
 
@@ -34,6 +34,5 @@ void main(void) {
     discard;
   }
   fragColor = vColor;
-  fragColor = picking_filterPickingColor(fragColor);
 }
 `;

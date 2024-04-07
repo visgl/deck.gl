@@ -20,11 +20,12 @@ import {CSVLoader} from '@loaders.gl/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
+import type {GlobeViewState} from '@deck.gl/core';
 
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: GlobeViewState = {
   longitude: 0,
   latitude: 20,
   zoom: 0
@@ -46,16 +47,36 @@ const sunLight = new SunLight({
 // create lighting effect with light sources
 const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
-/* eslint-disable react/no-deprecated */
-export default function App({data}) {
+type Flight = {
+  // Departure
+  time1: number;
+  lon1: number;
+  lat1: number;
+  alt1: number;
+
+  // Arrival
+  time2: number;
+  lon2: number;
+  lat2: number;
+  alt2: number;
+};
+
+type DailyFlights = {
+  date: string;
+  flights: Flight[];
+};
+
+export default function App({data}: {
+  data?: DailyFlights[]
+}) {
   const [currentTime, setCurrentTime] = useState(0);
 
-  const timeRange = [currentTime, currentTime + TIME_WINDOW];
+  const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
 
-  const formatLabel = useCallback(t => getDate(data, t).toUTCString(), [data]);
+  const formatLabel = useCallback((t: number) => getDate(data, t).toUTCString(), [data]);
 
   if (data) {
-    sunLight.timestamp = getDate(data, currentTime).getTime();
+    sunLight.timestamp = getDate(data, currentTime);
   }
 
   const backgroundLayers = useMemo(
@@ -85,7 +106,7 @@ export default function App({data}) {
     data &&
     data.map(
       ({date, flights}) =>
-        new AnimatedArcLayer({
+        new AnimatedArcLayer<Flight>({
           id: `flights-${date}`,
           data: flights,
           getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
@@ -123,35 +144,18 @@ export default function App({data}) {
   );
 }
 
-function getDate(data, t) {
+function getDate(data: DailyFlights[], t: number) {
   const index = Math.min(data.length - 1, Math.floor(t / SEC_PER_DAY));
   const date = data[index].date;
   const timestamp = new Date(`${date}T00:00:00Z`).getTime() + (t % SEC_PER_DAY) * 1000;
   return new Date(timestamp);
 }
 
-export function renderToDOM(container) {
+export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  async function loadData(dates) {
-    const data = [];
-    for (const date of dates) {
-      const url = `${DATA_URL}/${date}.csv`;
-      const flights = await load(url, CSVLoader, {csv: {skipEmptyLines: true}});
-
-      // Join flight data from multiple dates into one continuous animation
-      const offset = SEC_PER_DAY * data.length;
-      for (const f of flights) {
-        f.time1 += offset;
-        f.time2 += offset;
-      }
-      data.push({flights, date});
-      root.render(<App data={data} />);
-    }
-  }
-
-  loadData([
+  const dates = [
     '2020-01-14',
     '2020-02-11',
     '2020-03-10',
@@ -164,5 +168,20 @@ export function renderToDOM(container) {
     '2020-10-13',
     '2020-11-10',
     '2020-12-08'
-  ]);
+  ];
+
+  const data: DailyFlights[] = [];
+  for (const date of dates) {
+    const url = `${DATA_URL}/${date}.csv`;
+    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
+
+    // Join flight data from multiple dates into one continuous animation
+    const offset = SEC_PER_DAY * data.length;
+    for (const f of flights) {
+      f.time1 += offset;
+      f.time2 += offset;
+    }
+    data.push({flights, date});
+    root.render(<App data={data} />);
+  }
 }
