@@ -1,4 +1,4 @@
-# Widget Class
+# Widget
 
 A widget is a UI component that can interact with deck.gl's cameras and layers. Some examples are:
 
