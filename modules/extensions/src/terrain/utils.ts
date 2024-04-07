@@ -6,6 +6,7 @@ export function createRenderTarget(
   opts: {
     id: string;
     float?: boolean;
+    interpolate?: boolean;
   }
 ) {
   return device.createFramebuffer({
@@ -18,12 +19,16 @@ export function createRenderTarget(
           type: GL.FLOAT
         }),
         mipmaps: false,
-        sampler: {
-          minFilter: 'linear',
-          magFilter: 'linear',
-          addressModeU: 'clamp-to-edge',
-          addressModeV: 'clamp-to-edge'
-        }
+        sampler:
+          opts.interpolate === false
+            ? {
+                minFilter: 'nearest',
+                magFilter: 'nearest'
+              }
+            : {
+                minFilter: 'linear',
+                magFilter: 'linear'
+              }
       })
     ]
   });
