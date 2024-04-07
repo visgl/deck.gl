@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-
 import DeckGL from '@deck.gl/react';
 import {FirstPersonView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
+
+import type {FirstPersonViewState} from '@deck.gl/core';
 
 // Video created by the NASA Jet Propulsion Laboratory, Public domain, via Wikimedia Commons
 // Source: https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm
@@ -17,7 +18,7 @@ const sphere = new SphereGeometry({
   radius: 150
 });
 
-const PLAY_BUTTON_STYLE = {
+const PLAY_BUTTON_STYLE: React.CSSProperties = {
   width: '100%',
   height: '100%',
   display: 'flex',
@@ -26,7 +27,7 @@ const PLAY_BUTTON_STYLE = {
   opacity: 0.5
 };
 
-const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE: FirstPersonViewState = {
   latitude: 0,
   longitude: 0,
   position: [0, 0, 0],
@@ -36,7 +37,7 @@ const INITIAL_VIEW_STATE = {
 
 export default function App() {
   const [isPlaying, setPlaying] = useState(false);
-  const [video, setVideo] = useState(null);
+  const [video, setVideo] = useState<HTMLVideoElement>();
 
   useEffect(() => {
     let videoEl;
@@ -95,6 +96,6 @@ export default function App() {
   );
 }
 
-export function renderToDOM(container) {
+export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

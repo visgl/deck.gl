@@ -71,7 +71,7 @@ class TripsDemo extends Component {
         {...otherProps}
         trips={data && data[0]}
         buildings={data && data[1]}
-        animationSpeed={0.5}
+        animationSpeed={1}
         trailLength={params.trail.value}
       />
     );

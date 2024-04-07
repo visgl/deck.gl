@@ -1,18 +1,32 @@
-import {CompositeLayer} from '@deck.gl/core';
-import AnimatedArcLayer from './animated-arc-layer';
+import {CompositeLayer, UpdateParameters} from '@deck.gl/core';
+import AnimatedArcLayer, {AnimatedArcLayerProps} from './animated-arc-layer';
 
 const MAX_ARCS_PER_LAYER = 2500;
+
+type ArcsGroup<DataT> = {
+  startTime: number;
+  endTime: number;
+  data: DataT[];
+};
 
 /** Same effect as the AnimatedArcLayer, but perf optimized.
  * Data is divided into smaller groups, and one sub layer is rendered for each group.
  * This allows us to cheaply cull invisible arcs by turning layers off and on.
  */
-export default class AnimatedArcGroupLayer extends CompositeLayer {
-  updateState({props, changeFlags}) {
+export default class AnimatedArcGroupLayer<DataT = any, ExtraProps = {}> extends CompositeLayer<ExtraProps & Required<AnimatedArcLayerProps<DataT>>> {
+  layerName = 'AnimatedArcGroupLayer';
+  defaultProps = AnimatedArcLayer.defaultProps;
+
+  state!: {
+    groups: ArcsGroup<DataT>[];
+  };
+
+  updateState({props, changeFlags}: UpdateParameters<this>) {
     if (changeFlags.dataChanged) {
       // Sort and group data
       const {data, getSourceTimestamp, getTargetTimestamp} = props;
-      const groups = sortAndGroup(data, getSourceTimestamp, getTargetTimestamp, MAX_ARCS_PER_LAYER);
+      // @ts-ignore
+      const groups = sortAndGroup(data, getSourceTimestamp, getTargetTimestamp);
       this.setState({groups});
     }
   }
@@ -36,12 +50,14 @@ export default class AnimatedArcGroupLayer extends CompositeLayer {
   }
 }
 
-AnimatedArcGroupLayer.layerName = 'AnimatedArcGroupLayer';
-AnimatedArcGroupLayer.defaultProps = AnimatedArcLayer.defaultProps;
-
-function sortAndGroup(data, getStartTime, getEndTime, groupSize) {
-  const groups = [];
-  let group = null;
+function sortAndGroup<DataT>(
+  data: DataT[],
+  getStartTime: (d: DataT) => number,
+  getEndTime: (d: DataT) => number,
+  groupSize: number = MAX_ARCS_PER_LAYER
+): ArcsGroup<DataT>[] {
+  const groups: ArcsGroup<DataT>[] = [];
+  let group: ArcsGroup<DataT>;
 
   data.sort((d1, d2) => getStartTime(d1) - getStartTime(d2));
 

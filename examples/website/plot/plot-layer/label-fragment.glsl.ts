@@ -20,11 +20,13 @@
 
 export default `\
 #version 300 es
-#define SHADER_NAME graph-layer-fragment-shader
+#define SHADER_NAME axes-layer-label-fragment-shader
 
 precision highp float;
 
-in vec4 vColor;
+uniform sampler2D labelTexture;
+
+in vec2 vTexCoords;
 in float shouldDiscard;
 
 out vec4 fragColor;
@@ -33,6 +35,10 @@ void main(void) {
   if (shouldDiscard > 0.0) {
     discard;
   }
-  fragColor = vColor;
+  vec4 color = texture(labelTexture, vTexCoords);
+  if (color.a == 0.0) {
+    discard;
+  }
+  fragColor = color;
 }
 `;

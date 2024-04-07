@@ -1,6 +1,24 @@
-import {ArcLayer} from '@deck.gl/layers';
+import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
+import {Accessor, DefaultProps} from '@deck.gl/core';
 
-export default class AnimatedArcLayer extends ArcLayer {
+export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> & ArcLayerProps<DataT>;
+
+type _AnimatedArcLayerProps<DataT = any> = {
+  getSourceTimestamp?: Accessor<DataT, number>;
+  getTargetTimestamp?: Accessor<DataT, number>;
+  timeRange?: [number, number];
+};
+
+const defaultProps: DefaultProps<_AnimatedArcLayerProps> = {
+  getSourceTimestamp: {type: 'accessor', value: 0},
+  getTargetTimestamp: {type: 'accessor', value: 1},
+  timeRange: {type: 'array', compare: true, value: [0, 1]}
+};
+
+export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcLayer<DataT, ExtraProps & Required<_AnimatedArcLayerProps>> {
+  layerName = 'AnimatedArcLayer';
+  defaultProps = defaultProps;
+
   getShaders() {
     const shaders = super.getShaders();
     shaders.inject = {
@@ -44,16 +62,10 @@ color.a *= (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
   }
 
   draw(params) {
-    params.uniforms = Object.assign({}, params.uniforms, {
+    params.uniforms = {
+      ...params.uniforms,
       timeRange: this.props.timeRange
-    });
+    };
     super.draw(params);
   }
 }
-
-AnimatedArcLayer.layerName = 'AnimatedArcLayer';
-AnimatedArcLayer.defaultProps = {
-  getSourceTimestamp: {type: 'accessor', value: 0},
-  getTargetTimestamp: {type: 'accessor', value: 1},
-  timeRange: {type: 'array', compare: true, value: [0, 1]}
-};

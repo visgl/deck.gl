@@ -12,29 +12,35 @@ const PositionContainer = styled('div')({
   bottom: '40px',
   width: '100%',
   display: 'flex',
+  color: '#f5f1d8',
   justifyContent: 'center',
   alignItems: 'center'
 });
-
-const COLOR = '#f5f1d8';
 
 const SliderInput = withStyles({
   root: {
     marginLeft: 12,
     width: '40%',
-    color: COLOR
+    color: '#f5f1d8'
   },
   valueLabel: {
     '& span': {
       whiteSpace: 'nowrap',
       background: 'none',
-      color: COLOR
+      color: '#f5f1d8'
     }
   }
 })(Slider);
 
-export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}) {
-  const [isPlaying, setIsPlaying] = useState(true);
+export default function RangeInput({min, max, value, animationSpeed, onChange, formatLabel}: {
+  min: number;
+  max: number;
+  value: number;
+  animationSpeed: number;
+  formatLabel: (x: number) => string;
+  onChange: (newValue: number) => void;
+}) {
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // prettier-ignore
   useEffect(() => {
@@ -54,15 +60,15 @@ export default function RangeInput({min, max, value, animationSpeed, onChange, f
   });
 
   return (
-    <PositionContainer style={{color: COLOR}}>
-      <Button color="inherit" onClick={() => setIsPlaying(!isPlaying)}>
-        {isPlaying ? <PauseIcon title="Stop" /> : <PlayIcon title="Animate" />}
+    <PositionContainer>
+      <Button color="inherit" onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? 'Stop' : 'Animate'}>
+        {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </Button>
       <SliderInput
         min={min}
         max={max}
         value={value}
-        onChange={(event, newValue) => onChange(newValue)}
+        onChange={(event, newValue) => onChange(newValue as number)}
         valueLabelDisplay="on"
         valueLabelFormat={formatLabel}
       />

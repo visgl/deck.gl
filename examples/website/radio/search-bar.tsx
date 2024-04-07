@@ -2,8 +2,9 @@ import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {makeStyles} from '@material-ui/core/styles';
+import type {Station} from './app';
 
-const containerStyle = {
+const containerStyle: React.CSSProperties = {
   position: 'absolute',
   zIndex: 1,
   bottom: 40,
@@ -21,7 +22,7 @@ const useStyles = makeStyles(theme => ({
 
 const MAX_OPTIONS = 30;
 
-function filterOptions(options, {inputValue}) {
+function filterOptions(options: Station[], {inputValue}: {inputValue: string}) {
   if (!inputValue) return [];
 
   const result = [];
@@ -46,7 +47,10 @@ function filterOptions(options, {inputValue}) {
   return result;
 }
 
-function SearchBar(props) {
+function SearchBar(props: {
+  data: Station[];
+  onChange: (selectedStation: Station) => void;
+}) {
   const classes = useStyles();
 
   return (
