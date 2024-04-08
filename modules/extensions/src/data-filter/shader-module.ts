@@ -5,6 +5,42 @@ import {glsl} from '../utils/syntax-tags';
 /*
  * data filter shader module
  */
+export type Defines = {
+  // Defines passed externally
+  /**
+   * Primitive type of parameter used for category filtering. If undefined, category filtering disabled.
+   */
+  DATACATEGORY_TYPE?: 'float' | 'vec2' | 'vec3' | 'vec4';
+  /**
+   * Number of category filtering channels. Must match dimension of `DATACATEGORY_TYPE`
+   */
+  DATACATEGORY_CHANNELS?: 1 | 2 | 3 | 4;
+
+  /**
+   * Primitive type of parameter used for numeric filtering. If undefined, numeric filtering disabled.
+   */
+  DATAFILTER_TYPE?: 'float' | 'vec2' | 'vec3' | 'vec4';
+
+  /**
+   * Enable 64-bit precision in numeric filter.
+   */
+  DATAFILTER_DOUBLE?: boolean;
+
+  // Defines derived in shader
+  /**
+   * Numeric filter attribute
+   */
+  DATAFILTER_ATTRIB?: 'filterValues' | 'instanceFilterValues';
+  /**
+   * Numeric filter attribute (low bits). Only used when `DATAFILTER_DOUBLE = true`
+   */
+  DATAFILTER_ATTRIB_64LOW?: 'filterValues64Low' | 'instanceFilterValues64Low';
+  /**
+   * Category filter attribute
+   */
+  DATACATEGORY_ATTRIB?: 'filterCategoryValues' | 'instanceFilterCategoryValues';
+};
+
 const vs = glsl`
 uniform bool filter_useSoftMargin;
 uniform bool filter_enabled;

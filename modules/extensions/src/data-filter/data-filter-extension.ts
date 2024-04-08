@@ -22,7 +22,7 @@ import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {shaderModule, shaderModule64} from './shader-module';
+import {Defines, shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
 
 const defaultProps = {
@@ -125,10 +125,10 @@ const defaultOptions: Required<DataFilterExtensionOptions> = {
 };
 
 const DATA_TYPE_FROM_SIZE = {
-  1: 'float',
-  2: 'vec2',
-  3: 'vec3',
-  4: 'vec4'
+  1: 'float' as const,
+  2: 'vec2' as const,
+  3: 'vec3' as const,
+  4: 'vec4' as const
 };
 
 /** Adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. */
@@ -144,7 +144,7 @@ export default class DataFilterExtension extends LayerExtension<
 
   getShaders(this: Layer<DataFilterExtensionProps>, extension: this): any {
     const {categorySize, filterSize, fp64} = extension.opts;
-    const defines: Record<string, boolean | number | string> = {};
+    const defines: Defines = {};
     if (categorySize) {
       defines.DATACATEGORY_TYPE = DATA_TYPE_FROM_SIZE[categorySize];
       defines.DATACATEGORY_CHANNELS = categorySize;
