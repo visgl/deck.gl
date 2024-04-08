@@ -8,8 +8,8 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@loaders.gl/ply": "^4.1.4",
-    "@loaders.gl/gltf": "^4.1.4",
+    "@loaders.gl/ply": "^4.2.0-beta.2",
+    "@loaders.gl/gltf": "^4.2.0-beta.2",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",

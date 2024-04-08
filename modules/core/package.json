@@ -40,8 +40,8 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^4.1.4",
-    "@loaders.gl/images": "^4.1.4",
+    "@loaders.gl/core": "^4.2.0-beta.2",
+    "@loaders.gl/images": "^4.2.0-beta.2",
     "@luma.gl/constants": "^9.0.9",
     "@luma.gl/core": "^9.0.9",
     "@luma.gl/engine": "^9.0.9",
