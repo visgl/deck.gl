@@ -70,8 +70,8 @@ new deck.DataFilterExtension({});
 new DataFilterExtension({filterSize, fp64});
 ```
 
-* `filterSize` (number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Default `1`.
-* `categorySize` (number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Default `1`.
+* `filterSize` (number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Set to `0` to disable numeric filtering. Default `1`.
+* `categorySize` (number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering. Default `0`.
 * `fp64` (boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
 * `countItems` (boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
