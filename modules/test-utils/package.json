@@ -29,8 +29,7 @@
   },
   "files": [
     "dist",
-    "src",
-    "typed"
+    "src"
   ],
   "dependencies": {
     "@luma.gl/test-utils": "^9.0.9"
