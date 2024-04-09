@@ -22,7 +22,8 @@ export default defineConfig(async () => {
     define: {
       'process.env.GoogleMapsAPIKey': JSON.stringify(process.env.GoogleMapsAPIKey),
       'process.env.GoogleMapsMapId': JSON.stringify(process.env.GoogleMapsMapId),
-      'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken)
+      'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken),
+      'process.env.MapTilerApiKey': JSON.stringify(process.env.MapTilerApiKey)
     },
     server: {
       open: true,

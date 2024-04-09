@@ -19,6 +19,7 @@
     "@loaders.gl/las": "^4.1.4",
     "@loaders.gl/obj": "^4.1.4",
     "@loaders.gl/ply": "^4.1.4",
+    "@maptiler/sdk": "^2.0.1",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",

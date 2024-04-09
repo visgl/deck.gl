@@ -4,7 +4,11 @@ This directory contains standalone deck.gl examples that do not require installi
 
 ## Usage
 
-In the web browser, open any .html file from the `src` directory. Examples with base maps require Mapbox access tokens to render. Look for `<mapbox-access-token>` in the file and replace with your token. For more information, see [Mapbox access tokens](https://www.mapbox.com/help/how-access-tokens-work/).
+In the web browser, open any .html file from the `src` directory. 
+
+Examples with Mapbox base maps require Mapbox access tokens to render. Look for `<mapbox-access-token>` in the file and replace with your token. For more information, see [Mapbox access tokens](https://www.mapbox.com/help/how-access-tokens-work/).
+
+
 
 ## Contribute
 

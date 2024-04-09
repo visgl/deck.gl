@@ -4,7 +4,7 @@ const Mustache = require('mustache');
 
 Mustache.escape = escapeHTML;
 
-const {INPUT_DIR, IMAGE_DIR, MAPBOX_TOKEN, PORT} = require('./constants');
+const {INPUT_DIR, IMAGE_DIR, MAPBOX_TOKEN, MAPTILER_API_KEY, PORT} = require('./constants');
 
 const ARGS = parseArgs();
 const CACHE = {};
@@ -71,10 +71,17 @@ function getPage(page, opts = {}) {
     CACHE.pageTemplate = fs.readFileSync(path.resolve(__dirname, './page.html'), 'utf-8');
   }
 
+  const mapTokens = {
+    '<mapbox-access-token>': MAPBOX_TOKEN,
+    YOUR_MAPTILER_API_KEY_HERE: MAPTILER_API_KEY
+  };
+  const re = new RegExp(Object.keys(mapTokens).join('|'), 'gi');
   return Mustache.render(CACHE.pageTemplate, {
     ...page,
     iframeSrc: `<script>var src = unescape('${escape(
-      content.replace('<mapbox-access-token>', MAPBOX_TOKEN)
+      content.replace(re, function (matched) {
+        return mapTokens[matched];
+      })
     )}');</script>`,
     content,
     analytics: opts.analytics && analytics

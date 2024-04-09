@@ -77,7 +77,8 @@ const config = {
           new webpack.EnvironmentPlugin([
             'MapboxAccessToken',
             'GoogleMapsAPIKey',
-            'GoogleMapsMapId'
+            'GoogleMapsMapId',
+            'MapTilerApiKey'
           ]),
           // These modules break server side bundling
           new webpack.IgnorePlugin({

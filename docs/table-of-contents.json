@@ -51,7 +51,8 @@
           "developer-guide/base-maps/using-with-arcgis",
           "developer-guide/base-maps/using-with-google-maps",
           "developer-guide/base-maps/using-with-mapbox",
-          "developer-guide/base-maps/using-with-maplibre"
+          "developer-guide/base-maps/using-with-maplibre",
+          "developer-guide/base-maps/using-with-maptiler"
         ]
       },
       {

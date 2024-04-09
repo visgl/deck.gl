@@ -1,0 +1,20 @@
+{
+  "name": "deckgl-example-pure-js-maptiler",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
+    "@deck.gl/mapbox": "^9.0.0",
+    "@maptiler/sdk": "^2.0.1"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}

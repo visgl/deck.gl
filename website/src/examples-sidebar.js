@@ -43,7 +43,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox']
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox', 'maptiler']
     },
     {
       type: 'category',

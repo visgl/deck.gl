@@ -70,6 +70,7 @@ The following table details renderer support across different versions of mapbox
 | mapbox-gl-js v3+              | ✓                  | ✓                 |
 | maplibre-gl-js (before v3)    | ✓                  |                   |
 | maplibre-gl-js v3+            | ✓                  | ✓*                |
+| maptiler-sdk-js v2+           | ✓                  | ✓*                |
 
 > *will fallback to WebGL1 if WebGL2 is not available
 

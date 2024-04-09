@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>Interleaving deck.gl with MapTiler</title>
+    
+    <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.1/maptiler-sdk.umd.min.js"></script>
+    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.1/maptiler-sdk.css" rel="stylesheet" />
+  </head>
+
+  <body style="margin:0"></body>
+
+  <script type="text/javascript">
+
+    const {MapboxOverlay, ScatterplotLayer, ArcLayer} = deck;
+
+    maptilersdk.config.apiKey = 'YOUR_MAPTILER_API_KEY_HERE';
+
+    const map = new maptilersdk.Map({
+      container: document.body,
+      style: maptilersdk.MapStyle.BASIC,
+      center: [6.055784, 46.233402],
+      zoom: 16,
+      pitch: 60,
+      antialias: true
+    });
+
+    map.on('load', () => {
+      const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
+
+      map.addLayer({
+        'id': '3d-buildings',
+        'source': 'maptiler_planet',
+        'source-layer': 'building',
+        'filter': ['!has', 'hide_3d'],
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+            'fill-extrusion-color': '#aaa',
+
+            // use an 'interpolate' expression to add a smooth transition effect to the
+            // buildings as the user zooms in
+            'fill-extrusion-height': [
+                "interpolate", ["linear"], ["zoom"],
+                15, 0,
+                15.05, ["get", "render_height"]
+            ],
+            'fill-extrusion-base': [
+                "interpolate", ["linear"], ["zoom"],
+                15, 0,
+                15.05, ["get", "render_min_height"]
+            ],
+            'fill-extrusion-opacity': .6
+        }
+      }, firstLabelLayerId);
+
+      const deckOverlay = new MapboxOverlay({
+        interleaved: true,
+        layers: [
+          new ScatterplotLayer({
+            id: 'deckgl-circle',
+            data: [
+              {position: [6.055784, 46.233402], color: [255, 170, 1], radius: 200}
+            ],
+            getPosition: d => d.position,
+            getFillColor: d => d.color,
+            getRadius: d => d.radius,
+            opacity: 0.3,
+            beforeId: firstLabelLayerId
+          }),
+          new ArcLayer({
+            id: 'deckgl-arc',
+            data: [
+              {source: [6.055892,46.234151], target: [6.054690,46.232441]}
+            ],
+            getSourcePosition: d => d.source,
+            getTargetPosition: d => d.target,
+            getSourceColor: [118, 31, 235],
+            getTargetColor: [5, 208, 223],
+            getWidth: 8
+          })
+        ]
+      });
+
+      map.addControl(deckOverlay);
+    });
+
+  </script>
+</html>
