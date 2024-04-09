@@ -433,7 +433,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.widgetManager?.finalize();
     this.widgetManager = null;
 
-    if (!this.props.canvas && !this.props.device && this.canvas) {
+    if (!this.props.canvas && !this.props.device && !this.props.gl && this.canvas) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
