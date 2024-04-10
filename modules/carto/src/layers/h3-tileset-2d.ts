@@ -7,10 +7,37 @@ import {
   cellToBoundary,
   cellToParent,
   gridDisk,
-  cellToLatLng
+  cellToLatLng,
+  edgeLength,
+  UNITS,
+  originToDirectedEdges
 } from 'h3-js';
 
 export type H3TileIndex = {i: string};
+
+function padBoundingBox(
+  {west, north, east, south}: GeoBoundingBox,
+  resolution: number
+): GeoBoundingBox {
+  const corners = [
+    [north, east],
+    [south, east],
+    [south, west],
+    [north, west]
+  ];
+  const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
+  const cornerEdgeLengths = cornerCells.map(
+    c => (edgeLength(originToDirectedEdges(c)[0], UNITS.rads) * 180) / Math.PI
+  );
+  const buffer = Math.max(...cornerEdgeLengths);
+
+  return {
+    north: north + buffer,
+    east: east - buffer,
+    south: south - buffer,
+    west: west + buffer
+  };
+}
 
 function getHexagonsInBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
@@ -32,23 +59,12 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
-  const corners = [
+  const polygon = [
     [north, east],
     [south, east],
     [south, west],
-    [north, west]
-  ];
-  const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
-  const {west: w, south: s, east: e, north: n} = tilesToBoundingBox(cornerCells);
-  const cornerCellCenters = cornerCells.map(c => cellToLatLng(c));
-  cornerCellCenters.push(cornerCellCenters[0]); // Close polygon
-
-  const bounds2 = [
-    [n, e],
-    [s, e],
-    [s, w],
-    [n, w],
-    [n, e]
+    [north, west],
+    [north, east]
   ];
 
   // Add manual buffer
@@ -56,7 +72,7 @@ function getHexagonsInBoundingBox(
   // `polygonToCells()` fills based on hexagon center, which means tiles vanish
   // prematurely. Get more accurate coverage by oversampling
   const oversample = 0;
-  const h3Indices = polygonToCells(bounds2, resolution + oversample);
+  const h3Indices = polygonToCells(polygon, resolution + oversample);
 
   return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
 }
@@ -102,6 +118,7 @@ export default class H3Tileset2D extends Tileset2D {
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     if (viewport.latitude === undefined) return [];
+    // Aren't east/west the wrong way round??
     const [east, south, west, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
@@ -119,7 +136,8 @@ export default class H3Tileset2D extends Tileset2D {
       const center = latLngToCell(viewport.latitude, viewport.longitude, maxZoom);
       indices = gridDisk(center, 1);
     } else {
-      indices = getHexagonsInBoundingBox({west, north, east, south}, z);
+      const paddedBounds = padBoundingBox({west, north, east, south}, z);
+      indices = getHexagonsInBoundingBox(paddedBounds, z);
     }
 
     return indices.map(i => ({i}));
