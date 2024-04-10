@@ -36,11 +36,19 @@ ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
+uniform project32Uniforms {
+  bool autoWrapLongitude;
+  vec3 commonUnitsPerMeter;
+} project;
+
+const vec3 commonUnitsPerMeter = vec3(0.0, 0.0, 0.0001);
+
 uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;
-uniform bool project_uWrapLongitude;
-uniform vec3 project_uCommonUnitsPerMeter;
+// uniform bool project_uWrapLongitude;
+// uniform vec3 project_uCommonUnitsPerMeter;
+
 uniform vec3 project_uCommonUnitsPerWorldUnit;
 uniform vec3 project_uCommonUnitsPerWorldUnit2;
 uniform vec4 project_uCenter;
@@ -95,7 +103,7 @@ float project_size() {
 }
 
 float project_size_at_latitude(float meters, float lat) {
-  return meters * project_uCommonUnitsPerMeter.z * project_size_at_latitude(lat);
+  return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
 }
 
 //
@@ -103,19 +111,20 @@ float project_size_at_latitude(float meters, float lat) {
 // Note the scalar version of project_size is for scaling the z component only
 //
 float project_size(float meters) {
-  return meters * project_uCommonUnitsPerMeter.z * project_size();
+  // For scatter relevant
+  return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
-  return meters * project_uCommonUnitsPerMeter.xy * project_size();
+  return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
-  return meters * project_uCommonUnitsPerMeter * project_size();
+  return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
-  return vec4(meters.xyz * project_uCommonUnitsPerMeter, meters.w);
+  return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
 // Get rotation matrix that aligns the z axis with the given up vector
@@ -143,7 +152,7 @@ bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
 vec3 project_normal(vec3 vector) {
   // Apply model matrix
   vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
-  vec3 n = normalize(normal_modelspace.xyz * project_uCommonUnitsPerMeter);
+  vec3 n = normalize(normal_modelspace.xyz * project.commonUnitsPerMeter);
   mat3 rotation;
   if (project_needs_rotation(geometry.position.xyz, rotation)) {
     n = rotation * n;
@@ -162,7 +171,7 @@ vec4 project_offset_(vec4 offset) {
 //
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
-  if (project_uWrapLongitude) {
+  if (project.autoWrapLongitude) {
     x = mod(x + 180., 360.0) - 180.;
   }
   float y = clamp(lnglat.y, -89.9, 89.9);

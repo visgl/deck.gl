@@ -38,5 +38,13 @@ export default {
   name: 'project',
   dependencies: [fp32, geometry],
   vs: projectShader,
-  getUniforms
+  getUniforms,
+  uniformTypes: {
+    autoWrapLongitude: 'f32',
+    commonUnitsPerMeter: 'vec3<f32>'
+  },
+  defaultUniforms: {
+    autoWrapLongitude: false,
+    commonUnitsPerMeter: new Float32Array([0.0, 0.0, 0.00004])
+  }
 } as ShaderModule<ProjectModuleSettings>;

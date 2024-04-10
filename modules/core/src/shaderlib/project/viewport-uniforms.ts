@@ -315,7 +315,7 @@ function calculateViewportUniforms({
     project_uDevicePixelRatio: devicePixelRatio,
 
     project_uFocalDistance: focalDistance,
-    project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
+    // project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
