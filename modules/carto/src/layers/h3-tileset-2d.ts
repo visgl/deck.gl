@@ -1,3 +1,4 @@
+import {_flatten as flatten} from '@deck.gl/core';
 import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
 import {
   polygonToCells,
@@ -5,7 +6,8 @@ import {
   getResolution,
   cellToBoundary,
   cellToParent,
-  gridDisk
+  gridDisk,
+  cellToLatLng
 } from 'h3-js';
 
 export type H3TileIndex = {i: string};
@@ -30,28 +32,39 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
+  const corners = [
+    [north, east],
+    [south, east],
+    [south, west],
+    [north, west]
+  ];
+  const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
+  const {west: w, south: s, east: e, north: n} = tilesToBoundingBox(cornerCells);
+  const cornerCellCenters = cornerCells.map(c => cellToLatLng(c));
+  cornerCellCenters.push(cornerCellCenters[0]); // Close polygon
+
+  const bounds2 = [
+    [n, e],
+    [s, e],
+    [s, w],
+    [n, w],
+    [n, e]
+  ];
+
+  // Add manual buffer
+
   // `polygonToCells()` fills based on hexagon center, which means tiles vanish
   // prematurely. Get more accurate coverage by oversampling
-  const oversample = 2;
-  const h3Indices = polygonToCells(
-    [
-      [
-        [west, north],
-        [west, south],
-        [east, south],
-        [east, north],
-        [west, north]
-      ]
-    ],
-    resolution + oversample,
-    true
-  );
+  const oversample = 0;
+  const h3Indices = polygonToCells(bounds2, resolution + oversample);
 
   return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
 }
 
-function tileToBoundingBox(index: string): GeoBoundingBox {
-  const coordinates = cellToBoundary(index);
+function tilesToBoundingBox(indices: string[]): GeoBoundingBox {
+  const coordinates = indices
+    .map(index => cellToBoundary(index))
+    .reduce((accumulator, boundary, _, []) => accumulator.concat(boundary));
   const latitudes = coordinates.map(c => c[0]);
   const longitudes = coordinates.map(c => c[1]);
   const west = Math.min(...longitudes);
@@ -119,7 +132,7 @@ export default class H3Tileset2D extends Tileset2D {
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileMetadata({i}: H3TileIndex) {
-    return {bbox: tileToBoundingBox(i)};
+    return {bbox: tilesToBoundingBox([i])};
   }
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
