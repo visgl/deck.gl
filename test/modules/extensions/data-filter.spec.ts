@@ -33,6 +33,14 @@ test('DataFilterExtension', t => {
         t.is(uniforms.filter_softMax, 160, 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
         t.is(uniforms.filter_enabled, true, 'has correct uniforms');
+
+        const attributes = layer.getAttributeManager().getAttributes();
+        t.deepEqual(
+          attributes.filterValues.value,
+          [120, 140, 0, 0, 0, 0],
+          'filterValues attribute is populated'
+        );
+        t.notOk(attributes.filterCategoryValues, 'filterCategoryValues attribute is not populated');
       }
     },
     {
@@ -86,7 +94,7 @@ test('DataFilterExtension#categories', t => {
     {
       props: {
         data,
-        extensions: [new DataFilterExtension({categorySize: 2})],
+        extensions: [new DataFilterExtension({categorySize: 2, filterSize: 0})],
         getPosition: d => d.position,
         getFilterCategory: d => [d.field1, d.field2],
         filterCategories: [['a'], [8]]
@@ -98,6 +106,14 @@ test('DataFilterExtension#categories', t => {
           [2 ** 0, 0, 2 ** 1, 0],
           'has correct uniforms'
         );
+
+        const attributes = layer.getAttributeManager().getAttributes();
+        t.deepEqual(
+          attributes.filterCategoryValues.value,
+          [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+          'filterCategoryValues attribute is populated'
+        );
+        t.notOk(attributes.filterValues, 'filterValues attribute is not populated');
       }
     },
     {

@@ -17,6 +17,25 @@ for (let y = 0; y < 20; y++) {
 
 export default [
   {
+    name: 'filter-1d',
+    props: {
+      extensions: [new DataFilterExtension({filterSize: 1})],
+      getFilterValue: d => d.column,
+      filterRange: [3, 8]
+    }
+  },
+  {
+    name: 'filter-2d',
+    props: {
+      extensions: [new DataFilterExtension({filterSize: 2})],
+      getFilterValue: d => [d.column, d.row],
+      filterRange: [
+        [3, 8],
+        [2, 5]
+      ]
+    }
+  },
+  {
     name: 'single-category',
     props: {
       extensions: [new DataFilterExtension({categorySize: 1})],
@@ -27,7 +46,7 @@ export default [
   {
     name: '2-categories',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 2})],
+      extensions: [new DataFilterExtension({categorySize: 2, filterSize: 0})],
       getFilterCategory: d => [d.index % 128, d.row],
       filterCategories: [
         [3, 4, 5, 15, 50],
@@ -49,6 +68,19 @@ export default [
       extensions: [new DataFilterExtension({categorySize: 4})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
       filterCategories: [[0], [0], [0], [0]]
+    }
+  },
+  {
+    name: '4-categories-filter-2d',
+    props: {
+      extensions: [new DataFilterExtension({categorySize: 4, filterSize: 2})],
+      getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
+      filterCategories: [[0], [0], [0], [0]],
+      getFilterValue: d => [d.column, d.row],
+      filterRange: [
+        [2, 1000],
+        [0, 15]
+      ]
     }
   }
 ].map(({name, props}) => ({
