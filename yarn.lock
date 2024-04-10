@@ -1065,7 +1065,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.8.4":
+"@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.8.4":
   version "7.15.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.3.tgz#2e1c2880ca118e5b2f9988322bd8a7656a32502b"
   integrity sha512-OvwMLqNXkCXSz1kSm58sEsNuhqOx/fKpnUnKnFB5v8uDda5bLNEHNgKPvhDN6IU0LDcnHQ90LlJ0Q6jnyBSIBA==
@@ -2455,28 +2455,12 @@
     "@loaders.gl/textures" "4.2.0"
     "@math.gl/core" "^4.0.0"
 
-"@loaders.gl/images@4.1.4":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-4.1.4.tgz#42a69c6cdd3e3fb1ec321d63215524a07a0fbe10"
-  integrity sha512-uSdm1YTwhLkHw7wuwX50y8Ng8SPAfSa0L+b1Ac5XlfmFaUkt9BJ/+rdhfkYhAmbKP+IT47/BsDUHfS3XJmTZ4A==
-  dependencies:
-    "@loaders.gl/loader-utils" "4.1.4"
-
 "@loaders.gl/images@4.2.0", "@loaders.gl/images@^4.2.0":
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-4.2.0.tgz#961504856a3a997e71c116acc908eef6c945c67b"
   integrity sha512-0rntM3HheRsvlIESZiy39GDBj6FJ1L85wcMaIzmgre+AlCVZnuc0s619tgsbk+oJ+syPEtbzdyg+Ud05TIXhzA==
   dependencies:
     "@loaders.gl/loader-utils" "4.2.0"
-
-"@loaders.gl/loader-utils@4.1.4":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-4.1.4.tgz#5bfbdf35db71cae5b541b704cc7d66e66ed8bdad"
-  integrity sha512-H4JefiK3plFqQxENWx/Mzlx6WtkIvQ21if4VV+UQ/OB3bbq6QuLFHrWBHUx2z4z9QSBj1johiF1KGplgi/unWA==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    "@loaders.gl/worker-utils" "4.1.4"
-    "@probe.gl/stats" "^4.0.2"
 
 "@loaders.gl/loader-utils@4.2.0", "@loaders.gl/loader-utils@^4.2.0":
   version "4.2.0"
@@ -2523,13 +2507,6 @@
     through "^2.3.8"
     web-streams-polyfill "^3.2.1"
 
-"@loaders.gl/schema@4.1.4":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.1.4.tgz#951a6c04891dea992a7111ba41e4f46ff9bddc72"
-  integrity sha512-Y9FoM/HdBvAVrGi213Z7+dvSBEvDEc9va38RFzXA5HtTcUqOz1Rsu2wStNmY7oL7xjnNF856Wyq0Nty7I24V4g==
-  dependencies:
-    "@types/geojson" "^7946.0.7"
-
 "@loaders.gl/schema@4.2.0", "@loaders.gl/schema@^4.2.0":
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.2.0.tgz#87c1da01aa15a45060ea54010504bc0c87689d38"
@@ -2547,7 +2524,7 @@
     "@loaders.gl/schema" "4.2.0"
     "@mapbox/martini" "^0.2.0"
 
-"@loaders.gl/textures@4.2.0":
+"@loaders.gl/textures@4.2.0", "@loaders.gl/textures@^4.1.0":
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@loaders.gl/textures/-/textures-4.2.0.tgz#d1473e3b4933725ef130c66ec18502bd810d79ec"
   integrity sha512-T+MoSyVCUQAjPTbDRnEXhQxyn5iU5nMzYiMI59VElp43WkShU3s7k4OB6HhAFPfIeqlD0ZPnm3ecgYZ/BZbZ6w==
@@ -2557,18 +2534,6 @@
     "@loaders.gl/schema" "4.2.0"
     "@loaders.gl/worker-utils" "4.2.0"
     "@math.gl/types" "^4.0.1"
-    ktx-parse "^0.0.4"
-    texture-compressor "^1.0.2"
-
-"@loaders.gl/textures@^4.1.0":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/textures/-/textures-4.1.4.tgz#2b8c3dae7d9815e528086e152e6a7a5c65e87188"
-  integrity sha512-5lIwLbtmsPRR9Rh26/UnqWWWt/UubWld6v85u0hhrH36HhMpvGGEoZj8JiMY3ipy77iZu/mwdiUkyIfZ65WidQ==
-  dependencies:
-    "@loaders.gl/images" "4.1.4"
-    "@loaders.gl/loader-utils" "4.1.4"
-    "@loaders.gl/schema" "4.1.4"
-    "@loaders.gl/worker-utils" "4.1.4"
     ktx-parse "^0.0.4"
     texture-compressor "^1.0.2"
 
@@ -2596,13 +2561,6 @@
     "@loaders.gl/xml" "4.2.0"
     "@turf/rewind" "^5.1.5"
     deep-strict-equal "^0.2.0"
-
-"@loaders.gl/worker-utils@4.1.4":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/worker-utils/-/worker-utils-4.1.4.tgz#bc68dfa027cc09a8eb5e5b75e287713f6018586e"
-  integrity sha512-6SsOcS+aoI7/f/ak1vlpwlhzDXMbO8ivUIyDmCazPpRMnpFP7ig/H2yctvlGnUTUhsv1oJCRt4vPnhKefhCFvg==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
 
 "@loaders.gl/worker-utils@4.2.0":
   version "4.2.0"
