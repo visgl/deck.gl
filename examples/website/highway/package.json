@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^4.1.4",
+    "@loaders.gl/csv": "^4.2.0",
     "@types/d3-scale": "^4.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
