@@ -21,7 +21,8 @@ def in_jupyter():
 
 
 def convert_js_bool(py_bool):
-    if type(py_bool) is bool:
+    """Serializes Python booleans to JavaScript. Returns non-boolean values unchanged."""
+    if type(py_bool) is not bool:
         return py_bool
     return "true" if py_bool else "false"
 
