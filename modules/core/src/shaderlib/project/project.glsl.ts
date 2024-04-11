@@ -47,7 +47,7 @@ uniform project32Uniforms {
   vec3 commonUnitsPerWorldUnit2;
   vec4 center;
   mat4 modelMatrix;
-  // mat4 project_uViewProjectionMatrix;
+  mat4 viewProjectionMatrix;
   // vec2 project_uViewportSize;
   // float project_uDevicePixelRatio;
   // float project_uFocalDistance;
@@ -58,7 +58,6 @@ uniform project32Uniforms {
 } project;
 
 
-uniform mat4 project_uViewProjectionMatrix;
 uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
@@ -276,10 +275,10 @@ vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatr
 
 //
 // Projects from common space coordinates to clip space.
-// Uses project_uViewProjectionMatrix
+// Uses project.viewProjectionMatrix
 //
 vec4 project_common_position_to_clipspace(vec4 position) {
-  return project_common_position_to_clipspace(position, project_uViewProjectionMatrix, project.center);
+  return project_common_position_to_clipspace(position, project.viewProjectionMatrix, project.center);
 }
 
 // Returns a clip space offset that corresponds to a given number of screen pixels

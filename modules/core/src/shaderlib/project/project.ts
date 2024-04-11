@@ -49,14 +49,14 @@ export default {
     commonUnitsPerWorldUnit: 'vec3<f32>',
     commonUnitsPerWorldUnit2: 'vec3<f32>',
     center: 'vec4<f32>',
-    modelMatrix: 'mat4x4<f32>'
-    // mat4 project_uViewProjectionMatrix
-    // vec2 project_uViewportSize
-    // float project_uDevicePixelRatio
-    // float project_uFocalDistance
-    // vec3 project_uCameraPosition
-    // vec3 project_uCoordinateOrigin
-    // vec3 project_uCommonOrigin
-    // bool project_uPseudoMeters
+    modelMatrix: 'mat4x4<f32>',
+    viewProjectionMatrix: 'mat4x4<f32>'
+    //, vec2 project_uViewportSize
+    //, float project_uDevicePixelRatio
+    //, float project_uFocalDistance
+    //, vec3 project_uCameraPosition
+    //, vec3 project_uCoordinateOrigin
+    //, vec3 project_uCommonOrigin
+    //, bool project_uPseudoMeters
   }
 } as ShaderModule<ProjectModuleSettings>;

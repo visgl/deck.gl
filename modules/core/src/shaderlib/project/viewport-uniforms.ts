@@ -209,7 +209,7 @@ export type ProjectUniforms = {
   scale: number;
   autoWrapLongitude: boolean;
 
-  project_uViewProjectionMatrix: NumericArray;
+  viewProjectionMatrix: NumericArray;
   modelMatrix: NumericArray;
 
   // This is for lighting calculations
@@ -321,7 +321,7 @@ function calculateViewportUniforms({
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     autoWrapLongitude: false,
 
-    project_uViewProjectionMatrix: viewProjectionMatrix,
+    viewProjectionMatrix: viewProjectionMatrix,
     modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
