@@ -37,9 +37,9 @@ function padBoundingBox(
 
   return {
     north: Math.min(north + buffer, MAX_LATITUDE),
-    east: east - buffer,
+    east: east + buffer,
     south: Math.max(south - buffer, -MAX_LATITUDE),
-    west: west + buffer
+    west: west - buffer
   };
 }
 
@@ -54,8 +54,8 @@ function getHexagonsInBoundingBox(
     const nSegments = Math.ceil(longitudeSpan / 180);
     let h3Indices: string[] = [];
     for (let s = 0; s < nSegments; s++) {
-      const segmentEast = east + s * 180;
-      const segmentWest = Math.min(segmentEast + 179.9999999, west);
+      const segmentWest = west + s * 180;
+      const segmentEast = Math.min(segmentWest + 179.9999999, east);
       h3Indices = h3Indices.concat(
         getHexagonsInBoundingBox({west: segmentWest, north, east: segmentEast, south}, resolution)
       );
@@ -115,7 +115,7 @@ export default class H3Tileset2D extends Tileset2D {
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     if (viewport.latitude === undefined) return [];
     // Aren't east/west the wrong way round??
-    const [east, south, west, north] = viewport.getBounds();
+    const [west, south, east, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
     let z = getHexagonResolution(viewport, tileSize);
