@@ -206,7 +206,7 @@ export type ProjectUniforms = {
   project_uCommonUnitsPerWorldUnit: Vec3;
   project_uCommonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
-  project_uScale: number;
+  scale: number;
   autoWrapLongitude: boolean;
 
   project_uViewProjectionMatrix: NumericArray;
@@ -318,7 +318,7 @@ function calculateViewportUniforms({
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
-    project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
+    scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     autoWrapLongitude: false,
 
     project_uViewProjectionMatrix: viewProjectionMatrix,

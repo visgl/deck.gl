@@ -41,7 +41,7 @@ uniform project32Uniforms {
   int coordinateSystem;
   vec3 commonUnitsPerMeter;
   int projectionMode;
-  // float project_uScale;
+  float scale;
 
   // vec3 project_uCommonUnitsPerWorldUnit;
   // vec3 project_uCommonUnitsPerWorldUnit2;
@@ -57,7 +57,6 @@ uniform project32Uniforms {
   // bool project_uPseudoMeters;
 } project;
 
-uniform float project_uScale;
 
 uniform vec3 project_uCommonUnitsPerWorldUnit;
 uniform vec3 project_uCommonUnitsPerWorldUnit2;
@@ -294,18 +293,18 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
-  return project_size(meters) * project_uScale;
+  return project_size(meters) * project.scale;
 }
 float project_size_to_pixel(float size, int unit) {
   if (unit == UNIT_METERS) return project_size_to_pixel(size);
-  if (unit == UNIT_COMMON) return size * project_uScale;
+  if (unit == UNIT_COMMON) return size * project.scale;
   // UNIT_PIXELS
   return size;
 }
 float project_pixel_size(float pixels) {
-  return pixels / project_uScale;
+  return pixels / project.scale;
 }
 vec2 project_pixel_size(vec2 pixels) {
-  return pixels / project_uScale;
+  return pixels / project.scale;
 }
 `;

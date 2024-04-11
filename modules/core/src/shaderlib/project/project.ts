@@ -43,8 +43,8 @@ export default {
     autoWrapLongitude: 'f32',
     coordinateSystem: 'i32',
     commonUnitsPerMeter: 'vec3<f32>',
-    projectionMode: 'i32'
-    // float project_uScale;
+    projectionMode: 'i32',
+    scale: 'f32'
 
     // vec3 project_uCommonUnitsPerWorldUnit;
     // vec3 project_uCommonUnitsPerWorldUnit2;
