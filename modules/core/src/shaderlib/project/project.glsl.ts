@@ -38,10 +38,10 @@ ${UNIT_GLSL_CONSTANTS}
 
 uniform project32Uniforms {
   bool autoWrapLongitude;
+  int coordinateSystem;
   vec3 commonUnitsPerMeter;
 } project;
 
-uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;
 
@@ -73,7 +73,7 @@ float project_size_at_latitude(float lat) {
 
 float project_size() {
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
     project_uPseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
@@ -191,26 +191,26 @@ vec3 project_globe_(vec3 lnglatz) {
 }
 
 //
-// Projects positions (defined by project_uCoordinateSystem) to common space (defined by project_uProjectionMode)
+// Projects positions (defined by project.coordinateSystem) to common space (defined by project_uProjectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project_uModelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_mercator_(position_world.xy),
         project_size_at_latitude(position_world.z, position_world.y),
         position_world.w
       );
     }
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
       position_world.xyz += project_uCoordinateOrigin;
     }
   }
   if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_globe_(position_world.xyz),
         position_world.w
@@ -218,7 +218,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       if (abs(position_world.y - project_uCoordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
@@ -232,8 +232,8 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   }
   if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
     (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
-    (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-     project_uCoordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
+    (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
+     project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project_uCoordinateOrigin;
   }

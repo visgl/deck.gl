@@ -41,10 +41,7 @@ export default {
   getUniforms,
   uniformTypes: {
     autoWrapLongitude: 'f32',
+    coordinateSystem: 'i32',
     commonUnitsPerMeter: 'vec3<f32>'
-  },
-  defaultUniforms: {
-    autoWrapLongitude: false,
-    commonUnitsPerMeter: new Float32Array([0.0, 0.0, 0.0])
   }
 } as ShaderModule<ProjectModuleSettings>;
