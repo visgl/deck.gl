@@ -44,8 +44,6 @@ uniform project32Uniforms {
 uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;
-// uniform bool project_uWrapLongitude;
-// uniform vec3 project_uCommonUnitsPerMeter;
 
 uniform vec3 project_uCommonUnitsPerWorldUnit;
 uniform vec3 project_uCommonUnitsPerWorldUnit2;

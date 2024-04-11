@@ -202,13 +202,12 @@ export type ProjectUniforms = {
   project_uDevicePixelRatio: number;
 
   project_uFocalDistance: number;
-  project_uCommonUnitsPerMeter: Vec3;
   commonUnitsPerMeter: Vec3;
   project_uCommonUnitsPerWorldUnit: Vec3;
   project_uCommonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
   project_uScale: number;
-  project_uWrapLongitude: boolean;
+  autoWrapLongitude: boolean;
 
   project_uViewProjectionMatrix: NumericArray;
   project_uModelMatrix: NumericArray;
@@ -257,7 +256,7 @@ export function getUniformsFromViewport({
     coordinateOrigin
   });
 
-  uniforms.project_uWrapLongitude = autoWrapLongitude;
+  uniforms.autoWrapLongitude = autoWrapLongitude;
   uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
@@ -316,12 +315,11 @@ function calculateViewportUniforms({
     project_uDevicePixelRatio: devicePixelRatio,
 
     project_uFocalDistance: focalDistance,
-    // project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    project_uWrapLongitude: false,
+    autoWrapLongitude: false,
 
     project_uViewProjectionMatrix: viewProjectionMatrix,
     project_uModelMatrix: IDENTITY_MATRIX,
@@ -352,7 +350,6 @@ function calculateViewportUniforms({
         // @ts-expect-error _pseudoMeters only exists on WebMercatorView
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
-          uniforms.project_uCommonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
         uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
         uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
