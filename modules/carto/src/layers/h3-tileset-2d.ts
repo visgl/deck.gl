@@ -17,6 +17,8 @@ export type H3TileIndex = {i: string};
 
 const MAX_LATITUDE = 85.051128;
 
+// `polygonToCells()` fills based on hexagon center, this function will
+// pad the bounds such that all cells that overlap the bounds will be included
 function padBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
   resolution: number
@@ -68,15 +70,7 @@ function getHexagonsInBoundingBox(
     [north, west],
     [north, east]
   ];
-
-  // Add manual buffer
-
-  // `polygonToCells()` fills based on hexagon center, which means tiles vanish
-  // prematurely. Get more accurate coverage by oversampling
-  const oversample = 0;
-  const h3Indices = polygonToCells(polygon, resolution + oversample);
-
-  return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
+  return polygonToCells(polygon, resolution);
 }
 
 function tilesToBoundingBox(indices: string[]): GeoBoundingBox {
