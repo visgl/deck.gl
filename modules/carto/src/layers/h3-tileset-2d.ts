@@ -145,7 +145,7 @@ export default class H3Tileset2D extends Tileset2D {
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileMetadata({i}: H3TileIndex) {
-    return {bbox: tilesToBoundingBox(i)};
+    return {bbox: tileToBoundingBox(i)};
   }
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
