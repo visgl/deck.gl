@@ -311,17 +311,17 @@ function calculateViewportUniforms({
     pseudoMeters: Boolean(viewport._pseudoMeters),
 
     // Screen size
-    viewportSize: viewportSize,
-    devicePixelRatio: devicePixelRatio,
+    viewportSize,
+    devicePixelRatio,
 
-    focalDistance: focalDistance,
+    focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     autoWrapLongitude: false,
 
-    viewProjectionMatrix: viewProjectionMatrix,
+    viewProjectionMatrix,
     modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
