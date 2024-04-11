@@ -199,7 +199,7 @@ export type ProjectUniforms = {
 
   // Screen size
   viewportSize: [number, number];
-  project_uDevicePixelRatio: number;
+  devicePixelRatio: number;
 
   project_uFocalDistance: number;
   commonUnitsPerMeter: Vec3;
@@ -312,7 +312,7 @@ function calculateViewportUniforms({
 
     // Screen size
     viewportSize: viewportSize,
-    project_uDevicePixelRatio: devicePixelRatio,
+    devicePixelRatio: devicePixelRatio,
 
     project_uFocalDistance: focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,

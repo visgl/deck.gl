@@ -51,8 +51,8 @@ export default {
     center: 'vec4<f32>',
     modelMatrix: 'mat4x4<f32>',
     viewProjectionMatrix: 'mat4x4<f32>',
-    viewportSize: 'vec2<f32>'
-    //,  project_uDevicePixelRatio :'f32'
+    viewportSize: 'vec2<f32>',
+    devicePixelRatio: 'f32'
     //,  project_uFocalDistance    :'f32'
     //, project_uCameraPosition    :'vec3<f32>'
     //, project_uCoordinateOrigin  :'vec3<f32>'
