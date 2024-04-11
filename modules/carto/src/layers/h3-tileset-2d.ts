@@ -29,15 +29,16 @@ function padBoundingBox(
   ];
   const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
   const cornerEdgeLengths = cornerCells.map(
-    c => (edgeLength(originToDirectedEdges(c)[0], UNITS.rads) * 180) / Math.PI
+    c => Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180 / Math.PI
   );
-  const buffer = Math.max(...cornerEdgeLengths);
+  const bufferLat = Math.max(...cornerEdgeLengths);
+  const bufferLon = bufferLat / Math.cos((north + south) / 2 * Math.PI / 180);
 
   return {
-    north: Math.min(north + buffer, MAX_LATITUDE),
-    east: east + buffer,
-    south: Math.max(south - buffer, -MAX_LATITUDE),
-    west: west - buffer
+    north: Math.min(north + bufferLat, MAX_LATITUDE),
+    east: east + bufferLon,
+    south: Math.max(south - bufferLat, -MAX_LATITUDE),
+    west: west - bufferLon
   };
 }
 
@@ -61,9 +62,6 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
-  // `polygonToCells()` fills based on hexagon center, which means tiles vanish
-  // prematurely. Get more accurate coverage by oversampling
-  const oversample = 1;
   const polygon = [
     [north, east],
     [south, east],
@@ -71,8 +69,7 @@ function getHexagonsInBoundingBox(
     [north, west],
     [north, east]
   ];
-  const h3Indices = polygonToCells(polygon, resolution + oversample);
-  return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
+  return polygonToCells(polygon, resolution);
 }
 
 function tileToBoundingBox(index: string): GeoBoundingBox {
