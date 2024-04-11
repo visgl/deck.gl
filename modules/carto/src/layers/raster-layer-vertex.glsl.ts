@@ -46,8 +46,8 @@ void main(void) {
   // Important to set geometry.position before using project_ methods below
   // as geometry.worldPosition is not set (we don't know our lat/long)
   geometry.position = vec4(common_position, 0.0, 1.0);
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    geometry.position.xyz -= project_uCommonOrigin;
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+    geometry.position.xyz -= project.commonOrigin;
   }
 
   // calculate elevation, if 3d not enabled set to 0
@@ -86,7 +86,7 @@ void main(void) {
     position_commonspace = geometry.position;
     vColor = vec4(color.rgb, color.a * opacity);
 #else
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, color.a * opacity);
 #endif
   } else {

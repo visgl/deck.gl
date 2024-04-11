@@ -62,7 +62,7 @@ commonPos = geometry.position.xyz;
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
-  commonPos.z += project_uCommonOrigin.z;
+  commonPos.z += project.commonOrigin.z;
 }
 if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;

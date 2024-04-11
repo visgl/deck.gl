@@ -50,7 +50,7 @@ void main(void) {
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 
   vTexCoord = uv;
-  cameraPosition = project_uCameraPosition;
+  cameraPosition = project.cameraPosition;
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
   vec3 pos = (instanceModelMatrix * positions) * sizeScale;

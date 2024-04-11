@@ -23,7 +23,6 @@ export default `#version 300 es
 
 precision highp float;
 
-uniform vec3 project_uCameraPosition;
 uniform bool extruded;
 uniform bool isStroke;
 
@@ -39,7 +38,7 @@ void main(void) {
 #ifdef FLAT_SHADING
   if (extruded && !isStroke && !bool(picking.isActive)) {
     vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
-    fragColor.rgb = lighting_getLightColor(vColor.rgb, project_uCameraPosition, position_commonspace.xyz, normal);
+    fragColor.rgb = lighting_getLightColor(vColor.rgb, project.cameraPosition, position_commonspace.xyz, normal);
   }
 #endif
   DECKGL_FILTER_COLOR(fragColor, geometry);

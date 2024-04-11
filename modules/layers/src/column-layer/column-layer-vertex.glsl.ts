@@ -110,7 +110,7 @@ void main(void) {
     position_commonspace = geometry.position;
     vColor = vec4(color.rgb, color.a * opacity);
 #else
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, color.a * opacity);
 #endif
   } else {

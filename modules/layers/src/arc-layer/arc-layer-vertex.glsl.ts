@@ -75,7 +75,7 @@ float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
 // offset_direction is -1 (left) or 1 (right)
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
-  vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
+  vec2 dir_screenspace = normalize(line_clipspace * project.viewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
@@ -156,7 +156,7 @@ void main(void) {
   vec3 source;
   vec3 target;
 
-  if ((greatCircle || project_uProjectionMode == PROJECTION_MODE_GLOBE) && project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if ((greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
     source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
     target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
@@ -207,8 +207,8 @@ void main(void) {
     float antiMeridianX = 0.0;
 
     if (useShortestPath) {
-      if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-        antiMeridianX = -(project_uCoordinateOrigin.x + 180.) / 360. * TILE_SIZE;
+      if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+        antiMeridianX = -(project.coordinateOrigin.x + 180.) / 360. * TILE_SIZE;
       }
       float thresholdRatio = (antiMeridianX - source.x) / (target.x - source.x);
 

@@ -65,8 +65,8 @@ void main()
   vec4 glPos = project_position_to_clipspace(uPos, uPos64Low, vec3(0, 0, 0));
   outValue = glPos.xyz / glPos.w;
   outValue = vec3(
-    (1.0 + outValue.x) / 2.0 * project_uViewportSize.x,
-    (1.0 - outValue.y) / 2.0 * project_uViewportSize.y,
+    (1.0 + outValue.x) / 2.0 * project.viewportSize.x,
+    (1.0 - outValue.y) / 2.0 * project.viewportSize.y,
     outValue.z
   );
 }
