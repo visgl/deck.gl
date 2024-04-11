@@ -1,4 +1,3 @@
-import {_flatten as flatten} from '@deck.gl/core';
 import {_Tileset2D as Tileset2D, GeoBoundingBox} from '@deck.gl/geo-layers';
 import {
   polygonToCells,
@@ -7,7 +6,6 @@ import {
   cellToBoundary,
   cellToParent,
   gridDisk,
-  cellToLatLng,
   edgeLength,
   UNITS,
   originToDirectedEdges

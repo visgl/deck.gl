@@ -20,11 +20,15 @@ test('H3Tileset2D', async t => {
   t.deepEqual(
     indices,
     [
+      {i: '82742ffffffffff'},
+      {i: '8274e7fffffffff'},
       {i: '8274effffffffff'},
       {i: '827547fffffffff'},
       {i: '82754ffffffffff'},
+      {i: '827557fffffffff'},
       {i: '82755ffffffffff'},
       {i: '82756ffffffffff'},
+      {i: '82824ffffffffff'},
       {i: '82825ffffffffff'}
     ],
     'indices in viewport'
@@ -68,13 +72,13 @@ test('H3Tileset2D#tileSize', async t => {
   const indices1024 = tileset1024.getTileIndices({viewport}).sort(indicesSort);
   const indices2048 = tileset2048.getTileIndices({viewport}).sort(indicesSort);
 
-  t.equal(indices512.length, 35, 'indices.length @ 512px');
-  t.equal(indices1024.length, 8, 'indices.length @ 1024px');
-  t.equal(indices2048.length, 2, 'indices.length @ 2048px');
+  t.equal(indices512.length, 46, 'indices.length @ 512px');
+  t.equal(indices1024.length, 16, 'indices.length @ 1024px');
+  t.equal(indices2048.length, 6, 'indices.length @ 2048px');
 
-  t.deepEqual(indices512[0], {i: '8475481ffffffff'}, 'indices[0] @ 512px');
-  t.deepEqual(indices1024[0], {i: '837548fffffffff'}, 'indices[0] @ 1024px');
-  t.deepEqual(indices2048[0], {i: '82754ffffffffff'}, 'indices[0] @ 2048px');
+  t.deepEqual(indices512[0], {i: '8474ed9ffffffff'}, 'indices[0] @ 512px');
+  t.deepEqual(indices1024[0], {i: '8374ecfffffffff'}, 'indices[0] @ 1024px');
+  t.deepEqual(indices2048[0], {i: '8274effffffffff'}, 'indices[0] @ 2048px');
 
   t.equal(tileset512.getTileZoom(indices512[0]), 4, 'zoom @ 512px');
   t.equal(tileset1024.getTileZoom(indices1024[0]), 3, 'zoom @ 1024px');
@@ -124,7 +128,7 @@ test('H3Tileset2D min zoom', async t => {
   });
 
   let indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 31, 'without min zoom');
+  t.equal(indices.length, 41, 'without min zoom');
   indices = tileset.getTileIndices({viewport, minZoom: 1});
   t.equal(indices.length, 0, 'min zoom added');
   t.end();
@@ -141,7 +145,7 @@ test('H3Tileset2D max zoom', async t => {
   });
 
   let indices = tileset.getTileIndices({viewport});
-  t.equal(indices.length, 18, 'without max zoom');
+  t.equal(indices.length, 21, 'without max zoom');
   indices = tileset.getTileIndices({viewport, maxZoom: 1});
   t.equal(indices.length, 7, 'max zoom added');
   t.end();
