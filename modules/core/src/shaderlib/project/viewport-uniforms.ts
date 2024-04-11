@@ -192,7 +192,7 @@ export type ProjectUniforms = {
   projectionMode: number;
   project_uCoordinateOrigin: Vec3;
   project_uCommonOrigin: Vec3;
-  project_uCenter: Vec4;
+  center: Vec4;
   // Backward compatibility
   // TODO: remove in v9
   project_uPseudoMeters: boolean;
@@ -303,7 +303,7 @@ function calculateViewportUniforms({
     projectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
     project_uCommonOrigin: originCommon.slice(0, 3) as Vec3,
-    project_uCenter: projectionCenter,
+    center: projectionCenter,
 
     // Backward compatibility
     // TODO: remove in v9

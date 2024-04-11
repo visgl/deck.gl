@@ -47,8 +47,8 @@ export default {
     scale: 'f32',
 
     commonUnitsPerWorldUnit: 'vec3<f32>',
-    commonUnitsPerWorldUnit2: 'vec3<f32>'
-    // vec4 project_uCenter;
+    commonUnitsPerWorldUnit2: 'vec3<f32>',
+    center: 'vec4<f32>'
     // mat4 project_uModelMatrix;
     // mat4 project_uViewProjectionMatrix;
     // vec2 project_uViewportSize;

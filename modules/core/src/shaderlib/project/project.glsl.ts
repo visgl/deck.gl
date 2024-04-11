@@ -45,7 +45,7 @@ uniform project32Uniforms {
 
   vec3 commonUnitsPerWorldUnit;
   vec3 commonUnitsPerWorldUnit2;
-  // vec4 project_uCenter;
+  vec4 center;
   // mat4 project_uModelMatrix;
   // mat4 project_uViewProjectionMatrix;
   // vec2 project_uViewportSize;
@@ -58,7 +58,6 @@ uniform project32Uniforms {
 } project;
 
 
-uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
 uniform vec2 project_uViewportSize;
@@ -281,7 +280,7 @@ vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatr
 // Uses project_uViewProjectionMatrix
 //
 vec4 project_common_position_to_clipspace(vec4 position) {
-  return project_common_position_to_clipspace(position, project_uViewProjectionMatrix, project_uCenter);
+  return project_common_position_to_clipspace(position, project_uViewProjectionMatrix, project.center);
 }
 
 // Returns a clip space offset that corresponds to a given number of screen pixels
