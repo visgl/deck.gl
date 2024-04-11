@@ -75,10 +75,8 @@ function getHexagonsInBoundingBox(
   return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
 }
 
-function tilesToBoundingBox(indices: string[]): GeoBoundingBox {
-  const coordinates = indices
-    .map(index => cellToBoundary(index))
-    .reduce((accumulator, boundary, _, []) => accumulator.concat(boundary));
+function tileToBoundingBox(index: string): GeoBoundingBox {
+  const coordinates = cellToBoundary(index);
   const latitudes = coordinates.map(c => c[0]);
   const longitudes = coordinates.map(c => c[1]);
   const west = Math.min(...longitudes);
@@ -116,7 +114,6 @@ export default class H3Tileset2D extends Tileset2D {
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     if (viewport.latitude === undefined) return [];
-    // Aren't east/west the wrong way round??
     const [west, south, east, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
@@ -148,7 +145,7 @@ export default class H3Tileset2D extends Tileset2D {
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileMetadata({i}: H3TileIndex) {
-    return {bbox: tilesToBoundingBox([i])};
+    return {bbox: tilesToBoundingBox(i)};
   }
 
   // @ts-expect-error Tileset2D should be generic over TileIndex
