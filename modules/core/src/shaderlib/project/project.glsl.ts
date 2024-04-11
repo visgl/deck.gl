@@ -43,8 +43,8 @@ uniform project32Uniforms {
   int projectionMode;
   float scale;
 
-  // vec3 project_uCommonUnitsPerWorldUnit;
-  // vec3 project_uCommonUnitsPerWorldUnit2;
+  vec3 commonUnitsPerWorldUnit;
+  vec3 commonUnitsPerWorldUnit2;
   // vec4 project_uCenter;
   // mat4 project_uModelMatrix;
   // mat4 project_uViewProjectionMatrix;
@@ -58,8 +58,6 @@ uniform project32Uniforms {
 } project;
 
 
-uniform vec3 project_uCommonUnitsPerWorldUnit;
-uniform vec3 project_uCommonUnitsPerWorldUnit2;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -171,7 +169,7 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   float dy = offset.y;
-  vec3 commonUnitsPerWorldUnit = project_uCommonUnitsPerWorldUnit + project_uCommonUnitsPerWorldUnit2 * dy;
+  vec3 commonUnitsPerWorldUnit = project.commonUnitsPerWorldUnit + project.commonUnitsPerWorldUnit2 * dy;
   return vec4(offset.xyz * commonUnitsPerWorldUnit, offset.w);
 }
 

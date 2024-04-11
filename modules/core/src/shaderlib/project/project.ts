@@ -44,10 +44,10 @@ export default {
     coordinateSystem: 'i32',
     commonUnitsPerMeter: 'vec3<f32>',
     projectionMode: 'i32',
-    scale: 'f32'
+    scale: 'f32',
 
-    // vec3 project_uCommonUnitsPerWorldUnit;
-    // vec3 project_uCommonUnitsPerWorldUnit2;
+    commonUnitsPerWorldUnit: 'vec3<f32>',
+    commonUnitsPerWorldUnit2: 'vec3<f32>'
     // vec4 project_uCenter;
     // mat4 project_uModelMatrix;
     // mat4 project_uViewProjectionMatrix;

@@ -203,8 +203,8 @@ export type ProjectUniforms = {
 
   project_uFocalDistance: number;
   commonUnitsPerMeter: Vec3;
-  project_uCommonUnitsPerWorldUnit: Vec3;
-  project_uCommonUnitsPerWorldUnit2: Vec3;
+  commonUnitsPerWorldUnit: Vec3;
+  commonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
   scale: number;
   autoWrapLongitude: boolean;
@@ -316,8 +316,8 @@ function calculateViewportUniforms({
 
     project_uFocalDistance: focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
-    project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     autoWrapLongitude: false,
 
@@ -341,8 +341,8 @@ function calculateViewportUniforms({
     };
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:
-        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
-        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
         break;
 
       case COORDINATE_SYSTEM.LNGLAT:
@@ -351,18 +351,14 @@ function calculateViewportUniforms({
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
-        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
-        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
         break;
 
       // a.k.a "preprojected" positions
       case COORDINATE_SYSTEM.CARTESIAN:
-        uniforms.project_uCommonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
-        uniforms.project_uCommonUnitsPerWorldUnit2 = [
-          0,
-          0,
-          distanceScalesAtOrigin.unitsPerMeter2[2]
-        ];
+        uniforms.commonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
+        uniforms.commonUnitsPerWorldUnit2 = [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]];
         break;
 
       default:
