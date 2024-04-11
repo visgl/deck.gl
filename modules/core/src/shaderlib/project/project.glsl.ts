@@ -46,7 +46,7 @@ uniform project32Uniforms {
   vec3 commonUnitsPerWorldUnit;
   vec3 commonUnitsPerWorldUnit2;
   vec4 center;
-  // mat4 project_uModelMatrix;
+  mat4 modelMatrix;
   // mat4 project_uViewProjectionMatrix;
   // vec2 project_uViewportSize;
   // float project_uDevicePixelRatio;
@@ -58,7 +58,6 @@ uniform project32Uniforms {
 } project;
 
 
-uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
 uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
@@ -157,7 +156,7 @@ bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
 //
 vec3 project_normal(vec3 vector) {
   // Apply model matrix
-  vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
+  vec4 normal_modelspace = project.modelMatrix * vec4(vector, 0.0);
   vec3 n = normalize(normal_modelspace.xyz * project.commonUnitsPerMeter);
   mat3 rotation;
   if (project_needs_rotation(geometry.position.xyz, rotation)) {
@@ -204,7 +203,7 @@ vec3 project_globe_(vec3 lnglatz) {
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
-  vec4 position_world = project_uModelMatrix * position;
+  vec4 position_world = project.modelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
@@ -249,7 +248,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   }
 
   // Translation is already added to the high parts
-  return project_offset_(position_world) + project_offset_(project_uModelMatrix * vec4(position64Low, 0.0));
+  return project_offset_(position_world) + project_offset_(project.modelMatrix * vec4(position64Low, 0.0));
 }
 
 vec4 project_position(vec4 position) {

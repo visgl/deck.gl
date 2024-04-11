@@ -210,7 +210,7 @@ export type ProjectUniforms = {
   autoWrapLongitude: boolean;
 
   project_uViewProjectionMatrix: NumericArray;
-  project_uModelMatrix: NumericArray;
+  modelMatrix: NumericArray;
 
   // This is for lighting calculations
   project_uCameraPosition: Vec3;
@@ -257,7 +257,7 @@ export function getUniformsFromViewport({
   });
 
   uniforms.autoWrapLongitude = autoWrapLongitude;
-  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
+  uniforms.modelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
 }
@@ -322,7 +322,7 @@ function calculateViewportUniforms({
     autoWrapLongitude: false,
 
     project_uViewProjectionMatrix: viewProjectionMatrix,
-    project_uModelMatrix: IDENTITY_MATRIX,
+    modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
     project_uCameraPosition: cameraPosCommon
