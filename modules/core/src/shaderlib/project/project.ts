@@ -45,6 +45,6 @@ export default {
   },
   defaultUniforms: {
     autoWrapLongitude: false,
-    commonUnitsPerMeter: new Float32Array([0.0, 0.0, 0.00004])
+    commonUnitsPerMeter: new Float32Array([0.0, 0.0, 0.0])
   }
 } as ShaderModule<ProjectModuleSettings>;

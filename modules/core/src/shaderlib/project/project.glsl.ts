@@ -41,8 +41,6 @@ uniform project32Uniforms {
   vec3 commonUnitsPerMeter;
 } project;
 
-const vec3 commonUnitsPerMeter = vec3(0.0, 0.0, 0.0001);
-
 uniform int project_uCoordinateSystem;
 uniform int project_uProjectionMode;
 uniform float project_uScale;

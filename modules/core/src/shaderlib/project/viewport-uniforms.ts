@@ -203,6 +203,7 @@ export type ProjectUniforms = {
 
   project_uFocalDistance: number;
   project_uCommonUnitsPerMeter: Vec3;
+  commonUnitsPerMeter: Vec3;
   project_uCommonUnitsPerWorldUnit: Vec3;
   project_uCommonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
@@ -316,6 +317,7 @@ function calculateViewportUniforms({
 
     project_uFocalDistance: focalDistance,
     // project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
@@ -349,6 +351,7 @@ function calculateViewportUniforms({
       case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
         // @ts-expect-error _pseudoMeters only exists on WebMercatorView
         if (!viewport._pseudoMeters) {
+          uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
           uniforms.project_uCommonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
         uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;

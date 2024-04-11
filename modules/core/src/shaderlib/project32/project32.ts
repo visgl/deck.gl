@@ -48,6 +48,7 @@ export default {
   name: 'project32',
   dependencies: [project],
   vs,
+  getUniforms: project.getUniforms,
   uniformTypes: project.uniformTypes,
   defaultUniforms: project.defaultUniforms
 } as ShaderModule;
