@@ -15,6 +15,8 @@ import {
 
 export type H3TileIndex = {i: string};
 
+const MAX_LATITUDE = 85.051128;
+
 function padBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
   resolution: number
@@ -32,9 +34,9 @@ function padBoundingBox(
   const buffer = Math.max(...cornerEdgeLengths);
 
   return {
-    north: north + buffer,
+    north: Math.min(north + buffer, MAX_LATITUDE),
     east: east - buffer,
-    south: south - buffer,
+    south: Math.max(south - buffer, -MAX_LATITUDE),
     west: west + buffer
   };
 }
