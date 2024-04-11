@@ -198,7 +198,7 @@ export type ProjectUniforms = {
   project_uPseudoMeters: boolean;
 
   // Screen size
-  project_uViewportSize: [number, number];
+  viewportSize: [number, number];
   project_uDevicePixelRatio: number;
 
   project_uFocalDistance: number;
@@ -311,7 +311,7 @@ function calculateViewportUniforms({
     project_uPseudoMeters: Boolean(viewport._pseudoMeters),
 
     // Screen size
-    project_uViewportSize: viewportSize,
+    viewportSize: viewportSize,
     project_uDevicePixelRatio: devicePixelRatio,
 
     project_uFocalDistance: focalDistance,
