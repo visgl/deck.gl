@@ -52,13 +52,12 @@ uniform project32Uniforms {
   float devicePixelRatio;
   float focalDistance;
   vec3 cameraPosition;
-  // vec3 project_uCoordinateOrigin;
+  vec3 coordinateOrigin;
   // vec3 project_uCommonOrigin;
   // bool project_uPseudoMeters;
 } project;
 
 
-uniform vec3 project_uCoordinateOrigin;
 uniform vec3 project_uCommonOrigin;
 uniform bool project_uPseudoMeters;
 
@@ -210,7 +209,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       );
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
-      position_world.xyz += project_uCoordinateOrigin;
+      position_world.xyz += project.coordinateOrigin;
     }
   }
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
@@ -223,7 +222,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
-      if (abs(position_world.y - project_uCoordinateOrigin.y) > 0.25) {
+      if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
         return vec4(
@@ -239,7 +238,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    position_world.xyz -= project_uCoordinateOrigin;
+    position_world.xyz -= project.coordinateOrigin;
   }
 
   // Translation is already added to the high parts
