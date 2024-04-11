@@ -115,7 +115,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const {project_uCommonOrigin} = uniforms;
+      const {commonOrigin} = uniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
@@ -155,8 +155,8 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         // Convert bounds to the common space, as [minX, minY, width, height]
         terrain_bounds: bounds
           ? [
-              bounds[0] - project_uCommonOrigin[0],
-              bounds[1] - project_uCommonOrigin[1],
+              bounds[0] - commonOrigin[0],
+              bounds[1] - commonOrigin[1],
               bounds[2] - bounds[0],
               bounds[3] - bounds[1]
             ]

@@ -36,7 +36,7 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
   // This reduces the flicker present when objects are shown/hidden
   const int N = 2;
   float accumulator = 0.0;
-  vec2 step = vec2(1.0 / project_uViewportSize);
+  vec2 step = vec2(1.0 / project.viewportSize);
 
   const float floatN = float(N);
   vec2 delta = -floatN * step;

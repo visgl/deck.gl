@@ -51,7 +51,7 @@ const vs = glsl`
     }
     vec2 source_commonspace = project_position(position);
     vec2 target_commonspace = project_position(brushing_mousePos);
-    float distance = length((target_commonspace - source_commonspace) / project_uCommonUnitsPerMeter.xy);
+    float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter.xy);
 
     return distance <= brushing_radius;
   }
