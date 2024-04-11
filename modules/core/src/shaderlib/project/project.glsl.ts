@@ -53,13 +53,11 @@ uniform project32Uniforms {
   float focalDistance;
   vec3 cameraPosition;
   vec3 coordinateOrigin;
-  // vec3 project_uCommonOrigin;
-  // bool project_uPseudoMeters;
+  vec3 commonOrigin;
+  bool pseudoMeters;
 } project;
 
 
-uniform vec3 project_uCommonOrigin;
-uniform bool project_uPseudoMeters;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -77,7 +75,7 @@ float project_size_at_latitude(float lat) {
 float project_size() {
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
     project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
-    project_uPseudoMeters == false) {
+    project.pseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
     // Adjust by 1 / cos(latitude)
@@ -226,7 +224,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
         return vec4(
-          project_mercator_(position_world.xy) - project_uCommonOrigin.xy,
+          project_mercator_(position_world.xy) - project.commonOrigin.xy,
           project_size(position_world.z),
           position_world.w
         );

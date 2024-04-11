@@ -55,8 +55,8 @@ export default {
     devicePixelRatio: 'f32',
     focalDistance: 'f32',
     cameraPosition: 'vec3<f32>',
-    coordinateOrigin: 'vec3<f32>'
-    //, project_uCommonOrigin      :'vec3<f32>'
-    //, project_uPseudoMeters      :'f32'
+    coordinateOrigin: 'vec3<f32>',
+    commonOrigin: 'vec3<f32>',
+    pseudoMeters: 'f32'
   }
 } as ShaderModule<ProjectModuleSettings>;

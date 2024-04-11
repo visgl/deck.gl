@@ -191,11 +191,11 @@ export type ProjectUniforms = {
   coordinateSystem: number;
   projectionMode: number;
   coordinateOrigin: Vec3;
-  project_uCommonOrigin: Vec3;
+  commonOrigin: Vec3;
   center: Vec4;
   // Backward compatibility
   // TODO: remove in v9
-  project_uPseudoMeters: boolean;
+  pseudoMeters: boolean;
 
   // Screen size
   viewportSize: [number, number];
@@ -302,13 +302,13 @@ function calculateViewportUniforms({
     coordinateSystem,
     projectionMode: viewport.projectionMode,
     coordinateOrigin: shaderCoordinateOrigin,
-    project_uCommonOrigin: originCommon.slice(0, 3) as Vec3,
+    commonOrigin: originCommon.slice(0, 3) as Vec3,
     center: projectionCenter,
 
     // Backward compatibility
     // TODO: remove in v9
     // @ts-expect-error _pseudoMeters is only defined on WebMercator viewport
-    project_uPseudoMeters: Boolean(viewport._pseudoMeters),
+    pseudoMeters: Boolean(viewport._pseudoMeters),
 
     // Screen size
     viewportSize: viewportSize,
