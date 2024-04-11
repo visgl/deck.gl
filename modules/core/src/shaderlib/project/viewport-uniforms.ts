@@ -189,7 +189,7 @@ function calculateMatrixAndOffset(
 
 export type ProjectUniforms = {
   coordinateSystem: number;
-  project_uProjectionMode: number;
+  projectionMode: number;
   project_uCoordinateOrigin: Vec3;
   project_uCommonOrigin: Vec3;
   project_uCenter: Vec4;
@@ -300,7 +300,7 @@ function calculateViewportUniforms({
   const uniforms: ProjectUniforms = {
     // Projection mode values
     coordinateSystem,
-    project_uProjectionMode: viewport.projectionMode,
+    projectionMode: viewport.projectionMode,
     project_uCoordinateOrigin: shaderCoordinateOrigin,
     project_uCommonOrigin: originCommon.slice(0, 3) as Vec3,
     project_uCenter: projectionCenter,

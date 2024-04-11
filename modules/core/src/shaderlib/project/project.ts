@@ -42,6 +42,21 @@ export default {
   uniformTypes: {
     autoWrapLongitude: 'f32',
     coordinateSystem: 'i32',
-    commonUnitsPerMeter: 'vec3<f32>'
+    commonUnitsPerMeter: 'vec3<f32>',
+    projectionMode: 'i32'
+    // float project_uScale;
+
+    // vec3 project_uCommonUnitsPerWorldUnit;
+    // vec3 project_uCommonUnitsPerWorldUnit2;
+    // vec4 project_uCenter;
+    // mat4 project_uModelMatrix;
+    // mat4 project_uViewProjectionMatrix;
+    // vec2 project_uViewportSize;
+    // float project_uDevicePixelRatio;
+    // float project_uFocalDistance;
+    // vec3 project_uCameraPosition;
+    // vec3 project_uCoordinateOrigin;
+    // vec3 project_uCommonOrigin;
+    // bool project_uPseudoMeters;
   }
 } as ShaderModule<ProjectModuleSettings>;

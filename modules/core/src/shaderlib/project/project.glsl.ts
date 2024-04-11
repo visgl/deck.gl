@@ -40,9 +40,23 @@ uniform project32Uniforms {
   bool autoWrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;
+  int projectionMode;
+  // float project_uScale;
+
+  // vec3 project_uCommonUnitsPerWorldUnit;
+  // vec3 project_uCommonUnitsPerWorldUnit2;
+  // vec4 project_uCenter;
+  // mat4 project_uModelMatrix;
+  // mat4 project_uViewProjectionMatrix;
+  // vec2 project_uViewportSize;
+  // float project_uDevicePixelRatio;
+  // float project_uFocalDistance;
+  // vec3 project_uCameraPosition;
+  // vec3 project_uCoordinateOrigin;
+  // vec3 project_uCommonOrigin;
+  // bool project_uPseudoMeters;
 } project;
 
-uniform int project_uProjectionMode;
 uniform float project_uScale;
 
 uniform vec3 project_uCommonUnitsPerWorldUnit;
@@ -72,7 +86,7 @@ float project_size_at_latitude(float lat) {
 }
 
 float project_size() {
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR &&
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
     project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
     project_uPseudoMeters == false) {
 
@@ -134,7 +148,7 @@ mat3 project_get_orientation_matrix(vec3 up) {
 }
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     transform = project_get_orientation_matrix(commonPosition);
     return true;
   }
@@ -191,13 +205,13 @@ vec3 project_globe_(vec3 lnglatz) {
 }
 
 //
-// Projects positions (defined by project.coordinateSystem) to common space (defined by project_uProjectionMode)
+// Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project_uModelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR) {
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_mercator_(position_world.xy),
@@ -209,7 +223,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       position_world.xyz += project_uCoordinateOrigin;
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_GLOBE) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_globe_(position_world.xyz),
@@ -217,7 +231,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       );
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       if (abs(position_world.y - project_uCoordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
@@ -230,8 +244,8 @@ vec4 project_position(vec4 position, vec3 position64Low) {
       }
     }
   }
-  if (project_uProjectionMode == PROJECTION_MODE_IDENTITY ||
-    (project_uProjectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
+  if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+    (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
