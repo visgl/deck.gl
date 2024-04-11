@@ -201,7 +201,7 @@ export type ProjectUniforms = {
   viewportSize: [number, number];
   devicePixelRatio: number;
 
-  project_uFocalDistance: number;
+  focalDistance: number;
   commonUnitsPerMeter: Vec3;
   commonUnitsPerWorldUnit: Vec3;
   commonUnitsPerWorldUnit2: Vec3;
@@ -213,7 +213,7 @@ export type ProjectUniforms = {
   modelMatrix: NumericArray;
 
   // This is for lighting calculations
-  project_uCameraPosition: Vec3;
+  cameraPosition: Vec3;
 };
 
 export type ProjectModuleSettings = {
@@ -314,7 +314,7 @@ function calculateViewportUniforms({
     viewportSize: viewportSize,
     devicePixelRatio: devicePixelRatio,
 
-    project_uFocalDistance: focalDistance,
+    focalDistance: focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
@@ -325,7 +325,7 @@ function calculateViewportUniforms({
     modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
-    project_uCameraPosition: cameraPosCommon
+    cameraPosition: cameraPosCommon
   };
 
   if (geospatialOrigin) {
