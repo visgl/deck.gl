@@ -97,8 +97,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     }
     this.state.model.setUniforms({
       // Needed for PBR (TODO: find better way to get it)
-      // eslint-disable-next-line camelcase
-      u_Camera: this.state.model.uniforms.project_uCameraPosition,
+      u_Camera: this.state.model.uniforms.cameraPosition,
       pickFeatureIds: Boolean(featureIds)
     });
 
