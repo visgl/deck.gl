@@ -63,6 +63,9 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
+  // `polygonToCells()` fills based on hexagon center, which means tiles vanish
+  // prematurely. Get more accurate coverage by oversampling
+  const oversample = 1;
   const polygon = [
     [north, east],
     [south, east],
@@ -70,7 +73,8 @@ function getHexagonsInBoundingBox(
     [north, west],
     [north, east]
   ];
-  return polygonToCells(polygon, resolution);
+  const h3Indices = polygonToCells(polygon, resolution + oversample);
+  return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
 }
 
 function tilesToBoundingBox(indices: string[]): GeoBoundingBox {
