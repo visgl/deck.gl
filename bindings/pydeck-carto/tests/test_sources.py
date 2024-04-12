@@ -23,7 +23,7 @@ def test_vector_table_source():
     }
 
 
-def vector_query_source():
+def test_vector_query_source():
     assert vector_query_source(
         sql_query="select * from project.database.table",
         spatial_data_column="geom",
