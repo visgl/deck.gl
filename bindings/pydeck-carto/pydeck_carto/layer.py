@@ -1,7 +1,7 @@
 import pydeck as pdk
 
 H3_VERSION = "~4.1.*"
-DECKGL_VERSION = "~9.0.0-beta.*"
+DECKGL_VERSION = "~9.0.*"
 
 LIBRARIES_TO_INCLUDE = [
     f"npm/h3-js@{H3_VERSION}/dist/h3-js.umd.js",
