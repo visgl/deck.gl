@@ -32,7 +32,7 @@ function padBoundingBox(
     c => (Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180) / Math.PI
   );
   const bufferLat = Math.max(...cornerEdgeLengths);
-  const bufferLon = bufferLat / Math.cos((((north + south) / 2) * Math.PI) / 180);
+  const bufferLon = Math.min(180, bufferLat / Math.cos((((north + south) / 2) * Math.PI) / 180));
 
   return {
     north: Math.min(north + bufferLat, MAX_LATITUDE),
