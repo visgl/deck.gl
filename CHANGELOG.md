@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.7] - Apr 11 2024
+
+- CARTO: added the deckGl version to the map instantiation request (#8783)
+- Bump to loaders@4.2 (#8771)
+- fix(core): Deck.finalize removes externally created canvas (#8773)
+- Only add necessary attributes in DataFilterExtension (#8769)
+- chore(react,test-utils): Remove unused 'typed' entry from package.json#files (#8770)
+
 #### deck.gl [9.0.6] - Apr 7 2024
 
 - fix(extensions): picking over draped terrain (#8761)
