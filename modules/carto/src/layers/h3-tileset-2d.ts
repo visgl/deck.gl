@@ -29,10 +29,10 @@ function padBoundingBox(
   ];
   const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
   const cornerEdgeLengths = cornerCells.map(
-    c => Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180 / Math.PI
+    c => (Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180) / Math.PI
   );
   const bufferLat = Math.max(...cornerEdgeLengths);
-  const bufferLon = bufferLat / Math.cos((north + south) / 2 * Math.PI / 180);
+  const bufferLon = bufferLat / Math.cos((((north + south) / 2) * Math.PI) / 180);
 
   return {
     north: Math.min(north + bufferLat, MAX_LATITUDE),
