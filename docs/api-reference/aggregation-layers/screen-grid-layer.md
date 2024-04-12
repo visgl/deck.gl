@@ -15,7 +15,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {ScreenGridLayer} from '@deck.gl/geo-layers';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 const layer = new ScreenGridLayer({
   id: 'ScreenGridLayer',
@@ -51,7 +51,7 @@ new Deck({
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {ScreenGridLayer} from '@deck.gl/geo-layers';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;
@@ -94,7 +94,7 @@ new Deck({
 ```tsx
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {ScreenGridLayer} from '@deck.gl/geo-layers';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;
