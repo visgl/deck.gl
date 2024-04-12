@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {GL} from '@luma.gl/constants';
 import {GridCellLayer} from '@deck.gl/layers';
 import {Accessor, AccessorFunction, Color, Position, Material, DefaultProps} from '@deck.gl/core';
 
@@ -261,7 +260,7 @@ export default class CPUGridLayer<
     };
     const attributeManager = this.getAttributeManager()!;
     attributeManager.add({
-      positions: {size: 3, type: GL.DOUBLE, accessor: 'getPosition'}
+      positions: {size: 3, type: 'float64', accessor: 'getPosition'}
     });
     // color and elevation attributes can't be added as attributes
     // they are calcualted using 'getValue' accessor that takes an array of pints.

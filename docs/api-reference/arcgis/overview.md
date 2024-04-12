@@ -15,9 +15,9 @@ that acts as an interface between deck.gl and ArcGIS.
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/arcgis@^1.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">

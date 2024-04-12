@@ -21,6 +21,76 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.0 Prereleases
 
+#### deck.gl [9.0.0-beta.10] - Mar 20 2024
+
+- Add Zoom and Compass widgets (#8072)
+- fix(extensions): Use lodMaxClamp to disable m ips (#8677)
+- chore(*): Use stable '@loaders.gl/*' (#8679)
+- View and view state types improvements (#8663)
+- Fix PostProcessEffect render to framebuffer (#8661)
+- Fix IconManager upsizing auto-packed icon atlas (#8673)
+- feat(carto): Export types for generic source options (#8651)
+- chore: Bump luma to 9.0.4 (#8676)
+- Fix SolidPolygonLayer lighting (#8669)
+- Fix FillStyleExtension artifact (#8668)
+- Support loaders.gl v4 Table object (#8664)
+- fix(core): support view.clear (#8665)
+- Clean up dev dependencies (#8653)
+- Remove terrainModule from ShaderAssembler on cleanup (#8666)
+- Chore: Bump luma to 9.0.3 (#8659)
+- feat(carto): Cache pending requests (#8648)
+- Implement panning in FirstPersonController (#8166)
+- feat(geo-layers): add TileLayerPickingInfo type (#8645)
+- fix(react): move types to devDependencies (#8644)
+- Fix attribute transition (#8643)
+
+#### deck.gl [9.0.0-beta.9] - Mar 13 2024
+
+- Mask Extension: Handle case when no viewport exists (#8627)
+- Clamp Uint8Arrays in typedArrayFromDataType (#8631)
+- Type improvements (#8628)
+- chore: Upgrade to luma.gl@^9.0.0 (#8642)
+- feat(carto): Sort params in request cache key (#8638)
+- PointCloudLayer colors attribute type use 'unorm8' (#8633)
+- feat(geo-layers): Add .debounceTime option to Tileset2D, TileLayer (#8589)
+- feat(carto): Add 'tileResolution' and 'blockSize' (#8502)
+- feat(layers): specify feature properties type for GeoJsonLayer (#8623)
+- carto: columns support cleanup (#8413)
+- fix(arcgis) reenable build (#8622)
+
+#### deck.gl [9.0.0-beta.8] - Mar 11 2024
+
+- TerrainExtension: bind texture rather than FBO (#8611)
+- Remove dev dependency on react-map-gl v5 (#8618)
+- chore: Bump luma to beta.10 (#8610)
+- fix(arcgis): DeckGL rendering integration (#8545)
+- chore: bump probe.gl (#8617)
+- prevent js files in venv from being identified as part of deckgl module (#8609)
+- chore(deps): Update to loaders.gl v4.2.0-alpha.5 (#8604)
+- fix(core) warn and error when WebGL1 detected (#8548)
+- ignore bindings directory when running linter (#8598)
+- Correct operator precedence for clearColor in LayersPass (#8599)
+
+#### deck.gl [9.0.0-beta.7] - Mar 7 2024
+
+- chore: bump luma 9.0.0 beta.8 (#8586)
+- Audit module dependencies (#8573)
+- remove(mapbox) public MapboxLayer api (#8585)
+- Avoid creating empty buffer for attributes (#8576)
+
+#### deck.gl [9.0.0-beta.6] - Mar 5 2024
+
+- CARTO: Respect clientId property (#8581)
+- Change Attribute.type to VertexType from WebGL constants (#8572)
+- Cherry pick luma global exports in core bundle (#8574)
+- chore: Bump luma to 9.0.0-beta.6 (#8567)
+- CARTO: Mark filters parameter as optional (#8566)
+- fix(widgets): publish stylesheet (#8571)
+- chore(build): restore inline-webgl-constants transform (#8563)
+- Respect `DataT` on `TripsLayer` props (#8533)
+- chore(build): remove glsl comments (#8531)
+- fix(core): LayersPass#render should clear canvas by default (#8543)
+
 #### deck.gl [9.0.0-beta.5] - Feb 27 2024
 
 - Provide defaultOptions for DataFilterExtension (#8540)

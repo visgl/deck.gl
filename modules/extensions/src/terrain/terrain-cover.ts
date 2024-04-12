@@ -174,7 +174,8 @@ export class TerrainCover {
     }
     if (!this.pickingFbo) {
       this.pickingFbo = createRenderTarget(this.targetLayer.context.device, {
-        id: `${this.id}-picking`
+        id: `${this.id}-picking`,
+        interpolate: false
       });
     }
     return this.pickingFbo;

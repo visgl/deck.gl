@@ -64,7 +64,7 @@ new deck.carto.RasterTileLayer({});
 Inherits all properties from [`ColumnLayer`](../layers/column-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
 
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 

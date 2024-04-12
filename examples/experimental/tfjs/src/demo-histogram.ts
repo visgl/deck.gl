@@ -1,3 +1,4 @@
+/* global document,window */
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {HistogramLayer} from './layers/histogram-layer';
 

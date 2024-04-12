@@ -17,8 +17,8 @@ new PostProcessEffect(shaderModule, props);
 ```
 
 Parameters:
-* `shaderModule`(Object) - a shader module wraps a screen space effect. For supported effects see [luma.gl shader modules](https://github.com/visgl/luma.gl/tree/8.0-release/modules/shadertools/src/modules).
-* `props`(Object) - parameters to replace the default values in shader module.
+* `shaderModule`(object) - a shader module wraps a screen space effect. For supported effects see [luma.gl shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing).
+* `props`(object) - parameters to replace the default values in shader module.
 
 ## Example
 

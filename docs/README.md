@@ -2,39 +2,18 @@
 
 <p align="center">
   These docs are for
-  <a href="https://github.com/visgl/deck.gl/blob/8.8-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.8-brightgreen.svg?style=flat-square" />
+  <a href="https://github.com/visgl/deck.gl/blob/9.0-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v9.0-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
-  <a href="https://github.com/visgl/deck.gl/blob/8.7-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.7-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.6-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.6-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.5-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.5-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.4-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.4-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.3-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.2-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.1-brightgreen.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/visgl/deck.gl/blob/8.0-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v8.0-green.svg?style=flat-square" />
+  <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v8.x-brightgreen.svg?style=flat-square" />
   </a>
   <a href="https://github.com/visgl/deck.gl/blob/7.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v7.3-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v7.x-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/visgl/deck.gl/blob/6.4-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v6.4-green.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/deck.gl-v6.x-green.svg?style=flat-square" />
   </a>
 </p>
 
@@ -104,7 +83,7 @@ deck.gl is developed in parallel with a number of companion modules, including:
 
 * [luma.gl](https://luma.gl/) - A general purpose WebGL2/WebGPU library designed to be interoperable both with the raw browser APIs and (as far as possible) with other WebGL2/WebGPU libraries. In particular, luma.gl does not claim ownership of the WebGL2/WebGPU context, and can work with any supplied context, including contexts created by the application or other libraries.
 * [loaders.gl](https://loaders.gl) - a suite of framework-independent loaders for file formats focused on visualization of big data, including point clouds, 3D geometries, images, geospatial formats as well as tabular data.
-* [react-map-gl](https://visgl.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
+* [react-map-gl](https://visgl.github.io/react-map-gl/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl. There are two integration modes to choose from depending on which features you need, see [Using With Mapbox](./developer-guide/base-maps/using-with-mapbox.md#react-map-gl) for details.
 * [nebula.gl](https://nebula.gl/) - A high-performance feature editing framework for deck.gl.
 
 

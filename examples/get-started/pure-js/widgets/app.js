@@ -1,10 +1,17 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {FullscreenWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
+import {
+  CompassWidget,
+  ZoomWidget,
+  FullscreenWidget,
+  DarkGlassTheme,
+  LightGlassTheme
+} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme
+/* global window */
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const widgetTheme = prefersDarkScheme.matches ? DarkGlassTheme : LightGlassTheme;
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -64,8 +71,8 @@ new Deck({
     })
   ],
   widgets: [
-    new FullscreenWidget({}),
-    new FullscreenWidget({id: 'themed', style: widgetTheme}), 
-    new FullscreenWidget({id: 'purple', className: 'purple'})
+    new ZoomWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme}),
+    new FullscreenWidget({style: widgetTheme})
   ]
 });

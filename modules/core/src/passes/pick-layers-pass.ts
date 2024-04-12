@@ -1,14 +1,17 @@
 import LayersPass, {LayersPassRenderOptions, RenderStats, Rect} from './layers-pass';
-import type {Framebuffer} from '@luma.gl/core';
-import {GL, GLParameters} from '@luma.gl/constants';
+import type {Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import log from '../utils/log';
 
 import type Viewport from '../viewports/viewport';
 import type Layer from '../lib/layer';
 
-const PICKING_PARAMETERS: GLParameters = {
-  blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
-  blendEquation: GL.FUNC_ADD
+const PICKING_BLENDING: RenderPipelineParameters = {
+  blendColorOperation: 'add',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'zero',
+  blendAlphaOperation: 'add',
+  blendAlphaSrcFactor: 'constant-alpha',
+  blendAlphaDstFactor: 'zero'
 };
 
 type PickLayersPassRenderOptions = LayersPassRenderOptions & {
@@ -69,43 +72,29 @@ export default class PickLayersPass extends LayersPass {
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
+    const scissorRect = [x, y, width, height];
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
     // Note that the callback here is called synchronously.
     // Set blend mode for picking
     // always overwrite existing pixel with [r,g,b,layerIndex]
-    const renderStatus = this.device.withParametersWebGL(
-      {
-        scissorTest: true,
-        scissor: [x, y, width, height],
-        // When used as Mapbox custom layer, the context state may be dirty
-        // TODO - Remove when mapbox fixes this issue
-        // https://github.com/mapbox/mapbox-gl-js/issues/7801
-        depthMask: true,
-        depthTest: true,
-        depthRange: [0, 1],
-        colorMask: [true, true, true, true],
-        // Blending
-        ...PICKING_PARAMETERS,
-        blend: !pickZ
-      },
-      () =>
-        super.render({
-          target: pickingFBO,
-          layers,
-          layerFilter,
-          views,
-          viewports,
-          onViewportActive,
-          cullRect,
-          effects: effects?.filter(e => e.useInPicking),
-          pass,
-          isPicking: true,
-          moduleParameters,
-          clearColor: [0, 0, 0, 0]
-        })
-    );
+    const renderStatus = super.render({
+      target: pickingFBO,
+      layers,
+      layerFilter,
+      views,
+      viewports,
+      onViewportActive,
+      cullRect,
+      effects: effects?.filter(e => e.useInPicking),
+      pass,
+      isPicking: true,
+      moduleParameters,
+      clearColor: [0, 0, 0, 0],
+      colorMask: 0xf,
+      scissorRect
+    });
 
     // Clear the temp field
     this._colorEncoderState = null;
@@ -135,18 +124,23 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    const pickParameters = {...layer.props.parameters};
+    const pickParameters: any = {
+      // TODO - When used as a custom layer in older Mapbox versions, context
+      // state was dirty. Mapbox fixed that; we should test and remove the workaround.
+      // https://github.com/mapbox/mapbox-gl-js/issues/7801
+      depthMask: true,
+      depthTest: true,
+      depthRange: [0, 1],
+      ...layer.props.parameters
+    };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState) {
+    if (!this._colorEncoderState || operation.includes('terrain')) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
-      Object.assign(pickParameters, PICKING_PARAMETERS);
+      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
-    }
-    if (operation.includes('terrain')) {
-      pickParameters.blend = false;
     }
 
     return pickParameters;

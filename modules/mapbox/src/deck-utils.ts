@@ -114,7 +114,7 @@ export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
 export function getInterleavedProps(currProps: DeckProps) {
   const nextProps: DeckProps = {
     ...currProps,
-    // TODO: import these defaults from a single source of truth
+    // TODO: remove with withParametersWebGL
     parameters: {
       depthMask: true,
       depthTest: true,
@@ -124,7 +124,8 @@ export function getInterleavedProps(currProps: DeckProps) {
       depthFunc: GL.LEQUAL,
       blendEquation: GL.FUNC_ADD,
       ...currProps.parameters
-    },
+    } as any,
+    // @ts-ignore views prop is hidden by the types because it is not expected to work the same way as in standalone Deck, see documentation
     views: currProps.views || [new MapView({id: 'mapbox'})]
   };
 

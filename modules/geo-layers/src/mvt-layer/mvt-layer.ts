@@ -18,12 +18,12 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature} from 'geojson';
+import type {Feature, Geometry} from 'geojson';
 
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
 
-import TileLayer, {TiledPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
+import TileLayer, {TileLayerPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
 import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
 import {
@@ -62,13 +62,20 @@ export type TileJson = {
 
 type ParsedMvtTile = Feature[] | BinaryFeatureCollection;
 
+export type MVTLayerPickingInfo<FeaturePropertiesT = {}> = TileLayerPickingInfo<
+  ParsedMvtTile,
+  PickingInfo<Feature<Geometry, FeaturePropertiesT>>
+>;
+
 /** All props supported by the MVTLayer */
-export type MVTLayerProps = _MVTLayerProps &
-  Omit<GeoJsonLayerProps, 'data'> &
+export type MVTLayerProps<FeaturePropertiesT = unknown> = _MVTLayerProps<FeaturePropertiesT> &
   Omit<TileLayerProps<ParsedMvtTile>, 'data'>;
 
 /** Props added by the MVTLayer  */
-export type _MVTLayerProps = {
+export type _MVTLayerProps<FeaturePropertiesT> = Omit<
+  GeoJsonLayerProps<FeaturePropertiesT>,
+  'data'
+> & {
   data: TileJson | URLTemplate;
 
   /** Called if `data` is a TileJSON URL when it is successfully fetched. */
@@ -98,10 +105,10 @@ export type _MVTLayerProps = {
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
-export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
-  ParsedMvtTile,
-  Required<_MVTLayerProps> & ExtraProps
-> {
+export default class MVTLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends TileLayer<ParsedMvtTile, Required<_MVTLayerProps<FeaturePropertiesT>> & ExtraProps> {
   static layerName = 'MVTLayer';
   static defaultProps = defaultProps;
 
@@ -113,12 +120,6 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     hoveredFeatureId: number | string | null;
     hoveredFeatureLayerName: string | null;
   };
-
-  constructor(...propObjects: MVTLayerProps[]) {
-    // Force externally visible props type, as it is not possible modify via extension
-    // @ts-ignore
-    super(...propObjects);
-  }
 
   initializeState(): void {
     super.initializeState();
@@ -302,7 +303,7 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     }
   }
 
-  getPickingInfo(params: GetPickingInfoParams): TiledPickingInfo {
+  getPickingInfo(params: GetPickingInfoParams): MVTLayerPickingInfo<FeaturePropertiesT> {
     const info = super.getPickingInfo(params);
 
     const isWGS84 = Boolean(this.context.viewport.resolution);

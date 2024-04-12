@@ -11,12 +11,6 @@ test('DataFilterExtension#constructor', t => {
   t.is(extension.opts.filterSize, 3, 'Extension has filterSize');
   t.ok(extension.opts.fp64, 'fp64 is enabled');
 
-  t.throws(
-    () => new DataFilterExtension({filterSize: 5}),
-    /filterSize/,
-    'should throw on invalid filterSize'
-  );
-
   t.end();
 });
 
@@ -34,11 +28,19 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension()]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.is(uniforms.filter_min, 80, 'has correct uniforms');
         t.is(uniforms.filter_softMax, 160, 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, false, 'has correct uniforms');
         t.is(uniforms.filter_enabled, true, 'has correct uniforms');
+
+        const attributes = layer.getAttributeManager().getAttributes();
+        t.deepEqual(
+          attributes.filterValues.value,
+          [120, 140, 0, 0, 0, 0],
+          'filterValues attribute is populated'
+        );
+        t.notOk(attributes.filterCategoryValues, 'filterCategoryValues attribute is not populated');
       }
     },
     {
@@ -57,7 +59,7 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension({filterSize: 2})]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(uniforms.filter_min, [10000, 0], 'has correct uniforms');
         t.deepEqual(uniforms.filter_softMax, [18000, 8000], 'has correct uniforms');
         t.is(uniforms.filter_useSoftMargin, true, 'has correct uniforms');
@@ -69,7 +71,7 @@ test('DataFilterExtension', t => {
         extensions: [new DataFilterExtension({filterSize: 2, fp64: true})]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(uniforms.filter_min64High, [10000, 0], 'has double uniforms');
         t.deepEqual(uniforms.filter_max64High, [20000, 100000], 'has double uniforms');
         t.deepEqual(uniforms.filter_min, [0, 0], 'has correct uniforms');
@@ -92,18 +94,26 @@ test('DataFilterExtension#categories', t => {
     {
       props: {
         data,
-        extensions: [new DataFilterExtension({categorySize: 2})],
+        extensions: [new DataFilterExtension({categorySize: 2, filterSize: 0})],
         getPosition: d => d.position,
         getFilterCategory: d => [d.field1, d.field2],
         filterCategories: [['a'], [8]]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
           [2 ** 0, 0, 2 ** 1, 0],
           'has correct uniforms'
         );
+
+        const attributes = layer.getAttributeManager().getAttributes();
+        t.deepEqual(
+          attributes.filterCategoryValues.value,
+          [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+          'filterCategoryValues attribute is populated'
+        );
+        t.notOk(attributes.filterValues, 'filterValues attribute is not populated');
       }
     },
     {
@@ -111,7 +121,7 @@ test('DataFilterExtension#categories', t => {
         filterCategories: [['b', 'c'], []]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
           [2 ** 1 + 2 ** 2, 0, 0, 0],
@@ -125,7 +135,7 @@ test('DataFilterExtension#categories', t => {
         filterCategories: [['d'], [5]]
       },
       onAfterUpdate: ({layer}) => {
-        const {uniforms} = layer.state.model.program;
+        const {uniforms} = layer.state.model;
         t.deepEqual(
           uniforms.filter_categoryBitMask,
           [2 ** 2, 0, 2 ** 2, 0],
@@ -143,7 +153,6 @@ test('DataFilterExtension#categories', t => {
 test('DataFilterExtension#countItems', t => {
   let cbCalled = 0;
 
-  // TODO - counter does not seem to work in headless-gl
   const testCases = [
     {
       props: {

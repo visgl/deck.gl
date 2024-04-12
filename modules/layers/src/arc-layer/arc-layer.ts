@@ -36,7 +36,6 @@ import {
 
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
@@ -180,30 +179,28 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getTargetPosition'
       },
       instanceSourceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
         defaultValue: DEFAULT_COLOR
@@ -234,7 +231,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     super.updateState(opts);
     const {props, oldProps, changeFlags} = opts;
     // Re-generate model if geometry changed
-    if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+    if (changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();

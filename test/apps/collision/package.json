@@ -9,7 +9,8 @@
   "dependencies": {
     "deck.gl": "^8.6.0-alpha.0",
     "react": "^16.3.0",
-    "react-dom": "^16.3.0"
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^7.1.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

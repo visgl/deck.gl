@@ -7,7 +7,7 @@ import type {PickingInfo} from '../lib/picking/pick-info';
 import type {MjolnirEvent} from 'mjolnir.js';
 
 import type {Texture, TextureProps} from '@luma.gl/core';
-import type {Buffer} from '@luma.gl/core';
+import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 
@@ -83,12 +83,14 @@ export type TextureSource =
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
  * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
  * * `string` - a URL to load data from
+ * * `null` - empty data
  */
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | AsyncIterable<DataType[]>
-  | Promise<LayerData<DataType>>;
+  | Promise<LayerData<DataType>>
+  | null;
 
 /**
  * Base Layer prop types
@@ -183,7 +185,7 @@ export type LayerProps = {
   /**
    * Override the WebGL parameters used to draw this layer. See https://luma.gl/modules/gltools/docs/api-reference/parameter-setting#parameters
    */
-  parameters?: any;
+  parameters?: Parameters;
   /**
    * Create smooth transitions when prop values update.
    */

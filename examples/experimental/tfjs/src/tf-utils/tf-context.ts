@@ -1,25 +1,25 @@
 import {pushContextState, popContextState, getParameters, setParameters} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';
 import * as tfgl from '@tensorflow/tfjs-backend-webgl';
-import GL from '@luma.gl/constants';
+import {GL} from '@luma.gl/constants';
 
 /** Helper class for sharing WebGL context between Deck and tfjs */
 export class CustomTFContext {
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   ctx: tfgl.GPGPUContext;
   lastContextState: any;
 
   static lastContext: CustomTFContext = null;
-  static contexts = new Map<WebGLRenderingContext, CustomTFContext>();
+  static contexts = new Map<WebGL2RenderingContext, CustomTFContext>();
 
-  static getDefaultContext(gl: WebGLRenderingContext) {
+  static getDefaultContext(gl: WebGL2RenderingContext) {
     if (!this.contexts.has(gl)) {
       this.contexts.set(gl, new CustomTFContext(gl));
     }
     return this.contexts.get(gl);
   }
 
-  constructor(gl: WebGLRenderingContext) {
+  constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
     this.ctx = new tfgl.GPGPUContext(gl);
   }
@@ -42,9 +42,7 @@ export class CustomTFContext {
 
     if (this.lastContextState) {
       setParameters(gl, this.lastContextState);
-      (gl as WebGL2RenderingContext).bindVertexArray(
-        this.lastContextState[GL.VERTEX_ARRAY_BINDING]
-      );
+      gl.bindVertexArray(this.lastContextState[GL.VERTEX_ARRAY_BINDING]);
       gl.bindBuffer(
         GL.ELEMENT_ARRAY_BUFFER,
         this.lastContextState[GL.ELEMENT_ARRAY_BUFFER_BINDING]

@@ -18,15 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import * as React from 'react';
-import {
-  createElement,
-  useRef,
-  useState,
-  useMemo,
-  useEffect,
-  useImperativeHandle,
-  forwardRef
-} from 'react';
+import {createElement, useRef, useState, useMemo, useEffect, useImperativeHandle} from 'react';
 import {Deck} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
@@ -35,11 +27,13 @@ import positionChildrenUnderViews from './utils/position-children-under-views';
 import extractStyles from './utils/extract-styles';
 
 import type {DeckGLContextValue} from './utils/position-children-under-views';
-import type {DeckProps, Viewport} from '@deck.gl/core';
+import type {DeckProps, View, Viewport} from '@deck.gl/core';
+
+export type ViewOrViews = View | View[] | null;
 
 /* eslint-disable max-statements, accessor-pairs */
-type DeckInstanceRef = {
-  deck?: Deck;
+type DeckInstanceRef<ViewsT extends ViewOrViews> = {
+  deck?: Deck<ViewsT>;
   redrawReason?: string | null;
   lastRenderedViewports?: Viewport[];
   viewStateUpdateRequested?: any;
@@ -51,25 +45,28 @@ type DeckInstanceRef = {
 
 // Remove prop types in the base Deck class that support externally supplied canvas/WebGLContext
 /** DeckGL React component props */
-export type DeckGLProps = Omit<
-  DeckProps,
+export type DeckGLProps<ViewsT extends ViewOrViews = null> = Omit<
+  DeckProps<ViewsT>,
   'width' | 'height' | 'gl' | 'parent' | 'canvas' | '_customRender'
 > & {
   Deck?: typeof Deck;
   width?: string | number;
   height?: string | number;
   children?: React.ReactNode | DeckGLRenderCallback;
+  ref?: React.Ref<DeckGLRef<ViewsT>>;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
 };
 
-export type DeckGLRef = {
-  deck?: Deck;
+export type DeckGLRef<ViewsT extends ViewOrViews = null> = {
+  deck?: Deck<ViewsT>;
   pickObject: Deck['pickObject'];
   pickObjects: Deck['pickObjects'];
   pickMultipleObjects: Deck['pickMultipleObjects'];
 };
 
-function getRefHandles(thisRef: DeckInstanceRef): DeckGLRef {
+function getRefHandles<ViewsT extends ViewOrViews>(
+  thisRef: DeckInstanceRef<ViewsT>
+): DeckGLRef<ViewsT> {
   return {
     get deck() {
       return thisRef.deck;
@@ -81,7 +78,7 @@ function getRefHandles(thisRef: DeckInstanceRef): DeckGLRef {
   };
 }
 
-function redrawDeck(thisRef: DeckInstanceRef) {
+function redrawDeck(thisRef: DeckInstanceRef<any>) {
   if (thisRef.redrawReason) {
     // Only redraw if we have received a dirty flag
     // @ts-expect-error accessing protected method
@@ -90,11 +87,11 @@ function redrawDeck(thisRef: DeckInstanceRef) {
   }
 }
 
-function createDeckInstance(
-  thisRef: DeckInstanceRef,
+function createDeckInstance<ViewsT extends ViewOrViews>(
+  thisRef: DeckInstanceRef<ViewsT>,
   DeckClass: typeof Deck,
-  props: DeckProps
-): Deck {
+  props: DeckProps<ViewsT>
+): Deck<ViewsT> {
   const deck = new DeckClass({
     ...props,
     // The Deck's animation loop is independent from React's render cycle, causing potential
@@ -120,11 +117,14 @@ function createDeckInstance(
   return deck;
 }
 
-const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
+function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
+  props: DeckGLProps<ViewsT>,
+  ref: React.Ref<DeckGLRef<ViewsT>>
+) {
   // A mechanism to force redraw
   const [version, setVersion] = useState(0);
   // A reference to persistent states
-  const _thisRef = useRef<DeckInstanceRef>({
+  const _thisRef = useRef<DeckInstanceRef<ViewsT>>({
     control: null,
     version,
     forceUpdate: () => setVersion(v => v + 1)
@@ -143,7 +143,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
   // Callbacks
   let inRender = true;
 
-  const handleViewStateChange: DeckProps['onViewStateChange'] = params => {
+  const handleViewStateChange: DeckProps<ViewsT>['onViewStateChange'] = params => {
     if (inRender && props.viewState) {
       // Callback may invoke a state update. Defer callback to after render() to avoid React error
       // In React StrictMode, render is executed twice and useEffect/useLayoutEffect is executed once
@@ -155,7 +155,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
     return props.onViewStateChange?.(params);
   };
 
-  const handleInteractionStateChange: DeckProps['onInteractionStateChange'] = params => {
+  const handleInteractionStateChange: DeckProps<ViewsT>['onInteractionStateChange'] = params => {
     if (inRender) {
       // Callback may invoke a state update. Defer callback to after render() to avoid React error
       // In React StrictMode, render is executed twice and useEffect/useLayoutEffect is executed once
@@ -171,7 +171,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
   // the next animation frame.
   // Needs to be called both from initial mount, and when new props are received
   const deckProps = useMemo(() => {
-    const forwardProps: DeckProps = {
+    const forwardProps: DeckProps<ViewsT> = {
       ...props,
       // Override user styling props. We will set the canvas style in render()
       style: null,
@@ -180,7 +180,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
       parent: containerRef.current,
       canvas: canvasRef.current,
       layers: jsxProps.layers,
-      views: jsxProps.views,
+      views: jsxProps.views as ViewsT,
       onViewStateChange: handleViewStateChange,
       onInteractionStateChange: handleInteractionStateChange
     };
@@ -229,7 +229,7 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
   const currentViewports =
     thisRef.deck && thisRef.deck.isInitialized ? thisRef.deck.getViewports() : undefined;
 
-  const {ContextProvider, width, height, id, style} = props;
+  const {ContextProvider, width = '100%', height = '100%', id, style} = props;
 
   const {containerStyle, canvasStyle} = useMemo(
     () => extractStyles({width, height, style}),
@@ -274,8 +274,10 @@ const DeckGL = forwardRef<DeckGLRef, DeckGLProps>((props, ref) => {
 
   inRender = false;
   return thisRef.control;
-});
+}
 
-DeckGL.defaultProps = Deck.defaultProps;
+const DeckGL = React.forwardRef(DeckGLWithRef) as <ViewsT extends ViewOrViews>(
+  props: DeckGLProps<ViewsT>
+) => React.ReactElement;
 
 export default DeckGL;

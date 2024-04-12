@@ -56,6 +56,7 @@ export {
   OrthographicController,
   _GlobeController,
   // For custom layers
+  Attribute,
   AttributeManager,
   // Shader modules
   picking,
@@ -88,7 +89,6 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
-  getPipelineFactory,
   getShaderAssembler
 } from '@deck.gl/core';
 

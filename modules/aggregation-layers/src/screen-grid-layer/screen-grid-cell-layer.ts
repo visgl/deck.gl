@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device, Texture} from '@luma.gl/core';
+import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -53,10 +53,6 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
 > {
   static layerName = 'ScreenGridCellLayer';
   static defaultProps = defaultProps;
-
-  static isSupported(device: Device) {
-    return device.features.has('texture-formats-float32-webgl1');
-  }
 
   state!: {
     model?: Model;

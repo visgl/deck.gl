@@ -22,7 +22,7 @@ import type {Device, DeviceFeature} from '@luma.gl/core';
 import {Model, TextureTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import {GL} from '@luma.gl/constants';
-import {log, project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
+import {project32, _mergeShaders as mergeShaders, getShaderAssembler} from '@deck.gl/core';
 
 import {
   DEFAULT_RUN_PARAMS,
@@ -51,11 +51,8 @@ const ARRAY_BUFFER_MAP = {
 };
 
 const REQUIRED_FEATURES: DeviceFeature[] = [
-  'webgl2',
-  'blend-minmax-webgl1',
-  'texture-renderable-float32-webgl',
-  'texture-blend-float-webgl1',
-  'texture-formats-float32-webgl1'
+  'float32-renderable-webgl',
+  'texture-blend-float-webgl'
 ];
 
 export type GPUGridAggregatorProps = {
@@ -179,15 +176,10 @@ export default class GPUGridAggregator {
     this.device = device;
 
     const REQUIRED_FEATURES: DeviceFeature[] = [
-      'blend-minmax-webgl1', // set min/max blend modes
-      'texture-renderable-float32-webgl', // render to float texture
-      'texture-formats-float32-webgl1' // sample from a float texture
+      'float32-renderable-webgl' // render to float texture
     ];
 
-    // gl_InstanceID usage in min/max calculation shaders
-    this._hasGPUSupport =
-      this.device.info.type === 'webgl2' &&
-      REQUIRED_FEATURES.every(feature => device.features.has(feature));
+    this._hasGPUSupport = REQUIRED_FEATURES.every(feature => device.features.has(feature));
     if (this._hasGPUSupport) {
       this._setupModels();
     }
@@ -226,9 +218,6 @@ export default class GPUGridAggregator {
     // reset results
     this.setState({results: {}});
     const aggregationParams = this._normalizeAggregationParams(opts);
-    if (!this._hasGPUSupport) {
-      log.log(1, 'GPUGridAggregator: not supported')();
-    }
     return this._runAggregation(aggregationParams);
   }
 
@@ -408,7 +397,7 @@ export default class GPUGridAggregator {
 
   // render all aggregated grid-cells to generate Min, Max or MaxMin data texture
   _renderToMaxMinTexture(opts) {
-    const {id, parameters, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
+    const {id, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
     const {framebuffers} = this.state;
     const {allAggregationModel} = this;
 

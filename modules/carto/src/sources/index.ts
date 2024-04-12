@@ -36,3 +36,10 @@ export type {VectorTableSourceOptions} from './vector-table-source';
 
 export {vectorTilesetSource} from './vector-tileset-source';
 export type {VectorTilesetSourceOptions} from './vector-tileset-source';
+
+export type {
+  SourceOptions,
+  QuerySourceOptions,
+  TableSourceOptions,
+  TilesetSourceOptions
+} from './types';

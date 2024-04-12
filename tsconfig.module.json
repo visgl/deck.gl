@@ -19,6 +19,9 @@
         "pattern": ["**/*.glsl.ts"]
       },
       {
+        "transform": "ocular-dev-tools/ts-transform-inline-webgl-constants"
+      },
+      {
         "transform": "ocular-dev-tools/ts-transform-append-extension",
         "extensions": [".js", ".glsl.js"],
         "after": true

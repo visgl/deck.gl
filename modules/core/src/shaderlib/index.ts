@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Device} from '@luma.gl/core';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
@@ -26,7 +25,6 @@ import project from './project/project';
 import project32 from './project32/project32';
 import shadow from './shadow/shadow';
 import picking from './picking/picking';
-import {PipelineFactory} from '@luma.gl/engine';
 
 const DEFAULT_MODULES = [project];
 
@@ -48,12 +46,6 @@ export function getShaderAssembler() {
   }
 
   return shaderAssembler;
-}
-
-// TODO - is this really needed now that modules are registered on the ShaderAssembler
-export function getPipelineFactory(device: Device) {
-  const pipelineFactory = PipelineFactory.getDefaultPipelineFactory(device);
-  return pipelineFactory;
 }
 
 export {picking, project, project32, gouraudLighting, phongLighting, shadow};

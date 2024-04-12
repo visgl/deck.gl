@@ -20,7 +20,6 @@
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -168,7 +167,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {device, viewport} = this.context;
+    const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
     if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
@@ -192,7 +191,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // Provide a preproject function if the coordinates are in lnglat
         preproject,
         fp64: this.use64bitPositions(),
-        IndexType: !device || device.features.has('index-uint32-webgl1') ? Uint32Array : Uint16Array
+        IndexType: Uint32Array
       })
     });
 
@@ -212,7 +211,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       vertexPositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
@@ -232,7 +231,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       instanceVertexValid: {
         size: 1,
-        type: GL.UNSIGNED_SHORT,
+        type: 'uint16',
         divisor: 1,
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -250,8 +249,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       fillColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR,
@@ -263,8 +261,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       lineColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR,
@@ -276,7 +273,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       pickingColors: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         accessor: (object, {index, target: value}) =>
           this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
         shaderAttributes: {
@@ -292,23 +289,23 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     const info = super.getPickingInfo(params);
     const {index} = info;
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      info.object = (data as any[]).find(d => d.__source.index === index);
+      info.object = data.find(d => d.__source.index === index);
     }
     return info;
   }
 
   disablePickingIndex(objectIndex: number) {
-    const {data} = this.props;
+    const data = this.props.data as any[];
 
     // Check if data comes from a composite layer, wrapped with getSubLayerRow
     if (data[0] && data[0].__source) {
       // index decoded from picking color refers to the source index
-      for (let i = 0; i < (data as any[]).length; i++) {
+      for (let i = 0; i < data.length; i++) {
         if (data[i].__source.index === objectIndex) {
           this._disablePickingIndex(i);
         }

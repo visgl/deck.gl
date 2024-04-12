@@ -1,32 +1,19 @@
-/* global document, google, fetch, requestAnimationFrame, cancelAnimationFrame */
+/* global fetch, requestAnimationFrame, cancelAnimationFrame */
 import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {PathLayer} from '@deck.gl/layers';
+import {Loader} from '@googlemaps/js-api-loader';
 
 import TripBuilder from './trip-builder';
 
 // Set your Google Maps API key here or via environment variable
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const GOOGLE_MAP_ID = process.env.GoogleMapsMapId; // eslint-disable-line
-const GOOGLE_MAPS_API_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&v=beta`;
 
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d/trips.json'; // eslint-disable-line
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/google-3d/truck.gltf'; // eslint-disable-line
-
-function loadScript(url) {
-  if (typeof google !== 'undefined') {
-    return Promise.resolve();
-  }
-  return new Promise(resolve => {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    script.onload = resolve;
-    document.head.appendChild(script);
-  });
-}
 
 export async function renderToDOM(
   container,
@@ -35,12 +22,13 @@ export async function renderToDOM(
     showPaths: true
   }
 ) {
-  await loadScript(GOOGLE_MAPS_API_URL);
+  const loader = new Loader({apiKey: GOOGLE_MAPS_API_KEY});
+  const googlemaps = await loader.importLibrary('maps');
 
   const resp = await fetch(DATA_URL);
   const data = await resp.json();
 
-  const map = new google.maps.Map(container, {
+  const map = new googlemaps.Map(container, {
     center: {lng: -95.36403, lat: 29.756433},
     zoom: 19,
     heading: 0,

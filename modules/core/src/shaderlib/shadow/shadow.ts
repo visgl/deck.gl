@@ -190,7 +190,9 @@ function createShadowUniforms(
   if (!shadowEnabled || !opts.shadowMatrices || !opts.shadowMatrices.length) {
     return {
       shadow_uDrawShadowMap: false,
-      shadow_uUseShadowMap: false
+      shadow_uUseShadowMap: false,
+      shadow_uShadowMap0: opts.dummyShadowMap,
+      shadow_uShadowMap1: opts.dummyShadowMap
     };
   }
   const uniforms = {

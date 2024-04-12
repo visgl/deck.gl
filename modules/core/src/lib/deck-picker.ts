@@ -100,11 +100,10 @@ export default class DeckPicker {
 
   finalize() {
     if (this.pickingFBO) {
-      this.pickingFBO.delete();
+      this.pickingFBO.destroy();
     }
     if (this.depthFBO) {
-      this.depthFBO.colorAttachments[0].delete();
-      this.depthFBO.delete();
+      this.depthFBO.destroy();
     }
   }
 
@@ -145,16 +144,15 @@ export default class DeckPicker {
   _resizeBuffer() {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
-      this.pickingFBO = this.device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+      this.pickingFBO = this.device.createFramebuffer({
+        colorAttachments: ['rgba8unorm'],
+        depthStencilAttachment: 'depth16unorm'
+      });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
         const depthFBO = this.device.createFramebuffer({
-          colorAttachments: [
-            this.device.createTexture({
-              format: this.device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm'
-              // type: GL.FLOAT
-            })
-          ]
+          colorAttachments: ['rgba32float'],
+          depthStencilAttachment: 'depth16unorm'
         });
         this.depthFBO = depthFBO;
       }
@@ -162,7 +160,7 @@ export default class DeckPicker {
 
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     // @ts-expect-error
-    const gl = this.device.gl as WebGLRenderingContext;
+    const gl = this.device.gl as WebGL2RenderingContext;
     this.pickingFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
     this.depthFBO?.resize({width: gl.canvas.width, height: gl.canvas.height});
   }
@@ -201,7 +199,7 @@ export default class DeckPicker {
 
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return {
         result: [],
         emptyInfo: getEmptyPickingInfo({viewports, x, y, pixelRatio})
@@ -354,7 +352,7 @@ export default class DeckPicker {
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
     const pickableLayers = this._getPickable(layers);
 
-    if (!pickableLayers) {
+    if (!pickableLayers || viewports.length === 0) {
       return [];
     }
 
@@ -517,7 +515,7 @@ export default class DeckPicker {
 
     for (const effect of effects) {
       if (effect.useInPicking) {
-        opts.preRenderStats[effect.id] = effect.preRender(this.device, opts);
+        opts.preRenderStats[effect.id] = effect.preRender(opts);
       }
     }
 

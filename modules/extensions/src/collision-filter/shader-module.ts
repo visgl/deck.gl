@@ -102,6 +102,7 @@ const getCollisionUniforms = (
   const {collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
   return {
     collision_sort: Boolean(drawToCollisionMap),
+    // @ts-ignore (v9 not sure why this isn't allowed now)
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };

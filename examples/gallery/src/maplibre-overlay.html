@@ -19,17 +19,19 @@
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [-122.4, 37.79],
       zoom: 15,
-      pitch: 60
+      pitch: 60,
+      antialias: true
     });
 
-    map.on('load', () => {
+    map.on('style.load', () => {
       const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
+      map.removeLayer('building')
+      map.removeLayer('building-top')
       map.addLayer({
         'id': '3d-buildings',
         'source': 'carto',
         'source-layer': 'building',
-        'filter': ['==', 'extrude', 'true'],
         'type': 'fill-extrusion',
         'minzoom': 15,
         'paint': {
@@ -40,12 +42,12 @@
             'fill-extrusion-height': [
                 "interpolate", ["linear"], ["zoom"],
                 15, 0,
-                15.05, ["get", "height"]
+                15.05, ["get", "render_height"]
             ],
             'fill-extrusion-base': [
                 "interpolate", ["linear"], ["zoom"],
                 15, 0,
-                15.05, ["get", "min_height"]
+                15.05, ["get", "render_min_height"]
             ],
             'fill-extrusion-opacity': .6
         }

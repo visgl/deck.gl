@@ -23,7 +23,7 @@
 export {VERSION} from './lib/init';
 
 // Import shaderlib to make sure shader modules are initialized
-export {getPipelineFactory, getShaderAssembler} from './shaderlib/index';
+export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
@@ -45,6 +45,7 @@ export {default as _PickLayersPass} from './passes/pick-layers-pass';
 export {default as Deck} from './lib/deck';
 
 export {default as LayerManager} from './lib/layer-manager';
+export {default as Attribute} from './lib/attribute/attribute';
 export {default as AttributeManager} from './lib/attribute/attribute-manager';
 export {default as Layer} from './lib/layer';
 export {default as CompositeLayer} from './lib/composite-layer';
@@ -109,14 +110,14 @@ export {compareProps as _compareProps} from './lifecycle/props';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
-export type {MapViewState} from './views/map-view';
-export type {FirstPersonViewState} from './views/first-person-view';
-export type {OrbitViewState} from './views/orbit-view';
-export type {OrthographicViewState} from './views/orthographic-view';
-export type {GlobeViewState} from './views/globe-view';
+export type {MapViewState, MapViewProps} from './views/map-view';
+export type {FirstPersonViewState, FirstPersonViewProps} from './views/first-person-view';
+export type {OrbitViewState, OrbitViewProps} from './views/orbit-view';
+export type {OrthographicViewState, OrthographicViewProps} from './views/orthographic-view';
+export type {GlobeViewState, GlobeViewProps} from './views/globe-view';
 export type {ChangeFlags} from './lib/layer-state';
-export type {LayersList} from './lib/layer-manager';
-export type {LayerContext} from './lib/layer-manager';
+export type {LayersList, LayerContext} from './lib/layer-manager';
+export type {ViewStateMap} from './lib/view-manager';
 export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
 export type {
@@ -138,13 +139,23 @@ export type {FilterContext} from './passes/layers-pass';
 export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
-export type {Effect, PreRenderOptions, PostRenderOptions} from './lib/effect';
+export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from './lib/effect';
 export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';
+export type {LightingEffectProps} from './effects/lighting/lighting-effect';
+export type {AmbientLightOptions} from './effects/lighting/ambient-light';
+export type {DirectionalLightOptions} from './effects/lighting/directional-light';
+export type {PointLightOptions} from './effects/lighting/point-light';
+export type {SunLightOptions} from './effects/lighting/sun-light';
+export type {
+  ControllerProps,
+  ViewStateChangeParameters,
+  InteractionState
+} from './controllers/controller';
 
-// INTERNAL, DO NOT USER
+// INTERNAL, DO NOT USE
 // @deprecated internal do not use
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use

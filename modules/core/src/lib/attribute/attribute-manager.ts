@@ -275,7 +275,7 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes(): {[id: string]: Attribute} {
-    return this.attributes;
+    return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
   }
 
   /**

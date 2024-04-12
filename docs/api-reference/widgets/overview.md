@@ -2,9 +2,12 @@
 
 Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and information for a better user experience.
 
-This module contains the following extensions:
+This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
+- [ZoomWidget](./zoom-widget.md)
+- [CompassWidget](./compass-widget.md)
+
 
 ## Installation
 
@@ -26,12 +29,12 @@ new FullscreenWidget({});
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.10.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^8.10.0/widgets/stylesheet.css" rel='stylesheet' />
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.10.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/widgets@^8.10.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^8.10.0/widgets/stylesheet.css" rel='stylesheet' />
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
 ```
 
 ```js
@@ -44,7 +47,7 @@ Customizing the appearance of widgets can be achieved using CSS variables. This 
 
 ### Global Theming
 
-Apply to all wigdets with the `.deck-widget` selector.
+Apply to all widgets with the `.deck-widget` selector.
 
 ```css
 .deck-widget {
@@ -94,7 +97,7 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
-| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
+| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
 | `--widget-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
 
 ### Color
@@ -106,14 +109,18 @@ We've provided a set of CSS variables to make styling UI Widgets more convenient
 | `--button-inner-stroke` | [Border](https://developer.mozilla.org/en-US/docs/Web/CSS/border) | `unset` |
 | `--button-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
-| `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)`
-| `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)`
+| `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
+| `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+| `--icon-compass-north-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#F05C44` |
+| `--icon-compass-south-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#C2C2CC` |
 
 ### Icon
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@40) |
 | `--icon-fullscreen-enter` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Fullscreen Exit](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@40) |
+| `--icon-zoom-in` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Add](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40) |
+| `--icon-zoom-out` | [SVG Data Url](https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url) | [Material Symbol Remove](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40) |
 
 #### Replacing Icons
 

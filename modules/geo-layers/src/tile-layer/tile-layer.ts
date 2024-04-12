@@ -44,6 +44,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
+  debounceTime: 0,
   zoomOffset: 0
 };
 
@@ -129,6 +130,13 @@ type _TileLayerProps<DataT> = {
   maxRequests?: number;
 
   /**
+   * Queue tile requests until no new tiles have been requested for at least `debounceTime` milliseconds.
+   *
+   * @default 0
+   */
+  debounceTime?: number;
+
+  /**
    * This offset changes the zoom level at which the tiles are fetched.
    *
    * Needs to be an integer.
@@ -138,8 +146,14 @@ type _TileLayerProps<DataT> = {
   zoomOffset?: number;
 };
 
-export type TiledPickingInfo<DataT = any> = PickingInfo & {
+export type TileLayerPickingInfo<
+  DataT = any,
+  SubLayerPickingInfo = PickingInfo
+> = SubLayerPickingInfo & {
+  /** The picked tile */
   tile?: Tile2DHeader<DataT>;
+  /** the tile that emitted the picking event */
+  sourceTile: Tile2DHeader<DataT>;
 };
 
 /**
@@ -221,6 +235,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxZoom,
       minZoom,
       maxRequests,
+      debounceTime,
       zoomOffset
     } = this.props;
 
@@ -233,6 +248,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       refinementStrategy,
       extent,
       maxRequests,
+      debounceTime,
       zoomOffset,
 
       getTileData: this.getTileData.bind(this),
@@ -324,12 +340,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return null;
   }
 
-  getPickingInfo({info, sourceLayer}: GetPickingInfoParams): TiledPickingInfo<DataT> {
-    const sourceTile = (sourceLayer as any).props.tile;
+  getPickingInfo(params: GetPickingInfoParams): TileLayerPickingInfo<DataT> {
+    const sourceTile: Tile2DHeader<DataT> = (params.sourceLayer as any).props.tile;
+    const info = params.info as TileLayerPickingInfo<DataT>;
     if (info.picked) {
-      (info as any).tile = sourceTile;
+      info.tile = sourceTile;
     }
-    (info as any).sourceTile = sourceTile;
+    info.sourceTile = sourceTile;
     return info;
   }
 

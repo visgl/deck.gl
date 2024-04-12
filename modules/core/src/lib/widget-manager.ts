@@ -14,7 +14,7 @@ export interface Widget<PropsT = any> {
   props: PropsT;
   /**
    * The view id that this widget is being attached to. Default `null`.
-   * If assigned, this widget will only respond to events occured inside the specific view that matches this id.
+   * If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
    */
   viewId?: string | null;
   /** Widget positioning within the view. Default 'top-left'. */
@@ -28,7 +28,7 @@ export interface Widget<PropsT = any> {
    * @returns an optional UI element that should be appended to the Deck container */
   onAdd: (params: {
     /** The Deck instance that the widget is attached to */
-    deck: Deck;
+    deck: Deck<any>;
     /** The id of the view that the widget is attached to */
     viewId: string | null;
   }) => HTMLDivElement | null;
@@ -68,7 +68,7 @@ export type WidgetPlacement = keyof typeof PLACEMENTS;
 const ROOT_CONTAINER_ID = '__root';
 
 export class WidgetManager {
-  deck: Deck;
+  deck: Deck<any>;
   parentElement?: HTMLElement | null;
 
   /** Widgets added via the imperative API */
@@ -83,7 +83,7 @@ export class WidgetManager {
   /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
 
-  constructor({deck, parentElement}: {deck: Deck; parentElement?: HTMLElement | null}) {
+  constructor({deck, parentElement}: {deck: Deck<any>; parentElement?: HTMLElement | null}) {
     this.deck = deck;
     this.parentElement = parentElement;
   }

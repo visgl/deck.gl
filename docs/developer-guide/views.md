@@ -55,29 +55,6 @@ Whenever `viewState` updates, the view creates a new viewport under the hood. Ty
 > If you are using the Deck canvas as an [overlay on a base map rendered by another library](../get-started/using-with-map), you may need to update the viewport using the API provided by that library rather than by deck.gl.
 
 
-```js
-import {Deck, MapView} from '@deck.gl/core';
-
-const deck = new Deck({
-  ...
-  views: [new MapView()],
-  onClick: ({layer, object}) => {
-    if (layer) {
-      // The viewport is a WebMercatorViewport instance
-      const {viewport} = layer.context;
-      const {longitude, latitude, zoom} = viewport.fitBounds([
-        [object.minLng, object.minLat],
-        [object.maxLng, object.maxLat]
-      ]);
-      // Zoom to the object
-      deck.setProps({
-        viewState: {longitude, latitude, zoom}
-      });
-    }
-  }
-});
-```
-
 ## Types of Views
 
 deck.gl offers a set of `View` classes that package the camera and controller logic that you need to visualize and interact with your data. You may choose one or multiple `View` classes based on the type of data (e.g. geospatial, 2D chart) and the desired perspective (top down, first-person, etc).
@@ -96,72 +73,222 @@ Note that the set of view state parameters that will be used varies between View
 
 ## Examples
 
-### Using a View Class
+### Using a View
 
 If the `views` prop of `Deck` is not specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
 
 If using non-geospatial data, you will need to manually create a view that is appropriate for info-vis, e.g.:
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
 import {Deck, OrthographicView} from '@deck.gl/core';
 
 const deck = new Deck({
-  ...
+  // ...
   views: new OrthographicView()
 });
 ```
 
-### Using a View Class with View State
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-If `initialViewState` is provided, deck.gl automatically tracks the view states of interactive views (used as a "stateful" component):
-
-```js
-import {Deck, MapView} from '@deck.gl/core';
+```ts
+import {Deck, OrthographicView} from '@deck.gl/core';
 
 const deck = new Deck({
-  ...
-  views: new MapView(),
-  controller: true, // applies to the first view
-  initialViewState: {
-    longitude: -122.4,
-    latitude: 37.8,
-    zoom: 10,
-    pitch: 0,
-    bearing: 0
-  }
+  // ...
+  views: new OrthographicView()
 });
 ```
 
-If you need to manage and manipulate the view state outside of deck.gl, you may do so by providing an external `viewState` prop (used as a "stateless" component). In this case, you also need to listen to the `onViewStateChange` callback and update the `viewState` object yourself:
+  </TabItem>
+  <TabItem value="react" label="React">
 
-```js
-import React, {useState, useCallback} from 'react';
+```tsx
+import React from 'react';
 import DeckGL from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 
 function App() {
-  const [viewState, setViewState] = useState({
-    target: [0, 0, 0],
-    rotationX: 0,
-    rotationOrbit: 0,
-    zoom: 1
-  })
-
-  const onViewStateChange = useCallback(({viewState}) => {
-    // Manipulate view state
-    viewState.target[0] = Math.min(viewState.target[0], 10);
-    // Save the view state and trigger rerender
-    setViewState(viewState);
-  }, []);
-
   return <DeckGL
+    // ...
     views={new OrthographicView()}
-    controller={true}
-    viewState={viewState}
-    onViewStateChange={onViewStateChange}
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+### Using a View with View State
+
+If `initialViewState` is provided, deck.gl automatically tracks the view states of interactive views (used as a "stateful" component):
+
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE = {
+  longitude: -122.4,
+  latitude: 37.8,
+  zoom: 12,
+  pitch: 0,
+  bearing: 0
+};
+
+const deckInstance = new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, MapViewState} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE: MapViewState = {
+  longitude: -122.4,
+  latitude: 37.8,
+  zoom: 12,
+  pitch: 0,
+  bearing: 0
+};
+
+const deckInstance = new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {MapViewState} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE: MapViewState = {
+  longitude: -122.4,
+  latitude: 37.8,
+  zoom: 12,
+  pitch: 0,
+  bearing: 0
+};
+
+function App() {
+  return <DeckGL
+    initialViewState={INITIAL_VIEW_STATE}
+    controller
+  />;
+}
+```
+
+  </TabItem>
+</Tabs>
+
+If you need to manage and manipulate the view state outside of deck.gl, you may do so by providing the `viewState` prop (used as a "stateless" component). In this case, you also need to listen to the `onViewStateChange` callback and update the `viewState` object yourself:
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck, OrthographicView} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE = {
+  target: [0, 0, 0],
+  zoom: 1
+};
+
+const deckInstance = new Deck({
+  viewState: INITIAL_VIEW_STATE,
+  controller: true,
+  onViewStateChange: e => {
+    deckInstance.setProps({
+      viewState: e.viewState
+    });
+  }
+});
+
+document.getElementById('reset-btn').onclick = () => {
+  deckInstance.setProps({
+    viewState: INITIAL_VIEW_STATE
+  });
+}
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, OrthographicView, OrthographicViewState} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE: OrthographicViewState = {
+  target: [0, 0, 0],
+  zoom: 1
+};
+
+const deckInstance = new Deck<OrthographicView>({
+  viewState: INITIAL_VIEW_STATE,
+  controller: true,
+  onViewStateChange: e => {
+    deckInstance.setProps({
+      viewState: e.viewState
+    });
+  }
+});
+
+document.getElementById('reset-btn').onclick = () => {
+  deckInstance.setProps({
+    viewState: INITIAL_VIEW_STATE
+  });
+}
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import DeckGL from '@deck.gl/react';
+import {OrthographicView, OrthographicViewState} from '@deck.gl/core';
+
+const INITIAL_VIEW_STATE: OrthographicViewState = {
+  target: [0, 0, 0],
+  zoom: 1
+};
+
+function App() {
+  const [viewState, setViewState] = useState<OrthographicViewState>(INITIAL_VIEW_STATE);
+
+  const onReset = useCallback(() => setViewState(INITIAL_VIEW_STATE), []);
+
+  return <>
+    <DeckGL
+      views={new OrthographicView()}
+      controller
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState)}
+    />
+    <button onClick={onReset}>Reset</button>
+  </>;
+}
+```
+
+  </TabItem>
+</Tabs>
+
 
 ### Using Multiple Views
 
@@ -176,76 +303,236 @@ Common examples in 3D applications that render a 3D scene multiple times with di
 * To support stereoscopic rendering (e.g. VR), where left and right views are needed, providing the necessary parallax between left and right eye.
 * For rendering into offscreen framebuffers, which can then be used for e.g. advanced visual effects, screen shot solutions, overlays onto DOM elements outside of the primary deck.gl canvas (e.g. a video).
 
-Example of using with the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API):
+Example of displaying two maps side-by-side, and any camera change in one map is synchronized to another: 
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import {Deck, View} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 
-const deck = new Deck({
-  ...
+const deckInstance = new Deck({
   views: [
-    new View({
-      id: 'left-eye',
-      width: '50%',
-      viewMatrix: leftViewMatrix,
-      projectionMatrix: leftProjectionMatrix
-    }),
-    new View({
-      id: 'right-eye',
-      x: '50%',
-      width: '50%',
-      viewMatrix: rightViewMatrix,
-      projectionMatrix: rightProjectionMatrix
-    })
-  ]
+    new MapView({id: 'left', x: 0, width: '50%', controller: true}),
+    new MapView({id: 'right', x: '50%', width: '50%', controller: true})
+  ],
+  viewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  },
+  onViewStateChange: ({viewState}) => {
+    deckInstance.setProps({viewState});
+  }
 });
 ```
 
-Views can also overlap, (e.g. having a small "mini" map in the bottom middle of the screen overlaid over the main view)
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-```js
-import {Deck, FirstPersonView, MapView} from '@deck.gl/core';
+```ts
+import {Deck, MapView} from '@deck.gl/core';
 
-const deck = new Deck({
-  ...
+const deckInstance = new Deck<[MapView, MapView]>({
   views: [
-    new FirstPersonView({
-      id: 'first-person',
-      controller: true
-    }),
-    new MapView({
-      id: 'mini-map',
-      x: '80%',
-      y: '80%',
-      height: '15%',
-      width: '15%',
-      clear: true,
-      controller: true
-    })
-  ]
+    new MapView({id: 'left', x: 0, width: '50%', controller: true}),
+    new MapView({id: 'right', x: '50%', width: '50%', controller: true})
+  ],
+  viewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  },
+  onViewStateChange: ({viewState}) => {
+    deckInstance.setProps({viewState});
+  }
 });
 ```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState} from 'react';
+import DeckGL from '@deck.gl/react';
+import {MapView, MapViewState} from '@deck.gl/core';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 12
+  });
+
+  return <DeckGL
+    views={[
+      new MapView({id: 'left', x: 0, width: '50%', controller: true}),
+      new MapView({id: 'right', x: '50%', width: '50%', controller: true})
+    ]}
+    viewState={viewState}
+    onViewStateChange={evt => setViewState(evt.viewState)}
+  />;
+}
+```
+
+  </TabItem>
+</Tabs>
+
 
 ### Using Multiple Views with View States
 
-When using multiple views, each `View` can either have its own independent view state, or share the same view state as other views. To define the view state of a specific view, add a key to the `viewState` object that matches its view id:
+When using multiple views, each `View` can either have its own independent view state, or share the same view state as other views. To define the view state of a specific view, add a key to the `viewState` object that matches its view id.
+
+The following example displays a "minimap" in the corner that synchronizes with the main view, but provides a different perspective:
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-import React, {useState, useCallback} from 'react';
-import DeckGL from '@deck.gl/react';
-import {FirstPersonView, MapView} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 
-function App() {
-  const [viewStates, setViewStates] = useState({
+let currentViewState = {
+  main: {
     longitude: -122.4,
     latitude: 37.8,
-    pitch: 0,
-    bearing: 0,
-    zoom: 10
+    pitch: 30,
+    zoom: 12,
+  },
+  minimap: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  }
+};
+
+function onViewStateChange({viewId, viewState}) {
+  if (viewId === 'main') {
+    // When user moves the camera in the first-person view, the minimap should follow
+    currentViewState = {
+      main: viewState,
+      minimap: {
+        ...currentViewStates.minimap,
+        longitude: viewState.longitude,
+        latitude: viewState.latitude
+      }
+    };
+  } else {
+    // Only allow the user to change the zoom in the minimap
+    currentViewState = {
+      main: currentViewStates.main,
+      minimap: {
+        ...currentViewStates.minimap,
+        zoom: viewState.zoom
+      }
+    };
+  }
+  // Apply the new view state
+  deckInstance.setProps({viewState: currentViewState});
+};
+
+const deckInstance = new Deck({
+  views: [
+    new MapView({id: 'main', controller: true}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200, controller: true})
+  ],
+  viewState: currentViewState
+  onViewStateChange
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, MapView, MapViewState} from '@deck.gl/core';
+
+let currentViewState: {
+  main: MapViewState;
+  minimap: MapViewState
+} = {
+  main: {
+    longitude: -122.4,
+    latitude: 37.8,
+    pitch: 30,
+    zoom: 12,
+  },
+  minimap: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 8
+  }
+};
+
+function onViewStateChange({viewId, viewState}: {
+  viewId: 'main' | 'minimap';
+  viewState: MapViewState;
+}) {
+  if (viewId === 'main') {
+    // When user moves the camera in the first-person view, the minimap should follow
+    currentViewState = {
+      main: viewState,
+      minimap: {
+        ...currentViewStates.minimap,
+        longitude: viewState.longitude,
+        latitude: viewState.latitude
+      }
+    };
+  } else {
+    // Only allow the user to change the zoom in the minimap
+    currentViewState = {
+      main: currentViewStates.main,
+      minimap: {
+        ...currentViewStates.minimap,
+        zoom: viewState.zoom
+      }
+    };
+  }
+  // Apply the new view state
+  deckInstance.setProps({viewState: currentViewState});
+};
+
+const deckInstance = new Deck<[MapView, MapView]>({
+  views: [
+    new MapView({id: 'main', controller: true}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200, controller: true})
+  ],
+  viewState: currentViewState
+  onViewStateChange
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import DeckGL from '@deck.gl/react';
+import {MapView, MapViewState} from '@deck.gl/core';
+
+function App() {
+  const [viewStates, setViewStates] = useState<{
+    main: MapViewState;
+    minimap: MapViewState
+  }>({
+    main: {
+      longitude: -122.4,
+      latitude: 37.8,
+      pitch: 30,
+      zoom: 12,
+    },
+    minimap: {
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 8
+    }
   });
 
-  const onViewStateChange = useCallback(({viewId, viewState}) => {
+  const onViewStateChange = useCallback(({viewId, viewState}: {
+    viewId: 'main' | 'minimap';
+    viewState: MapViewState;
+  }) => {
     if (viewId === 'main') {
+      // When user moves the camera in the first-person view, the minimap should follow
       setViewStates(currentViewStates => ({
         main: viewState,
         minimap: {
@@ -255,22 +542,22 @@ function App() {
         }
       }));
     } else {
+      // Only allow the user to change the zoom in the minimap
       setViewStates(currentViewStates => ({
-        main: {
-          ...currentViewStates.main,
-          longitude: viewState.longitude,
-          latitude: viewState.latitude
-        },
-        minimap: viewState
+        main: currentViewStates.main,
+        minimap: {
+          ...currentViewStates.minimap,
+          zoom: viewState.zoom
+        }
       }));
     }
   }, []);
 
   render() {
     return <DeckGL
-      views={views: [
+      views={[
         new MapView({id: 'main', controller: true}),
-        new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%', controller: true})
+        new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200, controller: true})
       ]}
       viewState={viewStates}
       onViewStateChange={onViewStateChange}
@@ -279,56 +566,306 @@ function App() {
 }
 ```
 
+  </TabItem>
+</Tabs>
+
+
 ### Rendering Layers in Multiple Views
 
 By default, all visible layers are rendered into all the views. This may not be the case if certain layers are designed to go into one particular view.
 
-The `Deck` class' `layerFilter` prop has access to information of the view via the `viewport` argument. It can be used to determine which layers to draw in which view: 
+The `Deck` class has a `layerFilter` prop that can be used to determine which layers to draw in which view. In the following example, two views are rendered to follow a car moving on a map: a first-person perspective from the car's dash, and a top-down perspective of the city block that it's in. We only want to render the 3D car model in the minimap because it would block the camera in the first-person view.
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
 import {Deck, FirstPersonView, MapView} from '@deck.gl/core';
-import {MeshLayer, GeoJsonLayer} from '@deck.gl/layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
 
-function layerFilter({layer, viewport}) {
-  if (viewport.id === 'first-person' && layer.id === 'car') {
-    // Do not draw the car layer in the first person view
-    return false;
-  }
-  return true;
-}
-
-const deck = new Deck({
-  ...
-  layerFilter,
-  layers: [
-    new MeshLayer({id: 'car', ...}),
-    new GeoJsonLayer({id: 'streets', ...})
-  ],
+const deckInstance = new Deck({
   views: [
-    new FirstPersonView({id: 'first-person', ...}),
-    new MapView({id: 'mini-map', ...})
-  ]
+    new FirstPersonView({id: 'first-person'}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%'})
+  ],
+  layerFilter: ({layer, viewport}) => {
+    if (viewport.id === 'first-person' && layer.id === 'car') {
+      // Do not draw the car layer in the first person view
+      return false;
+    }
+    return true;
+  }
 });
+
+/** Called periodically to update the map with the car's latest position */
+function updateCar(carPose) {
+  deckInstance.setProps({
+    layers: [
+      new MVTLayer({
+        id: 'base-map',
+        // ...
+      }),
+      new SimpleMeshLayer({
+        id: 'car',
+        mesh: '/path/to/model.obj',
+        data: [carPose],
+        getPosition: d => [d.longitude, d.latitude, 0],
+        getOrientation: d => [0, -d.heading * Math.PI / 180, 0]
+      })
+    ],
+    viewState: {
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
+    }
+  });
+}
 ```
 
-Some layers, including `TileLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching/aggregation) on viewport change. Therefore, it is generally NOT recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, FirstPersonView, MapView} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
+
+type CarPose = {
+  longitude: number;
+  latitude: number;
+  heading: number;
+};
+
+const deckInstance = new Deck<[FirstPersonView, MapView]>({
+  views: [
+    new FirstPersonView({id: 'first-person'}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%'})
+  ],
+  layerFilter: ({layer, viewport}) => {
+    if (viewport.id === 'first-person' && layer.id === 'car') {
+      // Do not draw the car layer in the first person view
+      return false;
+    }
+    return true;
+  }
+});
+
+/** Called periodically to update the map with the car's latest position */
+function updateCar(carPose: CarPos) {
+  deckInstance.setProps({
+    layers: [
+      new MVTLayer({
+        id: 'base-map',
+        // ...
+      }),
+      new SimpleMeshLayer<CarPose>({
+        id: 'car',
+        mesh: '/path/to/model.obj',
+        data: [carPose],
+        getPosition: (d: CarPose) => [d.longitude, d.latitude, 0],
+        getOrientation: (d: CarPos) => [0, -d.heading * Math.PI / 180, 0]
+      })
+    ],
+    viewState: {
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
+    }
+  });
+}
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useMemo, useCallback} from 'react';
+import DeckGL from '@deck.gl/react';
+import {Deck, DeckProps, FirstPersonView, MapView} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
+
+type CarPose = {
+  longitude: number;
+  latitude: number;
+  heading: number;
+};
+
+/** Rerenders periodically to update the map with the car's latest position */
+function App({carPose}: {
+  carPos: CarPose;
+}) {
+
+  const layers = useMemo(() => [
+    new MVTLayer({
+      id: 'base-map',
+      // ...
+    }),
+    new SimpleMeshLayer<CarPose>({
+      id: 'car',
+      mesh: '/path/to/model.obj',
+      data: [carPose],
+      getPosition: (d: CarPose) => [d.longitude, d.latitude, 0],
+      getOrientation: (d: CarPos) => [0, -d.heading * Math.PI / 180, 0]
+    })
+  ], [carPos]);
+
+  const views = useMemo(() => [
+    new FirstPersonView({id: 'first-person'}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: '20%', height: '20%'})
+  ], []);
+
+  const layerFilter: DeckProps["layerFilter"] = useCallback(({layer, viewport}) => {
+    if (viewport.id === 'first-person' && layer.id === 'car') {
+      // Do not draw the car layer in the first person view
+      return false;
+    }
+    return true;
+  }, []);
+
+  return <DeckGL
+    views={views}
+    viewState={{
+      'first-person': {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        bearing: carPos.heading,
+        position: [0, 0, 2]
+      },
+      minimap: {
+        longitude: carPos.longitude,
+        latitude: carPos.latitude,
+        zoom: 10
+      }
+    }}
+    layers={layers}
+    layerFilter={layerFilter}
+  />;
+}
+```
+
+  </TabItem>
+</Tabs>
+
+
+Some layers, including `TileLayer`, `MVTLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching and/or aggregation) on viewport change. Therefore, it is generally *NOT* recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
+import {Deck, MapView} from '@deck.gl/core';
+import {MVTLayer} from '@deck.gl/geo-layers';
+
 const deck = new Deck({
-  ...
+  // ...
   views: [
-    new MapView({id: 'main', ...}),
-    new MapView({id: 'mini-map', ...})
+    new MapView({id: 'main', controller: true}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200})
   ],
   layers: [
-    new TileLayer({id: 'tiles-for-main', ...}),
-    new TileLayer({id: 'tiles-for-mini-map', ...})
+    new MVTLayer({
+      id: 'tiles-for-main',
+      // ...
+    }),
+    new MVTLayer({
+      id: 'tiles-for-minimap',
+      // ...
+    })
   ],
   layerFilter: ({layer, viewport} => {
     return layer.id === `tiles-for-${viewport.id}`;
   });
 });
 ```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, MapView} from '@deck.gl/core';
+import {MVTLayer} from '@deck.gl/geo-layers';
+
+const deck = new Deck<[MapView, MapView]>({
+  // ...
+  views: [
+    new MapView({id: 'main', controller: true}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200})
+  ],
+  layers: [
+    new MVTLayer({
+      id: 'tiles-for-main',
+      // ...
+    }),
+    new MVTLayer({
+      id: 'tiles-for-minimap',
+      // ...
+    })
+  ],
+  layerFilter: ({layer, viewport} => {
+    return layer.id === `tiles-for-${viewport.id}`;
+  });
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React, {useMemo, useCallback} from 'react';
+import DeckGL from '@deck.gl/react';
+import {DeckProps, MapView} from '@deck.gl/core';
+import {MVTLayer} from '@deck.gl/geo-layers';
+
+function App() {
+  const views = useMemo(() => [
+    new MapView({id: 'main', controller: true}),
+    new MapView({id: 'minimap', x: 10, y: 10, width: 300, height: 200})
+  ], []);
+
+  const layers = useMemo(() => [
+    new MVTLayer({
+      id: 'tiles-for-main',
+      // ...
+    }),
+    new MVTLayer({
+      id: 'tiles-for-minimap',
+      // ...
+    })
+  ], []);
+
+  const layerFilter: DeckProps["layerFilter"] = useCallback(({layer, viewport} => {
+    return layer.id === `tiles-for-${viewport.id}`;
+  }), []);
+
+  return <DeckGL
+    // ...
+    views={views}
+    layers={layers}
+    layerFilter={layerFilter}
+  />;
+}
+```
+
+  </TabItem>
+</Tabs>
 
 Starting with v8.5, `Tile3DLayer` supports rendering in multiple views with a single tile cache.
 
@@ -339,68 +876,76 @@ deck.gl's built-in picking support extends naturally to multiple viewports. The 
 
 Note that the `pickInfo` object does not contain a viewport reference, so you will not be able to tell which viewport was used to pick an object.
 
-Similar to the above example, you may control which layer is pickable in which view by supplying a `layerFilter`:
+In the [above example](#rendering-layers-in-multiple-views), you may also control which layer is pickable by view in `layerFilter`:
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
 ```js
-function layerFilter({layer, viewport, isPicking}) {
-  if (isPicking && viewport.id === 'first-person' && layer.id === 'car') {
-    // Do not pick the car layer in the first person view
+const layerFilter = ({layer, viewport, isPicking}) => {
+  if (viewport.id === 'first-person' && layer.id === 'car') {
+    // Do not draw the car layer in the first person view
+    return false;
+  }
+  if (isPicking && viewport.id === 'minimap') {
+    // Do not pick anything in the minimap
     return false;
   }
   return true;
-}
+};
 ```
 
-### Auto-Positioning React/HTML Components Behind Views
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-> This feature is currently only implemented in the React version of deck.gl.
-
-One of the core features of deck.gl is enabling perfectly synchronized visualization overlays on top other React components and DOM elements.
-
-When using a single `View`, the child components of `DeckGL` are positioned to fill the entire canvas. In this example the `StaticMap` component gets automatically positioned under the default `MapView`:
-
-```js
-import {StaticMap} from 'react-map-gl';
-import DeckGL from '@deck.gl/react';
-
-function App() {
-  return (
-    <DeckGL initialViewState={...} layers={...} controller={true}>
-      <StaticMap />
-    </DeckGL>
-  );
-}
+```ts
+const layerFilter: DeckProps["layerFilter"] = ({layer, viewport, isPicking}) => {
+  if (viewport.id === 'first-person' && layer.id === 'car') {
+    // Do not draw the car layer in the first person view
+    return false;
+  }
+  if (isPicking && viewport.id === 'minimap') {
+    // Do not pick anything in the minimap
+    return false;
+  }
+  return true;
+};
 ```
 
-When using multiple views, you can wrap component(s) in a `View` tag to align its position and size with a specific view. In the following example, the mapbox component is positioned and stretched to fit the "minimap" view:
+  </TabItem>
+  <TabItem value="react" label="React">
 
-```js
-import {StaticMap} from 'react-map-gl';
-import {View, FirstPersonView, MapView} from '@deck.gl/core';
-import DeckGL from '@deck.gl/react';
-
-const views = [
-  new FirstPersonView({id: 'first-person', ...}),
-  new MapView({id: 'minimap', ...})
-];
-
-function App() {
-  return (
-    <DeckGL views={views} initialViewState={...} layers={...} >
-      <View id="minimap">
-        <StaticMap />
-      </View>
-    </DeckGL>
-  );
-}
+```tsx
+const layerFilter: DeckProps["layerFilter"] = useCallback(({layer, viewport, isPicking}) => {
+  if (viewport.id === 'first-person' && layer.id === 'car') {
+    // Do not draw the car layer in the first person view
+    return false;
+  }
+  if (isPicking && viewport.id === 'minimap') {
+    // Do not pick anything in the minimap
+    return false;
+  }
+  return true;
+}, []);
 ```
+
+  </TabItem>
+</Tabs>
+
+### Auto-Positioning UI Components Behind Views
+
+When the deck.gl project first started, one of our major use cases was to build complex Web apps with perfectly synchronized WebGL visualizations and other UI components (HTML markers, charts, lists, etc.). Given the scale of these applications, some reactive, virtual-DOM framework is expected to be in use. At the moment, these features are only implemented for React. Visit the [DeckGL React component](../api-reference/react/deckgl.md) docs for examples.
+
 
 ## Performance Notes
 
-`views` and `viewState` props are deep compared to determine if anything changed, so there is little performance cost if new view instances are constructed each render.
+This section discusses how `views` and `viewState` impacts performance (frame rate).
 
-When `views`/`viewState` do change, new viewports are constructed. At this point, layers can get a chance to update their state, with the `changeFlags` argument containing `viewportChanged: true`. During interaction and transition, this may happen many times a second, raising performance concern if many layers need to recompute their states. By default, most layers ignore viewport changes, so the `updateState` lifecycle method do not get called if nothing else change.
+Between rerenders, the `views` and `viewState` props are deep compared to determine if anything changed. There is very little performance concern even if new view instances are constructed each render, as long as they are deemed equivalent with the previous values.
 
-However, some layers do need to update state when viewport changes (e.g. the [TileLayer](../api-reference/geo-layers/tile-layer.md)). To make sure `updateState` is called, the layer needs to override `shouldUpdateState`.
+If `views`/`viewState` do change, new viewports will be constructed. At this point, two things will happen:
 
-Read more in [Layer Lifecycles](./custom-layers/layer-lifecycle.md).
+- Layers are given a chance to recompute their state and create additional GPU resources (by calling the `shouldUpdateState` lifecycle method), with the `UpdateParameters` argument containing `changeFlags.viewportChanged: true`. By default, most layers ignore viewport changes, so `updateState` does not get called as long as nothing else changes. However, some layers do need to update when viewport changes (e.g. the [TileLayer](../api-reference/geo-layers/tile-layer.md) and [HeatmapLayer](../api-reference/aggregation-layers/heatmap-layer.md)). During interaction and transition, this may happen many times a second, so such layers may contribute to significant performance overhead.
+- Afterwards, all layers are redrawn to the updated viewport. This is a relatively cheap step as GPU is doing the heavy-lifting. All that CPU has to do is to supply the GPU with the new viewport parameters.
+
+Read more about this topic in [Layer Lifecycles](./custom-layers/layer-lifecycle.md).

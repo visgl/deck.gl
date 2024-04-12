@@ -8,33 +8,124 @@ The `HexagonLayer` aggregates data into a hexagon-based heatmap. The color and h
 
 HexagonLayer is a [CompositeLayer](../core/composite-layer.md) and at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-```js
-import DeckGL from '@deck.gl/react';
-import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * [
-   *   {COORDINATES: [-122.42177834, 37.78346622]},
-   *   ...
-   * ]
-   */
-  const layer = new HexagonLayer({
-    id: 'hexagon-layer',
-    data,
-    pickable: true,
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {HexagonLayer} from '@deck.gl/geo-layers';
+
+const layer = new HexagonLayer({
+  id: 'HexagonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  extruded: true,
+  getPosition: d => d.COORDINATES,
+  getColorWeight: d => d.SPACES,
+  getElevationWeight: d => d.SPACES,
+  elevationScale: 4,
+  radius: 200,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && `Count: ${object.elevationValue}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {HexagonLayer} from '@deck.gl/geo-layers';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+const layer = new HexagonLayer<BikeRack>({
+  id: 'HexagonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
+  extruded: true,
+  getPosition: (d: BikeRack) => d.COORDINATES,
+  getColorWeight: (d: BikeRack) => d.SPACES,
+  getElevationWeight: (d: BikeRack) => d.SPACES,
+  elevationScale: 4,
+  radius: 200,
+  pickable: true
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<BikeRack>) => object && `Count: ${object.elevationValue}`,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {HexagonLayer} from '@deck.gl/geo-layers';
+import type {PickingInfo} from '@deck.gl/core';
+
+type BikeRack = {
+  ADDRESS: string;
+  SPACES: number;
+  COORDINATES: [longitude: number, latitude: number];
+};
+
+function App() {
+  const layer = new HexagonLayer<BikeRack>({
+    id: 'HexagonLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf-bike-parking.json',
+
     extruded: true,
-    radius: 200,
+    getPosition: (d: BikeRack) => d.COORDINATES,
+    getColorWeight: (d: BikeRack) => d.SPACES,
+    getElevationWeight: (d: BikeRack) => d.SPACES,
     elevationScale: 4,
-    getPosition: d => d.COORDINATES
+    radius: 200,
+    pickable: true
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<BikeRack>) => object && `Count: ${object.elevationValue}`}
     layers={[layer]}
-    getTooltip={({object}) => object && `${object.centroid.join(', ')}\nCount: ${object.points.length}`} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -47,19 +138,21 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
-```js
+```ts
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
-new HexagonLayer({});
+import type {HexagonLayerProps} from '@deck.gl/aggregation-layers';
+
+new HexagonLayer<DataT>(...props: HexagonLayerProps<DataT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/aggregation-layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -73,13 +166,13 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 ### Render Options
 
-##### `radius` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radius}
+#### `radius` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#radius}
 
 * Default: `1000`
 
 Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
 
-##### `hexagonAggregator` (Function, optional) {#hexagonaggregator}
+#### `hexagonAggregator` (Function, optional) {#hexagonaggregator}
 
 * Default: `d3-hexbin`
 
@@ -92,9 +185,9 @@ center of the hexagon, and `points` is an array of points that contained by it. 
 
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
-see `modules/layers/src/point-density-hexagon-layer/hexagon-aggregator`
+see `modules/aggregation-layers/src/hexagon-layer/hexagon-aggregator.ts`
 
-##### `colorDomain` (Array, optional) {#colordomain}
+#### `colorDomain` (number[2], optional) {#colordomain}
 
 * Default: `[min(colorWeight), max(colorWeight)]`
 
@@ -104,7 +197,7 @@ extent of aggregated weights in each hexagon.
 You can control how the colors of hexagons are mapped to weights by passing in an arbitrary color domain.
 This is useful when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Array, optional) {#colorrange}
+#### `colorRange` (Color[], optional) {#colorrange}
 
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
@@ -112,14 +205,14 @@ Specified as an array of colors [color1, color2, ...]. Each color is an array of
 
 `colorDomain` is divided into `colorRange.length` equal segments, each mapped to one color in `colorRange`.
 
-##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
+#### `coverage` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#coverage}
 
 * Default: `1`
 
 Hexagon radius multiplier, clamped between 0 - 1. The displayed radius of hexagon is calculated by `coverage * radius`.
 Note: coverage does not affect how objects are binned.
 
-##### `elevationDomain` (Array, optional) {#elevationdomain}
+#### `elevationDomain` (number[2], optional) {#elevationdomain}
 
 * Default: `[0, max(elevationWeight)]`
 
@@ -130,13 +223,13 @@ You can control how the elevations of hexagons are mapped to weights by passing 
 This property is useful when you want to render different data input
 with the same elevation scale for comparison.
 
-##### `elevationRange` (Array, optional) {#elevationrange}
+#### `elevationRange` (number[2], optional) {#elevationrange}
 
 * Default: `[0, 1000]`
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -144,177 +237,144 @@ Hexagon elevation multiplier. The actual elevation is calculated by
   `elevationScale * getElevationValue(d)`. `elevationScale` is a handy property to scale
 all hexagons without updating the data.
 
-##### `extruded` (Boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 * Default: `false`
 
 Whether to enable cell elevation. If set to false, all cells will be flat.
 
-##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
+#### `upperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#upperpercentile}
 
 * Default: `100`
 
 Filter bins and re-calculate color by `upperPercentile`. Hexagons with color value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
+#### `lowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#lowerpercentile}
 
 * Default: `0`
 
 Filter bins and re-calculate color by `lowerPercentile`. Hexagons with color value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
+#### `elevationUpperPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationupperpercentile}
 
 * Default: `100`
 
 Filter bins and re-calculate elevation by `elevationUpperPercentile`. Hexagons with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
+#### `elevationLowerPercentile` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationlowerpercentile}
 
 * Default: `0`
 
 Filter bins and re-calculate elevation by `elevationLowerPercentile`. Hexagons with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
-##### `colorScaleType` (String, optional) {#colorscaletype}
+#### `colorScaleType` (string, optional) {#colorscaletype}
 
 * Default: 'quantize'
 
 Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'quantile' and 'ordinal'.
 
-##### `material` (Object, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
-##### `colorAggregation` (String, optional) {#coloraggregation}
+#### `colorAggregation` (string, optional) {#coloraggregation}
 
-* Default: 'SUM'
+* Default: `'SUM'`
 
-Defines the operation used to aggregate all data object weights to calculate a bin's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's color value. Valid values are `'SUM'`, `'MEAN'`, `'MIN'` and `'MAX'`. `'SUM'` is used when an invalid value is provided.
 
 `getColorWeight` and `colorAggregation` together determine the elevation value of each bin. If the `getColorValue` prop is supplied, they will be ignored.
 
-###### Example 1 : Using count of data elements that fall into a bin to encode the its color
+##### Example: Color by the count of data elements
 
-* Using `getColorValue`
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getColorValue: points => points.length,
-  ...
+```ts title="Option A: use getColorValue"
+const layer = new HexagonLayer<BikeRack>({
+  //...
+  getColorValue: (points: BikeRack[]) => points.length
 });
 ```
 
-* Using `getColorWeight` and `colorAggregation`
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getColorWeight: point => 1,
+```ts title="Option B: use getColorWeight and colorAggregation"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getColorWeight: (d: BikeRack) => 1,
   colorAggregation: 'SUM'
-  ...
 });
 ```
 
-###### Example 2 : Using mean value of 'SPACES' field of data elements to encode the color of the bin
+##### Example: Color by the mean value of 'SPACES' field
 
-* Using `getColorValue`
-```js
-function getMean(points) {
-  return points.reduce((sum, p) => sum += p.SPACES, 0) / points.length;
-}
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getColorValue: getMean,
-  ...
+```ts title="Option A: use getColorValue"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getColorValue: (points: BikeRack[]) => {
+    // Calculate mean value
+    return points.reduce((sum: number, p: BikeRack) => sum += p.SPACES, 0) / points.length;
+  }
 });
 ```
 
-* Using `getColorWeight` and `colorAggregation`
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getColorWeight: point => point.SPACES,
+```ts title="Option B: use getColorWeight and colorAggregation"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getColorWeight: (point: BikeRack) => point.SPACES,
   colorAggregation: 'SUM'
-  ...
 });
 ```
 
 If your use case requires aggregating using an operation that is not one of 'SUM', 'MEAN', 'MAX' and 'MIN', `getColorValue` should be used to define such custom aggregation function.
 
 
-##### `elevationAggregation` (String, optional) {#elevationaggregation}
+#### `elevationAggregation` (string, optional) {#elevationaggregation}
 
-* Default: 'SUM'
+* Default: `'SUM'`
 
-Defines the operation used to aggregate all data object weights to calculate a bin's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+Defines the operation used to aggregate all data object weights to calculate a bin's elevation value. Valid values are `'SUM'`, `'MEAN'`, `'MIN'` and `'MAX'`. `'SUM'` is used when an invalid value is provided.
 
 `getElevationWeight` and `elevationAggregation` together determine the elevation value of each bin. If the `getElevationValue` prop is supplied, they will be ignored.
 
-###### Example 1 : Using count of data elements that fall into a bin to encode the its elevation
+##### Example: Elevation by the count of data elements
 
-* Using `getElevationValue`
-
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getElevationValue: points => points.length,
-  ...
+```ts title="Option A: use getElevationValue"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getElevationValue: (points: BikeRack[]) => points.length
 });
 ```
 
-* Using `getElevationWeight` and `elevationAggregation`
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getElevationWeight: point => 1,
+```ts title="Option B: use getElevationWeight and elevationAggregation"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getElevationWeight: (point: BikeRack) => 1,
   elevationAggregation: 'SUM'
-  ...
 });
 ```
 
-###### Example 2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the bin
+##### Example: Elevation by the maximum value of 'SPACES' field
 
-* Using `getElevationValue`
-```js
-function getMax(points) {
-  return points.reduce((max, p) => p.SPACES > max ? p.SPACES : max, -Infinity);
-}
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getElevationValue: getMax,
-  ...
+```ts title="Option A: use getElevationValue"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getElevationValue: (points: BikeRack[]) => {
+    // Calculate max value
+    return points.reduce((max: number, p: BikeRack) => p.SPACES > max ? p.SPACES : max, -Infinity);
+  }
 });
 ```
 
-* Using `getElevationWeight` and `elevationAggregation`
-```js
-...
-const layer = new HexagonLayer({
-  id: 'my-hexagon-layer',
-  ...
-  getElevationWeight: point => point.SPACES,
+```ts title="Option B: use getElevationWeight and elevationAggregation"
+const layer = new HexagonLayer<BikeRack>({
+  // ...
+  getElevationWeight: (point: BikeRack) => point.SPACES,
   elevationAggregation: 'MAX'
-  ...
 });
 ```
 
@@ -323,14 +383,14 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 ### Data Accessors
 
-##### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
 
-##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
+#### `getColorWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorweight}
 
 * Default: `1`
 
@@ -340,7 +400,7 @@ The weight of a data object used to calculate the color value for a bin.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
+#### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolorvalue}
 
 * Default: `null`
 
@@ -348,13 +408,13 @@ After data objects are aggregated into bins, this accessor is called on each bin
 
 Arguments:
 
-- `objects` (Array) - a list of objects whose positions fall inside this cell.
-- `objectInfo` (Object) - contains the following fields:
-  + `indices` (Array) - the indices of `objects` in the original data
+- `objects` (DataT[]) - a list of objects whose positions fall inside this cell.
+- `objectInfo` (object) - contains the following fields:
+  + `indices` (number[]) - the indices of `objects` in the original data
   + `data` - the value of the `data` prop.
 
 
-##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
+#### `getElevationWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationweight}
 
 * Default: `1`
 
@@ -364,7 +424,7 @@ The weight of a data object used to calculate the elevation value for a bin.
 * If a function is provided, it is called on each object to retrieve its weight.
 
 
-##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
+#### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevationvalue}
 
 * Default: `null`
 
@@ -372,21 +432,21 @@ After data objects are aggregated into bins, this accessor is called on each bin
 
 Arguments:
 
-- `objects` (Array) - a list of objects whose positions fall inside this cell.
-- `objectInfo` (Object) - contains the following fields:
-  + `indices` (Array) - the indices of `objects` in the original data
+- `objects` (DataT[]) - a list of objects whose positions fall inside this cell.
+- `objectInfo` (object) - contains the following fields:
+  + `indices` (number[]) - the indices of `objects` in the original data
   + `data` - the value of the `data` prop.
 
 
 ### Callbacks
 
-##### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
+#### `onSetColorDomain` (Function, optional) {#onsetcolordomain}
 
 * Default: `([min, max]) => {}`
 
 This callback will be called when bin color domain has been calculated.
 
-##### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
+#### `onSetElevationDomain` (Function, optional) {#onsetelevationdomain}
 
 * Default: `([min, max]) => {}`
 

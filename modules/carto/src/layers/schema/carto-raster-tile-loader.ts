@@ -36,8 +36,8 @@ const CartoRasterTileLoader: LoaderWithParser = {
 };
 
 export type Raster = {
-  blockWidth: number;
-  blockHeight: number;
+  /** Raster tiles are square, with 'blockSize' width and height in pixels. */
+  blockSize: number;
   cells: {
     numericProps: NumericProps;
     properties: Properties[];
@@ -49,14 +49,14 @@ function parseCartoRasterTile(
   options?: CartoRasterTileLoaderOptions
 ): Raster | null {
   if (!arrayBuffer) return null;
-  const tile = parsePbf(arrayBuffer, TileReader);
-  const {bands, blockHeight, blockWidth} = tile;
+  const {bands, blockSize} = parsePbf(arrayBuffer, TileReader);
+
   const numericProps = {};
   for (let i = 0; i < bands.length; i++) {
     const {name, data} = bands[i];
     numericProps[name] = data;
   }
-  return {blockWidth, blockHeight, cells: {numericProps, properties: []}};
+  return {blockSize, cells: {numericProps, properties: []}};
 }
 
 export default CartoRasterTileLoader;

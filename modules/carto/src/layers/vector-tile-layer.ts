@@ -16,19 +16,22 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {binaryToGeojson} from '@loaders.gl/gis';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature} from 'geojson';
+import type {Feature, Geometry} from 'geojson';
 
 import type {TilejsonResult} from '../sources/types';
 import {TilejsonPropType, injectAccessToken, mergeBoundaryData} from './utils';
+import {DEFAULT_TILE_SIZE} from '../constants';
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
   data: TilejsonPropType,
-  dataComparator: TilejsonPropType.equal
+  dataComparator: TilejsonPropType.equal,
+  tileSize: DEFAULT_TILE_SIZE
 };
 
 /** All properties supported by VectorTileLayer. */
-export type VectorTileLayerProps = _VectorTileLayerProps & Omit<MVTLayerProps, 'data'>;
+export type VectorTileLayerProps<FeaturePropertiesT = unknown> = _VectorTileLayerProps &
+  Omit<MVTLayerProps<FeaturePropertiesT>, 'data'>;
 
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
@@ -36,9 +39,10 @@ type _VectorTileLayerProps = {
 };
 
 // @ts-ignore
-export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLayer<
-  Required<_VectorTileLayerProps> & ExtraProps
-> {
+export default class VectorTileLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends MVTLayer<FeaturePropertiesT, Required<_VectorTileLayerProps> & ExtraProps> {
   static layerName = 'VectorTileLayer';
   static defaultProps = defaultProps;
 
@@ -46,7 +50,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     mvt: boolean;
   };
 
-  constructor(...propObjects: VectorTileLayerProps[]) {
+  constructor(...propObjects: VectorTileLayerProps<FeaturePropertiesT>[]) {
     // Force externally visible props type, as it is not possible modify via extension
     // @ts-ignore
     super(...propObjects);
@@ -76,6 +80,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
     return loadOptions;
   }
 
+  /* eslint-disable camelcase */
   async getTileData(tile: TileLoadProps) {
     const tileJSON = this.props.data as TilejsonResult;
     const {tiles, properties_tiles} = tileJSON;
@@ -111,6 +116,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
 
     return attributes ? mergeBoundaryData(geometry, attributes) : geometry;
   }
+  /* eslint-enable camelcase */
 
   renderSubLayers(
     props: TileLayer['props'] & {
@@ -149,7 +155,7 @@ export default class VectorTileLayer<ExtraProps extends {} = {}> extends MVTLaye
       const {data} = params.sourceLayer!.props;
       info.object = binaryToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
-      }) as Feature;
+      }) as Feature<Geometry, FeaturePropertiesT>;
     }
 
     return info;

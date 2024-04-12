@@ -1,8 +1,8 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const lightCodeTheme = require('prism-react-renderer/themes/nightOwlLight');
+const darkCodeTheme = require('prism-react-renderer/themes/nightOwl');
 const webpack = require('webpack');
 const {resolve} = require('path');
 
@@ -48,18 +48,18 @@ const config = {
         resolve: {
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
-            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/src'),
-            '@deck.gl/arcgis': resolve('../modules/arcgis/src'),
-            '@deck.gl/carto': resolve('../modules/carto/src'),
-            '@deck.gl/core': resolve('../modules/core/src'),
-            '@deck.gl/extensions': resolve('../modules/extensions/src'),
-            '@deck.gl/geo-layers': resolve('../modules/geo-layers/src'),
-            '@deck.gl/google-maps': resolve('../modules/google-maps/src'),
-            '@deck.gl/json': resolve('../modules/json/src'),
-            '@deck.gl/layers': resolve('../modules/layers/src'),
-            '@deck.gl/mapbox': resolve('../modules/mapbox/src'),
-            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/src'),
-            '@deck.gl/react': resolve('../modules/react/src'),
+            '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers'),
+            '@deck.gl/arcgis': resolve('../modules/arcgis'),
+            '@deck.gl/carto': resolve('../modules/carto'),
+            '@deck.gl/core': resolve('../modules/core'),
+            '@deck.gl/extensions': resolve('../modules/extensions'),
+            '@deck.gl/geo-layers': resolve('../modules/geo-layers'),
+            '@deck.gl/google-maps': resolve('../modules/google-maps'),
+            '@deck.gl/json': resolve('../modules/json'),
+            '@deck.gl/layers': resolve('../modules/layers'),
+            '@deck.gl/mapbox': resolve('../modules/mapbox'),
+            '@deck.gl/mesh-layers': resolve('../modules/mesh-layers'),
+            '@deck.gl/react': resolve('../modules/react'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),

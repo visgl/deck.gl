@@ -8,7 +8,7 @@ import {
 } from './utils';
 import {Deck} from '@deck.gl/core';
 
-import type {DeckProps} from '@deck.gl/core';
+import type {DeckProps, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
 const HIDE_ALL_LAYERS = () => false;
@@ -27,7 +27,19 @@ const defaultProps = {
   interleaved: true
 };
 
-export type GoogleMapsOverlayProps = DeckProps & {
+export type GoogleMapsOverlayProps = Omit<
+  DeckProps,
+  | 'width'
+  | 'height'
+  | 'gl'
+  | 'glOptions'
+  | 'parent'
+  | 'canvas'
+  | '_customRender'
+  | 'viewState'
+  | 'initialViewState'
+  | 'controller'
+> & {
   interleaved?: boolean;
 };
 
@@ -215,7 +227,8 @@ export default class GoogleMapsOverlay {
     deck.setProps({
       width,
       height,
-      viewState: {altitude, repeat: true, ...rest}
+      // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
+      viewState: {altitude, ...rest} as MapViewState
     });
     // Deck is initialized
     deck.redraw();

@@ -20,7 +20,7 @@ const useLocalLuma = false;
 /** @type {OcularConfig} */
 const config = {
   lint: {
-    paths: ['modules', 'test']
+    paths: ['modules', 'test', 'examples']
     // paths: ['modules', 'test', 'examples', 'website']
   },
 
@@ -35,7 +35,6 @@ const config = {
       '@deck.gl/*': 'globalThis.deck',
       '@luma.gl/core': 'globalThis.luma',
       '@luma.gl/engine': 'globalThis.luma',
-      '@luma.gl/webgl': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
       'h3-js': 'globalThis.h3 || {}'
     }

@@ -3,7 +3,7 @@ import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
-import type {Effect, PostRenderOptions} from '../lib/effect';
+import type {Effect, EffectContext, PostRenderOptions} from '../lib/effect';
 
 export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
@@ -18,6 +18,10 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
     this.module = module;
   }
 
+  setup({device}: EffectContext) {
+    this.passes = createPasses(device, this.module, this.id);
+  }
+
   setProps(props: ShaderPassT['props']) {
     this.props = props;
   }
@@ -25,29 +29,27 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   preRender(): void {}
 
-  postRender(device: Device, params: PostRenderOptions): Framebuffer {
-    const passes = this.passes || createPasses(device, this.module, this.id);
-    this.passes = passes;
+  postRender(params: PostRenderOptions): Framebuffer {
+    const passes = this.passes!;
 
     const {target} = params;
     let inputBuffer = params.inputBuffer;
     let outputBuffer: Framebuffer | null = params.swapBuffer;
 
-    for (let index = 0; index < this.passes.length; index++) {
-      const isLastPass = index === this.passes.length - 1;
+    for (let index = 0; index < passes.length; index++) {
+      const isLastPass = index === passes.length - 1;
       const renderToTarget = target !== undefined && isLastPass;
       if (renderToTarget) {
         outputBuffer = target;
       }
+      const clearCanvas = !renderToTarget || Boolean(params.clearCanvas);
       const moduleSettings = {};
       moduleSettings[this.module.name] = this.props;
-      this.passes[index].render({inputBuffer, outputBuffer, moduleSettings});
+      passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleSettings});
 
-      if (!renderToTarget) {
-        const switchBuffer = outputBuffer as Framebuffer;
-        outputBuffer = inputBuffer;
-        inputBuffer = switchBuffer;
-      }
+      const switchBuffer = outputBuffer as Framebuffer;
+      outputBuffer = inputBuffer;
+      inputBuffer = switchBuffer;
     }
     return inputBuffer;
   }

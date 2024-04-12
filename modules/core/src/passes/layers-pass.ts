@@ -1,4 +1,4 @@
-import type {Device} from '@luma.gl/core';
+import type {Device, RenderPassParameters} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 
 import Pass from './pass';
@@ -24,6 +24,8 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  colorMask?: number;
+  scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
   moduleParameters?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
@@ -62,14 +64,21 @@ export default class LayersPass extends Pass {
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
-    const clearColor = options.clearColor ?? clearCanvas ? [0, 0, 0, 0] : false;
+    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     const clearDepth = clearCanvas ? 1 : false;
+    const colorMask = options.colorMask ?? 0xf;
+
+    const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
+    if (options.colorMask) {
+      parameters.colorMask = colorMask;
+    }
+    if (options.scissorRect) {
+      parameters.scissorRect = options.scissorRect;
+    }
 
     const renderPass = this.device.beginRenderPass({
       framebuffer: options.target,
-      parameters: {
-        viewport: [0, 0, width, height]
-      },
+      parameters,
       clearColor,
       clearDepth
     });
@@ -181,7 +190,10 @@ export default class LayersPass extends Pass {
           pass,
           moduleParameters
         );
-        layerParam.layerParameters = this.getLayerParameters(layer, layerIndex, viewport);
+        layerParam.layerParameters = {
+          ...layer.context.deck?.props.parameters,
+          ...this.getLayerParameters(layer, layerIndex, viewport)
+        };
       }
       drawLayerParams[layerIndex] = layerParam;
     }
@@ -203,20 +215,16 @@ export default class LayersPass extends Pass {
       viewport
     });
 
-    // TODO v9 - since clearing is done in renderPass construction in luma.gl v9
-    // we have a choice
+    // TODO v9 - remove WebGL specific logic
     if (view && view.props.clear) {
-      console.warn(`${view.id}: Per view clearing not yet implemented in deck.gl v9`);
-
-      // const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      // withGLParameters(
-      //   device,
-      //   {
-      //     scissorTest: true,
-      //     scissor: glViewport
-      //   },
-      //   () => clear(device, clearOpts)
-      // );
+      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
+      this.device.withParametersWebGL(
+        {
+          scissorTest: true,
+          scissor: glViewport
+        },
+        () => this.device.clearWebGL(clearOpts)
+      );
     }
 
     // render layers in normal colors

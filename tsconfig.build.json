@@ -7,7 +7,7 @@
   },
   "references": [
     {"path": "modules/aggregation-layers"},
-    // {"path": "modules/arcgis"},
+    {"path": "modules/arcgis"},
     {"path": "modules/carto"},
     {"path": "modules/core"},
     {"path": "modules/extensions"},

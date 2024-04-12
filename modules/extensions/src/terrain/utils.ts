@@ -6,23 +6,29 @@ export function createRenderTarget(
   opts: {
     id: string;
     float?: boolean;
+    interpolate?: boolean;
   }
 ) {
   return device.createFramebuffer({
     id: opts.id,
     colorAttachments: [
       device.createTexture({
+        id: opts.id,
         ...(opts.float && {
-          format: device.info.type === 'webgl2' ? 'rgba32float' : 'rgba8unorm',
+          format: 'rgba32float',
           type: GL.FLOAT
         }),
         mipmaps: false,
-        sampler: {
-          minFilter: 'linear',
-          magFilter: 'linear',
-          addressModeU: 'clamp-to-edge',
-          addressModeV: 'clamp-to-edge'
-        }
+        sampler:
+          opts.interpolate === false
+            ? {
+                minFilter: 'nearest',
+                magFilter: 'nearest'
+              }
+            : {
+                minFilter: 'linear',
+                magFilter: 'linear'
+              }
       })
     ]
   });

@@ -20,7 +20,6 @@
 import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/constants';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -165,7 +164,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     attributeManager!.addInstanced({
       instancePositions: {
         size: 3,
-        type: GL.DOUBLE,
+        type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
@@ -190,15 +189,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       },
       instanceColorModes: {
         size: 1,
-        type: GL.UNSIGNED_BYTE,
+        type: 'uint8',
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         transform: this.getInstanceColorMode
       },
       instanceColors: {
         size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
+        type: 'unorm8',
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR

@@ -9,7 +9,7 @@ const AIR_PORTS =
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   center: [0.45, 51.47],
   zoom: 4,
   bearing: 0,
@@ -17,6 +17,7 @@ const map = new maplibregl.Map({
 });
 
 const deckOverlay = new DeckOverlay({
+  // interleaved: true,
   layers: [
     new GeoJsonLayer({
       id: 'airports',
@@ -33,6 +34,7 @@ const deckOverlay = new DeckOverlay({
       onClick: info =>
         // eslint-disable-next-line
         info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',

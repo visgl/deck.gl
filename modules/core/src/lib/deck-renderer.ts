@@ -16,7 +16,7 @@ type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
   device: Device;
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
@@ -84,6 +84,7 @@ export default class DeckRenderer {
     const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
+      renderOpts.clearCanvas = true;
     }
     const renderStats = layerPass.render({...renderOpts, target: outputBuffer});
 
@@ -117,7 +118,7 @@ export default class DeckRenderer {
     opts.preRenderStats = opts.preRenderStats || {};
 
     for (const effect of effects) {
-      opts.preRenderStats[effect.id] = effect.preRender(this.device, opts);
+      opts.preRenderStats[effect.id] = effect.preRender(opts);
       if (effect.postRender) {
         this.lastPostProcessEffect = effect.id;
       }
@@ -158,13 +159,12 @@ export default class DeckRenderer {
     };
     for (const effect of effects) {
       if (effect.postRender) {
-        if (effect.id === this.lastPostProcessEffect) {
-          params.target = opts.target;
-          effect.postRender(this.device, params);
-          break;
-        }
-        const buffer = effect.postRender(this.device, params);
-        params.inputBuffer = buffer;
+        // If not the last post processing effect, unset the target so that
+        // it only renders between the swap buffers
+        params.target = effect.id === this.lastPostProcessEffect ? opts.target : undefined;
+        const buffer = effect.postRender(params);
+        // Buffer cannot be null if target is unset
+        params.inputBuffer = buffer!;
         params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }
     }
