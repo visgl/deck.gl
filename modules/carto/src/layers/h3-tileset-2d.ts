@@ -5,10 +5,42 @@ import {
   getResolution,
   cellToBoundary,
   cellToParent,
-  gridDisk
+  gridDisk,
+  edgeLength,
+  UNITS,
+  originToDirectedEdges
 } from 'h3-js';
 
 export type H3TileIndex = {i: string};
+
+const MAX_LATITUDE = 85.051128;
+
+// `polygonToCells()` fills based on hexagon center, this function will
+// pad the bounds such that all cells that overlap the bounds will be included
+function padBoundingBox(
+  {west, north, east, south}: GeoBoundingBox,
+  resolution: number
+): GeoBoundingBox {
+  const corners = [
+    [north, east],
+    [south, east],
+    [south, west],
+    [north, west]
+  ];
+  const cornerCells = corners.map(c => latLngToCell(c[0], c[1], resolution));
+  const cornerEdgeLengths = cornerCells.map(
+    c => (Math.max(...originToDirectedEdges(c).map(e => edgeLength(e, UNITS.rads))) * 180) / Math.PI
+  );
+  const bufferLat = Math.max(...cornerEdgeLengths);
+  const bufferLon = Math.min(180, bufferLat / Math.cos((((north + south) / 2) * Math.PI) / 180));
+
+  return {
+    north: Math.min(north + bufferLat, MAX_LATITUDE),
+    east: east + bufferLon,
+    south: Math.max(south - bufferLat, -MAX_LATITUDE),
+    west: west - bufferLon
+  };
+}
 
 function getHexagonsInBoundingBox(
   {west, north, east, south}: GeoBoundingBox,
@@ -21,8 +53,8 @@ function getHexagonsInBoundingBox(
     const nSegments = Math.ceil(longitudeSpan / 180);
     let h3Indices: string[] = [];
     for (let s = 0; s < nSegments; s++) {
-      const segmentEast = east + s * 180;
-      const segmentWest = Math.min(segmentEast + 179.9999999, west);
+      const segmentWest = west + s * 180;
+      const segmentEast = Math.min(segmentWest + 179.9999999, east);
       h3Indices = h3Indices.concat(
         getHexagonsInBoundingBox({west: segmentWest, north, east: segmentEast, south}, resolution)
       );
@@ -30,24 +62,14 @@ function getHexagonsInBoundingBox(
     return [...new Set(h3Indices)];
   }
 
-  // `polygonToCells()` fills based on hexagon center, which means tiles vanish
-  // prematurely. Get more accurate coverage by oversampling
-  const oversample = 2;
-  const h3Indices = polygonToCells(
-    [
-      [
-        [west, north],
-        [west, south],
-        [east, south],
-        [east, north],
-        [west, north]
-      ]
-    ],
-    resolution + oversample,
-    true
-  );
-
-  return oversample ? [...new Set(h3Indices.map(i => cellToParent(i, resolution)))] : h3Indices;
+  const polygon = [
+    [north, east],
+    [south, east],
+    [south, west],
+    [north, west],
+    [north, east]
+  ];
+  return polygonToCells(polygon, resolution);
 }
 
 function tileToBoundingBox(index: string): GeoBoundingBox {
@@ -89,7 +111,7 @@ export default class H3Tileset2D extends Tileset2D {
   // @ts-expect-error Tileset2D should be generic over TileIndex
   getTileIndices({viewport, minZoom, maxZoom}): H3TileIndex[] {
     if (viewport.latitude === undefined) return [];
-    const [east, south, west, north] = viewport.getBounds();
+    const [west, south, east, north] = viewport.getBounds();
     const {tileSize} = this.opts;
 
     let z = getHexagonResolution(viewport, tileSize);
@@ -106,7 +128,8 @@ export default class H3Tileset2D extends Tileset2D {
       const center = latLngToCell(viewport.latitude, viewport.longitude, maxZoom);
       indices = gridDisk(center, 1);
     } else {
-      indices = getHexagonsInBoundingBox({west, north, east, south}, z);
+      const paddedBounds = padBoundingBox({west, north, east, south}, z);
+      indices = getHexagonsInBoundingBox(paddedBounds, z);
     }
 
     return indices.map(i => ({i}));
