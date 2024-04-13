@@ -38,8 +38,8 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.0.9",
-    "@luma.gl/shadertools": "^9.0.9",
+    "@luma.gl/constants": "^9.0.10",
+    "@luma.gl/shadertools": "^9.0.10",
     "@math.gl/web-mercator": "^4.0.0",
     "d3-hexbin": "^0.2.1"
   },
