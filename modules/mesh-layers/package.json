@@ -3,7 +3,7 @@
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.7",
+  "version": "9.0.8",
   "publishConfig": {
     "access": "public"
   },

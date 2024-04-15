@@ -3,7 +3,7 @@
   "description": "UI widgets for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.7",
+  "version": "9.0.8",
   "publishConfig": {
     "access": "public"
   },

@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.8] - Apr 15 2024
+
+- CARTO: Improve H3Tileset2D.getTileIndices() by adding buffer (#8781)
+
 #### deck.gl [9.0.7] - Apr 11 2024
 
 - CARTO: added the deckGl version to the map instantiation request (#8783)
