@@ -29,12 +29,24 @@ class AggregationOptions(Options):
     aggregation_exp: str
     aggregation_res_level: NotRequired[int]
 
+# VALIDATORS
+
+# The 'interface' arguments are unused, but could be used with
+# 'get_type_hints' to provide type hints in the future.
+
 def validate_str(interface: type[Options], args: Options, arg: str, required: bool = True):
-    """Validates given key on an options object."""
-    # The 'interface' argument is unused, but could be used with
-    # 'get_type_hints' to provide type hints in the future.
+    """Validates given key on an options object is a string."""
     if not arg in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
+    elif arg in args:
+        assert type(args[arg]) is str, 'Argument {} must be of type str'.format(arg)
+
+def validate_int(interface: type[Options], args: Options, arg: str, required: bool = True):
+    """Validates given key on an options object is an int."""
+    if not arg in args and required:
+        raise AssertionError('Missing argument "{}".'.format(arg))
+    elif arg in args:
+        assert type(args[arg]) is int, 'Argument {} must be of type int'.format(arg)
 
 # BASE
 
@@ -85,6 +97,7 @@ def column_options(**kwargs: Unpack[ColumnOptions]):
 def aggregation_options(**kwargs: Unpack[AggregationOptions]):
     assert_type(kwargs, AggregationOptions)
     validate_str(AggregationOptions, kwargs, "aggregation_exp")
+    validate_int(AggregationOptions, kwargs, "aggregation_res_level", False)
     return {
         "aggregationExp": kwargs["aggregation_exp"],
         "aggregationResLevel": kwargs.get("aggregation_res_level")
