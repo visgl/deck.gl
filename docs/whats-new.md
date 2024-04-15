@@ -2,7 +2,7 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v9.0.0
+## deck.gl v9.0
 
 Release date: March 21, 2024
 

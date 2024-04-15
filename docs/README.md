@@ -1,17 +1,21 @@
 # Introduction
-
+  
 <p align="center">
   These docs are for
   <a href="https://github.com/visgl/deck.gl/blob/9.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v9.0-brightgreen.svg?style=flat-square" />
   </a>
+</p>
+<p align="center">
   Looking for an old version?
   <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v8.x-brightgreen.svg?style=flat-square" />
   </a>
+  &nbsp;
   <a href="https://github.com/visgl/deck.gl/blob/7.3-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v7.x-green.svg?style=flat-square" />
   </a>
+  &nbsp;
   <a href="https://github.com/visgl/deck.gl/blob/6.4-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.x-green.svg?style=flat-square" />
   </a>
