@@ -11,11 +11,11 @@ class BaseSourceOptions(Options):
     access_token: str
     api_base_url: str
 
-class TableSourceOptions(BaseSourceOptions, total=False):
+class TableSourceOptions(BaseSourceOptions):
     table_name: str
     spatial_data_column: NotRequired[str]
 
-class QuerySourceOptions(BaseSourceOptions, total=False):
+class QuerySourceOptions(BaseSourceOptions):
     sql_query: str
     spatial_data_column: NotRequired[str]
 
