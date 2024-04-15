@@ -40,7 +40,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
   const [radius, setRadius] = useState(20);
 
   const linearGradient = getPaletteGradient(palette);
-  const colorRange = getPalette(palette);
+  const colorRange = getPalette(palette, false);
 
   layers = layers.map((l: any) => {
     const {layerName} = l.constructor;

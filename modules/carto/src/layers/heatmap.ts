@@ -140,9 +140,7 @@ export type HeatmapProps = {
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
-  colorRange?: Color[];
-
-  palette?: string;
+  colorRange: Color[];
 };
 
 export type HeatmapUniforms = {
@@ -179,9 +177,8 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color6: 'vec3<f32>'
   },
   getUniforms: opts => {
-    const {palette, radiusPixels = 20, colorDomain = [0, 1]} = opts as HeatmapProps;
-    const colors = getPalette(palette, false);
-    const [color1, color2, color3, color4, color5, color6] = colors;
+    const {colorRange, radiusPixels = 20, colorDomain = [0, 1]} = opts as HeatmapProps;
+    const [color1, color2, color3, color4, color5, color6] = colorRange;
     return {
       color1,
       color2,
