@@ -5,6 +5,7 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import {heatmap} from './heatmap';
 import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
 import QuadbinTileLayer from './quadbin-tile-layer';
+import {CompositeLayer, Layer} from '@deck.gl/core';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
@@ -40,7 +41,28 @@ class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
 }
 
 // Modify QuadbinTileLayer to apply heatmap post process effect
-const QuadbinHeatmapTileLayer = PostProcessModifier(QuadbinTileLayer, heatmap);
+const PostProcessQuadbinTileLayer = PostProcessModifier(QuadbinTileLayer, heatmap);
+class QuadbinHeatmapTileLayer extends CompositeLayer {
+  static layerName = 'QuadbinHeatmapTileLayer';
+
+  renderLayers(): Layer {
+    const {aggregationExp, aggregationResLevel, getFillColor, palette, radius, rangeScale} =
+      this.props;
+    return new PostProcessQuadbinTileLayer(
+      this.getSubLayerProps({
+        id: 'heatmap',
+        data: this.props.data,
+
+        aggregationExp,
+        aggregationResLevel,
+        getFillColor,
+        palette,
+        radius,
+        rangeScale
+      })
+    );
+  }
+}
 
 // Inject modified polygon layer as sublayer into TileLayer
 const _subLayerProps = {cell: {_subLayerProps: {fill: {type: OffscreenSolidPolygonLayer}}}};

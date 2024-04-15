@@ -3,6 +3,7 @@ import {
   CompositeLayer,
   Layer,
   LayerContext,
+  LayerProps,
   LayersList,
   PostProcessEffect,
   PostRenderOptions
@@ -23,6 +24,7 @@ interface IPostProcessLayer {
   applyPostProcess: () => void;
   enableOffscreen: Layer['draw'];
   disableOffscreen: () => void;
+  props: LayerProps;
 }
 
 type Constructor<T> = (new (...args: any[]) => T) & {layerName: string};
@@ -33,6 +35,13 @@ type DrawableCompositeLayer = CompositeLayer & {
   renderLayers(): Layer<{}> | null | LayersList;
 };
 
+function getPostProcessLayer(layer: any): IPostProcessLayer {
+  while (layer.parent && !layer.applyPostProcess) {
+    layer = layer.parent;
+  }
+  return layer as unknown as IPostProcessLayer;
+}
+
 /**
  * Dummy Layer that draws nothing, just calls back to root Layer
  */
@@ -40,11 +49,15 @@ class DrawCallbackLayer extends Layer {
   static layerName = 'DrawCallbackLayer';
 
   initializeState(this: DrawCallbackLayer): void {
-    this.id = `draw-callback-${this.root.props.id}`;
+    this.id = `draw-callback-${getPostProcessLayer(this).props.id}`;
+  }
+
+  get postProcessLayer(): IPostProcessLayer {
+    return getPostProcessLayer(this);
   }
 
   _drawLayer(this: DrawCallbackLayer) {
-    (this.root as unknown as IPostProcessLayer).applyPostProcess();
+    getPostProcessLayer(this).applyPostProcess();
   }
 }
 
@@ -56,7 +69,7 @@ export function OffscreenModifier(BaseLayer) {
     draw(this: OffscreenLayer, opts: any) {
       const {moduleParameters} = opts;
       const {picking} = moduleParameters;
-      const postProcessLayer = this.root as unknown as IPostProcessLayer;
+      const postProcessLayer = getPostProcessLayer(this);
 
       // Enable offscreen rendering
       if (!picking.isActive) {
