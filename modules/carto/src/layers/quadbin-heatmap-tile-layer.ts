@@ -70,7 +70,7 @@ class QuadbinHeatmapTileLayer extends CompositeLayer {
 
         getFillColor: d => {
           const v = getWeight(d);
-          return [v % 256, Math.floor(v / 256), Math.floor(v / (256 * 256)), 0];
+          return [v % 256, Math.floor(v / 256), Math.floor(v / (256 * 256))];
         },
         palette,
         radius,
