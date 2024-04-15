@@ -1,5 +1,5 @@
 import pydeck as pdk
-from typing import TypedDict, List
+from typing import Any, TypedDict, List
 from typing_extensions import NotRequired, Unpack, assert_type
 
 # TYPES
@@ -45,7 +45,7 @@ class AggregationOptions(Options):
 
 
 def validate_str(
-    interface: type[Options], args: Options, arg: str, required: bool = True
+    interface: Any, args: Options, arg: str, required: bool = True
 ):
     """Validates given key on an options object is a string."""
     if arg not in args and required:
@@ -55,7 +55,7 @@ def validate_str(
 
 
 def validate_int(
-    interface: type[Options], args: Options, arg: str, required: bool = True
+    interface: Any, args: Options, arg: str, required: bool = True
 ):
     """Validates given key on an options object is an int."""
     if arg not in args and required:
