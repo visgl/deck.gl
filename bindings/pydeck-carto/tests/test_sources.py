@@ -26,10 +26,11 @@ base_options_serialized: Any = {
 
 # VECTOR
 
+
 def test_vector_table_source():
     assert vector_table_source(
-        table_name = "project.database.table",
-        spatial_data_column = "geom",
+        table_name="project.database.table",
+        spatial_data_column="geom",
         **base_options,
     ).serialize() == {
         "@@function": "vectorTableSource",
@@ -38,6 +39,7 @@ def test_vector_table_source():
         "columns": None,
         **base_options_serialized,
     }
+
 
 def test_vector_query_source():
     assert vector_query_source(
@@ -63,7 +65,9 @@ def test_vector_tileset_source():
         **base_options_serialized,
     }
 
+
 # H3
+
 
 def test_h3_table_source():
     assert h3_table_source(
@@ -113,7 +117,9 @@ def test_h3_tileset_source():
         **base_options_serialized,
     }
 
+
 # QUADBIN
+
 
 def test_quadbin_table_source():
     assert quadbin_table_source(
@@ -163,7 +169,9 @@ def test_quadbin_tileset_source():
         **base_options_serialized,
     }
 
+
 # RASTER
 
+
 def test_raster_tileset_source():
-    assert True # TODO
+    assert True  # TODO
