@@ -51,7 +51,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       // Heatmap effect props
       palette,
       radiusPixels: radius,
-      rangeScale,
+      colorDomain: [0, rangeScale],
 
       getWeight: d => d.properties.population_sum,
       pickable: false

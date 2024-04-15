@@ -2,7 +2,7 @@ import {getResolution} from 'quadbin';
 
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
-import {heatmap} from './heatmap';
+import {HeatmapProps, heatmap} from './heatmap';
 import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
 import {
@@ -61,42 +61,29 @@ export type QuadbinHeatmapTileLayerProps<DataT = unknown> = _QuadbinHeatmapTileL
   QuadbinTileLayerProps;
 
 /** Properties added by QuadbinHeatmapTileLayer. */
-type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> & {
-  /**
-   * Radius of the circle in pixels, to which the weight of an object is distributed.
-   *
-   * @default 30
-   */
-  radiusPixels?: number;
+type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
+  HeatmapProps & {
+    /**
+     * Specified as an array of colors [color1, color2, ...].
+     *
+     * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+     */
+    colorRange?: Color[];
 
-  /**
-   * Specified as an array of colors [color1, color2, ...].
-   *
-   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
-   */
-  colorRange?: Color[];
+    /**
+     * Value that is multiplied with the total weight at a pixel to obtain the final weight.
+     *
+     * @default 1
+     */
+    intensity?: number;
 
-  /**
-   * Value that is multiplied with the total weight at a pixel to obtain the final weight.
-   *
-   * @default 1
-   */
-  intensity?: number;
-
-  /**
-   * Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
-   *
-   * @default null
-   */
-  colorDomain?: [number, number] | null;
-
-  /**
-   * The weight of each object.
-   *
-   * @default 1
-   */
-  getWeight?: Accessor<DataT, number>;
-};
+    /**
+     * The weight of each object.
+     *
+     * @default 1
+     */
+    getWeight?: Accessor<DataT, number>;
+  };
 
 class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
   ExtraProps & Required<_QuadbinHeatmapTileLayerProps<DataT>>
@@ -105,7 +92,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
   static defaultProps = defaultProps;
 
   renderLayers(): Layer {
-    const {getWeight, palette, radiusPixels, rangeScale, _subLayerProps} = this.props;
+    const {getWeight, palette, radiusPixels, colorDomain, _subLayerProps} = this.props;
 
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
@@ -139,7 +126,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
         getFillColor,
         palette,
         radiusPixels,
-        rangeScale,
+        colorDomain,
         _subLayerProps: subLayerProps
       })
     );
