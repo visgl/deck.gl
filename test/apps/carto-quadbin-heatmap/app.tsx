@@ -36,8 +36,8 @@ function getTooltip(info?: PickingInfo): any {
 
 export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapStyle = MAP_STYLE}) {
   const [palette, setPalette] = useState(Object.values(PALETTES)[0]);
-  const [rangeScale, setRangeScale] = useState(300);
-  const [radius, setRadius] = useState(20);
+  const [colorDomain, setColorDomain] = useState<[number, number]>([0, 300]);
+  const [radiusPixels, setRadiusPixels] = useState(20);
 
   const linearGradient = getPaletteGradient(palette);
   const colorRange = getPalette(palette, false);
@@ -50,12 +50,13 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
 
     return new QuadbinHeatmapTileLayer(l.props, {
       // Heatmap effect props
+      colorDomain,
       colorRange,
-      radiusPixels: radius,
-      colorDomain: [0, rangeScale],
+      radiusPixels ,
 
       getWeight: d => d.properties.population_sum,
-      pickable: false
+      pickable: false,
+      opacity: 0.8
     });
   });
 
@@ -87,16 +88,19 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
         bottom={60}
         min={10}
         max={1000}
-        value={rangeScale}
-        onChange={setRangeScale}
-        formatLabel={(x: number) => formatLabel(x, 'intensity')}
+        value={colorDomain}
+        onChange={setColorDomain}
+        formatLabel={(x: number, index: number) => {
+          const label = index ===0 ? 'min' : 'max';
+          return formatLabel(x, label);
+        }}
       />
       <RangeInput
         bottom={0}
         min={0}
         max={30}
-        value={radius}
-        onChange={setRadius}
+        value={radiusPixels}
+        onChange={setRadiusPixels}
         formatLabel={(x: number) => formatLabel(x, 'radius')}
       />
     </>

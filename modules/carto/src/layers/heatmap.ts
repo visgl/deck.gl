@@ -21,6 +21,7 @@ uniform heatmapUniforms {
   vec3 color4;
   vec3 color5;
   vec3 color6;
+  float opacity;
 } heatmap;
 
 // Controls quality of heatmap, larger values increase quality at expense of performance
@@ -82,12 +83,17 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   }
 
   float value = accumulator / total;
-  value /= heatmap.colorDomain[1];
+
+  // Apply domain
+  value = (value - heatmap.colorDomain[0]) / (heatmap.colorDomain[1] - heatmap.colorDomain[0]);
 
   // Color map
   vec4 color = vec4(0.0);
   color.rgb = colorGradient(value);
-  color.a = 0.8 * smoothstep(0.0, 0.05, value);
+
+  color.a = smoothstep(0.0, 0.1, value);
+  color.a = pow(color.a, 1.0 / 2.2);
+  color.a *= heatmap.opacity;
 
   return color;
 }
@@ -141,6 +147,7 @@ export type HeatmapProps = {
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange: Color[];
+  opacity: number;
 };
 
 export type HeatmapUniforms = {
@@ -152,6 +159,7 @@ export type HeatmapUniforms = {
   color4?: [number, number, number];
   color5?: [number, number, number];
   color6?: [number, number, number];
+  opacity?: number;
 };
 
 export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
@@ -164,7 +172,8 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color3: {value: [0, 0, 0]},
     color4: {value: [0, 0, 0]},
     color5: {value: [0, 0, 0]},
-    color6: {value: [0, 0, 0]}
+    color6: {value: [0, 0, 0]},
+    opacity: {value: 1, min: 0, max: 1}
   },
   uniformTypes: {
     radiusPixels: 'f32',
@@ -174,10 +183,11 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color3: 'vec3<f32>',
     color4: 'vec3<f32>',
     color5: 'vec3<f32>',
-    color6: 'vec3<f32>'
+    color6: 'vec3<f32>',
+    opacity: 'f32'
   },
   getUniforms: opts => {
-    const {colorRange, radiusPixels = 20, colorDomain = [0, 1]} = opts as HeatmapProps;
+    const {colorRange, radiusPixels = 20, colorDomain = [0, 1], opacity = 1} = opts as HeatmapProps;
     const [color1, color2, color3, color4, color5, color6] = colorRange;
     return {
       color1,
@@ -187,7 +197,8 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       color5,
       color6,
       radiusPixels,
-      colorDomain
+      colorDomain,
+      opacity
     };
   },
   dependencies: [random],
