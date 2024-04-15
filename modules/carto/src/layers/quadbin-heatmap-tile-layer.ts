@@ -4,8 +4,15 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {heatmap} from './heatmap';
 import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
-import QuadbinTileLayer from './quadbin-tile-layer';
-import {CompositeLayer, Layer} from '@deck.gl/core';
+import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
+import {
+  Accessor,
+  AccessorFunction,
+  Color,
+  CompositeLayer,
+  DefaultProps,
+  Layer
+} from '@deck.gl/core';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
@@ -42,8 +49,60 @@ class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
 
 // Modify QuadbinTileLayer to apply heatmap post process effect
 const PostProcessQuadbinTileLayer = PostProcessModifier(QuadbinTileLayer, heatmap);
-class QuadbinHeatmapTileLayer extends CompositeLayer {
+
+const defaultProps: DefaultProps<QuadbinHeatmapTileLayerProps> = {
+  ...QuadbinTileLayer.defaultProps,
+
+  getWeight: {type: 'accessor', value: 1}
+};
+
+/** All properties supported by QuadbinHeatmapTileLayer. */
+export type QuadbinHeatmapTileLayerProps<DataT = unknown> = _QuadbinHeatmapTileLayerProps<DataT> &
+  QuadbinTileLayerProps;
+
+/** Properties added by QuadbinHeatmapTileLayer. */
+type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> & {
+  /**
+   * Radius of the circle in pixels, to which the weight of an object is distributed.
+   *
+   * @default 30
+   */
+  radiusPixels?: number;
+
+  /**
+   * Specified as an array of colors [color1, color2, ...].
+   *
+   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   */
+  colorRange?: Color[];
+
+  /**
+   * Value that is multiplied with the total weight at a pixel to obtain the final weight.
+   *
+   * @default 1
+   */
+  intensity?: number;
+
+  /**
+   * Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
+   *
+   * @default null
+   */
+  colorDomain?: [number, number] | null;
+
+  /**
+   * The weight of each object.
+   *
+   * @default 1
+   */
+  getWeight?: Accessor<DataT, number>;
+};
+
+class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends CompositeLayer<
+  ExtraProps & Required<_QuadbinHeatmapTileLayerProps<DataT>>
+> {
   static layerName = 'QuadbinHeatmapTileLayer';
+  static defaultProps = defaultProps;
 
   renderLayers(): Layer {
     const {getWeight, palette, radius, rangeScale, _subLayerProps} = this.props;
@@ -63,15 +122,21 @@ class QuadbinHeatmapTileLayer extends CompositeLayer {
       }
     };
 
+    function encodeWeight(w: number) {
+      return [w % 256, Math.floor(w / 256), Math.floor(w / (256 * 256))];
+    }
+
+    const getFillColor =
+      typeof getWeight === 'function'
+        ? (d, info) => encodeWeight(getWeight(d, info))
+        : encodeWeight(getWeight);
+
     return new PostProcessQuadbinTileLayer(
       this.getSubLayerProps({
         id: 'heatmap',
         data: this.props.data,
 
-        getFillColor: d => {
-          const v = getWeight(d);
-          return [v % 256, Math.floor(v / 256), Math.floor(v / (256 * 256))];
-        },
+        getFillColor,
         palette,
         radius,
         rangeScale,

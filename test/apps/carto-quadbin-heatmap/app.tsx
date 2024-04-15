@@ -53,11 +53,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       radius,
       rangeScale,
 
-      // TODO hacky way to pass in data, would be better to not use SolidPolygonLayer
-      getFillColor: d => {
-        let v = d.properties.population_sum;
-        return [v % 256, Math.floor(v / 256), Math.floor(v / (256 * 256)), 0];
-      },
+      // getWeight: d => d.properties.population_sum,
       pickable: false
     });
   });
