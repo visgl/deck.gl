@@ -46,30 +46,36 @@ class QuadbinHeatmapTileLayer extends CompositeLayer {
   static layerName = 'QuadbinHeatmapTileLayer';
 
   renderLayers(): Layer {
-    const {aggregationExp, aggregationResLevel, getFillColor, palette, radius, rangeScale} =
-      this.props;
+    const {getFillColor, palette, radius, rangeScale, _subLayerProps} = this.props;
+
+    // Inject modified polygon layer as sublayer into TileLayer
+    const subLayerProps = {
+      ..._subLayerProps,
+      cell: {
+        ..._subLayerProps?.cell,
+        _subLayerProps: {
+          ..._subLayerProps?.cell?._subLayerProps,
+          fill: {
+            ..._subLayerProps?.cell?._subLayerProps?.fill,
+            type: OffscreenSolidPolygonLayer
+          }
+        }
+      }
+    };
+
     return new PostProcessQuadbinTileLayer(
       this.getSubLayerProps({
         id: 'heatmap',
         data: this.props.data,
 
-        aggregationExp,
-        aggregationResLevel,
         getFillColor,
         palette,
         radius,
-        rangeScale
+        rangeScale,
+        _subLayerProps: subLayerProps
       })
     );
   }
 }
 
-// Inject modified polygon layer as sublayer into TileLayer
-const _subLayerProps = {cell: {_subLayerProps: {fill: {type: OffscreenSolidPolygonLayer}}}};
-QuadbinHeatmapTileLayer.defaultProps._subLayerProps = _subLayerProps;
-
 export default QuadbinHeatmapTileLayer;
-
-// Can also work with H3 in theory
-// const PostProcessH3TileLayer = PostProcessModifier(H3TileLayer, heatmap);
-// const _subLayerProps = {'hexagon-cell-hifi': {_subLayerProps: {fill: {type: OffscreenSolidPolygonLayer}}}};
