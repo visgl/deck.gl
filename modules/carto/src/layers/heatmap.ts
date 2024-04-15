@@ -5,14 +5,14 @@ const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
  * @filter       Heatmap
- * @param radius Blur radius, controls smoothness of heatmap
+ * @param radiusPixels Blur radius in pixels, controls smoothness of heatmap
  * @param rangeScale Scale factor to apply to values prior to applying color scale
  * @param color1-6 Colors to use in color scale
  */
 
 const fs = glsl`\
 uniform heatmapUniforms {
-  float radius;
+  float radiusPixels;
   float rangeScale;
   vec3 color1;
   vec3 color2;
@@ -65,7 +65,7 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   for (float t = -SUPPORT; t <= SUPPORT; t++) {
   for (float s = -SUPPORT; s <= SUPPORT; s++) {
     vec2 percent = (vec2(s, t) + offset - 0.5) / SUPPORT;
-    vec2 delta = percent * heatmap.radius / texSize;
+    vec2 delta = percent * heatmap.radiusPixels / texSize;
     vec4 offsetColor = texture(source, texCoord + delta);
 
     // Unpack float
@@ -122,13 +122,13 @@ export function getPaletteGradient(paletteName: string) {
 }
 
 export type HeatmapProps = {
-  radius?: number;
+  radiusPixels?: number;
   rangeScale?: number;
   palette?: string;
 };
 
 export type HeatmapUniforms = {
-  radius?: number;
+  radiusPixels?: number;
   rangeScale?: number;
   color1?: [number, number, number];
   color2?: [number, number, number];
@@ -141,7 +141,7 @@ export type HeatmapUniforms = {
 export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
   name: 'heatmap',
   uniformPropTypes: {
-    radius: {value: 20, min: 0, softMax: 100},
+    radiusPixels: {value: 20, min: 0, softMax: 100},
     rangeScale: {value: 1, min: 0},
     color1: {value: [0, 0, 0]},
     color2: {value: [0, 0, 0]},
@@ -151,7 +151,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color6: {value: [0, 0, 0]}
   },
   uniformTypes: {
-    radius: 'f32',
+    radiusPixels: 'f32',
     rangeScale: 'f32',
     color1: 'vec3<f32>',
     color2: 'vec3<f32>',
@@ -161,7 +161,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color6: 'vec3<f32>'
   },
   getUniforms: opts => {
-    const {palette, radius = 20, rangeScale = 1} = opts as HeatmapProps;
+    const {palette, radiusPixels = 20, rangeScale = 1} = opts as HeatmapProps;
     const colors = getPalette(palette);
     const [color1, color2, color3, color4, color5, color6] = colors;
     return {
@@ -171,7 +171,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       color4,
       color5,
       color6,
-      radius,
+      radiusPixels,
       rangeScale
     };
   },

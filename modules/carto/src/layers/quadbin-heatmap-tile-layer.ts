@@ -105,7 +105,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
   static defaultProps = defaultProps;
 
   renderLayers(): Layer {
-    const {getWeight, palette, radius, rangeScale, _subLayerProps} = this.props;
+    const {getWeight, palette, radiusPixels, rangeScale, _subLayerProps} = this.props;
 
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
@@ -138,7 +138,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
 
         getFillColor,
         palette,
-        radius,
+        radiusPixels,
         rangeScale,
         _subLayerProps: subLayerProps
       })

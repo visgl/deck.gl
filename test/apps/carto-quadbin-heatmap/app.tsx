@@ -50,10 +50,10 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
     return new QuadbinHeatmapTileLayer(l.props, {
       // Heatmap effect props
       palette,
-      radius,
+      radiusPixels: radius,
       rangeScale,
 
-      // getWeight: d => d.properties.population_sum,
+      getWeight: d => d.properties.population_sum,
       pickable: false
     });
   });
