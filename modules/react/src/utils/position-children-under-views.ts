@@ -4,6 +4,7 @@ import {View} from '@deck.gl/core';
 import {inheritsFrom} from './inherits-from';
 import evaluateChildren, {isComponent} from './evaluate-children';
 
+import type {ViewOrViews} from '../deckgl';
 import type {Deck, DeckProps, Viewport} from '@deck.gl/core';
 import type {EventManager} from 'mjolnir.js';
 
@@ -16,13 +17,13 @@ export type DeckGLContextValue = {
 
 // Iterate over views and reposition children associated with views
 // TODO - Can we supply a similar function for the non-React case?
-export default function positionChildrenUnderViews({
+export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   children,
   deck,
   ContextProvider
 }: {
   children: React.ReactNode[];
-  deck?: Deck;
+  deck?: Deck<ViewsT>;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
 }): React.ReactNode[] {
   // @ts-expect-error accessing protected property

@@ -56,12 +56,15 @@ export async function baseSource<UrlParameters extends Record<string, string>>(
   errorContext.requestType = 'Map data';
 
   if (format === 'tilejson') {
-    return await requestWithParameters<TilejsonResult>({
-      accessToken,
+    const json = await requestWithParameters<TilejsonResult>({
       baseUrl: dataUrl,
       headers,
       errorContext
     });
+    if (accessToken) {
+      json.accessToken = accessToken;
+    }
+    return json;
   }
 
   return await requestWithParameters<GeojsonResult | JsonResult>({

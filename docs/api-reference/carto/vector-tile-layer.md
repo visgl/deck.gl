@@ -61,7 +61,7 @@ new deck.carto.VectorTileLayer({});
 
 The properties of [`MVTLayer`](../geo-layers/mvt-layer.md) will be inherited.
 
-##### `data` (TilejsonResult) {#data}
+#### `data` (TilejsonResult) {#data}
 
 Required. A valid `TilejsonResult` object.
 

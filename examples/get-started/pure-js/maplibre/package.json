@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0-beta",
-    "@deck.gl/layers": "^9.0.0-beta",
-    "@deck.gl/mapbox": "^9.0.0-beta",
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
+    "@deck.gl/mapbox": "^9.0.0",
     "maplibre-gl": "^3.0.0"
   },
   "devDependencies": {

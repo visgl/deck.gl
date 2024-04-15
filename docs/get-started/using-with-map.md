@@ -8,11 +8,15 @@ deck.gl has been designed to work in tandem with popular JavaScript base map pro
 
 There are two types of integration between deck.gl and a base map renderer:
 
-- **Overlaid**: the Deck canvas is rendered over the base map as a separate DOM element. Deck's camera and the camera of the base map are synchronized so they pan/zoom together. This is the more robust option since the two libraries manage their renderings independently from each other. It is usually sufficient if the base map is 2D.
+### Overlaid
+
+The Deck canvas is rendered over the base map as a separate DOM element. Deck's camera and the camera of the base map are synchronized so they pan/zoom together. This is the more robust option since the two libraries manage their renderings independently from each other. It is usually sufficient if the base map is 2D.
 
 ![Deck as overlay on top of the base map](https://miro.medium.com/max/1600/0*K3DVssEhnv5VaDCp)
 
-- **Interleaved**: Deck renders into the WebGL2 context of the base map. This allows for occlusion between deck.gl layers and the base map's labels and/or 3D features. The availability of this option depends on whether the base map solution exposes certain developer APIs, and may subject the user to bugs/limitations associated with such APIs. 
+### Interleaved
+
+Deck renders into the WebGL2 context of the base map. This allows for occlusion between deck.gl layers and the base map's labels and/or 3D features. The availability of this option depends on whether the base map solution exposes certain developer APIs, and may subject the user to bugs/limitations associated with such APIs. 
 
 > Note: Deck cannot render into a WebGL1 context. Check your base map solution for WebGL2 compatibility.
 
@@ -26,7 +30,7 @@ There are two types of integration between deck.gl and a base map renderer:
 | [harp.gl](https://www.harp.gl/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/harp.gl) |  | |
 | [Leaflet](https://leafletjs.com/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/leaflet) |  | |
 | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/mapbox) | [example](https://deck.gl/gallery/mapbox-overlay) | [link](../developer-guide/base-maps/using-with-mapbox.md) |
-| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) | [link](../developer-guide/base-maps/using-with-mapbox.md#compatibility-with-mapbox-gl-js-forks) |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js-docs/api/) | ✓ | ✓ | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/maplibre) | [example](https://deck.gl/gallery/maplibre-overlay) | [link](../developer-guide/base-maps/using-with-maplibre.md) |
 | [OpenLayers](https://openlayers.org/) | ✓ | | [example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js/openlayers) |  | |
 
 It is also important to understand the difference between the JS library that renders the map and the map data provider. For example, you can use Mapbox GL JS with the Mapbox service, but also with any other service that hosts Mapbox Vector Tiles. When using a base map, be sure to follow the terms and conditions, as well as the attribution requirements of both the JS library and the data provider.

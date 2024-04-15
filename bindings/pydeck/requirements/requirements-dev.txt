@@ -11,7 +11,7 @@ flake8
 requests
 sphinx
 recommonmark
-jupyterlab
+jupyterlab<4.0.0
 ipython>=5.8.0;python_version<"3.4"
 semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder

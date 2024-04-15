@@ -29,11 +29,10 @@
   },
   "files": [
     "dist",
-    "src",
-    "typed"
+    "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.0.6"
+    "@luma.gl/test-utils": "^9.0.9"
   },
   "peerDependencies": {
     "@deck.gl/core": "^9.0.0-beta",

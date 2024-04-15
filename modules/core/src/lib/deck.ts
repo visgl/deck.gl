@@ -36,7 +36,7 @@ import {WebGLDevice} from '@luma.gl/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import type {Device, DeviceProps, Framebuffer} from '@luma.gl/core';
+import type {Device, DeviceProps, Framebuffer, Parameters} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
@@ -57,7 +57,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip';
-import type {ViewStateMap, AnyViewStateOf, ViewOrViews} from './view-manager';
+import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
 
 /* global document */
 
@@ -90,7 +90,7 @@ type CursorState = {
   isDragging: boolean;
 };
 
-export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
+export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.
@@ -114,7 +114,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   pickingRadius?: number;
 
   /** WebGL parameters to be set before each frame is rendered. */
-  parameters?: any;
+  parameters?: Parameters;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -192,7 +192,7 @@ export type DeckProps<ViewsT extends ViewOrViews = ViewOrViews> = {
   onResize?: (dimensions: {width: number; height: number}) => void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onViewStateChange?: <ViewStateT extends AnyViewStateOf<ViewsT>>(
-    params: ViewStateChangeParameters<ViewStateT> & {viewId: string}
+    params: ViewStateChangeParameters<ViewStateT>
   ) => ViewStateT | null | void;
   /** Called when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard. */
   onInteractionStateChange?: (state: InteractionState) => void;
@@ -288,7 +288,7 @@ const defaultProps = {
 };
 
 /* eslint-disable max-statements */
-export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
+export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
   // This is used to defeat tree shaking of init.js
   // https://github.com/visgl/deck.gl/issues/3213
@@ -314,7 +314,7 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
   protected animationLoop: AnimationLoop | null = null;
 
   /** Internal view state if no callback is supplied */
-  protected viewState: ViewStateMap<ViewsT> | null;
+  protected viewState: ViewStateObject<ViewsT> | null;
   protected cursorState: CursorState = {
     isHovering: false,
     isDragging: false
@@ -391,9 +391,6 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
         ...props.deviceProps,
         canvas: this._createCanvas(props)
       });
-      deviceOrPromise.then(device => {
-        this.device = device;
-      });
     }
 
     this.animationLoop = this._createAnimationLoop(deviceOrPromise, props);
@@ -436,7 +433,7 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
     this.widgetManager?.finalize();
     this.widgetManager = null;
 
-    if (!this.props.canvas && !this.props.device && this.canvas) {
+    if (!this.props.canvas && !this.props.device && !this.props.gl && this.canvas) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
@@ -473,7 +470,7 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
       width: number;
       height: number;
       views: View[];
-      viewState: ViewStateMap<ViewsT>;
+      viewState: ViewStateObject<ViewsT> | null;
     } = Object.create(this.props);
     Object.assign(resolvedProps, {
       views: this._getViews(),
@@ -826,8 +823,8 @@ export default class Deck<ViewsT extends ViewOrViews = ViewOrViews> {
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
-  private _getViewState(): ViewStateMap<ViewsT> {
-    return this.props.viewState || this.viewState || {};
+  private _getViewState(): ViewStateObject<ViewsT> | null {
+    return this.props.viewState || this.viewState;
   }
 
   // Get the view descriptor list

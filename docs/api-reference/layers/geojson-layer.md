@@ -8,37 +8,148 @@ The `GeoJsonLayer` renders [GeoJSON](http://geojson.org) formatted data as polyg
 
 `GeoJsonLayer` is a [CompositeLayer](../core/composite-layer.md). See the [sub layers](#sub-layers) that it renders.
 
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
 ```js
-import DeckGL from '@deck.gl/react';
+import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
-function App({data, viewState}) {
-  /**
-   * Data format:
-   * Valid GeoJSON object
-   */
-  const layer = new GeoJsonLayer({
-    id: 'geojson-layer',
-    data,
-    pickable: true,
+const layer = new GeoJsonLayer({
+  id: 'GeoJsonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json',
+
+  stroked: false,
+  filled: true,
+  pointType: 'circle+text',
+  pickable: true,
+
+  getFillColor: [160, 160, 180, 200],
+  getLineColor: f => {
+    const hex = f.properties.color;
+    // convert to RGB
+    return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0];
+  },
+  getLineWidth: 20,
+  getPointRadius: 4,
+  getText: f => f.properties.name,
+  getTextSize: 12
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}) => object && object.properties.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
+
+```ts
+import {Deck, PickingInfo} from '@deck.gl/core';
+import {GeoJsonLayer} from '@deck.gl/layers';
+import type {Feature, Geometry} from 'geojson';
+
+type PropertiesType = {
+  name: string;
+  color: string;
+};
+
+const layer = new GeoJsonLayer<PropertiesType>({
+  id: 'GeoJsonLayer',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json',
+
+  stroked: false,
+  filled: true,
+  pointType: 'circle+text',
+  pickable: true,
+
+  getFillColor: [160, 160, 180, 200],
+  getLineColor: (f: Feature<Geometry, PropertiesType>) => {
+    const hex = f.properties.color;
+    // convert to RGB
+    return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0];
+  },
+  getText: (f: Feature<Geometry, PropertiesType>) => f.properties.name,
+  getLineWidth: 20,
+  getPointRadius: 4,
+  getTextSize: 12
+});
+
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.74,
+    zoom: 11
+  },
+  controller: true,
+  getTooltip: ({object}: PickingInfo<Feature<Geometry, PropertiesType>>) => object && object.properties.name,
+  layers: [layer]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
+import type {Feature, Geometry} from 'geojson';
+import type {PickingInfo} from '@deck.gl/core';
+
+type PropertiesType = {
+  name: string;
+  color: string;
+};
+
+function App() {
+  const layer = new GeoJsonLayer<PropertiesType>({
+    id: 'GeoJsonLayer',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json',
+
     stroked: false,
     filled: true,
-    extruded: true,
-    pointType: 'circle',
-    lineWidthScale: 20,
-    lineWidthMinPixels: 2,
+    pointType: 'circle+text',
+    pickable: true,
+
     getFillColor: [160, 160, 180, 200],
-    getLineColor: d => colorToRGBArray(d.properties.color),
-    getPointRadius: 100,
-    getLineWidth: 1,
-    getElevation: 30
+    getLineColor: (f: Feature<Geometry, PropertiesType>) => {
+      const hex = f.properties.color;
+      // convert to RGB
+      return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0];
+    },
+    getText: (f: Feature<Geometry, PropertiesType>) => f.properties.name,
+    getLineWidth: 20,
+    getPointRadius: 4,
+    getTextSize: 12
   });
 
-  return <DeckGL viewState={viewState}
+  return <DeckGL
+    initialViewState={{
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11
+    }}
+    controller
+    getTooltip={({object}: PickingInfo<Feature<Geometry, PropertiesType>>) => object && object.properties.name}
     layers={[layer]}
-    getTooltip={({object}) => object && (object.properties.name || object.properties.station)} />;
+  />;
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 
 ## Installation
@@ -51,18 +162,20 @@ npm install deck.gl
 npm install @deck.gl/core @deck.gl/layers
 ```
 
-```js
+```ts
 import {GeoJsonLayer} from '@deck.gl/layers';
-new GeoJsonLayer({});
+import type {GeoJsonLayerProps} from '@deck.gl/layers';
+
+new GeoJsonLayer<FeaturePropertiesT>(...props: GeoJsonLayerProps<FeaturePropertiesT>[]);
 ```
 
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@^8.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -74,7 +187,7 @@ new deck.GeoJsonLayer({});
 
 Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
-##### `data` {#data}
+#### `data` {#data}
 
 The `GeoJSONLayer` accepts any of the following formats passed to the `data` prop:
 
@@ -83,7 +196,7 @@ The `GeoJSONLayer` accepts any of the following formats passed to the `data` pro
 * An URL or Promise that resolves to the above formats.
 * loaders.gl's [flat GeoJSON format](https://loaders.gl/modules/gis/docs/api-reference/geojson-to-binary).
 
-##### `pointType` (String, optional) {#pointtype}
+#### `pointType` (string, optional) {#pointtype}
 
 * Default: `'circle'`
 
@@ -100,7 +213,7 @@ To use more than one type, join the names with `+`, for example `pointType: 'ico
 The following props control the solid fill of `Polygon` and `MultiPolygon`
 features, and the `Point` and `MultiPoint` features if `pointType` is `'circle'`.
 
-##### `filled` (Boolean, optional) {#filled}
+#### `filled` (boolean, optional) {#filled}
 
 * Default: `true`
 
@@ -109,7 +222,7 @@ only the area between the outer polygon and any holes will be filled. This
 prop is effective only when the polygon is NOT extruded.
 
 
-##### `getFillColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -126,7 +239,7 @@ The following props control the `LineString` and `MultiLineString` features,
 the outline for `Polygon` and `MultiPolygon` features, and the outline for `Point` and `MultiPoint` features if `pointType` is `'circle'`.
 
 
-##### `stroked` (Boolean, optional) {#stroked}
+#### `stroked` (boolean, optional) {#stroked}
 
 * Default: `true`
 
@@ -135,7 +248,7 @@ for complex polygons, both the outer polygon as well the outlines of
 any holes will be drawn.
 
 
-##### `getLineColor` ([Function](../../developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -145,7 +258,7 @@ The rgba color of a line is in the format of `[r, g, b, [a]]`. Each channel is a
 * If a function is provided, it is called on each feature to retrieve its line color.
 
 
-##### `getLineWidth` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
+#### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
 * Default: `1`
 
@@ -155,50 +268,50 @@ The width of a line, in units specified by `lineWidthUnits` (default meters).
 * If a function is provided, it is called on each feature to retrieve its line width.
 
 
-##### `lineWidthUnits` (String, optional) {#linewidthunits}
+#### `lineWidthUnits` (string, optional) {#linewidthunits}
 
 * Default: `'meters'`
 
 The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units).
 
-##### `lineWidthScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
+#### `lineWidthScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthscale}
 
 * Default: `1`
 
 A multiplier that is applied to all line widths.
 
-##### `lineWidthMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthminpixels}
+#### `lineWidthMinPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthminpixels}
 
 * Default: `0`
 
 The minimum line width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
 
-##### `lineWidthMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthmaxpixels}
+#### `lineWidthMaxPixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linewidthmaxpixels}
 
 * Default: Number.MAX_SAFE_INTEGER
 
 The maximum line width in pixels. This prop can be used to prevent the line from getting too thick when zoomed in.
 
-##### `lineCapRounded` (Boolean, optional) {#linecaprounded}
+#### `lineCapRounded` (boolean, optional) {#linecaprounded}
 
 * Default: `false`
 
 Type of line caps. If `true`, draw round caps. Otherwise draw square caps.
 
-##### `lineJointRounded` (Boolean, optional) {#linejointrounded}
+#### `lineJointRounded` (boolean, optional) {#linejointrounded}
 
 * Default: `false`
 
 Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 
-##### `lineMiterLimit` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linemiterlimit}
+#### `lineMiterLimit` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#linemiterlimit}
 
 * Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
-##### `lineBillboard` (Boolean, optional) {#linebillboard}
+#### `lineBillboard` (boolean, optional) {#linebillboard}
 
 * Default: `false`
 
@@ -209,14 +322,14 @@ If `false`, the width always faces up.
 
 The following props control the extrusion of `Polygon` and `MultiPolygon` features.
 
-##### `extruded` (Boolean, optional) {#extruded}
+#### `extruded` (boolean, optional) {#extruded}
 
 Extrude Polygon and MultiPolygon features along the z-axis if set to
 true. The height of the drawn features is obtained using the `getElevation` accessor.
 
 * Default: `false`
 
-##### `wireframe` (Boolean, optional) {#wireframe}
+#### `wireframe` (boolean, optional) {#wireframe}
 
 * Default: `false`
 
@@ -232,7 +345,7 @@ Remarks:
 * This is only effective if the `extruded` prop is set to true.
 
 
-##### `getElevation` ([Function](../../developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -245,7 +358,7 @@ otherwise will be in unit coordinates.
 * If a function is provided, it is called on each polygon feature to retrieve its elevation.
 
 
-##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
+#### `elevationScale` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#elevationscale}
 
 * Default: `1`
 
@@ -254,15 +367,15 @@ Elevation multiplier. The final elevation is calculated by
 all polygon elevation without updating the data.
 
 
-##### `material` (Object, optional) {#material}
+#### `material` (Material, optional) {#material}
 
 * Default: `true`
 
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
-Check [the lighting guide](../../developer-guide/using-lighting.md#constructing-a-material-instance) for configurable settings.
+Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
 
-##### `_full3d` (Boolean, optional) {#_full3d}
+#### `_full3d` (boolean, optional) {#_full3d}
 
 * Default: `false`
 
@@ -366,144 +479,181 @@ In general this format is not intended to be human readable, and rather than bei
 
 At the top level the data is grouped by geometry type, into points, lines and polygons:
 
-```js
-const data = {points: {...}, lines: {...}, polygons: {...}};
+```ts
+import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+
+const data: BinaryFeatureCollection = {
+  shape: 'binary-feature-collection',
+  // points,
+  // lines,
+  // polygons
+};
 ```
 
 When the `GeoJsonLayer` detects this data structure it assumes it is dealing with binary data, rather than standard GeoJSON. Within each geometry type the data is laid out in a format that corresponds to the buffers that will be sent to the GPU. 
 
-#### Points
+#### Point geometries
 
-For example, for the point data, the positions are encoded as a flat interleaved array with associated properties grouped by point:
+For GeoJSON features of type `Point` or `MultiPoint`, the positions are encoded as a flat interleaved array with associated properties grouped by point:
 
-```js
-points: {
-  positions: {value: Float32Array([x0, y0, x1, y1, ...]), size: 2}, // Use size: 3 for xyz
-  properties: [{name: 'name0', address: 'address0'}, {name: 'name1', ...}, ...],
-  ...
-}
+```ts
+import type {BinaryPointFeature} from '@loaders.gl/schema';
+
+data.points = {
+  type: 'Point',
+  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  // featureIds
+  // globalFeatureIds
+  // numericProps
+  // properties
+} as BinaryPointFeature
 ```
 
-#### Numeric properties
+#### LineString geometries
 
-For performance numeric properties can be passed as flat arrays:
+GeoJSON features of type `LineString` and `MultiLineString` are represented in a similar manner, with the addition of a `pathIndices` array, which contains a series of offsets into the `positions` array, specifying the vertex index where each line begins.
 
-```js
-points: {
-  ...,
+```ts
+import type {BinaryLineFeature} from '@loaders.gl/schema';
+
+data.lines = {
+  type: 'LineString',
+  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  pathIndices: {value: Uint16Array([0, 5, 7, ...]), size: 1}, // First line contains vertex 0-4, second line contains vertex 5-6, ...
+  // featureIds
+  // globalFeatureIds
+  // numericProps
+  // properties
+} as BinaryLineFeature
+```
+
+#### Polygon geometries
+
+Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies the vertex index where each polygon starts. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array.
+
+```ts
+import type {BinaryPolygonFeature} from '@loaders.gl/schema';
+
+data.polygons = {
+  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2, ...]), size: 2}, // Use size=2 for xy and size=3 for xyz
+  polygonIndices: {value: Uint16Array([0, 100, ...]), size: 1}, // First polygon contains vertex 0-99
+  primitivePolygonIndices: {value: Uint16Array([0, 60, 80, 100, ...]), size: 1}, // First polygon has 2 holes, made of vertex 60-79 and vertex 80-99
+  // featureIds
+  // globalFeatureIds
+  // numericProps
+  // properties
+} as BinaryPolygonFeature
+```
+
+#### Properties and numeric properties
+
+The `properties` field of each feature is stored in the `properties` array, for example:
+
+```ts
+data.points = {
+  type: 'Point',
+  // positions
+  // featureIds
+  // globalFeatureIds
+  // numericProps
+  properties: [{name: 'A'}, {name: 'B'}, ...]
+} as BinaryPointFeature
+```
+
+For performance, numeric properties are stored separately in typed arrays:
+
+```ts
+data.points = {
+  type: 'Point',
+  // positions
+  // featureIds
+  // globalFeatureIds
   numericProps: {
-    numericProperty1: {value: Float32Array([v0, v1, ...], size: 1}
-    numericProperty2: {value: Float32Array([v0, v1, ...], size: 1}
-  }
+    population: {value: Float32Array([value0, value1, ...], size: 1}
+  },
+  // properties
+ } as BinaryPointFeature
 ```
 
-#### Feature ids
+Both `properties` and `numericProps` are specified per-feature.
 
-In order to specify how the `positions` data should be interpreted an array of feature ids is included. Often in the case of points this is just a trivial incrementing list:
+#### Feature IDs and global feature IDs
 
-```js
-points: {
-  featureIds: {value: Uint16Array([0, 1, 2, ...]), size: 1}
-}
+Both `featureIds` and `globalFeatureIds` are specified per-vertex.
 
+Feature ID is used to map each vertex to the corresponding element in the `properties` array. It increments within the current feature type.
+
+Global feature ID refers to the feature index in the original `FeatureCollection`, and is unique across all types.
+
+For example, consider a GeoJSON `FeatureCollection` contains the following features:
+
+| Global feature ID | Feature ID | Feature type | Vertex count |
+| ---- | ---- | ---- | ---- |
+| 0 | 0 | Point | 1 |
+| 1 | 0 | LineString | 10 |
+| 2 | 0 | Polygon | 5 |
+| 3 | 1 | MultiPoint | 3 |
+| 4 | 2 | Point | 1 |
+| 5 | 1 | Polygon | 5 |
+
+```ts
+data.points = {
+  type: 'Point',
+  // positions
+  featureIds: {value: new Uint16Array([0, 1, 1, 1, 2]), size: 1}, // this vertex belongs to the Nth point-type feature
+  globalFeatureIds: {value: new Uint16Array([0, 3, 3, 3, 4]), size: 1}, // this vertex belongs to the Nth feature
+  // numericProps
+  // properties
+ } as BinaryPointFeature
 ```
-
-These ids correspond to the values in the `positions` array and always start from 0, and increase, without any skipping any values.
-
-These are in general not equal to the `id`s present as top level fields on the GeoJSON source. Those are instead stored in the `fields` property in the same format as the `properties`. 
-
-#### Representing MultiPoints
-
-A MultiPoint is a feature which represents one logical unit, but compromises of a collection of point geometries. This is represented by association, where points within a MultiPoint will share the same `featureId`. Here `(x0, y0)` are a simple Point, while `(x1, y1)` and `(x2, y2)` belong to a MultiPoint.
-
-points: {
-  positions: {value: Float32Array([x0, y0, x1, y1, x2, y2]), size: 2},
-  featureIds: {value: Uint16Array([0, 1, 1, ...]), size: 1}
-}
-
-#### Array lengths
-
-Due to MultiPoints, the length of `properties` and `fields` arrays will not always be the same length (multiplied by `positions.size`) as the `positions` array. The length will match the count of individual features. This is in contrast to the `featureId` and `numericProp` arrays, which will contain the same number of elements as the `positions` array (divided by `positions.size`).
 
 
 #### Example comparison
 
-```js
-geojson = {
-  type: 'FeatureCollection',
-  features: [{
-    id: 123,
-    type: 'Feature',
-    properties: {name: 'London', population: 10000000},
-    geometry: {coordinates: [1.23, 4.56], type: 'Point'}
-  },
-  ...
-  ]
-}
+```ts
+import type {FeatureCollection} from 'geojson';
+import type {BinaryPointFeature} from '@loaders.gl/schema';
 
-binary = {
-  points: {
-    positions: {value: Float32Array([1,23, 4.56, ...]), size: 2},
-    properties: [{name: 'London'}, ...],
-    numericProps: {
-      population: {value: Float32Array([10000000, ...], size: 1}
+const geojson: FeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      id: 123,
+      type: 'Feature',
+      properties: {name: 'London', population: 10000000},
+      geometry: {coordinates: [1.23, 4.56], type: 'Point'}
     }
-    featureIds: {value: Uint16Array([0, ...]), size: 1}
+  ]
+};
+
+const binary: BinaryPointFeature = {
+  shape: 'binary-feature-collection',
+  points: {
+    positions: {value: Float32Array([1,23, 4.56]), size: 2},
+    properties: [{name: 'London'}],
+    numericProps: {
+      population: {value: Float32Array([10000000], size: 1}
+    },
+    featureIds: {value: Uint16Array([0]), size: 1},
+    globalFeatureIds: {value: Uint16Array([0]), size: 1},
     fields: [{id: 123}]
   }
-}
+};
 ```
-
-#### Lines
-
-Lines are represented in a similar manner, with the addition of a `pathIndices` array, which contains a series of offsets into the `positions` array, specifying where each line begins. All the other parameters are as above, namely that `featureIds` and `numericProps` are stored per-vertex, while `properties` and `fields` are per-feature.
-
-Here is how lines are represented, the first four vertices belong to the first line, thus the value of the second path index is 4.
-
-```js
-lines: {
-  positions: {value: Float32Array([x0, y0, ..., x4, y4, ...]), size: 2},
-  properties: [{name: 'name0'}, {name: 'name1}, ...],
-  numericProps: {
-    population: {value: Float32Array([100, 100, 100, 100, 789, 789, ...], size: 1}
-  }
-  pathIndices: {value: Uint16Array([0, 4, ...]), size: 1}
-  featureIds: {value: Uint16Array([0, 0, 0, 0, 1, 1, ...]), size: 1}
-  fields: [{id: 123}, {id: 456}]
-}
-```
-
-#### Polygons
-
-Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies where each polygon starts inside the `positions` array. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array. A polygon that has an outer ring consisting of 60 vertices and a hole with 40 vertices is represented as:
-
-```js
-polygons: {
-  positions: {value: Float32Array([x0, y0, ...]), size: 2},
-  polygonIndices: {value: Uint16Array([0, 100, ...]), size: 1}
-  primitivePolygonIndices: {value: Uint16Array([0, 60, 100, ...]), size: 1}
-}
-```
-
-Note the subtle difference here to other columnar formats (like [GeoArrow](https://github.com/geoarrow/geoarrow/)) where the indices are nested, i.e. `polygonIndices` point into the `primitivePolygonIndices` array rather than directly into `positions`.
-
-#### Global feature ids
-
-Because the `features` array in the GeoJSON can contain a mix of different geometry types, in order to represent this ordering each of the `points`, `lines` and `polygons` objects contains a `globalFeatureIds` array, which contains the per-vertex indices into the original GeoJSON `features' array.
-
 
 ### Overriding attibutes
 
 In order to pass [pass attributes directly](../../developer-guide/performance.md#supply-attributes-directly) directly to the sublayers, an optional `attributes` member can be added to the `points`, `lines` or `polygons`. For example to pass the `getWidth` attribute to the `PathLayer`:
 
-```js
-lines: {
-  ...,
-  attributes: {
-    getWidth: {value: new Float32Array([1, 2, 3, ....]), size: 1}
+```ts
+{
+  lines: {
+    // ...
+    attributes: {
+      getWidth: {value: new Float32Array([1, 2, 3, ....]), size: 1}
+    }
   }
 }
-
 ```
 
 

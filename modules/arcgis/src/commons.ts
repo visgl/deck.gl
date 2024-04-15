@@ -4,7 +4,6 @@ import {GL} from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/engine';
 import {Deck} from '@deck.gl/core';
 import type {Device, Texture, Framebuffer} from '@luma.gl/core';
-import type {WebGLDevice} from '@luma.gl/webgl';
 
 interface Renderer {
   redraw: () => void;
@@ -17,7 +16,40 @@ export type RenderResources = {
   fbo: Framebuffer;
 };
 
-export function initializeResources(this: Renderer, device: Device): RenderResources {
+async function createDeckInstance(gl: WebGL2RenderingContext): Promise<{
+  deckInstance: Deck;
+  device: Device;
+}> {
+  return new Promise(resolve => {
+    const deckInstance = new Deck({
+      // Input is handled by the ArcGIS API for JavaScript.
+      controller: false,
+
+      // We use the same WebGL context as the ArcGIS API for JavaScript.
+      gl,
+
+      // We need depth testing in general; we don't know what layers might be added to the deck.
+      parameters: {
+        depthCompare: 'less-equal'
+      },
+
+      // To disable canvas resizing, since the FBO is owned by the ArcGIS API for JavaScript.
+      width: null,
+      height: null,
+
+      onDeviceInitialized: (device: Device) => {
+        resolve({deckInstance, device});
+      }
+    });
+  });
+}
+
+export async function initializeResources(
+  this: Renderer,
+  gl: WebGL2RenderingContext
+): Promise<RenderResources> {
+  const {deckInstance, device} = await createDeckInstance(gl);
+
   const texture = device.createTexture({
     format: 'rgba8unorm',
     width: 1,
@@ -58,7 +90,13 @@ void main(void) {
     },
     parameters: {
       depthWriteEnabled: true,
-      depthCompare: 'less-equal'
+      depthCompare: 'less-equal',
+      blendColorSrcFactor: 'one',
+      blendColorDstFactor: 'one-minus-src-alpha',
+      blendAlphaSrcFactor: 'one',
+      blendAlphaDstFactor: 'one-minus-src-alpha',
+      blendColorOperation: 'add',
+      blendAlphaOperation: 'add'
     },
     geometry: new Geometry({
       topology: 'triangle-strip',
@@ -73,30 +111,13 @@ void main(void) {
     id: 'deckfbo',
     width: 1,
     height: 1,
-    colorAttachments: [texture]
+    colorAttachments: [texture],
+    depthStencilAttachment: 'depth16unorm'
   });
 
-  const deckInstance = new Deck({
-    // The view state will be set dynamically to track the MapView current extent.
-    viewState: {},
-
-    // Input is handled by the ArcGIS API for JavaScript.
-    controller: false,
-
-    // We use the same WebGL context as the ArcGIS API for JavaScript.
-    device,
-
-    // We need depth testing in general; we don't know what layers might be added to the deck.
-    parameters: {
-      depthTest: true
-    },
-
+  deckInstance.setProps({
     // This deck renders into an auxiliary framebuffer.
     _framebuffer: fbo,
-
-    // To disable canvas resizing, since the FBO is owned by the ArcGIS API for JavaScript.
-    width: null,
-    height: null,
 
     _customRender: redrawReason => {
       if (redrawReason === 'arcgis') {
@@ -125,7 +146,8 @@ export function render(
 ) {
   const {model, deck, fbo} = resources;
   const device = model.device;
-  const screenFbo = (device as WebGLDevice).getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+  // @ts-ignore device.getParametersWebGL should return `any` not `void`?
+  const screenFbo: Framebuffer = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
   const {width, height, ...viewState} = viewport;
 
   /* global window */
@@ -144,19 +166,14 @@ export function render(
   const textureToScreenPass = device.beginRenderPass({
     framebuffer: screenFbo,
     parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
-    clearColor: [0, 0, 0, 0],
-    clearDepth: 1
+    clearColor: false,
+    clearDepth: false
   });
-
-  device.withParametersWebGL(
-    {
-      blend: true,
-      blendFunc: [GL.ONE, GL.ONE_MINUS_SRC_ALPHA]
-    },
-    () => {
-      model.draw(textureToScreenPass);
-    }
-  );
+  try {
+    model.draw(textureToScreenPass);
+  } finally {
+    textureToScreenPass.end();
+  }
 }
 
 export function finalizeResources(resources: RenderResources) {

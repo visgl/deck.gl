@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^4.1.4",
-    "d3-scale": "^2.0.0",
-    "deck.gl": "^9.0.0-beta",
+    "@loaders.gl/csv": "^4.2.0",
+    "d3-scale": "^4.0.0",
+    "deck.gl": "^9.0.0",
     "mapbox-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

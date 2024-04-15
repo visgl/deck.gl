@@ -2,7 +2,7 @@
 
 Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and information for a better user experience.
 
-This module contains the following extensions:
+This module contains the following widgets:
 
 - [FullscreenWidget](./fullscreen-widget.md)
 - [ZoomWidget](./zoom-widget.md)
@@ -29,12 +29,12 @@ new FullscreenWidget({});
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@^8.10.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^8.10.0/widgets/stylesheet.css" rel='stylesheet' />
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^8.10.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/widgets@^8.10.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^8.10.0/widgets/stylesheet.css" rel='stylesheet' />
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
+<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
 ```
 
 ```js

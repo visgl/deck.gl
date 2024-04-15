@@ -17,12 +17,9 @@ function DeckGLOverlay(props) {
   const overlay = useMemo(() => new DeckOverlay(props));
 
   useEffect(() => {
-    if (map) {
-      overlay.setMap(map);
-      return () => overlay.setMap(null);
-    }
-    return undefined;
-  }, [map])
+    overlay.setMap(map);
+    return () => overlay.setMap(null);
+  }, [map]);
 
   overlay.setProps(props);
   return null;
@@ -66,10 +63,7 @@ function Root() {
 
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-      <Map
-        defaultCenter={{lat: 51.47, lng: 0.45}}
-        defaultZoom={4}
-        mapId={GOOGLE_MAP_ID} >
+      <Map defaultCenter={{lat: 51.47, lng: 0.45}} defaultZoom={4} mapId={GOOGLE_MAP_ID}>
         <DeckGLOverlay layers={layers} />
       </Map>
     </APIProvider>

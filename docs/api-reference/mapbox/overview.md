@@ -81,6 +81,6 @@ If you're using deck.gl in a React or Scripting environment, you just want the b
 
 * When using deck.gl's multi-view system, only one of the views can match the base map and receive interaction. See [using MapboxOverlay with multi-views](./mapbox-overlay.md#multi-view-usage) for details.
 * When using deck.gl as Mapbox layers or controls, `Deck` only receives a subset of user inputs delegated by `Map`. Therefore, certain interactive callbacks like `onDrag`, `onInteractionStateChange` are not available.
-* Mapbox/Maplibre's terrain features are partially supported. When a terrain is used, the camera of deck.gl and the base map should synchronize, however the deck.gl data with z=0 are rendered at the sea level and not aligned with the terrain surface.
+* Mapbox/MapLibre's terrain features are partially supported. When a terrain is used, the camera of deck.gl and the base map should synchronize, however the deck.gl data with z=0 are rendered at the sea level and not aligned with the terrain surface.
 * Only Mercator projection is supported. Mapbox adaptive projection is not supported as their API doesn't expose the projection used.
 * The `position` property in `viewState` has no equivalent in mapbox-gl.

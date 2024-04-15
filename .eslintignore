@@ -9,6 +9,6 @@ dist.js
 mapbox-gl.js
 .cache
 .docusaurus
-examples/
+examples/layer-browser/
 test/apps/
 bindings/

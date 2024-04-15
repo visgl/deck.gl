@@ -14,11 +14,10 @@ new PointCloudLayer({
   coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
   coordinateOrigin: [-122.4004935, 37.7900486, 0],  // anchor point in longitude/latitude/altitude
   data: [
-    {position: [33.22, 109.87, 1.455]}, // meter offsets from the coordinate origin
-    ...
+    {position: [33.22, 109.87, 1.455]}, // offsets from the coordinate origin in meters
   ],
-  radiusPixels: 2,
-  sizeUnits: 'pixels'
+  getPosition: d => d.position,
+  pointSize: 2
 })
 ```
 

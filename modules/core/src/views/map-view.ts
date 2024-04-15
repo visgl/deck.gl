@@ -1,4 +1,4 @@
-import View, {CommonViewState} from './view';
+import View, {CommonViewState, CommonViewProps} from './view';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import MapController from '../controllers/map-controller';
 
@@ -27,7 +27,7 @@ export type MapViewState = {
   position?: number[];
 } & CommonViewState;
 
-type MapViewProps = {
+export type MapViewProps = {
   /** Whether to render multiple copies of the map at low zoom levels. Default `false`. */
   repeat?: boolean;
   /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter. */
@@ -42,10 +42,14 @@ type MapViewProps = {
   altitude?: number;
   /** Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection). */
   orthographic?: boolean;
-};
+} & CommonViewProps<MapViewState>;
 
 export default class MapView extends View<MapViewState, MapViewProps> {
   static displayName = 'MapView';
+
+  constructor(props: MapViewProps = {}) {
+    super(props);
+  }
 
   get ViewportType() {
     return WebMercatorViewport;

@@ -50,11 +50,11 @@ export default class Tooltip implements Widget {
   placement: WidgetPlacement = 'fill';
   props = {};
   isVisible: boolean = false;
-  deck?: Deck;
+  deck?: Deck<any>;
   element?: HTMLDivElement;
   lastViewport?: Viewport;
 
-  onAdd({deck}: {deck: Deck}): HTMLDivElement {
+  onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
     const el = document.createElement('div');
     el.className = 'deck-tooltip';
     Object.assign(el.style, defaultStyle);

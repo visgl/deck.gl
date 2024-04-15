@@ -124,28 +124,23 @@ export default class PickLayersPass extends LayersPass {
   }
 
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): any {
-    const pickParameters = {
+    const pickParameters: any = {
       // TODO - When used as a custom layer in older Mapbox versions, context
       // state was dirty. Mapbox fixed that; we should test and remove the workaround.
       // https://github.com/mapbox/mapbox-gl-js/issues/7801
       depthMask: true,
       depthTest: true,
       depthRange: [0, 1],
-      ...layer.props.parameters,
-      // Blending
-      ...PICKING_BLENDING,
-      blend: !this.pickZ
+      ...layer.props.parameters
     };
     const {pickable, operation} = layer.props;
 
-    if (!this._colorEncoderState) {
+    if (!this._colorEncoderState || operation.includes('terrain')) {
       pickParameters.blend = false;
     } else if (pickable && operation.includes('draw')) {
+      Object.assign(pickParameters, PICKING_BLENDING);
       pickParameters.blend = true;
       pickParameters.blendColor = encodeColor(this._colorEncoderState, layer, viewport);
-    }
-    if (operation.includes('terrain')) {
-      pickParameters.blend = false;
     }
 
     return pickParameters;

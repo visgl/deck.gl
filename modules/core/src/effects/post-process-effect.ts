@@ -42,9 +42,10 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
       if (renderToTarget) {
         outputBuffer = target;
       }
+      const clearCanvas = !renderToTarget || Boolean(params.clearCanvas);
       const moduleSettings = {};
       moduleSettings[this.module.name] = this.props;
-      passes[index].render({inputBuffer, outputBuffer, moduleSettings, clear: !renderToTarget});
+      passes[index].render({clearCanvas, inputBuffer, outputBuffer, moduleSettings});
 
       const switchBuffer = outputBuffer as Framebuffer;
       outputBuffer = inputBuffer;

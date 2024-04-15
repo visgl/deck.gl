@@ -4,7 +4,7 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckGL from '@deck.gl/react';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer, h3QuerySource} from '@deck.gl/carto';
-import { TooltipContent } from '@deck.gl/core/dist/lib/tooltip';
+import {TooltipContent} from '@deck.gl/core/dist/lib/tooltip';
 
 const INITIAL_VIEW_STATE = {
   latitude: 35.7368521,
@@ -47,7 +47,7 @@ export default function App({
       WHERE 
         (@urbanity = 'any' OR urbanity = @urbanity)
         AND tourism >= @tourism`,
-    aggregationExp: `SUM(population) as pop`,
+    aggregationExp: 'SUM(population) as pop',
     aggregationResLevel: 5,
     queryParameters: {urbanity, tourism}
   });
