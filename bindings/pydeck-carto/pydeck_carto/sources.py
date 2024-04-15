@@ -36,14 +36,14 @@ class AggregationOptions(Options):
 
 def validate_str(interface: type[Options], args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is a string."""
-    if not arg in args and required:
+    if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
     elif arg in args:
         assert type(args[arg]) is str, 'Argument {} must be of type str'.format(arg)
 
 def validate_int(interface: type[Options], args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is an int."""
-    if not arg in args and required:
+    if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
     elif arg in args:
         assert type(args[arg]) is int, 'Argument {} must be of type int'.format(arg)
