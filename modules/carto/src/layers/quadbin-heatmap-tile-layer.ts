@@ -46,7 +46,7 @@ class QuadbinHeatmapTileLayer extends CompositeLayer {
   static layerName = 'QuadbinHeatmapTileLayer';
 
   renderLayers(): Layer {
-    const {getFillColor, palette, radius, rangeScale, _subLayerProps} = this.props;
+    const {getWeight, palette, radius, rangeScale, _subLayerProps} = this.props;
 
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
@@ -68,7 +68,10 @@ class QuadbinHeatmapTileLayer extends CompositeLayer {
         id: 'heatmap',
         data: this.props.data,
 
-        getFillColor,
+        getFillColor: d => {
+          const v = getWeight(d);
+          return [v % 256, Math.floor(v / 256), Math.floor(v / (256 * 256)), 0];
+        },
         palette,
         radius,
         rangeScale,
