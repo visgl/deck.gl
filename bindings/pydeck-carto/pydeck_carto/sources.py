@@ -1,5 +1,5 @@
 import pydeck as pdk
-from typing import Any, ClassVar, Dict, TypedDict, Union, List
+from typing import Any, TypedDict, List
 from typing_extensions import NotRequired, Unpack, assert_type
 
 # TYPES
