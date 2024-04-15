@@ -21,7 +21,9 @@ export {
   RasterTileLayer,
   VectorTileLayer
 };
-export {getPaletteGradient} from './layers/heatmap';
+
+// TODO remove
+export {getPalette, getPaletteGradient} from './layers/heatmap';
 
 export {default as BASEMAP} from './basemap';
 export {default as colorBins} from './style/color-bins-style';

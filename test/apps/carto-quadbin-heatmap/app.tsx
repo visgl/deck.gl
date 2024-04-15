@@ -4,7 +4,7 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 
 import {PickingInfo} from '@deck.gl/core';
-import {fetchMap, getPaletteGradient, QuadbinHeatmapTileLayer} from '@deck.gl/carto';
+import {fetchMap, getPalette, getPaletteGradient, QuadbinHeatmapTileLayer} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
 
 import RangeInput from './range-input';
@@ -40,6 +40,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
   const [radius, setRadius] = useState(20);
 
   const linearGradient = getPaletteGradient(palette);
+  const colorRange = getPalette(palette);
 
   layers = layers.map((l: any) => {
     const {layerName} = l.constructor;
@@ -49,7 +50,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
 
     return new QuadbinHeatmapTileLayer(l.props, {
       // Heatmap effect props
-      palette,
+      colorRange,
       radiusPixels: radius,
       colorDomain: [0, rangeScale],
 

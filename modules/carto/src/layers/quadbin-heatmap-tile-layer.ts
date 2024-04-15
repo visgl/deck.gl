@@ -64,13 +64,6 @@ export type QuadbinHeatmapTileLayerProps<DataT = unknown> = _QuadbinHeatmapTileL
 type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
   HeatmapProps & {
     /**
-     * Specified as an array of colors [color1, color2, ...].
-     *
-     * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
-     */
-    colorRange?: Color[];
-
-    /**
      * Value that is multiplied with the total weight at a pixel to obtain the final weight.
      *
      * @default 1

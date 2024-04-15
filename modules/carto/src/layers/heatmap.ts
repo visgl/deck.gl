@@ -1,6 +1,7 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
 import {random} from '@luma.gl/shadertools';
 import {colorCategories} from '@deck.gl/carto';
+import {Color} from '@deck.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
@@ -48,11 +49,11 @@ vec3 colorGradient(float value) {
   } else {
     // Fade out to white
     range = vec2(1.0, 10.0);
-    c1 = heatmap.color6; c2 = vec3(1.0);
+    c1 = heatmap.color6; c2 = vec3(255.0);
   }
 
   float f = (value - range.x) / (range.y - range.x);
-  return mix(c1, c2, f);
+  return mix(c1, c2, f) / 255.0;
 }
 
 vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
@@ -92,7 +93,7 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
 }
 `;
 
-function getPalette(paletteName?: string, rgb = true) {
+export function getPalette(paletteName?: string, rgb = true): Color[] {
   const [colors, offsetString] = paletteName ? paletteName.split('-') : ['Prism'];
   const n = 6;
   const offset = parseInt(offsetString || '0');
@@ -106,7 +107,7 @@ function getPalette(paletteName?: string, rgb = true) {
     palette = palette.map(c => c.slice(0, 3).map(v => v / 255));
   }
 
-  return palette.slice(offset);
+  return palette.slice(offset).map(c => new Uint8Array(c));
 }
 
 export function getPaletteGradient(paletteName: string) {
@@ -134,6 +135,13 @@ export type HeatmapProps = {
    * @default [0, 1]
    */
   colorDomain?: [number, number];
+  /**
+   * Specified as an array of colors [color1, color2, ...].
+   *
+   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   */
+  colorRange?: Color[];
+
   palette?: string;
 };
 
@@ -172,7 +180,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
   },
   getUniforms: opts => {
     const {palette, radiusPixels = 20, colorDomain = [0, 1]} = opts as HeatmapProps;
-    const colors = getPalette(palette);
+    const colors = getPalette(palette, false);
     const [color1, color2, color3, color4, color5, color6] = colors;
     return {
       color1,
