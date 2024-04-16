@@ -23,7 +23,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
         with:
-          node-version: '16.x'
+          node-version: '18.x'
 
       - name: Install dependencies
         run: |
@@ -54,10 +54,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Use Node.js
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
+        with:
+          node-version: '18.x'
+
       - name: Install dependencies
         run: |
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash
-          nvm install 12.12.0 && nvm use 12.12.0
           cd bindings/pydeck
           make setup-env
           make init
