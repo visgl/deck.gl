@@ -106,14 +106,10 @@ def test_h3_query_source():
 def test_h3_tileset_source():
     assert h3_tileset_source(
         table_name="project.database.table",
-        aggregation_exp="SUM(pop) AS total_population",
-        aggregation_res_level=6,
         **base_options,
     ).serialize() == {
         "@@function": "h3TilesetSource",
         "tableName": "project.database.table",
-        "aggregationExp": "SUM(pop) AS total_population",
-        "aggregationResLevel": 6,
         **base_options_serialized,
     }
 
@@ -158,14 +154,10 @@ def test_quadbin_query_source():
 def test_quadbin_tileset_source():
     assert quadbin_tileset_source(
         table_name="project.database.table",
-        aggregation_exp="SUM(pop) AS total_population",
-        aggregation_res_level=6,
         **base_options,
     ).serialize() == {
         "@@function": "quadbinTilesetSource",
         "tableName": "project.database.table",
-        "aggregationExp": "SUM(pop) AS total_population",
-        "aggregationResLevel": 6,
         **base_options_serialized,
     }
 

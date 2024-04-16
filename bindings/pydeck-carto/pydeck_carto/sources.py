@@ -187,7 +187,7 @@ def h3_query_source(**kwargs: Unpack[H3QuerySourceOptions]):
 def h3_tileset_source(**kwargs: Unpack[H3TilesetSourceOptions]):
     return pdk.types.Function(
         "h3TilesetSource",
-        **{**aggregation_options(**kwargs), **tileset_options(**kwargs)}
+        **tileset_options(**kwargs)
     )
 
 
@@ -223,7 +223,7 @@ def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
 def quadbin_tileset_source(**kwargs: Unpack[QuadbinTilesetSourceOptions]):
     return pdk.types.Function(
         "quadbinTilesetSource",
-        **{**aggregation_options(**kwargs), **tileset_options(**kwargs)}
+        **tileset_options(**kwargs)
     )
 
 
