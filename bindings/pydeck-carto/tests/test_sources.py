@@ -36,7 +36,6 @@ def test_vector_table_source():
         "@@function": "vectorTableSource",
         "tableName": "project.database.table",
         "spatialDataColumn": "geom",
-        "columns": None,
         **base_options_serialized,
     }
 
@@ -50,7 +49,6 @@ def test_vector_query_source():
         "@@function": "vectorQuerySource",
         "sqlQuery": "select * from project.database.table",
         "spatialDataColumn": "geom",
-        "columns": None,
         **base_options_serialized,
     }
 
