@@ -86,7 +86,7 @@ def table_options(**kwargs: Unpack[TableSourceOptions]):
     validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
     return {
         "tableName": kwargs.get("table_name"),
-        "spatialDataColumn": kwargs.get("spatial_data_column"),
+        **({"spatialDataColumn": kwargs["spatial_data_column"]} if "spatial_data_column" in kwargs else {}),
         **base_options(**kwargs),
     }
 
@@ -97,7 +97,7 @@ def query_options(**kwargs: Unpack[QuerySourceOptions]):
     validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
     return {
         "sqlQuery": kwargs.get("sql_query"),
-        "spatialDataColumn": kwargs.get("spatial_data_column"),
+        **({"spatialDataColumn": kwargs["spatial_data_column"]} if "spatial_data_column" in kwargs else {}),
         **base_options(**kwargs),
     }
 
@@ -113,7 +113,7 @@ def tileset_options(**kwargs: Unpack[TilesetSourceOptions]):
 
 def column_options(**kwargs: Unpack[ColumnOptions]):
     assert_type(kwargs, ColumnOptions)
-    return {"columns": kwargs.get("columns")}
+    return {"columns": kwargs["columns"]} if "columns" in kwargs else {}
 
 
 def aggregation_options(**kwargs: Unpack[AggregationOptions]):
@@ -122,7 +122,7 @@ def aggregation_options(**kwargs: Unpack[AggregationOptions]):
     validate_int(AggregationOptions, kwargs, "aggregation_res_level", False)
     return {
         "aggregationExp": kwargs["aggregation_exp"],
-        "aggregationResLevel": kwargs.get("aggregation_res_level"),
+        **({"aggregationResLevel": kwargs["aggregation_res_level"]} if "aggregation_res_level" in kwargs else {}),
     }
 
 

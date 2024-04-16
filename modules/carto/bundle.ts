@@ -7,3 +7,7 @@ import * as CartoUtils from '@deck.gl/carto';
 export * from '../layers/bundle/peer-dependency';
 
 export const carto = CartoUtils;
+
+// Export CARTO library for pydeck integration.
+// More info: https://github.com/ajduberstein/pydeck_custom_layer
+globalThis.CartoLibrary = CartoUtils;
