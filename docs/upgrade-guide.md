@@ -61,8 +61,8 @@ While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to ena
 
 ```ts
 // deck.gl v9
-import {DeckOverlay} from '@deck.gl/mapbox'
-map.addControl(new DeckOverlay({
+import {MapboxOverlay} from '@deck.gl/mapbox'
+map.addControl(new MapboxOverlay({
   interleaved: true,
   layers: [new ArcLayer({...})]
 }))
