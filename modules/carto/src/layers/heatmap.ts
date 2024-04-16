@@ -128,6 +128,15 @@ export function getPaletteGradient(paletteName: string) {
   return `${gradient.slice(0, -1)})`;
 }
 
+const defaultColorRange: Color[] = [
+  [255, 255, 178],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [240, 59, 32],
+  [189, 0, 38]
+];
+
 export type HeatmapProps = {
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
@@ -187,7 +196,12 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     opacity: 'f32'
   },
   getUniforms: opts => {
-    const {colorRange, radiusPixels = 20, colorDomain = [0, 1], opacity = 1} = opts as HeatmapProps;
+    const {
+      colorRange = defaultColorRange,
+      radiusPixels = 20,
+      colorDomain = [0, 1],
+      opacity = 1
+    } = opts as HeatmapProps;
     const [color1, color2, color3, color4, color5, color6] = colorRange;
     return {
       color1,
