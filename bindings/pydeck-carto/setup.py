@@ -20,7 +20,8 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "pydeck>=0.8.0",
-        "carto-auth>=0.1.0",
+        "carto-auth>=0.2.0",
+        "typing-extensions>=4.0.0",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
