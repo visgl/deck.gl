@@ -3,7 +3,7 @@ import {getResolution} from 'quadbin';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
-import {OffscreenModifier, PostProcessModifier} from './post-process-layer';
+import {RTTModifier, PostProcessModifier} from './post-process-layer';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
 import {
   Accessor,
@@ -15,7 +15,7 @@ import {
 } from '@deck.gl/core';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
-class OffscreenSolidPolygonLayer extends OffscreenModifier(SolidPolygonLayer) {
+class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   getShaders(type) {
     const shaders = super.getShaders(type);
     shaders.inject = {
@@ -96,7 +96,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
           ..._subLayerProps?.cell?._subLayerProps,
           fill: {
             ..._subLayerProps?.cell?._subLayerProps?.fill,
-            type: OffscreenSolidPolygonLayer
+            type: RTTSolidPolygonLayer
           }
         }
       }

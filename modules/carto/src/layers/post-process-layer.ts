@@ -22,8 +22,8 @@ const TEXTURE_PROPS: TextureProps = {
 
 interface IPostProcessLayer {
   applyPostProcess: () => void;
-  enableOffscreen: Layer['draw'];
-  disableOffscreen: () => void;
+  enableRTT: Layer['draw'];
+  disableRTT: () => void;
   props: LayerProps;
 }
 
@@ -52,36 +52,34 @@ class DrawCallbackLayer extends Layer {
     this.id = `draw-callback-${getPostProcessLayer(this).props.id}`;
   }
 
-  get postProcessLayer(): IPostProcessLayer {
-    return getPostProcessLayer(this);
-  }
-
   _drawLayer(this: DrawCallbackLayer) {
     getPostProcessLayer(this).applyPostProcess();
   }
 }
 
-// export function OffscreenModifier<T extends Constructor<DrawableLayer>>(BaseLayer: T) {
-export function OffscreenModifier(BaseLayer) {
-  return class OffscreenLayer extends BaseLayer {
-    static layerName = `PostProcess${BaseLayer.layerName}`;
+/**
+ * Modifier that marks a layer for Render-to-Target rendering.
+ * Resulting layer must be used as a sublayer of a layer created
+ * with `PostProcessModifier`
+ */
+export function RTTModifier(BaseLayer) {
+  return class RTTLayer extends BaseLayer {
+    static layerName = `RTT-{BaseLayer.layerName}`;
 
-    draw(this: OffscreenLayer, opts: any) {
+    draw(this: RTTLayer, opts: any) {
       const {moduleParameters} = opts;
       const {picking} = moduleParameters;
       const postProcessLayer = getPostProcessLayer(this);
 
-      // Enable offscreen rendering
       if (!picking.isActive) {
-        postProcessLayer.enableOffscreen(opts);
+        postProcessLayer.enableRTT(opts);
       }
 
       // Draw actual layer
       super.draw(opts);
 
-      // Disable offscreen rendering
       if (!picking.isActive) {
-        postProcessLayer.disableOffscreen();
+        postProcessLayer.disableRTT();
       }
     }
   };
@@ -152,13 +150,13 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
       this.internalState.renderBuffers.forEach((fbo: Framebuffer) => fbo.resize({width, height}));
     }
 
-    enableOffscreen(this: PostProcessLayer, opts: any) {
+    enableRTT(this: PostProcessLayer, opts: any) {
       this._resizeBuffers(opts);
       this.internalState.originalRenderPass = this.context.renderPass;
 
       const [framebuffer] = this.internalState.renderBuffers;
 
-      // Create new render pass for offscreen rendering
+      // Create new render pass for RTT
       this.internalState.internalRenderPass = this.context.device.beginRenderPass({
         framebuffer,
         parameters: {viewport: [0, 0, framebuffer.width, framebuffer.height]},
@@ -169,7 +167,7 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
       this.context.renderPass = this.internalState.internalRenderPass;
     }
 
-    disableOffscreen(this: PostProcessLayer) {
+    disableRTT(this: PostProcessLayer) {
       // End render pass, and reinstate original
       this.internalState.internalRenderPass.end();
       this.context.renderPass = this.internalState.originalRenderPass;
