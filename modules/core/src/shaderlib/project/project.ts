@@ -59,4 +59,4 @@ export default {
     commonOrigin: 'vec3<f32>',
     pseudoMeters: 'f32'
   }
-} as ShaderModule<ProjectModuleSettings>;
+} as const satisfies ShaderModule<ProjectModuleSettings>;

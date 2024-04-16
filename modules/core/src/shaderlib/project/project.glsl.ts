@@ -36,7 +36,7 @@ ${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
-uniform project32Uniforms {
+uniform projectUniforms {
   bool autoWrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;

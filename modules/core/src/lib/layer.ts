@@ -1069,7 +1069,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         this.setModuleParameters(moduleParameters);
         this.setShaderModuleProps({
           picking: {isActive, isAttribute},
-          project32: {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin}
+          project: {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin}
         });
       }
 
