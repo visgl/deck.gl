@@ -4,10 +4,11 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 
 import {PickingInfo} from '@deck.gl/core';
-import {fetchMap, getPalette, getPaletteGradient, QuadbinHeatmapTileLayer} from '@deck.gl/carto';
+import {fetchMap, QuadbinHeatmapTileLayer} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
 
 import RangeInput from './range-input';
+import {getPalette, getPaletteGradient} from './palette-utils';
 
 const PALETTES = {
   Prism: 'Prism',
