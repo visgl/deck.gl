@@ -157,7 +157,8 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
             0, 1, 0,
           ])
         }
-      })
+      }),
+      isInstanced: true
     });
   }
 
