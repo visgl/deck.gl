@@ -17,7 +17,8 @@ data = pdkc.sources.h3_table_source(
     access_token=carto_auth.get_access_token(),
     api_base_url=carto_auth.get_api_base_url(),
     connection_name="carto_dw",
-    table_name="carto-demo-data.demo_tables.derived_spatialfeatures_esp_h3res8_v1_yearly_v2",
+    table_name="carto-demo-data.demo_tables"
+    ".derived_spatialfeatures_esp_h3res8_v1_yearly_v2",
     aggregation_exp="sum(population) as population_sum",
 )
 
