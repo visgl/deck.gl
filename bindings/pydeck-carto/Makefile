@@ -16,6 +16,9 @@ lint:
 test:
 	$(BIN)/pytest tests --cov=pydeck_carto
 
+test-scripts:
+	for file in examples/scripts/*.py; do $(BIN)/python "$$file"; done
+
 publish-pypi:
 	rm -rf $(DIST) $(BUILD) *.egg-info
 	$(BIN)/python setup.py sdist bdist_wheel
