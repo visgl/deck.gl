@@ -57,14 +57,12 @@ vec3 colorGradient(float value) {
   return mix(c1, c2, f) / 255.0;
 }
 
-vec4 pack(float v) {
-  return vec4(
-    mod(vec3(v, floor(v / 256.0), floor(v / (256.0 * 256.0))), 256.0),
-    255.0) / 255.0;
+const vec3 SHIFT = vec3(1.0, 256.0, 256.0 * 256.0);
+vec4 pack(float value) {
+  return vec4(mod(vec3(value, floor(value / SHIFT.yz)), 256.0), 255.0) / 255.0;
 }
-
-float unpack(vec3 p) {
-  return 255.0 * dot(p, vec3(1.0, 256.0, 256.0 * 256.0));
+float unpack(vec3 color) {
+  return 255.0 * dot(color, SHIFT);
 }
 
 vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {

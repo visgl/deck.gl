@@ -16,8 +16,8 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
     shaders.inject = {
       'vs:#decl': 'uniform float cellResolution;',
       'vs:DECKGL_FILTER_COLOR': `
-  const vec3 RGB = vec3(256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
-  float value = dot(RGB, color.rgb);
+  const vec3 SHIFT = vec3(1.0, 256.0, 256.0 * 256.0);
+  float value = 255.0 * dot(SHIFT, color.rgb);
 
   // Keep "power" delivered to screen constant when tiles update
   float relativeZoom = log2(project_uScale) - cellResolution + 3.5; // range 0-1
@@ -25,9 +25,7 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   value *= relativeArea;
 
   // Pack float into 3 channels to pass to heatmap shader
-  color = vec4(
-    mod(vec3(value, floor(value / 256.0), floor(value / (256.0 * 256.0))), 256.0),
-    255.0) / 255.0;
+  color = vec4(mod(vec3(value, floor(value / SHIFT.yz)), 256.0), 255.0) / 255.0;
       `
     };
     return shaders;
