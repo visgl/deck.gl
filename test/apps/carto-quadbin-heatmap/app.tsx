@@ -87,7 +87,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       ></div>
       <RangeInput
         bottom={60}
-        min={10}
+        min={0}
         max={1000}
         value={colorDomain}
         onChange={setColorDomain}
