@@ -98,10 +98,19 @@ float dataFilter_reduceValue(vec4 value) {
 #ifdef DATAFILTER_ATTRIB
   void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
     if (filter_useSoftMargin) {
-      dataFilter_value = dataFilter_reduceValue(
-        smoothstep(filter_min, filter_softMin, valueFromMin) *
-          (1.0 - smoothstep(filter_softMax, filter_max, valueFromMax))
+      // smoothstep results are undefined if edge0 ≥ edge1
+      // Fallback to ignore filterSoftRange if it is truncated by filterRange
+      DATAFILTER_TYPE leftInRange = mix(
+        step(filter_min, valueFromMin),
+        smoothstep(filter_min, filter_softMin, valueFromMin),
+        lessThan(filter_min, filter_softMin)
       );
+      DATAFILTER_TYPE rightInRange = mix(
+        step(valueFromMax, filter_max),
+        1.0 - smoothstep(filter_softMax, filter_max, valueFromMax),
+        lessThan(filter_softMax, filter_max)
+      );
+      dataFilter_value = dataFilter_reduceValue(leftInRange * rightInRange);
     } else {
       dataFilter_value = dataFilter_reduceValue(
         step(filter_min, valueFromMin) * step(valueFromMax, filter_max)
