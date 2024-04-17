@@ -13,13 +13,18 @@ carto_auth = CartoAuth.from_oauth()
 
 pdkc.register_layers()
 
-layer = pdk.Layer(
-    "CartoLayer",
-    data="carto-demo-data.demo_tilesets"
+data = pdkc.sources.quadbin_tileset_source(
+    access_token=carto_auth.get_access_token(),
+    api_base_url=carto_auth.get_api_base_url(),
+    connection_name="carto_dw",
+    table_name="carto-demo-data.demo_tilesets"
     ".derived_spatialfeatures_usa_quadbin15_v1_yearly_v2_tileset",
-    type_=pdkc.MapType.TILESET,
-    connection=pdkc.CartoConnection.CARTO_DW,
-    credentials=pdkc.get_layer_credentials(carto_auth),
+    aggregation_exp="sum(population) as population_sum",
+)
+
+layer = pdk.Layer(
+    "QuadbinTileLayer",
+    data=data,
     get_fill_color=[200, 0, 80],
     pickable=True,
 )

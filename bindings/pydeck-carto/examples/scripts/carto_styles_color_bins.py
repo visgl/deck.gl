@@ -13,13 +13,17 @@ carto_auth = CartoAuth.from_oauth()
 
 pdkc.register_layers()
 
-layer = pdk.Layer(
-    "CartoLayer",
-    data="SELECT geom, pct_higher_ed "
+data = pdkc.sources.vector_query_source(
+    access_token=carto_auth.get_access_token(),
+    api_base_url=carto_auth.get_api_base_url(),
+    connection_name="carto_dw",
+    sql_query="SELECT geom, pct_higher_ed "
     "FROM `cartobq.public_account.higher_edu_by_county`",
-    type_=pdkc.MapType.QUERY,
-    connection=pdkc.CartoConnection.CARTO_DW,
-    credentials=pdkc.get_layer_credentials(carto_auth),
+)
+
+layer = pdk.Layer(
+    "VectorTileLayer",
+    data=data,
     get_fill_color=pdkc.styles.color_bins(
         "pct_higher_ed", [0, 20, 30, 40, 50, 60, 70], "PinkYl"
     ),

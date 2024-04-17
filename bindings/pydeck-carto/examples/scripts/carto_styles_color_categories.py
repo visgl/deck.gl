@@ -13,12 +13,16 @@ carto_auth = CartoAuth.from_oauth()
 
 pdkc.register_layers()
 
+data = pdkc.sources.vector_query_source(
+    access_token=carto_auth.get_access_token(),
+    api_base_url=carto_auth.get_api_base_url(),
+    connection_name="carto_dw",
+    sql_query="SELECT geom, landuse_type FROM `cartobq.public_account.wburg_parcels`",
+)
+
 layer = pdk.Layer(
-    "CartoLayer",
-    data="SELECT geom, landuse_type FROM `cartobq.public_account.wburg_parcels`",
-    type_=pdkc.MapType.QUERY,
-    connection=pdkc.CartoConnection.CARTO_DW,
-    credentials=pdkc.get_layer_credentials(carto_auth),
+    "VectorTileLayer",
+    data=data,
     get_fill_color=pdkc.styles.color_categories(
         "landuse_type",
         [

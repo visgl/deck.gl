@@ -20,7 +20,6 @@ data = pdkc.sources.h3_query_source(
     sql_query="select * from carto-demo-data.demo_tables"
     ".derived_spatialfeatures_usa_h3res8_v1_yearly_v2",
     aggregation_exp="sum(population) as population_sum",
-    spatial_data_column="h3",
 )
 
 layer = pdk.Layer(
