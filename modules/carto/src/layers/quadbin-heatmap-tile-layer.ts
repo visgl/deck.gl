@@ -25,7 +25,9 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   value *= relativeArea;
 
   // Pack float into 3 channels to pass to heatmap shader
-  color = vec4(mod(value, 256.0), floor(value / RGB.rg), 255.0) / 255.0;
+  color = vec4(
+    mod(vec3(value, floor(value / 256.0), floor(value / (256.0 * 256.0))), 256.0),
+    255.0) / 255.0;
       `
     };
     return shaders;

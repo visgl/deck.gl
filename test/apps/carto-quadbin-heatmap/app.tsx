@@ -37,7 +37,7 @@ function getTooltip(info?: PickingInfo): any {
 
 export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapStyle = MAP_STYLE}) {
   const [palette, setPalette] = useState(Object.values(PALETTES)[0]);
-  const [colorDomain, setColorDomain] = useState<[number, number]>([0, 300]);
+  const [colorDomain, setColorDomain] = useState<[number, number]>([0, 30000]);
   const [radiusPixels, setRadiusPixels] = useState(20);
 
   const linearGradient = getPaletteGradient(palette);
@@ -88,7 +88,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       <RangeInput
         bottom={60}
         min={0}
-        max={1000}
+        max={100000}
         value={colorDomain}
         onChange={setColorDomain}
         formatLabel={(x: number, index: number) => {
