@@ -120,7 +120,11 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
         colorRange,
         radiusPixels,
         colorDomain,
-        _subLayerProps: subLayerProps
+        _subLayerProps: subLayerProps,
+
+        updateTriggers: {
+          getPosition: this.props.updateTriggers.getWeight
+        }
       })
     );
   }
