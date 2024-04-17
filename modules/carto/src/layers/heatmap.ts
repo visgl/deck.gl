@@ -187,7 +187,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       radiusPixels = 20,
       colorDomain = [0, 1],
       opacity = 1
-    } = opts as HeatmapProps;
+    } = opts as HeatmapProps & {delta: [number, number]};
     const [color1, color2, color3, color4, color5, color6] = colorRange;
     return {
       delta,
