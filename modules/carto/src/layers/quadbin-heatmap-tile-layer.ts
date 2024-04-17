@@ -1,21 +1,16 @@
 import {getResolution} from 'quadbin';
 
+import {Accessor, CompositeLayer, DefaultProps, Layer} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
 import {RTTModifier, PostProcessModifier} from './post-process-layer';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
-import {
-  Accessor,
-  AccessorFunction,
-  Color,
-  CompositeLayer,
-  DefaultProps,
-  Layer
-} from '@deck.gl/core';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
+  static layerName = 'RTTSolidPolygonLayer';
+
   getShaders(type) {
     const shaders = super.getShaders(type);
     shaders.inject = {

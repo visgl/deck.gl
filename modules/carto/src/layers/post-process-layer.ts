@@ -28,9 +28,6 @@ interface IPostProcessLayer {
 }
 
 type Constructor<T> = (new (...args: any[]) => T) & {layerName: string};
-// type DrawableLayer = Layer & {
-//   initializeState(context: LayerContext): void;
-// };
 type DrawableCompositeLayer = CompositeLayer & {
   renderLayers(): Layer<{}> | null | LayersList;
 };
@@ -64,7 +61,7 @@ class DrawCallbackLayer extends Layer {
  */
 export function RTTModifier(BaseLayer) {
   return class RTTLayer extends BaseLayer {
-    static layerName = `RTT-{BaseLayer.layerName}`;
+    static layerName = `RTT-${BaseLayer.layerName}`;
 
     draw(this: RTTLayer, opts: any) {
       const {moduleParameters} = opts;
@@ -85,6 +82,10 @@ export function RTTModifier(BaseLayer) {
   };
 }
 
+/**
+ * Modifier that returns the a modified Layer, which applies a
+ * postprocess effect to all subLayers created using `RTTModifier`
+ */
 export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer>>(
   BaseLayer: T,
   effect: any
@@ -98,10 +99,7 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
       super.initializeState(context);
 
       this._createTextures();
-      this.internalState.postProcess = new PostProcessEffect(effect, {
-        radiusPixels: 10,
-        rangeScale: 1
-      });
+      this.internalState.postProcess = new PostProcessEffect(effect, this.props);
       this.internalState.postProcess.setup(context);
     }
 
@@ -120,23 +118,12 @@ export function PostProcessModifier<T extends Constructor<DrawableCompositeLayer
     }
 
     _createTextures(this: PostProcessLayer) {
+      const {device} = this.context;
       this.internalState.renderBuffers = [0, 1].map(i => {
-        const texture = this.context.device.createTexture(TEXTURE_PROPS);
-
-        // TODO is this needed?
-        // @ts-ignore
-        const depthStencilAttachment = this.context.device.createTexture({
-          format: 'depth16unorm',
-          mipmaps: false,
-
-          // TODO fix getWebGLTextureParameters() in luma to avoid passing deprecated parameters
-          dataFormat: 6402, // gl.DEPTH_COMPONENT
-          type: 5125 // gl.UNSIGNED_INT
-        });
-        return this.context.device.createFramebuffer({
+        return device.createFramebuffer({
           id: `layer-fbo-${i}`,
-          colorAttachments: [texture],
-          depthStencilAttachment
+          colorAttachments: [device.createTexture(TEXTURE_PROPS)],
+          depthStencilAttachment: 'depth16unorm'
         });
       });
     }
