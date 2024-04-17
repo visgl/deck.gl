@@ -45,6 +45,10 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
 // Modify QuadbinTileLayer to apply heatmap post process effect
 const PostProcessQuadbinTileLayer = PostProcessModifier(QuadbinTileLayer, heatmap);
 
+function encodeWeight(w: number) {
+  return [w % 256, Math.floor(w / 256), Math.floor(w / (256 * 256))];
+}
+
 const defaultProps: DefaultProps<QuadbinHeatmapTileLayerProps> = {
   ...QuadbinTileLayer.defaultProps,
 
@@ -58,13 +62,6 @@ export type QuadbinHeatmapTileLayerProps<DataT = unknown> = _QuadbinHeatmapTileL
 /** Properties added by QuadbinHeatmapTileLayer. */
 type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
   HeatmapProps & {
-    /**
-     * Value that is multiplied with the total weight at a pixel to obtain the final weight.
-     *
-     * @default 1
-     */
-    intensity?: number;
-
     /**
      * The weight of each object.
      *
@@ -80,7 +77,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
   static defaultProps = defaultProps;
 
   renderLayers(): Layer {
-    const {getWeight, radiusPixels, colorDomain, colorRange, _subLayerProps} = this.props;
+    const {getWeight, colorDomain, colorRange, radiusPixels, _subLayerProps} = this.props;
 
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
@@ -97,10 +94,6 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
       }
     };
 
-    function encodeWeight(w: number) {
-      return [w % 256, Math.floor(w / 256), Math.floor(w / (256 * 256))];
-    }
-
     const getFillColor =
       typeof getWeight === 'function'
         ? (d, info) => encodeWeight(getWeight(d, info))
@@ -112,9 +105,10 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
         data: this.props.data,
 
         getFillColor,
+
+        colorDomain,
         colorRange,
         radiusPixels,
-        colorDomain,
         _subLayerProps: subLayerProps,
 
         updateTriggers: {
