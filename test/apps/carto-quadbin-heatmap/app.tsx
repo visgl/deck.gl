@@ -53,7 +53,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       // Heatmap effect props
       colorDomain,
       colorRange,
-      radiusPixels ,
+      radiusPixels,
 
       getWeight: d => d.properties.population_sum,
       pickable: false,
@@ -92,7 +92,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
         value={colorDomain}
         onChange={setColorDomain}
         formatLabel={(x: number, index: number) => {
-          const label = index ===0 ? 'min' : 'max';
+          const label = index === 0 ? 'min' : 'max';
           return formatLabel(x, label);
         }}
       />
