@@ -36,7 +36,11 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
+    "@loaders.gl/core": "^4.2.0",
+    "@luma.gl/core": "^9.0.11",
+    "@luma.gl/engine": "^9.0.11",
     "@deck.gl/aggregation-layers": "9.0.8",
+    "@deck.gl/arcgis": "9.0.8",
     "@deck.gl/carto": "9.0.8",
     "@deck.gl/core": "9.0.8",
     "@deck.gl/extensions": "9.0.8",
@@ -48,6 +52,16 @@
     "@deck.gl/mesh-layers": "9.0.8",
     "@deck.gl/react": "9.0.8",
     "@deck.gl/widgets": "9.0.8"
+  },
+  "peerDependencies": {
+    "@arcgis/core": "^4.0.0",
+    "react": ">=16.3.0",
+    "react-dom": ">=16.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@arcgis/core": {"optional": true},
+    "react": {"optional": true},
+    "react-dom": {"optional": true}
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
