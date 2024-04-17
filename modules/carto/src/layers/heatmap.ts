@@ -63,6 +63,11 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   /* randomize the lookup values to hide the fixed number of samples */
   float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);
 
+  const float sigma = SUPPORT / 3.0;
+  const float a = -0.5 / (sigma * sigma);
+  // const float w0 = 1.0 / (sqrt(2.0 * 3.141592653589793) * sigma); // 1D normalization
+  const float w0 = 1.0 / (2.0 * 3.141592653589793 * sigma * sigma); // 2D normalization
+
   for (float t = -SUPPORT; t <= SUPPORT; t++) {
   for (float s = -SUPPORT; s <= SUPPORT; s++) {
     vec2 percent = (vec2(s, t) + offset - 0.5) / SUPPORT;
@@ -73,24 +78,20 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
     float value = dot(offsetColor.rgb, vec3(1.0, 256.0, 256.0 * 256.0));
 
     // Gaussian
-    float sigma = SUPPORT / 3.0;
-    float weight = exp(-0.5 * (s * s + t * t) / (sigma * sigma));
+    float weight = w0 * exp(a * (s * s + t * t));
     
     accumulator += value * weight;
-    total += weight;
   }
   }
-
-  float value = accumulator / total;
 
   // Apply domain
-  value = (value - heatmap.colorDomain[0]) / (heatmap.colorDomain[1] - heatmap.colorDomain[0]);
+  float f = (accumulator - heatmap.colorDomain[0]) / (heatmap.colorDomain[1] - heatmap.colorDomain[0]);
 
   // Color map
   vec4 color = vec4(0.0);
-  color.rgb = colorGradient(value);
+  color.rgb = colorGradient(f);
 
-  color.a = smoothstep(0.0, 0.1, value);
+  color.a = smoothstep(0.0, 0.1, f);
   color.a = pow(color.a, 1.0 / 2.2);
   color.a *= heatmap.opacity;
 
