@@ -4,7 +4,7 @@ import {Accessor, CompositeLayer, DefaultProps, Layer} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
-import {RTTModifier, PostProcessModifier} from './post-process-layer';
+import {RTTModifier, PostProcessModifier} from './post-process-utils';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
