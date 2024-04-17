@@ -1,5 +1,5 @@
 import pydeck as pdk
-from typing import Any, TypedDict, List
+from typing import Any, TypedDict, List, Union
 from typing_extensions import NotRequired, Unpack, assert_type
 
 # TYPES
@@ -20,9 +20,15 @@ class TableSourceOptions(BaseSourceOptions):
     spatial_data_column: NotRequired[str]
 
 
+QueryParameterValue = Union[str, int, float, bool]
+
+
 class QuerySourceOptions(BaseSourceOptions):
     sql_query: str
     spatial_data_column: NotRequired[str]
+    query_parameters: NotRequired[
+        List[Union[QueryParameterValue, List[QueryParameterValue]]]
+    ]
 
 
 class TilesetSourceOptions(BaseSourceOptions):
@@ -44,9 +50,7 @@ class AggregationOptions(Options):
 # 'get_type_hints' to provide type hints in the future.
 
 
-def validate_str(
-    interface: Any, args: Options, arg: str, required: bool = True
-):
+def validate_str(interface: Any, args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is a string."""
     if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
@@ -54,9 +58,7 @@ def validate_str(
         assert type(args[arg]) is str, "Argument {} must be of type str".format(arg)
 
 
-def validate_int(
-    interface: Any, args: Options, arg: str, required: bool = True
-):
+def validate_int(interface: Any, args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is an int."""
     if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
@@ -86,7 +88,11 @@ def table_options(**kwargs: Unpack[TableSourceOptions]):
     validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
     return {
         "tableName": kwargs.get("table_name"),
-        **({"spatialDataColumn": kwargs["spatial_data_column"]} if "spatial_data_column" in kwargs else {}),
+        **(
+            {"spatialDataColumn": kwargs["spatial_data_column"]}
+            if "spatial_data_column" in kwargs
+            else {}
+        ),
         **base_options(**kwargs),
     }
 
@@ -97,7 +103,16 @@ def query_options(**kwargs: Unpack[QuerySourceOptions]):
     validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
     return {
         "sqlQuery": kwargs.get("sql_query"),
-        **({"spatialDataColumn": kwargs["spatial_data_column"]} if "spatial_data_column" in kwargs else {}),
+        **(
+            {"spatialDataColumn": kwargs["spatial_data_column"]}
+            if "spatial_data_column" in kwargs
+            else {}
+        ),
+        **(
+            {"queryParameters": kwargs["query_parameters"]}
+            if "query_parameters" in kwargs
+            else {}
+        ),
         **base_options(**kwargs),
     }
 
@@ -122,7 +137,11 @@ def aggregation_options(**kwargs: Unpack[AggregationOptions]):
     validate_int(AggregationOptions, kwargs, "aggregation_res_level", False)
     return {
         "aggregationExp": kwargs["aggregation_exp"],
-        **({"aggregationResLevel": kwargs["aggregation_res_level"]} if "aggregation_res_level" in kwargs else {}),
+        **(
+            {"aggregationResLevel": kwargs["aggregation_res_level"]}
+            if "aggregation_res_level" in kwargs
+            else {}
+        ),
     }
 
 
@@ -144,17 +163,19 @@ class VectorTilesetSourceOptions(TilesetSourceOptions):
 def vector_table_source(**kwargs: Unpack[VectorTableSourceOptions]):
     return pdk.types.Function(
         "vectorTableSource", **{**column_options(**kwargs), **table_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def vector_query_source(**kwargs: Unpack[VectorQuerySourceOptions]):
     return pdk.types.Function(
         "vectorQuerySource", **{**column_options(**kwargs), **query_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def vector_tileset_source(**kwargs: Unpack[VectorTilesetSourceOptions]):
-    return pdk.types.Function("vectorTilesetSource", **tileset_options(**kwargs))
+    return pdk.types.Function(
+        "vectorTilesetSource", **tileset_options(**kwargs)
+    ).serialize()  # TODO Required?
 
 
 # H3
@@ -175,20 +196,19 @@ class H3TilesetSourceOptions(TilesetSourceOptions, AggregationOptions):
 def h3_table_source(**kwargs: Unpack[H3TableSourceOptions]):
     return pdk.types.Function(
         "h3TableSource", **{**aggregation_options(**kwargs), **table_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def h3_query_source(**kwargs: Unpack[H3QuerySourceOptions]):
     return pdk.types.Function(
         "h3QuerySource", **{**aggregation_options(**kwargs), **query_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def h3_tileset_source(**kwargs: Unpack[H3TilesetSourceOptions]):
     return pdk.types.Function(
-        "h3TilesetSource",
-        **tileset_options(**kwargs)
-    )
+        "h3TilesetSource", **tileset_options(**kwargs)
+    ).serialize()  # TODO Required?
 
 
 # QUADBIN
@@ -210,21 +230,20 @@ def quadbin_table_source(**kwargs: Unpack[QuadbinTableSourceOptions]):
     return pdk.types.Function(
         "quadbinTableSource",
         **{**aggregation_options(**kwargs), **table_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
     return pdk.types.Function(
         "quadbinQuerySource",
         **{**aggregation_options(**kwargs), **query_options(**kwargs)}
-    )
+    ).serialize()  # TODO Required?
 
 
 def quadbin_tileset_source(**kwargs: Unpack[QuadbinTilesetSourceOptions]):
     return pdk.types.Function(
-        "quadbinTilesetSource",
-        **tileset_options(**kwargs)
-    )
+        "quadbinTilesetSource", **tileset_options(**kwargs)
+    ).serialize()  # TODO Required?
 
 
 # RASTER (EXPERIMENTAL)

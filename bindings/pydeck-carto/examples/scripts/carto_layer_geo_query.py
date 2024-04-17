@@ -7,6 +7,7 @@ Render cloud data from a query.
 import pydeck as pdk
 import pydeck_carto as pdkc
 from carto_auth import CartoAuth
+from os.path import join, dirname
 
 carto_auth = CartoAuth.from_oauth()
 
@@ -21,7 +22,7 @@ data = pdkc.sources.vector_query_source(
 
 layer = pdk.Layer(
     "VectorTileLayer",
-    data=data.serialize(), # TODO(donmccurdy): How to automate this?
+    data=data,
     get_fill_color=[238, 77, 90],
     point_radius_min_pixels=2.5,
     pickable=True,
@@ -30,4 +31,4 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
-r.to_html("carto_layer_geo_query.html", open_browser=True)
+r.to_html(join(dirname(__file__), "carto_layer_geo_query.html"))

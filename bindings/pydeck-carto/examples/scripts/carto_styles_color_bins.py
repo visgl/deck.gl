@@ -7,10 +7,11 @@ Render cloud data with color bins style.
 import pydeck as pdk
 import pydeck_carto as pdkc
 from carto_auth import CartoAuth
+from os.path import join, dirname
 
 carto_auth = CartoAuth.from_oauth()
 
-pdkc.register_carto_layer()
+pdkc.register_layers()
 
 layer = pdk.Layer(
     "CartoLayer",
@@ -30,4 +31,4 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=38, longitude=-98, zoom=3)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
-r.to_html("carto_styles_color_bins.html", open_browser=True)
+r.to_html(join(dirname(__file__), "carto_styles_color_bins.html"))

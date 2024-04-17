@@ -8,7 +8,7 @@ https://docs.carto.com/deck-gl/examples/basic-examples/hello-world/
 import pydeck as pdk
 import pydeck_carto as pdkc
 
-pdkc.register_carto_layer()
+pdkc.register_layers()
 
 layer = pdk.Layer(
     "CartoLayer",
@@ -28,4 +28,4 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1)
 
 r = pdk.Deck(layer, map_style=pdk.map_styles.ROAD, initial_view_state=view_state)
-r.to_html("hello_world.html", open_browser=True)
+r.to_html(join(dirname(__file__), "hello_world.html"))

@@ -32,7 +32,7 @@ def test_vector_table_source():
         table_name="project.database.table",
         spatial_data_column="geom",
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "vectorTableSource",
         "tableName": "project.database.table",
         "spatialDataColumn": "geom",
@@ -45,7 +45,7 @@ def test_vector_query_source():
         sql_query="select * from project.database.table",
         spatial_data_column="geom",
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "vectorQuerySource",
         "sqlQuery": "select * from project.database.table",
         "spatialDataColumn": "geom",
@@ -57,7 +57,7 @@ def test_vector_tileset_source():
     assert vector_tileset_source(
         table_name="project.database.table",
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "vectorTilesetSource",
         "tableName": "project.database.table",
         **base_options_serialized,
@@ -74,7 +74,7 @@ def test_h3_table_source():
         aggregation_exp="SUM(pop) AS total_population",
         aggregation_res_level=6,
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "h3TableSource",
         "tableName": "project.database.table",
         "spatialDataColumn": "geom",
@@ -91,7 +91,7 @@ def test_h3_query_source():
         aggregation_exp="SUM(pop) AS total_population",
         aggregation_res_level=6,
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "h3QuerySource",
         "sqlQuery": "select * from project.database.table",
         "spatialDataColumn": "geom",
@@ -102,10 +102,7 @@ def test_h3_query_source():
 
 
 def test_h3_tileset_source():
-    assert h3_tileset_source(
-        table_name="project.database.table",
-        **base_options,
-    ).serialize() == {
+    assert h3_tileset_source(table_name="project.database.table", **base_options,) == {
         "@@function": "h3TilesetSource",
         "tableName": "project.database.table",
         **base_options_serialized,
@@ -122,7 +119,7 @@ def test_quadbin_table_source():
         aggregation_exp="SUM(pop) AS total_population",
         aggregation_res_level=6,
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "quadbinTableSource",
         "tableName": "project.database.table",
         "spatialDataColumn": "geom",
@@ -139,7 +136,7 @@ def test_quadbin_query_source():
         aggregation_exp="SUM(pop) AS total_population",
         aggregation_res_level=6,
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "quadbinQuerySource",
         "sqlQuery": "select * from project.database.table",
         "spatialDataColumn": "geom",
@@ -153,7 +150,7 @@ def test_quadbin_tileset_source():
     assert quadbin_tileset_source(
         table_name="project.database.table",
         **base_options,
-    ).serialize() == {
+    ) == {
         "@@function": "quadbinTilesetSource",
         "tableName": "project.database.table",
         **base_options_serialized,
