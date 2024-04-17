@@ -20,10 +20,7 @@ export type Defines = {
    * Primitive type of parameter used for numeric filtering. If undefined, numeric filtering disabled.
    */
   DATAFILTER_TYPE?: 'float' | 'vec2' | 'vec3' | 'vec4';
-  /**
-   * Number of numeric filtering channels. Must match dimension of `DATAFILTER_TYPE`
-   */
-  DATAFILTER_CHANNELS?: 1 | 2 | 3 | 4;
+
   /**
    * Enable 64-bit precision in numeric filter.
    */
@@ -104,22 +101,14 @@ float dataFilter_reduceValue(vec4 value) {
       // smoothstep results are undefined if edge0 ≥ edge1
       // Fallback to ignore filterSoftRange if it is truncated by filterRange
       DATAFILTER_TYPE leftInRange = mix(
-        step(filter_min, valueFromMin),
         smoothstep(filter_min, filter_softMin, valueFromMin),
-        #if DATAFILTER_CHANNELS == 1
-        filter_min < filter_softMin
-        #else
-        lessThan(filter_min, filter_softMin)
-        #endif
+        step(filter_min, valueFromMin),
+        step(filter_softMin, filter_min)
       );
       DATAFILTER_TYPE rightInRange = mix(
-        step(valueFromMax, filter_max),
         1.0 - smoothstep(filter_softMax, filter_max, valueFromMax),
-        #if DATAFILTER_CHANNELS == 1
-        filter_softMax < filter_max
-        #else
-        lessThan(filter_softMax, filter_max)
-        #endif
+        step(valueFromMax, filter_max),
+        step(filter_max, filter_softMax)
       );
       dataFilter_value = dataFilter_reduceValue(leftInRange * rightInRange);
     } else {

@@ -151,7 +151,6 @@ export default class DataFilterExtension extends LayerExtension<
     }
     if (filterSize) {
       defines.DATAFILTER_TYPE = DATA_TYPE_FROM_SIZE[filterSize];
-      defines.DATAFILTER_CHANNELS = filterSize;
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
