@@ -3,7 +3,7 @@
   "description": "deck.gl core layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.8",
+  "version": "9.0.9",
   "publishConfig": {
     "access": "public"
   },

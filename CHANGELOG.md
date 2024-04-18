@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.9] - Apr 17 2024
+
+- fix(geo-layers): TileLayer default autoHighlight (#8798)
+- fix(extensions): DataFilterExtension handling of filterSoftRange (#8800)
+- fix(main): Add missing peerDependencies (#8805)
+- fix(core): drawing layers with instance count 0 (#8788)
+
 #### deck.gl [9.0.8] - Apr 15 2024
 
 - CARTO: Improve H3Tileset2D.getTileIndices() by adding buffer (#8781)
