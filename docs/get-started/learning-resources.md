@@ -2,7 +2,9 @@
 
 ## API Documentation
 
-The documentation for the latest release can be found on deck.gl [website](https://deck.gl/docs).
+It's recommended that you start by reading the [Developer Guide](../developer-guide/using-layers.md).
+
+The documentation for the latest release can be found in [API Reference](../api-reference/core/deck.md).
 
 The documentation for previous releases are in the *docs* directory on the `<version-release>` branch in this repo.
 
@@ -29,13 +31,6 @@ PureJS examples in prototyping environments. These are great templates for featu
 
 Join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions.
 
-## Self-Study
-
-- A good starting point is the [Developer Guide]()
-- Exploring the [deck.gl examples](https://deck.gl/docs/get-started/getting-started#running-the-examples) is a good starting point.
-- The vis.gl [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
-
-But where to go after that?
 
 ### Learning Reactive UI Programming
 

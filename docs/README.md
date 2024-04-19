@@ -35,18 +35,8 @@ deck.gl handles a number of challenges out of the box:
 
 deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes are easily extendable by the users to address custom use cases.
 
-## Community
-
-deck.gl is part of the OpenJS and Linux Foundations, and is a leading framework in the [OpenJS Open Visualization](https://www.openvisualization.org/) program, with a strong community of contributors and users. Please join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions. Our **bi-weekly meetings** and **yearly collaborator summits** are open to everyone and are announced in the slack channel.
 
 ## Flavors
-
-deck.gl is packaged in a number of different ways to meet your needs:
-
-#### Pure JS
-
-- [Get started](./get-started/using-standalone.md)
-- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)
 
 ### Script Tag
 
@@ -56,7 +46,18 @@ deck.gl is packaged in a number of different ways to meet your needs:
 
 - [Get started](./get-started/using-standalone.md#using-the-scripting-api)
 - [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
-- 
+
+### NPM Module
+
+```bash
+npm install deck.gl
+```
+
+#### Pure JS
+
+- [Get started](./get-started/using-standalone.md)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)
+
 #### React
 
 - [Get started](./get-started/using-with-react.md)
@@ -82,19 +83,27 @@ deck.gl is the core framework in the **[vis.gl](http://vis.gl)** framework suite
 | **[loaders.gl](https://loaders.gl)**                                | Suite of framework-independent loaders for file formats focused on visualization of big geospatial data.                                                                                                                                                       |
 | **[luma.gl](https://luma.gl/)**                                     | A general purpose WebGPU/WebGL2 library designed to be interoperable with other WebGPU/WebGL2 libraries. luma.gl can work with WebGL contexts created by other libraries.                                                                                      |
 | **[math.gl](https://visgl.github.io/math.gl/)**                     | A 3D + geospatial math library.                                                                                                                                                                                                                                |
-### deck.gl-community
+### Community Add-Ons
 
-A source of "semi-official" extension modules for deck.gl can be found in the [deck.gl-community](https://visgl.github.io/deck.gl-community/) repository, including:
-- new layer packs (editable layers, graph layers, ...)
-- additional base map integrations
-- more React bindings
+A source of "semi-official" extension modules for deck.gl can be found in the [deck.gl-community](https://visgl.github.io/deck.gl-community/) repository, including experimental layer packs such as editable layers and graph layers, additional base map integrations, etc.
 
-### Extensions and bindings
+### Third-Party Bindings
 
-Additional "third party" add-on modules to deck.gl can be found on github and npm. Such extension modules can offer valuable functionality to deck.gl applications, but they are not always kept up to date with the latest deck.gl releases. 
+The following is a list of third-party bindings of deck.gl to other languages. Note the project maintainers may not always keep up with the latest deck.gl releases.
 
-| Language                            | Third-Party Binding                                                                      |
+| Language                            | Project URL                                                                      |
 | ----------------------------------- | ---------------------------------------------------------------------------------------- |
 | **R**                               | [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html)                    |
 | **C++**                             | [deck.gl-native](https://github.com/UnfoldedInc/deck.gl-native)                          |
 | **[Vega](https://vega.github.io/)** | [vega-deck.gl](https://github.com/microsoft/SandDance/tree/master/packages/vega-deck.gl) |
+| **Python**                          | [Lonboard](https://github.com/developmentseed/lonboard)                                  |
+
+
+
+## Governance
+
+deck.gl is part of the [OpenJS Foundation](https://openjsf.org), and is a leading framework in OpenJS's [Open Visualization](https://www.openvisualization.org/) collaboration space, with a strong community of contributors and users.
+
+- Find our Technical Charter and Community Governance Guidelines [here](https://github.com/visgl/tsc).
+- Join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions.
+- Our **bi-weekly meetings** and **yearly collaborator summits** are open to everyone and are announced in the slack channel.
