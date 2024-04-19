@@ -35,7 +35,11 @@ export default {
   name: 'project64',
   dependencies: [project, fp64],
   vs: project64Shader,
-  getUniforms
+  getUniforms,
+  uniformTypes: {
+    viewProjectionMatrix_x: 'mat4x4<f32>',
+    viewProjectionMatrix_y: 'mat4x4<f32>'
+  }
 } as ShaderModule<Project64ModuleSettings>;
 
 // TODO - this module should calculate the 64 bit uniforms
@@ -62,9 +66,14 @@ function calculateUniforms({
   const glViewProjectionMatrixFP64 = fp64ifyMatrix4(viewProjectionMatrix);
   const scaleFP64 = fp64ify(scale);
 
+  const viewProjectionMatrix_x = new Float32Array(16);
+  const viewProjectionMatrix_y = new Float32Array(16);
+  for (let i = 0; i < 16; i++) {
+    viewProjectionMatrix_x[i] = glViewProjectionMatrixFP64[2 * i];
+    viewProjectionMatrix_y[i] = glViewProjectionMatrixFP64[2 * i + 1];
+  }
   return {
-    project_uViewProjectionMatrixFP64: glViewProjectionMatrixFP64,
-    project64_uViewProjectionMatrix: glViewProjectionMatrixFP64,
-    project64_uScale: scaleFP64
+    viewProjectionMatrix_x,
+    viewProjectionMatrix_y
   };
 }

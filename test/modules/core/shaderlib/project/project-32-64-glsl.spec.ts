@@ -182,14 +182,10 @@ test('project32&64#vs', async t => {
 
       t.comment(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
 
-      let uniforms = project.getUniforms(testCase.params);
+      let uniforms = {};
       if (usefp64) {
-        uniforms = {
-          ...uniforms,
-          ...project64.getUniforms(testCase.params, uniforms),
-          // fp64arithmetic uniform
-          ONE: 1.0
-        };
+        // fp64arithmetic uniform
+        uniforms = {...uniforms, ONE: 1.0};
       }
 
       for (const c of testCase.tests) {
@@ -199,6 +195,7 @@ test('project32&64#vs', async t => {
           modules: usefp64 ? [project64] : [project32],
           varying: 'outValue',
           vertexCount: 1,
+          shaderInputProps: {project: testCase.params, project64: testCase.params},
           uniforms: {
             ...uniforms,
             uPos: c.input,
