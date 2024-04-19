@@ -119,8 +119,6 @@ export default class SurfaceLayer<DataT = any> extends Layer<Required<_SurfaceLa
     const {lightStrength} = this.props;
     const {model} = this.state;
 
-    // This is a non-instanced model
-    model.setInstanceCount(0);
     model.setUniforms(uniforms);
     model.setUniforms({lightStrength});
     model.draw(this.context.renderPass);

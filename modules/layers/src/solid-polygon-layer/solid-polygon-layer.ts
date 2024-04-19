@@ -450,7 +450,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
             }
           }
         }),
-        isInstanced: 1,
+        isInstanced: true,
         userData: {
           excludeAttributes: {indices: true}
         }
@@ -473,7 +473,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
             }
           }
         }),
-        isInstanced: 1,
+        isInstanced: true,
         userData: {
           excludeAttributes: {indices: true}
         }
