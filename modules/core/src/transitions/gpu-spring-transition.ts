@@ -9,10 +9,10 @@ import {
 } from './gpu-transition-utils';
 import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
+import project from '../shaderlib/project/project';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
-import {project} from '../shaderlib';
 
 export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
   type = 'spring';

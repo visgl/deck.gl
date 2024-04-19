@@ -9,10 +9,10 @@ import {
   getFloat32VertexFormat
 } from './gpu-transition-utils';
 import {GPUTransitionBase} from './gpu-transition';
+import project from '../shaderlib/project/project';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
-import {project} from '../shaderlib';
 
 export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
   type = 'interpolation';
