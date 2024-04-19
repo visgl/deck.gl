@@ -26,7 +26,7 @@ import project32 from './project32/project32';
 import shadow from './shadow/shadow';
 import picking from './picking/picking';
 
-const DEFAULT_MODULES = [project];
+const DEFAULT_MODULES = [];
 
 const SHADER_HOOKS = [
   'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',

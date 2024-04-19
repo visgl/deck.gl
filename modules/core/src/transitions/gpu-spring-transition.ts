@@ -12,6 +12,7 @@ import {GPUTransitionBase} from './gpu-transition';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
+import {project} from '../shaderlib';
 
 export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
   type = 'spring';
@@ -177,7 +178,10 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       blendAlphaOperation: 'max',
       blendAlphaSrcFactor: 'one',
       blendAlphaDstFactor: 'one'
-    }
+    },
+
+    // TODO investigate why this is needed
+    modules: [project]
   });
 }
 

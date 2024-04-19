@@ -12,6 +12,7 @@ import {GPUTransitionBase} from './gpu-transition';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
+import {project} from '../shaderlib';
 
 export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
   type = 'interpolation';
@@ -129,6 +130,9 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },
-    varyings: ['vCurrent']
+    varyings: ['vCurrent'],
+
+    // TODO investigate why this is needed
+    modules: [project]
   });
 }
