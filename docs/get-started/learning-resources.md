@@ -31,8 +31,7 @@ Join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and d
 
 ## Self-Study
 
-How you approach learning deck.gl will depend on your previous knowledge and how you want to use it.
-- 
+- A good starting point is the [Developer Guide]()
 - Exploring the [deck.gl examples](https://deck.gl/docs/get-started/getting-started#running-the-examples) is a good starting point.
 - The vis.gl [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
 
