@@ -30,26 +30,46 @@ deck.gl handles a number of challenges out of the box:
 
 * Performant rendering of large data sets
 * Interactive event handling such as picking, highlighting and filtering
-* Cartographic projections and integration with major basemap providers including Mapbox, Google Maps and Esri ArcGIS
+* Cartographic projections and integration with major basemap providers including Maplibre, Google Maps, Mapbox, and Esri ArcGIS
 * A catalog of proven, well-tested layers
 
 deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes are easily extendable by the users to address custom use cases.
 
 ## Community
 
-deck.gl is part of the OpenJS and Linux Foundations, and has a strong community of contributors and users. Please join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions. Our bi-weekly **meetings** and yearly **collaborator summits** are open to everyone and are announced in the slack channel.
+deck.gl is part of the OpenJS and Linux Foundations, and is a leading framework in the [OpenJS Open Visualization](https://www.openvisualization.org/) program, with a strong community of contributors and users. Please join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions. Our **bi-weekly meetings** and **yearly collaborator summits** are open to everyone and are announced in the slack channel.
 
 ## Flavors
 
 deck.gl is packaged in a number of different ways to meet your needs:
 
-| deck.gl Flavor            | Installed via                                                          | Get Started                                                              | Examples                                                                                |
-| ------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| **JavaScript/Script Tag** | `<script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>` | [Get started](./get-started/using-standalone.md#using-the-scripting-api) | [Examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting) |
-| **TypeScript/Pure JS**    | `npm install deck.gl`                                                  | [Get started](./get-started/using-standalone.md)                         | [Examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)   |
-| **TypeScript/React**      | `npm install deck.gl`                                                  | [Get started](./get-started/using-with-react.md)                         | [Examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react)     |
-| **Python**                | `pip install pydeck`                                                   | [Get started](https://pydeck.gl/installation.html)                       | [Examples](https://pydeck.gl/)                                                          |
-| **JSON**                  | `npm install @deck.gl/json`                                            |                                                                          |
+#### Pure JS
+
+- [Get started](./get-started/using-standalone.md)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/pure-js)
+
+### Script Tag
+
+```html
+<script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+```
+
+- [Get started](./get-started/using-standalone.md#using-the-scripting-api)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/scripting)
+- 
+#### React
+
+- [Get started](./get-started/using-with-react.md)
+- [Full examples](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react)
+
+### Python
+
+```bash
+pip install pydeck
+```
+
+- [Get started](https://pydeck.gl/installation.html)
+- [Examples](https://pydeck.gl/)
 
 ## Ecosystem
 
