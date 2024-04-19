@@ -24,7 +24,7 @@
 
 deck.gl is designed to simplify high-performance, WebGPU/WebGL2 based visualization of large data sets. Users can quickly get impressive visual results with minimal effort by composing existing layers, or leverage deck.gl's extensible architecture to address custom needs.
 
-deck.gl maps **data** (typically in the form of arrays of JSON objects or a maps of binary data columns) into a stack of visual **layers** - e.g. icons, polygons, texts; and lets the application render these through various **views**: e.g. map, first-person, orthographic.
+deck.gl maps **data** (typically in the form of arrays of JSON objects or binary data columns) into a stack of visual **layers** - e.g. icons, polygons, texts; and lets the application render these through various **views**: e.g. map, first-person, orthographic.
 
 deck.gl handles a number of challenges out of the box:
 
@@ -33,7 +33,7 @@ deck.gl handles a number of challenges out of the box:
 * Cartographic projections and integration with major basemap providers including Mapbox, Google Maps and Esri ArcGIS
 * A catalog of proven, well-tested layers
 
-deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes such are easily extendable by the users to address custom use cases.
+deck.gl is designed to be highly customizable. All layers come with flexible APIs to allow programmatic control of each aspect of the rendering. All core classes are easily extendable by the users to address custom use cases.
 
 ## Community
 
