@@ -154,6 +154,8 @@ export type TileLayerPickingInfo<
   tile?: Tile2DHeader<DataT>;
   /** the tile that emitted the picking event */
   sourceTile: Tile2DHeader<DataT>;
+  /** a layer created by props.renderSubLayer() that emitted the picking event */
+  sourceTileSubLayer: Layer;
 };
 
 /**
@@ -341,22 +343,20 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   getPickingInfo(params: GetPickingInfoParams): TileLayerPickingInfo<DataT> {
-    const sourceTile: Tile2DHeader<DataT> = (params.sourceLayer as any).props.tile;
+    // TileLayer does not directly render anything, sourceLayer cannot be null
+    const sourceLayer = params.sourceLayer!;
+    const sourceTile: Tile2DHeader<DataT> = (sourceLayer.props as any).tile;
     const info = params.info as TileLayerPickingInfo<DataT>;
     if (info.picked) {
       info.tile = sourceTile;
     }
     info.sourceTile = sourceTile;
+    info.sourceTileSubLayer = sourceLayer;
     return info;
   }
 
-  protected _updateAutoHighlight(info: PickingInfo): void {
-    const sourceTile = (info as any).sourceTile as Tile2DHeader;
-    if (sourceTile && sourceTile.layers) {
-      for (const layer of sourceTile.layers) {
-        layer.updateAutoHighlight(info);
-      }
-    }
+  protected _updateAutoHighlight(info: TileLayerPickingInfo<DataT>): void {
+    info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
   renderLayers(): Layer | null | LayersList {
