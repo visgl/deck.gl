@@ -207,7 +207,7 @@ export type ProjectUniforms = {
   commonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
   scale: number;
-  autoWrapLongitude: boolean;
+  wrapLongitude: boolean;
 
   viewProjectionMatrix: NumericArray;
   modelMatrix: NumericArray;
@@ -256,7 +256,7 @@ export function getUniformsFromViewport({
     coordinateOrigin
   });
 
-  uniforms.autoWrapLongitude = autoWrapLongitude;
+  uniforms.wrapLongitude = autoWrapLongitude;
   uniforms.modelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
@@ -319,7 +319,7 @@ function calculateViewportUniforms({
     commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    autoWrapLongitude: false,
+    wrapLongitude: false,
 
     viewProjectionMatrix,
     modelMatrix: IDENTITY_MATRIX,

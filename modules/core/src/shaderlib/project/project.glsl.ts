@@ -37,12 +37,11 @@ ${PROJECTION_MODE_GLSL_CONSTANTS}
 ${UNIT_GLSL_CONSTANTS}
 
 uniform projectUniforms {
-  bool autoWrapLongitude;
+  bool wrapLongitude;
   int coordinateSystem;
   vec3 commonUnitsPerMeter;
   int projectionMode;
   float scale;
-
   vec3 commonUnitsPerWorldUnit;
   vec3 commonUnitsPerWorldUnit2;
   vec4 center;
@@ -168,7 +167,7 @@ vec4 project_offset_(vec4 offset) {
 //
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
-  if (project.autoWrapLongitude) {
+  if (project.wrapLongitude) {
     x = mod(x + 180., 360.0) - 180.;
   }
   float y = clamp(lnglat.y, -89.9, 89.9);

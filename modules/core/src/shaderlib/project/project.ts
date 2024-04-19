@@ -40,7 +40,7 @@ export default {
   vs: projectShader,
   getUniforms,
   uniformTypes: {
-    autoWrapLongitude: 'f32',
+    wrapLongitude: 'f32',
     coordinateSystem: 'i32',
     commonUnitsPerMeter: 'vec3<f32>',
     projectionMode: 'i32',
