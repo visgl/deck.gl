@@ -26,6 +26,7 @@ import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 
 import {getPixelOffset, runOnGPU, verifyGPUResult} from './project-glsl-test-utils';
+import {UniformValue} from '@luma.gl/shadertools/dist/lib/shader-module/shader-module';
 const PIXEL_TOLERANCE = 1e-4;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
@@ -105,7 +106,19 @@ void main()
 }
 `
 };
-const TEST_CASES = [
+
+type TestCase = {
+  title: string;
+  params: Record<string, any>;
+  tests: {
+    name: string;
+    vs: string;
+    precision?: number;
+    input: Record<string, UniformValue>;
+    output: any;
+  }[];
+};
+const TEST_CASES: TestCase[] = [
   {
     title: 'LNGLAT mode',
     params: {
@@ -328,8 +341,6 @@ test('project#vs', async t => {
   for (const testCase of TEST_CASES) {
     t.comment(testCase.title);
 
-    const uniforms = project.getUniforms(testCase.params);
-
     for (const {name, vs, input, output, precision = 1e-7} of testCase.tests) {
       config.EPSILON = precision;
       let actual: NumericArray = await runOnGPU({
@@ -337,7 +348,8 @@ test('project#vs', async t => {
         varying: 'outValue',
         modules: [project],
         vertexCount: 1,
-        uniforms: {...uniforms, ...input}
+        shaderInputProps: {project: testCase.params},
+        uniforms: input
       });
 
       t.is(verifyGPUResult(actual, output), true, name);
@@ -361,10 +373,12 @@ void main() {
   outValue = transform * uInput;
 }
   `;
-  const uniforms = project.getUniforms({
-    viewport: TEST_VIEWPORT,
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT
-  });
+  const shaderInputProps = {
+    project: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+    }
+  };
 
   const runTransform = async (up: NumericArray, v: NumericArray): Promise<Vector3> => {
     const result = await runOnGPU({
@@ -372,7 +386,8 @@ void main() {
       varying: 'outValue',
       modules: [project],
       vertexCount: 1,
-      uniforms: {...uniforms, uDirUp: up, uInput: v}
+      shaderInputProps,
+      uniforms: {uDirUp: up, uInput: v}
     });
     return new Vector3(result.slice(0, 3));
   };
