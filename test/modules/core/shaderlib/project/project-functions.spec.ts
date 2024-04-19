@@ -170,16 +170,14 @@ void main()
   for (const {title, position, params} of TEST_CASES.filter(
     testCase => !testCase.params.fromCoordinateSystem
   )) {
-    const uniforms = project.getUniforms(params);
-
     const cpuResult = projectPosition(position, params);
     const shaderResult = await runOnGPU({
       vs,
       varying: 'outValue',
       modules: [project],
       vertexCount: 1,
+      shaderInputProps: {project: params},
       uniforms: {
-        ...uniforms,
         uPos: position,
         uPos64Low: position.map(fp64LowPart)
       }
