@@ -37,8 +37,9 @@ export default {
   vs: project64Shader,
   getUniforms,
   uniformTypes: {
-    viewProjectionMatrix_x: 'mat4x4<f32>',
-    viewProjectionMatrix_y: 'mat4x4<f32>'
+    // Cannot pass as vec2[16], so instead split into 2 mat4x4
+    viewProjectionMatrix: 'mat4x4<f32>',
+    viewProjectionMatrix64Low: 'mat4x4<f32>'
   }
 } as ShaderModule<Project64ModuleSettings>;
 
@@ -66,14 +67,14 @@ function calculateUniforms({
   const glViewProjectionMatrixFP64 = fp64ifyMatrix4(viewProjectionMatrix);
   const scaleFP64 = fp64ify(scale);
 
-  const viewProjectionMatrix_x = new Float32Array(16);
-  const viewProjectionMatrix_y = new Float32Array(16);
+  const viewProjectionMatrix64High = new Float32Array(16);
+  const viewProjectionMatrix64Low = new Float32Array(16);
   for (let i = 0; i < 16; i++) {
-    viewProjectionMatrix_x[i] = glViewProjectionMatrixFP64[2 * i];
-    viewProjectionMatrix_y[i] = glViewProjectionMatrixFP64[2 * i + 1];
+    viewProjectionMatrix64High[i] = glViewProjectionMatrixFP64[2 * i];
+    viewProjectionMatrix64Low[i] = glViewProjectionMatrixFP64[2 * i + 1];
   }
   return {
-    viewProjectionMatrix_x,
-    viewProjectionMatrix_y
+    viewProjectionMatrix: viewProjectionMatrix64High,
+    viewProjectionMatrix64Low
   };
 }

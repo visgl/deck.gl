@@ -23,8 +23,8 @@ export default `\
 const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
 
 uniform project64Uniforms {
-  mat4 viewProjectionMatrix_x;
-  mat4 viewProjectionMatrix_y;
+  mat4 viewProjectionMatrix;
+  mat4 viewProjectionMatrix64Low;
 } project64;
 
 // longitude: lnglat_fp64.xy; latitude: lnglat_fp64.zw
@@ -63,8 +63,8 @@ vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       viewProjectionMatrixFP64[4 * i + j] = vec2(
-        project64.viewProjectionMatrix_x[i][j],
-        project64.viewProjectionMatrix_y[i][j]
+        project64.viewProjectionMatrix[i][j],
+        project64.viewProjectionMatrix64Low[i][j]
       );
     }   
   }
