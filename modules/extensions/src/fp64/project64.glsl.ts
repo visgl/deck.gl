@@ -23,6 +23,7 @@ export default `\
 const vec2 WORLD_SCALE_FP64 = vec2(81.4873275756836, 0.0000032873668232014097);
 
 uniform project64Uniforms {
+  vec2 scale;
   mat4 viewProjectionMatrix;
   mat4 viewProjectionMatrix64Low;
 } project64;
