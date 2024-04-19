@@ -54,6 +54,7 @@ uniform int widthUnits;
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
+out vec3 cameraPosition;
 out vec4 position_commonspace;
 #endif
 
@@ -107,6 +108,7 @@ void main(void) {
   // Light calculations
   if (extruded && !isStroke) {
 #ifdef FLAT_SHADING
+    cameraPosition = project.cameraPosition;
     position_commonspace = geometry.position;
     vColor = vec4(color.rgb, color.a * opacity);
 #else

@@ -30,6 +30,7 @@ out vec4 fragColor;
 
 in vec4 vColor;
 #ifdef FLAT_SHADING
+in vec3 cameraPosition;
 in vec4 position_commonspace;
 #endif
 
@@ -38,7 +39,7 @@ void main(void) {
 #ifdef FLAT_SHADING
   if (extruded && !isStroke && !bool(picking.isActive)) {
     vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
-    fragColor.rgb = lighting_getLightColor(vColor.rgb, project.cameraPosition, position_commonspace.xyz, normal);
+    fragColor.rgb = lighting_getLightColor(vColor.rgb, cameraPosition, position_commonspace.xyz, normal);
   }
 #endif
   DECKGL_FILTER_COLOR(fragColor, geometry);
