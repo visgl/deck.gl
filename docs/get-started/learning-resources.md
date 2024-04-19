@@ -29,6 +29,8 @@ PureJS examples in prototyping environments. These are great templates for featu
 
 [vis.gl's Medium blog](https://medium.com/vis-gl) 
 
+[Showcases](https://deck.gl/showcases) of projects built with deck.gl
+
 Join our [Slack workspace](https://slack-invite.openjsf.org/) for learning and discussions.
 
 
@@ -43,4 +45,8 @@ There is an impressive amount of information (documentation, blog posts, educati
 
 Knowledge of WebGL2 or WebGPU is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL2/WebGPU knowledge.
 
-There are many web resources for learning WebGL2/WebGPU. [luma.gl](https://luma.gl/) documentation can be a good start.
+Some good resources for learning WebGL2/WebGPU:
+- MDN's [WebGL guidelines and tutorials](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API)
+- MDN's [introduction to WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API)
+- [WebGL2 Fundamentals](https://webgl2fundamentals.org/)
+- [luma.gl documentation](https://luma.gl/)
