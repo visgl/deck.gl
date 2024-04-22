@@ -66,7 +66,7 @@ def validate_int(interface: Any, args: Options, arg: str, required: bool = True)
         assert type(args[arg]) is int, "Argument {} must be of type int".format(arg)
 
 
-# BASE
+# BASE SOURCES
 
 
 def base_options(**kwargs: Unpack[BaseSourceOptions]):
@@ -145,7 +145,7 @@ def aggregation_options(**kwargs: Unpack[AggregationOptions]):
     }
 
 
-# VECTOR
+# VECTOR SOURCES
 
 
 class VectorTableSourceOptions(TableSourceOptions, ColumnOptions):
@@ -178,7 +178,7 @@ def vector_tileset_source(**kwargs: Unpack[VectorTilesetSourceOptions]):
     ).serialize()  # TODO Required?
 
 
-# H3
+# H3 SOURCES
 
 
 class H3TableSourceOptions(TableSourceOptions, AggregationOptions):
@@ -211,7 +211,7 @@ def h3_tileset_source(**kwargs: Unpack[H3TilesetSourceOptions]):
     ).serialize()  # TODO Required?
 
 
-# QUADBIN
+# QUADBIN SOURCES
 
 
 class QuadbinTableSourceOptions(TableSourceOptions, AggregationOptions):
@@ -246,7 +246,7 @@ def quadbin_tileset_source(**kwargs: Unpack[QuadbinTilesetSourceOptions]):
     ).serialize()  # TODO Required?
 
 
-# RASTER (EXPERIMENTAL)
+# RASTER SOURCES (EXPERIMENTAL)
 
 
 def raster_tileset_source(**kwargs):
