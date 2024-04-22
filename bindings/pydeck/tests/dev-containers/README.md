@@ -3,7 +3,7 @@ Dockerized development tools
 
 Files in this directory can be used to spin up JupyterLab and Jupyter Notebook environments for rapid testing.
 
-Ideally run this in an isolated Python 3.7 environment, with `pyppeteer` installed.
+Ideally run this in an isolated Python 3.8+ environment, with `pyppeteer` installed.
 Docker and docker-compose are also required for these tools to work.
 
 - `build-and-screenshot.sh` creates screenshots of the current state of the containers
