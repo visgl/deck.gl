@@ -1,5 +1,5 @@
 import pydeck as pdk
-from typing import Any, TypedDict, List, Union
+from typing import TypedDict, List, Union
 from typing_extensions import NotRequired, Unpack, assert_type
 
 # TYPES
@@ -46,11 +46,8 @@ class AggregationOptions(Options):
 
 # VALIDATORS
 
-# The 'interface' arguments are unused, but could be used with
-# 'get_type_hints' to provide type hints in the future.
 
-
-def validate_str(interface: Any, args: Options, arg: str, required: bool = True):
+def validate_str(args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is a string."""
     if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
@@ -58,7 +55,7 @@ def validate_str(interface: Any, args: Options, arg: str, required: bool = True)
         assert type(args[arg]) is str, "Argument {} must be of type str".format(arg)
 
 
-def validate_int(interface: Any, args: Options, arg: str, required: bool = True):
+def validate_int(args: Options, arg: str, required: bool = True):
     """Validates given key on an options object is an int."""
     if arg not in args and required:
         raise AssertionError('Missing argument "{}".'.format(arg))
@@ -71,9 +68,9 @@ def validate_int(interface: Any, args: Options, arg: str, required: bool = True)
 
 def base_options(**kwargs: Unpack[BaseSourceOptions]):
     assert_type(kwargs, BaseSourceOptions)
-    validate_str(BaseSourceOptions, kwargs, "connection_name")
-    validate_str(BaseSourceOptions, kwargs, "access_token")
-    validate_str(BaseSourceOptions, kwargs, "api_base_url")
+    validate_str(kwargs, "connection_name")
+    validate_str(kwargs, "access_token")
+    validate_str(kwargs, "api_base_url")
     return {
         "connectionName": kwargs["connection_name"],
         "accessToken": kwargs["access_token"],
@@ -84,8 +81,8 @@ def base_options(**kwargs: Unpack[BaseSourceOptions]):
 
 def table_options(**kwargs: Unpack[TableSourceOptions]):
     assert_type(kwargs, TableSourceOptions)
-    validate_str(TableSourceOptions, kwargs, "table_name")
-    validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
+    validate_str(kwargs, "table_name")
+    validate_str(kwargs, "spatial_data_column", False)
     return {
         "tableName": kwargs.get("table_name"),
         **(
@@ -99,8 +96,8 @@ def table_options(**kwargs: Unpack[TableSourceOptions]):
 
 def query_options(**kwargs: Unpack[QuerySourceOptions]):
     assert_type(kwargs, QuerySourceOptions)
-    validate_str(TableSourceOptions, kwargs, "sql_query")
-    validate_str(TableSourceOptions, kwargs, "spatial_data_column", False)
+    validate_str(kwargs, "sql_query")
+    validate_str(kwargs, "spatial_data_column", False)
     return {
         "sqlQuery": kwargs.get("sql_query"),
         **(
@@ -119,7 +116,7 @@ def query_options(**kwargs: Unpack[QuerySourceOptions]):
 
 def tileset_options(**kwargs: Unpack[TilesetSourceOptions]):
     assert_type(kwargs, TilesetSourceOptions)
-    validate_str(TableSourceOptions, kwargs, "table_name")
+    validate_str(kwargs, "table_name")
     return {
         "tableName": kwargs["table_name"],
         **base_options(**kwargs),
@@ -133,8 +130,8 @@ def column_options(**kwargs: Unpack[ColumnOptions]):
 
 def aggregation_options(**kwargs: Unpack[AggregationOptions]):
     assert_type(kwargs, AggregationOptions)
-    validate_str(AggregationOptions, kwargs, "aggregation_exp")
-    validate_int(AggregationOptions, kwargs, "aggregation_res_level", False)
+    validate_str(kwargs, "aggregation_exp")
+    validate_int(kwargs, "aggregation_res_level", False)
     return {
         "aggregationExp": kwargs["aggregation_exp"],
         **(
@@ -149,101 +146,128 @@ def aggregation_options(**kwargs: Unpack[AggregationOptions]):
 
 
 class VectorTableSourceOptions(TableSourceOptions, ColumnOptions):
+    """Options for vector_table_source."""
+
     pass
 
 
 class VectorQuerySourceOptions(QuerySourceOptions, ColumnOptions):
+    """Options for vector_query_source."""
+
     pass
 
 
 class VectorTilesetSourceOptions(TilesetSourceOptions):
+    """Options for vector_tileset_source."""
+
     pass
 
 
 def vector_table_source(**kwargs: Unpack[VectorTableSourceOptions]):
+    """Defines a table as a data source for one or more vector layers."""
     return pdk.types.Function(
         "vectorTableSource", **{**column_options(**kwargs), **table_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def vector_query_source(**kwargs: Unpack[VectorQuerySourceOptions]):
+    """Defines a query as a data source for one or more vector layers."""
     return pdk.types.Function(
         "vectorQuerySource", **{**column_options(**kwargs), **query_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def vector_tileset_source(**kwargs: Unpack[VectorTilesetSourceOptions]):
+    """Defines a tileset as a data source for one or more vector layers."""
     return pdk.types.Function(
         "vectorTilesetSource", **tileset_options(**kwargs)
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 # H3 SOURCES
 
 
 class H3TableSourceOptions(TableSourceOptions, AggregationOptions):
+    """Options for h3_table_source."""
+
     pass
 
 
 class H3QuerySourceOptions(QuerySourceOptions, AggregationOptions):
+    """Options for h3_query_source."""
+
     pass
 
 
 class H3TilesetSourceOptions(TilesetSourceOptions, AggregationOptions):
+    """Options for h3_tileset_source."""
+
     pass
 
 
 def h3_table_source(**kwargs: Unpack[H3TableSourceOptions]):
+    """Defines a table as a data source for one or more H3 layers."""
     return pdk.types.Function(
         "h3TableSource", **{**aggregation_options(**kwargs), **table_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def h3_query_source(**kwargs: Unpack[H3QuerySourceOptions]):
+    """Defines a query as a data source for one or more H3 layers."""
     return pdk.types.Function(
         "h3QuerySource", **{**aggregation_options(**kwargs), **query_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def h3_tileset_source(**kwargs: Unpack[H3TilesetSourceOptions]):
+    """Defines a tileset as a data source for one or more H3 layers."""
     return pdk.types.Function(
         "h3TilesetSource", **tileset_options(**kwargs)
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 # QUADBIN SOURCES
 
 
 class QuadbinTableSourceOptions(TableSourceOptions, AggregationOptions):
+    """Options for quadbin_table_source."""
+
     pass
 
 
 class QuadbinQuerySourceOptions(QuerySourceOptions, AggregationOptions):
+    """Options for quadbin_query_source."""
+
     pass
 
 
 class QuadbinTilesetSourceOptions(TilesetSourceOptions, AggregationOptions):
+    """Options for quadbin_tileset_source."""
+
     pass
 
 
 def quadbin_table_source(**kwargs: Unpack[QuadbinTableSourceOptions]):
+    """Defines a table as a data source for one or more quadbin layers."""
     return pdk.types.Function(
         "quadbinTableSource",
         **{**aggregation_options(**kwargs), **table_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
+    """Defines a query as a data source for one or more quadbin layers."""
     return pdk.types.Function(
         "quadbinQuerySource",
         **{**aggregation_options(**kwargs), **query_options(**kwargs)}
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 def quadbin_tileset_source(**kwargs: Unpack[QuadbinTilesetSourceOptions]):
+    """Defines a tileset as a data source for one or more quadbin layers."""
     return pdk.types.Function(
         "quadbinTilesetSource", **tileset_options(**kwargs)
-    ).serialize()  # TODO Required?
+    ).serialize()
 
 
 # RASTER SOURCES (EXPERIMENTAL)
