@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.10] - Apr 23 2024
+
+- fix(carto): Restore global required by pydeck-carto (#8799)
+- fix(core): Support fp64 in GPUInterpolationTransition (#8807)
+
 #### deck.gl [9.0.9] - Apr 17 2024
 
 - fix(geo-layers): TileLayer default autoHighlight (#8798)
