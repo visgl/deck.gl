@@ -1,12 +1,7 @@
 {
-  "lerna": "2.0.0",
   "version": "9.0.0-beta.10",
   "npmClient": "yarn",
-  "useWorkspaces": true,
   "packages": [
     "modules/*"
-  ],
-  "command": {
-    "bootstrap": {}
-  }
+  ]
 }

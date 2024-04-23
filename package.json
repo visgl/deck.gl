@@ -22,10 +22,10 @@
     "postinstall": "./scripts/postinstall.sh",
     "clean": "ocular-clean",
     "build": "npm run clean && ocular-build && lerna run build",
-    "version": "npm run build",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
-    "publish": "ocular-publish",
+    "publish-beta": "ocular-publish version-beta",
+    "publish-prod": "ocular-publish version-prod",
     "start": "open https://deck.gl/docs/get-started/getting-started",
     "test": "ocular-test",
     "test-ci": "ocular-lint && ocular-test node && ocular-test cover",
@@ -45,6 +45,9 @@
   },
   "browser": {
     "jsdom": false
+  },
+  "resolutions": {
+    "lerna": "8.1.2"
   },
   "devDependencies": {
     "@loaders.gl/csv": "^4.2.0",
