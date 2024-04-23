@@ -14,13 +14,13 @@ The [Deck](../api-reference/core/deck.md) class takes deck.gl layer instances an
 ```bash
 npm install @deck.gl/core @deck.gl/layers
 ```
-
+```js
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
-
+```
 ```js
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
