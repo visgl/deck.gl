@@ -233,6 +233,10 @@ Visit [what's new](https://deck.gl/docs/whats-new) for a full list.
 
 ### deck.gl v8.9 Prereleases
 
+#### deck.gl [8.9.36-alpha.0] - Apr 23 2024
+
+- Fix compatibility issue in pydeck-carto (#8786)
+
 #### deck.gl [8.9.0-beta.4] - Mar 8 2023
 
 - Prop types API improvements (#7726)
