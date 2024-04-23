@@ -1,7 +1,7 @@
 /**
  * Re-exported luma.gl API in the pre-built bundle
  */
-export {Device, Buffer, Texture, Framebuffer} from '@luma.gl/core';
+export {luma, Device, Buffer, Texture, Framebuffer} from '@luma.gl/core';
 export {
   Model,
   BufferTransform,
