@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v8.9
 
+#### deck.gl [8.9.36] - Apr 23 2024
+
+- Fix compatibility issue in pydeck-carto (#8786)
+
 #### deck.gl [8.9.35] - Feb 19 2024
 
 - Respect `DataT` on `TripsLayer` props (#8533)
