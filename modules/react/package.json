@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "8.9.35",
+  "version": "8.9.36-alpha.0",
   "publishConfig": {
     "access": "public",
     "tag": "v8"
