@@ -4,7 +4,8 @@
   "license": "MIT",
   "version": "8.9.35",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "v8"
   },
   "keywords": [
     "webgl",
