@@ -22,6 +22,7 @@
     "postinstall": "./scripts/postinstall.sh",
     "clean": "ocular-clean",
     "build": "npm run clean && ocular-build && lerna run build",
+    "version": "node scripts/verify-changelog.js && git add CHANGELOG.md",
     "lint": "ocular-lint",
     "cover": "ocular-test cover",
     "publish-beta": "ocular-publish version-only-beta",
