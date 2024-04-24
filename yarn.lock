@@ -7564,7 +7564,7 @@ lcov-parse@^1.0.0:
   resolved "https://registry.yarnpkg.com/lcov-parse/-/lcov-parse-1.0.0.tgz#eb0d46b54111ebc561acb4c408ef9363bdc8f7e0"
   integrity sha1-6w1GtUER68VhrLTECO+TY73I9+A=
 
-lerna@8.1.2, lerna@^3.14.1:
+lerna@^8.1.0:
   version "8.1.2"
   resolved "https://registry.yarnpkg.com/lerna/-/lerna-8.1.2.tgz#441e8078d0b68557b4ef5b33202a16a6bc2a50d3"
   integrity sha512-RCyBAn3XsqqvHbz3TxLfD7ylqzCi1A2UJnFEZmhURgx589vM3qYWQa/uOMeEEf565q6cAdtmulITciX1wgkAtw==
@@ -8857,10 +8857,10 @@ object.values@^1.1.7:
     define-properties "^1.2.0"
     es-abstract "^1.22.1"
 
-ocular-dev-tools@2.0.0-alpha.29:
-  version "2.0.0-alpha.29"
-  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.29.tgz#9d9e7479c921d4ea58712fd8524bc65e195e4c42"
-  integrity sha512-3cgs/vWZzevYdaD4oKgvDixzsExN72Ebwn/r4vvyiZxKY1mRnmv9hm2QyvIJvcaRrtIdm+mI/0UKaYcvh1t7HQ==
+ocular-dev-tools@2.0.0-alpha.30:
+  version "2.0.0-alpha.30"
+  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.30.tgz#68f6928142ae5526267988c9ab297e2002194772"
+  integrity sha512-Kz/mRzI6OHX8ljMZTaal2+iwJGVLzfojiP4l0LgptNCu6vEyV48eVTBD4+rWOrD/uCTCLATKFhBytkMONWK41A==
   dependencies:
     "@babel/cli" "^7.14.5"
     "@babel/core" "^7.14.5"
@@ -8890,7 +8890,7 @@ ocular-dev-tools@2.0.0-alpha.29:
     eslint-plugin-react "^7.22.0"
     eslint-plugin-react-hooks "^4.0.0"
     glob "^7.1.4"
-    lerna "^3.14.1"
+    lerna "^8.1.0"
     minimatch "^3.0.0"
     prettier "3.0.3"
     prettier-check "2.0.0"

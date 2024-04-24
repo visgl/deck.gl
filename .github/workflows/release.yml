@@ -12,10 +12,11 @@ jobs:
   release-notes:
     runs-on: ubuntu-latest
 
-    if: github.repository_owner == 'visgl'
+    if: github.repository_owner == 'visgl' && (github.ref == 'refs/heads/master' || endsWith(github.ref, '-release'))
 
     env:
       ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -28,7 +29,7 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Publish release
+      - name: Create GitHub release entry
         run: |
           body=$(node scripts/github-release.js) &&
           curl \
@@ -37,3 +38,12 @@ jobs:
             https://api.github.com/repos/visgl/deck.gl/releases \
             -d "${body}" \
             -H "Authorization: token ${ADMIN_TOKEN}"
+
+      - name: Login to NPM
+        run: npm set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
+
+      - name: Install dependencies
+        run: yarn
+      
+      - name: Publish to NPM
+        run: npx ocular-publish from-git
