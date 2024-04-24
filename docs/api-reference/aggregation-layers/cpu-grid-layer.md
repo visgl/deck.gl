@@ -19,7 +19,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {CPUGridLayer} from '@deck.gl/geo-layers';
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 
 const layer = new CPUGridLayer({
   id: 'CPUGridLayer',
@@ -51,7 +51,7 @@ new Deck({
 
 ```ts
 import {Deck, PickingInfo} from '@deck.gl/core';
-import {CPUGridLayer} from '@deck.gl/geo-layers';
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;
@@ -90,7 +90,7 @@ new Deck({
 ```tsx
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {CPUGridLayer} from '@deck.gl/geo-layers';
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 import type {PickingInfo} from '@deck.gl/core';
 
 type BikeRack = {
