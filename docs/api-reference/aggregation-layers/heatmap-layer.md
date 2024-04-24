@@ -15,7 +15,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {HeatmapLayer} from '@deck.gl/geo-layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 const layer = new HeatmapLayer({
   id: 'HeatmapLayer',
