@@ -40,7 +40,7 @@ jobs:
             -H "Authorization: token ${ADMIN_TOKEN}"
 
       - name: Login to NPM
-        run: npm set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
+        run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
 
       - name: Install dependencies
         run: yarn
