@@ -28,7 +28,7 @@ console.log(JSON.stringify(requestBody));
 
 function getGitTag() {
   try {
-    return execSync('git describe --tags --exact-match HEAD', {
+    return execSync('git describe --exact-match HEAD', {
       stdio: [null, 'pipe', null],
       encoding: 'utf-8'
     }).trim();

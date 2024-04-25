@@ -54,7 +54,7 @@
     "@math.gl/proj4": "^4.0.0",
     "@probe.gl/bench": "^4.0.9",
     "jsdom": "^20.0.0",
-    "ocular-dev-tools": "2.0.0-alpha.33",
+    "ocular-dev-tools": "2.0.0-alpha.30",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",
     "puppeteer": "^22.4.0",

@@ -8857,10 +8857,10 @@ object.values@^1.1.7:
     define-properties "^1.2.0"
     es-abstract "^1.22.1"
 
-ocular-dev-tools@2.0.0-alpha.33:
-  version "2.0.0-alpha.33"
-  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.33.tgz#c17da68040adfc5cff8e5033d7f0f2afea05d0f7"
-  integrity sha512-VhEtuT49d94IpV3IqQti21bX0aULhw8a4Pxw765K9axxM07WbgM1be1flcLxgBXZ4qHUy7pzmiuPmZOgkcc5uQ==
+ocular-dev-tools@2.0.0-alpha.30:
+  version "2.0.0-alpha.30"
+  resolved "https://registry.yarnpkg.com/ocular-dev-tools/-/ocular-dev-tools-2.0.0-alpha.30.tgz#68f6928142ae5526267988c9ab297e2002194772"
+  integrity sha512-Kz/mRzI6OHX8ljMZTaal2+iwJGVLzfojiP4l0LgptNCu6vEyV48eVTBD4+rWOrD/uCTCLATKFhBytkMONWK41A==
   dependencies:
     "@babel/cli" "^7.14.5"
     "@babel/core" "^7.14.5"
