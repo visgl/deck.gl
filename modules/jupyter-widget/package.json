@@ -3,6 +3,10 @@
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
   "version": "8.9.36",
+  "publishConfig": {
+    "access": "public",
+    "tag": "v8-latest"
+  },
   "keywords": [
     "jupyter",
     "jupyterlab",

@@ -3,6 +3,10 @@
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
   "version": "8.9.36",
+  "publishConfig": {
+    "access": "public",
+    "tag": "v8-latest"
+  },
   "keywords": [
     "webgl",
     "visualization",
