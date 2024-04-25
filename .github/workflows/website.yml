@@ -5,52 +5,51 @@ on:
     branches:
       - '*-release'
 
-permissions:
-  contents: read
-
 jobs:
-  publish-website:
+  check_branch:
     runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ endsWith(github.ref, steps.get_version.outputs.latest) }}
 
-    if: github.repository_owner == 'visgl'
+    steps:
+      - name: Get version
+        id: get_version
+        run: |
+          LATEST=$(npm show deck.gl@latest version | grep -o -E "^[0-9]+\.[0-9]+")
+          echo "latest=${LATEST}-release" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: check_branch
     
     permissions:
       contents: write
 
-    env:
-      MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
-      GoogleMapsAPIKey: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-      GoogleMapsMapId: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
+    if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_deploy }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          token: ${{ secrets.ADMIN_TOKEN }}
+          token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
 
       - name: Use Node.js
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: '18.x'
 
-      - name: Get version
-        id: get-version
-        run: LATEST=$(npm show deck.gl version | grep -o -E "^[0-9]+\.[0-9]+") && echo "::set-output name=latest::/${LATEST}-release"
-
-      - name: Check version
-        if: ${{ !endsWith(github.ref, steps.get-version.outputs.latest) }}
-        run: |
-          echo "Website is only published from the latest release branch"
-
-      - name: Build website
-        if: ${{ endsWith(github.ref, steps.get-version.outputs.latest) }}
+      - name: Install dependencies
         run: |
           yarn bootstrap
-          cd website
-          yarn
-          yarn build
+          (cd website && yarn)
+
+      - name: Build website
+        env:
+          MapboxAccessToken: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          GoogleMapsAPIKey: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GoogleMapsMapId: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
+        run: (cd website && yarn build)
 
       - name: Deploy
-        if: ${{ endsWith(github.ref, steps.get-version.outputs.latest) }}
         uses: JamesIves/github-pages-deploy-action@132898c54c57c7cc6b80eb3a89968de8fc283505 # 3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
