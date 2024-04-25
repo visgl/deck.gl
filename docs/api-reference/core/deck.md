@@ -360,7 +360,7 @@ Callback that takes a hovered-over point and renders a tooltip. If the prop is n
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being hovered.
 
 Returns one of the following:
 
@@ -484,7 +484,7 @@ Called when the pointer moves over the canvas.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being hovered.
 * `event` - the original gesture event
 
 #### `onClick` (Function) {#onclick}
@@ -493,7 +493,7 @@ Called when clicking on the canvas.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being clicked.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being clicked.
 * `event` - the original gesture event
 
 #### `onDragStart` (Function) {#ondragstart}
@@ -502,7 +502,7 @@ Called when the user starts dragging on the canvas.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
 #### `onDrag` (Function) {#ondrag}
@@ -511,7 +511,7 @@ Called when dragging the canvas.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
 #### `onDragEnd` (Function) {#ondragend}
@@ -520,7 +520,7 @@ Called when the user releases from dragging the canvas.
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
 
@@ -646,7 +646,7 @@ Parameters:
 
 Returns:
 
-* a single [`info`](../../developer-guide/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+* a single [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) object, or `null` if nothing is found.
 
 
 #### `pickMultipleObjects` {#pickmultipleobjects}
@@ -668,7 +668,7 @@ Parameters:
 
 Returns:
 
-* An array of [`info`](../../developer-guide/interactivity.md#the-picking-info-object) objects. The array will be empty if no object was picked.
+* An array of [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects. The array will be empty if no object was picked.
 
 Notes:
 
@@ -694,7 +694,7 @@ Parameters:
 
 Returns:
 
-* an array of unique [`info`](../../developer-guide/interactivity.md#the-picking-info-object) objects
+* an array of unique [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object) objects
 
 Notes:
 

@@ -124,7 +124,7 @@ Optional. Called when a hover event occurs in the containing view. If `viewId: n
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being hovered.
 * `event` - the original gesture event
 
 
@@ -134,7 +134,7 @@ Optional. Called when a click event occurs in the containing view. If `viewId: n
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being clicked.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being clicked.
 * `event` - the original gesture event
 
 
@@ -144,7 +144,7 @@ Optional. Called when a dragstart event occurs in the containing view. If `viewI
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
 #### `onDrag` {#ondrag}
@@ -153,7 +153,7 @@ Optional. Called when a drag event occurs in the containing view. If `viewId: nu
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
 
 #### `onDragEnd` {#ondragend}
@@ -162,5 +162,5 @@ Optional. Called when a dragend event occurs in the containing view. If `viewId:
 
 Receives arguments:
 
-* `info` - the [picking info](../../developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) describing the object being dragged.
 * `event` - the original gesture event
