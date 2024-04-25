@@ -631,7 +631,7 @@ IE support is deprecated and will be removed in the next major release.
 
 Breaking Changes:
 
-- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](./developer-guide/interactivity.md#the-picking-info-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
+- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](./developer-guide/interactivity.md#the-pickinginfo-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
 
 #### Layers
 
