@@ -22,8 +22,6 @@ import TEST_CASES from './test-cases';
 import {WIDTH, HEIGHT} from './constants';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
-import './jupyter-widget';
-
 test('Render Test', t => {
   // tape's default timeout is 500ms
   t.timeoutAfter(TEST_CASES.length * 10000 + 10000);

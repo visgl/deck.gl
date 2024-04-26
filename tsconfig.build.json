@@ -14,7 +14,6 @@
     {"path": "modules/geo-layers"},
     {"path": "modules/google-maps"},
     {"path": "modules/json"},
-    // {"path": "modules/jupyter-widget"},
     {"path": "modules/layers"},
     {"path": "modules/main"},
     {"path": "modules/mapbox"},

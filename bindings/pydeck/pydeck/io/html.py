@@ -46,6 +46,7 @@ def cdn_picker(offline=False):
             "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js.map'></script>\n"
         ).format(dev_port=dev_port)
     if offline:
+        # TODO(donmccurdy): Offline possibly broken with nbextension removal?
         RELPATH_TO_BUNDLE = "../nbextension/static/index.js"
         with open(join(dirname(__file__), RELPATH_TO_BUNDLE), "r", encoding="utf-8") as file:
             js = file.read()

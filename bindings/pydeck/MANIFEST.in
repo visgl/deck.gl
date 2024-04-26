@@ -14,7 +14,6 @@ graft tests
 prune tests/build
 
 # Javascript files
-graft pydeck/nbextension
 prune setup
 
 # Patterns to exclude from any directory

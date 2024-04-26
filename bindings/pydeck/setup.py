@@ -72,8 +72,8 @@ class FrontendBuild(Command):
 
     # Files to copy into the Python side of the widget
     target_files = [
-        os.path.join(here, "pydeck", "nbextension", "static", "index.js"),
-        os.path.join(here, "pydeck", "nbextension", "static", "index.js.map"),
+        # os.path.join(here, "pydeck", "nbextension", "static", "index.js"),
+        # os.path.join(here, "pydeck", "nbextension", "static", "index.js.map"),
     ]
 
     user_options = []
@@ -121,34 +121,34 @@ class FrontendBuild(Command):
         env = os.environ.copy()
         env["PATH"] = npm_path
 
-        if build_all:
-            log.info("Installing build dependencies with yarn. This may take a while...")
-            check_call(
-                ["yarn", "bootstrap"],
-                cwd=yarn_root,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
-            )
-        else:
-            log.info("Installing build dependencies with `npm run build`.")
-            check_call(
-                ["npm", "run", "build"],
-                cwd=widget_dir,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                env=env,
-            )
+        # if build_all:
+        #     log.info("Installing build dependencies with yarn. This may take a while...")
+        #     check_call(
+        #         ["yarn", "bootstrap"],
+        #         cwd=yarn_root,
+        #         stdout=sys.stdout,
+        #         stderr=sys.stderr,
+        #         env=env,
+        #     )
+        # else:
+        #     log.info("Installing build dependencies with `npm run build`.")
+        #     check_call(
+        #         ["npm", "run", "build"],
+        #         cwd=widget_dir,
+        #         stdout=sys.stdout,
+        #         stderr=sys.stderr,
+        #         env=env,
+        #     )
 
-        self.clean_frontend_build()
-        self.copy_frontend_build()
+        # self.clean_frontend_build()
+        # self.copy_frontend_build()
 
-        for t in self.target_files:
-            if not os.path.exists(t):
-                msg = "Missing file: %s" % t
-                if not has_build_utilities:
-                    msg += "\nyarn is required to build a development version of widgetsnbextension"
-                raise ValueError(msg)
+        # for t in self.target_files:
+        #     if not os.path.exists(t):
+        #         msg = "Missing file: %s" % t
+        #         if not has_build_utilities:
+        #             msg += "\nyarn is required to build a development version of widgetsnbextension"
+        #         raise ValueError(msg)
 
         # update package data in case this created new files
         update_package_data(self.distribution)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         extras_require={
             "carto": ["pydeck-carto"],
             "jupyter": [
-                "ipywidgets>=7,<8",
+                # "ipywidgets>=7,<8",
                 "traitlets>=4.3.2",
                 'ipython>=5.8.0;python_version<"3.4"',
                 'ipykernel>=5.1.2;python_version>="3.4"',
@@ -223,14 +223,14 @@ if __name__ == "__main__":
         setup_requires=["Jinja2>=2.10.1", "jupyter>=1.0.0"],
         tests_require=["pytest>=4.0.2", "pandas", "requests"],
         data_files=[
-            (
-                "share/jupyter/nbextensions/pydeck",
-                [
-                    "pydeck/nbextension/static/extensionRequires.js",
-                    "pydeck/nbextension/static/index.js",
-                    "pydeck/nbextension/static/index.js.map",
-                ],
-            ),
+            # (
+            #     "share/jupyter/nbextensions/pydeck",
+            #     [
+            #         "pydeck/nbextension/static/extensionRequires.js",
+            #         "pydeck/nbextension/static/index.js",
+            #         "pydeck/nbextension/static/index.js.map",
+            #     ],
+            # ),
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
         ],
         zip_safe=False,

@@ -11,16 +11,6 @@ from .base_map_provider import BaseMapProvider
 from .map_styles import DARK, get_from_map_identifier
 
 
-def has_jupyter_extra():
-    try:
-        from ..widget import DeckGLWidget
-
-        DeckGLWidget()
-        return True
-    except (ImportError, NotImplementedError):
-        return False
-
-
 in_google_colab = "google.colab" in sys.modules
 
 
@@ -97,18 +87,6 @@ class Deck(JSONMixin):
         self.map_provider = str(map_provider).lower() if map_provider else None
         self._tooltip = tooltip
 
-        if has_jupyter_extra():
-            from ..widget import DeckGLWidget
-
-            self.deck_widget = DeckGLWidget()
-            self.deck_widget.custom_libraries = pydeck_settings.custom_libraries
-            self.deck_widget.configuration = pydeck_settings.configuration
-
-            self.deck_widget.height = height
-            self.deck_widget.width = width
-            self.deck_widget.tooltip = tooltip
-            self.deck_widget.map_provider = map_provider
-
         self._set_api_keys(api_keys)
 
         custom_map_style_error = "The map_provider parameter must be 'mapbox' when map_style is provided as a dict."
@@ -121,14 +99,8 @@ class Deck(JSONMixin):
 
         self.parameters = parameters
 
-    @property
-    def selected_data(self):
-        if not self.deck_widget.selected_data:
-            return None
-        return self.deck_widget.selected_data
-
     def _set_api_keys(self, api_keys: dict = None):
-        """Sets API key for base map provider for both HTML embedding and the Jupyter widget"""
+        """Sets API key for base map provider for HTML embedding"""
         for k in api_keys:
             k and BaseMapProvider(k)
         for provider in BaseMapProvider:
@@ -136,38 +108,10 @@ class Deck(JSONMixin):
             provider_env_var = f"{provider.name}_API_KEY"
             attr_value = api_keys.get(provider.value) or os.getenv(provider_env_var)
             setattr(self, attr_name, attr_value)
-            if has_jupyter_extra():
-                setattr(self.deck_widget, attr_name, attr_value)
 
     def show(self):
-        """Display current Deck object for a Jupyter notebook"""
-        if in_google_colab:
-            self.to_html(notebook_display=True)
-        else:
-            self.update()
-            return self.deck_widget
-
-    def update(self):
-        """Update a deck.gl map to reflect the current configuration
-
-        For example, if you've modified data passed to Layer and rendered the map using `.show()`,
-        you can call `update` to change the data on the map.
-
-        Intended for use in a Jupyter environment.
-        """
-        if not has_jupyter_extra():
-            raise ImportError(
-                "Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`"
-            )
-        self.deck_widget.json_input = self.to_json()
-        has_binary = False
-        binary_data_sets = []
-        for layer in self.layers:
-            if layer.use_binary_transport:
-                binary_data_sets.extend(layer.get_binary_data())
-                has_binary = True
-        if has_binary:
-            self.deck_widget.data_buffer = binary_data_sets
+        """Display current Deck object"""
+        return self.to_html(notebook_display=True)
 
     def to_html(
         self,
@@ -180,7 +124,7 @@ class Deck(JSONMixin):
         offline=False,
         **kwargs,
     ):
-        """Write a file and loads it to an iframe, if in a Jupyter environment;
+        """Write a file and loads it to an iframe, if in a notebook environment;
         otherwise, write a file and optionally open it in a web browser
 
         Parameters
@@ -190,11 +134,11 @@ class Deck(JSONMixin):
         open_browser : bool, default False
             Whether a browser window will open or not after write.
         notebook_display : bool, default None
-            Display the HTML output in an iframe if True. Set to True automatically if rendering in Jupyter.
+            Display the HTML output in an iframe if True. Set to True automatically if rendering in a notebook.
         iframe_width : str or int, default '100%'
-            Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
+            Width of iframe in pixels, if rendered in a notebook environment.
         iframe_height : int, default 500
-            Height of Jupyter notebook iframe in pixels, if rendered in Jupyter or Colab.
+            Height of iframe in pixels, if rendered in a notebook environment.
         as_string : bool, default False
             Returns HTML as a string, if True and ``filename`` is None.
         css_background_color : str, default None

@@ -38,31 +38,6 @@ You can also use a Google Maps API key in a similar way. Currently Google Maps i
 
 If you set a ``MAPBOX_API_KEY`` or ``GOOGLE_MAPS_API_KEY`` environment variables, pydeck will detect them.
 
-Enabling pydeck for Jupyter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Jupyter allows for more complex server/client interactions. You or your system administrator
-must enable pydeck for use in Jupyter. Binary data transportation, data selection, and updating data over time
-interactively only work if pydeck is enabled for use in a Jupyter environments.
-
-To enable pydeck for Jupyter Notebook:
-
-.. code-block:: bash
-
-        jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-        jupyter nbextension enable --sys-prefix --py pydeck
-
-To enable pydeck for JupyterLab (on Mac/Unix-like systems):
-
-.. code-block:: bash
-
-        jupyter labextension install @jupyter-widgets/jupyterlab-manager
-        DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-        jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
-
-
-pydeck also works in Google Colab. While you can install pydeck in Google Colab via pip, it is not yet enabled for server use.
-
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
 
