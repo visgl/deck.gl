@@ -1,7 +1,7 @@
 import pydeck as pdk
 
 H3_VERSION = "~4.1.*"
-DECKGL_VERSION = "~8.8.*"
+DECKGL_VERSION = "~9.0.*"
 
 LIBRARIES_TO_INCLUDE = [
     f"npm/h3-js@{H3_VERSION}/dist/h3-js.umd.js",
@@ -12,33 +12,18 @@ SELECTED_LIBRARIES = ",".join(LIBRARIES_TO_INCLUDE)
 CARTO_LAYER_BUNDLE_URL = f"https://cdn.jsdelivr.net/combine/{SELECTED_LIBRARIES}"
 
 
-class MapType:
-    QUERY = pdk.types.String("query")
-    TABLE = pdk.types.String("table")
-    TILESET = pdk.types.String("tileset")
-
-
-class CartoConnection:
-    CARTO_DW = pdk.types.String("carto_dw")
-
-
-class GeoColumnType:
-    H3 = pdk.types.String("h3")
-    QUADBIN = pdk.types.String("quadbin")
-
-
-def register_carto_layer():
-    """Add CartoLayer JS bundle to pydeck's custom libraries."""
-    library_name = "CartoLayerLibrary"
+def register_layers():
+    """Add carto layers JS bundle to pydeck's custom libraries."""
+    library_name = "CartoLibrary"
     custom_library = {
         "libraryName": library_name,
         "resourceUri": CARTO_LAYER_BUNDLE_URL,
     }
     default_layer_attributes = {
-        "CartoLayer": {
-            "client_id": pdk.types.String("pydeck-carto"),
-            "on_data_error": pdk.types.Function("notifyError"),
-        }
+        "VectorTileLayer": {"on_data_error": pdk.types.Function("notifyError")},
+        "H3TileLayer": {"on_data_error": pdk.types.Function("notifyError")},
+        "QuadbinTileLayer": {"on_data_error": pdk.types.Function("notifyError")},
+        "RasterTileLayer": {"on_data_error": pdk.types.Function("notifyError")},
     }
     configuration = """{
         functions: {
@@ -73,19 +58,3 @@ def register_carto_layer():
         )
         if not exists:
             pdk.settings.custom_libraries.append(custom_library)
-
-
-def get_layer_credentials(carto_auth) -> dict:
-    """Get the layer credentials object to gather information
-    from carto warehouses.
-
-    The return object has the following structure:
-    ``{"apiVersion": "v3", "apiBaseUrl": "...", "accessToken": "...",}``
-    """
-    api_base_url = carto_auth.get_api_base_url()
-    access_token = carto_auth.get_access_token()
-    return {
-        "apiVersion": "v3",
-        "apiBaseUrl": api_base_url,
-        "accessToken": access_token,
-    }

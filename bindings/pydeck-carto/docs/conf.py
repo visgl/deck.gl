@@ -12,9 +12,9 @@ project = "pydeck-carto"
 copyright = f"{datetime.datetime.utcnow().year}, CartoDB Inc"
 author = "CARTO"
 # The short X.Y version
-version = "0.1"
+version = "0.2"
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.2.0b0"
 # Extensions to generate documents from our docstrings here
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 templates_path = ["_templates"]
