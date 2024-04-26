@@ -734,7 +734,7 @@ Parameters:
 * `context` (object) - Layer context from the current rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
-  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
+  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`
 
 Returns:
 
@@ -759,7 +759,7 @@ Parameters:
 * `context` (object) - Layer context from the current rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
-  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
+  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`
 
 The default implementation will invalidate all attributeManager attributes if the `data` prop has changed.
 
