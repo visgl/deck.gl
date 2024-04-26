@@ -26,14 +26,10 @@ jobs:
           node-version: '18.x'
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mesa-utils xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 libxi-dev
-          yarn bootstrap
+        run: yarn bootstrap
 
       - name: Run tests
-        run: |
-          xvfb-run -s "-ac -screen 0 1280x1024x16" yarn test-ci
+        run: yarn test-ci
 
       - name: Coveralls
         uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
