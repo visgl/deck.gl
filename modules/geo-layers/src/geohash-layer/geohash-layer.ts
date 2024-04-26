@@ -9,7 +9,7 @@ const defaultProps: DefaultProps<GeohashLayerProps> = {
 /**
  * Properties of `GeohashLayer`.
  */
-type GeohashLayerProps<DataT = unknown> = {
+export type GeohashLayerProps<DataT = unknown> = {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *

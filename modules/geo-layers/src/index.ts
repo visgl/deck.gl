@@ -47,6 +47,7 @@ export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
 export type {Tile3DLayerProps} from './tile-3d-layer/tile-3d-layer';
 export type {MVTLayerProps, MVTLayerPickingInfo} from './mvt-layer/mvt-layer';
 export type {GeoCellLayerProps as _GeoCellLayerProps} from './geo-cell-layer/GeoCellLayer';
+export type {GeohashLayerProps} from './geohash-layer/geohash-layer';
 
 // Tileset2D
 
