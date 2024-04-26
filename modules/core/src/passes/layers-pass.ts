@@ -66,6 +66,7 @@ export default class LayersPass extends Pass {
     const clearCanvas = options.clearCanvas ?? true;
     const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     const clearDepth = clearCanvas ? 1 : false;
+    const clearStencil = clearCanvas ? 0 : false;
     const colorMask = options.colorMask ?? 0xf;
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
@@ -80,7 +81,8 @@ export default class LayersPass extends Pass {
       framebuffer: options.target,
       parameters,
       clearColor,
-      clearDepth
+      clearDepth,
+      clearStencil
     });
 
     try {
