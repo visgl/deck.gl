@@ -31,16 +31,19 @@ from carto_auth import CartoAuth
 # Authentication with CARTO
 carto_auth = CartoAuth.from_oauth()
 
-# Register CartoLayer in pydeck
-pdkc.register_carto_layer()
+# Register new layer types in pydeck
+pdkc.register_layers()
 
-# Render CartoLayer in pydeck
+# Render CARTO layer in pydeck
+data = pdkc.sources.vector_query_source(
+    access_token=carto_auth.get_access_token(),
+    api_base_url=carto_auth.get_api_base_url(),
+    connection_name="carto_dw",
+    sql_query="SELECT geom, name FROM carto-demo-data.demo_tables.world_airports",
+)
 layer = pdk.Layer(
-    "CartoLayer",
-    data="SELECT geom, name FROM carto-demo-data.demo_tables.airports",
-    type_=pdkc.MapType.QUERY,
-    connection=pdkc.CartoConnection.CARTO_DW,
-    credentials=pdkc.get_layer_credentials(carto_auth),
+    "VectorTileLayer",
+    data=data,
     get_fill_color=[238, 77, 90],
     point_radius_min_pixels=2.5,
     pickable=True,
