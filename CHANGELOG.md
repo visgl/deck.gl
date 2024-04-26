@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.11] - Apr 26 2024
+
+- Export luma functions (#8822)
+- fix(core): explicitly set clearStencil in LayersPass (#8844)
+- fix(layers): work around Samsung shader compilation failure (#8843)
+- fix(types): add export for GeohashLayerProps (#8836)
+- Publish NPM packages from CI (#8828)
+
 #### deck.gl [9.0.10] - Apr 23 2024
 
 - fix(carto): Restore global required by pydeck-carto (#8799)
