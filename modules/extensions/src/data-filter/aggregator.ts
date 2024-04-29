@@ -71,7 +71,6 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
       colorAttachments: [
         device.createTexture({
           format: 'rgba32float',
-          type: GL.FLOAT,
           mipmaps: false
         })
       ]
@@ -80,7 +79,7 @@ export function getFramebuffer(device: Device, useFloatTarget: boolean): Framebu
   return device.createFramebuffer({
     width: 256,
     height: 64,
-    colorAttachments: [device.createTexture({format: 'rgba8unorm', type: GL.FLOAT, mipmaps: false})]
+    colorAttachments: [device.createTexture({format: 'rgba8unorm', mipmaps: false})]
   });
 }
 
