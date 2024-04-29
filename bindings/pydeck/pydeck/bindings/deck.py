@@ -175,7 +175,6 @@ class Deck(JSONMixin):
             "Jupyter-specific features not currently supported in pydeck v0.9."
         )
 
-
     def to_html(
         self,
         filename=None,
