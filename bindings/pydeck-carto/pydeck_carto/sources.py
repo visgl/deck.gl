@@ -164,21 +164,70 @@ class VectorTilesetSourceOptions(TilesetSourceOptions):
 
 
 def vector_table_source(**kwargs: Unpack[VectorTableSourceOptions]):
-    """Defines a table as a data source for one or more vector layers."""
+    """Defines a table as a data source for one or more vector layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    columns : List[str], optional
+        List of table columns to be loaded.
+    """
     return pdk.types.Function(
         "vectorTableSource", **{**column_options(**kwargs), **table_options(**kwargs)}
     ).serialize()
 
 
 def vector_query_source(**kwargs: Unpack[VectorQuerySourceOptions]):
-    """Defines a query as a data source for one or more vector layers."""
+    """Defines a query as a data source for one or more vector layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str, optional
+        Access token, see *Authentication*.
+    api_base_url : str
+        API base URL, see *Authentication*.
+    sql_query : str
+        SQL query.
+    query_parameters : List[str], optional
+        List of positional SQL parameters.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    columns : List[str], optional
+        List of table columns to be loaded.
+    """
     return pdk.types.Function(
         "vectorQuerySource", **{**column_options(**kwargs), **query_options(**kwargs)}
     ).serialize()
 
 
 def vector_tileset_source(**kwargs: Unpack[VectorTilesetSourceOptions]):
-    """Defines a tileset as a data source for one or more vector layers."""
+    """Defines a tileset as a data source for one or more vector layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    """
     return pdk.types.Function(
         "vectorTilesetSource", **tileset_options(**kwargs)
     ).serialize()
@@ -199,28 +248,83 @@ class H3QuerySourceOptions(QuerySourceOptions, AggregationOptions):
     pass
 
 
-class H3TilesetSourceOptions(TilesetSourceOptions, AggregationOptions):
+class H3TilesetSourceOptions(TilesetSourceOptions):
     """Options for h3_tileset_source."""
 
     pass
 
 
 def h3_table_source(**kwargs: Unpack[H3TableSourceOptions]):
-    """Defines a table as a data source for one or more H3 layers."""
+    """Defines a table as a data source for one or more H3 layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    aggregation_exp : str, optional
+        Aggregation SQL expression. Only used for spatial index datasets.
+    aggregation_res_level : int, optional
+        Aggregation resolution level. Only used for spatial index datasets,
+        defaults to 6 for quadbins, 4 for h3.
+    """
     return pdk.types.Function(
         "h3TableSource", **{**aggregation_options(**kwargs), **table_options(**kwargs)}
     ).serialize()
 
 
 def h3_query_source(**kwargs: Unpack[H3QuerySourceOptions]):
-    """Defines a query as a data source for one or more H3 layers."""
+    """Defines a query as a data source for one or more H3 layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    sql_query : str
+        SQL query.
+    query_parameters : List[str], optional
+        List of positional SQL parameters.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    aggregation_exp : str
+        Aggregation SQL expression. Only used for spatial index datasets.
+    aggregation_res_level : int, optional
+        Aggregation resolution level. Only used for spatial index datasets,
+        defaults to 6 for quadbins, 4 for h3.
+    """
     return pdk.types.Function(
         "h3QuerySource", **{**aggregation_options(**kwargs), **query_options(**kwargs)}
     ).serialize()
 
 
 def h3_tileset_source(**kwargs: Unpack[H3TilesetSourceOptions]):
-    """Defines a tileset as a data source for one or more H3 layers."""
+    """Defines a tileset as a data source for one or more H3 layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    """
     return pdk.types.Function(
         "h3TilesetSource", **tileset_options(**kwargs)
     ).serialize()
@@ -241,14 +345,34 @@ class QuadbinQuerySourceOptions(QuerySourceOptions, AggregationOptions):
     pass
 
 
-class QuadbinTilesetSourceOptions(TilesetSourceOptions, AggregationOptions):
+class QuadbinTilesetSourceOptions(TilesetSourceOptions):
     """Options for quadbin_tileset_source."""
 
     pass
 
 
 def quadbin_table_source(**kwargs: Unpack[QuadbinTableSourceOptions]):
-    """Defines a table as a data source for one or more quadbin layers."""
+    """Defines a table as a data source for one or more quadbin layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    aggregation_exp : str
+        Aggregation SQL expression. Only used for spatial index datasets.
+    aggregation_res_level : int, optional
+        Aggregation resolution level. Only used for spatial index datasets,
+        defaults to 6 for quadbins, 4 for h3.
+    """
     return pdk.types.Function(
         "quadbinTableSource",
         **{**aggregation_options(**kwargs), **table_options(**kwargs)}
@@ -256,7 +380,29 @@ def quadbin_table_source(**kwargs: Unpack[QuadbinTableSourceOptions]):
 
 
 def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
-    """Defines a query as a data source for one or more quadbin layers."""
+    """Defines a query as a data source for one or more quadbin layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    sql_query : str
+        SQL query.
+    query_parameters : List[str], optional
+        List of positional SQL parameters.
+    spatial_data_column : str, optional
+        Name of spatial data column. Common examples are "geom", "h3", or "quadbin".
+    aggregation_exp : str
+        Aggregation SQL expression. Only used for spatial index datasets.
+    aggregation_res_level : int, optional
+        Aggregation resolution level. Only used for spatial index datasets,
+        defaults to 6 for quadbins, 4 for h3.
+    """
     return pdk.types.Function(
         "quadbinQuerySource",
         **{**aggregation_options(**kwargs), **query_options(**kwargs)}
@@ -264,7 +410,20 @@ def quadbin_query_source(**kwargs: Unpack[QuadbinQuerySourceOptions]):
 
 
 def quadbin_tileset_source(**kwargs: Unpack[QuadbinTilesetSourceOptions]):
-    """Defines a tileset as a data source for one or more quadbin layers."""
+    """Defines a tileset as a data source for one or more quadbin layers.
+
+    Parameters
+    ----------
+    connection_name : str
+        Name of the connection registered in the CARTO Workspace. CARTO Data
+        Warehouse connection name is "carto_dw".
+    access_token : str
+        Access token, see *Authentication*.
+    api_base_url : str, optional
+        API base URL, see *Authentication*.
+    table_name : str
+        Fully-qualified name of table.
+    """
     return pdk.types.Function(
         "quadbinTilesetSource", **tileset_options(**kwargs)
     ).serialize()

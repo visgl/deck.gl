@@ -34,13 +34,15 @@ carto_auth = CartoAuth.from_oauth()
 # Register new layer types in pydeck
 pdkc.register_layers()
 
-# Render CARTO layer in pydeck
+# Create CARTO data source
 data = pdkc.sources.vector_query_source(
     access_token=carto_auth.get_access_token(),
     api_base_url=carto_auth.get_api_base_url(),
     connection_name="carto_dw",
     sql_query="SELECT geom, name FROM carto-demo-data.demo_tables.world_airports",
 )
+
+# Render CARTO layer in pydeck
 layer = pdk.Layer(
     "VectorTileLayer",
     data=data,

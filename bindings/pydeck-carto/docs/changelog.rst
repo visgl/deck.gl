@@ -7,7 +7,7 @@ Releases and associated GitHub PRs for pydeck-carto are documented here.
 ------------
 
 0.2.0b0 - Apr 24 2024
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v9.0
 - Rename register_carto_layer to register_layers
 - Add layer enums: VectorTileLayer, H3TileLayer, QuadbinTileLayer
@@ -17,7 +17,7 @@ Releases and associated GitHub PRs for pydeck-carto are documented here.
 ------------
 
 0.1.1b0 - Apr 24 2024
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v8.9
 
 0.1.0 - Nov 04 2022

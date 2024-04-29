@@ -7,7 +7,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 ------------
 
 0.9.0b0 - Apr 24 2024
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v9.0
 
 0.8 Releases
