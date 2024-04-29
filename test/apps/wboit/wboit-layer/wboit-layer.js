@@ -70,7 +70,6 @@ export default class WBOITLayer extends SolidPolygonLayer {
     // const accumulationDepthTexture = new Texture2D(gl, {
     //   ...textureOpts,
     //   format: GL.DEPTH_COMPONENT32F,
-    //   dataFormat: GL.DEPTH_COMPONENT
     // });
 
     const accumulationFramebuffer = new Framebuffer(gl, {

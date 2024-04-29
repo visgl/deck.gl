@@ -33,14 +33,12 @@ export const WEIGHT_SIZE = 3;
 
 export const MAX_MIN_TEXTURE_OPTS = {
   format: GL.RGBA32F,
-  type: GL.FLOAT,
   border: 0,
   mipmaps: false,
   sampler: {
     minFilter: 'nearest',
     magFilter: 'nearest'
   },
-  dataFormat: GL.RGBA,
   width: 1,
   height: 1
 };
