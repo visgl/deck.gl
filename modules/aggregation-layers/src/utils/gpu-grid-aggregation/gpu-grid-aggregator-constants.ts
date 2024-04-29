@@ -1,4 +1,5 @@
 import {GL} from '@luma.gl/constants';
+import type {TextureProps} from '@luma.gl/core';
 import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 export const DEFAULT_RUN_PARAMS = {
@@ -31,9 +32,8 @@ export const DEFAULT_WEIGHT_PARAMS = {
 export const PIXEL_SIZE = 4; // RGBA32F
 export const WEIGHT_SIZE = 3;
 
-export const MAX_MIN_TEXTURE_OPTS = {
-  format: GL.RGBA32F,
-  border: 0,
+export const MAX_MIN_TEXTURE_OPTS: TextureProps = {
+  format: 'rgba32float',
   mipmaps: false,
   sampler: {
     minFilter: 'nearest',

@@ -58,7 +58,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
 
     const accumulationTexture = new Texture2D(gl, {
       ...textureOpts,
-      format: gl.RGBA32F
+      format: 'rgba32float'
     });
 
     const revealageTexture = new Texture2D(gl, {

@@ -289,7 +289,7 @@ export default class IconManager {
   private _texture: Texture | null = null;
   private _externalTexture: Texture | null = null;
   private _mapping: IconMapping = {};
-  private _textureParameters: SamplerProps | null = null;
+  private _samplerParameters: SamplerProps | null = null;
 
   /** count of pending requests to fetch icons */
   private _pendingCount: number = 0;
@@ -368,7 +368,7 @@ export default class IconManager {
     }
 
     if (textureParameters) {
-      this._textureParameters = textureParameters;
+      this._samplerParameters = textureParameters;
     }
   }
 
@@ -407,7 +407,7 @@ export default class IconManager {
           format: 'rgba8unorm',
           width: this._canvasWidth,
           height: this._canvasHeight,
-          sampler: this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
+          sampler: this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
         });
       }
 
@@ -416,7 +416,7 @@ export default class IconManager {
           this._texture,
           this._canvasWidth,
           this._canvasHeight,
-          this._textureParameters || DEFAULT_SAMPLER_PARAMETERS
+          this._samplerParameters || DEFAULT_SAMPLER_PARAMETERS
         );
       }
 

@@ -1,6 +1,6 @@
 import {Device, SamplerProps} from '@luma.gl/core';
 
-const DEFAULT_PARAMETERS: SamplerProps = {
+const DEFAULT_SAMPLER: SamplerProps = {
   minFilter: 'nearest',
   magFilter: 'nearest'
 };
@@ -11,19 +11,19 @@ type FloatTextureOptions = {
   height?: number;
   data?: any;
   unpackFlipY?: boolean;
-  parameters?: SamplerProps;
+  sampler?: SamplerProps;
 };
 
 // TODO - not working
 export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
-  const {width = 1, height = 1, data = null, parameters = DEFAULT_PARAMETERS} = opts;
+  const {width = 1, height = 1, data = null, sampler = DEFAULT_SAMPLER} = opts;
   const texture = device.createTexture({
     data,
     format: 'rgba32float', // device.info.type === 'webgl2' ? 'rgba32float' : GL.RGBA,
     // type: GL.FLOAT,
     // border: 0,
     mipmaps: false,
-    sampler: parameters,
+    sampler,
     width,
     height
     // ts-expect-error
