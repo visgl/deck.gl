@@ -24,7 +24,6 @@ export function getFloatTexture(device: Device, opts: FloatTextureOptions) {
     // border: 0,
     mipmaps: false,
     sampler: parameters,
-    // dataFormat: GL.RGBA,
     width,
     height
     // ts-expect-error

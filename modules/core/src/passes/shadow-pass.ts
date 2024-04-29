@@ -33,11 +33,7 @@ export default class ShadowPass extends LayersPass {
       format: 'depth16unorm',
       width: 1,
       height: 1,
-      mipmaps: false,
-
-      // TODO fix getWebGLTextureParameters() in luma to avoid passing deprecated parameters
-      dataFormat: 6402, // gl.DEPTH_COMPONENT
-      type: 5125 // gl.UNSIGNED_INT
+      mipmaps: false
     });
 
     this.fbo = device.createFramebuffer({
