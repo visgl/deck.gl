@@ -90,7 +90,8 @@ Takes a single parameter as a map of attribute descriptor objects:
 
 #### `addInstanced` {#addinstanced}
 
-Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
+Shorthand for `add()` in which all attributes `instanced` field are set to `true`. The key for any instanced attribute must begin with "instance" for it
+to be passed to the shader as an instanced attribute. Without this the attribute will still be passed as a vertex.
 
 
 #### `remove` {#remove}
