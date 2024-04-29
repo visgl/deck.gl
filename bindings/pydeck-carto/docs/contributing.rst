@@ -9,7 +9,7 @@ For governance policy and code of conduct, please see the `deck.gl contribution 
 Development installation
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please develop using Python 3.7 or above.
+Please develop using Python 3.8 or above.
 
 .. code-block:: bash
 

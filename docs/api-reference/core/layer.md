@@ -152,7 +152,7 @@ Whether the layer responds to mouse pointer picking events.
 
 This callback will be called when the mouse enters/leaves an object of this deck.gl layer with the following parameters:
 
-* [`info`](../../developer-guide/interactivity.md#the-picking-info-object)
+* [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
 If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onHover`](../react/deckgl.md#onhover) callback of the `DeckGL` canvas.
@@ -163,7 +163,7 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse clicks over an object of this deck.gl layer with the following parameters:
 
-* [`info`](../../developer-guide/interactivity.md#the-picking-info-object)
+* [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
 If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onClick`](../react/deckgl.md#onclick) callback of the `DeckGL` canvas.
@@ -174,7 +174,7 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse starts dragging an object of this deck.gl layer with the following parameters:
 
-* [`info`](../../developer-guide/interactivity.md#the-picking-info-object)
+* [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
 If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](../react/deckgl.md#ondragstart) callback of the `DeckGL` canvas.
@@ -185,7 +185,7 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse drags an object of this deck.gl layer with the following parameters:
 
-* [`info`](../../developer-guide/interactivity.md#the-picking-info-object)
+* [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
 If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](../react/deckgl.md#ondrag) callback of the `DeckGL` canvas.
@@ -196,7 +196,7 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse releases an object of this deck.gl layer with the following parameters:
 
-* [`info`](../../developer-guide/interactivity.md#the-picking-info-object)
+* [`info`](../../developer-guide/interactivity.md#the-pickinginfo-object)
 * `event` - the source event
 
 If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](../react/deckgl.md#ondragend) callback of the `DeckGL` canvas.
@@ -210,7 +210,7 @@ Requires `pickable` to be true.
 RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). When the value is a 3 component (RGB) array, a default alpha of 255 is applied.
 
 - If an array is supplied, it is used for the object that is currently highlighted.
-- If a function is supplied, it is called with a [pickingInfo](../../developer-guide/interactivity.md#the-picking-info-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
+- If a function is supplied, it is called with a [pickingInfo](../../developer-guide/interactivity.md#the-pickinginfo-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
 
 #### `highlightedObjectIndex` (number | null, optional) {#highlightedobjectindex}
 
@@ -734,7 +734,7 @@ Parameters:
 * `context` (object) - Layer context from the current rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
-  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
+  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`
 
 Returns:
 
@@ -759,7 +759,7 @@ Parameters:
 * `context` (object) - Layer context from the current rendering cycle.
 * `changeFlags`:
   - an object that contains the following boolean flags:
-  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`, `viewportChanged`
+  - `dataChanged`, `propsChanged`, `viewportChanged`, `somethingChanged`, `propsOrDataChanged`, `stateChanged`, `updateTriggersChanged`
 
 The default implementation will invalidate all attributeManager attributes if the `data` prop has changed.
 

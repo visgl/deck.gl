@@ -176,6 +176,10 @@ const config = {
             title: 'Other vis.gl Libraries',
             items: [
               {
+                label: 'deck.gl-community',
+                href: 'https://visgl.github.io/deck.gl-community/'
+              },
+              {
                 label: 'luma.gl',
                 href: 'https://luma.gl'
               },
