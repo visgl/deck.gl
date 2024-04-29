@@ -26,7 +26,8 @@ Index
    :maxdepth: 2
    :caption: API Reference
 
-   layer
+   layers
+   sources
    styles
 
 .. toctree::

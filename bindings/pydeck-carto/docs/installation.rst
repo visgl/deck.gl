@@ -23,6 +23,9 @@ Via conda
 Using it on Jupyter notebook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. WARNING::
+   Jupyter-specific features are not currently supported in pydeck v0.9+.
+
 In order to use the library in Jupyter notebook (or jupyter lab) requires that pydeck would be properly enabled
 
 Please follow the latest instructions to enable pydeck for Jupyter `here <https://pydeck.gl/installation.html#enabling-pydeck-for-jupyter>`_
