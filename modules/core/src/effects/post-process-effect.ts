@@ -1,5 +1,5 @@
 import type {Device, Framebuffer} from '@luma.gl/core';
-import {normalizeShaderModule, ShaderPass} from '@luma.gl/shadertools';
+import {initializeShaderModule, ShaderPass} from '@luma.gl/shadertools';
 
 import ScreenPass from '../passes/screen-pass';
 
@@ -14,7 +14,7 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
   constructor(module: ShaderPassT, props: ShaderPassT['props']) {
     this.id = `${module.name}-pass`;
     this.props = props;
-    normalizeShaderModule(module);
+    initializeShaderModule(module);
     this.module = module;
   }
 

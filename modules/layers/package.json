@@ -3,7 +3,7 @@
   "description": "deck.gl core layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.0-beta.11",
+  "version": "9.1.0-alpha.0",
   "publishConfig": {
     "access": "public"
   },
@@ -46,10 +46,10 @@
     "earcut": "^2.2.4"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/core": "9.0.0-alpha.0",
     "@loaders.gl/core": "^4.2.0",
-    "@luma.gl/core": "^9.0.0",
-    "@luma.gl/engine": "^9.0.0"
+    "@luma.gl/core": "^9.1.0-alpha.9",
+    "@luma.gl/engine": "^9.1.0-alpha.9"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

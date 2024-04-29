@@ -29,7 +29,6 @@ export function createTexture(
   sampler: SamplerProps
 ): Texture | null {
   if (image instanceof Texture) {
-    // @ts-expect-error This type error seems like it shouldn't happen...
     return image;
   } else if (image.constructor && image.constructor.name !== 'Object') {
     // Browser object
