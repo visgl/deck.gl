@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.12] - Apr 29 2024
+
+- CARTO: Implement QuadbinHeatmapTileLayer (#8703)
+
 #### deck.gl [9.0.11] - Apr 26 2024
 
 - Export luma functions (#8822)
