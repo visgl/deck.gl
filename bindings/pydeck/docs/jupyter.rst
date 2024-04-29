@@ -1,6 +1,9 @@
 Jupyter-specific features
 =========================
 
+.. WARNING::
+   Jupyter-specific features are not currently supported in pydeck v0.9+.
+
 Jupyter environments offer unique opportunities for two-way data interaction,
 sharing data between the Python backend and visualization in deck.gl.
 
@@ -8,15 +11,15 @@ To use a visualization with these features, call :meth:`pydeck.bindings.deck.Dec
 rather than :meth:`pydeck.bindings.deck.Deck.to_html`.
 
 - *Data updates.* By calling :meth:`pydeck.bindings.deck.Deck.update` on a :class:`pydeck.bindings.deck.Deck` object with a new visualization configuration, you can seamless push new data into a pre-existing visualization.
-   
+
 .. figure:: https://i.imgur.com/qenLNEf.gif
-   
+
    `Conway's Game of Life <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>`_ in pydeck
 
 - *Binary data transfer.* For certain data sets pydeck can support many millions of points by using Jupyter's socket-level communication. Further documentation is `here <binary_transfer.html>`__.
 
 - *Data selection.* Data can be selected within a pydeck visualization and pushed back to the client. Holding Command while clicking allows the user to select multiple points.
-  
+
 .. figure:: https://user-images.githubusercontent.com/2204757/66785863-55499680-ee93-11e9-9824-21c6f6468b25.gif
    :alt: Selecting data in Jupyter
 

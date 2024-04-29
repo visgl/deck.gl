@@ -1,9 +1,12 @@
 Event handling
 ^^^^^^^^^^^^^^
 
+.. WARNING::
+   Jupyter-specific features are not currently supported in pydeck v0.9+.
+
 pydeck provides bidirectional interactions in Jupyter via event handlers,
 ``on_hover``, ``on_resize``, ``on_view_state_change``, and ``on_click``. Each corresponds
-to the 
+to the
 `cursor <https://deck.gl/docs/developer-guide/interactivity#using-the-built-in-event-handling>`__
 and `view state <https://deck.gl/docs/api-reference/core/deck#onviewstatechange>`__ events in the deck.gl
 documentation.
@@ -95,7 +98,7 @@ Only hovering over a layer will fire an event and hovering over the basemap alon
 
 View state change events with ``on_view_state_change``
 ------------------------------------------------------
-Zooming in and out, panning, and changing pitch or bearing all constitute view state changes. 
+Zooming in and out, panning, and changing pitch or bearing all constitute view state changes.
 A view state change event sends a dictionary with the following information as the ``payload``:
 
 .. code-block:: python
