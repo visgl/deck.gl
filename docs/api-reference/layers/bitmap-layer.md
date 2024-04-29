@@ -232,7 +232,7 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 
 ## Pixel Picking
 
-The [picking info](../../developer-guide/interactivity.md#the-picking-info-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
+The [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:
 
 - `bitmap`
   + `pixel` ([x: number, y: number])  Integer coordinates into the bitmap

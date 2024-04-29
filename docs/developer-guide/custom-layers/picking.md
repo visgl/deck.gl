@@ -15,7 +15,7 @@ After the picking buffer is rendered, deck.gl looks at the color of the pixel un
 
 ### Event Propagation
 
-Once an object is picked, deck.gl creates a [picking info](../interactivity.md#the-picking-info-object) object that describes what is under the pointer.
+Once an object is picked, deck.gl creates a [picking info](../interactivity.md#the-pickinginfo-object) object that describes what is under the pointer.
 
 The [`layer.getPickingInfo()`](../../api-reference/core/layer.md#getpickinginfo) method is called first on the layer that directly rendered the picked object, to modify or add additional fields to the info.
 
