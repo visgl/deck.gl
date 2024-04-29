@@ -248,11 +248,7 @@ export default class CollisionFilterEffect implements Effect {
       format: 'depth16unorm',
       width,
       height,
-      mipmaps: false,
-
-      // TODO fix getWebGLTextureParameters() in luma to avoid passing deprecated parameters
-      dataFormat: 6402, // gl.DEPTH_COMPONENT
-      type: 5125 // gl.UNSIGNED_INT
+      mipmaps: false
     });
     this.collisionFBOs[collisionGroup] = device.createFramebuffer({
       id: `collision-${collisionGroup}`,
