@@ -28,6 +28,11 @@ test('standalone#imports', t => {
   t.ok(deckgl.Layer, 'Layer class is exported');
   t.ok(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported');
 
+  t.ok(globalThis.deck, 'deck namespace is exported');
+  t.ok(globalThis.luma, 'luma namespace is exported');
+  t.ok(globalThis.luma.enforceWebGL2, 'enforceWebGL2 is exported');
+  t.ok(globalThis.loaders, 'loaders namespace is exported');
+
   t.end();
 });
 

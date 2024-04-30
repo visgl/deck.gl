@@ -190,7 +190,6 @@ function getTexture(device: Device): Texture {
     data: new Uint8Array(4),
     format: 'rgba8unorm',
     mipmaps: false,
-    // dataFormat: GL.RGBA,
     width: 1,
     height: 1
   });

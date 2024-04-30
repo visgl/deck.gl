@@ -15,7 +15,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {HeatmapLayer} from '@deck.gl/geo-layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 const layer = new HeatmapLayer({
   id: 'HeatmapLayer',
@@ -43,7 +43,7 @@ new Deck({
 
 ```ts
 import {Deck} from '@deck.gl/core';
-import {HeatmapLayer} from '@deck.gl/geo-layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;
@@ -78,7 +78,7 @@ new Deck({
 ```tsx
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {HeatmapLayer} from '@deck.gl/geo-layers';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;

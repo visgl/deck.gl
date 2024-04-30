@@ -36,6 +36,8 @@ in vec4 position_commonspace;
 
 void main(void) {
   fragColor = vColor;
+  // Fails to compile on some Android devices if geometry is never assigned (#8411)
+  geometry.uv = vec2(0.);
 #ifdef FLAT_SHADING
   if (extruded && !isStroke && !bool(picking.isActive)) {
     vec3 normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));

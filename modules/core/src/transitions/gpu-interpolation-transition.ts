@@ -1,5 +1,7 @@
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
+import {fp64arithmetic} from '@luma.gl/shadertools';
+import {GL} from '@luma.gl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
   getAttributeTypeFromSize,
@@ -68,7 +70,11 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
 
     const {transform} = this;
     const model = transform.model;
-    model.setVertexCount(Math.floor(this.currentLength / attribute.size));
+    let vertexCount = Math.floor(this.currentLength / attribute.size);
+    if (useFp64(attribute)) {
+      vertexCount /= 2;
+    }
+    model.setVertexCount(vertexCount);
     if (attribute.isConstant) {
       model.setAttributes({aFrom: buffers[0]});
       model.setConstantAttributes({aTo: attribute.value as TypedArray});
@@ -118,14 +124,82 @@ void main(void) {
   gl_Position = vec4(0.0);
 }
 `;
+const vs64 = `\
+#version 300 es
+#define SHADER_NAME interpolation-transition-vertex-shader
+
+uniform float time;
+in ATTRIBUTE_TYPE aFrom;
+in ATTRIBUTE_TYPE aFrom64Low;
+in ATTRIBUTE_TYPE aTo;
+in ATTRIBUTE_TYPE aTo64Low;
+out ATTRIBUTE_TYPE vCurrent;
+out ATTRIBUTE_TYPE vCurrent64Low;
+
+vec2 mix_fp64(vec2 a, vec2 b, float x) {
+  vec2 range = sub_fp64(b, a);
+  return sum_fp64(a, mul_fp64(range, vec2(x, 0.0)));
+}
+
+void main(void) {
+  for (int i=0; i<ATTRIBUTE_SIZE; i++) {
+    vec2 value = mix_fp64(vec2(aFrom[i], aFrom64Low[i]), vec2(aTo[i], aTo64Low[i]), time);
+    vCurrent[i] = value.x;
+    vCurrent64Low[i] = value.y;
+  }
+  gl_Position = vec4(0.0);
+}
+`;
+
+function useFp64(attribute: Attribute): boolean {
+  return attribute.doublePrecision && attribute.value instanceof Float64Array;
+}
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
-  const attributeType = getAttributeTypeFromSize(attribute.size);
+  const attributeSize = attribute.size;
+  const attributeType = getAttributeTypeFromSize(attributeSize);
+  const inputFormat = getFloat32VertexFormat(attributeSize);
+  const bufferLayout = attribute.getBufferLayout();
+
+  if (useFp64(attribute)) {
+    return new BufferTransform(device, {
+      vs: vs64,
+      bufferLayout: [
+        {
+          name: 'aFrom',
+          byteStride: 8 * attributeSize,
+          attributes: [
+            {attribute: 'aFrom', format: inputFormat, byteOffset: 0},
+            {attribute: 'aFrom64Low', format: inputFormat, byteOffset: 4 * attributeSize}
+          ]
+        },
+        {
+          name: 'aTo',
+          byteStride: 8 * attributeSize,
+          attributes: [
+            {attribute: 'aTo', format: inputFormat, byteOffset: 0},
+            {attribute: 'aTo64Low', format: inputFormat, byteOffset: 4 * attributeSize}
+          ]
+        }
+      ],
+      modules: [fp64arithmetic],
+      defines: {
+        ATTRIBUTE_TYPE: attributeType,
+        ATTRIBUTE_SIZE: attributeSize
+      },
+      // Default uniforms are not set without this
+      moduleSettings: {},
+      varyings: ['vCurrent', 'vCurrent64Low'],
+      // @ts-expect-error WebGLRenderPipeline only prop TODO - support in RenderPipeline?
+      bufferMode: GL.INTERLEAVED_ATTRIBS,
+      disableWarnings: true
+    });
+  }
   return new BufferTransform(device, {
     vs,
     bufferLayout: [
-      {name: 'aFrom', format: getFloat32VertexFormat(attribute.size)},
-      {name: 'aTo', format: attribute.getBufferLayout().attributes![0].format}
+      {name: 'aFrom', format: inputFormat},
+      {name: 'aTo', format: bufferLayout.attributes![0].format}
     ],
     defines: {
       ATTRIBUTE_TYPE: attributeType
@@ -133,6 +207,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     varyings: ['vCurrent'],
 
     // TODO investigate why this is needed
-    modules: [project]
+    modules: [project],
+    disableWarnings: true
   });
 }

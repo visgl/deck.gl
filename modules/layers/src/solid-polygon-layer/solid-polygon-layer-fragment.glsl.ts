@@ -30,6 +30,8 @@ out vec4 fragColor;
 
 void main(void) {
   fragColor = vColor;
+  // Fails to compile on some Android devices if geometry is never assigned (#8411)
+  geometry.uv = vec2(0.);
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }

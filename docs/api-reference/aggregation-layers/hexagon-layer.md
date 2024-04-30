@@ -17,7 +17,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 import {Deck} from '@deck.gl/core';
-import {HexagonLayer} from '@deck.gl/geo-layers';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const layer = new HexagonLayer({
   id: 'HexagonLayer',
@@ -49,7 +49,7 @@ new Deck({
 
 ```ts
 import {Deck, PickingInfo} from '@deck.gl/core';
-import {HexagonLayer} from '@deck.gl/geo-layers';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
   ADDRESS: string;
@@ -88,7 +88,7 @@ new Deck({
 ```tsx
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import {HexagonLayer} from '@deck.gl/geo-layers';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import type {PickingInfo} from '@deck.gl/core';
 
 type BikeRack = {
