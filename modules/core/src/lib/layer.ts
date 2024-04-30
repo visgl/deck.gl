@@ -1066,11 +1066,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (moduleParameters) {
         const {isActive, isAttribute} = moduleParameters.picking;
         const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
+        const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
         this.setShaderModuleProps({
           picking: {isActive, isAttribute},
-          project: {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin},
-          project64: {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin}
+          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin},
+          project64: {viewport}
         });
       }
 
