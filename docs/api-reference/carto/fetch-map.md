@@ -29,7 +29,7 @@ fetchMap({cartoMapId}).then(({initialViewState, basemap, mapStyle, layers}) => {
     container: 'container',
     controller: true,
     // (Optional) Include a basemap.
-    mapStyle: basemap.styleUrl,
+    mapStyle: basemap.style,
     initialViewState,
     layers
   });
@@ -95,7 +95,7 @@ The [view state](../../developer-guide/views.md#view-state).
 An object describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
 Properties:
- * `styleUrl` **(string or object)** - URL of basemap style or style object if custom basemap is configured
+ * `style` **(string or object)** - URL of basemap style or style object if custom basemap is configured
  * `attribution` **(string)** - custom attribution HTML for this basemap
 
 #### `mapStyle` (string) {#mapstyle}

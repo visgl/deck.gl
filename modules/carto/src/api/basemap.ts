@@ -58,7 +58,7 @@ export function getBasemapSettings(config: KeplerMapConfig) {
     const currentCustomBasemap = config.customBaseMaps?.custom;
     if (currentCustomBasemap) {
       return {
-        styleUrl: getCustomBasemapStyle(currentCustomBasemap),
+        style: getCustomBasemapStyle(currentCustomBasemap),
         attribution: currentCustomBasemap.attribution
       };
     }
@@ -68,7 +68,7 @@ export function getBasemapSettings(config: KeplerMapConfig) {
     const labelSuffix = label ? '' : '-nolabels';
     const styleUrl = `${CARTO_MAP_BASEURL}${styleType}${labelSuffix}-gl-style/style.json`;
     return {
-      styleUrl,
+      style: styleUrl,
       attribution: CARTO_MAP_ATRRIBUTION
     };
   }

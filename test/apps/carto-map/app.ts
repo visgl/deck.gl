@@ -30,7 +30,7 @@ async function createMap(cartoMapId: string) {
   // Mapbox basemap (optional)
   const map = new mapboxgl.Map({
     container: 'map',
-    style: basemap?.styleUrl,
+    style: basemap?.style,
     interactive: false,
     attributionControl: false
   }).addControl(
@@ -38,6 +38,7 @@ async function createMap(cartoMapId: string) {
       customAttribution: basemap?.attribution
     })
   );
+
   deck.setProps({
     controller: true,
     onViewStateChange: ({viewState}) => {
