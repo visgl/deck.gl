@@ -25,7 +25,6 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ```js
 fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  const MAP_STYLE = ;
   const deckgl = new deck.DeckGL({
     container: 'container',
     controller: true,
