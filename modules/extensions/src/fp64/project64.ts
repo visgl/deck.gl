@@ -31,34 +31,10 @@ type Project64ModuleSettings = {
   viewport: Viewport;
 };
 
-const vs = `
-vec4 project_position_to_clipspace(
-  vec3 position, vec3 position64Low, vec3 offset, out vec4 commonPosition
-) {
-  vec3 projectedPosition = project_position(position, position64Low);
-  mat3 rotation;
-  if (project_needs_rotation(projectedPosition, rotation)) {
-    // offset is specified as ENU
-    // when in globe projection, rotate offset so that the ground alighs with the surface of the globe
-    offset = rotation * offset;
-  }
-  commonPosition = vec4(projectedPosition + offset, 1.0);
-  return project_common_position_to_clipspace(commonPosition);
-}
-
-vec4 project_position_to_clipspace(
-  vec3 position, vec3 position64Low, vec3 offset
-) {
-  vec4 commonPosition;
-  return project_position_to_clipspace(position, position64Low, offset, commonPosition);
-}
-`;
-
 export default {
   name: 'project64',
   dependencies: [project, fp64],
-  // vs: project64Shader,
-  vs,
+  vs: project64Shader,
   getUniforms,
   uniformTypes: {
     scale: 'vec2<f32>',
@@ -95,7 +71,7 @@ function calculateUniforms({
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       const from = 4 * i + j;
-      const to = 4 * j + i;
+      const to = 4 * i + j;
       viewProjectionMatrix64High[to] = glViewProjectionMatrixFP64[2 * from];
       viewProjectionMatrix64Low[to] = glViewProjectionMatrixFP64[2 * from + 1];
     }

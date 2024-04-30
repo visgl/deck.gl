@@ -56,12 +56,6 @@ uniform projectUniforms {
   bool pseudoMeters;
 } project;
 
-uniform project64Uniforms {
-  vec2 scale;
-  mat4 viewProjectionMatrix;
-  mat4 viewProjectionMatrix64Low;
-} project64;
-
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -275,10 +269,7 @@ vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatr
 // Uses project.viewProjectionMatrix
 //
 vec4 project_common_position_to_clipspace(vec4 position) {
-  // float test = 1.0;
-  // float test = project64.scale.x; // <-- works!
-  float test = project64.viewProjectionMatrix[0][0]; // <-- works!
-  return project_common_position_to_clipspace(position, project64.viewProjectionMatrix, project.center);
+  return project_common_position_to_clipspace(position, project.viewProjectionMatrix, project.center);
 }
 
 // Returns a clip space offset that corresponds to a given number of screen pixels
