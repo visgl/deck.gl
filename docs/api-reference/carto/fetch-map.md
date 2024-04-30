@@ -24,15 +24,13 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 ### Integration with CARTO basemaps
 
 ```js
-import mapboxgl from 'mapbox-gl';
-
 fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
-  // Add Mapbox GL for the basemap. It's not a requirement if you don't need a basemap.
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`;
+  const MAP_STYLE = ;
   const deckgl = new deck.DeckGL({
     container: 'container',
     controller: true,
-    mapStyle: MAP_STYLE,
+    // (Optional) Include a basemap.
+    mapStyle: `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`,
     initialViewState,
     layers
   });
