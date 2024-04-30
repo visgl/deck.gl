@@ -24,12 +24,12 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 ### Integration with CARTO basemaps
 
 ```js
-fetchMap({cartoMapId}).then(({initialViewState, mapStyle, layers}) => {
+fetchMap({cartoMapId}).then(({initialViewState, basemap, mapStyle, layers}) => {
   const deckgl = new deck.DeckGL({
     container: 'container',
     controller: true,
     // (Optional) Include a basemap.
-    mapStyle: `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`,
+    mapStyle: basemap.styleUrl,
     initialViewState,
     layers
   });
@@ -90,9 +90,19 @@ When the map was last updated.
 
 The [view state](../../developer-guide/views.md#view-state).
 
+#### `basemap` (object) {#basemap}
+
+An object describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
+
+Properties:
+ * `styleUrl` **(string or object)** - URL of basemap style or style object if custom basemap is configured
+ * `attribution` **(string)** - custom attribution HTML for this basemap
+
 #### `mapStyle` (string) {#mapstyle}
 
-An identifier describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
+_(**deprecated**, use `basemap.styleUrl`)_
+
+An identifier describing the CARTO [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
 #### `layers` (Layer[]) {#layers}
 

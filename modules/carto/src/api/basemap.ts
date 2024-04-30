@@ -1,11 +1,11 @@
-import {KeplerMapConfig} from './types';
+import {Basemap, KeplerMapConfig} from './types';
 
-const getRasterJsonMapStyle = (url: string) => ({
+const getRasterJsonMapStyle = (basemap: Basemap) => ({
   version: 8,
   sources: {
     'basemap-tile-source': {
       type: 'raster',
-      tiles: [url],
+      tiles: [basemap.settings.url],
       tileSize: 256
     }
   },
@@ -17,7 +17,8 @@ const getRasterJsonMapStyle = (url: string) => ({
       minzoom: 0,
       maxzoom: 22
     }
-  ]
+  ],
+  attribution: basemap.attribution
 });
 
 function isRasterBasemap(url: string) {
@@ -32,13 +33,14 @@ function isWmtsBasemap(url: string) {
   return url.includes('service=WMS');
 }
 
-export function getCustomBasemapStyle(url: string): string | any {
+export function getCustomBasemapStyle(basemap: Basemap): string | any {
+  const url = basemap.settings.url;
   if (isRasterBasemap(url)) {
-    return getRasterJsonMapStyle(url);
+    return getRasterJsonMapStyle(basemap);
   } else if (isTileJsonBasemap(url)) {
     return url;
   } else if (isWmtsBasemap(url)) {
-    return getRasterJsonMapStyle(url);
+    return getRasterJsonMapStyle(basemap);
   }
   throw new Error('Unknown basemap format');
 }
@@ -48,14 +50,14 @@ const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
 const CARTO_MAP_ATRRIBUTION = `© <a href="https://carto.com/about-carto/" target="_blank" rel="noopener noreferrer">CARTO</a>, ©
 <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors`;
 
-export function getCartoMapStyle(config: KeplerMapConfig) {
+export function getBasemapSettings(config: KeplerMapConfig) {
   const {mapStyle} = config;
   const styleType = mapStyle.styleType || 'positron';
   if (styleType.startsWith('custom:')) {
     const currentCustomBasemap = config.customBaseMaps?.custom;
     if (currentCustomBasemap) {
       return {
-        styleUrl: getCustomBasemapStyle(currentCustomBasemap.settings.url),
+        styleUrl: getCustomBasemapStyle(currentCustomBasemap),
         attribution: currentCustomBasemap.attribution
       };
     }
@@ -63,7 +65,7 @@ export function getCartoMapStyle(config: KeplerMapConfig) {
   if (CARTO_MAP_STYLES.includes(styleType)) {
     const {label} = mapStyle.visibleLayerGroups;
     const labelSuffix = label ? '' : '-nolabels';
-    const styleUrl = `${CARTO_MAP_BASEURL}${mapStyle.styleType}${labelSuffix}-gl-style/style.json`;
+    const styleUrl = `${CARTO_MAP_BASEURL}${styleType}${labelSuffix}-gl-style/style.json`;
     return {
       styleUrl,
       attribution: CARTO_MAP_ATRRIBUTION
