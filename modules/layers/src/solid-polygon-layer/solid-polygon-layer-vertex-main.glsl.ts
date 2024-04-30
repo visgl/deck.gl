@@ -25,14 +25,15 @@ uniform bool isWireframe;
 uniform float elevationScale;
 uniform float opacity;
 
+in vec4 fillColors;
+in vec4 lineColors;
+in vec3 pickingColors;
+
 out vec4 vColor;
 
 struct PolygonProps {
-  vec4 fillColors;
-  vec4 lineColors;
   vec3 positions;
   vec3 positions64Low;
-  vec3 pickingColors;
   vec3 normal;
   float elevations;
 };
@@ -50,10 +51,10 @@ void calculatePosition(PolygonProps props) {
   vec3 pos = props.positions;
   vec3 pos64Low = props.positions64Low;
   vec3 normal = props.normal;
-  vec4 colors = isWireframe ? props.lineColors : props.fillColors;
+  vec4 colors = isWireframe ? lineColors : fillColors;
 
   geometry.worldPosition = props.positions;
-  geometry.pickingColor = props.pickingColors;
+  geometry.pickingColor = pickingColors;
 
   if (extruded) {
     pos.z += props.elevations * elevationScale;

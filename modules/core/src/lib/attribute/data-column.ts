@@ -22,8 +22,6 @@ export type BufferAccessor = {
   type?: DataType;
   /** The number of elements per vertex attribute. */
   size?: number;
-  /** 1 if instanced. */
-  divisor?: 1 | 0;
   /** Offset of the first vertex attribute into the buffer, in bytes. */
   offset?: number;
   /** The offset between the beginning of consecutive vertex attributes, in bytes. */
@@ -261,7 +259,7 @@ export default class DataColumn<Options, State> {
     return result;
   }
 
-  getBufferLayout(
+  protected _getBufferLayout(
     attributeName: string = this.id,
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {

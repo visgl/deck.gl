@@ -110,41 +110,20 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       attributeManager!.add({
         fillPatternFrames: {
           size: 4,
+          stepMode: 'dynamic',
           accessor: 'getFillPattern',
-          transform: extension.getPatternFrame.bind(this),
-          shaderAttributes: {
-            fillPatternFrames: {
-              divisor: 0
-            },
-            instanceFillPatternFrames: {
-              divisor: 1
-            }
-          }
+          transform: extension.getPatternFrame.bind(this)
         },
         fillPatternScales: {
           size: 1,
+          stepMode: 'dynamic',
           accessor: 'getFillPatternScale',
-          defaultValue: 1,
-          shaderAttributes: {
-            fillPatternScales: {
-              divisor: 0
-            },
-            instanceFillPatternScales: {
-              divisor: 1
-            }
-          }
+          defaultValue: 1
         },
         fillPatternOffsets: {
           size: 2,
-          accessor: 'getFillPatternOffset',
-          shaderAttributes: {
-            fillPatternOffsets: {
-              divisor: 0
-            },
-            instanceFillPatternOffsets: {
-              divisor: 1
-            }
-          }
+          stepMode: 'dynamic',
+          accessor: 'getFillPatternOffset'
         }
       });
     }

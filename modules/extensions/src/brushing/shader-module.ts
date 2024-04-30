@@ -37,11 +37,7 @@ const vs = glsl`
   uniform vec2 brushing_mousePos;
   uniform float brushing_radius;
 
-  #ifdef NON_INSTANCED_MODEL
   in vec2 brushingTargets;
-  #else
-  in vec2 instanceBrushingTargets;
-  #endif
 
   out float brushing_isVisible;
 
@@ -89,11 +85,7 @@ const inject = {
     } else if (brushing_target == 1) {
       brushingTarget = geometry.worldPositionAlt.xy;
     } else {
-      #ifdef NON_INSTANCED_MODEL
       brushingTarget = brushingTargets;
-      #else
-      brushingTarget = instanceBrushingTargets;
-      #endif
     }
     bool visible;
     if (brushing_target == 3) {

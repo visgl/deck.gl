@@ -27,14 +27,11 @@ export default `\
 
 in vec2 positions;
 
-in vec3 instancePositions;
-in vec3 instanceNextPositions;
-in vec3 instancePositions64Low;
-in vec3 instanceNextPositions64Low;
-in float instanceElevations;
-in vec4 instanceFillColors;
-in vec4 instanceLineColors;
-in vec3 instancePickingColors;
+in vec3 vertexPositions;
+in vec3 nextVertexPositions;
+in vec3 vertexPositions64Low;
+in vec3 nextVertexPositions64Low;
+in float elevations;
 in float instanceVertexValid;
 
 ${main}
@@ -53,15 +50,15 @@ void main(void) {
   vec3 nextPos64Low;
 
   #if RING_WINDING_ORDER_CW == 1
-    pos = instancePositions;
-    pos64Low = instancePositions64Low;
-    nextPos = instanceNextPositions;
-    nextPos64Low = instanceNextPositions64Low;
+    pos = vertexPositions;
+    pos64Low = vertexPositions64Low;
+    nextPos = nextVertexPositions;
+    nextPos64Low = nextVertexPositions64Low;
   #else
-    pos = instanceNextPositions;
-    pos64Low = instanceNextPositions64Low;
-    nextPos = instancePositions;
-    nextPos64Low = instancePositions64Low;
+    pos = nextVertexPositions;
+    pos64Low = nextVertexPositions64Low;
+    nextPos = vertexPositions;
+    nextPos64Low = vertexPositions64Low;
   #endif
 
   props.positions = mix(pos, nextPos, positions.x);
@@ -72,10 +69,7 @@ void main(void) {
     nextPos.x - pos.x + (nextPos64Low.x - pos64Low.x),
     0.0);
 
-  props.elevations = instanceElevations * positions.y;
-  props.fillColors = instanceFillColors;
-  props.lineColors = instanceLineColors;
-  props.pickingColors = instancePickingColors;
+  props.elevations = elevations * positions.y;
 
   calculatePosition(props);
 }
