@@ -176,3 +176,30 @@ export type MapDataset = {
   aggregationResLevel: number | null;
   geoColumn: string;
 };
+
+export interface Basemap {
+  id: string;
+  name: string;
+
+  settings: {
+    url: string;
+  };
+  type: 'wmts' | 'raster' | 'tilejson';
+  thumbnail: string;
+  attribution?: string;
+}
+export type KeplerMapConfig = {
+  mapState: any;
+  mapStyle: {
+    styleType: string;
+    visibleLayerGroups: Record<string, boolean>;
+  };
+  visState: {
+    layers: MapConfigLayer[];
+  };
+  layerBlending: any;
+  interactionConfig: any;
+  customBaseMaps?: {
+    custom?: Basemap;
+  };
+};

@@ -16,14 +16,15 @@ import {
 import PointLabelLayer from '../layers/point-label-layer';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
-import {MapDataset, MapLayerConfig, VisualChannels} from './types';
+import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
+import {getCartoMapStyle} from './basemap-style';
 
 const collisionFilterExtension = new CollisionFilterExtension();
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
   assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
-  const {mapState, mapStyle} = keplerMapConfig.config;
+  const {mapState, mapStyle} = keplerMapConfig.config as KeplerMapConfig;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
 
   return {
@@ -34,6 +35,7 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     initialViewState: mapState,
     mapStyle,
+    basemap: getCartoMapStyle(keplerMapConfig.config),
     token,
     layers: layers.reverse().map(({id, type, config, visualChannels}) => {
       try {

@@ -24,15 +24,15 @@ async function createMap(cartoMapId: string) {
   }
 
   // Get map info from CARTO and update deck
-  const {initialViewState, mapStyle, layers} = await fetchMap(options);
+  const {initialViewState, mapStyle, basemap, layers} = await fetchMap(options);
   deck.setProps({initialViewState, layers});
 
   // Mapbox basemap (optional)
-  const {label} = mapStyle.visibleLayerGroups;
-  const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}${
-    label ? '' : '-nolabels'
-  }-gl-style/style.json`;
-  const map = new mapboxgl.Map({container: 'map', style: MAP_STYLE, interactive: false});
+  // const {label} = mapStyle.visibleLayerGroups;
+  // const MAP_STYLE = `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}${
+  //   label ? '' : '-nolabels'
+  // }-gl-style/style.json`;
+  const map = new mapboxgl.Map({container: 'map', style: basemap?.styleUrl, interactive: false});
   deck.setProps({
     controller: true,
     onViewStateChange: ({viewState}) => {
