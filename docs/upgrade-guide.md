@@ -52,6 +52,7 @@ class MyLayer {
 While the 9.0 release of deck.gl does not yet support WebGPU, our goal is to enable WebGPU soon in a 9.x release. A number of changes will be required to deck.gl curtom layers:
 
 - deck.gl now uses uniform buffers instead of global uniforms. It is not yet required to use uniform buffers but it will be necessary if you would like to run deck.gl on WebGPU in future releases.
+- When defining an attribute, `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of GL constant, and `divisor` is replaced by `stepMode`. See [AttributeManager.add](./api-reference/core/attribute-manager.md#add)
 - WebGL draw modes `GL.TRIANGLE_FAN` and `GL.LINE_LOOP` are not supported on WebGPU. Select a different topology when creating geometries.
 - The luma picking module now [uses uniform buffers](https://github.com/visgl/luma.gl/blob/master/modules/shadertools/src/modules/engine/picking/picking.ts#L34-L50). To access picking state in shaders use `picking.isActive` rather than `picking_isActive`
 
