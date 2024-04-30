@@ -37,8 +37,8 @@
   },
   "dependencies": {
     "@loaders.gl/core": "^4.2.0",
-    "@luma.gl/core": "^9.0.9",
-    "@luma.gl/engine": "^9.0.9",
+    "@luma.gl/core": "^9.0.12",
+    "@luma.gl/engine": "^9.0.12",
     "@deck.gl/aggregation-layers": "9.0.0-beta.10",
     "@deck.gl/arcgis": "9.0.0-beta.10",
     "@deck.gl/carto": "9.0.0-beta.10",
