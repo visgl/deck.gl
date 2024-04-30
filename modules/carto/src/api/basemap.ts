@@ -1,12 +1,13 @@
 import {Basemap, KeplerMapConfig} from './types';
 
+const DEFAULT_TILE_SIZE = 256;
 const getRasterJsonMapStyle = (basemap: Basemap) => ({
   version: 8,
   sources: {
     'basemap-tile-source': {
       type: 'raster',
       tiles: [basemap.settings.url],
-      tileSize: 256
+      tileSize: basemap.settings.tileSize || DEFAULT_TILE_SIZE
     }
   },
   layers: [

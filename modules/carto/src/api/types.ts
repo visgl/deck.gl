@@ -183,6 +183,7 @@ export interface Basemap {
 
   settings: {
     url: string;
+    tileSize?: number;
   };
   type: 'wmts' | 'raster' | 'tilejson';
   thumbnail: string;
