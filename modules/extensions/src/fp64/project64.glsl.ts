@@ -64,8 +64,8 @@ vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       viewProjectionMatrixFP64[4 * i + j] = vec2(
-        project64.viewProjectionMatrix[i][j],
-        project64.viewProjectionMatrix64Low[i][j]
+        project64.viewProjectionMatrix[j][i],
+        project64.viewProjectionMatrix64Low[j][i]
       );
     }   
   }

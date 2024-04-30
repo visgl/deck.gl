@@ -70,8 +70,9 @@ function calculateUniforms({
   const viewProjectionMatrix64Low = new Float32Array(16);
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
+      // Match order used in project.viewProjectionMatrix
       const from = 4 * i + j;
-      const to = 4 * i + j;
+      const to = 4 * j + i;
       viewProjectionMatrix64High[to] = glViewProjectionMatrixFP64[2 * from];
       viewProjectionMatrix64Low[to] = glViewProjectionMatrixFP64[2 * from + 1];
     }
