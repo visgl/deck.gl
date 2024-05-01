@@ -311,7 +311,10 @@ export default class AttributeManager {
   /** Generate WebGPU-style buffer layout descriptors from all attributes */
   getBufferLayouts(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
-    modelInfo?: {isInstanced?: boolean}
+    modelInfo?: {
+      /** Whether the model is instanced */
+      isInstanced?: boolean;
+    }
   ): BufferLayout[] {
     return Object.values(this.getAttributes()).map(attribute =>
       attribute.getBufferLayout(modelInfo)
@@ -320,42 +323,28 @@ export default class AttributeManager {
 
   // PRIVATE METHODS
 
-  // Used to register an attribute
+  /** Register new attributes */
   private _add(
+    /** A map from attribute name to attribute descriptors */
     attributes: {[id: string]: AttributeOptions},
+    /** Additional attribute settings to pass to all attributes */
     overrideOptions?: Partial<AttributeOptions>
   ) {
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
 
+      const props: AttributeOptions = {
+        ...attribute,
+        id: attributeName,
+        size: (attribute.isIndexed && 1) || attribute.size || 1,
+        ...overrideOptions
+      };
+
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      this.attributes[attributeName] = this._createAttribute(
-        attributeName,
-        attribute,
-        overrideOptions
-      );
+      this.attributes[attributeName] = new Attribute(this.device, props);
     }
 
     this._mapUpdateTriggersToAttributes();
-  }
-  /* eslint-enable max-statements */
-
-  private _createAttribute(
-    name: string,
-    attribute: AttributeOptions,
-    overrideOptions?: Partial<AttributeOptions>
-  ) {
-    // For expected default values see:
-    // https://github.com/visgl/luma.gl/blob/1affe21352e289eeaccee2a876865138858a765c/modules/webgl/src/classes/accessor.js#L5-L13
-    // and https://deck.gl/docs/api-reference/core/attribute-manager#add
-    const props: AttributeOptions = {
-      ...attribute,
-      id: name,
-      size: (attribute.isIndexed && 1) || attribute.size || 1,
-      ...overrideOptions
-    };
-
-    return new Attribute(this.device, props);
   }
 
   // build updateTrigger name to attribute name mapping
