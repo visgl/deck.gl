@@ -226,27 +226,31 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     /* eslint-enable max-len */
   }
 
-  updateState(opts: UpdateParameters<this>): void {
-    super.updateState(opts);
-    const {props, oldProps, changeFlags} = opts;
-    // Re-generate model if geometry changed
-    if (changeFlags.extensionsChanged) {
+  updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
+
+    if (params.changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
-    if (props.numSegments !== oldProps.numSegments) {
-      this.state.model!.setVertexCount(props.numSegments * 2);
-    }
   }
 
   draw({uniforms}) {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
-      this.props;
+    const {
+      widthUnits,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      greatCircle,
+      wrapLongitude,
+      numSegments
+    } = this.props;
     const model = this.state.model!;
 
     model.setUniforms(uniforms);
     model.setUniforms({
+      numSegments,
       greatCircle,
       widthUnits: UNIT[widthUnits],
       widthScale,
@@ -254,23 +258,17 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       useShortestPath: wrapLongitude
     });
+    model.setVertexCount(numSegments * 2);
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
-    const {numSegments} = this.props;
-
-    const model = new Model(this.context.device, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       topology: 'triangle-strip',
-      vertexCount: numSegments * 2,
       isInstanced: true
     });
-
-    model.setUniforms({numSegments});
-
-    return model;
   }
 }
