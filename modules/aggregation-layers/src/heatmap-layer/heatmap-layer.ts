@@ -486,8 +486,8 @@ export default class HeatmapLayer<
     const viewportCorners = [
       viewport.unproject([0, 0]),
       viewport.unproject([viewport.width, 0]),
-      viewport.unproject([viewport.width, viewport.height]),
-      viewport.unproject([0, viewport.height])
+      viewport.unproject([0, viewport.height]),
+      viewport.unproject([viewport.width, viewport.height])
     ].map(p => p.map(Math.fround));
 
     // #1: get world bounds for current viewport extends
