@@ -265,6 +265,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       topology: 'triangle-strip',
+      vertexCount: numSegments * 2,
       isInstanced: true
     });
 
