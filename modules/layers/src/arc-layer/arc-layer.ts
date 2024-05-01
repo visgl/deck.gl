@@ -34,7 +34,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
 import vs from './arc-layer-vertex.glsl';
@@ -231,10 +230,13 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     super.updateState(opts);
     const {props, oldProps, changeFlags} = opts;
     // Re-generate model if geometry changed
-    if (changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+    if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
+    }
+    if (props.numSegments !== oldProps.numSegments) {
+      this.state.model!.setVertexCount(props.numSegments * 2);
     }
   }
 
@@ -257,28 +259,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   protected _getModel(): Model {
     const {numSegments} = this.props;
-    let positions: number[] = [];
-    /*
-     *  (0, -1)-------------_(1, -1)
-     *       |          _,-"  |
-     *       o      _,-"      o
-     *       |  _,-"          |
-     *   (0, 1)"-------------(1, 1)
-     */
-    for (let i = 0; i < numSegments; i++) {
-      positions = positions.concat([i, 1, 0, i, -1, 0]);
-    }
 
     const model = new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          positions: {size: 3, value: new Float32Array(positions)}
-        }
-      }),
+      topology: 'triangle-strip',
       isInstanced: true
     });
 
