@@ -27,8 +27,8 @@
       "require": "./dist/index.cjs"
     },
     "./stylesheet.css": {
-      "import":"./dist/stylesheet.css",
-      "style":"./dist/stylesheet.css"
+      "import": "./dist/stylesheet.css",
+      "style": "./dist/stylesheet.css"
     }
   },
   "files": [
