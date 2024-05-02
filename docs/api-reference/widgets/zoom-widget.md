@@ -28,12 +28,6 @@ Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
-#### `container` (HTMLElement, optional) {#container}
-
-Default: `undefined`
-
-A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements) which should be made full screen. By default, the map container element will be made full screen.
-
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
 Tooltip message displayed while hovering a mouse over the zoom in button.
