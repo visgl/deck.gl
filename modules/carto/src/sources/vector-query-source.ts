@@ -17,7 +17,7 @@ export type VectorQuerySourceOptions = SourceOptions &
 
 type UrlParameters = {
   columns?: string;
-  filters?: Record<string, unknown>,
+  filters?: Record<string, unknown>;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;

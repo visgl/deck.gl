@@ -9,7 +9,7 @@ export type BoundaryTableSourceOptions = SourceOptions &
     propertiesTableName: string;
   };
 type UrlParameters = {
-  filters?: Record<string, unknown>,
+  filters?: Record<string, unknown>;
   tilesetTableName: string;
   columns?: string;
   matchingColumn: string;

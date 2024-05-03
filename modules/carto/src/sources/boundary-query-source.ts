@@ -12,7 +12,7 @@ export type BoundaryQuerySourceOptions = SourceOptions &
   };
 type UrlParameters = {
   columns?: string;
-  filters?: Record<string, unknown>,
+  filters?: Record<string, unknown>;
   tilesetTableName: string;
   matchingColumn: string;
   propertiesSqlQuery: string;
