@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import { QueryParameters } from '../api';
 import {DEFAULT_AGGREGATION_RES_LEVEL_H3} from '../constants';
 import {baseSource} from './base-source';
 import type {
@@ -17,7 +16,7 @@ type UrlParameters = {
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   q: string;
-  queryParameters?: QueryParameters;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const h3QuerySource = async function (

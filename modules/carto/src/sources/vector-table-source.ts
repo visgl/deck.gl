@@ -14,8 +14,9 @@ export type VectorTableSourceOptions = SourceOptions &
   TableSourceOptions &
   FilterOptions &
   ColumnsOption;
-type UrlParameters = FilterOptions & {
+type UrlParameters = {
   columns?: string;
+  filters?: Record<string, unknown>;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;

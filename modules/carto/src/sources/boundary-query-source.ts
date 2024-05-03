@@ -10,12 +10,13 @@ export type BoundaryQuerySourceOptions = SourceOptions &
     propertiesSqlQuery: string;
     queryParameters?: QueryParameters;
   };
-type UrlParameters = FilterOptions & {
+type UrlParameters = {
   columns?: string;
+  filters?: Record<string, unknown>,
   tilesetTableName: string;
   matchingColumn: string;
   propertiesSqlQuery: string;
-  queryParameters?: QueryParameters;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const boundaryQuerySource = async function (

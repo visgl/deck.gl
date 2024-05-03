@@ -8,7 +8,8 @@ export type BoundaryTableSourceOptions = SourceOptions &
     matchingColumn?: string;
     propertiesTableName: string;
   };
-type UrlParameters = FilterOptions & {
+type UrlParameters = {
+  filters?: Record<string, unknown>,
   tilesetTableName: string;
   columns?: string;
   matchingColumn: string;

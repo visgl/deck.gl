@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import { QueryParameters } from '../api';
 import {DEFAULT_TILE_RESOLUTION} from '../constants';
 import {baseSource} from './base-source';
 import type {
@@ -16,13 +15,14 @@ export type VectorQuerySourceOptions = SourceOptions &
   FilterOptions &
   ColumnsOption;
 
-type UrlParameters = FilterOptions & {
+type UrlParameters = {
   columns?: string;
+  filters?: Record<string, unknown>,
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;
   q: string;
-  queryParameters?: QueryParameters;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const vectorQuerySource = async function (
