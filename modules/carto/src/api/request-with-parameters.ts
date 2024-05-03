@@ -1,3 +1,4 @@
+import {isPureObject} from '@loaders.gl/core';
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
 import type {APIErrorContext} from './types';
@@ -5,8 +6,17 @@ import type {APIErrorContext} from './types';
 /**
  * Simple encode parameter
  */
-function encodeParameter(name: string, value: string | boolean | number): string {
-  return `${name}=${encodeURIComponent(value)}`;
+function encodeParameter(name: string, value: unknown): string {
+  if (Array.isArray(value)) {
+    return `${name}=${encodeURIComponent(value.join(','))}`;
+  }
+  if (isPureObject(value)) {
+    return `${name}=${encodeURIComponent(JSON.stringify(value))}`;
+  }
+  if (typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number') {
+    return `${name}=${encodeURIComponent(value)}`;
+  }
+  throw new Error(`Unexpected type: ${value}`);
 }
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
@@ -17,10 +27,11 @@ export async function requestWithParameters<T = any>({
   errorContext
 }: {
   baseUrl: string;
-  parameters?: Record<string, string>;
+  parameters?: Record<string, unknown>;
   headers: Record<string, string>;
   errorContext: APIErrorContext;
 }): Promise<T> {
+  parameters = {...DEFAULT_PARAMETERS, ...parameters};
   const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
   if (REQUEST_CACHE.has(key)) {
     return REQUEST_CACHE.get(key) as Promise<T>;
@@ -58,7 +69,7 @@ export async function requestWithParameters<T = any>({
 
 function createCacheKey(
   baseUrl: string,
-  parameters: Record<string, string>,
+  parameters: Record<string, unknown>,
   headers: Record<string, string>
 ): string {
   const parameterEntries = Object.entries(parameters).sort(([a], [b]) => (a > b ? 1 : -1));
@@ -66,11 +77,9 @@ function createCacheKey(
   return JSON.stringify({baseUrl, parameters: parameterEntries, headers: headerEntries});
 }
 
-function createURLWithParameters(baseUrl: string, parameters: Record<string, string>): string {
-  const encodedParameters = Object.entries({...DEFAULT_PARAMETERS, ...parameters}).map(
-    ([key, value]) => {
-      return encodeParameter(key, value);
-    }
+function createURLWithParameters(baseUrl: string, parameters: Record<string, unknown>): string {
+  const encodedParameters = Object.entries(parameters).map(([key, value]) =>
+    encodeParameter(key, value)
   );
   return `${baseUrl}?${encodedParameters.join('&')}`;
 }

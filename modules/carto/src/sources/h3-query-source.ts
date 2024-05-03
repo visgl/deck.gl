@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { QueryParameters } from '../api';
 import {DEFAULT_AGGREGATION_RES_LEVEL_H3} from '../constants';
 import {baseSource} from './base-source';
 import type {
@@ -16,7 +17,7 @@ type UrlParameters = {
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   q: string;
-  queryParameters?: string;
+  queryParameters?: QueryParameters;
 };
 
 export const h3QuerySource = async function (
@@ -40,7 +41,7 @@ export const h3QuerySource = async function (
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   if (queryParameters) {
-    urlParameters.queryParameters = JSON.stringify(queryParameters);
+    urlParameters.queryParameters = queryParameters;
   }
   return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };

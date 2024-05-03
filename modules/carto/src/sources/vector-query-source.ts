@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { QueryParameters } from '../api';
 import {DEFAULT_TILE_RESOLUTION} from '../constants';
 import {baseSource} from './base-source';
 import type {
@@ -15,14 +16,13 @@ export type VectorQuerySourceOptions = SourceOptions &
   FilterOptions &
   ColumnsOption;
 
-type UrlParameters = {
+type UrlParameters = FilterOptions & {
   columns?: string;
-  filters?: string;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;
   q: string;
-  queryParameters?: string;
+  queryParameters?: QueryParameters;
 };
 
 export const vectorQuerySource = async function (
@@ -48,10 +48,10 @@ export const vectorQuerySource = async function (
     urlParameters.columns = columns.join(',');
   }
   if (filters) {
-    urlParameters.filters = JSON.stringify(filters);
+    urlParameters.filters = filters;
   }
   if (queryParameters) {
-    urlParameters.queryParameters = JSON.stringify(queryParameters);
+    urlParameters.queryParameters = queryParameters;
   }
   return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };

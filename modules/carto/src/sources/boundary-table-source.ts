@@ -8,8 +8,7 @@ export type BoundaryTableSourceOptions = SourceOptions &
     matchingColumn?: string;
     propertiesTableName: string;
   };
-type UrlParameters = {
-  filters?: string;
+type UrlParameters = FilterOptions & {
   tilesetTableName: string;
   columns?: string;
   matchingColumn: string;
@@ -30,7 +29,7 @@ export const boundaryTableSource = async function (
     urlParameters.columns = columns.join(',');
   }
   if (filters) {
-    urlParameters.filters = JSON.stringify(filters);
+    urlParameters.filters = filters;
   }
   return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
 };
