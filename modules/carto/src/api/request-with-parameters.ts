@@ -7,10 +7,7 @@ import type {APIErrorContext} from './types';
  * Simple encode parameter
  */
 function encodeParameter(name: string, value: unknown): string {
-  if (Array.isArray(value)) {
-    return `${name}=${encodeURIComponent(value.join(','))}`;
-  }
-  if (isPureObject(value)) {
+  if (isPureObject(value) || Array.isArray(value)) {
     return `${name}=${encodeURIComponent(JSON.stringify(value))}`;
   }
   if (typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number') {
