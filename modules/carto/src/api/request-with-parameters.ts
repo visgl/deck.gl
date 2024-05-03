@@ -10,10 +10,7 @@ function encodeParameter(name: string, value: unknown): string {
   if (isPureObject(value) || Array.isArray(value)) {
     return `${name}=${encodeURIComponent(JSON.stringify(value))}`;
   }
-  if (typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number') {
-    return `${name}=${encodeURIComponent(value)}`;
-  }
-  throw new Error(`Unexpected type: ${value}`);
+  return `${name}=${encodeURIComponent(value as string | boolean | number)}`;
 }
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
