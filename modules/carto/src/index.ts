@@ -22,7 +22,11 @@ export {
   VectorTileLayer
 };
 
-export {default as BASEMAP} from './basemap';
+export {
+  default as BASEMAP,
+  getCartoBasemapStyle as _getCartoBasemapStyle,
+  cartoStyleLayerGroups as _cartoStyleLayerGroups
+} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';

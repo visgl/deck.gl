@@ -21,6 +21,7 @@ import {parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
+import {getBasemapProps} from './basemap';
 
 type Dataset = {
   id: string;
@@ -272,12 +273,17 @@ export async function fetchMap({
     }
   });
 
-  // Mutates map.datasets so that dataset.data contains data
-  await fillInMapDatasets(map, clientId, apiBaseUrl, headers);
+  const [basemap] = await Promise.all([
+    getBasemapProps(map.keplerMapConfig.config),
+
+    // Mutates map.datasets so that dataset.data contains data
+    fillInMapDatasets(map, clientId, apiBaseUrl, headers)
+  ]);
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, apiBaseUrl);
-  const out = {...parseMap(map), ...{stopAutoRefresh}};
+
+  const out = {...parseMap(map), basemap, ...{stopAutoRefresh}};
 
   const textLayers = out.layers.filter(layer => {
     const pointType = layer.props.pointType || '';

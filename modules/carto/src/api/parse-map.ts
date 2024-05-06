@@ -17,7 +17,6 @@ import PointLabelLayer from '../layers/point-label-layer';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
 import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
-import {getBasemapSettings} from './basemap';
 
 const collisionFilterExtension = new CollisionFilterExtension();
 
@@ -35,7 +34,6 @@ export function parseMap(json) {
     updatedAt: json.updatedAt,
     initialViewState: mapState,
     mapStyle,
-    basemap: getBasemapSettings(keplerMapConfig.config),
     token,
     layers: layers.reverse().map(({id, type, config, visualChannels}) => {
       try {

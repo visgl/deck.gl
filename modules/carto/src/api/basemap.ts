@@ -1,15 +1,19 @@
-import {cartoBasemapsBaseUrl} from '../basemap';
+import {getCartoBasemapStyle} from '../basemap';
 import {KeplerMapConfig} from './types';
 
+const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';
 const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
-const CARTO_MAP_ATRRIBUTION = `© <a href="https://carto.com/about-carto/" target="_blank" rel="noopener noreferrer">CARTO</a>, ©
-<a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors`;
 
-export function getBasemapSettings(config: KeplerMapConfig) {
+type BasemapProps = {
+  style: string | unknown;
+  attribution?: string;
+};
+
+export async function getBasemapProps(config: KeplerMapConfig): Promise<BasemapProps | null> {
   const {mapStyle} = config;
   const styleType = mapStyle.styleType || DEFAULT_CARTO_STYLE;
-  if (styleType.startsWith('custom:')) {
+  if (styleType.startsWith(CUSTOM_STYLE_ID_PREFIX)) {
     const currentCustomStyle = config.customBaseMaps?.customStyle;
     if (currentCustomStyle) {
       return {
@@ -19,12 +23,9 @@ export function getBasemapSettings(config: KeplerMapConfig) {
     }
   }
   if (CARTO_MAP_STYLES.includes(styleType)) {
-    const {label} = mapStyle.visibleLayerGroups;
-    const labelSuffix = label ? '' : '-nolabels';
-    const styleUrl = `${cartoBasemapsBaseUrl}${styleType}${labelSuffix}-gl-style/style.json`;
+    const {visibleLayerGroups} = mapStyle;
     return {
-      style: styleUrl,
-      attribution: CARTO_MAP_ATRRIBUTION
+      style: await getCartoBasemapStyle({styleType, visibleLayerGroups})
     };
   }
   return null;
