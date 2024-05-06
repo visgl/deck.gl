@@ -16,7 +16,7 @@ type UrlParameters = {
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   q: string;
-  queryParameters?: string;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const h3QuerySource = async function (
@@ -40,7 +40,7 @@ export const h3QuerySource = async function (
     urlParameters.aggregationResLevel = String(aggregationResLevel);
   }
   if (queryParameters) {
-    urlParameters.queryParameters = JSON.stringify(queryParameters);
+    urlParameters.queryParameters = queryParameters;
   }
   return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };
