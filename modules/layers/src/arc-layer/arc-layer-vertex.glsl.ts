@@ -22,7 +22,6 @@ export default `\
 #version 300 es
 #define SHADER_NAME arc-layer-vertex-shader
 
-in vec3 positions;
 in vec4 instanceSourceColors;
 in vec4 instanceTargetColors;
 in vec3 instanceSourcePositions;
@@ -137,7 +136,15 @@ void main(void) {
   geometry.worldPosition = instanceSourcePositions;
   geometry.worldPositionAlt = instanceTargetPositions;
 
-  float segmentIndex = positions.x;
+  /*
+  *  --(i, -1)-----------_(i+1, -1)--
+  *       |          _,-"  |
+  *       o      _,-"      o
+  *       |  _,-"          |
+  *  --(i, 1)"-------------(i+1, 1)--
+  */
+  float segmentIndex = float(gl_VertexID / 2);
+  float segmentSide = mod(float(gl_VertexID), 2.) == 0. ? -1. : 1.;
   float segmentRatio = getSegmentRatio(segmentIndex);
   float prevSegmentRatio = getSegmentRatio(max(0.0, segmentIndex - 1.0));
   float nextSegmentRatio = getSegmentRatio(min(numSegments - 1.0, segmentIndex + 1.0));
@@ -147,7 +154,7 @@ void main(void) {
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   isValid = 1.0;
 
-  uv = vec2(segmentRatio, positions.y);
+  uv = vec2(segmentRatio, segmentSide);
   geometry.uv = uv;
   geometry.pickingColor = instancePickingColors;
 
@@ -244,7 +251,7 @@ void main(void) {
 
   // extrude
   vec3 offset = vec3(
-    getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, widthPixels),
+    getExtrusionOffset((next.xy - curr.xy) * indexDir, segmentSide, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
   DECKGL_FILTER_GL_POSITION(curr, geometry);

@@ -65,7 +65,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
         {name: 'positions', format: 'float32x3'},
         {name: 'texCoords', format: 'float32x2'}
       ],
-      topology: 'triangle-fan-webgl',
+      topology: 'triangle-strip',
       vertexCount
     });
   }
