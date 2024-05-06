@@ -34,7 +34,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
 import vs from './arc-layer-vertex.glsl';
@@ -227,11 +226,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     /* eslint-enable max-len */
   }
 
-  updateState(opts: UpdateParameters<this>): void {
-    super.updateState(opts);
-    const {props, oldProps, changeFlags} = opts;
-    // Re-generate model if geometry changed
-    if (changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
+  updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
+
+    if (params.changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -239,12 +237,20 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   draw({uniforms}) {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, greatCircle, wrapLongitude} =
-      this.props;
+    const {
+      widthUnits,
+      widthScale,
+      widthMinPixels,
+      widthMaxPixels,
+      greatCircle,
+      wrapLongitude,
+      numSegments
+    } = this.props;
     const model = this.state.model!;
 
     model.setUniforms(uniforms);
     model.setUniforms({
+      numSegments,
       greatCircle,
       widthUnits: UNIT[widthUnits],
       widthScale,
@@ -252,38 +258,17 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       useShortestPath: wrapLongitude
     });
+    model.setVertexCount(numSegments * 2);
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
-    const {numSegments} = this.props;
-    let positions: number[] = [];
-    /*
-     *  (0, -1)-------------_(1, -1)
-     *       |          _,-"  |
-     *       o      _,-"      o
-     *       |  _,-"          |
-     *   (0, 1)"-------------(1, 1)
-     */
-    for (let i = 0; i < numSegments; i++) {
-      positions = positions.concat([i, 1, 0, i, -1, 0]);
-    }
-
-    const model = new Model(this.context.device, {
+    return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          positions: {size: 3, value: new Float32Array(positions)}
-        }
-      }),
+      topology: 'triangle-strip',
       isInstanced: true
     });
-
-    model.setUniforms({numSegments});
-
-    return model;
   }
 }
