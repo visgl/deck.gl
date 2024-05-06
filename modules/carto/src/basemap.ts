@@ -1,4 +1,6 @@
-const baseUrl = 'https://basemaps.cartocdn.com/gl/{basemap}-gl-style/style.json';
+export const cartoBasemapsBaseUrl = 'https://basemaps.cartocdn.com/gl';
+
+const baseUrl = `${cartoBasemapsBaseUrl}/{basemap}-gl-style/style.json`;
 
 export default {
   VOYAGER: baseUrl.replace('{basemap}', 'voyager'),

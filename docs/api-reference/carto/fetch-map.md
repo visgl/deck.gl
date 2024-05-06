@@ -98,12 +98,6 @@ Properties:
  * `style` **(string or object)** - URL of basemap style or style object if custom basemap is configured
  * `attribution` **(string)** - custom attribution HTML for this basemap
 
-#### `mapStyle` (string) {#mapstyle}
-
-_(**deprecated**, use `basemap.styleUrl`)_
-
-An identifier describing the CARTO [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
-
 #### `layers` (Layer[]) {#layers}
 
 A collection of deck.gl [layers](../core/layer.md).
