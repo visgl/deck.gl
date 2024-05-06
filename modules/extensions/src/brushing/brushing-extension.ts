@@ -69,15 +69,8 @@ export default class BrushingExtension extends LayerExtension {
       attributeManager.add({
         brushingTargets: {
           size: 2,
-          accessor: 'getBrushingTarget',
-          shaderAttributes: {
-            brushingTargets: {
-              divisor: 0
-            },
-            instanceBrushingTargets: {
-              divisor: 1
-            }
-          }
+          stepMode: 'dynamic',
+          accessor: 'getBrushingTarget'
         }
       });
     }

@@ -70,10 +70,11 @@ test('AttributeManager.add', t => {
     {positions: ['positions'], getPosition: ['positions']},
     'AttributeManager.add - build update triggers mapping'
   );
+  attributeManager.addInstanced({instancePositions: {size: 2, accessor: 'getPosition', update}});
   t.equals(
-    attributeManager.getAttributes()['positions'].settings.divisor,
-    0,
-    'AttributeManager.add creates attribute with default divisor of 0'
+    attributeManager.getAttributes()['instancePositions'].settings.stepMode,
+    'instance',
+    'AttributeManager.addInstanced creates attribute with stepMode:instance'
   );
   t.end();
 });
@@ -366,6 +367,93 @@ test('AttributeManager.invalidate', t => {
   t.ok(
     attributeManager.getAttributes()['colors'].needsUpdate,
     'invalidated attribute by accessor name'
+  );
+
+  t.end();
+});
+
+test('AttributeManager.getBufferLayouts', t => {
+  const attributeManager = new AttributeManager(device);
+  attributeManager.add({
+    // indexed attribute
+    indices: {size: 1, isIndexed: true, update},
+    // non-instanced attribute
+    colors: {size: 4, type: 'unorm8', stepMode: 'vertex', accessor: 'getColor'},
+    // instanced attribute
+    instanceColors: {size: 4, type: 'unorm8', stepMode: 'instance', accessor: 'getColor'},
+    // dynamically assigned stepMode
+    positions: {size: 3, type: 'float64', fp64: true, stepMode: 'dynamic', accessor: 'getPosition'}
+  });
+
+  t.deepEqual(
+    attributeManager.getBufferLayouts(),
+    [
+      {
+        name: 'indices',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'indices',
+            format: 'uint32',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'vertex'
+      },
+      {
+        name: 'colors',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'colors',
+            format: 'unorm8x4',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'vertex'
+      },
+      {
+        name: 'instanceColors',
+        byteStride: 4,
+        attributes: [
+          {
+            attribute: 'instanceColors',
+            format: 'unorm8x4',
+            byteOffset: 0
+          }
+        ],
+        stepMode: 'instance'
+      },
+      {
+        name: 'positions',
+        byteStride: 24,
+        attributes: [
+          {
+            attribute: 'positions',
+            format: 'float32x3',
+            byteOffset: 0
+          },
+          {
+            attribute: 'positions64Low',
+            format: 'float32x3',
+            byteOffset: 12
+          }
+        ],
+        stepMode: 'instance'
+      }
+    ],
+    'getBufferLayouts()'
+  );
+
+  t.is(
+    attributeManager.getBufferLayouts({isInstanced: false})[3].stepMode,
+    'vertex',
+    'dynamic attribute.stepMode in nonInstancedModel'
+  );
+  t.is(
+    attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
+    'instance',
+    'dynamic attribute.stepMode in instancedModel'
   );
 
   t.end();

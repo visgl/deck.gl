@@ -43,6 +43,7 @@ export type Updater = (
 
 export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
+  stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
@@ -363,19 +364,31 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
-  getBufferLayout(): BufferLayout {
+  /** Generate WebGPU-style buffer layout descriptor from this attribute */
+  getBufferLayout(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {isInstanced?: boolean}
+  ): BufferLayout {
     // Clear change flag
     this.state.layoutChanged = false;
 
     const shaderAttributeDefs = this.settings.shaderAttributes;
-    const result: BufferLayout = super.getBufferLayout();
+    const result: BufferLayout = super._getBufferLayout();
+    const {stepMode} = this.settings;
+    if (stepMode === 'dynamic') {
+      // If model info is provided, use isInstanced flag to determine step mode
+      // If no model info is provided, assume it's an instanced model (most common use case)
+      result.stepMode = modelInfo ? (modelInfo.isInstanced ? 'instance' : 'vertex') : 'instance';
+    } else {
+      result.stepMode = stepMode ?? 'vertex';
+    }
 
     if (!shaderAttributeDefs) {
       return result;
     }
 
     for (const shaderAttributeName in shaderAttributeDefs) {
-      const map = super.getBufferLayout(
+      const map = super._getBufferLayout(
         shaderAttributeName,
         shaderAttributeDefs[shaderAttributeName]
       );

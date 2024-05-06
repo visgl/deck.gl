@@ -212,6 +212,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       vertexPositions: {
         size: 3,
         type: 'float64',
+        stepMode: 'dynamic',
         fp64: this.use64bitPositions(),
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
@@ -219,68 +220,47 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         update: this.calculatePositions,
         noAlloc,
         shaderAttributes: {
-          instancePositions: {
-            vertexOffset: 0,
-            divisor: 1
-          },
-          instanceNextPositions: {
-            vertexOffset: 1,
-            divisor: 1
+          nextVertexPositions: {
+            vertexOffset: 1
           }
         }
       },
       instanceVertexValid: {
         size: 1,
         type: 'uint16',
-        divisor: 1,
+        stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
         noAlloc
       },
       elevations: {
         size: 1,
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation',
-        shaderAttributes: {
-          instanceElevations: {
-            divisor: 1
-          }
-        }
+        accessor: 'getElevation'
       },
       fillColors: {
         size: this.props.colorFormat.length,
         type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          instanceFillColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       lineColors: {
         size: this.props.colorFormat.length,
         type: 'unorm8',
+        stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          instanceLineColors: {
-            divisor: 1
-          }
-        }
+        defaultValue: DEFAULT_COLOR
       },
       pickingColors: {
         size: 4,
         type: 'uint8',
+        stepMode: 'dynamic',
         accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value),
-        shaderAttributes: {
-          instancePickingColors: {
-            divisor: 1
-          }
-        }
+          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
       }
     });
     /* eslint-enable max-len */
@@ -412,11 +392,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     let sideModel;
     let wireframeModel;
 
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
-
     if (filled) {
       const shaders = this.getShaders('top');
       shaders.defines.NON_INSTANCED_MODEL = 1;
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
 
       topModel = new Model(this.context.device, {
         ...shaders,
@@ -433,6 +412,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
     }
     if (extruded) {
+      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,

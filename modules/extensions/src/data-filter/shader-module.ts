@@ -25,20 +25,6 @@ export type Defines = {
    * Enable 64-bit precision in numeric filter.
    */
   DATAFILTER_DOUBLE?: boolean;
-
-  // Defines derived in shader
-  /**
-   * Numeric filter attribute
-   */
-  DATAFILTER_ATTRIB?: 'filterValues' | 'instanceFilterValues';
-  /**
-   * Numeric filter attribute (low bits). Only used when `DATAFILTER_DOUBLE = true`
-   */
-  DATAFILTER_ATTRIB_64LOW?: 'filterValues64Low' | 'instanceFilterValues64Low';
-  /**
-   * Category filter attribute
-   */
-  DATACATEGORY_ATTRIB?: 'filterCategoryValues' | 'instanceFilterCategoryValues';
 };
 
 const vs = glsl`
@@ -53,17 +39,9 @@ uniform ivec4 filter_categoryBitMask;
   uniform DATAFILTER_TYPE filter_softMax;
   uniform DATAFILTER_TYPE filter_max;
 
-  #ifdef NON_INSTANCED_MODEL
-    #define DATAFILTER_ATTRIB filterValues
-    #define DATAFILTER_ATTRIB_64LOW filterValues64Low
-  #else
-    #define DATAFILTER_ATTRIB instanceFilterValues
-    #define DATAFILTER_ATTRIB_64LOW instanceFilterValues64Low
-  #endif
-
-  in DATAFILTER_TYPE DATAFILTER_ATTRIB;
+  in DATAFILTER_TYPE filterValues;
   #ifdef DATAFILTER_DOUBLE
-    in DATAFILTER_TYPE DATAFILTER_ATTRIB_64LOW;
+    in DATAFILTER_TYPE filterValues64Low;
 
     uniform DATAFILTER_TYPE filter_min64High;
     uniform DATAFILTER_TYPE filter_max64High;
@@ -72,12 +50,7 @@ uniform ivec4 filter_categoryBitMask;
 
 
 #ifdef DATACATEGORY_TYPE
-  #ifdef NON_INSTANCED_MODEL
-    #define DATACATEGORY_ATTRIB filterCategoryValues
-  #else
-    #define DATACATEGORY_ATTRIB instanceFilterCategoryValues
-  #endif
-  in DATACATEGORY_TYPE DATACATEGORY_ATTRIB;
+  in DATACATEGORY_TYPE filterCategoryValues;
 #endif
 
 out float dataFilter_value;
@@ -119,7 +92,7 @@ float dataFilter_reduceValue(vec4 value) {
   }
 #endif
 
-#ifdef DATACATEGORY_ATTRIB
+#ifdef DATACATEGORY_TYPE
   void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
     int dataFilter_masks = filter_categoryBitMask[int(category / 32.0)];
@@ -223,19 +196,19 @@ const inject = {
   'vs:#main-start': glsl`
     dataFilter_value = 1.0;
     if (filter_enabled) {
-      #ifdef DATAFILTER_ATTRIB
+      #ifdef DATAFILTER_TYPE
         #ifdef DATAFILTER_DOUBLE
           dataFilter_setValue(
-            DATAFILTER_ATTRIB - filter_min64High + DATAFILTER_ATTRIB_64LOW,
-            DATAFILTER_ATTRIB - filter_max64High + DATAFILTER_ATTRIB_64LOW
+            filterValues - filter_min64High + filterValues64Low,
+            filterValues - filter_max64High + filterValues64Low
           );
         #else
-          dataFilter_setValue(DATAFILTER_ATTRIB, DATAFILTER_ATTRIB);
+          dataFilter_setValue(filterValues, filterValues);
         #endif
       #endif
 
-      #ifdef DATACATEGORY_ATTRIB
-        dataFilter_setCategoryValue(DATACATEGORY_ATTRIB);
+      #ifdef DATACATEGORY_TYPE
+        dataFilter_setCategoryValue(filterCategoryValues);
       #endif
     }
   `,
