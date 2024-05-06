@@ -4,11 +4,7 @@ import {project} from '@deck.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const vs = glsl`
-#ifdef NON_INSTANCED_MODEL
 in float collisionPriorities;
-#else
-in float instanceCollisionPriorities;
-#endif
 
 uniform sampler2D collision_texture;
 uniform bool collision_sort;
@@ -60,11 +56,7 @@ const inject = {
 `,
   'vs:DECKGL_FILTER_GL_POSITION': glsl`
   if (collision_sort) {
-    #ifdef NON_INSTANCED_MODEL
     float collisionPriority = collisionPriorities;
-    #else
-    float collisionPriority = instanceCollisionPriorities;
-    #endif
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 

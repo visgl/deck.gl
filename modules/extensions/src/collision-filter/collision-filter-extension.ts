@@ -68,11 +68,8 @@ export default class CollisionFilterExtension extends LayerExtension {
     attributeManager!.add({
       collisionPriorities: {
         size: 1,
-        accessor: 'getCollisionPriority',
-        shaderAttributes: {
-          collisionPriorities: {divisor: 0},
-          instanceCollisionPriorities: {divisor: 1}
-        }
+        stepMode: 'dynamic',
+        accessor: 'getCollisionPriority'
       }
     });
   }
