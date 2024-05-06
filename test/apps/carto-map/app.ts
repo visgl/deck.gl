@@ -1,6 +1,7 @@
 import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // // Simplest instantiation
 // const cartoMapId = 'ff6ac53f-741a-49fb-b615-d040bc5a96b8';

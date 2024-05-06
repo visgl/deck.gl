@@ -177,17 +177,10 @@ export type MapDataset = {
   geoColumn: string;
 };
 
-export interface Basemap {
-  id: string;
-  name: string;
-
-  settings: {
-    url: string;
-    tileSize?: number;
-  };
-  type: 'wmts' | 'raster' | 'tilejson';
-  thumbnail: string;
-  attribution?: string;
+export interface CustomStyle {
+  url?: string;
+  style?: any;
+  customAttribution?: string;
 }
 export type KeplerMapConfig = {
   mapState: any;
@@ -201,6 +194,6 @@ export type KeplerMapConfig = {
   layerBlending: any;
   interactionConfig: any;
   customBaseMaps?: {
-    custom?: Basemap;
+    customStyle?: CustomStyle;
   };
 };
