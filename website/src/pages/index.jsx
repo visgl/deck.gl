@@ -113,7 +113,7 @@ export default function IndexPage() {
             </h3>
             <p>
               While deck.gl works standalone without a base map, it plays nicely with your favorite
-              base map providers such as Google Maps, Mapbox, ArcGIS, basemap renderers such as MapLibre, and more. Where the base map
+              base map libraries such as Google Maps, Mapbox, ArcGIS, MapLibre, and more. Where the base map
               library permits, deck.gl may interleave with 3D map layers to create seamless
               visualizations.
             </p>
