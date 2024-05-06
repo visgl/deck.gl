@@ -16,7 +16,7 @@ export type VectorTableSourceOptions = SourceOptions &
   ColumnsOption;
 type UrlParameters = {
   columns?: string;
-  filters?: string;
+  filters?: Record<string, unknown>;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;
@@ -45,7 +45,7 @@ export const vectorTableSource = async function (
     urlParameters.columns = columns.join(',');
   }
   if (filters) {
-    urlParameters.filters = JSON.stringify(filters);
+    urlParameters.filters = filters;
   }
   return baseSource<UrlParameters>('table', options, urlParameters) as Promise<TilejsonResult>;
 };

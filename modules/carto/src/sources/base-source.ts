@@ -19,7 +19,7 @@ export const SOURCE_DEFAULTS: SourceOptionalOptions = {
   headers: {}
 };
 
-export async function baseSource<UrlParameters extends Record<string, string>>(
+export async function baseSource<UrlParameters extends Record<string, unknown>>(
   endpoint: MapType,
   options: Partial<SourceOptionalOptions> & SourceRequiredOptions,
   urlParameters: UrlParameters

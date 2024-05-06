@@ -12,11 +12,11 @@ export type BoundaryQuerySourceOptions = SourceOptions &
   };
 type UrlParameters = {
   columns?: string;
-  filters?: string;
+  filters?: Record<string, unknown>;
   tilesetTableName: string;
   matchingColumn: string;
   propertiesSqlQuery: string;
-  queryParameters?: string;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const boundaryQuerySource = async function (
@@ -40,10 +40,10 @@ export const boundaryQuerySource = async function (
     urlParameters.columns = columns.join(',');
   }
   if (filters) {
-    urlParameters.filters = JSON.stringify(filters);
+    urlParameters.filters = filters;
   }
   if (queryParameters) {
-    urlParameters.queryParameters = JSON.stringify(queryParameters);
+    urlParameters.queryParameters = queryParameters;
   }
   return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
 };
