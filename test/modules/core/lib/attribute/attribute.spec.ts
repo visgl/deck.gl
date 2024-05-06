@@ -253,13 +253,10 @@ test('Attribute#shaderAttributes', t => {
     id: 'positions',
     update,
     size: 3,
+    stepMode: 'instance',
     shaderAttributes: {
-      instancePositions: {
-        divisor: 1
-      },
-      instanceNextPositions: {
-        vertexOffset: 1,
-        divisor: 1
+      nextPositions: {
+        vertexOffset: 1
       }
     }
   });
@@ -271,15 +268,12 @@ test('Attribute#shaderAttributes', t => {
   t.is(attributeLayout.format, 'float32x3', 'Attribute position has correct format');
   t.is(attributeLayout.byteOffset, 0, 'Attribute position has correct offset');
   attributeLayout = bufferLayout.attributes[1];
-  t.is(attributeLayout.format, 'float32x3', 'Attribute instancePositions has correct format');
-  t.is(attributeLayout.byteOffset, 0, 'Attribute instancePositions has correct offset');
-  attributeLayout = bufferLayout.attributes[2];
-  t.is(attributeLayout.format, 'float32x3', 'Attribute instanceNextPositions has correct format');
-  t.is(attributeLayout.byteOffset, 12, 'Attribute instanceNextPositions has correct offset');
+  t.is(attributeLayout.format, 'float32x3', 'Attribute nextPositions has correct format');
+  t.is(attributeLayout.byteOffset, 12, 'Attribute nextPositions has correct offset');
 
   t.deepEquals(
     attribute.getValue(),
-    {positions: buffer1, instancePositions: buffer1, instanceNextPositions: buffer1},
+    {positions: buffer1, nextPositions: buffer1},
     'Attribute has buffer'
   );
 

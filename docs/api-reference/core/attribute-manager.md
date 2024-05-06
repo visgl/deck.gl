@@ -52,7 +52,7 @@ the attributes that should be auto-calculated.
 ```js
 attributeManager.add({
   positions: {size: 2, accessor: 'getPosition', update: calculatePositions},
-  colors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: calculateColors}
+  colors: {size: 4, type: 'unorm8', accessor: 'getColor', update: calculateColors}
 });
 ```
 
@@ -61,13 +61,10 @@ Takes a single parameter as a map of attribute descriptor objects:
 * keys are attribute names
 * values are objects with attribute definitions:
   - luma.gl [accessor parameters](https://luma.gl/docs/api-reference-legacy/classes/accessor):
-    * `type` (string, optional) - data type of the attribute, see "Remarks" section below.
+    * `type` (string, optional) - data type of the attribute, see "Remarks" section below. Default `'float32'`.
     * `size` (number) - number of elements per vertex
-    * `normalized` (boolean) - default `false`
-    * `integer` (boolean) - WebGL2 only, default `false`
-    * `divisor` (boolean, optional) - `1` if this is an instanced attribute
-      (a.k.a. divisor). Default to `0`.
   - deck.gl attribute configurations:
+    * `stepMode` (string, optional) - One of `'vertex'`, `'instance'` and `'dynamic'`. If set to `'dynamic'`, will be resolved to `'instance'` when this attribute is applied to an instanced model, and `'vertex'` otherwise. Default `'vertex'`.
     * `isIndexed` (boolean, optional) - if this is an index attribute
       (a.k.a. indices). Default to `false`.
     * `accessor` (string | string[] | Function) - accessor name(s) that will
@@ -85,12 +82,10 @@ Takes a single parameter as a map of attribute descriptor objects:
     * `size` (number) - number of elements per vertex
     * `vertexOffset` (number) - offset of the attribute by vertex (stride). Default `0`.
     * `elementOffset` (number) - offset of the attribute by element. default `0`.
-    * `divisor` (boolean, optional) - `1` if this is an instanced attribute
-      (a.k.a. divisor). Default to `0`.
 
 #### `addInstanced` {#addinstanced}
 
-Shorthand for `add()` in which all attributes `instanced` field are set to `true`.
+Shorthand for `add()` in which all attributes `stepMode` field are set to `'instance'`.
 
 
 #### `remove` {#remove}
@@ -152,6 +147,16 @@ Notes:
 * Any preallocated buffers in "buffers" matching registered attribute names will be used. No update will happen in this case.
 * Calls onUpdateStart and onUpdateEnd log callbacks before and after.
 
+#### `getBufferLayouts`
+
+Returns WebGPU-style buffer layout descriptors.
+
+Parameters:
+
+* `modelInfo` (object) - a luma.gl `Model` or a similarly shaped object
+  + `isInstanced` (boolean) - used to resolve `stepMode: 'dynamic'`
+
+
 ## Remarks
 
 ### Attribute Type
@@ -160,15 +165,20 @@ The following `type` values are supported for attribute definitions:
 
 | type | value array type | notes |
 | ---- | ---------------- | ----- |
-| `GL.FLOAT` | `Float32Array` | |
-| `GL.DOUBLE` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64Low`, the sum of which is the 64-bit value. |
-| `GL.BYTE` | `Int8Array` | |
-| `GL.SHORT` | `Int16Array` | |
-| `GL.INT` | `Int32Array` | |
-| `GL.UNSIGNED_BYTE` | `Uint8ClampedArray` | |
-| `GL.UNSIGNED_SHORT` | `Uint16Array` | |
-| `GL.UNSIGNED_INT` | `Uint32Array` | |
+| `float32` | `Float32Array` | |
+| `float64` | `Float64Array` | Because 64-bit floats are not supported by WebGL, the value is converted to an interleaved `Float32Array` before uploading to the GPU. It is exposed to the vertex shader as two attributes, `<attribute_name>` and `<attribute_name>64Low`, the sum of which is the 64-bit value. |
+| `sint8`   | `Int8Array`    | |
+| `snorm8`  | `Int8Array`    | Normalized |
+| `uint8`   | `Uint8ClampedArray` | |
+| `unorm8`  | `Uint8ClampedArray` | Normalized |
+| `sint16`  | `Int16Array`   | |
+| `snorm16` | `Int16Array`   | Normalized |
+| `uint16`  | `Uint16Array`  | |
+| `unorm16` | `Uint16Array`  | Normalized |
+| `sint32`  | `Int32Array`   | |
+| `uint32`  | `Uint32Array`   | |
 
+      
 ## Source
 
 [modules/core/src/lib/attribute-manager.ts](https://github.com/visgl/deck.gl/tree/9.0-release/modules/core/src/lib/attribute/attribute-manager.ts)
