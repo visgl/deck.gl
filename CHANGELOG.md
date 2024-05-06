@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.14] - May 6 2024
+
+- fix(carto): Fix broken encoding in POST requests (#8865)
+
 #### deck.gl [9.0.13] - May 5 2024
 
 - feat(core): Explicitly set stepMode in Attribute layout (#8858)
