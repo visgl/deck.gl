@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.13] - May 5 2024
+
+- feat(core): Explicitly set stepMode in Attribute layout (#8858)
+- fix(widgets): export @deck.gl/widgets/stylesheet.css (#8863)
+- Set per-pass uniforms when postprocessing (#8801)
+
 #### deck.gl [9.0.12] - Apr 29 2024
 
 - CARTO: Implement QuadbinHeatmapTileLayer (#8703)
