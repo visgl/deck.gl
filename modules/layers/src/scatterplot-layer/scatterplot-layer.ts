@@ -173,7 +173,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-import scatterplot from './scatterplot-layer-inputs';
+import scatterplot, {ScatterplotSettings} from './scatterplot-layer-inputs';
 
 /** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
@@ -256,8 +256,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     const model = this.state.model!;
 
     model.setUniforms(uniforms);
-    const scatterplot = {
-      stroked: stroked ? 1 : 0,
+    const scatterplot: ScatterplotSettings = {
+      stroked,
       filled,
       billboard,
       antialiasing,
@@ -270,7 +270,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     };
-    model.setUniforms(scatterplot);
     model.shaderInputs.setProps({scatterplot});
     model.draw(this.context.renderPass);
   }
