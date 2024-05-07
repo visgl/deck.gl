@@ -15,5 +15,5 @@ ipython>=5.8.0;python_version<"3.4"
 semver # necessary for PEP440-compliant semantic versions
 sphinx-markdown-builder
 wheel
-sphinx_rtd_theme
+sphinx_rtd_theme==2.0.0
 black;python_version>="3.6"
