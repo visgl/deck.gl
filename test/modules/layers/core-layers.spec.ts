@@ -73,7 +73,8 @@ test('ScatterplotLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.getModels()[0].uniforms.radiusScale,
+        layer.getModels()[0]._uniformStore.uniformBlocks.get('scatterplot').uniforms.radiusScale,
+
         layer.props.radiusScale,
         'should update radiusScale'
       );
