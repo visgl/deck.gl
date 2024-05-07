@@ -180,7 +180,18 @@ export type ScatterplotSettings = {
 const scatterplot = {
   name: 'scatterplot',
   uniformTypes: {
-    opacity: 'f32'
+    radiusScale: 'f32',
+    radiusMinPixels: 'f32',
+    radiusMaxPixels: 'f32',
+    lineWidthScale: 'f32',
+    lineWidthMinPixels: 'f32',
+    lineWidthMaxPixels: 'f32',
+    stroked: 'f32',
+    filled: 'f32',
+    antialiasing: 'f32',
+    billboard: 'f32',
+    radiusUnits: 'i32',
+    lineWidthUnits: 'i32'
   }
 } as const satisfies ShaderModule<ScatterplotSettings>;
 
@@ -265,7 +276,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     const model = this.state.model!;
 
     model.setUniforms(uniforms);
-    model.setUniforms({
+    const scatterplot = {
       stroked: stroked ? 1 : 0,
       filled,
       billboard,
@@ -278,13 +289,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels
-    });
-    const {opacity} = this.props;
-    model.shaderInputs.setProps({
-      scatterplot: {
-        opacity
-      }
-    });
+    };
+    model.setUniforms(scatterplot);
+    model.shaderInputs.setProps({scatterplot});
     model.draw(this.context.renderPass);
   }
 
