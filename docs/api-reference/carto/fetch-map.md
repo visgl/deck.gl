@@ -24,7 +24,7 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 ### Integration with CARTO basemaps
 
 ```js
-fetchMap({cartoMapId}).then(({initialViewState, basemap, mapStyle, layers}) => {
+fetchMap({cartoMapId}).then(({initialViewState, basemap, layers}) => {
   const deckgl = new deck.DeckGL({
     container: 'container',
     controller: true,

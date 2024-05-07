@@ -57,11 +57,8 @@ export function applyCartoLayerGroupFilters(style, visibleLayerGroups: Record<st
   };
 }
 
-function someLayersFilteredOut(visibleLayerGroups?: Record<string, boolean>) {
-  return (
-    visibleLayerGroups &&
-    Object.values(visibleLayerGroups).some(filteredOut => filteredOut === false)
-  );
+function someLayerGroupsDisabled(visibleLayerGroups?: Record<string, boolean>) {
+  return visibleLayerGroups && Object.values(visibleLayerGroups).every(Boolean) === false;
 }
 
 export async function getCartoBasemapStyle({
@@ -75,7 +72,7 @@ export async function getCartoBasemapStyle({
   const styleUrl = `${cartoBasemapsBaseUrl}/${styleType}-gl-style/style.json`;
   let style = styleUrl;
 
-  if (visibleLayerGroups && someLayersFilteredOut(visibleLayerGroups)) {
+  if (visibleLayerGroups && someLayerGroupsDisabled(visibleLayerGroups)) {
     try {
       const originalStyle = await fetch(styleUrl, {
         mode: 'cors',
@@ -84,10 +81,7 @@ export async function getCartoBasemapStyle({
       style = applyCartoLayerGroupFilters(originalStyle, visibleLayerGroups);
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(
-        'Error fetching CARTO basemap style, falling back to not-filtered style',
-        error
-      );
+      console.error('Error fetching CARTO basemap style, falling back to unfiltered style', error);
     }
   }
   return style;
