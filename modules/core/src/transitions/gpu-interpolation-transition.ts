@@ -11,7 +11,6 @@ import {
   getFloat32VertexFormat
 } from './gpu-transition-utils';
 import {GPUTransitionBase} from './gpu-transition';
-import project from '../shaderlib/project/project';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
@@ -207,7 +206,6 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     varyings: ['vCurrent'],
 
     // TODO investigate why this is needed
-    modules: [project],
     disableWarnings: true
   });
 }

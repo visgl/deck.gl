@@ -9,7 +9,6 @@ import {
 } from './gpu-transition-utils';
 import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
-import project from '../shaderlib/project/project';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
 import type {TypedArray} from '../types/types';
@@ -178,10 +177,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       blendAlphaOperation: 'max',
       blendAlphaSrcFactor: 'one',
       blendAlphaDstFactor: 'one'
-    },
-
-    // TODO investigate why this is needed
-    modules: [project]
+    }
   });
 }
 
