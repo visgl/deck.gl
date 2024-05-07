@@ -17,12 +17,12 @@ export type VectorQuerySourceOptions = SourceOptions &
 
 type UrlParameters = {
   columns?: string;
-  filters?: string;
+  filters?: Record<string, unknown>;
   spatialDataType: SpatialDataType;
   spatialDataColumn?: string;
   tileResolution?: string;
   q: string;
-  queryParameters?: string;
+  queryParameters?: Record<string, unknown> | unknown[];
 };
 
 export const vectorQuerySource = async function (
@@ -48,10 +48,10 @@ export const vectorQuerySource = async function (
     urlParameters.columns = columns.join(',');
   }
   if (filters) {
-    urlParameters.filters = JSON.stringify(filters);
+    urlParameters.filters = filters;
   }
   if (queryParameters) {
-    urlParameters.queryParameters = JSON.stringify(queryParameters);
+    urlParameters.queryParameters = queryParameters;
   }
   return baseSource<UrlParameters>('query', options, urlParameters) as Promise<TilejsonResult>;
 };

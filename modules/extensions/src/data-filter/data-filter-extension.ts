@@ -167,15 +167,8 @@ export default class DataFilterExtension extends LayerExtension<
           filterValues: {
             size: filterSize,
             type: fp64 ? 'float64' : 'float32',
-            accessor: 'getFilterValue',
-            shaderAttributes: {
-              filterValues: {
-                divisor: 0
-              },
-              instanceFilterValues: {
-                divisor: 1
-              }
-            }
+            stepMode: 'dynamic',
+            accessor: 'getFilterValue'
           }
         });
       }
@@ -184,19 +177,12 @@ export default class DataFilterExtension extends LayerExtension<
         attributeManager.add({
           filterCategoryValues: {
             size: categorySize,
+            stepMode: 'dynamic',
             accessor: 'getFilterCategory',
             transform:
               categorySize === 1
                 ? d => extension._getCategoryKey.call(this, d, 0)
-                : d => d.map((x, i) => extension._getCategoryKey.call(this, x, i)),
-            shaderAttributes: {
-              filterCategoryValues: {
-                divisor: 0
-              },
-              instanceFilterCategoryValues: {
-                divisor: 1
-              }
-            }
+                : d => d.map((x, i) => extension._getCategoryKey.call(this, x, i))
           }
         });
       }

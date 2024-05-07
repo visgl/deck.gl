@@ -96,7 +96,7 @@ function DeckGLOverlay(props: DeckProps) {
 }
 
 function App() {
-  const layers: [
+  const layers = [
     new ScatterplotLayer({
       id: 'deckgl-circle',
       data: [
@@ -180,7 +180,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 function App() {
-  const layers: [
+  const layers = [
     new ScatterplotLayer({
       id: 'deckgl-circle',
       data: [

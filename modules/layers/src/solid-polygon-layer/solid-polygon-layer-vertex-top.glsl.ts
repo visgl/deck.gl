@@ -27,9 +27,6 @@ export default `\
 in vec3 vertexPositions;
 in vec3 vertexPositions64Low;
 in float elevations;
-in vec4 fillColors;
-in vec4 lineColors;
-in vec3 pickingColors;
 
 ${main}
 
@@ -39,9 +36,6 @@ void main(void) {
   props.positions = vertexPositions;
   props.positions64Low = vertexPositions64Low;
   props.elevations = elevations;
-  props.fillColors = fillColors;
-  props.lineColors = lineColors;
-  props.pickingColors = pickingColors;
   props.normal = vec3(0.0, 0.0, 1.0);
 
   calculatePosition(props);

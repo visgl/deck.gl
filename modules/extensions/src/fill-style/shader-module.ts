@@ -9,19 +9,9 @@ import {glsl} from '../utils/syntax-tags';
  * fill pattern shader module
  */
 const patternVs = glsl`
-#ifdef NON_INSTANCED_MODEL
-  #define FILL_PATTERN_FRAME_ATTRIB fillPatternFrames
-  #define FILL_PATTERN_SCALE_ATTRIB fillPatternScales
-  #define FILL_PATTERN_OFFSET_ATTRIB fillPatternOffsets
-#else
-  #define FILL_PATTERN_FRAME_ATTRIB instanceFillPatternFrames
-  #define FILL_PATTERN_SCALE_ATTRIB instanceFillPatternScales
-  #define FILL_PATTERN_OFFSET_ATTRIB instanceFillPatternOffsets
-#endif
-
-in vec4 FILL_PATTERN_FRAME_ATTRIB;
-in float FILL_PATTERN_SCALE_ATTRIB;
-in vec2 FILL_PATTERN_OFFSET_ATTRIB;
+in vec4 fillPatternFrames;
+in float fillPatternScales;
+in vec2 fillPatternOffsets;
 
 uniform bool fill_patternEnabled;
 uniform vec2 fill_patternTextureSize;
@@ -52,9 +42,9 @@ const inject = {
 
   'vs:DECKGL_FILTER_COLOR': glsl`
     if (fill_patternEnabled) {
-      fill_patternBounds = FILL_PATTERN_FRAME_ATTRIB / vec4(fill_patternTextureSize, fill_patternTextureSize);
-      fill_patternPlacement.xy = FILL_PATTERN_OFFSET_ATTRIB;
-      fill_patternPlacement.zw = FILL_PATTERN_SCALE_ATTRIB * FILL_PATTERN_FRAME_ATTRIB.zw;
+      fill_patternBounds = fillPatternFrames / vec4(fill_patternTextureSize, fill_patternTextureSize);
+      fill_patternPlacement.xy = fillPatternOffsets;
+      fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
     }
   `,
 

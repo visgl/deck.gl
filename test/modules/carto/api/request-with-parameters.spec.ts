@@ -101,3 +101,51 @@ test('requestWithParameters#nocacheErrorContext', async t => {
   );
   t.end();
 });
+
+test('requestWithParameters#method', async t => {
+  await withMockFetchMapsV3(async calls => {
+    t.equals(calls.length, 0, '0 initial calls');
+
+    await Promise.all([
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/params',
+        headers: {},
+        parameters: {object: {a: 1, b: 2}, array: [1, 2, 3], string: 'short'}
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/params`,
+        headers: {},
+        parameters: {object: {a: 1, b: 2}, array: [1, 2, 3], string: 'long'.padEnd(10_000, 'g')}
+      })
+    ]);
+
+    t.equals(calls.length, 2, '2 requests');
+
+    // GET
+    t.true(calls[0].url.startsWith('https://example.com/v1/params?'), 'get - url');
+    t.equals(calls[0].method, undefined, 'get - method');
+    t.equals(calls[0].body, undefined, 'get - body');
+    t.deepEquals(
+      Array.from(new URL(calls[0].url).searchParams.entries()),
+      [
+        ['v', '3.4'],
+        ['deckglVersion', 'untranspiled source'],
+        ['object', '{"a":1,"b":2}'],
+        ['array', '[1,2,3]'],
+        ['string', 'short']
+      ],
+      'get - params'
+    );
+
+    // POST
+    const postBody = JSON.parse(calls[1].body as string);
+    t.equals(calls[1].method, 'POST', 'post - method');
+    t.equals(postBody.v, '3.4', 'post - body.v');
+    t.equals(postBody.deckglVersion, 'untranspiled source', 'post - body.deckglVersion');
+    t.deepEquals(postBody.object, {a: 1, b: 2}, 'post - body.object');
+    t.deepEquals(postBody.array, [1, 2, 3], 'post - body.array');
+    t.true(postBody.string.startsWith('longgg'), 'post - body.string');
+    t.equals(calls[1].url, 'https://example.com/v1/params', 'post - url');
+  });
+  t.end();
+});

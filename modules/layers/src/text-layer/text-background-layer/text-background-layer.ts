@@ -159,14 +159,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
 
   protected _getModel(): Model {
     // a square that minimally cover the unit circle
-    const positions = [0, 0, 1, 0, 1, 1, 0, 1];
+    const positions = [0, 0, 1, 0, 0, 1, 1, 1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+        topology: 'triangle-strip',
         vertexCount: 4,
         attributes: {
           positions: {size: 2, value: new Float32Array(positions)}

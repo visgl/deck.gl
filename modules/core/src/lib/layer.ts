@@ -771,7 +771,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (bufferLayoutChanged) {
       // AttributeManager is always defined when this method is called
       const attributeManager = this.getAttributeManager()!;
-      model.setBufferLayout(attributeManager.getBufferLayouts());
+      model.setBufferLayout(attributeManager.getBufferLayouts(model));
       // All attributes must be reset after buffer layout change
       changedAttributes = attributeManager.getAttributes();
     }

@@ -5,7 +5,12 @@ import binaryTileData from './data/binaryTile.json';
 const BINARY_TILE = new Uint8Array(binaryTileData).buffer;
 
 const fetch = globalThis.fetch;
-type MockFetchCall = {url: string; headers: Record<string, unknown>};
+type MockFetchCall = {
+  url: string;
+  headers: Record<string, unknown>;
+  method?: 'GET' | 'POST';
+  body?: string;
+};
 
 export const TILEJSON_RESPONSE = {
   tilejson: '2.2.0',
@@ -96,8 +101,8 @@ async function setupMockFetchMapsV3(
 ): Promise<MockFetchCall[]> {
   const calls: MockFetchCall[] = [];
 
-  const mockFetch = (url: string, {headers}) => {
-    calls.push({url, headers});
+  const mockFetch = (url: string, {headers, method, body}) => {
+    calls.push({url, headers, method, body});
     if (url.indexOf('formatTiles=binary') !== -1) {
       headers = {...headers, 'Content-Type': 'application/vnd.carto-vector-tile'};
     }
@@ -114,7 +119,7 @@ function teardownMockFetchMaps() {
 }
 
 export async function withMockFetchMapsV3(
-  testFunc: (calls: {url: string; headers: Record<string, unknown>}[]) => Promise<void>,
+  testFunc: (calls: MockFetchCall[]) => Promise<void>,
   responseFunc: (
     url: string,
     headers: HeadersInit,
