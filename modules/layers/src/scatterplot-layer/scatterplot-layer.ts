@@ -173,7 +173,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-import scatterplot from './scatterplot-layer-uniforms.glsl';
+import scatterplot from './scatterplot-layer-inputs';
 
 /** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
