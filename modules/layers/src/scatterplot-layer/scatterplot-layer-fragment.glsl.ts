@@ -18,26 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import scatterplotUniforms from './scatterplot-layer-uniforms.glsl';
 export default `\
 #version 300 es
 #define SHADER_NAME scatterplot-layer-fragment-shader
 
 precision highp float;
 
-uniform scatterplotUniforms {
-  uniform float radiusScale;
-  uniform float radiusMinPixels;
-  uniform float radiusMaxPixels;
-  uniform float lineWidthScale;
-  uniform float lineWidthMinPixels;
-  uniform float lineWidthMaxPixels;
-  uniform float stroked;
-  uniform bool filled;
-  uniform bool antialiasing;
-  uniform bool billboard;
-  uniform highp int radiusUnits;
-  uniform highp int lineWidthUnits;
-} scatterplot;
+${scatterplotUniforms}
 
 in vec4 vFillColor;
 in vec4 vLineColor;

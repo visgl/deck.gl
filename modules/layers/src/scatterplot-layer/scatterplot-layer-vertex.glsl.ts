@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import scatterplotUniforms from './scatterplot-layer-uniforms.glsl';
 export default `\
 #version 300 es
 #define SHADER_NAME scatterplot-layer-vertex-shader
@@ -32,21 +33,7 @@ in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in vec3 instancePickingColors;
 
-uniform scatterplotUniforms {
-  uniform float radiusScale;
-  uniform float radiusMinPixels;
-  uniform float radiusMaxPixels;
-  uniform float lineWidthScale;
-  uniform float lineWidthMinPixels;
-  uniform float lineWidthMaxPixels;
-  uniform float stroked;
-  uniform bool filled;
-  uniform bool antialiasing;
-  uniform bool billboard;
-  uniform highp int radiusUnits;
-  uniform highp int lineWidthUnits;
-} scatterplot;
-
+${scatterplotUniforms}
 uniform float opacity;
 
 out vec4 vFillColor;
