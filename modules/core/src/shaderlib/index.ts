@@ -21,12 +21,13 @@
 import {ShaderAssembler} from '@luma.gl/shadertools';
 
 import {gouraudLighting, phongLighting} from '@luma.gl/shadertools';
+import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
 import shadow from './shadow/shadow';
 import picking from './picking/picking';
 
-const DEFAULT_MODULES = [project];
+const DEFAULT_MODULES = [geometry];
 
 const SHADER_HOOKS = [
   'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',

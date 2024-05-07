@@ -34,7 +34,7 @@ void main(void) {
   geometry.pickingColor = instancePickingColors;
 
   vTexCoord = texCoords;
-  cameraPosition = project_uCameraPosition;
+  cameraPosition = project.cameraPosition;
   vColor = vec4(colors * instanceColors.rgb, instanceColors.a);
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);

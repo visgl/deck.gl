@@ -20,7 +20,15 @@
 
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {Layer, LayerProps, log, picking, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {
+  Layer,
+  LayerProps,
+  log,
+  project32,
+  picking,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -59,7 +67,7 @@ export default class ScreenGridCellLayer<DataT = any, ExtraPropsT extends {} = {
   };
 
   getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return {vs, fs, modules: [picking as ShaderModule]};
+    return {vs, fs, modules: [project32, picking]};
   }
 
   initializeState() {

@@ -151,6 +151,6 @@ Returns a matrix that rotates any vector defined in the default common space to 
 
 ## Remarks
 
-* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project_uDevicePixelRatio`.
+* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project.devicePixelRatio`.
 * The pixels offsets will be divided by the `w` coordinate of `gl_Position`. This is simply the GPUs standard treatment of any coordinate. This means that there will be more pixels closer to the camera and less pixels further away from the camer. Setting the `focalDistance` uniform controls this.
 * To avoid pixel sizes scaling with distance from camera, simply set `focalDistance` to 1 and multiply clipspace offset with `gl_Position.w`

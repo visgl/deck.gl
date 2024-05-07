@@ -204,6 +204,8 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       ATTRIBUTE_TYPE: attributeType
     },
     varyings: ['vCurrent'],
+
+    // TODO investigate why this is needed
     disableWarnings: true
   });
 }

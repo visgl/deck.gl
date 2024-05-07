@@ -39,7 +39,7 @@ out vec4 vColor;
 // offset_direction is -1 (left) or 1 (right)
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
   // normalized direction of the line
-  vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
+  vec2 dir_screenspace = normalize(line_clipspace * project.viewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 

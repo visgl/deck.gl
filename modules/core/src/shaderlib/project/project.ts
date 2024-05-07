@@ -38,5 +38,25 @@ export default {
   name: 'project',
   dependencies: [fp32, geometry],
   vs: projectShader,
-  getUniforms
-} as ShaderModule<ProjectModuleSettings>;
+  getUniforms,
+  uniformTypes: {
+    wrapLongitude: 'f32',
+    coordinateSystem: 'i32',
+    commonUnitsPerMeter: 'vec3<f32>',
+    projectionMode: 'i32',
+    scale: 'f32',
+
+    commonUnitsPerWorldUnit: 'vec3<f32>',
+    commonUnitsPerWorldUnit2: 'vec3<f32>',
+    center: 'vec4<f32>',
+    modelMatrix: 'mat4x4<f32>',
+    viewProjectionMatrix: 'mat4x4<f32>',
+    viewportSize: 'vec2<f32>',
+    devicePixelRatio: 'f32',
+    focalDistance: 'f32',
+    cameraPosition: 'vec3<f32>',
+    coordinateOrigin: 'vec3<f32>',
+    commonOrigin: 'vec3<f32>',
+    pseudoMeters: 'f32'
+  }
+} as const satisfies ShaderModule<ProjectModuleSettings>;

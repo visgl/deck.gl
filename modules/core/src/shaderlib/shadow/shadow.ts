@@ -205,7 +205,7 @@ function createShadowUniforms(
 
   const center = getMemoizedViewportCenterPosition({
     viewport: opts.viewport,
-    center: context.project_uCenter
+    center: context.center
   });
 
   const projectCenters: NumericArray[] = [];
@@ -221,8 +221,8 @@ function createShadowUniforms(
       .translate(new Vector3(opts.viewport.center).negate());
 
     if (
-      context.project_uCoordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
-      context.project_uProjectionMode === PROJECTION_MODE.WEB_MERCATOR
+      context.coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+      context.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;
       projectCenters[i] = center;

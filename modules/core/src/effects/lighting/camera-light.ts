@@ -8,7 +8,7 @@ export default class CameraLight extends PointLight {
     const {projectedLight} = this;
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin, modelMatrix} = layer.props;
-    const {project_uCameraPosition} = getUniformsFromViewport({
+    const {cameraPosition} = getUniformsFromViewport({
       viewport,
       modelMatrix,
       coordinateSystem,
@@ -16,7 +16,7 @@ export default class CameraLight extends PointLight {
     });
     projectedLight.color = this.color;
     projectedLight.intensity = this.intensity;
-    projectedLight.position = project_uCameraPosition;
+    projectedLight.position = cameraPosition;
     return projectedLight;
   }
 }

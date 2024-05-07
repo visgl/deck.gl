@@ -92,7 +92,7 @@ function getPatternUniforms(
   }
   if ('viewport' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const {project_uCommonOrigin: coordinateOriginCommon} = uniforms as ProjectUniforms;
+    const {commonOrigin: coordinateOriginCommon} = uniforms as ProjectUniforms;
 
     const coordinateOriginCommon64Low = [
       fp64LowPart(coordinateOriginCommon[0]),
