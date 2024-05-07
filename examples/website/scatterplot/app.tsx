@@ -41,6 +41,7 @@ export default function App({
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
+      opacity: 0.5,
       radiusScale: radius,
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],

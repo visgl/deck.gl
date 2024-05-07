@@ -32,7 +32,10 @@ in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in vec3 instancePickingColors;
 
-uniform float opacity;
+uniform scatterplotUniforms {
+  float opacity;
+} scatterplot;
+
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
@@ -95,9 +98,9 @@ void main(void) {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * scatterplot.opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * scatterplot.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 }
 `;

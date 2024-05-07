@@ -21,6 +21,7 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
+import {ShaderModule} from '@luma.gl/shadertools';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -173,6 +174,16 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
+export type ScatterplotSettings = {
+  opacity?: number;
+};
+const scatterplot = {
+  name: 'scatterplot',
+  uniformTypes: {
+    opacity: 'f32'
+  }
+} as const satisfies ShaderModule<ScatterplotSettings>;
+
 /** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
@@ -185,7 +196,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, scatterplot]});
   }
 
   initializeState() {
@@ -267,6 +278,12 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels
+    });
+    const {opacity} = this.props;
+    model.shaderInputs.setProps({
+      scatterplot: {
+        opacity
+      }
     });
     model.draw(this.context.renderPass);
   }
