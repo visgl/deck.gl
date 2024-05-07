@@ -21,7 +21,6 @@
 import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
-import {ShaderModule} from '@luma.gl/shadertools';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -174,26 +173,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-export type ScatterplotSettings = {
-  opacity?: number;
-};
-const scatterplot = {
-  name: 'scatterplot',
-  uniformTypes: {
-    radiusScale: 'f32',
-    radiusMinPixels: 'f32',
-    radiusMaxPixels: 'f32',
-    lineWidthScale: 'f32',
-    lineWidthMinPixels: 'f32',
-    lineWidthMaxPixels: 'f32',
-    stroked: 'f32',
-    filled: 'f32',
-    antialiasing: 'f32',
-    billboard: 'f32',
-    radiusUnits: 'i32',
-    lineWidthUnits: 'i32'
-  }
-} as const satisfies ShaderModule<ScatterplotSettings>;
+import scatterplot from './scatterplot-layer-uniforms.glsl';
 
 /** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
