@@ -43,8 +43,8 @@ uniform scatterplotUniforms {
   uniform bool filled;
   uniform bool antialiasing;
   uniform bool billboard;
-  uniform int radiusUnits;
-  uniform int lineWidthUnits;
+  uniform highp int radiusUnits;
+  uniform highp int lineWidthUnits;
 } scatterplot;
 
 uniform float opacity;

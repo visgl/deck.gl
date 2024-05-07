@@ -24,9 +24,20 @@ export default `\
 
 precision highp float;
 
-uniform bool filled;
-uniform float stroked;
-uniform bool antialiasing;
+uniform scatterplotUniforms {
+  uniform float radiusScale;
+  uniform float radiusMinPixels;
+  uniform float radiusMaxPixels;
+  uniform float lineWidthScale;
+  uniform float lineWidthMinPixels;
+  uniform float lineWidthMaxPixels;
+  uniform float stroked;
+  uniform bool filled;
+  uniform bool antialiasing;
+  uniform bool billboard;
+  uniform highp int radiusUnits;
+  uniform highp int lineWidthUnits;
+} scatterplot;
 
 in vec4 vFillColor;
 in vec4 vLineColor;
@@ -40,7 +51,7 @@ void main(void) {
   geometry.uv = unitPosition;
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
-  float inCircle = antialiasing ? 
+  float inCircle = scatterplot.antialiasing ?
     smoothedge(distToCenter, outerRadiusPixels) : 
     step(distToCenter, outerRadiusPixels);
 
@@ -48,12 +59,12 @@ void main(void) {
     discard;
   }
 
-  if (stroked > 0.5) {
-    float isLine = antialiasing ? 
+  if (scatterplot.stroked > 0.5) {
+    float isLine = scatterplot.antialiasing ? 
       smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
       step(innerUnitRadius * outerRadiusPixels, distToCenter);
 
-    if (filled) {
+    if (scatterplot.filled) {
       fragColor = mix(vFillColor, vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
@@ -61,7 +72,7 @@ void main(void) {
       }
       fragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (!filled) {
+  } else if (!scatterplot.filled) {
     discard;
   } else {
     fragColor = vFillColor;
