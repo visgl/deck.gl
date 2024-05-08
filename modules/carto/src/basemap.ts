@@ -1,8 +1,18 @@
+import {CartoAPIError} from './api/carto-api-error';
+import {APIErrorContext} from './api/types';
+
 export const cartoBasemapsBaseUrl = 'https://basemaps.cartocdn.com/gl';
 
 const baseUrl = `${cartoBasemapsBaseUrl}/{basemap}-gl-style/style.json`;
 
-export const cartoStyleLayerGroups = [
+type StyleLayerGroupSlug = 'label' | 'road' | 'border' | 'building' | 'water' | 'land';
+type StyleLayerGroup = {
+  slug: StyleLayerGroupSlug;
+  filter: (layer: any) => boolean;
+  defaultVisibility: boolean;
+};
+
+export const STYLE_LAYER_GROUPS: StyleLayerGroup[] = [
   {
     slug: 'label',
     filter: ({id}: {id: string}) =>
@@ -40,14 +50,17 @@ export const cartoStyleLayerGroups = [
   }
 ];
 
-export function applyCartoLayerGroupFilters(style, visibleLayerGroups: Record<string, boolean>) {
+export function applyLayerGroupFilters(
+  style,
+  visibleLayerGroups: Record<StyleLayerGroupSlug, boolean>
+) {
   if (!Array.isArray(style?.layers)) {
     return style;
   }
 
-  const visibleFilters = cartoStyleLayerGroups
-    .filter(lg => visibleLayerGroups[lg.slug])
-    .map(lg => lg.filter);
+  const visibleFilters = STYLE_LAYER_GROUPS.filter(lg => visibleLayerGroups[lg.slug]).map(
+    lg => lg.filter
+  );
 
   const filteredLayers = style.layers.filter(layer => visibleFilters.some(match => match(layer)));
 
@@ -57,41 +70,50 @@ export function applyCartoLayerGroupFilters(style, visibleLayerGroups: Record<st
   };
 }
 
-function someLayerGroupsDisabled(visibleLayerGroups?: Record<string, boolean>) {
+function someLayerGroupsDisabled(visibleLayerGroups?: Record<StyleLayerGroupSlug, boolean>) {
   return visibleLayerGroups && Object.values(visibleLayerGroups).every(Boolean) === false;
 }
 
-export async function getCartoBasemapStyle({
+export function getStyleUrl(styleType: string) {
+  return baseUrl.replace('{basemap}', styleType);
+}
+
+export async function getBasemapStyle({
   styleType,
-  visibleLayerGroups
+  visibleLayerGroups,
+  errorContext
 }: {
   styleType: string;
-  visibleLayerGroups?: Record<string, boolean>;
+  visibleLayerGroups?: Record<StyleLayerGroupSlug, boolean>;
+  errorContext?: APIErrorContext;
 }) {
-  /* global fetch, console */
-  const styleUrl = `${cartoBasemapsBaseUrl}/${styleType}-gl-style/style.json`;
+  /* global fetch */
+  const styleUrl = getStyleUrl(styleType);
   let style = styleUrl;
 
   if (visibleLayerGroups && someLayerGroupsDisabled(visibleLayerGroups)) {
-    try {
-      const originalStyle = await fetch(styleUrl, {
-        mode: 'cors',
-        credentials: 'omit'
-      }).then(res => res.json());
-      style = applyCartoLayerGroupFilters(originalStyle, visibleLayerGroups);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error fetching CARTO basemap style, falling back to unfiltered style', error);
-    }
+    let response: Response | undefined;
+    const originalStyle = await fetch(styleUrl, {
+      mode: 'cors',
+      credentials: 'omit'
+    })
+      .then(res => {
+        response = res;
+        return res.json();
+      })
+      .catch(error => {
+        throw new CartoAPIError(error, {...errorContext, requestType: 'Basemap style'}, response);
+      });
+    style = applyLayerGroupFilters(originalStyle, visibleLayerGroups);
   }
   return style;
 }
 
 export default {
-  VOYAGER: baseUrl.replace('{basemap}', 'voyager'),
-  POSITRON: baseUrl.replace('{basemap}', 'positron'),
-  DARK_MATTER: baseUrl.replace('{basemap}', 'dark-matter'),
-  VOYAGER_NOLABELS: baseUrl.replace('{basemap}', 'voyager-nolabels'),
-  POSITRON_NOLABELS: baseUrl.replace('{basemap}', 'positron-nolabels'),
-  DARK_MATTER_NOLABELS: baseUrl.replace('{basemap}', 'dark-matter-nolabels')
+  VOYAGER: getStyleUrl('voyager'),
+  POSITRON: getStyleUrl('positron'),
+  DARK_MATTER: getStyleUrl('dark-matter'),
+  VOYAGER_NOLABELS: getStyleUrl('voyager-nolabels'),
+  POSITRON_NOLABELS: getStyleUrl('positron-nolabels'),
+  DARK_MATTER_NOLABELS: getStyleUrl('dark-matter-nolabels')
 } as const;

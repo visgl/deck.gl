@@ -1,5 +1,5 @@
-import {getCartoBasemapStyle} from '../basemap';
-import {KeplerMapConfig} from './types';
+import {getBasemapStyle, getStyleUrl} from '../basemap';
+import {APIErrorContext, KeplerMapConfig} from './types';
 
 const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';
@@ -10,7 +10,13 @@ type BasemapProps = {
   attribution?: string;
 };
 
-export async function getBasemapProps(config: KeplerMapConfig): Promise<BasemapProps | null> {
+export async function fetchBasemapProps({
+  config,
+  errorContext
+}: {
+  config: KeplerMapConfig;
+  errorContext?: APIErrorContext;
+}): Promise<BasemapProps | null> {
   const {mapStyle} = config;
   const styleType = mapStyle.styleType || DEFAULT_CARTO_STYLE;
   if (styleType.startsWith(CUSTOM_STYLE_ID_PREFIX)) {
@@ -25,8 +31,10 @@ export async function getBasemapProps(config: KeplerMapConfig): Promise<BasemapP
   if (CARTO_MAP_STYLES.includes(styleType)) {
     const {visibleLayerGroups} = mapStyle;
     return {
-      style: await getCartoBasemapStyle({styleType, visibleLayerGroups})
+      style: await getBasemapStyle({styleType, visibleLayerGroups, errorContext})
     };
   }
-  return null;
+  return {
+    style: getStyleUrl(DEFAULT_CARTO_STYLE)
+  };
 }

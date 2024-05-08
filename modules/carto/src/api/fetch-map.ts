@@ -21,7 +21,7 @@ import {parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
-import {getBasemapProps} from './basemap';
+import {fetchBasemapProps} from './basemap';
 
 type Dataset = {
   id: string;
@@ -274,7 +274,7 @@ export async function fetchMap({
   });
 
   const [basemap] = await Promise.all([
-    getBasemapProps(map.keplerMapConfig.config),
+    fetchBasemapProps({config: map.keplerMapConfig.config, errorContext}),
 
     // Mutates map.datasets so that dataset.data contains data
     fillInMapDatasets(map, clientId, apiBaseUrl, headers)

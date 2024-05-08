@@ -24,8 +24,8 @@ export {
 
 export {
   default as BASEMAP,
-  getCartoBasemapStyle as _getCartoBasemapStyle,
-  cartoStyleLayerGroups as _cartoStyleLayerGroups
+  getBasemapStyle as _getBasemapStyle,
+  STYLE_LAYER_GROUPS as _STYLE_LAYER_GROUPS
 } from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
