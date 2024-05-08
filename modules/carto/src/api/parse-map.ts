@@ -33,6 +33,7 @@ export function parseMap(json) {
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
     initialViewState: mapState,
+    /** @deprecated Use `basemap`. */
     mapStyle,
     token,
     layers: layers.reverse().map(({id, type, config, visualChannels}) => {
