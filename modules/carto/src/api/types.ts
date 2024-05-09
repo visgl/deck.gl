@@ -205,3 +205,76 @@ export type KeplerMapConfig = {
     customStyle?: CustomStyle;
   };
 };
+
+export type BasemapType = 'maplibre' | 'google-maps';
+
+export type Basemap = MaplibreBasemap | GoogleBasemap;
+
+export type BasemapCommon = {
+  /**
+   * Type of basemap.
+   */
+  type: BasemapType;
+
+  /**
+   * Custom attribution for style data if not provided by style definition.
+   */
+  attribution?: string;
+
+  /**
+   * Properties of the basemap. These properties are specific to the basemap type.
+   */
+  props: Record<string, any>;
+};
+
+export type MaplibreBasemap = BasemapCommon & {
+  type: 'maplibre';
+
+  /**
+   * Basemap style URL or style object.
+   *
+   * Note, layers in this style may be filtered by `visibleLayerGroups`.
+   *
+   * Non-filtered pristine version is stored in `rawStyle` property.
+   */
+  props: MaplibreBasemapProps;
+
+  /**
+   * Layer groups to be displayed in the basemap.
+   */
+  visibleLayerGroups?: Record<string, boolean>;
+
+  /**
+   * If `style` has been filtered by `visibleLayerGroups` then this property contains original style object, so user
+   * can use `applyLayerGroupFilters` again with new settings.
+   */
+  rawStyle?: string | Record<string, any>;
+};
+
+// Cherry-pick of google maplibregl Map API props that are supported/provided by fetchMap interface
+export type MaplibreBasemapProps = {
+  style: string | Record<string, any>;
+  center: [number, number];
+  zoom: number;
+  pitch?: number;
+  bearing?: number;
+};
+
+export type GoogleBasemap = BasemapCommon & {
+  type: 'google-maps';
+
+  /**
+   * Google map properties.
+   */
+  props: GoogleBasemapProps;
+};
+
+// Cherry-pick of google Map API props that are supported/provided by fetchMap interface
+export type GoogleBasemapProps = {
+  mapTypeId: string;
+  mapId?: string;
+  center?: {lat: number; lng: number};
+  zoom?: number;
+  tilt?: number;
+  heading?: number;
+};

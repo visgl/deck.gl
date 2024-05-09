@@ -1,11 +1,17 @@
-import {BASEMAP, CartoAPIError, fetchMap} from '@deck.gl/carto';
+import {BASEMAP, CartoAPIError, MaplibreBasemap, fetchMap} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
 import {fetchBasemapProps} from '@deck.gl/carto';
 
 const mockedMapConfig: KeplerMapConfig = {
-  mapState: undefined,
+  mapState: {
+    latitude: 33.3232,
+    longitude: -122.0312,
+    zoom: 5,
+    pitch: 0,
+    bearing: 0
+  },
   mapStyle: {
     styleType: 'positron',
     visibleLayerGroups: {}
@@ -46,7 +52,13 @@ test('fetchBasemapProps#carto - no filters', async t =>
       r,
       {
         type: 'maplibre',
-        style: BASEMAP.POSITRON,
+        props: {
+          style: BASEMAP.POSITRON,
+          center: [-122.0312, 33.3232],
+          zoom: 5,
+          pitch: 0,
+          bearing: 0
+        },
         visibleLayerGroups: {},
         rawStyle: BASEMAP.POSITRON
       },
@@ -70,16 +82,17 @@ test('fetchBasemapProps#carto - with filters', async t =>
     t.equals(calls.length, 1, 'should call fetch only once');
     t.equals(calls[0].url, BASEMAP.VOYAGER, 'should request voyager style');
     t.equals(r.type, 'maplibre', 'proper basemap type is returned');
-    t.equals(r.rawStyle, mockedCartoStyle, 'raw style is returned');
+    const r2 = r as MaplibreBasemap;
+    t.equals(r2.rawStyle, mockedCartoStyle, 'raw style is returned');
     t.deepEquals(
-      r.style,
+      r2.props.style,
       {
         ...mockedCartoStyle,
         layers: mockedCartoStyle.layers.filter(l => l.id !== 'label')
       },
       'actual style is loaded with layers filtered-out'
     );
-    t.deepEquals(r.visibleLayerGroups, visibleLayerGroups, 'visibleLayerGroups are passed');
+    t.deepEquals(r2.visibleLayerGroups, visibleLayerGroups, 'visibleLayerGroups are passed');
     t.end();
   }, responseFunc));
 
@@ -103,7 +116,17 @@ test('fetchBasemapProps#custom', async t =>
     t.equals(calls.length, 0, `shouldn't make any fetch requests`);
     t.deepEquals(
       r,
-      {type: 'maplibre', style: 'http://example.com/style.json', attribution: 'custom attribution'},
+      {
+        type: 'maplibre',
+        props: {
+          style: 'http://example.com/style.json',
+          center:  [-122.0312, 33.3232],
+          zoom: 5,
+          pitch: 0,
+          bearing: 0
+        },
+        attribution: 'custom attribution'
+      },
       'should return proper basemap settings'
     );
     t.end();
@@ -125,12 +148,19 @@ test('fetchBasemapProps#google', async t =>
       r,
       {
         type: 'google-maps',
-        options: {
+        props: {
           mapTypeId: 'roadmap',
-          mapId: '885caf1e15bb9ef2'
+          mapId: '885caf1e15bb9ef2',
+          center: {
+            lat: 33.3232,
+            lng: -122.0312
+          },
+          zoom: 6,
+          tilt: 0,
+          heading: 0
         }
       },
-      'should return proper google map options'
+      'should return proper google map props'
     );
     t.end();
   }, responseFunc));

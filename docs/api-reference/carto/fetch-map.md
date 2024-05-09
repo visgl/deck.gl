@@ -23,17 +23,23 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ### Integration with CARTO basemaps
 
+
 ```js
-fetchMap({cartoMapId}).then(({initialViewState, basemap, layers}) => {
-  const deckgl = new deck.DeckGL({
-    container: 'container',
-    controller: true,
-    // (Optional) Include a basemap.
-    mapStyle: basemap.style,
-    initialViewState,
-    layers
+import {fetchMap} from '@deck.gl/carto';
+import { MapboxOverlay } from '@deck.gl/mapbox';
+import maplibregl from 'maplibre-gl';
+
+fetchMap({ cartoMapId }).then(({ initialViewState, basemap, layers }) => {
+  const map = new maplibregl.Map({
+    ...basemap.props,
+    container: 'map',
+    interactive: true,
+    attributionControl: false,
   });
-});
+  // initialViewState
+  const overlay = new MapboxOverlay({ layers });
+  map.addControl(overlay);
+})
 ```
 
 ## Parameters

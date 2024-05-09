@@ -20,8 +20,8 @@ import {
 import {ParseMapResult, parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
-import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
-import {BasemapProps, fetchBasemapProps} from './basemap';
+import type {APIErrorContext, Basemap, Format, MapType, QueryParameters} from './types';
+import {fetchBasemapProps} from './basemap';
 
 type Dataset = {
   id: string;
@@ -218,7 +218,7 @@ export type FetchMapResult = ParseMapResult & {
   /**
    * Basemap properties
    */
-  basemap: BasemapProps | null;
+  basemap: Basemap | null;
   stopAutoRefresh?: () => void;
 };
 

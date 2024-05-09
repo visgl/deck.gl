@@ -1,17 +1,12 @@
 import {CartoAPIError} from './api/carto-api-error';
-import {APIErrorContext} from './api/types';
+import {APIErrorContext, GoogleBasemapProps} from './api/types';
 
 const cartoStyleUrlTemplate = 'https://basemaps.cartocdn.com/gl/{basemap}-gl-style/style.json';
 
 export const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
 
-// this is our local definition, we don't want to drag whole google maps types here
-type GoogleMapProps = {
-  mapTypeId: string;
-  mapId?: string;
-};
 
-export const GOOGLE_BASEMAPS: Record<string, GoogleMapProps> = {
+export const GOOGLE_BASEMAPS: Record<string, GoogleBasemapProps> = {
   roadmap: {
     mapTypeId: 'roadmap',
     mapId: '3754c817b510f791'

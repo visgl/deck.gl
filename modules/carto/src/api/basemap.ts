@@ -1,3 +1,4 @@
+import {MapViewState} from '@deck.gl/core';
 import {
   GOOGLE_BASEMAPS,
   CARTO_MAP_STYLES,
@@ -6,59 +7,18 @@ import {
   getStyleUrl,
   someLayerGroupsDisabled
 } from '../basemap';
-import {APIErrorContext, KeplerMapConfig} from './types';
+import {APIErrorContext, Basemap, KeplerMapConfig, MaplibreBasemapProps} from './types';
 
 const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';
 
-export type BasemapType = 'maplibre' | 'google-maps';
-
-export type BasemapProps = MaplibreBasemapProps | GoogleBasemapProps;
-
-type BasemapPropsBase = {
-  /**
-   * Type of basemap.
-   */
-  type: BasemapType;
-
-  /**
-   * Custom attribution for style data if not provided by style definition.
-   */
-  attribution?: string;
-};
-
-export type MaplibreBasemapProps = BasemapPropsBase & {
-  type: 'maplibre';
-
-  /**
-   * Basemap style URL or style object.
-   *
-   * Note, layers in this style may be filtered by `visibleLayerGroups`.
-   *
-   * Non-filtered pristine version is stored in `rawStyle` property.
-   */
-  style: string | Record<string, any>;
-
-  /**
-   * Layer groups to be displayed in the basemap.
-   */
-  visibleLayerGroups?: Record<string, boolean>;
-
-  /**
-   * If `style` has been filtered by `visibleLayerGroups` then this property contains original style object, so user
-   * can use `applyLayerGroupFilters` again with new settings.
-   */
-  rawStyle?: string | Record<string, any>;
-};
-
-export type GoogleBasemapProps = BasemapPropsBase & {
-  type: 'google-maps';
-
-  /**
-   * Google map options.
-   */
-  options: Record<string, any>;
-};
+function mapLibreViewpros(config: KeplerMapConfig): Omit<MaplibreBasemapProps, 'style'> {
+  const {longitude, latitude, ...rest} = config.mapState as MapViewState;
+  return {
+    center: [longitude, latitude],
+    ...rest
+  };
+}
 
 /**
  * Get basemap properties for Carto map.
@@ -80,7 +40,7 @@ export async function fetchBasemapProps({
   /** By default `fetchBasemapProps` applies layers filters to style. Set this to `false` to disable it. */
   applyLayerFilters?: boolean;
   errorContext?: APIErrorContext;
-}): Promise<BasemapProps | null> {
+}): Promise<Basemap | null> {
   const {mapStyle} = config;
   const styleType = mapStyle.styleType || DEFAULT_CARTO_STYLE;
   if (styleType.startsWith(CUSTOM_STYLE_ID_PREFIX)) {
@@ -88,7 +48,10 @@ export async function fetchBasemapProps({
     if (currentCustomStyle) {
       return {
         type: 'maplibre',
-        style: currentCustomStyle.style || currentCustomStyle.url,
+        props: {
+          style: currentCustomStyle.style || currentCustomStyle.url,
+          ...mapLibreViewpros(config)
+        },
         attribution: currentCustomStyle.customAttribution
       };
     }
@@ -105,20 +68,33 @@ export async function fetchBasemapProps({
     }
     return {
       type: 'maplibre',
+      props: {
+        style,
+        ...mapLibreViewpros(config)
+      },
       visibleLayerGroups,
-      style,
       rawStyle
     };
   }
   const googleBasemapDef = GOOGLE_BASEMAPS[styleType];
   if (googleBasemapDef) {
+    const {mapState} = config;
     return {
       type: 'google-maps',
-      options: googleBasemapDef
+      props: {
+        ...googleBasemapDef,
+        center: {lat: mapState.latitude, lng: mapState.longitude},
+        zoom: mapState.zoom + 1,
+        tilt: mapState.pitch,
+        heading: mapState.bearing
+      }
     };
   }
   return {
     type: 'maplibre',
-    style: getStyleUrl(DEFAULT_CARTO_STYLE)
+    props: {
+      style: getStyleUrl(DEFAULT_CARTO_STYLE),
+      ...mapLibreViewpros(config)
+    }
   };
 }
