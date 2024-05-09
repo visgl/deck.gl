@@ -1,5 +1,5 @@
 import {GL} from '@luma.gl/constants';
-import {log} from '@deck.gl/core';
+import {Layer, log} from '@deck.gl/core';
 import {
   AGGREGATION,
   getLayer,
@@ -19,6 +19,26 @@ import {assert} from '../utils';
 import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
 
 const collisionFilterExtension = new CollisionFilterExtension();
+
+export type ParseMapResult = {
+  /** Map id. */
+  id: string;
+
+  /** Title of map. */
+  title: string;
+
+  /** Description of map. */
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  initialViewState: any;
+
+  /** @deprecated Use `basemap`. */
+  mapStyle: any;
+  token: string;
+
+  layers: Layer[];
+};
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;

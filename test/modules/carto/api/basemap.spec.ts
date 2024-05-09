@@ -42,23 +42,30 @@ test('fetchBasemapProps#carto - no filters', async t =>
 
     const r = await fetchBasemapProps({config: mockedMapConfig});
     t.equals(calls.length, 0, 'no style loaded, when there are no filters');
-    t.deepEquals(r, {style: BASEMAP.POSITRON}, 'style is just positron URL');
+    t.deepEquals(
+      r,
+      {type: 'maplibre', style: BASEMAP.POSITRON, visibleLayerGroups: {}, rawStyle: undefined},
+      'style is just positron URL'
+    );
     t.end();
   }, responseFunc));
 
 test('fetchBasemapProps#carto - with filters', async t =>
   withMockFetchMapsV3(async calls => {
+    const visibleLayerGroups = {label: false, road: true, border: true, water: true};
     const r = await fetchBasemapProps({
       config: {
         ...mockedMapConfig,
         mapStyle: {
           styleType: 'voyager',
-          visibleLayerGroups: {label: false, road: true, border: true, water: true}
+          visibleLayerGroups
         }
       }
     });
     t.equals(calls.length, 1, 'should call fetch only once');
     t.equals(calls[0].url, BASEMAP.VOYAGER, 'should request voyager style');
+    t.equals(r.type, 'maplibre', 'proper basemap type is returned');
+    t.equals(r.rawStyle, mockedCartoStyle, 'raw style is returned');
     t.deepEquals(
       r.style,
       {
@@ -67,6 +74,7 @@ test('fetchBasemapProps#carto - with filters', async t =>
       },
       'actual style is loaded with layers filtered-out'
     );
+    t.deepEquals(r.visibleLayerGroups, visibleLayerGroups, 'visibleLayerGroups are passed');
     t.end();
   }, responseFunc));
 
@@ -90,8 +98,34 @@ test('fetchBasemapProps#custom', async t =>
     t.equals(calls.length, 0, `shouldn't make any fetch requests`);
     t.deepEquals(
       r,
-      {style: 'http://example.com/style.json', attribution: 'custom attribution'},
+      {type: 'maplibre', style: 'http://example.com/style.json', attribution: 'custom attribution'},
       'should return proper basemap settings'
+    );
+    t.end();
+  }, responseFunc));
+
+test('fetchBasemapProps#google', async t =>
+  withMockFetchMapsV3(async calls => {
+    const r = await fetchBasemapProps({
+      config: {
+        ...mockedMapConfig,
+        mapStyle: {
+          styleType: 'google-voyager'
+        }
+      }
+    });
+
+    t.equals(calls.length, 0, 'should fetch anything');
+    t.deepEquals(
+      r,
+      {
+        type: 'google-maps',
+        options: {
+          mapTypeId: 'roadmap',
+          mapId: '885caf1e15bb9ef2'
+        }
+      },
+      'should return proper google map options'
     );
     t.end();
   }, responseFunc));

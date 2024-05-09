@@ -17,11 +17,11 @@ import {
   vectorTableSource,
   vectorTilesetSource
 } from '../sources/index';
-import {parseMap} from './parse-map';
+import {ParseMapResult, parseMap} from './parse-map';
 import {requestWithParameters} from './request-with-parameters';
 import {assert} from '../utils';
 import type {APIErrorContext, Format, MapType, QueryParameters} from './types';
-import {fetchBasemapProps} from './basemap';
+import {BasemapProps, fetchBasemapProps} from './basemap';
 
 type Dataset = {
   id: string;
@@ -214,6 +214,14 @@ export type FetchMapOptions = {
   onNewData?: (map: any) => void;
 };
 
+export type FetchMapResult = ParseMapResult & {
+  /**
+   * Basemap properties
+   */
+  basemap: BasemapProps | null;
+  stopAutoRefresh?: () => void;
+};
+
 /* eslint-disable max-statements */
 export async function fetchMap({
   apiBaseUrl = DEFAULT_API_BASE_URL,
@@ -222,7 +230,7 @@ export async function fetchMap({
   headers = {},
   autoRefresh,
   onNewData
-}: FetchMapOptions) {
+}: FetchMapOptions): Promise<FetchMapResult> {
   assert(cartoMapId, 'Must define CARTO map id: fetchMap({cartoMapId: "XXXX-XXXX-XXXX"})');
   assert(apiBaseUrl, 'Must define apiBaseUrl');
 

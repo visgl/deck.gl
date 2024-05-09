@@ -70,7 +70,7 @@ export function applyLayerGroupFilters(
   };
 }
 
-function someLayerGroupsDisabled(visibleLayerGroups?: Record<StyleLayerGroupSlug, boolean>) {
+export function someLayerGroupsDisabled(visibleLayerGroups?: Record<StyleLayerGroupSlug, boolean>) {
   return visibleLayerGroups && Object.values(visibleLayerGroups).every(Boolean) === false;
 }
 
@@ -78,35 +78,26 @@ export function getStyleUrl(styleType: string) {
   return baseUrl.replace('{basemap}', styleType);
 }
 
-export async function getBasemapStyle({
-  styleType,
-  visibleLayerGroups,
+export async function fetchBasemapStyle({
+  styleUrl,
   errorContext
 }: {
-  styleType: string;
-  visibleLayerGroups?: Record<StyleLayerGroupSlug, boolean>;
+  styleUrl: string;
   errorContext?: APIErrorContext;
 }) {
   /* global fetch */
-  const styleUrl = getStyleUrl(styleType);
-  let style = styleUrl;
-
-  if (visibleLayerGroups && someLayerGroupsDisabled(visibleLayerGroups)) {
-    let response: Response | undefined;
-    const originalStyle = await fetch(styleUrl, {
-      mode: 'cors',
-      credentials: 'omit'
+  let response: Response | undefined;
+  return await fetch(styleUrl, {
+    mode: 'cors',
+    credentials: 'omit'
+  })
+    .then(res => {
+      response = res;
+      return res.json();
     })
-      .then(res => {
-        response = res;
-        return res.json();
-      })
-      .catch(error => {
-        throw new CartoAPIError(error, {...errorContext, requestType: 'Basemap style'}, response);
-      });
-    style = applyLayerGroupFilters(originalStyle, visibleLayerGroups);
-  }
-  return style;
+    .catch(error => {
+      throw new CartoAPIError(error, {...errorContext, requestType: 'Basemap style'}, response);
+    });
 }
 
 export default {

@@ -24,7 +24,8 @@ export {
 
 export {
   default as BASEMAP,
-  getBasemapStyle as _getBasemapStyle,
+  getStyleUrl as _getStyleUrl,
+  fetchBasemapStyle as _getBasemapStyle,
   STYLE_LAYER_GROUPS as _STYLE_LAYER_GROUPS
 } from './basemap';
 export {default as colorBins} from './style/color-bins-style';
