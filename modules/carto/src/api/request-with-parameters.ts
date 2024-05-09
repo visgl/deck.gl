@@ -1,4 +1,4 @@
-import {isPureObject} from '@loaders.gl/core';
+import {isPureObject} from '../utils';
 import {CartoAPIError} from './carto-api-error';
 import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
 import type {APIErrorContext} from './types';
