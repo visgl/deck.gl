@@ -1,5 +1,11 @@
 import test from 'tape-promise/tape';
-import {createBinaryProxy, getWorkerUrl, scaleIdentity, isObject, isPureObject} from '@deck.gl/carto/utils';
+import {
+  createBinaryProxy,
+  getWorkerUrl,
+  scaleIdentity,
+  isObject,
+  isPureObject
+} from '@deck.gl/carto/utils';
 
 test('createBinaryProxy', async t => {
   const binary = {
