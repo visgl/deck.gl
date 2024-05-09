@@ -113,7 +113,7 @@ def iframe_with_srcdoc(html_str, width="100%", height=500):
 def render_for_colab(html_str, iframe_height):
     from IPython.display import HTML, Javascript  # noqa
 
-    js_height_snippet = f"google.colab.output.setIframeHeight({iframe_height}, true, {{minHeight: {iframe_height}}})"
+    js_height_snippet = f"google.colab.output.setIframeHeight({iframe_height}, true, {{minHeight: {iframe_height}, maxHeight: {iframe_height}}})"
     display(Javascript(js_height_snippet))  # noqa
     display(HTML(html_str))  # noqa
 
