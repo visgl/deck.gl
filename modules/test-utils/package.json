@@ -32,10 +32,10 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.0.12"
+    "@luma.gl/test-utils": "^9.0.14"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/core": "^9.0.0",
     "@luma.gl/core": "^9.0.0",
     "@luma.gl/engine": "^9.0.0",
     "@probe.gl/test-utils": "^4.0.0"
