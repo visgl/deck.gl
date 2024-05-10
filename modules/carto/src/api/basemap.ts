@@ -1,6 +1,8 @@
 import {
+  GOOGLE_BASEMAPS,
+  CARTO_MAP_STYLES,
   applyLayerGroupFilters,
-  fetchBasemapStyle,
+  fetchStyle,
   getStyleUrl,
   someLayerGroupsDisabled
 } from '../basemap';
@@ -8,22 +10,30 @@ import {APIErrorContext, KeplerMapConfig} from './types';
 
 const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';
-const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
 
 export type BasemapType = 'maplibre' | 'google-maps';
 
 export type BasemapProps = MaplibreBasemapProps | GoogleBasemapProps;
 
-export type MaplibreBasemapProps = {
+type BasemapPropsBase = {
   /**
    * Type of basemap.
    */
+  type: BasemapType;
+
+  /**
+   * Custom attribution for style data if not provided by style definition.
+   */
+  attribution?: string;
+};
+
+export type MaplibreBasemapProps = BasemapPropsBase & {
   type: 'maplibre';
 
   /**
    * Basemap style URL or style object.
    *
-   * Note,  layers in this style may be filtered by `visibleLayerGroups`.
+   * Note, layers in this style may be filtered by `visibleLayerGroups`.
    *
    * Non-filtered pristine version is stored in `rawStyle` property.
    */
@@ -34,21 +44,14 @@ export type MaplibreBasemapProps = {
    */
   visibleLayerGroups?: Record<string, boolean>;
 
-  /** If `style` has been filtered by `visibleLayerGroups` then this property contains original style object, so user
+  /**
+   * If `style` has been filtered by `visibleLayerGroups` then this property contains original style object, so user
    * can use `applyLayerGroupFilters` again with new settings.
    */
   rawStyle?: string | Record<string, any>;
-
-  /**
-   * Custom attribution for style data if not provided by style definition.
-   */
-  attribution?: string;
 };
 
-export type GoogleBasemapProps = {
-  /**
-   * Type of basemap.
-   */
+export type GoogleBasemapProps = BasemapPropsBase & {
   type: 'google-maps';
 
   /**
@@ -57,60 +60,25 @@ export type GoogleBasemapProps = {
   options: Record<string, any>;
 };
 
-const googleBasemapTypes = [
-  {
-    id: 'roadmap',
-    options: {
-      mapTypeId: 'roadmap',
-      mapId: '3754c817b510f791'
-    }
-  },
-  {
-    id: 'google-positron',
-    options: {
-      mapTypeId: 'roadmap',
-      mapId: 'ea84ae4203ef21cd'
-    }
-  },
-  {
-    id: 'google-dark-matter',
-    options: {
-      mapTypeId: 'roadmap',
-      mapId: '2fccc3b36c22a0e2'
-    }
-  },
-  {
-    id: 'google-voyager',
-    options: {
-      mapTypeId: 'roadmap',
-      mapId: '885caf1e15bb9ef2'
-    }
-  },
-  {
-    id: 'satellite',
-    options: {
-      mapTypeId: 'satellite'
-    }
-  },
-  {
-    id: 'hybrid',
-    options: {
-      mapTypeId: 'hybrid'
-    }
-  },
-  {
-    id: 'terrain',
-    options: {
-      mapTypeId: 'terrain'
-    }
-  }
-];
-
+/**
+ * Get basemap properties for Carto map.
+ *
+ * For maplibre-based basemaps it returns style or style URL that can be used with  `maplibregl.Map` compatible component.
+ *  * style url is returned for non-filtered standard Carto basemaps or if user used style URL directly in configuration
+ *  * filtered style object returned for Carto basemaps with layer groups filtered
+ *
+ * For Google-maps base maps, it returns options that can be used with `google.maps.Map` constructor.
+ */
 export async function fetchBasemapProps({
   config,
-  errorContext
+  errorContext,
+
+  applyLayerFilters = true
 }: {
   config: KeplerMapConfig;
+
+  /** By default `fetchBasemapProps` applies layers filters to style. Set this to `false` to disable it. */
+  applyLayerFilters?: boolean;
   errorContext?: APIErrorContext;
 }): Promise<BasemapProps | null> {
   const {mapStyle} = config;
@@ -130,9 +98,9 @@ export async function fetchBasemapProps({
     const {visibleLayerGroups} = mapStyle;
     const styleUrl = getStyleUrl(styleType);
     let style = styleUrl;
-    let rawStyle;
-    if (visibleLayerGroups && someLayerGroupsDisabled(visibleLayerGroups)) {
-      rawStyle = await fetchBasemapStyle({styleUrl, errorContext});
+    let rawStyle = styleUrl;
+    if (applyLayerFilters && visibleLayerGroups && someLayerGroupsDisabled(visibleLayerGroups)) {
+      rawStyle = await fetchStyle({styleUrl, errorContext});
       style = applyLayerGroupFilters(rawStyle, visibleLayerGroups);
     }
     return {
@@ -142,11 +110,11 @@ export async function fetchBasemapProps({
       rawStyle
     };
   }
-  const googleBasemapDef = googleBasemapTypes.find(b => b.id === styleType);
+  const googleBasemapDef = GOOGLE_BASEMAPS[styleType];
   if (googleBasemapDef) {
     return {
       type: 'google-maps',
-      options: googleBasemapDef.options
+      options: googleBasemapDef
     };
   }
   return {

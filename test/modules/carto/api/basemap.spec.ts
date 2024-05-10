@@ -2,7 +2,7 @@ import {BASEMAP, CartoAPIError, fetchMap} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
-import {fetchBasemapProps} from '@deck.gl/carto/api/basemap';
+import {fetchBasemapProps} from '@deck.gl/carto';
 
 const mockedMapConfig: KeplerMapConfig = {
   mapState: undefined,
@@ -44,7 +44,12 @@ test('fetchBasemapProps#carto - no filters', async t =>
     t.equals(calls.length, 0, 'no style loaded, when there are no filters');
     t.deepEquals(
       r,
-      {type: 'maplibre', style: BASEMAP.POSITRON, visibleLayerGroups: {}, rawStyle: undefined},
+      {
+        type: 'maplibre',
+        style: BASEMAP.POSITRON,
+        visibleLayerGroups: {},
+        rawStyle: BASEMAP.POSITRON
+      },
       'style is just positron URL'
     );
     t.end();

@@ -1,9 +1,43 @@
 import {CartoAPIError} from './api/carto-api-error';
 import {APIErrorContext} from './api/types';
 
-export const cartoBasemapsBaseUrl = 'https://basemaps.cartocdn.com/gl';
+const cartoStyleUrlTemplate = 'https://basemaps.cartocdn.com/gl/{basemap}-gl-style/style.json';
 
-const baseUrl = `${cartoBasemapsBaseUrl}/{basemap}-gl-style/style.json`;
+export const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
+
+// this is our local definition, we don't want to drag whole google maps types here
+type GoogleMapProps = {
+  mapTypeId: string;
+  mapId?: string;
+};
+
+export const GOOGLE_BASEMAPS: Record<string, GoogleMapProps> = {
+  roadmap: {
+    mapTypeId: 'roadmap',
+    mapId: '3754c817b510f791'
+  },
+  'google-positron': {
+    mapTypeId: 'roadmap',
+    mapId: 'ea84ae4203ef21cd'
+  },
+  'google-dark-matter': {
+    mapTypeId: 'roadmap',
+    mapId: '2fccc3b36c22a0e2'
+  },
+  'google-voyager': {
+    mapTypeId: 'roadmap',
+    mapId: '885caf1e15bb9ef2'
+  },
+  satellite: {
+    mapTypeId: 'satellite'
+  },
+  hybrid: {
+    mapTypeId: 'hybrid'
+  },
+  terrain: {
+    mapTypeId: 'terrain'
+  }
+};
 
 type StyleLayerGroupSlug = 'label' | 'road' | 'border' | 'building' | 'water' | 'land';
 type StyleLayerGroup = {
@@ -75,10 +109,10 @@ export function someLayerGroupsDisabled(visibleLayerGroups?: Record<StyleLayerGr
 }
 
 export function getStyleUrl(styleType: string) {
-  return baseUrl.replace('{basemap}', styleType);
+  return cartoStyleUrlTemplate.replace('{basemap}', styleType);
 }
 
-export async function fetchBasemapStyle({
+export async function fetchStyle({
   styleUrl,
   errorContext
 }: {
@@ -87,10 +121,7 @@ export async function fetchBasemapStyle({
 }) {
   /* global fetch */
   let response: Response | undefined;
-  return await fetch(styleUrl, {
-    mode: 'cors',
-    credentials: 'omit'
-  })
+  return await fetch(styleUrl, {mode: 'cors'})
     .then(res => {
       response = res;
       return res.json();

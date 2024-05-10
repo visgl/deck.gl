@@ -1,4 +1,4 @@
-import {fetchMap, FetchMapOptions} from '@deck.gl/carto';
+import {BASEMAP, fetchMap, FetchMapOptions} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -31,7 +31,7 @@ async function createMap(cartoMapId: string) {
   // Mapbox basemap (optional)
   const map = new mapboxgl.Map({
     container: 'map',
-    style: basemap?.style,
+    style: basemap?.type === 'maplibre' ? basemap.style : BASEMAP.POSITRON,
     interactive: false,
     attributionControl: false
   }).addControl(
