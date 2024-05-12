@@ -55,15 +55,20 @@ export class WebGLAggregationTransform {
     return this._domains;
   }
 
-  setDimensions(numBins: number, stride: number = 0) {
+  setDimensions(numBins: number, binIdRange: [number, number][]) {
     const {model, transformFeedback} = this.transform;
     model.setVertexCount(numBins);
     model.setUniforms({
-      binStride: stride
+      binIdRange: [
+        binIdRange[0][0],
+        binIdRange[0][1],
+        binIdRange[1]?.[0] || 0,
+        binIdRange[1]?.[1] || 0
+      ]
     });
 
     // Only destroy existing buffer if it is not large enough
-    const binBufferByteLength = numBins * (stride ? 2 : 1) * 4;
+    const binBufferByteLength = numBins * binIdRange.length * 4;
     if (!this.binBuffer || this.binBuffer.byteLength < binBufferByteLength) {
       this.binBuffer?.destroy();
       this.binBuffer = this.device.createBuffer({byteLength: binBufferByteLength});
@@ -78,7 +83,10 @@ export class WebGLAggregationTransform {
     }
   }
 
-  update(bins: Texture, operations: AggregationOperation[]) {
+  update(bins: Texture | null, operations: AggregationOperation[]) {
+    if (!bins) {
+      return;
+    }
     const transform = this.transform;
     const target = this.domainFBO;
 
@@ -108,7 +116,7 @@ function createTransform(device: Device, settings: GPUAggregatorSettings): Buffe
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex
 
-uniform int binStride;
+uniform ivec4 binIdRange;
 uniform bvec3 isMean;
 uniform float naN;
 uniform sampler2D bins;
@@ -137,12 +145,12 @@ void main() {
   }
 
 #if NUM_DIMS == 1
-  binIds = float(gl_VertexID);
+  binIds = float(gl_VertexID + binIdRange.x);
 #else
-  int y = gl_VertexID / binStride;
-  int x = gl_VertexID - y * binStride;
-  binIds.y = float(y);
-  binIds.x = float(x);
+  int y = gl_VertexID / (binIdRange.y - binIdRange.x);
+  int x = gl_VertexID - y * (binIdRange.y - binIdRange.x);
+  binIds.y = float(y + binIdRange.z);
+  binIds.x = float(x + binIdRange.x);
 #endif
 
 #if NUM_CHANNELS == 3

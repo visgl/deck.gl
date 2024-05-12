@@ -60,7 +60,7 @@ export class WebGLBinSorter {
     return new Float32Array(buffer);
   }
 
-  setDimensions(numBins: number, stride: number = 0) {
+  setDimensions(numBins: number, binIdRange: [number, number][]) {
     const width = TEXTURE_WIDTH;
     const height = Math.ceil(numBins / width);
 
@@ -72,7 +72,12 @@ export class WebGLBinSorter {
     }
 
     this.model.setUniforms({
-      binStride: stride,
+      binIdRange: [
+        binIdRange[0][0],
+        binIdRange[0][1],
+        binIdRange[1]?.[0] || 0,
+        binIdRange[1]?.[1] || 0
+      ],
       targetSize: [this.binsFBO.width, this.binsFBO.height]
     });
   }
@@ -108,6 +113,9 @@ export class WebGLBinSorter {
     /** The aggregation operation for each channel. Use null to skip update. */
     operations: (AggregationOperation | null)[]
   ) {
+    if (!this.binsFBO) {
+      return;
+    }
     const masks = getMaskByOperation(operations);
     this._updateBins('SUM', masks.SUM + masks.MEAN);
     this._updateBins('MIN', masks.MIN);
@@ -176,10 +184,10 @@ function createModel(device: Device, settings: GPUAggregatorSettings): Model {
 void getBin(out int binId) {
   ivec2 binId2;
   getBin(binId2);
-  if (binId2.x < 0 || binId2.x >= binStride) {
+  if (binId2.x < binIdRange.x || binId2.x >= binIdRange.y) {
     binId = -1;
   } else {
-    binId = binId2.y * binStride + binId2.x;
+    binId = (binId2.y - binIdRange.z) * (binIdRange.y - binIdRange.x) + binId2.x;
   }
 }
 `;
@@ -189,7 +197,7 @@ void getBin(out int binId) {
 #version 300 es
 #define SHADER_NAME gpu-aggregation-sort-bins-vertex
 
-uniform int binStride;
+uniform ivec4 binIdRange;
 uniform ivec2 targetSize;
 
 ${userVs}
@@ -199,6 +207,7 @@ out vec3 v_Weight;
 void main() {
   int binIndex;
   getBin(binIndex);
+  binIndex = binIndex - binIdRange.x;
   if (binIndex < 0) {
     gl_Position = vec4(0.);
     return;
@@ -229,8 +238,12 @@ out vec4 fragColor;
 
 void main() {
   fragColor.xyz = v_Weight;
+
+  #ifdef MODULE_GEOMETRY
   geometry.uv = vec2(0.);
   DECKGL_FILTER_COLOR(fragColor, geometry);
+  #endif
+
   fragColor.w = 1.0;
 }
 `;

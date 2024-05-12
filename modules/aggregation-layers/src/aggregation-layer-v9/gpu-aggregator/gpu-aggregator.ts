@@ -1,7 +1,7 @@
 import {ModelProps} from '@luma.gl/engine';
 import {WebGLBinSorter} from './webgl-bin-sorter';
 import {WebGLAggregationTransform} from './webgl-aggregation-transform';
-import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
+import {_deepEqual as deepEqual, log, BinaryAttribute} from '@deck.gl/core';
 
 import type {Aggregator, AggregationProps} from '../aggregator';
 import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
@@ -16,8 +16,8 @@ export type GPUAggregatorSettings = {
   /** Buffer layout for input attributes */
   bufferLayout?: BufferLayout[];
   /** Define a shader function with one of the signatures
-   *  `void getBin(out int binId)`: if binCount is a number
-   *  `void getBin(out ivec2 binId)`: if binCount is a 2D array
+   *  `void getBin(out int binId)`: if dimensions=1
+   *  `void getBin(out ivec2 binId)`: if dimensions=2
    * And a shader function with one of the signatures
    *  `void getWeight(out float weight)`: if numChannels=1
    *  `void getWeight(out vec2 weight)`: if numChannels=2
@@ -34,13 +34,9 @@ export type GPUAggregatorSettings = {
 
 /** Options used to run GPU aggregation, can be changed at any time */
 export type GPUAggregationProps = AggregationProps & {
-  /** Number of bins, can be either 1D or 2D.
-   *  - 1D: vertex shader should implement a getBin function that yields an int id.
-   *        Only ids within the range of [0, binCount] are counted.
-   *  - 2D: vertex shader should implement a getBin function that yields an ivec2 id.
-   *        Only ids within the range of [[0, 0], binCount] are counted.
+  /** Limits of binId defined for each dimension. Ids outside of the [start, end) are ignored.
    */
-  binCount: number | [number, number];
+  binIdRange: [start: number, end: number][];
   /** Context props passed to the shader modules */
   moduleSettings?: ModelProps['moduleSettings'];
 };
@@ -62,7 +58,7 @@ export class GPUAggregator implements Aggregator {
   device: Device;
   props: GPUAggregationProps = {
     pointCount: 0,
-    binCount: 0,
+    binIdRange: [[0, 0]],
     operations: [],
     attributes: {},
     binOptions: {}
@@ -118,10 +114,16 @@ export class GPUAggregator implements Aggregator {
     if (index < 0 || index >= this.numBins) {
       return null;
     }
-    const {binCount} = this.props;
-    const id = Array.isArray(binCount)
-      ? ([index % binCount[0], Math.floor(index / binCount[0])] as [number, number])
-      : index;
+    const {binIdRange} = this.props;
+    let id: number | [number, number];
+
+    if (this.dimensions === 1) {
+      id = index + binIdRange[0][0];
+    } else {
+      const [[x0, x1], [y0]] = binIdRange;
+      const width = x1 - x0;
+      id = [(index % width) + x0, Math.floor(index / width) + y0];
+    }
 
     const pixel = this.binSorter.getBinValues(index);
     if (!pixel) {
@@ -151,12 +153,20 @@ export class GPUAggregator implements Aggregator {
     const oldProps = this.props;
 
     // Update local settings. These will set the flag this._needsUpdate
-    if ('binCount' in props && !deepEqual(props.binCount, oldProps.binCount, 1)) {
-      const binCount = props.binCount!;
-      this.numBins = Array.isArray(binCount) ? binCount[0] * binCount[1] : binCount;
+    if ('binIdRange' in props && !deepEqual(props.binIdRange, oldProps.binIdRange, 2)) {
+      const binIdRange = props.binIdRange!;
+      log.assert(binIdRange.length === this.dimensions);
 
-      this.binSorter.setDimensions(this.numBins, binCount[0]);
-      this.aggregationTransform.setDimensions(this.numBins, binCount[0]);
+      if (this.dimensions === 1) {
+        const [[x0, x1]] = binIdRange;
+        this.numBins = x1 - x0;
+      } else {
+        const [[x0, x1], [y0, y1]] = binIdRange;
+        this.numBins = (x1 - x0) * (y1 - y0);
+      }
+
+      this.binSorter.setDimensions(this.numBins, binIdRange);
+      this.aggregationTransform.setDimensions(this.numBins, binIdRange);
       this.setNeedsUpdate();
     }
     if (props.operations) {
@@ -234,7 +244,7 @@ export class GPUAggregator implements Aggregator {
     // Render data to bins
     this.binSorter.update(operationsToUpdate);
     // Read to buffer and calculate domain
-    this.aggregationTransform.update(this.binSorter.texture!, operations);
+    this.aggregationTransform.update(this.binSorter.texture, operations);
 
     this.needsUpdate.fill(false);
 
