@@ -21,6 +21,7 @@ import Layer, {UpdateParameters} from './layer';
 import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 
+import type AttributeManager from './attribute/attribute-manager';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
@@ -255,6 +256,11 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
     for (const layer of this.getSubLayers()) {
       layer.updateAutoHighlight(info);
     }
+  }
+
+  /** Override base Layer method */
+  protected _getAttributeManager(): AttributeManager | null {
+    return null;
   }
 
   /** (Internal) Called after an update to rerender sub layers */

@@ -884,7 +884,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     debug(TRACE_INITIALIZE, this);
 
-    const attributeManager = this.isDrawable ? this._getAttributeManager() : null;
+    const attributeManager = this._getAttributeManager();
 
     if (attributeManager) {
       // All instanced layers get instancePickingColors attribute by default

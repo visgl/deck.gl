@@ -4,7 +4,8 @@ import {
   LayerContext,
   UpdateParameters,
   CompositeLayerProps,
-  Attribute
+  Attribute,
+  AttributeManager
 } from '@deck.gl/core';
 import {Aggregator} from './aggregator';
 
@@ -28,7 +29,7 @@ export default abstract class AggregationLayer<
     cpuAggregator: CPUAggregator | null;
   };
 
-  /** Allow this layer to have an AttributeManager and participates in the draw cycle */
+  /** Allow this layer to participates in the draw cycle */
   get isDrawable() {
     return true;
   }
@@ -87,6 +88,14 @@ export default abstract class AggregationLayer<
 
   protected getAggregator(): Aggregator | null {
     return this.state.gpuAggregator || this.state.cpuAggregator;
+  }
+
+  // override CompositeLayer._getAttributeManager to create AttributeManager instance
+  _getAttributeManager() {
+    return new AttributeManager(this.context.device, {
+      id: this.props.id,
+      stats: this.context.stats
+    });
   }
 
   // Override CompositeLayer._postUpdate to update attributes and the CPUAggregator
