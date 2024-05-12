@@ -285,6 +285,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return false;
   }
 
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return true;
+  }
+
   /** Updates selected state members and marks the layer for redraw */
   setState(partialState: any): void {
     this.setChangeFlags({stateChanged: true});
@@ -879,7 +884,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     debug(TRACE_INITIALIZE, this);
 
-    const attributeManager = this._getAttributeManager();
+    const attributeManager = this.isDrawable ? this._getAttributeManager() : null;
 
     if (attributeManager) {
       // All instanced layers get instancePickingColors attribute by default

@@ -251,7 +251,8 @@ export default class LayersPass extends Pass {
       }
       if (layer.isComposite) {
         renderStatus.compositeCount++;
-      } else if (shouldDrawLayer) {
+      }
+      if (layer.isDrawable && shouldDrawLayer) {
         // Draw the layer
         renderStatus.visibleCount++;
 
