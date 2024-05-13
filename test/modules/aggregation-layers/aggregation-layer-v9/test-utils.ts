@@ -1,7 +1,14 @@
 import {BinaryAttribute} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 
-export function binaryAttributeToArray(accessor: BinaryAttribute, length: number): number[] {
+export function binaryAttributeToArray(
+  accessor: BinaryAttribute | null,
+  length: number
+): number[] | null {
+  if (!accessor) {
+    return null;
+  }
+
   let value = accessor.value;
   if (!value) {
     const buffer = accessor.buffer;

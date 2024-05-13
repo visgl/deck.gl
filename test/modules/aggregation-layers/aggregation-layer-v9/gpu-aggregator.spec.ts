@@ -1,6 +1,6 @@
 import test from 'tape-promise/tape';
 import {Attribute} from '@deck.gl/core';
-import {GPUAggregator} from '@deck.gl/aggregation-layers/aggregation-layer-v9/gpu-aggregator/gpu-aggregator';
+import {GPUAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';
 
 import {IncomeSurvey} from './data-sample';
