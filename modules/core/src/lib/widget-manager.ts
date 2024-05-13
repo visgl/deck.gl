@@ -205,6 +205,7 @@ export class WidgetManager {
       container = document.createElement('div');
       container.className = placement;
       container.style.position = 'absolute';
+      container.style.zIndex = '2';
       Object.assign(container.style, PLACEMENTS[placement]);
       viewContainer.append(container);
     }
