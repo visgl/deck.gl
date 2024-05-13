@@ -5,7 +5,6 @@ const cartoStyleUrlTemplate = 'https://basemaps.cartocdn.com/gl/{basemap}-gl-sty
 
 export const CARTO_MAP_STYLES = ['positron', 'dark-matter', 'voyager'];
 
-
 export const GOOGLE_BASEMAPS: Record<string, GoogleBasemapProps> = {
   roadmap: {
     mapTypeId: 'roadmap',

@@ -38,21 +38,34 @@ To use pre-bundled scripts:
 <script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl@^9.0.0/core/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/mesh-layers@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/extensions@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
+
+<!-- basemap provider -->
+<script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
 ```
 
 ```js
-const deckgl = new deck.DeckGL({
+const map = new mapboxgl.Map({
   container: 'map',
-  mapStyle: deck.carto.BASEMAP.POSITRON,
+  style: deck.carto.BASEMAP.POSITRON,
+  interactive: false
+})
+const deckgl = new deck.DeckGL({
+  canvas: 'deck-canvas',
   initialViewState: {
     latitude: 0,
     longitude: 0,
     zoom: 1
   },
+  onViewStateChange: ({viewState}) => {
+    const {longitude, latitude, ...rest} = viewState;
+    map.jumpTo({center: [longitude, latitude], ...rest});
+  }
   controller: true
 });
 ```

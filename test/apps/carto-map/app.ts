@@ -24,7 +24,6 @@ async function createMapWithMapboxOverlay(result: FetchMapResult) {
   document.getElementById('deck-canvas')!.style.display = 'none';
 
   const basemap = result.basemap as MaplibreBasemap;
-  // Mapbox basemap (optional)
   const map = new mapboxgl.Map({
     container: 'map',
     ...basemap?.props,

@@ -25,19 +25,17 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 
 ```js
-import {fetchMap} from '@deck.gl/carto';
+import { fetchMap } from '@deck.gl/carto';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import maplibregl from 'maplibre-gl';
 
-fetchMap({ cartoMapId }).then(({ initialViewState, basemap, layers }) => {
+fetchMap({ cartoMapId }).then(({ basemap, layers }) => {
   const map = new maplibregl.Map({
-    ...basemap.props,
-    container: 'map',
-    interactive: true,
-    attributionControl: false,
-  });
-  // initialViewState
-  const overlay = new MapboxOverlay({ layers });
+    container: '...',
+    ...basemap?.props, // basemap.props contain all props required to setup basemap
+    interactive: true
+  })
+  const overlay = new MapboxOverlay({layers: result.layers});
   map.addControl(overlay);
 })
 ```
@@ -96,17 +94,33 @@ When the map was last updated.
 
 The [view state](../../developer-guide/views.md#view-state).
 
+#### `layers` (Layer[]) {#layers}
+
+A collection of deck.gl [layers](../core/layer.md).
+
 #### `basemap` (object) {#basemap}
 
 An object describing the [basemap](../../api-reference/carto/basemap.md#supported-basemaps) configured in CARTO Builder.
 
 Properties:
- * `style` **(string or object)** - URL of basemap style or style object if custom basemap is configured
- * `attribution` **(string)** - custom attribution HTML for this basemap
-
-#### `layers` (Layer[]) {#layers}
-
-A collection of deck.gl [layers](../core/layer.md).
+ * `type` **(string)** - type of basemap: `'maplibre'` or `'google-maps'`
+ * `props` **(string or object)** - props that should be passed to basemap implementation
+    * if `type` is `'maplibre'` then it contains
+      * `style` **(string or object)** - URL of basemap style or style object if custom basemap is configured
+      * `center` **([number, number])** - center of map as `[latitude, longitude]`
+      * `zoom` **(number)** - zoom level
+      * `pitch` **(number)**
+      * `bearing` **(number)**
+    * if `type` is `'google-maps'`, then it contains those props
+      * `mapTypeId` **(string)** - type id of map
+      * `mapId` **(string, optional)** - map id
+      * `center` **(object)** - center of map as `{lat: number; lng: number}`
+      * `zoom`: **(number)** - zoom level (note, it has +1 offset applied versus deck.gl zoom)
+      * `tilt`: **(number)** - tilt, same as `pitch` in deck.gl API
+      * `heading`: **(number)** - heading, same as `bearing` in deck.gl API
+ * `rawStyle` **(string or object)** - for `maplibre` basemaps, original `style` before applying layer filtering
+ * `visibleLayerGroups` **(object, optional)** - layer groups to be displayed in the basemap.
+ * `attribution` **(string, optional)** - custom attribution HTML for this basemap
 
 #### `stopAutoRefresh` (Function) {#stopautorefresh}
 

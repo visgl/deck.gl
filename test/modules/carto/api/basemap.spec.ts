@@ -1,4 +1,4 @@
-import {BASEMAP, CartoAPIError, MaplibreBasemap, fetchMap} from '@deck.gl/carto';
+import {BASEMAP, CartoAPIError, MaplibreBasemap} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
@@ -120,7 +120,7 @@ test('fetchBasemapProps#custom', async t =>
         type: 'maplibre',
         props: {
           style: 'http://example.com/style.json',
-          center:  [-122.0312, 33.3232],
+          center: [-122.0312, 33.3232],
           zoom: 5,
           pitch: 0,
           bearing: 0
