@@ -216,7 +216,7 @@ export type FetchMapOptions = {
 
 export type FetchMapResult = ParseMapResult & {
   /**
-   * Basemap properties
+   * Basemap properties.
    */
   basemap: Basemap | null;
   stopAutoRefresh?: () => void;

@@ -7,12 +7,12 @@ import {
   getStyleUrl,
   someLayerGroupsDisabled
 } from '../basemap';
-import {APIErrorContext, Basemap, KeplerMapConfig, MaplibreBasemapProps} from './types';
+import {APIErrorContext, Basemap, KeplerMapConfig, MapLibreBasemapProps} from './types';
 
 const CUSTOM_STYLE_ID_PREFIX = 'custom:';
 const DEFAULT_CARTO_STYLE = 'positron';
 
-function mapLibreViewpros(config: KeplerMapConfig): Omit<MaplibreBasemapProps, 'style'> {
+function mapLibreViewpros(config: KeplerMapConfig): Omit<MapLibreBasemapProps, 'style'> {
   const {longitude, latitude, ...rest} = config.mapState as MapViewState;
   return {
     center: [longitude, latitude],

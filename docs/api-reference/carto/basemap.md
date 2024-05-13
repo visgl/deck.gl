@@ -38,7 +38,7 @@ To use pre-bundled scripts:
 <script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
 
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl@^9.0.0/core/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core/@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/mesh-layers@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
@@ -50,7 +50,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-const map = new mapboxgl.Map({
+const map = new maplibregl.Map({
   container: 'map',
   style: deck.carto.BASEMAP.POSITRON,
   interactive: false

@@ -1,4 +1,4 @@
-import {BASEMAP, CartoAPIError, MaplibreBasemap} from '@deck.gl/carto';
+import {BASEMAP, CartoAPIError, _MapLibreBasemap as MapLibreBasemap} from '@deck.gl/carto';
 import test from 'tape-catch';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {KeplerMapConfig} from '@deck.gl/carto/api/types';
@@ -82,7 +82,7 @@ test('fetchBasemapProps#carto - with filters', async t =>
     t.equals(calls.length, 1, 'should call fetch only once');
     t.equals(calls[0].url, BASEMAP.VOYAGER, 'should request voyager style');
     t.equals(r.type, 'maplibre', 'proper basemap type is returned');
-    const r2 = r as MaplibreBasemap;
+    const r2 = r as MapLibreBasemap;
     t.equals(r2.rawStyle, mockedCartoStyle, 'raw style is returned');
     t.deepEquals(
       r2.props.style,

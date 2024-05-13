@@ -8,7 +8,7 @@ export type {
   RequestType,
   QueryParameters,
   Basemap,
-  MaplibreBasemap,
+  MapLibreBasemap,
   GoogleBasemap
 } from './types';
 export {query} from './query';

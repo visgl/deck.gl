@@ -1,4 +1,10 @@
-import {BASEMAP, fetchMap, FetchMapOptions, GoogleBasemap, MaplibreBasemap} from '@deck.gl/carto';
+import {
+  BASEMAP,
+  fetchMap,
+  FetchMapOptions,
+  _GoogleBasemap as GoogleBasemap,
+  _MapLibreBasemap as MapLibreBasemap
+} from '@deck.gl/carto';
 import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -20,10 +26,32 @@ const GOOGLE_MAPS_API_KEY = '';
 const apiBaseUrl = 'https://gcp-us-east1.api.carto.com';
 // const apiBaseUrl = 'https://gcp-us-east1-05.dev.api.carto.com';
 
+async function createMapWithDeckController(result: FetchMapResult) {
+  const deck = new Deck({canvas: 'deck-canvas'});
+  // Get map info from CARTO and update deck
+  const {initialViewState, layers} = result;
+  deck.setProps({initialViewState, layers});
+
+  const basemap = result.basemap as MapLibreBasemap;
+  const map = new mapboxgl.Map({
+    container: 'map',
+    ...basemap.props,
+    interactive: false
+  });
+  deck.setProps({
+    controller: true,
+    onViewStateChange: ({viewState}) => {
+      const {longitude, latitude, ...rest} = viewState;
+      map.jumpTo({center: [longitude, latitude], ...rest});
+    }
+  });
+  return deck;
+}
+
 async function createMapWithMapboxOverlay(result: FetchMapResult) {
   document.getElementById('deck-canvas')!.style.display = 'none';
 
-  const basemap = result.basemap as MaplibreBasemap;
+  const basemap = result.basemap as MapLibreBasemap;
   const map = new mapboxgl.Map({
     container: 'map',
     ...basemap?.props,
@@ -39,10 +67,11 @@ async function createMapWithMapboxOverlay(result: FetchMapResult) {
   const overlay = new MapboxOverlay({layers: result.layers});
   map.addControl(overlay);
 
-  return map;
+  return overlay;
 }
 
 async function createMapWithGoogleMapsOverlay(result: FetchMapResult) {
+  document.getElementById('deck-canvas')!.style.display = 'none';
   const loader = new Loader({apiKey: GOOGLE_MAPS_API_KEY});
   const googlemaps = await loader.importLibrary('maps');
 
@@ -81,6 +110,7 @@ async function createMap(cartoMapId: string) {
     deck = await createMapWithGoogleMapsOverlay(result);
   } else {
     deck = await createMapWithMapboxOverlay(result);
+    // deck = await createMapWithDeckController(result);
   }
 }
 

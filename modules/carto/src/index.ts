@@ -38,14 +38,15 @@ export {fetchBasemapProps} from './api/basemap';
 export type {
   APIErrorContext,
   FetchMapOptions,
+  FetchMapResult,
   Format,
   MapType,
   RequestType,
   QueryParameters,
   QueryOptions,
-  Basemap,
-  MaplibreBasemap,
-  GoogleBasemap
+  Basemap as _Basemap,
+  MapLibreBasemap as _MapLibreBasemap,
+  GoogleBasemap as _GoogleBasemap
 } from './api/index';
 
 import {
