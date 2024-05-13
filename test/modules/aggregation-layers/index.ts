@@ -42,3 +42,4 @@ import './utils/color-utils.spec';
 import './utils/scale-utils.spec';
 
 import './aggregation-layer-v9/webgl-aggregator.spec';
+import './aggregation-layer-v9/cpu-aggregator.spec';
