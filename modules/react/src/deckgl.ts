@@ -264,11 +264,17 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       style: canvasStyle
     });
 
+    const eventRoot = createElement(
+      'div',
+      {key: 'event-manager-root', id: 'event-manager-root', ref: containerRef},
+      [canvas, childrenUnderViews]
+    );
+
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
-      {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
-      [canvas, childrenUnderViews]
+      {id: `${id || 'deckgl'}-wrapper`, style: containerStyle},
+      [eventRoot]
     );
   }
 

@@ -1007,9 +1007,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.deckPicker = new DeckPicker(this.device);
 
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = 'deck-widgets-container';
+    const parent = this.props.parent?.parentElement || document.body;
+    parent.appendChild(widgetContainer);
+
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: this.canvas?.parentElement
+      parentElement: widgetContainer
     });
     this.widgetManager.addDefault(new Tooltip());
 
