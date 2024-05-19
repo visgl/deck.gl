@@ -962,7 +962,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     timeline.play();
     this.animationLoop.attachTimeline(timeline);
 
-    this.eventManager = new EventManager(this.props.parent || this.canvas, {
+    const eventRoot =
+      this.props.parent?.querySelector<HTMLDivElement>('.event-manager-root') || this.canvas;
+    this.eventManager = new EventManager(eventRoot, {
       touchAction: this.props.touchAction,
       recognizerOptions: this.props.eventRecognizerOptions,
       events: {
@@ -1008,12 +1010,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.deckPicker = new DeckPicker(this.device);
 
     const parent = this.props.parent || document.body;
-    const widgetContainer =
+    const widgetParent =
       parent.querySelector<HTMLDivElement>('.deck-widgets-container') || this.canvas?.parentElement;
 
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: widgetContainer
+      parentElement: widgetParent
     });
     this.widgetManager.addDefault(new Tooltip());
 
