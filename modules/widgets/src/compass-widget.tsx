@@ -117,7 +117,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   }
 
   handleCompassReset() {
-    const viewId = this.viewId || 'default-view';
+    const viewId = this.viewId || this.viewport?.id || 'default-view';
     if (this.viewport instanceof WebMercatorViewport) {
       const nextViewState = {
         ...this.viewport,

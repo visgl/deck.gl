@@ -103,7 +103,7 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
   }
 
   handleZoom(nextZoom: number) {
-    const viewId = this.viewId || 'default-view';
+    const viewId = this.viewId || this.viewport?.id || 'default-view';
     const nextViewState = {
       ...this.viewport,
       zoom: nextZoom,
