@@ -1007,10 +1007,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.deckPicker = new DeckPicker(this.device);
 
-    const widgetContainer = document.createElement('div');
-    widgetContainer.id = 'deck-widgets-container';
-    const parent = this.props.parent?.parentElement || document.body;
-    parent.appendChild(widgetContainer);
+    const parent = this.props.parent || document.body;
+    const widgetContainer =
+      parent.querySelector<HTMLDivElement>('.deck-widgets-container') || this.canvas?.parentElement;
 
     this.widgetManager = new WidgetManager({
       deck: this,
