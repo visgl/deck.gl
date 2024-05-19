@@ -30,11 +30,11 @@ new FullscreenWidget({});
 
 ```html
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
+<link src="https://unpkg.com/deck.gl@^9.0.0/dist/widgets/stylesheet.css" rel='stylesheet' />
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"></script>
-<link src="https://unpkg.com/deck.gl@^9.0.0/widgets/stylesheet.css" rel='stylesheet' />
+<link src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
 ```
 
 ```js
