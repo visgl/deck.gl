@@ -6,18 +6,18 @@
 
 ```tsx
 import DeckGL from '@deck.gl/react';
-import {QuadbinHeatmapTileLayer, quadbinTilesetSource} from '@deck.gl/carto';
+import {QuadbinHeatmapTileLayer, quadbinTableSource} from '@deck.gl/carto';
 
 function App({viewState}) {
-  const data = quadbinTilesetSource({
+  const data = quadbinTableSource({
     accessToken: 'XXX',
     connectionName: 'carto_dw',
-    tableName: 'carto-demo-data.demo_tilesets.quadbin'
+    tableName: 'carto-demo-data.demo_tables.quadbin'
   });
 
   const layer = new QuadbinHeatmapTileLayer({
     data,
-    getFillColor: d => d.properties.color
+    getWeight: d => d.properties.count
   })
 
   return <DeckGL viewState={viewState} layers={[layer]} />;
@@ -58,7 +58,7 @@ new deck.carto.QuadbinHeatmapTileLayer({});
 
 ## Properties
 
-Inherits all properties from [`QuadbinTileLayer`](./quadbin-tile-layer.md), with exceptions indicated below.
+Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
 
 #### `data` (TilejsonResult) {#data}
 
@@ -69,4 +69,10 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 - [quadbinTableSource](./data-sources#quadbintablesource)
 - [quadbinQuerySource](./data-sources#quadbinquerysource)
 - [quadbinTilesetSource](./data-sources#quadbintilesetsource)
+
+#### `getWeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getweight}
+
+* Default: `1`
+
+Method called to retrieve weight of each quadbin cell. By default each cell will use a weight of `1`.
 
