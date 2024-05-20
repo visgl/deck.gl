@@ -54,23 +54,23 @@ const TEST_VIEWPORTS = {
 
 const UNIFORMS = {
   // Projection mode values
-  project_uCoordinateSystem: Number,
-  project_uCenter: Array,
+  coordinateSystem: Number,
+  center: Array,
 
   // Screen size
-  project_uViewportSize: Array,
-  project_uDevicePixelRatio: Number,
+  viewportSize: Array,
+  devicePixelRatio: Number,
 
   // Distance at which screen pixels are projected
-  project_uFocalDistance: Number,
-  project_uCommonUnitsPerWorldUnit: Array,
-  project_uScale: Number, // This is the mercator scale (2 ** zoom)
+  focalDistance: Number,
+  commonUnitsPerWorldUnit: Array,
+  scale: Number, // This is the mercator scale (2 ** zoom)
 
-  project_uModelMatrix: Array,
-  project_uViewProjectionMatrix: Array,
+  modelMatrix: Array,
+  viewProjectionMatrix: Array,
 
   // This is for lighting calculations
-  project_uCameraPosition: Array
+  cameraPosition: Array
 };
 
 // 64 bit support
@@ -99,33 +99,32 @@ function getUniformsError(uniforms, formats) {
 test('project#getUniforms', t => {
   let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.map,
     coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
-  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+  t.deepEqual(uniforms.center, [0, 0, 0, 0], 'Returned zero projection center');
 
   uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
   t.ok(
-    Math.abs(uniforms.project_uCenter[0]) < EPSILON &&
-      Math.abs(uniforms.project_uCenter[1]) < EPSILON,
+    Math.abs(uniforms.center[0]) < EPSILON && Math.abs(uniforms.center[1]) < EPSILON,
     'project center at center of clipspace'
   );
   t.deepEqual(
-    uniforms.project_uCoordinateOrigin,
+    uniforms.coordinateOrigin,
     [-122.42694091796875, 37.75153732299805, 0],
     'Returned shader coordinate origin'
   );
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 
@@ -136,7 +135,7 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 
@@ -146,18 +145,16 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
   // CARTESIAN + WEB_MERCATOR_AUTO_OFFSET is rounded in the common space
   t.ok(
-    Math.abs(uniforms.project_uCenter[0]) < EPSILON * 10 &&
-      Math.abs(uniforms.project_uCenter[1]) < EPSILON * 10,
+    Math.abs(uniforms.center[0]) < EPSILON * 10 && Math.abs(uniforms.center[1]) < EPSILON * 10,
     'project center at center of clipspace'
   );
   t.ok(
-    uniforms.project_uCommonUnitsPerWorldUnit[0] === 1 &&
-      uniforms.project_uCommonUnitsPerWorldUnit[1] === 1,
+    uniforms.commonUnitsPerWorldUnit[0] === 1 && uniforms.commonUnitsPerWorldUnit[1] === 1,
     'Returned correct distanceScales'
   );
 
@@ -167,12 +164,12 @@ test('project#getUniforms', t => {
   });
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(
-    uniforms.project_uCoordinateOrigin,
+    uniforms.coordinateOrigin,
     [10.285714149475098, -3.1415927410125732, 0],
     'Returned shader coordinate origin'
   );
   t.ok(
-    uniforms.project_uCenter.some(x => x),
+    uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   );
 

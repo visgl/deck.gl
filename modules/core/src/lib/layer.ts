@@ -1065,8 +1065,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // TODO/ib - hack move to luma Model.draw
       if (moduleParameters) {
         const {isActive, isAttribute} = moduleParameters.picking;
+        const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleParameters;
+        const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
-        this.setShaderModuleProps({picking: {isActive, isAttribute}});
+        this.setShaderModuleProps({
+          picking: {isActive, isAttribute},
+          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+        });
       }
 
       // Apply polygon offset to avoid z-fighting

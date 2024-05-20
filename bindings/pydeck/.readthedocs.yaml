@@ -11,3 +11,13 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.9"
+  jobs:
+    post_checkout:
+      # CWD for readthedocs is repository root.
+      - cp -r bindings/pydeck/* .
+      # Skip broken Jupyter widget build. Remove pyproject.toml and write stubs
+      # for setup.py's data_files. https://github.com/visgl/deck.gl/issues/8469
+      - rm pyproject.toml
+      - touch pydeck/nbextension/static/index.js & touch pydeck/nbextension/static/index.js.map
+    post_install:
+      - python -m pip install --upgrade --no-cache-dir -r requirements/requirements-dev.txt

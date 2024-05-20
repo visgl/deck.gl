@@ -19,7 +19,7 @@ setup(
     packages=find_packages(exclude=["examples", "tests"]),
     python_requires=">=3.8",
     install_requires=[
-        "pydeck>=0.8.0",
+        "pydeck>=0.9.0",
         "carto-auth>=0.2.0",
         "typing-extensions>=4.0.0",
     ],

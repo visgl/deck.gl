@@ -191,8 +191,8 @@ test('shadow#getUniforms', t => {
       dummyShadowMaps: [true]
     },
     {
-      project_uCenter: [0, 0, 0, 0],
-      project_uCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      center: [0, 0, 0, 0],
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     }
   );
 

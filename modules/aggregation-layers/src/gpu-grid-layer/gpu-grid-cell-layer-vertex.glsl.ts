@@ -134,7 +134,7 @@ void main(void) {
   vec3 normals_commonspace = project_normal(normals);
 
    if (extruded) {
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, normals_commonspace);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project.cameraPosition, geometry.position.xyz, normals_commonspace);
     vColor = vec4(lightColor, color.a * opacity) / 255.;
   } else {
     vColor = vec4(color.rgb, color.a * opacity) / 255.;

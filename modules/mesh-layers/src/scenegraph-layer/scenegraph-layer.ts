@@ -376,7 +376,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           // eslint-disable-next-line camelcase
-          u_Camera: model.uniforms.project_uCameraPosition
+          u_Camera: model.uniforms.cameraPosition
         });
 
         model.draw(renderPass);

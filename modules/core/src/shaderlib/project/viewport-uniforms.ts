@@ -188,32 +188,32 @@ function calculateMatrixAndOffset(
 }
 
 export type ProjectUniforms = {
-  project_uCoordinateSystem: number;
-  project_uProjectionMode: number;
-  project_uCoordinateOrigin: Vec3;
-  project_uCommonOrigin: Vec3;
-  project_uCenter: Vec4;
+  coordinateSystem: number;
+  projectionMode: number;
+  coordinateOrigin: Vec3;
+  commonOrigin: Vec3;
+  center: Vec4;
   // Backward compatibility
   // TODO: remove in v9
-  project_uPseudoMeters: boolean;
+  pseudoMeters: boolean;
 
   // Screen size
-  project_uViewportSize: [number, number];
-  project_uDevicePixelRatio: number;
+  viewportSize: [number, number];
+  devicePixelRatio: number;
 
-  project_uFocalDistance: number;
-  project_uCommonUnitsPerMeter: Vec3;
-  project_uCommonUnitsPerWorldUnit: Vec3;
-  project_uCommonUnitsPerWorldUnit2: Vec3;
+  focalDistance: number;
+  commonUnitsPerMeter: Vec3;
+  commonUnitsPerWorldUnit: Vec3;
+  commonUnitsPerWorldUnit2: Vec3;
   /** 2^zoom */
-  project_uScale: number;
-  project_uWrapLongitude: boolean;
+  scale: number;
+  wrapLongitude: boolean;
 
-  project_uViewProjectionMatrix: NumericArray;
-  project_uModelMatrix: NumericArray;
+  viewProjectionMatrix: NumericArray;
+  modelMatrix: NumericArray;
 
   // This is for lighting calculations
-  project_uCameraPosition: Vec3;
+  cameraPosition: Vec3;
 };
 
 export type ProjectModuleSettings = {
@@ -256,8 +256,8 @@ export function getUniformsFromViewport({
     coordinateOrigin
   });
 
-  uniforms.project_uWrapLongitude = autoWrapLongitude;
-  uniforms.project_uModelMatrix = modelMatrix || IDENTITY_MATRIX;
+  uniforms.wrapLongitude = autoWrapLongitude;
+  uniforms.modelMatrix = modelMatrix || IDENTITY_MATRIX;
 
   return uniforms;
 }
@@ -299,33 +299,33 @@ function calculateViewportUniforms({
 
   const uniforms: ProjectUniforms = {
     // Projection mode values
-    project_uCoordinateSystem: coordinateSystem,
-    project_uProjectionMode: viewport.projectionMode,
-    project_uCoordinateOrigin: shaderCoordinateOrigin,
-    project_uCommonOrigin: originCommon.slice(0, 3) as Vec3,
-    project_uCenter: projectionCenter,
+    coordinateSystem,
+    projectionMode: viewport.projectionMode,
+    coordinateOrigin: shaderCoordinateOrigin,
+    commonOrigin: originCommon.slice(0, 3) as Vec3,
+    center: projectionCenter,
 
     // Backward compatibility
     // TODO: remove in v9
     // @ts-expect-error _pseudoMeters is only defined on WebMercator viewport
-    project_uPseudoMeters: Boolean(viewport._pseudoMeters),
+    pseudoMeters: Boolean(viewport._pseudoMeters),
 
     // Screen size
-    project_uViewportSize: viewportSize,
-    project_uDevicePixelRatio: devicePixelRatio,
+    viewportSize,
+    devicePixelRatio,
 
-    project_uFocalDistance: focalDistance,
-    project_uCommonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    project_uCommonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
-    project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
-    project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
-    project_uWrapLongitude: false,
+    focalDistance,
+    commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    scale: viewport.scale, // This is the mercator scale (2 ** zoom)
+    wrapLongitude: false,
 
-    project_uViewProjectionMatrix: viewProjectionMatrix,
-    project_uModelMatrix: IDENTITY_MATRIX,
+    viewProjectionMatrix,
+    modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
-    project_uCameraPosition: cameraPosCommon
+    cameraPosition: cameraPosCommon
   };
 
   if (geospatialOrigin) {
@@ -341,28 +341,24 @@ function calculateViewportUniforms({
     };
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:
-        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
-        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
         break;
 
       case COORDINATE_SYSTEM.LNGLAT:
       case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
         // @ts-expect-error _pseudoMeters only exists on WebMercatorView
         if (!viewport._pseudoMeters) {
-          uniforms.project_uCommonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
+          uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
-        uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
-        uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
         break;
 
       // a.k.a "preprojected" positions
       case COORDINATE_SYSTEM.CARTESIAN:
-        uniforms.project_uCommonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
-        uniforms.project_uCommonUnitsPerWorldUnit2 = [
-          0,
-          0,
-          distanceScalesAtOrigin.unitsPerMeter2[2]
-        ];
+        uniforms.commonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
+        uniforms.commonUnitsPerWorldUnit2 = [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]];
         break;
 
       default:

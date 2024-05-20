@@ -62,7 +62,7 @@ commonPos = geometry.position.xyz;
 if (terrain_mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (commonPos.xy - terrain_bounds.xy) / terrain_bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
-  commonPos.z += project_uCommonOrigin.z;
+  commonPos.z += project.commonOrigin.z;
 }
 if (terrain_mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
@@ -115,7 +115,7 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         useTerrainHeightMap,
         terrainSkipRender
       } = opts;
-      const {project_uCommonOrigin} = uniforms;
+      const {commonOrigin} = uniforms;
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
@@ -155,8 +155,8 @@ if ((terrain_mode == TERRAIN_MODE_USE_COVER) || (terrain_mode == TERRAIN_MODE_US
         // Convert bounds to the common space, as [minX, minY, width, height]
         terrain_bounds: bounds
           ? [
-              bounds[0] - project_uCommonOrigin[0],
-              bounds[1] - project_uCommonOrigin[1],
+              bounds[0] - commonOrigin[0],
+              bounds[1] - commonOrigin[1],
               bounds[2] - bounds[0],
               bounds[3] - bounds[1]
             ]

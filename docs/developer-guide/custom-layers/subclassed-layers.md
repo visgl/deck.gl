@@ -225,7 +225,7 @@ void main(void) {
   /* replaced uniform 'radiusPixels' with 'instanceRadiusPixels' */
   gl_Position.xy += project_pixel_size_to_clipspace(positions.xy * instanceRadiusPixels);
 
-  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
 
   vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
 

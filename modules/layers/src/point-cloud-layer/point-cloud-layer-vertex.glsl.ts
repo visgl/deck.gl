@@ -54,7 +54,7 @@ void main(void) {
   gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
 
   // Apply lighting
-  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
 
   // Apply opacity to instance color, or return instance picking color
   vColor = vec4(lightColor, instanceColors.a * opacity);

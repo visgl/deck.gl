@@ -30,10 +30,12 @@ export function getPixelOffset(p1, p2) {
 const OUT_BUFFER = device.createBuffer({byteLength: 4 * 16});
 
 export async function runOnGPU({
+  shaderInputProps,
   uniforms,
   varying,
   ...transformProps
 }: BufferTransformProps & {
+  shaderInputProps: Record<string, Record<string, any>>;
   uniforms: Record<string, UniformValue>;
   varying: string;
 }): Promise<Float32Array> {
@@ -43,6 +45,7 @@ export async function runOnGPU({
     varyings: [varying]
   });
   transform.model.setUniforms(uniforms);
+  transform.model.shaderInputs.setProps(shaderInputProps);
   transform.run({
     discard: true
   });
