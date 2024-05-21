@@ -84,7 +84,7 @@ Radius of the heatmap blur in pixels, to which the weight of a cell is distribut
 
 Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
 
-When `colorDomain` is specified, a pixel with `minValue` is assigned the first color in `colorRange`, a pixel with `maxValue` is assigned the last color in `colorRange`, and any value in between is linearly interpolated. Pixels with weight less than `minValue` gradually fade out by reducing alpha, until 100% transparency representing `0`. Pixels with weight more than `maxValue` are capped to the last color in `colorRange`.
+When `colorDomain` is specified, a pixel with `minValue` is assigned the first color in `colorRange`, a pixel with `maxValue` is assigned the last color in `colorRange`, and any value in between is interpolated. Pixels in the bottom 10% of the range defined by `colorDomain` are gradually faded out by reducing alpha, until 100% transparency at `minValue`. Pixels with weight more than `maxValue` are capped to the last color in `colorRange`.
 
 #### `colorRange` (Color[], optional) {#colorrange}
 
