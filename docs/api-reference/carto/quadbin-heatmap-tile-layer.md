@@ -1,6 +1,6 @@
 # QuadbinHeatmapTileLayer (Experimental)
 
-`QuadbinHeatmapTileLayer` is a layer for visualizing tiled data described using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
+`QuadbinHeatmapTileLayer` is a layer for visualizing tiled data indexed with a [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
 
 ## Usage 
 
