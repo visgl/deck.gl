@@ -121,9 +121,9 @@ const defaultColorRange: Color[] = [
 
 export type HeatmapProps = {
   /**
-   * Radius of the circle in pixels, to which the weight of an object is distributed.
+   * Radius of the heatmap blur in pixels, to which the weight of a cell is distributed.
    *
-   * @default 30
+   * @default 20
    */
   radiusPixels?: number;
   /**
