@@ -20,7 +20,7 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   float value = 255.0 * dot(SHIFT, color.rgb);
 
   // Keep "power" delivered to screen constant when tiles update
-  float relativeZoom = log2(project_uScale) - cellResolution + 3.5; // range 0-1
+  float relativeZoom = log2(project.scale) - cellResolution + 3.5; // range 0-1
   float relativeArea = pow(2.0, -2.0 * relativeZoom); // range 0.25-1
   value *= relativeArea;
 
