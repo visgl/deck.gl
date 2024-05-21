@@ -129,6 +129,7 @@ test('requestWithParameters#method', async t => {
       Array.from(new URL(calls[0].url).searchParams.entries()),
       [
         ['v', '3.4'],
+        ['client', 'deck-gl-carto'],
         ['deckglVersion', 'untranspiled source'],
         ['object', '{"a":1,"b":2}'],
         ['array', '[1,2,3]'],
@@ -141,6 +142,7 @@ test('requestWithParameters#method', async t => {
     const postBody = JSON.parse(calls[1].body as string);
     t.equals(calls[1].method, 'POST', 'post - method');
     t.equals(postBody.v, '3.4', 'post - body.v');
+    t.equals(postBody.client, 'deck-gl-carto', 'post - body.client');
     t.equals(postBody.deckglVersion, 'untranspiled source', 'post - body.deckglVersion');
     t.deepEquals(postBody.object, {a: 1, b: 2}, 'post - body.object');
     t.deepEquals(postBody.array, [1, 2, 3], 'post - body.array');
