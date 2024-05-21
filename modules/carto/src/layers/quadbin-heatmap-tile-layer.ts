@@ -1,11 +1,13 @@
 import {getResolution} from 'quadbin';
 
-import {Accessor, CompositeLayer, DefaultProps, Layer} from '@deck.gl/core';
+import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';
 import {RTTModifier, PostProcessModifier} from './post-process-utils';
 import QuadbinTileLayer, {QuadbinTileLayerProps} from './quadbin-tile-layer';
+import {TilejsonPropType} from './utils';
+import {TilejsonResult} from '../sources';
 
 // Modified polygon layer to draw offscreen and output value expected by heatmap
 class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
@@ -20,7 +22,7 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   float value = 255.0 * dot(SHIFT, color.rgb);
 
   // Keep "power" delivered to screen constant when tiles update
-  float relativeZoom = log2(project_uScale) - cellResolution + 3.5; // range 0-1
+  float relativeZoom = log2(project.scale) - cellResolution + 3.5; // range 0-1
   float relativeArea = pow(2.0, -2.0 * relativeZoom); // range 0.25-1
   value *= relativeArea;
 
@@ -50,14 +52,15 @@ function encodeWeight(w: number) {
 }
 
 const defaultProps: DefaultProps<QuadbinHeatmapTileLayerProps> = {
-  ...QuadbinTileLayer.defaultProps,
-
+  data: TilejsonPropType,
   getWeight: {type: 'accessor', value: 1}
 };
 
 /** All properties supported by QuadbinHeatmapTileLayer. */
 export type QuadbinHeatmapTileLayerProps<DataT = unknown> = _QuadbinHeatmapTileLayerProps<DataT> &
-  QuadbinTileLayerProps;
+  CompositeLayerProps & {
+    data: null | TilejsonResult | Promise<TilejsonResult>;
+  };
 
 /** Properties added by QuadbinHeatmapTileLayer. */
 type _QuadbinHeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &

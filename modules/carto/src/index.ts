@@ -22,19 +22,31 @@ export {
   VectorTileLayer
 };
 
-export {default as BASEMAP} from './basemap';
+export {
+  default as BASEMAP,
+  GOOGLE_BASEMAPS as _GOOGLE_BASEMAPS,
+  getStyleUrl as _getStyleUrl,
+  fetchStyle as _fetchStyle,
+  applyLayerGroupFilters as _applyLayerGroupFilters,
+  STYLE_LAYER_GROUPS as _STYLE_LAYER_GROUPS
+} from './basemap';
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
 export {CartoAPIError, fetchMap, query} from './api/index';
+export {fetchBasemapProps} from './api/basemap';
 export type {
   APIErrorContext,
   FetchMapOptions,
+  FetchMapResult,
   Format,
   MapType,
   RequestType,
   QueryParameters,
-  QueryOptions
+  QueryOptions,
+  Basemap as _Basemap,
+  MapLibreBasemap as _MapLibreBasemap,
+  GoogleBasemap as _GoogleBasemap
 } from './api/index';
 
 import {

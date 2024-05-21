@@ -217,8 +217,9 @@ export default class GoogleMapsOverlay {
     );
 
     const canvas = deck.getCanvas();
-    if (canvas?.parentElement) {
-      const parentStyle = canvas.parentElement.style;
+    const parent = canvas?.parentElement || deck.props.parent;
+    if (parent) {
+      const parentStyle = parent.style;
       parentStyle.left = `${left}px`;
       parentStyle.top = `${top}px`;
     }
