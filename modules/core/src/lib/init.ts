@@ -30,8 +30,8 @@ declare global {
 }
 
 function checkVersion() {
-  // Version detection using babel plugin
-  // Fallback for tests and SSR since global variable is defined by Webpack.
+  // Version detection using typescript plugin.
+  // Fallback for tests and SSR since global variable is defined by esbuild.
   const version =
     typeof __VERSION__ !== 'undefined'
       ? __VERSION__
