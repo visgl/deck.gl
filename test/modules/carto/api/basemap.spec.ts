@@ -24,7 +24,7 @@ const mockedMapConfig: KeplerMapConfig = {
 };
 const mockedCartoStyle = {
   id: '1234',
-  layers: [{id: 'label'}, {id: 'road'}, {id: 'boundaries'}, {id: 'water'}]
+  layers: [{id: 'background'}, {id: 'label'}, {id: 'road'}, {id: 'boundaries'}, {id: 'water'}]
 };
 async function responseFunc(url: string) {
   if (url === BASEMAP.VOYAGER) {
