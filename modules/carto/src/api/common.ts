@@ -7,7 +7,6 @@ export const MAX_GET_LENGTH = 8192;
 
 export const DEFAULT_PARAMETERS = {
   v: V3_MINOR_VERSION,
-  client: DEFAULT_CLIENT,
   deckglVersion: VERSION
 };
 
