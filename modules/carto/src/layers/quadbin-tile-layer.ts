@@ -6,6 +6,7 @@ import {hexToBigInt} from 'quadbin';
 import type {TilejsonResult} from '../sources/types';
 import {injectAccessToken, TilejsonPropType} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
+import ClusterTileLayer from './cluster-tile-layer';
 
 export const renderSubLayers = props => {
   const {data} = props;
@@ -53,7 +54,7 @@ export default class QuadbinTileLayer<
     const {tiles: data, maxresolution: maxZoom} = tileJSON;
     return [
       // @ts-ignore
-      new SpatialIndexTileLayer(this.props, {
+      new ClusterTileLayer(this.props, {
         id: `quadbin-tile-layer-${this.props.id}`,
         data,
         // TODO: Tileset2D should be generic over TileIndex type
