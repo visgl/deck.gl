@@ -60,7 +60,6 @@ const createDefaultResponse = (
 ): Promise<unknown> => {
   return Promise.resolve({
     json: () => {
-      console.log('xxxxxxxx', url);
       if (url.indexOf('format=tilejson') !== -1) {
         return TILEJSON_RESPONSE;
       }
