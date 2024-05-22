@@ -86,15 +86,15 @@ export function applyLayerGroupFilters(
     return style;
   }
 
-  const visibleFilters = STYLE_LAYER_GROUPS.filter(lg => visibleLayerGroups[lg.slug]).map(
+  const removedLayerFilters = STYLE_LAYER_GROUPS.filter(lg => !visibleLayerGroups[lg.slug]).map(
     lg => lg.filter
   );
 
-  const filteredLayers = style.layers.filter(layer => visibleFilters.some(match => match(layer)));
+  const visibleLayers = style.layers.filter(layer => removedLayerFilters.every(match => !match(layer)));
 
   return {
     ...style,
-    layers: filteredLayers
+    layers: visibleLayers
   };
 }
 
