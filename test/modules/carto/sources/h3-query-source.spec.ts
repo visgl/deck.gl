@@ -6,6 +6,7 @@ test('h3QuerySource', async t => {
   await withMockFetchMapsV3(async calls => {
     const tilejson = await h3QuerySource({
       connectionName: 'carto_dw',
+      clientId: 'CUSTOM_CLIENT',
       accessToken: '<token>',
       sqlQuery: 'SELECT * FROM a.b.h3_table',
       aggregationExp: 'SUM(population) as pop'
@@ -20,6 +21,7 @@ test('h3QuerySource', async t => {
     t.match(initCall.url, /spatialDataColumn=h3/, 'spatialDataColumn');
     t.match(initCall.url, /spatialDataType=h3/, 'spatialDataType');
     t.match(initCall.url, /q=SELECT%20\*%20FROM%20a\.b\.h3_table/, 'query');
+    t.match(initCall.url, /client\=CUSTOM_CLIENT/, 'clientId');
 
     t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
 
