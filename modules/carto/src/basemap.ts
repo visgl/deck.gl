@@ -90,7 +90,9 @@ export function applyLayerGroupFilters(
     lg => lg.filter
   );
 
-  const visibleLayers = style.layers.filter(layer => removedLayerFilters.every(match => !match(layer)));
+  const visibleLayers = style.layers.filter(layer =>
+    removedLayerFilters.every(match => !match(layer))
+  );
 
   return {
     ...style,
