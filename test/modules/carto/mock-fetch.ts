@@ -51,6 +51,8 @@ export const TILESTATS_RESPONSE = {
   type: 'Number'
 };
 
+export const QUERY_RESPONSE = [{id: 1, value: 'string'}];
+
 const createDefaultResponse = (
   url: string,
   headers: HeadersInit,
@@ -58,6 +60,7 @@ const createDefaultResponse = (
 ): Promise<unknown> => {
   return Promise.resolve({
     json: () => {
+      console.log('xxxxxxxx', url);
       if (url.indexOf('format=tilejson') !== -1) {
         return TILEJSON_RESPONSE;
       }
@@ -74,6 +77,9 @@ const createDefaultResponse = (
       }
       if (url.indexOf('stats') !== -1) {
         return TILESTATS_RESPONSE;
+      }
+      if (url.indexOf('sql') !== -1) {
+        return QUERY_RESPONSE;
       }
       if (url.indexOf('query') !== -1 || url.indexOf('table')) {
         return {
