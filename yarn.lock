@@ -4076,10 +4076,10 @@ caniuse-lite@^1.0.30001254:
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001523.tgz"
   integrity sha512-I5q5cisATTPZ1mc588Z//pj/Ox80ERYDfR71YnvY7raS/NOk8xXlZcB0sF7JdqaV//kOaa6aus7lRfpdnt1eBA==
 
-cartocolor@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/cartocolor/-/cartocolor-5.0.0.tgz#b2a8d42d640badb6ecf9e85aa86dfb60f98c5ea6"
-  integrity sha512-9nZipa0nvgoSZyXWIe5IBTOKgV3CwTbFwlx+G3B6PLmckiFlKBqBCMEtPW+VszoKbSJqgqoaglQApM34YEhBeA==
+cartocolor@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/cartocolor/-/cartocolor-5.0.2.tgz#182050da45abe7f14e075df9e3a732ea4489c153"
+  integrity sha512-Ihb/wU5V6BVbHwapd8l/zg7bnhZ4YPFVfa7quSpL86lfkPJSf4YuNBT+EvesPRP5vSqhl6vZVsQJwCR8alBooQ==
   dependencies:
     colorbrewer "1.5.6"
 
