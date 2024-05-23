@@ -19,6 +19,19 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.15] - May 23 2024
+
+- fix(carto): Update 'cartocolor' dependency to v5 (#8917, #8899)
+- fix(carto): Add missing 'client' parameter to query requests (#8913)
+- fix(carto): Fix fetchMap visibleLayerGroup filtering to include static layers (#8915)
+- fix(widgets): Increase z-index to fix mouse events (#8890)
+- docs(carto): Add QuadbinHeatmapTileLayer documentation (#8909)
+- feat(carto): Update QuadbinHeatmapTileLayer performance and compatibility (#8908, #8874)
+- feat(carto): Support custom basemaps in fetchMap (#8856)
+- fix(google-maps): Fix initial layer position on raster basemaps (#8892)
+- chore(core): Update luma.gl to 9.0.14 (#8884)
+- fix(carto,pydeck-carto): Fix error fetching scripts from CDN (#8880)
+
 #### deck.gl [9.0.14] - May 6 2024
 
 - fix(carto): Fix broken encoding in POST requests (#8865)

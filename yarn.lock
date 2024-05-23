@@ -1922,15 +1922,15 @@
     jszip "^3.1.5"
     md5 "^2.3.0"
 
-"@luma.gl/constants@9.0.11", "@luma.gl/constants@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.11.tgz#652da5d5dfe870ca6972b6cae55b679490692dd3"
-  integrity sha512-LRsGHzjz6j035HA2OeAuOwwkrk7ymc5SFfHGKn+G96IRRtqWZ/G5aCVRT/Wlako/cvAKfG7yTrhe0aL2o36KUw==
+"@luma.gl/constants@9.0.14", "@luma.gl/constants@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.14.tgz#c9476b8da7f9f2eb3b26d96e7a2e3d0f27b77694"
+  integrity sha512-mCZ5Sr39EX8AjPVy3v5W/XamaU6dtA5CEHCYLPdyMXEQ2snqsFut2Y4cOO/ySuOUccjEm4Y6Vb45BJKNMN8NyQ==
 
-"@luma.gl/core@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.11.tgz#a4f986d857730597da918cd267a3735db31cb385"
-  integrity sha512-oSK/z4tkLlM7wZw5LLxJDr7zcpZHIcg71NBmMgcDx2IEisJth4bPT7GA1vs6r5Snxc+CUiXvdnggeS40ZKLV3A==
+"@luma.gl/core@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.0.14.tgz#ac5a92d978c568cf89c2b2ecad76638d2e510d68"
+  integrity sha512-XkgCpVWGtfmEVTRbkkBu1HksjD1+3ZFqamNlCNgeWqsCcy0UZ2+iTF9qyxnT9K0QhdhnPgox6890A49C2iSRnw==
   dependencies:
     "@math.gl/types" "^4.0.0"
     "@probe.gl/env" "^4.0.2"
@@ -1938,53 +1938,53 @@
     "@probe.gl/stats" "^4.0.2"
     "@types/offscreencanvas" "^2019.6.4"
 
-"@luma.gl/engine@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.11.tgz#ac3dcf11cbbcae22befd555b11088e6734da1f6d"
-  integrity sha512-YDbEBt1ach55TnngYTH0+aIsLQEhKUtMpvOpGaoZ4PPGlRPHhxVRBZQctNGY0CqvgFsI/VGMDSSYmBsrJ8w7GQ==
+"@luma.gl/engine@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-9.0.14.tgz#5e8ba4adc1c9a83212683b8e912eee2b3d1468e9"
+  integrity sha512-7PuvXbcovFfXgCWC4eAZAPMzNAf3rfFo7Cd9FB7AEKLIwdYYN6nmn/PNjsZREa8eXK5ExDC8jDJ6lqtWrTqlyg==
   dependencies:
-    "@luma.gl/shadertools" "9.0.11"
+    "@luma.gl/shadertools" "9.0.14"
     "@math.gl/core" "^4.0.0"
     "@probe.gl/log" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
-"@luma.gl/gltf@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.0.11.tgz#f04dcde3cc9e00ca36cc5766998972663eb9f35b"
-  integrity sha512-3Y/iyNblYR6JZKihm8XLoAAehB3MYL0dujbmUUuAtyOn9WJMngtMHIMjw75DSpse7mIqhJLRZph76nR9FaxpGQ==
+"@luma.gl/gltf@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-9.0.14.tgz#f25543b73c0673a778ed803974c81d3f9f7836c3"
+  integrity sha512-0C1AWEJ7xHN95cSNQXjA6NMCJZJLBlKl+eI65KXLtwIEdWnEopIr/+u4HX11P1lEzPMrpj3KFeCzo+scG+1hPA==
   dependencies:
     "@loaders.gl/textures" "^4.2.0"
-    "@luma.gl/shadertools" "9.0.11"
+    "@luma.gl/shadertools" "9.0.14"
     "@math.gl/core" "^4.0.0"
 
-"@luma.gl/shadertools@9.0.11", "@luma.gl/shadertools@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.11.tgz#00ea4b554273321cae9c18c060f42342652a833c"
-  integrity sha512-MSSmvyQ+hwCEHlw6z5O2bHNQJt4y6RHRaegMDaYPt8z9r4Pzphlzyrl1n+HxKWVfOj2mV/vvyPTJtwY90iBHIA==
+"@luma.gl/shadertools@9.0.14", "@luma.gl/shadertools@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-9.0.14.tgz#d59075e30a0320b2b1fdaabddfbde5cf34a26c2d"
+  integrity sha512-4UFh/oQ+sRwERzuPf2flgMhHIbENU1xnHvXUzpzE3Z/+/DNljb2oSeMkW74fgpVmM6MuyHZhU1hM5RRq/mW3Tw==
   dependencies:
     "@math.gl/core" "^4.0.0"
     "@math.gl/types" "^4.0.0"
 
-"@luma.gl/test-utils@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.0.11.tgz#dac11239434866d8df231174a8ad5509259d3049"
-  integrity sha512-0FqZAbtGZUbSNdtzto7Btk7a3II2k0GZSvtLfgxAQj9EhvFHhIzHJCf63VU9HcKPu3Rra7u0Gj0Wotbx+vDsLw==
+"@luma.gl/test-utils@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-9.0.14.tgz#9e72075c21acd249f36762ab32cddbadc130eed2"
+  integrity sha512-OzW4LFj3iqCcZtMvhBQyNS1xCkrJuqLICnbzgxLUisi4nBL6Tbvvh1+rf/JZf2VKCGvrssbIzlrJpEDiHeDplw==
   dependencies:
     "@probe.gl/env" "^4.0.2"
     "@probe.gl/stats" "^4.0.2"
 
-"@luma.gl/webgl@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.0.11.tgz#3fb0ff337c2e267a8f48c2d9c7368e664c9e3f39"
-  integrity sha512-mWgUzsqjOtdZBKLex0taeRpwwp7ZovHrNhoUccAsNG9WerY3VHGRp1Rx4fn6qIG1QCsyyFEl1c8zlrnzK7axrQ==
+"@luma.gl/webgl@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.0.14.tgz#48adffc0f9145884d9b7f622dbdd7d4611017472"
+  integrity sha512-TcgXPWaKVEVbnzB6Cu49Ia70oZny/GNy57OLj82kW7+llrKY5bpfOaD5aSIDEV34nqmmlpML4agPJXEIzeP/BQ==
   dependencies:
-    "@luma.gl/constants" "9.0.11"
+    "@luma.gl/constants" "9.0.14"
     "@probe.gl/env" "^4.0.2"
 
-"@luma.gl/webgpu@^9.0.11":
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.0.11.tgz#092e67fc7c985482116dee62bf488a35d568ed56"
-  integrity sha512-KwN4z32tzXJyEJ8tpm0r0Omj4TMAIZWSEimLm0uCjVbmP52qkryYcGspbvHZntSLxXgtpQ4vdJ4u4uoWMtDJFQ==
+"@luma.gl/webgpu@^9.0.14":
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgpu/-/webgpu-9.0.14.tgz#70d60ec6b26b24a30f205d20c04f40927cff2e50"
+  integrity sha512-pzwbXv46NDYdDClLYBkuPpaTMSncDKog5dfAq9SgsERU6UHSDhrlE9At08ZnXucnT30i39pCo3gXrNVgi6WxWw==
   dependencies:
     "@probe.gl/env" "^4.0.2"
     "@webgpu/types" "^0.1.34"
@@ -4076,12 +4076,12 @@ caniuse-lite@^1.0.30001254:
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001523.tgz"
   integrity sha512-I5q5cisATTPZ1mc588Z//pj/Ox80ERYDfR71YnvY7raS/NOk8xXlZcB0sF7JdqaV//kOaa6aus7lRfpdnt1eBA==
 
-cartocolor@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/cartocolor/-/cartocolor-4.0.2.tgz#ef1aa12860f6eeedc8d2420e2b9d7337937c4993"
-  integrity sha512-+Gh9mb6lFxsDOLQlBLPxAHCnWXlg2W8q3AcVwqRcy95TdBbcOU89Wrb6h2Hd/6Ww1Kc1pzXmUdpnWD+xeCG0dg==
+cartocolor@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/cartocolor/-/cartocolor-5.0.2.tgz#182050da45abe7f14e075df9e3a732ea4489c153"
+  integrity sha512-Ihb/wU5V6BVbHwapd8l/zg7bnhZ4YPFVfa7quSpL86lfkPJSf4YuNBT+EvesPRP5vSqhl6vZVsQJwCR8alBooQ==
   dependencies:
-    colorbrewer "1.0.0"
+    colorbrewer "1.5.6"
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -4309,10 +4309,10 @@ color@4.2.3:
     color-convert "^2.0.1"
     color-string "^1.9.0"
 
-colorbrewer@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/colorbrewer/-/colorbrewer-1.0.0.tgz#4f97333b969ba7612382be4bc3394b341fb4c8a2"
-  integrity sha512-NZuIOVdErK/C6jDH3jWT/roxWJbJAinMiqEpbuWniKvQAoWdg6lGra3pPrSHvaIf8PlX8wLs/RAC6nULFJbgmg==
+colorbrewer@1.5.6:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/colorbrewer/-/colorbrewer-1.5.6.tgz#5b6c81bcf2ee584642375143b210a9049d9e5ab5"
+  integrity sha512-fONg2pGXyID8zNgKHBlagW8sb/AMShGzj4rRJfz5biZ7iuHQZYquSCLE/Co1oSQFmt/vvwjyezJCejQl7FG/tg==
 
 colorette@^1.3.0:
   version "1.4.0"
