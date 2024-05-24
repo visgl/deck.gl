@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.16] - May 23 2024
+
+- Revert "CARTO: Update QuadbinHeatmapTileLayer to use project UBO (#8908)"
+
 #### deck.gl [9.0.15] - May 23 2024
 
 - fix(carto): Update 'cartocolor' dependency to v5 (#8917, #8899)

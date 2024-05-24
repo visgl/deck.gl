@@ -3,7 +3,7 @@
   "description": "Use deck.gl as a custom Google Maps overlay",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.15",
+  "version": "9.0.16",
   "publishConfig": {
     "access": "public"
   },
