@@ -41,12 +41,14 @@ export async function requestWithParameters<T = any>({
       : fetch(url, {headers});
 
   let response: Response | undefined;
+  let responseJson;
   const jsonPromise: Promise<T> = fetchPromise
     .then((_response: Response) => {
       response = _response;
       return response.json();
     })
     .then((json: any) => {
+      responseJson = json;
       if (!response || !response.ok) {
         throw new Error(json.error);
       }
@@ -54,7 +56,7 @@ export async function requestWithParameters<T = any>({
     })
     .catch((error: Error) => {
       REQUEST_CACHE.delete(key);
-      throw new CartoAPIError(error, errorContext, response);
+      throw new CartoAPIError(error, errorContext, response, responseJson);
     });
 
   REQUEST_CACHE.set(key, jsonPromise);

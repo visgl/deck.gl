@@ -88,6 +88,12 @@ test('requestWithParameters#nocacheErrorContext', async t => {
         error2 = error as Error;
       }
 
+      t.deepEquals(
+        (error1 as CartoAPIError).responseJson,
+        {error: 'CustomError', customData: {abc: 'def'}},
+        'responseJson',
+        'propagates actual JSON error response '
+      );
       t.equals(calls.length, 2, '2 unique requests, failures not cached');
       t.true(error1 instanceof CartoAPIError, 'error #1 type');
       t.is((error1 as CartoAPIError).errorContext.requestType, 'Map data', 'error #1 context');
@@ -96,7 +102,10 @@ test('requestWithParameters#nocacheErrorContext', async t => {
     },
     // @ts-ignore
     (url: string, headers: HeadersInit) => {
-      return Promise.reject(new Error('404 Not Found'));
+      return Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve({error: 'CustomError', customData: {abc: 'def'}})
+      });
     }
   );
   t.end();
