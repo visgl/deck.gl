@@ -7,8 +7,7 @@ import type {APIErrorContext} from './types';
 /**
  * Parameters added to all requests issued with `requestWithParameters()`.
  * These parameters override parameters already in the base URL, but not
- * user-provided parameters. For POST requests, default parameters are
- * included both in the query string and in the POST body.
+ * user-provided parameters.
  */
 const DEFAULT_PARAMETERS = {
   v: V3_MINOR_VERSION,
