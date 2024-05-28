@@ -16,7 +16,7 @@ test('query', async t => {
     const [queryCall] = calls;
 
     t.match(queryCall.url, /v3\/sql\/carto_dw\/query/, 'connection');
-    t.match(queryCall.url, /q=SELECT%20\*%20FROM%20a\.b\.h3_table/, 'query');
+    t.match(queryCall.url, /q=SELECT\+\*\+FROM\+a\.b\.h3_table/, 'query');
     t.match(queryCall.url, /client\=CUSTOM_CLIENT/, 'clientId');
 
     t.ok(response, 'returns response');

@@ -17,7 +17,7 @@ test('quadbinTilesetSource', async t => {
     t.match(initCall.url, /v3\/maps\/carto_dw\/tileset/, 'connection');
     t.match(initCall.url, /name=a.b.quadbin_tileset/, 'tileset');
 
-    t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
+    t.match(tilesetCall.url, /^https:\/\/xyz\.com\/\?format\=tilejson\&cache\=/, 'tileset URL');
 
     t.ok(tilejson, 'returns tilejson');
     t.deepEqual(
