@@ -1,37 +1,45 @@
+import {VERSION} from '@deck.gl/core';
 import {isPureObject} from '../utils';
 import {CartoAPIError} from './carto-api-error';
-import {DEFAULT_HEADERS, DEFAULT_PARAMETERS, MAX_GET_LENGTH} from './common';
+import {MAX_GET_LENGTH, V3_MINOR_VERSION} from './common';
 import type {APIErrorContext} from './types';
 
 /**
- * Simple encode parameter
+ * Parameters added to all requests issued with `requestWithParameters()`.
+ * These parameters override parameters already in the base URL, but not
+ * user-provided parameters.
  */
-function encodeParameter(name: string, value: unknown): string {
-  if (isPureObject(value) || Array.isArray(value)) {
-    return `${name}=${encodeURIComponent(JSON.stringify(value))}`;
-  }
-  return `${name}=${encodeURIComponent(value as string | boolean | number)}`;
-}
+const DEFAULT_PARAMETERS = {
+  v: V3_MINOR_VERSION,
+  deckglVersion: VERSION
+};
+
+const DEFAULT_HEADERS = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json'
+};
 
 const REQUEST_CACHE = new Map<string, Promise<unknown>>();
+
 export async function requestWithParameters<T = any>({
   baseUrl,
-  parameters,
-  headers: customHeaders,
+  parameters = {},
+  headers: customHeaders = {},
   errorContext
 }: {
   baseUrl: string;
   parameters?: Record<string, unknown>;
-  headers: Record<string, string>;
+  headers?: Record<string, string>;
   errorContext: APIErrorContext;
 }): Promise<T> {
   parameters = {...DEFAULT_PARAMETERS, ...parameters};
-  const key = createCacheKey(baseUrl, parameters || {}, customHeaders || {});
+  baseUrl = excludeURLParameters(baseUrl, Object.keys(parameters));
+  const key = createCacheKey(baseUrl, parameters, customHeaders);
   if (REQUEST_CACHE.has(key)) {
     return REQUEST_CACHE.get(key) as Promise<T>;
   }
 
-  const url = parameters ? createURLWithParameters(baseUrl, parameters) : baseUrl;
+  const url = createURLWithParameters(baseUrl, parameters);
   const headers = {...DEFAULT_HEADERS, ...customHeaders};
 
   /* global fetch */
@@ -73,9 +81,35 @@ function createCacheKey(
   return JSON.stringify({baseUrl, parameters: parameterEntries, headers: headerEntries});
 }
 
-function createURLWithParameters(baseUrl: string, parameters: Record<string, unknown>): string {
-  const encodedParameters = Object.entries(parameters).map(([key, value]) =>
-    encodeParameter(key, value)
-  );
-  return `${baseUrl}?${encodedParameters.join('&')}`;
+/**
+ * Appends query string parameters to a URL. Existing URL parameters are kept,
+ * unless there is a conflict, in which case the new parameters override
+ * those already in the URL.
+ */
+function createURLWithParameters(
+  baseUrlString: string,
+  parameters: Record<string, unknown>
+): string {
+  const baseUrl = new URL(baseUrlString);
+  for (const [key, value] of Object.entries(parameters)) {
+    if (isPureObject(value) || Array.isArray(value)) {
+      baseUrl.searchParams.set(key, JSON.stringify(value));
+    } else {
+      baseUrl.searchParams.set(key, (value as string | boolean | number).toString());
+    }
+  }
+  return baseUrl.toString();
+}
+
+/**
+ * Deletes query string parameters from a URL.
+ */
+function excludeURLParameters(baseUrlString: string, parameters: string[]) {
+  const baseUrl = new URL(baseUrlString);
+  for (const param of parameters) {
+    if (baseUrl.searchParams.has(param)) {
+      baseUrl.searchParams.delete(param);
+    }
+  }
+  return baseUrl.toString();
 }

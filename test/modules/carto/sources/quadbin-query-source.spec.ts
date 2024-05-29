@@ -16,12 +16,12 @@ test('quadbinQuerySource', async t => {
     const [initCall, tilesetCall] = calls;
 
     t.match(initCall.url, /v3\/maps\/carto_dw\/query/, 'connection');
-    t.match(initCall.url, /aggregationExp=SUM\(population\)%20as%20pop/, 'aggregationExp');
+    t.match(initCall.url, /aggregationExp=SUM%28population%29\+as\+pop/, 'aggregationExp');
     t.match(initCall.url, /spatialDataColumn=quadbin/, 'spatialDataColumn');
     t.match(initCall.url, /spatialDataType=quadbin/, 'spatialDataType');
-    t.match(initCall.url, /q=SELECT%20\*%20FROM%20a\.b\.quadbin_table/, 'query');
+    t.match(initCall.url, /q=SELECT\+\*\+FROM\+a\.b\.quadbin_table/, 'query');
 
-    t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
+    t.match(tilesetCall.url, /^https:\/\/xyz\.com\/\?format\=tilejson\&cache\=/, 'tileset URL');
 
     t.ok(tilejson, 'returns tilejson');
     t.deepEqual(
