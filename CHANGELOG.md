@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.17] - May 29 2024
+
+- feat(carto): Support filters parameter in rasterSource (#8928)
+- feat(carto): Improve API request error handling (#8920)
+- fix(carto): Avoid malformed URLs in certain tilesets (#8925)
+- fix(carto): Fix QuadbinHeatmapTileLayer onViewportLoad callback (#8924)
+
 #### deck.gl [9.0.16] - May 23 2024
 
 - Revert "CARTO: Update QuadbinHeatmapTileLayer to use project UBO (#8908)"
