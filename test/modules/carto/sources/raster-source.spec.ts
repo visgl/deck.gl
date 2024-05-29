@@ -29,3 +29,17 @@ test('rasterSource', async t => {
   }).catch(t.fail);
   t.end();
 });
+
+test('rasterSource - filters', async t => {
+  await withMockFetchMapsV3(async calls => {
+    const tilejson = await rasterSource({
+      connectionName: 'carto_dw',
+      accessToken: '<token>',
+      tableName: 'a.b.raster_table',
+      filters: {type: {in: [1, 2, 3]}}
+    });
+    const url = new URL(calls[0].url);
+    t.is(url.searchParams.get('filters'), '{"type":{"in":[1,2,3]}}');
+  }).catch(t.fail);
+  t.end();
+});
