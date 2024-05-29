@@ -3,8 +3,8 @@ import type {FilterOptions, SourceOptions, TilejsonResult, TilesetSourceOptions}
 
 export type RasterSourceOptions = SourceOptions & TilesetSourceOptions & FilterOptions;
 type UrlParameters = {
-  name: string,
-  filters?: Record<string, unknown>
+  name: string;
+  filters?: Record<string, unknown>;
 };
 
 export const rasterSource = async function (options: RasterSourceOptions): Promise<TilejsonResult> {
