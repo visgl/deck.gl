@@ -80,7 +80,16 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
   static defaultProps = defaultProps;
 
   renderLayers(): Layer {
-    const {getWeight, colorDomain, colorRange, radiusPixels, _subLayerProps} = this.props;
+    const {
+      data,
+      getWeight,
+      colorDomain,
+      colorRange,
+      radiusPixels,
+      _subLayerProps,
+      updateTriggers,
+      ...tileLayerProps
+    } = this.props;
 
     // Inject modified polygon layer as sublayer into TileLayer
     const subLayerProps = {
@@ -103,9 +112,10 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
         : encodeWeight(getWeight);
 
     return new PostProcessQuadbinTileLayer(
+      tileLayerProps as Omit<QuadbinTileLayerProps, 'data'>,
       this.getSubLayerProps({
         id: 'heatmap',
-        data: this.props.data,
+        data,
 
         getFillColor,
 
@@ -115,7 +125,7 @@ class QuadbinHeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends C
         _subLayerProps: subLayerProps,
 
         updateTriggers: {
-          getPosition: this.props.updateTriggers.getWeight
+          getPosition: updateTriggers.getWeight
         }
       })
     );
