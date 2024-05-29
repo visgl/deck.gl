@@ -1,5 +1,6 @@
 import test from 'tape-catch';
 import {requestWithParameters} from '@deck.gl/carto/api/request-with-parameters';
+import {V3_MINOR_VERSION} from '@deck.gl/carto/api/common';
 import {withMockFetchMapsV3} from '../mock-fetch';
 import {CartoAPIError} from '@deck.gl/carto';
 
@@ -155,6 +156,39 @@ test('requestWithParameters#method', async t => {
     t.deepEquals(postBody.array, [1, 2, 3], 'post - body.array');
     t.true(postBody.string.startsWith('longgg'), 'post - body.string');
     t.equals(calls[1].url, 'https://example.com/v1/params', 'post - url');
+  });
+  t.end();
+});
+
+test('requestWithParameters#precedence', async t => {
+  await withMockFetchMapsV3(async calls => {
+    t.equals(calls.length, 0, '0 initial calls');
+
+    await Promise.all([
+      requestWithParameters({
+        baseUrl: 'https://example.com/v1/params?test=1',
+        headers: {},
+        parameters: {}
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/params?test=2&v=3.0`,
+        headers: {},
+        parameters: {}
+      }),
+      requestWithParameters({
+        baseUrl: `https://example.com/v1/params?test=3&v=3.0`,
+        headers: {},
+        parameters: {v: '3.2'}
+      })
+    ]);
+
+    t.equals(calls.length, 3, '3 requests');
+
+    const [url1, url2, url3] = calls.map(call => new URL(call.url));
+
+    t.equals(url1.searchParams.get('v'), V3_MINOR_VERSION, 'unset');
+    t.equals(url2.searchParams.get('v'), V3_MINOR_VERSION, 'default overrides url');
+    t.equals(url3.searchParams.get('v'), '3.2', 'param overrides default');
   });
   t.end();
 });

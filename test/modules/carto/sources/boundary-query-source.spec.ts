@@ -22,12 +22,12 @@ test('boundaryQuerySource', async t => {
     t.match(initCall.url, /matchingColumn=geoid/, 'matchingColumn');
     t.match(
       initCall.url,
-      /propertiesSqlQuery=select%20\*%20from%20%60a.b.properties_table%60/,
+      /propertiesSqlQuery=select\+\*\+from\+%60a.b.properties_table%60/,
       'propertiesSqlQuery'
     );
     t.match(initCall.url, /columns=column1%2Ccolumn2/, 'columns');
 
-    t.match(tilesetCall.url, /^https:\/\/xyz\.com\?format\=tilejson\&cache\=/, 'tileset URL');
+    t.match(tilesetCall.url, /^https:\/\/xyz\.com\/\?format\=tilejson\&cache\=/, 'tileset URL');
 
     t.ok(tilejson, 'returns source');
     t.deepEqual(tilejson.tiles, ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary'], 'source.tiles');
