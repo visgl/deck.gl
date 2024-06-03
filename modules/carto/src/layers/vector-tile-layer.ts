@@ -151,6 +151,12 @@ export default class VectorTileLayer<
   getPickingInfo(params) {
     const info = super.getPickingInfo(params);
 
+    // MVT tiles use tile-relative coordinates, handled by MVTLayer#getPickingInfo.
+    if (this.state.mvt) {
+      return info;
+    }
+
+    // CARTO tiles use [lat, lng], so overwrite `info.object`.
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
       info.object = binaryToGeojson(data as BinaryFeatureCollection, {
