@@ -146,7 +146,8 @@ export default class VectorTileLayer<
   }
 
   protected override _isWGS84(): boolean {
-    if (!this.state.mvt) return true;
-    return super._isWGS84();
+    // MVT coordinates are tile-relative; CARTO binary coordinates are [lat, lng].
+    if (this.state.mvt) return super._isWGS84();
+    return true;
   }
 }
