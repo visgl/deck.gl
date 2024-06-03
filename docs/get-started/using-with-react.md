@@ -31,7 +31,7 @@ function App() {
       data: '/path/to/data.json',
       getSourcePosition: (d: DataType) => d.from,
       getTargetPosition: (d: DataType) => d.to,
-    });
+    })
   ];
 
   return <DeckGL
