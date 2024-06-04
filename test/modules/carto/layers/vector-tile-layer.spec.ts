@@ -8,7 +8,7 @@ import {withMockFetchMapsV3} from '../mock-fetch';
 test(`VectorTileLayer#picking`, async t => {
   await withMockFetchMapsV3(async () => {
     await testPickingLayer({
-      // CARTO binary tile coordinates are [lat, lng], not tile-relative like MVT.
+      // CARTO binary tile coordinates are [lng, lat], not tile-relative like MVT.
       layer: createTestVectorTileLayer([-123, 45], 'binary'),
       viewport: new WebMercatorViewport({
         latitude: 0,
