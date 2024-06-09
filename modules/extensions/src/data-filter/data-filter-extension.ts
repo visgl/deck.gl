@@ -250,7 +250,7 @@ export default class DataFilterExtension extends LayerExtension<
         attributeManager.attributes.filterCategoryValues.needsUpdate() ||
         !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
       if (categoryBitMaskNeedsUpdate) {
-        this.setState({categoryBitMaskNeedsUpdate});
+        this.setState({categoryBitMask: null});
       }
 
       // Need to recreate category map if categorySize has changed
@@ -270,13 +270,14 @@ export default class DataFilterExtension extends LayerExtension<
     const filterFBO = this.state.filterFBO as Framebuffer;
     const filterModel = this.state.filterModel as Model;
     const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
-    const categoryBitMaskNeedsUpdate = this.state.categoryBitMaskNeedsUpdate as boolean;
 
     const {onFilteredItemsChange} = this.props;
 
-    if (categoryBitMaskNeedsUpdate) {
+    if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
+    /* eslint-disable-next-line camelcase */
+    params.uniforms.filter_categoryBitMask = this.state.categoryBitMask;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterCategoryValues, filterIndices}
@@ -353,9 +354,7 @@ export default class DataFilterExtension extends LayerExtension<
         }
       }
     }
-    /* eslint-disable-next-line camelcase */
-    params.uniforms.filter_categoryBitMask = categoryBitMask;
-    this.state.categoryBitMaskNeedsUpdate = false;
+    this.state.categoryBitMask = categoryBitMask;
   }
 
   /**
