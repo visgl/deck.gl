@@ -16,7 +16,15 @@ export class CartoAPIError extends Error {
   /** Response from server */
   response?: Response;
 
-  constructor(error: Error, errorContext: APIErrorContext, response?: Response) {
+  /** JSON Response from server */
+  responseJson?: any;
+
+  constructor(
+    error: Error,
+    errorContext: APIErrorContext,
+    response?: Response,
+    responseJson?: any
+  ) {
     let responseString = 'Failed to connect';
     if (response) {
       responseString = 'Server returned: ';
@@ -46,6 +54,7 @@ export class CartoAPIError extends Error {
 
     this.name = 'CartoAPIError';
     this.response = response;
+    this.responseJson = responseJson;
     this.error = error;
     this.errorContext = errorContext;
   }
