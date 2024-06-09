@@ -9,11 +9,6 @@ import {
 } from '@deck.gl/core';
 import {Aggregator} from './aggregator';
 
-// TODO
-type GPUAggregator = Aggregator & {destroy(): void};
-// TODO
-type CPUAggregator = Aggregator;
-
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
 };
@@ -25,8 +20,7 @@ export default abstract class AggregationLayer<
   static layerName = 'AggregationLayer';
 
   state!: {
-    gpuAggregator: GPUAggregator | null;
-    cpuAggregator: CPUAggregator | null;
+    aggregator: Aggregator;
   };
 
   /** Allow this layer to participates in the draw cycle */
@@ -34,10 +28,8 @@ export default abstract class AggregationLayer<
     return true;
   }
 
-  /** Called to create a GPUAggregator instance */
-  abstract getGPUAggregator(): GPUAggregator | null;
-  /** Called to create a CPUAggregator instance if getGPUAggregator() returns null */
-  abstract getCPUAggregator(): CPUAggregator | null;
+  /** Called to create an Aggregator instance */
+  abstract createAggregator(): Aggregator;
   /** Called when some attributes change, a chance to mark Aggregator as dirty */
   abstract onAttributeChange(id: string): void;
 
@@ -50,44 +42,43 @@ export default abstract class AggregationLayer<
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      this.state.gpuAggregator?.destroy();
-      this.state.gpuAggregator = this.getGPUAggregator();
-      if (this.state.gpuAggregator) {
-        this.getAttributeManager()!.invalidateAll();
-      } else if (!this.state.cpuAggregator) {
-        this.state.cpuAggregator = this.getCPUAggregator();
-      }
+      this.state.aggregator?.destroy();
+      this.state.aggregator = this.createAggregator();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
 
   // Override Layer.finalizeState to dispose the GPUAggregator instance
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.gpuAggregator?.destroy();
+    this.state.aggregator.destroy();
   }
 
   // Override Layer.updateAttributes to update the aggregator
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
-    this.getAggregator()?.setProps({
+    const {aggregator} = this.state;
+    aggregator.setProps({
       attributes: changedAttributes
     });
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
     }
+
+    // In aggregator.update() the aggregator allocates the buffers to store its output
+    // These buffers will be exposed by aggregator.getResults() and passed to the sublayers
+    // Therefore update() must be called before renderLayers()
+    // CPUAggregator's output is populated right here in update()
+    // GPUAggregator's output is pre-allocated and populated in preDraw(), see comments below
+    aggregator.update();
   }
 
   draw({moduleParameters}) {
     // GPU aggregation needs `moduleSettings` for projection/filter uniforms which are only accessible at draw time
-    // GPUAggregator's Buffers are allocated during `updateState`/`GPUAggregator.setProps`
-    // and passed down to the sublayer attributes in renderLayers()
+    // GPUAggregator's Buffers are pre-allocated during `update()` and passed down to the sublayer attributes in renderLayers()
     // Although the Buffers have been bound to the sublayer's Model, their content are not populated yet
-    // GPUAggregator.update() is called in the draw cycle here right before Buffers are used by sublayer.draw()
-    this.state.gpuAggregator?.update({moduleSettings: moduleParameters});
-  }
-
-  protected getAggregator(): Aggregator | null {
-    return this.state.gpuAggregator || this.state.cpuAggregator;
+    // GPUAggregator.preDraw() is called in the draw cycle here right before Buffers are used by sublayer.draw()
+    this.state.aggregator.preDraw({moduleSettings: moduleParameters});
   }
 
   // override CompositeLayer._getAttributeManager to create AttributeManager instance
@@ -96,16 +87,5 @@ export default abstract class AggregationLayer<
       id: this.props.id,
       stats: this.context.stats
     });
-  }
-
-  // Override CompositeLayer._postUpdate to update attributes and the CPUAggregator
-  protected _postUpdate(updateParams: UpdateParameters<this>, forceUpdate: boolean) {
-    this._updateAttributes();
-    // CPUAggregator.update() must be called before renderLayers()
-    // CPUAggregator's outputs are Float32Array whose content is applied during the `updateState` lifecycle
-    // The typed arrays are passed to the sublayer's attributes and uploaded to GPU Buffers during the sublayer's update
-    // therefore they must be up to date before renderLayers()
-    this.state.cpuAggregator?.update();
-    super._postUpdate(updateParams, forceUpdate);
   }
 }
