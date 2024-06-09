@@ -7,7 +7,7 @@ import type {AggregationOperation} from '../aggregator';
 
 const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8]; // GPU color mask RED, GREEN, BLUE, ALPHA
 const MAX_FLOAT32 = 3e38;
-const EMPTY_MASKS = {SUM: 0, MEAN: 0, MIN: 0, MAX: 0};
+const EMPTY_MASKS = {SUM: 0, MEAN: 0, MIN: 0, MAX: 0, COUNT: 0};
 
 export const TEXTURE_WIDTH = 1024;
 
@@ -23,8 +23,8 @@ export class WebGLBinSorter {
    * A packed texture in which each pixel represents a bin.
    * The index of the pixel in the memory layout is the bin index.
    * Alpha value is the count of data points that fall into this bin
-   * R,G,B values are the aggregated weights of each channel:
-   *   - Sum of all data points if operation is 'SUM' or 'MEAN'
+   * R,G,B values are the aggregated values of each channel:
+   *   - Sum of all data points if operation is 'SUM', or 'MEAN'
    *   - Min of all data points if operation is 'MIN'
    *   - Max of all data points if operation is 'MAX'
    */
@@ -202,7 +202,7 @@ uniform ivec2 targetSize;
 
 ${userVs}
 
-out vec3 v_Weight;
+out vec3 v_Value;
 
 void main() {
   int binIndex;
@@ -219,11 +219,11 @@ void main() {
   gl_PointSize = 1.0;
 
 #if NUM_CHANNELS == 3
-  getWeight(v_Weight);
+  getValue(v_Value);
 #elif NUM_CHANNELS == 2
-  getWeight(v_Weight.xy);
+  getValue(v_Value.xy);
 #else
-  getWeight(v_Weight.x);
+  getValue(v_Value.x);
 #endif
 }
 `;
@@ -233,11 +233,11 @@ void main() {
 
 precision highp float;
 
-in vec3 v_Weight;
+in vec3 v_Value;
 out vec4 fragColor;
 
 void main() {
-  fragColor.xyz = v_Weight;
+  fragColor.xyz = v_Value;
 
   #ifdef MODULE_GEOMETRY
   geometry.uv = vec2(0.);

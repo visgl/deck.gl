@@ -91,6 +91,7 @@ export class WebGLAggregationTransform {
     const target = this.domainFBO;
 
     transform.model.setUniforms({
+      isCount: Array.from({length: 3}, (_, i) => (operations[i] === 'COUNT' ? 1 : 0)),
       isMean: Array.from({length: 3}, (_, i) => (operations[i] === 'MEAN' ? 1 : 0))
     });
     transform.model.setBindings({bins});
@@ -117,6 +118,7 @@ function createTransform(device: Device, settings: GPUAggregatorSettings): Buffe
 #define SHADER_NAME gpu-aggregation-domain-vertex
 
 uniform ivec4 binIdRange;
+uniform bvec3 isCount;
 uniform bvec3 isMean;
 uniform float naN;
 uniform sampler2D bins;
@@ -136,10 +138,14 @@ out vec3 values;
 #endif
 
 void main() {
-  int row = gl_VertexID / SAMEPLER_WIDTH;
-  int col = gl_VertexID - row * SAMEPLER_WIDTH;
+  int row = gl_VertexID / SAMPLER_WIDTH;
+  int col = gl_VertexID - row * SAMPLER_WIDTH;
   vec4 weights = texelFetch(bins, ivec2(col, row), 0);
-  vec3 value3 = mix(weights.rgb, weights.rgb / max(weights.a, 1.0), isMean);
+  vec3 value3 = mix(
+    mix(weights.rgb, vec3(weights.a), isCount),
+    weights.rgb / max(weights.a, 1.0),
+    isMean
+  );
   if (weights.a == 0.0) {
     value3 = vec3(naN);
   }
@@ -162,6 +168,8 @@ void main() {
 #endif
 
   gl_Position = vec4(0., 0., 0., 1.);
+  // This model renders into a 2x1 texture to obtain min and max simultaneously.
+  // See comments in fragment shader
   gl_PointSize = 2.0;
 }
 `;
@@ -222,7 +230,7 @@ void main() {
     defines: {
       NUM_DIMS: settings.dimensions,
       NUM_CHANNELS: settings.numChannels,
-      SAMEPLER_WIDTH: TEXTURE_WIDTH
+      SAMPLER_WIDTH: TEXTURE_WIDTH
     },
     uniforms: {
       // Passed in as uniform because 1) there is no GLSL symbol for NaN 2) any expression that exploits undefined behavior to produces NaN

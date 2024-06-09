@@ -19,9 +19,9 @@ export type GPUAggregatorSettings = {
    *  `void getBin(out int binId)`: if dimensions=1
    *  `void getBin(out ivec2 binId)`: if dimensions=2
    * And a shader function with one of the signatures
-   *  `void getWeight(out float weight)`: if numChannels=1
-   *  `void getWeight(out vec2 weight)`: if numChannels=2
-   *  `void getWeight(out vec3 weight)`: if numChannels=3
+   *  `void getValue(out float value)`: if numChannels=1
+   *  `void getValue(out vec2 value)`: if numChannels=2
+   *  `void getValue(out vec3 value)`: if numChannels=3
    */
   vs: string;
   /** Shader modules
@@ -132,11 +132,13 @@ export class GPUAggregator implements Aggregator {
     const count = pixel[3];
     const value: number[] = [];
     for (let channel = 0; channel < this.numChannels; channel++) {
-      if (count === 0) {
+      const operation = this.props.operations[channel];
+      if (operation === 'COUNT') {
+        value[channel] = count;
+      } else if (count === 0) {
         value[channel] = NaN;
       } else {
-        value[channel] =
-          this.props.operations[channel] === 'MEAN' ? pixel[channel] / count : pixel[channel];
+        value[channel] = operation === 'MEAN' ? pixel[channel] / count : pixel[channel];
       }
     }
     return {id, value, count};
@@ -222,11 +224,13 @@ export class GPUAggregator implements Aggregator {
     }
   }
 
+  update() {}
+
   /** Run aggregation */
-  update(
+  preDraw(
     /** Parameters only available at runtime  */
     opts: {
-      moduleSettings?: ModelProps['moduleSettings'];
+      moduleSettings: any;
     }
   ) {
     if (!this.needsUpdate.some(Boolean)) {

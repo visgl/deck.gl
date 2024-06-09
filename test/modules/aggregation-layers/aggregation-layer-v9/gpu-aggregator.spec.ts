@@ -23,13 +23,13 @@ test('GPUAggregator#resources', t => {
       void getBin(out int binId) {
         binId = int(education);
       }
-      void getWeight(out float weight) {
-        weight = income;
+      void getValue(out float value) {
+        value = income;
       }
     `
   });
 
-  t.doesNotThrow(() => aggregator.update({}), 'Calling update() without setting props');
+  t.doesNotThrow(() => aggregator.update(), 'Calling update() without setting props');
   t.notOk(aggregator.getResult(0));
   t.notOk(aggregator.getBin(0));
 
@@ -52,7 +52,7 @@ test('GPUAggregator#resources', t => {
     operations: ['MEAN']
   });
 
-  aggregator.update({});
+  aggregator.update();
   t.ok(aggregator.getResult(0));
   t.ok(aggregator.getBin(0));
 
@@ -60,7 +60,7 @@ test('GPUAggregator#resources', t => {
   aggregator.setProps({
     binIdRange: [[0, 15]]
   });
-  aggregator.update({});
+  aggregator.update();
   t.ok(aggregator.getResult(0));
   t.ok(aggregator.getBin(0));
 
@@ -93,8 +93,8 @@ test('GPUAggregator#1D', t => {
       void getBin(out int binId) {
         binId = int(floor(age / ageGroupSize));
       }
-      void getWeight(out vec3 weight) {
-        weight = vec3(1.0, income, education);
+      void getValue(out vec3 value) {
+        value = vec3(1.0, income, education);
       }
     `
   });
@@ -121,7 +121,8 @@ test('GPUAggregator#1D', t => {
     binOptions: {ageGroupSize: 5}
   });
 
-  aggregator.update({});
+  aggregator.update();
+  aggregator.preDraw({moduleSettings: {}});
 
   t.is(aggregator.numBins, 15, 'numBins');
 
@@ -191,8 +192,8 @@ test('GPUAggregator#2D', t => {
         binId.x = int(floor(age / ageGroupSize));
         binId.y = int(education);
       }
-      void getWeight(out vec2 weight) {
-        weight = vec2(1.0, income);
+      void getValue(out vec2 value) {
+        value = vec2(5.0, income);
       }
     `
   });
@@ -218,11 +219,12 @@ test('GPUAggregator#2D', t => {
       [1, 6]
     ], // age: 20..59, education: 1..5
     attributes,
-    operations: ['SUM', 'MEAN'],
+    operations: ['COUNT', 'MEAN'],
     binOptions: {ageGroupSize: 10}
   });
 
-  aggregator.update({});
+  aggregator.update();
+  aggregator.preDraw({moduleSettings: {}});
 
   t.is(aggregator.numBins, 20, 'numBins');
 
@@ -260,7 +262,7 @@ test('GPUAggregator#2D', t => {
   t.deepEqual(aggregator.getResultDomain(1), [10, 320], 'getResultDomain() - mean income');
 
   // Empty bin
-  t.deepEqual(aggregator.getBin(0), {id: [2, 1], count: 0, value: [NaN, NaN]}, 'getBin() - empty');
+  t.deepEqual(aggregator.getBin(0), {id: [2, 1], count: 0, value: [0, NaN]}, 'getBin() - empty');
   // {age: 40, household: 4, income: 140, education: 4},
   // {age: 44, household: 4, income: 500, education: 4},
   t.deepEqual(aggregator.getBin(14), {id: [4, 4], count: 2, value: [2, 320]}, 'getBin()');
