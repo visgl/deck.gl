@@ -303,10 +303,12 @@ export default class MVTLayer<
     }
   }
 
+  protected _isWGS84(): boolean {
+    return Boolean(this.context.viewport.resolution);
+  }
+
   getPickingInfo(params: GetPickingInfoParams): MVTLayerPickingInfo<FeaturePropertiesT> {
     const info = super.getPickingInfo(params);
-
-    const isWGS84 = Boolean(this.context.viewport.resolution);
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
@@ -314,7 +316,7 @@ export default class MVTLayer<
         globalFeatureId: info.index
       }) as Feature;
     }
-    if (info.object && !isWGS84) {
+    if (info.object && !this._isWGS84()) {
       info.object = transformTileCoordsToWGS84(
         info.object,
         info.tile!.bbox as GeoBoundingBox, // eslint-disable-line
