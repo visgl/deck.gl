@@ -46,5 +46,5 @@ export type {ScreenGridLayerProps} from './screen-grid-layer/screen-grid-layer';
 
 export type {
   GPUAggregationProps,
-  GPUAggregatorSettings
+  GPUAggregatorOptions
 } from './aggregation-layer-v9/gpu-aggregator/gpu-aggregator';

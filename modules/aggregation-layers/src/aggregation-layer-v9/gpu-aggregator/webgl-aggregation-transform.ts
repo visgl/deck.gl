@@ -2,7 +2,7 @@ import {BufferTransform} from '@luma.gl/engine';
 import {glsl, createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core';
-import type {GPUAggregatorSettings} from './gpu-aggregator';
+import type {GPUAggregatorOptions} from './gpu-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 import {TEXTURE_WIDTH} from './webgl-bin-sorter';
@@ -26,7 +26,7 @@ export class WebGLAggregationTransform {
   /** Aggregated [min, max] for each channel */
   private _domains: [min: number, max: number][] | null = null;
 
-  constructor(device: Device, settings: GPUAggregatorSettings) {
+  constructor(device: Device, settings: GPUAggregatorOptions) {
     this.device = device;
     this.numChannels = settings.numChannels;
     this.transform = createTransform(device, settings);
@@ -112,7 +112,7 @@ export class WebGLAggregationTransform {
   }
 }
 
-function createTransform(device: Device, settings: GPUAggregatorSettings): BufferTransform {
+function createTransform(device: Device, settings: GPUAggregatorOptions): BufferTransform {
   const vs = glsl`\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex

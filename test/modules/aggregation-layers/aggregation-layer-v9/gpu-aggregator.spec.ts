@@ -158,11 +158,15 @@ test('GPUAggregator#1D', t => {
   t.deepEqual(aggregator.getResultDomain(2), [1, 5], 'getResultDomain() - max education');
 
   // Empty bin
-  t.deepEqual(aggregator.getBin(0), {id: 2, count: 0, value: [NaN, NaN, NaN]}, 'getBin() - empty');
+  t.deepEqual(
+    aggregator.getBin(0),
+    {id: [2], count: 0, value: [NaN, NaN, NaN]},
+    'getBin() - empty'
+  );
   // {age: 40, household: 4, income: 140, education: 4},
   // {age: 42, household: 2, income: 110, education: 5},
   // {age: 44, household: 4, income: 500, education: 4},
-  t.deepEqual(aggregator.getBin(6), {id: 8, count: 3, value: [3, 250, 5]}, 'getBin()');
+  t.deepEqual(aggregator.getBin(6), {id: [8], count: 3, value: [3, 250, 5]}, 'getBin()');
 
   attributes.age.delete();
   attributes.income.delete();

@@ -2,7 +2,7 @@ import {Model, ModelProps} from '@luma.gl/engine';
 import {glsl, createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import type {GPUAggregatorSettings} from './gpu-aggregator';
+import type {GPUAggregatorOptions} from './gpu-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8]; // GPU color mask RED, GREEN, BLUE, ALPHA
@@ -30,7 +30,7 @@ export class WebGLBinSorter {
    */
   private binsFBO: Framebuffer | null = null;
 
-  constructor(device: Device, settings: GPUAggregatorSettings) {
+  constructor(device: Device, settings: GPUAggregatorOptions) {
     this.device = device;
     this.model = createModel(device, settings);
   }
@@ -175,7 +175,7 @@ function getMaskByOperation(
   return result;
 }
 
-function createModel(device: Device, settings: GPUAggregatorSettings): Model {
+function createModel(device: Device, settings: GPUAggregatorOptions): Model {
   let userVs = settings.vs;
 
   if (settings.dimensions === 2) {

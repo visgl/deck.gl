@@ -3,12 +3,12 @@ import {WebGLBinSorter} from './webgl-bin-sorter';
 import {WebGLAggregationTransform} from './webgl-aggregation-transform';
 import {_deepEqual as deepEqual, log, BinaryAttribute} from '@deck.gl/core';
 
-import type {Aggregator, AggregationProps} from '../aggregator';
+import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-/** Settings used to construct a new GPUAggregator */
-export type GPUAggregatorSettings = {
+/** Options used to construct a new GPUAggregator */
+export type GPUAggregatorOptions = {
   /** Size of bin IDs */
   dimensions: 1 | 2;
   /** How many properties to perform aggregation on */
@@ -32,7 +32,7 @@ export type GPUAggregatorSettings = {
   defines?: Record<string, string | number | boolean>;
 };
 
-/** Options used to run GPU aggregation, can be changed at any time */
+/** Props used to run GPU aggregation, can be changed at any time */
 export type GPUAggregationProps = AggregationProps & {
   /** Limits of binId defined for each dimension. Ids outside of the [start, end) are ignored.
    */
@@ -71,7 +71,7 @@ export class GPUAggregator implements Aggregator {
   /** Step 2. (optional) calculate the min/max across all bins */
   protected aggregationTransform: WebGLAggregationTransform;
 
-  constructor(device: Device, settings: GPUAggregatorSettings) {
+  constructor(device: Device, settings: GPUAggregatorOptions) {
     this.device = device;
     this.dimensions = settings.dimensions;
     this.numChannels = settings.numChannels;
@@ -103,22 +103,15 @@ export class GPUAggregator implements Aggregator {
   }
 
   /** Returns the information for a given bin. */
-  getBin(index: number): {
-    /** The original id */
-    id: number | [number, number];
-    /** Aggregated values by channel */
-    value: number[];
-    /** Count of data points in this bin */
-    count: number;
-  } | null {
+  getBin(index: number): AggregatedBin | null {
     if (index < 0 || index >= this.numBins) {
       return null;
     }
     const {binIdRange} = this.props;
-    let id: number | [number, number];
+    let id: number[];
 
     if (this.dimensions === 1) {
-      id = index + binIdRange[0][0];
+      id = [index + binIdRange[0][0]];
     } else {
       const [[x0, x1], [y0]] = binIdRange;
       const width = x1 - x0;
