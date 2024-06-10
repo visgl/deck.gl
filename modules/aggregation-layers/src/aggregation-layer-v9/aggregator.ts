@@ -18,7 +18,7 @@ export type AggregationProps = {
 /** Descriptor of an aggregated bin */
 export type AggregatedBin = {
   /** The unique identifier of the bin */
-  id: number | number[];
+  id: number[];
   /** Aggregated values by channel */
   value: number[];
   /** Count of data points in this bin */
