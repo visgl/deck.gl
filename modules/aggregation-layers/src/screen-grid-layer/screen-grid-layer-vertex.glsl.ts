@@ -23,63 +23,33 @@ export default `\
 #define SHADER_NAME screen-grid-layer-vertex-shader
 #define RANGE_COUNT 6
 
-in vec3 positions;
-in vec3 instancePositions;
-in vec4 instanceCounts;
+in vec2 positions;
+in vec2 instancePositions;
+in float instanceWeights;
 in vec3 instancePickingColors;
 
 uniform float opacity;
-uniform vec3 cellScale;
-uniform vec4 minColor;
-uniform vec4 maxColor;
-uniform vec4 colorRange[RANGE_COUNT];
+uniform ivec2 binCount;
+uniform vec2 gridSizeClipspace;
+uniform vec2 cellSizeClipspace;
 uniform vec2 colorDomain;
-uniform bool shouldUseMinMax;
-uniform sampler2D maxTexture;
+uniform sampler2D colorRange;
 
 out vec4 vColor;
-out float vSampleCount;
-
-vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
-  vec4 outColor = vec4(0., 0., 0., 0.);
-  if (value >= domain.x && value <= domain.y) {
-    float domainRange = domain.y - domain.x;
-    if (domainRange <= 0.) {
-      outColor = colorRange[0];
-    } else {
-      float rangeCount = float(RANGE_COUNT);
-      float rangeStep = domainRange / rangeCount;
-      float idx = floor((value - domain.x) / rangeStep);
-      idx = clamp(idx, 0., rangeCount - 1.);
-      int intIdx = int(idx);
-      outColor = colorRange[intIdx];
-    }
-  }
-  outColor = outColor / 255.;
-  return outColor;
-}
+out float vIsValid;
 
 void main(void) {
-  vSampleCount = instanceCounts.a;
+  gl_Position = vec4(
+    instancePositions * gridSizeClipspace + positions * cellSizeClipspace - 1.,
+    0., 1.);
 
-  float weight = instanceCounts.r;
-  float maxWeight = texture(maxTexture, vec2(0.5)).r;
+  vIsValid = isnan(instanceWeights) ? 0.0 : 1.0;
+  float r = min(max((instanceWeights - colorDomain.x) / (colorDomain.y - colorDomain.x), 0.), 1.);
+  vec4 rangeColor = texture(colorRange, vec2(r, 0.5));
 
-  float step = weight / maxWeight;
-  vec4 minMaxColor = mix(minColor, maxColor, step) / 255.;
-
-  vec2 domain = colorDomain;
-  float domainMaxValid = float(colorDomain.y != 0.);
-  domain.y = mix(maxWeight, colorDomain.y, domainMaxValid);
-  vec4 rangeColor = quantizeScale(domain, colorRange, weight);
-
-  float rangeMinMax = float(shouldUseMinMax);
-  vec4 color = mix(rangeColor, minMaxColor, rangeMinMax);
-  vColor = vec4(color.rgb, color.a * opacity);
+  vColor = vec4(rangeColor.rgb, rangeColor.a * opacity);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
-
-  gl_Position = vec4(instancePositions + positions * cellScale, 1.);
 }
 `;

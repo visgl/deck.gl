@@ -23,11 +23,10 @@ import {device} from '@deck.gl/test-utils';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 
 import {testLayer} from '@deck.gl/test-utils';
-let cellScale;
+let cellSize;
 
 test('ScreenGridCellLayer#constructor', t => {
   const SAMPLE_BUFFER = device.createBuffer({});
-  const SAMPLE_TEXTURE = device.createTexture({});
 
   testLayer({
     Layer: ScreenGridCellLayer,
@@ -36,9 +35,14 @@ test('ScreenGridCellLayer#constructor', t => {
       {
         title: 'Constructor',
         props: {
-          data: {attributes: {instanceCounts: SAMPLE_BUFFER}},
-          maxTexture: SAMPLE_TEXTURE,
-          numInstances: 1
+          data: {
+            attributes: {
+              instanceWeights: SAMPLE_BUFFER,
+              instancePositions: SAMPLE_BUFFER
+            }
+          },
+          numInstances: 1,
+          colorDomain: () => [0, 1]
         }
       },
       {
@@ -46,20 +50,20 @@ test('ScreenGridCellLayer#constructor', t => {
           cellSizePixels: 50 // default 100
         },
         onBeforeUpdate({layer}) {
-          cellScale = layer.state.model.uniforms.cellScale;
+          cellSize = layer.state.model.uniforms.cellSizeClipspace;
         },
         onAfterUpdate({layer}) {
           t.ok(layer.state, 'should update layer state');
           t.notDeepEqual(
-            layer.state.model.uniforms.cellScale,
-            cellScale,
-            'should update cellScale uniform'
+            layer.state.model.uniforms.cellSizeClipspace,
+            cellSize,
+            'should update cellSizeClipspace uniform'
           );
         }
       },
       {
         updateProps: {
-          colorDomain: [5, 50]
+          colorDomain: () => [5, 50]
         },
         onAfterUpdate({layer, oldState}) {
           t.deepEqual(
