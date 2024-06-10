@@ -15,7 +15,7 @@ export type CPUAggregatorSettings = {
    */
   getBin: VertexAccessor<number | number[] | null, any>;
   /** Accessor to map each data point to a weight value, defined per channel */
-  getWeight: VertexAccessor<number>[];
+  getValue: VertexAccessor<number>[];
 };
 
 /** Options used to run CPU aggregation, can be changed at any time */
@@ -41,7 +41,7 @@ export class CPUAggregator implements Aggregator {
   };
 
   protected getBinId: CPUAggregatorSettings['getBin'];
-  protected getWeight: CPUAggregatorSettings['getWeight'];
+  protected getValue: CPUAggregatorSettings['getValue'];
   /** Dirty flag
    * If true, redo sorting
    * If array, redo aggregation on the specified channel
@@ -52,13 +52,15 @@ export class CPUAggregator implements Aggregator {
   protected binIds: Float32Array | null = null;
   protected results: {value: Float32Array; domain: [min: number, max: number]}[] = [];
 
-  constructor({dimensions, getBin, getWeight}: CPUAggregatorSettings) {
+  constructor({dimensions, getBin, getValue}: CPUAggregatorSettings) {
     this.dimensions = dimensions;
-    this.numChannels = getWeight.length;
+    this.numChannels = getValue.length;
     this.getBinId = getBin;
-    this.getWeight = getWeight;
+    this.getValue = getValue;
     this.needsUpdate = true;
   }
+
+  destroy() {}
 
   get numBins() {
     return this.bins.length;
@@ -125,8 +127,8 @@ export class CPUAggregator implements Aggregator {
       if (this.needsUpdate === true || this.needsUpdate[channel]) {
         this.results[channel] = aggregateChannel({
           bins: this.bins,
-          getWeight: evaluateVertexAccessor(
-            this.getWeight[channel],
+          getValue: evaluateVertexAccessor(
+            this.getValue[channel],
             this.props.attributes,
             undefined
           ),
@@ -136,6 +138,8 @@ export class CPUAggregator implements Aggregator {
       }
     }
   }
+
+  preDraw() {}
 
   /** Returns an accessor to the bins. */
   getBins(): BinaryAttribute | null {

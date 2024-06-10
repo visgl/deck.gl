@@ -3,6 +3,10 @@ import type {AggregationOperation} from '../aggregator';
 
 type AggregationFunc = (pointIndices: number[], getValue: (index: number) => number) => number;
 
+const count: AggregationFunc = pointIndices => {
+  return pointIndices.length;
+};
+
 const sum: AggregationFunc = (pointIndices, getValue) => {
   let result = 0;
   for (const i of pointIndices) {
@@ -41,6 +45,7 @@ const max: AggregationFunc = (pointIndices, getValue) => {
 };
 
 const AGGREGATION_FUNC: Record<AggregationOperation, AggregationFunc> = {
+  COUNT: count,
   SUM: sum,
   MEAN: mean,
   MIN: min,
@@ -53,12 +58,12 @@ const AGGREGATION_FUNC: Record<AggregationOperation, AggregationFunc> = {
  */
 export function aggregateChannel({
   bins,
-  getWeight,
+  getValue,
   operation,
   target
 }: {
   bins: Bin[];
-  getWeight: (index: number) => number;
+  getValue: (index: number) => number;
   operation: AggregationOperation;
   /** Optional typed array to pack values into */
   target?: Float32Array;
@@ -76,7 +81,7 @@ export function aggregateChannel({
 
   for (let j = 0; j < bins.length; j++) {
     const {points} = bins[j];
-    target[j] = aggregationFunc(points, getWeight);
+    target[j] = aggregationFunc(points, getValue);
     if (target[j] < min) min = target[j];
     if (target[j] > max) max = target[j];
   }

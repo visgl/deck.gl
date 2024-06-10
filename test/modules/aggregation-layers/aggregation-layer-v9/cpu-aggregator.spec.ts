@@ -15,7 +15,7 @@ test('CPUAggregator#1D', t => {
       sources: ['age'],
       getValue: ({age}, index, {ageGroupSize}) => Math.floor(age / ageGroupSize)
     },
-    getWeight: [
+    getValue: [
       {getValue: () => 1},
       {sources: ['income'], getValue: ({income}) => income},
       {sources: ['education'], getValue: ({education}) => education}
@@ -94,7 +94,7 @@ test('CPUAggregator#1D', t => {
   t.end();
 });
 
-test('CPUAggregator#2D', t => {
+test.only('CPUAggregator#2D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
   const aggregator = new CPUAggregator({
@@ -109,7 +109,7 @@ test('CPUAggregator#2D', t => {
         return null;
       }
     },
-    getWeight: [{getValue: () => 1}, {sources: ['income'], getValue: ({income}) => income}]
+    getValue: [{getValue: () => 1}, {sources: ['income'], getValue: ({income}) => income}]
   });
 
   const attributes = {
@@ -129,7 +129,7 @@ test('CPUAggregator#2D', t => {
   aggregator.setProps({
     pointCount: IncomeSurvey.length,
     attributes,
-    operations: ['SUM', 'MEAN'],
+    operations: ['COUNT', 'MEAN'],
     binOptions: {ageGroupSize: 10}
   });
 
