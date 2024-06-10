@@ -51,5 +51,5 @@ export type {
 } from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 export type {
   CPUAggregationProps,
-  CPUAggregatorSettings
+  CPUAggregatorOptions
 } from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';

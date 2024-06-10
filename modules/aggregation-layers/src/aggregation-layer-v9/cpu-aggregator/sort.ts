@@ -6,7 +6,7 @@ export function sortBins({
   getBinId
 }: {
   pointCount: number;
-  getBinId: (index: number) => number | number[] | null;
+  getBinId: (index: number) => number[] | null;
 }): Bin[] {
   const binsById: Map<string, Bin> = new Map();
 

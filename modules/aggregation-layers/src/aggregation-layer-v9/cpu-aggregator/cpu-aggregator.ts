@@ -1,11 +1,11 @@
-import type {Aggregator, AggregationProps} from '../aggregator';
+import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
 import {sortBins, packBinIds} from './sort';
 import {aggregateChannel} from './aggregate';
 import {VertexAccessor, evaluateVertexAccessor} from './vertex-accessor';
 
-/** Settings used to construct a new CPUAggregator */
-export type CPUAggregatorSettings = {
+/** Options used to construct a new CPUAggregator */
+export type CPUAggregatorOptions = {
   /** Size of bin IDs */
   dimensions: number;
   /** Accessor to map each data point to a bin ID.
@@ -13,16 +13,16 @@ export type CPUAggregatorSettings = {
    * If dimensions>1, bin ID should be an array with [dimensions] elements;
    * The data point will be skipped if bin ID is null.
    */
-  getBin: VertexAccessor<number | number[] | null, any>;
+  getBin: VertexAccessor<number[] | null, any>;
   /** Accessor to map each data point to a weight value, defined per channel */
   getValue: VertexAccessor<number>[];
 };
 
-/** Options used to run CPU aggregation, can be changed at any time */
+/** Props used to run CPU aggregation, can be changed at any time */
 export type CPUAggregationProps = AggregationProps & {};
 
 export type Bin = {
-  id: number | number[];
+  id: number[];
   index: number;
   /** list of data point indices */
   points: number[];
@@ -40,8 +40,8 @@ export class CPUAggregator implements Aggregator {
     attributes: {}
   };
 
-  protected getBinId: CPUAggregatorSettings['getBin'];
-  protected getValue: CPUAggregatorSettings['getValue'];
+  protected getBinId: CPUAggregatorOptions['getBin'];
+  protected getValue: CPUAggregatorOptions['getValue'];
   /** Dirty flag
    * If true, redo sorting
    * If array, redo aggregation on the specified channel
@@ -52,7 +52,7 @@ export class CPUAggregator implements Aggregator {
   protected binIds: Float32Array | null = null;
   protected results: {value: Float32Array; domain: [min: number, max: number]}[] = [];
 
-  constructor({dimensions, getBin, getValue}: CPUAggregatorSettings) {
+  constructor({dimensions, getBin, getValue}: CPUAggregatorOptions) {
     this.dimensions = dimensions;
     this.numChannels = getValue.length;
     this.getBinId = getBin;
@@ -164,16 +164,12 @@ export class CPUAggregator implements Aggregator {
   }
 
   /** Returns the information for a given bin. */
-  getBin(index: number): {
-    /** The original id */
-    id: number | number[];
-    /** Aggregated values by channel */
-    value: number[];
-    /** Count of data points in this bin */
-    count: number;
-    /** List of data point indices that fall into this bin. */
-    points?: number[];
-  } | null {
+  getBin(index: number):
+    | (AggregatedBin & {
+        /** List of data point indices that fall into this bin. */
+        points?: number[];
+      })
+    | null {
     const bin = this.bins[index];
     if (!bin) {
       return null;

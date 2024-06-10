@@ -13,7 +13,7 @@ test('CPUAggregator#1D', t => {
     dimensions: 1,
     getBin: {
       sources: ['age'],
-      getValue: ({age}, index, {ageGroupSize}) => Math.floor(age / ageGroupSize)
+      getValue: ({age}, index, {ageGroupSize}) => [Math.floor(age / ageGroupSize)]
     },
     getValue: [
       {getValue: () => 1},
@@ -83,7 +83,7 @@ test('CPUAggregator#1D', t => {
   // {age: 44, household: 4, income: 500, education: 4},
   t.deepEqual(
     aggregator.getBin(5),
-    {id: 8, count: 3, value: [3, 250, 5], points: [16, 17, 18]},
+    {id: [8], count: 3, value: [3, 250, 5], points: [16, 17, 18]},
     'getBin()'
   );
 
@@ -94,7 +94,7 @@ test('CPUAggregator#1D', t => {
   t.end();
 });
 
-test.only('CPUAggregator#2D', t => {
+test('CPUAggregator#2D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
   const aggregator = new CPUAggregator({
