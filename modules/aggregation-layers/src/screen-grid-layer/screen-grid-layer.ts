@@ -129,11 +129,7 @@ export default class ScreenGridLayer<
               // Not on screen
               return null;
             }
-            return [
-              Math.floor(p[0] / cellSizePixels),
-              // Use bottom-left origin to match GPU bin coords
-              Math.floor((viewport.height - p[1]) / cellSizePixels)
-            ];
+            return [Math.floor(p[0] / cellSizePixels), Math.floor(p[1] / cellSizePixels)];
           }
         },
         getValue: [{sources: ['counts'], getValue: ({counts}) => counts}]
@@ -153,7 +149,7 @@ export default class ScreenGridLayer<
   
   void getBin(out ivec2 binId) {
     vec4 pos = project_position_to_clipspace(positions, positions64Low, vec3(0.0));
-    vec2 screenCoords = (pos.xy / pos.w + 1.0) / 2.0 * project.viewportSize / project.devicePixelRatio;
+    vec2 screenCoords = vec2(pos.x / pos.w + 1.0, 1.0 - pos.y / pos.w) / 2.0 * project.viewportSize / project.devicePixelRatio;
     vec2 gridCoords = floor(screenCoords / cellSizePixels);
     binId = ivec2(gridCoords);
   }

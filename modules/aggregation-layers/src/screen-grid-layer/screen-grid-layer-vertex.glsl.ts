@@ -39,9 +39,11 @@ out vec4 vColor;
 out float vIsValid;
 
 void main(void) {
-  gl_Position = vec4(
-    instancePositions * gridSizeClipspace + positions * cellSizeClipspace - 1.,
-    0., 1.);
+  vec2 pos = instancePositions * gridSizeClipspace + positions * cellSizeClipspace;
+  pos.x = pos.x - 1.0;
+  pos.y = 1.0 - pos.y;
+
+  gl_Position = vec4(pos, 0., 1.);
 
   vIsValid = isnan(instanceWeights) ? 0.0 : 1.0;
   float r = min(max((instanceWeights - colorDomain.x) / (colorDomain.y - colorDomain.x), 0.), 1.);
