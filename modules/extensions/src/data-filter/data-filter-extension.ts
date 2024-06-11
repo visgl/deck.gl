@@ -336,6 +336,7 @@ export default class DataFilterExtension extends LayerExtension<
     extension: this
   ): void {
     const {categorySize} = extension.opts;
+    if (!categorySize) return;
     const {filterCategories} = this.props;
     const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
     const categoryFilters = (
