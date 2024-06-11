@@ -1,12 +1,12 @@
-# QuadbinHeatmapTileLayer (Experimental)
+# HeatmapTileLayer (Experimental)
 
-`QuadbinHeatmapTileLayer` is a layer for visualizing tiled data indexed with a [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
+`HeatmapTileLayer` is a layer for visualizing point data aggregated using the [Quadbin Spatial Index](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) using a heatmap. 
 
 ## Usage 
 
 ```tsx
 import DeckGL from '@deck.gl/react';
-import {QuadbinHeatmapTileLayer, quadbinTableSource} from '@deck.gl/carto';
+import {HeatmapTileLayer, quadbinTableSource} from '@deck.gl/carto';
 
 function App({viewState}) {
   const data = quadbinTableSource({
@@ -15,7 +15,7 @@ function App({viewState}) {
     tableName: 'carto-demo-data.demo_tables.quadbin'
   });
 
-  const layer = new QuadbinHeatmapTileLayer({
+  const layer = new HeatmapTileLayer({
     data,
     getWeight: d => d.properties.count
   })
@@ -35,8 +35,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
 ```
 
 ```js
-import {QuadbinHeatmapTileLayer} from '@deck.gl/carto';
-new QuadbinHeatmapTileLayer({});
+import {HeatmapTileLayer} from '@deck.gl/carto';
+new HeatmapTileLayer({});
 ```
 
 To use pre-bundled scripts:
@@ -53,7 +53,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.carto.QuadbinHeatmapTileLayer({});
+new deck.carto.HeatmapTileLayer({});
 ```
 
 ## Properties
@@ -82,7 +82,7 @@ Radius of the heatmap blur in pixels, to which the weight of a cell is distribut
 
 * Default: `[0, 1]`
 
-Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
+Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`]. The values are normalized, with a value of `1` corresponding to the maximum density present in the viewport.
 
 When `colorDomain` is specified, a pixel with `minValue` is assigned the first color in `colorRange`, a pixel with `maxValue` is assigned the last color in `colorRange`, and any value in between is interpolated. Pixels in the bottom 10% of the range defined by `colorDomain` are gradually faded out by reducing alpha, until 100% transparency at `minValue`. Pixels with weight more than `maxValue` are capped to the last color in `colorRange`.
 
@@ -92,6 +92,11 @@ When `colorDomain` is specified, a pixel with `minValue` is assigned the first c
 
 The color palette used in the heatmap, as an array of colors [color1, color2, ...]. Each color is in the format of `[r, g, b]`. Each channel is a number between 0-255.
 
+#### `intensity` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#intensity}
+
+* Default: `1`
+
+Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
 
 ### Data Accessors
 
@@ -101,4 +106,10 @@ The color palette used in the heatmap, as an array of colors [color1, color2, ..
 
 Method called to retrieve weight of each quadbin cell. By default each cell will use a weight of `1`.
 
+### Callbacks
 
+#### `onMaxDensityChange` (Function, optional) {#onmaxdensitychange}
+
+`onMaxDensityChange` is a function that is called when maximum density of the displayed data changes. The units correspond to a density, such that a value of `1` is a single entity across the entire world, in Mercator projection space. 
+
+- Default: `null`

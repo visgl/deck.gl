@@ -144,7 +144,13 @@ export function getLayer(
   if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
-  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
+  if (
+    type === 'mvt' ||
+    type === 'tileset' ||
+    type === 'h3' ||
+    type === 'quadbin' ||
+    type === 'quadbinHeatmap' // TODO change to 'heatmap' only
+  ) {
     return getTileLayer(dataset, basePropMap);
   }
 
