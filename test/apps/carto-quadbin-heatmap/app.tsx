@@ -42,7 +42,7 @@ function getTooltip(info?: PickingInfo): any {
   const cellResolution = Number(getResolution(info.object.id));
   const unitDensity = Math.pow(4.0, cellResolution);
   const value = info.object.properties[KEY];
-  const density = value * unitDensity / EARTH_SURFACE;
+  const density = (value * unitDensity) / EARTH_SURFACE;
   return `${KEY}: ${Math.round(density)}${DENSITY_UNITS}`;
 }
 
@@ -62,15 +62,14 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
     if (!['QuadbinTileLayer'].includes(layerName)) {
       return l;
     }
-    
+
     const getWeight = d => {
       if (!KEY) KEY = Object.keys(d.properties)[0];
       let value = d.properties[KEY];
       value = isNaN(value) ? 1 : value;
       return value;
-    }
+    };
 
-;
     return new HeatmapTileLayer(l.props, {
       // Heatmap effect props
       colorDomain: colorDomain.map(n => n / 100) as [number, number],
@@ -131,20 +130,30 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
         onChange={setRadiusPixels}
         formatLabel={(x: number) => formatLabel(x, 'radius')}
       />
-      <div style={{position: 'absolute', padding: 4, background: 'white', right: 3, top: 64, width: 190}}>{`Max density: ${Math.round(maxDensity / EARTH_SURFACE)}${DENSITY_UNITS}`}</div>
+      <div
+        style={{
+          position: 'absolute',
+          padding: 4,
+          background: 'white',
+          right: 3,
+          top: 64,
+          width: 190
+        }}
+      >{`Max density: ${Math.round(maxDensity / EARTH_SURFACE)}${DENSITY_UNITS}`}</div>
     </>
   );
 }
 
 // const apiBaseUrl = 'https://-us-east1-24.dev.api.carto.com';
-const apiBaseUrl = 'https://gcp-us-east1-24.dev.api.carto.com'
+const apiBaseUrl = 'https://gcp-us-east1-24.dev.api.carto.com';
 
 export function renderToDOM(container: HTMLElement) {
   const root = createRoot(container);
 
   fetchMap({
     apiBaseUrl,
-    cartoMapId: '7d802fb9-db3d-41d8-a2f0-8f3efda83f2a'}).then(
+    cartoMapId: '7d802fb9-db3d-41d8-a2f0-8f3efda83f2a'
+  }).then(
     // cartoMapId: '4b093ac8-b58d-40ba-ba62-fa7d6e59a06f'}).then(
     // cartoMapId: 'b66d2b74-6b82-4849-9f74-e569f8fbf423'}).then(
     // cartoMapId: '78ca1fc9-b6ec-4345-9ac9-1628c3c7d21c'}).then(<-- use default apiBaseUrl
