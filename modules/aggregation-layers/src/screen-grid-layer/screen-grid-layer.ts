@@ -31,7 +31,7 @@ import {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
-import {GPUAggregator} from '../aggregation-layer-v9/gpu-aggregator/gpu-aggregator';
+import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
@@ -115,8 +115,8 @@ export default class ScreenGridLayer<
   static layerName = 'ScreenGridLayer';
   static defaultProps = defaultProps;
 
-  createAggregator(): GPUAggregator | CPUAggregator {
-    if (!this.props.gpuAggregation || !GPUAggregator.isSupported(this.context.device)) {
+  createAggregator(): WebGLAggregator | CPUAggregator {
+    if (!this.props.gpuAggregation || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
@@ -135,7 +135,7 @@ export default class ScreenGridLayer<
         getValue: [{sources: ['counts'], getValue: ({counts}) => counts}]
       });
     }
-    return new GPUAggregator(this.context.device, {
+    return new WebGLAggregator(this.context.device, {
       dimensions: 2,
       numChannels: 1,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
@@ -196,7 +196,7 @@ export default class ScreenGridLayer<
       const {width, height} = this.context.viewport;
       const {aggregator} = this.state;
 
-      if (aggregator instanceof GPUAggregator) {
+      if (aggregator instanceof WebGLAggregator) {
         aggregator.setProps({
           binIdRange: [
             [0, Math.ceil(width / cellSizePixels)],
@@ -249,7 +249,7 @@ export default class ScreenGridLayer<
       }),
       {
         data: {
-          length: aggregator.numBins,
+          length: aggregator.binCount,
           attributes: {
             getBin: binAttribute,
             getWeight: weightAttribute
