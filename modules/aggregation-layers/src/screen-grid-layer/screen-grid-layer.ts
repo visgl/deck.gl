@@ -107,6 +107,21 @@ export type _ScreenGridLayerProps<DataT> = {
   aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
 };
 
+export type ScreenGridLayerPickingInfo<DataT> = PickingInfo<{
+  /** Column index of the picked cell, starting from 0 at the left of the viewport */
+  col: number;
+  /** Row index of the picked cell, starting from 0 at the top of the viewport */
+  row: number;
+  /** Aggregated value */
+  value: number;
+  /** Number of data points in the picked cell */
+  count: number;
+  /** Indices of the data objects in the picked cell. Only available if using CPU aggregation. */
+  pointIndices?: number[];
+  /** The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array. */
+  points?: DataT[];
+}>;
+
 /** Aggregates data into histogram bins and renders them as a grid. */
 export default class ScreenGridLayer<
   DataT = any,
@@ -273,18 +288,27 @@ export default class ScreenGridLayer<
     );
   }
 
-  getPickingInfo({info}: GetPickingInfoParams): PickingInfo {
+  getPickingInfo(params: GetPickingInfoParams): ScreenGridLayerPickingInfo<DataT> {
+    const info: ScreenGridLayerPickingInfo<DataT> = params.info;
     const {index} = info;
     if (index >= 0) {
       const bin = this.state.aggregator.getBin(index);
+      let object: ScreenGridLayerPickingInfo<DataT>['object'];
       if (bin) {
-        info.object = {
+        object = {
           col: bin.id[0],
           row: bin.id[1],
-          weight: Number.isFinite(bin.value[0]) ? bin.value[0] : undefined,
+          value: bin.value[0],
           count: bin.count
         };
+        if (bin.points) {
+          object.pointIndices = bin.points;
+          object.points = Array.isArray(this.props.data)
+            ? bin.points.map(i => (this.props.data as DataT[])[i])
+            : [];
+        }
       }
+      info.object = object;
     }
 
     return info;
