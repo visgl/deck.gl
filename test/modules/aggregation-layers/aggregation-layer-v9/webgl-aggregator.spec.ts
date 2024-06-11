@@ -1,17 +1,17 @@
 import test from 'tape-promise/tape';
 import {Attribute} from '@deck.gl/core';
-import {GPUAggregator} from '@deck.gl/aggregation-layers';
+import {WebGLAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';
 
 import {IncomeSurvey} from './data-sample';
 import {getResourceCounts, binaryAttributeToArray} from './test-utils';
 
-test('GPUAggregator#resources', t => {
+test('WebGLAggregator#resources', t => {
   const oldResourceCounts = getResourceCounts();
   // An aggregator that calculates average income grouped by education
-  const aggregator = new GPUAggregator(device, {
+  const aggregator = new WebGLAggregator(device, {
     dimensions: 1,
-    numChannels: 1,
+    channelCount: 1,
     bufferLayout: [
       {name: 'income', format: 'float32', stepMode: 'vertex'},
       {name: 'education', format: 'float32', stepMode: 'vertex'}
@@ -73,12 +73,12 @@ test('GPUAggregator#resources', t => {
   t.end();
 });
 
-test('GPUAggregator#1D', t => {
+test('WebGLAggregator#1D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income [2] highest education, grouped by age
-  const aggregator = new GPUAggregator(device, {
+  const aggregator = new WebGLAggregator(device, {
     dimensions: 1,
-    numChannels: 3,
+    channelCount: 3,
     bufferLayout: [
       {name: 'age', format: 'float32', stepMode: 'vertex'},
       {name: 'income', format: 'float32', stepMode: 'vertex'},
@@ -124,17 +124,17 @@ test('GPUAggregator#1D', t => {
   aggregator.update();
   aggregator.preDraw({moduleSettings: {}});
 
-  t.is(aggregator.numBins, 15, 'numBins');
+  t.is(aggregator.binCount, 15, 'binCount');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getBins(), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getBins(), aggregator.binCount),
     // prettier-ignore
     [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     'getBins()'
   );
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(0), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     // prettier-ignore
     [NaN, 1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2],
     'getResult() - total counts'
@@ -142,7 +142,7 @@ test('GPUAggregator#1D', t => {
   t.deepEqual(aggregator.getResultDomain(0), [1, 5], 'getResultDomain() - counts');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(1), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     // prettier-ignore
     [NaN, 25, 48, 54, 100, 145, 250, 72.5, 252.5, 107.5, 0, 127.5, 0, 40, 25],
     'getResult() - mean income'
@@ -150,7 +150,7 @@ test('GPUAggregator#1D', t => {
   t.deepEqual(aggregator.getResultDomain(1), [0, 252.5], 'getResultDomain() - mean income');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(2), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(2), aggregator.binCount),
     // prettier-ignore
     [NaN, 1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3],
     'getResult() - max education'
@@ -175,12 +175,12 @@ test('GPUAggregator#1D', t => {
   t.end();
 });
 
-test('GPUAggregator#2D', t => {
+test('WebGLAggregator#2D', t => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
-  const aggregator = new GPUAggregator(device, {
+  const aggregator = new WebGLAggregator(device, {
     dimensions: 2,
-    numChannels: 2,
+    channelCount: 2,
     bufferLayout: [
       {name: 'age', format: 'float32', stepMode: 'vertex'},
       {name: 'income', format: 'float32', stepMode: 'vertex'},
@@ -230,10 +230,10 @@ test('GPUAggregator#2D', t => {
   aggregator.update();
   aggregator.preDraw({moduleSettings: {}});
 
-  t.is(aggregator.numBins, 20, 'numBins');
+  t.is(aggregator.binCount, 20, 'binCount');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getBins(), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getBins(), aggregator.binCount),
     // prettier-ignore
     [ 2, 1, 3, 1, 4, 1, 5, 1,
       2, 2, 3, 2, 4, 2, 5, 2,
@@ -244,7 +244,7 @@ test('GPUAggregator#2D', t => {
   );
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(0), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     // prettier-ignore
     [ NaN, NaN, NaN, NaN, 4,
       NaN, 1, NaN, 4, 2,
@@ -255,7 +255,7 @@ test('GPUAggregator#2D', t => {
   t.deepEqual(aggregator.getResultDomain(0), [1, 4], 'getResultDomain() - counts');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(1), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     // prettier-ignore
     [ NaN, NaN, NaN, NaN, 25,
       NaN, 65, NaN, 97.5, 90,

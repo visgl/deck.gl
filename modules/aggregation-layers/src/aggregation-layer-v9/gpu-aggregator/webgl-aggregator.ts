@@ -7,21 +7,21 @@ import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-/** Options used to construct a new GPUAggregator */
-export type GPUAggregatorOptions = {
+/** Options used to construct a new WebGLAggregator */
+export type WebGLAggregatorOptions = {
   /** Size of bin IDs */
   dimensions: 1 | 2;
   /** How many properties to perform aggregation on */
-  numChannels: 1 | 2 | 3;
+  channelCount: 1 | 2 | 3;
   /** Buffer layout for input attributes */
   bufferLayout?: BufferLayout[];
   /** Define a shader function with one of the signatures
    *  `void getBin(out int binId)`: if dimensions=1
    *  `void getBin(out ivec2 binId)`: if dimensions=2
    * And a shader function with one of the signatures
-   *  `void getValue(out float value)`: if numChannels=1
-   *  `void getValue(out vec2 value)`: if numChannels=2
-   *  `void getValue(out vec3 value)`: if numChannels=3
+   *  `void getValue(out float value)`: if channelCount=1
+   *  `void getValue(out vec2 value)`: if channelCount=2
+   *  `void getValue(out vec3 value)`: if channelCount=3
    */
   vs: string;
   /** Shader modules
@@ -33,7 +33,7 @@ export type GPUAggregatorOptions = {
 };
 
 /** Props used to run GPU aggregation, can be changed at any time */
-export type GPUAggregationProps = AggregationProps & {
+export type WebGLAggregationProps = AggregationProps & {
   /** Limits of binId defined for each dimension. Ids outside of the [start, end) are ignored.
    */
   binIdRange: [start: number, end: number][];
@@ -42,7 +42,7 @@ export type GPUAggregationProps = AggregationProps & {
 };
 
 /** An Aggregator implementation that calculates aggregation on the GPU */
-export class GPUAggregator implements Aggregator {
+export class WebGLAggregator implements Aggregator {
   /** Checks if the current device supports GPU aggregation */
   static isSupported(device: Device): boolean {
     return (
@@ -52,11 +52,11 @@ export class GPUAggregator implements Aggregator {
   }
 
   dimensions: 1 | 2;
-  numChannels: 1 | 2 | 3;
-  numBins: number = 0;
+  channelCount: 1 | 2 | 3;
+  binCount: number = 0;
 
   device: Device;
-  props: GPUAggregationProps = {
+  props: WebGLAggregationProps = {
     pointCount: 0,
     binIdRange: [[0, 0]],
     operations: [],
@@ -71,11 +71,11 @@ export class GPUAggregator implements Aggregator {
   /** Step 2. (optional) calculate the min/max across all bins */
   protected aggregationTransform: WebGLAggregationTransform;
 
-  constructor(device: Device, settings: GPUAggregatorOptions) {
+  constructor(device: Device, settings: WebGLAggregatorOptions) {
     this.device = device;
     this.dimensions = settings.dimensions;
-    this.numChannels = settings.numChannels;
-    this.needsUpdate = new Array(this.numChannels).fill(true);
+    this.channelCount = settings.channelCount;
+    this.needsUpdate = new Array(this.channelCount).fill(true);
     this.binSorter = new WebGLBinSorter(device, settings);
     this.aggregationTransform = new WebGLAggregationTransform(device, settings);
   }
@@ -91,10 +91,10 @@ export class GPUAggregator implements Aggregator {
   /** Returns an accessor to the output for a given channel. */
   getResult(channel: 0 | 1 | 2): BinaryAttribute | null {
     const buffer = this.aggregationTransform.valueBuffer;
-    if (!buffer || channel >= this.numChannels) {
+    if (!buffer || channel >= this.channelCount) {
       return null;
     }
-    return {buffer, type: 'float32', size: 1, stride: this.numChannels * 4, offset: channel * 4};
+    return {buffer, type: 'float32', size: 1, stride: this.channelCount * 4, offset: channel * 4};
   }
 
   /** Returns the [min, max] of aggregated values for a given channel. */
@@ -104,7 +104,7 @@ export class GPUAggregator implements Aggregator {
 
   /** Returns the information for a given bin. */
   getBin(index: number): AggregatedBin | null {
-    if (index < 0 || index >= this.numBins) {
+    if (index < 0 || index >= this.binCount) {
       return null;
     }
     const {binIdRange} = this.props;
@@ -124,7 +124,7 @@ export class GPUAggregator implements Aggregator {
     }
     const count = pixel[3];
     const value: number[] = [];
-    for (let channel = 0; channel < this.numChannels; channel++) {
+    for (let channel = 0; channel < this.channelCount; channel++) {
       const operation = this.props.operations[channel];
       if (operation === 'COUNT') {
         value[channel] = count;
@@ -144,7 +144,7 @@ export class GPUAggregator implements Aggregator {
   }
 
   /** Update aggregation props. Normalize prop values and set change flags. */
-  setProps(props: Partial<GPUAggregationProps>) {
+  setProps(props: Partial<WebGLAggregationProps>) {
     const oldProps = this.props;
 
     // Update local settings. These will set the flag this._needsUpdate
@@ -154,18 +154,18 @@ export class GPUAggregator implements Aggregator {
 
       if (this.dimensions === 1) {
         const [[x0, x1]] = binIdRange;
-        this.numBins = x1 - x0;
+        this.binCount = x1 - x0;
       } else {
         const [[x0, x1], [y0, y1]] = binIdRange;
-        this.numBins = (x1 - x0) * (y1 - y0);
+        this.binCount = (x1 - x0) * (y1 - y0);
       }
 
-      this.binSorter.setDimensions(this.numBins, binIdRange);
-      this.aggregationTransform.setDimensions(this.numBins, binIdRange);
+      this.binSorter.setDimensions(this.binCount, binIdRange);
+      this.aggregationTransform.setDimensions(this.binCount, binIdRange);
       this.setNeedsUpdate();
     }
     if (props.operations) {
-      for (let channel = 0; channel < this.numChannels; channel++) {
+      for (let channel = 0; channel < this.channelCount; channel++) {
         if (props.operations[channel] !== oldProps.operations[channel]) {
           this.setNeedsUpdate(channel);
         }

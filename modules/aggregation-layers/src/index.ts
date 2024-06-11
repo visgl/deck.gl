@@ -33,7 +33,7 @@ export {default as _CPUAggregator} from './utils/cpu-aggregator';
 export {default as _AggregationLayer} from './aggregation-layer';
 export {default as _BinSorter} from './utils/bin-sorter';
 
-export {GPUAggregator} from './aggregation-layer-v9/gpu-aggregator/gpu-aggregator';
+export {WebGLAggregator} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 
 // types
 export type {ContourLayerProps} from './contour-layer/contour-layer';
@@ -45,6 +45,6 @@ export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';
 export type {ScreenGridLayerProps} from './screen-grid-layer/screen-grid-layer';
 
 export type {
-  GPUAggregationProps,
-  GPUAggregatorOptions
-} from './aggregation-layer-v9/gpu-aggregator/gpu-aggregator';
+  WebGLAggregationProps,
+  WebGLAggregatorOptions
+} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';

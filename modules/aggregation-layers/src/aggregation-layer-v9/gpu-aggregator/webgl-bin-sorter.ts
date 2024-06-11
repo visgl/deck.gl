@@ -2,7 +2,7 @@ import {Model, ModelProps} from '@luma.gl/engine';
 import {glsl, createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
-import type {GPUAggregatorOptions} from './gpu-aggregator';
+import type {WebGLAggregatorOptions} from './webgl-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 const COLOR_CHANNELS = [0x1, 0x2, 0x4, 0x8]; // GPU color mask RED, GREEN, BLUE, ALPHA
@@ -30,7 +30,7 @@ export class WebGLBinSorter {
    */
   private binsFBO: Framebuffer | null = null;
 
-  constructor(device: Device, settings: GPUAggregatorOptions) {
+  constructor(device: Device, settings: WebGLAggregatorOptions) {
     this.device = device;
     this.model = createModel(device, settings);
   }
@@ -60,9 +60,9 @@ export class WebGLBinSorter {
     return new Float32Array(buffer);
   }
 
-  setDimensions(numBins: number, binIdRange: [number, number][]) {
+  setDimensions(binCount: number, binIdRange: [number, number][]) {
     const width = TEXTURE_WIDTH;
-    const height = Math.ceil(numBins / width);
+    const height = Math.ceil(binCount / width);
 
     // Only destroy existing texture if it is not large enough
     if (!this.binsFBO) {
@@ -175,7 +175,7 @@ function getMaskByOperation(
   return result;
 }
 
-function createModel(device: Device, settings: GPUAggregatorOptions): Model {
+function createModel(device: Device, settings: WebGLAggregatorOptions): Model {
   let userVs = settings.vs;
 
   if (settings.dimensions === 2) {
@@ -249,7 +249,7 @@ void main() {
 `;
   const model = new Model(device, {
     ...settings,
-    defines: {...settings.defines, NON_INSTANCED_MODEL: 1, NUM_CHANNELS: settings.numChannels},
+    defines: {...settings.defines, NON_INSTANCED_MODEL: 1, NUM_CHANNELS: settings.channelCount},
     isInstanced: false,
     vs,
     fs,

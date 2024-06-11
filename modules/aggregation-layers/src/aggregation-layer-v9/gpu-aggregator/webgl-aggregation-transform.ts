@@ -2,7 +2,7 @@ import {BufferTransform} from '@luma.gl/engine';
 import {glsl, createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core';
-import type {GPUAggregatorOptions} from './gpu-aggregator';
+import type {WebGLAggregatorOptions} from './webgl-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 import {TEXTURE_WIDTH} from './webgl-bin-sorter';
@@ -11,7 +11,7 @@ const MAX_FLOAT32 = 3e38;
 
 export class WebGLAggregationTransform {
   device: Device;
-  numChannels: number;
+  channelCount: number;
 
   /** Packed from bin ids */
   binBuffer: Buffer | null = null;
@@ -26,9 +26,9 @@ export class WebGLAggregationTransform {
   /** Aggregated [min, max] for each channel */
   private _domains: [min: number, max: number][] | null = null;
 
-  constructor(device: Device, settings: GPUAggregatorOptions) {
+  constructor(device: Device, settings: WebGLAggregatorOptions) {
     this.device = device;
-    this.numChannels = settings.numChannels;
+    this.channelCount = settings.channelCount;
     this.transform = createTransform(device, settings);
     this.domainFBO = createRenderTarget(device, 2, 1);
   }
@@ -50,14 +50,14 @@ export class WebGLAggregationTransform {
         [-domain[4], domain[0]],
         [-domain[5], domain[1]],
         [-domain[6], domain[2]]
-      ].slice(0, this.numChannels) as [number, number][];
+      ].slice(0, this.channelCount) as [number, number][];
     }
     return this._domains;
   }
 
-  setDimensions(numBins: number, binIdRange: [number, number][]) {
+  setDimensions(binCount: number, binIdRange: [number, number][]) {
     const {model, transformFeedback} = this.transform;
-    model.setVertexCount(numBins);
+    model.setVertexCount(binCount);
     model.setUniforms({
       binIdRange: [
         binIdRange[0][0],
@@ -68,14 +68,14 @@ export class WebGLAggregationTransform {
     });
 
     // Only destroy existing buffer if it is not large enough
-    const binBufferByteLength = numBins * binIdRange.length * 4;
+    const binBufferByteLength = binCount * binIdRange.length * 4;
     if (!this.binBuffer || this.binBuffer.byteLength < binBufferByteLength) {
       this.binBuffer?.destroy();
       this.binBuffer = this.device.createBuffer({byteLength: binBufferByteLength});
       transformFeedback.setBuffer('binIds', this.binBuffer);
     }
 
-    const valueBufferByteLength = numBins * this.numChannels * 4;
+    const valueBufferByteLength = binCount * this.channelCount * 4;
     if (!this.valueBuffer || this.valueBuffer.byteLength < valueBufferByteLength) {
       this.valueBuffer?.destroy();
       this.valueBuffer = this.device.createBuffer({byteLength: valueBufferByteLength});
@@ -112,7 +112,7 @@ export class WebGLAggregationTransform {
   }
 }
 
-function createTransform(device: Device, settings: GPUAggregatorOptions): BufferTransform {
+function createTransform(device: Device, settings: WebGLAggregatorOptions): BufferTransform {
   const vs = glsl`\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex
@@ -229,7 +229,7 @@ void main() {
     },
     defines: {
       NUM_DIMS: settings.dimensions,
-      NUM_CHANNELS: settings.numChannels,
+      NUM_CHANNELS: settings.channelCount,
       SAMPLER_WIDTH: TEXTURE_WIDTH
     },
     uniforms: {
