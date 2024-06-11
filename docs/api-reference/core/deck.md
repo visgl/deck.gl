@@ -48,13 +48,17 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
 
+#### `device` ([Device](https://luma.gl/docs/api-reference/core/device))
+
+luma.gl Device used to manage the application's connection with the GPU. Will be auto-created if not supplied.
+
+#### `deviceProps` ([DeviceProps](https://luma.gl/docs/api-reference/core/device#deviceprops) | [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)) {#deviceprops}
+
+Additional options used when creating the luma.gl [Device](https://luma.gl/docs/api-reference/core/device). When using WebGL, see [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes).
+
 #### `gl` (WebGLContext) {#gl}
 
-WebGL context. Will be auto-created if not supplied.
-
-#### `glOptions` (object) {#gloptions}
-
-Additional options used when creating the WebGLContext. See [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext).
+WebGL context. Will be auto-created if not supplied. Deprecated, use `device`.
 
 #### `id` (string) {#id}
 
@@ -434,7 +438,7 @@ Called once the [Device](https://luma.gl/docs/api-reference/core/device) context
 
 Receives arguments:
 
-* `device` (Device) - a `WEBGLDevice` or `WebGPUDevice`.
+* `device` (Device) - a `WebGLDevice` or `WebGPUDevice`.
 
 #### `onViewStateChange` (Function) {#onviewstatechange}
 
