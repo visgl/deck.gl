@@ -285,6 +285,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return false;
   }
 
+  /** `true` if the layer renders to screen */
+  get isDrawable(): boolean {
+    return true;
+  }
+
   /** Updates selected state members and marks the layer for redraw */
   setState(partialState: any): void {
     this.setChangeFlags({stateChanged: true});
@@ -1009,6 +1014,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         extension.updateState.call(this, updateParams, extension);
       }
 
+      this.setNeedsRedraw();
+      // Check if attributes need recalculation
+      this._updateAttributes();
+
       const modelChanged = this.getModels()[0] !== oldModels[0];
       this._postUpdate(updateParams, modelChanged);
       // End subclass lifecycle methods
@@ -1251,10 +1260,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called after updateState to perform common tasks */
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
     const {props, oldProps} = updateParams;
-
-    this.setNeedsRedraw();
-    // Check if attributes need recalculation
-    this._updateAttributes();
 
     // Note: Automatic instance count update only works for single layers
     const model = this.state.model as Model | undefined;
