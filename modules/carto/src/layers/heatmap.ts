@@ -1,5 +1,4 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
-import {random} from '@luma.gl/shadertools';
 import {Color} from '@deck.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
@@ -70,9 +69,6 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   bool firstPass = (heatmap.delta.y < 0.5);
   float accumulator = 0.0;
 
-  // Randomize the lookup values to hide the fixed number of samples
-  float offset = 0.5 * random(vec3(12.9898, 78.233, 151.7182), 0.0);
-
   // Controls quality of heatmap, larger values increase quality at expense of performance
   float SUPPORT = clamp(heatmap.radiusPixels / 2.0, 8.0, 32.0);
 
@@ -81,7 +77,7 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   float a = -0.5 / (sigma * sigma);
   float w0 = 0.3989422804014327 / sigma; // 1D normalization
   for (float t = -SUPPORT; t <= SUPPORT; t++) {
-    vec2 percent = (t * heatmap.delta + offset - 0.5) / SUPPORT;
+    vec2 percent = (t * heatmap.delta - 0.5) / SUPPORT;
     vec2 delta = percent * heatmap.radiusPixels / texSize;
     vec4 offsetColor = texture(source, texCoord + delta);
 
@@ -224,7 +220,6 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       opacity
     };
   },
-  dependencies: [random],
   fs,
   passes: [
     {sampler: true, uniforms: {delta: [1, 0]}},
