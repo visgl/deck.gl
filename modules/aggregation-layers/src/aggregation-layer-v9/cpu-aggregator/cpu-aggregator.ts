@@ -31,7 +31,7 @@ export type Bin = {
 /** An Aggregator implementation that calculates aggregation on the CPU */
 export class CPUAggregator implements Aggregator {
   dimensions: number;
-  numChannels: number;
+  channelCount: number;
 
   props: CPUAggregationProps = {
     binOptions: {},
@@ -54,7 +54,7 @@ export class CPUAggregator implements Aggregator {
 
   constructor({dimensions, getBin, getValue}: CPUAggregatorOptions) {
     this.dimensions = dimensions;
-    this.numChannels = getValue.length;
+    this.channelCount = getValue.length;
     this.getBinId = getBin;
     this.getValue = getValue;
     this.needsUpdate = true;
@@ -62,7 +62,7 @@ export class CPUAggregator implements Aggregator {
 
   destroy() {}
 
-  get numBins() {
+  get binCount() {
     return this.bins.length;
   }
 
@@ -76,7 +76,7 @@ export class CPUAggregator implements Aggregator {
       }
     }
     if (props.operations) {
-      for (let channel = 0; channel < this.numChannels; channel++) {
+      for (let channel = 0; channel < this.channelCount; channel++) {
         if (props.operations[channel] !== oldProps.operations[channel]) {
           this.setNeedsUpdate(channel);
         }
@@ -123,7 +123,7 @@ export class CPUAggregator implements Aggregator {
         target: this.binIds
       });
     }
-    for (let channel = 0; channel < this.numChannels; channel++) {
+    for (let channel = 0; channel < this.channelCount; channel++) {
       if (this.needsUpdate === true || this.needsUpdate[channel]) {
         this.results[channel] = aggregateChannel({
           bins: this.bins,
@@ -174,7 +174,7 @@ export class CPUAggregator implements Aggregator {
     if (!bin) {
       return null;
     }
-    const value = new Array(this.numChannels);
+    const value = new Array(this.channelCount);
     for (let i = 0; i < value.length; i++) {
       const result = this.results[i];
       value[i] = result?.value[index];

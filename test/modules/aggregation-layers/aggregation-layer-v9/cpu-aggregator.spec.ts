@@ -45,17 +45,17 @@ test('CPUAggregator#1D', t => {
 
   aggregator.update();
 
-  t.is(aggregator.numBins, 14, 'numBins');
+  t.is(aggregator.binCount, 14, 'binCount');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getBins(), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getBins(), aggregator.binCount),
     // prettier-ignore
     [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     'getBins()'
   );
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(0), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     // prettier-ignore
     [1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2],
     'getResult() - total counts'
@@ -63,7 +63,7 @@ test('CPUAggregator#1D', t => {
   t.deepEqual(aggregator.getResultDomain(0), [1, 5], 'getResultDomain() - counts');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(1), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     // prettier-ignore
     [25, 48, 54, 100, 145, 250, 72.5, 252.5, 107.5, 0, 127.5, 0, 40, 25],
     'getResult() - mean income'
@@ -71,7 +71,7 @@ test('CPUAggregator#1D', t => {
   t.deepEqual(aggregator.getResultDomain(1), [0, 252.5], 'getResultDomain() - mean income');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(2), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(2), aggregator.binCount),
     // prettier-ignore
     [1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3],
     'getResult() - max education'
@@ -135,10 +135,10 @@ test('CPUAggregator#2D', t => {
 
   aggregator.update();
 
-  t.is(aggregator.numBins, 12, 'numBins');
+  t.is(aggregator.binCount, 12, 'binCount');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getBins(), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getBins(), aggregator.binCount),
     // prettier-ignore
     [ 2, 2, 2, 3, 2, 4,
       3, 3, 3, 4, 3, 5,
@@ -148,7 +148,7 @@ test('CPUAggregator#2D', t => {
   );
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(0), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     // prettier-ignore
     [ 4, 4, 2, 2, 2, 1, 2, 1, 1, 1, 3, 1 ],
     'getResult() - total counts'
@@ -156,7 +156,7 @@ test('CPUAggregator#2D', t => {
   t.deepEqual(aggregator.getResultDomain(0), [1, 4], 'getResultDomain() - counts');
 
   t.deepEqual(
-    binaryAttributeToArray(aggregator.getResult(1), aggregator.numBins),
+    binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     // prettier-ignore
     [25, 97.5, 10, 90, 175, 60, 320, 110, 80, 65, 200, 120 ],
     'getResult() - mean income'
