@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.18] - Jun 12 2024
+
+- feat(carto): HeatmapTileLayer implement autoscaling (#8944)
+- fix(widgets): use assigned viewport to change viewState (#8903)
+- feat(geo-layers): Allow layers extending MVTLayer to override isWGS84 (#8932)
+- fix(carto): Support picking with MVT tile-relative coordinates (#8926)
+
 #### deck.gl [9.0.17] - May 29 2024
 
 - feat(carto): Support filters parameter in rasterSource (#8928)
