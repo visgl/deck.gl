@@ -110,6 +110,13 @@ Method called to retrieve weight of each quadbin cell. By default each cell will
 
 #### `onMaxDensityChange` (Function, optional) {#onmaxdensitychange}
 
-`onMaxDensityChange` is a function that is called when maximum density of the displayed data changes. The units correspond to a density, such that a value of `1` is a single entity across the entire world, in Mercator projection space. 
+Function that is called when the maximum density of the displayed data changes. The units correspond to a density, such that a value of `1` is a weight of `1` across the entire world, in Mercator projection space. To obtain the density the layer invokes the `getWeight` accessor on all visible quadbin cells, normalizing by the cell area (`0.25 ** cellZ`). The value is then heurstically adjusted based on the viewport zoom to give smooth transitions when the data changes. 
 
 - Default: `null`
+
+##### Example
+
+A quadbin cell at zoom level `2` with a `weight` of `1000` gives a density of `16000` (`1000 / (0.25 ** 2)`). Upon zooming in, there are different ways the data can be distributed, with the extremes are given here:
+
+- At zoom level `3` the cell splits equally into four cells with weight `250`. The density stays at `16000` (`250 / (0.25 ** 3)`).
+- The cell splits into three empty cells and one with weight `1000`. The density increases to `64000` (`1000 / (0.25 ** 3)`).
