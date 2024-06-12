@@ -42,16 +42,12 @@ vec3 colorGradient(float value) {
   } else if (value < STOPS.w) {
     range = STOPS.zw;
     c1 = heatmap.color4; c2 = heatmap.color5;
-  } else if (value < 1.0 ) {
+  } else {
     range = vec2(STOPS.w, 1.0);
     c1 = heatmap.color5; c2 = heatmap.color6;
-  } else {
-    // Fade out to white
-    range = vec2(1.0, 10.0);
-    c1 = heatmap.color6; c2 = vec3(255.0);
   }
 
-  float f = (value - range.x) / (range.y - range.x);
+  float f = (clamp(value, 0.0, 1.0) - range.x) / (range.y - range.x);
   return mix(c1, c2, f) / 255.0;
 }
 

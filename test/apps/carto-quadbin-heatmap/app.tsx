@@ -78,7 +78,7 @@ export default function App({layers, initialViewState = INITIAL_VIEW_STATE, mapS
       visible,
       onViewportLoad: () => setVisible(true),
       onMaxDensityChange: setMaxDensity,
-      intensity: 10,
+      intensity: 1,
 
       getWeight,
       opacity: 0.8,
