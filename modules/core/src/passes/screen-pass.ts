@@ -59,6 +59,9 @@ export default class ScreenPass extends Pass {
       screen: screenProps,
       ...options.moduleProps
     });
+    if (window.colorTexture) {
+      this.model.setBindings({colorTexture: window.colorTexture});
+    }
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},

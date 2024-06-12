@@ -23,9 +23,13 @@ uniform heatmapUniforms {
   float opacity;
 } heatmap;
 
+
+uniform sampler2D colorTexture;
+
 const vec4 STOPS = vec4(0.2, 0.4, 0.6, 0.8);
 
 vec3 colorGradient(float value) {
+  return texture(colorTexture, vec2(value, 0.5)).rgb;
   vec3 c1;
   vec3 c2;
   vec2 range;
