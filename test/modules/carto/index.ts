@@ -16,6 +16,7 @@ import './layers/point-label-layer.spec';
 import './layers/quadbin-layer.spec';
 import './layers/quadbin-tile-layer.spec';
 import './layers/quadbin-tileset-2d.spec';
+import './layers/utils.spec';
 import './layers/vector-tile-layer.spec';
 import './sources/boundary-query-source.spec';
 import './sources/boundary-table-source.spec';
