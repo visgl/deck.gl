@@ -8,7 +8,7 @@ test('boundaryTableSource', async t => {
       connectionName: 'carto_dw',
       accessToken: '<token>',
       tilesetTableName: 'a.b.tileset_table',
-      matchingColumn: 'geoid',
+      matchingColumn: 'custom_id',
       columns: ['column1', 'column2'],
       propertiesTableName: 'a.b.properties_table'
     });
@@ -19,7 +19,7 @@ test('boundaryTableSource', async t => {
 
     t.match(initCall.url, /v3\/maps\/carto_dw\/boundary/, 'connection');
     t.match(initCall.url, /tilesetTableName=a.b.tileset_table/, 'tilesetTableName');
-    t.match(initCall.url, /matchingColumn=geoid/, 'matchingColumn');
+    t.match(initCall.url, /matchingColumn=custom_id/, 'matchingColumn');
     t.match(initCall.url, /propertiesTableName=a.b.properties_table/, 'propertiesTableName');
     t.match(initCall.url, /columns=column1%2Ccolumn2/, 'columns');
 
@@ -28,6 +28,7 @@ test('boundaryTableSource', async t => {
     t.ok(tilejson, 'returns source');
     t.deepEqual(tilejson.tiles, ['https://xyz.com/{z}/{x}/{y}?formatTiles=binary'], 'source.tiles');
     t.equal(tilejson.accessToken, '<token>', 'source.accessToken');
+    t.equal(tilejson.matchingColumn, 'custom_id', 'source.matchingColumn');
   }).catch(t.fail);
   t.end();
 });
