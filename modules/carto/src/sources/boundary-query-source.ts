@@ -45,5 +45,11 @@ export const boundaryQuerySource = async function (
   if (queryParameters) {
     urlParameters.queryParameters = queryParameters;
   }
-  return baseSource<UrlParameters>('boundary', options, urlParameters) as Promise<TilejsonResult>;
+  const json = (await baseSource<UrlParameters>(
+    'boundary',
+    options,
+    urlParameters
+  )) as TilejsonResult;
+  json.matchingColumn = matchingColumn;
+  return json;
 };

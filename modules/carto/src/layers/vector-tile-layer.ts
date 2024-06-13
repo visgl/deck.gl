@@ -80,7 +80,7 @@ export default class VectorTileLayer<
   /* eslint-disable camelcase */
   async getTileData(tile: TileLoadProps) {
     const tileJSON = this.props.data as TilejsonResult;
-    const {tiles, properties_tiles} = tileJSON;
+    const {tiles, properties_tiles, matchingColumn} = tileJSON;
     const url = _getURLFromTemplate(tiles, tile);
     if (!url) {
       return Promise.reject('Invalid URL');
@@ -111,7 +111,7 @@ export default class VectorTileLayer<
     const [geometry, attributes] = await Promise.all([geometryFetch, attributesFetch]);
     if (!geometry) return null;
 
-    return attributes ? mergeBoundaryData(geometry, attributes) : geometry;
+    return attributes ? mergeBoundaryData(geometry, attributes, matchingColumn!) : geometry;
   }
   /* eslint-enable camelcase */
 

@@ -16,7 +16,11 @@ export function injectAccessToken(loadOptions: any, accessToken: string): void {
   }
 }
 
-export function mergeBoundaryData(geometry: VectorTile, properties: PropertiesTile): VectorTile {
+export function mergeBoundaryData(
+  geometry: VectorTile,
+  properties: PropertiesTile,
+  matchingColumn: string
+): VectorTile {
   const mapping = {};
   for (const {geoid, ...rest} of properties.properties) {
     if (geoid in mapping) {
