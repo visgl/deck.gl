@@ -47,7 +47,7 @@ export function mergeBoundaryData(
 
     geom.properties = geom.properties.map((property: Record<string, string>) => {
       const matchingKey = property[matchingColumn];
-      if (!matchingKey || matchingKey === '') {
+      if (!matchingKey) {
         log.warn(
           `Boundaries: Missing value for matchingKey with matchingColumn: ${matchingColumn}`
         )();
