@@ -153,9 +153,9 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
     let tileZ = 0;
     let maxDensity = 0;
-    const tiles = [...this.state.tiles].filter(t => t.isVisible && t.data);
+    const tiles = [...this.state.tiles].filter(t => t.isVisible && t.content);
     for (const tile of tiles) {
-      const cell = tile.data[0];
+      const cell = tile.content[0];
       const unitDensity = unitDensityForCell(cell.id);
       maxDensity = Math.max(tile.userData!.maxWeight * unitDensity, maxDensity);
       tileZ = Math.max(tile.zoom, tileZ);
