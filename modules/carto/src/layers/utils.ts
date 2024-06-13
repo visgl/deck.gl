@@ -33,7 +33,7 @@ export function mergeBoundaryData(
     delete row[matchingColumn];
 
     if (matchingKey in mapping) {
-      log.warn('Properties: Duplicate key in boundary mapping, using first occurance')();
+      log.warn('Properties: Duplicate key in boundary mapping, using first occurrence')();
     } else {
       mapping[matchingKey] = row;
     }
