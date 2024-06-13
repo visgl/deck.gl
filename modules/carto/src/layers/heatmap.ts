@@ -219,6 +219,10 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       opacity
     };
   },
+  getBindings: opts => {
+    const {colorTexture} = opts;
+    return {colorTexture};
+  },
   fs,
   passes: [
     {sampler: true, uniforms: {delta: [1, 0]}},

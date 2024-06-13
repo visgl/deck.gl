@@ -206,7 +206,6 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     if (typeof onMaxDensityChange === 'function') {
       onMaxDensityChange(maxDensity);
     }
-    window.colorTexture = this.state.colorTexture;
     return new PostProcessQuadbinTileLayer(
       tileLayerProps as Omit<QuadbinTileLayerProps, 'data'>,
       this.getSubLayerProps({
