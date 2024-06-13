@@ -24,7 +24,7 @@ export function mergeBoundaryData(
   const mapping = {};
   for (const property of properties.properties) {
     const matchingKey = property[matchingColumn];
-    if (!matchingKey || matchingKey === '') {
+    if (!matchingKey) {
       log.warn(
         `Properties: Missing value for matchingKey with matchingColumn: ${matchingColumn}`
       )();
