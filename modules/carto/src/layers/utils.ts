@@ -29,13 +29,10 @@ export function mergeBoundaryData(
         `Properties: Missing value for matchingKey with matchingColumn: ${matchingColumn}`
       )();
     }
-    const row = {...property};
-    delete row[matchingColumn];
-
     if (matchingKey in mapping) {
       log.warn('Properties: Duplicate key in boundary mapping, using first occurrence')();
     } else {
-      mapping[matchingKey] = row;
+      mapping[matchingKey] = property;
     }
   }
 
