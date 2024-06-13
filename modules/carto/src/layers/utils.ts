@@ -22,11 +22,20 @@ export function mergeBoundaryData(
   matchingColumn: string
 ): VectorTile {
   const mapping = {};
-  for (const {geoid, ...rest} of properties.properties) {
-    if (geoid in mapping) {
-      log.warn('Duplicate geoid key in boundary mapping, using first occurance')();
+  for (const property of properties.properties) {
+    const matchingKey = property[matchingColumn];
+    if (!matchingKey || matchingKey === '') {
+      log.warn(
+        `Properties: Missing value for matchingKey with matchingColumn: ${matchingColumn}`
+      )();
+    }
+    const row = {...property};
+    delete row[matchingColumn];
+
+    if (matchingKey in mapping) {
+      log.warn('Properties: Duplicate key in boundary mapping, using first occurance')();
     } else {
-      mapping[geoid] = rest;
+      mapping[matchingKey] = row;
     }
   }
 
@@ -36,7 +45,16 @@ export function mergeBoundaryData(
       continue;
     }
 
-    geom.properties = geom.properties.map(({geoid}) => mapping[geoid]);
+    geom.properties = geom.properties.map((property: Record<string, string>) => {
+      const matchingKey = property[matchingColumn];
+      if (!matchingKey || matchingKey === '') {
+        log.warn(
+          `Boundaries: Missing value for matchingKey with matchingColumn: ${matchingColumn}`
+        )();
+      }
+
+      return mapping[matchingKey];
+    });
 
     // numericProps need to be filled to match length of positions buffer
     const {positions, globalFeatureIds} = geom;
