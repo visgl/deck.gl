@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.19] - Jun 13 2024
+
+- fix(carto): Use tile.content in HeatmapTileLayer (#8947)
+- docs: Fix broken link after file rename (#8946)
+
 #### deck.gl [9.0.18] - Jun 12 2024
 
 - feat(carto): HeatmapTileLayer implement autoscaling (#8944)
