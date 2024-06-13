@@ -32,7 +32,10 @@ export type VectorTileLayerProps<FeaturePropertiesT = unknown> = _VectorTileLaye
 
 /** Properties added by VectorTileLayer. */
 type _VectorTileLayerProps = {
-  data: null | TilejsonResult | Promise<TilejsonResult>;
+  data:
+    | null
+    | (TilejsonResult & {matchingColumn?: string})
+    | Promise<TilejsonResult & {matchingColumn?: string}>;
 };
 
 // @ts-ignore
@@ -79,7 +82,7 @@ export default class VectorTileLayer<
 
   /* eslint-disable camelcase */
   async getTileData(tile: TileLoadProps) {
-    const tileJSON = this.props.data as TilejsonResult;
+    const tileJSON = this.props.data as TilejsonResult & {matchingColumn?: string};
     const {tiles, properties_tiles, matchingColumn} = tileJSON;
     const url = _getURLFromTemplate(tiles, tile);
     if (!url) {

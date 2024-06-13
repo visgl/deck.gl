@@ -214,7 +214,7 @@ export interface VectorLayer {
   fields: Record<string, string>;
 }
 
-export type TilejsonResult = Tilejson & {accessToken: string; matchingColumn?: string};
+export type TilejsonResult = Tilejson & {accessToken: string};
 export type GeojsonResult = {type: 'FeatureCollection'; features: Feature[]};
 export type JsonResult = any[];
 export type QueryResult = {

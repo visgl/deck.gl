@@ -90,8 +90,8 @@ export function mergeBoundaryData(
 
 export const TilejsonPropType = {
   type: 'object' as const,
-  value: null as null | TilejsonResult,
-  validate: (value: TilejsonResult, propType) =>
+  value: null as null | (TilejsonResult & {matchingColumn?: string}),
+  validate: (value: TilejsonResult & {matchingColumn?: string}, propType) =>
     (propType.optional && value === null) ||
     (typeof value === 'object' &&
       Array.isArray(value.tiles) &&

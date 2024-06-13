@@ -21,7 +21,7 @@ type UrlParameters = {
 
 export const boundaryQuerySource = async function (
   options: BoundaryQuerySourceOptions
-): Promise<TilejsonResult> {
+): Promise<TilejsonResult & {matchingColumn: string}> {
   const {
     columns,
     filters,
@@ -49,7 +49,7 @@ export const boundaryQuerySource = async function (
     'boundary',
     options,
     urlParameters
-  )) as TilejsonResult;
+  )) as TilejsonResult & {matchingColumn: string};
   json.matchingColumn = matchingColumn;
   return json;
 };

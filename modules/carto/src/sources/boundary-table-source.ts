@@ -18,7 +18,7 @@ type UrlParameters = {
 
 export const boundaryTableSource = async function (
   options: BoundaryTableSourceOptions
-): Promise<TilejsonResult> {
+): Promise<TilejsonResult & {matchingColumn: string}> {
   const {filters, tilesetTableName, columns, matchingColumn = 'id', propertiesTableName} = options;
   const urlParameters: UrlParameters = {
     tilesetTableName,
@@ -36,7 +36,7 @@ export const boundaryTableSource = async function (
     'boundary',
     options,
     urlParameters
-  )) as TilejsonResult;
+  )) as TilejsonResult & {matchingColumn: string};
   json.matchingColumn = matchingColumn;
   return json;
 };
