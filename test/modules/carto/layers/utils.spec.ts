@@ -45,6 +45,9 @@ test('mergeBoundaryData', async t => {
   };
 
   const merged = mergeBoundaryData(geometry, properties, 'custom_id');
-  t.deepEqual(merged.polygons.properties, [{name: 'A'}, {name: 'B'}]);
+  t.deepEqual(merged.polygons.properties, [
+    {custom_id: 'a', name: 'A'},
+    {custom_id: 'b', name: 'B'}
+  ]);
   t.end();
 });
