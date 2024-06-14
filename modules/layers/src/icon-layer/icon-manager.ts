@@ -456,7 +456,7 @@ export default class IconManager {
           );
 
           // @ts-expect-error TODO v9 API not yet clear
-          this._texture.setSubImageData({
+          this._texture.setTexture2DData({
             data,
             x: x + (maxWidth - width) / 2,
             y: y + (maxHeight - height) / 2,

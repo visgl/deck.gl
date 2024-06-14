@@ -354,7 +354,7 @@ export default class DataColumn<Options, State> {
       buffer?: Buffer;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
-      opts = {value: data};
+      opts = {value: data as TypedArray};
     } else if (data instanceof Buffer) {
       opts = {buffer: data};
     } else {
