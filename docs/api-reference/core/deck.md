@@ -58,7 +58,7 @@ Additional options used when creating the luma.gl [Device](https://luma.gl/docs/
 
 #### `gl` (WebGLContext) {#gl}
 
-WebGL context. Will be auto-created if not supplied. Deprecated, use `device`.
+WebGL context to use. This prop is deprecated and replaced by `device`.
 
 #### `id` (string) {#id}
 
