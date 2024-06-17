@@ -218,7 +218,7 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
 export function renderToDOM(container: HTMLElement) {
   const root = createRoot(container);
   const params = new URLSearchParams(location.search.slice(1));
-  const cartoMapId = params.has('id') ? params.get('id')! : '82729c69-cc8d-4b65-a01a-2a0ed1a18818';
+  const cartoMapId = params.has('id') ? params.get('id')! : 'f45022b8-298b-44d5-8168-3ae329808914';
 
   fetchMap({cartoMapId}).then(
     ({initialViewState, layers}) => {

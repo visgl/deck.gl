@@ -102,6 +102,8 @@ class ClusterGeoJsonLayer<
   static layerName = 'ClusterGeoJsonLayer';
   static defaultProps = defaultProps;
   state!: TileLayer<FeaturePropertiesT>['state'] & {
+    data: BinaryFeatureCollection;
+    clusterIds: bigint[];
     hoveredFeatureId: BigInt | number | null;
     highlightColor: number[];
   };
@@ -130,15 +132,22 @@ class ClusterGeoJsonLayer<
 
     data.sort((a, b) => Number(b.count - a.count));
 
-    const stats = computeAggregationStats(data, properties);
-    for (const d of data) {
-      d.stats = stats;
+    const clusterIds = data?.map((tile: any) => tile.id);
+    const needsUpdate = !deepEqual(clusterIds, this.state.clusterIds, 1);
+    this.setState({clusterIds});
+
+    if (needsUpdate) {
+      const stats = computeAggregationStats(data, properties);
+      for (const d of data) {
+        d.stats = stats;
+      }
+      this.setState({data: clustersToBinary(data)});
     }
 
     const props = {
       ...this.props,
       id: 'clusters',
-      data: clustersToBinary(data),
+      data: this.state.data,
       dataComparator: (data?: BinaryFeatureCollection, oldData?: BinaryFeatureCollection) => {
         const newIds = data?.points?.properties?.map((tile: any) => tile.id);
         const oldIds = oldData?.points?.properties?.map((tile: any) => tile.id);
@@ -197,7 +206,7 @@ export default class ClusterTileLayer<
     return [
       // @ts-ignore
       new ClusterGeoJsonLayer(this.props, {
-        id: `quadbin-tile-layer-${this.props.id}`,
+        id: `cluster-geojson-layer-${this.props.id}`,
         data,
         // TODO: Tileset2D should be generic over TileIndex type
         TilesetClass: QuadbinTileset2D as any,

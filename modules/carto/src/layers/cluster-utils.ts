@@ -63,8 +63,7 @@ export function aggregateTile<FeaturePropertiesT>(
     out[parentId].position[0] = (prevTotalW * out[parentId].position[0] + W * position[0]) / totalW;
     out[parentId].position[1] = (prevTotalW * out[parentId].position[1] + W * position[1]) / totalW;
 
-    // Other properties
-    // TODO don't re-aggregate layout properties
+    // Re-aggregate other properties so clusters can be styled
     for (const {name, aggregation} of properties) {
       const prevValue = out[parentId][name];
       const value = cell.properties[name] as number;
