@@ -32,6 +32,7 @@ import {
   VisualChannelField,
   VisualChannels
 } from './types';
+import HeatmapTileLayer from '../layers/heatmap-tile-layer';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -144,8 +145,14 @@ export function getLayer(
   if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
-  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
-    return getTileLayer(dataset, basePropMap);
+  if (
+    type === 'mvt' ||
+    type === 'tileset' ||
+    type === 'h3' ||
+    type === 'quadbin' ||
+    type === 'heatmapTile'
+  ) {
+    return getTileLayer(dataset, basePropMap, type);
   }
 
   const geoColumn = dataset?.geoColumn;
@@ -202,31 +209,29 @@ export function getLayer(
 }
 
 export function layerFromTileDataset(
-  scheme: string,
-  type?: MapType
+  type: string
 ): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
-  if (scheme === 'h3') {
+  if (type === 'h3') {
     return H3TileLayer;
   }
-  if (scheme === 'quadbin') {
+  if (type === 'quadbin') {
     return QuadbinTileLayer;
+  }
+  if (type === 'heatmapTile') {
+    return HeatmapTileLayer;
   }
 
   return VectorTileLayer;
 }
 
-function getTileLayer(dataset: MapDataset, basePropMap) {
-  const {
-    aggregationExp,
-    aggregationResLevel,
-    data: {scheme}
-  } = dataset;
+function getTileLayer(dataset: MapDataset, basePropMap, type: string) {
+  const {aggregationExp, aggregationResLevel} = dataset;
 
   return {
-    Layer: layerFromTileDataset(scheme),
+    Layer: layerFromTileDataset(type),
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
