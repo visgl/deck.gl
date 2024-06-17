@@ -1,141 +1,167 @@
-import {registerLoaders} from '@loaders.gl/core';
-import {DefaultProps} from '@deck.gl/core';
-import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
-registerLoaders([CartoSpatialTileLoader]);
-
-import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
-import {_deepEqual as deepEqual, Layer, PickingInfo} from '@deck.gl/core';
-import type {GetPickingInfoParams, LayersList} from '@deck.gl/core';
+import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {
   TileLayer,
   _Tile2DHeader as Tile2DHeader,
   TileLayerProps,
   TileLayerPickingInfo
 } from '@deck.gl/geo-layers';
+import {registerLoaders} from '@loaders.gl/core';
+import {binaryToGeojson} from '@loaders.gl/gis';
+import {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {Feature, Geometry} from 'geojson';
+
+import {
+  Accessor,
+  DefaultProps,
+  CompositeLayer,
+  _deepEqual as deepEqual,
+  GetPickingInfoParams,
+  Layer,
+  LayersList,
+  PickingInfo
+} from '@deck.gl/core';
+
+import {
+  aggregateTile,
+  ClusteredFeaturePropertiesT,
+  clustersToBinary,
+  computeAggregationStats,
+  extractAggregationProperties,
+  ParsedQuadbinCell,
+  ParsedQuadbinTile
+} from './cluster-utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
-import {aggregateTile, brokenCell, formatCount, highlightBroken} from './cluster-utils';
+import QuadbinTileset2D from './quadbin-tileset-2d';
+import {getQuadbinPolygon} from './quadbin-utils';
+import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
+import {injectAccessToken, TilejsonPropType} from './utils';
+import type {TilejsonResult} from '../sources/types';
+
+registerLoaders([CartoSpatialTileLoader]);
 
 const defaultProps: DefaultProps<ClusterTileLayerProps> = {
-  tileSize: DEFAULT_TILE_SIZE,
-  refinementStrategy: 'no-overlap'
+  data: TilejsonPropType,
+  clusterLevel: {type: 'number', value: 5, min: 1},
+  getPosition: {
+    type: 'accessor',
+    value: ({id}) => getQuadbinPolygon(id, 0.5).slice(2, 4) as [number, number]
+  },
+  getWeight: {type: 'accessor', value: 100},
+  refinementStrategy: 'no-overlap',
+  tileSize: DEFAULT_TILE_SIZE
 };
 
+export type ClusterTileLayerPickingInfo<FeaturePropertiesT = {}> = TileLayerPickingInfo<
+  ParsedQuadbinTile<FeaturePropertiesT>,
+  PickingInfo<Feature<Geometry, FeaturePropertiesT>>
+>;
+
 /** All properties supported by ClusterTileLayer. */
-export type ClusterTileLayerProps<DataT = unknown> = _ClusterTileLayerProps & TileLayerProps<DataT>;
+export type ClusterTileLayerProps<FeaturePropertiesT = unknown> =
+  _ClusterTileLayerProps<FeaturePropertiesT> &
+    Omit<TileLayerProps<ParsedQuadbinTile<FeaturePropertiesT>>, 'data'>;
 
 /** Properties added by ClusterTileLayer. */
-type _ClusterTileLayerProps = {};
+type _ClusterTileLayerProps<FeaturePropertiesT> = Omit<
+  GeoJsonLayerProps<ClusteredFeaturePropertiesT<FeaturePropertiesT>>,
+  'data'
+> & {
+  data: null | TilejsonResult | Promise<TilejsonResult>;
 
-export default class ClusterTileLayer<DataT = any, ExtraProps extends {} = {}> extends TileLayer<
-  DataT,
-  ExtraProps & Required<_ClusterTileLayerProps>
+  /**
+   * The number of aggregation levels to cluster cells by. Larger values increase
+   * the clustering radius, an increment of `clusterLevel` doubling the radius.
+   *
+   * @default 5
+   */
+  clusterLevel?: number;
+
+  /**
+   * The (average) position of points in a cell used for clustering.
+   * If not supplied the center of the quadbin cell is used.
+   *
+   * @default cell center
+   */
+  getPosition?: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>;
+
+  /**
+   * The weight of each cell used for clustering.
+   *
+   * @default 1
+   */
+  getWeight?: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, number>;
+};
+
+class ClusterGeoJsonLayer<
+  FeaturePropertiesT extends {} = {},
+  ExtraProps extends {} = {}
+> extends TileLayer<
+  ParsedQuadbinTile<FeaturePropertiesT>,
+  ExtraProps & Required<_ClusterTileLayerProps<FeaturePropertiesT>>
 > {
-  static layerName = 'ClusterTileLayer';
+  static layerName = 'ClusterGeoJsonLayer';
   static defaultProps = defaultProps;
-  state!: TileLayer<DataT>['state'] & {
+  state!: TileLayer<FeaturePropertiesT>['state'] & {
     hoveredFeatureId: BigInt | number | null;
     highlightColor: number[];
   };
 
   renderLayers(): Layer | null | LayersList {
-    // let _layers = super.renderLayers()?.flat();
-    const _layers = [];
-    // _layers = highlightBroken(_layers);
-
     const visibleTiles = this.state.tileset?.tiles.filter((tile: Tile2DHeader) => {
       return tile.isLoaded && tile.content && this.state.tileset!.isTileVisible(tile);
-    });
+    }) as Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>[];
     if (!visibleTiles?.length) {
       return null;
     }
     visibleTiles.sort((a, b) => b.zoom - a.zoom);
 
     const {zoom} = this.context.viewport;
-    // @ts-ignore
-    const {getFillColor, aggregation = 5, radiusRange} = this.props;
+    const {clusterLevel, getPosition, getWeight} = this.props;
 
-    const data: any[] = [];
+    const properties = extractAggregationProperties(visibleTiles[0]);
+    const data = [] as ClusteredFeaturePropertiesT<FeaturePropertiesT>[];
     for (const tile of visibleTiles) {
       // Calculate aggregation based on viewport zoom
       const overZoom = Math.round(zoom - tile.zoom);
-      const aggregationLevels = Math.round(aggregation) - overZoom;
-      aggregateTile(tile, aggregationLevels);
+      const aggregationLevels = Math.round(clusterLevel) - overZoom;
+      aggregateTile(tile, aggregationLevels, properties, getPosition, getWeight);
       data.push(...tile.userData![aggregationLevels]);
     }
 
     data.sort((a, b) => Number(b.count - a.count));
 
-    let maxTotalWeight = 0;
-    for (let d of data) {
-      maxTotalWeight = Math.max(maxTotalWeight, d.count);
+    const stats = computeAggregationStats(data, properties);
+    for (const d of data) {
+      d.stats = stats;
     }
 
-    const zoomScale = Math.max(1, maxTotalWeight);
-
-    const [radiusMin, radiusMax] = radiusRange;
-    const radiusDelta = (radiusMax - radiusMin) / Math.sqrt(zoomScale);
     const props = {
-      data,
-      dataComparator: (data?: any, oldData?: any) => {
-        const newIds = data?.map(tile => tile.id);
-        const oldIds = oldData?.map(tile => tile.id);
-        // Replace with hash?
+      ...this.props,
+      id: 'clusters',
+      data: clustersToBinary(data),
+      dataComparator: (data?: BinaryFeatureCollection, oldData?: BinaryFeatureCollection) => {
+        const newIds = data?.points?.properties?.map((tile: any) => tile.id);
+        const oldIds = oldData?.points?.properties?.map((tile: any) => tile.id);
         return deepEqual(newIds, oldIds, 1);
-      },
-      getPosition: d => d.position,
-      radiusScale: 1,
-      getRadius: d => radiusMin + radiusDelta * Math.sqrt(d.count),
-      getFillColor: d => {
-        const value = d.count / zoomScale; // Range 0-1
-        return getFillColor({properties: {value}});
-      },
-      radiusUnits: 'pixels'
-    };
+      }
+    } as GeoJsonLayerProps<ClusteredFeaturePropertiesT<FeaturePropertiesT>>;
 
-    const updateTriggers = {
-      ...this.props.updateTriggers,
-      getRadius: [radiusMin, radiusDelta]
-    };
-
-    // TODO implement via renderSubLayers prop?
-    // Use GeoJSONLayer?
-    const clusters = [
-      new ScatterplotLayer({
-        ...this.props,
-        ...this.getSubLayerProps({id: 'centers', updateTriggers}),
-        ...props
-      }),
-      new TextLayer({
-        ...this.props,
-        ...this.getSubLayerProps({id: 'labels', updateTriggers}),
-        ...props,
-
-        getSize: 16,
-        getColor: d => [255, 255, 255],
-        outlineColor: [0, 0, 0, 100],
-        outlineWidth: 3,
-        fontWeight: 'bold',
-        fontSettings: {sdf: true, smoothing: 0.2}
-      })
-    ];
-
-    return [_layers, clusters];
+    return new GeoJsonLayer(this.getSubLayerProps(props));
   }
 
-  getPickingInfo(params: GetPickingInfoParams): TileLayerPickingInfo<DataT> {
-    const info = params.info as TileLayerPickingInfo<DataT>;
-    // if (info.object) {
-    //   // TODO don't use __sourceTile (only for debug)
-    //   const sourceTile: Tile2DHeader<DataT> = info.object.__sourceTile;
-    //   if (info.picked) {
-    //     info.tile = sourceTile;
-    //   }
-    //   info.sourceTile = sourceTile;
-    // }
+  getPickingInfo(params: GetPickingInfoParams): ClusterTileLayerPickingInfo<FeaturePropertiesT> {
+    const info = params.info as TileLayerPickingInfo<ParsedQuadbinTile<FeaturePropertiesT>>;
+
+    if (info.index !== -1) {
+      const {data} = params.sourceLayer!.props;
+      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
+        globalFeatureId: info.index
+      }) as Feature;
+    }
+
     return info;
   }
 
-  // Use implementation from CompositeLayer
   protected _updateAutoHighlight(info: PickingInfo): void {
     for (const layer of this.getSubLayers()) {
       layer.updateAutoHighlight(info);
@@ -144,5 +170,40 @@ export default class ClusterTileLayer<DataT = any, ExtraProps extends {} = {}> e
 
   filterSubLayer() {
     return true;
+  }
+}
+
+// Adapter layer around ClusterLayer that converts tileJSON into TileLayer API
+export default class ClusterTileLayer<
+  FeaturePropertiesT = any,
+  ExtraProps extends {} = {}
+> extends CompositeLayer<ExtraProps & Required<_ClusterTileLayerProps<FeaturePropertiesT>>> {
+  static layerName = 'ClusterTileLayer';
+  static defaultProps = defaultProps;
+
+  getLoadOptions(): any {
+    const loadOptions = super.getLoadOptions() || {};
+    const tileJSON = this.props.data as TilejsonResult;
+    injectAccessToken(loadOptions, tileJSON.accessToken);
+    loadOptions.cartoSpatialTile = {...loadOptions.cartoSpatialTile, scheme: 'quadbin'};
+    return loadOptions;
+  }
+
+  renderLayers(): Layer | null | LayersList {
+    const tileJSON = this.props.data as TilejsonResult;
+    if (!tileJSON) return null;
+
+    const {tiles: data, maxresolution: maxZoom} = tileJSON;
+    return [
+      // @ts-ignore
+      new ClusterGeoJsonLayer(this.props, {
+        id: `quadbin-tile-layer-${this.props.id}`,
+        data,
+        // TODO: Tileset2D should be generic over TileIndex type
+        TilesetClass: QuadbinTileset2D as any,
+        maxZoom,
+        loadOptions: this.getLoadOptions()
+      })
+    ];
   }
 }

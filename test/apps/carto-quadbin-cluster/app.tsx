@@ -4,12 +4,15 @@ import {Map} from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 
 import {TooltipContent} from 'modules/core/src/lib/tooltip';
-import {PickingInfo} from '@deck.gl/core';
-import {colorContinuous, fetchMap} from '@deck.gl/carto';
+import {Accessor, Color, PickingInfo} from '@deck.gl/core';
+import {ClusterTileLayer, colorContinuous, fetchMap} from '@deck.gl/carto';
 import DeckGL from '@deck.gl/react';
 
 import RangeInput from './range-input';
+import {Feature} from '@loaders.gl/schema';
 import {GL} from '@luma.gl/constants';
+import {ScatterplotLayer} from 'deck.gl';
+import {ClusteredFeaturePropertiesT, ParsedQuadbinCell} from 'modules/carto/src/layers/cluster-utils';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
@@ -37,12 +40,16 @@ const LABELS = {
   Rounded: 'Rounded'
 };
 
+const LABEL_ACCESSORS = {
+  Full: d => String(d.properties.count),
+  Rounded: d => formatCount(d.properties.count)
+}
+
 function getTooltip({
   object
-}: PickingInfo<{count: number; id: bigint; __sourceTile: any}>): TooltipContent {
-  if (!object) return null;
-  const {count} = object;
-  return `count: ${count}`;
+}: PickingInfo<Feature>): TooltipContent {
+  if (!object?.properties) return null;
+  return `count: ${object.properties.count}`;
 }
 
 export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
@@ -50,35 +57,103 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
   const [labels, setLabels] = useState(Object.values(LABELS)[2]);
   const [palette, setPalette] = useState(Object.values(PALETTES)[3]);
   const [radiusRange, setRadiusRange] = useState<[number, number]>([20, 100]);
-  const [aggregation, setAggregation] = useState(5);
+  const [clusterLevel, setClusterLevel] = useState(5);
   const [opacity, setOpacity] = useState(50);
   const [lineWidth, setLineWidth] = useState(1);
 
   layers = layers.map((l: any) => {
     const {layerName} = l.constructor;
-    if (!['QuadbinTileLayer'].includes(layerName)) {
+    if (!['ClusterTileLayer'].includes(layerName)) {
       return l;
     }
 
-    return l.clone({
-      aggregation,
-      radiusRange, 
-      highlightColor: [255, 255, 255, 50],
-      getFillColor: colorContinuous({attr: 'value', domain: [0, 1], colors: palette}),
-      ...(labels !== 'None' && {
-        getText: labels === 'Full' ? d => String(d.count) : d => formatCount(d.count)
-      }),
-      updateTriggers: {
-        getFillColor: [opacity, palette],
-        getText: labels
-      },
-      parameters: createParameters(blending),
-      opacity: opacity / 100,
+    type PropertiesType = {
+      longitude_count: number;
+      longitude_average: number;
+      latitude_average: number;
+    };
 
-      getLineWidth: lineWidth,
-      stroked: lineWidth > 0,
+    const clusterLayer = l as ClusterTileLayer<PropertiesType>;
+
+    function normalize(value, min, max) {
+      return (value - min) / Math.max(1, max - min);
+    }
+    const getFillColor: Accessor<Feature<any, PropertiesType>, Color> = colorContinuous({attr: (d: any) => {
+      // Normalize value to range 0-1 to match domain
+      const value = d.properties.longitude_count;
+      const {min, max} = d.properties.stats.longitude_count;
+      return normalize(value, min, max);
+    }, domain: [0, 1], colors: palette});
+
+    const [radiusMin, radiusMax] = radiusRange;
+    const radiusDelta = radiusMax - radiusMin;
+    const getPointRadius: Accessor<Feature<any, ClusteredFeaturePropertiesT<PropertiesType>>, number> = (d) => {
+      const value = d.properties.longitude_count;
+      const {min, max} = d.properties.stats.longitude_count;
+      const normalized = normalize(value, min, max);
+      return radiusMin + radiusDelta * Math.sqrt(normalized);
+    }  
+
+    return clusterLayer.clone({
+      // Clustering props
+      clusterLevel,
+      getPosition: ({properties}) => {
+        return [ properties.longitude_average, properties.latitude_average ]
+      },
+      getWeight: ({properties}) => properties.longitude_count,
+
+      // GeoJsonLayer props
+      pointType: 'circle+icon+text',
+
+      // Circle
+      getFillColor,
       getLineColor: [255, 255, 255],
-      lineWidthUnits: 'pixels'
+      getLineWidth: lineWidth,
+      getPointRadius: d => {
+        const value = d.properties.longitude_count;
+        const {min, max} = d.properties.stats.longitude_count;
+        const normalized = normalize(value, min, max);
+        return radiusMin + radiusDelta * Math.sqrt(normalized);
+      }, 
+      lineWidthUnits: 'pixels',
+      stroked: lineWidth > 0,
+      pointRadiusUnits: 'pixels', // move to defaultProps
+
+      // Text
+      ...(labels !== 'None' && {getText: LABEL_ACCESSORS[labels]}),
+      getTextSize: 16,
+      getTextColor: d => [255, 255, 255],
+      textFontWeight: 800,
+      textFontSettings: {sdf: true, smoothing: 0.2},
+      textOutlineColor: [0, 0, 0, 100],
+      textOutlineWidth: 3,
+
+      // Icon
+      iconAtlas: 'https://unpkg.com/@mapbox/maki@8.0.0/icons/triangle.svg',
+      iconMapping: {
+        triangle: {
+          x: 0,
+          y: 0,
+          width: 15,
+          height: 15,
+          mask: true
+        }
+      },
+      getIcon: d => 'triangle',
+      getIconColor: [255, 255, 255],
+      getIconSize: 8,
+      getTextPixelOffset: [20, 0],
+
+      // Shared props
+      pickable: true,
+      highlightColor: [255, 255, 255, 50],
+      opacity: opacity / 100,
+      parameters: createParameters(blending),
+      updateTriggers: {
+        getFillColor: palette,
+        getPointRadius: radiusRange,
+        getText: labels
+      }
     });
   });
 
@@ -110,13 +185,13 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
         }}
       />
       <RangeInput
-        name={'Cluster size'}
+        name={'Cluster level'}
         bottom={100}
         min={1}
         max={7}
-        value={aggregation}
-        onChange={setAggregation}
-        formatLabel={(x: number) => formatLabel(x, 'size')}
+        value={clusterLevel}
+        onChange={setClusterLevel}
+        formatLabel={(x: number) => formatLabel(x, 'level')}
       />
       <RangeInput
         name={'Opacity'}

@@ -1,95 +1,160 @@
-import {getResolution, cellToParent, hexToBigInt} from 'quadbin';
+import {cellToParent} from 'quadbin';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
-import {getQuadbinPolygon} from './quadbin-utils';
+import {Accessor} from '@deck.gl/core';
+import {BinaryFeatureCollection} from '@loaders.gl/schema';
 
-export function aggregateTile(tile: Tile2DHeader<any>, aggregationLevels: number) {
+export type Aggregation = 'any' | 'average' | 'count' | 'min' | 'max' | 'sum';
+export type AggregationProperties<FeaturePropertiesT> = {
+  aggregation: Aggregation;
+  name: keyof FeaturePropertiesT;
+}[];
+export type ClusteredFeaturePropertiesT<FeaturePropertiesT> = FeaturePropertiesT & {
+  id: bigint;
+  count: number;
+  position: [number, number];
+  stats: Record<keyof FeaturePropertiesT, {min: number; max: number}>;
+};
+export type ParsedQuadbinCell<FeaturePropertiesT> = {id: bigint; properties: FeaturePropertiesT};
+export type ParsedQuadbinTile<FeaturePropertiesT> = ParsedQuadbinCell<FeaturePropertiesT>[];
+
+export function aggregateTile<FeaturePropertiesT>(
+  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>,
+  aggregationLevels: number,
+  properties: AggregationProperties<FeaturePropertiesT> = [],
+  getPosition: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, [number, number]>,
+  getWeight: Accessor<ParsedQuadbinCell<FeaturePropertiesT>, number>
+): void {
+  if (!tile.content) return;
+
   // Aggregate on demand and cache result
   if (!tile.userData) tile.userData = {};
   if (tile.userData[aggregationLevels]) return;
-  const weightParam = Object.keys(tile.data[0].properties).find(k => k.includes('_count'));
 
-  const out: any = {};
-  for (const cell of tile.data) {
+  const out: Record<number, any> = {};
+  for (const cell of tile.content) {
     let id = cell.id;
-    const {properties} = cell;
-
-    // TODO don't hardcode
-    const havePosition =
-      ('lon_average' in properties && 'lat_average' in properties) ||
-      ('longitude_average' in properties && 'latitude_average' in properties);
-    const position = havePosition
-      ? [
-          properties.lon_average || properties.longitude_average,
-          properties.lat_average || properties.latitude_average
-        ]
-      : getQuadbinPolygon(id, 0.5).slice(2, 4);
+    const position = typeof getPosition === 'function' ? getPosition(cell, {} as any) : getPosition;
 
     // Aggregate by parent id
     for (let i = 0; i < aggregationLevels - 1; i++) {
       id = cellToParent(id);
     }
 
-    if (!(id in out)) {
-      // TODO better to store sourceTile elsewhere?
-      out[id] = {id, count: 0, position: [0, 0], __sourceTile: tile};
+    // Unfortunately TS doesn't support Record<bigint, any>
+    // https://github.com/microsoft/TypeScript/issues/46395
+    const parentId = Number(id);
+    if (!(parentId in out)) {
+      out[parentId] = {id, count: 0, position: [0, 0]};
+      for (const {name, aggregation} of properties) {
+        if (aggregation === 'any') {
+          // Just pick first value for ANY
+          out[parentId][name] = cell.properties[name];
+        } else {
+          out[parentId][name] = 0;
+        }
+      }
     }
+    // Layout props
+    const prevTotalW = out[parentId].count;
+    out[parentId].count += typeof getWeight === 'function' ? getWeight(cell, {} as any) : getWeight;
 
-    const prevTotalW = out[id].count;
-    out[id].count += cell.properties[weightParam];
-
-    const totalW = out[id].count;
+    const totalW = out[parentId].count;
     const W = totalW - prevTotalW;
-    out[id].position[0] = (prevTotalW * out[id].position[0] + W * position[0]) / totalW;
-    out[id].position[1] = (prevTotalW * out[id].position[1] + W * position[1]) / totalW;
+    out[parentId].position[0] = (prevTotalW * out[parentId].position[0] + W * position[0]) / totalW;
+    out[parentId].position[1] = (prevTotalW * out[parentId].position[1] + W * position[1]) / totalW;
+
+    // Other properties
+    // TODO don't re-aggregate layout properties
+    for (const {name, aggregation} of properties) {
+      const prevValue = out[parentId][name];
+      const value = cell.properties[name] as number;
+      if (aggregation === 'average') {
+        out[parentId][name] = (prevTotalW * prevValue + W * value) / totalW;
+      } else if (aggregation === 'count' || aggregation === 'sum') {
+        out[parentId][name] = prevValue + value;
+      } else if (aggregation === 'max') {
+        out[parentId][name] = Math.max(prevValue, value);
+      } else if (aggregation === 'min') {
+        out[parentId][name] = Math.min(prevValue, value);
+      }
+    }
   }
 
   tile.userData[aggregationLevels] = Object.values(out);
 }
 
-// TODO remove once API fixed
-export function brokenCell(d) {
-  // Hide broken cells
-  const parent = d.__sourceTile.index.q;
-  const parentRes = getResolution(parent);
-  let id = d.id;
-  while (getResolution(id) > parentRes) {
-    id = cellToParent(id);
+export function extractAggregationProperties<FeaturePropertiesT extends {}>(
+  tile: Tile2DHeader<ParsedQuadbinTile<FeaturePropertiesT>>
+): AggregationProperties<FeaturePropertiesT> {
+  const properties: AggregationProperties<FeaturePropertiesT> = [];
+  const validAggregations: Aggregation[] = ['any', 'average', 'count', 'min', 'max', 'sum'];
+  for (const name of Object.keys(tile.content![0].properties)) {
+    let aggregation = name.split('_').pop()!.toLowerCase() as Aggregation;
+    if (!validAggregations.includes(aggregation)) {
+      aggregation = 'any';
+    }
+    properties.push({name: name as keyof FeaturePropertiesT, aggregation});
   }
-  return id !== parent;
+
+  return properties;
 }
 
-export function formatCount(count: number): string {
-  if (count < 1000) {
-    return `${count}`;
+export function computeAggregationStats<FeaturePropertiesT>(
+  data: ClusteredFeaturePropertiesT<FeaturePropertiesT>[],
+  properties: AggregationProperties<FeaturePropertiesT>
+) {
+  const stats = {} as Record<keyof FeaturePropertiesT, {min: number; max: number}>;
+  for (const {name, aggregation} of properties) {
+    stats[name] = {min: Infinity, max: -Infinity};
+    if (aggregation !== 'any') {
+      for (let d of data) {
+        stats[name].min = Math.min(stats[name].min, d[name] as number);
+        stats[name].max = Math.max(stats[name].max, d[name] as number);
+      }
+    }
   }
-  if (count < 1000000) {
-    const thousands = Math.floor(count / 1000);
-    return `${thousands}k`;
-  }
-  const millions = Math.floor(count / 1000000);
-  return `${millions}M`;
+
+  return stats;
 }
 
-export function highlightBroken(layers) {
-  return layers.map(
-    l =>
-      l?.clone({
-        getFillColor: d => {
-          const parent = hexToBigInt(d.tile);
-          const parentRes = getResolution(parent);
-          let id = d.id;
-          while (getResolution(id) > parentRes) {
-            id = cellToParent(id);
-          }
-          const tileTint = (0 * (parseInt(d.tile.slice(4, 6), 16) * 57)) % 255;
-          if (id !== parent) {
-            console.log(`tile: ${d.tile}, cell: ${bigIntToHex(d.id)}`);
-          }
-          return id === parent ? [0, 255, tileTint] : [255, 0, tileTint];
-        },
-        stroked: true,
-        getLineColor: [0, 0, 0],
-        lineWidthMinPixels: 1
-      })
-  );
+export function clustersToBinary<FeaturePropertiesT>(
+  data: ClusteredFeaturePropertiesT<FeaturePropertiesT>[]
+): BinaryFeatureCollection {
+  const positions = new Float32Array(data.length * 2);
+  const featureIds = new Uint16Array(data.length);
+  for (let i = 0; i < data.length; i++) {
+    positions.set(data[i].position, 2 * i);
+    featureIds[i] = i;
+  }
+
+  return {
+    shape: 'binary-feature-collection',
+    points: {
+      type: 'Point',
+      positions: {value: positions, size: 2},
+      properties: data,
+      numericProps: {},
+      featureIds: {value: featureIds, size: 1},
+      globalFeatureIds: {value: featureIds, size: 1}
+    },
+    lines: {
+      type: 'LineString',
+      positions: {value: new Float32Array(), size: 2},
+      pathIndices: {value: new Uint16Array(), size: 1},
+      properties: [],
+      numericProps: {},
+      featureIds: {value: new Uint16Array(), size: 1},
+      globalFeatureIds: {value: new Uint16Array(), size: 1}
+    },
+    polygons: {
+      type: 'Polygon',
+      positions: {value: new Float32Array(), size: 2},
+      polygonIndices: {value: new Uint16Array(), size: 1},
+      primitivePolygonIndices: {value: new Uint16Array(), size: 1},
+      properties: [],
+      numericProps: {},
+      featureIds: {value: new Uint16Array(), size: 1},
+      globalFeatureIds: {value: new Uint16Array(), size: 1}
+    } as any
+  };
 }

@@ -18,8 +18,9 @@ import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-lay
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
+import ClusterTileLayer from '../layers/cluster-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
-import QuadbinTileLayer from '../layers/quadbin-tile-layer';
+// import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
 import {MapType} from './types';
@@ -204,7 +205,7 @@ export function getLayer(
 export function layerFromTileDataset(
   scheme: string,
   type?: MapType
-): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
+): typeof H3TileLayer | typeof ClusterTileLayer | typeof RasterTileLayer | typeof VectorTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
@@ -212,7 +213,8 @@ export function layerFromTileDataset(
     return H3TileLayer;
   }
   if (scheme === 'quadbin') {
-    return QuadbinTileLayer;
+    return ClusterTileLayer;
+    // return QuadbinTileLayer;
   }
 
   return VectorTileLayer;
