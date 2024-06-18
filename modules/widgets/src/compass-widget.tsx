@@ -53,7 +53,9 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
 
   onViewportChange(viewport) {
     this.viewport = viewport;
-    this.update();
+    const [longitude, latitude] = [14.267484985407632, 50.10765117036714];
+    const xy = viewport.project([longitude, latitude]);
+    this.update(xy);
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -61,12 +63,13 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
+    const override = {margin: '0px', top: '0', left: '0', position: 'absolute'};
     if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+      Object.entries({...style, ...override}).map(([key, value]) => element.style.setProperty(key, value as string));
     }
     this.deck = deck;
     this.element = element;
-    this.update();
+    this.update([0, 0]);
     return element;
   }
 
@@ -79,33 +82,16 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return [0, 0];
   }
 
-  update() {
+  update(xy) {
     const [rz, rx] = this.getRotation();
+    const [x, y] = xy;
     const element = this.element;
     if (!element) {
       return;
     }
     const ui = (
-      <div className="deck-widget-button" style={{perspective: 100}}>
-        <button
-          type="button"
-          onClick={() => this.handleCompassReset()}
-          label={this.props.label}
-          style={{transform: `rotateX(${rx}deg)`}}
-        >
-          <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
-            <g transform={`rotate(${rz},13,13)`}>
-              <path
-                d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
-                fill="var(--icon-compass-north-color, #F05C44)"
-              />
-              <path
-                d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
-                fill="var(--icon-compass-south-color, #C2C2CC)"
-              />
-            </g>
-          </svg>
-        </button>
+      <div style={{background: 'white', perspective: 100, transform: `translate(${x}px, ${y}px)`}}>
+        Popup
       </div>
     );
     render(ui, element);
