@@ -12,14 +12,17 @@ import RangeInput from './range-input';
 import {Feature} from '@loaders.gl/schema';
 import {GL} from '@luma.gl/constants';
 import {ScatterplotLayer} from 'deck.gl';
-import {ClusteredFeaturePropertiesT, ParsedQuadbinCell} from 'modules/carto/src/layers/cluster-utils';
+import {
+  ClusteredFeaturePropertiesT,
+  ParsedQuadbinCell
+} from 'modules/carto/src/layers/cluster-utils';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 const BLENDING = {
-  'Normal': 'normal',
-  'Additive': 'additive',
-  'Subtractive': 'subtractive'
+  Normal: 'normal',
+  Additive: 'additive',
+  Subtractive: 'subtractive'
 };
 
 const PALETTES = {
@@ -43,11 +46,9 @@ const LABELS = {
 const LABEL_ACCESSORS = {
   Full: d => String(d.properties.count),
   Rounded: d => formatCount(d.properties.count)
-}
+};
 
-function getTooltip({
-  object
-}: PickingInfo<Feature>): TooltipContent {
+function getTooltip({object}: PickingInfo<Feature>): TooltipContent {
   if (!object?.properties) return null;
   return `count: ${object.properties.count}`;
 }
@@ -78,27 +79,34 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
     function normalize(value, min, max) {
       return (value - min) / Math.max(1, max - min);
     }
-    const getFillColor: Accessor<Feature<any, PropertiesType>, Color> = colorContinuous({attr: (d: any) => {
-      // Normalize value to range 0-1 to match domain
-      const value = d.properties.longitude_count;
-      const {min, max} = d.properties.stats.longitude_count;
-      return normalize(value, min, max);
-    }, domain: [0, 1], colors: palette});
+    const getFillColor: Accessor<Feature<any, PropertiesType>, Color> = colorContinuous({
+      attr: (d: any) => {
+        // Normalize value to range 0-1 to match domain
+        const value = d.properties.longitude_count;
+        const {min, max} = d.properties.stats.longitude_count;
+        return normalize(value, min, max);
+      },
+      domain: [0, 1],
+      colors: palette
+    });
 
     const [radiusMin, radiusMax] = radiusRange;
     const radiusDelta = radiusMax - radiusMin;
-    const getPointRadius: Accessor<Feature<any, ClusteredFeaturePropertiesT<PropertiesType>>, number> = (d) => {
+    const getPointRadius: Accessor<
+      Feature<any, ClusteredFeaturePropertiesT<PropertiesType>>,
+      number
+    > = d => {
       const value = d.properties.longitude_count;
       const {min, max} = d.properties.stats.longitude_count;
       const normalized = normalize(value, min, max);
       return radiusMin + radiusDelta * Math.sqrt(normalized);
-    }  
+    };
 
     return clusterLayer.clone({
       // Clustering props
       clusterLevel,
       getPosition: ({properties}) => {
-        return [ properties.longitude_average, properties.latitude_average ]
+        return [properties.longitude_average, properties.latitude_average];
       },
       getWeight: ({properties}) => properties.longitude_count,
 
@@ -114,7 +122,7 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
         const {min, max} = d.properties.stats.longitude_count;
         const normalized = normalize(value, min, max);
         return radiusMin + radiusDelta * Math.sqrt(normalized);
-      }, 
+      },
       lineWidthUnits: 'pixels',
       stroked: lineWidth > 0,
       pointRadiusUnits: 'pixels', // move to defaultProps
@@ -171,7 +179,13 @@ export default function App({layers, initialViewState, mapStyle = MAP_STYLE}) {
       </DeckGL>
       <ObjectSelect title="palette" obj={PALETTES} value={palette} onSelect={setPalette} />
       <ObjectSelect title="labels" obj={LABELS} value={labels} onSelect={setLabels} top={30} />
-      <ObjectSelect title="blending" obj={BLENDING} value={blending} onSelect={setBlending} top={60} />
+      <ObjectSelect
+        title="blending"
+        obj={BLENDING}
+        value={blending}
+        onSelect={setBlending}
+        top={60}
+      />
       <RangeInput
         name={'Radius'}
         bottom={150}
@@ -220,11 +234,9 @@ export function renderToDOM(container: HTMLElement) {
   const params = new URLSearchParams(location.search.slice(1));
   const cartoMapId = params.has('id') ? params.get('id')! : 'f45022b8-298b-44d5-8168-3ae329808914';
 
-  fetchMap({cartoMapId}).then(
-    ({initialViewState, layers}) => {
-      root.render(<App initialViewState={initialViewState} layers={layers} />);
-    }
-  );
+  fetchMap({cartoMapId}).then(({initialViewState, layers}) => {
+    root.render(<App initialViewState={initialViewState} layers={layers} />);
+  });
 }
 
 function formatLabel(n: number, label: string) {

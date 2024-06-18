@@ -33,7 +33,15 @@ const SliderInput = withStyles({
   }
 })(Slider);
 
-export default function RangeInput({min, max, value, onChange, formatLabel, bottom = 40, name = ''}) {
+export default function RangeInput({
+  min,
+  max,
+  value,
+  onChange,
+  formatLabel,
+  bottom = 40,
+  name = ''
+}) {
   return (
     <PositionContainer style={{color: COLOR, bottom}}>
       <label>{name}</label>

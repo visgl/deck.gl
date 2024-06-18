@@ -106,7 +106,7 @@ export function computeAggregationStats<FeaturePropertiesT>(
   for (const {name, aggregation} of properties) {
     stats[name] = {min: Infinity, max: -Infinity};
     if (aggregation !== 'any') {
-      for (let d of data) {
+      for (const d of data) {
         stats[name].min = Math.min(stats[name].min, d[name] as number);
         stats[name].max = Math.max(stats[name].max, d[name] as number);
       }
