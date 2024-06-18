@@ -210,7 +210,7 @@ export function getLayer(
 
 export function layerFromTileDataset(
   type: string
-): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer {
+): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer | typeof HeatmapTileLayer {
   if (type === 'raster') {
     return RasterTileLayer;
   }
