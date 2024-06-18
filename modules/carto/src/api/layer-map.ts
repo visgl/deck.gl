@@ -22,7 +22,6 @@ import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
-import {MapType} from './types';
 import {assert, createBinaryProxy, scaleIdentity} from '../utils';
 import {
   CustomMarkersRange,
@@ -46,6 +45,20 @@ const SCALE_FUNCS = {
   identity: scaleIdentity
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
+
+const RASTER_LAYER_TYPE = 'raster';
+const MVT_LAYER_TYPE = 'mvt';
+const TILESET_LAYER_TYPE = 'tileset';
+const QUADBIN_LAYER_TYPE = 'quadbin';
+const H3_LAYER_TYPE = 'h3';
+const HEATMAP_TILE_LAYER_TYPE = 'heatmapTile';
+type LayerType =
+  | typeof RASTER_LAYER_TYPE
+  | typeof MVT_LAYER_TYPE
+  | typeof TILESET_LAYER_TYPE
+  | typeof QUADBIN_LAYER_TYPE
+  | typeof H3_LAYER_TYPE
+  | typeof HEATMAP_TILE_LAYER_TYPE;
 
 function identity<T>(v: T): T {
   return v;
@@ -73,6 +86,13 @@ const AGGREGATION_FUNC = {
   mode: (values, accessor) => groupSort(values, v => v.length, accessor).pop(),
   stddev: deviation,
   variance
+};
+
+const LAYER_FROM_LAYER_TYPE = {
+  [RASTER_LAYER_TYPE]: RasterTileLayer,
+  [H3_LAYER_TYPE]: H3TileLayer,
+  [QUADBIN_LAYER_TYPE]: QuadbinTileLayer,
+  [HEATMAP_TILE_LAYER_TYPE]: HeatmapTileLayer
 };
 
 const hexToRGBA = c => {
@@ -136,7 +156,7 @@ function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {})
 }
 
 export function getLayer(
-  type: string,
+  type: LayerType,
   config: MapTextSubLayerConfig,
   dataset: MapDataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
@@ -146,11 +166,11 @@ export function getLayer(
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
   if (
-    type === 'mvt' ||
-    type === 'tileset' ||
-    type === 'h3' ||
-    type === 'quadbin' ||
-    type === 'heatmapTile'
+    type === MVT_LAYER_TYPE ||
+    type === TILESET_LAYER_TYPE ||
+    type === H3_LAYER_TYPE ||
+    type === QUADBIN_LAYER_TYPE ||
+    type === HEATMAP_TILE_LAYER_TYPE
   ) {
     return getTileLayer(dataset, basePropMap, type);
   }
@@ -208,30 +228,11 @@ export function getLayer(
   };
 }
 
-export function layerFromTileDataset(
-  type: string
-): typeof VectorTileLayer | typeof H3TileLayer | typeof QuadbinTileLayer | typeof HeatmapTileLayer {
-  if (type === 'raster') {
-    return RasterTileLayer;
-  }
-  if (type === 'h3') {
-    return H3TileLayer;
-  }
-  if (type === 'quadbin') {
-    return QuadbinTileLayer;
-  }
-  if (type === 'heatmapTile') {
-    return HeatmapTileLayer;
-  }
-
-  return VectorTileLayer;
-}
-
-function getTileLayer(dataset: MapDataset, basePropMap, type: string) {
+function getTileLayer(dataset: MapDataset, basePropMap, type: LayerType) {
   const {aggregationExp, aggregationResLevel} = dataset;
 
   return {
-    Layer: layerFromTileDataset(type),
+    Layer: LAYER_FROM_LAYER_TYPE[type] || VectorTileLayer,
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
