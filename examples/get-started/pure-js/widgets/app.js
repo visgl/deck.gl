@@ -72,7 +72,8 @@ new Deck({
   ],
   widgets: [
     new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme}),
+    new CompassWidget({style: widgetTheme, position: [14.267484985407632, 50.10765117036714]}),
+    new CompassWidget({style: widgetTheme, position: [12.267484985407632, 50.10765117036714]}),
     new FullscreenWidget({style: widgetTheme})
   ]
 });

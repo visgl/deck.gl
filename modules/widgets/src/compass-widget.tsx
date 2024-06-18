@@ -26,6 +26,7 @@ interface CompassWidgetProps {
    * Additional CSS class.
    */
   className?: string;
+  position: [number, number];
 }
 
 export class CompassWidget implements Widget<CompassWidgetProps> {
@@ -44,6 +45,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     props.transitionDuration = props.transitionDuration || 200;
     props.label = props.label || 'Compass';
     props.style = props.style || {};
+    props.position = props.position || [0, 0];
     this.props = props;
   }
 
@@ -53,7 +55,7 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
 
   onViewportChange(viewport) {
     this.viewport = viewport;
-    const [longitude, latitude] = [14.267484985407632, 50.10765117036714];
+    const [longitude, latitude] = this.props.position;
     const xy = viewport.project([longitude, latitude]);
     this.update(xy);
   }
