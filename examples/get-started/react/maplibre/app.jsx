@@ -40,7 +40,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick: info => setSelected(info.object),
+      onClick: info => setSelected(info.object)
       // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
@@ -56,8 +56,9 @@ function Root() {
     })
   ];
 
-
-  let longitude, latitude, text;
+  let latitude;
+  let longitude;
+  let text;
   if (selected) {
     [longitude, latitude] = selected.geometry.coordinates;
     text = `${selected.properties.name} (${selected.properties.abbrev})`;
@@ -65,12 +66,16 @@ function Root() {
   return (
     <Map initialViewState={INITIAL_VIEW_STATE} mapStyle={MAP_STYLE}>
       {selected && (
-        <Popup anchor="bottom"
+        <Popup
+          anchor="bottom"
           style={{zIndex: 10}} /* position above deck.gl canvas */
-          longitude={longitude} latitude={latitude}
-          onClose={() => setSelected(null)}>
-        {text}
-        </Popup>)}
+          longitude={longitude}
+          latitude={latitude}
+          onClose={() => setSelected(null)}
+        >
+          {text}
+        </Popup>
+      )}
       <DeckGLOverlay layers={layers} /* interleaved*/ />
       <NavigationControl position="top-left" />
     </Map>
