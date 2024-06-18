@@ -3,21 +3,12 @@ import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/c
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface CompassWidgetProps {
+interface PopupWidgetProps {
   id: string;
-  placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
    */
   viewId?: string | null;
-  /**
-   * Tooltip message.
-   */
-  label?: string;
-  /**
-   * Bearing and pitch reset transition duration in ms.
-   */
-  transitionDuration?: number;
   /**
    * CSS inline style overrides.
    */
@@ -26,38 +17,40 @@ interface CompassWidgetProps {
    * Additional CSS class.
    */
   className?: string;
+  /** 
+   * Position at which to place popup
+   */
   position: [number, number];
+  /** 
+   * Text of popup
+   */
+  text: string;
 }
 
-export class CompassWidget implements Widget<CompassWidgetProps> {
+export class CompassWidget implements Widget<PopupWidgetProps> {
   id = 'compass';
-  props: CompassWidgetProps;
-  placement: WidgetPlacement = 'top-left';
+  props: PopupWidgetProps;
   viewId?: string | null = null;
   viewport?: Viewport;
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: CompassWidgetProps) {
+  constructor(props: PopupWidgetProps) {
     this.id = props.id || 'compass';
     this.viewId = props.viewId || null;
-    this.placement = props.placement || 'top-left';
-    props.transitionDuration = props.transitionDuration || 200;
-    props.label = props.label || 'Compass';
     props.style = props.style || {};
     props.position = props.position || [0, 0];
+    props.text = props.text || '';
     this.props = props;
   }
 
-  setProps(props: Partial<CompassWidgetProps>) {
+  setProps(props: Partial<PopupWidgetProps>) {
     Object.assign(this.props, props);
   }
 
   onViewportChange(viewport) {
     this.viewport = viewport;
-    const [longitude, latitude] = this.props.position;
-    const xy = viewport.project([longitude, latitude]);
-    this.update(xy);
+    this.update();
   }
 
   onAdd({deck}: {deck: Deck<any>}): HTMLDivElement {
@@ -70,8 +63,9 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
       Object.entries({...style, ...override}).map(([key, value]) => element.style.setProperty(key, value as string));
     }
     this.deck = deck;
+    this.viewport = new WebMercatorViewport(deck.viewState['default-view']);
     this.element = element;
-    this.update([0, 0]);
+    this.update();
     return element;
   }
 
@@ -84,16 +78,17 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     return [0, 0];
   }
 
-  update(xy) {
+  update() {
     const [rz, rx] = this.getRotation();
-    const [x, y] = xy;
+    const [longitude, latitude] = this.props.position;
+    const [x, y] = this.viewport!.project([longitude, latitude]);
     const element = this.element;
     if (!element) {
       return;
     }
     const ui = (
-      <div style={{background: 'white', perspective: 100, transform: `translate(${x}px, ${y}px)`}}>
-        Popup
+      <div style={{width: '200px', background: 'white', perspective: 100, transform: `translate(${x}px, ${y}px)`}}>
+        {this.props.text}
       </div>
     );
     render(ui, element);
@@ -102,20 +97,5 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
   onRemove() {
     this.deck = undefined;
     this.element = undefined;
-  }
-
-  handleCompassReset() {
-    const viewId = this.viewId || this.viewport?.id || 'default-view';
-    if (this.viewport instanceof WebMercatorViewport) {
-      const nextViewState = {
-        ...this.viewport,
-        bearing: 0,
-        ...(this.getRotation()[0] === 0 ? {pitch: 0} : {}),
-        transitionDuration: this.props.transitionDuration,
-        transitionInterpolator: new FlyToInterpolator()
-      };
-      // @ts-ignore Using private method temporary until there's a public one
-      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
-    }
   }
 }

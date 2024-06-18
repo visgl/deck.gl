@@ -27,7 +27,20 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-new Deck({
+const UI_WIDGETS = [
+  new ZoomWidget({style: widgetTheme}),
+  new FullscreenWidget({style: widgetTheme})
+];
+
+function updatePopup(object) {
+  const position = object.geometry.coordinates;
+  const text = object.properties.name;
+  deck.setProps({
+    widgets: [...UI_WIDGETS, new CompassWidget({style: widgetTheme, position, text})]
+  });
+}
+
+const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
@@ -54,9 +67,7 @@ new Deck({
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
+      onClick: info => updatePopup(info.object)
     }),
     new ArcLayer({
       id: 'arcs',
@@ -70,10 +81,5 @@ new Deck({
       getWidth: 1
     })
   ],
-  widgets: [
-    new ZoomWidget({style: widgetTheme}),
-    new CompassWidget({style: widgetTheme, position: [14.267484985407632, 50.10765117036714]}),
-    new CompassWidget({style: widgetTheme, position: [12.267484985407632, 50.10765117036714]}),
-    new FullscreenWidget({style: widgetTheme})
-  ]
+  widgets: UI_WIDGETS
 });
