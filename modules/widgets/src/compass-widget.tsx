@@ -3,12 +3,21 @@ import {FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/c
 import type {Deck, Viewport, Widget, WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 
-interface PopupWidgetProps {
+interface CompassWidgetProps {
   id: string;
+  placement?: WidgetPlacement;
   /**
    * View to attach to and interact with. Required when using multiple views.
    */
   viewId?: string | null;
+  /**
+   * Tooltip message.
+   */
+  label?: string;
+  /**
+   * Bearing and pitch reset transition duration in ms.
+   */
+  transitionDuration?: number;
   /**
    * CSS inline style overrides.
    */
@@ -17,34 +26,28 @@ interface PopupWidgetProps {
    * Additional CSS class.
    */
   className?: string;
-  /** 
-   * Position at which to place popup
-   */
-  position: [number, number];
-  /** 
-   * Text of popup
-   */
-  text: string;
 }
 
-export class CompassWidget implements Widget<PopupWidgetProps> {
+export class CompassWidget implements Widget<CompassWidgetProps> {
   id = 'compass';
-  props: PopupWidgetProps;
+  props: CompassWidgetProps;
+  placement: WidgetPlacement = 'top-left';
   viewId?: string | null = null;
   viewport?: Viewport;
   deck?: Deck<any>;
   element?: HTMLDivElement;
 
-  constructor(props: PopupWidgetProps) {
+  constructor(props: CompassWidgetProps) {
     this.id = props.id || 'compass';
     this.viewId = props.viewId || null;
+    this.placement = props.placement || 'top-left';
+    props.transitionDuration = props.transitionDuration || 200;
+    props.label = props.label || 'Compass';
     props.style = props.style || {};
-    props.position = props.position || [0, 0];
-    props.text = props.text || '';
     this.props = props;
   }
 
-  setProps(props: Partial<PopupWidgetProps>) {
+  setProps(props: Partial<CompassWidgetProps>) {
     Object.assign(this.props, props);
   }
 
@@ -58,12 +61,10 @@ export class CompassWidget implements Widget<PopupWidgetProps> {
     const element = document.createElement('div');
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
-    const override = {margin: '0px', top: '0', left: '0', position: 'absolute'};
     if (style) {
-      Object.entries({...style, ...override}).map(([key, value]) => element.style.setProperty(key, value as string));
+      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
     }
     this.deck = deck;
-    this.viewport = new WebMercatorViewport(deck.viewState['default-view']);
     this.element = element;
     this.update();
     return element;
@@ -80,15 +81,31 @@ export class CompassWidget implements Widget<PopupWidgetProps> {
 
   update() {
     const [rz, rx] = this.getRotation();
-    const [longitude, latitude] = this.props.position;
-    const [x, y] = this.viewport!.project([longitude, latitude]);
     const element = this.element;
     if (!element) {
       return;
     }
     const ui = (
-      <div style={{width: '200px', background: 'white', perspective: 100, transform: `translate(${x}px, ${y}px)`}}>
-        {this.props.text}
+      <div className="deck-widget-button" style={{perspective: 100}}>
+        <button
+          type="button"
+          onClick={() => this.handleCompassReset()}
+          label={this.props.label}
+          style={{transform: `rotateX(${rx}deg)`}}
+        >
+          <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
+            <g transform={`rotate(${rz},13,13)`}>
+              <path
+                d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
+                fill="var(--icon-compass-north-color, #F05C44)"
+              />
+              <path
+                d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
+                fill="var(--icon-compass-south-color, #C2C2CC)"
+              />
+            </g>
+          </svg>
+        </button>
       </div>
     );
     render(ui, element);
@@ -97,5 +114,20 @@ export class CompassWidget implements Widget<PopupWidgetProps> {
   onRemove() {
     this.deck = undefined;
     this.element = undefined;
+  }
+
+  handleCompassReset() {
+    const viewId = this.viewId || this.viewport?.id || 'default-view';
+    if (this.viewport instanceof WebMercatorViewport) {
+      const nextViewState = {
+        ...this.viewport,
+        bearing: 0,
+        ...(this.getRotation()[0] === 0 ? {pitch: 0} : {}),
+        transitionDuration: this.props.transitionDuration,
+        transitionInterpolator: new FlyToInterpolator()
+      };
+      // @ts-ignore Using private method temporary until there's a public one
+      this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+    }
   }
 }

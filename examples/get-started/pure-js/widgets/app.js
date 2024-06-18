@@ -2,6 +2,7 @@ import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {
   CompassWidget,
+  PopupWidget,
   ZoomWidget,
   FullscreenWidget,
   DarkGlassTheme,
@@ -29,20 +30,27 @@ const INITIAL_VIEW_STATE = {
 
 const UI_WIDGETS = [
   new ZoomWidget({style: widgetTheme}),
+  new CompassWidget({style: widgetTheme}),
   new FullscreenWidget({style: widgetTheme})
 ];
 
 function updatePopup(object) {
-  const position = object.geometry.coordinates;
-  const text = object.properties.name;
-  deck.setProps({
-    widgets: [...UI_WIDGETS, new CompassWidget({style: widgetTheme, position, text})]
-  });
+  const widgets = [...UI_WIDGETS];
+  if (object) {
+    const position = object.geometry.coordinates;
+    const text = `${object.properties.name} (${object.properties.abbrev})`;
+    const style = {width: 200, boxShadow: 'rgba(0, 0, 0, 0.5) 2px 2px 5px'};
+    widgets.push(new PopupWidget({position, text, style}));
+  }
+
+  deck.setProps({widgets});
+  return true;
 }
 
 const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
+  onClick: () => updatePopup(),
   layers: [
     new GeoJsonLayer({
       id: 'base-map',
