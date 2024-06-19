@@ -46,7 +46,9 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
-type LayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
+type DocumentLayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
+type TableLayerType = 'point' | 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId';
+type LayerType = DocumentLayerType | TableLayerType;
 
 function identity<T>(v: T): T {
   return v;
@@ -76,7 +78,7 @@ const AGGREGATION_FUNC = {
   variance
 };
 
-const LAYER_FROM_LAYER_TYPE: Record<LayerType, ConstructorOf<Layer>> = {
+const DOCUMENT_LAYER_TYPE_TO_LAYER: Record<DocumentLayerType, ConstructorOf<Layer>> = {
   tileset: VectorTileLayer,
   mvt: VectorTileLayer,
   raster: RasterTileLayer,
@@ -155,13 +157,7 @@ export function getLayer(
   if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
-  if (
-    type === 'mvt' ||
-    type === 'tileset' ||
-    type === 'h3' ||
-    type === 'quadbin' ||
-    type === 'heatmapTile'
-  ) {
+  if (DOCUMENT_LAYER_TYPE_TO_LAYER[type]) {
     return getTileLayer(dataset, basePropMap, type);
   }
 
@@ -171,7 +167,7 @@ export function getLayer(
   const hexagonId = config.columns?.hex_id;
 
   const layerTypeDefs: Record<
-    string,
+    TableLayerType,
     {Layer: ConstructorOf<Layer>; propMap?: any; defaultProps?: any}
   > = {
     point: {
@@ -222,7 +218,7 @@ function getTileLayer(dataset: MapDataset, basePropMap, type: LayerType) {
   const {aggregationExp, aggregationResLevel} = dataset;
 
   return {
-    Layer: LAYER_FROM_LAYER_TYPE[type] || VectorTileLayer,
+    Layer: DOCUMENT_LAYER_TYPE_TO_LAYER[type] || VectorTileLayer,
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
