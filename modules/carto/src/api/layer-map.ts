@@ -20,10 +20,9 @@ import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
 import ClusterTileLayer from '../layers/cluster-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
-// import QuadbinTileLayer from '../layers/quadbin-tile-layer';
+import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
 import VectorTileLayer from '../layers/vector-tile-layer';
-import {MapType} from './types';
 import {assert, createBinaryProxy, scaleIdentity} from '../utils';
 import {
   CustomMarkersRange,
@@ -33,6 +32,7 @@ import {
   VisualChannelField,
   VisualChannels
 } from './types';
+import HeatmapTileLayer from '../layers/heatmap-tile-layer';
 
 const SCALE_FUNCS = {
   linear: scaleLinear,
@@ -46,6 +46,17 @@ const SCALE_FUNCS = {
   identity: scaleIdentity
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
+
+type TileLayerType =
+  | 'clusterTile'
+  | 'h3'
+  | 'heatmapTile'
+  | 'mvt'
+  | 'quadbin'
+  | 'raster'
+  | 'tileset';
+type DocumentLayerType = 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId' | 'point';
+type LayerType = TileLayerType | DocumentLayerType;
 
 function identity<T>(v: T): T {
   return v;
@@ -73,6 +84,18 @@ const AGGREGATION_FUNC = {
   mode: (values, accessor) => groupSort(values, v => v.length, accessor).pop(),
   stddev: deviation,
   variance
+};
+
+const TILE_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
+  clusterTile: ClusterTileLayer,
+  h3: H3TileLayer,
+  heatmapTile: HeatmapTileLayer,
+  mvt: VectorTileLayer,
+  // TODO undo before merge
+  // quadbin: QuadbinTileLayer,
+  quadbin: ClusterTileLayer,
+  raster: RasterTileLayer,
+  tileset: VectorTileLayer
 };
 
 const hexToRGBA = c => {
@@ -136,7 +159,7 @@ function mergePropMaps(a: Record<string, any> = {}, b: Record<string, any> = {})
 }
 
 export function getLayer(
-  type: string,
+  type: LayerType,
   config: MapTextSubLayerConfig,
   dataset: MapDataset
 ): {Layer: ConstructorOf<Layer>; propMap: any; defaultProps: any} {
@@ -145,8 +168,8 @@ export function getLayer(
   if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
-  if (type === 'mvt' || type === 'tileset' || type === 'h3' || type === 'quadbin') {
-    return getTileLayer(dataset, basePropMap);
+  if (TILE_LAYER_TYPE_TO_LAYER[type]) {
+    return getTileLayer(dataset, basePropMap, type);
   }
 
   const geoColumn = dataset?.geoColumn;
@@ -155,7 +178,7 @@ export function getLayer(
   const hexagonId = config.columns?.hex_id;
 
   const layerTypeDefs: Record<
-    string,
+    DocumentLayerType,
     {Layer: ConstructorOf<Layer>; propMap?: any; defaultProps?: any}
   > = {
     point: {
@@ -202,33 +225,11 @@ export function getLayer(
   };
 }
 
-export function layerFromTileDataset(
-  scheme: string,
-  type?: MapType
-): typeof H3TileLayer | typeof ClusterTileLayer | typeof RasterTileLayer | typeof VectorTileLayer {
-  if (type === 'raster') {
-    return RasterTileLayer;
-  }
-  if (scheme === 'h3') {
-    return H3TileLayer;
-  }
-  if (scheme === 'quadbin') {
-    return ClusterTileLayer;
-    // return QuadbinTileLayer;
-  }
-
-  return VectorTileLayer;
-}
-
-function getTileLayer(dataset: MapDataset, basePropMap) {
-  const {
-    aggregationExp,
-    aggregationResLevel,
-    data: {scheme}
-  } = dataset;
+function getTileLayer(dataset: MapDataset, basePropMap, type: LayerType) {
+  const {aggregationExp, aggregationResLevel} = dataset;
 
   return {
-    Layer: layerFromTileDataset(scheme),
+    Layer: TILE_LAYER_TYPE_TO_LAYER[type] || VectorTileLayer,
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
