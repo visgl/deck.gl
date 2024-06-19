@@ -83,7 +83,7 @@ test('CPUAggregator#1D', t => {
   // {age: 44, household: 4, income: 500, education: 4},
   t.deepEqual(
     aggregator.getBin(5),
-    {id: [8], count: 3, value: [3, 250, 5], points: [16, 17, 18]},
+    {id: [8], count: 3, value: [3, 250, 5], pointIndices: [16, 17, 18]},
     'getBin()'
   );
 
@@ -167,7 +167,7 @@ test('CPUAggregator#2D', t => {
   // {age: 44, household: 4, income: 500, education: 4},
   t.deepEqual(
     aggregator.getBin(6),
-    {id: [4, 4], count: 2, value: [2, 320], points: [16, 18]},
+    {id: [4, 4], count: 2, value: [2, 320], pointIndices: [16, 18]},
     'getBin()'
   );
 
