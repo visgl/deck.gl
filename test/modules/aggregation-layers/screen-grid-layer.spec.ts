@@ -21,7 +21,7 @@
 import test from 'tape-promise/tape';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {ScreenGridLayer, GPUAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {ScreenGridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
 

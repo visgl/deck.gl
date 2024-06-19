@@ -301,10 +301,10 @@ export default class ScreenGridLayer<
           value: bin.value[0],
           count: bin.count
         };
-        if (bin.points) {
-          object.pointIndices = bin.points;
+        if (bin.pointIndices) {
+          object.pointIndices = bin.pointIndices;
           object.points = Array.isArray(this.props.data)
-            ? bin.points.map(i => (this.props.data as DataT[])[i])
+            ? bin.pointIndices.map(i => (this.props.data as DataT[])[i])
             : [];
         }
       }
