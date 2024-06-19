@@ -46,9 +46,9 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
-type DocumentLayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
-type TableLayerType = 'point' | 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId';
-type LayerType = DocumentLayerType | TableLayerType;
+type TileLayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
+type DocumentLayerType = 'point' | 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId';
+type LayerType = TileLayerType | DocumentLayerType;
 
 function identity<T>(v: T): T {
   return v;
@@ -78,7 +78,7 @@ const AGGREGATION_FUNC = {
   variance
 };
 
-const DOCUMENT_LAYER_TYPE_TO_LAYER: Record<DocumentLayerType, ConstructorOf<Layer>> = {
+const DOCUMENT_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
   tileset: VectorTileLayer,
   mvt: VectorTileLayer,
   raster: RasterTileLayer,
@@ -167,7 +167,7 @@ export function getLayer(
   const hexagonId = config.columns?.hex_id;
 
   const layerTypeDefs: Record<
-    TableLayerType,
+    DocumentLayerType,
     {Layer: ConstructorOf<Layer>; propMap?: any; defaultProps?: any}
   > = {
     point: {
