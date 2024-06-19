@@ -78,7 +78,7 @@ const AGGREGATION_FUNC = {
   variance
 };
 
-const DOCUMENT_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
+const TILE_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
   tileset: VectorTileLayer,
   mvt: VectorTileLayer,
   raster: RasterTileLayer,
@@ -157,7 +157,7 @@ export function getLayer(
   if (config.visConfig?.customMarkers) {
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
-  if (DOCUMENT_LAYER_TYPE_TO_LAYER[type]) {
+  if (TILE_LAYER_TYPE_TO_LAYER[type]) {
     return getTileLayer(dataset, basePropMap, type);
   }
 
@@ -218,7 +218,7 @@ function getTileLayer(dataset: MapDataset, basePropMap, type: LayerType) {
   const {aggregationExp, aggregationResLevel} = dataset;
 
   return {
-    Layer: DOCUMENT_LAYER_TYPE_TO_LAYER[type] || VectorTileLayer,
+    Layer: TILE_LAYER_TYPE_TO_LAYER[type] || VectorTileLayer,
     propMap: basePropMap,
     defaultProps: {
       ...defaultProps,
