@@ -88,7 +88,9 @@ const AGGREGATION_FUNC = {
   variance
 };
 
-const LAYER_FROM_LAYER_TYPE = {
+const LAYER_FROM_LAYER_TYPE: Record<LayerType, ConstructorOf<Layer>> = {
+  [TILESET_LAYER_TYPE]: VectorTileLayer,
+  [MVT_LAYER_TYPE]: VectorTileLayer,
   [RASTER_LAYER_TYPE]: RasterTileLayer,
   [H3_LAYER_TYPE]: H3TileLayer,
   [QUADBIN_LAYER_TYPE]: QuadbinTileLayer,
