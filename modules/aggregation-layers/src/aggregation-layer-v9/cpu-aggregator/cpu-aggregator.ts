@@ -1,7 +1,7 @@
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import {_deepEqual as deepEqual, BinaryAttribute} from '@deck.gl/core';
-import {sortBins, packBinIds} from './sort';
-import {aggregateChannel} from './aggregate';
+import {sortBins, packBinIds} from './sort-bins';
+import {aggregate} from './aggregate';
 import {VertexAccessor, evaluateVertexAccessor} from './vertex-accessor';
 
 /** Options used to construct a new CPUAggregator */
@@ -97,7 +97,7 @@ export class CPUAggregator implements Aggregator {
    * the underlying buffers could have been updated and require rerunning the aggregation
    * @param {number} channel - mark the given channel as dirty. If not provided, all channels will be updated.
    */
-  setNeedsUpdate(channel?: number) {
+  setNeedsUpdate(channel?: number): void {
     if (channel === undefined) {
       this.needsUpdate = true;
     } else if (this.needsUpdate !== true) {
@@ -125,7 +125,7 @@ export class CPUAggregator implements Aggregator {
     }
     for (let channel = 0; channel < this.channelCount; channel++) {
       if (this.needsUpdate === true || this.needsUpdate[channel]) {
-        this.results[channel] = aggregateChannel({
+        this.results[channel] = aggregate({
           bins: this.bins,
           getValue: evaluateVertexAccessor(
             this.getValue[channel],
@@ -164,12 +164,7 @@ export class CPUAggregator implements Aggregator {
   }
 
   /** Returns the information for a given bin. */
-  getBin(index: number):
-    | (AggregatedBin & {
-        /** List of data point indices that fall into this bin. */
-        points?: number[];
-      })
-    | null {
+  getBin(index: number): AggregatedBin | null {
     const bin = this.bins[index];
     if (!bin) {
       return null;
@@ -183,7 +178,7 @@ export class CPUAggregator implements Aggregator {
       id: bin.id,
       value,
       count: bin.points.length,
-      points: bin.points
+      pointIndices: bin.points
     };
   }
 }

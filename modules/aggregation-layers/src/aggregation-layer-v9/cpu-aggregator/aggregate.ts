@@ -53,17 +53,20 @@ const AGGREGATION_FUNC: Record<AggregationOperation, AggregationFunc> = {
 } as const;
 
 /**
- * Performs aggregation
+ * Performs the aggregation step. See interface Aggregator comments.
  * @returns Floa32Array of aggregated values, one for each bin, and the [min,max] of the values
  */
-export function aggregateChannel({
+export function aggregate({
   bins,
   getValue,
   operation,
   target
 }: {
+  /** Data points sorted by bins */
   bins: Bin[];
+  /** Given the index of a data point, returns its value */
   getValue: (index: number) => number;
+  /** Method used to reduce a list of values to one number */
   operation: AggregationOperation;
   /** Optional typed array to pack values into */
   target?: Float32Array;
