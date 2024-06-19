@@ -1,4 +1,4 @@
-import {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule, UniformFormat} from '@luma.gl/shadertools';
 const uniformBlock = `\
 uniform scatterplotUniforms {
   uniform float radiusScale;
@@ -16,7 +16,11 @@ uniform scatterplotUniforms {
 } scatterplot;
 `;
 
-export type ScatterplotSettings = {
+type DefaultUniformTypes<PropsT extends {} = {}> = {
+  [propName in keyof PropsT]: UniformFormat;
+};
+
+export type ScatterplotProps = {
   radiusScale?: number;
   radiusMinPixels?: number;
   radiusMaxPixels?: number;
@@ -48,5 +52,5 @@ export default {
     billboard: 'f32',
     radiusUnits: 'i32',
     lineWidthUnits: 'i32'
-  }
-} as const satisfies ShaderModule<ScatterplotSettings>;
+  } as const satisfies DefaultUniformTypes<ScatterplotProps>
+} as const satisfies ShaderModule<ScatterplotProps>;
