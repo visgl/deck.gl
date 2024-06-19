@@ -22,6 +22,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
+import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
@@ -173,8 +174,6 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
-import scatterplot, {ScatterplotSettings} from './scatterplot-layer-inputs';
-
 /** Render circles at given coordinates. */
 export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_ScatterplotLayerProps<DataT>>
@@ -187,7 +186,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, scatterplot]});
+    return super.getShaders({vs, fs, modules: [project32, picking, scatterplotUniforms]});
   }
 
   initializeState() {
@@ -256,7 +255,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     const model = this.state.model!;
 
     model.setUniforms(uniforms);
-    const scatterplot: ScatterplotSettings = {
+    const scatterplotProps: ScatterplotProps = {
       stroked,
       filled,
       billboard,
@@ -270,7 +269,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     };
-    model.shaderInputs.setProps({scatterplot});
+    model.shaderInputs.setProps({scatterplot: scatterplotProps});
     model.draw(this.context.renderPass);
   }
 

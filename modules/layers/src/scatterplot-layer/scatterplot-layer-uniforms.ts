@@ -35,7 +35,7 @@ export type ScatterplotProps = {
   lineWidthUnits?: number;
 };
 
-export default {
+export const scatterplotUniforms = {
   name: 'scatterplot',
   vs: uniformBlock,
   fs: uniformBlock,
