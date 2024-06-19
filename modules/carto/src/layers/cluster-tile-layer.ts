@@ -104,7 +104,7 @@ class ClusterGeoJsonLayer<
   state!: TileLayer<FeaturePropertiesT>['state'] & {
     data: BinaryFeatureCollection;
     clusterIds: bigint[];
-    hoveredFeatureId: BigInt | number | null;
+    hoveredFeatureId: bigint | number | null;
     highlightColor: number[];
   };
 

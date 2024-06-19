@@ -116,6 +116,15 @@ export function computeAggregationStats<FeaturePropertiesT>(
   return stats;
 }
 
+const EMPTY_UINT16ARRAY = new Uint16Array();
+const EMPTY_BINARY_PROPS = {
+  positions: {value: new Float32Array(), size: 2},
+  properties: [],
+  numericProps: {},
+  featureIds: {value: EMPTY_UINT16ARRAY, size: 1},
+  globalFeatureIds: {value: EMPTY_UINT16ARRAY, size: 1}
+};
+
 export function clustersToBinary<FeaturePropertiesT>(
   data: ClusteredFeaturePropertiesT<FeaturePropertiesT>[]
 ): BinaryFeatureCollection {
@@ -138,22 +147,14 @@ export function clustersToBinary<FeaturePropertiesT>(
     },
     lines: {
       type: 'LineString',
-      positions: {value: new Float32Array(), size: 2},
-      pathIndices: {value: new Uint16Array(), size: 1},
-      properties: [],
-      numericProps: {},
-      featureIds: {value: new Uint16Array(), size: 1},
-      globalFeatureIds: {value: new Uint16Array(), size: 1}
+      pathIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      ...EMPTY_BINARY_PROPS
     },
     polygons: {
       type: 'Polygon',
-      positions: {value: new Float32Array(), size: 2},
-      polygonIndices: {value: new Uint16Array(), size: 1},
-      primitivePolygonIndices: {value: new Uint16Array(), size: 1},
-      properties: [],
-      numericProps: {},
-      featureIds: {value: new Uint16Array(), size: 1},
-      globalFeatureIds: {value: new Uint16Array(), size: 1}
-    } as any
+      polygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      primitivePolygonIndices: {value: EMPTY_UINT16ARRAY, size: 1},
+      ...EMPTY_BINARY_PROPS
+    }
   };
 }
