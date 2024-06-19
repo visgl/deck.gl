@@ -46,19 +46,7 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
-const RASTER_LAYER_TYPE = 'raster';
-const MVT_LAYER_TYPE = 'mvt';
-const TILESET_LAYER_TYPE = 'tileset';
-const QUADBIN_LAYER_TYPE = 'quadbin';
-const H3_LAYER_TYPE = 'h3';
-const HEATMAP_TILE_LAYER_TYPE = 'heatmapTile';
-type LayerType =
-  | typeof RASTER_LAYER_TYPE
-  | typeof MVT_LAYER_TYPE
-  | typeof TILESET_LAYER_TYPE
-  | typeof QUADBIN_LAYER_TYPE
-  | typeof H3_LAYER_TYPE
-  | typeof HEATMAP_TILE_LAYER_TYPE;
+type LayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
 
 function identity<T>(v: T): T {
   return v;
@@ -89,12 +77,12 @@ const AGGREGATION_FUNC = {
 };
 
 const LAYER_FROM_LAYER_TYPE: Record<LayerType, ConstructorOf<Layer>> = {
-  [TILESET_LAYER_TYPE]: VectorTileLayer,
-  [MVT_LAYER_TYPE]: VectorTileLayer,
-  [RASTER_LAYER_TYPE]: RasterTileLayer,
-  [H3_LAYER_TYPE]: H3TileLayer,
-  [QUADBIN_LAYER_TYPE]: QuadbinTileLayer,
-  [HEATMAP_TILE_LAYER_TYPE]: HeatmapTileLayer
+  tileset: VectorTileLayer,
+  mvt: VectorTileLayer,
+  raster: RasterTileLayer,
+  h3: H3TileLayer,
+  quadbin: QuadbinTileLayer,
+  heatmapTile: HeatmapTileLayer
 };
 
 const hexToRGBA = c => {
@@ -168,11 +156,11 @@ export function getLayer(
     basePropMap = mergePropMaps(sharedPropMap, customMarkersPropsMap);
   }
   if (
-    type === MVT_LAYER_TYPE ||
-    type === TILESET_LAYER_TYPE ||
-    type === H3_LAYER_TYPE ||
-    type === QUADBIN_LAYER_TYPE ||
-    type === HEATMAP_TILE_LAYER_TYPE
+    type === 'mvt' ||
+    type === 'tileset' ||
+    type === 'h3' ||
+    type === 'quadbin' ||
+    type === 'heatmapTile'
   ) {
     return getTileLayer(dataset, basePropMap, type);
   }
