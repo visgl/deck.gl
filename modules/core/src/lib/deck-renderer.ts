@@ -16,7 +16,6 @@ type LayerFilter = ((context: FilterContext) => boolean) | null;
 
 export default class DeckRenderer {
   device: Device;
-  gl: WebGL2RenderingContext;
   layerFilter: LayerFilter;
   drawPickingColors: boolean;
   drawLayersPass: DrawLayersPass;
@@ -29,8 +28,6 @@ export default class DeckRenderer {
 
   constructor(device: Device) {
     this.device = device;
-    // @ts-expect-error
-    this.gl = device.gl;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(device);
