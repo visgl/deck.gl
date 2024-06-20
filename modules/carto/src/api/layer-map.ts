@@ -91,9 +91,7 @@ const TILE_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
   h3: H3TileLayer,
   heatmapTile: HeatmapTileLayer,
   mvt: VectorTileLayer,
-  // TODO undo before merge
-  // quadbin: QuadbinTileLayer,
-  quadbin: ClusterTileLayer,
+  quadbin: QuadbinTileLayer,
   raster: RasterTileLayer,
   tileset: VectorTileLayer
 };
