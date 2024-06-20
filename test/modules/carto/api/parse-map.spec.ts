@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 import {parseMap} from '@deck.gl/carto/api/parse-map';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {H3TileLayer, QuadbinTileLayer, VectorTileLayer} from '@deck.gl/carto';
+import {H3TileLayer, QuadbinTileLayer, VectorTileLayer, HeatmapTileLayer} from '@deck.gl/carto';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 
@@ -1893,6 +1893,130 @@ test(`parseMap#visState tilesets spatial index`, async t => {
   t.equal(quadbinLayer.props.stroked, false, 'quadbinLayer - stroked');
   t.deepEqual(quadbinLayer.props.getFillColor, [246, 209, 138, 230], 'quadbinLayer - getFillColor');
   t.equal((quadbinLayer.props as any).cartoLabel, 'Layer 2', 'quadbinLayer - cartoLabel');
+  t.end();
+});
+
+test(`parseMap#visState HeatmapTileLayer`, async t => {
+  const keplerMapConfig = {
+    version: 'v1',
+    config: {
+      visState: {
+        layers: [
+          {
+            id: 'a6bbdbj',
+            type: 'heatmapTile',
+            config: {
+              color: [246, 209, 138],
+              label: 'Layer 2',
+              dataId: 'DATA_TILESET_QUADBIN_ID',
+              hidden: false,
+              columns: {},
+              isVisible: true,
+              textLabel: [
+                {
+                  size: 18,
+                  color: [255, 255, 255],
+                  outlineColor: [0, 0, 0],
+                  field: null,
+                  anchor: 'start',
+                  offset: [0, 0],
+                  alignment: 'center'
+                }
+              ],
+              visConfig: {
+                filled: true,
+                radius: 2,
+                opacity: 0.8,
+                stroked: false,
+                enable3d: false,
+                sizeRange: [0, 10],
+                thickness: 1,
+                wireframe: false,
+                colorRange: {
+                  name: 'Global Warming',
+                  type: 'sequential',
+                  colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'],
+                  category: 'Uber'
+                },
+                heightRange: [0, 500],
+                radiusRange: [0, 50],
+                strokeColor: null,
+                strokeOpacity: 0.8,
+                elevationScale: 5,
+                colorAggregation: 'average',
+                strokeColorRange: {
+                  name: 'Global Warming',
+                  type: 'sequential',
+                  colors: ['#5A1846', '#900C3F', '#C70039', '#E3611C', '#F1920E', '#FFC300'],
+                  category: 'Uber'
+                },
+                heightAggregation: 'average'
+              },
+              highlightColor: [252, 242, 26, 255]
+            },
+            visualChannels: {
+              sizeField: null,
+              sizeScale: 'linear',
+              colorField: null,
+              colorScale: 'quantile',
+              heightField: null,
+              heightScale: 'linear',
+              radiusField: null,
+              radiusScale: 'linear',
+              strokeColorField: null,
+              strokeColorScale: 'quantile'
+            }
+          }
+        ],
+        filters: [],
+        splitMaps: [],
+        layerBlending: 'subtractive',
+        animationConfig: {speed: 1, currentTime: null},
+        interactionConfig: {
+          brush: {size: 0.5, enabled: false},
+          tooltip: {
+            enabled: true,
+            compareMode: false,
+            compareType: 'absolute',
+            fieldsToShow: {
+              '6184df9c-bb75-4fa3-abe5-e3b51bc1e63b': [],
+              '6da2452e-0390-4392-88ae-b8314cd68060': [],
+              'b3079c06-4ce1-4030-85a0-db79865a5e80': [
+                {name: 'type', format: null},
+                {name: 'name', format: null},
+                {name: 'location', format: null},
+                {name: 'capacity_mw', format: null},
+                {name: 'year_opened', format: null}
+              ]
+            }
+          },
+          geocoder: {enabled: false},
+          coordinate: {enabled: false}
+        }
+      }
+    }
+  };
+
+  const map = parseMap({...METADATA, datasets: DATASETS, keplerMapConfig});
+
+  t.deepEquals(
+    map.layers.map(l => l.toString()),
+    [`HeatmapTileLayer({id: 'a6bbdbj'})`],
+    'layer names'
+  );
+
+  const heatmapTileLayer = map.layers[0] as HeatmapTileLayer;
+  t.equal(heatmapTileLayer.props.id, 'a6bbdbj', 'heatmapTileLayer - id');
+  t.equal(heatmapTileLayer.props.pickable, true, 'heatmapTileLayer - pickable');
+  t.equal(heatmapTileLayer.props.visible, true, 'heatmapTileLayer - visible');
+  t.equal(heatmapTileLayer.props.filled, true, 'heatmapTileLayer - filled');
+  t.equal(heatmapTileLayer.props.stroked, false, 'heatmapTileLayer - stroked');
+  t.deepEqual(
+    heatmapTileLayer.props.getFillColor,
+    [246, 209, 138, 230],
+    'heatmapTileLayer - getFillColor'
+  );
+  t.equal((heatmapTileLayer.props as any).cartoLabel, 'Layer 2', 'heatmapTileLayer - cartoLabel');
   t.end();
 });
 

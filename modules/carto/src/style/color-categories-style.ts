@@ -1,6 +1,6 @@
-import {AccessorFunction} from '@deck.gl/core';
+import {AccessorFunction, Color} from '@deck.gl/core';
 import {Feature} from 'geojson';
-import getPalette, {Color, DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
+import getPalette, {DEFAULT_PALETTE, NULL_COLOR, OTHERS_COLOR} from './palette';
 import {assert} from '../utils';
 import {AttributeSelector, getAttrValue} from './utils';
 

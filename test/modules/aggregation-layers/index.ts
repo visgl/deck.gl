@@ -40,3 +40,5 @@ import './utils/bin-sorter.spec';
 import './utils/color-utils.spec';
 // import './utils/gpu-grid-aggregator.spec';
 import './utils/scale-utils.spec';
+
+import './aggregation-layer-v9/webgl-aggregator.spec';

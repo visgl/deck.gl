@@ -47,7 +47,6 @@
     "@loaders.gl/mvt": "^4.2.0",
     "@loaders.gl/schema": "^4.2.0",
     "@loaders.gl/tiles": "^4.2.0",
-    "@luma.gl/constants": "^9.0.14",
     "@luma.gl/core": "^9.0.14",
     "@luma.gl/shadertools": "^9.0.14",
     "@math.gl/web-mercator": "^4.0.0",
