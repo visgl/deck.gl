@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.0
 
+#### deck.gl [9.0.20] - Jun 20 2024
+
+- fix(extensions): DataFilterExtension not setting category uniforms (#8940)
+- chore(carto): Remove dependency on @luma.gl/constants (#8959)
+
 #### deck.gl [9.0.19] - Jun 13 2024
 
 - fix(carto): Use tile.content in HeatmapTileLayer (#8947)

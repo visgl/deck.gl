@@ -3,7 +3,7 @@
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.19",
+  "version": "9.0.20",
   "publishConfig": {
     "access": "public"
   },

@@ -3,7 +3,7 @@
   "description": "JSON format rendering components for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.0.19",
+  "version": "9.0.20",
   "publishConfig": {
     "access": "public"
   },
