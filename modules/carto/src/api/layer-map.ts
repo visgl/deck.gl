@@ -18,6 +18,7 @@ import {CPUGridLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-lay
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
+import ClusterTileLayer from '../layers/cluster-tile-layer';
 import H3TileLayer from '../layers/h3-tile-layer';
 import QuadbinTileLayer from '../layers/quadbin-tile-layer';
 import RasterTileLayer from '../layers/raster-tile-layer';
@@ -46,8 +47,15 @@ const SCALE_FUNCS = {
 };
 export type SCALE_TYPE = keyof typeof SCALE_FUNCS;
 
-type TileLayerType = 'raster' | 'mvt' | 'tileset' | 'quadbin' | 'h3' | 'heatmapTile';
-type DocumentLayerType = 'point' | 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId';
+type TileLayerType =
+  | 'clusterTile'
+  | 'h3'
+  | 'heatmapTile'
+  | 'mvt'
+  | 'quadbin'
+  | 'raster'
+  | 'tileset';
+type DocumentLayerType = 'geojson' | 'grid' | 'heatmap' | 'hexagon' | 'hexagonId' | 'point';
 type LayerType = TileLayerType | DocumentLayerType;
 
 function identity<T>(v: T): T {
@@ -79,12 +87,13 @@ const AGGREGATION_FUNC = {
 };
 
 const TILE_LAYER_TYPE_TO_LAYER: Record<TileLayerType, ConstructorOf<Layer>> = {
-  tileset: VectorTileLayer,
-  mvt: VectorTileLayer,
-  raster: RasterTileLayer,
+  clusterTile: ClusterTileLayer,
   h3: H3TileLayer,
+  heatmapTile: HeatmapTileLayer,
+  mvt: VectorTileLayer,
   quadbin: QuadbinTileLayer,
-  heatmapTile: HeatmapTileLayer
+  raster: RasterTileLayer,
+  tileset: VectorTileLayer
 };
 
 const hexToRGBA = c => {
