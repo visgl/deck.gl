@@ -56,24 +56,17 @@ function Root() {
     })
   ];
 
-  let latitude;
-  let longitude;
-  let text;
-  if (selected) {
-    [longitude, latitude] = selected.geometry.coordinates;
-    text = `${selected.properties.name} (${selected.properties.abbrev})`;
-  }
   return (
     <Map initialViewState={INITIAL_VIEW_STATE} mapStyle={MAP_STYLE}>
       {selected && (
         <Popup
           anchor="bottom"
           style={{zIndex: 10}} /* position above deck.gl canvas */
-          longitude={longitude}
-          latitude={latitude}
+          longitude={selected.geometry.coordinates[0]}
+          latitude={selected.geometry.coordinates[1]}
           onClose={() => setSelected(null)}
         >
-          {text}
+          {selected.properties.name} ({selected.properties.abbrev})
         </Popup>
       )}
       <DeckGLOverlay layers={layers} /* interleaved*/ />
