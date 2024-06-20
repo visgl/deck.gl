@@ -1,23 +1,26 @@
+import {default as ClusterTileLayer} from './layers/cluster-tile-layer';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
+import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';
 import {default as _PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
-import {default as QuadbinHeatmapTileLayer} from './layers/quadbin-heatmap-tile-layer';
 import {default as RasterTileLayer} from './layers/raster-tile-layer';
 import {default as VectorTileLayer} from './layers/vector-tile-layer';
 const CARTO_LAYERS = {
+  ClusterTileLayer,
   H3TileLayer,
+  HeatmapTileLayer,
   _PointLabelLayer,
   QuadbinTileLayer,
-  QuadbinHeatmapTileLayer,
   RasterTileLayer,
   VectorTileLayer
 };
 export {
   CARTO_LAYERS,
+  ClusterTileLayer,
   H3TileLayer,
+  HeatmapTileLayer,
   _PointLabelLayer,
   QuadbinTileLayer,
-  QuadbinHeatmapTileLayer,
   RasterTileLayer,
   VectorTileLayer
 };

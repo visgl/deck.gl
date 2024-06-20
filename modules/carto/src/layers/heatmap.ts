@@ -1,5 +1,4 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
-import {random} from '@luma.gl/shadertools';
 import {Color} from '@deck.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
@@ -21,11 +20,10 @@ uniform heatmapUniforms {
   vec3 color4;
   vec3 color5;
   vec3 color6;
+  float intensity;
   float opacity;
 } heatmap;
 
-// Controls quality of heatmap, larger values increase quality at expense of performance
-const float SUPPORT = 8.0;
 const vec4 STOPS = vec4(0.2, 0.4, 0.6, 0.8);
 
 vec3 colorGradient(float value) {
@@ -44,20 +42,18 @@ vec3 colorGradient(float value) {
   } else if (value < STOPS.w) {
     range = STOPS.zw;
     c1 = heatmap.color4; c2 = heatmap.color5;
-  } else if (value < 1.0 ) {
+  } else {
     range = vec2(STOPS.w, 1.0);
     c1 = heatmap.color5; c2 = heatmap.color6;
-  } else {
-    // Fade out to white
-    range = vec2(1.0, 10.0);
-    c1 = heatmap.color6; c2 = vec3(255.0);
   }
 
-  float f = (value - range.x) / (range.y - range.x);
+  float f = (clamp(value, 0.0, 1.0) - range.x) / (range.y - range.x);
   return mix(c1, c2, f) / 255.0;
 }
 
 const vec3 SHIFT = vec3(1.0, 256.0, 256.0 * 256.0);
+const float MAX_VAL = SHIFT.z * 255.0;
+const float SCALE = MAX_VAL / 8.0;
 vec4 pack(float value) {
   return vec4(mod(vec3(value, floor(value / SHIFT.yz)), 256.0), 255.0) / 255.0;
 }
@@ -69,16 +65,15 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   bool firstPass = (heatmap.delta.y < 0.5);
   float accumulator = 0.0;
 
-  // Randomize the lookup values to hide the fixed number of samples
-  float offset = 0.5 * random(vec3(12.9898, 78.233, 151.7182), 0.0);
+  // Controls quality of heatmap, larger values increase quality at expense of performance
+  float SUPPORT = clamp(heatmap.radiusPixels / 2.0, 8.0, 32.0);
 
   // Gaussian normalization parameters
-  const float sigma = SUPPORT / 3.0;
-  const float a = -0.5 / (sigma * sigma);
-  const float w0 = 0.3989422804014327 / sigma; // 1D normalization
-
+  float sigma = SUPPORT / 3.0;
+  float a = -0.5 / (sigma * sigma);
+  float w0 = 0.3989422804014327 / sigma; // 1D normalization
   for (float t = -SUPPORT; t <= SUPPORT; t++) {
-    vec2 percent = (t * heatmap.delta + offset - 0.5) / SUPPORT;
+    vec2 percent = (t * heatmap.delta - 0.5) / SUPPORT;
     vec2 delta = percent * heatmap.radiusPixels / texSize;
     vec4 offsetColor = texture(source, texCoord + delta);
 
@@ -95,8 +90,18 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
     return pack(accumulator);
   }
 
+  // Undo scaling to obtain normalized density
+  float density = 10.0 * heatmap.intensity * accumulator / SCALE;
+ 
+  // Domain also in normalized density units
+  vec2 domain = heatmap.colorDomain;
+
   // Apply domain
-  float f = (accumulator - heatmap.colorDomain[0]) / (heatmap.colorDomain[1] - heatmap.colorDomain[0]);
+  float f = (density - domain[0]) / (domain[1] - domain[0]);
+
+  // sqrt/log scaling??
+  // float f = (log(density) - log(domain[0] + 1.0)) / (log(domain[1] + 1.0) - log(domain[0] + 1.0));
+  // f = sqrt(f);
 
   // Color map
   vec4 color = vec4(0.0);
@@ -138,6 +143,10 @@ export type HeatmapProps = {
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange: Color[];
+  /**
+   * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
+   */
+  intensity?: number;
   opacity: number;
 };
 
@@ -151,6 +160,7 @@ export type HeatmapUniforms = {
   color4?: [number, number, number];
   color5?: [number, number, number];
   color6?: [number, number, number];
+  intensity: number;
   opacity?: number;
 };
 
@@ -166,6 +176,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color4: {value: [0, 0, 0]},
     color5: {value: [0, 0, 0]},
     color6: {value: [0, 0, 0]},
+    intensity: {value: 1, min: 0.1, max: 10},
     opacity: {value: 1, min: 0, max: 1}
   },
   uniformTypes: {
@@ -178,6 +189,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     color4: 'vec3<f32>',
     color5: 'vec3<f32>',
     color6: 'vec3<f32>',
+    intensity: 'f32',
     opacity: 'f32'
   },
   getUniforms: opts => {
@@ -186,6 +198,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       colorRange = defaultColorRange,
       radiusPixels = 20,
       colorDomain = [0, 1],
+      intensity = 1,
       opacity = 1
     } = opts as HeatmapProps & {delta: [number, number]};
     const [color1, color2, color3, color4, color5, color6] = colorRange;
@@ -199,10 +212,10 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       color6,
       radiusPixels,
       colorDomain,
+      intensity,
       opacity
     };
   },
-  dependencies: [random],
   fs,
   passes: [
     {sampler: true, uniforms: {delta: [1, 0]}},
