@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map, NavigationControl, useControl} from 'react-map-gl/maplibre';
+import {Map, NavigationControl, Popup, useControl} from 'react-map-gl/maplibre';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -25,12 +25,7 @@ function DeckGLOverlay(props) {
 }
 
 function Root() {
-  const onClick = info => {
-    if (info.object) {
-      // eslint-disable-next-line
-      alert(`${info.object.properties.name} (${info.object.properties.abbrev})`);
-    }
-  };
+  const [selected, setSelected] = useState(null);
 
   const layers = [
     new GeoJsonLayer({
@@ -45,7 +40,7 @@ function Root() {
       // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick
+      onClick: info => setSelected(info.object)
       // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
@@ -63,6 +58,17 @@ function Root() {
 
   return (
     <Map initialViewState={INITIAL_VIEW_STATE} mapStyle={MAP_STYLE}>
+      {selected && (
+        <Popup
+          key={selected.properties.name}
+          anchor="bottom"
+          style={{zIndex: 10}} /* position above deck.gl canvas */
+          longitude={selected.geometry.coordinates[0]}
+          latitude={selected.geometry.coordinates[1]}
+        >
+          {selected.properties.name} ({selected.properties.abbrev})
+        </Popup>
+      )}
       <DeckGLOverlay layers={layers} /* interleaved*/ />
       <NavigationControl position="top-left" />
     </Map>
