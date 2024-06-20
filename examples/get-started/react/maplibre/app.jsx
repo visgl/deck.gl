@@ -60,11 +60,11 @@ function Root() {
     <Map initialViewState={INITIAL_VIEW_STATE} mapStyle={MAP_STYLE}>
       {selected && (
         <Popup
+          key={selected.properties.name}
           anchor="bottom"
           style={{zIndex: 10}} /* position above deck.gl canvas */
           longitude={selected.geometry.coordinates[0]}
           latitude={selected.geometry.coordinates[1]}
-          onClose={() => setSelected(null)}
         >
           {selected.properties.name} ({selected.properties.abbrev})
         </Popup>
