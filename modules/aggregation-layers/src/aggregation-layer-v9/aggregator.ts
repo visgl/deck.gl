@@ -63,7 +63,7 @@ export interface Aggregator {
   destroy(): void;
 
   /** Get the number of bins */
-  get numBins(): number;
+  get binCount(): number;
 
   /** Returns an accessor to the bins. */
   getBins(): BinaryAttribute | null;

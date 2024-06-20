@@ -1,4 +1,4 @@
-import {GL} from '@luma.gl/constants';
+import {ColorParameters} from '@luma.gl/core';
 import {Layer, log} from '@deck.gl/core';
 import {
   AGGREGATION,
@@ -83,13 +83,18 @@ export function parseMap(json) {
   };
 }
 
-function createParametersProp(layerBlending, parameters: Record<string, any>) {
+function createParametersProp(layerBlending: string, parameters: ColorParameters) {
   if (layerBlending === 'additive') {
-    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = GL.FUNC_ADD;
+    parameters.blendColorSrcFactor = parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendColorDstFactor = parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
-    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
+    parameters.blendColorSrcFactor = 'one';
+    parameters.blendColorDstFactor = 'one-minus-dst-color';
+    parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = 'subtract';
+    parameters.blendAlphaOperation = 'add';
   }
 
   return Object.keys(parameters).length ? {parameters} : {};
