@@ -96,9 +96,9 @@ export default function App({
           image: props.data,
           bounds: [
             clamp(left, 0, width),
-            clamp(bottom, 0, height),
+            clamp(top, 0, height),
             clamp(right, 0, width),
-            clamp(top, 0, height)
+            clamp(bottom, 0, height)
           ]
         });
       }
