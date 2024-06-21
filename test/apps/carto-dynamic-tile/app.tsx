@@ -70,14 +70,8 @@ function Root() {
 }
 
 function useBoundaryLayer(datasource) {
-  const {
-    getFillColor,
-    source,
-    tilesetTableName,
-    columns,
-    propertiesSqlQuery,
-    propertiesTableName
-  } = datasource;
+  const {getFillColor, source, tilesetTableName, columns, propertiesSqlQuery, propertiesTableName} =
+    datasource;
   const tilejson = source({
     ...globalOptions,
     tilesetTableName,
