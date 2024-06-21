@@ -1,5 +1,7 @@
 import type {ShaderUniformType} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
+import {DefaultUniformTypes} from '../types';
+
 const uniformBlock = `\
 uniform scatterplotUniforms {
   uniform float radiusScale;
@@ -16,10 +18,6 @@ uniform scatterplotUniforms {
   uniform highp int lineWidthUnits;
 } scatterplot;
 `;
-
-type DefaultUniformTypes<PropsT extends {} = {}> = {
-  [propName in keyof PropsT]: ShaderUniformType;
-};
 
 export type ScatterplotProps = {
   radiusScale?: number;

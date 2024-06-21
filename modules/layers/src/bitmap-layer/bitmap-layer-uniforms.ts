@@ -1,5 +1,7 @@
-import type {ShaderUniformType, Texture} from '@luma.gl/core';
+import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
+import {DefaultUniformTypes} from '../types';
+
 const uniformBlock = `\
 uniform bitmapUniforms {
   vec4 bounds;
@@ -9,10 +11,6 @@ uniform bitmapUniforms {
   vec4 transparentColor;
 } bitmap;
 `;
-
-type DefaultUniformTypes<PropsT extends {} = {}> = {
-  [propName in keyof PropsT]: ShaderUniformType;
-};
 
 type BitmapBindingProps = {
   bitmapTexture: Texture;
