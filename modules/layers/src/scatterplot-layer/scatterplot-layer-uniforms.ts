@@ -1,6 +1,5 @@
-import type {ShaderUniformType} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
-import {DefaultUniformTypes} from '../types';
+import {UniformTypes} from '../uniform-types';
 
 const uniformBlock = `\
 uniform scatterplotUniforms {
@@ -51,5 +50,5 @@ export const scatterplotUniforms = {
     billboard: 'f32',
     radiusUnits: 'i32',
     lineWidthUnits: 'i32'
-  } as const satisfies DefaultUniformTypes<ScatterplotProps>
+  } as const satisfies UniformTypes<ScatterplotProps>
 } as const satisfies ShaderModule<ScatterplotProps>;
