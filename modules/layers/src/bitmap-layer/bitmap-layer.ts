@@ -39,6 +39,7 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
 
+import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
@@ -141,11 +142,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     model?: Model;
     mesh?: any;
     coordinateConversion: number;
-    bounds: number[];
+    bounds: [number, number, number, number];
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking]});
+    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
   }
 
   initializeState() {
@@ -295,14 +296,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // Render the image
     if (image && model) {
       model.setUniforms(uniforms);
-      model.setBindings({bitmapTexture: image as Texture});
-      model.setUniforms({
+      const bitmapProps: BitmapProps = {
         desaturate,
-        transparentColor: transparentColor.map(x => x / 255) as number[],
-        tintColor: tintColor.slice(0, 3).map(x => x / 255),
+        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number],
+        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
         coordinateConversion,
-        bounds
-      });
+        bounds: bounds
+      };
+
+      model.setBindings({bitmapTexture: image as Texture});
+      // model.setUniforms({
+      //   desaturate,
+      //   transparentColor: transparentColor.map(x => x / 255) as number[],
+      //   tintColor: tintColor.slice(0, 3).map(x => x / 255),
+      //   coordinateConversion,
+      //   bounds
+      // });
       model.draw(this.context.renderPass);
     }
   }

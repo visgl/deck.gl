@@ -21,9 +21,9 @@ void main(void) {
 
   vTexCoord = texCoords;
 
-  if (coordinateConversion < -0.5) {
+  if (bitmap.coordinateConversion < -0.5) {
     vTexPos = geometry.position.xy + project.commonOrigin.xy;
-  } else if (coordinateConversion > 0.5) {
+  } else if (bitmap.coordinateConversion > 0.5) {
     vTexPos = geometry.worldPosition.xy;
   }
 
