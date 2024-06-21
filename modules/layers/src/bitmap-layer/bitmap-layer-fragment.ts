@@ -39,8 +39,6 @@ in vec2 vTexPos;
 
 out vec4 fragColor;
 
-uniform float opacity;
-
 /* projection utils */
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -108,7 +106,7 @@ void main(void) {
   }
   vec4 bitmapColor = texture(bitmapTexture, uv);
 
-  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
+  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * layer.opacity);
 
   geometry.uv = uv;
   DECKGL_FILTER_COLOR(fragColor, geometry);
