@@ -22,6 +22,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
+import {layerUniforms} from './layer-uniforms';
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -186,7 +187,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, scatterplotUniforms]});
+    return super.getShaders({
+      vs,
+      fs,
+      modules: [layerUniforms, project32, picking, scatterplotUniforms]
+    });
   }
 
   initializeState() {
@@ -254,7 +259,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     } = this.props;
     const model = this.state.model!;
 
-    model.setUniforms(uniforms);
+    // model.setUniforms(uniforms);
     const scatterplotProps: ScatterplotProps = {
       stroked,
       filled,

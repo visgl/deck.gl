@@ -32,8 +32,6 @@ in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in vec3 instancePickingColors;
 
-uniform float opacity;
-
 out vec4 vFillColor;
 out vec4 vLineColor;
 out vec2 unitPosition;
@@ -82,9 +80,9 @@ void main(void) {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 }
 `;
