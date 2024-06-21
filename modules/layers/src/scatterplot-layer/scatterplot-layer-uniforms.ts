@@ -1,4 +1,4 @@
-import {ShaderUniformType} from '@luma.gl/core';
+import type {ShaderUniformType} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 const uniformBlock = `\
 uniform scatterplotUniforms {

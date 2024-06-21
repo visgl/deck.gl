@@ -297,14 +297,14 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (image && model) {
       model.setUniforms(uniforms);
       const bitmapProps: BitmapProps = {
-        desaturate,
-        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number],
-        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
+        bitmapTexture: image as Texture,
+        bounds,
         coordinateConversion,
-        bounds: bounds
+        desaturate,
+        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
+        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number]
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
-      model.setBindings({bitmapTexture: image as Texture});
       model.draw(this.context.renderPass);
     }
   }

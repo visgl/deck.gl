@@ -1,4 +1,4 @@
-import {ShaderUniformType} from '@luma.gl/core';
+import type {ShaderUniformType, Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 const uniformBlock = `\
 uniform bitmapUniforms {
@@ -14,13 +14,19 @@ type DefaultUniformTypes<PropsT extends {} = {}> = {
   [propName in keyof PropsT]: ShaderUniformType;
 };
 
-export type BitmapProps = {
+type BitmapBindingProps = {
+  bitmapTexture: Texture;
+};
+
+type BitmapUniformProps = {
   bounds?: [number, number, number, number];
   coordinateConversion?: number;
   desaturate?: number;
   tintColor?: [number, number, number];
   transparentColor?: [number, number, number, number];
 };
+
+export type BitmapProps = BitmapBindingProps & BitmapUniformProps;
 
 export const bitmapUniforms = {
   name: 'bitmap',
@@ -32,5 +38,5 @@ export const bitmapUniforms = {
     desaturate: 'f32',
     tintColor: 'vec3<f32>',
     transparentColor: 'vec4<f32>'
-  } as const satisfies DefaultUniformTypes<BitmapProps>
+  } as const satisfies DefaultUniformTypes<BitmapUniformProps>
 } as const satisfies ShaderModule<BitmapProps>;
