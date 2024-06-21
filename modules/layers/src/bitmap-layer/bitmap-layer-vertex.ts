@@ -9,8 +9,6 @@ in vec3 positions64Low;
 out vec2 vTexCoord;
 out vec2 vTexPos;
 
-uniform float coordinateConversion;
-
 const vec3 pickingColor = vec3(1.0, 0.0, 0.0);
 
 void main(void) {

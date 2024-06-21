@@ -39,13 +39,7 @@ in vec2 vTexPos;
 
 out vec4 fragColor;
 
-uniform float desaturate;
-uniform vec4 transparentColor;
-uniform vec3 tintColor;
 uniform float opacity;
-
-uniform float coordinateConversion;
-uniform vec4 bounds;
 
 /* projection utils */
 const float TILE_SIZE = 512.0;
