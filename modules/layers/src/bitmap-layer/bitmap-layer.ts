@@ -303,15 +303,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         coordinateConversion,
         bounds: bounds
       };
-
+      model.shaderInputs.setProps({bitmap: bitmapProps});
       model.setBindings({bitmapTexture: image as Texture});
-      // model.setUniforms({
-      //   desaturate,
-      //   transparentColor: transparentColor.map(x => x / 255) as number[],
-      //   tintColor: tintColor.slice(0, 3).map(x => x / 255),
-      //   coordinateConversion,
-      //   bounds
-      // });
       model.draw(this.context.renderPass);
     }
   }
