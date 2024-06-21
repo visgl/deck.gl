@@ -1266,16 +1266,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightColor !== highlightColor
     ) {
       const picking: PickingProps = {};
-      if (!autoHighlight) {
-        picking.highlightedObjectColor = null;
-      }
+
       if (Array.isArray(highlightColor)) {
         picking.highlightColor = highlightColor;
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
       // Do not reset unless the value has changed.
-      if (forceUpdate || highlightedObjectIndex !== oldProps.highlightedObjectIndex) {
+      if (
+        forceUpdate ||
+        oldProps.autoHighlight !== autoHighlight ||
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+      ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
             ? this.encodePickingColor(highlightedObjectIndex)
