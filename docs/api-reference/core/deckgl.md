@@ -73,13 +73,17 @@ new deck.DeckGL({
 });
 ```
 
-#### `mapStyle` (object | String) {#mapstyle}
+#### `mapStyle` (object | string, optional) {#mapstyle}
 
 The style JSON or URL for the Mapbox map.
 
-#### `mapboxApiAccessToken` (string) {#mapboxapiaccesstoken}
+#### `mapboxApiAccessToken` (string, optional) {#mapboxapiaccesstoken}
 
 The API access token to use Mapbox tiles. See [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api) documentation for how to use Mapbox.
+
+#### `mapOptions` (object, optional) {#mapoptions}
+
+Additional options to pass to the [mapboxgl.Map](https://docs.mapbox.com/mapbox-gl-js/api/map/) or [maplibregl.Map](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/) constructor.
 
 
 ## Methods
