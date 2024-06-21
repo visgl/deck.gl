@@ -1,5 +1,5 @@
 import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '../uniform-types';
+import {UniformTypes} from './uniform-types';
 
 const uniformBlock = `\
 uniform layerUniforms {

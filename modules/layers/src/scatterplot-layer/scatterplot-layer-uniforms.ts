@@ -1,5 +1,5 @@
 import {ShaderModule} from '@luma.gl/shadertools';
-import {UniformTypes} from '../uniform-types';
+import {UniformTypes} from '@deck.gl/core';
 
 const uniformBlock = `\
 uniform scatterplotUniforms {

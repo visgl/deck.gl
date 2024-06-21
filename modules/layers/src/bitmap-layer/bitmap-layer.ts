@@ -20,6 +20,7 @@
 
 import {
   Layer,
+  layerUniforms,
   project32,
   picking,
   CoordinateSystem,
@@ -39,7 +40,6 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
 
-import {layerUniforms} from './../scatterplot-layer/layer-uniforms';
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';

@@ -61,6 +61,7 @@ export {default as FirstPersonViewport} from './viewports/first-person-viewport'
 
 // Shader modules
 export {
+  layerUniforms,
   picking,
   project,
   project32,
@@ -140,7 +141,7 @@ export type {PickingInfo, GetPickingInfoParams} from './lib/picking/pick-info';
 export type {ConstructorOf as _ConstructorOf} from './types/types';
 export type {BinaryAttribute} from './lib/attribute/attribute';
 export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from './lib/effect';
-export type {PickingUniforms, ProjectUniforms} from './shaderlib/index';
+export type {PickingUniforms, ProjectUniforms, UniformTypes} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
 export type {Widget, WidgetPlacement} from './lib/widget-manager';
