@@ -1,7 +1,14 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {getResolution} from 'quadbin';
 
-import {Accessor, CompositeLayer, CompositeLayerProps, DefaultProps, Layer} from '@deck.gl/core';
+import {
+  Accessor,
+  CompositeLayer,
+  CompositeLayerProps,
+  DefaultProps,
+  Layer,
+  UpdateParameters
+} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import {HeatmapProps, heatmap} from './heatmap';

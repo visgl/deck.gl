@@ -1,4 +1,5 @@
 import type {ShaderPass} from '@luma.gl/shadertools';
+import {Texture} from '@luma.gl/core';
 const glsl = (s: TemplateStringsArray) => `${s}`;
 
 /**
@@ -150,6 +151,10 @@ export type HeatmapProps = {
    * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
    */
   intensity?: number;
+  /**
+   * Color LUT for color gradient
+   */
+  colorTexture: Texture;
   opacity: number;
 };
 
