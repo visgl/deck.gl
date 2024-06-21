@@ -285,7 +285,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   draw(opts) {
-    const {uniforms, moduleParameters} = opts;
+    const {moduleParameters} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
     const {image, desaturate, transparentColor, tintColor} = this.props;
 
@@ -296,7 +296,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      model.setUniforms(uniforms);
       const bitmapProps: BitmapProps = {
         bitmapTexture: image as Texture,
         bounds,

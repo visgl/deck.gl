@@ -241,7 +241,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     }
   }
 
-  draw({uniforms}) {
+  draw() {
     const {
       radiusUnits,
       radiusScale,
@@ -256,9 +256,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
-    const model = this.state.model!;
-
-    // model.setUniforms(uniforms);
     const scatterplotProps: ScatterplotProps = {
       stroked,
       filled,
@@ -273,6 +270,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     };
+    const model = this.state.model!;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     model.draw(this.context.renderPass);
   }
