@@ -36,12 +36,12 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.0.12",
+    "@luma.gl/constants": "^9.0.14",
     "esri-loader": "^3.7.0"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
-    "@deck.gl/core": "^9.0.0-beta",
+    "@deck.gl/core": "^9.0.0",
     "@luma.gl/core": "^9.0.0",
     "@luma.gl/engine": "^9.0.0"
   },

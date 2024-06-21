@@ -59,3 +59,8 @@ export function scaleIdentity() {
 
   return scale;
 }
+
+export const isObject: (x: unknown) => boolean = x => x !== null && typeof x === 'object';
+
+export const isPureObject: (x: any) => boolean = x =>
+  isObject(x) && x.constructor === {}.constructor;

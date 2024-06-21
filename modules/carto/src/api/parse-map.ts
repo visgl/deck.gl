@@ -1,5 +1,5 @@
-import {GL} from '@luma.gl/constants';
-import {log} from '@deck.gl/core';
+import {ColorParameters} from '@luma.gl/core';
+import {Layer, log} from '@deck.gl/core';
 import {
   AGGREGATION,
   getLayer,
@@ -16,14 +16,34 @@ import {
 import PointLabelLayer from '../layers/point-label-layer';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {assert} from '../utils';
-import {MapDataset, MapLayerConfig, VisualChannels} from './types';
+import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
 
 const collisionFilterExtension = new CollisionFilterExtension();
+
+export type ParseMapResult = {
+  /** Map id. */
+  id: string;
+
+  /** Title of map. */
+  title: string;
+
+  /** Description of map. */
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  initialViewState: any;
+
+  /** @deprecated Use `basemap`. */
+  mapStyle: any;
+  token: string;
+
+  layers: Layer[];
+};
 
 export function parseMap(json) {
   const {keplerMapConfig, datasets, token} = json;
   assert(keplerMapConfig.version === 'v1', 'Only support Kepler v1');
-  const {mapState, mapStyle} = keplerMapConfig.config;
+  const {mapState, mapStyle} = keplerMapConfig.config as KeplerMapConfig;
   const {layers, layerBlending, interactionConfig} = keplerMapConfig.config.visState;
 
   return {
@@ -33,6 +53,7 @@ export function parseMap(json) {
     createdAt: json.createdAt,
     updatedAt: json.updatedAt,
     initialViewState: mapState,
+    /** @deprecated Use `basemap`. */
     mapStyle,
     token,
     layers: layers.reverse().map(({id, type, config, visualChannels}) => {
@@ -62,13 +83,18 @@ export function parseMap(json) {
   };
 }
 
-function createParametersProp(layerBlending, parameters: Record<string, any>) {
+function createParametersProp(layerBlending: string, parameters: ColorParameters) {
   if (layerBlending === 'additive') {
-    parameters.blendFunc = [GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = GL.FUNC_ADD;
+    parameters.blendColorSrcFactor = parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendColorDstFactor = parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = parameters.blendAlphaOperation = 'add';
   } else if (layerBlending === 'subtractive') {
-    parameters.blendFunc = [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA];
-    parameters.blendEquation = [GL.FUNC_SUBTRACT, GL.FUNC_ADD];
+    parameters.blendColorSrcFactor = 'one';
+    parameters.blendColorDstFactor = 'one-minus-dst-color';
+    parameters.blendAlphaSrcFactor = 'src-alpha';
+    parameters.blendAlphaDstFactor = 'dst-alpha';
+    parameters.blendColorOperation = 'subtract';
+    parameters.blendAlphaOperation = 'add';
   }
 
   return Object.keys(parameters).length ? {parameters} : {};

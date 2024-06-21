@@ -1,5 +1,11 @@
 import test from 'tape-promise/tape';
-import {createBinaryProxy, getWorkerUrl, scaleIdentity} from '@deck.gl/carto/utils';
+import {
+  createBinaryProxy,
+  getWorkerUrl,
+  scaleIdentity,
+  isObject,
+  isPureObject
+} from '@deck.gl/carto/utils';
 
 test('createBinaryProxy', async t => {
   const binary = {
@@ -52,5 +58,23 @@ test('scaleIdentity', async t => {
   t.equal(scaleCopy(null), -2, 'copies set "unknown"');
   t.equal(scale(null), -1, 'copies do not affect "unknown" for original');
 
+  t.end();
+});
+
+test('isObject', t => {
+  class TestClass {}
+  t.equal(isObject({}), true, 'object is object');
+  t.equal(isObject(3), false, 'number is not object');
+  t.equal(isObject([]), true, 'array is object');
+  t.equal(isObject(new TestClass()), true, 'class instance is object');
+  t.end();
+});
+
+test('isPureObject', t => {
+  class TestClass {}
+  t.equal(isPureObject({}), true, 'object is pure');
+  t.equal(isPureObject(3), false, 'number is not pure');
+  t.equal(isPureObject([]), false, 'array is not pure');
+  t.equal(isPureObject(new TestClass()), false, 'class instance is not pure');
   t.end();
 });

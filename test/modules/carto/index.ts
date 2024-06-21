@@ -1,7 +1,9 @@
+import './api/basemap.spec';
 import './api/carto-api-error.spec';
 import './api/fetch-map.spec';
 import './api/layer-map.spec';
 import './api/parse-map.spec';
+import './api/query.spec';
 import './api/request-with-parameters.spec';
 import './utils.spec';
 import './layers/carto-vector-tile.spec';
