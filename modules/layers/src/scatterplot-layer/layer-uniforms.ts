@@ -7,7 +7,7 @@ uniform layerUniforms {
 } layer;
 `;
 
-export type LLayerProps = {
+export type LayerProps = {
   opacity?: number;
 };
 
@@ -17,5 +17,5 @@ export const layerUniforms = {
   fs: uniformBlock,
   uniformTypes: {
     opacity: 'f32'
-  } as const satisfies UniformTypes<LLayerProps>
-} as const satisfies ShaderModule<LLayerProps>;
+  } as const satisfies UniformTypes<LayerProps>
+} as const satisfies ShaderModule<LayerProps>;
