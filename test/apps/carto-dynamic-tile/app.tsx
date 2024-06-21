@@ -75,7 +75,6 @@ function useBoundaryLayer(datasource) {
     source,
     tilesetTableName,
     columns,
-    matchingColumn,
     propertiesSqlQuery,
     propertiesTableName
   } = datasource;
@@ -83,7 +82,6 @@ function useBoundaryLayer(datasource) {
     ...globalOptions,
     tilesetTableName,
     columns,
-    matchingColumn,
     propertiesTableName,
     propertiesSqlQuery
   });

@@ -18,7 +18,6 @@ export default {
   'boundary-query': {
     source: boundaryQuerySource,
     tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
-    matchingColumn: 'geoid',
     propertiesSqlQuery:
       'select * from `cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered`',
     getFillColor: colorBins({
@@ -31,7 +30,6 @@ export default {
   'boundary-table': {
     source: boundaryTableSource,
     tilesetTableName: 'carto-boundaries.us.usa_zip_code_v1',
-    matchingColumn: 'geoid',
     columns: ['do_label', 'do_perimeter'],
     propertiesTableName: 'cartodb-on-gcp-backend-team.juanra.geography_usa_zcta5_2019_clustered',
     getFillColor: colorBins({
