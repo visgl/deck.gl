@@ -36,7 +36,7 @@ uniform vec2 colorDomain;
 uniform sampler2D colorRange;
 
 out vec4 vColor;
-out float vIsValid;
+flat out int vIsValid;
 
 void main(void) {
   vec2 pos = instancePositions * gridSizeClipspace + positions * cellSizeClipspace;
@@ -45,7 +45,7 @@ void main(void) {
 
   gl_Position = vec4(pos, 0., 1.);
 
-  vIsValid = isnan(instanceWeights) ? 0.0 : 1.0;
+  vIsValid = isnan(instanceWeights) ? 0 : 1;
   float r = min(max((instanceWeights - colorDomain.x) / (colorDomain.y - colorDomain.x), 0.), 1.);
   vec4 rangeColor = texture(colorRange, vec2(r, 0.5));
 

@@ -26,12 +26,12 @@ export default `\
 precision highp float;
 
 in vec4 vColor;
-in float vIsValid;
+flat in int vIsValid;
 
 out vec4 fragColor;
 
 void main(void) {
-  if (vIsValid == 0.0) {
+  if (vIsValid == 0) {
     discard;
   }
   fragColor = vColor;
