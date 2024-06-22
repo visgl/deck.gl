@@ -33,19 +33,14 @@ export function sortBins({
 /** Pack bin ids into a typed array */
 export function packBinIds({
   bins,
-  dimensions,
-  target
+  dimensions
 }: {
   bins: Bin[];
   /** Size of bin IDs */
   dimensions: number;
-  /** Optional typed array to pack values into */
-  target: Float32Array | null;
 }): Float32Array {
-  const targetLength = bins.length * dimensions;
-  if (!target || target.length < targetLength) {
-    target = new Float32Array(targetLength);
-  }
+  const target = new Float32Array(bins.length * dimensions);
+
   for (let i = 0; i < bins.length; i++) {
     const {id} = bins[i];
     if (Array.isArray(id)) {

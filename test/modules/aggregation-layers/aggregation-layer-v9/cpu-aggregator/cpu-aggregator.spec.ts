@@ -1,10 +1,10 @@
 import test from 'tape-promise/tape';
-import {Attribute} from '@deck.gl/core';
+import {Attribute, BinaryAttribute, _deepEqual} from '@deck.gl/core';
 import {CPUAggregator} from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils';
 
-import {IncomeSurvey} from './data-sample';
-import {binaryAttributeToArray} from './test-utils';
+import {IncomeSurvey} from '../data-sample';
+import {binaryAttributeToArray} from '../test-utils';
 
 test('CPUAggregator#1D', t => {
   // An aggregator that calculates:
@@ -177,3 +177,78 @@ test('CPUAggregator#2D', t => {
 
   t.end();
 });
+
+test('CPUAggregator#setNeedsUpdate', t => {
+  const aggregator = new CPUAggregator({
+    dimensions: 1,
+    getBin: {
+      sources: ['age'],
+      getValue: ({age}, index, {ageGroupSize}) => [Math.floor(age / ageGroupSize)]
+    },
+    getValue: [
+      {sources: ['income'], getValue: ({income}) => income},
+      {sources: ['education'], getValue: ({education}) => education}
+    ]
+  });
+
+  const attributes = {
+    age: new Attribute(device, {id: 'age', size: 1, type: 'float32', accessor: 'getAge'}),
+    income: new Attribute(device, {id: 'income', size: 1, type: 'float32', accessor: 'getIncome'}),
+    education: new Attribute(device, {
+      id: 'education',
+      size: 1,
+      type: 'float32',
+      accessor: 'getEducation'
+    })
+  };
+  attributes.age.setData({value: new Float32Array(IncomeSurvey.map(d => d.age))});
+  attributes.income.setData({value: new Float32Array(IncomeSurvey.map(d => d.income))});
+  attributes.education.setData({value: new Float32Array(IncomeSurvey.map(d => d.education))});
+
+  aggregator.setProps({
+    pointCount: IncomeSurvey.length,
+    attributes,
+    operations: ['MIN', 'MAX'],
+    binOptions: {ageGroupSize: 5}
+  });
+
+  aggregator.update();
+
+  let binIds = aggregator.getBins();
+  let result0 = aggregator.getResult(0);
+  let result1 = aggregator.getResult(1);
+
+  t.ok(binIds, 'calculated bin IDs');
+  t.ok(result0, 'calculated channel 0');
+  t.ok(result1, 'calculated channel 1');
+
+  aggregator.update();
+  t.ok(binaryAttributeEqual(aggregator.getBins(), binIds), 'did not update bins');
+  t.ok(binaryAttributeEqual(aggregator.getResult(0), result0), 'did not update channel 0');
+  t.ok(binaryAttributeEqual(aggregator.getResult(1), result1), 'did not update channel 1');
+
+  aggregator.setNeedsUpdate(1);
+  aggregator.update();
+  t.ok(binaryAttributeEqual(aggregator.getBins(), binIds), 'did not update bins');
+  t.ok(binaryAttributeEqual(aggregator.getResult(0), result0), 'did not update channel 0');
+  t.notOk(binaryAttributeEqual(aggregator.getResult(1), result1), 'updated channel 1');
+
+  aggregator.setNeedsUpdate();
+  aggregator.update();
+  t.notOk(binaryAttributeEqual(aggregator.getBins(), binIds), 'updated bins');
+  t.notOk(binaryAttributeEqual(aggregator.getResult(0), result0), 'updated channel 0');
+  t.notOk(binaryAttributeEqual(aggregator.getResult(1), result1), 'updated channel 1');
+
+  attributes.age.delete();
+  attributes.income.delete();
+  attributes.education.delete();
+
+  t.end();
+});
+
+function binaryAttributeEqual(
+  attr0: BinaryAttribute | null,
+  attr1: BinaryAttribute | null
+): boolean {
+  return _deepEqual(attr0, attr1, 1);
+}

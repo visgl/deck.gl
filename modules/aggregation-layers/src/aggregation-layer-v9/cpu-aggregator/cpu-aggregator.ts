@@ -118,8 +118,7 @@ export class CPUAggregator implements Aggregator {
       });
       this.binIds = packBinIds({
         bins: this.bins,
-        dimensions: this.dimensions,
-        target: this.binIds
+        dimensions: this.dimensions
       });
     }
     for (let channel = 0; channel < this.channelCount; channel++) {
@@ -131,11 +130,11 @@ export class CPUAggregator implements Aggregator {
             this.props.attributes,
             undefined
           ),
-          operation: this.props.operations[channel],
-          target: this.results[channel]?.value
+          operation: this.props.operations[channel]
         });
       }
     }
+    this.needsUpdate = false;
   }
 
   preDraw() {}
