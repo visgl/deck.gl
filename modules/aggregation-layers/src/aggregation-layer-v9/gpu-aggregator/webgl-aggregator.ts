@@ -8,7 +8,7 @@ import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 /** Options used to construct a new WebGLAggregator */
-export type WebGLAggregatorOptions = {
+export type WebGLAggregatorProps = {
   /** Size of bin IDs */
   dimensions: 1 | 2;
   /** How many properties to perform aggregation on */
@@ -30,10 +30,10 @@ export type WebGLAggregatorOptions = {
   modules?: ShaderModule[];
   /** Shadertool module defines */
   defines?: Record<string, string | number | boolean>;
-};
+} & Partial<WebGLAggregationProps>;
 
 /** Props used to run GPU aggregation, can be changed at any time */
-export type WebGLAggregationProps = AggregationProps & {
+type WebGLAggregationProps = AggregationProps & {
   /** Limits of binId defined for each dimension. Ids outside of the [start, end) are ignored.
    */
   binIdRange: [start: number, end: number][];
@@ -51,18 +51,12 @@ export class WebGLAggregator implements Aggregator {
     );
   }
 
-  dimensions: 1 | 2;
-  channelCount: 1 | 2 | 3;
+  readonly dimensions: 1 | 2;
+  readonly channelCount: 1 | 2 | 3;
   binCount: number = 0;
 
-  device: Device;
-  props: WebGLAggregationProps = {
-    pointCount: 0,
-    binIdRange: [[0, 0]],
-    operations: [],
-    attributes: {},
-    binOptions: {}
-  };
+  readonly device: Device;
+  props: WebGLAggregatorProps & WebGLAggregationProps;
 
   /** Dirty flag per channel */
   protected needsUpdate: boolean[];
@@ -71,13 +65,22 @@ export class WebGLAggregator implements Aggregator {
   /** Step 2. (optional) calculate the min/max across all bins */
   protected aggregationTransform: WebGLAggregationTransform;
 
-  constructor(device: Device, settings: WebGLAggregatorOptions) {
+  constructor(device: Device, props: WebGLAggregatorProps) {
     this.device = device;
-    this.dimensions = settings.dimensions;
-    this.channelCount = settings.channelCount;
+    this.dimensions = props.dimensions;
+    this.channelCount = props.channelCount;
+    this.props = {
+      ...props,
+      pointCount: 0,
+      binIdRange: [[0, 0]],
+      operations: [],
+      attributes: {},
+      binOptions: {}
+    };
     this.needsUpdate = new Array(this.channelCount).fill(true);
-    this.binSorter = new WebGLBinSorter(device, settings);
-    this.aggregationTransform = new WebGLAggregationTransform(device, settings);
+    this.binSorter = new WebGLBinSorter(device, props);
+    this.aggregationTransform = new WebGLAggregationTransform(device, props);
+    this.setProps(props);
   }
 
   getBins(): BinaryAttribute | null {

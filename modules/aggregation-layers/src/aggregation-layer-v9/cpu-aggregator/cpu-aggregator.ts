@@ -5,7 +5,7 @@ import {aggregate} from './aggregate';
 import {VertexAccessor, evaluateVertexAccessor} from './vertex-accessor';
 
 /** Options used to construct a new CPUAggregator */
-export type CPUAggregatorOptions = {
+export type CPUAggregatorProps = {
   /** Size of bin IDs */
   dimensions: number;
   /** Accessor to map each data point to a bin ID.
@@ -16,10 +16,10 @@ export type CPUAggregatorOptions = {
   getBin: VertexAccessor<number[] | null, any>;
   /** Accessor to map each data point to a weight value, defined per channel */
   getValue: VertexAccessor<number>[];
-};
+} & Partial<CPUAggregationProps>;
 
 /** Props used to run CPU aggregation, can be changed at any time */
-export type CPUAggregationProps = AggregationProps & {};
+type CPUAggregationProps = AggregationProps & {};
 
 export type Bin = {
   id: number[];
@@ -30,18 +30,11 @@ export type Bin = {
 
 /** An Aggregator implementation that calculates aggregation on the CPU */
 export class CPUAggregator implements Aggregator {
-  dimensions: number;
-  channelCount: number;
+  readonly dimensions: number;
+  readonly channelCount: number;
 
-  props: CPUAggregationProps = {
-    binOptions: {},
-    pointCount: 0,
-    operations: [],
-    attributes: {}
-  };
+  props: CPUAggregatorProps & CPUAggregationProps;
 
-  protected getBinId: CPUAggregatorOptions['getBin'];
-  protected getValue: CPUAggregatorOptions['getValue'];
   /** Dirty flag
    * If true, redo sorting
    * If array, redo aggregation on the specified channel
@@ -52,12 +45,18 @@ export class CPUAggregator implements Aggregator {
   protected binIds: Float32Array | null = null;
   protected results: {value: Float32Array; domain: [min: number, max: number]}[] = [];
 
-  constructor({dimensions, getBin, getValue}: CPUAggregatorOptions) {
-    this.dimensions = dimensions;
-    this.channelCount = getValue.length;
-    this.getBinId = getBin;
-    this.getValue = getValue;
+  constructor(props: CPUAggregatorProps) {
+    this.dimensions = props.dimensions;
+    this.channelCount = props.getValue.length;
+    this.props = {
+      ...props,
+      binOptions: {},
+      pointCount: 0,
+      operations: [],
+      attributes: {}
+    };
     this.needsUpdate = true;
+    this.setProps(props);
   }
 
   destroy() {}
@@ -112,7 +111,7 @@ export class CPUAggregator implements Aggregator {
       this.bins = sortBins({
         pointCount: this.props.pointCount,
         getBinId: evaluateVertexAccessor(
-          this.getBinId,
+          this.props.getBin,
           this.props.attributes,
           this.props.binOptions
         )
@@ -128,7 +127,7 @@ export class CPUAggregator implements Aggregator {
         this.results[channel] = aggregate({
           bins: this.bins,
           getValue: evaluateVertexAccessor(
-            this.getValue[channel],
+            this.props.getValue[channel],
             this.props.attributes,
             undefined
           ),

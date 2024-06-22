@@ -45,11 +45,5 @@ export type {GridLayerProps} from './grid-layer/grid-layer';
 export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';
 export type {ScreenGridLayerProps} from './screen-grid-layer/screen-grid-layer';
 
-export type {
-  WebGLAggregationProps,
-  WebGLAggregatorOptions
-} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
-export type {
-  CPUAggregationProps,
-  CPUAggregatorOptions
-} from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
+export type {WebGLAggregatorProps} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
+export type {CPUAggregatorProps} from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
