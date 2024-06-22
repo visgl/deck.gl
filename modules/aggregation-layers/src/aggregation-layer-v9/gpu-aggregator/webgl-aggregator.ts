@@ -65,6 +65,10 @@ export class WebGLAggregator implements Aggregator {
   /** Step 2. (optional) calculate the min/max across all bins */
   protected aggregationTransform: WebGLAggregationTransform;
 
+  /** Cached outputs */
+  protected binIds: BinaryAttribute | null = null;
+  protected results: BinaryAttribute[] = [];
+
   constructor(device: Device, props: WebGLAggregatorProps) {
     this.device = device;
     this.dimensions = props.dimensions;
@@ -88,7 +92,12 @@ export class WebGLAggregator implements Aggregator {
     if (!buffer) {
       return null;
     }
-    return {buffer, type: 'float32', size: this.dimensions};
+    if (this.binIds?.buffer !== buffer) {
+      // deck.gl Attribute.setBinaryValue uses shallow comparison to determine if attribute value has changed
+      // For performance, only create a new binary attribute descriptor when Buffer changes
+      this.binIds = {buffer, type: 'float32', size: this.dimensions};
+    }
+    return this.binIds;
   }
 
   /** Returns an accessor to the output for a given channel. */
@@ -97,7 +106,16 @@ export class WebGLAggregator implements Aggregator {
     if (!buffer || channel >= this.channelCount) {
       return null;
     }
-    return {buffer, type: 'float32', size: 1, stride: this.channelCount * 4, offset: channel * 4};
+    if (this.results[channel]?.buffer !== buffer) {
+      this.results[channel] = {
+        buffer,
+        type: 'float32',
+        size: 1,
+        stride: this.channelCount * 4,
+        offset: channel * 4
+      };
+    }
+    return this.results[channel];
   }
 
   /** Returns the [min, max] of aggregated values for a given channel. */

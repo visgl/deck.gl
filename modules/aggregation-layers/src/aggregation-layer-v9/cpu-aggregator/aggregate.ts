@@ -59,7 +59,8 @@ const AGGREGATION_FUNC: Record<AggregationOperation, AggregationFunc> = {
 export function aggregate({
   bins,
   getValue,
-  operation
+  operation,
+  target
 }: {
   /** Data points sorted by bins */
   bins: Bin[];
@@ -67,11 +68,15 @@ export function aggregate({
   getValue: (index: number) => number;
   /** Method used to reduce a list of values to one number */
   operation: AggregationOperation;
+  /** Array to write the output into */
+  target?: Float32Array | null;
 }): {
   value: Float32Array;
   domain: [min: number, max: number];
 } {
-  const target = new Float32Array(bins.length);
+  if (!target || target.length < bins.length) {
+    target = new Float32Array(bins.length);
+  }
   let min = Infinity;
   let max = -Infinity;
 

@@ -223,21 +223,21 @@ test('CPUAggregator#setNeedsUpdate', t => {
   t.ok(result1, 'calculated channel 1');
 
   aggregator.update();
-  t.ok(binaryAttributeEqual(aggregator.getBins(), binIds), 'did not update bins');
-  t.ok(binaryAttributeEqual(aggregator.getResult(0), result0), 'did not update channel 0');
-  t.ok(binaryAttributeEqual(aggregator.getResult(1), result1), 'did not update channel 1');
+  t.is(aggregator.getBins(), binIds, 'did not update bins');
+  t.is(aggregator.getResult(0), result0, 'did not update channel 0');
+  t.is(aggregator.getResult(1), result1, 'did not update channel 1');
 
   aggregator.setNeedsUpdate(1);
   aggregator.update();
-  t.ok(binaryAttributeEqual(aggregator.getBins(), binIds), 'did not update bins');
-  t.ok(binaryAttributeEqual(aggregator.getResult(0), result0), 'did not update channel 0');
-  t.notOk(binaryAttributeEqual(aggregator.getResult(1), result1), 'updated channel 1');
+  t.is(aggregator.getBins(), binIds, 'did not update bins');
+  t.is(aggregator.getResult(0), result0, 'did not update channel 0');
+  t.not(aggregator.getResult(1), result1, 'updated channel 1');
 
   aggregator.setNeedsUpdate();
   aggregator.update();
-  t.notOk(binaryAttributeEqual(aggregator.getBins(), binIds), 'updated bins');
-  t.notOk(binaryAttributeEqual(aggregator.getResult(0), result0), 'updated channel 0');
-  t.notOk(binaryAttributeEqual(aggregator.getResult(1), result1), 'updated channel 1');
+  t.not(aggregator.getBins(), binIds, 'updated bins');
+  t.not(aggregator.getResult(0), result0, 'updated channel 0');
+  t.not(aggregator.getResult(1), result1, 'updated channel 1');
 
   attributes.age.delete();
   attributes.income.delete();
@@ -245,10 +245,3 @@ test('CPUAggregator#setNeedsUpdate', t => {
 
   t.end();
 });
-
-function binaryAttributeEqual(
-  attr0: BinaryAttribute | null,
-  attr1: BinaryAttribute | null
-): boolean {
-  return _deepEqual(attr0, attr1, 1);
-}

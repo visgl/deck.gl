@@ -273,8 +273,8 @@ export default class ScreenGridLayer<
         // Data has changed shallowly, but we likely don't need to update the attributes
         dataComparator: (data, oldData) => data.length === oldData.length,
         updateTriggers: {
-          getBin: binAttribute?.buffer,
-          getWeight: weightAttribute?.buffer
+          getBin: [binAttribute],
+          getWeight: [weightAttribute]
         },
         parameters: {
           depthWriteEnabled: false,
