@@ -41,7 +41,11 @@ export default abstract class AggregationLayer<
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    if (
+      params.changeFlags.extensionsChanged ||
+      // @ts-ignore gpuAggregation prop may not exist
+      params.props.gpuAggregation !== params.oldProps.gpuAggregation
+    ) {
       this.state.aggregator?.destroy();
       this.state.aggregator = this.createAggregator();
       this.getAttributeManager()!.invalidateAll();
