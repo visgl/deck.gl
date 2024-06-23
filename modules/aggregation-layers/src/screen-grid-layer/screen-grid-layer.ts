@@ -34,6 +34,7 @@ import {
 import {WebGLAggregator} from '../aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 import {CPUAggregator} from '../aggregation-layer-v9/cpu-aggregator/cpu-aggregator';
 import AggregationLayer from '../aggregation-layer-v9/aggregation-layer';
+import {AggregationOperation} from '../aggregation-layer-v9/aggregator';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
@@ -99,12 +100,11 @@ export type _ScreenGridLayerProps<DataT> = {
 
   /**
    * Defines the type of aggregation operation
-   *
-   * V valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'.
+   * Valid values are 'SUM', 'MEAN', 'MIN', 'MAX', 'COUNT'.
    *
    * @default 'SUM'
    */
-  aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
+  aggregation?: AggregationOperation;
 };
 
 export type ScreenGridLayerPickingInfo<DataT> = PickingInfo<{
@@ -130,8 +130,12 @@ export default class ScreenGridLayer<
   static layerName = 'ScreenGridLayer';
   static defaultProps = defaultProps;
 
-  createAggregator(): WebGLAggregator | CPUAggregator {
-    if (!this.props.gpuAggregation || !WebGLAggregator.isSupported(this.context.device)) {
+  getAggregatorType(): string {
+    return this.props.gpuAggregation ? 'gpu' : 'cpu';
+  }
+
+  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+    if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
@@ -152,7 +156,7 @@ export default class ScreenGridLayer<
     }
     return new WebGLAggregator(this.context.device, {
       dimensions: 2,
-      numChannels: 1,
+      channelCount: 1,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts({isInstanced: false}),
       ...super.getShaders({
         modules: [project32],
@@ -168,7 +172,7 @@ export default class ScreenGridLayer<
     vec2 gridCoords = floor(screenCoords / cellSizePixels);
     binId = ivec2(gridCoords);
   }
-  void getWeight(out float weight) {
+  void getValue(out float weight) {
     weight = counts;
   }
   `
@@ -197,11 +201,12 @@ export default class ScreenGridLayer<
   }
 
   updateState(params: UpdateParameters<this>) {
-    super.updateState(params);
+    const aggregatorChanged = super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
     const {cellSizePixels, aggregation} = props;
     if (
+      aggregatorChanged ||
       changeFlags.dataChanged ||
       changeFlags.updateTriggersChanged ||
       changeFlags.viewportChanged ||
@@ -233,6 +238,7 @@ export default class ScreenGridLayer<
       // Rerun aggregation on viewport change
       this.state.aggregator.setNeedsUpdate();
     }
+    return aggregatorChanged;
   }
 
   onAttributeChange(id: string) {
