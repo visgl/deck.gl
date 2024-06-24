@@ -42,8 +42,11 @@ export class CPUAggregator implements Aggregator {
   protected needsUpdate: boolean[] | boolean;
 
   protected bins: Bin[] = [];
-  protected binIds: Float32Array | null = null;
-  protected results: {value: Float32Array; domain: [min: number, max: number]}[] = [];
+  protected binIds: (BinaryAttribute & {value: Float32Array}) | null = null;
+  protected results: (BinaryAttribute & {
+    value: Float32Array;
+    domain: [min: number, max: number];
+  })[] = [];
 
   constructor(props: CPUAggregatorProps) {
     this.dimensions = props.dimensions;
@@ -116,22 +119,28 @@ export class CPUAggregator implements Aggregator {
           this.props.binOptions
         )
       });
-      this.binIds = packBinIds({
+      const value = packBinIds({
         bins: this.bins,
-        dimensions: this.dimensions
+        dimensions: this.dimensions,
+        // Reuse allocated typed array
+        target: this.binIds?.value
       });
+      this.binIds = {value, type: 'float32', size: this.dimensions};
     }
     for (let channel = 0; channel < this.channelCount; channel++) {
       if (this.needsUpdate === true || this.needsUpdate[channel]) {
-        this.results[channel] = aggregate({
+        const {value, domain} = aggregate({
           bins: this.bins,
           getValue: evaluateVertexAccessor(
             this.props.getValue[channel],
             this.props.attributes,
             undefined
           ),
-          operation: this.props.operations[channel]
+          operation: this.props.operations[channel],
+          // Reuse allocated typed array
+          target: this.results[channel]?.value
         });
+        this.results[channel] = {value, domain, type: 'float32', size: 1};
       }
     }
     this.needsUpdate = false;
@@ -141,19 +150,12 @@ export class CPUAggregator implements Aggregator {
 
   /** Returns an accessor to the bins. */
   getBins(): BinaryAttribute | null {
-    if (!this.binIds) {
-      return null;
-    }
-    return {value: this.binIds, type: 'float32', size: this.dimensions};
+    return this.binIds;
   }
 
   /** Returns an accessor to the output for a given channel. */
   getResult(channel: number): BinaryAttribute | null {
-    const result = this.results[channel];
-    if (!result) {
-      return null;
-    }
-    return {value: result.value, type: 'float32', size: 1};
+    return this.results[channel];
   }
 
   /** Returns the [min, max] of aggregated values for a given channel. */

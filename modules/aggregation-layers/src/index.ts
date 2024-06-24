@@ -43,7 +43,10 @@ export type {HexagonLayerProps} from './hexagon-layer/hexagon-layer';
 export type {CPUGridLayerProps} from './cpu-grid-layer/cpu-grid-layer';
 export type {GridLayerProps} from './grid-layer/grid-layer';
 export type {GPUGridLayerProps} from './gpu-grid-layer/gpu-grid-layer';
-export type {ScreenGridLayerProps} from './screen-grid-layer/screen-grid-layer';
+export type {
+  ScreenGridLayerProps,
+  ScreenGridLayerPickingInfo
+} from './screen-grid-layer/screen-grid-layer';
 
 export type {WebGLAggregatorProps} from './aggregation-layer-v9/gpu-aggregator/webgl-aggregator';
 export type {CPUAggregatorProps} from './aggregation-layer-v9/cpu-aggregator/cpu-aggregator';

@@ -277,3 +277,86 @@ test('WebGLAggregator#2D', t => {
   aggregator.destroy();
   t.end();
 });
+
+test('CPUAggregator#setNeedsUpdate', t => {
+  const aggregator = new WebGLAggregator(device, {
+    dimensions: 1,
+    channelCount: 2,
+    bufferLayout: [
+      {name: 'age', format: 'float32', stepMode: 'vertex'},
+      {name: 'income', format: 'float32', stepMode: 'vertex'},
+      {name: 'education', format: 'float32', stepMode: 'vertex'}
+    ],
+    vs: `
+      uniform float ageGroupSize;
+      in float age;
+      in float income;
+      in float education;
+
+      void getBin(out int binId) {
+        binId = int(floor(age / ageGroupSize));
+      }
+      void getValue(out vec2 value) {
+        value = vec2(income, education);
+      }
+    `
+  });
+
+  const attributes = {
+    age: new Attribute(device, {id: 'age', size: 1, type: 'float32', accessor: 'getAge'}),
+    income: new Attribute(device, {id: 'income', size: 1, type: 'float32', accessor: 'getIncome'}),
+    education: new Attribute(device, {
+      id: 'education',
+      size: 1,
+      type: 'float32',
+      accessor: 'getEducation'
+    })
+  };
+  attributes.age.setData({value: new Float32Array(IncomeSurvey.map(d => d.age))});
+  attributes.income.setData({value: new Float32Array(IncomeSurvey.map(d => d.income))});
+  attributes.education.setData({value: new Float32Array(IncomeSurvey.map(d => d.education))});
+
+  aggregator.setProps({
+    pointCount: IncomeSurvey.length,
+    binIdRange: [[4, 14]], // age: 20..69
+    attributes,
+    operations: ['MIN', 'MAX'],
+    binOptions: {ageGroupSize: 5}
+  });
+
+  aggregator.update();
+
+  let binIds = aggregator.getBins();
+  let result0 = aggregator.getResult(0);
+  let result1 = aggregator.getResult(1);
+
+  t.ok(binIds, 'calculated bin IDs');
+  t.ok(result0, 'calculated channel 0');
+  t.ok(result1, 'calculated channel 1');
+
+  aggregator.update();
+  t.is(aggregator.getBins(), binIds, 'did not update bins');
+  t.is(aggregator.getResult(0), result0, 'did not update channel 0');
+  t.is(aggregator.getResult(1), result1, 'did not update channel 1');
+
+  aggregator.setNeedsUpdate(1);
+  aggregator.update();
+  t.is(aggregator.getBins(), binIds, 'did not update bins');
+  t.is(aggregator.getResult(0), result0, 'did not update channel 0');
+  t.is(aggregator.getResult(1), result1, 'did not update channel 1 (buffer ref unchanged)');
+
+  aggregator.setProps({
+    binIdRange: [[2, 17]] // age: 10..84
+  });
+  aggregator.update();
+  t.not(aggregator.getBins(), binIds, 'updated bins');
+  t.not(aggregator.getResult(0), result0, 'updated channel 0');
+  t.not(aggregator.getResult(1), result1, 'updated channel 1');
+
+  attributes.age.delete();
+  attributes.income.delete();
+  attributes.education.delete();
+  aggregator.destroy();
+
+  t.end();
+});
