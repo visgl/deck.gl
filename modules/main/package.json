@@ -22,6 +22,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./widgets/stylesheet.css": {
+      "import": "./dist/widgets/stylesheet.css"
     }
   },
   "files": [
@@ -31,7 +34,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "npm run build-bundle",
+    "build": "npm run build-bundle && mkdir -p ./dist/widgets && cp ../widgets/src/stylesheet.css $_",
     "build-bundle": "ocular-bundle ./bundle.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
