@@ -167,7 +167,7 @@ type _PolygonLayerProps<DataT = unknown> = {
   /**
    * Line width value or accessor.
    *
-   * @default [0, 0, 0, 255]
+   * @default 1
    */
   getLineWidth?: Accessor<DataT, number>;
 
