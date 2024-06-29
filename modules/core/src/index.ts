@@ -107,6 +107,7 @@ export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
+export {applyStyles as _applyStyles} from './utils/apply-styles';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
