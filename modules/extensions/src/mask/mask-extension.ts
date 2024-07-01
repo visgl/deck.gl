@@ -49,17 +49,18 @@ export default class MaskExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<MaskExtensionProps>>, {uniforms, context, moduleParameters}: any) {
-    uniforms.mask_maskByInstance = this.state.maskByInstance;
+  draw(this: Layer<Required<MaskExtensionProps>>, {context, moduleParameters}: any) {
+    const maskProps = {} as any;
+    maskProps.maskByInstance = this.state.maskByInstance;
     const {maskId, maskInverted} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
       const {index, bounds, coordinateOrigin: fromCoordinateOrigin} = maskChannels[maskId];
       let {coordinateSystem: fromCoordinateSystem} = maskChannels[maskId];
-      uniforms.mask_enabled = true;
-      uniforms.mask_channel = index;
-      uniforms.mask_inverted = maskInverted;
+      maskProps.enabled = true;
+      maskProps.channel = index;
+      maskProps.inverted = maskInverted;
 
       if (fromCoordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
         fromCoordinateSystem = viewport.isGeospatial
@@ -69,12 +70,14 @@ export default class MaskExtension extends LayerExtension {
       const opts = {modelMatrix: null, fromCoordinateOrigin, fromCoordinateSystem};
       const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);
       const tr = this.projectPosition([bounds[2], bounds[3], 0], opts);
-      uniforms.mask_bounds = [bl[0], bl[1], tr[0], tr[1]];
+      maskProps.bounds = [bl[0], bl[1], tr[0], tr[1]];
     } else {
       if (maskId) {
         log.warn(`Could not find a mask layer with id: ${maskId}`)();
       }
-      uniforms.mask_enabled = false;
+      maskProps.enabled = false;
     }
+
+    this.setShaderModuleProps({mask: maskProps});
   }
 }
