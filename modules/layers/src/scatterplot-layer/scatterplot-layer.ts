@@ -241,7 +241,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     }
   }
 
-  draw({uniforms}) {
+  draw() {
     const {
       radiusUnits,
       radiusScale,
@@ -272,9 +272,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     };
     const model = this.state.model!;
 
-    // TODO still need this to enable mask
-    console.log(uniforms);
-    model.setUniforms(uniforms);
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     model.draw(this.context.renderPass);
   }

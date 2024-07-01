@@ -102,14 +102,11 @@ export type MaskProps = MaskBindingProps & MaskUniformProps;
 /* eslint-disable camelcase */
 const getMaskUniforms = (opts?: MaskProps | {}): Record<string, any> => {
   if (opts && 'maskMap' in opts) {
-    // @ts-ignore
-    window.maskMap = opts.maskMap;
     return {
       mask_texture: opts.maskMap
     };
   }
-  // @ts-ignore
-  return opts ? {...opts, maskMap: window.maskMap} : {};
+  return opts || {};
 };
 
 export default {
