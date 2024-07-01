@@ -1,5 +1,3 @@
-import type {ShaderUniformType} from '@luma.gl/core';
-
 type UniformProps = {
   [name: string]: number | boolean | number[];
 };

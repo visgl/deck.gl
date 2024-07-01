@@ -59,7 +59,6 @@ export {
   Attribute,
   AttributeManager,
   // Shader modules
-  layerUniforms,
   picking,
   project,
   project32,
