@@ -241,7 +241,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     }
   }
 
-  draw() {
+  draw({uniforms}) {
     const {
       radiusUnits,
       radiusScale,
@@ -272,6 +272,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     };
     const model = this.state.model!;
 
+    // TODO remove setUniforms() - currently DataFilterExtension needs this
+    model.setUniforms(uniforms);
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     model.draw(this.context.renderPass);
   }
