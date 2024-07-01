@@ -6,16 +6,18 @@ const glsl = (s: TemplateStringsArray) => `${s}`;
  * @filter       Heatmap
  * @param radiusPixels Blur radius in pixels, controls smoothness of heatmap
  * @param colorDomain Domain to apply to values prior to applying color scale
- * @param color1-6 Colors to use in color scale
+ * @param colorTexture 1D RGB lookup texture for color scale
+ * @param intensity Multiplier to apply to value
+ * @param opacity Output opacity
  */
 
 const fs = glsl`\
 uniform heatmapUniforms {
-  vec2 delta;
-  float radiusPixels;
   vec2 colorDomain;
+  vec2 delta;
   float intensity;
   float opacity;
+  float radiusPixels;
 } heatmap;
 
 
@@ -131,46 +133,45 @@ export type HeatmapProps = {
 };
 
 export type HeatmapUniforms = {
-  delta?: [number, number];
-  radiusPixels?: number;
   colorDomain?: [number, number];
+  delta?: [number, number];
   intensity: number;
   opacity?: number;
+  radiusPixels?: number;
 };
 
 export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
   name: 'heatmap',
   uniformPropTypes: {
-    delta: {value: [0, 1]},
-    radiusPixels: {value: 20, min: 0, softMax: 100},
     colorDomain: {value: [0, 1]},
+    delta: {value: [0, 1]},
     intensity: {value: 1, min: 0.1, max: 10},
-    opacity: {value: 1, min: 0, max: 1}
+    opacity: {value: 1, min: 0, max: 1},
+    radiusPixels: {value: 20, min: 0, softMax: 100}
   },
   uniformTypes: {
-    delta: 'vec2<f32>',
-    radiusPixels: 'f32',
     colorDomain: 'vec2<f32>',
+    delta: 'vec2<f32>',
     intensity: 'f32',
-    opacity: 'f32'
+    opacity: 'f32',
+    radiusPixels: 'f32'
   },
   getUniforms: opts => {
     const {
-      delta = [1, 0],
-      colorRange = defaultColorRange,
-      radiusPixels = 20,
       colorDomain = [0, 1],
+      colorTexture,
+      delta = [1, 0],
       intensity = 1,
       opacity = 1,
-      colorTexture
+      radiusPixels = 20
     } = opts as HeatmapProps & {delta: [number, number]};
     return {
-      delta,
-      radiusPixels,
       colorDomain,
+      colorTexture,
+      delta,
       intensity,
       opacity,
-      colorTexture
+      radiusPixels
     };
   },
   fs,
