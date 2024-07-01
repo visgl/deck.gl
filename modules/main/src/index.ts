@@ -122,7 +122,8 @@ export {
   GPUGridLayer,
   AGGREGATION_OPERATION,
   HeatmapLayer,
-  WebGLAggregator
+  WebGLAggregator,
+  CPUAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {

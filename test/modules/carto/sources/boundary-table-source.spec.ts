@@ -8,7 +8,6 @@ test('boundaryTableSource', async t => {
       connectionName: 'carto_dw',
       accessToken: '<token>',
       tilesetTableName: 'a.b.tileset_table',
-      matchingColumn: 'geoid',
       columns: ['column1', 'column2'],
       propertiesTableName: 'a.b.properties_table'
     });
@@ -19,7 +18,6 @@ test('boundaryTableSource', async t => {
 
     t.match(initCall.url, /v3\/maps\/carto_dw\/boundary/, 'connection');
     t.match(initCall.url, /tilesetTableName=a.b.tileset_table/, 'tilesetTableName');
-    t.match(initCall.url, /matchingColumn=geoid/, 'matchingColumn');
     t.match(initCall.url, /propertiesTableName=a.b.properties_table/, 'propertiesTableName');
     t.match(initCall.url, /columns=column1%2Ccolumn2/, 'columns');
 

@@ -77,7 +77,7 @@ type _GPUGridCellLayerProps = _GPUGridLayerProps<any> & {
   elevationMaxMinBuffer: Buffer;
 };
 
-export default class GPUGridCellLayer extends Layer<_GPUGridCellLayerProps> {
+export default class GPUGridCellLayer extends Layer<Required<_GPUGridCellLayerProps>> {
   static layerName = 'GPUGridCellLayer';
   static defaultProps = defaultProps;
 

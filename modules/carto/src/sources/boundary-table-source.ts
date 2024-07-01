@@ -5,24 +5,21 @@ export type BoundaryTableSourceOptions = SourceOptions &
   FilterOptions & {
     tilesetTableName: string;
     columns?: string[];
-    matchingColumn?: string;
     propertiesTableName: string;
   };
 type UrlParameters = {
   filters?: Record<string, unknown>;
   tilesetTableName: string;
   columns?: string;
-  matchingColumn: string;
   propertiesTableName: string;
 };
 
 export const boundaryTableSource = async function (
   options: BoundaryTableSourceOptions
 ): Promise<TilejsonResult> {
-  const {filters, tilesetTableName, columns, matchingColumn = 'id', propertiesTableName} = options;
+  const {filters, tilesetTableName, columns, propertiesTableName} = options;
   const urlParameters: UrlParameters = {
     tilesetTableName,
-    matchingColumn,
     propertiesTableName
   };
 
