@@ -1,5 +1,5 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {project} from '@deck.gl/core';
+import {project, UniformTypes} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
@@ -85,18 +85,31 @@ in vec2 mask_texCoords;
 `
 };
 
-type MaskModuleSettings = {
+type MaskBindingProps = {
   maskMap?: Texture;
 };
 
+type MaskUniformProps = {
+  bounds: [number, number, number, number];
+  channel: number;
+  enabled: boolean;
+  inverted: boolean;
+  maskByInstance: boolean;
+};
+
+export type MaskProps = MaskBindingProps & MaskUniformProps;
+
 /* eslint-disable camelcase */
-const getMaskUniforms = (opts?: MaskModuleSettings | {}): Record<string, any> => {
+const getMaskUniforms = (opts?: MaskProps | {}): Record<string, any> => {
   if (opts && 'maskMap' in opts) {
+    // @ts-ignore
+    window.maskMap = opts.maskMap;
     return {
       mask_texture: opts.maskMap
     };
   }
-  return opts || {};
+  // @ts-ignore
+  return opts ? {...opts, maskMap: window.maskMap} : {};
 };
 
 export default {
@@ -112,5 +125,5 @@ export default {
     enabled: 'i32',
     inverted: 'i32',
     maskByInstance: 'i32'
-  }
-} as ShaderModule<MaskModuleSettings>;
+  } as const satisfies UniformTypes<MaskUniformProps>
+} as const satisfies ShaderModule<MaskProps>;

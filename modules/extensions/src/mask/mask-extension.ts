@@ -1,5 +1,5 @@
 import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
-import mask from './shader-module';
+import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
 
 const defaultProps = {
@@ -50,8 +50,8 @@ export default class MaskExtension extends LayerExtension {
 
   /* eslint-disable camelcase */
   draw(this: Layer<Required<MaskExtensionProps>>, {context, moduleParameters}: any) {
-    const maskProps = {} as any;
-    maskProps.maskByInstance = this.state.maskByInstance;
+    const maskProps = {} as MaskProps;
+    maskProps.maskByInstance = Boolean(this.state.maskByInstance);
     const {maskId, maskInverted} = this.props;
     const {maskChannels} = moduleParameters;
     const {viewport} = context;
