@@ -104,15 +104,6 @@ export type HeatmapProps = {
    */
   colorDomain?: [number, number];
   /**
-<<<<<<< HEAD
-   * Specified as an array of colors [color1, color2, ...].
-   *
-   * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
-   */
-  colorRange: [number, number, number][];
-  /**
-=======
->>>>>>> 015e44185 (Tidy)
    * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
    */
   intensity?: number;
@@ -123,15 +114,11 @@ export type HeatmapProps = {
   opacity: number;
 };
 
-export type HeatmapUniforms = {
-  colorDomain?: [number, number];
-  delta?: [number, number];
-  intensity: number;
-  opacity?: number;
-  radiusPixels?: number;
+type PassProps = {
+  delta: [number, number];
 };
 
-export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
+export const heatmap = {
   name: 'heatmap',
   uniformPropTypes: {
     colorDomain: {value: [0, 1]},
@@ -148,6 +135,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     radiusPixels: 'f32'
   },
   getUniforms: opts => {
+    if (!opts) return {};
     const {
       colorDomain = [0, 1],
       colorTexture,
@@ -155,7 +143,7 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
       intensity = 1,
       opacity = 1,
       radiusPixels = 20
-    } = opts as HeatmapProps & {delta: [number, number]};
+    } = opts;
     return {
       colorDomain,
       colorTexture,
@@ -170,4 +158,4 @@ export const heatmap: ShaderPass<HeatmapProps, HeatmapUniforms> = {
     {sampler: true, uniforms: {delta: [1, 0]}},
     {sampler: true, uniforms: {delta: [0, 1]}}
   ]
-};
+} as const satisfies ShaderPass<HeatmapProps & PassProps>;
