@@ -21,7 +21,7 @@
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
-import {getShaderAssembler} from '../shaderlib/index';
+import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -106,7 +106,7 @@ export default class LayerManager {
       gl: device?.gl,
       deck,
       shaderAssembler: getShaderAssembler(),
-      defaultShaderModules: [],
+      defaultShaderModules: [layerUniforms],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization

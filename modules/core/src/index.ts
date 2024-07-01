@@ -61,7 +61,6 @@ export {default as FirstPersonViewport} from './viewports/first-person-viewport'
 
 // Shader modules
 export {
-  layerUniforms,
   picking,
   project,
   project32,

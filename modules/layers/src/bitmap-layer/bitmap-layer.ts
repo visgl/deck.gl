@@ -20,7 +20,6 @@
 
 import {
   Layer,
-  layerUniforms,
   project32,
   picking,
   CoordinateSystem,
@@ -147,7 +146,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [layerUniforms, project32, picking, bitmapUniforms]});
+    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
   }
 
   initializeState() {

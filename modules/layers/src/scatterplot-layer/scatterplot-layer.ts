@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, layerUniforms, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
@@ -189,7 +189,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return super.getShaders({
       vs,
       fs,
-      modules: [layerUniforms, project32, picking, scatterplotUniforms]
+      modules: [project32, picking, scatterplotUniforms]
     });
   }
 
