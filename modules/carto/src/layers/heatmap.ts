@@ -20,10 +20,7 @@ uniform heatmapUniforms {
   float radiusPixels;
 } heatmap;
 
-
 uniform sampler2D colorTexture;
-
-const vec4 STOPS = vec4(0.2, 0.4, 0.6, 0.8);
 
 vec3 colorGradient(float value) {
   return texture(colorTexture, vec2(value, 0.5)).rgb;
@@ -93,15 +90,6 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
 }
 `;
 
-const defaultColorRange: [number, number, number][] = [
-  [255, 255, 178],
-  [254, 217, 118],
-  [254, 178, 76],
-  [253, 141, 60],
-  [240, 59, 32],
-  [189, 0, 38]
-];
-
 export type HeatmapProps = {
   /**
    * Radius of the heatmap blur in pixels, to which the weight of a cell is distributed.
@@ -110,18 +98,21 @@ export type HeatmapProps = {
    */
   radiusPixels?: number;
   /**
-   * Controls how weight values are mapped to the `colorRange`, as an array of two numbers [`minValue`, `maxValue`].
+   * Controls how weight values are mapped to the colors in `colorTexture`, as an array of two numbers [`minValue`, `maxValue`].
    *
    * @default [0, 1]
    */
   colorDomain?: [number, number];
   /**
+<<<<<<< HEAD
    * Specified as an array of colors [color1, color2, ...].
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
    */
   colorRange: [number, number, number][];
   /**
+=======
+>>>>>>> 015e44185 (Tidy)
    * Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than 1 biases the output color towards the higher end of the spectrum, and a value less than 1 biases the output color towards the lower end of the spectrum.
    */
   intensity?: number;
