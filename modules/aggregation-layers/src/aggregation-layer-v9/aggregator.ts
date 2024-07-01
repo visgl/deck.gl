@@ -23,6 +23,8 @@ export type AggregatedBin = {
   value: number[];
   /** Count of data points in this bin */
   count: number;
+  /** Indices of data points in this bin. Only available if using CPU aggregation. */
+  pointIndices?: number[];
 };
 
 /**

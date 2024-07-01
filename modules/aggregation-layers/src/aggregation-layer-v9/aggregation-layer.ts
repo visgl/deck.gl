@@ -20,6 +20,7 @@ export default abstract class AggregationLayer<
   static layerName = 'AggregationLayer';
 
   state!: {
+    aggregatorType: string;
     aggregator: Aggregator;
   };
 
@@ -28,8 +29,9 @@ export default abstract class AggregationLayer<
     return true;
   }
 
+  abstract getAggregatorType(): string;
   /** Called to create an Aggregator instance */
-  abstract createAggregator(): Aggregator;
+  abstract createAggregator(type: string): Aggregator;
   /** Called when some attributes change, a chance to mark Aggregator as dirty */
   abstract onAttributeChange(id: string): void;
 
@@ -37,18 +39,25 @@ export default abstract class AggregationLayer<
     this.getAttributeManager()!.remove(['instancePickingColors']);
   }
 
-  // Override Layer.updateState to update the GPUAggregator instance
-  updateState(params: UpdateParameters<this>) {
+  // Extend Layer.updateState to update the Aggregator instance
+  // returns true if aggregator is changed
+  updateState(params: UpdateParameters<this>): boolean {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const aggregatorType = this.getAggregatorType();
+    if (params.changeFlags.extensionsChanged || this.state.aggregatorType !== aggregatorType) {
       this.state.aggregator?.destroy();
-      this.state.aggregator = this.createAggregator();
-      this.getAttributeManager()!.invalidateAll();
+      const aggregator = this.createAggregator(aggregatorType);
+      aggregator.setProps({
+        attributes: this.getAttributeManager()?.attributes
+      });
+      this.setState({aggregator, aggregatorType});
+      return true;
     }
+    return false;
   }
 
-  // Override Layer.finalizeState to dispose the GPUAggregator instance
+  // Override Layer.finalizeState to dispose the Aggregator instance
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
     this.state.aggregator.destroy();

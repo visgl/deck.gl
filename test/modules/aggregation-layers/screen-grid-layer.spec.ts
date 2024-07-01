@@ -21,7 +21,7 @@
 import test from 'tape-promise/tape';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
+import {ScreenGridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
 
@@ -33,34 +33,8 @@ test('ScreenGridLayer', t => {
       getPosition
     },
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate({layer}) {
-      t.ok(layer.state.aggregationResults !== null, 'should update state.aggregationResults');
-    }
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
-
-  testCases = testCases.concat([
-    {
-      updateProps: {
-        gpuAggregation: true
-      }
-    },
-    {
-      updateProps: {
-        gpuAggregation: false
-      },
-      onAfterUpdate({layer, oldState}) {
-        if (oldState.gpuAggregation) {
-          // Under WebGL1 gpuAggregation is always false, this change is a nop
-          const {aggregationDataDirty} = layer.state;
-          t.ok(
-            aggregationDataDirty,
-            'should set aggregationDataDirty when gpuAggregation prop changes'
-          );
-        }
-      }
-    }
-  ]);
 
   testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
 

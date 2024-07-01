@@ -2,7 +2,7 @@ import {BufferTransform} from '@luma.gl/engine';
 import {glsl, createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Buffer, Texture} from '@luma.gl/core';
-import type {WebGLAggregatorOptions} from './webgl-aggregator';
+import type {WebGLAggregatorProps} from './webgl-aggregator';
 import type {AggregationOperation} from '../aggregator';
 
 import {TEXTURE_WIDTH} from './webgl-bin-sorter';
@@ -26,10 +26,10 @@ export class WebGLAggregationTransform {
   /** Aggregated [min, max] for each channel */
   private _domains: [min: number, max: number][] | null = null;
 
-  constructor(device: Device, settings: WebGLAggregatorOptions) {
+  constructor(device: Device, props: WebGLAggregatorProps) {
     this.device = device;
-    this.channelCount = settings.channelCount;
-    this.transform = createTransform(device, settings);
+    this.channelCount = props.channelCount;
+    this.transform = createTransform(device, props);
     this.domainFBO = createRenderTarget(device, 2, 1);
   }
 
@@ -112,7 +112,7 @@ export class WebGLAggregationTransform {
   }
 }
 
-function createTransform(device: Device, settings: WebGLAggregatorOptions): BufferTransform {
+function createTransform(device: Device, props: WebGLAggregatorProps): BufferTransform {
   const vs = glsl`\
 #version 300 es
 #define SHADER_NAME gpu-aggregation-domain-vertex
@@ -228,8 +228,8 @@ void main() {
       blendAlphaOperation: 'max'
     },
     defines: {
-      NUM_DIMS: settings.dimensions,
-      NUM_CHANNELS: settings.channelCount,
+      NUM_DIMS: props.dimensions,
+      NUM_CHANNELS: props.channelCount,
       SAMPLER_WIDTH: TEXTURE_WIDTH
     },
     uniforms: {
