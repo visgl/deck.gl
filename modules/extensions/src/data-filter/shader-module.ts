@@ -27,12 +27,16 @@ export type Defines = {
   DATAFILTER_DOUBLE?: boolean;
 };
 
-const vs = glsl`
-uniform bool filter_useSoftMargin;
-uniform bool filter_enabled;
-uniform bool filter_transformSize;
-uniform ivec4 filter_categoryBitMask;
+const uniformBlock = glsl`\
+uniform dataFilterUniforms {
+  bool useSoftMargin;
+  bool enabled;
+  bool transformSize;
+  ivec4 categoryBitMask;
+} dataFilter;
+`;
 
+const vertex = glsl`
 #ifdef DATAFILTER_TYPE
   uniform DATAFILTER_TYPE filter_min;
   uniform DATAFILTER_TYPE filter_softMin;
@@ -70,7 +74,7 @@ float dataFilter_reduceValue(vec4 value) {
 
 #ifdef DATAFILTER_TYPE
   void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
-    if (filter_useSoftMargin) {
+    if (dataFilter.useSoftMargin) {
       // smoothstep results are undefined if edge0 ≥ edge1
       // Fallback to ignore filterSoftRange if it is truncated by filterRange
       DATAFILTER_TYPE leftInRange = mix(
@@ -95,16 +99,16 @@ float dataFilter_reduceValue(vec4 value) {
 #ifdef DATACATEGORY_TYPE
   void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
-    int dataFilter_masks = filter_categoryBitMask[int(category / 32.0)];
+    int dataFilter_masks = dataFilter.categoryBitMask[int(category / 32.0)];
     #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
     ivec2 dataFilter_masks = ivec2(
-      filter_categoryBitMask[int(category.x / 32.0)],
-      filter_categoryBitMask[int(category.y / 32.0) + 2]
+      dataFilter.categoryBitMask[int(category.x / 32.0)],
+      dataFilter.categoryBitMask[int(category.y / 32.0) + 2]
     );
     #elif DATACATEGORY_CHANNELS == 3 // Three 32-bit masks
-    ivec3 dataFilter_masks = filter_categoryBitMask.xyz;
+    ivec3 dataFilter_masks = dataFilter.categoryBitMask.xyz;
     #else // Four 32-bit masks
-    ivec4 dataFilter_masks = filter_categoryBitMask;
+    ivec4 dataFilter_masks = dataFilter.categoryBitMask;
     #endif
 
     // Shift mask and extract relevant bits
@@ -118,6 +122,11 @@ float dataFilter_reduceValue(vec4 value) {
     #endif
   }
 #endif
+`;
+
+const vs = `
+${uniformBlock}
+${vertex}
 `;
 
 const fs = glsl`
@@ -156,9 +165,9 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
           filter_softMax: filterSoftRange.map(r => r[1]),
           filter_max: filterRange.map(r => r[1])
         }),
-    filter_enabled: filterEnabled,
-    filter_useSoftMargin: Boolean(opts.filterSoftRange),
-    filter_transformSize: filterEnabled && filterTransformSize,
+    enabled: filterEnabled,
+    useSoftMargin: Boolean(opts.filterSoftRange),
+    transformSize: filterEnabled && filterTransformSize,
     filter_transformColor: filterEnabled && filterTransformColor
   };
 }
@@ -195,7 +204,7 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
 const inject = {
   'vs:#main-start': glsl`
     dataFilter_value = 1.0;
-    if (filter_enabled) {
+    if (dataFilter.enabled) {
       #ifdef DATAFILTER_TYPE
         #ifdef DATAFILTER_DOUBLE
           dataFilter_setValue(
@@ -220,7 +229,7 @@ const inject = {
   `,
 
   'vs:DECKGL_FILTER_SIZE': glsl`
-    if (filter_transformSize) {
+    if (dataFilter.transformSize) {
       size = size * dataFilter_value;
     }
   `,
@@ -234,11 +243,17 @@ const inject = {
 };
 
 export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
-  name: 'data-filter',
+  name: 'dataFilter',
   vs,
   fs,
   inject,
-  getUniforms
+  getUniforms,
+  uniformTypes: {
+    useSoftMargin: 'i32',
+    enabled: 'i32',
+    transformSize: 'i32',
+    categoryBitMask: 'vec4<i32>'
+  }
 };
 
 export const shaderModule64: ShaderModule<DataFilterModuleSettings> = {
