@@ -22,7 +22,13 @@ import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {DataFilterModuleSettings, Defines, dataFilter, dataFilter64} from './shader-module';
+import {
+  CategoryBitMask,
+  DataFilterModuleSettings,
+  Defines,
+  dataFilter,
+  dataFilter64
+} from './shader-module';
 import * as aggregator from './aggregator';
 
 const defaultProps = {
@@ -280,7 +286,6 @@ export default class DataFilterExtension extends LayerExtension<
       extension._updateCategoryBitMask.call(this, params, extension);
     }
 
-    const {categoryBitMask} = this.state;
     const {
       extensions,
       filterEnabled,
@@ -292,7 +297,6 @@ export default class DataFilterExtension extends LayerExtension<
     } = params.moduleParameters;
     const dataFilterProps: DataFilterModuleSettings = {
       extensions,
-      categoryBitMask,
       filterEnabled,
       filterRange,
       filterSoftRange,
@@ -300,6 +304,9 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformColor,
       filterCategories
     };
+    if (this.state.categoryBitMask) {
+      dataFilterProps.categoryBitMask = this.state.categoryBitMask as CategoryBitMask;
+    }
     this.setShaderModuleProps({dataFilter: dataFilterProps});
 
     /* eslint-disable-next-line camelcase */
@@ -363,7 +370,7 @@ export default class DataFilterExtension extends LayerExtension<
     const {categorySize} = extension.opts;
     if (!categorySize) return;
     const {filterCategories} = this.props;
-    const categoryBitMask = new Uint32Array([0, 0, 0, 0]);
+    const categoryBitMask: CategoryBitMask = new Uint32Array([0, 0, 0, 0]);
     const categoryFilters = (
       categorySize === 1 ? [filterCategories] : filterCategories
     ) as FilterCategory[][];

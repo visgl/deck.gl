@@ -143,8 +143,10 @@ ${uniformBlock}
 ${fragment}
 `;
 
+export type CategoryBitMask = Uint32Array;
 export type DataFilterModuleSettings = {
   extensions: any[]; // used to detect if layer props are present
+  categoryBitMask?: CategoryBitMask;
 } & DataFilterExtensionProps;
 
 /* eslint-disable camelcase */
