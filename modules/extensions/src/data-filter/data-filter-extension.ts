@@ -276,6 +276,25 @@ export default class DataFilterExtension extends LayerExtension<
     if (!this.state.categoryBitMask) {
       extension._updateCategoryBitMask.call(this, params, extension);
     }
+
+    const {
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    } = params.moduleParameters;
+    const dataFilterProps: DataFilterExtensionProps = {
+      filterEnabled,
+      filterRange,
+      filterSoftRange,
+      filterTransformSize,
+      filterTransformColor,
+      filterCategories
+    };
+    this.setShaderModuleProps({dataFilter: dataFilterProps});
+
     /* eslint-disable-next-line camelcase */
     params.uniforms.filter_categoryBitMask = this.state.categoryBitMask;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
