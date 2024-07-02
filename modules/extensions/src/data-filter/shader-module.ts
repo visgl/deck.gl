@@ -32,11 +32,13 @@ uniform dataFilterUniforms {
   bool useSoftMargin;
   bool enabled;
   bool transformSize;
-  float min;
-  float softMin;
-  float softMax;
-  DATAFILTER_TYPE max;
   ivec4 categoryBitMask;
+#ifdef DATAFILTER_TYPE
+  DATAFILTER_TYPE min;
+  DATAFILTER_TYPE softMin;
+  DATAFILTER_TYPE softMax;
+  DATAFILTER_TYPE max;
+#endif
 } dataFilter;
 `;
 
@@ -252,11 +254,11 @@ export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
+    categoryBitMask: 'vec4<i32>',
     min: 'f32',
     softMin: 'f32',
     softMax: 'f32',
-    max: 'f32',
-    categoryBitMask: 'vec4<i32>'
+    max: 'f32'
   }
 };
 
