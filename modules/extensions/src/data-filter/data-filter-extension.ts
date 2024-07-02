@@ -22,7 +22,7 @@ import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {DataFilterModuleSettings, Defines, shaderModule, shaderModule64} from './shader-module';
+import {DataFilterModuleSettings, Defines, dataFilter, dataFilter64} from './shader-module';
 import * as aggregator from './aggregator';
 
 const defaultProps = {
@@ -94,7 +94,7 @@ export type DataFilterExtensionProps<DataT = any> = {
   }) => void;
 };
 
-type DataFilterExtensionOptions = {
+export type DataFilterExtensionOptions = {
   /**
    * The size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering.
    * @default 0
@@ -154,7 +154,10 @@ export default class DataFilterExtension extends LayerExtension<
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
-    return {modules: [fp64 ? shaderModule64 : shaderModule], defines};
+    const module = fp64 ? dataFilter64 : dataFilter;
+    module.uniformTypes = module.uniformTypesForSize(extension.opts);
+
+    return {modules: [module], defines};
   }
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {

@@ -1,7 +1,6 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
-import type {DataFilterExtensionProps} from './data-filter-extension';
+import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
 import {glsl} from '../utils/syntax-tags';
-import {UniformTypes} from '@deck.gl/core';
 import {UniformFormat} from '@luma.gl/shadertools/dist/types';
 
 /*
@@ -251,36 +250,48 @@ const inject = {
   `
 };
 
-const DTYPE = 'vec2<f32>';
+type UniformTypesFunc = (opts: DataFilterExtensionOptions) => Record<string, UniformFormat>;
+function uniformTypesForSize(opts: DataFilterExtensionOptions) {
+  const {categorySize, filterSize, fp64} = opts;
+  const uniformTypes: Record<string, UniformFormat> = {
+    useSoftMargin: 'i32',
+    enabled: 'i32',
+    transformSize: 'i32',
+    transformColor: 'i32',
+    categoryBitMask: 'vec4<i32>'
+  };
 
-const uniformTypes = {
-  useSoftMargin: 'i32',
-  enabled: 'i32',
-  transformSize: 'i32',
-  transformColor: 'i32',
-  categoryBitMask: 'vec4<i32>',
-  min: DTYPE,
-  softMin: DTYPE,
-  softMax: DTYPE,
-  max: DTYPE,
-  min64High: DTYPE,
-  max64High: DTYPE
-} as const satisfies Record<string, UniformFormat>;
+  if (filterSize) {
+    const uniformFormat: UniformFormat = filterSize === 1 ? 'f32' : `vec${filterSize}<f32>`;
+    uniformTypes.min = uniformFormat;
+    uniformTypes.softMin = uniformFormat;
+    uniformTypes.softMax = uniformFormat;
+    uniformTypes.max = uniformFormat;
+    uniformTypes.min64High = uniformFormat;
+    uniformTypes.max64High = uniformFormat;
+  }
 
-export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
+  return uniformTypes;
+}
+
+export const dataFilter: ShaderModule<DataFilterModuleSettings> & {
+  uniformTypesForSize: UniformTypesFunc;
+} = {
   name: 'dataFilter',
   vs,
   fs,
   inject,
   getUniforms,
-  uniformTypes
+  uniformTypesForSize
 };
 
-export const shaderModule64: ShaderModule<DataFilterModuleSettings> = {
+export const dataFilter64: ShaderModule<DataFilterModuleSettings> & {
+  uniformTypesForSize: UniformTypesFunc;
+} = {
   name: 'dataFilter',
   vs,
   fs,
   inject,
   getUniforms: getUniforms64,
-  uniformTypes
+  uniformTypesForSize
 };
