@@ -22,7 +22,7 @@ import type {Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
-import {Defines, shaderModule, shaderModule64} from './shader-module';
+import {DataFilterModuleSettings, Defines, shaderModule, shaderModule64} from './shader-module';
 import * as aggregator from './aggregator';
 
 const defaultProps = {
@@ -278,6 +278,7 @@ export default class DataFilterExtension extends LayerExtension<
     }
 
     const {
+      extensions,
       filterEnabled,
       filterRange,
       filterSoftRange,
@@ -285,7 +286,8 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformColor,
       filterCategories
     } = params.moduleParameters;
-    const dataFilterProps: DataFilterExtensionProps = {
+    const dataFilterProps: DataFilterModuleSettings = {
+      extensions,
       filterEnabled,
       filterRange,
       filterSoftRange,

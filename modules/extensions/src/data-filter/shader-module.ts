@@ -32,18 +32,16 @@ uniform dataFilterUniforms {
   bool useSoftMargin;
   bool enabled;
   bool transformSize;
+  float min;
+  float softMin;
+  float softMax;
+  DATAFILTER_TYPE max;
   ivec4 categoryBitMask;
-#ifdef DATAFILTER_TYPE
-  DATAFILTER_TYPE min;
-#endif
 } dataFilter;
 `;
 
 const vertex = glsl`
 #ifdef DATAFILTER_TYPE
-  uniform DATAFILTER_TYPE filter_softMin;
-  uniform DATAFILTER_TYPE filter_softMax;
-  uniform DATAFILTER_TYPE filter_max;
 
   in DATAFILTER_TYPE filterValues;
   #ifdef DATAFILTER_DOUBLE
@@ -80,19 +78,19 @@ float dataFilter_reduceValue(vec4 value) {
       // smoothstep results are undefined if edge0 ≥ edge1
       // Fallback to ignore filterSoftRange if it is truncated by filterRange
       DATAFILTER_TYPE leftInRange = mix(
-        smoothstep(dataFilter.min, filter_softMin, valueFromMin),
+        smoothstep(dataFilter.min, dataFilter.softMin, valueFromMin),
         step(dataFilter.min, valueFromMin),
-        step(filter_softMin, dataFilter.min)
+        step(dataFilter.softMin, dataFilter.min)
       );
       DATAFILTER_TYPE rightInRange = mix(
-        1.0 - smoothstep(filter_softMax, filter_max, valueFromMax),
-        step(valueFromMax, filter_max),
-        step(filter_max, filter_softMax)
+        1.0 - smoothstep(dataFilter.softMax, dataFilter.max, valueFromMax),
+        step(valueFromMax, dataFilter.max),
+        step(dataFilter.max, dataFilter.softMax)
       );
       dataFilter_value = dataFilter_reduceValue(leftInRange * rightInRange);
     } else {
       dataFilter_value = dataFilter_reduceValue(
-        step(dataFilter.min, valueFromMin) * step(valueFromMax, filter_max)
+        step(dataFilter.min, valueFromMin) * step(valueFromMax, dataFilter.max)
       );
     }
   }
@@ -136,7 +134,7 @@ uniform bool filter_transformColor;
 in float dataFilter_value;
 `;
 
-type DataFilterModuleSettings = {
+export type DataFilterModuleSettings = {
   extensions: any[]; // used to detect if layer props are present
 } & DataFilterExtensionProps;
 
@@ -157,15 +155,15 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     ...(Number.isFinite(filterRange[0])
       ? {
           min: filterRange[0],
-          filter_softMin: filterSoftRange[0],
-          filter_softMax: filterSoftRange[1],
-          filter_max: filterRange[1]
+          softMin: filterSoftRange[0],
+          softMax: filterSoftRange[1],
+          max: filterRange[1]
         }
       : {
           min: filterRange.map(r => r[0]),
-          filter_softMin: filterSoftRange.map(r => r[0]),
-          filter_softMax: filterSoftRange.map(r => r[1]),
-          filter_max: filterRange.map(r => r[1])
+          softMin: filterSoftRange.map(r => r[0]),
+          softMax: filterSoftRange.map(r => r[1]),
+          max: filterRange.map(r => r[1])
         }),
     enabled: filterEnabled,
     useSoftMargin: Boolean(opts.filterSoftRange),
@@ -182,22 +180,22 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
   if (Number.isFinite(uniforms.min)) {
     const min64High = Math.fround(uniforms.min);
     uniforms.min -= min64High;
-    uniforms.filter_softMin -= min64High;
+    uniforms.softMin -= min64High;
     uniforms.filter_min64High = min64High;
 
-    const max64High = Math.fround(uniforms.filter_max);
-    uniforms.filter_max -= max64High;
-    uniforms.filter_softMax -= max64High;
+    const max64High = Math.fround(uniforms.max);
+    uniforms.max -= max64High;
+    uniforms.softMax -= max64High;
     uniforms.filter_max64High = max64High;
   } else {
     const min64High = uniforms.min.map(Math.fround);
     uniforms.min = uniforms.min.map((x, i) => x - min64High[i]);
-    uniforms.filter_softMin = uniforms.filter_softMin.map((x, i) => x - min64High[i]);
+    uniforms.softMin = uniforms.softMin.map((x, i) => x - min64High[i]);
     uniforms.filter_min64High = min64High;
 
-    const max64High = uniforms.filter_max.map(Math.fround);
-    uniforms.filter_max = uniforms.filter_max.map((x, i) => x - max64High[i]);
-    uniforms.filter_softMax = uniforms.filter_softMax.map((x, i) => x - max64High[i]);
+    const max64High = uniforms.max.map(Math.fround);
+    uniforms.max = uniforms.max.map((x, i) => x - max64High[i]);
+    uniforms.softMax = uniforms.softMax.map((x, i) => x - max64High[i]);
     uniforms.filter_max64High = max64High;
   }
   return uniforms;
@@ -254,8 +252,11 @@ export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
-    categoryBitMask: 'vec4<i32>',
-    min: 'f32'
+    min: 'f32',
+    softMin: 'f32',
+    softMax: 'f32',
+    max: 'f32',
+    categoryBitMask: 'vec4<i32>'
   }
 };
 
