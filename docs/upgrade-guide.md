@@ -19,6 +19,7 @@ The biggest changes in deck.gl v9 are due to the upgrade to the luma.gl v9 API. 
 Quick summary:
 
 - All references to `gl: WebGLRenderingContext` should be replaced with `device`: [Device](https://luma.gl/docs/api-reference/core/device).
+- All references to `glOptions: WebGLContextAttributes` should be replaced with `deviceProps: {type: 'webgl', ...glOptions}`: [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)
 - Layer props `parameters` and `textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/).
 - Deck class prop `onWebGLInitialized` is now `onDeviceInitialized`.
 - When providing [binary data attributes](./api-reference/core/layer.md#data), `type` is now a WebGPU-style [string format](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat) instead of a GL constant.
