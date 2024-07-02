@@ -251,18 +251,20 @@ const inject = {
   `
 };
 
+const DTYPE = 'vec2<f32>';
+
 const uniformTypes = {
   useSoftMargin: 'i32',
   enabled: 'i32',
   transformSize: 'i32',
   transformColor: 'i32',
   categoryBitMask: 'vec4<i32>',
-  min: 'f32',
-  softMin: 'f32',
-  softMax: 'f32',
-  max: 'f32',
-  min64High: 'f32',
-  max64High: 'f32'
+  min: DTYPE,
+  softMin: DTYPE,
+  softMax: DTYPE,
+  max: DTYPE,
+  min64High: DTYPE,
+  max64High: DTYPE
 } as const satisfies Record<string, UniformFormat>;
 
 export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
