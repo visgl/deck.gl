@@ -3,6 +3,7 @@ import {getResolution} from 'quadbin';
 
 import {
   Accessor,
+  Color,
   CompositeLayer,
   CompositeLayerProps,
   DefaultProps,
@@ -18,7 +19,10 @@ import {TilejsonPropType} from './utils';
 import {TilejsonResult} from '../sources';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Texture, TextureProps} from '@luma.gl/core';
-import {colorRangeToFlatArray} from '../../../aggregation-layers/src/utils/color-utils';
+import {
+  defaultColorRange,
+  colorRangeToFlatArray
+} from '../../../aggregation-layers/src/utils/color-utils';
 
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
@@ -105,6 +109,7 @@ const defaultProps: DefaultProps<HeatmapTileLayerProps> = {
   getWeight: {type: 'accessor', value: 1},
   onMaxDensityChange: {type: 'function', optional: true, value: null},
   colorDomain: {type: 'array', value: [0, 1]},
+  colorRange: defaultColorRange,
   intensity: {type: 'number', value: 1},
   radiusPixels: {type: 'number', min: 0, max: 100, value: 20}
 };
@@ -118,6 +123,13 @@ export type HeatmapTileLayerProps<DataT = unknown> = _HeatmapTileLayerProps<Data
 /** Properties added by HeatmapTileLayer. */
 type _HeatmapTileLayerProps<DataT> = QuadbinTileLayerProps<DataT> &
   HeatmapProps & {
+    /**
+     * Specified as an array of colors [color1, color2, ...].
+     *
+     * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+     */
+    colorRange: Color[];
+
     /**
      * The weight of each object.
      *
