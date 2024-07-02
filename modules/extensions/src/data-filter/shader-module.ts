@@ -34,7 +34,6 @@ uniform dataFilterUniforms {
   bool enabled;
   bool transformSize;
   bool transformColor;
-  highp ivec4 categoryBitMask;
 #ifdef DATAFILTER_TYPE
   DATAFILTER_TYPE min;
   DATAFILTER_TYPE softMin;
@@ -44,6 +43,9 @@ uniform dataFilterUniforms {
   DATAFILTER_TYPE min64High;
   DATAFILTER_TYPE max64High;
 #endif
+#endif
+#ifdef DATACATEGORY_TYPE
+  highp ivec4 categoryBitMask;
 #endif
 } dataFilter;
 `;
@@ -55,7 +57,6 @@ const vertex = glsl`
   in DATAFILTER_TYPE filterValues64Low;
 #endif
 #endif
-
 
 #ifdef DATACATEGORY_TYPE
   in DATACATEGORY_TYPE filterCategoryValues;
@@ -257,8 +258,7 @@ function unifromTypesFromOptions(opts: DataFilterExtensionOptions) {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
-    transformColor: 'i32',
-    categoryBitMask: 'vec4<i32>'
+    transformColor: 'i32'
   };
 
   if (filterSize) {
@@ -271,6 +271,10 @@ function unifromTypesFromOptions(opts: DataFilterExtensionOptions) {
       uniformTypes.min64High = uniformFormat;
       uniformTypes.max64High = uniformFormat;
     }
+  }
+
+  if (categorySize) {
+    uniformTypes.categoryBitMask = 'vec4<i32>';
   }
 
   return uniformTypes;
