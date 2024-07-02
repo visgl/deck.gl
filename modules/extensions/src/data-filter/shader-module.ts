@@ -1,6 +1,8 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import type {DataFilterExtensionProps} from './data-filter-extension';
 import {glsl} from '../utils/syntax-tags';
+import {UniformTypes} from '@deck.gl/core';
+import {UniformFormat} from '@luma.gl/shadertools/dist/types';
 
 /*
  * data filter shader module
@@ -39,20 +41,20 @@ uniform dataFilterUniforms {
   DATAFILTER_TYPE softMin;
   DATAFILTER_TYPE softMax;
   DATAFILTER_TYPE max;
+#ifdef DATAFILTER_DOUBLE
+  DATAFILTER_TYPE min64High;
+  DATAFILTER_TYPE max64High;
+#endif
 #endif
 } dataFilter;
 `;
 
 const vertex = glsl`
 #ifdef DATAFILTER_TYPE
-
   in DATAFILTER_TYPE filterValues;
-  #ifdef DATAFILTER_DOUBLE
-    in DATAFILTER_TYPE filterValues64Low;
-
-    uniform DATAFILTER_TYPE filter_min64High;
-    uniform DATAFILTER_TYPE filter_max64High;
-  #endif
+#ifdef DATAFILTER_DOUBLE
+  in DATAFILTER_TYPE filterValues64Low;
+#endif
 #endif
 
 
@@ -188,22 +190,22 @@ function getUniforms64(opts?: DataFilterModuleSettings | {}): Record<string, any
     const min64High = Math.fround(uniforms.min);
     uniforms.min -= min64High;
     uniforms.softMin -= min64High;
-    uniforms.filter_min64High = min64High;
+    uniforms.min64High = min64High;
 
     const max64High = Math.fround(uniforms.max);
     uniforms.max -= max64High;
     uniforms.softMax -= max64High;
-    uniforms.filter_max64High = max64High;
+    uniforms.max64High = max64High;
   } else {
     const min64High = uniforms.min.map(Math.fround);
     uniforms.min = uniforms.min.map((x, i) => x - min64High[i]);
     uniforms.softMin = uniforms.softMin.map((x, i) => x - min64High[i]);
-    uniforms.filter_min64High = min64High;
+    uniforms.min64High = min64High;
 
     const max64High = uniforms.max.map(Math.fround);
     uniforms.max = uniforms.max.map((x, i) => x - max64High[i]);
     uniforms.softMax = uniforms.softMax.map((x, i) => x - max64High[i]);
-    uniforms.filter_max64High = max64High;
+    uniforms.max64High = max64High;
   }
   return uniforms;
 }
@@ -215,8 +217,8 @@ const inject = {
       #ifdef DATAFILTER_TYPE
         #ifdef DATAFILTER_DOUBLE
           dataFilter_setValue(
-            filterValues - filter_min64High + filterValues64Low,
-            filterValues - filter_max64High + filterValues64Low
+            filterValues - dataFilter.min64High + filterValues64Low,
+            filterValues - dataFilter.max64High + filterValues64Low
           );
         #else
           dataFilter_setValue(filterValues, filterValues);
@@ -249,29 +251,34 @@ const inject = {
   `
 };
 
+const uniformTypes = {
+  useSoftMargin: 'i32',
+  enabled: 'i32',
+  transformSize: 'i32',
+  transformColor: 'i32',
+  categoryBitMask: 'vec4<i32>',
+  min: 'f32',
+  softMin: 'f32',
+  softMax: 'f32',
+  max: 'f32',
+  min64High: 'f32',
+  max64High: 'f32'
+} as const satisfies Record<string, UniformFormat>;
+
 export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
   name: 'dataFilter',
   vs,
   fs,
   inject,
   getUniforms,
-  uniformTypes: {
-    useSoftMargin: 'i32',
-    enabled: 'i32',
-    transformSize: 'i32',
-    transformColor: 'i32',
-    categoryBitMask: 'vec4<i32>',
-    min: 'f32',
-    softMin: 'f32',
-    softMax: 'f32',
-    max: 'f32'
-  }
+  uniformTypes
 };
 
 export const shaderModule64: ShaderModule<DataFilterModuleSettings> = {
-  name: 'data-filter-fp64',
+  name: 'dataFilter',
   vs,
   fs,
   inject,
-  getUniforms: getUniforms64
+  getUniforms: getUniforms64,
+  uniformTypes
 };
