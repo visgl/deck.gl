@@ -32,7 +32,8 @@ uniform dataFilterUniforms {
   bool useSoftMargin;
   bool enabled;
   bool transformSize;
-  ivec4 categoryBitMask;
+  bool transformColor;
+  highp ivec4 categoryBitMask;
 #ifdef DATAFILTER_TYPE
   DATAFILTER_TYPE min;
   DATAFILTER_TYPE softMin;
@@ -131,9 +132,13 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fs = glsl`
-uniform bool filter_transformColor;
+const fragment = glsl`
 in float dataFilter_value;
+`;
+
+const fs = `
+${uniformBlock}
+${fragment}
 `;
 
 export type DataFilterModuleSettings = {
@@ -170,7 +175,7 @@ function getUniforms(opts?: DataFilterModuleSettings | {}): Record<string, any> 
     enabled: filterEnabled,
     useSoftMargin: Boolean(opts.filterSoftRange),
     transformSize: filterEnabled && filterTransformSize,
-    filter_transformColor: filterEnabled && filterTransformColor
+    transformColor: filterEnabled && filterTransformColor
   };
 }
 
@@ -238,7 +243,7 @@ const inject = {
 
   'fs:DECKGL_FILTER_COLOR': glsl`
     if (dataFilter_value == 0.0) discard;
-    if (filter_transformColor) {
+    if (dataFilter.transformColor) {
       color.a *= dataFilter_value;
     }
   `
@@ -254,6 +259,7 @@ export const shaderModule: ShaderModule<DataFilterModuleSettings> = {
     useSoftMargin: 'i32',
     enabled: 'i32',
     transformSize: 'i32',
+    transformColor: 'i32',
     categoryBitMask: 'vec4<i32>',
     min: 'f32',
     softMin: 'f32',
