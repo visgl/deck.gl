@@ -65,7 +65,12 @@ export class ZoomWidget implements Widget<ZoomWidgetProps> {
     element.classList.add('deck-widget', 'deck-widget-zoom');
     if (className) element.classList.add(className);
     if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+      Object.entries(style).map(([key, value]) =>
+        element.style.setProperty(
+          key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(),
+          value as string
+        )
+      );
     }
     const ui = (
       <ButtonGroup orientation={this.orientation}>

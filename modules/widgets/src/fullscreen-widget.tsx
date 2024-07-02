@@ -56,7 +56,9 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
     el.classList.add('deck-widget', 'deck-widget-fullscreen');
     if (className) el.classList.add(className);
     if (style) {
-      Object.entries(style).map(([key, value]) => el.style.setProperty(key, value as string));
+      Object.entries(style).map(([key, value]) =>
+        el.style.setProperty(key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(), value as string)
+      );
     }
     this.deck = deck;
     this.element = el;
@@ -99,11 +101,16 @@ export class FullscreenWidget implements Widget<FullscreenWidgetProps> {
 
       if (!deepEqual(oldProps.style, props.style, 1)) {
         if (oldProps.style) {
-          Object.entries(oldProps.style).map(([key]) => el.style.removeProperty(key));
+          Object.entries(oldProps.style).map(([key]) =>
+            el.style.removeProperty(key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase())
+          );
         }
         if (props.style) {
           Object.entries(props.style).map(([key, value]) =>
-            el.style.setProperty(key, value as string)
+            el.style.setProperty(
+              key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(),
+              value as string
+            )
           );
         }
       }

@@ -62,7 +62,12 @@ export class CompassWidget implements Widget<CompassWidgetProps> {
     element.classList.add('deck-widget', 'deck-widget-compass');
     if (className) element.classList.add(className);
     if (style) {
-      Object.entries(style).map(([key, value]) => element.style.setProperty(key, value as string));
+      Object.entries(style).map(([key, value]) =>
+        element.style.setProperty(
+          key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(),
+          value as string
+        )
+      );
     }
     this.deck = deck;
     this.element = element;
