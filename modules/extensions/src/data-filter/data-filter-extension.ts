@@ -280,6 +280,7 @@ export default class DataFilterExtension extends LayerExtension<
       extension._updateCategoryBitMask.call(this, params, extension);
     }
 
+    const {categoryBitMask} = this.state;
     const {
       extensions,
       filterEnabled,
@@ -291,6 +292,7 @@ export default class DataFilterExtension extends LayerExtension<
     } = params.moduleParameters;
     const dataFilterProps: DataFilterModuleSettings = {
       extensions,
+      categoryBitMask,
       filterEnabled,
       filterRange,
       filterSoftRange,
@@ -301,7 +303,6 @@ export default class DataFilterExtension extends LayerExtension<
     this.setShaderModuleProps({dataFilter: dataFilterProps});
 
     /* eslint-disable-next-line camelcase */
-    params.uniforms.filter_categoryBitMask = this.state.categoryBitMask;
     if (filterNeedsUpdate && onFilteredItemsChange && filterModel) {
       const {
         attributes: {filterValues, filterCategoryValues, filterIndices}
@@ -317,7 +318,7 @@ export default class DataFilterExtension extends LayerExtension<
         ...filterCategoryValues?.getValue(),
         ...filterIndices?.getValue()
       });
-      filterModel.setUniforms(params.uniforms);
+      filterModel.shaderInputs.setProps({dataFilter: dataFilterProps});
       filterModel.device.withParametersWebGL(
         {
           framebuffer: filterFBO,
