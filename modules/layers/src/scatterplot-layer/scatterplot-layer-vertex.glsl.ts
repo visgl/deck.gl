@@ -32,20 +32,6 @@ in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 in vec3 instancePickingColors;
 
-uniform float opacity;
-uniform float radiusScale;
-uniform float radiusMinPixels;
-uniform float radiusMaxPixels;
-uniform float lineWidthScale;
-uniform float lineWidthMinPixels;
-uniform float lineWidthMaxPixels;
-uniform float stroked;
-uniform bool filled;
-uniform bool antialiasing;
-uniform bool billboard;
-uniform int radiusUnits;
-uniform int lineWidthUnits;
-
 out vec4 vFillColor;
 out vec4 vLineColor;
 out vec2 unitPosition;
@@ -58,30 +44,29 @@ void main(void) {
 
   // Multiply out radius and clamp to limits
   outerRadiusPixels = clamp(
-    project_size_to_pixel(radiusScale * instanceRadius, radiusUnits),
-    radiusMinPixels, radiusMaxPixels
+    project_size_to_pixel(scatterplot.radiusScale * instanceRadius, scatterplot.radiusUnits),
+    scatterplot.radiusMinPixels, scatterplot.radiusMaxPixels
   );
   
   // Multiply out line width and clamp to limits
   float lineWidthPixels = clamp(
-    project_size_to_pixel(lineWidthScale * instanceLineWidths, lineWidthUnits),
-    lineWidthMinPixels, lineWidthMaxPixels
+    project_size_to_pixel(scatterplot.lineWidthScale * instanceLineWidths, scatterplot.lineWidthUnits),
+    scatterplot.lineWidthMinPixels, scatterplot.lineWidthMaxPixels
   );
 
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += stroked * lineWidthPixels / 2.0;
-
+  outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
   // Expand geometry to accomodate edge smoothing
-  float edgePadding = antialiasing ? (outerRadiusPixels + SMOOTH_EDGE_RADIUS) / outerRadiusPixels : 1.0;
+  float edgePadding = scatterplot.antialiasing ? (outerRadiusPixels + SMOOTH_EDGE_RADIUS) / outerRadiusPixels : 1.0;
 
   // position on the containing square in [-1, 1] space
   unitPosition = edgePadding * positions.xy;
   geometry.uv = unitPosition;
   geometry.pickingColor = instancePickingColors;
 
-  innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
+  innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / outerRadiusPixels;
   
-  if (billboard) {
+  if (scatterplot.billboard) {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = edgePadding * positions * outerRadiusPixels;
@@ -95,9 +80,9 @@ void main(void) {
   }
 
   // Apply opacity to instance color, or return instance picking color
-  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 }
 `;

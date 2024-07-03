@@ -39,14 +39,6 @@ in vec2 vTexPos;
 
 out vec4 fragColor;
 
-uniform float desaturate;
-uniform vec4 transparentColor;
-uniform vec3 tintColor;
-uniform float opacity;
-
-uniform float coordinateConversion;
-uniform vec4 bounds;
-
 /* projection utils */
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -75,29 +67,29 @@ vec2 mercator_to_lnglat(vec2 xy) {
 // apply desaturation
 vec3 color_desaturate(vec3 color) {
   float luminance = (color.r + color.g + color.b) * 0.333333333;
-  return mix(color, vec3(luminance), desaturate);
+  return mix(color, vec3(luminance), bitmap.desaturate);
 }
 
 // apply tint
 vec3 color_tint(vec3 color) {
-  return color * tintColor;
+  return color * bitmap.tintColor;
 }
 
 // blend with background color
 vec4 apply_opacity(vec3 color, float alpha) {
-  if (transparentColor.a == 0.0) {
+  if (bitmap.transparentColor.a == 0.0) {
     return vec4(color, alpha);
   }
-  float blendedAlpha = alpha + transparentColor.a * (1.0 - alpha);
+  float blendedAlpha = alpha + bitmap.transparentColor.a * (1.0 - alpha);
   float highLightRatio = alpha / blendedAlpha;
-  vec3 blendedRGB = mix(transparentColor.rgb, color, highLightRatio);
+  vec3 blendedRGB = mix(bitmap.transparentColor.rgb, color, highLightRatio);
   return vec4(blendedRGB, blendedAlpha);
 }
 
 vec2 getUV(vec2 pos) {
   return vec2(
-    (pos.x - bounds[0]) / (bounds[2] - bounds[0]),
-    (pos.y - bounds[3]) / (bounds[1] - bounds[3])
+    (pos.x - bitmap.bounds[0]) / (bitmap.bounds[2] - bitmap.bounds[0]),
+    (pos.y - bitmap.bounds[3]) / (bitmap.bounds[1] - bitmap.bounds[3])
   );
 }
 
@@ -105,16 +97,16 @@ ${packUVsIntoRGB}
 
 void main(void) {
   vec2 uv = vTexCoord;
-  if (coordinateConversion < -0.5) {
+  if (bitmap.coordinateConversion < -0.5) {
     vec2 lnglat = mercator_to_lnglat(vTexPos);
     uv = getUV(lnglat);
-  } else if (coordinateConversion > 0.5) {
+  } else if (bitmap.coordinateConversion > 0.5) {
     vec2 commonPos = lnglat_to_mercator(vTexPos);
     uv = getUV(commonPos);
   }
   vec4 bitmapColor = texture(bitmapTexture, uv);
 
-  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
+  fragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * layer.opacity);
 
   geometry.uv = uv;
   DECKGL_FILTER_COLOR(fragColor, geometry);

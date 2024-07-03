@@ -54,6 +54,7 @@ import type {LayerContext} from './layer-manager';
 import type {BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
+import {ProjectModuleSettings} from '../shaderlib/project/viewport-uniforms';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -1066,9 +1067,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     this.props = this.internalState.propsInTransition || currentProps;
 
-    const opacity = this.props.opacity;
     // apply gamma to opacity to make it visually "linear"
-    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
+    const opacity = Math.pow(this.props.opacity, 1 / 2.2);
+    uniforms.opacity = opacity; // TODO remove once layers ported to UBO
 
     try {
       // TODO/ib - hack move to luma Model.draw
@@ -1078,8 +1079,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const {modelMatrix} = this.props;
         this.setModuleParameters(moduleParameters);
         this.setShaderModuleProps({
-          picking: {isActive, isAttribute},
-          project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin}
+          layer: {opacity},
+          picking: {isActive, isAttribute} as PickingProps,
+          project: {
+            viewport,
+            devicePixelRatio,
+            modelMatrix,
+            coordinateSystem,
+            coordinateOrigin
+          } as ProjectModuleSettings
         });
       }
 
