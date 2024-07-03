@@ -73,7 +73,7 @@ export default class App extends PureComponent {
 
     this.state = props.state || {
       activeExamples: {
-        ScatterplotLayer: true
+        'PolygonLayer (Flat)': true,
       },
       settings: {
         shadow: false,
