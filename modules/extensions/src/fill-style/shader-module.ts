@@ -78,7 +78,7 @@ const inject = {
   `
 };
 
-type FillStyleModuleSettings =
+export type FillStyleModuleSettings =
   | {
       viewport: Viewport;
       fillPatternEnabled?: boolean;
@@ -89,38 +89,32 @@ type FillStyleModuleSettings =
     };
 
 /* eslint-disable camelcase */
-function getPatternUniforms(
-  opts: FillStyleModuleSettings | {},
-  uniforms: Record<string, any>
-): Record<string, any> {
+function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, any> {
   if (!opts) {
     return {};
   }
-  const uniforms = {};
+  const out = {} as any;
   if ('fillPatternTexture' in opts) {
     const {fillPatternTexture} = opts;
-    (uniforms.fill_patternTexture = fillPatternTexture),
-      (uniforms.fill_patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height]);
+    out.fill_patternTexture = fillPatternTexture;
+    out.fill_patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
   if ('viewport' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
-    const {commonOrigin: coordinateOriginCommon} = uniforms as ProjectUniforms;
+    const projectUniforms = project.getUniforms(opts) as ProjectUniforms;
+    const {commonOrigin: coordinateOriginCommon} = projectUniforms;
 
     const coordinateOriginCommon64Low = [
       fp64LowPart(coordinateOriginCommon[0]),
       fp64LowPart(coordinateOriginCommon[1])
     ];
 
-    const out = {
-      fill_uvCoordinateOrigin: coordinateOriginCommon.slice(0, 2),
-      fill_uvCoordinateOrigin64Low: coordinateOriginCommon64Low,
-      fill_patternMask: fillPatternMask,
-      fill_patternEnabled: fillPatternEnabled
-    };
-    console.log(out);
-    return out;
+    out.fill_uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
+    out.fill_uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    out.fill_patternMask = fillPatternMask;
+    out.fill_patternEnabled = fillPatternEnabled;
   }
-  return {};
+  return out;
 }
 
 export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
