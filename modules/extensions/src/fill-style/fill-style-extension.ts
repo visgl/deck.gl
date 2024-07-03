@@ -162,7 +162,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       viewport,
       fillPatternEnabled,
       fillPatternMask,
-      fillPatternTexture: fillPatternAtlas || this.state.emptyTexture
+      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture
     };
     this.setShaderModuleProps({fill: fillProps});
   }

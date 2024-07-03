@@ -2,7 +2,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {Viewport, ProjectUniforms} from '@deck.gl/core';
 
-import type {Texture} from '@luma.gl/core';
+import type {Texture, UniformValue} from '@luma.gl/core';
 import {glsl} from '../utils/syntax-tags';
 
 const uniformBlock = glsl`\
@@ -78,26 +78,23 @@ const inject = {
   `
 };
 
-export type FillStyleModuleSettings =
-  | {
-      viewport: Viewport;
-      fillPatternEnabled?: boolean;
-      fillPatternMask?: boolean;
-    }
-  | {
-      fillPatternTexture: Texture;
-    };
+export type FillStyleModuleSettings = {
+  viewport: Viewport;
+  fillPatternEnabled?: boolean;
+  fillPatternMask?: boolean;
+  fillPatternTexture: Texture;
+};
 
 /* eslint-disable camelcase */
 function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, any> {
   if (!opts) {
     return {};
   }
-  const out = {} as any;
+  const uniforms = {} as Record<string, any>;
   if ('fillPatternTexture' in opts) {
     const {fillPatternTexture} = opts;
-    out.fill_patternTexture = fillPatternTexture;
-    out.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
+    uniforms.fill_patternTexture = fillPatternTexture;
+    uniforms.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
   if ('viewport' in opts) {
     const {fillPatternMask = true, fillPatternEnabled = true} = opts;
@@ -109,15 +106,15 @@ function getPatternUniforms(opts: FillStyleModuleSettings | {}): Record<string, 
       fp64LowPart(coordinateOriginCommon[1])
     ];
 
-    out.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
-    out.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
-    out.patternMask = fillPatternMask;
-    out.patternEnabled = fillPatternEnabled;
+    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2);
+    uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    uniforms.patternMask = fillPatternMask;
+    uniforms.patternEnabled = fillPatternEnabled;
   }
-  return out;
+  return uniforms;
 }
 
-export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
+export const patternShaders = {
   name: 'fill',
   vs,
   fs,
@@ -131,4 +128,4 @@ export const patternShaders: ShaderModule<FillStyleModuleSettings> = {
     uvCoordinateOrigin: 'vec2<f32>',
     uvCoordinateOrigin64Low: 'vec2<f32>'
   }
-};
+} as const satisfies ShaderModule<FillStyleModuleSettings>;
